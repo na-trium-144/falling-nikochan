@@ -1,57 +1,16 @@
 "use client"; // あとでけす
 
 import { useEffect, useRef, useState } from "react";
-
-// x, y: 0〜1
-interface Pos {
-  x: number;
-  y: number;
-}
-interface NoteTrace {
-  time: Date;
-  pos: Pos;
-}
-class Note {
-  id: number;
-  hitTime: Date;
-  // traceは時刻順に並んでいる (前が早い)
-  trace: NoteTrace[];
-  constructor(id: number, hitTime: Date, trace: NoteTrace[]) {
-    this.id = id;
-    this.hitTime = hitTime;
-    this.trace = trace;
-  }
-  display(time: Date): DisplayNote | null {
-    const i = this.trace.findIndex((tr) => tr.time.getTime() <= time.getTime());
-    if (i < 0 || i + 1 >= this.trace.length) {
-      return null;
-    }
-    const prevTrace = this.trace[i];
-    const afterTrace = this.trace[i + 1];
-    const interp =
-      (time.getTime() - prevTrace.time.getTime()) /
-      (afterTrace.time.getTime() - prevTrace.time.getTime());
-    return {
-      id: this.id,
-      pos: {
-        x: prevTrace.pos.x + (afterTrace.pos.x - prevTrace.pos.x) * interp,
-        y: prevTrace.pos.y + (afterTrace.pos.y - prevTrace.pos.y) * interp,
-      },
-    };
-  }
-}
-interface DisplayNote {
-  id: number;
-  pos: Pos;
-}
+import { Pos, Note, DisplayNote, loadChart } from "@/chartFormat/seq";
+import { sampleChart } from "@/chartFormat/command";
 
 export default function Home() {
-  const notes = useRef<Note[]>([
-    new Note(0, new Date(), [
-      { time: new Date(2000, 1, 1), pos: { x: 0, y: 1 } },
-      { time: new Date(2100, 1, 1), pos: { x: 0, y: 0 } },
-    ]),
-  ]);
+  const notes = useRef<Note[]>([]);
+  useEffect(() => {
+    // テスト用
+    notes.current = loadChart(sampleChart);
+  }, []);
+  const startDate = useRef<Date>(new Date());
   const divRef = useRef<HTMLDivElement>(null);
   const [divWidth, setDivWidth] = useState<number>(0);
   const [divHeight, setDivHeight] = useState<number>(0);
@@ -67,7 +26,7 @@ export default function Home() {
       if (divHeight != divRef.current.clientHeight) {
         setDivHeight(divRef.current.clientHeight);
       }
-      const now = new Date();
+      const now = (new Date().getTime() - startDate.current.getTime()) / 1000;
       setDisplayNotes(
         notes.current.map((n) => n.display(now)).filter((n) => n !== null)
       );
