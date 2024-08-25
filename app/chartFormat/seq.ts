@@ -5,6 +5,10 @@ import { NoteCommand, Chart, BPMChange } from "./command";
  */
 export const noteSize = 0.05;
 /**
+ * 判定線の位置
+ */
+export const targetY = 0.1;
+/**
  * 画面上の位置
  * x: 0(画面左端)〜1(画面右端)
  * y: 0(判定ライン)〜1(画面上端)
@@ -22,7 +26,11 @@ export interface Pos {
 export interface Note {
   id: number;
   hitTimeSec: number;
-  display: (timeSec: number) => DisplayNote | null;
+  display: (
+    timeSec: number,
+    xRange: [number, number],
+    yRange: [number, number]
+  ) => DisplayNote | null;
 }
 /**
  * 画面上でその瞬間に表示する音符の管理
@@ -36,7 +44,7 @@ export interface DisplayNote {
 /**
  * bpmとstep数→時刻(秒数)
  */
-function getTimeSec(bpmChanges: BPMChange[], step: number): number {
+export function getTimeSec(bpmChanges: BPMChange[], step: number): number {
   let timeSec = 0;
   for (let bi = 0; bi < bpmChanges.length; bi++) {
     if (bi + 1 < bpmChanges.length && bpmChanges[bi + 1].step <= step) {
@@ -64,7 +72,11 @@ export function loadChart(chart: Chart): Note[] {
     return {
       id,
       hitTimeSec,
-      display: (timeSec: number): DisplayNote | null => {
+      display: (
+        timeSec: number,
+        xRange: [number, number],
+        yRange: [number, number]
+      ): DisplayNote | null => {
         let x = c.hitX;
         let y = 0;
         let vx = c.hitVX;
@@ -85,10 +97,10 @@ export function loadChart(chart: Chart): Note[] {
           }
         }
         if (
-          x + noteSize >= 0 &&
-          x - noteSize < 1 &&
-          y + noteSize >= 0 &&
-          y - noteSize < 1
+          x + noteSize >= xRange[0] &&
+          x - noteSize < xRange[1] &&
+          y + noteSize + targetY >= yRange[0] &&
+          y - noteSize + targetY < yRange[1]
         ) {
           return { id, pos: { x, y } };
         } else {
