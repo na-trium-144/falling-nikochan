@@ -9,6 +9,9 @@
 export interface Chart {
   notes: NoteCommand[];
   bpmChanges: BPMChange[];
+  ytId: string;
+  title: string;
+  author: string;
 }
 
 /**
@@ -39,6 +42,10 @@ export interface BPMChange {
 }
 
 export const sampleChart: Chart = {
+  ytId: "cNnCLGrXBYs",
+  title: "aaaaaa123タイトル",
+  author: "author",
+
   bpmChanges: [{ step: 0, bpm: 120 }],
   notes: [
     {

@@ -8,17 +8,20 @@ import { YouTubePlayer } from "./youtubePlayer";
 interface Props {
   className?: string;
   style?: object;
+  id?: string;
 }
 export default function FlexYouTube(props: Props) {
+  const { id } = props;
   const ytPlayer = useRef<YouTubePlayer | null>(null);
   const { width, height, ref } = useResizeDetector();
   const resizeYouTube = useRef<() => void>(() => undefined);
   useEffect(() => {
     resizeYouTube.current = () => {
       if (ytPlayer.current) {
-        if (width) {
-          ytPlayer.current.getIframe().width = String(width);
-          ytPlayer.current.getIframe().height = String((width * 9) / 16);
+        if (width && height) {
+          const iframe = ytPlayer.current.getIframe();
+          iframe.width = String(width);
+          iframe.height = String((width * 9) / 16);
         }
       }
     };
@@ -26,15 +29,16 @@ export default function FlexYouTube(props: Props) {
   }, [width, height]);
 
   useEffect(() => {
-    if (!ytPlayer.current) {
+    if (id) {
       const loadVideo = () => {
         // the Player object is created uniquely based on the id in props
         // https://developers.google.com/youtube/iframe_api_reference?hl=ja#Loading_a_Video_Player
         ytPlayer.current = new (window as any).YT.Player("youtube-player", {
-          videoId: "cNnCLGrXBYs",
+          width: 1,
+          height: 1,
+          videoId: id,
           events: {
             onReady: resizeYouTube.current,
-            
           },
         }) as YouTubePlayer;
       };
@@ -54,9 +58,16 @@ export default function FlexYouTube(props: Props) {
         loadVideo();
       }
     }
-  }, []);
+  }, [id]);
   return (
-    <div className={props.className} style={props.style} ref={ref}>
+    <div
+      className={
+        props.className + " overflow-hidden"
+        /* + " flex justify-center items-center"*/
+      }
+      style={props.style}
+      ref={ref}
+    >
       <div id="youtube-player" />
     </div>
   );

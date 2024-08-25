@@ -17,7 +17,6 @@ export default function FallingWindow(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
-
   useEffect(() => {
     const i = setInterval(() => {
       if (startDate != null) {
@@ -33,8 +32,8 @@ export default function FallingWindow(props: Props) {
   }, [notes, startDate]);
 
   return (
-    <div className={props.className} style={props.style}>
-      <div className="absolute w-full h-full top-0 left-0 overflow-hidden">
+    <div className={props.className} style={props.style} ref={ref}>
+      <div className="relative w-full h-full overflow-hidden">
         {displayNotes.map(
           (d) =>
             boxSize && (
