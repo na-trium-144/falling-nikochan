@@ -11,6 +11,17 @@ export interface Chart {
   bpmChanges: BPMChange[];
 }
 
+/**
+ * 音符コマンド
+ * step: 判定時刻(step数)
+ * hitX: 判定時のX
+ * (hitY = 0)
+ * hitVX: 判定時のX速度
+ * hitVY: 判定時のY速度
+ * (accelX = 0)
+ * accelY: Y加速度
+ * timeScale: { 時刻(判定時刻 - step数), VX,VY,accelYの倍率 } のリスト
+ */
 export interface NoteCommand {
   step: number;
   hitX: number;

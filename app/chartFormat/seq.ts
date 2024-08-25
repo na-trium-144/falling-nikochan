@@ -1,6 +1,10 @@
 import { NoteCommand, Chart, BPMChange } from "./command";
 
 /**
+ * 音符の大きさ (画面サイズに対する割合)
+ */
+export const noteSize = 0.05;
+/**
  * 画面上の位置
  * x: 0(画面左端)〜1(画面右端)
  * y: 0(判定ライン)〜1(画面上端)
@@ -60,7 +64,7 @@ export function loadChart(chart: Chart): Note[] {
     return {
       id,
       hitTimeSec,
-      display: (timeSec: number) => {
+      display: (timeSec: number): DisplayNote | null => {
         let x = c.hitX;
         let y = 0;
         let vx = c.hitVX;
@@ -80,7 +84,16 @@ export function loadChart(chart: Chart): Note[] {
             break;
           }
         }
-        return { id, pos: { x, y } };
+        if (
+          x + noteSize >= 0 &&
+          x - noteSize < 1 &&
+          y + noteSize >= 0 &&
+          y - noteSize < 1
+        ) {
+          return { id, pos: { x, y } };
+        } else {
+          return null;
+        }
       },
     };
   });
