@@ -22,14 +22,19 @@ export interface Pos {
  * id: 通し番号
  * hitTimeSec: 判定時刻
  * display: 現在時刻→画面上の位置
+ * done: 判定結果 0:まだ 1:Good 2:OK 3:bad 4:miss
  */
 export interface Note {
   id: number;
   hitTimeSec: number;
+  hitPos?: Pos;
+  done: number;
+  chain?: number;
   display: (
     timeSec: number,
-    xRange: [number, number],
-    yRange: [number, number]
+    note: Note,
+    xRange?: [number, number],
+    yRange?: [number, number]
   ) => DisplayNote | null;
 }
 /**
@@ -39,6 +44,8 @@ export interface Note {
 export interface DisplayNote {
   id: number;
   pos: Pos;
+  done: number;
+  chain?: number;
 }
 
 /**
@@ -72,39 +79,48 @@ export function loadChart(chart: Chart): Note[] {
     return {
       id,
       hitTimeSec,
+      done: 0,
       display: (
         timeSec: number,
-        xRange: [number, number],
-        yRange: [number, number]
+        note: Note,
+        xRange?: [number, number],
+        yRange?: [number, number]
       ): DisplayNote | null => {
-        let x = c.hitX;
-        let y = 0;
-        let vx = c.hitVX;
-        let vy = c.hitVY;
-        // todo: これを毎フレーム計算しなくて済むようにする
-        for (let ti = 0; ti < c.timeScale.length; ti++) {
-          if (ti + 1 < c.timeScale.length && tsTimeSec[ti + 1] > timeSec) {
-            const dt = c.timeScale[ti].scale * (hitTimeSec - tsTimeSec[ti + 1]);
-            x += vx * dt;
-            // y += ∫ (vy + ay * t) dt
-            y += vy * dt - (c.accelY * dt * dt) / 2;
-            vy -= c.accelY * dt;
-          } else {
-            const dt = c.timeScale[ti].scale * (hitTimeSec - timeSec);
-            x += vx * dt;
-            y += vy * dt - (c.accelY * dt * dt) / 2;
-            break;
-          }
-        }
-        if (
-          x + noteSize >= xRange[0] &&
-          x - noteSize < xRange[1] &&
-          y + noteSize + targetY >= yRange[0] &&
-          y - noteSize + targetY < yRange[1]
-        ) {
-          return { id, pos: { x, y } };
+        if (note.done >= 1 && note.done <= 3) {
+          return { id, pos: note.hitPos || {x: -1, y: -1}, done: note.done, chain: note.chain };
         } else {
-          return null;
+          let x = c.hitX;
+          let y = 0;
+          let vx = c.hitVX;
+          let vy = c.hitVY;
+          // todo: これを毎フレーム計算しなくて済むようにする
+          for (let ti = 0; ti < c.timeScale.length; ti++) {
+            if (ti + 1 < c.timeScale.length && tsTimeSec[ti + 1] > timeSec) {
+              const dt =
+                c.timeScale[ti].scale * (hitTimeSec - tsTimeSec[ti + 1]);
+              x += vx * dt;
+              // y += ∫ (vy + ay * t) dt
+              y += vy * dt - (c.accelY * dt * dt) / 2;
+              vy -= c.accelY * dt;
+            } else {
+              const dt = c.timeScale[ti].scale * (hitTimeSec - timeSec);
+              x += vx * dt;
+              y += vy * dt - (c.accelY * dt * dt) / 2;
+              break;
+            }
+          }
+          if (
+            !xRange ||
+            !yRange ||
+            (x + noteSize >= xRange[0] &&
+              x - noteSize < xRange[1] &&
+              y + noteSize + targetY >= yRange[0] &&
+              y - noteSize + targetY < yRange[1])
+          ) {
+            return { id, pos: { x, y }, done: note.done, chain: note.chain };
+          } else {
+            return null;
+          }
         }
       },
     };

@@ -9,14 +9,21 @@ interface Props {
   className?: string;
   style?: object;
   id?: string;
+  ytPlayer: { current: YouTubePlayer | null };
+  onReady: () => void;
+  onStart: () => void;
+  onStop: () => void;
 }
 export default function FlexYouTube(props: Props) {
-  const { id } = props;
-  const ytPlayer = useRef<YouTubePlayer | null>(null);
+  const { id, ytPlayer, onReady, onStart, onStop } = props;
   const { width, height, ref } = useResizeDetector();
   const resizeYouTube = useRef<() => void>(() => undefined);
+  const onReadyRef = useRef<() => void>(() => undefined);
+  const onStartRef = useRef<() => void>(() => undefined);
+  const onStopRef = useRef<() => void>(() => undefined);
   useEffect(() => {
     resizeYouTube.current = () => {
+      console.log("resize");
       if (ytPlayer.current) {
         if (width && height) {
           const iframe = ytPlayer.current.getIframe();
@@ -26,7 +33,11 @@ export default function FlexYouTube(props: Props) {
       }
     };
     resizeYouTube.current();
-  }, [width, height]);
+  }, [width, height, ytPlayer]);
+
+  onReadyRef.current = onReady;
+  onStartRef.current = onStart;
+  onStopRef.current = onStop;
 
   useEffect(() => {
     if (id) {
@@ -37,8 +48,24 @@ export default function FlexYouTube(props: Props) {
           width: 1,
           height: 1,
           videoId: id,
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+          },
           events: {
-            onReady: resizeYouTube.current,
+            onReady: () => {
+              resizeYouTube.current();
+              onReadyRef.current();
+            },
+            onStateChange: () => {
+              if (ytPlayer.current?.getPlayerState() === 1) {
+                onStartRef.current();
+              } else {
+                onStopRef.current();
+              }
+            },
           },
         }) as YouTubePlayer;
       };
@@ -62,13 +89,15 @@ export default function FlexYouTube(props: Props) {
   return (
     <div
       className={
-        props.className + " overflow-hidden"
+        props.className + " relative"
         /* + " flex justify-center items-center"*/
       }
-      style={props.style}
+      style={{ ...props.style, height: ((width || 1) * 9) / 16 }}
       ref={ref}
     >
-      <div id="youtube-player" />
+      <div className="absolute inset-0">
+        <div id="youtube-player" />
+      </div>
     </div>
   );
 }

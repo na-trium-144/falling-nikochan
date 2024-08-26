@@ -44,7 +44,7 @@ export interface YouTubePlayer {
     getPlaylistIndex(): number;
     getPlaybackQuality(): string;
     getPlaybackRate(): number;
-    // getPlayerState(): PlayerState;
+    getPlayerState(): number;
     getVideoEmbedCode(): string;
     getVideoLoadedFraction(): number;
     getVideoUrl(): string;

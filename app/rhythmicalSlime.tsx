@@ -7,11 +7,12 @@ interface Props {
   className?: string;
   style?: object;
   num: number;
-  startDate: Date | null;
+  getCurrentTimeSec: () => number | undefined;
+  playing: boolean;
   bpmChanges?: BPMChange[];
 }
 export default function RhythmicalSlime(props: Props) {
-  const { num, startDate, bpmChanges } = props;
+  const { num, playing, getCurrentTimeSec, bpmChanges } = props;
   const step = useRef<number>(-1);
   const [jumpingSlime, setJumpingSlime] = useState<number>(-1);
   const [preparingSlime, setPreparingSlime] = useState<number>(-1);
@@ -19,22 +20,33 @@ export default function RhythmicalSlime(props: Props) {
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const nextStep = () => {
-      while (startDate && bpmChanges) {
+      while (playing && bpmChanges) {
         step.current++;
-        const step0 = getTimeSec(bpmChanges, step.current - 0);
-        const step0_5 = getTimeSec(bpmChanges, step.current + 0.5);
-        const step1 = getTimeSec(bpmChanges, step.current + 1);
-        const now = (new Date().getTime() - startDate.getTime()) / 1000;
+        const step0 = getTimeSec(bpmChanges, step.current - 0.25);
+        const step0_5 = getTimeSec(bpmChanges, step.current + 0.25);
+        const step1 = getTimeSec(bpmChanges, step.current + 0.75);
+        const now = getCurrentTimeSec();
         transitionTimeMSec.current = (step0_5 - step0) * 1000;
         const jumpSlime = step.current % num;
+        if (now === undefined) {
+          return;
+        }
         if (now < step0) {
           timer = setTimeout(() => {
-            const now = (new Date().getTime() - startDate.getTime()) / 1000;
+            timer = null;
+            const now = getCurrentTimeSec();
+            if (now === undefined) {
+              return;
+            }
             if (now < step0_5) {
               setPreparingSlime(-1);
               setJumpingSlime(jumpSlime);
               timer = setTimeout(() => {
-                const now = (new Date().getTime() - startDate.getTime()) / 1000;
+                timer = null;
+                const now = getCurrentTimeSec();
+                if (now === undefined) {
+                  return;
+                }
                 if (now < step1) {
                   setPreparingSlime((jumpSlime + 1) % 4);
                   setJumpingSlime(-1);
@@ -57,7 +69,7 @@ export default function RhythmicalSlime(props: Props) {
         clearTimeout(timer);
       }
     };
-  }, [bpmChanges, num, startDate]);
+  }, [bpmChanges, num, playing, getCurrentTimeSec]);
   return (
     <div
       className={props.className + " flex flex-row-reverse "}

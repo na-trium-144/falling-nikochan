@@ -2,6 +2,8 @@
  * 譜面データを保存しておく形式
  * notes: 1音符1要素
  * bpmChanges: bpm変化の情報
+ * offset: step=0に対応する時刻(秒)
+ * (offsetの処理はgetCurrentTimeSec()の中に含まれる)
  *
  * 時刻は開始からのstep数(60/BPM*step=秒)で管理する。
  * プレイ時に秒単位の時刻に変換
@@ -9,6 +11,7 @@
 export interface Chart {
   notes: NoteCommand[];
   bpmChanges: BPMChange[];
+  offset: number;
   ytId: string;
   title: string;
   author: string;
@@ -41,44 +44,41 @@ export interface BPMChange {
   bpm: number;
 }
 
-export const sampleChart: Chart = {
-  ytId: "cNnCLGrXBYs",
-  title: "aaaaaa123タイトル",
-  author: "author",
+export const sampleChart = (): Chart => {
+  let notes: NoteCommand[] = [];
+  const def = {
+    hitX: 1 / 4,
+    hitVX: 1 / 4,
+    hitVY: 1,
+    accelY: 1 / 4,
+    timeScale: [{ stepBefore: 0, scale: 1 }],
+  };
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      notes.push({ ...def, step: 16 + j + i * 4 });
+    }
+  }
+  notes.push({ ...def, step: 28 });
+  notes.push({ ...def, step: 29 });
+  notes.push({ ...def, step: 30, hitX: 1 / 4, hitVX: 1 / 4 });
+  notes.push({ ...def, step: 30.5, hitX: 2 / 4, hitVX: 1 / 8 });
+  notes.push({ ...def, step: 31, hitX: 3 / 4, hitVX: 0 });
 
-  bpmChanges: [{ step: 0, bpm: 120 }],
-  notes: [
-    {
-      step: 4,
-      hitX: 0,
-      hitVX: 1 / 4,
-      hitVY: 2 / 4,
-      accelY: 1 / 4,
-      timeScale: [{ stepBefore: 0, scale: 1 }],
-    },
-    {
-      step: 5,
-      hitX: 1 / 4,
-      hitVX: 1 / 4,
-      hitVY: 2 / 4,
-      accelY: 1 / 4,
-      timeScale: [{ stepBefore: 0, scale: 1 }],
-    },
-    {
-      step: 6,
-      hitX: 2 / 4,
-      hitVX: 1 / 4,
-      hitVY: 2 / 4,
-      accelY: 1 / 4,
-      timeScale: [{ stepBefore: 0, scale: 1 }],
-    },
-    {
-      step: 7,
-      hitX: 3 / 4,
-      hitVX: 1 / 4,
-      hitVY: 2 / 4,
-      accelY: 1 / 4,
-      timeScale: [{ stepBefore: 0, scale: 1 }],
-    },
-  ],
+  for (let i = 0; i < 4; i++) {
+    notes.push({ ...def, step: 32 + i * 8 });
+    notes.push({ ...def, step: 32 + i * 8 + 7 / 4 });
+    notes.push({ ...def, step: 32 + i * 8 + 11 / 4 });
+    notes.push({ ...def, step: 32 + i * 8 + 4 });
+    notes.push({ ...def, step: 32 + i * 8 + 4 + 7 / 4 });
+    notes.push({ ...def, step: 32 + i * 8 + 4 + 3 });
+  }
+  return {
+    ytId: "cNnCLGrXBYs",
+    title: "aaaaaa123タイトル",
+    author: "author",
+
+    bpmChanges: [{ step: 0, bpm: 127 }],
+    offset: 0,
+    notes,
+  };
 };
