@@ -11,6 +11,7 @@ interface Props {
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
+  barFlash: boolean;
 }
 
 export default function FallingWindow(props: Props) {
@@ -52,7 +53,7 @@ export default function FallingWindow(props: Props) {
       }
 
       fpsCount.current++;
-      if(new Date().getTime() - fpsCountBegin.current.getTime() >= 1000){
+      if (new Date().getTime() - fpsCountBegin.current.getTime() >= 1000) {
         setFPS && setFPS(fpsCount.current);
         fpsCountBegin.current = new Date();
         fpsCount.current = 0;
@@ -66,7 +67,12 @@ export default function FallingWindow(props: Props) {
       <div className="relative w-full h-full overflow-visible">
         {boxSize && marginY !== undefined && (
           <div
-            className="absolute border-b-2 border-gray-400"
+            className={
+              "absolute h-0.5 transition duration-100 " +
+              (props.barFlash
+                ? "bg-amber-400 shadow shadow-yellow-400"
+                : "bg-gray-400 shadow-none")
+            }
             style={{
               left: 0,
               right: "-100%",
@@ -81,7 +87,18 @@ export default function FallingWindow(props: Props) {
             marginY !== undefined && (
               <div
                 key={d.id}
-                className="absolute "
+                className={
+                  "absolute " +
+                  (d.done === 0
+                    ? ""
+                    : d.done === 1
+                    ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+                    : d.done === 2
+                    ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
+                    : d.done === 3
+                    ? "transition ease-linear duration-300 opacity-0"
+                    : "")
+                }
                 style={{
                   width: noteSize * boxSize,
                   height: noteSize * boxSize,
@@ -90,34 +107,20 @@ export default function FallingWindow(props: Props) {
                     (d.pos.y + targetY - noteSize / 2) * boxSize + marginY,
                 }}
               >
-                {d.done === 0 ? (
-                  <img src="/nikochan0.svg" className="w-full h-full " />
-                ) : d.done === 1 ? (
-                  <img
-                    src="/nikochan1.svg"
+                <img
+                  src={`/nikochan${d.done <= 3 ? d.done : 0}.svg`}
+                  className="w-full h-full "
+                />
+                {d.chainBonus && d.chain && (
+                  <span
                     className={
-                      "w-full h-full transition ease-linear " +
-                      "duration-300 -translate-y-4 opacity-0 scale-125"
+                      "absolute w-16 " +
+                      (d.chain >= 100 ? "text-orange-500 " : "")
                     }
-                  />
-                ) : d.done === 2 ? (
-                  <img
-                    src="/nikochan2.svg"
-                    className={
-                      "w-full h-full transition ease-linear " +
-                      "duration-300 -translate-y-2 opacity-0"
-                    }
-                  />
-                ) : d.done === 3 ? (
-                  <img
-                    src="/nikochan3.svg"
-                    className={
-                      "w-full h-full transition ease-linear " +
-                      "duration-300 opacity-0"
-                    }
-                  />
-                ) : (
-                  <img src="/nikochan0.svg" className="w-full h-full " />
+                    style={{ bottom: "100%", left: "100%" }}
+                  >
+                    × {d.chainBonus.toFixed(2)}
+                  </span>
                 )}
               </div>
             )

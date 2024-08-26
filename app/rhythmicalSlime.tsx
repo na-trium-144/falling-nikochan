@@ -19,56 +19,60 @@ export default function RhythmicalSlime(props: Props) {
   const transitionTimeMSec = useRef<number>(0);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
-    const nextStep = () => {
-      while (playing && bpmChanges) {
-        step.current++;
-        const step0 = getTimeSec(bpmChanges, step.current - 0.25);
-        const step0_5 = getTimeSec(bpmChanges, step.current + 0.25);
-        const step1 = getTimeSec(bpmChanges, step.current + 0.75);
-        const now = getCurrentTimeSec();
-        transitionTimeMSec.current = (step0_5 - step0) * 1000;
-        const jumpSlime = step.current % num;
-        if (now === undefined) {
-          return;
-        }
-        if (now < step0) {
-          timer = setTimeout(() => {
-            timer = null;
-            const now = getCurrentTimeSec();
-            if (now === undefined) {
-              return;
-            }
-            if (now < step0_5) {
-              setPreparingSlime(-1);
-              setJumpingSlime(jumpSlime);
-              timer = setTimeout(() => {
-                timer = null;
-                const now = getCurrentTimeSec();
-                if (now === undefined) {
-                  return;
-                }
-                if (now < step1) {
-                  setPreparingSlime((jumpSlime + 1) % 4);
-                  setJumpingSlime(-1);
-                }
+    if (playing) {
+      const nextStep = () => {
+        while (playing && bpmChanges) {
+          step.current++;
+          const step0 = getTimeSec(bpmChanges, step.current - 0.25);
+          const step0_5 = getTimeSec(bpmChanges, step.current + 0.25);
+          const step1 = getTimeSec(bpmChanges, step.current + 0.75);
+          const now = getCurrentTimeSec();
+          transitionTimeMSec.current = (step0_5 - step0) * 1000;
+          const jumpSlime = step.current % num;
+          if (now === undefined) {
+            return;
+          }
+          if (now < step0) {
+            timer = setTimeout(() => {
+              timer = null;
+              const now = getCurrentTimeSec();
+              if (now === undefined) {
+                return;
+              }
+              if (now < step0_5) {
+                setPreparingSlime(-1);
+                setJumpingSlime(jumpSlime);
+                timer = setTimeout(() => {
+                  timer = null;
+                  const now = getCurrentTimeSec();
+                  if (now === undefined) {
+                    return;
+                  }
+                  if (now < step1) {
+                    setPreparingSlime((jumpSlime + 1) % 4);
+                    setJumpingSlime(-1);
+                  }
+                  nextStep();
+                }, (step0_5 - now) * 1000);
+              } else {
                 nextStep();
-              }, (step0_5 - now) * 1000);
-            } else {
-              nextStep();
-            }
-          }, (step0 - now) * 1000);
-          break;
-        } else {
-          continue;
+              }
+            }, (step0 - now) * 1000);
+            break;
+          } else {
+            continue;
+          }
         }
-      }
-    };
-    nextStep();
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-    };
+      };
+      nextStep();
+      return () => {
+        if (timer !== null) {
+          clearTimeout(timer);
+        }
+      };
+    } else {
+      step.current = -1;
+    }
   }, [bpmChanges, num, playing, getCurrentTimeSec]);
   return (
     <div

@@ -8,7 +8,7 @@ interface Props {
 export default function StatusBox(props: Props) {
   return (
     <div
-      className={props.className + " p-3 w-52 rounded-lg text-sm"}
+      className={props.className + " p-3 w-52 rounded-lg text-sm z-10"}
       style={{ background: "rgba(255, 255, 255, 0.5)" }}
     >
       {[

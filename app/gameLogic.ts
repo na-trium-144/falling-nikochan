@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Note } from "@/chartFormat/seq";
 
 export default function useGameLogic(
-  getCurrentTimeSec: () => number | undefined
+  getCurrentTimeSec: () => number | undefined,
+  auto: boolean
 ) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
@@ -46,7 +47,11 @@ export default function useGameLogic(
       if (j <= 2) {
         const thisChain = chain + 1;
         n.chain = thisChain;
-        setBonus((bonus) => bonus + thisChain);
+        n.chainBonus = 1 + Math.min(thisChain / bonusMax, 1) * 0.5;
+        if (j === 2) {
+          n.chainBonus *= 0.5;
+        }
+        setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
         setChain((chain) => chain + 1);
       } else {
         setChain(0);
@@ -75,12 +80,12 @@ export default function useGameLogic(
         judge(n, now, 2);
         notesYetDone.current.shift();
         break;
-      } else if (late <= 0.1 && late >= -0.25) {
+      } else if (late <= 0.12 && late >= -0.25) {
         console.log(`Bad (${late} s)`);
         judge(n, now, 3);
         notesYetDone.current.shift();
         break;
-      } else if (late > 0.1) {
+      } else if (late > 0.12) {
         // miss
         console.log("miss in hit()");
         judge(n, now, 4);
@@ -101,9 +106,14 @@ export default function useGameLogic(
       while (now !== undefined && notesYetDone.current.length >= 1) {
         const n = notesYetDone.current[0];
         const late = now - n.hitTimeSec;
-        if (late > 0.1) {
+        if (late > 0.12) {
           console.log("miss in interval");
           judge(n, now, 4);
+          notesYetDone.current.shift();
+          continue;
+        } else if (auto && late >= 0) {
+          console.log("auto");
+          judge(n, now, 1);
           notesYetDone.current.shift();
           continue;
         } else {
@@ -118,7 +128,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [getCurrentTimeSec, judge]);
+  }, [auto, getCurrentTimeSec, judge]);
 
   return { score, chain, notesAll, resetNotesAll, hit, judgeCount };
 }

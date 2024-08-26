@@ -61,23 +61,47 @@ export const sampleChart = (): Chart => {
   notes.push({ ...def, step: 28 });
   notes.push({ ...def, step: 29 });
   notes.push({ ...def, step: 30, hitX: 1 / 4, hitVX: 1 / 4 });
-  notes.push({ ...def, step: 30.5, hitX: 2 / 4, hitVX: 1 / 8 });
-  notes.push({ ...def, step: 31, hitX: 3 / 4, hitVX: 0 });
+  notes.push({ ...def, step: 30.5, hitX: 2 / 4, hitVX: 1 / 4 });
+  notes.push({ ...def, step: 31, hitX: 3 / 4, hitVX: 1 / 4 });
 
   for (let i = 0; i < 4; i++) {
     notes.push({ ...def, step: 32 + i * 8 });
-    notes.push({ ...def, step: 32 + i * 8 + 7 / 4 });
-    notes.push({ ...def, step: 32 + i * 8 + 11 / 4 });
+    notes.push({ ...def, step: 32 + i * 8 + 1.75 });
+    notes.push({ ...def, step: 32 + i * 8 + 2.75 });
     notes.push({ ...def, step: 32 + i * 8 + 4 });
-    notes.push({ ...def, step: 32 + i * 8 + 4 + 7 / 4 });
-    notes.push({ ...def, step: 32 + i * 8 + 4 + 3 });
+    notes.push({ ...def, step: 32 + i * 8 + 5.75 });
+    notes.push({ ...def, step: 32 + i * 8 + 7 });
   }
+  for (let j = 0; j < 14; j++) {
+    notes.push({ ...def, step: 64 + j });
+  }
+  notes.push({ ...def, step: 64 + 14 });
+  notes.push({ ...def, step: 64 + 14.5, hitX: 2 / 4 });
+  notes.push({ ...def, step: 64 + 15 });
+  for (let j = 0; j < 14; j++) {
+    notes.push({ ...def, step: 64 + 16 + j });
+  }
+  notes.push({ ...def, step: 64 + 16 + 13.75 });
+  notes.push({ ...def, step: 64 + 16 + 14.5 });
+  notes.push({ ...def, step: 64 + 16 + 15 });
+
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 4; j++) {
+      notes.push({ ...def, step: 96 + i * 8 + j });
+    }
+    notes.push({ ...def, step: 96 + i * 8 + 4, hitX: 3 / 4 });
+    notes.push({ ...def, step: 96 + i * 8 + 5 });
+    notes.push({ ...def, step: 96 + i * 8 + 6, hitX: 3 / 4 });
+    notes.push({ ...def, step: 96 + i * 8 + 6.5, hitX: 2 / 4 });
+    notes.push({ ...def, step: 96 + i * 8 + 7 });
+  }
+  
   return {
     ytId: "cNnCLGrXBYs",
     title: "aaaaaa123タイトル",
     author: "author",
 
-    bpmChanges: [{ step: 0, bpm: 127 }],
+    bpmChanges: [{ step: 0, bpm: 127.0 }],
     offset: 0,
     notes,
   };

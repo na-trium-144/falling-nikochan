@@ -7,7 +7,7 @@ export const noteSize = 0.05;
 /**
  * 判定線の位置
  */
-export const targetY = 0.1;
+export const targetY = 0.2;
 /**
  * 画面上の位置
  * x: 0(画面左端)〜1(画面右端)
@@ -29,6 +29,7 @@ export interface Note {
   hitTimeSec: number;
   hitPos?: Pos;
   done: number;
+  chainBonus?: number;
   chain?: number;
   display: (
     timeSec: number,
@@ -45,6 +46,7 @@ export interface DisplayNote {
   id: number;
   pos: Pos;
   done: number;
+  chainBonus?: number;
   chain?: number;
 }
 
@@ -64,6 +66,25 @@ export function getTimeSec(bpmChanges: BPMChange[], step: number): number {
     }
   }
   return timeSec;
+}
+/**
+ * 時刻(秒数)→bpm
+ */
+export function getBpm(bpmChanges: BPMChange[], now: number): number {
+  let timeSec = 0;
+  for (let bi = 0; bi < bpmChanges.length; bi++) {
+    if (bi + 1 < bpmChanges.length) {
+      timeSec +=
+        (60 / bpmChanges[bi].bpm) *
+        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
+      if (timeSec > now) {
+        return bpmChanges[bi].bpm;
+      }
+    } else {
+      return bpmChanges[bi].bpm;
+    }
+  }
+  return 0;
 }
 /**
  * chartを読み込む
@@ -86,8 +107,16 @@ export function loadChart(chart: Chart): Note[] {
         xRange?: [number, number],
         yRange?: [number, number]
       ): DisplayNote | null => {
-        if (note.done >= 1 && note.done <= 3) {
-          return { id, pos: note.hitPos || {x: -1, y: -1}, done: note.done, chain: note.chain };
+        if (note.done > 0 && timeSec - note.hitTimeSec > 0.5) {
+          return null;
+        } else if (note.done >= 1 && note.done <= 3) {
+          return {
+            id,
+            pos: note.hitPos || { x: -1, y: -1 },
+            done: note.done,
+            chain: note.chain,
+            chainBonus: note.chainBonus,
+          };
         } else {
           let x = c.hitX;
           let y = 0;
@@ -117,7 +146,13 @@ export function loadChart(chart: Chart): Note[] {
               y + noteSize + targetY >= yRange[0] &&
               y - noteSize + targetY < yRange[1])
           ) {
-            return { id, pos: { x, y }, done: note.done, chain: note.chain };
+            return {
+              id,
+              pos: { x, y },
+              done: note.done,
+              chain: note.chain,
+              chainBonus: note.chainBonus,
+            };
           } else {
             return null;
           }
