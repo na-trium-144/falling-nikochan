@@ -25,6 +25,6 @@
 .font-title {
   font-family: 'Noto Sans', sans-serif;
 }
-body {
+.font-main-ui, body {
   font-family: 'Merriweather', serif;
 }

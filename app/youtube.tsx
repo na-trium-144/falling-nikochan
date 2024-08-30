@@ -11,17 +11,17 @@ interface Props {
   isMobile: boolean;
   id?: string;
   ytPlayer: { current: YouTubePlayer | null };
-  onReady: () => void;
-  onStart: () => void;
-  onStop: () => void;
+  onReady?: () => void;
+  onStart?: () => void;
+  onStop?: () => void;
 }
 export default function FlexYouTube(props: Props) {
   const { isMobile, id, ytPlayer, onReady, onStart, onStop } = props;
   const { width, height, ref } = useResizeDetector();
-  const resizeYouTube = useRef<() => void>(() => undefined);
-  const onReadyRef = useRef<() => void>(() => undefined);
-  const onStartRef = useRef<() => void>(() => undefined);
-  const onStopRef = useRef<() => void>(() => undefined);
+  const resizeYouTube = useRef<() => void>();
+  const onReadyRef = useRef<() => void>();
+  const onStartRef = useRef<() => void>();
+  const onStopRef = useRef<() => void>();
   useEffect(() => {
     resizeYouTube.current = () => {
       console.log("resize");
@@ -57,14 +57,22 @@ export default function FlexYouTube(props: Props) {
           },
           events: {
             onReady: () => {
-              resizeYouTube.current();
-              onReadyRef.current();
+              if (resizeYouTube.current) {
+                resizeYouTube.current();
+              }
+              if (onReadyRef.current) {
+                onReadyRef.current();
+              }
             },
             onStateChange: () => {
               if (ytPlayer.current?.getPlayerState() === 1) {
-                onStartRef.current();
+                if (onStartRef.current) {
+                  onStartRef.current();
+                }
               } else {
-                onStopRef.current();
+                if (onStopRef.current) {
+                  onStopRef.current();
+                }
               }
             },
           },

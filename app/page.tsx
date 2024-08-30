@@ -105,7 +105,7 @@ export default function Home() {
     if (ref.current) {
       ref.current.focus();
     }
-  }, [chart, playing, ref, resetNotesAll, playing]);
+  }, [chart, ref, resetNotesAll]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (playing) {
@@ -133,10 +133,7 @@ export default function Home() {
 
   return (
     <main
-      className={
-        "w-screen h-screen overflow-hidden " +
-        "bg-gradient-to-t from-white to-sky-200 "
-      }
+      className="w-screen h-screen overflow-hidden "
       style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
