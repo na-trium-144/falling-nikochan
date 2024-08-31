@@ -50,7 +50,7 @@ export const sampleChart = (): Chart => {
     hitX: 1 / 4,
     hitVX: 1 / 4,
     hitVY: 1,
-    accelY: 1 / 4,
+    accelY: 3 / 4,
     timeScale: [{ stepBefore: 0, scale: 1 }],
   };
   for (let i = 0; i < 3; i++) {

@@ -20,23 +20,53 @@ export default function FallingWindow(props: Props) {
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
 
-  let displayNotes: DisplayNote[] = [];
+  const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] = [];
   if (
     marginX !== undefined &&
     marginY !== undefined &&
     boxSize &&
     currentTimeSec !== undefined
   ) {
-    displayNotes = notes
-      .map((n) =>
-        n.display(
+    for (let ni = 0; ni < notes.length; ni++) {
+      const dn = {
+        current: notes[ni].display(
           currentTimeSec,
-          n,
+          notes[ni],
           [-marginX / boxSize, 1 + marginX / boxSize],
           [-marginY / boxSize, 1 + marginY / boxSize]
-        )
-      )
-      .filter((n) => n !== null);
+        ),
+        history: [] as DisplayNote[],
+      };
+      if (dn.current !== null) {
+        for (let dt = 0; dt < 5; dt += 0.3) {
+          const dn2 = notes[ni].display(
+            currentTimeSec + dt,
+            notes[ni],
+            [-marginX / boxSize, 1 + marginX / boxSize],
+            [-marginY / boxSize, 1 + marginY / boxSize]
+          );
+          if (dn2 !== null) {
+            dn.history.push(dn2);
+          } else {
+            break;
+          }
+        }
+        for (let dt = 0; dt < 5; dt += 0.3) {
+          const dn2 = notes[ni].display(
+            currentTimeSec - dt,
+            notes[ni],
+            [-marginX / boxSize, 1 + marginX / boxSize],
+            [-marginY / boxSize, 1 + marginY / boxSize]
+          );
+          if (dn2 !== null) {
+            dn.history.unshift(dn2);
+          } else {
+            break;
+          }
+        }
+        displayNotes.push({ current: dn.current, history: dn.history });
+      }
+    }
   }
 
   return (
@@ -60,19 +90,48 @@ export default function FallingWindow(props: Props) {
             boxSize &&
             marginX !== undefined &&
             marginY !== undefined && (
-              <div
-                key={d.id}
-                className={"absolute "}
-                style={{
-                  width: noteSize * boxSize,
-                  height: noteSize * boxSize,
-                  left: (d.pos.x - noteSize / 2) * boxSize + marginX,
-                  bottom:
-                    (d.pos.y + targetY - noteSize / 2) * boxSize + marginY,
-                }}
-              >
-                <img src={`/nikochan0.svg`} className="w-full h-full " />
-              </div>
+              <>
+                <div
+                  key={d.current.id}
+                  className={"absolute "}
+                  style={{
+                    width: noteSize * boxSize,
+                    height: noteSize * boxSize,
+                    left: (d.current.pos.x - noteSize / 2) * boxSize + marginX,
+                    bottom:
+                      (d.current.pos.y + targetY - noteSize / 2) * boxSize +
+                      marginY,
+                  }}
+                >
+                  <img src={`/nikochan0.svg`} className="w-full h-full " />
+                </div>
+                {d.history.slice(1).map((_, di) => (
+                  <span
+                    key={di}
+                    className="absolute border-b border-gray-400 origin-bottom-left"
+                    style={{
+                      width:
+                        Math.sqrt(
+                          Math.pow(
+                            d.history[di].pos.x - d.history[di + 1].pos.x,
+                            2
+                          ) +
+                            Math.pow(
+                              d.history[di].pos.y - d.history[di + 1].pos.y,
+                              2
+                            )
+                        ) * boxSize,
+                      left: d.history[di].pos.x * boxSize + marginX,
+                      bottom:
+                        (d.history[di].pos.y + targetY) * boxSize + marginY,
+                      transform: `rotate(${-Math.atan2(
+                        d.history[di + 1].pos.y - d.history[di].pos.y,
+                        d.history[di + 1].pos.x - d.history[di].pos.x
+                      )}rad)`,
+                    }}
+                  />
+                ))}
+              </>
             )
         )}
       </div>

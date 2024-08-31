@@ -5,7 +5,7 @@ import FlexYouTube from "@/youtube";
 import { YouTubePlayer } from "@/youtubePlayer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
-import { getBpm, getStep, getTimeSec, Note } from "@/chartFormat/seq";
+import { getBpm, getStep, getTimeSec, loadChart, Note } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
 import { cursorTo } from "readline";
 
@@ -103,6 +103,11 @@ export default function Page() {
   }, [chart, timeBarBeginSec, currentTimeSecWithoutOffset]);
 
   const [notesAll, setNotesAll] = useState<Note[]>([]);
+  useEffect(() => {
+    if(chart){
+      setNotesAll(loadChart(chart));
+    }
+  }, [chart]);
 
   // テキストボックス内の値
   // 実際のoffsetはchart.offset
