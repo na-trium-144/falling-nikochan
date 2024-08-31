@@ -3,15 +3,18 @@
 import { Chart, sampleChart } from "@/chartFormat/command";
 import FlexYouTube from "@/youtube";
 import { YouTubePlayer } from "@/youtubePlayer";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
-import { getTimeSec, Note } from "@/chartFormat/seq";
+import { getBpm, getStep, getTimeSec, Note } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
+import { cursorTo } from "readline";
 
 export default function Page() {
-  const ytPlayer = useRef<YouTubePlayer | null>(null);
   const [chart, setChart] = useState<Chart | null>(null);
-  const [currentTimeSec, setCurrentTimeSec] = useState<number>(0);
+  // 現在時刻 offsetを引く前
+  // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
+  const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
+    useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
   useEffect(() => {
     // テスト用
@@ -21,15 +24,88 @@ export default function Page() {
     setBpm(ch.bpmChanges[0].bpm.toString());
   }, []);
 
+  const ytPlayer = useRef<YouTubePlayer | null>(null);
+  // ytPlayerが再生中
+  const [playing, setPlaying] = useState<boolean>(false);
+  // ytPlayerが準備完了
+  const [ready, setReady] = useState<boolean>(false);
+  const onReady = useCallback(() => {
+    console.log("ready");
+    setReady(true);
+  }, []);
+  const onStart = useCallback(() => {
+    console.log("start");
+    setPlaying(true);
+  }, []);
+  const onStop = useCallback(() => {
+    console.log("stop");
+    setPlaying(false);
+  }, []);
+  const start = () => {
+    ytPlayer.current?.playVideo();
+  };
+  const stop = () => {
+    ytPlayer.current?.pauseVideo();
+  };
+  const changeCurrentTimeSec = (timeSec: number) => {
+    ytPlayer.current?.seekTo(timeSec, true);
+  };
+  useEffect(() => {
+    const i = setInterval(() => {
+      if (ytPlayer.current?.getCurrentTime) {
+        setCurrentTimeSecWithoutOffset(ytPlayer.current.getCurrentTime());
+      }
+    }, 50);
+    return () => clearInterval(i);
+  }, []);
+
   const timeBarResize = useResizeDetector();
-  const timeBarWidth = timeBarResize.width;
+  const timeBarWidth = timeBarResize.width || 500;
   const timeBarRef = timeBarResize.ref;
+  // timebar左端の時刻
   const [timeBarBeginSec, setTimeBarBeginSec] = useState<number>(-1);
+
+  const timeBarPxPerSec = 300;
+  // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
-    ((timeSec - timeBarBeginSec) * (timeBarWidth || 500)) / 2.5;
+    (timeSec - timeBarBeginSec) * timeBarPxPerSec;
+  useEffect(() => {
+    const marginPxLeft = 50;
+    const marginPxRight = 300;
+    if (
+      currentTimeSecWithoutOffset - timeBarBeginSec <
+      marginPxLeft / timeBarPxPerSec
+    ) {
+      setTimeBarBeginSec(
+        currentTimeSecWithoutOffset - marginPxLeft / timeBarPxPerSec
+      );
+    } else if (
+      currentTimeSecWithoutOffset - timeBarBeginSec >
+      (timeBarWidth - marginPxRight) / timeBarPxPerSec
+    ) {
+      setTimeBarBeginSec(
+        currentTimeSecWithoutOffset -
+          (timeBarWidth - marginPxRight) / timeBarPxPerSec
+      );
+    }
+  }, [currentTimeSecWithoutOffset, timeBarBeginSec, timeBarWidth]);
+
+  const [timeBarBeginStep, setTimeBarBeginStep] = useState<number>(0);
+  useEffect(() => {
+    if (chart) {
+      setCurrentStep(
+        getStep(chart?.bpmChanges, currentTimeSecWithoutOffset - chart.offset)
+      );
+      setTimeBarBeginStep(
+        getStep(chart?.bpmChanges, timeBarBeginSec - chart.offset)
+      );
+    }
+  }, [chart, timeBarBeginSec, currentTimeSecWithoutOffset]);
 
   const [notesAll, setNotesAll] = useState<Note[]>([]);
 
+  // テキストボックス内の値
+  // 実際のoffsetはchart.offset
   const [offset, setOffset] = useState<string>("");
   const offsetValid = (offset: string) =>
     !isNaN(Number(offset)) && Number(offset) >= 0;
@@ -39,6 +115,10 @@ export default function Page() {
       chart.offset = Number(ofs);
     }
   };
+  const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
+
+  // テキストボックス内の値
+  // 実際のbpmはchart.bpmChanges
   const [bpm, setBpm] = useState<string>("");
   const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) >= 0;
   const changeBpm = (bpm: string) => {
@@ -72,8 +152,12 @@ export default function Page() {
             <FlexYouTube
               className={"block "}
               isMobile={false}
+              control={true}
               id={chart?.ytId}
               ytPlayer={ytPlayer}
+              onReady={onReady}
+              onStart={onStart}
+              onStop={onStop}
             />
           </div>
           <div className={"relative flex-1 basis-8/12 "}>
@@ -89,7 +173,9 @@ export default function Page() {
             className={"h-2 bg-gray-300 relative mt-12 mb-12"}
             ref={timeBarRef}
           >
-            {[0, 1, 2].map((dt) => (
+            {Array.from(
+              new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))
+            ).map((_, dt) => (
               <span
                 key={dt}
                 className="absolute border-l border-gray-400"
@@ -102,17 +188,16 @@ export default function Page() {
                 {timeSecStr(Math.ceil(timeBarBeginSec) + dt)}
               </span>
             ))}
-            <span
-              className="absolute "
-              style={{
-                top: -40,
-                left: timeBarPos(currentTimeSec),
-              }}
-            >
-              {timeStr(currentTimeSec)}
-            </span>
             {chart &&
-              [0, 1, 2, 3].map((dt) => (
+              Array.from(
+                new Array(
+                  Math.ceil(
+                    timeBarWidth /
+                      (timeBarPxPerSec *
+                        (60 / getBpm(chart.bpmChanges, timeBarBeginSec)))
+                  )
+                )
+              ).map((_, dt) => (
                 <span
                   key={dt}
                   className="absolute border-l border-red-400 "
@@ -122,13 +207,13 @@ export default function Page() {
                     left: timeBarPos(
                       getTimeSec(
                         chart!.bpmChanges,
-                        Math.floor(currentStep) + dt
-                      )
+                        Math.ceil(timeBarBeginStep) + dt
+                      ) + chart.offset
                     ),
                   }}
                 >
                   <span className="absolute bottom-0">
-                    {Math.floor(currentStep) + dt}
+                    {Math.ceil(timeBarBeginStep) + dt}
                   </span>
                 </span>
               ))}
@@ -150,9 +235,18 @@ export default function Page() {
               style={{
                 top: -40,
                 bottom: -20,
-                left: timeBarPos(currentTimeSec),
+                left: timeBarPos(currentTimeSecWithoutOffset),
               }}
             />
+            <span
+              className="absolute "
+              style={{
+                top: -40,
+                left: timeBarPos(currentTimeSecWithoutOffset),
+              }}
+            >
+              {timeStr(currentTimeSecWithoutOffset)}
+            </span>
           </div>
           <div className="flex flex-row pl-3">
             <span
@@ -207,7 +301,7 @@ export default function Page() {
               />
               <label htmlFor="bpmChangeHere">
                 <span>Change At</span>
-                <span className="ml-2">{timeStr(currentTimeSec / 60)}</span>
+                <span className="ml-2">{Math.round(currentStep)}</span>
               </label>
               <span className="ml-1">:</span>
               <input

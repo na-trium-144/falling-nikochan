@@ -40,9 +40,15 @@ export default function Home() {
   const isTouch = isTouchEventsEnabled();
 
   const [chart, setChart] = useState<Chart | null>(null);
+
+  // start後true
   const [playing, setPlaying] = useState<boolean>(false);
+
   const [auto, setAuto] = useState<boolean>(false); // todo: 切り替えボタンや表示など
+
   const ytPlayer = useRef<YouTubePlayer | null>(null);
+  // ytPlayerから現在時刻を取得
+  // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chart && playing) {
       return ytPlayer.current?.getCurrentTime() - chart.offset;
@@ -60,8 +66,12 @@ export default function Home() {
       ref.current.focus();
     }
   }, [ref]);
+
+  // chart.bpmChanges 内の現在のインデックス
   const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
+  // chart.bpmChanges[setCurrentBpmIndex].step に対応する時刻を保存しておく (計算するには積算しないといけないので)
   const currentBpmChangeTime = useRef<number>(0);
+  // bpmを更新
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const now = getCurrentTimeSec();
@@ -88,7 +98,9 @@ export default function Home() {
     };
   }, [chart, currentBpmIndex, getCurrentTimeSec]);
 
+  // ytPlayer準備完了
   const [ready, setReady] = useState<boolean>(false);
+  // 停止後 (最初に戻してリセットしてからスタートしないといけない)
   const [stopped, setStopped] = useState<boolean>(false);
   const onReady = useCallback(() => {
     console.log("ready");
@@ -186,6 +198,7 @@ export default function Home() {
                 }
                 isMobile={isMobile}
                 id={chart?.ytId}
+                control={false}
                 ytPlayer={ytPlayer}
                 onReady={onReady}
                 onStart={onStart}

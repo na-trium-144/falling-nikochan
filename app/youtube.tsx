@@ -9,6 +9,7 @@ interface Props {
   className?: string;
   style?: object;
   isMobile: boolean;
+  control: boolean;
   id?: string;
   ytPlayer: { current: YouTubePlayer | null };
   onReady?: () => void;
@@ -16,7 +17,7 @@ interface Props {
   onStop?: () => void;
 }
 export default function FlexYouTube(props: Props) {
-  const { isMobile, id, ytPlayer, onReady, onStart, onStop } = props;
+  const { isMobile, id, control, ytPlayer, onReady, onStart, onStop } = props;
   const { width, height, ref } = useResizeDetector();
   const resizeYouTube = useRef<() => void>();
   const onReadyRef = useRef<() => void>();
@@ -51,8 +52,8 @@ export default function FlexYouTube(props: Props) {
           videoId: id,
           playerVars: {
             autoplay: 0,
-            controls: 0,
-            disablekb: 1,
+            controls: control ? 1 : 0,
+            disablekb: control ? 0 : 1,
             fs: 0,
           },
           events: {
@@ -94,7 +95,7 @@ export default function FlexYouTube(props: Props) {
         loadVideo();
       }
     }
-  }, [id]);
+  }, [id, control]);
   return (
     <div
       className={

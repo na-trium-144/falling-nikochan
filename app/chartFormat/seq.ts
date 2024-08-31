@@ -68,6 +68,31 @@ export function getTimeSec(bpmChanges: BPMChange[], step: number): number {
   return timeSec;
 }
 /**
+ * bpmと時刻(秒数)→step
+ */
+export function getStep(bpmChanges: BPMChange[], timeSec: number): number {
+  let timeSecSum = 0;
+  for (let bi = 0; bi < bpmChanges.length; bi++) {
+    if (bi + 1 < bpmChanges.length) {
+      const timeSecPrev = timeSecSum;
+      timeSecSum +=
+        (60 / bpmChanges[bi].bpm) *
+        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
+      if (timeSecSum > timeSec) {
+        return (
+          bpmChanges[bi].step +
+          (timeSec - timeSecPrev) / (60 / bpmChanges[bi].bpm)
+        );
+      }
+    } else {
+      return (
+        bpmChanges[bi].step + (timeSec - timeSecSum) / (60 / bpmChanges[bi].bpm)
+      );
+    }
+  }
+  return 0;
+}
+/**
  * 時刻(秒数)→bpm
  */
 export function getBpm(bpmChanges: BPMChange[], now: number): number {
@@ -84,7 +109,7 @@ export function getBpm(bpmChanges: BPMChange[], now: number): number {
       return bpmChanges[bi].bpm;
     }
   }
-  return 0;
+  return bpmChanges[0].bpm || 120;
 }
 /**
  * chartを読み込む
