@@ -1,3 +1,5 @@
+import { Step } from "@/chartFormat/command";
+
 export function timeStr(timeSec: number): string {
   if (timeSec < 0) {
     return "-" + timeStr(-timeSec);
@@ -16,5 +18,13 @@ export function timeSecStr(timeSec: number): string {
     return "-" + timeSecStr(-timeSec);
   } else {
     return ":" + (Math.floor(timeSec) % 60).toString().padStart(2, "0");
+  }
+}
+
+export function stepNStr(s: Step): string {
+  if (s.numerator === 0) {
+    return s.fourth.toString();
+  } else {
+    return "";
   }
 }

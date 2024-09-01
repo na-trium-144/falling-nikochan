@@ -1,12 +1,19 @@
 "use client";
 
-import { Chart, NoteCommand, sampleChart } from "@/chartFormat/command";
+import {
+  Chart,
+  NoteCommand,
+  sampleChart,
+  Step,
+  stepAdd,
+  stepCmp,
+} from "@/chartFormat/command";
 import FlexYouTube from "@/youtube";
 import { YouTubePlayer } from "@/youtubePlayer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
-  getBpm,
+  findBpmIndexFromStep,
   getStep,
   getTimeSec,
   loadChart,
@@ -25,23 +32,43 @@ export default function Page() {
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
     useState<number>(0);
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const currentStepSnapped = Math.round(currentStep);
+  // 現在時刻に対応するstep
+  const [currentStep, setCurrentStep] = useState<Step>({
+    fourth: 0,
+    numerator: 0,
+    denominator: 4,
+  });
+  // snapの刻み幅 を1stepの4n分の1にする
+  const [snapDivider, setSnapDivider] = useState<number>(4);
+
   useEffect(() => {
     // テスト用
     const ch = sampleChart();
     setChart(ch);
   }, []);
+
+  // offsetを引いた後の時刻
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
-  const currentNoteIndex =
-    chart && chart.notes.findIndex((n) => n.step === currentStepSnapped);
+  // 現在選択中の音符 (currentStepSnappedに一致)
+  const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(-1);
+
+  // currentTimeが変わったときcurrentStepを更新
   useEffect(() => {
     if (chart) {
-      setCurrentStep(
-        getStep(chart?.bpmChanges, currentTimeSecWithoutOffset - chart.offset)
-      );
+      const step = getStep(chart.bpmChanges, currentTimeSec, snapDivider);
+      if (stepCmp(step, currentStep) !== 0) {
+        setCurrentStep(step);
+        if (
+          currentNoteIndex < 0 ||
+          stepCmp(chart.notes[currentNoteIndex].step, step) != 0
+        ) {
+          setCurrentNoteIndex(
+            chart.notes.findIndex((n) => stepCmp(n.step, step) == 0)
+          );
+        }
+      }
     }
-  }, [chart, currentTimeSecWithoutOffset]);
+  }, [chart, snapDivider, currentTimeSec, currentStep, currentNoteIndex]);
 
   const ytPlayer = useRef<YouTubePlayer | null>(null);
   // ytPlayerが再生中
@@ -74,7 +101,14 @@ export default function Page() {
   const seekStepRel = (move: number) => {
     if (chart) {
       changeCurrentTimeSec(
-        getTimeSec(chart.bpmChanges, currentStepSnapped + move) + chart.offset
+        getTimeSec(
+          chart.bpmChanges,
+          stepAdd(currentStep, {
+            fourth: 0,
+            numerator: move,
+            denominator: snapDivider,
+          })
+        ) + chart.offset
       );
     }
   };
@@ -104,11 +138,10 @@ export default function Page() {
   };
   const changeBpm = (bpm: number) => {
     if (chart /*&& bpmValid(bpm)*/) {
-      let bpmChangeIndex =
-        chart.bpmChanges.findIndex((ch) => ch.step > currentStepSnapped) - 1;
-      if (bpmChangeIndex < 0) {
-        bpmChangeIndex = chart.bpmChanges.length - 1;
-      }
+      const bpmChangeIndex = findBpmIndexFromStep(
+        chart.bpmChanges,
+        currentStep
+      );
       chart.bpmChanges[bpmChangeIndex].bpm = bpm;
     }
   };
@@ -118,14 +151,16 @@ export default function Page() {
     if (chart) {
       const newChart = { ...chart };
       newChart.notes.push({
-        step: currentStepSnapped,
+        step: currentStep,
         hitX: 1 / 4,
         hitVX: 1 / 4,
         hitVY: 1,
         accelY: 1 / 4,
-        timeScale: [{ stepBefore: 0, scale: 1 }],
+        timeScale: [
+          { stepBefore: { fourth: 0, numerator: 0, denominator: 4 }, scale: 1 },
+        ],
       });
-      newChart.notes = newChart.notes.sort((a, b) => a.step - b.step);
+      newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       setChart(newChart);
     }
   };
@@ -140,7 +175,7 @@ export default function Page() {
     if (chart && currentNoteIndex !== null) {
       const newChart = { ...chart };
       newChart.notes[currentNoteIndex] = n;
-      newChart.notes = newChart.notes.sort((a, b) => a.step - b.step);
+      newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       setChart(newChart);
     }
   };
@@ -163,7 +198,11 @@ export default function Page() {
             seekStepRel(-1);
           } else if (e.key === "Right" || e.key === "ArrowRight") {
             seekStepRel(1);
-          } else if (e.key === "n" && currentNoteIndex !== null && currentNoteIndex < 0) {
+          } else if (
+            e.key === "n" &&
+            currentNoteIndex !== null &&
+            currentNoteIndex < 0
+          ) {
             addNote();
           } else {
           }
@@ -244,8 +283,23 @@ export default function Page() {
             currentNoteIndex={currentNoteIndex}
             chart={chart}
             notesAll={notesAll}
+            snapDivider={snapDivider}
           />
-          <div className="flex flex-row pl-3">
+          <p>
+            <span>Step =</span>
+            <span className="ml-2">1</span>
+            <span className="ml-1">/</span>
+            <Input
+              actualValue={String(snapDivider * 4)}
+              updateValue={(v: string) => {
+                setSnapDivider(Number(v) / 4);
+              }}
+              isValid={(v) =>
+                !isNaN(Number(v)) && String(Math.floor(Number(v) / 4) * 4) === v
+              }
+            />
+          </p>
+          <div className="flex flex-row ml-3 mt-3">
             {["Timing", "Notes", "Coding"].map((tabName, i) =>
               i === tab ? (
                 <span

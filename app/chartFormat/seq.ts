@@ -1,4 +1,4 @@
-import { NoteCommand, Chart, BPMChange } from "./command";
+import { NoteCommand, Chart, BPMChange, Step, stepToFloat, stepAdd, stepSub, stepCmp } from "./command";
 
 /**
  * 音符の大きさ (画面サイズに対する割合)
@@ -53,74 +53,53 @@ export interface DisplayNote {
 /**
  * bpmとstep数→時刻(秒数)
  */
-export function getTimeSec(bpmChanges: BPMChange[], step: number): number {
-  let timeSec = 0;
-  for (let bi = 0; bi < bpmChanges.length; bi++) {
-    if (bi + 1 < bpmChanges.length && bpmChanges[bi + 1].step <= step) {
-      timeSec +=
-        (60 / bpmChanges[bi].bpm) *
-        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
-    } else {
-      timeSec += (60 / bpmChanges[bi].bpm) * (step - bpmChanges[bi].step);
-      break;
-    }
-  }
-  return timeSec;
+export function getTimeSec(bpmChanges: BPMChange[], step: Step): number {
+  const targetBpmIndex = bpmChanges.findIndex((ch) => step < ch.step);
+  const targetBpmChange = bpmChanges[targetBpmIndex < 0 ? 0 : targetBpmIndex];
+  return (
+    targetBpmChange.timeSec +
+    (60 / targetBpmChange.bpm) *
+      (stepToFloat(step) - stepToFloat(targetBpmChange.step))
+  );
 }
 /**
  * bpmと時刻(秒数)→step
  */
-export function getStep(bpmChanges: BPMChange[], timeSec: number): number {
-  let timeSecSum = 0;
-  for (let bi = 0; bi < bpmChanges.length; bi++) {
-    if (bi + 1 < bpmChanges.length) {
-      const timeSecPrev = timeSecSum;
-      timeSecSum +=
-        (60 / bpmChanges[bi].bpm) *
-        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
-      if (timeSecSum > timeSec) {
-        return (
-          bpmChanges[bi].step +
-          (timeSec - timeSecPrev) / (60 / bpmChanges[bi].bpm)
-        );
-      }
-    } else {
-      return (
-        bpmChanges[bi].step + (timeSec - timeSecSum) / (60 / bpmChanges[bi].bpm)
-      );
-    }
-  }
-  return 0;
+export function getStep(bpmChanges: BPMChange[], timeSec: number, denominator: number): Step {
+  const targetBpmIndex = bpmChanges.findIndex((ch) => timeSec < ch.timeSec);
+  const targetBpmChange = bpmChanges[targetBpmIndex < 0 ? 0 : targetBpmIndex];
+  const stepFloat = stepToFloat(targetBpmChange.step) + (timeSec - targetBpmChange.timeSec) / (60 / targetBpmChange.bpm);
+  const num = Math.round(stepFloat * denominator);
+  return {
+    fourth: Math.floor(num / denominator),
+    numerator: num % denominator,
+    denominator,
+  };
 }
 /**
  * 時刻(秒数)→bpm
  */
-export function getBpm(bpmChanges: BPMChange[], now: number): number {
-  let timeSec = 0;
-  for (let bi = 0; bi < bpmChanges.length; bi++) {
-    if (bi + 1 < bpmChanges.length) {
-      timeSec +=
-        (60 / bpmChanges[bi].bpm) *
-        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
-      if (timeSec > now) {
-        return bpmChanges[bi].bpm;
-      }
-    } else {
-      return bpmChanges[bi].bpm;
-    }
-  }
-  return bpmChanges[0].bpm || 120;
+export function findBpmIndexFromSec(bpmChanges: BPMChange[], timeSec: number): number {
+  const targetBpmIndex = bpmChanges.findIndex((ch) => timeSec < ch.timeSec);
+  return targetBpmIndex < 0 ? 0 : targetBpmIndex;
+}
+/**
+ * 時刻(秒数)→bpm
+ */
+export function findBpmIndexFromStep(bpmChanges: BPMChange[], step: Step): number {
+  const targetBpmIndex = bpmChanges.findIndex((ch) => stepCmp(step, ch.step) < 0);
+  return targetBpmIndex < 0 ? 0 : targetBpmIndex;
 }
 /**
  * chartを読み込む
  */
 export function loadChart(chart: Chart): Note[] {
   return chart.notes.map((c: NoteCommand, id) => {
-    // step→時刻
+    // hitの時刻
     const hitTimeSec: number = getTimeSec(chart.bpmChanges, c.step);
     // timeScaleの変化点それぞれの時刻
     const tsTimeSec: number[] = c.timeScale.map((ts) =>
-      getTimeSec(chart.bpmChanges, c.step - ts.stepBefore)
+      getTimeSec(chart.bpmChanges, stepSub(c.step, ts.stepBefore))
     );
     return {
       id,

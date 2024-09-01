@@ -18,6 +18,70 @@ export interface Chart {
 }
 
 /**
+ * 時刻(step数)の数え方
+ * 4分音符の個数 = fourth + numerator / denominator
+ * パラメーターはいずれも自然数で、 numerator < denominator
+ * ただし既約分数であるとは限らない
+ */
+export interface Step {
+  fourth: number;
+  numerator: number;
+  denominator: number;
+}
+function step(f: number, n: number = 0, d: number = 16): Step {
+  return { fourth: f, numerator: n, denominator: d / 4 };
+}
+export function stepToFloat(s: Step) {
+  return s.fourth + s.numerator / s.denominator;
+}
+/**
+ * 1: s1 > s2
+ * 0: s1 = s2
+ * -1: s1 < s2
+ */
+export function stepCmp(s1: Step, s2: Step) {
+  if (
+    s1.fourth === s2.fourth &&
+    s1.numerator * s2.denominator === s1.denominator * s2.numerator
+  ) {
+    return 0;
+  } else {
+    return Math.sign(stepToFloat(s1) - stepToFloat(s2));
+  }
+}
+/**
+ * s1 - s2
+ */
+export function stepSub(s1: Step, s2: Step) {
+  return stepAdd(s1, {
+    fourth: -s2.fourth,
+    numerator: -s2.numerator,
+    denominator: s2.denominator,
+  });
+}
+/**
+ * s1 + s2
+ */
+export function stepAdd(s1: Step, s2: Step) {
+  const sa: Step = {
+    fourth: s1.fourth + s2.fourth,
+    numerator: s1.numerator * s2.denominator + s2.numerator * s1.denominator,
+    denominator: s1.denominator * s2.denominator,
+  };
+  if (Math.abs(sa.numerator) >= sa.denominator) {
+    sa.fourth += Math.floor(sa.numerator / sa.denominator);
+    sa.numerator -= Math.floor(sa.numerator / sa.denominator) * sa.denominator;
+  }
+  for (let i = 2; i <= sa.numerator && i <= sa.denominator; i++) {
+    while (sa.numerator % i == 0 && sa.denominator % i == 0) {
+      sa.numerator /= i;
+      sa.denominator /= i;
+    }
+  }
+  return sa;
+}
+
+/**
  * 音符コマンド
  * step: 判定時刻(step数)
  * hitX: 判定時のX
@@ -29,19 +93,40 @@ export interface Chart {
  * timeScale: { 時刻(判定時刻 - step数), VX,VY,accelYの倍率 } のリスト
  */
 export interface NoteCommand {
-  step: number;
+  step: Step;
   hitX: number;
   hitVX: number;
   hitVY: number;
   accelY: number;
   timeScale: {
-    stepBefore: number;
+    stepBefore: Step;
     scale: number;
   }[];
 }
+/**
+ *       timeSec +=
+        (60 / bpmChanges[bi].bpm) *
+        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
+ */
 export interface BPMChange {
-  step: number;
+  step: Step;
+  timeSec: number;
   bpm: number;
+}
+/**
+ * stepが正しいとしてtimeSecを再計算
+ */
+export function updateBpmTimeSec(bpmChanges: BPMChange[]) {
+  let timeSum = 0;
+  for (let bi = 0; bi < bpmChanges.length; bi++) {
+    bpmChanges[bi].timeSec = timeSum;
+    if (bi + 1 < bpmChanges.length) {
+      timeSum +=
+        (60 / bpmChanges[bi].bpm) *
+        (stepToFloat(bpmChanges[bi + 1].step) -
+          stepToFloat(bpmChanges[bi].step));
+    }
+  }
 }
 
 export const sampleChart = (): Chart => {
@@ -51,57 +136,63 @@ export const sampleChart = (): Chart => {
     hitVX: 1 / 4,
     hitVY: 1,
     accelY: 1 / 4,
-    timeScale: [{ stepBefore: 0, scale: 1 }],
+    timeScale: [{ stepBefore: step(0), scale: 1 }],
   };
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      notes.push({ ...def, step: 16 + j + i * 4 });
+      notes.push({ ...def, step: step(16 + j + i * 4) });
     }
   }
-  notes.push({ ...def, step: 28 });
-  notes.push({ ...def, step: 29 });
-  notes.push({ ...def, step: 30, hitX: 1 / 4, hitVX: 1 / 4 });
-  notes.push({ ...def, step: 30.5, hitX: 2 / 4, hitVX: 1 / 4 });
-  notes.push({ ...def, step: 31, hitX: 3 / 4, hitVX: 1 / 4 });
+  notes.push({ ...def, step: step(28) });
+  notes.push({ ...def, step: step(29) });
+  notes.push({ ...def, step: step(30), hitX: 1 / 4, hitVX: 1 / 4 });
+  notes.push({ ...def, step: step(30, 1, 8), hitX: 2 / 4, hitVX: 1 / 4 });
+  notes.push({ ...def, step: step(31), hitX: 3 / 4, hitVX: 1 / 4 });
 
   for (let i = 0; i < 4; i++) {
-    notes.push({ ...def, step: 32 + i * 8 });
-    notes.push({ ...def, step: 32 + i * 8 + 1.75 });
-    notes.push({ ...def, step: 32 + i * 8 + 2.75 });
-    notes.push({ ...def, step: 32 + i * 8 + 4 });
-    notes.push({ ...def, step: 32 + i * 8 + 5.75 });
-    notes.push({ ...def, step: 32 + i * 8 + 7 });
+    notes.push({ ...def, step: step(32 + i * 8) });
+    notes.push({ ...def, step: step(32 + i * 8 + 1, 3, 16) });
+    notes.push({ ...def, step: step(32 + i * 8 + 2, 3, 16) });
+    notes.push({ ...def, step: step(32 + i * 8 + 4) });
+    notes.push({ ...def, step: step(32 + i * 8 + 5, 3, 16) });
+    notes.push({ ...def, step: step(32 + i * 8 + 7) });
   }
   for (let j = 0; j < 14; j++) {
-    notes.push({ ...def, step: 64 + j });
+    notes.push({ ...def, step: step(64 + j) });
   }
-  notes.push({ ...def, step: 64 + 14 });
-  notes.push({ ...def, step: 64 + 14.5, hitX: 2 / 4 });
-  notes.push({ ...def, step: 64 + 15 });
+  notes.push({ ...def, step: step(64 + 14) });
+  notes.push({ ...def, step: step(64 + 14, 1, 8), hitX: 2 / 4 });
+  notes.push({ ...def, step: step(64 + 15) });
   for (let j = 0; j < 14; j++) {
-    notes.push({ ...def, step: 64 + 16 + j });
+    notes.push({ ...def, step: step(64 + 16 + j) });
   }
-  notes.push({ ...def, step: 64 + 16 + 13.75 });
-  notes.push({ ...def, step: 64 + 16 + 14.5 });
-  notes.push({ ...def, step: 64 + 16 + 15 });
+  notes.push({ ...def, step: step(64 + 16 + 13, 3, 16) });
+  notes.push({ ...def, step: step(64 + 16 + 14, 1, 8) });
+  notes.push({ ...def, step: step(64 + 16 + 15) });
 
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 4; j++) {
-      notes.push({ ...def, step: 96 + i * 8 + j });
+      notes.push({ ...def, step: step(96 + i * 8 + j) });
     }
-    notes.push({ ...def, step: 96 + i * 8 + 4, hitX: 3 / 4 });
-    notes.push({ ...def, step: 96 + i * 8 + 5 });
-    notes.push({ ...def, step: 96 + i * 8 + 6, hitX: 3 / 4 });
-    notes.push({ ...def, step: 96 + i * 8 + 6.5, hitX: 2 / 4 });
-    notes.push({ ...def, step: 96 + i * 8 + 7 });
+    notes.push({ ...def, step: step(96 + i * 8 + 4), hitX: 3 / 4 });
+    notes.push({ ...def, step: step(96 + i * 8 + 5) });
+    notes.push({ ...def, step: step(96 + i * 8 + 6), hitX: 3 / 4 });
+    notes.push({ ...def, step: step(96 + i * 8 + 6, 1, 8), hitX: 2 / 4 });
+    notes.push({ ...def, step: step(96 + i * 8 + 7) });
   }
-  
+
   return {
     ytId: "cNnCLGrXBYs",
     title: "aaaaaa123タイトル",
     author: "author",
 
-    bpmChanges: [{ step: 0, bpm: 127.0 }],
+    bpmChanges: [
+      {
+        step: { fourth: 0, numerator: 0, denominator: 4 },
+        timeSec: 0,
+        bpm: 127.0,
+      },
+    ],
     offset: 0,
     notes,
   };

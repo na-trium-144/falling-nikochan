@@ -12,6 +12,7 @@ export default function Button(props: Props) {
       "hover:bg-gray-100 active:bg-gray-300 active:shadow-inner"
     }
     onClick={() => props.onClick && props.onClick()}
+    onKeyDown={(e) => e.stopPropagation()}
   >
     <span>{props.text}</span>
     {props.keyName && <Key className="text-xs ml-1 p-0.5">{props.keyName}</Key>}
