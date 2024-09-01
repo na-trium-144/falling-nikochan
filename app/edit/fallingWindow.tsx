@@ -3,17 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Note, DisplayNote, noteSize, targetY } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
+import { Chart, NoteCommand } from "@/chartFormat/command";
+import Arrow from "./arrow";
+import DragHandle from "./dragHandle";
 
 interface Props {
   className?: string;
   style?: object;
   notes: Note[];
+  chart: Chart | null;
   currentTimeSec: number;
   currentNoteIndex: number | null;
+  updateNote: (n: NoteCommand) => void;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, currentTimeSec, currentNoteIndex } = props;
+  const { notes, chart, currentTimeSec, currentNoteIndex } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -73,6 +78,7 @@ export default function FallingWindow(props: Props) {
   return (
     <div className={props.className} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
+        {/* 判定線 */}
         {boxSize && marginY !== undefined && (
           <div
             className={
@@ -92,6 +98,9 @@ export default function FallingWindow(props: Props) {
             marginX !== undefined &&
             marginY !== undefined && (
               <>
+                {/* にこちゃん
+                  currentNoteIndexと一致していたら赤色にする
+                */}
                 <div
                   key={d.current.id}
                   className={
@@ -110,6 +119,13 @@ export default function FallingWindow(props: Props) {
                   }}
                 />
                 {d.history.slice(1).map((_, di) => (
+                  /* 軌跡
+                  短い時間ごとに区切って位置を計算したものがd.historyで、
+                  width=d.historyの2点間の距離, height=0のspanを用意し
+                  border-b でその長さの水平な線を引いて
+                  origin-bottom-left から d.historyの2点のatan2だけ回転することで
+                  軌跡の線を引いている
+                  */
                   <span
                     key={di}
                     className={
@@ -143,6 +159,120 @@ export default function FallingWindow(props: Props) {
               </>
             )
         )}
+        {chart &&
+          currentNoteIndex !== null &&
+          currentNoteIndex >= 0 &&
+          boxSize &&
+          marginX !== undefined &&
+          marginY !== undefined && (
+            <>
+              {/* xを左右に動かす矢印 */}
+              <Arrow
+                left={
+                  chart.notes[currentNoteIndex].hitX * boxSize +
+                  marginX -
+                  (0.12 + noteSize / 2) * boxSize
+                }
+                bottom={targetY * boxSize + marginY}
+                length={0.1 * boxSize}
+                lineWidth={12}
+                rotation={0}
+              />
+              <Arrow
+                left={
+                  chart.notes[currentNoteIndex].hitX * boxSize +
+                  marginX +
+                  (0.12 + noteSize / 2) * boxSize
+                }
+                bottom={targetY * boxSize + marginY}
+                length={0.1 * boxSize}
+                lineWidth={12}
+                rotation={Math.PI}
+              />
+              <DragHandle
+                className="absolute "
+                style={{
+                  left:
+                    chart.notes[currentNoteIndex].hitX * boxSize +
+                    marginX -
+                    (0.12 + noteSize / 2) * boxSize,
+                  bottom: targetY * boxSize + marginY - 8,
+                  width: (0.12 + noteSize / 2) * boxSize * 2,
+                  height: 16,
+                }}
+                onMove={(x, y) =>
+                  props.updateNote({
+                    ...chart.notes[currentNoteIndex],
+                    hitX: chart.notes[currentNoteIndex].hitX + x / boxSize,
+                  })
+                }
+              />
+              {/* vx,vyを動かす矢印 */}
+              <Arrow
+                left={chart.notes[currentNoteIndex].hitX * boxSize + marginX}
+                bottom={targetY * boxSize + marginY}
+                length={
+                  Math.sqrt(
+                    Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
+                      Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
+                  ) * boxSize
+                }
+                lineWidth={12}
+                rotation={
+                  -Math.atan2(
+                    chart.notes[currentNoteIndex].hitVY,
+                    chart.notes[currentNoteIndex].hitVX
+                  )
+                }
+              />
+              <DragHandle
+                className="absolute origin-left z-20"
+                style={{
+                  left: chart.notes[currentNoteIndex].hitX * boxSize + marginX,
+                  bottom: targetY * boxSize + marginY - 16,
+                  width:
+                    Math.sqrt(
+                      Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
+                        Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
+                    ) * boxSize,
+                  height: 32,
+                  transform: `rotate(${-Math.atan2(
+                    chart.notes[currentNoteIndex].hitVY,
+                    chart.notes[currentNoteIndex].hitVX
+                  )}rad)`,
+                }}
+                onMove={(x, y, cx, cy) => {
+                  const winLeft = ref.current.getBoundingClientRect().left;
+                  const winBottom = ref.current.getBoundingClientRect().bottom;
+                  const originLeft =
+                    chart.notes[currentNoteIndex].hitX * boxSize + marginX;
+                  const originBottom = targetY * boxSize + marginY - 16;
+                  // cx-winLeft, winBottom-cy が divのabsolute基準からマウスカーソル位置までの相対位置になる
+
+                  // 音符位置からマウスまでの距離
+                  const mouseVX = (cx - winLeft - originLeft) / boxSize;
+                  const mouseVY = (winBottom - cy - originBottom) / boxSize;
+                  const mouseDist = Math.sqrt(
+                    Math.pow(mouseVX, 2) + Math.pow(mouseVY, 2)
+                  );
+                  const hitVDist = Math.sqrt(
+                    Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
+                      Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
+                  );
+                  console.log(mouseVY, chart.notes[currentNoteIndex].hitVY);
+                  props.updateNote({
+                    ...chart.notes[currentNoteIndex],
+                    hitVX:
+                      chart.notes[currentNoteIndex].hitVX +
+                      (x / boxSize / mouseDist) * hitVDist,
+                    hitVY:
+                      chart.notes[currentNoteIndex].hitVY -
+                      (y / boxSize / mouseDist) * hitVDist,
+                  });
+                }}
+              />
+            </>
+          )}
       </div>
     </div>
   );

@@ -31,7 +31,7 @@ export default function TimeBar(props: Props) {
     (timeSec - timeBarBeginSec) * timeBarPxPerSec;
   useEffect(() => {
     const marginPxLeft = 50;
-    const marginPxRight = 300;
+    const marginPxRight = timeBarWidth / 2;
     if (
       currentTimeSecWithoutOffset - timeBarBeginSec <
       marginPxLeft / timeBarPxPerSec

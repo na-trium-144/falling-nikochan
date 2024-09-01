@@ -65,6 +65,7 @@ export default function FallingWindow(props: Props) {
   return (
     <div className={props.className} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
+        {/* 判定線 */}
         {boxSize && marginY !== undefined && (
           <div
             className={
@@ -85,6 +86,12 @@ export default function FallingWindow(props: Props) {
             boxSize &&
             marginX !== undefined &&
             marginY !== undefined && (
+              /* にこちゃん
+                d.done に応じて画像と動きを変える
+                0: 通常
+                1〜3: good, ok, bad
+                4: miss は画像が0と同じ
+                */
               <div
                 key={d.id}
                 className={
@@ -100,6 +107,7 @@ export default function FallingWindow(props: Props) {
                     : "")
                 }
                 style={{
+                  /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
                   width: noteSize * boxSize,
                   height: noteSize * boxSize,
                   left: (d.pos.x - noteSize / 2) * boxSize + marginX,
@@ -111,6 +119,7 @@ export default function FallingWindow(props: Props) {
                   src={`/nikochan${d.done <= 3 ? d.done : 0}.svg`}
                   className="w-full h-full "
                 />
+                {/* chainBonusをにこちゃんの右上に表示する */}
                 {d.chainBonus && d.chain && (
                   <span
                     className={

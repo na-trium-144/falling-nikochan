@@ -1,6 +1,6 @@
 "use client";
 
-import { Chart, sampleChart } from "@/chartFormat/command";
+import { Chart, NoteCommand, sampleChart } from "@/chartFormat/command";
 import FlexYouTube from "@/youtube";
 import { YouTubePlayer } from "@/youtubePlayer";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,6 +16,8 @@ import { useResizeDetector } from "react-resize-detector";
 import Button from "./button";
 import TimeBar from "./timeBar";
 import Input from "./input";
+import TimingTab from "./timingTab";
+import NoteTab from "./noteTab";
 
 export default function Page() {
   const [chart, setChart] = useState<Chart | null>(null);
@@ -24,6 +26,7 @@ export default function Page() {
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
     useState<number>(0);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepSnapped = Math.round(currentStep);
   useEffect(() => {
     // テスト用
     const ch = sampleChart();
@@ -31,16 +34,7 @@ export default function Page() {
   }, []);
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
   const currentNoteIndex =
-    chart &&
-    chart.notes.indexOf(
-      chart.notes.reduce(
-        (prevN, n) =>
-          Math.abs(n.step - currentStep) < Math.abs(prevN.step - currentStep)
-            ? n
-            : prevN,
-        chart.notes[0]
-      )
-    );
+    chart && chart.notes.findIndex((n) => n.step === currentStepSnapped);
   useEffect(() => {
     if (chart) {
       setCurrentStep(
@@ -73,13 +67,14 @@ export default function Page() {
     ytPlayer.current?.pauseVideo();
   };
   const changeCurrentTimeSec = (timeSec: number) => {
-    ytPlayer.current?.seekTo(timeSec, true);
+    if (ytPlayer.current?.seekTo) {
+      ytPlayer.current?.seekTo(timeSec, true);
+    }
   };
   const seekStepRel = (move: number) => {
     if (chart) {
       changeCurrentTimeSec(
-        getTimeSec(chart.bpmChanges, Math.round(currentStep + move)) +
-          chart.offset
+        getTimeSec(chart.bpmChanges, currentStepSnapped + move) + chart.offset
       );
     }
   };
@@ -100,26 +95,55 @@ export default function Page() {
     }
   }, [chart]);
 
-  const offsetValid = (offset: string) =>
-    !isNaN(Number(offset)) && Number(offset) >= 0;
-  const changeOffset = (ofs: string) => {
+  const [tab, setTab] = useState<number>(0);
+
+  const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
-      setChart({ ...chart, offset: Number(ofs) });
+      setChart({ ...chart, offset: ofs });
     }
   };
-
-  const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) >= 0;
-  const changeBpm = (bpm: string) => {
+  const changeBpm = (bpm: number) => {
     if (chart /*&& bpmValid(bpm)*/) {
       let bpmChangeIndex =
-        chart.bpmChanges.findIndex((ch) => ch.step > currentStep) - 1;
+        chart.bpmChanges.findIndex((ch) => ch.step > currentStepSnapped) - 1;
       if (bpmChangeIndex < 0) {
         bpmChangeIndex = chart.bpmChanges.length - 1;
       }
-      chart.bpmChanges[bpmChangeIndex].bpm = Number(bpm);
+      chart.bpmChanges[bpmChangeIndex].bpm = bpm;
     }
   };
   const toggleBpmChangeHere = () => {};
+
+  const addNote = () => {
+    if (chart) {
+      const newChart = { ...chart };
+      newChart.notes.push({
+        step: currentStepSnapped,
+        hitX: 1 / 4,
+        hitVX: 1 / 4,
+        hitVY: 1,
+        accelY: 1 / 4,
+        timeScale: [{ stepBefore: 0, scale: 1 }],
+      });
+      newChart.notes = newChart.notes.sort((a, b) => a.step - b.step);
+      setChart(newChart);
+    }
+  };
+  const deleteNote = () => {
+    if (chart && currentNoteIndex !== null) {
+      const newChart = { ...chart };
+      newChart.notes = newChart.notes.filter((n, i) => i !== currentNoteIndex);
+      setChart(newChart);
+    }
+  };
+  const updateNote = (n: NoteCommand) => {
+    if (chart && currentNoteIndex !== null) {
+      const newChart = { ...chart };
+      newChart.notes[currentNoteIndex] = n;
+      newChart.notes = newChart.notes.sort((a, b) => a.step - b.step);
+      setChart(newChart);
+    }
+  };
 
   return (
     <main
@@ -139,6 +163,8 @@ export default function Page() {
             seekStepRel(-1);
           } else if (e.key === "Right" || e.key === "ArrowRight") {
             seekStepRel(1);
+          } else if (e.key === "n" && currentNoteIndex !== null && currentNoteIndex < 0) {
+            addNote();
           } else {
           }
         }
@@ -173,6 +199,8 @@ export default function Page() {
               notes={notesAll}
               currentTimeSec={currentTimeSec || 0}
               currentNoteIndex={currentNoteIndex}
+              chart={chart}
+              updateNote={updateNote}
             />
           </div>
         </div>
@@ -218,55 +246,50 @@ export default function Page() {
             notesAll={notesAll}
           />
           <div className="flex flex-row pl-3">
-            <span
-              className="rounded-t-lg px-3 pt-2 pb-1"
-              style={{ background: "rgba(255, 255, 255, 0.5)" }}
-            >
-              Timing
-            </span>
-            <span className="px-3 pt-2 pb-1">Notes</span>
-            <span className="px-3 pt-2 pb-1">Coding</span>
+            {["Timing", "Notes", "Coding"].map((tabName, i) =>
+              i === tab ? (
+                <span
+                  key={i}
+                  className="rounded-t-lg px-3 pt-2 pb-1"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  {tabName}
+                </span>
+              ) : (
+                <button
+                  key={i}
+                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200"
+                  onClick={() => setTab(i)}
+                >
+                  {tabName}
+                </button>
+              )
+            )}
           </div>
           <div
             className="flex-1 rounded-lg p-3"
             style={{ background: "rgba(255, 255, 255, 0.5)" }}
           >
-            <p>
-              <span>Offset</span>
-              <Input
-                actualValue={chart ? chart.offset.toString() : ""}
-                updateValue={changeOffset}
-                isValid={offsetValid}
+            {tab === 0 ? (
+              <TimingTab
+                offset={chart?.offset}
+                setOffset={changeOffset}
+                currentBpm={chart?.bpmChanges[0].bpm}
+                setCurrentBpm={changeBpm}
+                bpmChangeHere={false}
+                toggleBpmChangeHere={toggleBpmChangeHere}
               />
-              <span>s</span>
-            </p>
-            <p>
-              <span>Current BPM:</span>
-              <Input
-                actualValue={chart ? chart.bpmChanges[0].bpm.toString() : ""}
-                updateValue={changeBpm}
-                isValid={bpmValid}
+            ) : (
+              <NoteTab
+                currentNoteIndex={currentNoteIndex}
+                addNote={addNote}
+                deleteNote={deleteNote}
+                updateNote={updateNote}
+                chart={chart}
               />
-            </p>
-            <p>
-              <input
-                className="ml-4 mr-1"
-                type="checkbox"
-                id="bpmChangeHere"
-                checked={false}
-                onChange={toggleBpmChangeHere}
-              />
-              <label htmlFor="bpmChangeHere">
-                <span>Change At</span>
-                <span className="ml-2">{Math.round(currentStep)}</span>
-              </label>
-              <span className="ml-1">:</span>
-              <Input
-                actualValue={chart ? chart.bpmChanges[0].bpm.toString() : ""}
-                updateValue={changeBpm}
-                isValid={bpmValid}
-              />
-            </p>
+            )}
           </div>
         </div>
       </div>
