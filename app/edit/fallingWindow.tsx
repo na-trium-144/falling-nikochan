@@ -9,10 +9,11 @@ interface Props {
   style?: object;
   notes: Note[];
   currentTimeSec: number;
+  currentNoteIndex: number | null;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, currentTimeSec } = props;
+  const { notes, currentTimeSec, currentNoteIndex } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -93,7 +94,12 @@ export default function FallingWindow(props: Props) {
               <>
                 <div
                   key={d.current.id}
-                  className={"absolute "}
+                  className={
+                    "absolute rounded-full " +
+                    (d.current.id === currentNoteIndex
+                      ? "bg-red-400 "
+                      : "bg-yellow-400 ")
+                  }
                   style={{
                     width: noteSize * boxSize,
                     height: noteSize * boxSize,
@@ -102,13 +108,16 @@ export default function FallingWindow(props: Props) {
                       (d.current.pos.y + targetY - noteSize / 2) * boxSize +
                       marginY,
                   }}
-                >
-                  <img src={`/nikochan0.svg`} className="w-full h-full " />
-                </div>
+                />
                 {d.history.slice(1).map((_, di) => (
                   <span
                     key={di}
-                    className="absolute border-b border-gray-400 origin-bottom-left"
+                    className={
+                      "absolute border-b origin-bottom-left " +
+                      (d.history[di].id === currentNoteIndex
+                        ? "border-red-300 z-10 "
+                        : "border-gray-300 ")
+                    }
                     style={{
                       width:
                         Math.sqrt(

@@ -152,7 +152,7 @@ export default function Home() {
       onKeyDown={(e) => {
         if (e.key === " " && (ready || stopped) && !playing) {
           start();
-        } else if (e.key === "Escape" || e.key === "Esc") {
+        } else if ((e.key === "Escape" || e.key === "Esc") && playing) {
           stop();
         } else {
           flash();

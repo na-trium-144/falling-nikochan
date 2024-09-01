@@ -5,9 +5,15 @@ import FlexYouTube from "@/youtube";
 import { YouTubePlayer } from "@/youtubePlayer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
-import { getBpm, getStep, getTimeSec, loadChart, Note } from "@/chartFormat/seq";
+import {
+  getBpm,
+  getStep,
+  getTimeSec,
+  loadChart,
+  Note,
+} from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
-import { cursorTo } from "readline";
+import { Key } from "@/messageBox";
 
 export default function Page() {
   const [chart, setChart] = useState<Chart | null>(null);
@@ -23,6 +29,19 @@ export default function Page() {
     setOffset(ch.offset.toString());
     setBpm(ch.bpmChanges[0].bpm.toString());
   }, []);
+  const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
+  const currentBpm = chart && getBpm(chart.bpmChanges, currentTimeSec);
+  const currentNoteIndex =
+    chart &&
+    chart.notes.indexOf(
+      chart.notes.reduce(
+        (prevN, n) =>
+          Math.abs(n.step - currentStep) < Math.abs(prevN.step - currentStep)
+            ? n
+            : prevN,
+        chart.notes[0]
+      )
+    );
 
   const ytPlayer = useRef<YouTubePlayer | null>(null);
   // ytPlayerが再生中
@@ -50,6 +69,15 @@ export default function Page() {
   const changeCurrentTimeSec = (timeSec: number) => {
     ytPlayer.current?.seekTo(timeSec, true);
   };
+  const seekStepRel = (move: number) => {
+    if (currentBpm) {
+      changeCurrentTimeSec(
+        getTimeSec(chart.bpmChanges, Math.round(currentStep + move)) +
+          chart.offset
+      );
+    }
+  };
+
   useEffect(() => {
     const i = setInterval(() => {
       if (ytPlayer.current?.getCurrentTime) {
@@ -104,7 +132,7 @@ export default function Page() {
 
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
-    if(chart){
+    if (chart) {
       setNotesAll(loadChart(chart));
     }
   }, [chart]);
@@ -120,7 +148,6 @@ export default function Page() {
       chart.offset = Number(ofs);
     }
   };
-  const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
 
   // テキストボックス内の値
   // 実際のbpmはchart.bpmChanges
@@ -141,7 +168,28 @@ export default function Page() {
   const toggleBpmChangeHere = () => {};
 
   return (
-    <main className="w-screen min-h-screen overflow-x-hidden ">
+    <main
+      className="w-screen min-h-screen overflow-x-hidden overflow-y-hidden"
+      style={{ touchAction: "none" }}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (ready) {
+          if (e.key === " " && !playing) {
+            start();
+          } else if (
+            (e.key === "Escape" || e.key === "Esc" || e.key === " ") &&
+            playing
+          ) {
+            stop();
+          } else if (e.key === "Left" || e.key === "ArrowLeft") {
+            seekStepRel(-1);
+          } else if (e.key === "Right" || e.key === "ArrowRight") {
+            seekStepRel(1);
+          } else {
+          }
+        }
+      }}
+    >
       <div className={"w-full h-screen flex items-stretch flex-row"}>
         <div
           className={
@@ -170,12 +218,62 @@ export default function Page() {
               className="absolute inset-0"
               notes={notesAll}
               currentTimeSec={currentTimeSec || 0}
+              currentNoteIndex={currentNoteIndex}
             />
           </div>
         </div>
         <div className="flex-1 p-3 flex flex-col items-stretch">
+          <div>
+            <span>Player Control:</span>
+            <button
+              className={
+                "bg-gray-200 ml-1 p-1 border border-gray-600 rounded " +
+                "hover:bg-gray-100 active:bg-gray-300 active:shadow-inner"
+              }
+              onClick={() => {
+                if (ready) {
+                  if (!playing) {
+                    start();
+                  } else {
+                    stop();
+                  }
+                }
+              }}
+            >
+              <span>{playing ? "Pause" : "Play"}</span>
+              <Key className="text-xs ml-1 p-0.5">Space</Key>
+            </button>
+            <button
+              className={
+                "bg-gray-200 ml-1 p-1 border border-gray-600 rounded " +
+                "hover:bg-gray-100 active:bg-gray-300 active:shadow-inner"
+              }
+              onClick={() => {
+                if (ready) {
+                  seekStepRel(-1);
+                }
+              }}
+            >
+              <span>-1 Step</span>
+              <Key className="text-xs ml-1 p-0.5">←</Key>
+            </button>
+            <button
+              className={
+                "bg-gray-200 ml-1 p-1 border border-gray-600 rounded " +
+                "hover:bg-gray-100 active:bg-gray-300 active:shadow-inner"
+              }
+              onClick={() => {
+                if (ready) {
+                  seekStepRel(1);
+                }
+              }}
+            >
+              <span>+1 Step</span>
+              <Key className="text-xs ml-1 p-0.5">→</Key>
+            </button>
+          </div>
           <div
-            className={"h-2 bg-gray-300 relative mt-12 mb-12"}
+            className={"h-2 bg-gray-300 relative mt-12 mb-12 overflow-visible"}
             ref={timeBarRef}
           >
             {Array.from(
@@ -194,12 +292,11 @@ export default function Page() {
               </span>
             ))}
             {chart &&
+              currentBpm &&
               Array.from(
                 new Array(
                   Math.ceil(
-                    timeBarWidth /
-                      (timeBarPxPerSec *
-                        (60 / getBpm(chart.bpmChanges, timeBarBeginSec)))
+                    timeBarWidth / (timeBarPxPerSec * (60 / currentBpm))
                   )
                 )
               ).map((_, dt) => (
@@ -252,6 +349,27 @@ export default function Page() {
             >
               {timeStr(currentTimeSecWithoutOffset)}
             </span>
+            {chart &&
+              notesAll.map(
+                (n, i) =>
+                  n.hitTimeSec + chart.offset > timeBarBeginSec &&
+                  n.hitTimeSec + chart.offset <
+                    timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+                    <span
+                      key={n.id}
+                      className={
+                        "absolute w-3 h-3 rounded-full " +
+                        (n.id === currentNoteIndex
+                          ? "bg-red-400 "
+                          : "bg-yellow-400 ")
+                      }
+                      style={{
+                        top: -2,
+                        left: timeBarPos(n.hitTimeSec + chart.offset) - 6,
+                      }}
+                    />
+                  )
+              )}
           </div>
           <div className="flex flex-row pl-3">
             <span
