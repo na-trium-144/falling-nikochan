@@ -1,4 +1,6 @@
+import { Step, stepCmp, stepZero } from "@/chartFormat/command";
 import Input from "./input";
+import { stepStr } from "./str";
 
 interface Props {
   offset?: number;
@@ -7,14 +9,15 @@ interface Props {
   setCurrentBpm: (bpm: number) => void;
   bpmChangeHere: boolean;
   toggleBpmChangeHere: () => void;
+  currentStep: Step;
 }
 export default function TimingTab(props: Props) {
   const offsetValid = (offset: string) =>
     !isNaN(Number(offset)) && Number(offset) >= 0;
-  const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) >= 0;
+  const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) > 0;
   return (
     <>
-      <p>
+      <p className="mb-1">
         <span>Offset</span>
         <Input
           actualValue={
@@ -35,25 +38,19 @@ export default function TimingTab(props: Props) {
           isValid={bpmValid}
         />
       </p>
-      {/*<p>
+      <p>
         <input
           className="ml-4 mr-1"
           type="checkbox"
           id="bpmChangeHere"
           checked={props.bpmChangeHere}
           onChange={props.toggleBpmChangeHere}
+          disabled={stepCmp(props.currentStep, stepZero()) <= 0}
         />
         <label htmlFor="bpmChangeHere">
-          <span>Change At</span>
-          <span className="ml-2">{Math.round(props.currentStep)}</span>
+          <span>Change BPM Here (at {stepStr(props.currentStep)})</span>
         </label>
-        <span className="ml-1">:</span>
-        <Input
-          actualValue={chart ? chart.bpmChanges[0].bpm.toString() : ""}
-          updateValue={changeBpm}
-          isValid={bpmValid}
-        />
-      </p>*/}
+      </p>
     </>
   );
 }

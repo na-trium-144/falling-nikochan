@@ -21,6 +21,13 @@ export function timeSecStr(timeSec: number): string {
   }
 }
 
+export function stepStr(s: Step): string {
+  if (s.numerator === 0) {
+    return s.fourth.toString();
+  } else {
+    return `${s.fourth.toString()}+${s.numerator}/${s.denominator * 4}`;
+  }
+}
 export function stepNStr(s: Step): string {
   if (s.numerator === 0) {
     return s.fourth.toString();

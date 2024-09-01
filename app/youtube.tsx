@@ -11,7 +11,7 @@ interface Props {
   isMobile: boolean;
   control: boolean;
   id?: string;
-  ytPlayer: { current: YouTubePlayer | null };
+  ytPlayer: { current?: YouTubePlayer };
   onReady?: () => void;
   onStart?: () => void;
   onStop?: () => void;
@@ -95,7 +95,7 @@ export default function FlexYouTube(props: Props) {
         loadVideo();
       }
     }
-  }, [id, control]);
+  }, [id, control, ytPlayer]);
   return (
     <div
       className={

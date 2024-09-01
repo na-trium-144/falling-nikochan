@@ -3,15 +3,15 @@ import Button from "./button";
 import Input from "./input";
 
 interface Props {
-  currentNoteIndex: number | null;
+  currentNoteIndex: number;
   addNote: () => void;
   deleteNote: () => void;
   updateNote: (n: NoteCommand) => void;
-  chart: Chart | null;
+  chart?: Chart;
 }
 export default function NoteTab(props: Props) {
   const { currentNoteIndex, chart } = props;
-  if (chart && currentNoteIndex !== null && currentNoteIndex >= 0) {
+  if (chart && currentNoteIndex >= 0) {
     const n = chart.notes[currentNoteIndex];
     const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
@@ -89,7 +89,10 @@ export default function NoteTab(props: Props) {
               <td>angle =</td>
               <td>
                 <Input
-                  actualValue={(Math.atan2(n.hitVY, n.hitVX) / Math.PI * 180).toFixed(2)}
+                  actualValue={(
+                    (Math.atan2(n.hitVY, n.hitVX) / Math.PI) *
+                    180
+                  ).toFixed(2)}
                   updateValue={(v) =>
                     props.updateNote({
                       ...n,

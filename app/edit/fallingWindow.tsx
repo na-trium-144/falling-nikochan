@@ -11,9 +11,9 @@ interface Props {
   className?: string;
   style?: object;
   notes: Note[];
-  chart: Chart | null;
+  chart?: Chart;
   currentTimeSec: number;
-  currentNoteIndex: number | null;
+  currentNoteIndex: number;
   updateNote: (n: NoteCommand) => void;
 }
 
@@ -160,7 +160,6 @@ export default function FallingWindow(props: Props) {
             )
         )}
         {chart &&
-          currentNoteIndex !== null &&
           currentNoteIndex >= 0 &&
           boxSize &&
           marginX !== undefined &&

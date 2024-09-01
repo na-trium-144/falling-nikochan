@@ -1,15 +1,21 @@
 "use client";
 
-import { Chart, Step, stepAdd } from "@/chartFormat/command";
-import { getStep, getTimeSec, Note } from "@/chartFormat/seq";
+import { Chart, Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/command";
+import {
+  findBpmIndexFromStep,
+  getStep,
+  getTimeSec,
+  Note,
+} from "@/chartFormat/seq";
 import { useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { stepNStr, timeSecStr, timeStr } from "./str";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
-  currentNoteIndex: number | null;
-  chart: Chart | null;
+  currentNoteIndex: number;
+  currentStep: Step;
+  chart?: Chart;
   notesAll: Note[];
   snapDivider: number;
 }
@@ -17,6 +23,7 @@ export default function TimeBar(props: Props) {
   const {
     currentTimeSecWithoutOffset,
     currentNoteIndex,
+    currentStep,
     chart,
     notesAll,
     snapDivider,
@@ -27,7 +34,7 @@ export default function TimeBar(props: Props) {
   const timeBarRef = timeBarResize.ref;
   // timebar左端の時刻
   const [timeBarBeginSec, setTimeBarBeginSec] = useState<number>(-1);
-  const [timeBarBeginStep, setTimeBarBeginStep] = useState<Step>(0);
+  const [timeBarBeginStep, setTimeBarBeginStep] = useState<Step>(stepZero());
 
   const timeBarPxPerSec = 300;
   // timebar上の位置を計算
@@ -78,6 +85,7 @@ export default function TimeBar(props: Props) {
     snapDivider,
   ]);
 
+  // timebarに表示するstep目盛りのリスト
   const timeBarSteps: { step: Step; timeSec: number }[] = [];
   if (chart) {
     timeBarSteps.push({
@@ -99,11 +107,17 @@ export default function TimeBar(props: Props) {
     }
   }
 
+  const beginBpmIndex =
+    chart && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(chart?.bpmChanges, timeBarBeginStep)
+      : undefined;
+
   return (
     <div
-      className={"h-2 bg-gray-300 relative mt-12 mb-8 overflow-visible"}
+      className={"h-2 bg-gray-300 relative mt-12 mb-10 overflow-visible"}
       ref={timeBarRef}
     >
+      {/* 秒数目盛り */}
       {Array.from(new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))).map(
         (_, dt) => (
           <span
@@ -119,32 +133,47 @@ export default function TimeBar(props: Props) {
           </span>
         )
       )}
-      {timeBarSteps.map(({ step, timeSec }, dt) => (
-        <span
-          key={dt}
-          className="absolute border-l border-red-400 "
-          style={{
-            top: -4,
-            bottom: step.numerator === 0 ? -20 : -4,
-            left: timeBarPos(timeSec),
-          }}
-        >
-          <span className="absolute bottom-0">{stepNStr(step)}</span>
-        </span>
-      ))}
-      {chart?.bpmChanges.map((ch, i) => (
-        <span
-          key={i}
-          className="absolute "
-          style={{
-            bottom: -40,
-            left: timeBarPos(getTimeSec(chart!.bpmChanges, ch.step)),
-          }}
-        >
-          <span className="absolute bottom-0">{ch.bpm}</span>
-        </span>
-      ))}
-
+      {/* step目盛り 目盛りのリストは別で計算してある */}
+      {timeBarSteps.map(
+        ({ step, timeSec }, dt) =>
+          stepCmp(step, stepZero()) >= 0 && (
+            <span
+              key={dt}
+              className="absolute border-l border-red-400 "
+              style={{
+                top: -4,
+                bottom: step.numerator === 0 ? -20 : -4,
+                left: timeBarPos(timeSec),
+              }}
+            >
+              <span className="absolute bottom-0">{stepNStr(step)}</span>
+            </span>
+          )
+      )}
+      {/* bpm変化 */}
+      <div className="absolute" style={{ bottom: -40, left: 0 }}>
+        <span className="mr-1">BPM:</span>
+        {beginBpmIndex !== undefined && (
+          <span>{chart?.bpmChanges[beginBpmIndex].bpm.toString()}</span>
+        )}
+      </div>
+      {chart?.bpmChanges.map(
+        (ch, i) =>
+          ch.timeSec >= timeBarBeginSec &&
+          ch.timeSec < timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+            <span
+              key={i}
+              className="absolute "
+              style={{
+                bottom: -40,
+                left: timeBarPos(ch.timeSec),
+              }}
+            >
+              <span className="absolute bottom-0">{ch.bpm}</span>
+            </span>
+          )
+      )}
+      {/* 現在位置カーソル */}
       <div
         className="absolute border-l border-amber-400 shadow shadow-yellow-400"
         style={{
@@ -153,6 +182,7 @@ export default function TimeBar(props: Props) {
           left: timeBarPos(currentTimeSecWithoutOffset),
         }}
       />
+      {/* 現在時刻 */}
       <span
         className="absolute "
         style={{
@@ -162,9 +192,10 @@ export default function TimeBar(props: Props) {
       >
         {timeStr(currentTimeSecWithoutOffset)}
       </span>
+      {/* にこちゃんの位置 */}
       {chart &&
         notesAll.map(
-          (n, i) =>
+          (n) =>
             n.hitTimeSec + chart.offset > timeBarBeginSec &&
             n.hitTimeSec + chart.offset <
               timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (

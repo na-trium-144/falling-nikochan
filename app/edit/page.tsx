@@ -7,6 +7,8 @@ import {
   Step,
   stepAdd,
   stepCmp,
+  stepZero,
+  updateBpmTimeSec,
 } from "@/chartFormat/command";
 import FlexYouTube from "@/youtube";
 import { YouTubePlayer } from "@/youtubePlayer";
@@ -27,17 +29,13 @@ import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
 
 export default function Page() {
-  const [chart, setChart] = useState<Chart | null>(null);
+  const [chart, setChart] = useState<Chart>();
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
     useState<number>(0);
   // 現在時刻に対応するstep
-  const [currentStep, setCurrentStep] = useState<Step>({
-    fourth: 0,
-    numerator: 0,
-    denominator: 4,
-  });
+  const [currentStep, setCurrentStep] = useState<Step>(stepZero());
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
 
@@ -70,7 +68,7 @@ export default function Page() {
     }
   }, [chart, snapDivider, currentTimeSec, currentStep, currentNoteIndex]);
 
-  const ytPlayer = useRef<YouTubePlayer | null>(null);
+  const ytPlayer = useRef<YouTubePlayer>();
   // ytPlayerが再生中
   const [playing, setPlaying] = useState<boolean>(false);
   // ytPlayerが準備完了
@@ -100,15 +98,16 @@ export default function Page() {
   };
   const seekStepRel = (move: number) => {
     if (chart) {
+      let newStep = stepAdd(currentStep, {
+        fourth: 0,
+        numerator: move,
+        denominator: snapDivider,
+      });
+      if (stepCmp(newStep, stepZero()) < 0) {
+        newStep = stepZero();
+      }
       changeCurrentTimeSec(
-        getTimeSec(
-          chart.bpmChanges,
-          stepAdd(currentStep, {
-            fourth: 0,
-            numerator: move,
-            denominator: snapDivider,
-          })
-        ) + chart.offset
+        getTimeSec(chart.bpmChanges, newStep) + chart.offset
       );
     }
   };
@@ -136,16 +135,44 @@ export default function Page() {
       setChart({ ...chart, offset: ofs });
     }
   };
+  const currentBpmIndex =
+    chart && findBpmIndexFromStep(chart?.bpmChanges, currentStep);
   const changeBpm = (bpm: number) => {
-    if (chart /*&& bpmValid(bpm)*/) {
-      const bpmChangeIndex = findBpmIndexFromStep(
-        chart.bpmChanges,
-        currentStep
-      );
-      chart.bpmChanges[bpmChangeIndex].bpm = bpm;
+    if (chart && currentBpmIndex !== undefined) {
+      chart.bpmChanges[currentBpmIndex].bpm = bpm;
+      updateBpmTimeSec(chart.bpmChanges);
+      setChart({ ...chart });
     }
   };
-  const toggleBpmChangeHere = () => {};
+  const bpmChangeHere =
+    chart &&
+    currentBpmIndex !== undefined &&
+    stepCmp(chart.bpmChanges[currentBpmIndex].step, currentStep) === 0;
+  const toggleBpmChangeHere = () => {
+    if (
+      chart &&
+      currentBpmIndex !== undefined &&
+      stepCmp(currentStep, stepZero()) > 0
+    ) {
+      if (bpmChangeHere) {
+        chart.bpmChanges = chart.bpmChanges.filter(
+          (ch) => stepCmp(ch.step, currentStep) !== 0
+        );
+        updateBpmTimeSec(chart.bpmChanges);
+        setChart({ ...chart });
+      } else {
+        chart.bpmChanges.push({
+          step: currentStep,
+          bpm: chart.bpmChanges[currentBpmIndex].bpm,
+          timeSec: currentTimeSec,
+        });
+        chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
+          stepCmp(a.step, b.step)
+        );
+        setChart({ ...chart });
+      }
+    }
+  };
 
   const addNote = () => {
     if (chart) {
@@ -156,23 +183,21 @@ export default function Page() {
         hitVX: 1 / 4,
         hitVY: 1,
         accelY: 1 / 4,
-        timeScale: [
-          { stepBefore: { fourth: 0, numerator: 0, denominator: 4 }, scale: 1 },
-        ],
+        timeScale: [{ stepBefore: stepZero(), scale: 1 }],
       });
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       setChart(newChart);
     }
   };
   const deleteNote = () => {
-    if (chart && currentNoteIndex !== null) {
+    if (chart) {
       const newChart = { ...chart };
       newChart.notes = newChart.notes.filter((n, i) => i !== currentNoteIndex);
       setChart(newChart);
     }
   };
   const updateNote = (n: NoteCommand) => {
-    if (chart && currentNoteIndex !== null) {
+    if (chart) {
       const newChart = { ...chart };
       newChart.notes[currentNoteIndex] = n;
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
@@ -198,11 +223,7 @@ export default function Page() {
             seekStepRel(-1);
           } else if (e.key === "Right" || e.key === "ArrowRight") {
             seekStepRel(1);
-          } else if (
-            e.key === "n" &&
-            currentNoteIndex !== null &&
-            currentNoteIndex < 0
-          ) {
+          } else if (e.key === "n" && currentNoteIndex < 0) {
             addNote();
           } else {
           }
@@ -281,6 +302,7 @@ export default function Page() {
           <TimeBar
             currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
             currentNoteIndex={currentNoteIndex}
+            currentStep={currentStep}
             chart={chart}
             notesAll={notesAll}
             snapDivider={snapDivider}
@@ -330,10 +352,15 @@ export default function Page() {
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
-                currentBpm={chart?.bpmChanges[0].bpm}
+                currentBpm={
+                  currentBpmIndex !== undefined
+                    ? chart?.bpmChanges[currentBpmIndex].bpm
+                    : undefined
+                }
                 setCurrentBpm={changeBpm}
-                bpmChangeHere={false}
+                bpmChangeHere={!!bpmChangeHere}
                 toggleBpmChangeHere={toggleBpmChangeHere}
+                currentStep={currentStep}
               />
             ) : (
               <NoteTab

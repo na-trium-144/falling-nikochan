@@ -28,6 +28,9 @@ export interface Step {
   numerator: number;
   denominator: number;
 }
+export function stepZero() {
+  return { fourth: 0, numerator: 0, denominator: 4 };
+}
 function step(f: number, n: number = 0, d: number = 16): Step {
   return { fourth: f, numerator: n, denominator: d / 4 };
 }
@@ -68,10 +71,8 @@ export function stepAdd(s1: Step, s2: Step) {
     numerator: s1.numerator * s2.denominator + s2.numerator * s1.denominator,
     denominator: s1.denominator * s2.denominator,
   };
-  if (Math.abs(sa.numerator) >= sa.denominator) {
-    sa.fourth += Math.floor(sa.numerator / sa.denominator);
-    sa.numerator -= Math.floor(sa.numerator / sa.denominator) * sa.denominator;
-  }
+  sa.fourth += Math.floor(sa.numerator / sa.denominator);
+  sa.numerator -= Math.floor(sa.numerator / sa.denominator) * sa.denominator;
   for (let i = 2; i <= sa.numerator && i <= sa.denominator; i++) {
     while (sa.numerator % i == 0 && sa.denominator % i == 0) {
       sa.numerator /= i;
@@ -120,6 +121,7 @@ export function updateBpmTimeSec(bpmChanges: BPMChange[]) {
   let timeSum = 0;
   for (let bi = 0; bi < bpmChanges.length; bi++) {
     bpmChanges[bi].timeSec = timeSum;
+    console.log(bpmChanges[bi]);
     if (bi + 1 < bpmChanges.length) {
       timeSum +=
         (60 / bpmChanges[bi].bpm) *
