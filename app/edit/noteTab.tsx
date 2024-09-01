@@ -13,6 +13,7 @@ export default function NoteTab(props: Props) {
   const { currentNoteIndex, chart } = props;
   if (chart && currentNoteIndex !== null && currentNoteIndex >= 0) {
     const n = chart.notes[currentNoteIndex];
+    const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
       <>
         <p>
@@ -66,6 +67,39 @@ export default function NoteTab(props: Props) {
                   }
                   isValid={(v) => !isNaN(Number(v)) && Number(v) >= 0}
                 />
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>|v| =</td>
+              <td>
+                <Input
+                  actualValue={(nv * 100).toFixed(2)}
+                  updateValue={(v) =>
+                    props.updateNote({
+                      ...n,
+                      hitVX: (Number(v) / 100 / nv) * n.hitVX,
+                      hitVY: (Number(v) / 100 / nv) * n.hitVY,
+                    })
+                  }
+                  isValid={(v) => !isNaN(Number(v)) && Number(v) > 0}
+                />
+              </td>
+              <td>,</td>
+              <td>angle =</td>
+              <td>
+                <Input
+                  actualValue={(Math.atan2(n.hitVY, n.hitVX) / Math.PI * 180).toFixed(2)}
+                  updateValue={(v) =>
+                    props.updateNote({
+                      ...n,
+                      hitVX: nv * Math.cos((Number(v) / 180) * Math.PI),
+                      hitVY: nv * Math.sin((Number(v) / 180) * Math.PI),
+                    })
+                  }
+                  isValid={(v) => !isNaN(Number(v)) && nv > 0}
+                />
+                °
               </td>
             </tr>
             <tr>
