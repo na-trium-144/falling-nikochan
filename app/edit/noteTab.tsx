@@ -4,12 +4,54 @@ import Input from "./input";
 
 interface Props {
   currentNoteIndex: number;
-  addNote: () => void;
   deleteNote: () => void;
   updateNote: (n: NoteCommand) => void;
+  copyNote: (i: number) => void;
+  pasteNote: (i: number) => void;
+  hasCopyBuf: boolean[];
   chart?: Chart;
 }
 export default function NoteTab(props: Props) {
+  return (
+    <div className="flex flex-col h-full">
+      <NoteEdit {...props} />
+      <span className="flex-1" />
+      <div className="flex flex-row ">
+        <CopyPasteButton {...props} />
+      </div>
+    </div>
+  );
+}
+function CopyPasteButton(props: Props) {
+  return (
+    <>
+      <div className="flex flex-col space-y-1 items-stretch">
+        <Button
+          onClick={() => props.pasteNote(0)}
+          text="Paste"
+          keyName="V"
+          disabled={!props.hasCopyBuf[0]}
+        />
+        <Button onClick={() => props.copyNote(0)} text="Copy" keyName="C" />
+      </div>
+      {Array.from(new Array(7)).map((_, i) => (
+        <div key={i} className="flex flex-col space-y-1 items-stretch">
+          <Button
+            onClick={() => props.pasteNote(i + 1)}
+            keyName={(i + 1).toString()}
+            disabled={!props.hasCopyBuf[i + 1]}
+          />
+          <Button
+            onClick={() => props.copyNote(i + 1)}
+            text={(i + 1).toString()}
+          />
+        </div>
+      ))}
+    </>
+  );
+}
+
+function NoteEdit(props: Props) {
   const { currentNoteIndex, chart } = props;
   if (chart && currentNoteIndex >= 0) {
     const n = chart.notes[currentNoteIndex];
@@ -130,11 +172,6 @@ export default function NoteTab(props: Props) {
       <>
         <p>
           <span>No note selected.</span>
-          <Button
-            text="+ Add a note here"
-            keyName="N"
-            onClick={props.addNote}
-          />
         </p>
       </>
     );

@@ -104,6 +104,16 @@ export interface NoteCommand {
     scale: number;
   }[];
 }
+export function defaultNoteCommand(currentStep: Step = stepZero()) {
+  return {
+    step: currentStep,
+    hitX: 1 / 4,
+    hitVX: 1 / 4,
+    hitVY: 1,
+    accelY: 1 / 4,
+    timeScale: [{ stepBefore: stepZero(), scale: 1 }],
+  };
+}
 /**
  *       timeSec +=
         (60 / bpmChanges[bi].bpm) *

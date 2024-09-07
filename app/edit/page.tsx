@@ -2,6 +2,7 @@
 
 import {
   Chart,
+  defaultNoteCommand,
   NoteCommand,
   sampleChart,
   Step,
@@ -56,13 +57,16 @@ export default function Page() {
       const step = getStep(chart.bpmChanges, currentTimeSec, snapDivider);
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
-        if (
-          currentNoteIndex < 0 ||
-          stepCmp(chart.notes[currentNoteIndex].step, step) != 0
-        ) {
-          setCurrentNoteIndex(
-            chart.notes.findIndex((n) => stepCmp(n.step, step) == 0)
-          );
+      }
+      if (
+        currentNoteIndex < 0 ||
+        stepCmp(chart.notes[currentNoteIndex].step, step) != 0
+      ) {
+        const noteIndex = chart.notes.findIndex(
+          (n) => stepCmp(n.step, step) == 0
+        );
+        if (currentNoteIndex !== noteIndex) {
+          setCurrentNoteIndex(noteIndex);
         }
       }
     }
@@ -174,34 +178,50 @@ export default function Page() {
     }
   };
 
-  const addNote = () => {
+  const addNote = (n: NoteCommand) => {
     if (chart) {
       const newChart = { ...chart };
-      newChart.notes.push({
-        step: currentStep,
-        hitX: 1 / 4,
-        hitVX: 1 / 4,
-        hitVY: 1,
-        accelY: 1 / 4,
-        timeScale: [{ stepBefore: stepZero(), scale: 1 }],
-      });
+      newChart.notes.push({ ...n, step: currentStep });
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       setChart(newChart);
     }
   };
   const deleteNote = () => {
-    if (chart) {
+    if (chart && currentNoteIndex >= 0) {
       const newChart = { ...chart };
-      newChart.notes = newChart.notes.filter((n, i) => i !== currentNoteIndex);
+      newChart.notes = newChart.notes.filter((_, i) => i !== currentNoteIndex);
       setChart(newChart);
     }
   };
   const updateNote = (n: NoteCommand) => {
-    if (chart) {
+    if (chart && currentNoteIndex >= 0) {
       const newChart = { ...chart };
       newChart.notes[currentNoteIndex] = n;
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       setChart(newChart);
+    }
+  };
+  const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
+    ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
+      Array.from(new Array(7)).map(() => null)
+    )
+  );
+  const copyNote = (copyIndex: number) => {
+    if (chart && currentNoteIndex >= 0) {
+      const newCopyBuf = copyBuf.slice();
+      newCopyBuf[copyIndex] = chart.notes[currentNoteIndex];
+      setCopyBuf(newCopyBuf);
+    }
+  };
+  const pasteNote = (copyIndex: number) => {
+    if (copyBuf[copyIndex]) {
+      if (chart) {
+        if (currentNoteIndex >= 0) {
+          updateNote(copyBuf[copyIndex]);
+        } else {
+          addNote(copyBuf[copyIndex]);
+        }
+      }
     }
   };
 
@@ -223,8 +243,10 @@ export default function Page() {
             seekStepRel(-1);
           } else if (e.key === "Right" || e.key === "ArrowRight") {
             seekStepRel(1);
-          } else if (e.key === "n" && currentNoteIndex < 0) {
-            addNote();
+          } else if (e.key === "c") {
+            copyNote(0);
+          } else if (e.key === "v") {
+            pasteNote(0);
           } else {
           }
         }
@@ -365,9 +387,11 @@ export default function Page() {
             ) : (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
-                addNote={addNote}
                 deleteNote={deleteNote}
                 updateNote={updateNote}
+                copyNote={copyNote}
+                pasteNote={pasteNote}
+                hasCopyBuf={copyBuf.map((n) => n !== null)}
                 chart={chart}
               />
             )}
