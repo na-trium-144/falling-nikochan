@@ -8,7 +8,10 @@ import { useEffect, useState } from "react";
 interface Props {
   actualValue: string;
   updateValue: (v: string) => void;
-  isValid: (v: string) => boolean;
+  isValid?: (v: string) => boolean;
+  left?: boolean;
+  right?: boolean;
+  className?: string;
 }
 export default function Input(props: Props) {
   const [value, setValue] = useState<string>("");
@@ -22,15 +25,17 @@ export default function Input(props: Props) {
     <input
       type="text"
       className={
-        "mx-1 px-1 font-main-ui text-base text-right " +
+        "mx-1 px-1 font-main-ui text-base " +
+        (!props.left ? "text-right " : "") +
         "border-0 border-b border-black bg-transparent " +
-        (!props.isValid(value) ? "text-red-500 " : "")
+        (props.isValid && !props.isValid(value) ? "text-red-500 " : "") +
+        (props.className || "")
       }
       value={value}
       onKeyDown={(e) => e.stopPropagation()}
       onChange={(e) => {
         setValue(e.target.value);
-        if (props.isValid(e.target.value)) {
+        if (!props.isValid || props.isValid(e.target.value)) {
           props.updateValue(e.target.value);
         }
       }}

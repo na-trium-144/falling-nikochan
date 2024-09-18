@@ -4,12 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import { loadChart, Note } from "@/chartFormat/seq";
 import { Chart, sampleChart } from "@/chartFormat/command";
-import FlexYouTube from "./youtube";
+import {FlexYouTube, YouTubePlayer} from "./youtube";
 import { ChainDisp, ScoreDisp } from "./score";
 import RhythmicalSlime from "./rhythmicalSlime";
-import { YouTubePlayer } from "./youtubePlayer";
 import useGameLogic from "./gameLogic";
-import { Key, ReadyMessage, StopMessage } from "./messageBox";
+import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
 

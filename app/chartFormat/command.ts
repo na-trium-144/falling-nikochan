@@ -14,7 +14,7 @@ export interface Chart {
   offset: number;
   ytId: string;
   title: string;
-  author: string;
+  composer: string;
 }
 
 /**

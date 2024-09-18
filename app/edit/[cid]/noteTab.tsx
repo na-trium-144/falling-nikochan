@@ -1,6 +1,6 @@
 import { Chart, NoteCommand } from "@/chartFormat/command";
-import Button from "./button";
-import Input from "./input";
+import Button from "@/common/button";
+import Input from "@/common/input";
 
 interface Props {
   currentNoteIndex: number;

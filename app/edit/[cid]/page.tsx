@@ -11,8 +11,7 @@ import {
   stepZero,
   updateBpmTimeSec,
 } from "@/chartFormat/command";
-import FlexYouTube from "@/youtube";
-import { YouTubePlayer } from "@/youtubePlayer";
+import { FlexYouTube, YouTubePlayer } from "@/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
@@ -23,14 +22,34 @@ import {
   Note,
 } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
-import Button from "./button";
+import Button from "@/common/button";
 import TimeBar from "./timeBar";
-import Input from "./input";
+import Input from "@/common/input";
 import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
+import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
+import { IChartFileGet } from "@/api/chartFile/interface";
+import { Box, CenterBox } from "@/common/box";
+import MetaTab from "./metaTab";
 
-export default function Page() {
+export default function Page(context: { params: Params }) {
+  const cid = context.params.cid;
   const [chart, setChart] = useState<Chart>();
+  const [chartFetchError, setChartFetchError] = useState<boolean>(false);
+  useEffect(() => {
+    void (async () => {
+      const res = await fetch(`/api/chartFile/${cid}`);
+      const resBody = (await res.json()) as IChartFileGet;
+      if (resBody.ok && resBody.chart !== undefined) {
+        setChart(resBody.chart);
+        setChartFetchError(false);
+      } else {
+        setChart(undefined);
+        setChartFetchError(true);
+      }
+    })();
+  }, [cid]);
+
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
@@ -39,12 +58,6 @@ export default function Page() {
   const [currentStep, setCurrentStep] = useState<Step>(stepZero());
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
-
-  useEffect(() => {
-    // テスト用
-    const ch = sampleChart();
-    setChart(ch);
-  }, []);
 
   // offsetを引いた後の時刻
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
@@ -225,6 +238,16 @@ export default function Page() {
     }
   };
 
+  if (chartFetchError) {
+    return (
+      <main className="w-screen h-screen">
+      <CenterBox>
+        <p>Error: Bad chart ID</p>
+      </CenterBox>
+      </main>
+    );
+  }
+
   return (
     <main
       className="w-screen min-h-screen overflow-x-hidden overflow-y-hidden"
@@ -344,17 +367,11 @@ export default function Page() {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Timing", "Notes", "Coding"].map((tabName, i) =>
+            {["Meta", "Timing", "Notes", "Coding"].map((tabName, i) =>
               i === tab ? (
-                <span
-                  key={i}
-                  className="rounded-t-lg px-3 pt-2 pb-1"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.5)",
-                  }}
-                >
+                <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
-                </span>
+                </Box>
               ) : (
                 <button
                   key={i}
@@ -366,11 +383,10 @@ export default function Page() {
               )
             )}
           </div>
-          <div
-            className="flex-1 rounded-lg p-3"
-            style={{ background: "rgba(255, 255, 255, 0.5)" }}
-          >
+          <Box className="flex-1 p-3">
             {tab === 0 ? (
+              <MetaTab chart={chart} setChart={setChart} />
+            ) : tab === 1 ? (
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
@@ -395,7 +411,7 @@ export default function Page() {
                 chart={chart}
               />
             )}
-          </div>
+          </Box>
         </div>
       </div>
     </main>

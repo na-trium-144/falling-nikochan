@@ -1,5 +1,5 @@
 import { Step, stepCmp, stepZero } from "@/chartFormat/command";
-import Input from "./input";
+import Input from "@/common/input";
 import { stepStr } from "./str";
 
 interface Props {

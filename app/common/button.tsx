@@ -1,4 +1,4 @@
-import { Key } from "../messageBox";
+import { Key } from "./key";
 
 interface Props {
   onClick?: () => void;

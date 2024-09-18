@@ -1,3 +1,4 @@
+import { Box } from "./common/box";
 import { Key } from "./messageBox";
 
 interface Props {
@@ -9,13 +10,12 @@ interface Props {
 }
 export default function StatusBox(props: Props) {
   return (
-    <div
+    <Box
       className={
         props.className +
         (props.isMobile ? " " : " w-52 ") +
-        "p-3 rounded-lg text-sm z-10"
+        "p-3 text-sm z-10"
       }
-      style={{ background: "rgba(255, 255, 255, 0.5)" }}
     >
       {props.isTouch ? (
         <p className="mb-2 text-center">
@@ -74,6 +74,6 @@ export default function StatusBox(props: Props) {
           </span>
         )}
       </div>
-    </div>
+    </Box>
   );
 }

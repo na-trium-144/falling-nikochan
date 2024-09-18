@@ -2,6 +2,7 @@ import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
 import { createFileEntry, getFileEntry } from "./dbAccess";
 import { fsAssign, fsDelete, fsRead, fsWrite } from "./fsAccess";
+import { IChartFileGet } from "../interface";
 
 // todo: password
 
@@ -9,13 +10,14 @@ export async function GET(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
-    return NextResponse.json({ ok: false });
+    return NextResponse.json({ ok: false } as IChartFileGet);
   }
   const fsData = await fsRead(fileEntry.fid);
   if (fsData === null) {
-    return NextResponse.json({ ok: false });
+    return NextResponse.json({ ok: false } as IChartFileGet);
   }
-  return NextResponse.json({ ok: true, data: fsData.data });
+  // todo: chartがちゃんとchartの中身をしているかチェック
+  return NextResponse.json({ ok: true, chart: JSON.parse(fsData.data) } as IChartFileGet);
 }
 
 export async function POST(request: NextRequest, context: { params: Params }) {
