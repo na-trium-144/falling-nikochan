@@ -1,6 +1,6 @@
 import { Chart } from "@/chartFormat/command";
 import Input from "@/common/input";
-import { checkYouTubeId, getYouTubeId } from "@/youtube";
+import { checkYouTubeId, getYouTubeId } from "@/common/youtube";
 
 interface Props {
   chart?: Chart;

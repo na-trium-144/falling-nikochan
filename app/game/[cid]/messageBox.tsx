@@ -1,5 +1,5 @@
-import { CenterBox } from "./common/box";
-import { Key } from "./common/key";
+import { CenterBox } from "@/common/box";
+import { Key } from "@/common/key";
 
 interface MessageProps {
   isTouch: boolean;

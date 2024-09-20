@@ -11,7 +11,7 @@ import {
   stepZero,
   updateBpmTimeSec,
 } from "@/chartFormat/command";
-import { FlexYouTube, YouTubePlayer } from "@/youtube";
+import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
@@ -29,7 +29,13 @@ import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { IChartFileGet } from "@/api/chartFile/interface";
-import { Box, CenterBox } from "@/common/box";
+import {
+  Box,
+  CenterBox,
+  CenterBoxOnlyPage,
+  ChartFetchError,
+  Loading,
+} from "@/common/box";
 import MetaTab from "./metaTab";
 
 export default function Page(context: { params: Params }) {
@@ -239,13 +245,10 @@ export default function Page(context: { params: Params }) {
   };
 
   if (chartFetchError) {
-    return (
-      <main className="w-screen h-screen">
-      <CenterBox>
-        <p>Error: Bad chart ID</p>
-      </CenterBox>
-      </main>
-    );
+    return <ChartFetchError />;
+  }
+  if (chart === undefined) {
+    return <Loading />;
   }
 
   return (

@@ -1,4 +1,4 @@
-import { Box } from "./common/box";
+import { Box } from "@/common/box";
 import { Key } from "./messageBox";
 
 interface Props {
