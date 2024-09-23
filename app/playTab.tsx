@@ -1,3 +1,3 @@
-export default function AboutTab() {
+export default function PlayTab() {
   return <></>;
 }

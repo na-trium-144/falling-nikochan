@@ -9,7 +9,7 @@ import Link from "next/link";
 import { getRecentEdit, removeRecentEdit } from "./common/recentEdit";
 import { Chart, ChartBrief, emptyChart } from "./chartFormat/chart";
 
-export default function AboutTab() {
+export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
     [key in string]: ChartBrief;

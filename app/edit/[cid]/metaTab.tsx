@@ -74,7 +74,7 @@ export function MetaTab(props: Props2) {
           onClick={async () => {
             const res = await fetch(`/api/chartFile/${props.cid}`, {
               method: "POST",
-              body: JSON.stringify(props.chart),
+              body: msgpack.serialize(props.chart),
             });
             if (res.ok) {
               setErrorMsg("保存しました！");

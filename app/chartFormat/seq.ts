@@ -2,6 +2,12 @@ import { Chart } from "./chart";
 import { BPMChange, NoteCommand } from "./command";
 import { Step, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 
+export interface ChartSeqData {
+  notes: Note[];
+  bpmChanges: BPMChange[];
+  offset: number;
+}
+
 /**
  * 音符の大きさ (画面サイズに対する割合)
  */
@@ -13,7 +19,7 @@ export const targetY = 0.2;
 /**
  * big音符の大きさ
  */
-export function bigScale(big: boolean){
+export function bigScale(big: boolean) {
   return big ? 1.5 : 1;
 }
 /**
@@ -124,76 +130,80 @@ export function findBpmIndexFromStep(
 /**
  * chartを読み込む
  */
-export function loadChart(chart: Chart): Note[] {
-  return chart.notes.map((c: NoteCommand, id) => {
-    // hitの時刻
-    const hitTimeSec: number = getTimeSec(chart.bpmChanges, c.step);
-    // timeScaleの変化点それぞれの時刻
-    const tsTimeSec: number[] = c.timeScale.map((ts) =>
-      getTimeSec(chart.bpmChanges, stepSub(c.step, ts.stepBefore))
-    );
-    return {
-      id,
-      big: c.big,
-      hitTimeSec,
-      done: 0,
-      display: (
-        timeSec: number,
-        note: Note,
-        xRange?: [number, number],
-        yRange?: [number, number]
-      ): DisplayNote | null => {
-        if (note.done > 0 && timeSec - note.hitTimeSec > 0.5) {
-          return null;
-        } else if (note.done >= 1 && note.done <= 3) {
-          return {
-            id,
-            pos: note.hitPos || { x: -1, y: -1 },
-            done: note.done,
-            chain: note.chain,
-            chainBonus: note.chainBonus,
-          };
-        } else {
-          let x = c.hitX;
-          let y = 0;
-          let vx = c.hitVX;
-          let vy = c.hitVY;
-          // todo: これを毎フレーム計算しなくて済むようにする
-          for (let ti = 0; ti < c.timeScale.length; ti++) {
-            if (ti + 1 < c.timeScale.length && tsTimeSec[ti + 1] > timeSec) {
-              const dt =
-                c.timeScale[ti].scale * (hitTimeSec - tsTimeSec[ti + 1]);
-              x += vx * dt;
-              // y += ∫ (vy + ay * t) dt
-              y += vy * dt - (c.accelY * dt * dt) / 2;
-              vy -= c.accelY * dt;
-            } else {
-              const dt = c.timeScale[ti].scale * (hitTimeSec - timeSec);
-              x += vx * dt;
-              y += vy * dt - (c.accelY * dt * dt) / 2;
-              break;
-            }
-          }
-          if (
-            !xRange ||
-            !yRange ||
-            (x + noteSize >= xRange[0] &&
-              x - noteSize < xRange[1] &&
-              y + noteSize + targetY >= yRange[0] &&
-              y - noteSize + targetY < yRange[1])
-          ) {
+export function loadChart(chart: Chart): ChartSeqData {
+  return {
+    offset: chart.offset,
+    bpmChanges: chart.bpmChanges,
+    notes: chart.notes.map((c: NoteCommand, id) => {
+      // hitの時刻
+      const hitTimeSec: number = getTimeSec(chart.bpmChanges, c.step);
+      // timeScaleの変化点それぞれの時刻
+      const tsTimeSec: number[] = c.timeScale.map((ts) =>
+        getTimeSec(chart.bpmChanges, stepSub(c.step, ts.stepBefore))
+      );
+      return {
+        id,
+        big: c.big,
+        hitTimeSec,
+        done: 0,
+        display: (
+          timeSec: number,
+          note: Note,
+          xRange?: [number, number],
+          yRange?: [number, number]
+        ): DisplayNote | null => {
+          if (note.done > 0 && timeSec - note.hitTimeSec > 0.5) {
+            return null;
+          } else if (note.done >= 1 && note.done <= 3) {
             return {
               id,
-              pos: { x, y },
+              pos: note.hitPos || { x: -1, y: -1 },
               done: note.done,
               chain: note.chain,
               chainBonus: note.chainBonus,
             };
           } else {
-            return null;
+            let x = c.hitX;
+            let y = 0;
+            let vx = c.hitVX;
+            let vy = c.hitVY;
+            // todo: これを毎フレーム計算しなくて済むようにする
+            for (let ti = 0; ti < c.timeScale.length; ti++) {
+              if (ti + 1 < c.timeScale.length && tsTimeSec[ti + 1] > timeSec) {
+                const dt =
+                  c.timeScale[ti].scale * (hitTimeSec - tsTimeSec[ti + 1]);
+                x += vx * dt;
+                // y += ∫ (vy + ay * t) dt
+                y += vy * dt - (c.accelY * dt * dt) / 2;
+                vy -= c.accelY * dt;
+              } else {
+                const dt = c.timeScale[ti].scale * (hitTimeSec - timeSec);
+                x += vx * dt;
+                y += vy * dt - (c.accelY * dt * dt) / 2;
+                break;
+              }
+            }
+            if (
+              !xRange ||
+              !yRange ||
+              (x + noteSize >= xRange[0] &&
+                x - noteSize < xRange[1] &&
+                y + noteSize + targetY >= yRange[0] &&
+                y - noteSize + targetY < yRange[1])
+            ) {
+              return {
+                id,
+                pos: { x, y },
+                done: note.done,
+                chain: note.chain,
+                chainBonus: note.chainBonus,
+              };
+            } else {
+              return null;
+            }
           }
-        }
-      },
-    };
-  });
+        },
+      };
+    }),
+  };
 }

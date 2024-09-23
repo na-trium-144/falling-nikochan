@@ -159,7 +159,7 @@ export default function Page(context: { params: Params }) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
     if (chart) {
-      setNotesAll(loadChart(chart));
+      setNotesAll(loadChart(chart).notes);
     }
   }, [chart]);
 

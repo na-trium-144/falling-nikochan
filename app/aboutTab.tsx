@@ -1,3 +1,7 @@
 export default function AboutTab() {
-  return <></>;
+  return (
+    <>
+      <p>TODO: ここに説明を書く</p>
+    </>
+  );
 }

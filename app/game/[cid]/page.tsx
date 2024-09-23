@@ -2,15 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
-import { loadChart, Note } from "@/chartFormat/seq";
-import {FlexYouTube, YouTubePlayer} from "@/common/youtube";
+import { ChartSeqData, loadChart, Note } from "@/chartFormat/seq";
+import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { ChainDisp, ScoreDisp } from "./score";
 import RhythmicalSlime from "./rhythmicalSlime";
 import useGameLogic from "./gameLogic";
 import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
-import { Chart, sampleChart } from "@/chartFormat/chart";
+import { Chart, ChartBrief, sampleChart } from "@/chartFormat/chart";
+import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
+import msgpack from "@ygoe/msgpack";
+import { stepSub, stepToFloat } from "@/chartFormat/step";
+import { Loading, Error } from "@/common/box";
 
 function isTouchEventsEnabled() {
   // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.
@@ -26,7 +30,49 @@ function isTouchEventsEnabled() {
   return "ontouchstart" in window;
 }
 
-export default function Home() {
+export default function Home(context: { params: Params }) {
+  const cid = context.params.cid;
+  const [chartBrief, setChartBrief] = useState<ChartBrief>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData>();
+
+  const [errorStatus, setErrorStatus] = useState<number>();
+  const [errorMsg, setErrorMsg] = useState<string>();
+  useEffect(() => {
+    void (async () => {
+      const res = await fetch(`/api/brief/${cid}`);
+      if (res.ok) {
+        // cidからタイトルなどを取得
+        const resBody = await res.json();
+        setChartBrief(resBody);
+      }
+    })();
+
+    void (async () => {
+      const res = await fetch(`/api/seqFile/${cid}`);
+      if (res.ok) {
+        try {
+          const seq = msgpack.deserialize(await res.arrayBuffer());
+          setChartSeq(seq);
+          setErrorStatus(undefined);
+          setErrorMsg(undefined);
+          // addRecentPlay(cid);
+        } catch (e) {
+          setChartSeq(undefined);
+          setErrorStatus(undefined);
+          setErrorMsg(String(e));
+        }
+      } else {
+        setChartSeq(undefined);
+        setErrorStatus(res.status);
+        try {
+          setErrorMsg(String((await res.json()).message));
+        } catch (e) {
+          setErrorMsg(String(e));
+        }
+      }
+    })();
+  }, [cid]);
+
   const { width, height, ref } = useResizeDetector();
   // スクリーンが縦長かどうかで表示を切り替えている
   const isMobile =
@@ -38,29 +84,25 @@ export default function Home() {
   // タッチ操作かどうか (操作説明が変わる)
   const isTouch = isTouchEventsEnabled();
 
-  const [chart, setChart] = useState<Chart | null>(null);
-
   // start後true
   const [playing, setPlaying] = useState<boolean>(false);
 
   const [auto, setAuto] = useState<boolean>(false); // todo: 切り替えボタンや表示など
 
-  const ytPlayer = useRef<YouTubePlayer | null>(null);
+  const ytPlayer = useRef<YouTubePlayer>();
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
-    if (ytPlayer.current?.getCurrentTime && chart && playing) {
-      return ytPlayer.current?.getCurrentTime() - chart.offset;
+    if (ytPlayer.current?.getCurrentTime && chartSeq && playing) {
+      return ytPlayer.current?.getCurrentTime() - chartSeq.offset;
     }
-  }, [chart, playing]);
+  }, [chartSeq, playing]);
   const { score, chain, notesAll, resetNotesAll, hit, judgeCount } =
     useGameLogic(getCurrentTimeSec, auto);
 
   const [fps, setFps] = useState<number>(0);
+
   useEffect(() => {
-    // テスト用
-    const ch = sampleChart();
-    setChart(ch);
     if (ref.current) {
       ref.current.focus();
     }
@@ -76,14 +118,18 @@ export default function Home() {
     const now = getCurrentTimeSec();
     if (
       now !== undefined &&
-      chart &&
-      currentBpmIndex + 1 < chart?.bpmChanges.length
+      chartSeq &&
+      currentBpmIndex + 1 < chartSeq.bpmChanges.length
     ) {
       const nextBpmChangeTime =
         currentBpmChangeTime.current +
-        (60 / chart.bpmChanges[currentBpmIndex].bpm) *
-          (chart.bpmChanges[currentBpmIndex + 1].step -
-            chart.bpmChanges[currentBpmIndex].step);
+        (60 / chartSeq.bpmChanges[currentBpmIndex].bpm) *
+          stepToFloat(
+            stepSub(
+              chartSeq.bpmChanges[currentBpmIndex + 1].step,
+              chartSeq.bpmChanges[currentBpmIndex].step
+            )
+          );
       timer = setTimeout(() => {
         timer = null;
         currentBpmChangeTime.current = nextBpmChangeTime;
@@ -95,7 +141,7 @@ export default function Home() {
         clearTimeout(timer);
       }
     };
-  }, [chart, currentBpmIndex, getCurrentTimeSec]);
+  }, [chartSeq, currentBpmIndex, getCurrentTimeSec]);
 
   // ytPlayer準備完了
   const [ready, setReady] = useState<boolean>(false);
@@ -106,17 +152,18 @@ export default function Home() {
     setReady(true);
   }, []);
   const onStart = useCallback(() => {
-    if (chart) {
+    console.log("start")
+    if (chartSeq) {
       setStopped(false);
       setReady(false);
-      resetNotesAll(loadChart(chart));
+      resetNotesAll(chartSeq.notes.slice());
       setCurrentBpmIndex(0);
       setPlaying(true);
     }
     if (ref.current) {
       ref.current.focus();
     }
-  }, [chart, ref, resetNotesAll]);
+  }, [chartSeq, ref, resetNotesAll]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (playing) {
@@ -141,6 +188,14 @@ export default function Home() {
     setBarFlash(true);
     setTimeout(() => setBarFlash(false), 100);
   };
+
+
+  if (errorStatus !== undefined || errorMsg !== undefined) {
+    return <Error status={errorStatus} message={errorMsg} />;
+  }
+  if (chartSeq === undefined) {
+    return <Loading />;
+  }
 
   return (
     <main
@@ -196,7 +251,7 @@ export default function Home() {
                   "block " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "")
                 }
                 isMobile={isMobile}
-                id={chart?.ytId}
+                id={chartBrief?.ytId}
                 control={false}
                 ytPlayer={ytPlayer}
                 onReady={onReady}
@@ -204,8 +259,8 @@ export default function Home() {
                 onStop={onStop}
               />
               <div className="flex-1">
-                <p className="font-title text-lg">{chart?.title}</p>
-                <p className="font-title text-sm">by {chart?.author}</p>
+                <p className="font-title text-lg">{chartBrief?.title}</p>
+                <p className="font-title text-sm">{chartBrief?.composer}</p>
               </div>
             </div>
             <div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
@@ -257,7 +312,7 @@ export default function Home() {
             num={4}
             getCurrentTimeSec={getCurrentTimeSec}
             playing={playing}
-            bpmChanges={chart?.bpmChanges}
+            bpmChanges={chartSeq?.bpmChanges}
           />
           <div className="absolute " style={{ bottom: "100%", left: 15 }}>
             <div
@@ -275,12 +330,12 @@ export default function Home() {
               <span className="text-2xl font-title">♩</span>
               <span className="text-xl ml-2 mr-1">=</span>
               <span className="text-right text-3xl w-16">
-                {Math.floor(chart?.bpmChanges[currentBpmIndex].bpm || 0)}
+                {Math.floor(chartSeq?.bpmChanges[currentBpmIndex].bpm || 0)}
               </span>
               <span className="text-lg">.</span>
               <span className="text-lg w-3">
                 {Math.floor(
-                  (chart?.bpmChanges[currentBpmIndex].bpm || 0) * 10
+                  (chartSeq?.bpmChanges[currentBpmIndex].bpm || 0) * 10
                 ) % 10}
               </span>
             </div>

@@ -89,6 +89,7 @@ export function FlexYouTube(props: Props) {
               }
             },
             onStateChange: () => {
+              console.log(ytPlayer.current?.getPlayerState())
               if (ytPlayer.current?.getPlayerState() === 1) {
                 if (onStartRef.current) {
                   onStartRef.current();
