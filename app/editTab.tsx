@@ -23,7 +23,7 @@ export default function EditTab() {
     setRecentCId(recentCId);
     for (const cid of recentCId) {
       void (async () => {
-        const res = await fetch(`/api/brief/${cid}`);
+        const res = await fetch(`/api/brief/${cid}`, {cache: "no-store"});
         if (res.ok) {
           // cidからタイトルなどを取得
           const resBody = await res.json();
@@ -64,6 +64,7 @@ export default function EditTab() {
             const res = await fetch(`/api/newChartFile/`, {
               method: "POST",
               body: msgpack.serialize(chart),
+              cache: "no-store",
             });
             const resBody = await res.json();
             if (res.ok) {

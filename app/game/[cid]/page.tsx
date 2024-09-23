@@ -26,7 +26,7 @@ export default function Home(context: { params: Params }) {
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
     void (async () => {
-      const res = await fetch(`/api/brief/${cid}`);
+      const res = await fetch(`/api/brief/${cid}`, {cache: "no-store"});
       if (res.ok) {
         // cidからタイトルなどを取得
         const resBody = await res.json();
@@ -35,7 +35,7 @@ export default function Home(context: { params: Params }) {
     })();
 
     void (async () => {
-      const res = await fetch(`/api/seqFile/${cid}`);
+      const res = await fetch(`/api/seqFile/${cid}`, {cache: "no-store"});
       if (res.ok) {
         try {
           const seq = msgpack.deserialize(await res.arrayBuffer());
@@ -249,7 +249,7 @@ export default function Home(context: { params: Params }) {
           )}
         </div>
         <div className={"relative " + (isMobile ? "flex-1 " : "basis-8/12 ")}>
-          <FallingWindow
+{/*          <FallingWindow
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -265,10 +265,10 @@ export default function Home(context: { params: Params }) {
           <ChainDisp className="absolute top-0 left-3 " chain={chain} />
           {ready && <ReadyMessage isTouch={isTouch} />}
           {stopped && <StopMessage isTouch={isTouch} />}
-        </div>
+*/}        </div>
       </div>
       <div className={"relative w-full " + (isMobile ? "h-32 " : "h-16 ")}>
-        <div
+        {/*<div
           className={
             "absolute inset-x-0 bottom-0 " +
             "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 "
@@ -309,7 +309,7 @@ export default function Home(context: { params: Params }) {
             </span>
           </div>
         </div>
-        {isMobile && (
+*/}        {isMobile && (
           <StatusBox
             className="absolute inset-4 "
             judgeCount={judgeCount}

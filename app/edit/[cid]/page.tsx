@@ -43,7 +43,7 @@ export default function Page(context: { params: Params }) {
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
     void (async () => {
-      const res = await fetch(`/api/chartFile/${cid}`);
+      const res = await fetch(`/api/chartFile/${cid}`, {cache: "no-store"});
       if (res.ok) {
         try {
           const chart = msgpack.deserialize(await res.arrayBuffer());
