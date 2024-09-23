@@ -15,15 +15,17 @@ export default function useGameLogic(
   const judgeScore = judgeCount[0] * 1 + judgeCount[1] * 0.5;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
   const bonusMax = 100;
-  const bonusScore = (bonus / bonusMax) * 0.5;
   const bonusTotal =
-    ((notesTotal < 100
+    notesTotal < bonusMax
       ? (notesTotal * (notesTotal + 1)) / 2
-      : (100 * 101) / 2 + 100 * (notesTotal - 100)) /
-      bonusMax) *
-    0.5;
-  const score =
-    ((judgeScore + bonusScore) / (notesTotal + bonusTotal || 1)) * 100;
+      : (bonusMax * (bonusMax + 1)) / 2 + bonusMax * (notesTotal - bonusMax);
+  // const score =
+  //   ((judgeScore + bonusScore) / (notesTotal + bonusTotal || 1)) * 100;
+  const baseScore = (judgeScore / (notesTotal || 1)) * 70;
+  const chainScore = (bonus / (bonusTotal || 1)) * 30;
+  const score = baseScore + chainScore;
+
+  const end = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
 
   const [chain, setChain] = useState<number>(0);
 
@@ -130,5 +132,15 @@ export default function useGameLogic(
     };
   }, [auto, getCurrentTimeSec, judge]);
 
-  return { score, chain, notesAll, resetNotesAll, hit, judgeCount };
+  return {
+    baseScore,
+    chainScore,
+    score,
+    chain,
+    notesAll,
+    resetNotesAll,
+    hit,
+    judgeCount,
+    end,
+  };
 }

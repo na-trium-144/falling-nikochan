@@ -18,6 +18,7 @@ import { Loading, Error } from "@/common/box";
 import { useDisplayMode } from "@/scale";
 import { addRecent } from "@/common/recent";
 import { useSearchParams } from "next/navigation";
+import Result from "./result";
 
 export default function Home(context: { params: Params }) {
   const cid = context.params.cid;
@@ -31,7 +32,7 @@ export default function Home(context: { params: Params }) {
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
     void (async () => {
-      const res = await fetch(`/api/brief/${cid}`, {cache: "no-store"});
+      const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
       if (res.ok) {
         // cidからタイトルなどを取得
         const resBody = await res.json();
@@ -40,7 +41,7 @@ export default function Home(context: { params: Params }) {
     })();
 
     void (async () => {
-      const res = await fetch(`/api/seqFile/${cid}`, {cache: "no-store"});
+      const res = await fetch(`/api/seqFile/${cid}`, { cache: "no-store" });
       if (res.ok) {
         try {
           const seq = msgpack.deserialize(await res.arrayBuffer());
@@ -79,8 +80,17 @@ export default function Home(context: { params: Params }) {
       return ytPlayer.current?.getCurrentTime() - chartSeq.offset;
     }
   }, [chartSeq, playing]);
-  const { score, chain, notesAll, resetNotesAll, hit, judgeCount } =
-    useGameLogic(getCurrentTimeSec, auto);
+  const {
+    baseScore,
+    chainScore,
+    score,
+    chain,
+    notesAll,
+    resetNotesAll,
+    hit,
+    judgeCount,
+    end,
+  } = useGameLogic(getCurrentTimeSec, auto);
 
   const [fps, setFps] = useState<number>(0);
 
@@ -170,6 +180,18 @@ export default function Home(context: { params: Params }) {
     setBarFlash(true);
     setTimeout(() => setBarFlash(false), 100);
   };
+
+  const [showResult, setShowResult] = useState<boolean>(false);
+  useEffect(() => {
+    if (chartSeq && end) {
+      const t = setTimeout(() => {
+        setShowResult(true);
+      }, 1000);
+      return () => clearTimeout(t);
+    } else {
+      setShowResult(false);
+    }
+  }, [end]);
 
   if (errorStatus !== undefined || errorMsg !== undefined) {
     return <Error status={errorStatus} message={errorMsg} />;
@@ -268,6 +290,13 @@ export default function Home(context: { params: Params }) {
           <ChainDisp className="absolute top-0 left-3 " chain={chain} />
           {ready && <ReadyMessage isTouch={isTouch} />}
           {stopped && <StopMessage isTouch={isTouch} />}
+          {showResult && (
+            <Result
+              baseScore={baseScore}
+              chainScore={chainScore}
+              score={score}
+            />
+          )}
         </div>
       </div>
       <div className={"relative w-full " + (isMobile ? "h-32 " : "h-16 ")}>
