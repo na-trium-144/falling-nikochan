@@ -16,6 +16,7 @@ import msgpack from "@ygoe/msgpack";
 import { stepSub, stepToFloat } from "@/chartFormat/step";
 import { Loading, Error } from "@/common/box";
 import { useDisplayMode } from "@/scale";
+import { addRecent } from "@/common/recent";
 
 export default function Home(context: { params: Params }) {
   const cid = context.params.cid;
@@ -42,7 +43,7 @@ export default function Home(context: { params: Params }) {
           setChartSeq(seq);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
-          // addRecentPlay(cid);
+          addRecent("play", cid);
         } catch (e) {
           setChartSeq(undefined);
           setErrorStatus(undefined);
@@ -175,7 +176,6 @@ export default function Home(context: { params: Params }) {
     return <Loading />;
   }
 
-  console.log(chartSeq)
   return (
     <main
       className="overflow-hidden flex flex-col "

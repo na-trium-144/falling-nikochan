@@ -6,7 +6,7 @@ import Button from "./common/button";
 import { useRouter } from "next/navigation";
 import msgpack from "@ygoe/msgpack";
 import Link from "next/link";
-import { getRecentEdit, removeRecentEdit } from "./common/recentEdit";
+import { getRecent, removeRecent } from "./common/recent";
 import { Chart, ChartBrief, emptyChart } from "./chartFormat/chart";
 
 export default function EditTab() {
@@ -19,7 +19,7 @@ export default function EditTab() {
   const router = useRouter();
 
   useEffect(() => {
-    const recentCId = getRecentEdit();
+    const recentCId = getRecent("edit");
     setRecentCId(recentCId);
     for (const cid of recentCId) {
       void (async () => {
@@ -33,7 +33,7 @@ export default function EditTab() {
           });
         } else if (res.status === 404) {
           // 存在しない譜面のデータは消す
-          removeRecentEdit(cid);
+          removeRecent("edit", cid);
           setRecentCId((recentCId) =>
             recentCId.filter((oldCId) => oldCId !== cid)
           );

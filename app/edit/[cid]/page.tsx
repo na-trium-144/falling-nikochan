@@ -31,7 +31,7 @@ import {
 } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
-import { addRecentEdit } from "@/common/recentEdit";
+import { addRecent } from "@/common/recent";
 import { Chart } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { useDisplayMode } from "@/scale";
@@ -51,7 +51,7 @@ export default function Page(context: { params: Params }) {
           setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
-          addRecentEdit(cid);
+          addRecent("edit", cid);
         } catch (e) {
           setChart(undefined);
           setErrorStatus(undefined);
