@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BPMChange } from "@/chartFormat/command";
 import { getTimeSec } from "@/chartFormat/seq";
+import { Step, stepAdd, stepSub, stepZero } from "@/chartFormat/step";
 
 interface Props {
   className?: string;
@@ -13,7 +14,9 @@ interface Props {
 }
 export default function RhythmicalSlime(props: Props) {
   const { num, playing, getCurrentTimeSec, bpmChanges } = props;
-  const step = useRef<number>(-1);
+  const step = useRef<Step>(
+    stepSub(stepZero(), { fourth: 1, numerator: 0, denominator: 4 })
+  );
   const [jumpingSlime, setJumpingSlime] = useState<number>(-1);
   const [preparingSlime, setPreparingSlime] = useState<number>(-1);
   const transitionTimeMSec = useRef<number>(0);
@@ -22,13 +25,26 @@ export default function RhythmicalSlime(props: Props) {
     if (playing) {
       const nextStep = () => {
         while (playing && bpmChanges) {
-          step.current++;
-          const step0 = getTimeSec(bpmChanges, step.current - 0.25);
-          const step0_5 = getTimeSec(bpmChanges, step.current + 0.25);
-          const step1 = getTimeSec(bpmChanges, step.current + 0.75);
+          step.current = stepAdd(step.current, {
+            fourth: 1,
+            numerator: 0,
+            denominator: 4,
+          });
+          const step0 = getTimeSec(
+            bpmChanges,
+            stepSub(step.current, { fourth: 0, numerator: 1, denominator: 4 })
+          );
+          const step0_5 = getTimeSec(
+            bpmChanges,
+            stepAdd(step.current, { fourth: 0, numerator: 1, denominator: 4 })
+          );
+          const step1 = getTimeSec(
+            bpmChanges,
+            stepAdd(step.current, { fourth: 0, numerator: 3, denominator: 4 })
+          );
           const now = getCurrentTimeSec();
           transitionTimeMSec.current = (step0_5 - step0) * 1000;
-          const jumpSlime = step.current % num;
+          const jumpSlime = step.current.fourth % num;
           if (now === undefined) {
             return;
           }
@@ -71,7 +87,11 @@ export default function RhythmicalSlime(props: Props) {
         }
       };
     } else {
-      step.current = -1;
+      step.current = stepSub(stepZero(), {
+        fourth: 1,
+        numerator: 0,
+        denominator: 4,
+      });
     }
   }, [bpmChanges, num, playing, getCurrentTimeSec]);
   return (
