@@ -10,6 +10,7 @@ import {
   stepCmp,
   stepZero,
   updateBpmTimeSec,
+  validateChart,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -36,6 +37,7 @@ import {
   Loading,
 } from "@/common/box";
 import { MetaTab } from "./metaTab";
+import msgpack from "@ygoe/msgpack";
 
 export default function Page(context: { params: Params }) {
   const cid = context.params.cid;
@@ -45,21 +47,26 @@ export default function Page(context: { params: Params }) {
   useEffect(() => {
     void (async () => {
       const res = await fetch(`/api/chartFile/${cid}`);
-      const resBody = await res.json();
       if (res.ok) {
-        if (resBody.chart) {
-          setChart(resBody.chart);
+        try {
+          const chart = msgpack.deserialize(await res.arrayBuffer());
+          // validateはサーバー側でやってる
+          setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
-        } else {
+        } catch (e) {
           setChart(undefined);
           setErrorStatus(undefined);
-          setErrorMsg("Invalid response");
+          setErrorMsg(String(e));
         }
       } else {
         setChart(undefined);
         setErrorStatus(res.status);
-        setErrorMsg(String(resBody.message));
+        try {
+          setErrorMsg(String((await res.json()).message));
+        } catch (e) {
+          setErrorMsg(String(e));
+        }
       }
     })();
   }, [cid]);

@@ -10,7 +10,7 @@ export async function fsAssign() {
     return null;
   }
 }
-export async function fsWrite(fid: string, data: string) {
+export async function fsWrite(fid: string, data: Blob) {
   const formData = new FormData();
   formData.append("file", data);
   const fsPostRes = await fetch(process.env.FS_VOLUME + "/" + fid, {
@@ -27,7 +27,7 @@ export async function fsWrite(fid: string, data: string) {
 export async function fsRead(fid: string) {
   const fsRes = await fetch(process.env.FS_VOLUME + "/" + fid);
   if (fsRes.ok) {
-    return { data: await fsRes.text() };
+    return { data: await fsRes.arrayBuffer() };
   } else {
     console.log(fsRes);
     return null;

@@ -2,15 +2,29 @@ import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
 import { createFileEntry, getFileEntry } from "@/api/dbAccess";
 import { fsAssign, fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
+import msgpack from "@ygoe/msgpack";
+import { validateChart } from "@/chartFormat/command";
 
 // todo: password
 
 export async function GET() {
-  return NextResponse.json({}, { status: 400 });
+  return new Response(null, { status: 400 });
 }
 
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
 export async function POST(request: NextRequest, context: { params: Params }) {
+  let chartBlob: Blob;
+  try {
+    const chart = msgpack.deserialize(await request.arrayBuffer());
+    validateChart(chart);
+    chartBlob = new Blob([msgpack.serialize(chart)]);
+  } catch (e) {
+    return NextResponse.json(
+      { message: "invalid chart data" },
+      { status: 400 }
+    );
+  }
+
   let cid: string;
   while (true) {
     cid = Math.floor(Math.random() * 900000 + 100000).toString();
@@ -31,7 +45,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     await createFileEntry(cid, fid);
   }
 
-  if (!(await fsWrite(fid, await request.text()))) {
+  if (!(await fsWrite(fid, chartBlob))) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
 

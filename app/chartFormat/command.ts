@@ -9,6 +9,8 @@
  * プレイ時に秒単位の時刻に変換
  */
 export interface Chart {
+  falling: "nikochan"; // magic
+  ver: 1;
   notes: NoteCommand[];
   bpmChanges: BPMChange[];
   offset: number;
@@ -17,15 +19,30 @@ export interface Chart {
   composer: string;
 }
 
+export function validateChart(chart: Chart) {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  if (chart.ver !== 1) throw "chart.ver is invalid";
+  if (!Array.isArray(chart.notes)) throw "chart.notes is invalid";
+  chart.notes.forEach((n) => validateNoteCommand(n));
+  if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
+  chart.bpmChanges.forEach((n) => validateBpmChange(n));
+  if (typeof chart.offset !== "number") throw "chart.offset is invalid";
+  if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
+  if (typeof chart.title !== "string") throw "chart.title is invalid";
+  if (typeof chart.composer !== "string") throw "chart.composer is invalid";
+}
+
 export function emptyChart(): Chart {
   return {
+    falling: "nikochan",
+    ver: 1,
     notes: [],
     bpmChanges: [],
     offset: 0,
     ytId: "",
     title: "",
     composer: "",
-  }
+  };
 }
 
 /**
@@ -38,6 +55,11 @@ export interface Step {
   fourth: number;
   numerator: number;
   denominator: number;
+}
+function validateStep(s: Step) {
+  if (typeof s.fourth !== "number") throw "step.fourth is invalid";
+  if (typeof s.numerator !== "number") throw "step.numerator is invalid";
+  if (typeof s.denominator !== "number") throw "step.denominator is invalid";
 }
 export function stepZero() {
   return { fourth: 0, numerator: 0, denominator: 4 };
@@ -115,6 +137,18 @@ export interface NoteCommand {
     scale: number;
   }[];
 }
+function validateNoteCommand(n: NoteCommand) {
+  validateStep(n.step);
+  if (typeof n.hitX !== "number") throw "note.hitX is invalid";
+  if (typeof n.hitVX !== "number") throw "note.hitVX is invalid";
+  if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
+  if (typeof n.accelY !== "number") throw "note.accelY is invalid";
+  if (!Array.isArray(n.timeScale)) throw "note.timeScale is invalid";
+  n.timeScale.forEach((ts) => {
+    validateStep(ts.stepBefore);
+    if (typeof ts.scale !== "number") throw "timeScale.scale is invalid";
+  });
+}
 export function defaultNoteCommand(currentStep: Step = stepZero()) {
   return {
     step: currentStep,
@@ -134,6 +168,11 @@ export interface BPMChange {
   step: Step;
   timeSec: number;
   bpm: number;
+}
+function validateBpmChange(b: BPMChange) {
+  validateStep(b.step);
+  if (typeof b.timeSec !== "number") throw "BpmChange.timeSec is invalid";
+  if (typeof b.step !== "number") throw "BpmChange.step is invalid";
 }
 /**
  * stepが正しいとしてtimeSecを再計算
@@ -205,9 +244,11 @@ export const sampleChart = (): Chart => {
   }
 
   return {
+    falling: "nikochan",
+    ver: 1,
     ytId: "cNnCLGrXBYs",
     title: "aaaaaa123タイトル",
-    author: "author",
+    composer: "author",
 
     bpmChanges: [
       {
