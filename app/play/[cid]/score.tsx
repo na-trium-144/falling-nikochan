@@ -7,6 +7,7 @@ interface Props {
   style?: object;
   score: number;
   best: number;
+  auto: boolean;
 }
 export function ScoreDisp(props: Props) {
   const { score, best } = props;
@@ -25,10 +26,14 @@ export function ScoreDisp(props: Props) {
         <span className="flex-1 text-md">Score</span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim />
       </div>
-      <div className="flex flex-row items-baseline mt-1">
-        <span className="flex-1 text-md mr-2">Best Score</span>
-        <NumDisp num={best} fontSize1={24} fontSize2={24} />
-      </div>
+      {props.auto ? (
+        <div className="text-center">&lt;&lt; AutoPlay &gt;&gt;</div>
+      ) : (
+        <div className="flex flex-row items-baseline mt-1">
+          <span className="flex-1 text-md mr-2">Best Score</span>
+          <NumDisp num={best} fontSize1={24} fontSize2={24} />
+        </div>
+      )}
     </div>
   );
 }

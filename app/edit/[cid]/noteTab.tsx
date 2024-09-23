@@ -181,11 +181,11 @@ function NoteEdit(props: Props) {
           </label>
         </p>
         <p className="mt-3">
-          <Button
+          {/*<Button
             keyName="N"
             text={`Add note here (at ${stepStr(props.currentStep)})`}
             onClick={() => props.pasteNote(0)}
-          />
+          />*/}
           <Button text="× Delete this note" onClick={props.deleteNote} />
         </p>
       </>

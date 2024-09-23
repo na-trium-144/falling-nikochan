@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Note } from "@/chartFormat/seq";
+import { displayNote, Note } from "@/chartFormat/seq";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
@@ -41,7 +41,7 @@ export default function useGameLogic(
     (n: Note, now: number, j: number) => {
       // j = 1 ~ 4
       if (j <= 3) {
-        n.hitPos = n.display(now, n)?.pos; // 位置を固定
+        n.hitPos = displayNote(n, now)?.pos; // 位置を固定
       }
       n.done = j;
       if (j <= 2) {

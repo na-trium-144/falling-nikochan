@@ -17,9 +17,13 @@ import { stepSub, stepToFloat } from "@/chartFormat/step";
 import { Loading, Error } from "@/common/box";
 import { useDisplayMode } from "@/scale";
 import { addRecent } from "@/common/recent";
+import { useSearchParams } from "next/navigation";
 
 export default function Home(context: { params: Params }) {
   const cid = context.params.cid;
+  const searchParams = useSearchParams();
+  const auto = !!Number(searchParams.get("auto"));
+
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
 
@@ -66,8 +70,6 @@ export default function Home(context: { params: Params }) {
 
   // start後true
   const [playing, setPlaying] = useState<boolean>(false);
-
-  const [auto, setAuto] = useState<boolean>(false); // todo: 切り替えボタンや表示など
 
   const ytPlayer = useRef<YouTubePlayer>();
   // ytPlayerから現在時刻を取得
@@ -261,6 +263,7 @@ export default function Home(context: { params: Params }) {
             className="absolute top-0 right-3 "
             score={score}
             best={0}
+            auto={auto}
           />
           <ChainDisp className="absolute top-0 left-3 " chain={chain} />
           {ready && <ReadyMessage isTouch={isTouch} />}

@@ -44,7 +44,7 @@ export default function PlayTab() {
         {recentCId.map((cid) => (
           <li key={cid}>
             <Link
-              href={`/play/${cid}`}
+              href={`/share/${cid}`}
               className="hover:text-blue-600 hover:underline"
             >
               {cid}: {recentBrief[cid]?.title}
