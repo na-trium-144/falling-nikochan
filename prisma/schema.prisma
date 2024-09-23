@@ -16,4 +16,7 @@ datasource db {
 model ChartFile {
   fid String @id
   cid String @unique
+  ytId String
+  title String
+  composer String
 }

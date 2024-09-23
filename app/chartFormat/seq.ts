@@ -1,14 +1,6 @@
-import {
-  NoteCommand,
-  Chart,
-  BPMChange,
-  Step,
-  stepToFloat,
-  stepAdd,
-  stepSub,
-  stepCmp,
-  stepZero,
-} from "./command";
+import { Chart } from "./chart";
+import { BPMChange, NoteCommand } from "./command";
+import { Step, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 
 /**
  * 音符の大きさ (画面サイズに対する割合)

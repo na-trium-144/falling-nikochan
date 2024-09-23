@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Note, DisplayNote, noteSize, targetY } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
-import { Chart, NoteCommand } from "@/chartFormat/command";
+import { NoteCommand } from "@/chartFormat/command";
 import Arrow from "./arrow";
 import DragHandle from "./dragHandle";
+import { Chart } from "@/chartFormat/chart";
 
 interface Props {
   className?: string;

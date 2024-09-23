@@ -1,9 +1,9 @@
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
 import { createFileEntry, getFileEntry } from "@/api/dbAccess";
-import { fsAssign, fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
+import { fsAssign, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
-import { validateChart } from "@/chartFormat/command";
+import { Chart, validateChart } from "@/chartFormat/chart";
 
 // todo: password
 
@@ -14,8 +14,9 @@ export async function GET() {
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
 export async function POST(request: NextRequest, context: { params: Params }) {
   let chartBlob: Blob;
+  let chart: Chart;
   try {
-    const chart = msgpack.deserialize(await request.arrayBuffer());
+    chart = msgpack.deserialize(await request.arrayBuffer());
     validateChart(chart);
     chartBlob = new Blob([msgpack.serialize(chart)]);
   } catch (e) {
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     return NextResponse.json({ message: "fsAssign() failed" }, { status: 500 });
   } else {
     fid = fsRes.fid;
-    await createFileEntry(cid, fid);
+    await createFileEntry(cid, fid, chart);
   }
 
   if (!(await fsWrite(fid, chartBlob))) {

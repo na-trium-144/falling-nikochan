@@ -1,4 +1,5 @@
-import { Chart, NoteCommand } from "@/chartFormat/command";
+import { Chart } from "@/chartFormat/chart";
+import { NoteCommand } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
 

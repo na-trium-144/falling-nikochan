@@ -1,16 +1,9 @@
 "use client";
 
 import {
-  Chart,
   defaultNoteCommand,
   NoteCommand,
-  sampleChart,
-  Step,
-  stepAdd,
-  stepCmp,
-  stepZero,
   updateBpmTimeSec,
-  validateChart,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -38,6 +31,9 @@ import {
 } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
+import { addRecentEdit } from "@/common/recentEdit";
+import { Chart } from "@/chartFormat/chart";
+import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 
 export default function Page(context: { params: Params }) {
   const cid = context.params.cid;
@@ -54,6 +50,7 @@ export default function Page(context: { params: Params }) {
           setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
+          addRecentEdit(cid);
         } catch (e) {
           setChart(undefined);
           setErrorStatus(undefined);

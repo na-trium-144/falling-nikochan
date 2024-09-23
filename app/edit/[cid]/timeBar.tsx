@@ -1,6 +1,5 @@
 "use client";
 
-import { Chart, Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/command";
 import {
   findBpmIndexFromStep,
   getStep,
@@ -10,6 +9,8 @@ import {
 import { useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { stepNStr, timeSecStr, timeStr } from "./str";
+import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
+import { Chart } from "@/chartFormat/chart";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
@@ -23,7 +24,6 @@ export default function TimeBar(props: Props) {
   const {
     currentTimeSecWithoutOffset,
     currentNoteIndex,
-    currentStep,
     chart,
     notesAll,
     snapDivider,

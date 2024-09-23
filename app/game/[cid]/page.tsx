@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import { loadChart, Note } from "@/chartFormat/seq";
-import { Chart, sampleChart } from "@/chartFormat/command";
 import {FlexYouTube, YouTubePlayer} from "@/common/youtube";
 import { ChainDisp, ScoreDisp } from "./score";
 import RhythmicalSlime from "./rhythmicalSlime";
@@ -11,6 +10,7 @@ import useGameLogic from "./gameLogic";
 import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
+import { Chart, sampleChart } from "@/chartFormat/chart";
 
 function isTouchEventsEnabled() {
   // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.

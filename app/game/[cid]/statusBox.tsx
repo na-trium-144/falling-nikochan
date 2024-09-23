@@ -1,5 +1,5 @@
 import { Box } from "@/common/box";
-import { Key } from "./messageBox";
+import { Key } from "@/common/key";
 
 interface Props {
   className?: string;

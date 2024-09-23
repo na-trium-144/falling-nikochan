@@ -1,6 +1,6 @@
-import { Step, stepCmp, stepZero } from "@/chartFormat/command";
 import Input from "@/common/input";
 import { stepStr } from "./str";
+import { Step, stepCmp, stepZero } from "@/chartFormat/step";
 
 interface Props {
   offset?: number;

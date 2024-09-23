@@ -1,10 +1,11 @@
-import { Chart } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
 import { checkYouTubeId, getYouTubeId } from "@/common/youtube";
 import { useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
+import { Chart } from "@/chartFormat/chart";
+
 interface Props {
   chart?: Chart;
   setChart: (chart: Chart) => void;
@@ -75,11 +76,15 @@ export function MetaTab(props: Props2) {
               method: "POST",
               body: JSON.stringify(props.chart),
             });
-            const resBody = await res.json();
             if (res.ok) {
               setErrorMsg("保存しました！");
             } else {
-              setErrorMsg(`${res.status}: ${resBody.message}`);
+              try {
+                const resBody = await res.json();
+                setErrorMsg(`${res.status}: ${resBody.message}`);
+              } catch (e) {
+                setErrorMsg(String(e));
+              }
             }
           }}
         />
