@@ -17,6 +17,17 @@ export interface Chart {
   composer: string;
 }
 
+export function emptyChart(): Chart {
+  return {
+    notes: [],
+    bpmChanges: [],
+    offset: 0,
+    ytId: "",
+    title: "",
+    composer: "",
+  }
+}
+
 /**
  * 時刻(step数)の数え方
  * 4分音符の個数 = fourth + numerator / denominator

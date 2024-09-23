@@ -4,7 +4,7 @@
 
 * database + storage
 ```
-docker-compose up -d
+docker-compose up
 ```
 
 * docker-compose.ymlの設定をもとに、 `.env` ファイルにデータベースのurlなどを記述

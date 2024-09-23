@@ -1,30 +1,33 @@
 import { Chart } from "@/chartFormat/command";
+import Button from "@/common/button";
 import Input from "@/common/input";
 import { checkYouTubeId, getYouTubeId } from "@/common/youtube";
+import { useEffect, useState } from "react";
 
 interface Props {
   chart?: Chart;
   setChart: (chart: Chart) => void;
 }
-export default function MetaTab(props: Props) {
+export function MetaEdit(props: Props) {
   return (
     <>
       <p className="flex flex-row">
-        <span className="w-max">YouTube URL or ID</span>
+        <span className="w-max">YouTube URL または動画ID</span>
         <Input
           className="flex-1"
           actualValue={props.chart?.ytId || ""}
           updateValue={(v: string) =>
-            props.chart && props.setChart({ ...props.chart, ytId: getYouTubeId(v) })
+            props.chart &&
+            props.setChart({ ...props.chart, ytId: getYouTubeId(v) })
           }
           isValid={checkYouTubeId}
           left
         />
       </p>
       <p className="flex flex-row">
-        <span className="w-max">Title</span>
+        <span className="w-max">楽曲タイトル</span>
         <Input
-        className="flex-1 font-title"
+          className="flex-1 font-title"
           actualValue={props.chart?.title || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, title: v })
@@ -32,16 +35,52 @@ export default function MetaTab(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row text-sm mt-1">
-        <span className="w-max">Composer etc.</span>
+      <p className="flex flex-row text-sm my-1">
+        <span className="w-max">(作曲者など</span>
         <Input
-        className="flex-1 text-sm font-title"
+          className="flex-1 text-sm font-title"
           actualValue={props.chart?.composer || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, composer: v })
           }
           left
         />
+        <span>)</span>
+      </p>
+    </>
+  );
+}
+
+interface Props2 {
+  chart?: Chart;
+  setChart: (chart: Chart) => void;
+  cid: string;
+}
+export function MetaTab(props: Props2) {
+  const [errorMsg, setErrorMsg] = useState<string>("");
+  useEffect(() => {
+    setErrorMsg("");
+  }, [props.chart]);
+  return (
+    <>
+      <MetaEdit {...props} />
+      <p>
+        <Button
+          text="サーバーに保存"
+          onClick={async () => {
+            const res = await fetch(`/api/chartFile/${props.cid}`, {
+              method: "POST",
+              body: JSON.stringify(props.chart),
+            });
+            const resBody = await res.json();
+            if (res.ok) {
+              setErrorMsg("保存しました！");
+            } else {
+              setErrorMsg(`${res.status}: ${resBody.message}`);
+            }
+          }}
+        />
+        <span className="ml-1">{errorMsg}</span>
       </p>
     </>
   );

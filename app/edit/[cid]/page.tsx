@@ -28,30 +28,38 @@ import Input from "@/common/input";
 import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
-import { IChartFileGet } from "@/api/chartFile/interface";
 import {
   Box,
   CenterBox,
   CenterBoxOnlyPage,
-  ChartFetchError,
+  Error,
   Loading,
 } from "@/common/box";
-import MetaTab from "./metaTab";
+import { MetaTab } from "./metaTab";
 
 export default function Page(context: { params: Params }) {
   const cid = context.params.cid;
   const [chart, setChart] = useState<Chart>();
-  const [chartFetchError, setChartFetchError] = useState<boolean>(false);
+  const [errorStatus, setErrorStatus] = useState<number>();
+  const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
     void (async () => {
       const res = await fetch(`/api/chartFile/${cid}`);
-      const resBody = (await res.json()) as IChartFileGet;
-      if (resBody.ok && resBody.chart !== undefined) {
-        setChart(resBody.chart);
-        setChartFetchError(false);
+      const resBody = await res.json();
+      if (res.ok) {
+        if (resBody.chart) {
+          setChart(resBody.chart);
+          setErrorStatus(undefined);
+          setErrorMsg(undefined);
+        } else {
+          setChart(undefined);
+          setErrorStatus(undefined);
+          setErrorMsg("Invalid response");
+        }
       } else {
         setChart(undefined);
-        setChartFetchError(true);
+        setErrorStatus(res.status);
+        setErrorMsg(String(resBody.message));
       }
     })();
   }, [cid]);
@@ -160,16 +168,29 @@ export default function Page(context: { params: Params }) {
   };
   const currentBpmIndex =
     chart && findBpmIndexFromStep(chart?.bpmChanges, currentStep);
+  const currentBpm =
+    chart && chart.bpmChanges.length > 0 && currentBpmIndex !== undefined
+      ? chart.bpmChanges[currentBpmIndex].bpm
+      : 120;
   const changeBpm = (bpm: number) => {
     if (chart && currentBpmIndex !== undefined) {
-      chart.bpmChanges[currentBpmIndex].bpm = bpm;
-      updateBpmTimeSec(chart.bpmChanges);
+      if (chart.bpmChanges.length === 0) {
+        chart.bpmChanges.push({
+          step: stepZero(),
+          bpm: bpm,
+          timeSec: 0,
+        });
+      } else {
+        chart.bpmChanges[currentBpmIndex].bpm = bpm;
+        updateBpmTimeSec(chart.bpmChanges);
+      }
       setChart({ ...chart });
     }
   };
   const bpmChangeHere =
     chart &&
     currentBpmIndex !== undefined &&
+    chart.bpmChanges.length > 0 &&
     stepCmp(chart.bpmChanges[currentBpmIndex].step, currentStep) === 0;
   const toggleBpmChangeHere = () => {
     if (
@@ -186,7 +207,7 @@ export default function Page(context: { params: Params }) {
       } else {
         chart.bpmChanges.push({
           step: currentStep,
-          bpm: chart.bpmChanges[currentBpmIndex].bpm,
+          bpm: currentBpm,
           timeSec: currentTimeSec,
         });
         chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
@@ -244,8 +265,8 @@ export default function Page(context: { params: Params }) {
     }
   };
 
-  if (chartFetchError) {
-    return <ChartFetchError />;
+  if (errorStatus !== undefined || errorMsg !== undefined) {
+    return <Error status={errorStatus} message={errorMsg} />;
   }
   if (chart === undefined) {
     return <Loading />;
@@ -370,7 +391,7 @@ export default function Page(context: { params: Params }) {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Meta", "Timing", "Notes", "Coding"].map((tabName, i) =>
+            {["Meta", "Timing", "Notes"].map((tabName, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
@@ -388,15 +409,13 @@ export default function Page(context: { params: Params }) {
           </div>
           <Box className="flex-1 p-3">
             {tab === 0 ? (
-              <MetaTab chart={chart} setChart={setChart} />
+              <MetaTab chart={chart} setChart={setChart} cid={cid} />
             ) : tab === 1 ? (
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
                 currentBpm={
-                  currentBpmIndex !== undefined
-                    ? chart?.bpmChanges[currentBpmIndex].bpm
-                    : undefined
+                  currentBpmIndex !== undefined ? currentBpm : undefined
                 }
                 setCurrentBpm={changeBpm}
                 bpmChangeHere={!!bpmChangeHere}

@@ -7,6 +7,7 @@ import {
   stepAdd,
   stepSub,
   stepCmp,
+  stepZero,
 } from "./command";
 
 /**
@@ -59,11 +60,15 @@ export interface DisplayNote {
   chain?: number;
 }
 
+function defaultBpmChange(): BPMChange {
+  return { timeSec: 0, bpm: 120, step: stepZero() };
+}
 /**
  * bpmとstep数→時刻(秒数)
  */
 export function getTimeSec(bpmChanges: BPMChange[], step: Step): number {
-  const targetBpmChange = bpmChanges[findBpmIndexFromStep(bpmChanges, step)];
+  const targetBpmChange =
+    bpmChanges[findBpmIndexFromStep(bpmChanges, step)] || defaultBpmChange();
   return (
     targetBpmChange.timeSec +
     (60 / targetBpmChange.bpm) *
@@ -78,7 +83,8 @@ export function getStep(
   timeSec: number,
   denominator: number
 ): Step {
-  const targetBpmChange = bpmChanges[findBpmIndexFromSec(bpmChanges, timeSec)];
+  const targetBpmChange =
+    bpmChanges[findBpmIndexFromSec(bpmChanges, timeSec)] || defaultBpmChange();
   const stepFloat =
     stepToFloat(targetBpmChange.step) +
     (timeSec - targetBpmChange.timeSec) / (60 / targetBpmChange.bpm);
@@ -96,6 +102,9 @@ export function findBpmIndexFromSec(
   bpmChanges: BPMChange[],
   timeSec: number
 ): number {
+  if (bpmChanges.length === 0) {
+    return 0;
+  }
   const targetBpmIndex = bpmChanges.findIndex((ch) => timeSec < ch.timeSec) - 1;
   return targetBpmIndex < 0 ? bpmChanges.length - 1 : targetBpmIndex;
 }
@@ -106,6 +115,9 @@ export function findBpmIndexFromStep(
   bpmChanges: BPMChange[],
   step: Step
 ): number {
+  if (bpmChanges.length === 0) {
+    return 0;
+  }
   const targetBpmIndex =
     bpmChanges.findIndex((ch) => stepCmp(step, ch.step) < 0) - 1;
   return targetBpmIndex < 0 ? bpmChanges.length - 1 : targetBpmIndex;

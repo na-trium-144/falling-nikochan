@@ -40,21 +40,20 @@ export function CenterBoxOnlyPage(props: {
   );
 }
 
-export function NotFound() {
+export function Error(props: { status?: number; message?: string }) {
   return (
     <CenterBoxOnlyPage>
-      <p>404 Not Found</p>
+      <p>
+        {props.status ? `${props.status}: ` : ""}
+        {String(props.message)}
+      </p>
     </CenterBoxOnlyPage>
   );
+}
+export function NotFound() {
+  return <Error status={404} message={"Not Found"} />;
 }
 
-export function ChartFetchError() {
-  return (
-    <CenterBoxOnlyPage>
-      <p>Error: Bad chart ID</p>
-    </CenterBoxOnlyPage>
-  );
-}
 export function Loading() {
   return (
     <CenterBoxOnlyPage>
