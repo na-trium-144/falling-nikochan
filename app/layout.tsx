@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AutoScaler } from "./scale";
 
 export const metadata: Metadata = {
   title: "FallingNikochan",
@@ -13,8 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-gradient-to-t from-sky-50 to-sky-200 ">
-        {children}
+      <body className="overflow-hidden">
+        <AutoScaler>{children}</AutoScaler>
       </body>
     </html>
   );

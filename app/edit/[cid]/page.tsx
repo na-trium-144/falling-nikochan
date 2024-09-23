@@ -34,6 +34,7 @@ import msgpack from "@ygoe/msgpack";
 import { addRecentEdit } from "@/common/recentEdit";
 import { Chart } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
+import { useDisplayMode } from "@/scale";
 
 export default function Page(context: { params: Params }) {
   const cid = context.params.cid;
@@ -67,6 +68,8 @@ export default function Page(context: { params: Params }) {
       }
     })();
   }, [cid]);
+
+  const { scaledSize } = useDisplayMode();
 
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
@@ -278,8 +281,8 @@ export default function Page(context: { params: Params }) {
 
   return (
     <main
-      className="w-screen min-h-screen overflow-x-hidden overflow-y-hidden"
-      style={{ touchAction: "none" }}
+      className="overflow-x-hidden overflow-y-hidden"
+      style={{ ...scaledSize, touchAction: "none" }}
       tabIndex={0}
       onKeyDown={(e) => {
         if (ready) {
@@ -305,7 +308,7 @@ export default function Page(context: { params: Params }) {
         }
       }}
     >
-      <div className={"w-full h-screen flex items-stretch flex-row"}>
+      <div className="w-full h-full flex items-stretch flex-row">
         <div
           className={
             "basis-4/12 " +

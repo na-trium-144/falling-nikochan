@@ -5,12 +5,14 @@ import { useState } from "react";
 import AboutTab from "./aboutTab";
 import PlayTab from "./playTab";
 import EditTab from "./editTab";
+import { useDisplayMode } from "./scale";
 
 export default function MainPage() {
-  const [tab, setTab] = useState<number>(undefined);
+  const [tab, setTab] = useState<number>();
+  const { scaledSize } = useDisplayMode();
 
   return (
-    <main className="w-screen h-screen flex flex-col">
+    <main className="flex flex-col" style={{ ...scaledSize }}>
       <div className="basis-1/4 flex flex-row items-center justify-center">
         <div className="text-4xl">Falling Nikochan</div>
       </div>
