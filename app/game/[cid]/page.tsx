@@ -61,7 +61,7 @@ export default function Home(context: { params: Params }) {
   }, [cid]);
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isMobile, isTouch } = useDisplayMode();
+  const { isMobile, isTouch, scaledSize } = useDisplayMode();
 
   // start後true
   const [playing, setPlaying] = useState<boolean>(false);
@@ -175,10 +175,11 @@ export default function Home(context: { params: Params }) {
     return <Loading />;
   }
 
+  console.log(chartSeq)
   return (
     <main
-      className="w-screen h-screen overflow-hidden flex flex-col "
-      style={{ touchAction: "none" }}
+      className="overflow-hidden flex flex-col "
+      style={{ ...scaledSize, touchAction: "none" }}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
@@ -298,12 +299,12 @@ export default function Home(context: { params: Params }) {
             <span className="text-2xl font-title">♩</span>
             <span className="text-xl ml-2 mr-1">=</span>
             <span className="text-right text-3xl w-16">
-              {Math.floor(chartSeq?.bpmChanges[currentBpmIndex].bpm || 0)}
+              {Math.floor(chartSeq?.bpmChanges[currentBpmIndex]?.bpm || 0)}
             </span>
             <span className="text-lg">.</span>
             <span className="text-lg w-3">
               {Math.floor(
-                (chartSeq?.bpmChanges[currentBpmIndex].bpm || 0) * 10
+                (chartSeq?.bpmChanges[currentBpmIndex]?.bpm || 0) * 10
               ) % 10}
             </span>
           </div>

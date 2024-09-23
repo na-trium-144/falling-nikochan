@@ -63,7 +63,7 @@ export interface BPMChange {
 export function validateBpmChange(b: BPMChange) {
   validateStep(b.step);
   if (typeof b.timeSec !== "number") throw "BpmChange.timeSec is invalid";
-  if (typeof b.step !== "number") throw "BpmChange.step is invalid";
+  if (typeof b.bpm !== "number") throw "BpmChange.bpm is invalid";
 }
 /**
  * stepが正しいとしてtimeSecを再計算

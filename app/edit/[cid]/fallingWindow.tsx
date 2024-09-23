@@ -7,6 +7,7 @@ import {
   noteSize,
   targetY,
   bigScale,
+  displayNote,
 } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
 import { NoteCommand } from "@/chartFormat/command";
@@ -42,22 +43,12 @@ export default function FallingWindow(props: Props) {
   ) {
     for (let ni = 0; ni < notes.length; ni++) {
       const dn = {
-        current: notes[ni].display(
-          currentTimeSec,
-          notes[ni],
-          [-marginX / boxSize, 1 + marginX / boxSize],
-          [-marginY / boxSize, 1 + marginY / boxSize]
-        ),
+        current: displayNote(notes[ni], currentTimeSec),
         history: [] as DisplayNote[],
       };
       if (dn.current !== null) {
         for (let dt = 0; dt < 5; dt += 0.3) {
-          const dn2 = notes[ni].display(
-            currentTimeSec + dt,
-            notes[ni],
-            [-marginX / boxSize, 1 + marginX / boxSize],
-            [-marginY / boxSize, 1 + marginY / boxSize]
-          );
+          const dn2 = displayNote(notes[ni], currentTimeSec + dt);
           if (dn2 !== null) {
             dn.history.push(dn2);
           } else {
@@ -65,12 +56,7 @@ export default function FallingWindow(props: Props) {
           }
         }
         for (let dt = 0; dt < 5; dt += 0.3) {
-          const dn2 = notes[ni].display(
-            currentTimeSec - dt,
-            notes[ni],
-            [-marginX / boxSize, 1 + marginX / boxSize],
-            [-marginY / boxSize, 1 + marginY / boxSize]
-          );
+          const dn2 = displayNote(notes[ni], currentTimeSec - dt);
           if (dn2 !== null) {
             dn.history.unshift(dn2);
           } else {

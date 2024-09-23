@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Note, DisplayNote, noteSize, targetY } from "@/chartFormat/seq";
+import {
+  Note,
+  DisplayNote,
+  noteSize,
+  targetY,
+  displayNote,
+} from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
 
 interface Props {
@@ -37,16 +43,7 @@ export default function FallingWindow(props: Props) {
         now !== undefined
       ) {
         setDisplayNotes(
-          notes
-            .map((n) =>
-              n.display(
-                now,
-                n,
-                [-marginX / boxSize, 1 + marginX / boxSize],
-                [-marginY / boxSize, 1 + marginY / boxSize]
-              )
-            )
-            .filter((n) => n !== null)
+          notes.map((n) => displayNote(n, now)).filter((n) => n !== null)
         );
       } else {
         setDisplayNotes([]);

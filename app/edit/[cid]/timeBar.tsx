@@ -154,7 +154,7 @@ export default function TimeBar(props: Props) {
       <div className="absolute" style={{ bottom: -40, left: 0 }}>
         <span className="mr-1">BPM:</span>
         {beginBpmIndex !== undefined && (
-          <span>{chart?.bpmChanges[beginBpmIndex].bpm.toString()}</span>
+          <span>{chart?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
         )}
       </div>
       {chart?.bpmChanges.map(

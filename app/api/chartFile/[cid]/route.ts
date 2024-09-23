@@ -44,6 +44,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     validateChart(chart);
     chartBlob = new Blob([msgpack.serialize(chart)]);
   } catch (e) {
+    console.error(e)
     return NextResponse.json(
       { message: "invalid chart data" },
       { status: 400 }
