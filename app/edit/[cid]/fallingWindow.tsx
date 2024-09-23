@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Note, DisplayNote, noteSize, targetY } from "@/chartFormat/seq";
+import {
+  Note,
+  DisplayNote,
+  noteSize,
+  targetY,
+  bigScale,
+} from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
 import { NoteCommand } from "@/chartFormat/command";
 import Arrow from "./arrow";
@@ -111,11 +117,20 @@ export default function FallingWindow(props: Props) {
                       : "bg-yellow-400 ")
                   }
                   style={{
-                    width: noteSize * boxSize,
-                    height: noteSize * boxSize,
-                    left: (d.current.pos.x - noteSize / 2) * boxSize + marginX,
+                    width:
+                      noteSize * boxSize * bigScale(notes[d.current.id].big),
+                    height:
+                      noteSize * boxSize * bigScale(notes[d.current.id].big),
+                    left:
+                      (d.current.pos.x -
+                        (noteSize * bigScale(notes[d.current.id].big)) / 2) *
+                        boxSize +
+                      marginX,
                     bottom:
-                      (d.current.pos.y + targetY - noteSize / 2) * boxSize +
+                      (d.current.pos.y +
+                        targetY -
+                        (noteSize * bigScale(notes[d.current.id].big)) / 2) *
+                        boxSize +
                       marginY,
                   }}
                 />

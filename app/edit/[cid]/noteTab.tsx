@@ -2,6 +2,8 @@ import { Chart } from "@/chartFormat/chart";
 import { NoteCommand } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
+import { stepStr } from "./str";
+import { Step } from "@/chartFormat/step";
 
 interface Props {
   currentNoteIndex: number;
@@ -10,6 +12,7 @@ interface Props {
   copyNote: (i: number) => void;
   pasteNote: (i: number) => void;
   hasCopyBuf: boolean[];
+  currentStep: Step;
   chart?: Chart;
 }
 export default function NoteTab(props: Props) {
@@ -66,7 +69,6 @@ function NoteEdit(props: Props) {
           </span>
           <span className="m-1">/</span>
           <span className="">{chart.notes.length}</span>
-          <Button text="× Delete this note" onClick={props.deleteNote} />
         </p>
         <table>
           <tbody className="text-center">
@@ -166,6 +168,26 @@ function NoteEdit(props: Props) {
             </tr>
           </tbody>
         </table>
+        <p>
+          <input
+            className="ml-4 mr-1"
+            type="checkbox"
+            id="bigNote"
+            checked={n.big}
+            onChange={(v) => props.updateNote({ ...n, big: v.target.checked })}
+          />
+          <label htmlFor="bigNote">
+            <span>Big</span>
+          </label>
+        </p>
+        <p className="mt-3">
+          <Button
+            keyName="N"
+            text={`Add note here (at ${stepStr(props.currentStep)})`}
+            onClick={() => props.pasteNote(0)}
+          />
+          <Button text="× Delete this note" onClick={props.deleteNote} />
+        </p>
       </>
     );
   } else {
@@ -173,6 +195,14 @@ function NoteEdit(props: Props) {
       <>
         <p>
           <span>No note selected.</span>
+        </p>
+        <p className="mt-1">
+          <Button
+            keyName="N"
+            text={`Add note here (at ${stepStr(props.currentStep)})`}
+            onClick={() => props.pasteNote(0)}
+          />
+          <span className="ml-1">, or use Paste button.</span>
         </p>
       </>
     );

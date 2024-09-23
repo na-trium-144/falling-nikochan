@@ -257,10 +257,10 @@ export default function Page(context: { params: Params }) {
       setCopyBuf(newCopyBuf);
     }
   };
-  const pasteNote = (copyIndex: number) => {
+  const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
     if (copyBuf[copyIndex]) {
       if (chart) {
-        if (currentNoteIndex >= 0) {
+        if (currentNoteIndex >= 0 && !forceAdd) {
           updateNote(copyBuf[copyIndex]);
         } else {
           addNote(copyBuf[copyIndex]);
@@ -298,6 +298,8 @@ export default function Page(context: { params: Params }) {
             copyNote(0);
           } else if (e.key === "v") {
             pasteNote(0);
+          } else if (e.key === "n") {
+            pasteNote(0, true);
           } else {
           }
         }
@@ -434,6 +436,7 @@ export default function Page(context: { params: Params }) {
                 copyNote={copyNote}
                 pasteNote={pasteNote}
                 hasCopyBuf={copyBuf.map((n) => n !== null)}
+                currentStep={currentStep}
                 chart={chart}
               />
             )}

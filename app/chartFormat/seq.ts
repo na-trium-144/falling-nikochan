@@ -11,6 +11,12 @@ export const noteSize = 0.05;
  */
 export const targetY = 0.2;
 /**
+ * big音符の大きさ
+ */
+export function bigScale(big: boolean){
+  return big ? 1.5 : 1;
+}
+/**
  * 画面上の位置
  * x: 0(画面左端)〜1(画面右端)
  * y: 0(判定ライン)〜1(画面上端)
@@ -28,6 +34,7 @@ export interface Pos {
  */
 export interface Note {
   id: number;
+  big: boolean;
   hitTimeSec: number;
   hitPos?: Pos;
   done: number;
@@ -127,6 +134,7 @@ export function loadChart(chart: Chart): Note[] {
     );
     return {
       id,
+      big: c.big,
       hitTimeSec,
       done: 0,
       display: (

@@ -13,6 +13,7 @@ import { Step, stepToFloat, stepZero, validateStep } from "./step";
  */
 export interface NoteCommand {
   step: Step;
+  big: boolean;
   hitX: number;
   hitVX: number;
   hitVY: number;
@@ -24,6 +25,7 @@ export interface NoteCommand {
 }
 export function validateNoteCommand(n: NoteCommand) {
   validateStep(n.step);
+  if (typeof n.big !== "boolean") throw "note.big is invalid";
   if (typeof n.hitX !== "number") throw "note.hitX is invalid";
   if (typeof n.hitVX !== "number") throw "note.hitVX is invalid";
   if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
@@ -34,9 +36,12 @@ export function validateNoteCommand(n: NoteCommand) {
     if (typeof ts.scale !== "number") throw "timeScale.scale is invalid";
   });
 }
-export function defaultNoteCommand(currentStep: Step = stepZero()) {
+export function defaultNoteCommand(
+  currentStep: Step = stepZero()
+): NoteCommand {
   return {
     step: currentStep,
+    big: false,
     hitX: 1 / 4,
     hitVX: 1 / 4,
     hitVY: 1,
