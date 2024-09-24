@@ -70,6 +70,24 @@ export default function Page(context: { params: Params }) {
     })();
   }, [cid]);
 
+  const [hasChange, setHasChange] = useState<boolean>(false);
+  const changeChart = (chart: Chart) => {
+    setHasChange(true);
+    setChart(chart);
+  };
+  useEffect(() => {
+    const onUnload = (e: BeforeUnloadEvent) => {
+      if (hasChange) {
+        const confirmationMessage = "未保存の変更があります";
+
+        (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+        return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+      }
+    };
+    window.addEventListener("beforeunload", onUnload);
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, [hasChange]);
+
   const { scaledSize, isMobile } = useDisplayMode();
 
   // 現在時刻 offsetを引く前
@@ -171,7 +189,7 @@ export default function Page(context: { params: Params }) {
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
-      setChart({ ...chart, offset: ofs });
+      changeChart({ ...chart, offset: ofs });
     }
   };
   const currentBpmIndex =
@@ -192,7 +210,7 @@ export default function Page(context: { params: Params }) {
         chart.bpmChanges[currentBpmIndex].bpm = bpm;
         updateBpmTimeSec(chart.bpmChanges);
       }
-      setChart({ ...chart });
+      changeChart({ ...chart });
     }
   };
   const bpmChangeHere =
@@ -211,7 +229,7 @@ export default function Page(context: { params: Params }) {
           (ch) => stepCmp(ch.step, currentStep) !== 0
         );
         updateBpmTimeSec(chart.bpmChanges);
-        setChart({ ...chart });
+        changeChart({ ...chart });
       } else {
         chart.bpmChanges.push({
           step: currentStep,
@@ -221,7 +239,7 @@ export default function Page(context: { params: Params }) {
         chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
           stepCmp(a.step, b.step)
         );
-        setChart({ ...chart });
+        changeChart({ ...chart });
       }
     }
   };
@@ -231,14 +249,14 @@ export default function Page(context: { params: Params }) {
       const newChart = { ...chart };
       newChart.notes.push({ ...n, step: currentStep });
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
-      setChart(newChart);
+      changeChart(newChart);
     }
   };
   const deleteNote = () => {
     if (chart && currentNoteIndex >= 0) {
       const newChart = { ...chart };
       newChart.notes = newChart.notes.filter((_, i) => i !== currentNoteIndex);
-      setChart(newChart);
+      changeChart(newChart);
     }
   };
   const updateNote = (n: NoteCommand) => {
@@ -246,7 +264,7 @@ export default function Page(context: { params: Params }) {
       const newChart = { ...chart };
       newChart.notes[currentNoteIndex] = n;
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
-      setChart(newChart);
+      changeChart(newChart);
     }
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
@@ -321,7 +339,7 @@ export default function Page(context: { params: Params }) {
             "grow-0 shrink-0 h-full flex flex-col items-stretch p-3"
           }
         >
-          <BackButton className="" href="/main/edit">
+          <BackButton className="" href="/main/edit" reload>
             Edit
           </BackButton>
           <div
@@ -432,7 +450,13 @@ export default function Page(context: { params: Params }) {
           </div>
           <Box className="flex-1 p-3">
             {tab === 0 ? (
-              <MetaTab chart={chart} setChart={setChart} cid={cid} />
+              <MetaTab
+                chart={chart}
+                setChart={changeChart}
+                cid={cid}
+                hasChange={hasChange}
+                setHasChange={setHasChange}
+              />
             ) : tab === 1 ? (
               <TimingTab
                 offset={chart?.offset}

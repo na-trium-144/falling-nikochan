@@ -57,6 +57,8 @@ interface Props2 {
   chart?: Chart;
   setChart: (chart: Chart) => void;
   cid: string;
+  hasChange: boolean;
+  setHasChange: (h: boolean) => void;
 }
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -78,6 +80,7 @@ export function MetaTab(props: Props2) {
               cache: "no-store",
             });
             if (res.ok) {
+              props.setHasChange(false);
               setErrorMsg("保存しました！");
             } else {
               try {
@@ -90,6 +93,9 @@ export function MetaTab(props: Props2) {
           }}
         />
         <span className="ml-1">{errorMsg}</span>
+        {props.hasChange && (
+          <span className="ml-1">(未保存の変更があります)</span>
+        )}
       </p>
       <p>
         <Button
