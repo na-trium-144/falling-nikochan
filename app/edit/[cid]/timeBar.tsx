@@ -6,11 +6,13 @@ import {
   getTimeSec,
   Note,
 } from "@/chartFormat/seq";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { stepNStr, timeSecStr, timeStr } from "./str";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { Chart } from "@/chartFormat/chart";
+import msgpack from "@ygoe/msgpack";
+import { ColorRGBA, WebglLine, WebglPlot } from "webgl-plot";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
@@ -19,6 +21,7 @@ interface Props {
   chart?: Chart;
   notesAll: Note[];
   snapDivider: number;
+  ytId: string;
 }
 export default function TimeBar(props: Props) {
   const {
@@ -27,7 +30,18 @@ export default function TimeBar(props: Props) {
     chart,
     notesAll,
     snapDivider,
+    ytId,
   } = props;
+
+  const [sampledWave, setSampledWave] = useState<number[]>();
+  useEffect(() => {
+    void (async () => {
+      const res = await fetch(`/api/wave/${ytId}`, { cache: "no-store" });
+      if (res.ok) {
+        setSampledWave(msgpack.deserialize(await res.arrayBuffer()));
+      }
+    })();
+  }, [ytId]);
 
   const timeBarResize = useResizeDetector();
   const timeBarWidth = timeBarResize.width || 500;
@@ -112,11 +126,61 @@ export default function TimeBar(props: Props) {
       ? findBpmIndexFromStep(chart?.bpmChanges, timeBarBeginStep)
       : undefined;
 
+  const canvasMain = useRef<HTMLCanvasElement>(null!);
+  useEffect(() => {
+    let webglp: WebglPlot | null = null;
+    const line: WebglLine = new WebglLine(new ColorRGBA(0, 0.6, 0, 1), 1000);
+    line.arrangeX();
+
+    if (canvasMain.current && sampledWave) {
+      let id = 0;
+      let renderPlot = () => {
+        if (
+          webglp == null ||
+          canvasMain.current.width != timeBarRef.current.clientWidth ||
+          canvasMain.current.height !== timeBarRef.current.clientHeight
+        ) {
+          canvasMain.current.width = timeBarRef.current.clientWidth;
+          canvasMain.current.height = timeBarRef.current.clientHeight;
+
+          webglp = new WebglPlot(canvasMain.current);
+          webglp.addLine(line);
+        }
+
+        let maxY = 1;
+        for (let i = 0; i < line.numPoints; i++) {
+          // 最大numPoints個の点しか描画できない
+          const t1 =
+            timeBarBeginSec +
+            ((i / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
+          const t2 =
+            timeBarBeginSec +
+            (((i+1) / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
+
+          const y = Math.max(...sampledWave.slice(Math.floor(t1 * 1000), Math.floor(t2 * 1000)));
+          line.setY(i, y);
+          maxY = Math.max(maxY, y);
+        }
+        line.offsetY = -1;
+        line.scaleY = 2 / maxY;
+        id = requestAnimationFrame(renderPlot);
+        webglp.update();
+      };
+      id = requestAnimationFrame(renderPlot);
+
+      return () => {
+        renderPlot = () => undefined;
+        cancelAnimationFrame(id);
+      };
+    }
+  }, [sampledWave, timeBarBeginSec, timeBarRef, timeBarWidth]);
+
   return (
     <div
-      className={"h-2 bg-gray-300 relative mt-12 mb-10 overflow-visible"}
+      className={"h-6 bg-gray-200 relative mt-12 mb-10 overflow-visible"}
       ref={timeBarRef}
     >
+      <canvas className="absolute " ref={canvasMain} />
       {/* 秒数目盛り */}
       {Array.from(new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))).map(
         (_, dt) => (

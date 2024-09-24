@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "falling-nikochan-wave"
+version = "0.1.0"
+description = ""
+authors = ["na-trium-144 <100704180+na-trium-144@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+yt-dlp = "^2024.8.6"
+soundfile = "^0.12.1"
+msgpack = "^1.1.0"
+numpy = "^2.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,6 +1,6 @@
 import Button from "@/common/button";
 import Input from "@/common/input";
-import { checkYouTubeId, getYouTubeId } from "@/common/youtube";
+import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
 import { useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";

@@ -14,6 +14,13 @@ FS_MASTER="http://localhost:9333"
 FS_VOLUME="http://localhost:8080"
 ```
 
+* install ffmpeg
+
+* install python and dependencies
+```
+pip install yt-dlp soundfile msgpack numpy
+```
+
 * backend + frontend
 ```
 npm install

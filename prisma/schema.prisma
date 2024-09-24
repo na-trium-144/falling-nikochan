@@ -20,3 +20,8 @@ model ChartFile {
   title String
   composer String
 }
+
+model WaveCache {
+  fid String @id
+  ytId String @unique
+}

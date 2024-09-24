@@ -416,6 +416,7 @@ export default function Page(context: { params: Params }) {
             chart={chart}
             notesAll={notesAll}
             snapDivider={snapDivider}
+            ytId={chart.ytId}
           />
           <p>
             <span>Step =</span>

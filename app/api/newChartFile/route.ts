@@ -1,6 +1,6 @@
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
-import { createFileEntry, getFileEntry } from "@/api/dbAccess";
+import { createFileEntry, getFileEntry } from "@/api/dbChartFile";
 import { fsAssign, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";

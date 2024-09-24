@@ -10,16 +10,17 @@
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",
-    "@types/file-saver": "^2.0.7",
     "@ygoe/msgpack": "^1.0.3",
     "dotenv": "^16.4.5",
     "file-saver": "^2.0.5",
     "next": "14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-resize-detector": "^11.0.1"
+    "react-resize-detector": "^11.0.1",
+    "webgl-plot": "^0.7.1"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
