@@ -9,6 +9,7 @@ export default function useGameLogic(
 ) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
+  const notesBigYetDone = useRef<Note[]>([]); // 通常判定がおわってbig判定がまだのNote
 
   const [judgeCount, setJudgeCount] = useState<number[]>([0, 0, 0, 0]);
   const notesTotal = notesAll.length;
@@ -20,13 +21,17 @@ export default function useGameLogic(
     notesTotal < bonusMax
       ? (notesTotal * (notesTotal + 1)) / 2
       : (bonusMax * (bonusMax + 1)) / 2 + bonusMax * (notesTotal - bonusMax);
+  const [bigCount, setBigCount] = useState<number>(0);
+  const [bigTotal, setBigTotal] = useState<number>(0);
   // const score =
   //   ((judgeScore + bonusScore) / (notesTotal + bonusTotal || 1)) * 100;
   const baseScoreRate = 70;
   const chainScoreRate = 30;
+  const bigScoreRate = 20;
   const baseScore = (judgeScore / (notesTotal || 1)) * baseScoreRate;
   const chainScore = (bonus / (bonusTotal || 1)) * chainScoreRate;
-  const score = baseScore + chainScore;
+  const bigScore = (bigCount / (bigTotal || 1)) * bigScoreRate;
+  const score = baseScore + chainScore + bigScore;
 
   const end = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
 
@@ -37,64 +42,83 @@ export default function useGameLogic(
     const notesCopy = notes.map((n) => ({ ...n }));
     setNotesAll(notesCopy.slice());
     notesYetDone.current = notesCopy;
+    notesBigYetDone.current = [];
     setJudgeCount([0, 0, 0, 0]);
     setChain(0);
     setBonus(0);
+    setBigCount(0);
+    setBigTotal(notesCopy.filter((n) => n.big).length);
   }, []);
 
   // Noteに判定を保存し、scoreとchainを更新
   const judge = useCallback(
     (n: Note, now: number, j: number) => {
-      // j = 1 ~ 4
-      if (j <= 3) {
-        n.hitPos = displayNote(n, now)?.pos; // 位置を固定
-      }
-      n.done = j;
-      if (j <= 2) {
-        const thisChain = chain + 1;
-        n.chain = thisChain;
-        n.chainBonus =
-          1 +
-          ((Math.min(thisChain, bonusMax) / bonusTotal) * chainScoreRate) /
-            ((1 / notesTotal) * baseScoreRate);
-        if (j === 1) {
-          setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
-        } else {
-          n.chainBonus *= okScore;
-          setBonus((bonus) => bonus + Math.min(thisChain, bonusMax) * okScore);
+      if (n.big && n.done > 0) {
+        n.bigDone = true;
+        if (j <= 2) {
+          setBigCount((big) => big + 1);
+          if (n.chainBonus !== undefined) {
+            n.chainBonus +=
+              ((1 / (bigTotal || 1)) * bigScoreRate) /
+              ((1 / notesTotal) * baseScoreRate);
+          }
         }
-        setChain((chain) => chain + 1);
       } else {
-        setChain(0);
+        // j = 1 ~ 4
+        if (j <= 3) {
+          n.hitPos = displayNote(n, now)?.pos; // 位置を固定
+        }
+        n.done = j;
+        if (j <= 2) {
+          const thisChain = chain + 1;
+          n.chain = thisChain;
+          n.chainBonus =
+            1 +
+            ((Math.min(thisChain, bonusMax) / bonusTotal) * chainScoreRate) /
+              ((1 / notesTotal) * baseScoreRate);
+          if (j === 1) {
+            setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
+          } else {
+            n.chainBonus *= okScore;
+            setBonus(
+              (bonus) => bonus + Math.min(thisChain, bonusMax) * okScore
+            );
+          }
+          setChain((chain) => chain + 1);
+        } else {
+          setChain(0);
+        }
+        setJudgeCount((judgeCount) => {
+          judgeCount = judgeCount.slice();
+          judgeCount[j - 1]++;
+          return judgeCount;
+        });
       }
-      setJudgeCount((judgeCount) => {
-        judgeCount = judgeCount.slice();
-        judgeCount[j - 1]++;
-        return judgeCount;
-      });
     },
-    [chain, bonusTotal, notesTotal]
+    [chain, bonusTotal, notesTotal, bigTotal]
   );
   // キーを押したときの判定
   const hit = () => {
     const now = getCurrentTimeSec();
+    let candidate: Note | null = null;
+    let candidateJudge: number = 0;
     while (now !== undefined && notesYetDone.current.length >= 1) {
       const n = notesYetDone.current[0];
       const late = now - n.hitTimeSec;
       if (Math.abs(late) <= 0.04) {
         console.log(`Good (${late} s)`);
-        judge(n, now, 1);
-        notesYetDone.current.shift();
+        candidate = n;
+        candidateJudge = 1;
         break;
       } else if (Math.abs(late) <= 0.08) {
         console.log(`OK (${late} s)`);
-        judge(n, now, 2);
-        notesYetDone.current.shift();
+        candidate = n;
+        candidateJudge = 2;
         break;
       } else if (late <= 0.12 && late >= -0.25) {
         console.log(`Bad (${late} s)`);
-        judge(n, now, 3);
-        notesYetDone.current.shift();
+        candidate = n;
+        candidateJudge = 3;
         break;
       } else if (late > 0.12) {
         // miss
@@ -107,6 +131,52 @@ export default function useGameLogic(
         break;
       }
     }
+    let candidateBig: Note | null = null;
+    let candidateJudgeBig: number = 0;
+    while (now !== undefined && notesBigYetDone.current.length >= 1) {
+      const n = notesBigYetDone.current[0];
+      const late = now - n.hitTimeSec;
+      if (Math.abs(late) <= 0.04) {
+        console.log(`Big Good (${late} s)`);
+        candidateBig = n;
+        candidateJudgeBig = 1;
+        break;
+      } else if (Math.abs(late) <= 0.08) {
+        console.log(`Big OK (${late} s)`);
+        candidateBig = n;
+        candidateJudgeBig = 2;
+        break;
+      } else if (late <= 0.12 && late >= -0.25) {
+        console.log(`Big Bad (${late} s)`);
+        candidateBig = n;
+        candidateJudgeBig = 3;
+        break;
+      } else if (late > 0.12) {
+        // miss
+        console.log("Big miss in hit()");
+        judge(n, now, 4);
+        notesBigYetDone.current.shift();
+        continue;
+      } else {
+        // not yet
+        break;
+      }
+    }
+    // candidateJudgeとcandidateJudgeBigのうち近い方を判定する
+    if (
+      now &&
+      candidate !== null &&
+      (candidateBig === null || candidateJudge <= candidateJudgeBig)
+    ) {
+      judge(candidate, now, candidateJudge);
+      notesYetDone.current.shift();
+      if (candidate.big) {
+        notesBigYetDone.current.push(candidate);
+      }
+    } else if (now && candidateBig !== null) {
+      judge(candidateBig, now, candidateJudgeBig);
+      notesBigYetDone.current.shift();
+    }
   };
   // 0.1s以上過ぎたものをmiss判定にする
   useEffect(() => {
@@ -114,6 +184,7 @@ export default function useGameLogic(
     const removeOneNote = () => {
       timer = null;
       const now = getCurrentTimeSec();
+      let nextMissTime: number | null = null;
       while (now !== undefined && notesYetDone.current.length >= 1) {
         const n = notesYetDone.current[0];
         const late = now - n.hitTimeSec;
@@ -126,11 +197,36 @@ export default function useGameLogic(
           console.log("auto");
           judge(n, now, 1);
           notesYetDone.current.shift();
+          if (n.big) {
+            notesBigYetDone.current.push(n);
+          }
           continue;
         } else {
-          timer = setTimeout(removeOneNote, -Math.ceil(late * 1000));
+          nextMissTime = late;
           break;
         }
+      }
+      while (now !== undefined && notesBigYetDone.current.length >= 1) {
+        const n = notesBigYetDone.current[0];
+        const late = now - n.hitTimeSec;
+        if (late > 0.12) {
+          console.log("Big miss in interval");
+          judge(n, now, 4);
+          notesBigYetDone.current.shift();
+          continue;
+        } else if (auto && late >= 0) {
+          console.log("auto");
+          judge(n, now, 1);
+          notesBigYetDone.current.shift();
+          continue;
+        } else {
+          nextMissTime =
+            nextMissTime !== null && nextMissTime < late ? nextMissTime : late;
+          break;
+        }
+      }
+      if (nextMissTime !== null) {
+        timer = setTimeout(removeOneNote, -Math.ceil(nextMissTime * 1000));
       }
     };
     removeOneNote();
@@ -144,12 +240,15 @@ export default function useGameLogic(
   return {
     baseScore,
     chainScore,
+    bigScore,
     score,
     chain,
     notesAll,
     resetNotesAll,
     hit,
     judgeCount,
+    bigCount,
+    bigTotal,
     end,
   };
 }

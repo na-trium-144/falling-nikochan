@@ -43,6 +43,7 @@ export interface Pos {
 export interface Note {
   id: number;
   big: boolean;
+  bigDone: boolean;
   hitTimeSec: number;
   appearTimeSec: number;
   hitPos?: Pos;
@@ -68,6 +69,7 @@ export interface DisplayNote {
   id: number;
   pos: Pos;
   done: number;
+  bigDone: boolean;
   chainBonus?: number;
   chain?: number;
 }
@@ -195,6 +197,7 @@ export function loadChart(chart: Chart): ChartSeqData {
       hitTimeSec,
       appearTimeSec,
       done: 0,
+      bigDone: false,
       display,
     });
   }
@@ -212,6 +215,7 @@ export function displayNote(note: Note, timeSec: number): DisplayNote | null {
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
       done: note.done,
+      bigDone: note.bigDone,
       chain: note.chain,
       chainBonus: note.chainBonus,
     };
@@ -234,6 +238,7 @@ export function displayNote(note: Note, timeSec: number): DisplayNote | null {
         y: b[0] + b[1] * t + b[2] * t * t,
       },
       done: note.done,
+      bigDone: note.bigDone,
       chain: note.chain,
       chainBonus: note.chainBonus,
     };

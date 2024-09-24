@@ -93,12 +93,15 @@ export default function Home(context: { params: Params }) {
   const {
     baseScore,
     chainScore,
+    bigScore,
     score,
     chain,
     notesAll,
     resetNotesAll,
     hit,
     judgeCount,
+    bigCount,
+    bigTotal,
     end,
   } = useGameLogic(getCurrentTimeSec, auto);
 
@@ -290,6 +293,8 @@ export default function Home(context: { params: Params }) {
               <StatusBox
                 className="grow-0 shrink-0 m-3 self-end"
                 judgeCount={judgeCount}
+                bigCount={bigCount}
+                bigTotal={bigTotal}
                 notesTotal={notesAll.length}
                 isMobile={false}
                 isTouch={isTouch}
@@ -318,6 +323,7 @@ export default function Home(context: { params: Params }) {
             <Result
               baseScore={baseScore}
               chainScore={chainScore}
+              bigScore={bigScore}
               score={score}
               start={start}
               exit={exit}
@@ -375,6 +381,7 @@ export default function Home(context: { params: Params }) {
           <StatusBox
             className="absolute inset-4 "
             judgeCount={judgeCount}
+            bigCount={bigCount}
             notesTotal={notesAll.length}
             isMobile={true}
             isTouch={true /* isTouch がfalseの場合の表示は調整してない */}

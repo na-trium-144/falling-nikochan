@@ -7,6 +7,7 @@ import {
   noteSize,
   targetY,
   displayNote,
+  bigScale,
 } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -105,11 +106,18 @@ export default function FallingWindow(props: Props) {
                 }
                 style={{
                   /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-                  width: noteSize * boxSize,
-                  height: noteSize * boxSize,
-                  left: (d.pos.x - noteSize / 2) * boxSize + marginX,
+                  width: noteSize * boxSize * bigScale(notes[d.id].big),
+                  height: noteSize * boxSize * bigScale(notes[d.id].big),
+                  left:
+                    (d.pos.x - (noteSize * bigScale(notes[d.id].big)) / 2) *
+                      boxSize +
+                    marginX,
                   bottom:
-                    (d.pos.y + targetY - noteSize / 2) * boxSize + marginY,
+                    (d.pos.y +
+                      targetY -
+                      (noteSize * bigScale(notes[d.id].big)) / 2) *
+                      boxSize +
+                    marginY,
                 }}
               >
                 <img
@@ -121,7 +129,7 @@ export default function FallingWindow(props: Props) {
                   <span
                     className={
                       "absolute w-16 " +
-                      (d.chain >= 100 ? "text-orange-500 " : "")
+                      (d.chain >= 100 || d.bigDone ? "text-orange-500 " : "")
                     }
                     style={{ bottom: "100%", left: "100%" }}
                   >

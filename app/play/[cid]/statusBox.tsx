@@ -4,6 +4,8 @@ import { Key } from "@/common/key";
 interface Props {
   className?: string;
   judgeCount: number[];
+  bigCount: number;
+  bigTotal: number;
   notesTotal: number;
   isMobile: boolean;
   isTouch: boolean;
@@ -12,9 +14,7 @@ export default function StatusBox(props: Props) {
   return (
     <Box
       className={
-        props.className +
-        (props.isMobile ? " " : " w-52 ") +
-        "p-3 text-sm z-10"
+        props.className + (props.isMobile ? " " : " w-52 ") + "p-3 text-sm z-10"
       }
     >
       {props.isTouch ? (
@@ -35,13 +35,13 @@ export default function StatusBox(props: Props) {
           </p>
         ))
       )}
-      <div className={props.isMobile ? "flex flex-row items-start" : ""}>
+      <div className={props.isMobile ? "flex flex-row items-start justify-between " : ""}>
         {["Good", "OK", "Bad", "Miss"].map((name, ji) => (
           <p
             key={ji}
             className={
               props.isMobile
-                ? "flex-1 flex flex-col mr-4 "
+                ? "flex-1 flex flex-col mr-2 "
                 : "flex flex-row items-baseline mr-12"
             }
           >
@@ -49,6 +49,24 @@ export default function StatusBox(props: Props) {
             <span className="text-2xl text-right">{props.judgeCount[ji]}</span>
           </p>
         ))}
+        <p
+          className={
+            props.isMobile
+              ? "flex-1 flex flex-col mr-2 "
+              : "flex flex-row items-baseline "
+          }
+        >
+          <span className={props.isMobile ? "h-3 " : "flex-1"}>
+            {props.isMobile ? "Big" : "Big Notes"}
+          </span>
+          <span className="text-2xl text-right">{props.bigCount}</span>
+          {!props.isMobile && (
+            <span className="w-12 pl-1 flex flex-row items-baseline">
+              <span className="flex-1">/</span>
+              <span>{props.bigTotal}</span>
+            </span>
+          )}
+        </p>
         <p
           className={
             props.isMobile
@@ -65,7 +83,7 @@ export default function StatusBox(props: Props) {
               <span className="flex-1">/</span>
               <span>{props.notesTotal}</span>
             </span>
-          )}{" "}
+          )}
         </p>
         {props.isMobile && (
           <span className="w-12 pl-1 self-end flex flex-row items-baseline">
