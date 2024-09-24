@@ -4,7 +4,7 @@ import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
 import { useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
-import { Chart, hashPasswd } from "@/chartFormat/chart";
+import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 
 interface Props {
@@ -92,6 +92,7 @@ interface Props2 {
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
+  const [uploadMsg, setUploadMsg] = useState<string>("");
   const [auto, setAuto] = useState<boolean>(false);
   useEffect(() => {
     setErrorMsg("");
@@ -145,6 +146,30 @@ export function MetaTab(props: Props2) {
           }}
         />
         <span className="ml-1">{saveMsg}</span>
+      </p>
+      <p>
+        <label htmlFor="upload-bin">ローカルのファイルをアップロード:</label>
+        <input
+          type="file"
+          id="upload-bin"
+          name="upload-bin"
+          onChange={async (e) => {
+            if (e.target.files && e.target.files.length >= 1) {
+              const f = e.target.files[0];
+              try {
+                const newChart = msgpack.deserialize(await f.arrayBuffer());
+                validateChart(newChart);
+                if(confirm("このファイルで譜面データを上書きしますか?")){
+                  props.setChart(newChart);
+                }
+              } catch (e) {
+                setUploadMsg(String(e));
+              }
+              e.target.files = null;
+            }
+          }}
+        />
+        <span className="ml-1">{uploadMsg}</span>
       </p>
       <p className="mt-2">
         <a
