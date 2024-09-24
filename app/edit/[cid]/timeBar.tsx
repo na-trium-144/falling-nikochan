@@ -22,6 +22,7 @@ interface Props {
   notesAll: Note[];
   snapDivider: number;
   ytId: string;
+  timeBarPxPerSec: number;
 }
 export default function TimeBar(props: Props) {
   const {
@@ -31,14 +32,27 @@ export default function TimeBar(props: Props) {
     notesAll,
     snapDivider,
     ytId,
+    timeBarPxPerSec,
   } = props;
 
   const [sampledWave, setSampledWave] = useState<number[]>();
+  const [waveLoading, setWaveLoading] = useState<boolean>(false);
+  const [waveFetchErrorStatus, setWaveFetchErrorStatus] = useState<number>();
+  const [waveFetchErrorMsg, setWaveFetchErrorMsg] = useState<string>();
   useEffect(() => {
     void (async () => {
+      setWaveLoading(true);
       const res = await fetch(`/api/wave/${ytId}`, { cache: "no-store" });
+      setWaveLoading(false);
       if (res.ok) {
         setSampledWave(msgpack.deserialize(await res.arrayBuffer()));
+      } else {
+        setWaveFetchErrorStatus(res.status);
+        try {
+          setWaveFetchErrorMsg((await res.json()).message);
+        } catch (e) {
+          setWaveFetchErrorMsg(String(e));
+        }
       }
     })();
   }, [ytId]);
@@ -49,8 +63,19 @@ export default function TimeBar(props: Props) {
   // timebar左端の時刻
   const [timeBarBeginSec, setTimeBarBeginSec] = useState<number>(-1);
   const [timeBarBeginStep, setTimeBarBeginStep] = useState<Step>(stepZero());
+  // 現在のカーソル位置中心に拡大縮小
+  const timeBarPxPerSecPrev = useRef<number>(timeBarPxPerSec);
+  useEffect(() => {
+    if (timeBarPxPerSecPrev.current !== timeBarPxPerSec) {
+      setTimeBarBeginSec(
+        currentTimeSecWithoutOffset -
+          (currentTimeSecWithoutOffset - timeBarBeginSec) /
+            (timeBarPxPerSec / timeBarPxPerSecPrev.current)
+      );
+      timeBarPxPerSecPrev.current = timeBarPxPerSec;
+    }
+  }, [timeBarPxPerSec, currentTimeSecWithoutOffset, timeBarBeginSec]);
 
-  const timeBarPxPerSec = 300;
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
     (timeSec - timeBarBeginSec) * timeBarPxPerSec;
@@ -97,6 +122,7 @@ export default function TimeBar(props: Props) {
     timeBarWidth,
     chart,
     snapDivider,
+    timeBarPxPerSec,
   ]);
 
   // timebarに表示するstep目盛りのリスト
@@ -155,9 +181,14 @@ export default function TimeBar(props: Props) {
             ((i / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
           const t2 =
             timeBarBeginSec +
-            (((i+1) / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
+            (((i + 1) / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
 
-          const y = Math.max(...sampledWave.slice(Math.floor(t1 * 1000), Math.floor(t2 * 1000)));
+          let y: number = 0;
+          if (t1 >= 0 && t2 >= 0) {
+            y = Math.max(
+              ...sampledWave.slice(Math.floor(t1 * 1000), Math.floor(t2 * 1000))
+            );
+          }
           line.setY(i, y);
           maxY = Math.max(maxY, y);
         }
@@ -180,6 +211,12 @@ export default function TimeBar(props: Props) {
       className={"h-6 bg-gray-200 relative mt-12 mb-10 overflow-visible"}
       ref={timeBarRef}
     >
+      {waveLoading && <span className="absolute loader" />}
+      {waveFetchErrorStatus && (
+        <span className="absolute">
+          {waveFetchErrorStatus}: {waveFetchErrorMsg}
+        </span>
+      )}
       <canvas className="absolute " ref={canvasMain} />
       {/* 秒数目盛り */}
       {Array.from(new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))).map(

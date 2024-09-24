@@ -98,6 +98,7 @@ export default function Page(context: { params: Params }) {
   const [currentStep, setCurrentStep] = useState<Step>(stepZero());
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
+  const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
 
   // offsetを引いた後の時刻
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
@@ -417,8 +418,9 @@ export default function Page(context: { params: Params }) {
             notesAll={notesAll}
             snapDivider={snapDivider}
             ytId={chart.ytId}
+            timeBarPxPerSec={timeBarPxPerSec}
           />
-          <p>
+          <p className="flex flex-row items-baseline">
             <span>Step =</span>
             <span className="ml-2">1</span>
             <span className="ml-1">/</span>
@@ -431,6 +433,10 @@ export default function Page(context: { params: Params }) {
                 !isNaN(Number(v)) && String(Math.floor(Number(v) / 4) * 4) === v
               }
             />
+            <div className="flex-1" />
+            <span>Zoom</span>
+            <Button text="-" onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)} />
+            <Button text="+" onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)} />
           </p>
           <div className="flex flex-row ml-3 mt-3">
             {["Meta", "Timing", "Notes"].map((tabName, i) =>
