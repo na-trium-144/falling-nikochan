@@ -12,7 +12,8 @@ interface Props {
 }
 export function IndexMain(props: Props) {
   const { isMobile, scaledSize } = useDisplayMode();
-  const tabTitles = ["Falling Nikochan とは?", "プレイする", "譜面作成"];
+  const tabTitles = ["Falling Nikochan とは？", "プレイする", "譜面作成"];
+  const tabURLs = ["/main/about/1", "/main/play", "/main/edit"];
 
   return (
     <main className="flex flex-col" style={{ ...scaledSize }}>
@@ -40,7 +41,7 @@ export function IndexMain(props: Props) {
                       ? "rounded-l-lg py-3 pl-2 pr-2"
                       : "rounded-lg p-3")
                   }
-                  href={["/main/about", "/main/play", "/main/edit"][i]}
+                  href={tabURLs[i]}
                 >
                   {tabName}
                 </Link>
@@ -50,7 +51,7 @@ export function IndexMain(props: Props) {
         )}
         {props.tab !== undefined && (
           <Box
-            className={"p-6 " + (isMobile ? "" : "shrink")}
+            className={"flex flex-col p-6 " + (isMobile ? "w-full" : "shrink")}
             style={{ flexBasis: isMobile ? undefined : 600 }}
           >
             {isMobile && (
