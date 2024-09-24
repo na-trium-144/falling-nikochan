@@ -21,17 +21,13 @@ export function IndexMain(props: Props) {
           <div className="text-4xl">Falling Nikochan</div>
         </div>
       )}
-      <div
-        className={
-          "flex flex-1 flex-row justify-center " + (isMobile ? "p-6 " : "p-3 ")
-        }
-      >
+      <div className="flex flex-1 flex-row justify-center p-6 ">
         {!(isMobile && props.tab !== undefined) && (
           <div className="flex flex-col mt-3 justify-center">
             {tabTitles.map((tabName, i) =>
               i === props.tab ? (
                 <Link key={i} href="/">
-                  <Box className="text-center rounded-r-none py-3 pl-2 pr-1">
+                  <Box className="text-center rounded-r-none py-3 pl-2 pr-2">
                     {tabName}
                   </Box>
                 </Link>
@@ -41,7 +37,7 @@ export function IndexMain(props: Props) {
                   className={
                     " text-center hover:bg-sky-200 " +
                     (props.tab !== undefined
-                      ? "rounded-l-lg py-3 pl-2 pr-1"
+                      ? "rounded-l-lg py-3 pl-2 pr-2"
                       : "rounded-lg p-3")
                   }
                   href={["/main/about", "/main/play", "/main/edit"][i]}
@@ -53,7 +49,10 @@ export function IndexMain(props: Props) {
           </div>
         )}
         {props.tab !== undefined && (
-          <Box className={"flex-1 " + (isMobile ? "p-6 " : "p-3 ")}>
+          <Box
+            className={"p-6 " + (isMobile ? "" : "shrink")}
+            style={{ flexBasis: isMobile ? undefined : 600 }}
+          >
             {isMobile && (
               <BackButton href="/">{tabTitles[props.tab]}</BackButton>
             )}
