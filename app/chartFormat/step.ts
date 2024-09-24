@@ -62,5 +62,8 @@ export function stepAdd(s1: Step, s2: Step) {
       sa.denominator /= i;
     }
   }
+  if (sa.numerator === 0) {
+    sa.denominator = 4;
+  }
   return sa;
 }
