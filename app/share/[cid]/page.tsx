@@ -66,7 +66,7 @@ export default function ShareChart(context: { params: Params }) {
           <div className="basis-2/3">
             <div className="mb-2">
               <Link
-                href="/"
+                href="/main/play"
                 className="mr-2 p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
               >
                 ←

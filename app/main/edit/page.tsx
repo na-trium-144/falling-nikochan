@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MetaEdit } from "./edit/[cid]/metaTab";
-import Button from "./common/button";
+import { MetaEdit } from "@/edit/[cid]/metaTab";
+import Button from "@/common/button";
 import { useRouter } from "next/navigation";
 import msgpack from "@ygoe/msgpack";
 import Link from "next/link";
-import { getRecent, removeRecent } from "./common/recent";
-import { Chart, ChartBrief, emptyChart } from "./chartFormat/chart";
+import { getRecent, removeRecent } from "@/common/recent";
+import { Chart, ChartBrief, emptyChart } from "@/chartFormat/chart";
+import { IndexMain } from "../main";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -43,7 +44,7 @@ export default function EditTab() {
   }, []);
 
   return (
-    <>
+    <IndexMain tab={2}>
       <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
       <ul className="list-disc list-inside">
         {recentCId.map((cid) => (
@@ -80,6 +81,6 @@ export default function EditTab() {
         />
         <span className="ml-1">{errorMsg}</span>
       </p>
-    </>
+    </IndexMain>
   );
 }

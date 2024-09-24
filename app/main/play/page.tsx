@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChartBrief } from "./chartFormat/chart";
+import { ChartBrief } from "@/chartFormat/chart";
 import { useRouter } from "next/navigation";
-import { getRecent, removeRecent } from "./common/recent";
+import { getRecent, removeRecent } from "@/common/recent";
 import Link from "next/link";
-import Input from "./common/input";
+import Input from "@/common/input";
+import { IndexMain } from "../main";
 
 export default function PlayTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -52,8 +53,9 @@ export default function PlayTab() {
       }
     }
   };
+
   return (
-    <>
+    <IndexMain tab={1}>
       <h3>
         <span className="text-xl font-bold font-title mb-2">譜面IDを入力:</span>
         <Input
@@ -80,6 +82,6 @@ export default function PlayTab() {
           </li>
         ))}
       </ul>
-    </>
+    </IndexMain>
   );
 }
