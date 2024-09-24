@@ -73,7 +73,7 @@ export default function useGameLogic(
         return judgeCount;
       });
     },
-    [chain]
+    [chain, bonusTotal, notesTotal]
   );
   // キーを押したときの判定
   const hit = () => {

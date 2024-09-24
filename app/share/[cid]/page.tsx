@@ -1,8 +1,10 @@
 "use client";
 
 import { ChartBrief } from "@/chartFormat/chart";
+import { getBestScore } from "@/common/bestScore";
 import { Box, Error } from "@/common/box";
 import Button from "@/common/button";
+import { rankStr } from "@/common/rank";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useDisplayMode } from "@/scale";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
@@ -14,8 +16,10 @@ export default function ShareChart(context: { params: Params }) {
   const [brief, setBrief] = useState<ChartBrief>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [bestScoreState, setBestScoreState] = useState<number>(0);
 
   useEffect(() => {
+    setBestScoreState(getBestScore(cid));
     void (async () => {
       const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
       if (res.ok) {
@@ -33,7 +37,7 @@ export default function ShareChart(context: { params: Params }) {
         }
       }
     })();
-  }, []);
+  }, [cid]);
 
   const { scaledSize, isMobile } = useDisplayMode();
 
@@ -73,7 +77,7 @@ export default function ShareChart(context: { params: Params }) {
             <p className="font-title text-lg">{brief?.composer}</p>
           </div>
         </div>
-        <p className="my-2">
+        <p className="mt-2">
           共有用リンク:
           <Link
             className="mx-2 text-blue-600 hover:underline"
@@ -93,6 +97,21 @@ export default function ShareChart(context: { params: Params }) {
           )}
         </p>
         <p>
+          <span>Best Score:</span>
+          <span className="inline-block text-xl w-10 text-right">
+            {Math.floor(bestScoreState)}
+          </span>
+          <span>.</span>
+          <span className="inline-block w-6">
+            {(Math.floor(bestScoreState * 100) % 100)
+              .toString()
+              .padStart(2, "0")}
+          </span>
+          {bestScoreState > 0 && (
+            <span className="text-xl">({rankStr(bestScoreState)})</span>
+          )}
+        </p>
+        <p className="mt-2">
           <input
             className="ml-1 mr-1"
             type="checkbox"

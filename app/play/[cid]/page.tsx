@@ -19,6 +19,7 @@ import { useDisplayMode } from "@/scale";
 import { addRecent } from "@/common/recent";
 import { useRouter, useSearchParams } from "next/navigation";
 import Result from "./result";
+import { getBestScore, setBestScore } from "@/common/bestScore";
 
 export default function Home(context: { params: Params }) {
   const cid = context.params.cid;
@@ -69,6 +70,14 @@ export default function Home(context: { params: Params }) {
 
   const ref = useRef<HTMLDivElement>(null!);
   const { isMobile, isTouch, scaledSize } = useDisplayMode();
+
+  const [bestScoreState, setBestScoreState] = useState<number>(0);
+  const reloadBestScore = useCallback(() => {
+    if (!auto) {
+      setBestScoreState(getBestScore(cid));
+    }
+  }, [cid, auto]);
+  useEffect(reloadBestScore, [reloadBestScore]);
 
   // start後true
   const [playing, setPlaying] = useState<boolean>(false);
@@ -146,6 +155,9 @@ export default function Home(context: { params: Params }) {
   const [showResult, setShowResult] = useState<boolean>(false);
   useEffect(() => {
     if (chartSeq && playedOnce && end) {
+      if (!auto && score > bestScoreState) {
+        setBestScore(cid, score);
+      }
       const t = setTimeout(() => {
         setShowResult(true);
         stop();
@@ -154,7 +166,7 @@ export default function Home(context: { params: Params }) {
     } else {
       setShowResult(false);
     }
-  }, [playedOnce, end, chartSeq]);
+  }, [playedOnce, end, chartSeq, score, bestScoreState, cid, auto]);
 
   const onReady = useCallback(() => {
     console.log("ready");
@@ -169,11 +181,12 @@ export default function Home(context: { params: Params }) {
       setCurrentBpmIndex(0);
       setPlaying(true);
       setPlayedOnce(true);
+      reloadBestScore();
     }
     if (ref.current) {
       ref.current.focus();
     }
-  }, [chartSeq, ref, resetNotesAll]);
+  }, [chartSeq, ref, resetNotesAll, reloadBestScore]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (playing) {
@@ -186,13 +199,13 @@ export default function Home(context: { params: Params }) {
     }
   }, [playing, ref]);
   const start = () => {
-    if(ytPlayer.current?.playVideo){
+    if (ytPlayer.current?.playVideo) {
       // なぜか playVideo is not a function な場合がある
       ytPlayer.current?.playVideo();
     }
   };
   const stop = () => {
-    if(ytPlayer.current?.pauseVideo){
+    if (ytPlayer.current?.pauseVideo) {
       ytPlayer.current?.pauseVideo();
     }
   };
@@ -300,7 +313,7 @@ export default function Home(context: { params: Params }) {
           <ScoreDisp
             className="absolute top-0 right-3 "
             score={score}
-            best={0}
+            best={bestScoreState}
             auto={auto}
           />
           <ChainDisp className="absolute top-0 left-3 " chain={chain} />

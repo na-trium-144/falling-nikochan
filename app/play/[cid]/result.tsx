@@ -3,6 +3,7 @@
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
 import { Key } from "@/common/key";
+import { rankStr } from "@/common/rank";
 import { ReactNode, useEffect, useState } from "react";
 
 interface Props {
@@ -13,14 +14,6 @@ interface Props {
   exit: () => void;
 }
 export default function Result(props: Props) {
-  const ranks = ["S+", "S", "A+", "A", "B+", "B", "C"];
-  let rank: string = "C";
-  for (let i = 0; i < ranks.length; i++) {
-    if (props.score >= 120 - i * 10 - 0.005) {
-      rank = ranks[i];
-      break;
-    }
-  }
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
     const t1 = setTimeout(() => setShowing(1), 100);
@@ -68,7 +61,7 @@ export default function Result(props: Props) {
         </span>
       </ResultRow>
       <ResultRow className="mt-1 mb-3" visible={showing >= 4} name="Rank">
-        <span className="text-4xl">{rank}</span>
+        <span className="text-4xl">{rankStr(props.score)}</span>
       </ResultRow>
       <div className="text-center">
         <Button
