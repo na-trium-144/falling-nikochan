@@ -35,6 +35,7 @@ import { addRecent } from "@/common/recent";
 import { Chart } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { useDisplayMode } from "@/scale";
+import BackButton from "@/common/backButton";
 
 export default function Page(context: { params: Params }) {
   const cid = context.params.cid;
@@ -43,7 +44,7 @@ export default function Page(context: { params: Params }) {
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
     void (async () => {
-      const res = await fetch(`/api/chartFile/${cid}`, {cache: "no-store"});
+      const res = await fetch(`/api/chartFile/${cid}`, { cache: "no-store" });
       if (res.ok) {
         try {
           const chart = msgpack.deserialize(await res.arrayBuffer());
@@ -69,7 +70,7 @@ export default function Page(context: { params: Params }) {
     })();
   }, [cid]);
 
-  const { scaledSize } = useDisplayMode();
+  const { scaledSize, isMobile } = useDisplayMode();
 
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
@@ -281,7 +282,7 @@ export default function Page(context: { params: Params }) {
 
   return (
     <main
-      className="overflow-x-hidden overflow-y-hidden"
+      className={"overflow-x-hidden " + (isMobile ? "" : "overflow-y-hidden ")}
       style={{ ...scaledSize, touchAction: "none" }}
       tabIndex={0}
       onKeyDown={(e) => {
@@ -308,13 +309,21 @@ export default function Page(context: { params: Params }) {
         }
       }}
     >
-      <div className="w-full h-full flex items-stretch flex-row">
+      <div
+        className={
+          "w-full h-full " +
+          (isMobile ? "h-5/6 " : "flex items-stretch flex-row ")
+        }
+      >
         <div
           className={
             "basis-4/12 " +
             "grow-0 shrink-0 h-full flex flex-col items-stretch p-3"
           }
         >
+          <BackButton className="" href="/main/edit">
+            Edit
+          </BackButton>
           <div
             className={
               "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex " + "flex-col"
@@ -331,7 +340,7 @@ export default function Page(context: { params: Params }) {
               onStop={onStop}
             />
           </div>
-          <div className={"relative flex-1 basis-8/12 "}>
+          <div className="relative flex-1 basis-8/12 ">
             <FallingWindow
               className="absolute inset-0"
               notes={notesAll}
@@ -342,7 +351,12 @@ export default function Page(context: { params: Params }) {
             />
           </div>
         </div>
-        <div className="flex-1 p-3 flex flex-col items-stretch">
+        <div
+          className={
+            "p-3 flex flex-col items-stretch " +
+            (isMobile ? "h-5/6 " : "flex-1 ")
+          }
+        >
           <div>
             <span>Player Control:</span>
             <Button

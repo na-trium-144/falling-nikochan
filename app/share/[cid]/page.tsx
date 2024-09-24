@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartBrief } from "@/chartFormat/chart";
+import BackButton from "@/common/backButton";
 import { getBestScore } from "@/common/bestScore";
 import { Box, Error } from "@/common/box";
 import Button from "@/common/button";
@@ -55,24 +56,17 @@ export default function ShareChart(context: { params: Params }) {
       style={{ ...scaledSize }}
     >
       <Box className="flex flex-col p-6 shrink" style={{ flexBasis: 800 }}>
-        <div className="flex flex-row-reverse">
+        {isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
+        <div className={isMobile ? "basis-3/12" : "flex flex-row-reverse "}>
           <FlexYouTube
-            className={"block basis-1/3 "}
+            className={isMobile ? "my-2 " : "block basis-1/3 "}
             isMobile={isMobile}
             id={brief?.ytId}
             control={true}
             ytPlayer={ytPlayer}
           />
-          <div className="basis-2/3">
-            <div className="mb-2">
-              <Link
-                href="/main/play"
-                className="mr-2 p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
-              >
-                ←
-              </Link>
-              <span className="text-xl">ID: {cid}</span>
-            </div>
+          <div className={isMobile ? "" : "basis-2/3"}>
+            {!isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
             <p className="font-title text-2xl">{brief?.title}</p>
             <p className="font-title text-lg">{brief?.composer}</p>
           </div>
