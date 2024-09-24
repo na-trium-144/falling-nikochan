@@ -264,13 +264,13 @@ export default function Home(context: { params: Params }) {
         >
           <div
             className={
-              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex " +
+              "z-10 grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex " +
               (isMobile ? "mt-3 mx-3 flex-row-reverse " : "my-3 mr-3 flex-col ")
             }
           >
             <FlexYouTube
               className={
-                "block " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "")
+                "z-10 block " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "")
               }
               isMobile={isMobile}
               id={chartBrief?.ytId}
@@ -295,7 +295,7 @@ export default function Home(context: { params: Params }) {
           {!isMobile && (
             <>
               <StatusBox
-                className="grow-0 shrink-0 m-3 self-end"
+                className="z-10 grow-0 shrink-0 m-3 self-end"
                 judgeCount={judgeCount}
                 bigCount={bigCount}
                 bigTotal={bigTotal}
@@ -383,7 +383,7 @@ export default function Home(context: { params: Params }) {
         </div>
         {isMobile && (
           <StatusBox
-            className="absolute inset-4 "
+            className="absolute inset-4 z-10"
             judgeCount={judgeCount}
             bigCount={bigCount}
             bigTotal={bigTotal}

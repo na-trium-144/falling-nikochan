@@ -14,7 +14,7 @@ export default function StatusBox(props: Props) {
   return (
     <Box
       className={
-        props.className + (props.isMobile ? " " : " w-52 ") + "p-3 text-sm z-10"
+        props.className + (props.isMobile ? " " : " w-52 ") + "p-3 text-sm"
       }
     >
       {props.isTouch ? (
