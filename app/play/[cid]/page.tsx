@@ -382,6 +382,7 @@ export default function Home(context: { params: Params }) {
             className="absolute inset-4 "
             judgeCount={judgeCount}
             bigCount={bigCount}
+            bigTotal={bigTotal}
             notesTotal={notesAll.length}
             isMobile={true}
             isTouch={true /* isTouch がfalseの場合の表示は調整してない */}

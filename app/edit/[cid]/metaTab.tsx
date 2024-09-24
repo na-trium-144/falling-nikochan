@@ -63,6 +63,7 @@ interface Props2 {
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
+  const [auto, setAuto] = useState<boolean>(false);
   useEffect(() => {
     setErrorMsg("");
     setSaveMsg("");
@@ -108,6 +109,25 @@ export function MetaTab(props: Props2) {
           }}
         />
         <span className="ml-1">{saveMsg}</span>
+      </p>
+      <p className="mt-2">
+        <a
+          className="hover:text-blue-600 hover:underline"
+          href={`/play/${props.cid}?auto=${auto ? 1 : 0}`}
+          target="_blank"
+        >
+          ゲーム画面へ(新しいタブ)...
+        </a>
+        <input
+          className="ml-2 mr-1"
+          type="checkbox"
+          id="auto"
+          checked={auto}
+          onChange={(v) => setAuto(v.target.checked)}
+        />
+        <label htmlFor="auto">
+          <span>オートプレイ</span>
+        </label>
       </p>
     </>
   );
