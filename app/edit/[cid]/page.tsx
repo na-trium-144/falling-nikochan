@@ -32,32 +32,51 @@ import {
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
-import { Chart } from "@/chartFormat/chart";
+import { Chart, hashPasswd } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { useDisplayMode } from "@/scale";
 import BackButton from "@/common/backButton";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getPasswd, setPasswd } from "@/common/passwdCache";
 
 export default function Page(context: { params: Params }) {
   const cid = context.params.cid;
+
+  // chartのgetやpostに必要なパスワード
+  // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
+  const [editPasswd, setEditPasswd] = useState<string>("");
+  const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
   const [chart, setChart] = useState<Chart>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
-  useEffect(() => {
-    void (async () => {
-      const res = await fetch(`/api/chartFile/${cid}`, { cache: "no-store" });
-      if (res.ok) {
-        try {
-          const chart = msgpack.deserialize(await res.arrayBuffer());
-          // validateはサーバー側でやってる
-          setChart(chart);
-          setErrorStatus(undefined);
-          setErrorMsg(undefined);
-          addRecent("edit", cid);
-        } catch (e) {
-          setChart(undefined);
-          setErrorStatus(undefined);
-          setErrorMsg(String(e));
-        }
+  const fetchChart = useCallback(async () => {
+    setPasswdFailed(false);
+    setLoading(true);
+    const res = await fetch(
+      `/api/chartFile/${cid}?p=${await hashPasswd(getPasswd(cid))}`,
+      { cache: "no-store" }
+    );
+    setLoading(false);
+    if (res.ok) {
+      try {
+        const chart = msgpack.deserialize(await res.arrayBuffer());
+        // validateはサーバー側でやってる
+        setPasswd(cid, chart.editPasswd);
+        setChart(chart);
+        setErrorStatus(undefined);
+        setErrorMsg(undefined);
+        addRecent("edit", cid);
+      } catch (e) {
+        setChart(undefined);
+        setErrorStatus(undefined);
+        setErrorMsg(String(e));
+      }
+    } else {
+      if (res.status === 401) {
+        setPasswdFailed(true);
+        setChart(undefined);
       } else {
         setChart(undefined);
         setErrorStatus(res.status);
@@ -67,8 +86,9 @@ export default function Page(context: { params: Params }) {
           setErrorMsg(String(e));
         }
       }
-    })();
+    }
   }, [cid]);
+  useEffect(() => void fetchChart(), [fetchChart]);
 
   const [hasChange, setHasChange] = useState<boolean>(false);
   const changeChart = (chart: Chart) => {
@@ -198,6 +218,11 @@ export default function Page(context: { params: Params }) {
       changeChart({ ...chart, offset: ofs });
     }
   };
+  const changeWaveOffset = (ofs: number) => {
+    if (chart /*&& offsetValid(ofs)*/) {
+      changeChart({ ...chart, waveOffset: ofs });
+    }
+  };
   const currentBpmIndex =
     chart && findBpmIndexFromStep(chart?.bpmChanges, currentStep);
   const currentBpm =
@@ -305,11 +330,35 @@ export default function Page(context: { params: Params }) {
     ref.current.focus();
   };
 
-  if (errorStatus !== undefined || errorMsg !== undefined) {
-    return <Error status={errorStatus} message={errorMsg} />;
-  }
   if (chart === undefined) {
-    return <Loading />;
+    if (loading) {
+      return <Loading />;
+    }
+    if (errorStatus !== undefined || errorMsg !== undefined) {
+      return <Error status={errorStatus} message={errorMsg} />;
+    }
+    return (
+      <CenterBoxOnlyPage>
+        <BackButton className="" href="/main/edit" reload>
+          Edit
+        </BackButton>
+        <p>編集用パスワードを入力してください。</p>
+        {passwdFailed && <p>パスワードが違います。</p>}
+        <Input
+          actualValue={editPasswd}
+          updateValue={setEditPasswd}
+          left
+          passwd
+        />
+        <Button
+          text="進む"
+          onClick={() => {
+            setPasswd(cid, editPasswd);
+            void fetchChart();
+          }}
+        />
+      </CenterBoxOnlyPage>
+    );
   }
 
   return (
@@ -514,6 +563,8 @@ export default function Page(context: { params: Params }) {
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
+                waveOffset={chart?.waveOffset}
+                setWaveOffset={changeWaveOffset}
                 currentBpm={
                   currentBpmIndex !== undefined ? currentBpm : undefined
                 }

@@ -57,7 +57,10 @@ export function NotFound() {
 export function Loading() {
   return (
     <CenterBoxOnlyPage>
-      <p>Loading...</p>
+      <p>
+        <span className="loader" />
+        Loading...
+      </p>
     </CenterBoxOnlyPage>
   );
 }

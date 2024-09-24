@@ -69,6 +69,12 @@ export default function ShareChart(context: { params: Params }) {
             {!isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
             <p className="font-title text-2xl">{brief?.title}</p>
             <p className="font-title text-lg">{brief?.composer}</p>
+            <p className="text-sm mt-1">
+              <span>Chart by</span>
+              <span className="ml-3 font-title text-lg">
+                {brief?.chartCreator}
+              </span>
+            </p>
           </div>
         </div>
         <p className="mt-2">

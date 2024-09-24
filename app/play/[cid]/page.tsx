@@ -10,7 +10,7 @@ import useGameLogic from "./gameLogic";
 import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
-import { Chart, ChartBrief, sampleChart } from "@/chartFormat/chart";
+import { Chart, ChartBrief } from "@/chartFormat/chart";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import msgpack from "@ygoe/msgpack";
 import { stepSub, stepToFloat } from "@/chartFormat/step";
@@ -283,6 +283,10 @@ export default function Home(context: { params: Params }) {
             <div className="flex-1">
               <p className="font-title text-lg">{chartBrief?.title}</p>
               <p className="font-title text-sm">{chartBrief?.composer}</p>
+            <p className="text-xs">
+              <span>Chart by</span>
+              <span className="ml-2 font-title text-sm">{chartBrief?.chartCreator}</span>
+              </p>
             </div>
           </div>
           <div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>

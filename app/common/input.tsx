@@ -12,6 +12,7 @@ interface Props {
   left?: boolean;
   right?: boolean;
   className?: string;
+  passwd?: boolean;
 }
 export default function Input(props: Props) {
   const [value, setValue] = useState<string>("");
@@ -23,7 +24,7 @@ export default function Input(props: Props) {
   }, [focus, props]);
   return (
     <input
-      type="text"
+      type={props.passwd ? "password" : "text"}
       className={
         "mx-1 px-1 font-main-ui text-base " +
         (!props.left ? "text-right " : "") +

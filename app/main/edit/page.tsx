@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getRecent, removeRecent } from "@/common/recent";
 import { Chart, ChartBrief, emptyChart } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
+import { setPasswd } from "@/common/passwdCache";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -57,7 +58,7 @@ export default function EditTab() {
       </ul>
       <h3 className="text-xl font-bold font-title my-2">新規作成</h3>
       <MetaEdit chart={chart} setChart={setChart} />
-      <p>※ここで入力した情報は後からでも変更できます。</p>
+      <p className="mt-2">※ここで入力した情報は後からでも変更できます。</p>
       <p>
         <Button
           text="新規作成"
@@ -70,6 +71,7 @@ export default function EditTab() {
             const resBody = await res.json();
             if (res.ok) {
               if (typeof resBody.cid === "string") {
+                setPasswd(resBody.cid, chart.editPasswd);
                 router.push(`/edit/${resBody.cid}`);
               } else {
                 setErrorMsg("Invalid response");

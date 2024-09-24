@@ -5,6 +5,8 @@ import { Step, stepCmp, stepZero } from "@/chartFormat/step";
 interface Props {
   offset?: number;
   setOffset: (offset: number) => void;
+  waveOffset?: number;
+  setWaveOffset: (offset: number) => void;
   currentBpm?: number;
   setCurrentBpm: (bpm: number) => void;
   bpmChangeHere: boolean;
@@ -27,6 +29,18 @@ export default function TimingTab(props: Props) {
           isValid={offsetValid}
         />
         <span>s</span>
+      </p>
+      <p className="mb-1">
+        <span>Wave Offset</span>
+        <Input
+          actualValue={props.waveOffset?.toString() || ""}
+          updateValue={(v: string) => props.setWaveOffset(Number(v))}
+          isValid={offsetValid}
+        />
+        <span>s</span>
+        <span className="text-sm">
+          (上部の波形の表示位置のみが調整されます)
+        </span>
       </p>
       <p>
         <span>Current BPM:</span>

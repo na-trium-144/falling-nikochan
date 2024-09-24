@@ -21,6 +21,7 @@ export async function createFileEntry(
       ytId: brief.ytId,
       title: brief.title,
       composer: brief.composer,
+      chartCreator: brief.chartCreator,
     },
   });
 }
@@ -33,6 +34,7 @@ export async function updateFileEntry(cid: string, brief: ChartBrief) {
       ytId: brief.ytId,
       title: brief.title,
       composer: brief.composer,
+      chartCreator: brief.chartCreator,
     },
   });
 }

@@ -4,13 +4,15 @@ import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
 import { useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
-import { Chart } from "@/chartFormat/chart";
+import { Chart, hashPasswd } from "@/chartFormat/chart";
+import { getPasswd, setPasswd } from "@/common/passwdCache";
 
 interface Props {
   chart?: Chart;
   setChart: (chart: Chart) => void;
 }
 export function MetaEdit(props: Props) {
+  const [hidePasswd, setHidePasswd] = useState<boolean>(true);
   return (
     <>
       <p className="flex flex-row">
@@ -49,6 +51,33 @@ export function MetaEdit(props: Props) {
         />
         <span>)</span>
       </p>
+      <p className="flex flex-row">
+        <span className="w-max">譜面作成者(あなたの名前)</span>
+        <Input
+          className="flex-1 font-title"
+          actualValue={props.chart?.chartCreator || ""}
+          updateValue={(v: string) =>
+            props.chart && props.setChart({ ...props.chart, chartCreator: v })
+          }
+          left
+        />
+      </p>
+      <p className="flex flex-row">
+        <span className="w-max">編集用パスワード</span>
+        <Input
+          className="flex-1 font-title"
+          actualValue={props.chart?.editPasswd || ""}
+          updateValue={(v: string) =>
+            props.chart && props.setChart({ ...props.chart, editPasswd: v })
+          }
+          left
+          passwd={hidePasswd}
+        />
+        <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
+      </p>
+      <p className="text-sm">
+        (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
+      </p>
     </>
   );
 }
@@ -71,18 +100,25 @@ export function MetaTab(props: Props2) {
   return (
     <>
       <MetaEdit {...props} />
-      <p>
+      <p className="mt-2">
         <Button
           text="サーバーに保存"
           onClick={async () => {
-            const res = await fetch(`/api/chartFile/${props.cid}`, {
-              method: "POST",
-              body: msgpack.serialize(props.chart),
-              cache: "no-store",
-            });
+            const res = await fetch(
+              `/api/chartFile/${props.cid}?p=${await hashPasswd(
+                getPasswd(props.cid)
+              )}`,
+              {
+                method: "POST",
+                body: msgpack.serialize(props.chart),
+                cache: "no-store",
+              }
+            );
             if (res.ok) {
               props.setHasChange(false);
               setErrorMsg("保存しました！");
+              // 次からは新しいパスワードが必要
+              setPasswd(props.cid, props.chart!.editPasswd);
             } else {
               try {
                 const resBody = await res.json();

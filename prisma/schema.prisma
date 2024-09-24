@@ -17,8 +17,9 @@ model ChartFile {
   fid String @id
   cid String @unique
   ytId String
-  title String
-  composer String
+  title String @default("")
+  composer String @default("")
+  chartCreator String @default("")
 }
 
 model WaveCache {

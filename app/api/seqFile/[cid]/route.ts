@@ -6,8 +6,6 @@ import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
 
-// todo: password
-
 export async function GET(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
   const fileEntry = await getFileEntry(cid);

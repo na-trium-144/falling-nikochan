@@ -3,55 +3,69 @@ import { NextRequest, NextResponse } from "next/server";
 import { getFileEntry, updateFileEntry } from "@/api/dbChartFile";
 import { fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
-import { Chart, validateChart } from "@/chartFormat/chart";
+import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
 
-// todo: password
+// 他のAPIと違って編集用パスワードのチェックが入る
+// クエリパラメータのpで渡す
 
-export async function GET(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
+async function getChart(cid: string, p: string): Promise<{res?: Response, chart?: Chart}> {
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
-    return NextResponse.json(
+    return {res: NextResponse.json(
       { message: "Chart ID Not Found" },
       { status: 404 }
-    );
+    )};
   }
   const fsData = await fsRead(fileEntry.fid);
   if (fsData === null) {
-    return NextResponse.json({ message: "fsRead() failed" }, { status: 500 });
+    return {res: NextResponse.json({ message: "fsRead() failed" }, { status: 500 })};
   }
 
-  let chartBlob: Blob;
+  let chart: Chart;
   try {
-    const chart = msgpack.deserialize(fsData.data);
+    chart = msgpack.deserialize(fsData.data);
     validateChart(chart);
-    chartBlob = new Blob([msgpack.serialize(chart)]);
   } catch (e) {
-    return NextResponse.json(
+    return {res: NextResponse.json(
       { message: "invalid chart data" },
       { status: 500 }
-    );
+    )};
   }
 
-  return new Response(chartBlob);
+  if (p !== (await hashPasswd(chart.editPasswd))) {
+    return {res: new Response(null, { status: 401 })};
+  }
+  return {chart};
+}
+export async function GET(request: NextRequest, context: { params: Params }) {
+  const cid: string = context.params.cid;
+  const passwdHash = new URL(request.url).searchParams.get("p");
+  const {res, chart} = await getChart(cid, passwdHash || "");
+  if(chart){
+    return new Response(new Blob([msgpack.serialize(chart)]));
+  }
+  return res;
 }
 
 export async function POST(request: NextRequest, context: { params: Params }) {
-  let chartBlob: Blob;
-  let chart: Chart;
+  const cid: string = context.params.cid;
+  const passwdHash = new URL(request.url).searchParams.get("p");
+  const {res, chart} = await getChart(cid, passwdHash || "");
+  if(!chart){
+    return res;
+  }
+
+  let newChart: Chart;
   try {
-    chart = msgpack.deserialize(await request.arrayBuffer());
-    validateChart(chart);
-    chartBlob = new Blob([msgpack.serialize(chart)]);
+    newChart = msgpack.deserialize(await request.arrayBuffer());
+    validateChart(newChart);
   } catch (e) {
-    console.error(e)
+    console.error(e);
     return NextResponse.json(
       { message: "invalid chart data" },
       { status: 400 }
     );
   }
-
-  const cid: string = context.params.cid;
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
     return NextResponse.json(
@@ -60,8 +74,8 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     );
   }
 
-  await updateFileEntry(cid, chart);
-  if (!(await fsWrite(fileEntry.fid, chartBlob))) {
+  await updateFileEntry(cid, newChart);
+  if (!(await fsWrite(fileEntry.fid, new Blob([msgpack.serialize(newChart)])))) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
 
@@ -73,6 +87,12 @@ export async function DELETE(
   context: { params: Params }
 ) {
   const cid: string = context.params.cid;
+  const passwdHash = new URL(request.url).searchParams.get("p");
+  const {res, chart} = await getChart(cid, passwdHash || "");
+  if(!chart){
+    return res;
+  }
+
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
     return NextResponse.json(

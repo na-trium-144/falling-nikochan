@@ -178,9 +178,11 @@ export default function TimeBar(props: Props) {
           // 最大numPoints個の点しか描画できない
           const t1 =
             timeBarBeginSec +
+            (chart?.waveOffset || 0) +
             ((i / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
           const t2 =
             timeBarBeginSec +
+            (chart?.waveOffset || 0) +
             (((i + 1) / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
 
           let y: number = 0;
@@ -204,7 +206,7 @@ export default function TimeBar(props: Props) {
         cancelAnimationFrame(id);
       };
     }
-  }, [sampledWave, timeBarBeginSec, timeBarRef, timeBarWidth]);
+  }, [sampledWave, timeBarBeginSec, timeBarRef, timeBarWidth, timeBarPxPerSec, chart]);
 
   return (
     <div
@@ -310,7 +312,8 @@ export default function TimeBar(props: Props) {
                   width: n.big ? 18 : 12,
                   height: n.big ? 18 : 12,
                   top: 12 - (n.big ? 9 : 6),
-                  left: timeBarPos(n.hitTimeSec + chart.offset) - (n.big ? 9 : 6),
+                  left:
+                    timeBarPos(n.hitTimeSec + chart.offset) - (n.big ? 9 : 6),
                 }}
               />
             )

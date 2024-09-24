@@ -1,10 +1,16 @@
-import { BPMChange, NoteCommand, validateBpmChange, validateNoteCommand } from "./command";
+import {
+  BPMChange,
+  NoteCommand,
+  validateBpmChange,
+  validateNoteCommand,
+} from "./command";
 import { Step } from "./step";
 
 export interface ChartBrief {
   ytId: string;
   title: string;
   composer: string;
+  chartCreator: string;
 }
 
 /**
@@ -13,19 +19,23 @@ export interface ChartBrief {
  * bpmChanges: bpm変化の情報
  * offset: step=0に対応する時刻(秒)
  * (offsetの処理はgetCurrentTimeSec()の中に含まれる)
+ * waveOffset: edit画面で波形の表示位置を補正(仮)
  *
  * 時刻は開始からのstep数(60/BPM*step=秒)で管理する。
  * プレイ時に秒単位の時刻に変換
  */
-export interface Chart extends ChartBrief {
+export interface Chart {
   falling: "nikochan"; // magic
   ver: 1;
   notes: NoteCommand[];
   bpmChanges: BPMChange[];
   offset: number;
+  waveOffset: number;
   ytId: string;
   title: string;
   composer: string;
+  chartCreator: string;
+  editPasswd: string;
 }
 
 export function validateChart(chart: Chart) {
@@ -35,10 +45,23 @@ export function validateChart(chart: Chart) {
   chart.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
   chart.bpmChanges.forEach((n) => validateBpmChange(n));
-  if (typeof chart.offset !== "number") throw "chart.offset is invalid";
+  if (typeof chart.offset !== "number") chart.offset = 0;
+  if (typeof chart.waveOffset !== "number") chart.waveOffset = 0;
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
-  if (typeof chart.title !== "string") throw "chart.title is invalid";
-  if (typeof chart.composer !== "string") throw "chart.composer is invalid";
+  if (typeof chart.title !== "string") chart.title = "";
+  if (typeof chart.composer !== "string") chart.composer = "";
+  if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
+  if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
+}
+
+export async function hashPasswd(text: string) {
+  const msgUint8 = new TextEncoder().encode(text); // (utf-8 の) Uint8Array にエンコードする
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // メッセージをハッシュする
+  const hashArray = Array.from(new Uint8Array(hashBuffer)); // バッファーをバイト列に変換する
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join(""); // バイト列を 16 進文字列に変換する
+  return hashHex;
 }
 
 export function emptyChart(): Chart {
@@ -48,84 +71,15 @@ export function emptyChart(): Chart {
     notes: [],
     bpmChanges: [],
     offset: 0,
+    waveOffset: 0,
     ytId: "",
     title: "",
     composer: "",
+    chartCreator: "",
+    editPasswd: "",
   };
 }
 
 function step(f: number, n: number = 0, d: number = 16): Step {
   return { fourth: f, numerator: n, denominator: d / 4 };
 }
-
-export const sampleChart = (): Chart => {
-  let notes: NoteCommand[] = [];
-  const def = {
-    hitX: 1 / 4,
-    hitVX: 1 / 4,
-    hitVY: 1,
-    accelY: 1 / 4,
-    timeScale: [{ stepBefore: step(0), scale: 1 }],
-  };
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      notes.push({ ...def, step: step(16 + j + i * 4) });
-    }
-  }
-  notes.push({ ...def, step: step(28) });
-  notes.push({ ...def, step: step(29) });
-  notes.push({ ...def, step: step(30), hitX: 1 / 4, hitVX: 1 / 4 });
-  notes.push({ ...def, step: step(30, 1, 8), hitX: 2 / 4, hitVX: 1 / 4 });
-  notes.push({ ...def, step: step(31), hitX: 3 / 4, hitVX: 1 / 4 });
-
-  for (let i = 0; i < 4; i++) {
-    notes.push({ ...def, step: step(32 + i * 8) });
-    notes.push({ ...def, step: step(32 + i * 8 + 1, 3, 16) });
-    notes.push({ ...def, step: step(32 + i * 8 + 2, 3, 16) });
-    notes.push({ ...def, step: step(32 + i * 8 + 4) });
-    notes.push({ ...def, step: step(32 + i * 8 + 5, 3, 16) });
-    notes.push({ ...def, step: step(32 + i * 8 + 7) });
-  }
-  for (let j = 0; j < 14; j++) {
-    notes.push({ ...def, step: step(64 + j) });
-  }
-  notes.push({ ...def, step: step(64 + 14) });
-  notes.push({ ...def, step: step(64 + 14, 1, 8), hitX: 2 / 4 });
-  notes.push({ ...def, step: step(64 + 15) });
-  for (let j = 0; j < 14; j++) {
-    notes.push({ ...def, step: step(64 + 16 + j) });
-  }
-  notes.push({ ...def, step: step(64 + 16 + 13, 3, 16) });
-  notes.push({ ...def, step: step(64 + 16 + 14, 1, 8) });
-  notes.push({ ...def, step: step(64 + 16 + 15) });
-
-  for (let i = 0; i < 8; i++) {
-    for (let j = 0; j < 4; j++) {
-      notes.push({ ...def, step: step(96 + i * 8 + j) });
-    }
-    notes.push({ ...def, step: step(96 + i * 8 + 4), hitX: 3 / 4 });
-    notes.push({ ...def, step: step(96 + i * 8 + 5) });
-    notes.push({ ...def, step: step(96 + i * 8 + 6), hitX: 3 / 4 });
-    notes.push({ ...def, step: step(96 + i * 8 + 6, 1, 8), hitX: 2 / 4 });
-    notes.push({ ...def, step: step(96 + i * 8 + 7) });
-  }
-
-  return {
-    falling: "nikochan",
-    ver: 1,
-    ytId: "cNnCLGrXBYs",
-    title: "aaaaaa123タイトル",
-    composer: "author",
-
-    bpmChanges: [
-      {
-        step: { fourth: 0, numerator: 0, denominator: 4 },
-        timeSec: 0,
-        bpm: 127.0,
-      },
-    ],
-    offset: 0,
-    notes,
-  };
-};
-
