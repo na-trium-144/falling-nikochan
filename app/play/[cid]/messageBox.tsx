@@ -15,6 +15,9 @@ export function ReadyMessage(props: MessageProps) {
         <Button text="スタート" keyName="Space" onClick={() => props.start()} />
         <Button text="やめる" keyName="Esc" onClick={() => props.exit()} />
       </p>
+      <p className="mt-2">
+        (スタートされない場合はページを再読み込みしてください)
+      </p>
     </CenterBox>
   );
 }

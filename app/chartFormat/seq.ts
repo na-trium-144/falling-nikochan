@@ -120,7 +120,13 @@ export function findBpmIndexFromSec(
     return 0;
   }
   const targetBpmIndex = bpmChanges.findIndex((ch) => timeSec < ch.timeSec) - 1;
-  return targetBpmIndex < 0 ? bpmChanges.length - 1 : targetBpmIndex;
+  if (targetBpmIndex === -2) {
+    return bpmChanges.length - 1;
+  }
+  if (targetBpmIndex === -1) {
+    return 0;
+  }
+  return targetBpmIndex;
 }
 /**
  * 時刻(秒数)→bpm
@@ -134,7 +140,13 @@ export function findBpmIndexFromStep(
   }
   const targetBpmIndex =
     bpmChanges.findIndex((ch) => stepCmp(step, ch.step) < 0) - 1;
-  return targetBpmIndex < 0 ? bpmChanges.length - 1 : targetBpmIndex;
+  if (targetBpmIndex === -2) {
+    return bpmChanges.length - 1;
+  }
+  if (targetBpmIndex === -1) {
+    return 0;
+  }
+  return targetBpmIndex;
 }
 /**
  * chartを読み込む
