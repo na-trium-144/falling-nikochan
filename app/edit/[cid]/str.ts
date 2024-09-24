@@ -23,14 +23,31 @@ export function timeSecStr(timeSec: number): string {
 
 export function stepStr(s: Step): string {
   if (s.numerator === 0) {
-    return s.fourth.toString();
+    return (
+      (Math.floor(s.fourth / 4) + 1).toString() +
+      ";" +
+      ((s.fourth % 4) + 1).toString()
+    );
   } else {
-    return `${s.fourth.toString()}+${s.numerator}/${s.denominator * 4}`;
+    return (
+      (Math.floor(s.fourth / 4) + 1).toString() +
+      ";" +
+      ((s.fourth % 4) + 1).toString() +
+      "+" +
+      s.numerator.toString() +
+      "/" +
+      (s.denominator * 4).toString()
+    );
   }
 }
+// todo: 拍子を考慮
 export function stepNStr(s: Step): string {
   if (s.numerator === 0) {
-    return s.fourth.toString();
+    return (
+      (Math.floor(s.fourth / 4) + 1).toString() +
+      ";" +
+      ((s.fourth % 4) + 1).toString()
+    );
   } else {
     return "";
   }

@@ -4,6 +4,7 @@ import Button from "@/common/button";
 import Input from "@/common/input";
 import { stepStr } from "./str";
 import { Step } from "@/chartFormat/step";
+import { Key } from "@/common/key";
 
 interface Props {
   currentNoteIndex: number;
@@ -57,7 +58,7 @@ function CopyPasteButton(props: Props) {
 
 function NoteEdit(props: Props) {
   const { currentNoteIndex, chart } = props;
-  if (chart && currentNoteIndex >= 0) {
+  if (chart && currentNoteIndex >= 0 && chart.notes[currentNoteIndex]) {
     const n = chart.notes[currentNoteIndex];
     const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
@@ -178,6 +179,7 @@ function NoteEdit(props: Props) {
           />
           <label htmlFor="bigNote">
             <span>Big</span>
+            <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </label>
         </p>
         <p className="mt-3">

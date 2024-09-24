@@ -44,7 +44,7 @@ export function defaultNoteCommand(
     big: false,
     hitX: 1 / 4,
     hitVX: 1 / 4,
-    hitVY: 1,
+    hitVY: 3 / 4,
     accelY: 1 / 4,
     timeScale: [{ stepBefore: stepZero(), scale: 1 }],
   };

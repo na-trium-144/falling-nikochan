@@ -89,6 +89,7 @@ export default function Page(context: { params: Params }) {
   }, [hasChange]);
 
   const { scaledSize, isMobile } = useDisplayMode();
+  const ref = useRef<HTMLDivElement>(null!);
 
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
@@ -114,6 +115,7 @@ export default function Page(context: { params: Params }) {
       }
       if (
         currentNoteIndex < 0 ||
+        chart.notes[currentNoteIndex] === undefined ||
         stepCmp(chart.notes[currentNoteIndex].step, step) != 0
       ) {
         const noteIndex = chart.notes.findIndex(
@@ -145,14 +147,17 @@ export default function Page(context: { params: Params }) {
   }, []);
   const start = () => {
     ytPlayer.current?.playVideo();
+    ref.current.focus();
   };
   const stop = () => {
     ytPlayer.current?.pauseVideo();
+    ref.current.focus();
   };
   const changeCurrentTimeSec = (timeSec: number) => {
     if (ytPlayer.current?.seekTo) {
       ytPlayer.current?.seekTo(timeSec, true);
     }
+    ref.current.focus();
   };
   const seekStepRel = (move: number) => {
     if (chart) {
@@ -252,6 +257,7 @@ export default function Page(context: { params: Params }) {
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       changeChart(newChart);
     }
+    ref.current.focus();
   };
   const deleteNote = () => {
     if (chart && currentNoteIndex >= 0) {
@@ -259,14 +265,19 @@ export default function Page(context: { params: Params }) {
       newChart.notes = newChart.notes.filter((_, i) => i !== currentNoteIndex);
       changeChart(newChart);
     }
+    ref.current.focus();
   };
   const updateNote = (n: NoteCommand) => {
     if (chart && currentNoteIndex >= 0) {
       const newChart = { ...chart };
-      newChart.notes[currentNoteIndex] = n;
+      newChart.notes[currentNoteIndex] = {
+        ...n,
+        step: newChart.notes[currentNoteIndex].step,
+      };
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       changeChart(newChart);
     }
+    // ref.current.focus();
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
     ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
@@ -279,6 +290,7 @@ export default function Page(context: { params: Params }) {
       newCopyBuf[copyIndex] = chart.notes[currentNoteIndex];
       setCopyBuf(newCopyBuf);
     }
+    ref.current.focus();
   };
   const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
     if (copyBuf[copyIndex]) {
@@ -290,6 +302,7 @@ export default function Page(context: { params: Params }) {
         }
       }
     }
+    ref.current.focus();
   };
 
   if (errorStatus !== undefined || errorMsg !== undefined) {
@@ -304,6 +317,7 @@ export default function Page(context: { params: Params }) {
       className={"overflow-x-hidden " + (isMobile ? "" : "overflow-y-hidden ")}
       style={{ ...scaledSize, touchAction: "none" }}
       tabIndex={0}
+      ref={ref}
       onKeyDown={(e) => {
         if (ready) {
           if (e.key === " " && !playing) {
@@ -321,8 +335,18 @@ export default function Page(context: { params: Params }) {
             copyNote(0);
           } else if (e.key === "v") {
             pasteNote(0);
+          } else if (
+            Number(e.key) >= 1 &&
+            Number(e.key) <= copyBuf.length - 1
+          ) {
+            pasteNote(Number(e.key));
           } else if (e.key === "n") {
             pasteNote(0, true);
+          } else if (e.key === "b") {
+            if (currentNoteIndex >= 0 && chart.notes[currentNoteIndex]) {
+              const n = chart.notes[currentNoteIndex];
+              updateNote({ ...n, big: !n.big });
+            }
           } else {
           }
         }
@@ -394,6 +418,14 @@ export default function Page(context: { params: Params }) {
             <Button
               onClick={() => {
                 if (ready) {
+                  seekStepRel(-snapDivider * 4);
+                }
+              }}
+              text={`-${snapDivider * 4} Step`}
+            />
+            <Button
+              onClick={() => {
+                if (ready) {
                   seekStepRel(-1);
                 }
               }}
@@ -408,6 +440,14 @@ export default function Page(context: { params: Params }) {
               }}
               text="+1 Step"
               keyName="→"
+            />
+            <Button
+              onClick={() => {
+                if (ready) {
+                  seekStepRel(snapDivider * 4);
+                }
+              }}
+              text={`+${snapDivider * 4} Step`}
             />
           </div>
           <TimeBar
@@ -435,8 +475,14 @@ export default function Page(context: { params: Params }) {
             />
             <div className="flex-1" />
             <span>Zoom</span>
-            <Button text="-" onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)} />
-            <Button text="+" onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)} />
+            <Button
+              text="-"
+              onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
+            />
+            <Button
+              text="+"
+              onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
+            />
           </p>
           <div className="flex flex-row ml-3 mt-3">
             {["Meta", "Timing", "Notes"].map((tabName, i) =>

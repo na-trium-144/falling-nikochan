@@ -171,6 +171,7 @@ export default function Home(context: { params: Params }) {
   const onReady = useCallback(() => {
     console.log("ready");
     setReady(true);
+    ref.current?.focus();
   }, []);
   const onStart = useCallback(() => {
     console.log("start");
@@ -183,9 +184,7 @@ export default function Home(context: { params: Params }) {
       setPlayedOnce(true);
       reloadBestScore();
     }
-    if (ref.current) {
-      ref.current.focus();
-    }
+    ref.current?.focus();
   }, [chartSeq, ref, resetNotesAll, reloadBestScore]);
   const onStop = useCallback(() => {
     console.log("stop");
@@ -194,9 +193,7 @@ export default function Home(context: { params: Params }) {
       setPlaying(false);
       ytPlayer.current?.seekTo(0, true);
     }
-    if (ref.current) {
-      ref.current.focus();
-    }
+    ref.current?.focus();
   }, [playing, ref]);
   const start = () => {
     if (ytPlayer.current?.playVideo) {

@@ -303,12 +303,14 @@ export default function TimeBar(props: Props) {
               <span
                 key={n.id}
                 className={
-                  "absolute w-3 h-3 rounded-full " +
+                  "absolute rounded-full " +
                   (n.id === currentNoteIndex ? "bg-red-400 " : "bg-yellow-400 ")
                 }
                 style={{
-                  top: -2,
-                  left: timeBarPos(n.hitTimeSec + chart.offset) - 6,
+                  width: n.big ? 18 : 12,
+                  height: n.big ? 18 : 12,
+                  top: 12 - (n.big ? 9 : 6),
+                  left: timeBarPos(n.hitTimeSec + chart.offset) - (n.big ? 9 : 6),
                 }}
               />
             )

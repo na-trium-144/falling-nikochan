@@ -23,11 +23,14 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     error_code = ydl.download(URLS)
 
 sig, sr = sf.read("nikochan-" + sys.argv[1] + ".wav")
-sample_reduce = sr // 1000
-sampled = [
-    int(np.max(np.abs(sig[i - sample_reduce : i, 0])) * 127)
-    for i in range(sample_reduce, sig.shape[0], sample_reduce)
-]
+sample_reduce = sr / 1000
+sampled = []
+i = 0.0
+while int(i + sample_reduce) < sig.shape[0]:
+    sampled.append(int(np.max(np.abs(sig[int(i) : int(i + sample_reduce), 0])) * 127))
+    i += sample_reduce
 with open("nikochan-" + sys.argv[1] + "-sampled", "wb") as f:
     f.write(msgpack.packb(sampled))
 os.remove("nikochan-" + sys.argv[1] + ".wav")
+
+# todo: なぜか音源と動画がずれることがある
