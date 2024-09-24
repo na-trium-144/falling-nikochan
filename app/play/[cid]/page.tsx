@@ -115,8 +115,6 @@ export default function Home(context: { params: Params }) {
 
   // chart.bpmChanges 内の現在のインデックス
   const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
-  // chart.bpmChanges[setCurrentBpmIndex].step に対応する時刻を保存しておく (計算するには積算しないといけないので)
-  const currentBpmChangeTime = useRef<number>(0);
   // bpmを更新
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -126,20 +124,13 @@ export default function Home(context: { params: Params }) {
       chartSeq &&
       currentBpmIndex + 1 < chartSeq.bpmChanges.length
     ) {
+      // chartのvalidateでtimesecは再計算されたことが保証されている
       const nextBpmChangeTime =
-        currentBpmChangeTime.current +
-        (60 / chartSeq.bpmChanges[currentBpmIndex].bpm) *
-          stepToFloat(
-            stepSub(
-              chartSeq.bpmChanges[currentBpmIndex + 1].step,
-              chartSeq.bpmChanges[currentBpmIndex].step
-            )
-          );
+        chartSeq.bpmChanges[currentBpmIndex + 1].timeSec;
       timer = setTimeout(() => {
         timer = null;
-        currentBpmChangeTime.current = nextBpmChangeTime;
         setCurrentBpmIndex(currentBpmIndex + 1);
-      }, (nextBpmChangeTime - currentBpmChangeTime.current) / 1000);
+      }, (nextBpmChangeTime - now) * 1000);
     }
     return () => {
       if (timer !== null) {

@@ -1,6 +1,7 @@
 import {
   BPMChange,
   NoteCommand,
+  updateBpmTimeSec,
   validateBpmChange,
   validateNoteCommand,
 } from "./command";
@@ -45,6 +46,7 @@ export function validateChart(chart: Chart) {
   chart.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
   chart.bpmChanges.forEach((n) => validateBpmChange(n));
+  updateBpmTimeSec(chart.bpmChanges);
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (typeof chart.waveOffset !== "number") chart.waveOffset = 0;
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
