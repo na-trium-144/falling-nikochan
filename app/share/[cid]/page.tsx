@@ -19,6 +19,8 @@ export default function ShareChart(context: { params: Params }) {
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [bestScoreState, setBestScoreState] = useState<number>(0);
+  const [origin, setOrigin] = useState<string>("");
+  useEffect(() => setOrigin(window.location.origin), []);
 
   useEffect(() => {
     setBestScoreState(getBestScore(cid));
@@ -87,15 +89,13 @@ export default function ShareChart(context: { params: Params }) {
               className="mx-2 text-blue-600 hover:underline"
               href={`/share/${cid}`}
             >
-              {window.location.origin}/share/{cid}
+              {origin}/share/{cid}
             </Link>
             {navigator.clipboard && (
               <Button
                 text="コピー"
                 onClick={() =>
-                  navigator.clipboard.writeText(
-                    `${window.location.origin}/share/${cid}`
-                  )
+                  navigator.clipboard.writeText(`${origin}/share/${cid}`)
                 }
               />
             )}
