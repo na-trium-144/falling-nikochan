@@ -69,15 +69,19 @@ export function AutoScaler(props: { children: ReactNode }) {
 }
 
 function isTouchEventsEnabled() {
-  // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.
-  // TBD: report to bugzilla.
-  const navigator = (window.top || window).navigator;
-  const maxTouchPoints = Number.isFinite(navigator.maxTouchPoints)
-    ? navigator.maxTouchPoints
-    : navigator.msMaxTouchPoints;
-  if (Number.isFinite(maxTouchPoints)) {
-    // Windows 10 system reports that it supports touch, even though it acutally doesn't (ignore msMaxTouchPoints === 256).
-    return maxTouchPoints > 0 && maxTouchPoints !== 256;
+  if (typeof window === "undefined") {
+    return false;
+  } else {
+    // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.
+    // TBD: report to bugzilla.
+    const navigator = (window.top || window).navigator;
+    const maxTouchPoints = Number.isFinite(navigator.maxTouchPoints)
+      ? navigator.maxTouchPoints
+      : (navigator as any).msMaxTouchPoints;
+    if (Number.isFinite(maxTouchPoints)) {
+      // Windows 10 system reports that it supports touch, even though it acutally doesn't (ignore msMaxTouchPoints === 256).
+      return maxTouchPoints > 0 && maxTouchPoints !== 256;
+    }
+    return "ontouchstart" in window;
   }
-  return "ontouchstart" in window;
 }

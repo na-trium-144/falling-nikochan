@@ -1,4 +1,4 @@
-import { Step } from "@/chartFormat/command";
+import { Step } from "@/chartFormat/step";
 
 export function timeStr(timeSec: number): string {
   if (timeSec < 0) {
