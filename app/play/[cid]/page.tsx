@@ -283,15 +283,17 @@ export default function Home(context: { params: Params }) {
             <div className="flex-1">
               <p className="font-title text-lg">{chartBrief?.title}</p>
               <p className="font-title text-sm">{chartBrief?.composer}</p>
-            <p className="text-xs">
-              <span>Chart by</span>
-              <span className="ml-2 font-title text-sm">{chartBrief?.chartCreator}</span>
+              <p className="text-xs">
+                <span>Chart by</span>
+                <span className="ml-2 font-title text-sm">
+                  {chartBrief?.chartCreator}
+                </span>
               </p>
             </div>
           </div>
-          <div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
+          {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
             {fps} FPS
-          </div>
+          </div>*/}
           {!isMobile && (
             <>
               <StatusBox
