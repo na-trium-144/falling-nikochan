@@ -219,7 +219,7 @@ export default function TimeBar(props: Props) {
           {waveFetchErrorStatus}: {waveFetchErrorMsg}
         </span>
       )}
-      <canvas className="absolute " ref={canvasMain} />
+      <canvas className="absolute h-6" ref={canvasMain} />
       {/* 秒数目盛り */}
       {Array.from(new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))).map(
         (_, dt) => (
