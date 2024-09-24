@@ -5,7 +5,8 @@ import { displayNote, Note } from "@/chartFormat/seq";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
-  auto: boolean
+  auto: boolean,
+  sePlay: () => void,
 ) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
@@ -99,6 +100,7 @@ export default function useGameLogic(
   );
   // キーを押したときの判定
   const hit = () => {
+    sePlay();
     const now = getCurrentTimeSec();
     let candidate: Note | null = null;
     let candidateJudge: number = 0;
@@ -195,6 +197,7 @@ export default function useGameLogic(
           continue;
         } else if (auto && late >= 0) {
           console.log("auto");
+          sePlay();
           judge(n, now, 1);
           notesYetDone.current.shift();
           if (n.big) {
@@ -216,6 +219,7 @@ export default function useGameLogic(
           continue;
         } else if (auto && late >= 0) {
           console.log("auto");
+          sePlay();
           judge(n, now, 1);
           notesBigYetDone.current.shift();
           continue;

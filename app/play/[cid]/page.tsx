@@ -82,6 +82,20 @@ export default function Home(context: { params: Params }) {
   // start後true
   const [playing, setPlaying] = useState<boolean>(false);
 
+  const seNum = 10;
+  const lastPlayedSe = useRef<number>(0);
+  const audioContext = useRef<AudioContext>(new AudioContext());
+  const sePlay = useCallback(() => {
+    const se = document.getElementsByClassName("play-se-audio")[lastPlayedSe.current] as HTMLAudioElement;
+    try{
+      const track = audioContext.current.createMediaElementSource(se);
+      track.connect(audioContext.current.destination);
+    }catch{}
+    // audioContext.current.resume();
+    se.play();
+    lastPlayedSe.current = (lastPlayedSe.current + 1) % seNum;
+  }, []);
+
   const ytPlayer = useRef<YouTubePlayer>();
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
@@ -103,7 +117,7 @@ export default function Home(context: { params: Params }) {
     bigCount,
     bigTotal,
     end,
-  } = useGameLogic(getCurrentTimeSec, auto);
+  } = useGameLogic(getCurrentTimeSec, auto, sePlay);
 
   const [fps, setFps] = useState<number>(0);
 
@@ -250,6 +264,9 @@ export default function Home(context: { params: Params }) {
         hit();
       }}
     >
+      {Array.from(new Array(seNum)).map((_, i) => (
+        <audio key={i} className="play-se-audio" src="/se_def0.wav" />
+      ))}
       <div
         className={
           "flex-1 w-full h-full flex items-stretch " +
