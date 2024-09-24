@@ -5,6 +5,7 @@ import BackButton from "@/common/backButton";
 import { getBestScore } from "@/common/bestScore";
 import { Box, Error } from "@/common/box";
 import Button from "@/common/button";
+import Footer from "@/common/footer";
 import { rankStr } from "@/common/rank";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useDisplayMode } from "@/scale";
@@ -51,84 +52,89 @@ export default function ShareChart(context: { params: Params }) {
   }
 
   return (
-    <main
-      className="flex p-6 items-center justify-center"
-      style={{ ...scaledSize }}
-    >
-      <Box className="flex flex-col p-6 shrink" style={{ flexBasis: 800 }}>
-        {isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
-        <div className={isMobile ? "basis-3/12" : "flex flex-row-reverse "}>
-          <FlexYouTube
-            className={isMobile ? "my-2 " : "block basis-1/3 "}
-            isMobile={isMobile}
-            id={brief?.ytId}
-            control={true}
-            ytPlayer={ytPlayer}
-          />
-          <div className={isMobile ? "" : "basis-2/3"}>
-            {!isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
-            <p className="font-title text-2xl">{brief?.title}</p>
-            <p className="font-title text-lg">{brief?.composer}</p>
-            <p className="text-sm mt-1">
-              <span>Chart by</span>
-              <span className="ml-3 font-title text-lg">
-                {brief?.chartCreator}
-              </span>
-            </p>
-          </div>
-        </div>
-        <p className="mt-2">
-          共有用リンク:
-          <Link
-            className="mx-2 text-blue-600 hover:underline"
-            href={`/share/${cid}`}
-          >
-            {window.location.origin}/share/{cid}
-          </Link>
-          {navigator.clipboard && (
-            <Button
-              text="コピー"
-              onClick={() =>
-                navigator.clipboard.writeText(
-                  `${window.location.origin}/share/${cid}`
-                )
-              }
+    <main className="flex flex-col items-center" style={{ ...scaledSize }}>
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <Box
+          className="m-auto flex flex-col p-6 shrink"
+          style={{ flexBasis: 800 }}
+        >
+          {isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
+          <div className={isMobile ? "basis-3/12" : "flex flex-row-reverse "}>
+            <FlexYouTube
+              className={isMobile ? "my-2 " : "block basis-1/3 "}
+              isMobile={isMobile}
+              id={brief?.ytId}
+              control={true}
+              ytPlayer={ytPlayer}
             />
-          )}
-        </p>
-        <p>
-          <span>Best Score:</span>
-          <span className="inline-block text-xl w-10 text-right">
-            {Math.floor(bestScoreState)}
-          </span>
-          <span>.</span>
-          <span className="inline-block w-6">
-            {(Math.floor(bestScoreState * 100) % 100)
-              .toString()
-              .padStart(2, "0")}
-          </span>
-          {bestScoreState > 0 && (
-            <span className="text-xl">({rankStr(bestScoreState)})</span>
-          )}
-        </p>
-        <p className="mt-2">
-          <input
-            className="ml-1 mr-1"
-            type="checkbox"
-            id="auto"
-            checked={auto}
-            onChange={(v) => setAuto(v.target.checked)}
-          />
-          <label htmlFor="auto">
-            <span>オートプレイ</span>
-          </label>
-        </p>
-        <p className="mt-3">
-          <Link href={`/play/${cid}?auto=${auto ? 1 : 0}`}>
-            <Button text="ゲーム開始！" />
-          </Link>
-        </p>
-      </Box>
+            <div className={isMobile ? "" : "basis-2/3"}>
+              {!isMobile && (
+                <BackButton href="/main/play">ID: {cid}</BackButton>
+              )}
+              <p className="font-title text-2xl">{brief?.title}</p>
+              <p className="font-title text-lg">{brief?.composer}</p>
+              <p className="text-sm mt-1">
+                <span>Chart by</span>
+                <span className="ml-3 font-title text-lg">
+                  {brief?.chartCreator}
+                </span>
+              </p>
+            </div>
+          </div>
+          <p className="mt-2">
+            共有用リンク:
+            <Link
+              className="mx-2 text-blue-600 hover:underline"
+              href={`/share/${cid}`}
+            >
+              {window.location.origin}/share/{cid}
+            </Link>
+            {navigator.clipboard && (
+              <Button
+                text="コピー"
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    `${window.location.origin}/share/${cid}`
+                  )
+                }
+              />
+            )}
+          </p>
+          <p>
+            <span>Best Score:</span>
+            <span className="inline-block text-xl w-10 text-right">
+              {Math.floor(bestScoreState)}
+            </span>
+            <span>.</span>
+            <span className="inline-block w-6">
+              {(Math.floor(bestScoreState * 100) % 100)
+                .toString()
+                .padStart(2, "0")}
+            </span>
+            {bestScoreState > 0 && (
+              <span className="text-xl">({rankStr(bestScoreState)})</span>
+            )}
+          </p>
+          <p className="mt-2">
+            <input
+              className="ml-1 mr-1"
+              type="checkbox"
+              id="auto"
+              checked={auto}
+              onChange={(v) => setAuto(v.target.checked)}
+            />
+            <label htmlFor="auto">
+              <span>オートプレイ</span>
+            </label>
+          </p>
+          <p className="mt-3">
+            <Link href={`/play/${cid}?auto=${auto ? 1 : 0}`}>
+              <Button text="ゲーム開始！" />
+            </Link>
+          </p>
+        </Box>
+      </div>
+      <Footer />
     </main>
   );
 }

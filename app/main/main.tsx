@@ -2,6 +2,7 @@
 
 import BackButton from "@/common/backButton";
 import { Box } from "@/common/box";
+import Footer from "@/common/footer";
 import { useDisplayMode } from "@/scale";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -61,6 +62,7 @@ export function IndexMain(props: Props) {
           </Box>
         )}
       </div>
+      <Footer />
     </main>
   );
 }

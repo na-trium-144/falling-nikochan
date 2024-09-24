@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@icon-park/react": "^1.4.2",
     "@prisma/client": "^5.19.1",
     "@ygoe/msgpack": "^1.0.3",
     "dotenv": "^16.4.5",
