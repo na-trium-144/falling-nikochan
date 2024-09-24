@@ -17,12 +17,13 @@ import { stepSub, stepToFloat } from "@/chartFormat/step";
 import { Loading, Error } from "@/common/box";
 import { useDisplayMode } from "@/scale";
 import { addRecent } from "@/common/recent";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Result from "./result";
 
 export default function Home(context: { params: Params }) {
   const cid = context.params.cid;
   const searchParams = useSearchParams();
+  const router = useRouter();
   const auto = !!Number(searchParams.get("auto"));
 
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
@@ -139,6 +140,22 @@ export default function Home(context: { params: Params }) {
   const [ready, setReady] = useState<boolean>(false);
   // 停止後 (最初に戻してリセットしてからスタートしないといけない)
   const [stopped, setStopped] = useState<boolean>(false);
+  // 少なくとも1回以上startした
+  const [playedOnce, setPlayedOnce] = useState<boolean>(false);
+  // 終了した
+  const [showResult, setShowResult] = useState<boolean>(false);
+  useEffect(() => {
+    if (chartSeq && playedOnce && end) {
+      const t = setTimeout(() => {
+        setShowResult(true);
+        stop();
+      }, 1000);
+      return () => clearTimeout(t);
+    } else {
+      setShowResult(false);
+    }
+  }, [playedOnce, end, chartSeq]);
+
   const onReady = useCallback(() => {
     console.log("ready");
     setReady(true);
@@ -148,9 +165,10 @@ export default function Home(context: { params: Params }) {
     if (chartSeq) {
       setStopped(false);
       setReady(false);
-      resetNotesAll(chartSeq.notes.slice());
+      resetNotesAll(chartSeq.notes);
       setCurrentBpmIndex(0);
       setPlaying(true);
+      setPlayedOnce(true);
     }
     if (ref.current) {
       ref.current.focus();
@@ -168,10 +186,18 @@ export default function Home(context: { params: Params }) {
     }
   }, [playing, ref]);
   const start = () => {
-    ytPlayer.current?.playVideo();
+    if(ytPlayer.current?.playVideo){
+      // なぜか playVideo is not a function な場合がある
+      ytPlayer.current?.playVideo();
+    }
   };
   const stop = () => {
-    ytPlayer.current?.pauseVideo();
+    if(ytPlayer.current?.pauseVideo){
+      ytPlayer.current?.pauseVideo();
+    }
+  };
+  const exit = () => {
+    router.push(`/share/${cid}`);
   };
 
   // キーを押したとき一定時間光らせる
@@ -180,18 +206,6 @@ export default function Home(context: { params: Params }) {
     setBarFlash(true);
     setTimeout(() => setBarFlash(false), 100);
   };
-
-  const [showResult, setShowResult] = useState<boolean>(false);
-  useEffect(() => {
-    if (chartSeq && end) {
-      const t = setTimeout(() => {
-        setShowResult(true);
-      }, 1000);
-      return () => clearTimeout(t);
-    } else {
-      setShowResult(false);
-    }
-  }, [end]);
 
   if (errorStatus !== undefined || errorMsg !== undefined) {
     return <Error status={errorStatus} message={errorMsg} />;
@@ -211,6 +225,8 @@ export default function Home(context: { params: Params }) {
           start();
         } else if ((e.key === "Escape" || e.key === "Esc") && playing) {
           stop();
+        } else if ((e.key === "Escape" || e.key === "Esc") && !playing) {
+          exit();
         } else {
           flash();
           hit();
@@ -288,15 +304,19 @@ export default function Home(context: { params: Params }) {
             auto={auto}
           />
           <ChainDisp className="absolute top-0 left-3 " chain={chain} />
-          {ready && <ReadyMessage isTouch={isTouch} />}
-          {stopped && <StopMessage isTouch={isTouch} />}
-          {showResult && (
+          {showResult ? (
             <Result
               baseScore={baseScore}
               chainScore={chainScore}
               score={score}
+              start={start}
+              exit={exit}
             />
-          )}
+          ) : ready ? (
+            <ReadyMessage isTouch={isTouch} start={start} exit={exit} />
+          ) : stopped ? (
+            <StopMessage isTouch={isTouch} start={start} exit={exit} />
+          ) : null}
         </div>
       </div>
       <div className={"relative w-full " + (isMobile ? "h-32 " : "h-16 ")}>

@@ -163,6 +163,7 @@ export default function FallingWindow(props: Props) {
         )}
         {chart &&
           currentNoteIndex >= 0 &&
+          chart.notes[currentNoteIndex] &&
           boxSize &&
           marginX !== undefined &&
           marginY !== undefined && (

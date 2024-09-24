@@ -60,10 +60,38 @@ export default function ShareChart(context: { params: Params }) {
             ytPlayer={ytPlayer}
           />
           <div className="basis-2/3">
+            <div className="mb-2">
+              <Link
+                href="/"
+                className="mr-2 p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
+              >
+                ←
+              </Link>
+              <span className="text-xl">ID: {cid}</span>
+            </div>
             <p className="font-title text-2xl">{brief?.title}</p>
             <p className="font-title text-lg">{brief?.composer}</p>
           </div>
         </div>
+        <p className="my-2">
+          共有用リンク:
+          <Link
+            className="mx-2 text-blue-600 hover:underline"
+            href={`/share/${cid}`}
+          >
+            {window.location.origin}/share/{cid}
+          </Link>
+          {navigator.clipboard && (
+            <Button
+              text="コピー"
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/share/${cid}`
+                )
+              }
+            />
+          )}
+        </p>
         <p>
           <input
             className="ml-1 mr-1"

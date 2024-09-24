@@ -12,7 +12,8 @@ export default function useGameLogic(
 
   const [judgeCount, setJudgeCount] = useState<number[]>([0, 0, 0, 0]);
   const notesTotal = notesAll.length;
-  const judgeScore = judgeCount[0] * 1 + judgeCount[1] * 0.5;
+  const okScore = 0.5;
+  const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
   const bonusMax = 100;
   const bonusTotal =
@@ -21,8 +22,10 @@ export default function useGameLogic(
       : (bonusMax * (bonusMax + 1)) / 2 + bonusMax * (notesTotal - bonusMax);
   // const score =
   //   ((judgeScore + bonusScore) / (notesTotal + bonusTotal || 1)) * 100;
-  const baseScore = (judgeScore / (notesTotal || 1)) * 70;
-  const chainScore = (bonus / (bonusTotal || 1)) * 30;
+  const baseScoreRate = 70;
+  const chainScoreRate = 30;
+  const baseScore = (judgeScore / (notesTotal || 1)) * baseScoreRate;
+  const chainScore = (bonus / (bonusTotal || 1)) * chainScoreRate;
   const score = baseScore + chainScore;
 
   const end = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
@@ -30,12 +33,13 @@ export default function useGameLogic(
   const [chain, setChain] = useState<number>(0);
 
   const resetNotesAll = useCallback((notes: Note[]) => {
-    setNotesAll(notes);
+    // note.done などを書き換えるため、元データを壊さないようdeepcopy
+    const notesCopy = notes.map((n) => ({ ...n }));
+    setNotesAll(notesCopy.slice());
+    notesYetDone.current = notesCopy;
     setJudgeCount([0, 0, 0, 0]);
     setChain(0);
     setBonus(0);
-
-    notesYetDone.current = notes.slice();
   }, []);
 
   // Noteに判定を保存し、scoreとchainを更新
@@ -49,11 +53,16 @@ export default function useGameLogic(
       if (j <= 2) {
         const thisChain = chain + 1;
         n.chain = thisChain;
-        n.chainBonus = 1 + Math.min(thisChain / bonusMax, 1) * 0.5;
-        if (j === 2) {
-          n.chainBonus *= 0.5;
+        n.chainBonus =
+          1 +
+          ((Math.min(thisChain, bonusMax) / bonusTotal) * chainScoreRate) /
+            ((1 / notesTotal) * baseScoreRate);
+        if (j === 1) {
+          setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
+        } else {
+          n.chainBonus *= okScore;
+          setBonus((bonus) => bonus + Math.min(thisChain, bonusMax) * okScore);
         }
-        setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
         setChain((chain) => chain + 1);
       } else {
         setChain(0);
