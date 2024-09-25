@@ -108,7 +108,8 @@ export default function Page(context: { params: Params }) {
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [hasChange]);
 
-  const { scaledSize, isMobile } = useDisplayMode();
+  const { screenWidth, screenHeight, rem } = useDisplayMode();
+  const isMobile = screenWidth < 50 * rem;
   const ref = useRef<HTMLDivElement>(null!);
 
   // 現在時刻 offsetを引く前
@@ -364,7 +365,7 @@ export default function Page(context: { params: Params }) {
   return (
     <main
       className={"overflow-x-hidden " + (isMobile ? "" : "overflow-y-hidden ")}
-      style={{ ...scaledSize, touchAction: "none" }}
+      style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
@@ -403,13 +404,13 @@ export default function Page(context: { params: Params }) {
     >
       <div
         className={
-          "w-full h-full " +
-          (isMobile ? "h-5/6 " : "flex items-stretch flex-row ")
+          "w-full " +
+          (isMobile ? "h-screen" : "h-full flex items-stretch flex-row ")
         }
       >
         <div
           className={
-            "basis-4/12 " +
+            (isMobile ? "h-full " : "basis-4/12 ") +
             "grow-0 shrink-0 h-full flex flex-col items-stretch p-3"
           }
         >
@@ -418,11 +419,13 @@ export default function Page(context: { params: Params }) {
           </BackButton>
           <div
             className={
-              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex " + "flex-col"
+              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex flex-col items-center " +
+              (isMobile ? "h-1/3 " : "")
             }
           >
             <FlexYouTube
-              className={"block "}
+              fixedSide={isMobile ? "height" : "width"}
+              className={isMobile ? "w-max h-full" : ""}
               isMobile={false}
               control={true}
               id={chart?.ytId}
@@ -550,7 +553,7 @@ export default function Page(context: { params: Params }) {
               )
             )}
           </div>
-          <Box className="flex-1 p-3">
+          <Box className="flex-1 p-3 overflow-auto">
             {tab === 0 ? (
               <MetaTab
                 chart={chart}

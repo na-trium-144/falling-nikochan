@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { BPMChange } from "@/chartFormat/command";
 import { getTimeSec } from "@/chartFormat/seq";
 import { Step, stepAdd, stepSub, stepZero } from "@/chartFormat/step";
+import { useDisplayMode } from "@/scale";
 
 interface Props {
   className?: string;
@@ -94,6 +95,13 @@ export default function RhythmicalSlime(props: Props) {
       });
     }
   }, [bpmChanges, num, playing, getCurrentTimeSec]);
+
+
+  const { screenWidth, screenHeight } = useDisplayMode();
+  const isMobile = screenWidth < screenHeight;
+  const scalingWidthThreshold = isMobile ? 500 : 750;
+  const scale = Math.min(screenWidth/scalingWidthThreshold, 1);
+
   return (
     <div
       className={props.className + " flex flex-row-reverse "}
@@ -106,15 +114,15 @@ export default function RhythmicalSlime(props: Props) {
           className={
             "transition-transform origin-bottom " +
             (jumpingSlime == i
-              ? "ease-out -translate-y-6 scale-y-110 "
+              ? "ease-out -translate-y-1/2 scale-y-110 "
               : preparingSlime == i
               ? "ease-out translate-y-0 scale-y-75 "
               : "ease-in translate-y-0 scale-y-100 ")
           }
           style={{
             transitionDuration: Math.round(transitionTimeMSec.current) + "ms",
-            height: 40,
-            marginLeft: 8,
+            height: 40 * scale,
+            marginLeft: 8 * scale,
           }}
         />
       ))}

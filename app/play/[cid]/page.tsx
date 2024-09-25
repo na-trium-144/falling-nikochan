@@ -20,6 +20,7 @@ import { addRecent } from "@/common/recent";
 import { useRouter, useSearchParams } from "next/navigation";
 import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
+import BPMSign from "./bpmSign";
 
 export default function Home(context: { params: Params }) {
   const cid = context.params.cid;
@@ -69,7 +70,10 @@ export default function Home(context: { params: Params }) {
   }, [cid]);
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isMobile, isTouch, scaledSize } = useDisplayMode();
+  const { isTouch, screenWidth, screenHeight, rem } = useDisplayMode();
+  const isMobile = screenWidth < screenHeight;
+  const statusHide = !isMobile && screenHeight < 32 * rem;
+  const statusOverlaps = !isMobile && screenHeight < 40 * rem && !statusHide;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -220,8 +224,8 @@ export default function Home(context: { params: Params }) {
 
   return (
     <main
-      className="overflow-hidden flex flex-col "
-      style={{ ...scaledSize, touchAction: "none" }}
+      className="overflow-hidden w-screen h-screen relative"
+      style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
@@ -243,14 +247,17 @@ export default function Home(context: { params: Params }) {
     >
       <div
         className={
-          "flex-1 w-full h-full flex items-stretch " +
+          "w-full overflow-y-visible flex items-stretch " +
           (isMobile ? "flex-col" : "flex-row-reverse")
         }
+        style={{
+          height: isMobile ? screenHeight - 6 * rem : screenHeight * 0.9,
+        }}
       >
         <div
           className={
-            (isMobile ? "flex-none " : "basis-4/12 ") +
-            "grow-0 shrink-0 flex flex-col items-stretch"
+            (isMobile ? "" : "w-1/3 overflow-x-visible ") +
+            "flex-none flex flex-col items-stretch"
           }
         >
           <div
@@ -260,8 +267,9 @@ export default function Home(context: { params: Params }) {
             }
           >
             <FlexYouTube
+              fixedSide="width"
               className={
-                "z-10 block " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "")
+                "z-10 " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "w-full")
               }
               isMobile={isMobile}
               id={chartBrief?.ytId}
@@ -285,10 +293,10 @@ export default function Home(context: { params: Params }) {
           {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
             {fps} FPS
           </div>*/}
-          {!isMobile && (
+          {!isMobile && !statusHide && (
             <>
               <StatusBox
-                className="z-10 grow-0 shrink-0 m-3 self-end"
+                className="z-10 flex-none m-3 self-end"
                 judgeCount={judgeCount}
                 bigCount={bigCount}
                 bigTotal={bigTotal}
@@ -300,7 +308,7 @@ export default function Home(context: { params: Params }) {
             </>
           )}
         </div>
-        <div className={"relative " + (isMobile ? "flex-1 " : "basis-8/12 ")}>
+        <div className={"relative flex-1"}>
           <FallingWindow
             className="absolute inset-0"
             notes={notesAll}
@@ -309,13 +317,8 @@ export default function Home(context: { params: Params }) {
             setFPS={setFps}
             barFlash={barFlash}
           />
-          <ScoreDisp
-            className="absolute top-0 right-3 "
-            score={score}
-            best={bestScoreState}
-            auto={auto}
-          />
-          <ChainDisp className="absolute top-0 left-3 " chain={chain} />
+          <ScoreDisp score={score} best={bestScoreState} auto={auto} />
+          <ChainDisp chain={chain} />
           {showResult ? (
             <Result
               baseScore={baseScore}
@@ -332,48 +335,29 @@ export default function Home(context: { params: Params }) {
           ) : null}
         </div>
       </div>
-      <div className={"relative w-full " + (isMobile ? "h-32 " : "h-16 ")}>
+      <div
+        className={"relative w-full "}
+        style={{ height: isMobile ? "6rem" : "10%" }}
+      >
         <div
           className={
-            "absolute inset-x-0 bottom-0 " +
+            "-z-20 absolute inset-x-0 bottom-0 " +
             "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 "
           }
-          style={{ top: -15 }}
+          style={{ top: "-1rem" }}
         />
         <RhythmicalSlime
-          className="absolute "
-          style={{ bottom: "100%", right: 15 }}
+          className="-z-10 absolute "
+          style={{
+            bottom: "100%",
+            right: isMobile ? "1rem" : statusOverlaps ? 17 * rem : "1rem",
+          }}
           num={4}
           getCurrentTimeSec={getCurrentTimeSec}
           playing={playing}
           bpmChanges={chartSeq?.bpmChanges}
         />
-        <div className="absolute " style={{ bottom: "100%", left: 15 }}>
-          <div
-            className="absolute inset-0 m-auto w-4 bg-amber-800 "
-            style={{ borderRadius: "100%/6px" }}
-          ></div>
-          <div
-            className={
-              "rounded-sm -translate-y-10 p-2 " +
-              "bg-gradient-to-t from-amber-700 to-amber-600 " +
-              "border-b-2 border-r-2 border-amber-900 " +
-              "flex flex-row items-baseline"
-            }
-          >
-            <span className="text-2xl font-title">♩</span>
-            <span className="text-xl ml-2 mr-1">=</span>
-            <span className="text-right text-3xl w-16">
-              {Math.floor(chartSeq?.bpmChanges[currentBpmIndex]?.bpm || 0)}
-            </span>
-            <span className="text-lg">.</span>
-            <span className="text-lg w-3">
-              {Math.floor(
-                (chartSeq?.bpmChanges[currentBpmIndex]?.bpm || 0) * 10
-              ) % 10}
-            </span>
-          </div>
-        </div>
+        <BPMSign currentBpm={chartSeq?.bpmChanges[currentBpmIndex]?.bpm} />
         {isMobile && (
           <StatusBox
             className="absolute inset-4 z-10"
@@ -386,6 +370,18 @@ export default function Home(context: { params: Params }) {
           />
         )}
       </div>
+      {!isMobile && statusHide && showResult && (
+        <StatusBox
+          className="z-20 absolute my-auto h-max inset-y-0"
+          style={{ right: "0.75rem" }}
+          judgeCount={judgeCount}
+          bigCount={bigCount}
+          bigTotal={bigTotal}
+          notesTotal={notesAll.length}
+          isMobile={false}
+          isTouch={isTouch}
+        />
+      )}
     </main>
   );
 }

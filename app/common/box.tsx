@@ -9,7 +9,11 @@ export function Box(props: Props) {
   return (
     <div
       className={"rounded-lg " + (props.className || "")}
-      style={{ background: "rgba(255, 255, 255, 0.5)", ...props.style }}
+      style={{
+        background: "rgba(255, 255, 255, 0.7)",
+        backdropFilter: "blur(1px)",
+        ...props.style,
+      }}
     >
       {props.children}
     </div>
@@ -20,7 +24,7 @@ export function CenterBox(props: Props) {
   return (
     <Box
       className={
-        "absolute inset-0 w-max h-max m-auto p-6 text-center " +
+        "absolute inset-0 w-max h-max m-auto p-6 text-center z-20 " +
         (props.className || "")
       }
       style={props.style}

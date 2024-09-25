@@ -9,22 +9,26 @@ import {
 } from "react";
 
 interface DisplayMode {
-  isMobile: boolean;
   isTouch: boolean;
-  scaledSize: { width: number; height: number };
+  screenWidth: number;
+  screenHeight: number;
+  rem: number;
 }
 const DisplayModeContext = createContext<DisplayMode>({
-  isMobile: false,
   isTouch: false,
-  scaledSize: { width: 1, height: 1 },
+  screenWidth: 1,
+  screenHeight: 1,
+  rem: 16,
 });
 export const useDisplayMode = () => useContext(DisplayModeContext);
 
 export function AutoScaler(props: { children: ReactNode }) {
   const [size, setSize] = useState([1, 1]);
+  const [rem, setRem] = useState<number>(16);
   useEffect(() => {
     function updateSize() {
       setSize([window.innerWidth, window.innerHeight]);
+      setRem(parseFloat(getComputedStyle(document.documentElement).fontSize));
     }
     window.addEventListener("resize", updateSize);
     updateSize();
@@ -32,38 +36,20 @@ export function AutoScaler(props: { children: ReactNode }) {
   }, []);
 
   const [width, height] = size;
-  // スクリーンが縦長かどうかで表示を切り替えている
-  const isMobile = width < height;
-  const globalScale = Math.min(height / 800, width / 500);
+
   // タッチ操作かどうか (操作説明が変わる)
   const isTouch = isTouchEventsEnabled();
-
-  const scaledWidth = width / globalScale;
-  const scaledHeight = height / globalScale;
 
   return (
     <DisplayModeContext.Provider
       value={{
-        isMobile,
         isTouch,
-        scaledSize: {
-          width: scaledWidth,
-          height: scaledHeight,
-        },
+        screenWidth: width,
+        screenHeight: height,
+        rem,
       }}
     >
-      <div
-        className="origin-top-left overflow-auto"
-        style={{
-          transform: `scale(${globalScale})`,
-          width: scaledWidth,
-          height: scaledHeight,
-        }}
-      >
-        <div className="bg-gradient-to-t from-sky-50 to-sky-200 min-w-full min-h-full">
-          {props.children}
-        </div>
-      </div>
+      {props.children}
     </DisplayModeContext.Provider>
   );
 }
