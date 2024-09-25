@@ -10,6 +10,7 @@ import {
   bigScale,
 } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
+import TargetLine from "@/common/targetLine";
 
 interface Props {
   className?: string;
@@ -65,18 +66,11 @@ export default function FallingWindow(props: Props) {
       <div className="relative w-full h-full overflow-visible">
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
-          <div
-            className={
-              "absolute h-0.5 transition duration-100 " +
-              (props.barFlash
-                ? "bg-amber-400 shadow shadow-yellow-400"
-                : "bg-gray-400 shadow-none")
-            }
-            style={{
-              left: 0,
-              right: "-100%",
-              bottom: targetY * boxSize + marginY,
-            }}
+          <TargetLine
+            barFlash={props.barFlash}
+            left={0}
+            right="-100%"
+            bottom={targetY * boxSize + marginY}
           />
         )}
         {displayNotes.map(

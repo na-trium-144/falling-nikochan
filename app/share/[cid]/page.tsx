@@ -110,7 +110,7 @@ export default function ShareChart(context: { params: Params }) {
                 </Link>
               </>
             )}
-            {navigator.clipboard && (
+            {navigator && navigator.clipboard && (
               <Button
                 text="コピー"
                 onClick={() =>
