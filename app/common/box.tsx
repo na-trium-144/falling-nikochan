@@ -20,7 +20,7 @@ export function CenterBox(props: Props) {
   return (
     <Box
       className={
-        "absolute inset-0 w-max h-max m-auto p-6 text-center " +
+        "absolute inset-0 w-max h-max m-auto p-6 text-center z-20 " +
         (props.className || "")
       }
       style={props.style}

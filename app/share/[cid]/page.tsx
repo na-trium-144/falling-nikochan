@@ -43,7 +43,8 @@ export default function ShareChart(context: { params: Params }) {
     })();
   }, [cid]);
 
-  const { scaledSize, isMobile } = useDisplayMode();
+  const { screenWidth, screenHeight, rem } = useDisplayMode();
+  const isMobile = screenWidth < 40 * rem;
 
   const ytPlayer = useRef<YouTubePlayer>();
 
@@ -54,22 +55,29 @@ export default function ShareChart(context: { params: Params }) {
   }
 
   return (
-    <main className="flex flex-col items-center" style={{ ...scaledSize }}>
-      <div className="flex-1 p-6 flex items-center justify-center">
+    <main className="flex flex-col items-center w-full min-h-screen h-max">
+      <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
         <Box
-          className="m-auto flex flex-col p-6 shrink"
-          style={{ flexBasis: 800 }}
+          className="m-auto max-w-full flex flex-col p-6 shrink"
+          style={{ flexBasis: "60rem" }}
         >
           {isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
-          <div className={isMobile ? "basis-3/12" : "flex flex-row-reverse "}>
+          <div className={isMobile ? "" : "flex flex-row-reverse items-center"}>
             <FlexYouTube
-              className={isMobile ? "my-2 " : "block basis-1/3 "}
+              fixedSide="width"
+              className={
+                isMobile
+                  ? "my-2 w-full"
+                  : screenWidth < 60 * rem
+                  ? "basis-1/3 "
+                  : "w-80 "
+              }
               isMobile={isMobile}
               id={brief?.ytId}
               control={true}
               ytPlayer={ytPlayer}
             />
-            <div className={isMobile ? "" : "basis-2/3"}>
+            <div className={isMobile ? "" : "flex-1 self-start"}>
               {!isMobile && (
                 <BackButton href="/main/play">ID: {cid}</BackButton>
               )}
@@ -84,13 +92,24 @@ export default function ShareChart(context: { params: Params }) {
             </div>
           </div>
           <p className="mt-2">
-            共有用リンク:
-            <Link
-              className="mx-2 text-blue-600 hover:underline"
-              href={`/share/${cid}`}
-            >
-              {origin}/share/{cid}
-            </Link>
+            {isMobile ? (
+              <Link
+                className="mx-2 text-blue-600 hover:underline"
+                href={`/share/${cid}`}
+              >
+                共有用リンク
+              </Link>
+            ) : (
+              <>
+                <span>共有用リンク:</span>
+                <Link
+                  className="mx-2 text-blue-600 hover:underline"
+                  href={`/share/${cid}`}
+                >
+                  {origin}/share/{cid}
+                </Link>
+              </>
+            )}
             {navigator.clipboard && (
               <Button
                 text="コピー"

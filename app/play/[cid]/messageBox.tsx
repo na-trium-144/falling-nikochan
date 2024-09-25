@@ -1,6 +1,9 @@
+"use client";
+
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
 import { Key } from "@/common/key";
+import { useDisplayMode } from "@/scale";
 
 interface MessageProps {
   isTouch: boolean;
@@ -12,11 +15,21 @@ export function ReadyMessage(props: MessageProps) {
     <CenterBox>
       <p className="mb-1">Ready to start!</p>
       <p>
-        <Button text="スタート" keyName="Space" onClick={() => props.start()} />
-        <Button text="やめる" keyName="Esc" onClick={() => props.exit()} />
+        <Button
+          text="スタート"
+          keyName={props.isTouch ? undefined : "Space"}
+          onClick={() => props.start()}
+        />
+        <Button
+          text="やめる"
+          keyName={props.isTouch ? undefined : "Esc"}
+          onClick={() => props.exit()}
+        />
       </p>
       <p className="mt-2">
-        (スタートされない場合はページを再読み込みしてください)
+        ※スタートされない場合は
+        <br />
+        ページを再読み込みしてください
       </p>
     </CenterBox>
   );
@@ -28,10 +41,14 @@ export function StopMessage(props: MessageProps) {
       <p>
         <Button
           text="再スタート"
-          keyName="Space"
+          keyName={props.isTouch ? undefined : "Space"}
           onClick={() => props.start()}
         />
-        <Button text="やめる" keyName="Esc" onClick={() => props.exit()} />
+        <Button
+          text="やめる"
+          keyName={props.isTouch ? undefined : "Esc"}
+          onClick={() => props.exit()}
+        />
       </p>
     </CenterBox>
   );
