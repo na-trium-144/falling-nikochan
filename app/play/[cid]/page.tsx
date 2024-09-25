@@ -72,6 +72,8 @@ export default function Home(context: { params: Params }) {
   const ref = useRef<HTMLDivElement>(null!);
   const { isTouch, screenWidth, screenHeight, rem } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
+  const statusHide = !isMobile && screenHeight < 32 * rem;
+  const statusOverlaps = !isMobile && screenHeight < 40 * rem && !statusHide;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -222,7 +224,7 @@ export default function Home(context: { params: Params }) {
 
   return (
     <main
-      className="overflow-hidden w-screen h-screen"
+      className="overflow-hidden w-screen h-screen relative"
       style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
@@ -291,7 +293,7 @@ export default function Home(context: { params: Params }) {
           {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
             {fps} FPS
           </div>*/}
-          {!isMobile && (
+          {!isMobile && !statusHide && (
             <>
               <StatusBox
                 className="z-10 flex-none m-3 self-end"
@@ -339,20 +341,16 @@ export default function Home(context: { params: Params }) {
       >
         <div
           className={
-            "absolute inset-x-0 bottom-0 " +
+            "-z-20 absolute inset-x-0 bottom-0 " +
             "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 "
           }
           style={{ top: "-1rem" }}
         />
         <RhythmicalSlime
-          className="absolute "
+          className="-z-10 absolute "
           style={{
             bottom: "100%",
-            right: isMobile
-              ? "1rem"
-              : screenHeight < 40 * rem
-              ? (20 * rem) / ((40 * rem) / screenHeight)
-              : "1rem",
+            right: isMobile ? "1rem" : statusOverlaps ? 17 * rem : "1rem",
           }}
           num={4}
           getCurrentTimeSec={getCurrentTimeSec}
@@ -372,6 +370,18 @@ export default function Home(context: { params: Params }) {
           />
         )}
       </div>
+      {!isMobile && statusHide && showResult && (
+        <StatusBox
+          className="z-20 absolute my-auto h-max inset-y-0"
+          style={{ right: "0.75rem" }}
+          judgeCount={judgeCount}
+          bigCount={bigCount}
+          bigTotal={bigTotal}
+          notesTotal={notesAll.length}
+          isMobile={false}
+          isTouch={isTouch}
+        />
+      )}
     </main>
   );
 }

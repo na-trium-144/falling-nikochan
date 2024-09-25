@@ -13,7 +13,7 @@ export default function BPMSign(props: Props) {
 
   return (
     <div
-      className="absolute origin-bottom-left"
+      className="-z-10 absolute origin-bottom-left"
       style={{
         bottom: "100%",
         left: "1rem",

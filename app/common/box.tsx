@@ -9,7 +9,11 @@ export function Box(props: Props) {
   return (
     <div
       className={"rounded-lg " + (props.className || "")}
-      style={{ background: "rgba(255, 255, 255, 0.5)", ...props.style }}
+      style={{
+        background: "rgba(255, 255, 255, 0.7)",
+        backdropFilter: "blur(1px)",
+        ...props.style,
+      }}
     >
       {props.children}
     </div>

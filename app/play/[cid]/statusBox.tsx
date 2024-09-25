@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 
 interface Props {
   className?: string;
+  style?: object;
   judgeCount: number[];
   bigCount: number;
   bigTotal: number;
@@ -17,24 +18,18 @@ interface Props {
 export default function StatusBox(props: Props) {
   const { screenWidth, screenHeight, rem } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  let boxScale: number = 1;
   let textScale: number = 1;
   if (isMobile) {
     textScale = Math.min(screenWidth / (31 * rem), 1);
-  } else {
-    // 計算めんどくなって適当に数字入れてでっちあげしている
-    boxScale = Math.min(
-      (screenHeight - screenWidth * (1 / 3) * (2 / 3) - 7 * rem) / (17 * rem),
-      1
-    );
   }
 
   return (
     <Box
-      className={props.className + (isMobile ? "" : " origin-top-right")}
+      className={
+        props.className + " p-3 " + (isMobile ? "" : " origin-top-right")
+      }
       style={{
-        transform: boxScale < 1 ? `scale(${boxScale})` : undefined,
-        padding: (3 / 4) * rem * boxScale,
+        ...props.style,
         fontSize: textScale * rem,
       }}
     >
