@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@icon-park/react": "^1.4.2",
-    "@prisma/client": "^5.19.1",
+    "@prisma/client": "^5.20.0",
     "@ygoe/msgpack": "^1.0.3",
     "dotenv": "^16.4.5",
     "file-saver": "^2.0.5",
