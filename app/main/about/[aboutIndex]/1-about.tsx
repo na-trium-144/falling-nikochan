@@ -1,4 +1,9 @@
+"use client";
+
+import { useDisplayMode } from "@/scale";
+
 export function AboutContent1() {
+  const { isMobile } = useDisplayMode();
   return (
     <>
       <div className="mb-4 space-y-2 text-center">
@@ -8,9 +13,11 @@ export function AboutContent1() {
           シンプルでかわいいリズムゲームです。
         </p>
         <p>
-          PCだけでなくタブレットやスマートフォンなどでも手軽に遊べます。
+          PCだけでなくタブレットやスマートフォンなどでも{isMobile && <br />}
+          手軽に遊べます。
           <br />
-          音楽ゲームにあまり馴染みがない方でも楽しめるようにしています。
+          音楽ゲームにあまり馴染みがない方でも{isMobile && <br />}
+          楽しめるようにしています。
         </p>
       </div>
       <div className="mb-4 space-y-2 text-center">
