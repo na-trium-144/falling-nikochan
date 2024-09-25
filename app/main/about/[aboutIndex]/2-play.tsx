@@ -36,7 +36,13 @@ export function AboutContent2() {
 
   return (
     <>
-      <div className={isMobile ? "flex flex-col space-y-2 items-center " : "flex flex-row space-x-2 mb-4 "}>
+      <div
+        className={
+          isMobile
+            ? "flex flex-col space-y-2 items-center "
+            : "flex flex-row space-x-2 mb-4 "
+        }
+      >
         <div className="flex-1 space-y-2 text-center">
           <p>
             ニコチャンが線に重なったときに音符を叩くだけの
@@ -52,7 +58,11 @@ export function AboutContent2() {
             音符を叩きます。
           </p>
         </div>
-        <div className={"shrink-0 relative " + (isMobile ? "w-60 h-28" : "basis-3/12 ")}>
+        <div
+          className={
+            "shrink-0 relative " + (isMobile ? "w-60 h-28" : "basis-3/12 ")
+          }
+        >
           <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
           <div
             className={
@@ -78,14 +88,32 @@ export function AboutContent2() {
           </div>
         </div>
       </div>
-      <div className={isMobile ? "flex flex-col space-y-2 items-center " : "flex flex-row-reverse space-x-2 mb-4 "}>
+      <div
+        className={
+          isMobile
+            ? "flex flex-col space-y-2 items-center "
+            : "flex flex-row-reverse space-x-2 mb-4 "
+        }
+      >
         <div className="flex-1 space-y-2 text-center">
           <p>
-          大きいニコチャンは2つのキーを同時押し<br />または2本指でタップすることで、<br />通常より多くのスコアが入ります。
-        </p>
-        <p>ミスせず連続でニコチャンを叩くと(chain)<br />得られるスコアも増えます。</p>
+            大きいニコチャンは2つのキーを同時押し
+            <br />
+            または2本指でタップすることで、
+            <br />
+            通常より多くのスコアが入ります。
+          </p>
+          <p>
+            ミスせず連続でニコチャンを叩くと(chain)
+            <br />
+            得られるスコアも増えます。
+          </p>
         </div>
-        <div className={"shrink-0 relative " + (isMobile ? "w-60 h-28" : "basis-3/12 ")}>
+        <div
+          className={
+            "shrink-0 relative " + (isMobile ? "w-60 h-28" : "basis-3/12 ")
+          }
+        >
           <div className="absolute top-0 left-0">
             <span className="inline-block text-lg w-6 text-right">{chain}</span>
             <span className="text-xs ml-1">Chains</span>
@@ -114,7 +142,6 @@ export function AboutContent2() {
             />
           </div>
         </div>
-
       </div>
     </>
   );
