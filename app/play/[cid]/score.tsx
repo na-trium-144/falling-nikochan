@@ -1,9 +1,45 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useDisplayMode } from "@/scale";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
-interface Props {
+interface CProps {
   className?: string;
+  left?: boolean;
+  children: ReactNode;
+}
+function Cloud(props: CProps) {
+  const { screenWidth, screenHeight } = useDisplayMode();
+  const isMobile = screenWidth < screenHeight;
+  const scalingWidthThreshold = isMobile ? 500 : 750;
+  const scale = Math.min(screenWidth / scalingWidthThreshold, 1);
+
+  return (
+    <div
+      className={
+        "absolute top-0 " +
+        (props.left ? "left-3 origin-top-left" : "right-3 origin-top-right")
+      }
+      style={{
+        transform: scale < 1 ? `scale(${scale})` : undefined,
+      }}
+    >
+      <div
+        className={props.className}
+        style={{
+          backgroundImage: "url(/cloud.svg)",
+          width: 225,
+          height: 115,
+          paddingLeft: 16,
+          paddingRight: 22,
+        }}
+      >
+        {props.children}
+      </div>
+    </div>
+  );
+}
+interface Props {
   style?: object;
   score: number;
   best: number;
@@ -12,59 +48,48 @@ interface Props {
 export function ScoreDisp(props: Props) {
   const { score, best } = props;
   return (
-    <div
-      className={props.className + " flex flex-col"}
-      style={{
-        backgroundImage: "url(/cloud.svg)",
-        width: 225,
-        height: 115,
-        paddingLeft: 16,
-        paddingRight: 22,
-      }}
-    >
-      <div className="flex flex-row items-baseline mt-1">
+    <Cloud className="flex flex-col">
+      <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
         <span className="flex-1 text-md">Score</span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim />
       </div>
       {props.auto ? (
         <div className="text-center">&lt;&lt; AutoPlay &gt;&gt;</div>
       ) : (
-        <div className="flex flex-row items-baseline mt-1">
-          <span className="flex-1 text-md mr-2">Best Score</span>
+        <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
+          <span className="flex-1 " style={{ fontSize: 16, marginRight: 8 }}>
+            Best Score
+          </span>
           <NumDisp num={best} fontSize1={24} fontSize2={24} />
         </div>
       )}
-    </div>
+    </Cloud>
   );
 }
 interface ChainProps {
-  className?: string;
   style?: object;
   chain: number;
 }
 export function ChainDisp(props: ChainProps) {
   return (
-    <div
+    <Cloud
       className={
-        props.className +
-        " flex flex-col " +
-        (props.chain >= 100 ? "text-orange-500 " : "")
+        "flex flex-col " + (props.chain >= 100 ? "text-orange-500 " : "")
       }
-      style={{
-        backgroundImage: "url(/cloud.svg)",
-        width: 225,
-        height: 115,
-        paddingLeft: 16,
-        paddingRight: 22,
-      }}
+      left
     >
-      <div className="flex flex-row items-baseline justify-center mt-5 space-x-2">
-        <span className="w-28">
+      <div
+        className="flex flex-row items-baseline justify-center "
+        style={{ marginTop: 20 }}
+      >
+        <span className="" style={{ width: 112, marginRight: 8 }}>
           <NumDisp num={props.chain} fontSize1={40} fontSize2={null} anim />
         </span>
-        <span className="text-left text-md ">Chains</span>
+        <span className="text-left " style={{ fontSize: 16 }}>
+          Chains
+        </span>
       </div>
-    </div>
+    </Cloud>
   );
 }
 
@@ -110,7 +135,7 @@ function NumDisp(props: NumProps) {
             className={
               "inline-block transition duration-100 " +
               (numChanged[i]
-                ? "ease-out -translate-y-1"
+                ? "ease-out -translate-y-1/4"
                 : "ease-in translate-y-0")
             }
             style={{
@@ -131,14 +156,17 @@ function NumDisp(props: NumProps) {
           >
             .
           </span>
-          <div className="" style={{ width: 1.4 * props.fontSize2 }}>
+          <div
+            className="flex flex-row "
+            style={{ width: 1.4 * props.fontSize2 }}
+          >
             {[10, 100].map((a, i) => (
               <span
                 key={a}
                 className={
                   "inline-block transition duration-100 " +
                   (numChanged[i + digits - 2]
-                    ? "ease-out -translate-y-1"
+                    ? "ease-out -translate-y-1/4"
                     : "ease-in translate-y-0")
                 }
                 style={{

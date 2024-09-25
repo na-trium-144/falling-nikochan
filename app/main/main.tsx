@@ -12,20 +12,30 @@ interface Props {
   tab: number | undefined;
 }
 export function IndexMain(props: Props) {
-  const { isMobile, scaledSize } = useDisplayMode();
+  const { screenWidth, screenHeight, rem } = useDisplayMode();
   const tabTitles = ["Falling Nikochan とは？", "プレイする", "譜面作成"];
   const tabURLs = ["/main/about/1", "/main/play", "/main/edit"];
 
+  const isMobile = screenWidth < 40 * rem;
+  console.log(isMobile);
+  console.log(screenWidth / rem);
   return (
-    <main className="flex flex-col" style={{ ...scaledSize }}>
+    <main className="flex flex-col w-full min-h-screen h-max">
       {!(isMobile && props.tab !== undefined) && (
-        <div className="basis-1/4 flex flex-row items-center justify-center">
+        <div className="flex-none basis-32 flex flex-row items-center justify-center">
           <div className="text-4xl">Falling Nikochan</div>
         </div>
       )}
-      <div className="flex flex-1 flex-row justify-center p-6 ">
+      <div
+        className={
+          (props.tab !== undefined ? "basis-96 " : "basis-auto ") +
+          (isMobile ? "" : "max-h-screen overflow-hidden ") +
+          "grow shrink-0 " +
+          "flex flex-row justify-center px-6 "
+        }
+      >
         {!(isMobile && props.tab !== undefined) && (
-          <div className="flex flex-col mt-3 justify-center">
+          <div className="flex flex-col justify-center w-56 shrink-0">
             {tabTitles.map((tabName, i) =>
               i === props.tab ? (
                 <Link key={i} href="/">
@@ -52,7 +62,10 @@ export function IndexMain(props: Props) {
         )}
         {props.tab !== undefined && (
           <Box
-            className={"flex flex-col p-6 " + (isMobile ? "w-full" : "shrink")}
+            className={
+              "flex flex-col p-6 overflow-auto " +
+              (isMobile ? "w-full my-6 " : "shrink ")
+            }
             style={{ flexBasis: isMobile ? undefined : 600 }}
           >
             {isMobile && (

@@ -14,9 +14,19 @@ interface Props {
   onReady?: () => void;
   onStart?: () => void;
   onStop?: () => void;
+  fixedSide: "width" | "height";
 }
 export function FlexYouTube(props: Props) {
-  const { isMobile, id, control, ytPlayer, onReady, onStart, onStop } = props;
+  const {
+    isMobile,
+    id,
+    control,
+    ytPlayer,
+    onReady,
+    onStart,
+    onStop,
+    fixedSide,
+  } = props;
   const { width, height, ref } = useResizeDetector();
   const resizeYouTube = useRef<() => void>();
   const onReadyRef = useRef<() => void>();
@@ -28,13 +38,18 @@ export function FlexYouTube(props: Props) {
       if (ytPlayer.current) {
         if (width && height) {
           const iframe = ytPlayer.current.getIframe();
-          iframe.width = String(width);
-          iframe.height = String((width * 9) / 16);
+          if (fixedSide === "width") {
+            iframe.width = String(width);
+            iframe.height = String((width * 9) / 16);
+          } else {
+            iframe.height = String(height);
+            iframe.width = String((height * 16) / 9);
+          }
         }
       }
     };
     resizeYouTube.current();
-  }, [width, height, ytPlayer]);
+  }, [width, height, ytPlayer, fixedSide]);
 
   onReadyRef.current = onReady;
   onStartRef.current = onStart;
@@ -65,7 +80,7 @@ export function FlexYouTube(props: Props) {
               }
             },
             onStateChange: () => {
-              console.log(ytPlayer.current?.getPlayerState())
+              console.log(ytPlayer.current?.getPlayerState());
               if (ytPlayer.current?.getPlayerState() === 1) {
                 if (onStartRef.current) {
                   onStartRef.current();
@@ -99,10 +114,14 @@ export function FlexYouTube(props: Props) {
   return (
     <div
       className={
-        props.className + " relative"
+        "relative " + props.className
         /* + " flex justify-center items-center"*/
       }
-      style={{ ...props.style, height: ((width || 1) * 9) / 16 }}
+      style={{
+        ...props.style,
+        width: fixedSide === "height" && height ? (height * 16) / 9 : undefined,
+        height: fixedSide === "width" && width ? (width * 9) / 16 : undefined,
+      }}
       ref={ref}
     >
       <div className="absolute inset-0">
