@@ -8,7 +8,7 @@ import Link from "next/link";
 import Input from "@/common/input";
 import { IndexMain } from "../main";
 
-const sampleCId = ["999999"];
+const sampleCId = ["762237"];
 
 export default function PlayTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
