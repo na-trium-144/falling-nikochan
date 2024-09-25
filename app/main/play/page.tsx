@@ -8,6 +8,8 @@ import Link from "next/link";
 import Input from "@/common/input";
 import { IndexMain } from "../main";
 
+const sampleCId = ["999999"];
+
 export default function PlayTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
@@ -18,7 +20,8 @@ export default function PlayTab() {
   useEffect(() => {
     const recentCId = getRecent("play");
     setRecentCId(recentCId);
-    for (const cid of recentCId) {
+    for (const cid of recentCId.concat(sampleCId)) {
+      // recentCIdもsampleCIdもまとめて扱い、受信したデータをrecentBriefに全部入れる
       void (async () => {
         const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
         if (res.ok) {
@@ -54,9 +57,12 @@ export default function PlayTab() {
     }
   };
 
+  const [hostname, setHostname] = useState("");
+  useEffect(() => setHostname(window.location.host), []);
+
   return (
     <IndexMain tab={1}>
-      <h3>
+      <h3 className="mb-2">
         <span className="text-xl font-bold font-title mb-2">譜面IDを入力:</span>
         <Input
           className="ml-4"
@@ -69,19 +75,52 @@ export default function PlayTab() {
         />
         <span>{cidErrorMsg}</span>
       </h3>
-      <h3 className="text-xl font-bold font-title my-2">最近プレイした譜面</h3>
-      <ul className="list-disc list-inside">
-        {recentCId.map((cid) => (
-          <li key={cid}>
-            <Link
-              href={`/share/${cid}`}
-              className="hover:text-blue-600 hover:underline"
-            >
-              {cid}: {recentBrief[cid]?.title}
-            </Link>
-          </li>
+      <p className="pl-2">
+        プレイしたい譜面のIDを知っている場合はこちらに入力してください。
+      </p>
+      <p className="pl-2">
+        ※譜面のURL (<span className="text-sm">{hostname}/share/*</span>)
+        にアクセスすることでもプレイできます。
+      </p>
+      <h3 className="text-xl font-bold font-title mt-3 mb-2">
+        最近プレイした譜面
+      </h3>
+      {recentCId.length > 0 ? (
+        <ul className="list-disc list-inside ml-3">
+          {recentCId.map((cid) => (
+            <ChartListItem key={cid} cid={cid} brief={recentBrief[cid]} />
+          ))}
+        </ul>
+      ) : (
+        <p className="pl-2">まだありません</p>
+      )}
+      <h3 className="text-xl font-bold font-title mt-3 mb-2">サンプル譜面</h3>
+      <p className="pl-2">はじめての方はこちらから</p>
+      <ul className="list-disc list-inside ml-3">
+        {sampleCId.map((cid) => (
+          <ChartListItem key={cid} cid={cid} brief={recentBrief[cid]} />
         ))}
       </ul>
     </IndexMain>
+  );
+}
+
+interface CProps {
+  cid: string;
+  brief?: ChartBrief;
+}
+function ChartListItem(props: CProps) {
+  return (
+    <li>
+      <Link
+        href={`/share/${props.cid}`}
+        className="hover:text-blue-600 hover:underline"
+      >
+        <span className="mr-1.5">{props.cid}:</span>
+        <span className="font-title">{props.brief?.title}</span>
+        <span className="ml-2 mr-1 text-sm">by</span>
+        <span className="font-title text-sm">{props.brief?.chartCreator}</span>
+      </Link>
+    </li>
   );
 }
