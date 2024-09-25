@@ -3,7 +3,9 @@
 import { useDisplayMode } from "@/scale";
 
 export function AboutContent1() {
-  const { isMobile } = useDisplayMode();
+  const { screenWidth, rem } = useDisplayMode();
+  const isMobile = screenWidth < 40 * rem;
+
   return (
     <>
       <div className="mb-4 space-y-2 text-center">

@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 export function AboutContent3() {
   const [hostname, setHostname] = useState("");
   useEffect(() => setHostname(window.location.host), []);
-  const { isMobile } = useDisplayMode();
+  const { screenWidth, rem } = useDisplayMode();
+  const isMobile = screenWidth < 40 * rem;
 
   return (
     <>

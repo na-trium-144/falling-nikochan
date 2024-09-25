@@ -32,7 +32,8 @@ export function AboutContent2() {
     }
   }, [nikochanPhase, flash]);
 
-  const { isMobile } = useDisplayMode();
+  const { screenWidth, rem } = useDisplayMode();
+  const isMobile = screenWidth < 40 * rem;
 
   return (
     <>
