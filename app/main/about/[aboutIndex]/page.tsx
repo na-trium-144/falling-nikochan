@@ -22,7 +22,7 @@ export default function AboutTab(context: { params: Params }) {
           ][aboutIndex]
         }
       </h3>
-      <div className="flex-1">
+      <div className="flex-1 text-center break-keep break-words">
         {aboutIndex === 1 ? (
           <AboutContent1 />
         ) : aboutIndex === 2 ? (
