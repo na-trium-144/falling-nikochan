@@ -9,7 +9,9 @@ interface Props {
 }
 export default function BackButton(props: Props) {
   return (
-    <div className={"mb-2 " + (props.className || "")}>
+    <div
+      className={"mb-2 flex flex-row items-center " + (props.className || "")}
+    >
       {props.reload ? (
         <a
           href={props.href}
@@ -25,9 +27,11 @@ export default function BackButton(props: Props) {
           ←
         </Link>
       )}
-      <span className="">FallingNikochan</span>
-      <span className="mx-2">/</span>
-      <span className="text-xl">{props.children}</span>
+      <div>
+        <span className="">FallingNikochan</span>
+        <span className="mx-2">/</span>
+        <span className="text-xl inline-block">{props.children}</span>
+      </div>
     </div>
   );
 }
