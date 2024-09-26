@@ -364,7 +364,9 @@ export default function Page(context: { params: Params }) {
 
   return (
     <main
-      className={"overflow-x-hidden " + (isMobile ? "" : "overflow-y-hidden ")}
+      className={
+        "overflow-x-hidden " + (isMobile ? "" : "h-screen overflow-y-hidden ")
+      }
       style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
@@ -404,14 +406,13 @@ export default function Page(context: { params: Params }) {
     >
       <div
         className={
-          "w-full " +
-          (isMobile ? "h-screen" : "h-full flex items-stretch flex-row ")
+          "w-full " + (isMobile ? "" : "h-full flex items-stretch flex-row ")
         }
       >
         <div
           className={
-            (isMobile ? "h-full " : "basis-4/12 ") +
-            "grow-0 shrink-0 h-full flex flex-col items-stretch p-3"
+            (isMobile ? "" : "basis-4/12 h-full ") +
+            "grow-0 shrink-0 flex flex-col items-stretch p-3"
           }
         >
           <BackButton className="" href="/main/edit" reload>
@@ -419,13 +420,12 @@ export default function Page(context: { params: Params }) {
           </BackButton>
           <div
             className={
-              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex flex-col items-center " +
-              (isMobile ? "h-1/3 " : "")
+              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
             }
           >
             <FlexYouTube
-              fixedSide={isMobile ? "height" : "width"}
-              className={isMobile ? "w-max h-full" : ""}
+              fixedSide="width"
+              className={isMobile ? "w-full h-max" : "w-full "}
               isMobile={false}
               control={true}
               id={chart?.ytId}
@@ -435,7 +435,12 @@ export default function Page(context: { params: Params }) {
               onStop={onStop}
             />
           </div>
-          <div className="relative flex-1 basis-8/12 ">
+          <div
+            className={
+              "relative " +
+              (isMobile ? "w-full aspect-square" : "flex-1 basis-8/12 ")
+            }
+          >
             <FallingWindow
               className="absolute inset-0"
               notes={notesAll}
@@ -553,7 +558,7 @@ export default function Page(context: { params: Params }) {
               )
             )}
           </div>
-          <Box className="flex-1 p-3 overflow-auto">
+          <Box className="flex-1 p-3 overflow-auto min-h-96">
             {tab === 0 ? (
               <MetaTab
                 chart={chart}

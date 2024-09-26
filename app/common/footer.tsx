@@ -16,7 +16,7 @@ export default function Footer() {
         }
       >
         <Link
-          className="relative hover:text-blue-600 hover:underline"
+          className="relative w-max hover:text-blue-600 hover:underline"
           href="https://github.com/na-trium-144/falling-nikochan"
         >
           <Github className="absolute bottom-1 left-0" />

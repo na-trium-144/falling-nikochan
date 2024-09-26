@@ -23,83 +23,130 @@ export function AboutContent3() {
       >
         <div className="flex-1 space-y-2 text-center">
           <p>
-            好きな楽曲を使って{isMobile && <br />}譜面を作ることができます。
+            好きな楽曲を
+            <wbr />
+            使って
+            <wbr />
+            譜面を
+            <wbr />
+            作ることが
+            <wbr />
+            できます。
           </p>
           <p>
-            FallingNikochanでは{isMobile && <br />}
-            音源をダウンロードする必要はなく、
-            <br />
-            <span className="relative inline-block w-5">
-              <Youtube
-                className="absolute left-0 bottom-0 translate-y-1"
-                theme="filled"
-              />
+            Falling Nikochan では
+            <wbr />
+            音源を
+            <wbr />
+            ダウンロード
+            <wbr />
+            する必要は
+            <wbr />
+            なく、
+            <span className="relative inline-block">
+              <Youtube className="absolute left-0.5 bottom-1" theme="filled" />
+              <span className="ml-5 mr-1">YouTube</span>
             </span>
-            YouTube を埋め込んで{isMobile && <br />}音源を再生するので、
-            <br />
-            YouTubeにアップロードされている{isMobile && <br />}
-            楽曲であればなんでも使用できます。
+            を<wbr />
+            埋め込んで
+            <wbr />
+            音源を
+            <wbr />
+            再生する
+            <wbr />
+            ので、
+            <wbr />
+            YouTube に<wbr />
+            アップロード
+            <wbr />
+            されている
+            <wbr />
+            楽曲で
+            <wbr />
+            あれば
+            <wbr />
+            なんでも
+            <wbr />
+            使用できます。
           </p>
-          {/*<p>
-          FallingNikochanはYouTubeの動画を再生しているだけなので、
-          <br />
-          権利的な問題も発生しません。
-          <br />
-          (FallingNikochanで音源を再生するとYouTube上の元の動画の再生回数が1増えます)
-        </p>*/}
         </div>
-        <Box
-          className={
-            "rounded-none relative " + (isMobile ? "h-48 w-32 " : "w-56 h-24 ")
-          }
-        >
-          <div
+        {screenWidth >= 25 * rem && (
+          <Box
             className={
-              "absolute bg-amber-700 rounded-sm m-1 " +
-              (isMobile
-                ? "top-0 inset-x-0 p-1 pl-10 h-12"
-                : "top-0 right-0 p-1 pb-2 w-20 h-14 ")
+              "rounded-none relative " +
+              (isMobile ? "basis-1/3 shrink max-w-32 " : "w-56 h-24 ")
             }
           >
-            <div className="bg-black w-full h-full text-center flex items-center justify-center">
-              <Youtube
-                className="inline-block w-max text-red-600 text-4xl"
-                theme="filled"
-              />
+            <div
+              className={
+                "absolute bg-amber-700 rounded-sm m-1 " +
+                (isMobile
+                  ? "top-0 inset-x-0 p-1 pl-10 h-12"
+                  : "top-0 right-0 p-1 pb-2 w-20 h-14 ")
+              }
+            >
+              <div className="bg-black w-full h-full text-center flex items-center justify-center">
+                <Youtube
+                  className="inline-block w-max text-red-600 text-4xl"
+                  theme="filled"
+                />
+              </div>
             </div>
-          </div>
-          <TargetLine left={0} right={0} bottom={isMobile ? 30 : 15} />
-          <div
-            className="absolute "
-            style={{
-              width: 20,
-              height: 20,
-              left: 40,
-              bottom: isMobile ? 35 : 20,
-            }}
-          >
-            <img src={`/nikochan0.svg`} className="w-full h-full " />
-          </div>
-          <div
-            className="absolute "
-            style={{
-              width: 20,
-              height: 20,
-              left: 70,
-              bottom: isMobile ? 70 : 55,
-            }}
-          >
-            <img src={`/nikochan0.svg`} className="w-full h-full " />
-          </div>
-        </Box>
+            <TargetLine left={0} right={0} bottom={isMobile ? 30 : 15} />
+            <div
+              className="absolute "
+              style={{
+                width: 20,
+                height: 20,
+                left: 40,
+                bottom: isMobile ? 35 : 20,
+              }}
+            >
+              <img src={`/nikochan0.svg`} className="w-full h-full " />
+            </div>
+            <div
+              className="absolute "
+              style={{
+                width: 20,
+                height: 20,
+                left: 70,
+                bottom: isMobile ? 70 : 55,
+              }}
+            >
+              <img src={`/nikochan0.svg`} className="w-full h-full " />
+            </div>
+          </Box>
+        )}
       </div>
       <div className="mb-4 space-y-2 text-center">
         <p>
-          作った譜面は、譜面ID (6桁の数字) を入力するか
-          <br />
-          譜面のURL (<span className="text-sm">{hostname}/share/*</span>)
-          <br />
-          にアクセスすることで他の人も遊ぶことができます。
+          作った譜面は、
+          <wbr />
+          譜面ID (6桁の数字)
+          <wbr />を<wbr />
+          入力
+          <wbr />
+          するか、
+          <wbr />
+          譜面のURL (
+          <span className="text-sm">
+            {hostname}&#47;<wbr />
+            share
+            <wbr />
+            &#47;*
+          </span>
+          ) に<wbr />
+          アクセス
+          <wbr />
+          する
+          <wbr />
+          ことで
+          <wbr />
+          他の人も
+          <wbr />
+          遊ぶことが
+          <wbr />
+          できます。
         </p>
       </div>
     </>

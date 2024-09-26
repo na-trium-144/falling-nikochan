@@ -28,7 +28,7 @@ export default function Input(props: Props) {
       className={
         "mx-1 px-1 font-main-ui text-base " +
         (!props.left ? "text-right " : "") +
-        "border-0 border-b border-black bg-transparent " +
+        "border-0 border-b border-black bg-transparent appearance-none " +
         (props.isValid && !props.isValid(value) ? "text-red-500 " : "") +
         (props.className || "")
       }
