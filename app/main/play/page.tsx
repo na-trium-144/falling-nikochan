@@ -65,7 +65,7 @@ export default function PlayTab() {
       <h3 className="mb-2">
         <span className="text-xl font-bold font-title mb-2">譜面IDを入力:</span>
         <Input
-          className="ml-4"
+          className="ml-4 w-20"
           actualValue=""
           updateValue={gotoCId}
           isValid={(v) =>
@@ -73,20 +73,52 @@ export default function PlayTab() {
           }
           left
         />
-        <span>{cidErrorMsg}</span>
+        <span className="ml-1 inline-block">{cidErrorMsg}</span>
       </h3>
-      <p className="pl-2">
-        プレイしたい譜面のIDを知っている場合はこちらに入力してください。
+      <p className="pl-2 break-keep break-words">
+        プレイしたい
+        <wbr />
+        譜面の
+        <wbr />
+        IDを
+        <wbr />
+        知って
+        <wbr />
+        いる
+        <wbr />
+        場合は
+        <wbr />
+        こちらに
+        <wbr />
+        入力して
+        <wbr />
+        ください。
       </p>
-      <p className="pl-2">
-        ※譜面のURL (<span className="text-sm">{hostname}/share/*</span>)
-        にアクセスすることでもプレイできます。
+      <p className="pl-2 break-keep break-words">
+        ※譜面のURL (
+        <span className="text-sm">
+          {hostname}&#47;
+          <wbr />
+          share
+          <wbr />
+          &#47;*
+        </span>
+        ) に<wbr />
+        アクセス
+        <wbr />
+        する
+        <wbr />
+        ことでも
+        <wbr />
+        プレイ
+        <wbr />
+        できます。
       </p>
       <h3 className="text-xl font-bold font-title mt-3 mb-2">
         最近プレイした譜面
       </h3>
       {recentCId.length > 0 ? (
-        <ul className="list-disc list-inside ml-3">
+        <ul className="ml-3">
           {recentCId.map((cid) => (
             <ChartListItem key={cid} cid={cid} brief={recentBrief[cid]} />
           ))}
@@ -111,15 +143,22 @@ interface CProps {
 }
 function ChartListItem(props: CProps) {
   return (
-    <li>
+    <li className="flex flex-row items-start w-full">
+      <span className="flex-none mr-2">•</span>
       <Link
         href={`/share/${props.cid}`}
-        className="hover:text-blue-600 hover:underline"
+        className="flex-1 min-w-0 hover:text-blue-600 "
       >
-        <span className="mr-1.5">{props.cid}:</span>
-        <span className="font-title">{props.brief?.title}</span>
-        <span className="ml-2 mr-1 text-sm">by</span>
-        <span className="font-title text-sm">{props.brief?.chartCreator}</span>
+        <span className="inline-block">
+        <span className="inline-block ">{props.cid}:</span>
+        <span className="inline-block ml-2 font-title">{props.brief?.title}</span>
+        </span>
+        <span className="inline-block ml-2 text-sm">
+          <span className="">by</span>
+          <span className="ml-1 font-title ">
+            {props.brief?.chartCreator}
+          </span>
+        </span>
       </Link>
     </li>
   );

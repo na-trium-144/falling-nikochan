@@ -120,9 +120,33 @@ export function AboutContent3() {
       </div>
       <div className="mb-4 space-y-2 text-center">
         <p>
-          作った譜面は、<wbr/>譜面ID (6桁の数字)<wbr/>を<wbr/>入力<wbr/>するか、<wbr/>譜面のURL (
-          <span className="text-sm">{hostname}/<wbr/>share<wbr/>/*</span>)
-          に<wbr/>アクセス<wbr/>する<wbr/>ことで<wbr/>他の人も<wbr/>遊ぶことが<wbr/>できます。
+          作った譜面は、
+          <wbr />
+          譜面ID (6桁の数字)
+          <wbr />を<wbr />
+          入力
+          <wbr />
+          するか、
+          <wbr />
+          譜面のURL (
+          <span className="text-sm">
+            {hostname}&#47;<wbr />
+            share
+            <wbr />
+            &#47;*
+          </span>
+          ) に<wbr />
+          アクセス
+          <wbr />
+          する
+          <wbr />
+          ことで
+          <wbr />
+          他の人も
+          <wbr />
+          遊ぶことが
+          <wbr />
+          できます。
         </p>
       </div>
     </>
