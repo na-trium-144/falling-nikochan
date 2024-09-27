@@ -39,6 +39,8 @@ export default function AboutTab(context: { params: Params }) {
             <Link
               className="p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
               href={`/main/about/${aboutIndex - 1}`}
+              scroll={false}
+              replace
             >
               &lt;
             </Link>
@@ -52,6 +54,8 @@ export default function AboutTab(context: { params: Params }) {
             <Link
               className="p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
               href={`/main/about/${aboutIndex + 1}`}
+              scroll={false}
+              replace
             >
               &gt;
             </Link>

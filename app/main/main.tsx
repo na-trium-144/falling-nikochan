@@ -22,9 +22,9 @@ export function IndexMain(props: Props) {
   console.log(screenWidth / rem);
   return (
     <main className="flex flex-col w-full min-h-screen h-max">
-      {(isMobile && props.tab !== undefined) ?(    
-              <Header>{tabTitles[props.tab]}</Header>
-) : (
+      {isMobile && props.tab !== undefined ? (
+        <Header>{tabTitles[props.tab]}</Header>
+      ) : (
         <div className="flex-none basis-32 flex flex-row items-center justify-center">
           <div className="text-4xl">Falling Nikochan</div>
         </div>
@@ -41,7 +41,7 @@ export function IndexMain(props: Props) {
           <div className="flex flex-col justify-center w-56 shrink-0">
             {tabTitles.map((tabName, i) =>
               i === props.tab ? (
-                <Link key={i} href="/">
+                <Link key={i} href="/" scroll={false} replace>
                   <Box className="text-center rounded-r-none py-3 pl-2 pr-2">
                     {tabName}
                   </Box>
@@ -56,6 +56,8 @@ export function IndexMain(props: Props) {
                       : "rounded-lg p-3")
                   }
                   href={tabURLs[i]}
+                  scroll={false}
+                  replace
                 >
                   {tabName}
                 </Link>
@@ -75,7 +77,7 @@ export function IndexMain(props: Props) {
           </Box>
         )}
       </div>
-      <Footer nav={isMobile && props.tab !== undefined}/>
+      <Footer nav={isMobile && props.tab !== undefined} />
     </main>
   );
 }
