@@ -7,7 +7,7 @@ import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import Link from "next/link";
 import { PlayOption } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
-import { getBrief } from "@/api/brief/[cid]/route";
+import { getBrief } from "@/api/brief/brief";
 
 export default async function ShareChart(context: { params: Params }) {
   const cid = context.params.cid;
