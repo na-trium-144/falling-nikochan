@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartBrief } from "@/chartFormat/chart";
-import BackButton from "@/common/backButton";
+import Header from "@/common/header";
 import { getBestScore } from "@/common/bestScore";
 import { Box, Error } from "@/common/box";
 import Button from "@/common/button";
@@ -56,12 +56,12 @@ export default function ShareChart(context: { params: Params }) {
 
   return (
     <main className="flex flex-col items-center w-full min-h-screen h-max">
+      {isMobile && <Header>ID: {cid}</Header>}
       <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
         <Box
           className="m-auto max-w-full flex flex-col p-6 shrink"
           style={{ flexBasis: "60rem" }}
         >
-          {isMobile && <BackButton href="/main/play">ID: {cid}</BackButton>}
           <div className={isMobile ? "" : "flex flex-row-reverse items-center"}>
             <FlexYouTube
               fixedSide="width"
@@ -78,9 +78,7 @@ export default function ShareChart(context: { params: Params }) {
               ytPlayer={ytPlayer}
             />
             <div className={isMobile ? "" : "flex-1 self-start"}>
-              {!isMobile && (
-                <BackButton href="/main/play">ID: {cid}</BackButton>
-              )}
+              {!isMobile && <p className="mb-1">ID: {cid}</p>}
               <p className="font-title text-2xl">{brief?.title}</p>
               <p className="font-title text-lg">{brief?.composer}</p>
               <p className="text-sm mt-1">
@@ -153,7 +151,7 @@ export default function ShareChart(context: { params: Params }) {
           </p>
         </Box>
       </div>
-      <Footer />
+      <Footer nav />
     </main>
   );
 }

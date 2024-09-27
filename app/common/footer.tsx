@@ -1,13 +1,37 @@
 "use client";
 
+import { tabTitles, tabURLs } from "@/main/main";
 import { useDisplayMode } from "@/scale";
 import { Github } from "@icon-park/react";
 import Link from "next/link";
 
-export default function Footer() {
+interface Props {
+  nav?: boolean;
+}
+export default function Footer(props: Props) {
   const { screenWidth, screenHeight, rem } = useDisplayMode();
   return (
     <footer className="">
+      {props.nav && (
+        <div
+          className={
+            "text-center mb-3 divide-solid divide-black " +
+            (screenWidth >= 25 * rem
+              ? "divide-x "
+              : "flex flex-col items-stretch w-max mx-auto")
+          }
+        >
+          {tabTitles.map((tabName, i) => (
+            <Link
+              key={i}
+              className="px-2 hover:text-slate-500 "
+              href={tabURLs[i]}
+            >
+              {tabName}
+            </Link>
+          ))}
+        </div>
+      )}
       <div
         className={
           screenWidth < 45 * rem

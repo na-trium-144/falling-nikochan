@@ -35,7 +35,7 @@ import { addRecent } from "@/common/recent";
 import { Chart, hashPasswd } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { useDisplayMode } from "@/scale";
-import BackButton from "@/common/backButton";
+import Header from "@/common/header";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 
@@ -340,9 +340,9 @@ export default function Page(context: { params: Params }) {
     }
     return (
       <CenterBoxOnlyPage>
-        <BackButton className="" href="/main/edit" reload>
+        <Header reload>
           Edit
-        </BackButton>
+        </Header>
         <p>編集用パスワードを入力してください。</p>
         {passwdFailed && <p>パスワードが違います。</p>}
         <Input
@@ -415,12 +415,12 @@ export default function Page(context: { params: Params }) {
             "grow-0 shrink-0 flex flex-col items-stretch p-3"
           }
         >
-          <BackButton className="" href="/main/edit" reload>
+          <Header reload>
             Edit
-          </BackButton>
+          </Header>
           <div
             className={
-              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
+              "grow-0 shrink-0 mt-3 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
             }
           >
             <FlexYouTube

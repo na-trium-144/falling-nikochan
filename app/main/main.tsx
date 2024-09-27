@@ -1,11 +1,14 @@
 "use client";
 
-import BackButton from "@/common/backButton";
+import Header from "@/common/header";
 import { Box } from "@/common/box";
 import Footer from "@/common/footer";
 import { useDisplayMode } from "@/scale";
 import Link from "next/link";
 import { ReactNode } from "react";
+
+export const tabTitles = ["Falling Nikochan とは？", "プレイする", "譜面作成"];
+export const tabURLs = ["/main/about/1", "/main/play", "/main/edit"];
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -13,15 +16,15 @@ interface Props {
 }
 export function IndexMain(props: Props) {
   const { screenWidth, screenHeight, rem } = useDisplayMode();
-  const tabTitles = ["Falling Nikochan とは？", "プレイする", "譜面作成"];
-  const tabURLs = ["/main/about/1", "/main/play", "/main/edit"];
 
   const isMobile = screenWidth < 40 * rem;
   console.log(isMobile);
   console.log(screenWidth / rem);
   return (
     <main className="flex flex-col w-full min-h-screen h-max">
-      {!(isMobile && props.tab !== undefined) && (
+      {(isMobile && props.tab !== undefined) ?(    
+              <Header>{tabTitles[props.tab]}</Header>
+) : (
         <div className="flex-none basis-32 flex flex-row items-center justify-center">
           <div className="text-4xl">Falling Nikochan</div>
         </div>
@@ -29,7 +32,7 @@ export function IndexMain(props: Props) {
       <div
         className={
           (props.tab !== undefined ? "basis-96 " : "basis-auto ") +
-          (isMobile ? "" : "max-h-screen overflow-hidden ") +
+          (isMobile ? "" : "max-h-screen overflow-hidden mb-3 ") +
           "grow shrink-0 " +
           "flex flex-row justify-center px-6 "
         }
@@ -68,14 +71,11 @@ export function IndexMain(props: Props) {
             }
             style={{ flexBasis: isMobile ? undefined : 600 }}
           >
-            {isMobile && (
-              <BackButton href="/">{tabTitles[props.tab]}</BackButton>
-            )}
             {props.children}
           </Box>
         )}
       </div>
-      <Footer />
+      <Footer nav={isMobile && props.tab !== undefined}/>
     </main>
   );
 }

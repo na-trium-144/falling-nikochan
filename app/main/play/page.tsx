@@ -147,17 +147,17 @@ function ChartListItem(props: CProps) {
       <span className="flex-none mr-2">•</span>
       <Link
         href={`/share/${props.cid}`}
-        className="flex-1 min-w-0 hover:text-blue-600 "
+        className="flex-1 min-w-0 hover:text-slate-500 "
       >
         <span className="inline-block">
-        <span className="inline-block ">{props.cid}:</span>
-        <span className="inline-block ml-2 font-title">{props.brief?.title}</span>
+          <span className="inline-block ">{props.cid}:</span>
+          <span className="inline-block ml-2 font-title">
+            {props.brief?.title}
+          </span>
         </span>
         <span className="inline-block ml-2 text-sm">
           <span className="">by</span>
-          <span className="ml-1 font-title ">
-            {props.brief?.chartCreator}
-          </span>
+          <span className="ml-1 font-title ">{props.brief?.chartCreator}</span>
         </span>
       </Link>
     </li>
