@@ -56,29 +56,30 @@ export default function ShareChart(context: { params: Params }) {
 
   return (
     <main className="flex flex-col items-center w-full min-h-screen h-max">
-      {isMobile && <Header>ID: {cid}</Header>}
+      <div className="main-wide:hidden w-full">
+        <Header>ID: {cid}</Header>
+      </div>
       <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
         <Box
           className="m-auto max-w-full flex flex-col p-6 shrink"
           style={{ flexBasis: "60rem" }}
         >
-          <div className={isMobile ? "" : "flex flex-row-reverse items-center"}>
+          <div className="main-wide:flex main-wide:flex-row-reverse main-wide:items-center">
             <FlexYouTube
               fixedSide="width"
               className={
-                isMobile
-                  ? "my-2 w-full"
-                  : screenWidth < 60 * rem
-                  ? "basis-1/3 "
-                  : "w-80 "
+                "my-2 w-full " +
+                (screenWidth < 60 * rem
+                  ? "main-wide:basis-1/3 "
+                  : "main-wide:w-80 ")
               }
               isMobile={isMobile}
               id={brief?.ytId}
               control={true}
               ytPlayer={ytPlayer}
             />
-            <div className={isMobile ? "" : "flex-1 self-start"}>
-              {!isMobile && <p className="mb-1">ID: {cid}</p>}
+            <div className="main-wide:flex-1 main-wide:self-start">
+              <p className="hidden main-wide:block mb-1">ID: {cid}</p>
               <p className="font-title text-2xl">{brief?.title}</p>
               <p className="font-title text-lg">{brief?.composer}</p>
               <p className="text-sm mt-1">
@@ -90,26 +91,19 @@ export default function ShareChart(context: { params: Params }) {
             </div>
           </div>
           <p className="mt-2">
-            {isMobile ? (
-              <Link
-                className="mx-2 text-blue-600 hover:underline"
-                href={`/share/${cid}`}
-              >
-                共有用リンク
-              </Link>
-            ) : (
-              <>
-                <span>共有用リンク:</span>
-                <Link
-                  className="mx-2 text-blue-600 hover:underline"
-                  href={`/share/${cid}`}
-                >
-                  {origin}/share/{cid}
-                </Link>
-              </>
-            )}
+            <span className="hidden main-wide:inline-block mr-2">共有用リンク:</span>
+            <Link
+              className="text-blue-600 hover:underline"
+              href={`/share/${cid}`}
+            >
+              <span className="main-wide:hidden">共有用リンク</span>
+              <span className="hidden main-wide:inline-block">
+                {origin}/share/{cid}
+              </span>
+            </Link>
             {navigator && navigator.clipboard && (
               <Button
+                className="ml-2"
                 text="コピー"
                 onClick={() =>
                   navigator.clipboard.writeText(`${origin}/share/${cid}`)

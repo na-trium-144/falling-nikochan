@@ -12,16 +12,55 @@ export default function AboutTab(context: { params: Params }) {
 
   return (
     <IndexMain tab={0}>
-      <h3 className="text-xl font-bold font-title mb-4">
-        {
-          [
-            "",
-            "FallingNikochanの概要",
-            "FallingNikochanのルール",
-            "譜面を作ろう",
-          ][aboutIndex]
-        }
-      </h3>
+      <div className="flex flex-row items-center mb-4">
+        {aboutIndex > 1 ? (
+          <Link
+            className={
+              "px-2 text-center inline-block w-7 rounded-full " +
+              "text-lg text-bold hover:bg-gray-200 active:bg-gray-300 "
+            }
+            href={`/main/about/${aboutIndex - 1}`}
+            scroll={false}
+            replace
+          >
+            &lt;
+          </Link>
+        ) : (
+          <span className="inline-block w-7" />
+        )}
+        <div className="flex-1">
+          <span className="inline-block">
+            <span className="inline-block w-6 text-right">{aboutIndex}</span>
+            <span className="mx-2">/</span>
+            <span className="inline-block w-6 text-left">{maxIndex}</span>
+          </span>
+          <span className="inline-block text-xl font-bold font-title ">
+            {
+              [
+                "",
+                "概要",
+                "遊び方",
+                "譜面を作ろう",
+              ][aboutIndex]
+            }
+          </span>
+        </div>
+        {aboutIndex < maxIndex ? (
+          <Link
+            className={
+              "px-2 text-center inline-block w-7 rounded-full " +
+              "text-lg text-bold hover:bg-gray-200 active:bg-gray-300 "
+            }
+            href={`/main/about/${aboutIndex + 1}`}
+            scroll={false}
+            replace
+          >
+            &gt;
+          </Link>
+        ) : (
+          <span className="inline-block w-7" />
+        )}
+      </div>
       <div className="flex-1 text-center break-keep break-words">
         {aboutIndex === 1 ? (
           <AboutContent1 />
@@ -32,35 +71,6 @@ export default function AboutTab(context: { params: Params }) {
         ) : (
           <p> Not Found</p>
         )}
-      </div>
-      <div className="flex flex-row items-baseline">
-        <div className="flex-1 text-right">
-          {aboutIndex > 1 && (
-            <Link
-              className="p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
-              href={`/main/about/${aboutIndex - 1}`}
-              scroll={false}
-              replace
-            >
-              &lt;
-            </Link>
-          )}
-        </div>
-        <span className="w-6 text-right">{aboutIndex}</span>
-        <span className="mx-2">/</span>
-        <span className="w-6 text-left">{maxIndex}</span>
-        <div className="flex-1 text-left">
-          {aboutIndex < maxIndex && (
-            <Link
-              className="p-2 aspect-square rounded-full text-xl text-bold hover:bg-gray-200"
-              href={`/main/about/${aboutIndex + 1}`}
-              scroll={false}
-              replace
-            >
-              &gt;
-            </Link>
-          )}
-        </div>
       </div>
     </IndexMain>
   );

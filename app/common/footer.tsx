@@ -1,7 +1,6 @@
 "use client";
 
 import { tabTitles, tabURLs } from "@/main/main";
-import { useDisplayMode } from "@/scale";
 import { Github } from "@icon-park/react";
 import Link from "next/link";
 
@@ -9,16 +8,14 @@ interface Props {
   nav?: boolean;
 }
 export default function Footer(props: Props) {
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
   return (
     <footer className="">
       {props.nav && (
         <div
           className={
             "text-center mb-3 divide-solid divide-black " +
-            (screenWidth >= 25 * rem
-              ? "divide-x "
-              : "flex flex-col items-stretch w-max mx-auto")
+            "flex flex-col space-y-1 items-stretch w-max mx-auto " +
+            "footer-wide:divide-x footer-wide:space-y-0 footer-wide:flex-row "
           }
         >
           {tabTitles.map((tabName, i) => (
@@ -34,9 +31,8 @@ export default function Footer(props: Props) {
       )}
       <div
         className={
-          screenWidth < 45 * rem
-            ? "flex flex-col items-center "
-            : "flex flex-row justify-center space-x-3"
+          "flex flex-col items-center justify-center " +
+          "footer-wide2:flex-row footer-wide2:items-baseline footer-wide2:space-x-3"
         }
       >
         <Link
@@ -46,13 +42,11 @@ export default function Footer(props: Props) {
           <Github className="absolute bottom-1 left-0" />
           <span className="ml-5">na-trium-144/falling-nikochan</span>
         </Link>
-        {screenWidth >= 25 * rem && (
-          <div className="space-x-2">
-            <span>Build</span>
-            <span>{process.env.buildDate}</span>
-            <span>({process.env.buildCommit})</span>
-          </div>
-        )}
+        <div className="hidden footer-wide:inline-block space-x-2">
+          <span>Build</span>
+          <span>{process.env.buildDate}</span>
+          <span>({process.env.buildCommit})</span>
+        </div>
       </div>
       <p className="my-1 text-center text-sm">
         ※ FallingNikochanは開発中です。

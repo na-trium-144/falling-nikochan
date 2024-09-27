@@ -1,6 +1,7 @@
 import { Key } from "./key";
 
 interface Props {
+  className?: string;
   onClick?: () => void;
   text?: string;
   keyName?: string;
@@ -13,7 +14,8 @@ export default function Button(props: Props) {
         "mx-0.5 p-1 border border-gray-600 rounded " +
         (props.disabled
           ? "bg-gray-500 "
-          : "bg-gray-200 hover:bg-gray-100 active:bg-gray-300 active:shadow-inner")
+          : "bg-gray-200 hover:bg-gray-100 active:bg-gray-300 active:shadow-inner ") +
+        props.className
       }
       onClick={() => props.onClick && props.onClick()}
       onKeyDown={(e) => e.stopPropagation()}

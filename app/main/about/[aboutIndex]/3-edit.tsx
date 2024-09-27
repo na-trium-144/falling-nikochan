@@ -16,9 +16,9 @@ export function AboutContent3() {
     <>
       <div
         className={
-          isMobile
-            ? "flex flex-row space-x-2 mb-4 "
-            : "flex flex-col space-y-2 items-center mb-4 "
+          "flex flex-row space-x-2 mb-4 items-center " + 
+          "main-wide:flex-col main-wide:space-x-0 main-wide:space-y-2 "+
+          "main-wide:mb-4 "
         }
       >
         <div className="flex-1 space-y-2 text-center">
@@ -74,15 +74,14 @@ export function AboutContent3() {
           <Box
             className={
               "rounded-none relative " +
-              (isMobile ? "basis-1/3 shrink max-w-32 " : "w-56 h-24 ")
+              "basis-1/3 shrink max-w-32 h-48 " + "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24 "
             }
           >
             <div
               className={
                 "absolute bg-amber-700 rounded-sm m-1 " +
-                (isMobile
-                  ? "top-0 inset-x-0 p-1 pl-10 h-12"
-                  : "top-0 right-0 p-1 pb-2 w-20 h-14 ")
+                "top-0 inset-x-0 p-1 pl-10 h-12 "+
+                "main-wide:left-auto main-wide:pb-2 main-wide:w-20 main-wide:h-14 "
               }
             >
               <div className="bg-black w-full h-full text-center flex items-center justify-center">
