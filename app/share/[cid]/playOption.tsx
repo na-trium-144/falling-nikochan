@@ -72,7 +72,7 @@ export function PlayOption(props: Props) {
         </label>
       </p>
       <p className="mt-3">
-        <Link href={`/play/${props.cid}?auto=${auto ? 1 : 0}`}>
+        <Link href={`/play/${props.cid}?auto=${auto ? 1 : 0}`} replace>
           <Button text="ゲーム開始！" />
         </Link>
       </p>
