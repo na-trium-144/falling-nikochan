@@ -5,6 +5,9 @@ import { ChartBrief } from "@/chartFormat/chart";
 
 export async function GET(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
+  return getBrief(cid);
+}
+export async function getBrief(cid: string): Promise<NextResponse> {
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
     return NextResponse.json(

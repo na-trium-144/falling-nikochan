@@ -7,7 +7,7 @@ import { useResizeDetector } from "react-resize-detector";
 interface Props {
   className?: string;
   style?: object;
-  isMobile: boolean;
+  isMobile?: boolean;
   control: boolean;
   id?: string;
   ytPlayer: { current?: YouTubePlayer };
@@ -18,7 +18,6 @@ interface Props {
 }
 export function FlexYouTube(props: Props) {
   const {
-    isMobile,
     id,
     control,
     ytPlayer,

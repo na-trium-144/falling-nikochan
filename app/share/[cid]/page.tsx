@@ -1,56 +1,35 @@
-"use client";
-
 import { ChartBrief } from "@/chartFormat/chart";
 import Header from "@/common/header";
-import { getBestScore } from "@/common/bestScore";
 import { Box, Error } from "@/common/box";
 import Button from "@/common/button";
 import Footer from "@/common/footer";
-import { rankStr } from "@/common/rank";
-import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
-import { useDisplayMode } from "@/scale";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { PlayOption } from "./playOption";
+import { FlexYouTubeShare } from "./youtube";
+import { getBrief } from "@/api/brief/[cid]/route";
 
-export default function ShareChart(context: { params: Params }) {
+export default async function ShareChart(context: { params: Params }) {
   const cid = context.params.cid;
-  const [brief, setBrief] = useState<ChartBrief>();
-  const [errorStatus, setErrorStatus] = useState<number>();
-  const [errorMsg, setErrorMsg] = useState<string>("");
-  const [bestScoreState, setBestScoreState] = useState<number>(0);
-  const [origin, setOrigin] = useState<string>("");
-  useEffect(() => setOrigin(window.location.origin), []);
+  let brief: ChartBrief | undefined = undefined;
+  let errorMsg: string | undefined = undefined;
+  let errorStatus: number | undefined = undefined;
 
-  useEffect(() => {
-    setBestScoreState(getBestScore(cid));
-    void (async () => {
-      const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-      if (res.ok) {
-        // cidからタイトルなどを取得
-        setBrief(await res.json());
-        setErrorMsg("");
-        setErrorStatus(undefined);
-      } else {
-        setBrief(undefined);
-        setErrorStatus(res.status);
-        try {
-          setErrorMsg(String((await res.json()).message));
-        } catch (e) {
-          setErrorMsg(String(e));
-        }
-      }
-    })();
-  }, [cid]);
+  // const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+  const res = await getBrief(cid);
+  if (res.ok) {
+    // cidからタイトルなどを取得
+    brief = await res.json();
+  } else {
+    errorStatus = res.status;
+    try {
+      errorMsg = String((await res.json()).message);
+    } catch (e) {
+      errorMsg = String(e);
+    }
+  }
 
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
-  const isMobile = screenWidth < 40 * rem;
-
-  const ytPlayer = useRef<YouTubePlayer>();
-
-  const [auto, setAuto] = useState<boolean>(false);
-
-  if (errorMsg) {
+  if (!brief) {
     return <Error status={errorStatus} message={errorMsg} />;
   }
 
@@ -65,19 +44,7 @@ export default function ShareChart(context: { params: Params }) {
           style={{ flexBasis: "60rem" }}
         >
           <div className="main-wide:flex main-wide:flex-row-reverse main-wide:items-center">
-            <FlexYouTube
-              fixedSide="width"
-              className={
-                "my-2 w-full " +
-                (screenWidth < 60 * rem
-                  ? "main-wide:basis-1/3 "
-                  : "main-wide:w-80 ")
-              }
-              isMobile={isMobile}
-              id={brief?.ytId}
-              control={true}
-              ytPlayer={ytPlayer}
-            />
+            <FlexYouTubeShare ytId={brief.ytId} />
             <div className="main-wide:flex-1 main-wide:self-start">
               <p className="hidden main-wide:block mb-1">ID: {cid}</p>
               <p className="font-title text-2xl">{brief?.title}</p>
@@ -85,64 +52,12 @@ export default function ShareChart(context: { params: Params }) {
               <p className="text-sm mt-1">
                 <span>Chart by</span>
                 <span className="ml-3 font-title text-lg">
-                  {brief?.chartCreator}
+                  {brief.chartCreator}
                 </span>
               </p>
             </div>
           </div>
-          <p className="mt-2">
-            <span className="hidden main-wide:inline-block mr-2">共有用リンク:</span>
-            <Link
-              className="text-blue-600 hover:underline"
-              href={`/share/${cid}`}
-            >
-              <span className="main-wide:hidden">共有用リンク</span>
-              <span className="hidden main-wide:inline-block">
-                {origin}/share/{cid}
-              </span>
-            </Link>
-            {navigator && navigator.clipboard && (
-              <Button
-                className="ml-2"
-                text="コピー"
-                onClick={() =>
-                  navigator.clipboard.writeText(`${origin}/share/${cid}`)
-                }
-              />
-            )}
-          </p>
-          <p>
-            <span>Best Score:</span>
-            <span className="inline-block text-xl w-10 text-right">
-              {Math.floor(bestScoreState)}
-            </span>
-            <span>.</span>
-            <span className="inline-block w-6">
-              {(Math.floor(bestScoreState * 100) % 100)
-                .toString()
-                .padStart(2, "0")}
-            </span>
-            {bestScoreState > 0 && (
-              <span className="text-xl">({rankStr(bestScoreState)})</span>
-            )}
-          </p>
-          <p className="mt-2">
-            <input
-              className="ml-1 mr-1"
-              type="checkbox"
-              id="auto"
-              checked={auto}
-              onChange={(v) => setAuto(v.target.checked)}
-            />
-            <label htmlFor="auto">
-              <span>オートプレイ</span>
-            </label>
-          </p>
-          <p className="mt-3">
-            <Link href={`/play/${cid}?auto=${auto ? 1 : 0}`}>
-              <Button text="ゲーム開始！" />
-            </Link>
-          </p>
+          <PlayOption cid={cid} />
         </Box>
       </div>
       <Footer nav />

@@ -10,6 +10,7 @@ const config: Config = {
       'footer-wide': '25rem',
       'footer-wide2': '45rem',
       'edit-wide': '50rem',
+      'share-yt-wide': '60rem',
     },
   },
   plugins: [],
