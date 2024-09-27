@@ -2,7 +2,6 @@
 
 import { Key } from "@/common/key";
 import TargetLine from "@/common/targetLine";
-import { useDisplayMode } from "@/scale";
 import { useCallback, useEffect, useState } from "react";
 
 export function AboutContent2() {
@@ -43,16 +42,13 @@ export function AboutContent2() {
     }
   }, [nikochanPhase, flash]);
 
-  const { screenWidth, rem } = useDisplayMode();
-  const isMobile = screenWidth < 40 * rem;
-
   return (
     <>
       <div
         className={
-          isMobile
-            ? "flex flex-col space-y-2 items-center "
-            : "flex flex-row space-x-2 mb-4 "
+          "flex flex-col space-y-2 items-center " +
+          "main-wide:flex-row main-wide:space-y-0 main-wide:space-x-2 " +
+          "main-wide:items-stretch main-wide:mb-4 "
         }
       >
         <div className="flex-1 space-y-2">
@@ -95,7 +91,8 @@ export function AboutContent2() {
         <div
           className={
             "shrink-0 relative " +
-            (isMobile ? "max-w-full w-60 h-28" : "basis-3/12 ")
+            "max-w-full w-60 h-28 " +
+            "main-wide:basis-3/12 main-wide:w-auto main-wide:min-h-full"
           }
         >
           <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
@@ -125,9 +122,9 @@ export function AboutContent2() {
       </div>
       <div
         className={
-          isMobile
-            ? "flex flex-col space-y-2 items-center "
-            : "flex flex-row-reverse space-x-2 mb-4 "
+          "flex flex-col space-y-2 items-center " +
+          "main-wide:flex-row-reverse main-wide:space-y-0 main-wide:space-x-2 " +
+          "main-wide:mb-4 "
         }
       >
         <div className="flex-1 space-y-2 text-center">
@@ -177,7 +174,8 @@ export function AboutContent2() {
         <div
           className={
             "shrink-0 relative " +
-            (isMobile ? "max-w-full w-60 h-28" : "basis-3/12 ")
+            "max-w-full w-60 h-28 " +
+            "main-wide:basis-3/12 main-wide:w-auto main-wide:min-h-full"
           }
         >
           <div className="absolute top-0 left-0">

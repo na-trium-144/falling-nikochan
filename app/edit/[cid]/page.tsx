@@ -15,7 +15,6 @@ import {
   loadChart,
   Note,
 } from "@/chartFormat/seq";
-import { useResizeDetector } from "react-resize-detector";
 import Button from "@/common/button";
 import TimeBar from "./timeBar";
 import Input from "@/common/input";
@@ -34,9 +33,7 @@ import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
 import { Chart, hashPasswd } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
-import { useDisplayMode } from "@/scale";
-import BackButton from "@/common/backButton";
-import { useRouter, useSearchParams } from "next/navigation";
+import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 
 export default function Page(context: { params: Params }) {
@@ -108,8 +105,6 @@ export default function Page(context: { params: Params }) {
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [hasChange]);
 
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
-  const isMobile = screenWidth < 50 * rem;
   const ref = useRef<HTMLDivElement>(null!);
 
   // 現在時刻 offsetを引く前
@@ -340,9 +335,7 @@ export default function Page(context: { params: Params }) {
     }
     return (
       <CenterBoxOnlyPage>
-        <BackButton className="" href="/main/edit" reload>
-          Edit
-        </BackButton>
+        <Header reload>Edit</Header>
         <p>編集用パスワードを入力してください。</p>
         {passwdFailed && <p>パスワードが違います。</p>}
         <Input
@@ -365,7 +358,7 @@ export default function Page(context: { params: Params }) {
   return (
     <main
       className={
-        "overflow-x-hidden " + (isMobile ? "" : "h-screen overflow-y-hidden ")
+        "overflow-x-hidden " + "edit-wide:h-screen edit-wide:overflow-y-hidden "
       }
       style={{ touchAction: "none" }}
       tabIndex={0}
@@ -406,26 +399,25 @@ export default function Page(context: { params: Params }) {
     >
       <div
         className={
-          "w-full " + (isMobile ? "" : "h-full flex items-stretch flex-row ")
+          "w-full " +
+          "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row "
         }
       >
         <div
           className={
-            (isMobile ? "" : "basis-4/12 h-full ") +
+            "edit-wide:basis-4/12 edit-wide:h-full " +
             "grow-0 shrink-0 flex flex-col items-stretch p-3"
           }
         >
-          <BackButton className="" href="/main/edit" reload>
-            Edit
-          </BackButton>
+          <Header reload>Edit</Header>
           <div
             className={
-              "grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
+              "grow-0 shrink-0 mt-3 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
             }
           >
             <FlexYouTube
               fixedSide="width"
-              className={isMobile ? "w-full h-max" : "w-full "}
+              className={"w-full h-max " + "edit-wide:w-full edit-wide:h-auto "}
               isMobile={false}
               control={true}
               id={chart?.ytId}
@@ -438,7 +430,8 @@ export default function Page(context: { params: Params }) {
           <div
             className={
               "relative " +
-              (isMobile ? "w-full aspect-square" : "flex-1 basis-8/12 ")
+              "w-full aspect-square " +
+              "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto "
             }
           >
             <FallingWindow
@@ -454,7 +447,8 @@ export default function Page(context: { params: Params }) {
         <div
           className={
             "p-3 flex flex-col items-stretch " +
-            (isMobile ? "h-5/6 " : "flex-1 ")
+            "h-5/6 " +
+            "edit-wide:h-full edit-wide:flex-1 "
           }
         >
           <div>
@@ -507,16 +501,18 @@ export default function Page(context: { params: Params }) {
               text={`+${snapDivider * 4} Step`}
             />
           </div>
-          <TimeBar
-            currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
-            currentNoteIndex={currentNoteIndex}
-            currentStep={currentStep}
-            chart={chart}
-            notesAll={notesAll}
-            snapDivider={snapDivider}
-            ytId={chart.ytId}
-            timeBarPxPerSec={timeBarPxPerSec}
-          />
+          <div className="flex-none">
+            <TimeBar
+              currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
+              currentNoteIndex={currentNoteIndex}
+              currentStep={currentStep}
+              chart={chart}
+              notesAll={notesAll}
+              snapDivider={snapDivider}
+              ytId={chart.ytId}
+              timeBarPxPerSec={timeBarPxPerSec}
+            />
+          </div>
           <p className="flex flex-row items-baseline">
             <span>Step =</span>
             <span className="ml-2">1</span>

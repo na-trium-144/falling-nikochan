@@ -50,7 +50,7 @@ export default function EditTab() {
       <ul className="list-disc list-inside">
         {recentCId.map((cid) => (
           <li key={cid}>
-            <Link href={`/edit/${cid}`} className="hover:text-blue-600 hover:underline">
+            <Link href={`/edit/${cid}`} className="hover:text-slate-500 ">
               {cid}: {recentBrief[cid]?.title}
             </Link>
           </li>

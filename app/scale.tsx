@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 interface DisplayMode {
   isTouch: boolean;
@@ -14,15 +8,7 @@ interface DisplayMode {
   screenHeight: number;
   rem: number;
 }
-const DisplayModeContext = createContext<DisplayMode>({
-  isTouch: false,
-  screenWidth: 1,
-  screenHeight: 1,
-  rem: 16,
-});
-export const useDisplayMode = () => useContext(DisplayModeContext);
-
-export function AutoScaler(props: { children: ReactNode }) {
+export function useDisplayMode(): DisplayMode {
   const [size, setSize] = useState([1, 1]);
   const [rem, setRem] = useState<number>(16);
   useEffect(() => {
@@ -40,18 +26,12 @@ export function AutoScaler(props: { children: ReactNode }) {
   // タッチ操作かどうか (操作説明が変わる)
   const isTouch = isTouchEventsEnabled();
 
-  return (
-    <DisplayModeContext.Provider
-      value={{
-        isTouch,
-        screenWidth: width,
-        screenHeight: height,
-        rem,
-      }}
-    >
-      {props.children}
-    </DisplayModeContext.Provider>
-  );
+  return {
+    isTouch,
+    screenWidth: width,
+    screenHeight: height,
+    rem,
+  };
 }
 
 function isTouchEventsEnabled() {

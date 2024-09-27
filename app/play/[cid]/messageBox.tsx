@@ -2,8 +2,6 @@
 
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
-import { Key } from "@/common/key";
-import { useDisplayMode } from "@/scale";
 
 interface MessageProps {
   isTouch: boolean;

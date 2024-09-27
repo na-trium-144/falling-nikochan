@@ -205,7 +205,7 @@ export default function Home(context: { params: Params }) {
     }
   };
   const exit = () => {
-    router.push(`/share/${cid}`);
+    router.replace(`/share/${cid}`);
   };
 
   // キーを押したとき一定時間光らせる
