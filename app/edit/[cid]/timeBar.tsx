@@ -12,7 +12,7 @@ import { stepNStr, timeSecStr, timeStr } from "./str";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { Chart } from "@/chartFormat/chart";
 import msgpack from "@ygoe/msgpack";
-import { ColorRGBA, WebglLine, WebglPlot } from "webgl-plot";
+import { useDisplayMode } from "@/scale";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
@@ -31,31 +31,9 @@ export default function TimeBar(props: Props) {
     chart,
     notesAll,
     snapDivider,
-    ytId,
     timeBarPxPerSec,
   } = props;
-
-  const [sampledWave, setSampledWave] = useState<number[]>();
-  const [waveLoading, setWaveLoading] = useState<boolean>(false);
-  const [waveFetchErrorStatus, setWaveFetchErrorStatus] = useState<number>();
-  const [waveFetchErrorMsg, setWaveFetchErrorMsg] = useState<string>();
-  useEffect(() => {
-    void (async () => {
-      setWaveLoading(true);
-      const res = await fetch(`/api/wave/${ytId}`, { cache: "no-store" });
-      setWaveLoading(false);
-      if (res.ok) {
-        setSampledWave(msgpack.deserialize(await res.arrayBuffer()));
-      } else {
-        setWaveFetchErrorStatus(res.status);
-        try {
-          setWaveFetchErrorMsg((await res.json()).message);
-        } catch (e) {
-          setWaveFetchErrorMsg(String(e));
-        }
-      }
-    })();
-  }, [ytId]);
+  const { rem } = useDisplayMode();
 
   const timeBarResize = useResizeDetector();
   const timeBarWidth = timeBarResize.width || 500;
@@ -152,74 +130,11 @@ export default function TimeBar(props: Props) {
       ? findBpmIndexFromStep(chart?.bpmChanges, timeBarBeginStep)
       : undefined;
 
-  const canvasMain = useRef<HTMLCanvasElement>(null!);
-  useEffect(() => {
-    let webglp: WebglPlot | null = null;
-    const line: WebglLine = new WebglLine(new ColorRGBA(0, 0.6, 0, 1), 1000);
-    line.arrangeX();
-
-    if (canvasMain.current && sampledWave) {
-      let id = 0;
-      let renderPlot = () => {
-        if (
-          webglp == null ||
-          canvasMain.current.width != timeBarRef.current.clientWidth ||
-          canvasMain.current.height !== timeBarRef.current.clientHeight
-        ) {
-          canvasMain.current.width = timeBarRef.current.clientWidth;
-          canvasMain.current.height = timeBarRef.current.clientHeight;
-
-          webglp = new WebglPlot(canvasMain.current);
-          webglp.addLine(line);
-        }
-
-        let maxY = 1;
-        for (let i = 0; i < line.numPoints; i++) {
-          // 最大numPoints個の点しか描画できない
-          const t1 =
-            timeBarBeginSec +
-            (chart?.waveOffset || 0) +
-            ((i / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
-          const t2 =
-            timeBarBeginSec +
-            (chart?.waveOffset || 0) +
-            (((i + 1) / line.numPoints) * timeBarWidth) / timeBarPxPerSec;
-
-          let y: number = 0;
-          if (t1 >= 0 && t2 >= 0) {
-            y = Math.max(
-              ...sampledWave.slice(Math.floor(t1 * 1000), Math.floor(t2 * 1000))
-            );
-          }
-          line.setY(i, y);
-          maxY = Math.max(maxY, y);
-        }
-        line.offsetY = -1;
-        line.scaleY = 2 / maxY;
-        id = requestAnimationFrame(renderPlot);
-        webglp.update();
-      };
-      id = requestAnimationFrame(renderPlot);
-
-      return () => {
-        renderPlot = () => undefined;
-        cancelAnimationFrame(id);
-      };
-    }
-  }, [sampledWave, timeBarBeginSec, timeBarRef, timeBarWidth, timeBarPxPerSec, chart]);
-
   return (
     <div
-      className={"h-6 bg-gray-200 relative mt-12 mb-10 overflow-visible"}
+      className={"h-3 bg-gray-200 relative mt-10 mb-10 overflow-visible"}
       ref={timeBarRef}
     >
-      {waveLoading && <span className="absolute loader" />}
-      {waveFetchErrorStatus && (
-        <span className="absolute">
-          {waveFetchErrorStatus}: {waveFetchErrorMsg}
-        </span>
-      )}
-      <canvas className="absolute h-6" ref={canvasMain} />
       {/* 秒数目盛り */}
       {Array.from(new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))).map(
         (_, dt) => (
@@ -227,7 +142,7 @@ export default function TimeBar(props: Props) {
             key={dt}
             className="absolute border-l border-gray-400"
             style={{
-              top: -20,
+              top: -1.25 * rem,
               bottom: -4,
               left: timeBarPos(Math.ceil(timeBarBeginSec) + dt),
             }}
@@ -245,7 +160,7 @@ export default function TimeBar(props: Props) {
               className="absolute border-l border-red-400 "
               style={{
                 top: -4,
-                bottom: step.numerator === 0 ? -20 : -4,
+                bottom: step.numerator === 0 ? -1.25 * rem : -4,
                 left: timeBarPos(timeSec),
               }}
             >
@@ -254,7 +169,7 @@ export default function TimeBar(props: Props) {
           )
       )}
       {/* bpm変化 */}
-      <div className="absolute" style={{ bottom: -40, left: 0 }}>
+      <div className="absolute" style={{ bottom: -3 * rem, left: 0 }}>
         <span className="mr-1">BPM:</span>
         {beginBpmIndex !== undefined && (
           <span>{chart?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
@@ -268,7 +183,7 @@ export default function TimeBar(props: Props) {
               key={i}
               className="absolute "
               style={{
-                bottom: -40,
+                bottom: -2.5 * rem,
                 left: timeBarPos(ch.timeSec),
               }}
             >
@@ -280,8 +195,8 @@ export default function TimeBar(props: Props) {
       <div
         className="absolute border-l border-amber-400 shadow shadow-yellow-400"
         style={{
-          top: -40,
-          bottom: -20,
+          top: -2.5 * rem,
+          bottom: -2.5 * rem,
           left: timeBarPos(currentTimeSecWithoutOffset),
         }}
       />
@@ -289,7 +204,7 @@ export default function TimeBar(props: Props) {
       <span
         className="absolute "
         style={{
-          top: -40,
+          top: -2.5 * rem,
           left: timeBarPos(currentTimeSecWithoutOffset),
         }}
       >
@@ -311,7 +226,7 @@ export default function TimeBar(props: Props) {
                 style={{
                   width: n.big ? 18 : 12,
                   height: n.big ? 18 : 12,
-                  top: 12 - (n.big ? 9 : 6),
+                  top: ((3 / 4) * rem) / 2 - (n.big ? 9 : 6),
                   left:
                     timeBarPos(n.hitTimeSec + chart.offset) - (n.big ? 9 : 6),
                 }}

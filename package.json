@@ -17,8 +17,7 @@
     "next": "^14.2.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-resize-detector": "^11.0.1",
-    "webgl-plot": "^0.7.1"
+    "react-resize-detector": "^11.0.1"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.7",
