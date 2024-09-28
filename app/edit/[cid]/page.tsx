@@ -133,8 +133,11 @@ export default function Page(context: { params: Params }) {
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
   // 現在選択中の音符 (currentStepSnappedに一致)
   const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(-1);
+  const hasCurrentNote =
+    currentNoteIndex >= 0 && chart?.notes[currentNoteIndex] !== undefined;
 
   // currentTimeが変わったときcurrentStepを更新
+  const prevTimeSec = useRef<number>(-1);
   useEffect(() => {
     if (chart) {
       const step = getStep(chart.bpmChanges, currentTimeSec, snapDivider);
@@ -142,19 +145,31 @@ export default function Page(context: { params: Params }) {
         setCurrentStep(step);
       }
       if (
-        currentNoteIndex < 0 ||
-        chart.notes[currentNoteIndex] === undefined ||
+        !hasCurrentNote ||
         stepCmp(chart.notes[currentNoteIndex].step, step) != 0
       ) {
-        const noteIndex = chart.notes.findIndex(
-          (n) => stepCmp(n.step, step) == 0
-        );
+        let noteIndex: number;
+        if (currentTimeSec < prevTimeSec.current) {
+          noteIndex = chart.notes.findLastIndex(
+            (n) => stepCmp(n.step, step) == 0
+          );
+        } else {
+          noteIndex = chart.notes.findIndex((n) => stepCmp(n.step, step) == 0);
+        }
         if (currentNoteIndex !== noteIndex) {
           setCurrentNoteIndex(noteIndex);
         }
       }
     }
-  }, [chart, snapDivider, currentTimeSec, currentStep, currentNoteIndex]);
+    prevTimeSec.current = currentTimeSec;
+  }, [
+    chart,
+    snapDivider,
+    currentTimeSec,
+    currentStep,
+    currentNoteIndex,
+    hasCurrentNote,
+  ]);
 
   const ytPlayer = useRef<YouTubePlayer>();
   // ytPlayerが再生中
@@ -186,6 +201,32 @@ export default function Page(context: { params: Params }) {
       ytPlayer.current?.seekTo(timeSec, true);
     }
     ref.current.focus();
+  };
+  const seekRight1 = () => {
+    if (chart) {
+      if (
+        hasCurrentNote &&
+        chart.notes[currentNoteIndex + 1] &&
+        stepCmp(currentStep, chart.notes[currentNoteIndex + 1].step) === 0
+      ) {
+        setCurrentNoteIndex(currentNoteIndex + 1);
+      } else {
+        seekStepRel(1);
+      }
+    }
+  };
+  const seekLeft1 = () => {
+    if (chart) {
+      if (
+        hasCurrentNote &&
+        chart.notes[currentNoteIndex - 1] &&
+        stepCmp(currentStep, chart.notes[currentNoteIndex - 1].step) === 0
+      ) {
+        setCurrentNoteIndex(currentNoteIndex - 1);
+      } else {
+        seekStepRel(-1);
+      }
+    }
   };
   const seekStepRel = (move: number) => {
     if (chart) {
@@ -283,17 +324,21 @@ export default function Page(context: { params: Params }) {
     }
   };
 
-  const addNote = (n: NoteCommand) => {
-    if (chart) {
+  const addNote = (n: NoteCommand | null = copyBuf[0]) => {
+    if (chart && n) {
       const newChart = { ...chart };
       newChart.notes.push({ ...n, step: currentStep });
       newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
       changeChart(newChart);
+      // 追加したnoteは同じ時刻の音符の中でも最後
+      setCurrentNoteIndex(
+        chart.notes.findLastIndex((n) => stepCmp(n.step, currentStep) == 0)
+      );
     }
     ref.current.focus();
   };
   const deleteNote = () => {
-    if (chart && currentNoteIndex >= 0) {
+    if (chart && hasCurrentNote) {
       const newChart = { ...chart };
       newChart.notes = newChart.notes.filter((_, i) => i !== currentNoteIndex);
       changeChart(newChart);
@@ -301,7 +346,7 @@ export default function Page(context: { params: Params }) {
     ref.current.focus();
   };
   const updateNote = (n: NoteCommand) => {
-    if (chart && currentNoteIndex >= 0) {
+    if (chart && hasCurrentNote) {
       const newChart = { ...chart };
       newChart.notes[currentNoteIndex] = {
         ...n,
@@ -318,7 +363,7 @@ export default function Page(context: { params: Params }) {
     )
   );
   const copyNote = (copyIndex: number) => {
-    if (chart && currentNoteIndex >= 0) {
+    if (chart && hasCurrentNote) {
       const newCopyBuf = copyBuf.slice();
       newCopyBuf[copyIndex] = chart.notes[currentNoteIndex];
       setCopyBuf(newCopyBuf);
@@ -328,7 +373,7 @@ export default function Page(context: { params: Params }) {
   const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
     if (copyBuf[copyIndex]) {
       if (chart) {
-        if (currentNoteIndex >= 0 && !forceAdd) {
+        if (hasCurrentNote && !forceAdd) {
           updateNote(copyBuf[copyIndex]);
         } else {
           addNote(copyBuf[copyIndex]);
@@ -385,9 +430,9 @@ export default function Page(context: { params: Params }) {
           ) {
             stop();
           } else if (e.key === "Left" || e.key === "ArrowLeft") {
-            seekStepRel(-1);
+            seekLeft1();
           } else if (e.key === "Right" || e.key === "ArrowRight") {
-            seekStepRel(1);
+            seekRight1();
           } else if (e.key === "c") {
             copyNote(0);
           } else if (e.key === "v") {
@@ -489,7 +534,7 @@ export default function Page(context: { params: Params }) {
             <Button
               onClick={() => {
                 if (ready) {
-                  seekStepRel(-1);
+                  seekLeft1();
                 }
               }}
               text="-1 Step"
@@ -498,7 +543,7 @@ export default function Page(context: { params: Params }) {
             <Button
               onClick={() => {
                 if (ready) {
-                  seekStepRel(1);
+                  seekRight1();
                 }
               }}
               text="+1 Step"
@@ -599,6 +644,7 @@ export default function Page(context: { params: Params }) {
             ) : (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
+                addNote={addNote}
                 deleteNote={deleteNote}
                 updateNote={updateNote}
                 copyNote={copyNote}

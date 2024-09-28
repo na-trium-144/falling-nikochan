@@ -2,12 +2,19 @@ import { Chart } from "@/chartFormat/chart";
 import { NoteCommand } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
-import { stepStr } from "./str";
-import { Step } from "@/chartFormat/step";
+import {
+  stepDenominator,
+  stepFourth,
+  stepMeasure,
+  stepNumerator,
+  stepStr,
+} from "./str";
+import { Step, stepCmp } from "@/chartFormat/step";
 import { Key } from "@/common/key";
 
 interface Props {
   currentNoteIndex: number;
+  addNote: () => void;
   deleteNote: () => void;
   updateNote: (n: NoteCommand) => void;
   copyNote: (i: number) => void;
@@ -17,8 +24,71 @@ interface Props {
   chart?: Chart;
 }
 export default function NoteTab(props: Props) {
+  const hasNoteHere =
+    props.currentNoteIndex >= 0 &&
+    props.chart?.notes[props.currentNoteIndex] !== undefined;
+  let notesCountInStep = 0;
+  let notesIndexInStep = 0;
+  if (props.chart) {
+    for (let i = 0; i < props.chart.notes.length; i++) {
+      const n = props.chart.notes[i];
+      if (stepCmp(props.currentStep, n.step) > 0) {
+        continue;
+      } else if (stepCmp(props.currentStep, n.step) == 0) {
+        if (i < props.currentNoteIndex) {
+          notesIndexInStep++;
+        }
+        notesCountInStep++;
+      } else {
+        break;
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col h-full">
+      <p>
+        <span>Step</span>
+        <span className="inline-block text-right w-6">
+          {stepMeasure(props.currentStep)}
+        </span>
+        <span className="ml-1 ">;</span>
+        <span className="inline-block text-right w-6">
+          {stepFourth(props.currentStep)}
+        </span>
+        <div className="w-20 inline-block">
+          {props.currentStep.numerator > 0 && (
+            <>
+              <span className="ml-2 ">+</span>
+              <span className="inline-block text-right w-6">
+                {stepNumerator(props.currentStep)}
+              </span>
+              <span className="ml-1 mr-1">/</span>
+              <span>{stepDenominator(props.currentStep)}</span>
+            </>
+          )}
+        </div>
+        <div className="inline-block ml-2 w-28">
+          <span>Note</span>
+          <span className="inline-block text-right w-6">
+            {hasNoteHere ? notesIndexInStep + 1 : "-"}
+          </span>
+          <span className="ml-1 ">/</span>
+          <span className="inline-block ml-1">{notesCountInStep}</span>
+        </div>
+        <div className="inline-block">
+          <Button keyName="N" text={`Add`} onClick={() => props.addNote()} />
+          {hasNoteHere && <Button text="Delete" onClick={props.deleteNote} />}
+        </div>
+      </p>
+      <p className="mb-1">
+        <span>Total Notes:</span>
+        <span className="inline-block w-12 text-right">
+          {hasNoteHere ? props.currentNoteIndex + 1 : "-"}
+        </span>
+        <span className="mx-1">/</span>
+        <span className="">{props.chart?.notes.length || 0}</span>
+      </p>
       <NoteEdit {...props} />
       <span className="flex-1" />
       <div className="flex flex-row ">
@@ -63,14 +133,6 @@ function NoteEdit(props: Props) {
     const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
       <>
-        <p>
-          <span>Note</span>
-          <span className="inline-block w-12 text-right">
-            {currentNoteIndex + 1}
-          </span>
-          <span className="m-1">/</span>
-          <span className="">{chart.notes.length}</span>
-        </p>
         <table>
           <tbody className="text-center">
             <tr>
@@ -182,31 +244,9 @@ function NoteEdit(props: Props) {
             <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </label>
         </p>
-        <p className="mt-3">
-          {/*<Button
-            keyName="N"
-            text={`Add note here (at ${stepStr(props.currentStep)})`}
-            onClick={() => props.pasteNote(0)}
-          />*/}
-          <Button text="× Delete this note" onClick={props.deleteNote} />
-        </p>
       </>
     );
   } else {
-    return (
-      <>
-        <p>
-          <span>No note selected.</span>
-        </p>
-        <p className="mt-1">
-          <Button
-            keyName="N"
-            text={`Add note here (at ${stepStr(props.currentStep)})`}
-            onClick={() => props.pasteNote(0)}
-          />
-          <span className="ml-1">, or use Paste button.</span>
-        </p>
-      </>
-    );
+    return <></>;
   }
 }

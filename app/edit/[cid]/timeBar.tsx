@@ -132,7 +132,7 @@ export default function TimeBar(props: Props) {
 
   return (
     <div
-      className={"h-3 bg-gray-200 relative mt-10 mb-10 overflow-visible"}
+      className={"h-6 bg-gray-200 relative mt-10 mb-10 overflow-visible"}
       ref={timeBarRef}
     >
       {/* 秒数目盛り */}
@@ -216,21 +216,39 @@ export default function TimeBar(props: Props) {
           (n) =>
             n.hitTimeSec + chart.offset > timeBarBeginSec &&
             n.hitTimeSec + chart.offset <
-              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+              timeBarBeginSec + timeBarWidth / timeBarPxPerSec &&
+            // 同じ位置に2つ以上の音符を重ねない
+            n.hitTimeSec !== notesAll[n.id + 1]?.hitTimeSec && (
               <span
                 key={n.id}
                 className={
                   "absolute rounded-full " +
-                  (n.id === currentNoteIndex ? "bg-red-400 " : "bg-yellow-400 ")
+                  (n.hitTimeSec === notesAll[currentNoteIndex]?.hitTimeSec
+                    ? "bg-red-400 "
+                    : "bg-yellow-400 ")
                 }
                 style={{
-                  width: n.big ? 18 : 12,
-                  height: n.big ? 18 : 12,
-                  top: ((3 / 4) * rem) / 2 - (n.big ? 9 : 6),
+                  width: n.big ? "1.5rem" : "1rem",
+                  height: n.big ? "1.5rem" : "1rem",
+                  top: ((6 / 4 - (n.big ? 1.5 : 1)) * rem) / 2,
                   left:
-                    timeBarPos(n.hitTimeSec + chart.offset) - (n.big ? 9 : 6),
+                    timeBarPos(n.hitTimeSec + chart.offset) -
+                    ((n.big ? 1.5 : 1) * rem) / 2,
                 }}
-              />
+              >
+                {/* 重なっている音符の数 */}
+                <span
+                  className="absolute inset-x-0 text-center"
+                  style={{ top: n.big ? "0.125rem" : 0 }}
+                >
+                  {(() => {
+                    const length = notesAll
+                      .slice(0, n.id)
+                      .filter((n2) => n.hitTimeSec === n2.hitTimeSec).length;
+                    return length > 0 ? length + 1 : null;
+                  })()}
+                </span>
+              </span>
             )
         )}
     </div>

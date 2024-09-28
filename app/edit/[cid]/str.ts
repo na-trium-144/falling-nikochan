@@ -21,33 +21,32 @@ export function timeSecStr(timeSec: number): string {
   }
 }
 
+// todo: 拍子を考慮
+export function stepMeasure(s: Step): string {
+  return (Math.floor(s.fourth / 4) + 1).toString();
+}
+export function stepFourth(s: Step): string {
+  return ((s.fourth % 4) + 1).toString();
+}
+export function stepNumerator(s: Step): string {
+  return s.numerator.toString();
+}
+export function stepDenominator(s: Step): string {
+  return (s.denominator * 4).toString();
+}
 export function stepStr(s: Step): string {
   if (s.numerator === 0) {
-    return (
-      (Math.floor(s.fourth / 4) + 1).toString() +
-      ";" +
-      ((s.fourth % 4) + 1).toString()
-    );
+    return `${stepMeasure(s)};${stepFourth(s)}`;
   } else {
     return (
-      (Math.floor(s.fourth / 4) + 1).toString() +
-      ";" +
-      ((s.fourth % 4) + 1).toString() +
-      "+" +
-      s.numerator.toString() +
-      "/" +
-      (s.denominator * 4).toString()
+      `${stepMeasure(s)};${stepFourth(s)}` +
+      `+${stepNumerator(s)}/${stepDenominator(s)}`
     );
   }
 }
-// todo: 拍子を考慮
 export function stepNStr(s: Step): string {
   if (s.numerator === 0) {
-    return (
-      (Math.floor(s.fourth / 4) + 1).toString() +
-      ";" +
-      ((s.fourth % 4) + 1).toString()
-    );
+    return `${stepMeasure(s)};${stepFourth(s)}`;
   } else {
     return "";
   }
