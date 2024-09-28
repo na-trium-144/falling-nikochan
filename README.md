@@ -20,18 +20,8 @@ FS_MASTER="http://localhost:9333"
 FS_VOLUME="http://localhost:8080"
 ```
 
-* install ffmpeg
-    * ubuntuなら `apt install ffmpeg`
-
 * (install git)
     * ビルド中にコミットIDを取得する箇所があるので必要です
-
-* install python and dependencies
-    * venvでもok
-    * poetryをインストールしている人は、pushしてある pyproject.toml を使えます
-```sh
-pip install yt-dlp soundfile msgpack numpy
-```
 
 * backend + frontend
     * venvを使う場合はactivateした状態で
@@ -44,7 +34,7 @@ npm run dev
 
 ## deploy
 
-* developmentの場合と同様に必要なライブラリをインストール、postgresqlとseaweedfsを起動して
+* developmentの場合と同様にpostgresqlとseaweedfsを起動して
 ```sh
 npm run start
 ```

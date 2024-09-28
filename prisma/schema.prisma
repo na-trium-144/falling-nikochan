@@ -21,8 +21,3 @@ model ChartFile {
   composer String @default("")
   chartCreator String @default("")
 }
-
-model WaveCache {
-  fid String @id
-  ytId String @unique
-}
