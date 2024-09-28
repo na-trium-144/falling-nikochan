@@ -31,13 +31,15 @@ import {
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
-import { Chart, hashPasswd } from "@/chartFormat/chart";
+import { Chart, emptyChart, hashPasswd } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 
 export default function Page(context: { params: Params }) {
-  const cid = context.params.cid;
+  // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
+  const cidInitial = useRef<string>(context.params.cid);
+  const [cid, setCid] = useState<string | undefined>(context.params.cid);
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -48,43 +50,53 @@ export default function Page(context: { params: Params }) {
   const [chart, setChart] = useState<Chart>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
+
   const fetchChart = useCallback(async () => {
-    setPasswdFailed(false);
-    setLoading(true);
-    const res = await fetch(
-      `/api/chartFile/${cid}?p=${await hashPasswd(getPasswd(cid))}`,
-      { cache: "no-store" }
-    );
-    setLoading(false);
-    if (res.ok) {
-      try {
-        const chart = msgpack.deserialize(await res.arrayBuffer());
-        // validateはサーバー側でやってる
-        setPasswd(cid, chart.editPasswd);
-        setChart(chart);
-        setErrorStatus(undefined);
-        setErrorMsg(undefined);
-        addRecent("edit", cid);
-      } catch (e) {
-        setChart(undefined);
-        setErrorStatus(undefined);
-        setErrorMsg(String(e));
-      }
+    if (cidInitial.current === "new") {
+      setChart(emptyChart());
+      setPasswdFailed(false);
+      setLoading(false);
+      setCid(undefined);
     } else {
-      if (res.status === 401) {
-        setPasswdFailed(true);
-        setChart(undefined);
-      } else {
-        setChart(undefined);
-        setErrorStatus(res.status);
+      setPasswdFailed(false);
+      setLoading(true);
+      const res = await fetch(
+        `/api/chartFile/${cidInitial.current}?p=${await hashPasswd(
+          getPasswd(cidInitial.current)
+        )}`,
+        { cache: "no-store" }
+      );
+      setLoading(false);
+      if (res.ok) {
         try {
-          setErrorMsg(String((await res.json()).message));
+          const chart = msgpack.deserialize(await res.arrayBuffer());
+          // validateはサーバー側でやってる
+          setPasswd(cidInitial.current, chart.editPasswd);
+          setChart(chart);
+          setErrorStatus(undefined);
+          setErrorMsg(undefined);
+          addRecent("edit", cidInitial.current);
         } catch (e) {
+          setChart(undefined);
+          setErrorStatus(undefined);
           setErrorMsg(String(e));
+        }
+      } else {
+        if (res.status === 401) {
+          setPasswdFailed(true);
+          setChart(undefined);
+        } else {
+          setChart(undefined);
+          setErrorStatus(res.status);
+          try {
+            setErrorMsg(String((await res.json()).message));
+          } catch (e) {
+            setErrorMsg(String(e));
+          }
         }
       }
     }
-  }, [cid]);
+  }, []);
   useEffect(() => void fetchChart(), [fetchChart]);
 
   const [hasChange, setHasChange] = useState<boolean>(false);
@@ -347,7 +359,7 @@ export default function Page(context: { params: Params }) {
         <Button
           text="進む"
           onClick={() => {
-            setPasswd(cid, editPasswd);
+            setPasswd(cidInitial.current || "", editPasswd);
             void fetchChart();
           }}
         />
@@ -554,12 +566,19 @@ export default function Page(context: { params: Params }) {
               )
             )}
           </div>
-          <Box className="flex-1 p-3 overflow-auto min-h-96">
+          <Box
+            className={
+              "p-3 overflow-auto " +
+              "min-h-96 " +
+              "edit-wide:flex-1 edit-wide:min-h-0"
+            }
+          >
             {tab === 0 ? (
               <MetaTab
                 chart={chart}
                 setChart={changeChart}
                 cid={cid}
+                setCid={(newCid: string) => setCid(newCid)}
                 hasChange={hasChange}
                 setHasChange={setHasChange}
               />

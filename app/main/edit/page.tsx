@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { MetaEdit } from "@/edit/[cid]/metaTab";
-import Button from "@/common/button";
+import Button, { buttonStyle } from "@/common/button";
 import { useRouter } from "next/navigation";
 import msgpack from "@ygoe/msgpack";
 import Link from "next/link";
 import { getRecent, removeRecent } from "@/common/recent";
-import { Chart, ChartBrief, emptyChart } from "@/chartFormat/chart";
+import {
+  Chart,
+  ChartBrief,
+  emptyChart,
+  validateChart,
+  validCId,
+} from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import { setPasswd } from "@/common/passwdCache";
+import Input from "@/common/input";
+import { ChartListItem } from "../chartList";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -25,7 +33,7 @@ export default function EditTab() {
     setRecentCId(recentCId);
     for (const cid of recentCId) {
       void (async () => {
-        const res = await fetch(`/api/brief/${cid}`, {cache: "no-store"});
+        const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
         if (res.ok) {
           // cidからタイトルなどを取得
           const resBody = await res.json();
@@ -44,45 +52,103 @@ export default function EditTab() {
     }
   }, []);
 
+  const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
+  const gotoCId = async (cid: string) => {
+    setCIdErrorMsg("");
+    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    if (res.ok) {
+      router.push(`/edit/${cid}`);
+    } else {
+      try {
+        setCIdErrorMsg((await res.json()).message);
+      } catch (e) {
+        setCIdErrorMsg(String(e));
+      }
+    }
+  };
+
+  const [uploadMsg, setUploadMsg] = useState<string>("");
   return (
     <IndexMain tab={2}>
-      <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
-      <ul className="list-disc list-inside">
-        {recentCId.map((cid) => (
-          <li key={cid}>
-            <Link href={`/edit/${cid}`} className="hover:text-slate-500 ">
-              {cid}: {recentBrief[cid]?.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <h3 className="text-xl font-bold font-title my-2">新規作成</h3>
-      <MetaEdit chart={chart} setChart={setChart} />
-      <p className="mt-2">※ここで入力した情報は後からでも変更できます。</p>
-      <p>
-        <Button
-          text="新規作成"
-          onClick={async () => {
-            const res = await fetch(`/api/newChartFile/`, {
-              method: "POST",
-              body: msgpack.serialize(chart),
-              cache: "no-store",
-            });
-            const resBody = await res.json();
-            if (res.ok) {
-              if (typeof resBody.cid === "string") {
-                setPasswd(resBody.cid, chart.editPasswd);
-                router.push(`/edit/${resBody.cid}`);
-              } else {
-                setErrorMsg("Invalid response");
-              }
-            } else {
-              setErrorMsg(`${res.status}: ${resBody.message}`);
-            }
-          }}
-        />
-        <span className="ml-1">{errorMsg}</span>
-      </p>
+      <div className="mb-3">
+        <h3 className="mb-2">
+          <span className="text-xl font-bold font-title ">譜面IDを入力:</span>
+          <Input
+            className="ml-4 w-20"
+            actualValue=""
+            updateValue={gotoCId}
+            isValid={validCId}
+            left
+          />
+          <span className="ml-1 inline-block">{cidErrorMsg}</span>
+        </h3>
+        <ChartIdDesc />
+      </div>
+      <div className="mb-3">
+        <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
+        {recentCId.length > 0 ? (
+          <ul className="ml-3">
+            {recentCId.map((cid) => (
+              <ChartListItem
+                key={cid}
+                cid={cid}
+                brief={recentBrief[cid]}
+                href={`/edit/${cid}`}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="pl-2">まだありません</p>
+        )}
+      </div>
+      <div className="mb-3">
+        <h3 className="mb-2">
+          <span className="text-xl font-bold font-title ">
+            新しく譜面を作る:
+          </span>
+          <Link className={buttonStyle + "ml-2 inline-block "} href="/edit/new">
+            新規作成
+          </Link>
+        </h3>
+      </div>
     </IndexMain>
+  );
+}
+
+function ChartIdDesc() {
+  return (
+    <>
+      <p className="pl-2 break-keep break-words">
+        編集したい
+        <wbr />
+        譜面の
+        <wbr />
+        IDを
+        <wbr />
+        知って
+        <wbr />
+        いる
+        <wbr />
+        場合は
+        <wbr />
+        こちらに
+        <wbr />
+        入力して
+        <wbr />
+        ください。
+        <wbr />
+        ID
+        <wbr />
+        入力後、
+        <wbr />
+        編集用
+        <wbr />
+        パスワード
+        <wbr />も<wbr />
+        必要に
+        <wbr />
+        なります。
+      </p>
+    </>
   );
 }
