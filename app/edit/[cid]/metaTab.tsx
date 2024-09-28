@@ -7,6 +7,7 @@ import { saveAs } from "file-saver";
 import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
+import { EfferentThree } from "@icon-park/react";
 
 interface Props {
   chart?: Chart;
@@ -16,7 +17,7 @@ export function MetaEdit(props: Props) {
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
   return (
     <>
-      <p className="flex flex-row">
+      <p className="flex flex-row items-baseline mb-2">
         <span className="w-max">YouTube URL または動画ID</span>
         <Input
           className="flex-1"
@@ -29,10 +30,11 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row">
+      <p>楽曲情報:</p>
+      <p className="flex flex-row items-baseline ml-2">
         <span className="w-max">楽曲タイトル</span>
         <Input
-          className="flex-1 font-title"
+          className="font-title shrink w-80"
           actualValue={props.chart?.title || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, title: v })
@@ -40,22 +42,21 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row text-sm my-1">
-        <span className="w-max">(作曲者など</span>
+      <p className="flex flex-row items-baseline ml-2 ">
+        <span className="w-max">作曲者など</span>
         <Input
-          className="flex-1 text-sm font-title"
+          className="text-sm font-title shrink w-80"
           actualValue={props.chart?.composer || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, composer: v })
           }
           left
         />
-        <span>)</span>
       </p>
-      <p className="flex flex-row">
+      <p className="flex flex-row items-baseline ml-2 mb-2">
         <span className="w-max">譜面作成者(あなたの名前)</span>
         <Input
-          className="flex-1 font-title"
+          className="font-title shrink w-40"
           actualValue={props.chart?.chartCreator || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, chartCreator: v })
@@ -63,10 +64,10 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row">
+      <p className="flex flex-row items-baseline">
         <span className="w-max">編集用パスワード</span>
         <Input
-          className="flex-1 font-title"
+          className="font-title shrink w-40"
           actualValue={props.chart?.editPasswd || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, editPasswd: v })
@@ -76,7 +77,7 @@ export function MetaEdit(props: Props) {
         />
         <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
       </p>
-      <p className="text-sm">
+      <p className="text-sm ml-2">
         (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
       </p>
     </>
@@ -96,128 +97,159 @@ export function MetaTab(props: Props2) {
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [uploadMsg, setUploadMsg] = useState<string>("");
   const [auto, setAuto] = useState<boolean>(false);
+  const [origin, setOrigin] = useState<string>("");
+  const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   useEffect(() => {
     setErrorMsg("");
     setSaveMsg("");
+    setOrigin(window.location.origin);
+    setHasClipboard(!!navigator?.clipboard);
   }, [props.chart]);
+
+  const save = async () => {
+    if (props.cid === undefined) {
+      const res = await fetch(`/api/newChartFile/`, {
+        method: "POST",
+        body: msgpack.serialize(props.chart),
+        cache: "no-store",
+      });
+      const resBody = await res.json();
+      if (res.ok) {
+        if (typeof resBody.cid === "string") {
+          props.setCid(resBody.cid);
+          setPasswd(resBody.cid, props.chart!.editPasswd);
+          history.replaceState(null, "", `/edit/${resBody.cid}`);
+          setErrorMsg("保存しました！");
+          addRecent("edit", resBody.cid);
+          props.setHasChange(false);
+        } else {
+          setErrorMsg("Invalid response");
+        }
+      } else {
+        setErrorMsg(`${res.status}: ${resBody.message}`);
+      }
+    } else {
+      const res = await fetch(
+        `/api/chartFile/${props.cid}?p=${await hashPasswd(
+          getPasswd(props.cid)
+        )}`,
+        {
+          method: "POST",
+          body: msgpack.serialize(props.chart),
+          cache: "no-store",
+        }
+      );
+      if (res.ok) {
+        props.setHasChange(false);
+        setErrorMsg("保存しました！");
+        // 次からは新しいパスワードが必要
+        setPasswd(props.cid, props.chart!.editPasswd);
+      } else {
+        try {
+          const resBody = await res.json();
+          setErrorMsg(`${res.status}: ${resBody.message}`);
+        } catch (e) {
+          setErrorMsg(String(e));
+        }
+      }
+    }
+  };
+  const download = () => {
+    const blob = new Blob([msgpack.serialize(props.chart)]);
+    const filename = `${props.cid}_${props.chart?.title}.bin`;
+    saveAs(blob, filename);
+    setSaveMsg(`保存しました！ (${filename})`);
+  };
+  const upload = async (e) => {
+    if (e.target.files && e.target.files.length >= 1) {
+      const f = e.target.files[0];
+      try {
+        const newChart = msgpack.deserialize(await f.arrayBuffer());
+        validateChart(newChart);
+        if (confirm("このファイルで譜面データを上書きしますか?")) {
+          props.setChart(newChart);
+        }
+      } catch (e) {
+        setUploadMsg(String(e));
+      }
+      e.target.files = null;
+    }
+  };
   return (
     <>
-      <MetaEdit {...props} />
-      <p className="mt-2">
-        <Button
-          text="サーバーに保存"
-          onClick={async () => {
-            if (props.cid === undefined) {
-              const res = await fetch(`/api/newChartFile/`, {
-                method: "POST",
-                body: msgpack.serialize(props.chart),
-                cache: "no-store",
-              });
-              const resBody = await res.json();
-              if (res.ok) {
-                if (typeof resBody.cid === "string") {
-                  props.setCid(resBody.cid);
-                  setPasswd(resBody.cid, props.chart!.editPasswd);
-                  history.replaceState(null, "", `/edit/${resBody.cid}`);
-                  setErrorMsg("保存しました！");
-                  addRecent("edit", resBody.cid);
-                  props.setHasChange(false);
-                } else {
-                  setErrorMsg("Invalid response");
-                }
-              } else {
-                setErrorMsg(`${res.status}: ${resBody.message}`);
-              }
-            } else {
-              const res = await fetch(
-                `/api/chartFile/${props.cid}?p=${await hashPasswd(
-                  getPasswd(props.cid)
-                )}`,
-                {
-                  method: "POST",
-                  body: msgpack.serialize(props.chart),
-                  cache: "no-store",
-                }
-              );
-              if (res.ok) {
-                props.setHasChange(false);
-                setErrorMsg("保存しました！");
-                // 次からは新しいパスワードが必要
-                setPasswd(props.cid, props.chart!.editPasswd);
-              } else {
-                try {
-                  const resBody = await res.json();
-                  setErrorMsg(`${res.status}: ${resBody.message}`);
-                } catch (e) {
-                  setErrorMsg(String(e));
-                }
-              }
-            }
-          }}
-        />
+      <p className="mb-1">
+        譜面ID:
+        <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
+        <Button text="サーバーに保存" onClick={save} />
         <span className="ml-1">{errorMsg}</span>
         {props.hasChange && (
           <span className="ml-1">(未保存の変更があります)</span>
         )}
       </p>
-      <p>
-        <Button
-          text="ダウンロードして保存"
-          onClick={() => {
-            const blob = new Blob([msgpack.serialize(props.chart)]);
-            const filename = `${props.cid}_${props.chart?.title}.bin`;
-            saveAs(blob, filename);
-            setSaveMsg(`保存しました！ (${filename})`);
-          }}
-        />
-        <span className="ml-1">{saveMsg}</span>
-      </p>
-      <p>
+      {props.cid && (
+        <>
+          <p className="ml-2">
+            <span className="hidden edit-wide:inline-block mr-2">
+              共有用リンク:
+            </span>
+            <a
+              className="text-blue-600 hover:underline"
+              href={`/share/${props.cid}`}
+              target="_blank"
+            >
+              <span className="edit-wide:hidden">共有用リンク</span>
+              <span className="hidden edit-wide:inline-block text-sm">
+                {origin}/share/{props.cid}
+              </span>
+            </a>
+            {hasClipboard && (
+              <Button
+                className="ml-2"
+                text="コピー"
+                onClick={() =>
+                  navigator.clipboard.writeText(`${origin}/share/${props.cid}`)
+                }
+              />
+            )}
+          </p>
+          <p className="ml-2 mb-1">
+            <a
+              className="hover:text-blue-600 underline relative inline-block"
+              href={`/play/${props.cid}?auto=${auto ? 1 : 0}`}
+              target="_blank"
+            >
+              <span className="mr-5">ゲーム画面へ</span>
+              <EfferentThree className="absolute bottom-1 right-0" />
+            </a>
+            <input
+              className="ml-2 mr-1"
+              type="checkbox"
+              id="auto"
+              checked={auto}
+              onChange={(v) => setAuto(v.target.checked)}
+            />
+            <label htmlFor="auto">
+              <span>オートプレイ</span>
+            </label>
+          </p>
+        </>
+      )}
+      <p className="mb-4">
+        <span className="mr-1">ローカルに保存/読み込み:</span>
+        <Button text="ダウンロードして保存" onClick={download} />
         <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
-          ファイルをアップロード
+          アップロード
         </label>
-        <span className="ml-1">{uploadMsg}</span>
+        <span className="ml-1">{saveMsg || uploadMsg}</span>
         <input
           type="file"
           className="hidden"
           id="upload-bin"
           name="upload-bin"
-          onChange={async (e) => {
-            if (e.target.files && e.target.files.length >= 1) {
-              const f = e.target.files[0];
-              try {
-                const newChart = msgpack.deserialize(await f.arrayBuffer());
-                validateChart(newChart);
-                if (confirm("このファイルで譜面データを上書きしますか?")) {
-                  props.setChart(newChart);
-                }
-              } catch (e) {
-                setUploadMsg(String(e));
-              }
-              e.target.files = null;
-            }
-          }}
+          onChange={upload}
         />
       </p>
-      <p className="mt-2">
-        <a
-          className="hover:text-blue-600 hover:underline"
-          href={`/play/${props.cid}?auto=${auto ? 1 : 0}`}
-          target="_blank"
-        >
-          ゲーム画面へ(新しいタブ)...
-        </a>
-        <input
-          className="ml-2 mr-1"
-          type="checkbox"
-          id="auto"
-          checked={auto}
-          onChange={(v) => setAuto(v.target.checked)}
-        />
-        <label htmlFor="auto">
-          <span>オートプレイ</span>
-        </label>
-      </p>
+      <MetaEdit {...props} />
     </>
   );
 }

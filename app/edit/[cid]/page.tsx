@@ -566,7 +566,13 @@ export default function Page(context: { params: Params }) {
               )
             )}
           </div>
-          <Box className="flex-1 p-3 overflow-auto min-h-96">
+          <Box
+            className={
+              "p-3 overflow-auto " +
+              "min-h-96 " +
+              "edit-wide:flex-1 edit-wide:min-h-0"
+            }
+          >
             {tab === 0 ? (
               <MetaTab
                 chart={chart}
