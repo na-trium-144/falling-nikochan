@@ -66,6 +66,10 @@ export async function hashPasswd(text: string) {
   return hashHex;
 }
 
+export function validCId(cid: string) {
+  return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
+}
+
 export function emptyChart(): Chart {
   return {
     falling: "nikochan",

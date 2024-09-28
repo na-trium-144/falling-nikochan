@@ -1,5 +1,10 @@
 import { Key } from "./key";
 
+export const buttonStyle =
+  "mx-0.5 p-1 border border-gray-600 rounded " +
+  "bg-gray-200 hover:bg-gray-100 active:bg-gray-300 active:shadow-inner " +
+  "cursor-pointer ";
+
 interface Props {
   className?: string;
   onClick?: () => void;

@@ -1,4 +1,4 @@
-import Button from "@/common/button";
+import Button, { buttonStyle } from "@/common/button";
 import Input from "@/common/input";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
 import { useEffect, useState } from "react";
@@ -6,6 +6,7 @@ import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
+import { addRecent } from "@/common/recent";
 
 interface Props {
   chart?: Chart;
@@ -85,7 +86,8 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   chart?: Chart;
   setChart: (chart: Chart) => void;
-  cid: string;
+  cid: string | undefined;
+  setCid: (cid: string) => void;
   hasChange: boolean;
   setHasChange: (h: boolean) => void;
 }
@@ -105,27 +107,50 @@ export function MetaTab(props: Props2) {
         <Button
           text="サーバーに保存"
           onClick={async () => {
-            const res = await fetch(
-              `/api/chartFile/${props.cid}?p=${await hashPasswd(
-                getPasswd(props.cid)
-              )}`,
-              {
+            if (props.cid === undefined) {
+              const res = await fetch(`/api/newChartFile/`, {
                 method: "POST",
                 body: msgpack.serialize(props.chart),
                 cache: "no-store",
-              }
-            );
-            if (res.ok) {
-              props.setHasChange(false);
-              setErrorMsg("保存しました！");
-              // 次からは新しいパスワードが必要
-              setPasswd(props.cid, props.chart!.editPasswd);
-            } else {
-              try {
-                const resBody = await res.json();
+              });
+              const resBody = await res.json();
+              if (res.ok) {
+                if (typeof resBody.cid === "string") {
+                  props.setCid(resBody.cid);
+                  setPasswd(resBody.cid, props.chart!.editPasswd);
+                  history.replaceState(null, "", `/edit/${resBody.cid}`);
+                  setErrorMsg("保存しました！");
+                  addRecent("edit", resBody.cid);
+                  props.setHasChange(false);
+                } else {
+                  setErrorMsg("Invalid response");
+                }
+              } else {
                 setErrorMsg(`${res.status}: ${resBody.message}`);
-              } catch (e) {
-                setErrorMsg(String(e));
+              }
+            } else {
+              const res = await fetch(
+                `/api/chartFile/${props.cid}?p=${await hashPasswd(
+                  getPasswd(props.cid)
+                )}`,
+                {
+                  method: "POST",
+                  body: msgpack.serialize(props.chart),
+                  cache: "no-store",
+                }
+              );
+              if (res.ok) {
+                props.setHasChange(false);
+                setErrorMsg("保存しました！");
+                // 次からは新しいパスワードが必要
+                setPasswd(props.cid, props.chart!.editPasswd);
+              } else {
+                try {
+                  const resBody = await res.json();
+                  setErrorMsg(`${res.status}: ${resBody.message}`);
+                } catch (e) {
+                  setErrorMsg(String(e));
+                }
               }
             }
           }}
@@ -148,9 +173,13 @@ export function MetaTab(props: Props2) {
         <span className="ml-1">{saveMsg}</span>
       </p>
       <p>
-        <label htmlFor="upload-bin">ローカルのファイルをアップロード:</label>
+        <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
+          ファイルをアップロード
+        </label>
+        <span className="ml-1">{uploadMsg}</span>
         <input
           type="file"
+          className="hidden"
           id="upload-bin"
           name="upload-bin"
           onChange={async (e) => {
@@ -159,7 +188,7 @@ export function MetaTab(props: Props2) {
               try {
                 const newChart = msgpack.deserialize(await f.arrayBuffer());
                 validateChart(newChart);
-                if(confirm("このファイルで譜面データを上書きしますか?")){
+                if (confirm("このファイルで譜面データを上書きしますか?")) {
                   props.setChart(newChart);
                 }
               } catch (e) {
@@ -169,7 +198,6 @@ export function MetaTab(props: Props2) {
             }
           }}
         />
-        <span className="ml-1">{uploadMsg}</span>
       </p>
       <p className="mt-2">
         <a
