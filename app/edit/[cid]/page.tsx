@@ -359,7 +359,7 @@ export default function Page(context: { params: Params }) {
         <Button
           text="進む"
           onClick={() => {
-            setPasswd(cid.current || "", editPasswd);
+            setPasswd(cidInitial.current || "", editPasswd);
             void fetchChart();
           }}
         />

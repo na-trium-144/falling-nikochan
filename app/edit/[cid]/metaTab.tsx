@@ -1,7 +1,7 @@
 import Button, { buttonStyle } from "@/common/button";
 import Input from "@/common/input";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
@@ -160,9 +160,10 @@ export function MetaTab(props: Props2) {
     saveAs(blob, filename);
     setSaveMsg(`保存しました！ (${filename})`);
   };
-  const upload = async (e) => {
-    if (e.target.files && e.target.files.length >= 1) {
-      const f = e.target.files[0];
+  const upload = async (e: ChangeEvent) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files.length >= 1) {
+      const f = target.files[0];
       try {
         const newChart = msgpack.deserialize(await f.arrayBuffer());
         validateChart(newChart);
@@ -172,7 +173,7 @@ export function MetaTab(props: Props2) {
       } catch (e) {
         setUploadMsg(String(e));
       }
-      e.target.files = null;
+      target.files = null;
     }
   };
   return (
