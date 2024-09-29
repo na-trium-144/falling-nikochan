@@ -9,9 +9,14 @@ interface Props {
 }
 export default function DragHandle(props: Props) {
   const [dragging, setDragging] = useState<boolean>(false);
+  // なぜかドラッグ中のカーソルがcursor-grabbingにならない なぜ?
   return (
-    <button
-      className={props.className}
+    <div
+      className={
+        props.className +
+        " z-10 " +
+        (dragging ? "cursor-grabbing " : "cursor-grab ")
+      }
       style={props.style}
       onPointerMove={(e) => {
         if (dragging) {

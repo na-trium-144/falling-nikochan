@@ -214,6 +214,7 @@ export default function Page(context: { params: Params }) {
         seekStepRel(1);
       }
     }
+    ref.current.focus();
   };
   const seekLeft1 = () => {
     if (chart) {
@@ -227,6 +228,7 @@ export default function Page(context: { params: Params }) {
         seekStepRel(-1);
       }
     }
+    ref.current.focus();
   };
   const seekStepRel = (move: number) => {
     if (chart) {
@@ -242,6 +244,7 @@ export default function Page(context: { params: Params }) {
         getTimeSec(chart.bpmChanges, newStep) + chart.offset
       );
     }
+    ref.current.focus();
   };
 
   useEffect(() => {
@@ -261,6 +264,8 @@ export default function Page(context: { params: Params }) {
   }, [chart]);
 
   const [tab, setTab] = useState<number>(0);
+
+  const [dragMode, setDragMode] = useState<"p" | "v" | "a">("p");
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
@@ -477,9 +482,17 @@ export default function Page(context: { params: Params }) {
           ) {
             stop();
           } else if (e.key === "Left" || e.key === "ArrowLeft") {
-            seekLeft1();
+            if (e.shiftKey) {
+              seekStepRel(-snapDivider * 4);
+            } else {
+              seekLeft1();
+            }
           } else if (e.key === "Right" || e.key === "ArrowRight") {
-            seekRight1();
+            if (e.shiftKey) {
+              seekStepRel(snapDivider * 4);
+            } else {
+              seekRight1();
+            }
           } else if (e.key === "c") {
             copyNote(0);
           } else if (e.key === "v") {
@@ -496,8 +509,17 @@ export default function Page(context: { params: Params }) {
               const n = chart.notes[currentNoteIndex];
               updateNote({ ...n, big: !n.big });
             }
+          } else if (e.key === "Shift") {
+            setDragMode("v");
+          } else if (e.key === "Control") {
+            setDragMode("a");
           } else {
           }
+        }
+      }}
+      onKeyUp={(e) => {
+        if (e.key === "Shift" || e.key === "Control") {
+          setDragMode("p");
         }
       }}
     >
@@ -545,6 +567,7 @@ export default function Page(context: { params: Params }) {
               currentNoteIndex={currentNoteIndex}
               chart={chart}
               updateNote={updateNote}
+              dragMode={dragMode}
             />
           </div>
         </div>
@@ -577,6 +600,7 @@ export default function Page(context: { params: Params }) {
                 }
               }}
               text={`-${snapDivider * 4} Step`}
+              keyName={["Shift", "←"]}
             />
             <Button
               onClick={() => {
@@ -603,6 +627,7 @@ export default function Page(context: { params: Params }) {
                 }
               }}
               text={`+${snapDivider * 4} Step`}
+              keyName={["Shift", "→"]}
             />
           </div>
           <div className="flex-none">

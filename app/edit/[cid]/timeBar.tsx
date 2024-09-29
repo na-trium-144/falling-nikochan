@@ -56,8 +56,8 @@ export default function TimeBar(props: Props) {
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
     (timeSec - timeBarBeginSec) * timeBarPxPerSec;
+  const marginPxLeft = 4 * rem;
   useEffect(() => {
-    const marginPxLeft = 50;
     const marginPxRight = timeBarWidth / 2;
     if (
       currentTimeSecWithoutOffset - timeBarBeginSec <
@@ -100,6 +100,7 @@ export default function TimeBar(props: Props) {
     chart,
     snapDivider,
     timeBarPxPerSec,
+    marginPxLeft,
   ]);
 
   // timebarに表示するstep目盛りのリスト

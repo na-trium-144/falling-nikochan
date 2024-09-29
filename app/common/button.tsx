@@ -9,7 +9,7 @@ interface Props {
   className?: string;
   onClick?: () => void;
   text?: string;
-  keyName?: string;
+  keyName?: string | string[];
   disabled?: boolean;
 }
 export default function Button(props: Props) {
@@ -26,12 +26,19 @@ export default function Button(props: Props) {
       onKeyDown={(e) => e.stopPropagation()}
       disabled={props.disabled}
     >
-      <span>{props.text}</span>
-      {props.keyName && (
-        <Key className={"text-xs p-0.5 " + (props.text ? "ml-1 " : "")}>
-          {props.keyName}
-        </Key>
-      )}
+      <span className={props.keyName ? "mr-1" : ""}>{props.text}</span>
+      {Array.isArray(props.keyName)
+        ? props.keyName.map((k, i) => (
+            <>
+              {i > 0 && <span className="">+</span>}
+              <Key key={i} className="text-xs p-0.5 ">
+                {k}
+              </Key>
+            </>
+          ))
+        : props.keyName && (
+            <Key className="text-xs p-0.5 ">{props.keyName}</Key>
+          )}
     </button>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "./str";
 import { Step, stepCmp } from "@/chartFormat/step";
 import { Key } from "@/common/key";
+import { Mouse } from "@icon-park/react";
 
 interface Props {
   currentNoteIndex: number;
@@ -133,16 +134,25 @@ function NoteEdit(props: Props) {
     const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
       <>
-        <table>
+        <table className="w-max mb-4">
           <tbody className="text-center">
             <tr>
-              <td className="pr-2">Position:</td>
+              <td className="pr-2 ">
+                <span>Position</span>
+                <span className="inline-block ml-1">
+                  (
+                  <span className="inline-block">
+                    <Mouse className="" />
+                  </span>
+                  )
+                </span>
+              </td>
               <td>x =</td>
               <td>
                 <Input
                   actualValue={n.hitX.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitX: Number(v)})
+                    props.updateNote({ ...n, hitX: Number(v) })
                   }
                   isValid={(v) =>
                     !isNaN(Number(v)) && Number(v) >= -5 && Number(v) <= 5
@@ -154,7 +164,16 @@ function NoteEdit(props: Props) {
               <td />
             </tr>
             <tr>
-              <td className="pr-2">Velocity:</td>
+              <td className="pr-2">
+                <span>Velocity</span>
+                <span className="inline-block ml-1">
+                  (<Key className="px-1 py-0.5 mx-0.5 text-sm">Shift</Key>+
+                  <span className="inline-block">
+                    <Mouse className="" />
+                  </span>
+                  )
+                </span>
+              </td>
               <td>vx =</td>
               <td>
                 <Input
@@ -214,7 +233,16 @@ function NoteEdit(props: Props) {
               </td>
             </tr>
             <tr>
-              <td className="pr-2">Gravity:</td>
+              <td className="pr-2">
+                <span>Gravity</span>
+                <span className="inline-block ml-1">
+                  (<Key className="px-1 py-0.5 mx-0.5 text-sm">Ctrl</Key>+
+                  <span className="inline-block">
+                    <Mouse className="" />
+                  </span>
+                  )
+                </span>
+              </td>
               <td />
               <td />
               <td />
@@ -233,7 +261,7 @@ function NoteEdit(props: Props) {
         </table>
         <p>
           <input
-            className="ml-4 mr-1"
+            className="mr-1"
             type="checkbox"
             id="bigNote"
             checked={n.big}
