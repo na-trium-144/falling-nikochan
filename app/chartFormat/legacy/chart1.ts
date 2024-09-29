@@ -20,9 +20,16 @@ export function convert1To2(chart: Chart1): Chart {
   return {
     falling: "nikochan",
     ver: 2,
-    notes: chart.notes,
+    notes: chart.notes.map((n) => ({
+      step: n.step,
+      big: n.big,
+      hitX: n.hitX * 10 - 5,
+      hitVX: n.hitVX * 4,
+      hitVY: n.hitVY * 4,
+      accelY: n.accelY * 4,
+    })),
     bpmChanges: chart.bpmChanges,
-    scaleChanges: [{step: stepZero(), timeSec: 0, bpm: 120}],
+    scaleChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
     offset: chart.offset,
     ytId: chart.ytId,
     title: chart.title,

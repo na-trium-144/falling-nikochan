@@ -140,12 +140,12 @@ function NoteEdit(props: Props) {
               <td>x =</td>
               <td>
                 <Input
-                  actualValue={(n.hitX * 100).toFixed(2)}
+                  actualValue={n.hitX.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitX: Number(v) / 100 })
+                    props.updateNote({ ...n, hitX: Number(v)})
                   }
                   isValid={(v) =>
-                    !isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 100
+                    !isNaN(Number(v)) && Number(v) >= -5 && Number(v) <= 5
                   }
                 />
               </td>
@@ -158,9 +158,9 @@ function NoteEdit(props: Props) {
               <td>vx =</td>
               <td>
                 <Input
-                  actualValue={(n.hitVX * 100).toFixed(2)}
+                  actualValue={n.hitVX.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitVX: Number(v) / 100 })
+                    props.updateNote({ ...n, hitVX: Number(v) })
                   }
                   isValid={(v) => !isNaN(Number(v))}
                 />
@@ -169,9 +169,9 @@ function NoteEdit(props: Props) {
               <td>vy =</td>
               <td>
                 <Input
-                  actualValue={(n.hitVY * 100).toFixed(2)}
+                  actualValue={n.hitVY.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitVY: Number(v) / 100 })
+                    props.updateNote({ ...n, hitVY: Number(v) })
                   }
                   isValid={(v) => !isNaN(Number(v)) && Number(v) >= 0}
                 />
@@ -182,12 +182,12 @@ function NoteEdit(props: Props) {
               <td>|v| =</td>
               <td>
                 <Input
-                  actualValue={(nv * 100).toFixed(2)}
+                  actualValue={(Math.round(nv * 100) / 100).toString()}
                   updateValue={(v) =>
                     props.updateNote({
                       ...n,
-                      hitVX: (Number(v) / 100 / nv) * n.hitVX,
-                      hitVY: (Number(v) / 100 / nv) * n.hitVY,
+                      hitVX: (Number(v) / nv) * n.hitVX,
+                      hitVY: (Number(v) / nv) * n.hitVY,
                     })
                   }
                   isValid={(v) => !isNaN(Number(v)) && Number(v) > 0}
@@ -221,9 +221,9 @@ function NoteEdit(props: Props) {
               <td>ay =</td>
               <td>
                 <Input
-                  actualValue={(n.accelY * 100).toFixed(2)}
+                  actualValue={n.accelY.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, accelY: Number(v) / 100 })
+                    props.updateNote({ ...n, accelY: Number(v) })
                   }
                   isValid={(v) => !isNaN(Number(v))}
                 />

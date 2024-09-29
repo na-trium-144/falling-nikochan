@@ -171,7 +171,7 @@ export default function FallingWindow(props: Props) {
               {/* xを左右に動かす矢印 */}
               <Arrow
                 left={
-                  chart.notes[currentNoteIndex].hitX * boxSize +
+                  ((chart.notes[currentNoteIndex].hitX + 5) / 10) * boxSize +
                   marginX -
                   (0.12 + noteSize / 2) * boxSize
                 }
@@ -182,7 +182,7 @@ export default function FallingWindow(props: Props) {
               />
               <Arrow
                 left={
-                  chart.notes[currentNoteIndex].hitX * boxSize +
+                  ((chart.notes[currentNoteIndex].hitX + 5) / 10) * boxSize +
                   marginX +
                   (0.12 + noteSize / 2) * boxSize
                 }
@@ -195,7 +195,7 @@ export default function FallingWindow(props: Props) {
                 className="absolute "
                 style={{
                   left:
-                    chart.notes[currentNoteIndex].hitX * boxSize +
+                    ((chart.notes[currentNoteIndex].hitX + 5) / 10) * boxSize +
                     marginX -
                     (0.12 + noteSize / 2) * boxSize,
                   bottom: targetY * boxSize + marginY - 8,
@@ -205,19 +205,25 @@ export default function FallingWindow(props: Props) {
                 onMove={(x, y) =>
                   props.updateNote({
                     ...chart.notes[currentNoteIndex],
-                    hitX: chart.notes[currentNoteIndex].hitX + x / boxSize,
+                    hitX:
+                      chart.notes[currentNoteIndex].hitX + (x * 10) / boxSize,
                   })
                 }
               />
               {/* vx,vyを動かす矢印 */}
               <Arrow
-                left={chart.notes[currentNoteIndex].hitX * boxSize + marginX}
+                left={
+                  ((chart.notes[currentNoteIndex].hitX + 5) / 10) * boxSize +
+                  marginX
+                }
                 bottom={targetY * boxSize + marginY}
                 length={
-                  Math.sqrt(
+                  (Math.sqrt(
                     Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
                       Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
-                  ) * boxSize
+                  ) *
+                    boxSize) /
+                  4
                 }
                 lineWidth={12}
                 rotation={
@@ -230,13 +236,17 @@ export default function FallingWindow(props: Props) {
               <DragHandle
                 className="absolute origin-left z-20"
                 style={{
-                  left: chart.notes[currentNoteIndex].hitX * boxSize + marginX,
+                  left:
+                    ((chart.notes[currentNoteIndex].hitX + 5) / 10) * boxSize +
+                    marginX,
                   bottom: targetY * boxSize + marginY - 16,
                   width:
-                    Math.sqrt(
+                    (Math.sqrt(
                       Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
                         Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
-                    ) * boxSize,
+                    ) *
+                      boxSize) /
+                    4,
                   height: 32,
                   transform: `rotate(${-Math.atan2(
                     chart.notes[currentNoteIndex].hitVY,
@@ -266,10 +276,10 @@ export default function FallingWindow(props: Props) {
                     ...chart.notes[currentNoteIndex],
                     hitVX:
                       chart.notes[currentNoteIndex].hitVX +
-                      (x / boxSize / mouseDist) * hitVDist,
+                      ((x * 4) / boxSize / mouseDist) * hitVDist,
                     hitVY:
                       chart.notes[currentNoteIndex].hitVY -
-                      (y / boxSize / mouseDist) * hitVDist,
+                      ((y * 4) / boxSize / mouseDist) * hitVDist,
                   });
                 }}
               />
