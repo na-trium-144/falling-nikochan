@@ -283,7 +283,7 @@ export default function Page(context: { params: Params }) {
         });
       } else {
         chart.bpmChanges[currentBpmIndex].bpm = bpm;
-        updateBpmTimeSec(chart.bpmChanges);
+        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
       }
       changeChart({ ...chart });
     }
@@ -303,7 +303,7 @@ export default function Page(context: { params: Params }) {
         chart.bpmChanges = chart.bpmChanges.filter(
           (ch) => stepCmp(ch.step, currentStep) !== 0
         );
-        updateBpmTimeSec(chart.bpmChanges);
+        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
         changeChart({ ...chart });
       } else {
         chart.bpmChanges.push({
@@ -312,6 +312,58 @@ export default function Page(context: { params: Params }) {
           timeSec: currentTimeSec,
         });
         chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
+          stepCmp(a.step, b.step)
+        );
+        changeChart({ ...chart });
+      }
+    }
+  };
+
+  const currentScaleIndex =
+    chart && findBpmIndexFromStep(chart?.scaleChanges, currentStep);
+  const currentScale =
+    chart && chart.scaleChanges.length > 0 && currentScaleIndex !== undefined
+      ? chart.scaleChanges[currentScaleIndex].bpm
+      : 120;
+  const changeScale = (bpm: number) => {
+    if (chart && currentScaleIndex !== undefined) {
+      if (chart.scaleChanges.length === 0) {
+        chart.scaleChanges.push({
+          step: stepZero(),
+          bpm: bpm,
+          timeSec: 0,
+        });
+      } else {
+        chart.scaleChanges[currentScaleIndex].bpm = bpm;
+        // updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+      }
+      changeChart({ ...chart });
+    }
+  };
+  const scaleChangeHere =
+    chart &&
+    currentScaleIndex !== undefined &&
+    chart.scaleChanges.length > 0 &&
+    stepCmp(chart.scaleChanges[currentScaleIndex].step, currentStep) === 0;
+  const toggleScaleChangeHere = () => {
+    if (
+      chart &&
+      currentScaleIndex !== undefined &&
+      stepCmp(currentStep, stepZero()) > 0
+    ) {
+      if (scaleChangeHere) {
+        chart.scaleChanges = chart.scaleChanges.filter(
+          (ch) => stepCmp(ch.step, currentStep) !== 0
+        );
+        // updateScaleTimeSec(chart.bpmChanges, chart.scaleChanges);
+        changeChart({ ...chart });
+      } else {
+        chart.scaleChanges.push({
+          step: currentStep,
+          bpm: currentScale,
+          timeSec: currentTimeSec,
+        });
+        chart.scaleChanges = chart.scaleChanges.sort((a, b) =>
           stepCmp(a.step, b.step)
         );
         changeChart({ ...chart });
@@ -626,14 +678,18 @@ export default function Page(context: { params: Params }) {
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
-                waveOffset={chart?.waveOffset}
-                setWaveOffset={changeWaveOffset}
                 currentBpm={
                   currentBpmIndex !== undefined ? currentBpm : undefined
                 }
                 setCurrentBpm={changeBpm}
                 bpmChangeHere={!!bpmChangeHere}
                 toggleBpmChangeHere={toggleBpmChangeHere}
+                currentScale={
+                  currentScaleIndex !== undefined ? currentScale : undefined
+                }
+                setCurrentScale={changeScale}
+                scaleChangeHere={!!scaleChangeHere}
+                toggleScaleChangeHere={toggleScaleChangeHere}
                 currentStep={currentStep}
               />
             ) : (

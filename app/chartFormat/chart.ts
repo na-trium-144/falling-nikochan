@@ -51,7 +51,9 @@ export function validateChart(chart_: Chart | Chart1) {
   chart.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
   chart.bpmChanges.forEach((n) => validateBpmChange(n));
-  updateBpmTimeSec(chart.bpmChanges);
+  if (!Array.isArray(chart.scaleChanges)) throw "chart.scaleChanges is invalid";
+  chart.scaleChanges.forEach((n) => validateBpmChange(n));
+  updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";

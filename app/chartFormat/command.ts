@@ -1,4 +1,4 @@
-import { Step, stepToFloat, stepZero, validateStep } from "./step";
+import { Step, stepCmp, stepToFloat, stepZero, validateStep } from "./step";
 
 /**
  * 音符コマンド
@@ -28,8 +28,7 @@ export function validateNoteCommand(n: NoteCommand) {
   if (typeof n.accelY !== "number") throw "note.accelY is invalid";
 }
 export function defaultNoteCommand(
-  bpmChanges: BPMChange[],
-  currentStep: Step = stepZero(),
+  currentStep: Step = stepZero()
 ): NoteCommand {
   return {
     step: currentStep,
@@ -59,11 +58,26 @@ export function validateBpmChange(b: BPMChange) {
 /**
  * stepが正しいとしてtimeSecを再計算
  */
-export function updateBpmTimeSec(bpmChanges: BPMChange[]) {
+export function updateBpmTimeSec(
+  bpmChanges: BPMChange[],
+  scaleChanges: BPMChange[]
+) {
   let timeSum = 0;
+  let si = 0;
   for (let bi = 0; bi < bpmChanges.length; bi++) {
     bpmChanges[bi].timeSec = timeSum;
-    console.log(bpmChanges[bi]);
+    while (
+      si < scaleChanges.length &&
+      (bi + 1 >= bpmChanges.length ||
+        stepCmp(scaleChanges[si].step, bpmChanges[bi + 1].step) < 0)
+    ) {
+      scaleChanges[si].timeSec =
+        timeSum +
+        (60 / bpmChanges[bi].bpm) *
+          (stepToFloat(scaleChanges[si].step) -
+            stepToFloat(bpmChanges[bi].step));
+      si++;
+    }
     if (bi + 1 < bpmChanges.length) {
       timeSum +=
         (60 / bpmChanges[bi].bpm) *

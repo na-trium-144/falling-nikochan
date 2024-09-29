@@ -161,46 +161,60 @@ export function loadChart(chart: Chart): ChartSeqData {
 
     const display: DisplayParam[] = [];
     let tBegin = hitTimeSec;
-    let x = c.hitX;
+    // noteCommandの座標系 (-5<=x<=5) から
+    //  displayの座標系に変換するのもここでやる
+    let x = (c.hitX + 5) / 10;
     let y = 0;
     let vx = c.hitVX;
     let vy = c.hitVY;
     let appearTimeSec = hitTimeSec;
-    for (let ti = chart.scaleChanges.length - 1; ti >= 0; ti++) {
+    for (let ti = chart.scaleChanges.length - 1; ti >= 0; ti--) {
       const ts = chart.scaleChanges[ti];
-      if (ts.timeSec >= hitTimeSec) {
+      if (ts.timeSec >= hitTimeSec && ti >= 1) {
         continue;
       }
       const tEnd = ts.timeSec;
+
+      const vx_ = (vx * ts.bpm) / 4 / 120;
+      const vy_ = (vy * ts.bpm) / 4 / 120;
+      const ay_ = (c.accelY * ts.bpm * ts.bpm) / 4 / 120 / 120;
 
       // tEnd <= 時刻 <= tBegin の間、
       //  t = tBegin - 時刻  > 0
       //  x = x(tBegin) + vx * t
       //  y = y(tBegin) + vy * t - (ay * t * t) / 2;
       display.push({
-        timeSecBefore: hitTimeSec - tEnd,
-        a: [x / 5, (vx * ts.bpm) / 4 / 120],
-        b: [
-          y / 5,
-          (vy * ts.bpm) / 4 / 120,
-          (-c.accelY * ts.bpm * ts.bpm) / 4 / 120 / 120 / 2,
-        ],
+        timeSecBefore: hitTimeSec - tBegin,
+        a: [x, vx_],
+        b: [y, vy_, -ay_ / 2],
       });
 
       // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
       for (let t = 0; t < tBegin - tEnd; t += 0.01) {
-        const xt = x + vx * t;
-        const yt = y + vy * t - (c.accelY * t * t) / 2;
+        const xt = x + vx_ * t;
+        const yt = y + vy_ * t - (ay_ * t * t) / 2;
         if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
           appearTimeSec = tBegin - t;
         }
       }
+      if(ti == 0){
+        // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
+        for (let t = 0; t < 999; t += 0.01) {
+        const xt = x + vx_ * t;
+        const yt = y + vy_ * t - (ay_ * t * t) / 2;
+        if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
+          appearTimeSec = tBegin - t;
+        }else{
+          break;
+        }
+      }
+      }
 
       const dt = tBegin - tEnd;
-      x += vx * ts.bpm * dt;
+      x += vx_ * dt;
       // y += ∫ (vy + ay * t) dt
-      y += vy * ts.bpm * dt - (c.accelY * ts.bpm * ts.bpm * dt * dt) / 2;
-      vy -= c.accelY * dt;
+      y += vy_ * dt - (ay_ * dt * dt) / 2;
+      vy -= c.accelY * ts.bpm / 120 * dt;
 
       tBegin = tEnd;
     }
@@ -214,6 +228,7 @@ export function loadChart(chart: Chart): ChartSeqData {
       display,
     });
   }
+  console.log(notes);
   return {
     offset: chart.offset,
     bpmChanges: chart.bpmChanges,
