@@ -224,7 +224,7 @@ export default function Home(context: { params: Params }) {
 
   return (
     <main
-      className="overflow-hidden w-screen h-screen relative"
+      className="overflow-hidden w-screen h-screen relative select-none"
       style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
