@@ -60,8 +60,8 @@ export default function EditTab() {
     } else {
       try {
         setCIdErrorMsg((await res.json()).message);
-      } catch (e) {
-        setCIdErrorMsg(String(e));
+      } catch {
+        setCIdErrorMsg("");
       }
     }
   };
@@ -109,6 +109,9 @@ export default function EditTab() {
             新規作成
           </Link>
         </h3>
+        <p className="pl-2">
+          新規譜面作成は30分ごとに1回までできます。
+        </p>
       </div>
     </IndexMain>
   );

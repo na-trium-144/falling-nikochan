@@ -79,7 +79,7 @@ export default function Page(context: { params: Params }) {
         } catch (e) {
           setChart(undefined);
           setErrorStatus(undefined);
-          setErrorMsg(String(e));
+          setErrorMsg("invalid response");
         }
       } else {
         if (res.status === 401) {
@@ -91,7 +91,7 @@ export default function Page(context: { params: Params }) {
           try {
             setErrorMsg(String((await res.json()).message));
           } catch (e) {
-            setErrorMsg(String(e));
+            setErrorMsg("");
           }
         }
       }

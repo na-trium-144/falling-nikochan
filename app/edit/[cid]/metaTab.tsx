@@ -113,20 +113,29 @@ export function MetaTab(props: Props2) {
         body: msgpack.serialize(props.chart),
         cache: "no-store",
       });
-      const resBody = await res.json();
       if (res.ok) {
-        if (typeof resBody.cid === "string") {
-          props.setCid(resBody.cid);
-          setPasswd(resBody.cid, props.chart!.editPasswd);
-          history.replaceState(null, "", `/edit/${resBody.cid}`);
-          setErrorMsg("保存しました！");
-          addRecent("edit", resBody.cid);
-          props.setHasChange(false);
-        } else {
+        try {
+          const resBody = await res.json();
+          if (typeof resBody.cid === "string") {
+            props.setCid(resBody.cid);
+            setPasswd(resBody.cid, props.chart!.editPasswd);
+            history.replaceState(null, "", `/edit/${resBody.cid}`);
+            setErrorMsg("保存しました！");
+            addRecent("edit", resBody.cid);
+            props.setHasChange(false);
+          } else {
+            setErrorMsg("Invalid response");
+          }
+        } catch {
           setErrorMsg("Invalid response");
         }
       } else {
-        setErrorMsg(`${res.status}: ${resBody.message}`);
+        try {
+          const resBody = await res.json();
+          setErrorMsg(`${res.status}: ${resBody.message}`);
+        } catch {
+          setErrorMsg(`${res.status} Error`);
+        }
       }
     } else {
       const res = await fetch(
@@ -148,8 +157,8 @@ export function MetaTab(props: Props2) {
         try {
           const resBody = await res.json();
           setErrorMsg(`${res.status}: ${resBody.message}`);
-        } catch (e) {
-          setErrorMsg(String(e));
+        } catch {
+          setErrorMsg(`${res.status} Error`);
         }
       }
     }
