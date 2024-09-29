@@ -24,8 +24,8 @@ export default async function ShareChart(context: { params: Params }) {
     errorStatus = res.status;
     try {
       errorMsg = String((await res.json()).message);
-    } catch (e) {
-      errorMsg = String(e);
+    } catch {
+      errorMsg = "";
     }
   }
 

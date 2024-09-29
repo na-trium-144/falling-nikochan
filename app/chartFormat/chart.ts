@@ -40,6 +40,8 @@ export interface Chart {
   editPasswd: string;
 }
 
+export const chartMaxSize = 100000;
+
 export function validateChart(chart_: Chart | Chart1) {
   if (chart_.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart_.ver === 1) {

@@ -3,22 +3,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { getFileEntry, updateFileEntry } from "@/api/dbChartFile";
 import { fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
-import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
+import {
+  Chart,
+  chartMaxSize,
+  hashPasswd,
+  validateChart,
+} from "@/chartFormat/chart";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
 
-async function getChart(cid: string, p: string): Promise<{res?: Response, chart?: Chart}> {
+async function getChart(
+  cid: string,
+  p: string
+): Promise<{ res?: Response; chart?: Chart }> {
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
-    return {res: NextResponse.json(
-      { message: "Chart ID Not Found" },
-      { status: 404 }
-    )};
+    return {
+      res: NextResponse.json(
+        { message: "Chart ID Not Found" },
+        { status: 404 }
+      ),
+    };
   }
   const fsData = await fsRead(fileEntry.fid);
   if (fsData === null) {
-    return {res: NextResponse.json({ message: "fsRead() failed" }, { status: 500 })};
+    return {
+      res: NextResponse.json({ message: "fsRead() failed" }, { status: 500 }),
+    };
   }
 
   let chart: Chart;
@@ -26,22 +38,24 @@ async function getChart(cid: string, p: string): Promise<{res?: Response, chart?
     chart = msgpack.deserialize(fsData.data);
     chart = validateChart(chart);
   } catch (e) {
-    return {res: NextResponse.json(
-      { message: "invalid chart data" },
-      { status: 500 }
-    )};
+    return {
+      res: NextResponse.json(
+        { message: "invalid chart data" },
+        { status: 500 }
+      ),
+    };
   }
 
   if (p !== (await hashPasswd(chart.editPasswd))) {
-    return {res: new Response(null, { status: 401 })};
+    return { res: new Response(null, { status: 401 }) };
   }
-  return {chart};
+  return { chart };
 }
 export async function GET(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
   const passwdHash = new URL(request.url).searchParams.get("p");
-  const {res, chart} = await getChart(cid, passwdHash || "");
-  if(chart){
+  const { res, chart } = await getChart(cid, passwdHash || "");
+  if (chart) {
     return new Response(new Blob([msgpack.serialize(chart)]));
   }
   return res;
@@ -50,14 +64,26 @@ export async function GET(request: NextRequest, context: { params: Params }) {
 export async function POST(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
   const passwdHash = new URL(request.url).searchParams.get("p");
-  const {res, chart} = await getChart(cid, passwdHash || "");
-  if(!chart){
+  const { res, chart } = await getChart(cid, passwdHash || "");
+  if (!chart) {
     return res;
+  }
+
+  const chartBuf = await request.arrayBuffer();
+  if (chartBuf.byteLength > chartMaxSize) {
+    return NextResponse.json(
+      {
+        message:
+          `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
+          `Max ${Math.round(chartMaxSize / 1000)}kB`,
+      },
+      { status: 413 }
+    );
   }
 
   let newChart: Chart;
   try {
-    newChart = msgpack.deserialize(await request.arrayBuffer());
+    newChart = msgpack.deserialize(chartBuf);
     newChart = validateChart(newChart);
   } catch (e) {
     console.error(e);
@@ -75,7 +101,9 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   }
 
   await updateFileEntry(cid, newChart);
-  if (!(await fsWrite(fileEntry.fid, new Blob([msgpack.serialize(newChart)])))) {
+  if (
+    !(await fsWrite(fileEntry.fid, new Blob([msgpack.serialize(newChart)])))
+  ) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
 
@@ -88,8 +116,8 @@ export async function DELETE(
 ) {
   const cid: string = context.params.cid;
   const passwdHash = new URL(request.url).searchParams.get("p");
-  const {res, chart} = await getChart(cid, passwdHash || "");
-  if(!chart){
+  const { res, chart } = await getChart(cid, passwdHash || "");
+  if (!chart) {
     return res;
   }
 

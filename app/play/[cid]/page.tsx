@@ -62,8 +62,8 @@ export default function Home(context: { params: Params }) {
         setErrorStatus(res.status);
         try {
           setErrorMsg(String((await res.json()).message));
-        } catch (e) {
-          setErrorMsg(String(e));
+        } catch {
+          setErrorMsg("");
         }
       }
     })();

@@ -21,3 +21,8 @@ model ChartFile {
   composer String @default("")
   chartCreator String @default("")
 }
+
+model CreateRateLimit {
+  ip String @id
+  lastCreate DateTime @updatedAt
+}
