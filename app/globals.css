@@ -72,3 +72,15 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* tailwind css の user-select: none だけでは足りなかった */
+.select-none {
+  /*//選択制御*/
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /*//ポップアップメニュー表示制御*/
+  -webkit-touch-callout: none;
+}

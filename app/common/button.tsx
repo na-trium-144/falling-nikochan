@@ -1,9 +1,12 @@
 import { Key } from "./key";
 
+export const buttonStyleDisabled =
+  "mx-0.5 py-1.5 px-2.5 border border-gray-600 rounded cursor-pointer " + "bg-gray-500 ";
 export const buttonStyle =
-  "mx-0.5 p-1 border border-gray-600 rounded " +
-  "bg-gray-200 hover:bg-gray-100 active:bg-gray-300 active:shadow-inner " +
-  "cursor-pointer ";
+  "mx-0.5 py-1.5 px-2.5 border border-gray-600 rounded cursor-pointer " +
+  "bg-gradient-to-t from-slate-300 to-slate-50 " +
+  "hover:from-slate-200 hover:to-white " +
+  "active:from-slate-100 active:to-slate-300 active:shadow-inner ";
 
 interface Props {
   className?: string;
@@ -16,10 +19,9 @@ export default function Button(props: Props) {
   return (
     <button
       className={
-        "mx-0.5 p-1 border border-gray-600 rounded " +
         (props.disabled
-          ? "bg-gray-500 "
-          : "bg-gray-200 hover:bg-gray-100 active:bg-gray-300 active:shadow-inner ") +
+          ? buttonStyleDisabled
+          : buttonStyle) +
         props.className
       }
       onClick={() => props.onClick && props.onClick()}
