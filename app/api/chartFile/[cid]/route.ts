@@ -24,7 +24,7 @@ async function getChart(cid: string, p: string): Promise<{res?: Response, chart?
   let chart: Chart;
   try {
     chart = msgpack.deserialize(fsData.data);
-    validateChart(chart);
+    chart = validateChart(chart);
   } catch (e) {
     return {res: NextResponse.json(
       { message: "invalid chart data" },
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   let newChart: Chart;
   try {
     newChart = msgpack.deserialize(await request.arrayBuffer());
-    validateChart(newChart);
+    newChart = validateChart(newChart);
   } catch (e) {
     console.error(e);
     return NextResponse.json(

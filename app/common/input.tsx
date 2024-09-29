@@ -13,6 +13,7 @@ interface Props {
   right?: boolean;
   className?: string;
   passwd?: boolean;
+  disabled?: boolean;
 }
 export default function Input(props: Props) {
   const [value, setValue] = useState<string>("");
@@ -30,6 +31,7 @@ export default function Input(props: Props) {
         (!props.left ? "text-right " : "") +
         "border-0 border-b border-slate-400 bg-transparent appearance-none " +
         (props.isValid && !props.isValid(value) ? "text-red-500 " : "") +
+        (props.disabled ? "text-slate-400 border-slate-200 ":"") + 
         (props.className || "")
       }
       value={value}
@@ -42,7 +44,7 @@ export default function Input(props: Props) {
       }}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
-      size={6}
+      disabled={props.disabled}
     />
   );
 }

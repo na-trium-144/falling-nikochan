@@ -165,8 +165,8 @@ export function MetaTab(props: Props2) {
     if (target.files && target.files.length >= 1) {
       const f = target.files[0];
       try {
-        const newChart = msgpack.deserialize(await f.arrayBuffer());
-        validateChart(newChart);
+        let newChart = msgpack.deserialize(await f.arrayBuffer());
+        newChart = validateChart(newChart);
         if (confirm("このファイルで譜面データを上書きしますか?")) {
           props.setChart(newChart);
         }

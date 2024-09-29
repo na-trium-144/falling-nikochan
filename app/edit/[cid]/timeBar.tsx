@@ -11,7 +11,6 @@ import { useResizeDetector } from "react-resize-detector";
 import { stepNStr, timeSecStr, timeStr } from "./str";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import { Chart } from "@/chartFormat/chart";
-import msgpack from "@ygoe/msgpack";
 import { useDisplayMode } from "@/scale";
 
 interface Props {
@@ -57,8 +56,8 @@ export default function TimeBar(props: Props) {
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
     (timeSec - timeBarBeginSec) * timeBarPxPerSec;
+  const marginPxLeft = 4 * rem;
   useEffect(() => {
-    const marginPxLeft = 50;
     const marginPxRight = timeBarWidth / 2;
     if (
       currentTimeSecWithoutOffset - timeBarBeginSec <
@@ -101,6 +100,7 @@ export default function TimeBar(props: Props) {
     chart,
     snapDivider,
     timeBarPxPerSec,
+    marginPxLeft,
   ]);
 
   // timebarに表示するstep目盛りのリスト
@@ -129,10 +129,14 @@ export default function TimeBar(props: Props) {
     chart && stepCmp(timeBarBeginStep, stepZero()) > 0
       ? findBpmIndexFromStep(chart?.bpmChanges, timeBarBeginStep)
       : undefined;
+  const beginScaleIndex =
+    chart && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(chart?.scaleChanges, timeBarBeginStep)
+      : undefined;
 
   return (
     <div
-      className={"h-6 bg-gray-200 relative mt-10 mb-10 overflow-visible"}
+      className={"h-6 bg-gray-200 relative mt-10 mb-16 overflow-visible"}
       ref={timeBarRef}
     >
       {/* 秒数目盛り */}
@@ -169,7 +173,7 @@ export default function TimeBar(props: Props) {
           )
       )}
       {/* bpm変化 */}
-      <div className="absolute" style={{ bottom: -3 * rem, left: 0 }}>
+      <div className="absolute" style={{ bottom: -2.5 * rem, left: 0 }}>
         <span className="mr-1">BPM:</span>
         {beginBpmIndex !== undefined && (
           <span>{chart?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
@@ -191,12 +195,35 @@ export default function TimeBar(props: Props) {
             </span>
           )
       )}
+      {/* scale変化 */}
+      <div className="absolute" style={{ bottom: -3.75 * rem, left: 0 }}>
+        <span className="mr-1">Scale:</span>
+        {beginScaleIndex !== undefined && (
+          <span>{chart?.scaleChanges[beginScaleIndex]?.bpm.toString()}</span>
+        )}
+      </div>
+      {chart?.scaleChanges.map(
+        (ch, i) =>
+          ch.timeSec >= timeBarBeginSec &&
+          ch.timeSec < timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+            <span
+              key={i}
+              className="absolute "
+              style={{
+                bottom: -3.75 * rem,
+                left: timeBarPos(ch.timeSec),
+              }}
+            >
+              <span className="absolute bottom-0">{ch.bpm}</span>
+            </span>
+          )
+      )}
       {/* 現在位置カーソル */}
       <div
         className="absolute border-l border-amber-400 shadow shadow-yellow-400"
         style={{
           top: -2.5 * rem,
-          bottom: -2.5 * rem,
+          bottom: -4 * rem,
           left: timeBarPos(currentTimeSecWithoutOffset),
         }}
       />

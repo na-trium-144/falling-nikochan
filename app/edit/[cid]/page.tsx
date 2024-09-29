@@ -214,6 +214,7 @@ export default function Page(context: { params: Params }) {
         seekStepRel(1);
       }
     }
+    ref.current.focus();
   };
   const seekLeft1 = () => {
     if (chart) {
@@ -227,6 +228,7 @@ export default function Page(context: { params: Params }) {
         seekStepRel(-1);
       }
     }
+    ref.current.focus();
   };
   const seekStepRel = (move: number) => {
     if (chart) {
@@ -242,6 +244,7 @@ export default function Page(context: { params: Params }) {
         getTimeSec(chart.bpmChanges, newStep) + chart.offset
       );
     }
+    ref.current.focus();
   };
 
   useEffect(() => {
@@ -262,14 +265,11 @@ export default function Page(context: { params: Params }) {
 
   const [tab, setTab] = useState<number>(0);
 
+  const [dragMode, setDragMode] = useState<"p" | "v" | "a">("p");
+
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
       changeChart({ ...chart, offset: ofs });
-    }
-  };
-  const changeWaveOffset = (ofs: number) => {
-    if (chart /*&& offsetValid(ofs)*/) {
-      changeChart({ ...chart, waveOffset: ofs });
     }
   };
   const currentBpmIndex =
@@ -288,7 +288,7 @@ export default function Page(context: { params: Params }) {
         });
       } else {
         chart.bpmChanges[currentBpmIndex].bpm = bpm;
-        updateBpmTimeSec(chart.bpmChanges);
+        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
       }
       changeChart({ ...chart });
     }
@@ -308,7 +308,7 @@ export default function Page(context: { params: Params }) {
         chart.bpmChanges = chart.bpmChanges.filter(
           (ch) => stepCmp(ch.step, currentStep) !== 0
         );
-        updateBpmTimeSec(chart.bpmChanges);
+        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
         changeChart({ ...chart });
       } else {
         chart.bpmChanges.push({
@@ -317,6 +317,58 @@ export default function Page(context: { params: Params }) {
           timeSec: currentTimeSec,
         });
         chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
+          stepCmp(a.step, b.step)
+        );
+        changeChart({ ...chart });
+      }
+    }
+  };
+
+  const currentScaleIndex =
+    chart && findBpmIndexFromStep(chart?.scaleChanges, currentStep);
+  const currentScale =
+    chart && chart.scaleChanges.length > 0 && currentScaleIndex !== undefined
+      ? chart.scaleChanges[currentScaleIndex].bpm
+      : 120;
+  const changeScale = (bpm: number) => {
+    if (chart && currentScaleIndex !== undefined) {
+      if (chart.scaleChanges.length === 0) {
+        chart.scaleChanges.push({
+          step: stepZero(),
+          bpm: bpm,
+          timeSec: 0,
+        });
+      } else {
+        chart.scaleChanges[currentScaleIndex].bpm = bpm;
+        // updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+      }
+      changeChart({ ...chart });
+    }
+  };
+  const scaleChangeHere =
+    chart &&
+    currentScaleIndex !== undefined &&
+    chart.scaleChanges.length > 0 &&
+    stepCmp(chart.scaleChanges[currentScaleIndex].step, currentStep) === 0;
+  const toggleScaleChangeHere = () => {
+    if (
+      chart &&
+      currentScaleIndex !== undefined &&
+      stepCmp(currentStep, stepZero()) > 0
+    ) {
+      if (scaleChangeHere) {
+        chart.scaleChanges = chart.scaleChanges.filter(
+          (ch) => stepCmp(ch.step, currentStep) !== 0
+        );
+        // updateScaleTimeSec(chart.bpmChanges, chart.scaleChanges);
+        changeChart({ ...chart });
+      } else {
+        chart.scaleChanges.push({
+          step: currentStep,
+          bpm: currentScale,
+          timeSec: currentTimeSec,
+        });
+        chart.scaleChanges = chart.scaleChanges.sort((a, b) =>
           stepCmp(a.step, b.step)
         );
         changeChart({ ...chart });
@@ -430,9 +482,17 @@ export default function Page(context: { params: Params }) {
           ) {
             stop();
           } else if (e.key === "Left" || e.key === "ArrowLeft") {
-            seekLeft1();
+            if (e.shiftKey) {
+              seekStepRel(-snapDivider * 4);
+            } else {
+              seekLeft1();
+            }
           } else if (e.key === "Right" || e.key === "ArrowRight") {
-            seekRight1();
+            if (e.shiftKey) {
+              seekStepRel(snapDivider * 4);
+            } else {
+              seekRight1();
+            }
           } else if (e.key === "c") {
             copyNote(0);
           } else if (e.key === "v") {
@@ -449,8 +509,17 @@ export default function Page(context: { params: Params }) {
               const n = chart.notes[currentNoteIndex];
               updateNote({ ...n, big: !n.big });
             }
+          } else if (e.key === "Shift") {
+            setDragMode("v");
+          } else if (e.key === "Control") {
+            setDragMode("a");
           } else {
           }
+        }
+      }}
+      onKeyUp={(e) => {
+        if (e.key === "Shift" || e.key === "Control") {
+          setDragMode("p");
         }
       }}
     >
@@ -498,6 +567,7 @@ export default function Page(context: { params: Params }) {
               currentNoteIndex={currentNoteIndex}
               chart={chart}
               updateNote={updateNote}
+              dragMode={dragMode}
             />
           </div>
         </div>
@@ -530,6 +600,7 @@ export default function Page(context: { params: Params }) {
                 }
               }}
               text={`-${snapDivider * 4} Step`}
+              keyName={["Shift", "←"]}
             />
             <Button
               onClick={() => {
@@ -556,6 +627,7 @@ export default function Page(context: { params: Params }) {
                 }
               }}
               text={`+${snapDivider * 4} Step`}
+              keyName={["Shift", "→"]}
             />
           </div>
           <div className="flex-none">
@@ -631,14 +703,28 @@ export default function Page(context: { params: Params }) {
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
-                waveOffset={chart?.waveOffset}
-                setWaveOffset={changeWaveOffset}
+                prevBpm={
+                  currentBpmIndex !== undefined && currentBpmIndex >= 1
+                    ? chart.bpmChanges[currentBpmIndex - 1].bpm
+                    : undefined
+                }
                 currentBpm={
                   currentBpmIndex !== undefined ? currentBpm : undefined
                 }
                 setCurrentBpm={changeBpm}
                 bpmChangeHere={!!bpmChangeHere}
                 toggleBpmChangeHere={toggleBpmChangeHere}
+                prevScale={
+                  currentScaleIndex !== undefined && currentScaleIndex >= 1
+                    ? chart.scaleChanges[currentScaleIndex - 1].bpm
+                    : undefined
+                }
+                currentScale={
+                  currentScaleIndex !== undefined ? currentScale : undefined
+                }
+                setCurrentScale={changeScale}
+                scaleChangeHere={!!scaleChangeHere}
+                toggleScaleChangeHere={toggleScaleChangeHere}
                 currentStep={currentStep}
               />
             ) : (

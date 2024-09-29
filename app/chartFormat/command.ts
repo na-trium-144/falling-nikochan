@@ -1,4 +1,4 @@
-import { Step, stepToFloat, stepZero, validateStep } from "./step";
+import { Step, stepCmp, stepToFloat, stepZero, validateStep } from "./step";
 
 /**
  * 音符コマンド
@@ -18,10 +18,6 @@ export interface NoteCommand {
   hitVX: number;
   hitVY: number;
   accelY: number;
-  timeScale: {
-    stepBefore: Step;
-    scale: number;
-  }[];
 }
 export function validateNoteCommand(n: NoteCommand) {
   validateStep(n.step);
@@ -30,11 +26,6 @@ export function validateNoteCommand(n: NoteCommand) {
   if (typeof n.hitVX !== "number") throw "note.hitVX is invalid";
   if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
   if (typeof n.accelY !== "number") throw "note.accelY is invalid";
-  if (!Array.isArray(n.timeScale)) throw "note.timeScale is invalid";
-  n.timeScale.forEach((ts) => {
-    validateStep(ts.stepBefore);
-    if (typeof ts.scale !== "number") throw "timeScale.scale is invalid";
-  });
 }
 export function defaultNoteCommand(
   currentStep: Step = stepZero()
@@ -42,11 +33,10 @@ export function defaultNoteCommand(
   return {
     step: currentStep,
     big: false,
-    hitX: 1 / 4,
-    hitVX: 1 / 4,
-    hitVY: 3 / 4,
-    accelY: 1 / 4,
-    timeScale: [{ stepBefore: stepZero(), scale: 1 }],
+    hitX: -3,
+    hitVX: +1,
+    hitVY: +3,
+    accelY: +1,
   };
 }
 
@@ -68,11 +58,26 @@ export function validateBpmChange(b: BPMChange) {
 /**
  * stepが正しいとしてtimeSecを再計算
  */
-export function updateBpmTimeSec(bpmChanges: BPMChange[]) {
+export function updateBpmTimeSec(
+  bpmChanges: BPMChange[],
+  scaleChanges: BPMChange[]
+) {
   let timeSum = 0;
+  let si = 0;
   for (let bi = 0; bi < bpmChanges.length; bi++) {
     bpmChanges[bi].timeSec = timeSum;
-    console.log(bpmChanges[bi]);
+    while (
+      si < scaleChanges.length &&
+      (bi + 1 >= bpmChanges.length ||
+        stepCmp(scaleChanges[si].step, bpmChanges[bi + 1].step) < 0)
+    ) {
+      scaleChanges[si].timeSec =
+        timeSum +
+        (60 / bpmChanges[bi].bpm) *
+          (stepToFloat(scaleChanges[si].step) -
+            stepToFloat(bpmChanges[bi].step));
+      si++;
+    }
     if (bi + 1 < bpmChanges.length) {
       timeSum +=
         (60 / bpmChanges[bi].bpm) *
