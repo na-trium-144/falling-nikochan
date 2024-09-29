@@ -703,12 +703,22 @@ export default function Page(context: { params: Params }) {
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
+                prevBpm={
+                  currentBpmIndex !== undefined && currentBpmIndex >= 1
+                    ? chart.bpmChanges[currentBpmIndex - 1].bpm
+                    : undefined
+                }
                 currentBpm={
                   currentBpmIndex !== undefined ? currentBpm : undefined
                 }
                 setCurrentBpm={changeBpm}
                 bpmChangeHere={!!bpmChangeHere}
                 toggleBpmChangeHere={toggleBpmChangeHere}
+                prevScale={
+                  currentScaleIndex !== undefined && currentScaleIndex >= 1
+                    ? chart.scaleChanges[currentScaleIndex - 1].bpm
+                    : undefined
+                }
                 currentScale={
                   currentScaleIndex !== undefined ? currentScale : undefined
                 }
