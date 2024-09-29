@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, context: { params: Params }) {
   let chart: Chart;
   try {
     chart = msgpack.deserialize(fsData.data);
-    validateChart(chart);
+    chart = validateChart(chart);
   } catch (e) {
     return NextResponse.json(
       { message: "invalid chart data" },

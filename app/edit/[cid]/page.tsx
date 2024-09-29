@@ -267,11 +267,6 @@ export default function Page(context: { params: Params }) {
       changeChart({ ...chart, offset: ofs });
     }
   };
-  const changeWaveOffset = (ofs: number) => {
-    if (chart /*&& offsetValid(ofs)*/) {
-      changeChart({ ...chart, waveOffset: ofs });
-    }
-  };
   const currentBpmIndex =
     chart && findBpmIndexFromStep(chart?.bpmChanges, currentStep);
   const currentBpm =

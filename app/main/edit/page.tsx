@@ -11,7 +11,6 @@ import {
   Chart,
   ChartBrief,
   emptyChart,
-  validateChart,
   validCId,
 } from "@/chartFormat/chart";
 import { IndexMain } from "../main";

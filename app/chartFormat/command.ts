@@ -18,10 +18,6 @@ export interface NoteCommand {
   hitVX: number;
   hitVY: number;
   accelY: number;
-  timeScale: {
-    stepBefore: Step;
-    scale: number;
-  }[];
 }
 export function validateNoteCommand(n: NoteCommand) {
   validateStep(n.step);
@@ -30,23 +26,18 @@ export function validateNoteCommand(n: NoteCommand) {
   if (typeof n.hitVX !== "number") throw "note.hitVX is invalid";
   if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
   if (typeof n.accelY !== "number") throw "note.accelY is invalid";
-  if (!Array.isArray(n.timeScale)) throw "note.timeScale is invalid";
-  n.timeScale.forEach((ts) => {
-    validateStep(ts.stepBefore);
-    if (typeof ts.scale !== "number") throw "timeScale.scale is invalid";
-  });
 }
 export function defaultNoteCommand(
-  currentStep: Step = stepZero()
+  bpmChanges: BPMChange[],
+  currentStep: Step = stepZero(),
 ): NoteCommand {
   return {
     step: currentStep,
     big: false,
-    hitX: 1 / 4,
-    hitVX: 1 / 4,
-    hitVY: 3 / 4,
-    accelY: 1 / 4,
-    timeScale: [{ stepBefore: stepZero(), scale: 1 }],
+    hitX: -3,
+    hitVX: +1,
+    hitVY: +3,
+    accelY: +1,
   };
 }
 
