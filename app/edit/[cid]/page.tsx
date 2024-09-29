@@ -139,7 +139,7 @@ export default function Page(context: { params: Params }) {
   // currentTimeが変わったときcurrentStepを更新
   const prevTimeSec = useRef<number>(-1);
   useEffect(() => {
-    if (chart) {
+    if (chart && currentTimeSec !== prevTimeSec.current) {
       const step = getStep(chart.bpmChanges, currentTimeSec, snapDivider);
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
@@ -647,6 +647,7 @@ export default function Page(context: { params: Params }) {
             <span className="ml-2">1</span>
             <span className="ml-1">/</span>
             <Input
+              className="w-12"
               actualValue={String(snapDivider * 4)}
               updateValue={(v: string) => {
                 setSnapDivider(Number(v) / 4);
