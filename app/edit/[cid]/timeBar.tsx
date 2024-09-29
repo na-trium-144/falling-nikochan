@@ -165,7 +165,7 @@ export default function TimeBar(props: Props) {
               style={{
                 top: -4,
                 bottom: step.numerator === 0 ? -1.25 * rem : -4,
-                left: timeBarPos(timeSec),
+                left: timeBarPos(timeSec), // offsetはtimeBarStepsに足されている
               }}
             >
               <span className="absolute bottom-0">{stepNStr(step)}</span>
@@ -181,14 +181,15 @@ export default function TimeBar(props: Props) {
       </div>
       {chart?.bpmChanges.map(
         (ch, i) =>
-          ch.timeSec >= timeBarBeginSec &&
-          ch.timeSec < timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+          ch.timeSec + chart.offset >= timeBarBeginSec &&
+          ch.timeSec + chart.offset <
+            timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
             <span
               key={i}
               className="absolute "
               style={{
                 bottom: -2.5 * rem,
-                left: timeBarPos(ch.timeSec),
+                left: timeBarPos(ch.timeSec + chart.offset),
               }}
             >
               <span className="absolute bottom-0">{ch.bpm}</span>
@@ -204,14 +205,15 @@ export default function TimeBar(props: Props) {
       </div>
       {chart?.scaleChanges.map(
         (ch, i) =>
-          ch.timeSec >= timeBarBeginSec &&
-          ch.timeSec < timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+          ch.timeSec + chart.offset >= timeBarBeginSec &&
+          ch.timeSec + chart.offset <
+            timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
             <span
               key={i}
               className="absolute "
               style={{
                 bottom: -3.75 * rem,
-                left: timeBarPos(ch.timeSec),
+                left: timeBarPos(ch.timeSec + chart.offset),
               }}
             >
               <span className="absolute bottom-0">{ch.bpm}</span>
