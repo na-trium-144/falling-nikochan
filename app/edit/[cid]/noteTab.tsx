@@ -150,6 +150,7 @@ function NoteEdit(props: Props) {
               <td>x =</td>
               <td>
                 <Input
+                  className="w-20"
                   actualValue={n.hitX.toString()}
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitX: Number(v) })
@@ -177,6 +178,7 @@ function NoteEdit(props: Props) {
               <td>vx =</td>
               <td>
                 <Input
+                  className="w-20"
                   actualValue={n.hitVX.toString()}
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVX: Number(v) })
@@ -188,6 +190,7 @@ function NoteEdit(props: Props) {
               <td>vy =</td>
               <td>
                 <Input
+                  className="w-20"
                   actualValue={n.hitVY.toString()}
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVY: Number(v) })
@@ -201,6 +204,7 @@ function NoteEdit(props: Props) {
               <td>|v| =</td>
               <td>
                 <Input
+                  className="w-20"
                   actualValue={(Math.round(nv * 100) / 100).toString()}
                   updateValue={(v) =>
                     props.updateNote({
@@ -216,6 +220,7 @@ function NoteEdit(props: Props) {
               <td>angle =</td>
               <td>
                 <Input
+                  className="w-20"
                   actualValue={(
                     (Math.atan2(n.hitVY, n.hitVX) / Math.PI) *
                     180
@@ -249,6 +254,7 @@ function NoteEdit(props: Props) {
               <td>ay =</td>
               <td>
                 <Input
+                  className="w-20"
                   actualValue={n.accelY.toString()}
                   updateValue={(v) =>
                     props.updateNote({ ...n, accelY: Number(v) })
