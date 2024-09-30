@@ -164,8 +164,11 @@ export function MetaTab(props: Props2) {
     }
   };
   const download = () => {
-    const blob = new Blob([msgpack.serialize(props.chart)]);
-    const filename = `${props.cid}_${props.chart?.title}.bin`;
+    // editPasswdだけ消す
+    const blob = new Blob([
+      msgpack.serialize({ ...props.chart, editPasswd: "" }),
+    ]);
+    const filename = `${props.cid}_${props.chart?.title}.fn${props.chart?.ver}.mpk`;
     saveAs(blob, filename);
     setSaveMsg(`保存しました！ (${filename})`);
   };
