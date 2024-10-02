@@ -15,9 +15,9 @@ interface Props {
 }
 export default function LuaTab(props: Props) {
   const { rem } = useDisplayMode();
-  const [code, setCode] = useState<string>("");
+  const [code, setCode] = useState<string>(props.chart?.lua || "");
   const [stdout, setStdout] = useState<string[]>([]);
-  const [err, setErr] = useState<string>("");
+  const [err, setErr] = useState<string[]>([]);
 
   return (
     <div className="flex flex-col absolute inset-3 space-y-3">
@@ -27,6 +27,7 @@ export default function LuaTab(props: Props) {
           theme="github"
           width="100%"
           height="100%"
+          tabSize={2}
           fontSize={1 * rem}
           value={code}
           onChange={(value, e) => {
@@ -34,14 +35,18 @@ export default function LuaTab(props: Props) {
           }}
         />
       </div>
-      {(stdout.length > 0 || err !== "") && (
+      {(stdout.length > 0 || err.length > 0) && (
         <div className="bg-slate-200 p-1 text-sm">
           {stdout.map((s, i) => (
             <p className="" key={i}>
               {s}
             </p>
           ))}
-          {err !== "" && <p className="text-red-600">{err}</p>}
+          {err.map((e, i) => (
+            <p className="text-red-600" key={i}>
+              {e}
+            </p>
+          ))}
         </div>
       )}
       <p>
@@ -51,6 +56,14 @@ export default function LuaTab(props: Props) {
             const result = await luaExec(code);
             setStdout(result.stdout);
             setErr(result.err);
+            if (props.chart && result.err.length === 0) {
+              props.changeChart({
+                ...props.chart,
+                lua: code,
+                notes: result.notes,
+                bpmChanges: result.bpmChanges,
+              });
+            }
           }}
         />
       </p>

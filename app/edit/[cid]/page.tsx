@@ -742,7 +742,7 @@ export default function Page(context: { params: Params }) {
                 chart={chart}
               />
             ) : (
-              <LuaTab />
+              <LuaTab chart={chart} changeChart={changeChart} />
             )}
           </Box>
         </div>
