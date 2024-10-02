@@ -35,6 +35,7 @@ import { Chart, emptyChart, hashPasswd } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
+import LuaTab from "./luaTab";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -473,7 +474,7 @@ export default function Page(context: { params: Params }) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (ready) {
+        if (ready && tab !== 3) {
           if (e.key === " " && !playing) {
             start();
           } else if (
@@ -668,7 +669,7 @@ export default function Page(context: { params: Params }) {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Meta", "Timing", "Notes"].map((tabName, i) =>
+            {["Meta", "Timing", "Notes", "Code"].map((tabName, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
@@ -687,7 +688,7 @@ export default function Page(context: { params: Params }) {
           <Box
             className={
               "p-3 overflow-auto " +
-              "min-h-96 " +
+              "min-h-96 relative " +
               "edit-wide:flex-1 edit-wide:min-h-0"
             }
           >
@@ -728,7 +729,7 @@ export default function Page(context: { params: Params }) {
                 toggleScaleChangeHere={toggleScaleChangeHere}
                 currentStep={currentStep}
               />
-            ) : (
+            ) : tab === 2 ? (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
                 addNote={addNote}
@@ -740,6 +741,8 @@ export default function Page(context: { params: Params }) {
                 currentStep={currentStep}
                 chart={chart}
               />
+            ) : (
+              <LuaTab />
             )}
           </Box>
         </div>

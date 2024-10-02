@@ -28,11 +28,12 @@ export interface ChartBrief {
  */
 export interface Chart {
   falling: "nikochan"; // magic
-  ver: 2;
+  ver: 3;
   notes: NoteCommand[];
   bpmChanges: BPMChange[];
   scaleChanges: BPMChange[];
   offset: number;
+  lua: string;
   ytId: string;
   title: string;
   composer: string;
@@ -47,7 +48,7 @@ export function validateChart(chart_: Chart | Chart1) {
   if (chart_.ver === 1) {
     chart_ = convert1To2(chart_);
   }
-  if (chart_.ver !== 2) throw "chart.ver is invalid";
+  if (chart_.ver !== 3) throw "chart.ver is invalid";
   const chart = chart_ as Chart;
   if (!Array.isArray(chart.notes)) throw "chart.notes is invalid";
   chart.notes.forEach((n) => validateNoteCommand(n));
@@ -82,11 +83,12 @@ export function validCId(cid: string) {
 export function emptyChart(): Chart {
   return {
     falling: "nikochan",
-    ver: 2,
+    ver: 3,
     notes: [],
     bpmChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
     scaleChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
     offset: 0,
+    lua: "",
     ytId: "",
     title: "",
     composer: "",
