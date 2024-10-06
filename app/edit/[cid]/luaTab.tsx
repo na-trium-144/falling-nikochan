@@ -7,13 +7,16 @@ import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale";
 import { Chart } from "@/chartFormat/chart";
 import { luaExec } from "@/chartFormat/lua/exec";
+import { Step } from "@/chartFormat/step";
+import { findStepFromLua } from "@/chartFormat/lua/edit";
 
 interface Props {
   chart?: Chart;
   changeChart: (chart: Chart) => void;
+  seekStepAbs: (s: Step) => void;
 }
 export default function LuaTab(props: Props) {
-  const { chart, changeChart } = props;
+  const { chart, changeChart, seekStepAbs } = props;
   const { rem } = useDisplayMode();
   const [code, setCode] = useState<string>(props.chart?.lua.join("\n") || "");
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
@@ -68,6 +71,14 @@ export default function LuaTab(props: Props) {
           onChange={(value, e) => {
             setCode(value);
             setCodeChanged(true);
+          }}
+          onCursorChange={(sel, e) => {
+            if (chart) {
+              const step = findStepFromLua(chart, sel.cursor.row);
+              if (step !== null) {
+                seekStepAbs(step);
+              }
+            }
           }}
         />
       </div>

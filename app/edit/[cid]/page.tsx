@@ -37,7 +37,7 @@ import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import LuaTab from "./luaTab";
 import {
-    luaAddBpmChange,
+  luaAddBpmChange,
   luaAddNote,
   luaDeleteBpmChange,
   luaDeleteNote,
@@ -205,11 +205,13 @@ export default function Page(context: { params: Params }) {
     ytPlayer.current?.pauseVideo();
     ref.current.focus();
   };
-  const changeCurrentTimeSec = (timeSec: number) => {
+  const changeCurrentTimeSec = (timeSec: number, focus = true) => {
     if (ytPlayer.current?.seekTo) {
       ytPlayer.current?.seekTo(timeSec, true);
     }
-    ref.current.focus();
+    if (focus) {
+      ref.current.focus();
+    }
   };
   const seekRight1 = () => {
     if (chart) {
@@ -240,20 +242,26 @@ export default function Page(context: { params: Params }) {
     ref.current.focus();
   };
   const seekStepRel = (move: number) => {
+    let newStep = stepAdd(currentStep, {
+      fourth: 0,
+      numerator: move,
+      denominator: snapDivider,
+    });
+    seekStepAbs(newStep);
+  };
+  const seekStepAbs = (newStep: Step, focus = true) => {
     if (chart) {
-      let newStep = stepAdd(currentStep, {
-        fourth: 0,
-        numerator: move,
-        denominator: snapDivider,
-      });
       if (stepCmp(newStep, stepZero()) < 0) {
         newStep = stepZero();
       }
       changeCurrentTimeSec(
-        getTimeSec(chart.bpmChanges, newStep) + chart.offset
+        getTimeSec(chart.bpmChanges, newStep) + chart.offset,
+        focus
       );
     }
-    ref.current.focus();
+    if (focus) {
+      ref.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -298,7 +306,7 @@ export default function Page(context: { params: Params }) {
         // });
       } else {
         const newChart = luaUpdateBpmChange(chart, currentBpmIndex, bpm);
-        if(newChart !== null){
+        if (newChart !== null) {
           changeChart({ ...newChart });
         }
       }
@@ -317,7 +325,7 @@ export default function Page(context: { params: Params }) {
     ) {
       if (bpmChangeHere) {
         const newChart = luaDeleteBpmChange(chart, currentBpmIndex);
-        if(newChart !== null){
+        if (newChart !== null) {
           changeChart({ ...newChart });
         }
       } else {
@@ -326,7 +334,7 @@ export default function Page(context: { params: Params }) {
           bpm: currentBpm,
           timeSec: currentTimeSec,
         });
-        if(newChart !== null){
+        if (newChart !== null) {
           changeChart({ ...newChart });
         }
       }
@@ -751,7 +759,11 @@ export default function Page(context: { params: Params }) {
                 chart={chart}
               />
             ) : (
-              <LuaTab chart={chart} changeChart={changeChart} />
+              <LuaTab
+                chart={chart}
+                changeChart={changeChart}
+                seekStepAbs={(s: Step) => seekStepAbs(s, false)}
+              />
             )}
           </Box>
         </div>

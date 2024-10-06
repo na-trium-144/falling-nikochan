@@ -7,6 +7,25 @@ import {
 } from "../command";
 import { Step, stepAdd, stepCmp, stepSub, stepZero } from "../step";
 
+export function findStepFromLua(chart: Chart, line: number): Step | null {
+  for (const n of chart.notes) {
+    if (n.luaLine === line) {
+      return n.step;
+    }
+  }
+  for (const n of chart.rest) {
+    if (n.luaLine === line) {
+      return n.begin;
+    }
+  }
+  for (const n of chart.bpmChanges) {
+    if (n.luaLine === line) {
+      return n.step;
+    }
+  }
+  return null;
+}
+
 // コマンドを挿入
 function insertLua(chart: Chart, line: number, content: string) {
   chart.lua = chart.lua
