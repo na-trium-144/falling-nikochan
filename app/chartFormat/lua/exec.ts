@@ -1,5 +1,11 @@
 import { LuaFactory } from "wasmoon";
-import { BPMChange, NoteCommand, NoteCommandWithLua, RestStep, updateBpmTimeSec } from "../command";
+import {
+  BPMChange,
+  NoteCommand,
+  NoteCommandWithLua,
+  RestStep,
+  updateBpmTimeSec,
+} from "../command";
 import { Step, stepAdd, stepZero } from "../step";
 import { emptyChart } from "../chart";
 import { luaBPM, luaNote, luaStep } from "./api";
@@ -7,6 +13,7 @@ import { luaBPM, luaNote, luaStep } from "./api";
 export interface Result {
   stdout: string[];
   err: string[];
+  errorLine: number | null;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChange[];
@@ -18,6 +25,7 @@ export async function luaExec(code: string): Promise<Result> {
   const result: Result = {
     stdout: [],
     err: [],
+    errorLine: null,
     notes: [],
     rest: [],
     bpmChanges: [],
@@ -60,6 +68,25 @@ export async function luaExec(code: string): Promise<Result> {
     await lua.doString(codeStatic.join("\n"));
   } catch (e) {
     result.err = String(e).split("\n");
+    let firstErrorLine: number | null = null;
+    // tracebackをパース
+    result.err = result.err.map((s) => {
+      const errorLineMatch = s.match(/\[string ".*"\]:(\d+):/);
+      if (errorLineMatch !== null) {
+        if (firstErrorLine === null) {
+          firstErrorLine = Number(errorLineMatch[1]) - 1;
+        }
+        return s.replace(/\[string ".*"\]:(\d+):/, "$1:");
+      }
+      const errorLineMatchShort = s.match(/Error: (\d+):/);
+      if (errorLineMatchShort !== null) {
+        if (firstErrorLine === null) {
+          firstErrorLine = Number(errorLineMatchShort[1]) - 1;
+        }
+      }
+      return s
+    });
+    result.errorLine = firstErrorLine;
   } finally {
     lua.global.close();
   }

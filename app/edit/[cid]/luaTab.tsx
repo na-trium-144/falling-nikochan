@@ -3,10 +3,9 @@
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/mode-lua";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale";
 import { Chart } from "@/chartFormat/chart";
-import Button from "@/common/button";
 import { luaExec } from "@/chartFormat/lua/exec";
 
 interface Props {
@@ -14,10 +13,37 @@ interface Props {
   changeChart: (chart: Chart) => void;
 }
 export default function LuaTab(props: Props) {
+  const { chart, changeChart } = props;
   const { rem } = useDisplayMode();
   const [code, setCode] = useState<string>(props.chart?.lua.join("\n") || "");
+  const [codeChanged, setCodeChanged] = useState<boolean>(false);
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
+  const [errLine, setErrLine] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (codeChanged) {
+      const t = setTimeout(() => {
+        setCodeChanged(false);
+        void (async () => {
+          const result = await luaExec(code);
+          setStdout(result.stdout);
+          setErr(result.err);
+          setErrLine(result.errorLine);
+          if (chart && result.err.length === 0) {
+            changeChart({
+              ...chart,
+              lua: code.split("\n"),
+              notes: result.notes,
+              rest: result.rest,
+              bpmChanges: result.bpmChanges,
+            });
+          }
+        })();
+      }, 500);
+      return () => clearTimeout(t);
+    }
+  }, [code, codeChanged, chart, changeChart]);
 
   return (
     <div className="flex flex-col absolute inset-3 space-y-3">
@@ -30,8 +56,18 @@ export default function LuaTab(props: Props) {
           tabSize={2}
           fontSize={1 * rem}
           value={code}
+          annotations={
+            errLine !== null
+              ? [
+                  /* 指定すると表示位置がなんかおかしい↓
+                  { row: errLine, column: 1, text: err[0], type: "error" }
+                  */
+                ]
+              : []
+          }
           onChange={(value, e) => {
             setCode(value);
+            setCodeChanged(true);
           }}
         />
       </div>
@@ -49,25 +85,6 @@ export default function LuaTab(props: Props) {
           ))}
         </div>
       )}
-      <p>
-        <Button
-          text="Run"
-          onClick={async () => {
-            const result = await luaExec(code);
-            setStdout(result.stdout);
-            setErr(result.err);
-            if (props.chart && result.err.length === 0) {
-              props.changeChart({
-                ...props.chart,
-                lua: code.split("\n"),
-                notes: result.notes,
-                rest: result.rest,
-                bpmChanges: result.bpmChanges,
-              });
-            }
-          }}
-        />
-      </p>
     </div>
   );
 }
