@@ -75,8 +75,8 @@ export default function Page(context: { params: Params }) {
       setPasswdFailed(false);
       setLoading(true);
       const res = await fetch(
-        `/api/chartFile/${cidInitial.current}?p=${await hashPasswd(
-          getPasswd(cidInitial.current)
+        `/api/chartFile/${cidInitial.current}?p=${getPasswd(
+          cidInitial.current
         )}`,
         { cache: "no-store" }
       );
@@ -85,7 +85,7 @@ export default function Page(context: { params: Params }) {
         try {
           const chart = msgpack.deserialize(await res.arrayBuffer());
           // validateはサーバー側でやってる
-          setPasswd(cidInitial.current, chart.editPasswd);
+          setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
           setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
@@ -479,8 +479,10 @@ export default function Page(context: { params: Params }) {
         <Button
           text="進む"
           onClick={() => {
-            setPasswd(cidInitial.current || "", editPasswd);
-            void fetchChart();
+            void (async () => {
+              setPasswd(cidInitial.current || "", await hashPasswd(editPasswd));
+              await fetchChart();
+            })();
           }}
         />
       </CenterBoxOnlyPage>
