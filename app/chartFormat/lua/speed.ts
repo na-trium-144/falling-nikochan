@@ -7,12 +7,14 @@ function accelLuaCommand(bpm: number) {
   return `Accel(${bpm})`;
 }
 export function luaAddSpeedChange(chart: Chart, change: BPMChange) {
-  const luaLine = findInsertLine(chart, change.step);
-  if (luaLine === null) {
+  const insert = findInsertLine(chart, change.step);
+  if (insert.luaLine === null) {
     return null;
   }
-  insertLua(chart, luaLine, accelLuaCommand(change.bpm));
-  chart.speedChanges.push({ ...change, luaLine });
+  chart = insert.chart;
+
+  insertLua(chart, insert.luaLine, accelLuaCommand(change.bpm));
+  chart.speedChanges.push({ ...change, luaLine: insert.luaLine });
   chart.speedChanges = chart.speedChanges.sort((a, b) =>
     stepCmp(a.step, b.step)
   );

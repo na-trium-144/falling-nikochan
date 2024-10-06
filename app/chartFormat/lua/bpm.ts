@@ -7,12 +7,13 @@ function bpmLuaCommand(bpm: number) {
   return `BPM(${bpm})`;
 }
 export function luaAddBpmChange(chart: Chart, change: BPMChange) {
-  const luaLine = findInsertLine(chart, change.step);
-  if (luaLine === null) {
+  const insert = findInsertLine(chart, change.step);
+  if (insert.luaLine === null) {
     return null;
   }
-  insertLua(chart, luaLine, bpmLuaCommand(change.bpm));
-  chart.bpmChanges.push({ ...change, luaLine });
+  chart = insert.chart;
+  insertLua(chart, insert.luaLine, bpmLuaCommand(change.bpm));
+  chart.bpmChanges.push({ ...change, luaLine: insert.luaLine });
   chart.bpmChanges = chart.bpmChanges.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }

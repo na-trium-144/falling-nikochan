@@ -1,7 +1,5 @@
 import {
-  BPMChange,
   BPMChangeWithLua,
-  NoteCommand,
   NoteCommandWithLua,
   RestStep,
   updateBpmTimeSec,
@@ -10,9 +8,10 @@ import {
   validateRestStep,
 } from "./command";
 import { Chart1, convert1To2 } from "./legacy/chart1";
+import { Chart2, convert2To3 } from "./legacy/chart2";
 import { luaAddBpmChange } from "./lua/bpm";
 import { luaAddSpeedChange } from "./lua/speed";
-import { Step, stepZero } from "./step";
+import { stepZero } from "./step";
 
 export interface ChartBrief {
   ytId: string;
@@ -53,13 +52,15 @@ export interface Chart {
 
 export const chartMaxSize = 100000;
 
-export function validateChart(chart_: Chart | Chart1) {
-  if (chart_.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart_.ver === 1) {
-    chart_ = convert1To2(chart_);
+export function validateChart(chart: Chart | Chart1 | Chart2): Chart {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  if (chart.ver === 1) {
+    chart = convert1To2(chart);
   }
-  if (chart_.ver !== 3) throw "chart.ver is invalid";
-  const chart = chart_ as Chart;
+  if (chart.ver === 2) {
+    chart = convert2To3(chart);
+  }
+  if (chart.ver !== 3) throw "chart.ver is invalid";
   if (!Array.isArray(chart.notes)) throw "chart.notes is invalid";
   chart.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(chart.rest)) throw "chart.rest is invalid";
@@ -111,7 +112,7 @@ export function emptyChart(): Chart {
     chartCreator: "",
     editPasswd: "",
   };
-  chart = luaAddBpmChange(chart, {bpm: 120, step: stepZero(), timeSec: 0})!;
-  chart = luaAddSpeedChange(chart, {bpm: 120, step: stepZero(), timeSec: 0})!;
+  chart = luaAddBpmChange(chart, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+  chart = luaAddSpeedChange(chart, { bpm: 120, step: stepZero(), timeSec: 0 })!;
   return chart;
 }

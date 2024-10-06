@@ -4,22 +4,21 @@ import { Step, stepCmp } from "../step";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
 
 function noteLuaCommand(n: NoteCommand) {
-  return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${
-    n.big ? "true" : "false"
-  })`;
+  return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${n.big ? "true" : "false"})`;
 }
 export function luaAddNote(
   chart: Chart,
   n: NoteCommand,
   step: Step
 ): Chart | null {
-  const luaLine = findInsertLine(chart, step);
-  if (luaLine === null) {
+  const insert = findInsertLine(chart, step);
+  if (insert.luaLine === null) {
     return null;
   }
+  chart = insert.chart;
 
-  const newNote = { ...n, step, luaLine };
-  insertLua(chart, luaLine, noteLuaCommand(n));
+  const newNote = { ...n, step, luaLine: insert.luaLine };
+  insertLua(chart, insert.luaLine, noteLuaCommand(n));
 
   chart.notes.push(newNote);
   chart.notes = chart.notes.sort((a, b) => stepCmp(a.step, b.step));

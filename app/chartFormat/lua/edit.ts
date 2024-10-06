@@ -1,5 +1,5 @@
 import { Chart } from "../chart";
-import { Step, stepAdd, stepCmp, stepSub, stepZero } from "../step";
+import { Step, stepAdd, stepCmp, stepSimplify, stepSub, stepZero } from "../step";
 
 export function findStepFromLua(chart: Chart, line: number): Step | null {
   for (const n of chart.notes) {
@@ -87,45 +87,69 @@ export function deleteLua(chart: Chart, line: number) {
 }
 
 function stepLuaCommand(s: Step) {
-  return `Step(${s.fourth * s.denominator + s.numerator}, ${
-    s.denominator * 4
-  })`;
+  let num = s.fourth * s.denominator + s.numerator;
+  let denom = s.denominator * 4;
+  for (let i = 2; i <= num && i <= denom; i++) {
+    while (num % i == 0 && denom % i == 0 && denom / i >= 4) {
+      num /= i;
+      denom /= i;
+    }
+  }
+  return `Step(${num}, ${denom})`;
 }
 // 時刻stepにコマンドを挿入する準備
 // 挿入する行、またはnullを返す。
 // 既存のStepコマンドを分割する必要がある場合は分割し、
 // Stepコマンドを追加する必要がある場合は追加する。
-export function findInsertLine(chart: Chart, step: Step) {
+export function findInsertLine(
+  chart: Chart,
+  step: Step
+): { chart: Chart; luaLine: number | null } {
   for (let ri = 0; ri < chart.rest.length; ri++) {
     const rest = chart.rest[ri];
     if (stepCmp(rest.begin, step) === 0) {
-      return rest.luaLine;
+      return { chart, luaLine: rest.luaLine };
     } else {
       const restEnd = stepAdd(rest.begin, rest.duration);
       if (stepCmp(restEnd, step) > 0) {
         if (rest.luaLine === null) {
-          return null;
+          return { chart, luaLine: null };
         }
         const stepBefore = stepSub(step, rest.begin);
         const stepAfter = stepSub(restEnd, step);
         replaceLua(chart, rest.luaLine, stepLuaCommand(stepBefore));
         insertLua(chart, rest.luaLine + 1, stepLuaCommand(stepAfter));
-        return rest.luaLine + 1;
+        chart.rest = chart.rest
+          .slice(0, ri)
+          .concat([
+            { begin: rest.begin, duration: stepBefore, luaLine: rest.luaLine },
+            { begin: step, duration: stepAfter, luaLine: rest.luaLine + 1 },
+          ])
+          .concat(chart.rest.slice(ri + 1));
+        return { chart, luaLine: rest.luaLine + 1 };
       }
     }
   }
   const lastRest = chart.rest[chart.rest.length - 1];
+  let restBegin: Step;
   let stepBefore: Step;
   if (lastRest) {
-    stepBefore = stepSub(step, stepAdd(lastRest.begin, lastRest.duration));
+    restBegin = stepAdd(lastRest.begin, lastRest.duration);
+    stepBefore = stepSub(step, restBegin);
   } else {
-    stepBefore = stepZero();
+    restBegin = stepZero();
+    stepBefore = stepSimplify(step);
   }
   const newLine = chart.lua.length;
-  if (stepCmp(stepBefore, step) === 0) {
-    return newLine;
+  if (stepCmp(stepBefore, stepZero()) === 0) {
+    return { chart, luaLine: newLine };
   } else {
     insertLua(chart, newLine, stepLuaCommand(stepBefore));
-    return newLine + 1;
+    chart.rest.push({
+      begin: restBegin,
+      duration: stepBefore,
+      luaLine: newLine,
+    });
+    return { chart, luaLine: newLine + 1 };
   }
 }

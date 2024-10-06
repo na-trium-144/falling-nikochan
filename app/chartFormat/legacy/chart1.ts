@@ -1,5 +1,4 @@
-import { Chart } from "../chart";
-import { BPMChange, NoteCommand } from "../command";
+import { BPMChange } from "../command";
 import { stepZero } from "../step";
 import { Chart2, NoteCommand2 } from "./chart2";
 

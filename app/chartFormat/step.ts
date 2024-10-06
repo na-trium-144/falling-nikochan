@@ -54,16 +54,19 @@ export function stepAdd(s1: Step, s2: Step) {
     numerator: s1.numerator * s2.denominator + s2.numerator * s1.denominator,
     denominator: s1.denominator * s2.denominator,
   };
-  sa.fourth += Math.floor(sa.numerator / sa.denominator);
-  sa.numerator -= Math.floor(sa.numerator / sa.denominator) * sa.denominator;
-  for (let i = 2; i <= sa.numerator && i <= sa.denominator; i++) {
-    while (sa.numerator % i == 0 && sa.denominator % i == 0) {
-      sa.numerator /= i;
-      sa.denominator /= i;
+  return stepSimplify(sa);
+}
+export function stepSimplify(s: Step) {
+  s.fourth += Math.floor(s.numerator / s.denominator);
+  s.numerator -= Math.floor(s.numerator / s.denominator) * s.denominator;
+  for (let i = 2; i <= s.numerator && i <= s.denominator; i++) {
+    while (s.numerator % i == 0 && s.denominator % i == 0) {
+      s.numerator /= i;
+      s.denominator /= i;
     }
   }
-  if (sa.numerator === 0) {
-    sa.denominator = 4;
+  if (s.numerator === 0) {
+    s.denominator = 4;
   }
-  return sa;
+  return s;
 }
