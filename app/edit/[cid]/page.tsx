@@ -36,6 +36,11 @@ import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import LuaTab from "./luaTab";
+import {
+  luaAddNote,
+  luaDeleteNote,
+  luaUpdateNote,
+} from "@/chartFormat/lua/edit";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -379,34 +384,35 @@ export default function Page(context: { params: Params }) {
 
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
     if (chart && n) {
-      const newChart = { ...chart };
-      newChart.notes.push({ ...n, step: currentStep });
-      newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
-      changeChart(newChart);
-      // 追加したnoteは同じ時刻の音符の中でも最後
-      setCurrentNoteIndex(
-        chart.notes.findLastIndex((n) => stepCmp(n.step, currentStep) == 0)
-      );
+      const chartCopied = { ...chart };
+      const newChart = luaAddNote(chartCopied, n, currentStep);
+      if (newChart !== null) {
+        changeChart(newChart);
+        // 追加したnoteは同じ時刻の音符の中でも最後
+        setCurrentNoteIndex(
+          chart.notes.findLastIndex((n) => stepCmp(n.step, currentStep) == 0)
+        );
+      }
     }
     ref.current.focus();
   };
   const deleteNote = () => {
     if (chart && hasCurrentNote) {
-      const newChart = { ...chart };
-      newChart.notes = newChart.notes.filter((_, i) => i !== currentNoteIndex);
-      changeChart(newChart);
+      const chartCopied = { ...chart };
+      const newChart = luaDeleteNote(chartCopied, currentNoteIndex);
+      if (newChart !== null) {
+        changeChart(newChart);
+      }
     }
     ref.current.focus();
   };
   const updateNote = (n: NoteCommand) => {
     if (chart && hasCurrentNote) {
-      const newChart = { ...chart };
-      newChart.notes[currentNoteIndex] = {
-        ...n,
-        step: newChart.notes[currentNoteIndex].step,
-      };
-      newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
-      changeChart(newChart);
+      const chartCopied = { ...chart };
+      const newChart = luaUpdateNote(chartCopied, currentNoteIndex, n);
+      if (newChart !== null) {
+        changeChart(newChart);
+      }
     }
     // ref.current.focus();
   };

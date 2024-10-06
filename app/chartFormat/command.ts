@@ -19,13 +19,18 @@ export interface NoteCommand {
   hitVY: number;
   accelY: number;
 }
-export function validateNoteCommand(n: NoteCommand) {
+export interface NoteCommandWithLua extends NoteCommand {
+  luaLine: number | null;
+}
+export function validateNoteCommand(n: NoteCommandWithLua) {
   validateStep(n.step);
   if (typeof n.big !== "boolean") throw "note.big is invalid";
   if (typeof n.hitX !== "number") throw "note.hitX is invalid";
   if (typeof n.hitVX !== "number") throw "note.hitVX is invalid";
   if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
   if (typeof n.accelY !== "number") throw "note.accelY is invalid";
+  if (typeof n.luaLine !== "number" && n.luaLine !== null)
+    throw "note.luaLine is invalid";
 }
 export function defaultNoteCommand(
   currentStep: Step = stepZero()
@@ -37,7 +42,20 @@ export function defaultNoteCommand(
     hitVX: +1,
     hitVY: +3,
     accelY: +1,
+    // luaLine
   };
+}
+
+export interface RestStep {
+  begin: Step;
+  duration: Step;
+  luaLine: number | null;
+}
+export function validateRestStep(n: RestStep) {
+  validateStep(n.begin);
+  validateStep(n.duration);
+  if (typeof n.luaLine !== "number" && n.luaLine !== null)
+    throw "note.luaLine is invalid";
 }
 
 /**

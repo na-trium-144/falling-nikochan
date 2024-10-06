@@ -15,7 +15,7 @@ interface Props {
 }
 export default function LuaTab(props: Props) {
   const { rem } = useDisplayMode();
-  const [code, setCode] = useState<string>(props.chart?.lua || "");
+  const [code, setCode] = useState<string>(props.chart?.lua.join("\n") || "");
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
 
@@ -59,8 +59,9 @@ export default function LuaTab(props: Props) {
             if (props.chart && result.err.length === 0) {
               props.changeChart({
                 ...props.chart,
-                lua: code,
+                lua: code.split("\n"),
                 notes: result.notes,
+                rest: result.rest,
                 bpmChanges: result.bpmChanges,
               });
             }

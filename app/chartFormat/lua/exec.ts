@@ -1,5 +1,5 @@
 import { LuaFactory } from "wasmoon";
-import { BPMChange, NoteCommand, updateBpmTimeSec } from "../command";
+import { BPMChange, NoteCommand, NoteCommandWithLua, RestStep, updateBpmTimeSec } from "../command";
 import { Step, stepAdd, stepZero } from "../step";
 import { emptyChart } from "../chart";
 import { luaBPM, luaNote, luaStep } from "./api";
@@ -7,30 +7,64 @@ import { luaBPM, luaNote, luaStep } from "./api";
 export interface Result {
   stdout: string[];
   err: string[];
-  notes: NoteCommand[];
+  notes: NoteCommandWithLua[];
+  rest: RestStep[];
   bpmChanges: BPMChange[];
   step: Step;
 }
 export async function luaExec(code: string): Promise<Result> {
   const factory = new LuaFactory();
   const lua = await factory.createEngine();
-  const result: Result = { stdout: [], err: [], notes: [], bpmChanges: [], step: stepZero() };
+  const result: Result = {
+    stdout: [],
+    err: [],
+    notes: [],
+    rest: [],
+    bpmChanges: [],
+    step: stepZero(),
+  };
   try {
     lua.global.set("print", (...args: any[]) => {
       result.stdout.push(args.map((a) => String(a)).join("\t"));
     });
-    lua.global.set("Note", (...args: any[]) => luaNote(result, ...args));
+
+    /*
+      実行前に Note(...) → NoteStatic(行番号, ...) に置き換え、
+      引数に渡された行番号をNoteCommandといっしょに保存
+      保存した行番号は、その音符を(Noteタブなどから)編集したときに
+      luaの該当の部分を修正するために使う。
+      Note()の引数に変数が入っていたりする場合は置き換えない (行番号はnullにする)
+      この場合Noteタブなどから編集できない
+    */
+
+    lua.global.set("Note", (...args: any[]) => luaNote(result, null, ...args));
+    lua.global.set("NoteStatic", (...args: any[]) => luaNote(result, ...args));
+    lua.global.set("Step", (...args: any[]) => luaStep(result, null, ...args));
+    lua.global.set("StepStatic", (...args: any[]) => luaStep(result, ...args));
     lua.global.set("BPM", (...args: any[]) => luaBPM(result, ...args));
-    lua.global.set("Step", (...args: any[]) => luaStep(result, ...args));
-    // lua.global.set('sum', (x, y) => x + y)
-    await lua.doString(code);
+
+    const codeStatic = code
+      .split("\n")
+      .map((lineStr, ln) =>
+        lineStr
+          .replace(
+            /^( *)Note\(( *-?[\d\.]+ *(?:, *-?[\d\.]+ *){3}, *(?:true|false) *)\)( *)$/,
+            `$1NoteStatic(${ln},$2)$3`
+          )
+          .replace(
+            /^( *)Step\(( *[\d\.]+ *, *[\d\.]+ *)\)( *)$/,
+            `$1StepStatic(${ln},$2)$3`
+          )
+      );
+    console.log(codeStatic);
+    await lua.doString(codeStatic.join("\n"));
   } catch (e) {
     result.err = String(e).split("\n");
   } finally {
     lua.global.close();
   }
   updateBpmTimeSec(result.bpmChanges, []);
-  if (result.bpmChanges.length === 0){
+  if (result.bpmChanges.length === 0) {
     result.bpmChanges = emptyChart().bpmChanges;
   }
   return result;

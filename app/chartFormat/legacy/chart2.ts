@@ -1,4 +1,5 @@
 import { BPMChange, NoteCommand } from "../command";
+import { Step, validateStep } from "../step";
 
 export interface Chart2 {
   falling: "nikochan"; // magic
