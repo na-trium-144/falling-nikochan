@@ -25,7 +25,6 @@ const nextConfig = {
         ...config.resolve?.fallback,
       },
     };
-    console.log(config)
     return config;
   },
 };

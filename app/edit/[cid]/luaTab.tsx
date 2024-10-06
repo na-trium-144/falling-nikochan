@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useDisplayMode } from "@/scale";
 import { Chart } from "@/chartFormat/chart";
 import Button from "@/common/button";
-import { luaExec } from "@/chartFormat/luaExec";
+import { luaExec } from "@/chartFormat/lua/exec";
 
 interface Props {
   chart?: Chart;
