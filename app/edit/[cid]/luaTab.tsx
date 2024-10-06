@@ -3,6 +3,7 @@
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/mode-lua";
+import "ace-builds/src-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale";
 import { Chart } from "@/chartFormat/chart";
@@ -68,6 +69,9 @@ export default function LuaTab(props: Props) {
                 ]
               : []
           }
+          enableBasicAutocompletion={true}
+          enableLiveAutocompletion={true}
+          enableSnippets={true}
           onChange={(value, e) => {
             setCode(value);
             setCodeChanged(true);
