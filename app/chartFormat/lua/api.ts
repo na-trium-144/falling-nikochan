@@ -27,11 +27,17 @@ export function luaNote(state: Result, ...args: any[]) {
 }
 
 export function luaBPM(state: Result, ...args: any[]) {
-  if (args.length === 1 && typeof args[0] === "number") {
+  if (
+    args.length === 2 &&
+    (typeof args[0] === "number" || args[0] === null) &&
+    typeof args[1] === "number" &&
+    args[1] > 0
+  ) {
     state.bpmChanges.push({
-      bpm: args[0],
+      bpm: args[1],
       step: { ...state.step },
       timeSec: 0,
+      luaLine: args[0],
     });
   } else {
     throw "invalid argument for BPM()";

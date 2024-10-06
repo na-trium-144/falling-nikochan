@@ -37,8 +37,11 @@ import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import LuaTab from "./luaTab";
 import {
+    luaAddBpmChange,
   luaAddNote,
+  luaDeleteBpmChange,
   luaDeleteNote,
+  luaUpdateBpmChange,
   luaUpdateNote,
 } from "@/chartFormat/lua/edit";
 
@@ -287,16 +290,18 @@ export default function Page(context: { params: Params }) {
   const changeBpm = (bpm: number) => {
     if (chart && currentBpmIndex !== undefined) {
       if (chart.bpmChanges.length === 0) {
-        chart.bpmChanges.push({
-          step: stepZero(),
-          bpm: bpm,
-          timeSec: 0,
-        });
+        throw "bpmChanges empty";
+        // chart.bpmChanges.push({
+        //   step: stepZero(),
+        //   bpm: bpm,
+        //   timeSec: 0,
+        // });
       } else {
-        chart.bpmChanges[currentBpmIndex].bpm = bpm;
-        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+        const newChart = luaUpdateBpmChange(chart, currentBpmIndex, bpm);
+        if(newChart !== null){
+          changeChart({ ...newChart });
+        }
       }
-      changeChart({ ...chart });
     }
   };
   const bpmChangeHere =
@@ -311,21 +316,19 @@ export default function Page(context: { params: Params }) {
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (bpmChangeHere) {
-        chart.bpmChanges = chart.bpmChanges.filter(
-          (ch) => stepCmp(ch.step, currentStep) !== 0
-        );
-        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
-        changeChart({ ...chart });
+        const newChart = luaDeleteBpmChange(chart, currentBpmIndex);
+        if(newChart !== null){
+          changeChart({ ...newChart });
+        }
       } else {
-        chart.bpmChanges.push({
+        const newChart = luaAddBpmChange(chart, {
           step: currentStep,
           bpm: currentBpm,
           timeSec: currentTimeSec,
         });
-        chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
-          stepCmp(a.step, b.step)
-        );
-        changeChart({ ...chart });
+        if(newChart !== null){
+          changeChart({ ...newChart });
+        }
       }
     }
   };

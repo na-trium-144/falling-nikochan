@@ -1,6 +1,7 @@
 import { LuaFactory } from "wasmoon";
 import {
   BPMChange,
+  BPMChangeWithLua,
   NoteCommand,
   NoteCommandWithLua,
   RestStep,
@@ -16,7 +17,7 @@ export interface Result {
   errorLine: number | null;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
-  bpmChanges: BPMChange[];
+  bpmChanges: BPMChangeWithLua[];
   step: Step;
 }
 export async function luaExec(code: string): Promise<Result> {
@@ -49,21 +50,21 @@ export async function luaExec(code: string): Promise<Result> {
     lua.global.set("NoteStatic", (...args: any[]) => luaNote(result, ...args));
     lua.global.set("Step", (...args: any[]) => luaStep(result, null, ...args));
     lua.global.set("StepStatic", (...args: any[]) => luaStep(result, ...args));
-    lua.global.set("BPM", (...args: any[]) => luaBPM(result, ...args));
+    lua.global.set("BPM", (...args: any[]) => luaBPM(result, null, ...args));
+    lua.global.set("BPMStatic", (...args: any[]) => luaBPM(result, ...args));
 
-    const codeStatic = code
-      .split("\n")
-      .map((lineStr, ln) =>
-        lineStr
-          .replace(
-            /^( *)Note\(( *-?[\d\.]+ *(?:, *-?[\d\.]+ *){3}, *(?:true|false) *)\)( *)$/,
-            `$1NoteStatic(${ln},$2)$3`
-          )
-          .replace(
-            /^( *)Step\(( *[\d\.]+ *, *[\d\.]+ *)\)( *)$/,
-            `$1StepStatic(${ln},$2)$3`
-          )
-      );
+    const codeStatic = code.split("\n").map((lineStr, ln) =>
+      lineStr
+        .replace(
+          /^( *)Note\(( *-?[\d\.]+ *(?:, *-?[\d\.]+ *){3}, *(?:true|false) *)\)( *)$/,
+          `$1NoteStatic(${ln},$2)$3`
+        )
+        .replace(
+          /^( *)Step\(( *[\d\.]+ *, *[\d\.]+ *)\)( *)$/,
+          `$1StepStatic(${ln},$2)$3`
+        )
+        .replace(/^( *)BPM\(( *[\d\.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
+    );
     console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
   } catch (e) {
@@ -84,7 +85,7 @@ export async function luaExec(code: string): Promise<Result> {
           firstErrorLine = Number(errorLineMatchShort[1]) - 1;
         }
       }
-      return s
+      return s;
     });
     result.errorLine = firstErrorLine;
   } finally {

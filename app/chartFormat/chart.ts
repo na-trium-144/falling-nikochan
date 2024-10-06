@@ -1,5 +1,6 @@
 import {
   BPMChange,
+  BPMChangeWithLua,
   NoteCommand,
   NoteCommandWithLua,
   RestStep,
@@ -37,7 +38,7 @@ export interface Chart {
   ver: 3;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
-  bpmChanges: BPMChange[];
+  bpmChanges: BPMChangeWithLua[];
   scaleChanges: BPMChange[];
   offset: number;
   lua: string[];
@@ -68,7 +69,8 @@ export function validateChart(chart_: Chart | Chart1) {
   updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (!Array.isArray(chart.lua)) throw "chart.lua is invalid";
-  if (chart.lua.filter((l) => typeof l !== "string").length > 0) throw "chart.lua is invalid";
+  if (chart.lua.filter((l) => typeof l !== "string").length > 0)
+    throw "chart.lua is invalid";
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
   if (typeof chart.composer !== "string") chart.composer = "";
@@ -97,10 +99,10 @@ export function emptyChart(): Chart {
     ver: 3,
     notes: [],
     rest: [],
-    bpmChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
+    bpmChanges: [{ step: stepZero(), timeSec: 0, bpm: 120, luaLine: 0 }],
     scaleChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
     offset: 0,
-    lua: [],
+    lua: ["BPM(120)"],
     ytId: "",
     title: "",
     composer: "",

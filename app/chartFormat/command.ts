@@ -68,11 +68,17 @@ export interface BPMChange {
   timeSec: number;
   bpm: number;
 }
-export function validateBpmChange(b: BPMChange) {
+export interface BPMChangeWithLua extends BPMChange{
+  luaLine: number | null;
+}
+export function validateBpmChange(b: BPMChangeWithLua) {
   validateStep(b.step);
   if (typeof b.timeSec !== "number") throw "BpmChange.timeSec is invalid";
   if (typeof b.bpm !== "number") throw "BpmChange.bpm is invalid";
+  if (typeof b.luaLine !== "number" && b.luaLine !== null)
+    throw "note.luaLine is invalid";
 }
+
 /**
  * stepが正しいとしてtimeSecを再計算
  */
