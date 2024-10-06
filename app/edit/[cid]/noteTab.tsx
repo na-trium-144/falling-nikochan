@@ -7,7 +7,6 @@ import {
   stepFourth,
   stepMeasure,
   stepNumerator,
-  stepStr,
 } from "./str";
 import { Step, stepCmp } from "@/chartFormat/step";
 import { Key } from "@/common/key";
@@ -235,32 +234,6 @@ function NoteEdit(props: Props) {
                   isValid={(v) => !isNaN(Number(v)) && nv > 0}
                 />
                 °
-              </td>
-            </tr>
-            <tr>
-              <td className="pr-2">
-                <span>Gravity</span>
-                <span className="inline-block ml-1">
-                  (<Key className="px-1 py-0.5 mx-0.5 text-sm">Ctrl</Key>+
-                  <span className="inline-block">
-                    <Mouse className="" />
-                  </span>
-                  )
-                </span>
-              </td>
-              <td />
-              <td />
-              <td />
-              <td>ay =</td>
-              <td>
-                <Input
-                  className="w-20"
-                  actualValue={n.accelY.toString()}
-                  updateValue={(v) =>
-                    props.updateNote({ ...n, accelY: Number(v) })
-                  }
-                  isValid={(v) => !isNaN(Number(v))}
-                />
               </td>
             </tr>
           </tbody>

@@ -12,6 +12,21 @@ const nextConfig = {
     buildDate: date,
     buildCommit: commit,
   },
+  webpack: (config, options) => {
+    config.resolve = {
+      ...config.resolve,
+      fallback: {
+        path: false,
+        fs: false,
+        child_process: false,
+        crypto: false,
+        url: false,
+        module: false,
+        ...config.resolve?.fallback,
+      },
+    };
+    return config;
+  },
 };
 
 export default nextConfig;

@@ -3,7 +3,6 @@
 import {
   defaultNoteCommand,
   NoteCommand,
-  updateBpmTimeSec,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -23,7 +22,6 @@ import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import {
   Box,
-  CenterBox,
   CenterBoxOnlyPage,
   Error,
   Loading,
@@ -35,6 +33,22 @@ import { Chart, emptyChart, hashPasswd } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
+import LuaTab from "./luaTab";
+import {
+  luaAddBpmChange,
+  luaDeleteBpmChange,
+  luaUpdateBpmChange,
+} from "@/chartFormat/lua/bpm";
+import {
+  luaAddSpeedChange,
+  luaDeleteSpeedChange,
+  luaUpdateSpeedChange,
+} from "@/chartFormat/lua/speed";
+import {
+  luaAddNote,
+  luaDeleteNote,
+  luaUpdateNote,
+} from "@/chartFormat/lua/note";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -196,11 +210,13 @@ export default function Page(context: { params: Params }) {
     ytPlayer.current?.pauseVideo();
     ref.current.focus();
   };
-  const changeCurrentTimeSec = (timeSec: number) => {
+  const changeCurrentTimeSec = (timeSec: number, focus = true) => {
     if (ytPlayer.current?.seekTo) {
       ytPlayer.current?.seekTo(timeSec, true);
     }
-    ref.current.focus();
+    if (focus) {
+      ref.current.focus();
+    }
   };
   const seekRight1 = () => {
     if (chart) {
@@ -231,20 +247,26 @@ export default function Page(context: { params: Params }) {
     ref.current.focus();
   };
   const seekStepRel = (move: number) => {
+    let newStep = stepAdd(currentStep, {
+      fourth: 0,
+      numerator: move,
+      denominator: snapDivider,
+    });
+    seekStepAbs(newStep);
+  };
+  const seekStepAbs = (newStep: Step, focus = true) => {
     if (chart) {
-      let newStep = stepAdd(currentStep, {
-        fourth: 0,
-        numerator: move,
-        denominator: snapDivider,
-      });
       if (stepCmp(newStep, stepZero()) < 0) {
         newStep = stepZero();
       }
       changeCurrentTimeSec(
-        getTimeSec(chart.bpmChanges, newStep) + chart.offset
+        getTimeSec(chart.bpmChanges, newStep) + chart.offset,
+        focus
       );
     }
-    ref.current.focus();
+    if (focus) {
+      ref.current.focus();
+    }
   };
 
   useEffect(() => {
@@ -265,7 +287,7 @@ export default function Page(context: { params: Params }) {
 
   const [tab, setTab] = useState<number>(0);
 
-  const [dragMode, setDragMode] = useState<"p" | "v" | "a">("p");
+  const [dragMode, setDragMode] = useState<"p" | "v">("p");
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
@@ -281,16 +303,18 @@ export default function Page(context: { params: Params }) {
   const changeBpm = (bpm: number) => {
     if (chart && currentBpmIndex !== undefined) {
       if (chart.bpmChanges.length === 0) {
-        chart.bpmChanges.push({
-          step: stepZero(),
-          bpm: bpm,
-          timeSec: 0,
-        });
+        throw "bpmChanges empty";
+        // chart.bpmChanges.push({
+        //   step: stepZero(),
+        //   bpm: bpm,
+        //   timeSec: 0,
+        // });
       } else {
-        chart.bpmChanges[currentBpmIndex].bpm = bpm;
-        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+        const newChart = luaUpdateBpmChange(chart, currentBpmIndex, bpm);
+        if (newChart !== null) {
+          changeChart({ ...newChart });
+        }
       }
-      changeChart({ ...chart });
     }
   };
   const bpmChangeHere =
@@ -305,107 +329,106 @@ export default function Page(context: { params: Params }) {
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (bpmChangeHere) {
-        chart.bpmChanges = chart.bpmChanges.filter(
-          (ch) => stepCmp(ch.step, currentStep) !== 0
-        );
-        updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
-        changeChart({ ...chart });
+        const newChart = luaDeleteBpmChange(chart, currentBpmIndex);
+        if (newChart !== null) {
+          changeChart({ ...newChart });
+        }
       } else {
-        chart.bpmChanges.push({
+        const newChart = luaAddBpmChange(chart, {
           step: currentStep,
           bpm: currentBpm,
           timeSec: currentTimeSec,
         });
-        chart.bpmChanges = chart.bpmChanges.sort((a, b) =>
-          stepCmp(a.step, b.step)
-        );
-        changeChart({ ...chart });
+        if (newChart !== null) {
+          changeChart({ ...newChart });
+        }
       }
     }
   };
 
-  const currentScaleIndex =
-    chart && findBpmIndexFromStep(chart?.scaleChanges, currentStep);
-  const currentScale =
-    chart && chart.scaleChanges.length > 0 && currentScaleIndex !== undefined
-      ? chart.scaleChanges[currentScaleIndex].bpm
+  const currentSpeedIndex =
+    chart && findBpmIndexFromStep(chart?.speedChanges, currentStep);
+  const currentSpeed =
+    chart && chart.speedChanges.length > 0 && currentSpeedIndex !== undefined
+      ? chart.speedChanges[currentSpeedIndex].bpm
       : 120;
-  const changeScale = (bpm: number) => {
-    if (chart && currentScaleIndex !== undefined) {
-      if (chart.scaleChanges.length === 0) {
-        chart.scaleChanges.push({
-          step: stepZero(),
-          bpm: bpm,
-          timeSec: 0,
-        });
+  const changeSpeed = (bpm: number) => {
+    if (chart && currentSpeedIndex !== undefined) {
+      if (chart.speedChanges.length === 0) {
+        throw "speedChanges empty";
+        // chart.speedChanges.push({
+        //   step: stepZero(),
+        //   bpm: bpm,
+        //   timeSec: 0,
+        // });
       } else {
-        chart.scaleChanges[currentScaleIndex].bpm = bpm;
-        // updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+        const newChart = luaUpdateSpeedChange(chart, currentSpeedIndex, bpm);
+        if (newChart) {
+          changeChart({ ...newChart });
+        }
       }
-      changeChart({ ...chart });
     }
   };
-  const scaleChangeHere =
+  const speedChangeHere =
     chart &&
-    currentScaleIndex !== undefined &&
-    chart.scaleChanges.length > 0 &&
-    stepCmp(chart.scaleChanges[currentScaleIndex].step, currentStep) === 0;
-  const toggleScaleChangeHere = () => {
+    currentSpeedIndex !== undefined &&
+    chart.speedChanges.length > 0 &&
+    stepCmp(chart.speedChanges[currentSpeedIndex].step, currentStep) === 0;
+  const toggleSpeedChangeHere = () => {
     if (
       chart &&
-      currentScaleIndex !== undefined &&
+      currentSpeedIndex !== undefined &&
       stepCmp(currentStep, stepZero()) > 0
     ) {
-      if (scaleChangeHere) {
-        chart.scaleChanges = chart.scaleChanges.filter(
-          (ch) => stepCmp(ch.step, currentStep) !== 0
-        );
-        // updateScaleTimeSec(chart.bpmChanges, chart.scaleChanges);
-        changeChart({ ...chart });
+      if (speedChangeHere) {
+        const newChart = luaDeleteSpeedChange(chart, currentSpeedIndex);
+        if (newChart) {
+          changeChart({ ...newChart });
+        }
       } else {
-        chart.scaleChanges.push({
+        const newChart = luaAddSpeedChange(chart, {
           step: currentStep,
-          bpm: currentScale,
+          bpm: currentSpeed,
           timeSec: currentTimeSec,
         });
-        chart.scaleChanges = chart.scaleChanges.sort((a, b) =>
-          stepCmp(a.step, b.step)
-        );
-        changeChart({ ...chart });
+        if (newChart) {
+          changeChart({ ...newChart });
+        }
       }
     }
   };
 
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
     if (chart && n) {
-      const newChart = { ...chart };
-      newChart.notes.push({ ...n, step: currentStep });
-      newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
-      changeChart(newChart);
-      // 追加したnoteは同じ時刻の音符の中でも最後
-      setCurrentNoteIndex(
-        chart.notes.findLastIndex((n) => stepCmp(n.step, currentStep) == 0)
-      );
+      const chartCopied = { ...chart };
+      const newChart = luaAddNote(chartCopied, n, currentStep);
+      if (newChart !== null) {
+        changeChart(newChart);
+        // 追加したnoteは同じ時刻の音符の中でも最後
+        setCurrentNoteIndex(
+          chart.notes.findLastIndex((n) => stepCmp(n.step, currentStep) == 0)
+        );
+      }
     }
     ref.current.focus();
   };
   const deleteNote = () => {
     if (chart && hasCurrentNote) {
-      const newChart = { ...chart };
-      newChart.notes = newChart.notes.filter((_, i) => i !== currentNoteIndex);
-      changeChart(newChart);
+      const chartCopied = { ...chart };
+      const newChart = luaDeleteNote(chartCopied, currentNoteIndex);
+      if (newChart !== null) {
+        changeChart(newChart);
+      }
     }
     ref.current.focus();
   };
   const updateNote = (n: NoteCommand) => {
     if (chart && hasCurrentNote) {
-      const newChart = { ...chart };
-      newChart.notes[currentNoteIndex] = {
-        ...n,
-        step: newChart.notes[currentNoteIndex].step,
-      };
-      newChart.notes = newChart.notes.sort((a, b) => stepCmp(a.step, b.step));
-      changeChart(newChart);
+      const chartCopied = { ...chart };
+      const newChart = luaUpdateNote(chartCopied, currentNoteIndex, n);
+      if (newChart !== null) {
+        changeChart(newChart);
+      }
     }
     // ref.current.focus();
   };
@@ -473,7 +496,7 @@ export default function Page(context: { params: Params }) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (ready) {
+        if (ready && tab !== 3) {
           if (e.key === " " && !playing) {
             start();
           } else if (
@@ -511,8 +534,6 @@ export default function Page(context: { params: Params }) {
             }
           } else if (e.key === "Shift") {
             setDragMode("v");
-          } else if (e.key === "Control") {
-            setDragMode("a");
           } else {
           }
         }
@@ -668,7 +689,7 @@ export default function Page(context: { params: Params }) {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Meta", "Timing", "Notes"].map((tabName, i) =>
+            {["Meta", "Timing", "Notes", "Code"].map((tabName, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
@@ -687,7 +708,7 @@ export default function Page(context: { params: Params }) {
           <Box
             className={
               "p-3 overflow-auto " +
-              "min-h-96 " +
+              "min-h-96 relative " +
               "edit-wide:flex-1 edit-wide:min-h-0"
             }
           >
@@ -715,20 +736,20 @@ export default function Page(context: { params: Params }) {
                 setCurrentBpm={changeBpm}
                 bpmChangeHere={!!bpmChangeHere}
                 toggleBpmChangeHere={toggleBpmChangeHere}
-                prevScale={
-                  currentScaleIndex !== undefined && currentScaleIndex >= 1
-                    ? chart.scaleChanges[currentScaleIndex - 1].bpm
+                prevSpeed={
+                  currentSpeedIndex !== undefined && currentSpeedIndex >= 1
+                    ? chart.speedChanges[currentSpeedIndex - 1].bpm
                     : undefined
                 }
-                currentScale={
-                  currentScaleIndex !== undefined ? currentScale : undefined
+                currentSpeed={
+                  currentSpeedIndex !== undefined ? currentSpeed : undefined
                 }
-                setCurrentScale={changeScale}
-                scaleChangeHere={!!scaleChangeHere}
-                toggleScaleChangeHere={toggleScaleChangeHere}
+                setCurrentSpeed={changeSpeed}
+                speedChangeHere={!!speedChangeHere}
+                toggleSpeedChangeHere={toggleSpeedChangeHere}
                 currentStep={currentStep}
               />
-            ) : (
+            ) : tab === 2 ? (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
                 addNote={addNote}
@@ -739,6 +760,12 @@ export default function Page(context: { params: Params }) {
                 hasCopyBuf={copyBuf.map((n) => n !== null)}
                 currentStep={currentStep}
                 chart={chart}
+              />
+            ) : (
+              <LuaTab
+                chart={chart}
+                changeChart={changeChart}
+                seekStepAbs={(s: Step) => seekStepAbs(s, false)}
               />
             )}
           </Box>

@@ -129,9 +129,9 @@ export default function TimeBar(props: Props) {
     chart && stepCmp(timeBarBeginStep, stepZero()) > 0
       ? findBpmIndexFromStep(chart?.bpmChanges, timeBarBeginStep)
       : undefined;
-  const beginScaleIndex =
+  const beginSpeedIndex =
     chart && stepCmp(timeBarBeginStep, stepZero()) > 0
-      ? findBpmIndexFromStep(chart?.scaleChanges, timeBarBeginStep)
+      ? findBpmIndexFromStep(chart?.speedChanges, timeBarBeginStep)
       : undefined;
 
   return (
@@ -196,14 +196,14 @@ export default function TimeBar(props: Props) {
             </span>
           )
       )}
-      {/* scale変化 */}
+      {/* speed変化 */}
       <div className="absolute" style={{ bottom: -3.75 * rem, left: 0 }}>
-        <span className="mr-1">Scale:</span>
-        {beginScaleIndex !== undefined && (
-          <span>{chart?.scaleChanges[beginScaleIndex]?.bpm.toString()}</span>
+        <span className="mr-1">Speed:</span>
+        {beginSpeedIndex !== undefined && (
+          <span>{chart?.speedChanges[beginSpeedIndex]?.bpm.toString()}</span>
         )}
       </div>
-      {chart?.scaleChanges.map(
+      {chart?.speedChanges.map(
         (ch, i) =>
           ch.timeSec + chart.offset >= timeBarBeginSec &&
           ch.timeSec + chart.offset <

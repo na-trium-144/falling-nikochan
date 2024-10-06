@@ -1,12 +1,17 @@
 import {
-  BPMChange,
-  NoteCommand,
+  BPMChangeWithLua,
+  NoteCommandWithLua,
+  RestStep,
   updateBpmTimeSec,
   validateBpmChange,
   validateNoteCommand,
+  validateRestStep,
 } from "./command";
 import { Chart1, convert1To2 } from "./legacy/chart1";
-import { Step, stepZero } from "./step";
+import { Chart2, convert2To3 } from "./legacy/chart2";
+import { luaAddBpmChange } from "./lua/bpm";
+import { luaAddSpeedChange } from "./lua/speed";
+import { stepZero } from "./step";
 
 export interface ChartBrief {
   ytId: string;
@@ -18,6 +23,9 @@ export interface ChartBrief {
 /**
  * 譜面データを保存しておく形式
  * notes: 1音符1要素
+ * rest: 休符
+ *   notesそれぞれにstepの情報は入っているので、譜面を読むだけなら無くてもいい
+ *   エディタがluaを編集するときどこにNoteコマンドを挿入するかの判断に使う。
  * bpmChanges: bpm変化の情報
  * offset: step=0に対応する時刻(秒)
  * (offsetの処理はgetCurrentTimeSec()の中に含まれる)
@@ -28,11 +36,13 @@ export interface ChartBrief {
  */
 export interface Chart {
   falling: "nikochan"; // magic
-  ver: 2;
-  notes: NoteCommand[];
-  bpmChanges: BPMChange[];
-  scaleChanges: BPMChange[];
+  ver: 3;
+  notes: NoteCommandWithLua[];
+  rest: RestStep[];
+  bpmChanges: BPMChangeWithLua[];
+  speedChanges: BPMChangeWithLua[];
   offset: number;
+  lua: string[];
   ytId: string;
   title: string;
   composer: string;
@@ -42,21 +52,28 @@ export interface Chart {
 
 export const chartMaxSize = 100000;
 
-export function validateChart(chart_: Chart | Chart1) {
-  if (chart_.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart_.ver === 1) {
-    chart_ = convert1To2(chart_);
+export function validateChart(chart: Chart | Chart1 | Chart2): Chart {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  if (chart.ver === 1) {
+    chart = convert1To2(chart);
   }
-  if (chart_.ver !== 2) throw "chart.ver is invalid";
-  const chart = chart_ as Chart;
+  if (chart.ver === 2) {
+    chart = convert2To3(chart);
+  }
+  if (chart.ver !== 3) throw "chart.ver is invalid";
   if (!Array.isArray(chart.notes)) throw "chart.notes is invalid";
   chart.notes.forEach((n) => validateNoteCommand(n));
+  if (!Array.isArray(chart.rest)) throw "chart.rest is invalid";
+  chart.rest.forEach((n) => validateRestStep(n));
   if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
   chart.bpmChanges.forEach((n) => validateBpmChange(n));
-  if (!Array.isArray(chart.scaleChanges)) throw "chart.scaleChanges is invalid";
-  chart.scaleChanges.forEach((n) => validateBpmChange(n));
-  updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+  if (!Array.isArray(chart.speedChanges)) throw "chart.speedChanges is invalid";
+  chart.speedChanges.forEach((n) => validateBpmChange(n));
+  updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   if (typeof chart.offset !== "number") chart.offset = 0;
+  if (!Array.isArray(chart.lua)) throw "chart.lua is invalid";
+  if (chart.lua.filter((l) => typeof l !== "string").length > 0)
+    throw "chart.lua is invalid";
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
   if (typeof chart.composer !== "string") chart.composer = "";
@@ -80,17 +97,22 @@ export function validCId(cid: string) {
 }
 
 export function emptyChart(): Chart {
-  return {
+  let chart: Chart = {
     falling: "nikochan",
-    ver: 2,
+    ver: 3,
     notes: [],
-    bpmChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
-    scaleChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
+    rest: [],
+    bpmChanges: [],
+    speedChanges: [],
     offset: 0,
+    lua: [],
     ytId: "",
     title: "",
     composer: "",
     chartCreator: "",
     editPasswd: "",
   };
+  chart = luaAddBpmChange(chart, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+  chart = luaAddSpeedChange(chart, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+  return chart;
 }
