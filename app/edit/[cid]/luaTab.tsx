@@ -41,6 +41,7 @@ export default function LuaTab(props: Props) {
               notes: result.notes,
               rest: result.rest,
               bpmChanges: result.bpmChanges,
+              speedChanges: result.speedChanges,
             });
           }
         })();

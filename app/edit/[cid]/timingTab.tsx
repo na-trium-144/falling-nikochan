@@ -12,22 +12,22 @@ interface Props {
   offset?: number;
   setOffset: (offset: number) => void;
   prevBpm?: number;
-  prevScale?: number;
+  prevSpeed?: number;
   currentBpm?: number;
   setCurrentBpm: (bpm: number) => void;
   bpmChangeHere: boolean;
   toggleBpmChangeHere: () => void;
-  currentScale?: number;
-  setCurrentScale: (bpm: number) => void;
-  scaleChangeHere: boolean;
-  toggleScaleChangeHere: () => void;
+  currentSpeed?: number;
+  setCurrentSpeed: (bpm: number) => void;
+  speedChangeHere: boolean;
+  toggleSpeedChangeHere: () => void;
   currentStep: Step;
 }
 export default function TimingTab(props: Props) {
   const offsetValid = (offset: string) =>
     !isNaN(Number(offset)) && Number(offset) >= 0;
   const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) > 0;
-  const scaleValid = (bpm: string) => !isNaN(Number(bpm));
+  const speedValid = (bpm: string) => !isNaN(Number(bpm));
   return (
     <>
       <p className="mb-3">
@@ -86,9 +86,9 @@ export default function TimingTab(props: Props) {
           id="bpmChangeHere"
           checked={props.bpmChangeHere}
           onChange={() => {
-            // bpmの変更時にscaleも変える
-            if (props.currentBpm == props.currentScale) {
-              props.toggleScaleChangeHere();
+            // bpmの変更時にspeedも変える
+            if (props.currentBpm == props.currentSpeed) {
+              props.toggleSpeedChangeHere();
             }
             props.toggleBpmChangeHere();
           }}
@@ -99,12 +99,12 @@ export default function TimingTab(props: Props) {
           className="w-16 mx-1"
           actualValue={props.currentBpm?.toString() || ""}
           updateValue={(v: string) => {
-            // bpmの変更時にscaleも変える
+            // bpmの変更時にspeedも変える
             if (
-              props.scaleChangeHere &&
-              props.currentBpm === props.currentScale
+              props.speedChangeHere &&
+              props.currentBpm === props.currentSpeed
             ) {
-              props.setCurrentScale(Number(v));
+              props.setCurrentSpeed(Number(v));
             }
             props.setCurrentBpm(Number(v));
           }}
@@ -113,36 +113,36 @@ export default function TimingTab(props: Props) {
         />
       </p>
       <p className="ml-2">
-        <span>Scale</span>
+        <span>Speed</span>
         <Input
           className="w-16 mx-1"
           actualValue={
-            props.scaleChangeHere
-              ? props.prevScale?.toString() || ""
-              : props.currentScale !== undefined
-              ? props.currentScale.toString()
+            props.speedChangeHere
+              ? props.prevSpeed?.toString() || ""
+              : props.currentSpeed !== undefined
+              ? props.currentSpeed.toString()
               : ""
           }
-          updateValue={(v: string) => props.setCurrentScale(Number(v))}
-          disabled={props.scaleChangeHere}
-          isValid={scaleValid}
+          updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
+          disabled={props.speedChangeHere}
+          isValid={speedValid}
         />
         <span>→</span>
         <input
           className="ml-4 mr-1"
           type="checkbox"
-          id="scaleChangeHere"
-          checked={props.scaleChangeHere}
-          onChange={props.toggleScaleChangeHere}
+          id="speedChangeHere"
+          checked={props.speedChangeHere}
+          onChange={props.toggleSpeedChangeHere}
           disabled={stepCmp(props.currentStep, stepZero()) <= 0}
         />
-        <label htmlFor="scaleChangeHere">ここで変化</label>
+        <label htmlFor="speedChangeHere">ここで変化</label>
         <Input
           className="w-16 mx-1"
-          actualValue={props.currentScale?.toString() || ""}
-          updateValue={(v: string) => props.setCurrentScale(Number(v))}
-          disabled={!props.scaleChangeHere}
-          isValid={scaleValid}
+          actualValue={props.currentSpeed?.toString() || ""}
+          updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
+          disabled={!props.speedChangeHere}
+          isValid={speedValid}
         />
       </p>
     </>

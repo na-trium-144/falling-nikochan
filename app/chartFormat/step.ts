@@ -14,7 +14,7 @@ export function validateStep(s: Step) {
   if (typeof s.numerator !== "number") throw "step.numerator is invalid";
   if (typeof s.denominator !== "number") throw "step.denominator is invalid";
 }
-export function stepZero() {
+export function stepZero(): Step {
   return { fourth: 0, numerator: 0, denominator: 4 };
 }
 export function stepToFloat(s: Step) {

@@ -10,6 +10,8 @@ import {
   validateRestStep,
 } from "./command";
 import { Chart1, convert1To2 } from "./legacy/chart1";
+import { luaAddBpmChange } from "./lua/bpm";
+import { luaAddSpeedChange } from "./lua/speed";
 import { Step, stepZero } from "./step";
 
 export interface ChartBrief {
@@ -39,7 +41,7 @@ export interface Chart {
   notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
-  scaleChanges: BPMChange[];
+  speedChanges: BPMChangeWithLua[];
   offset: number;
   lua: string[];
   ytId: string;
@@ -64,9 +66,9 @@ export function validateChart(chart_: Chart | Chart1) {
   chart.rest.forEach((n) => validateRestStep(n));
   if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
   chart.bpmChanges.forEach((n) => validateBpmChange(n));
-  if (!Array.isArray(chart.scaleChanges)) throw "chart.scaleChanges is invalid";
-  chart.scaleChanges.forEach((n) => validateBpmChange(n));
-  updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+  if (!Array.isArray(chart.speedChanges)) throw "chart.speedChanges is invalid";
+  chart.speedChanges.forEach((n) => validateBpmChange(n));
+  updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (!Array.isArray(chart.lua)) throw "chart.lua is invalid";
   if (chart.lua.filter((l) => typeof l !== "string").length > 0)
@@ -94,19 +96,22 @@ export function validCId(cid: string) {
 }
 
 export function emptyChart(): Chart {
-  return {
+  let chart: Chart = {
     falling: "nikochan",
     ver: 3,
     notes: [],
     rest: [],
-    bpmChanges: [{ step: stepZero(), timeSec: 0, bpm: 120, luaLine: 0 }],
-    scaleChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
+    bpmChanges: [],
+    speedChanges: [],
     offset: 0,
-    lua: ["BPM(120)"],
+    lua: [],
     ytId: "",
     title: "",
     composer: "",
     chartCreator: "",
     editPasswd: "",
   };
+  chart = luaAddBpmChange(chart, {bpm: 120, step: stepZero(), timeSec: 0})!;
+  chart = luaAddSpeedChange(chart, {bpm: 120, step: stepZero(), timeSec: 0})!;
+  return chart;
 }

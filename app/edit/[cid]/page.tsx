@@ -38,12 +38,19 @@ import { getPasswd, setPasswd } from "@/common/passwdCache";
 import LuaTab from "./luaTab";
 import {
   luaAddBpmChange,
-  luaAddNote,
   luaDeleteBpmChange,
-  luaDeleteNote,
   luaUpdateBpmChange,
+} from "@/chartFormat/lua/bpm";
+import {
+  luaAddSpeedChange,
+  luaDeleteSpeedChange,
+  luaUpdateSpeedChange,
+} from "@/chartFormat/lua/speed";
+import {
+  luaAddNote,
+  luaDeleteNote,
   luaUpdateNote,
-} from "@/chartFormat/lua/edit";
+} from "@/chartFormat/lua/note";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -341,54 +348,54 @@ export default function Page(context: { params: Params }) {
     }
   };
 
-  const currentScaleIndex =
-    chart && findBpmIndexFromStep(chart?.scaleChanges, currentStep);
-  const currentScale =
-    chart && chart.scaleChanges.length > 0 && currentScaleIndex !== undefined
-      ? chart.scaleChanges[currentScaleIndex].bpm
+  const currentSpeedIndex =
+    chart && findBpmIndexFromStep(chart?.speedChanges, currentStep);
+  const currentSpeed =
+    chart && chart.speedChanges.length > 0 && currentSpeedIndex !== undefined
+      ? chart.speedChanges[currentSpeedIndex].bpm
       : 120;
-  const changeScale = (bpm: number) => {
-    if (chart && currentScaleIndex !== undefined) {
-      if (chart.scaleChanges.length === 0) {
-        chart.scaleChanges.push({
-          step: stepZero(),
-          bpm: bpm,
-          timeSec: 0,
-        });
+  const changeSpeed = (bpm: number) => {
+    if (chart && currentSpeedIndex !== undefined) {
+      if (chart.speedChanges.length === 0) {
+        throw "speedChanges empty";
+        // chart.speedChanges.push({
+        //   step: stepZero(),
+        //   bpm: bpm,
+        //   timeSec: 0,
+        // });
       } else {
-        chart.scaleChanges[currentScaleIndex].bpm = bpm;
-        // updateBpmTimeSec(chart.bpmChanges, chart.scaleChanges);
+        const newChart = luaUpdateSpeedChange(chart, currentSpeedIndex, bpm);
+        if (newChart) {
+          changeChart({ ...newChart });
+        }
       }
-      changeChart({ ...chart });
     }
   };
-  const scaleChangeHere =
+  const speedChangeHere =
     chart &&
-    currentScaleIndex !== undefined &&
-    chart.scaleChanges.length > 0 &&
-    stepCmp(chart.scaleChanges[currentScaleIndex].step, currentStep) === 0;
-  const toggleScaleChangeHere = () => {
+    currentSpeedIndex !== undefined &&
+    chart.speedChanges.length > 0 &&
+    stepCmp(chart.speedChanges[currentSpeedIndex].step, currentStep) === 0;
+  const toggleSpeedChangeHere = () => {
     if (
       chart &&
-      currentScaleIndex !== undefined &&
+      currentSpeedIndex !== undefined &&
       stepCmp(currentStep, stepZero()) > 0
     ) {
-      if (scaleChangeHere) {
-        chart.scaleChanges = chart.scaleChanges.filter(
-          (ch) => stepCmp(ch.step, currentStep) !== 0
-        );
-        // updateScaleTimeSec(chart.bpmChanges, chart.scaleChanges);
-        changeChart({ ...chart });
+      if (speedChangeHere) {
+        const newChart = luaDeleteSpeedChange(chart, currentSpeedIndex);
+        if (newChart) {
+          changeChart({ ...newChart });
+        }
       } else {
-        chart.scaleChanges.push({
+        const newChart = luaAddSpeedChange(chart, {
           step: currentStep,
-          bpm: currentScale,
+          bpm: currentSpeed,
           timeSec: currentTimeSec,
         });
-        chart.scaleChanges = chart.scaleChanges.sort((a, b) =>
-          stepCmp(a.step, b.step)
-        );
-        changeChart({ ...chart });
+        if (newChart) {
+          changeChart({ ...newChart });
+        }
       }
     }
   };
@@ -733,17 +740,17 @@ export default function Page(context: { params: Params }) {
                 setCurrentBpm={changeBpm}
                 bpmChangeHere={!!bpmChangeHere}
                 toggleBpmChangeHere={toggleBpmChangeHere}
-                prevScale={
-                  currentScaleIndex !== undefined && currentScaleIndex >= 1
-                    ? chart.scaleChanges[currentScaleIndex - 1].bpm
+                prevSpeed={
+                  currentSpeedIndex !== undefined && currentSpeedIndex >= 1
+                    ? chart.speedChanges[currentSpeedIndex - 1].bpm
                     : undefined
                 }
-                currentScale={
-                  currentScaleIndex !== undefined ? currentScale : undefined
+                currentSpeed={
+                  currentSpeedIndex !== undefined ? currentSpeed : undefined
                 }
-                setCurrentScale={changeScale}
-                scaleChangeHere={!!scaleChangeHere}
-                toggleScaleChangeHere={toggleScaleChangeHere}
+                setCurrentSpeed={changeSpeed}
+                speedChangeHere={!!speedChangeHere}
+                toggleSpeedChangeHere={toggleSpeedChangeHere}
                 currentStep={currentStep}
               />
             ) : tab === 2 ? (
