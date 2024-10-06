@@ -1,7 +1,6 @@
-import { timeStamp } from "console";
 import { Chart } from "./chart";
-import { BPMChange, NoteCommand } from "./command";
-import { Step, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
+import { BPMChange } from "./command";
+import { Step, stepCmp, stepToFloat, stepZero } from "./step";
 
 export interface ChartSeqData {
   notes: Note[];
@@ -167,9 +166,10 @@ export function loadChart(chart: Chart): ChartSeqData {
     let y = 0;
     let vx = c.hitVX;
     let vy = c.hitVY;
+    const ay = 1;
     let appearTimeSec = hitTimeSec;
-    for (let ti = chart.scaleChanges.length - 1; ti >= 0; ti--) {
-      const ts = chart.scaleChanges[ti];
+    for (let ti = chart.speedChanges.length - 1; ti >= 0; ti--) {
+      const ts = chart.speedChanges[ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
         continue;
       }
@@ -177,7 +177,7 @@ export function loadChart(chart: Chart): ChartSeqData {
 
       const vx_ = (vx * ts.bpm) / 4 / 120;
       const vy_ = (vy * ts.bpm) / 4 / 120;
-      const ay_ = (c.accelY * ts.bpm * ts.bpm) / 4 / 120 / 120;
+      const ay_ = (ay * ts.bpm * ts.bpm) / 4 / 120 / 120;
 
       // tEnd <= 時刻 <= tBegin の間、
       //  t = tBegin - 時刻  > 0
@@ -214,7 +214,7 @@ export function loadChart(chart: Chart): ChartSeqData {
       x += vx_ * dt;
       // y += ∫ (vy + ay * t) dt
       y += vy_ * dt - (ay_ * dt * dt) / 2;
-      vy -= c.accelY * ts.bpm / 120 * dt;
+      vy -= ay * ts.bpm / 120 * dt;
 
       tBegin = tEnd;
     }

@@ -4,20 +4,18 @@ import { Result } from "./exec";
 
 export function luaNote(state: Result, ...args: any[]) {
   if (
-    args.length === 6 &&
+    args.length === 5 &&
     (typeof args[0] === "number" || args[0] === null) &&
     typeof args[1] === "number" &&
     typeof args[2] === "number" &&
     typeof args[3] === "number" &&
-    typeof args[4] === "number" &&
-    typeof args[5] === "boolean"
+    typeof args[4] === "boolean"
   ) {
     state.notes.push({
       hitX: args[1],
       hitVX: args[2],
       hitVY: args[3],
-      accelY: args[4],
-      big: !!args[5],
+      big: !!args[4],
       step: { ...state.step },
       luaLine: args[0],
     } as NoteCommandWithLua);

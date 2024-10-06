@@ -17,7 +17,6 @@ export interface NoteCommand {
   hitX: number;
   hitVX: number;
   hitVY: number;
-  accelY: number;
 }
 export interface NoteCommandWithLua extends NoteCommand {
   luaLine: number | null;
@@ -28,7 +27,6 @@ export function validateNoteCommand(n: NoteCommandWithLua) {
   if (typeof n.hitX !== "number") throw "note.hitX is invalid";
   if (typeof n.hitVX !== "number") throw "note.hitVX is invalid";
   if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
-  if (typeof n.accelY !== "number") throw "note.accelY is invalid";
   if (typeof n.luaLine !== "number" && n.luaLine !== null)
     throw "note.luaLine is invalid";
 }
@@ -41,7 +39,6 @@ export function defaultNoteCommand(
     hitX: -3,
     hitVX: +1,
     hitVY: +3,
-    accelY: +1,
     // luaLine
   };
 }

@@ -1,11 +1,12 @@
 import { Chart } from "../chart";
 import { BPMChange, NoteCommand } from "../command";
 import { stepZero } from "../step";
+import { Chart2, NoteCommand2 } from "./chart2";
 
 export interface Chart1 {
   falling: "nikochan"; // magic
   ver: 1;
-  notes: NoteCommand[];
+  notes: NoteCommand2[];
   bpmChanges: BPMChange[];
   offset: number;
   waveOffset: number;
@@ -16,7 +17,7 @@ export interface Chart1 {
   editPasswd: string;
 }
 
-export function convert1To2(chart: Chart1): Chart {
+export function convert1To2(chart: Chart1): Chart2 {
   return {
     falling: "nikochan",
     ver: 2,

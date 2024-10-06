@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import {
   Note,
   DisplayNote,
@@ -267,22 +266,6 @@ export default function FallingWindow(props: Props) {
                         ...chart.notes[currentNoteIndex],
                         hitVX: Math.round(mouseVX * 4),
                         hitVY: Math.round(mouseVY * 4),
-                      });
-                    }}
-                  />
-                </>
-              )}
-              {dragMode === "a" && (
-                <>
-                  <DragHandle
-                    className="absolute inset-0"
-                    onMove={(x, y, cx, cy) => {
-                      const winTop =
-                        ref.current.getBoundingClientRect().top;
-
-                      props.updateNote({
-                        ...chart.notes[currentNoteIndex],
-                        accelY: Math.round(((cy - winTop) * 4) / boxSize),
                       });
                     }}
                   />

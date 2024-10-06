@@ -58,7 +58,7 @@ export async function luaExec(code: string): Promise<Result> {
     const codeStatic = code.split("\n").map((lineStr, ln) =>
       lineStr
         .replace(
-          /^( *)Note\(( *-?[\d\.]+ *(?:, *-?[\d\.]+ *){3}, *(?:true|false) *)\)( *)$/,
+          /^( *)Note\(( *-?[\d\.]+ *(?:, *-?[\d\.]+ *){2}, *(?:true|false) *)\)( *)$/,
           `$1NoteStatic(${ln},$2)$3`
         )
         .replace(

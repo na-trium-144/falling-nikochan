@@ -4,7 +4,7 @@ import { Step, stepCmp } from "../step";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
 
 function noteLuaCommand(n: NoteCommand) {
-  return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${n.accelY}, ${
+  return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${
     n.big ? "true" : "false"
   })`;
 }

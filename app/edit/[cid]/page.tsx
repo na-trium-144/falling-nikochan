@@ -3,7 +3,6 @@
 import {
   defaultNoteCommand,
   NoteCommand,
-  updateBpmTimeSec,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -23,7 +22,6 @@ import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import {
   Box,
-  CenterBox,
   CenterBoxOnlyPage,
   Error,
   Loading,
@@ -289,7 +287,7 @@ export default function Page(context: { params: Params }) {
 
   const [tab, setTab] = useState<number>(0);
 
-  const [dragMode, setDragMode] = useState<"p" | "v" | "a">("p");
+  const [dragMode, setDragMode] = useState<"p" | "v">("p");
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
@@ -536,8 +534,6 @@ export default function Page(context: { params: Params }) {
             }
           } else if (e.key === "Shift") {
             setDragMode("v");
-          } else if (e.key === "Control") {
-            setDragMode("a");
           } else {
           }
         }
