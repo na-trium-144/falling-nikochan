@@ -10,7 +10,7 @@ export default function Select(props: Props) {
   console.log(props.value)
   return (
     <select
-      className={buttonStyle + " text-center"}
+      className={buttonStyle}
       value={props.value}
       onChange={(e) => props.onChange(e.target.value)}
     >

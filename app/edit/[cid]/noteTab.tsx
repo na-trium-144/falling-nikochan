@@ -100,7 +100,7 @@ export default function NoteTab(props: Props) {
 function CopyPasteButton(props: Props) {
   return (
     <>
-      <div className="flex flex-col space-y-1 items-stretch">
+      <div className="flex flex-col items-stretch">
         <Button
           onClick={() => props.pasteNote(0)}
           text="Paste"
@@ -110,7 +110,7 @@ function CopyPasteButton(props: Props) {
         <Button onClick={() => props.copyNote(0)} text="Copy" keyName="C" />
       </div>
       {Array.from(new Array(7)).map((_, i) => (
-        <div key={i} className="flex flex-col space-y-1 items-stretch">
+        <div key={i} className="flex flex-col items-stretch">
           <Button
             onClick={() => props.pasteNote(i + 1)}
             keyName={(i + 1).toString()}
