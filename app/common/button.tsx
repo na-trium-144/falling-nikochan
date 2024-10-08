@@ -1,9 +1,9 @@
 import { Key } from "./key";
 
 export const buttonStyleDisabled =
-  "mx-0.5 py-1.5 px-2.5 border border-gray-600 rounded cursor-pointer " + "bg-gray-500 ";
+  "m-0.5 h-10 py-1.5 px-2.5 border border-gray-600 rounded cursor-pointer " + "bg-gray-500 ";
 export const buttonStyle =
-  "mx-0.5 py-1.5 px-2.5 border border-gray-600 rounded cursor-pointer " +
+  "m-0.5 h-10 px-2.5 border border-gray-600 rounded cursor-pointer " +
   "bg-gradient-to-t from-slate-300 to-slate-50 " +
   "hover:from-slate-200 hover:to-white " +
   "active:from-slate-100 active:to-slate-300 active:shadow-inner ";

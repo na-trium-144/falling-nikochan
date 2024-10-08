@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  defaultNoteCommand,
-  NoteCommand,
-} from "@/chartFormat/command";
+import { defaultNoteCommand, NoteCommand } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
@@ -20,12 +17,7 @@ import Input from "@/common/input";
 import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
-import {
-  Box,
-  CenterBoxOnlyPage,
-  Error,
-  Loading,
-} from "@/common/box";
+import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
@@ -49,6 +41,7 @@ import {
   luaDeleteNote,
   luaUpdateNote,
 } from "@/chartFormat/lua/note";
+import Select from "@/common/select";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -186,6 +179,11 @@ export default function Page(context: { params: Params }) {
   ]);
 
   const ytPlayer = useRef<YouTubePlayer>();
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const changePlaybackRate = (rate: number) => {
+    ytPlayer.current?.setPlaybackRate(rate);
+  };
+
   // ytPlayerが再生中
   const [playing, setPlaying] = useState<boolean>(false);
   // ytPlayerが準備完了
@@ -574,6 +572,7 @@ export default function Page(context: { params: Params }) {
               onReady={onReady}
               onStart={onStart}
               onStop={onStop}
+              onPlaybackRateChange={setPlaybackRate}
             />
           </div>
           <div
@@ -603,6 +602,12 @@ export default function Page(context: { params: Params }) {
         >
           <div>
             <span>Player Control:</span>
+            <Select
+              options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
+              values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+              value={playbackRate.toString()}
+              onChange={(s: string) => changePlaybackRate(Number(s))}
+            />
             <Button
               onClick={() => {
                 if (ready) {
