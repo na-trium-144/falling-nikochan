@@ -96,11 +96,7 @@ export default function RhythmicalSlime(props: Props) {
     }
   }, [bpmChanges, num, playing, getCurrentTimeSec]);
 
-
-  const { screenWidth, screenHeight } = useDisplayMode();
-  const isMobile = screenWidth < screenHeight;
-  const scalingWidthThreshold = isMobile ? 500 : 750;
-  const scale = Math.min(screenWidth/scalingWidthThreshold, 1);
+  const { playUIScale } = useDisplayMode();
 
   return (
     <div
@@ -121,8 +117,8 @@ export default function RhythmicalSlime(props: Props) {
           }
           style={{
             transitionDuration: Math.round(transitionTimeMSec.current) + "ms",
-            height: 40 * scale,
-            marginLeft: 8 * scale,
+            height: 40 * playUIScale,
+            marginLeft: 8 * playUIScale,
           }}
         />
       ))}

@@ -7,10 +7,7 @@ interface Props {
   currentBpm?: number;
 }
 export default function BPMSign(props: Props) {
-  const { screenWidth, screenHeight } = useDisplayMode();
-  const isMobile = screenWidth < screenHeight;
-  const scalingWidthThreshold = (isMobile ? 500 : 750) * 0.8; // score.tsx にあわせる
-  const scale = Math.min(screenWidth / scalingWidthThreshold, 1);
+  const { playUIScale } = useDisplayMode();
 
   const prevBpm = useRef<number | undefined>(undefined);
   const displayedBpm = useRef<number | undefined>(undefined);
@@ -38,7 +35,7 @@ export default function BPMSign(props: Props) {
       style={{
         bottom: "100%",
         left: "0.8rem",
-        transform: scale < 1 ? `scale(${scale})` : undefined,
+        transform: playUIScale !== 1 ? `scale(${playUIScale})` : undefined,
       }}
     >
       <div

@@ -16,8 +16,8 @@ export function AboutContent3() {
     <>
       <div
         className={
-          "flex flex-row space-x-2 mb-4 items-center " + 
-          "main-wide:flex-col main-wide:space-x-0 main-wide:space-y-2 "+
+          "flex flex-row space-x-2 mb-4 items-center " +
+          "main-wide:flex-col main-wide:space-x-0 main-wide:space-y-2 " +
           "main-wide:mb-4 "
         }
       >
@@ -74,13 +74,14 @@ export function AboutContent3() {
           <Box
             className={
               "rounded-none relative " +
-              "basis-1/3 shrink max-w-32 h-48 " + "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24 "
+              "basis-1/3 shrink max-w-32 h-48 " +
+              "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24 "
             }
           >
             <div
               className={
                 "absolute bg-amber-600 rounded-sm m-1 " +
-                "top-0 inset-x-0 p-1 pl-10 h-12 "+
+                "top-0 inset-x-0 p-1 pl-10 h-12 " +
                 "main-wide:left-auto main-wide:pb-2 main-wide:w-20 main-wide:h-14 "
               }
             >
@@ -129,7 +130,8 @@ export function AboutContent3() {
           <wbr />
           譜面のURL (
           <span className="text-sm">
-            {hostname}&#47;<wbr />
+            {hostname}&#47;
+            <wbr />
             share
             <wbr />
             &#47;*

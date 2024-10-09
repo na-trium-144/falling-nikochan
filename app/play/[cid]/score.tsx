@@ -9,10 +9,7 @@ interface CProps {
   children: ReactNode;
 }
 function Cloud(props: CProps) {
-  const { screenWidth, screenHeight } = useDisplayMode();
-  const isMobile = screenWidth < screenHeight;
-  const scalingWidthThreshold = isMobile ? 500 : 750;
-  const scale = Math.min(screenWidth / scalingWidthThreshold, 0.8);
+  const { playUIScale } = useDisplayMode();
 
   return (
     <div
@@ -21,7 +18,7 @@ function Cloud(props: CProps) {
         (props.left ? "left-3 origin-top-left" : "right-3 origin-top-right")
       }
       style={{
-        transform: scale < 1 ? `scale(${scale})` : undefined,
+        transform: `scale(${playUIScale * 0.8})`,
       }}
     >
       <div

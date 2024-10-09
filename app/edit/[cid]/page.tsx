@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  defaultNoteCommand,
-  NoteCommand,
-} from "@/chartFormat/command";
+import { defaultNoteCommand, NoteCommand } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
@@ -20,12 +17,7 @@ import Input from "@/common/input";
 import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
-import {
-  Box,
-  CenterBoxOnlyPage,
-  Error,
-  Loading,
-} from "@/common/box";
+import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
