@@ -262,7 +262,7 @@ export default function Home(context: { params: Params }) {
         >
           <div
             className={
-              "z-10 grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex " +
+              "z-10 grow-0 shrink-0 p-3 bg-amber-600 rounded-lg flex " +
               (isMobile ? "mt-3 mx-3 flex-row-reverse " : "my-3 mr-3 flex-col ")
             }
           >
@@ -350,7 +350,7 @@ export default function Home(context: { params: Params }) {
           className="-z-10 absolute "
           style={{
             bottom: "100%",
-            right: isMobile ? "1rem" : statusOverlaps ? 17 * rem : "1rem",
+            right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
           }}
           num={4}
           getCurrentTimeSec={getCurrentTimeSec}

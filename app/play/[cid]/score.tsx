@@ -12,7 +12,7 @@ function Cloud(props: CProps) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   const scalingWidthThreshold = isMobile ? 500 : 750;
-  const scale = Math.min(screenWidth / scalingWidthThreshold, 1);
+  const scale = Math.min(screenWidth / scalingWidthThreshold, 0.8);
 
   return (
     <div

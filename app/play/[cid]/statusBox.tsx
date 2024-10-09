@@ -18,7 +18,7 @@ interface Props {
 export default function StatusBox(props: Props) {
   const { screenWidth, screenHeight, rem } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  let textScale: number = 1;
+  let textScale: number = 0.8;
   if (isMobile) {
     textScale = Math.min(screenWidth / (31 * rem), 1);
   }
@@ -37,7 +37,7 @@ export default function StatusBox(props: Props) {
         className={
           props.isMobile
             ? "flex flex-row h-full items-center justify-between "
-            : "w-56"
+            : "w-48"
         }
       >
         {["Good", "OK", "Bad", "Miss"].map((name, ji) => (

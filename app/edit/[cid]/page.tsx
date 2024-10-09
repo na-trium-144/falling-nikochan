@@ -561,7 +561,7 @@ export default function Page(context: { params: Params }) {
           <Header reload>Edit</Header>
           <div
             className={
-              "grow-0 shrink-0 mt-3 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
+              "grow-0 shrink-0 mt-3 p-3 bg-amber-600 rounded-lg flex flex-col items-center "
             }
           >
             <FlexYouTube

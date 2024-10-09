@@ -79,7 +79,7 @@ export function AboutContent3() {
           >
             <div
               className={
-                "absolute bg-amber-700 rounded-sm m-1 " +
+                "absolute bg-amber-600 rounded-sm m-1 " +
                 "top-0 inset-x-0 p-1 pl-10 h-12 "+
                 "main-wide:left-auto main-wide:pb-2 main-wide:w-20 main-wide:h-14 "
               }
