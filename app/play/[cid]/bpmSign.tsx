@@ -9,7 +9,7 @@ interface Props {
 export default function BPMSign(props: Props) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  const scalingWidthThreshold = isMobile ? 500 : 750;
+  const scalingWidthThreshold = (isMobile ? 500 : 750) * 0.8; // score.tsx にあわせる
   const scale = Math.min(screenWidth / scalingWidthThreshold, 1);
 
   const prevBpm = useRef<number | undefined>(undefined);
