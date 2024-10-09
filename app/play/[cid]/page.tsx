@@ -70,10 +70,17 @@ export default function Home(context: { params: Params }) {
   }, [cid]);
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isTouch, screenWidth, screenHeight, rem } = useDisplayMode();
+  const { isTouch, screenWidth, screenHeight, rem, playUIScale } =
+    useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  const statusHide = !isMobile && screenHeight < 32 * rem;
-  const statusOverlaps = !isMobile && screenHeight < 40 * rem && !statusHide;
+
+  const statusSpace = useResizeDetector();
+  const statusHide = !isMobile && statusSpace.height === 0;
+  const statusOverlaps =
+    !isMobile &&
+    statusSpace.height &&
+    statusSpace.height < 30 * playUIScale &&
+    !statusHide;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -262,7 +269,7 @@ export default function Home(context: { params: Params }) {
         >
           <div
             className={
-              "z-10 grow-0 shrink-0 p-3 bg-amber-700 rounded-lg flex " +
+              "z-10 grow-0 shrink-0 p-3 bg-amber-600 rounded-lg flex " +
               (isMobile ? "mt-3 mx-3 flex-row-reverse " : "my-3 mr-3 flex-col ")
             }
           >
@@ -293,10 +300,13 @@ export default function Home(context: { params: Params }) {
           {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
             {fps} FPS
           </div>*/}
-          {!isMobile && !statusHide && (
+          {!isMobile && (
             <>
               <StatusBox
-                className="z-10 flex-none m-3 self-end"
+                className={
+                  "z-10 flex-none m-3 self-end " +
+                  (statusHide ? "opacity-0 " : "")
+                }
                 judgeCount={judgeCount}
                 bigCount={bigCount}
                 bigTotal={bigTotal}
@@ -304,7 +314,7 @@ export default function Home(context: { params: Params }) {
                 isMobile={false}
                 isTouch={isTouch}
               />
-              <div className="grow-0 shrink-0 basis-2/12" />
+              <div className="flex-1 basis-0" ref={statusSpace.ref} />
             </>
           )}
         </div>
@@ -350,7 +360,7 @@ export default function Home(context: { params: Params }) {
           className="-z-10 absolute "
           style={{
             bottom: "100%",
-            right: isMobile ? "1rem" : statusOverlaps ? 17 * rem : "1rem",
+            right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
           }}
           num={4}
           getCurrentTimeSec={getCurrentTimeSec}

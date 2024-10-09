@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  defaultNoteCommand,
-  NoteCommand,
-} from "@/chartFormat/command";
+import { defaultNoteCommand, NoteCommand } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
@@ -20,12 +17,7 @@ import Input from "@/common/input";
 import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
-import {
-  Box,
-  CenterBoxOnlyPage,
-  Error,
-  Loading,
-} from "@/common/box";
+import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
@@ -561,7 +553,7 @@ export default function Page(context: { params: Params }) {
           <Header reload>Edit</Header>
           <div
             className={
-              "grow-0 shrink-0 mt-3 p-3 bg-amber-700 rounded-lg flex flex-col items-center "
+              "grow-0 shrink-0 mt-3 p-3 bg-amber-600 rounded-lg flex flex-col items-center "
             }
           >
             <FlexYouTube
