@@ -41,6 +41,7 @@ import {
   luaDeleteNote,
   luaUpdateNote,
 } from "@/chartFormat/lua/note";
+import Select from "@/common/select";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -178,6 +179,11 @@ export default function Page(context: { params: Params }) {
   ]);
 
   const ytPlayer = useRef<YouTubePlayer>();
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const changePlaybackRate = (rate: number) => {
+    ytPlayer.current?.setPlaybackRate(rate);
+  };
+
   // ytPlayerが再生中
   const [playing, setPlaying] = useState<boolean>(false);
   // ytPlayerが準備完了
@@ -566,6 +572,7 @@ export default function Page(context: { params: Params }) {
               onReady={onReady}
               onStart={onStart}
               onStop={onStop}
+              onPlaybackRateChange={setPlaybackRate}
             />
           </div>
           <div
@@ -595,6 +602,12 @@ export default function Page(context: { params: Params }) {
         >
           <div>
             <span>Player Control:</span>
+            <Select
+              options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
+              values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+              value={playbackRate.toString()}
+              onChange={(s: string) => changePlaybackRate(Number(s))}
+            />
             <Button
               onClick={() => {
                 if (ready) {

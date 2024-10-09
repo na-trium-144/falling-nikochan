@@ -14,6 +14,7 @@ interface Props {
   onReady?: () => void;
   onStart?: () => void;
   onStop?: () => void;
+  onPlaybackRateChange?: (rate: number) => void;
   fixedSide: "width" | "height";
 }
 export function FlexYouTube(props: Props) {
@@ -24,6 +25,7 @@ export function FlexYouTube(props: Props) {
     onReady,
     onStart,
     onStop,
+    onPlaybackRateChange,
     fixedSide,
   } = props;
   const { width, height, ref } = useResizeDetector();
@@ -31,6 +33,7 @@ export function FlexYouTube(props: Props) {
   const onReadyRef = useRef<() => void>();
   const onStartRef = useRef<() => void>();
   const onStopRef = useRef<() => void>();
+  const onPlaybackRateChangeRef = useRef<(rate: number) => void>();
   useEffect(() => {
     resizeYouTube.current = () => {
       console.log("resize");
@@ -53,6 +56,7 @@ export function FlexYouTube(props: Props) {
   onReadyRef.current = onReady;
   onStartRef.current = onStart;
   onStopRef.current = onStop;
+  onPlaybackRateChangeRef.current = onPlaybackRateChange;
 
   useEffect(() => {
     if (id) {
@@ -88,6 +92,11 @@ export function FlexYouTube(props: Props) {
                 if (onStopRef.current) {
                   onStopRef.current();
                 }
+              }
+            },
+            onPlaybackRateChange: () => {
+              if (onPlaybackRateChangeRef.current) {
+                onPlaybackRateChangeRef.current(ytPlayer.current?.getPlaybackRate() || 1);
               }
             },
           },
