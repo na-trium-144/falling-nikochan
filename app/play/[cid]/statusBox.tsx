@@ -3,6 +3,12 @@
 import { Box } from "@/common/box";
 import { Key } from "@/common/key";
 import { useDisplayMode } from "@/scale";
+import {
+  DisappointedFace,
+  DistraughtFace,
+  GrinningFaceWithSquintingEyes,
+  SmilingFace,
+} from "@icon-park/react";
 import { ReactNode } from "react";
 
 interface Props {
@@ -42,7 +48,10 @@ export default function StatusBox(props: Props) {
       >
         {["Good", "OK", "Bad", "Miss"].map((name, ji) => (
           <StatusItem key={ji}>
-            <StatusName>{name}</StatusName>
+            <StatusName>
+              <StatusIcon index={ji} />
+              {name}
+            </StatusName>
             <StatusValue>{props.judgeCount[ji]}</StatusValue>
           </StatusItem>
         ))}
@@ -102,6 +111,26 @@ function StatusItem(props: { wide?: boolean; children: ReactNode[] }) {
     >
       {props.children}
     </div>
+  );
+}
+function StatusIcon(props: { index: number }) {
+  return (
+    <span
+      className="inline-block relative "
+      style={{ width: "1.25em", fontSize: "1.25em" }}
+    >
+      <span className="absolute bottom-0 left-0 translate-y-0.5 ">
+        {props.index === 0 ? (
+          <GrinningFaceWithSquintingEyes />
+        ) : props.index === 1 ? (
+          <SmilingFace />
+        ) : props.index === 2 ? (
+          <DisappointedFace />
+        ) : (
+          <DistraughtFace />
+        )}
+      </span>
+    </span>
   );
 }
 function StatusName(props: { children: ReactNode }) {
