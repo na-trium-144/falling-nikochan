@@ -608,7 +608,7 @@ export default function Page(context: { params: Params }) {
               notes={notesAll}
               currentTimeSec={currentTimeSec || 0}
               currentNoteIndex={currentNoteIndex}
-              chart={chart}
+              currentLevel={currentLevel}
               updateNote={updateNote}
               dragMode={dragMode}
             />
