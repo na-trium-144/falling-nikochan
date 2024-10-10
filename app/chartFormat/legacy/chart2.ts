@@ -5,6 +5,7 @@ import { luaAddNote } from "../lua/note";
 import { luaAddSpeedChange } from "../lua/speed";
 import { findBpmIndexFromStep, getTimeSec } from "../seq";
 import { Step, stepZero } from "../step";
+import { Chart3 } from "./chart3";
 
 export interface Chart2 {
   falling: "nikochan"; // magic
@@ -28,7 +29,7 @@ export interface NoteCommand2 {
   accelY: number;
 }
 
-export function convert2To3(chart: Chart2): Chart {
+export function convert2To3(chart: Chart2): Chart3 {
   let newChart: Chart = {
     falling: "nikochan",
     ver: 3,

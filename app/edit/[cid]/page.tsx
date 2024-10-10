@@ -21,7 +21,7 @@ import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
-import { Chart, emptyChart, hashPasswd } from "@/chartFormat/chart";
+import { Chart, emptyChart, hashPasswd, Level } from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
@@ -124,6 +124,16 @@ export default function Page(context: { params: Params }) {
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [hasChange]);
 
+  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
+  const currentLevel = chart?.levels.at(currentLevelIndex);
+  const changeLevel = (newLevel: Level | null) => {
+    if (chart && newLevel) {
+      const newChart: Chart = { ...chart };
+      newChart.levels[currentLevelIndex] = newLevel;
+      changeChart(newChart);
+    }
+  };
+
   const ref = useRef<HTMLDivElement>(null!);
 
   // 現在時刻 offsetを引く前
@@ -141,27 +151,34 @@ export default function Page(context: { params: Params }) {
   // 現在選択中の音符 (currentStepSnappedに一致)
   const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(-1);
   const hasCurrentNote =
-    currentNoteIndex >= 0 && chart?.notes[currentNoteIndex] !== undefined;
+    currentNoteIndex >= 0 &&
+    currentLevel?.notes.at(currentNoteIndex) !== undefined;
 
   // currentTimeが変わったときcurrentStepを更新
   const prevTimeSec = useRef<number>(-1);
   useEffect(() => {
-    if (chart && currentTimeSec !== prevTimeSec.current) {
-      const step = getStep(chart.bpmChanges, currentTimeSec, snapDivider);
+    if (currentLevel && currentTimeSec !== prevTimeSec.current) {
+      const step = getStep(
+        currentLevel.bpmChanges,
+        currentTimeSec,
+        snapDivider
+      );
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
       }
       if (
         !hasCurrentNote ||
-        stepCmp(chart.notes[currentNoteIndex].step, step) != 0
+        stepCmp(currentLevel.notes[currentNoteIndex].step, step) != 0
       ) {
         let noteIndex: number;
         if (currentTimeSec < prevTimeSec.current) {
-          noteIndex = chart.notes.findLastIndex(
+          noteIndex = currentLevel.notes.findLastIndex(
             (n) => stepCmp(n.step, step) == 0
           );
         } else {
-          noteIndex = chart.notes.findIndex((n) => stepCmp(n.step, step) == 0);
+          noteIndex = currentLevel.notes.findIndex(
+            (n) => stepCmp(n.step, step) == 0
+          );
         }
         if (currentNoteIndex !== noteIndex) {
           setCurrentNoteIndex(noteIndex);
@@ -170,7 +187,7 @@ export default function Page(context: { params: Params }) {
     }
     prevTimeSec.current = currentTimeSec;
   }, [
-    chart,
+    currentLevel,
     snapDivider,
     currentTimeSec,
     currentStep,
@@ -217,11 +234,12 @@ export default function Page(context: { params: Params }) {
     }
   };
   const seekRight1 = () => {
-    if (chart) {
+    if (currentLevel) {
       if (
         hasCurrentNote &&
-        chart.notes[currentNoteIndex + 1] &&
-        stepCmp(currentStep, chart.notes[currentNoteIndex + 1].step) === 0
+        currentLevel.notes[currentNoteIndex + 1] &&
+        stepCmp(currentStep, currentLevel.notes[currentNoteIndex + 1].step) ===
+          0
       ) {
         setCurrentNoteIndex(currentNoteIndex + 1);
       } else {
@@ -234,8 +252,9 @@ export default function Page(context: { params: Params }) {
     if (chart) {
       if (
         hasCurrentNote &&
-        chart.notes[currentNoteIndex - 1] &&
-        stepCmp(currentStep, chart.notes[currentNoteIndex - 1].step) === 0
+        currentLevel.notes[currentNoteIndex - 1] &&
+        stepCmp(currentStep, currentLevel.notes[currentNoteIndex - 1].step) ===
+          0
       ) {
         setCurrentNoteIndex(currentNoteIndex - 1);
       } else {
@@ -253,12 +272,12 @@ export default function Page(context: { params: Params }) {
     seekStepAbs(newStep);
   };
   const seekStepAbs = (newStep: Step, focus = true) => {
-    if (chart) {
+    if (chart && currentLevel) {
       if (stepCmp(newStep, stepZero()) < 0) {
         newStep = stepZero();
       }
       changeCurrentTimeSec(
-        getTimeSec(chart.bpmChanges, newStep) + chart.offset,
+        getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
         focus
       );
     }
@@ -279,9 +298,9 @@ export default function Page(context: { params: Params }) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
     if (chart) {
-      setNotesAll(loadChart(chart).notes);
+      setNotesAll(loadChart(chart, currentLevelIndex).notes);
     }
-  }, [chart]);
+  }, [chart, currentLevelIndex]);
 
   const [tab, setTab] = useState<number>(0);
 
@@ -293,14 +312,16 @@ export default function Page(context: { params: Params }) {
     }
   };
   const currentBpmIndex =
-    chart && findBpmIndexFromStep(chart?.bpmChanges, currentStep);
+    currentLevel && findBpmIndexFromStep(currentLevel.bpmChanges, currentStep);
   const currentBpm =
-    chart && chart.bpmChanges.length > 0 && currentBpmIndex !== undefined
-      ? chart.bpmChanges[currentBpmIndex].bpm
+    currentLevel &&
+    currentLevel.bpmChanges.length > 0 &&
+    currentBpmIndex !== undefined
+      ? currentLevel.bpmChanges[currentBpmIndex].bpm
       : 120;
   const changeBpm = (bpm: number) => {
-    if (chart && currentBpmIndex !== undefined) {
-      if (chart.bpmChanges.length === 0) {
+    if (currentLevel && currentBpmIndex !== undefined) {
+      if (currentLevel.bpmChanges.length === 0) {
         throw "bpmChanges empty";
         // chart.bpmChanges.push({
         //   step: stepZero(),
@@ -308,51 +329,49 @@ export default function Page(context: { params: Params }) {
         //   timeSec: 0,
         // });
       } else {
-        const newChart = luaUpdateBpmChange(chart, currentBpmIndex, bpm);
-        if (newChart !== null) {
-          changeChart({ ...newChart });
-        }
+        const newLevel = luaUpdateBpmChange(currentLevel, currentBpmIndex, bpm);
+        changeLevel(newLevel);
       }
     }
   };
   const bpmChangeHere =
-    chart &&
+    currentLevel &&
     currentBpmIndex !== undefined &&
-    chart.bpmChanges.length > 0 &&
-    stepCmp(chart.bpmChanges[currentBpmIndex].step, currentStep) === 0;
+    currentLevel.bpmChanges.length > 0 &&
+    stepCmp(currentLevel.bpmChanges[currentBpmIndex].step, currentStep) === 0;
   const toggleBpmChangeHere = () => {
     if (
       chart &&
+      currentLevel &&
       currentBpmIndex !== undefined &&
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (bpmChangeHere) {
-        const newChart = luaDeleteBpmChange(chart, currentBpmIndex);
-        if (newChart !== null) {
-          changeChart({ ...newChart });
-        }
+        const newLevel = luaDeleteBpmChange(currentLevel, currentBpmIndex);
+        changeLevel(newLevel);
       } else {
-        const newChart = luaAddBpmChange(chart, {
+        const newLevel = luaAddBpmChange(currentLevel, {
           step: currentStep,
           bpm: currentBpm,
           timeSec: currentTimeSec,
         });
-        if (newChart !== null) {
-          changeChart({ ...newChart });
-        }
+        changeLevel(newLevel);
       }
     }
   };
 
   const currentSpeedIndex =
-    chart && findBpmIndexFromStep(chart?.speedChanges, currentStep);
+    currentLevel &&
+    findBpmIndexFromStep(currentLevel.speedChanges, currentStep);
   const currentSpeed =
-    chart && chart.speedChanges.length > 0 && currentSpeedIndex !== undefined
-      ? chart.speedChanges[currentSpeedIndex].bpm
+    currentLevel &&
+    currentLevel.speedChanges.length > 0 &&
+    currentSpeedIndex !== undefined
+      ? currentLevel.speedChanges[currentSpeedIndex].bpm
       : 120;
   const changeSpeed = (bpm: number) => {
-    if (chart && currentSpeedIndex !== undefined) {
-      if (chart.speedChanges.length === 0) {
+    if (chart && currentLevel && currentSpeedIndex !== undefined) {
+      if (currentLevel.speedChanges.length === 0) {
         throw "speedChanges empty";
         // chart.speedChanges.push({
         //   step: stepZero(),
@@ -360,73 +379,71 @@ export default function Page(context: { params: Params }) {
         //   timeSec: 0,
         // });
       } else {
-        const newChart = luaUpdateSpeedChange(chart, currentSpeedIndex, bpm);
-        if (newChart) {
-          changeChart({ ...newChart });
-        }
+        const newLevel = luaUpdateSpeedChange(
+          currentLevel,
+          currentSpeedIndex,
+          bpm
+        );
+        changeLevel(newLevel);
       }
     }
   };
   const speedChangeHere =
-    chart &&
+    currentLevel &&
     currentSpeedIndex !== undefined &&
-    chart.speedChanges.length > 0 &&
-    stepCmp(chart.speedChanges[currentSpeedIndex].step, currentStep) === 0;
+    currentLevel.speedChanges.length > 0 &&
+    stepCmp(currentLevel.speedChanges[currentSpeedIndex].step, currentStep) ===
+      0;
   const toggleSpeedChangeHere = () => {
     if (
       chart &&
+      currentLevel &&
       currentSpeedIndex !== undefined &&
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (speedChangeHere) {
-        const newChart = luaDeleteSpeedChange(chart, currentSpeedIndex);
-        if (newChart) {
-          changeChart({ ...newChart });
-        }
+        const newLevel = luaDeleteSpeedChange(currentLevel, currentSpeedIndex);
+        changeLevel(newLevel);
       } else {
-        const newChart = luaAddSpeedChange(chart, {
+        const newLevel = luaAddSpeedChange(currentLevel, {
           step: currentStep,
           bpm: currentSpeed,
           timeSec: currentTimeSec,
         });
-        if (newChart) {
-          changeChart({ ...newChart });
-        }
+        changeLevel(newLevel);
       }
     }
   };
 
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
-    if (chart && n) {
-      const chartCopied = { ...chart };
-      const newChart = luaAddNote(chartCopied, n, currentStep);
-      if (newChart !== null) {
-        changeChart(newChart);
+    if (chart && currentLevel && n) {
+      const levelCopied = { ...currentLevel };
+      const newLevel = luaAddNote(levelCopied, n, currentStep);
+      if (newLevel !== null) {
         // 追加したnoteは同じ時刻の音符の中でも最後
         setCurrentNoteIndex(
-          chart.notes.findLastIndex((n) => stepCmp(n.step, currentStep) == 0)
+          currentLevel.notes.findLastIndex(
+            (n) => stepCmp(n.step, currentStep) == 0
+          )
         );
+        changeLevel(newLevel);
       }
     }
     ref.current.focus();
   };
   const deleteNote = () => {
-    if (chart && hasCurrentNote) {
-      const chartCopied = { ...chart };
-      const newChart = luaDeleteNote(chartCopied, currentNoteIndex);
-      if (newChart !== null) {
-        changeChart(newChart);
-      }
+    if (chart && currentLevel && hasCurrentNote) {
+      const levelCopied = { ...currentLevel };
+      const newLevel = luaDeleteNote(levelCopied, currentNoteIndex);
+      changeLevel(newLevel);
     }
     ref.current.focus();
   };
   const updateNote = (n: NoteCommand) => {
-    if (chart && hasCurrentNote) {
-      const chartCopied = { ...chart };
-      const newChart = luaUpdateNote(chartCopied, currentNoteIndex, n);
-      if (newChart !== null) {
-        changeChart(newChart);
-      }
+    if (chart && currentLevel && hasCurrentNote) {
+      const levelCopied = { ...currentLevel };
+      const newLevel = luaUpdateNote(levelCopied, currentNoteIndex, n);
+      changeLevel(newLevel);
     }
     // ref.current.focus();
   };
@@ -436,9 +453,9 @@ export default function Page(context: { params: Params }) {
     )
   );
   const copyNote = (copyIndex: number) => {
-    if (chart && hasCurrentNote) {
+    if (chart && currentLevel && hasCurrentNote) {
       const newCopyBuf = copyBuf.slice();
-      newCopyBuf[copyIndex] = chart.notes[currentNoteIndex];
+      newCopyBuf[copyIndex] = currentLevel.notes[currentNoteIndex];
       setCopyBuf(newCopyBuf);
     }
     ref.current.focus();
@@ -528,8 +545,11 @@ export default function Page(context: { params: Params }) {
           } else if (e.key === "n") {
             pasteNote(0, true);
           } else if (e.key === "b") {
-            if (currentNoteIndex >= 0 && chart.notes[currentNoteIndex]) {
-              const n = chart.notes[currentNoteIndex];
+            if (
+              currentNoteIndex >= 0 &&
+              currentLevel?.notes[currentNoteIndex]
+            ) {
+              const n = currentLevel.notes[currentNoteIndex];
               updateNote({ ...n, big: !n.big });
             }
           } else if (e.key === "Shift") {
@@ -734,7 +754,7 @@ export default function Page(context: { params: Params }) {
                 setOffset={changeOffset}
                 prevBpm={
                   currentBpmIndex !== undefined && currentBpmIndex >= 1
-                    ? chart.bpmChanges[currentBpmIndex - 1].bpm
+                    ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
                     : undefined
                 }
                 currentBpm={
@@ -745,7 +765,7 @@ export default function Page(context: { params: Params }) {
                 toggleBpmChangeHere={toggleBpmChangeHere}
                 prevSpeed={
                   currentSpeedIndex !== undefined && currentSpeedIndex >= 1
-                    ? chart.speedChanges[currentSpeedIndex - 1].bpm
+                    ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
                     : undefined
                 }
                 currentSpeed={

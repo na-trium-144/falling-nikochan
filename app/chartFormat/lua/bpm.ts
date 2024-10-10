@@ -1,4 +1,4 @@
-import { Chart } from "../chart";
+import { Level } from "../chart";
 import { BPMChange, updateBpmTimeSec } from "../command";
 import { stepCmp } from "../step";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
@@ -6,7 +6,7 @@ import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
 function bpmLuaCommand(bpm: number) {
   return `BPM(${bpm})`;
 }
-export function luaAddBpmChange(chart: Chart, change: BPMChange) {
+export function luaAddBpmChange(chart: Level, change: BPMChange) {
   const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
     return null;
@@ -17,7 +17,7 @@ export function luaAddBpmChange(chart: Chart, change: BPMChange) {
   chart.bpmChanges = chart.bpmChanges.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }
-export function luaUpdateBpmChange(chart: Chart, index: number, bpm: number) {
+export function luaUpdateBpmChange(chart: Level, index: number, bpm: number) {
   if (chart.bpmChanges[index].luaLine === null) {
     return null;
   }
@@ -26,7 +26,7 @@ export function luaUpdateBpmChange(chart: Chart, index: number, bpm: number) {
   updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   return chart;
 }
-export function luaDeleteBpmChange(chart: Chart, index: number) {
+export function luaDeleteBpmChange(chart: Level, index: number) {
   if (chart.bpmChanges[index].luaLine === null) {
     return null;
   }
