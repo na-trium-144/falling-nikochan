@@ -1,16 +1,14 @@
-import { CloseSmall, HamburgerButton } from "@icon-park/react";
 import Link from "next/link";
-import { ReactNode, useState } from "react";
-import { Box } from "./box";
-import { tabTitles, tabURLs } from "@/main/main";
+import { ReactNode } from "react";
 
 interface Props {
+  className?: string;
   children: ReactNode | ReactNode[];
   reload?: boolean;
 }
 export default function Header(props: Props) {
   return (
-    <div className="p-3 pb-0 w-full ">
+    <div className={"p-3 pb-0 w-full " + props.className}>
       {props.reload ? (
         <a href="/" className="text-xl hover:text-slate-500 ">
           FallingNikochan

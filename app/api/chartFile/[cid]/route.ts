@@ -6,6 +6,7 @@ import msgpack from "@ygoe/msgpack";
 import {
   Chart,
   chartMaxSize,
+  createBrief,
   hashPasswd,
   validateChart,
 } from "@/chartFormat/chart";
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     );
   }
 
-  await updateFileEntry(cid, newChart);
+  await updateFileEntry(cid, createBrief(newChart));
   if (
     !(await fsWrite(fileEntry.fid, new Blob([msgpack.serialize(newChart)])))
   ) {

@@ -20,6 +20,18 @@ model ChartFile {
   title String @default("")
   composer String @default("")
   chartCreator String @default("")
+  levels LevelBrief[]
+}
+model LevelBrief {
+  id Int @id @default(autoincrement())
+  chart ChartFile @relation(fields: [cid], references: [cid])
+  cid String
+  name String
+  type String
+  difficulty Int
+  noteCount Int
+  bpmMin Int
+  bpmMax Int
 }
 
 model CreateRateLimit {

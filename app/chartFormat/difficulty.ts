@@ -5,7 +5,7 @@ import {
   goodSec,
   okBaseScore,
   okSec,
-} from "@/play/[cid]/gameLogic";
+} from "@/common/gameConstant";
 import { Level } from "./chart";
 import { getTimeSec } from "./seq";
 

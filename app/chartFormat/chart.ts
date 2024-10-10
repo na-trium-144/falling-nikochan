@@ -7,6 +7,7 @@ import {
   validateNoteCommand,
   validateRestStep,
 } from "./command";
+import { difficulty } from "./difficulty";
 import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
@@ -19,6 +20,14 @@ export interface ChartBrief {
   title: string;
   composer: string;
   chartCreator: string;
+  levels: {
+    name: string;
+    type: string;
+    difficulty: number;
+    noteCount: number;
+    bpmMin: number;
+    bpmMax: number;
+  }[];
 }
 
 /**
@@ -62,7 +71,7 @@ export const levelColors = [
   "text-pink-700 ",
 ];
 
-export const chartMaxSize = 100000;
+export const chartMaxSize = 1000000;
 
 export function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Chart {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
@@ -146,4 +155,22 @@ export function emptyLevel(prevLevel?: Level): Level {
     })!;
   }
   return level;
+}
+
+export function createBrief(chart: Chart) {
+  const levelBrief = chart.levels.map((level) => ({
+    name: level.name,
+    type: level.type,
+    noteCount: level.notes.length,
+    difficulty: difficulty(level, level.type),
+    bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
+    bpmMax: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.max(a, b)),
+  }));
+  return {
+    ytId: chart.ytId,
+    title: chart.title,
+    composer: chart.composer,
+    chartCreator: chart.chartCreator,
+    levels: levelBrief,
+  } as ChartBrief;
 }

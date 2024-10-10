@@ -94,7 +94,11 @@ export default function LevelTab(props: Props) {
                 {i === props.currentLevelIndex && <RightOne theme="filled" />}
               </span>
               <span className="inline-block w-4 mr-2 text-right">{i + 1}.</span>
-              <span className="inline-block mr-2 font-title">{level.name}</span>
+              {level.name && (
+                <span className="inline-block mr-2 font-title">
+                  {level.name}
+                </span>
+              )}
               <span
                 className={
                   "inline-block mr-2 " +
