@@ -684,6 +684,7 @@ export default function Page(context: { params: Params }) {
               currentNoteIndex={currentNoteIndex}
               currentStep={currentStep}
               chart={chart}
+              currentLevel={currentLevel}
               notesAll={notesAll}
               snapDivider={snapDivider}
               ytId={chart.ytId}
@@ -786,12 +787,12 @@ export default function Page(context: { params: Params }) {
                 pasteNote={pasteNote}
                 hasCopyBuf={copyBuf.map((n) => n !== null)}
                 currentStep={currentStep}
-                chart={chart}
+                currentLevel={currentLevel}
               />
             ) : (
               <LuaTab
-                chart={chart}
-                changeChart={changeChart}
+                currentLevel={currentLevel}
+                changeLevel={changeLevel}
                 seekStepAbs={(s: Step) => seekStepAbs(s, false)}
               />
             )}

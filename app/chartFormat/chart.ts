@@ -47,7 +47,6 @@ export interface Chart {
   editPasswd: string;
 }
 export interface Level {
-  lvId: number;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
@@ -63,25 +62,30 @@ export function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Chart {
   if (chart.ver === 2) chart = convert2To3(chart);
   if (chart.ver === 3) chart = convert3To4(chart);
   if (chart.ver !== 4) throw "chart.ver is invalid";
-  // if (!Array.isArray(chart.notes)) throw "chart.notes is invalid";
-  // chart.notes.forEach((n) => validateNoteCommand(n));
-  // if (!Array.isArray(chart.rest)) throw "chart.rest is invalid";
-  // chart.rest.forEach((n) => validateRestStep(n));
-  // if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
-  // chart.bpmChanges.forEach((n) => validateBpmChange(n));
-  // if (!Array.isArray(chart.speedChanges)) throw "chart.speedChanges is invalid";
-  // chart.speedChanges.forEach((n) => validateBpmChange(n));
-  // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
+  if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
+  chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
-  // if (!Array.isArray(chart.lua)) throw "chart.lua is invalid";
-  // if (chart.lua.filter((l) => typeof l !== "string").length > 0)
-    // throw "chart.lua is invalid";
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
   return chart;
+}
+export function validateLevel(level: Level): Level {
+  if (!Array.isArray(level.notes)) throw "level.notes is invalid";
+  level.notes.forEach((n) => validateNoteCommand(n));
+  if (!Array.isArray(level.rest)) throw "level.rest is invalid";
+  level.rest.forEach((n) => validateRestStep(n));
+  if (!Array.isArray(level.bpmChanges)) throw "level.bpmChanges is invalid";
+  level.bpmChanges.forEach((n) => validateBpmChange(n));
+  if (!Array.isArray(level.speedChanges)) throw "level.speedChanges is invalid";
+  level.speedChanges.forEach((n) => validateBpmChange(n));
+  updateBpmTimeSec(level.bpmChanges, level.speedChanges);
+  if (!Array.isArray(level.lua)) throw "level.lua is invalid";
+  if (level.lua.filter((l) => typeof l !== "string").length > 0)
+    throw "level.lua is invalid";
+  return level;
 }
 
 export async function hashPasswd(text: string) {
@@ -111,4 +115,16 @@ export function emptyChart(): Chart {
     editPasswd: "",
   };
   return chart;
+}
+export function emptyLevel(): Level {
+  let level: Level = {
+    notes: [],
+    rest: [],
+    bpmChanges: [],
+    speedChanges: [],
+    lua: [],
+  };
+  level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+  level = luaAddSpeedChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+  return level;
 }
