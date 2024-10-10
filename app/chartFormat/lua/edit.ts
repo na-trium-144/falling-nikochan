@@ -1,7 +1,7 @@
-import { Chart } from "../chart";
+import { Level } from "../chart";
 import { Step, stepAdd, stepCmp, stepSimplify, stepSub, stepZero } from "../step";
 
-export function findStepFromLua(chart: Chart, line: number): Step | null {
+export function findStepFromLua(chart: Level, line: number): Step | null {
   for (const n of chart.notes) {
     if (n.luaLine === line) {
       return n.step;
@@ -26,7 +26,7 @@ export function findStepFromLua(chart: Chart, line: number): Step | null {
 }
 
 // コマンドを挿入
-export function insertLua(chart: Chart, line: number, content: string) {
+export function insertLua(chart: Level, line: number, content: string) {
   chart.lua = chart.lua
     .slice(0, line)
     .concat([content])
@@ -54,14 +54,14 @@ export function insertLua(chart: Chart, line: number, content: string) {
   });
 }
 // コマンドを置き換え
-export function replaceLua(chart: Chart, line: number, content: string) {
+export function replaceLua(chart: Level, line: number, content: string) {
   chart.lua = chart.lua
     .slice(0, line)
     .concat([content])
     .concat(chart.lua.slice(line + 1));
 }
 // コマンドを削除
-export function deleteLua(chart: Chart, line: number) {
+export function deleteLua(chart: Level, line: number) {
   chart.lua = chart.lua.slice(0, line).concat(chart.lua.slice(line + 1));
   // 以降の行番号がすべて1ずれる
   chart.notes.forEach((n) => {
@@ -102,9 +102,9 @@ function stepLuaCommand(s: Step) {
 // 既存のStepコマンドを分割する必要がある場合は分割し、
 // Stepコマンドを追加する必要がある場合は追加する。
 export function findInsertLine(
-  chart: Chart,
+  chart: Level,
   step: Step
-): { chart: Chart; luaLine: number | null } {
+): { chart: Level; luaLine: number | null } {
   for (let ri = 0; ri < chart.rest.length; ri++) {
     const rest = chart.rest[ri];
     if (stepCmp(rest.begin, step) === 0) {

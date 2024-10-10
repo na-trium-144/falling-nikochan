@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { stepNStr, timeSecStr, timeStr } from "./str";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
-import { Chart } from "@/chartFormat/chart";
+import { Chart, Level } from "@/chartFormat/chart";
 import { useDisplayMode } from "@/scale";
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
   currentNoteIndex: number;
   currentStep: Step;
   chart?: Chart;
+  currentLevel?: Level;
   notesAll: Note[];
   snapDivider: number;
   ytId: string;
@@ -28,6 +29,7 @@ export default function TimeBar(props: Props) {
     currentTimeSecWithoutOffset,
     currentNoteIndex,
     chart,
+    currentLevel,
     notesAll,
     snapDivider,
     timeBarPxPerSec,
@@ -66,10 +68,10 @@ export default function TimeBar(props: Props) {
       const timeBarBeginSec =
         currentTimeSecWithoutOffset - marginPxLeft / timeBarPxPerSec;
       setTimeBarBeginSec(timeBarBeginSec);
-      if (chart) {
+      if (chart && currentLevel) {
         setTimeBarBeginStep(
           getStep(
-            chart?.bpmChanges,
+            currentLevel.bpmChanges,
             timeBarBeginSec - chart.offset,
             snapDivider
           )
@@ -83,10 +85,10 @@ export default function TimeBar(props: Props) {
         currentTimeSecWithoutOffset -
         (timeBarWidth - marginPxRight) / timeBarPxPerSec;
       setTimeBarBeginSec(timeBarBeginSec);
-      if (chart) {
+      if (chart && currentLevel) {
         setTimeBarBeginStep(
           getStep(
-            chart?.bpmChanges,
+            currentLevel.bpmChanges,
             timeBarBeginSec - chart.offset,
             snapDivider
           )
@@ -105,10 +107,10 @@ export default function TimeBar(props: Props) {
 
   // timebarに表示するstep目盛りのリスト
   const timeBarSteps: { step: Step; timeSec: number }[] = [];
-  if (chart) {
+  if (chart && currentLevel) {
     timeBarSteps.push({
       step: timeBarBeginStep,
-      timeSec: getTimeSec(chart.bpmChanges, timeBarBeginStep),
+      timeSec: getTimeSec(currentLevel.bpmChanges, timeBarBeginStep),
     });
     while (true) {
       const s = stepAdd(timeBarSteps[timeBarSteps.length - 1].step, {
@@ -116,7 +118,7 @@ export default function TimeBar(props: Props) {
         numerator: 1,
         denominator: snapDivider,
       });
-      const t = getTimeSec(chart.bpmChanges, s) + chart.offset;
+      const t = getTimeSec(currentLevel.bpmChanges, s) + chart.offset;
       if (t - timeBarBeginSec < timeBarWidth / timeBarPxPerSec) {
         timeBarSteps.push({ step: s, timeSec: t });
       } else {
@@ -126,12 +128,12 @@ export default function TimeBar(props: Props) {
   }
 
   const beginBpmIndex =
-    chart && stepCmp(timeBarBeginStep, stepZero()) > 0
-      ? findBpmIndexFromStep(chart?.bpmChanges, timeBarBeginStep)
+    currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(currentLevel.bpmChanges, timeBarBeginStep)
       : undefined;
   const beginSpeedIndex =
-    chart && stepCmp(timeBarBeginStep, stepZero()) > 0
-      ? findBpmIndexFromStep(chart?.speedChanges, timeBarBeginStep)
+    currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(currentLevel.speedChanges, timeBarBeginStep)
       : undefined;
 
   return (
@@ -176,50 +178,54 @@ export default function TimeBar(props: Props) {
       <div className="absolute" style={{ bottom: -2.5 * rem, left: 0 }}>
         <span className="mr-1">BPM:</span>
         {beginBpmIndex !== undefined && (
-          <span>{chart?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
+          <span>{currentLevel?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
         )}
       </div>
-      {chart?.bpmChanges.map(
-        (ch, i) =>
-          ch.timeSec + chart.offset >= timeBarBeginSec &&
-          ch.timeSec + chart.offset <
-            timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
-            <span
-              key={i}
-              className="absolute "
-              style={{
-                bottom: -2.5 * rem,
-                left: timeBarPos(ch.timeSec + chart.offset),
-              }}
-            >
-              <span className="absolute bottom-0">{ch.bpm}</span>
-            </span>
-          )
-      )}
+      {chart &&
+        currentLevel?.bpmChanges.map(
+          (ch, i) =>
+            ch.timeSec + chart.offset >= timeBarBeginSec &&
+            ch.timeSec + chart.offset <
+              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+              <span
+                key={i}
+                className="absolute "
+                style={{
+                  bottom: -2.5 * rem,
+                  left: timeBarPos(ch.timeSec + chart.offset),
+                }}
+              >
+                <span className="absolute bottom-0">{ch.bpm}</span>
+              </span>
+            )
+        )}
       {/* speed変化 */}
       <div className="absolute" style={{ bottom: -3.75 * rem, left: 0 }}>
         <span className="mr-1">Speed:</span>
         {beginSpeedIndex !== undefined && (
-          <span>{chart?.speedChanges[beginSpeedIndex]?.bpm.toString()}</span>
+          <span>
+            {currentLevel?.speedChanges[beginSpeedIndex]?.bpm.toString()}
+          </span>
         )}
       </div>
-      {chart?.speedChanges.map(
-        (ch, i) =>
-          ch.timeSec + chart.offset >= timeBarBeginSec &&
-          ch.timeSec + chart.offset <
-            timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
-            <span
-              key={i}
-              className="absolute "
-              style={{
-                bottom: -3.75 * rem,
-                left: timeBarPos(ch.timeSec + chart.offset),
-              }}
-            >
-              <span className="absolute bottom-0">{ch.bpm}</span>
-            </span>
-          )
-      )}
+      {chart &&
+        currentLevel?.speedChanges.map(
+          (ch, i) =>
+            ch.timeSec + chart.offset >= timeBarBeginSec &&
+            ch.timeSec + chart.offset <
+              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+              <span
+                key={i}
+                className="absolute "
+                style={{
+                  bottom: -3.75 * rem,
+                  left: timeBarPos(ch.timeSec + chart.offset),
+                }}
+              >
+                <span className="absolute bottom-0">{ch.bpm}</span>
+              </span>
+            )
+        )}
       {/* 現在位置カーソル */}
       <div
         className="absolute border-l border-amber-400 shadow shadow-yellow-400"

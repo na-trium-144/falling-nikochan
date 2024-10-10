@@ -12,13 +12,13 @@ import { useResizeDetector } from "react-resize-detector";
 import { NoteCommand } from "@/chartFormat/command";
 import Arrow from "./arrow";
 import DragHandle from "./dragHandle";
-import { Chart } from "@/chartFormat/chart";
+import { Chart, Level } from "@/chartFormat/chart";
 
 interface Props {
   className?: string;
   style?: object;
   notes: Note[];
-  chart?: Chart;
+  currentLevel?: Level;
   currentTimeSec: number;
   currentNoteIndex: number;
   updateNote: (n: NoteCommand) => void;
@@ -26,7 +26,8 @@ interface Props {
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, chart, currentTimeSec, currentNoteIndex, dragMode } = props;
+  const { notes, currentLevel, currentTimeSec, currentNoteIndex, dragMode } =
+    props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -161,9 +162,9 @@ export default function FallingWindow(props: Props) {
               </>
             )
         )}
-        {chart &&
+        {currentLevel &&
           currentNoteIndex >= 0 &&
-          chart.notes[currentNoteIndex] &&
+          currentLevel.notes[currentNoteIndex] &&
           boxSize &&
           marginX !== undefined &&
           marginY !== undefined && (
@@ -173,7 +174,7 @@ export default function FallingWindow(props: Props) {
                 <>
                   <Arrow
                     left={
-                      ((chart.notes[currentNoteIndex].hitX + 5) / 10) *
+                      ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
                         boxSize +
                       marginX -
                       (0.12 + noteSize / 2) * boxSize
@@ -185,7 +186,7 @@ export default function FallingWindow(props: Props) {
                   />
                   <Arrow
                     left={
-                      ((chart.notes[currentNoteIndex].hitX + 5) / 10) *
+                      ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
                         boxSize +
                       marginX +
                       (0.12 + noteSize / 2) * boxSize
@@ -203,7 +204,7 @@ export default function FallingWindow(props: Props) {
                         ref.current.getBoundingClientRect().bottom;
                       // cx-winLeft, winBottom-cy が divのabsolute基準からマウスカーソル位置までの相対位置になる
                       props.updateNote({
-                        ...chart.notes[currentNoteIndex],
+                        ...currentLevel.notes[currentNoteIndex],
                         hitX: Math.round(
                           ((cx - winLeft - marginX) * 10) / boxSize - 5
                         ),
@@ -217,15 +218,21 @@ export default function FallingWindow(props: Props) {
                   {/* vx,vyを動かす矢印 */}
                   <Arrow
                     left={
-                      ((chart.notes[currentNoteIndex].hitX + 5) / 10) *
+                      ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
                         boxSize +
                       marginX
                     }
                     bottom={targetY * boxSize + marginY}
                     length={
                       (Math.sqrt(
-                        Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
-                          Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
+                        Math.pow(
+                          currentLevel.notes[currentNoteIndex].hitVX,
+                          2
+                        ) +
+                          Math.pow(
+                            currentLevel.notes[currentNoteIndex].hitVY,
+                            2
+                          )
                       ) *
                         boxSize) /
                       4
@@ -233,8 +240,8 @@ export default function FallingWindow(props: Props) {
                     lineWidth={12}
                     rotation={
                       -Math.atan2(
-                        chart.notes[currentNoteIndex].hitVY,
-                        chart.notes[currentNoteIndex].hitVX
+                        currentLevel.notes[currentNoteIndex].hitVY,
+                        currentLevel.notes[currentNoteIndex].hitVX
                       )
                     }
                   />
@@ -245,7 +252,7 @@ export default function FallingWindow(props: Props) {
                       const winBottom =
                         ref.current.getBoundingClientRect().bottom;
                       const originLeft =
-                        ((chart.notes[currentNoteIndex].hitX + 5) / 10) *
+                        ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
                           boxSize +
                         marginX;
                       const originBottom = targetY * boxSize + marginY - 16;
@@ -258,12 +265,21 @@ export default function FallingWindow(props: Props) {
                         Math.pow(mouseVX, 2) + Math.pow(mouseVY, 2)
                       );
                       const hitVDist = Math.sqrt(
-                        Math.pow(chart.notes[currentNoteIndex].hitVX, 2) +
-                          Math.pow(chart.notes[currentNoteIndex].hitVY, 2)
+                        Math.pow(
+                          currentLevel.notes[currentNoteIndex].hitVX,
+                          2
+                        ) +
+                          Math.pow(
+                            currentLevel.notes[currentNoteIndex].hitVY,
+                            2
+                          )
                       );
-                      console.log(mouseVY, chart.notes[currentNoteIndex].hitVY);
+                      console.log(
+                        mouseVY,
+                        currentLevel.notes[currentNoteIndex].hitVY
+                      );
                       props.updateNote({
-                        ...chart.notes[currentNoteIndex],
+                        ...currentLevel.notes[currentNoteIndex],
                         hitVX: Math.round(mouseVX * 4),
                         hitVY: Math.round(mouseVY * 4),
                       });

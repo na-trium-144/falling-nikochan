@@ -6,20 +6,20 @@ import "ace-builds/src-noconflict/mode-lua";
 import "ace-builds/src-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale";
-import { Chart } from "@/chartFormat/chart";
+import { Chart, Level } from "@/chartFormat/chart";
 import { luaExec } from "@/chartFormat/lua/exec";
 import { Step } from "@/chartFormat/step";
 import { findStepFromLua } from "@/chartFormat/lua/edit";
 
 interface Props {
-  chart?: Chart;
-  changeChart: (chart: Chart) => void;
+  currentLevel?: Level;
+  changeLevel: (chart: Level) => void;
   seekStepAbs: (s: Step) => void;
 }
 export default function LuaTab(props: Props) {
-  const { chart, changeChart, seekStepAbs } = props;
+  const { currentLevel, changeLevel, seekStepAbs } = props;
   const { rem } = useDisplayMode();
-  const [code, setCode] = useState<string>(props.chart?.lua.join("\n") || "");
+  const [code, setCode] = useState<string>(currentLevel?.lua.join("\n") || "");
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
@@ -34,9 +34,9 @@ export default function LuaTab(props: Props) {
           setStdout(result.stdout);
           setErr(result.err);
           setErrLine(result.errorLine);
-          if (chart && result.err.length === 0) {
-            changeChart({
-              ...chart,
+          if (currentLevel && result.err.length === 0) {
+            changeLevel({
+              ...currentLevel,
               lua: code.split("\n"),
               notes: result.notes,
               rest: result.rest,
@@ -48,7 +48,7 @@ export default function LuaTab(props: Props) {
       }, 500);
       return () => clearTimeout(t);
     }
-  }, [code, codeChanged, chart, changeChart]);
+  }, [code, codeChanged, currentLevel, changeLevel]);
 
   return (
     <div className="flex flex-col absolute inset-3 space-y-3">
@@ -78,8 +78,8 @@ export default function LuaTab(props: Props) {
             setCodeChanged(true);
           }}
           onCursorChange={(sel, e) => {
-            if (chart) {
-              const step = findStepFromLua(chart, sel.cursor.row);
+            if (currentLevel) {
+              const step = findStepFromLua(currentLevel, sel.cursor.row);
               if (step !== null) {
                 seekStepAbs(step);
               }

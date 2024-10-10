@@ -7,8 +7,10 @@ import {
   validateNoteCommand,
   validateRestStep,
 } from "./command";
+import { difficulty } from "./difficulty";
 import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
+import { Chart3, convert3To4 } from "./legacy/chart3";
 import { luaAddBpmChange } from "./lua/bpm";
 import { luaAddSpeedChange } from "./lua/speed";
 import { stepZero } from "./step";
@@ -18,6 +20,14 @@ export interface ChartBrief {
   title: string;
   composer: string;
   chartCreator: string;
+  levels: {
+    name: string;
+    type: string;
+    difficulty: number;
+    noteCount: number;
+    bpmMin: number;
+    bpmMax: number;
+  }[];
 }
 
 /**
@@ -36,50 +46,65 @@ export interface ChartBrief {
  */
 export interface Chart {
   falling: "nikochan"; // magic
-  ver: 3;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
+  ver: 4;
+  levels: Level[];
   offset: number;
-  lua: string[];
   ytId: string;
   title: string;
   composer: string;
   chartCreator: string;
   editPasswd: string;
 }
+export interface Level {
+  name: string;
+  type: string;
+  notes: NoteCommandWithLua[];
+  rest: RestStep[];
+  bpmChanges: BPMChangeWithLua[];
+  speedChanges: BPMChangeWithLua[];
+  lua: string[];
+}
+export const levelTypes = ["Single", "Double", "Maniac"];
+export const levelColors = [
+  "text-emerald-700 ",
+  "text-yellow-700 ",
+  "text-pink-700 ",
+];
 
-export const chartMaxSize = 100000;
+export const chartMaxSize = 1000000;
 
-export function validateChart(chart: Chart | Chart1 | Chart2): Chart {
+export function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Chart {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver === 1) {
-    chart = convert1To2(chart);
-  }
-  if (chart.ver === 2) {
-    chart = convert2To3(chart);
-  }
-  if (chart.ver !== 3) throw "chart.ver is invalid";
-  if (!Array.isArray(chart.notes)) throw "chart.notes is invalid";
-  chart.notes.forEach((n) => validateNoteCommand(n));
-  if (!Array.isArray(chart.rest)) throw "chart.rest is invalid";
-  chart.rest.forEach((n) => validateRestStep(n));
-  if (!Array.isArray(chart.bpmChanges)) throw "chart.bpmChanges is invalid";
-  chart.bpmChanges.forEach((n) => validateBpmChange(n));
-  if (!Array.isArray(chart.speedChanges)) throw "chart.speedChanges is invalid";
-  chart.speedChanges.forEach((n) => validateBpmChange(n));
-  updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
+  if (chart.ver === 1) chart = convert1To2(chart);
+  if (chart.ver === 2) chart = convert2To3(chart);
+  if (chart.ver === 3) chart = convert3To4(chart);
+  if (chart.ver !== 4) throw "chart.ver is invalid";
+  if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
+  chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
-  if (!Array.isArray(chart.lua)) throw "chart.lua is invalid";
-  if (chart.lua.filter((l) => typeof l !== "string").length > 0)
-    throw "chart.lua is invalid";
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
   return chart;
+}
+export function validateLevel(level: Level): Level {
+  if (typeof level.name !== "string") throw "level.name is invalid";
+  if (typeof level.type !== "string") throw "level.type is invalid";
+  if (!Array.isArray(level.notes)) throw "level.notes is invalid";
+  level.notes.forEach((n) => validateNoteCommand(n));
+  if (!Array.isArray(level.rest)) throw "level.rest is invalid";
+  level.rest.forEach((n) => validateRestStep(n));
+  if (!Array.isArray(level.bpmChanges)) throw "level.bpmChanges is invalid";
+  level.bpmChanges.forEach((n) => validateBpmChange(n));
+  if (!Array.isArray(level.speedChanges)) throw "level.speedChanges is invalid";
+  level.speedChanges.forEach((n) => validateBpmChange(n));
+  updateBpmTimeSec(level.bpmChanges, level.speedChanges);
+  if (!Array.isArray(level.lua)) throw "level.lua is invalid";
+  if (level.lua.filter((l) => typeof l !== "string").length > 0)
+    throw "level.lua is invalid";
+  return level;
 }
 
 export async function hashPasswd(text: string) {
@@ -99,20 +124,53 @@ export function validCId(cid: string) {
 export function emptyChart(): Chart {
   let chart: Chart = {
     falling: "nikochan",
-    ver: 3,
-    notes: [],
-    rest: [],
-    bpmChanges: [],
-    speedChanges: [],
+    ver: 4,
+    levels: [],
     offset: 0,
-    lua: [],
     ytId: "",
     title: "",
     composer: "",
     chartCreator: "",
     editPasswd: "",
   };
-  chart = luaAddBpmChange(chart, { bpm: 120, step: stepZero(), timeSec: 0 })!;
-  chart = luaAddSpeedChange(chart, { bpm: 120, step: stepZero(), timeSec: 0 })!;
   return chart;
+}
+// prevLevelからbpmとspeedだけはコピー
+export function emptyLevel(prevLevel?: Level): Level {
+  let level: Level = {
+    name: "",
+    type: levelTypes[0],
+    notes: [],
+    rest: [],
+    bpmChanges: prevLevel?.bpmChanges.slice() || [],
+    speedChanges: prevLevel?.speedChanges.slice() || [],
+    lua: [],
+  };
+  if (!prevLevel) {
+    level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+    level = luaAddSpeedChange(level, {
+      bpm: 120,
+      step: stepZero(),
+      timeSec: 0,
+    })!;
+  }
+  return level;
+}
+
+export function createBrief(chart: Chart) {
+  const levelBrief = chart.levels.map((level) => ({
+    name: level.name,
+    type: level.type,
+    noteCount: level.notes.length,
+    difficulty: difficulty(level, level.type),
+    bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
+    bpmMax: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.max(a, b)),
+  }));
+  return {
+    ytId: chart.ytId,
+    title: chart.title,
+    composer: chart.composer,
+    chartCreator: chart.chartCreator,
+    levels: levelBrief,
+  } as ChartBrief;
 }
