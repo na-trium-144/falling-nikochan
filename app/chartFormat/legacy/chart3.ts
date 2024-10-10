@@ -22,6 +22,8 @@ export function convert3To4(chart: Chart3): Chart {
     falling: "nikochan",
     ver: 4,
     levels: [{
+      name: "",
+      type: "Single",
       notes: chart.notes,
       rest: chart.rest,
       bpmChanges: chart.bpmChanges,

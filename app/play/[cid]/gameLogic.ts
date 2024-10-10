@@ -3,6 +3,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { displayNote, Note } from "@/chartFormat/seq";
 
+export const goodSec = 0.04;
+export const okSec = 0.08;
+export const badLateSec = 0.15;
+export const badFastSec = -0.25;
+export const okBaseScore = 0.5;
+export const bonusMax = 100;
+export const baseScoreRate = 70;
+export const chainScoreRate = 30;
+export const bigScoreRate = 20;
+
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean
@@ -14,19 +24,14 @@ export default function useGameLogic(
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<number[]>([0, 0, 0, 0]);
   const notesTotal = notesAll.length;
-  const okScore = 0.5;
-  const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okScore;
+  const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okBaseScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
-  const bonusMax = 100;
   const bonusTotal =
     notesTotal < bonusMax
       ? (notesTotal * (notesTotal + 1)) / 2
       : (bonusMax * (bonusMax + 1)) / 2 + bonusMax * (notesTotal - bonusMax);
   const [bigCount, setBigCount] = useState<number>(0);
   const [bigTotal, setBigTotal] = useState<number>(0);
-  const baseScoreRate = 70;
-  const chainScoreRate = 30;
-  const bigScoreRate = 20;
   const baseScore = (judgeScore / (notesTotal || 1)) * baseScoreRate;
   const chainScore = (bonus / (bonusTotal || 1)) * chainScoreRate;
   const bigScore = (bigCount / (bigTotal || 1)) * bigScoreRate;
@@ -78,7 +83,7 @@ export default function useGameLogic(
           if (j === 1) {
             n.chainBonus += 1;
           } else {
-            n.chainBonus += okScore;
+            n.chainBonus += okBaseScore;
           }
           setChain((chain) => chain + 1);
         } else {
@@ -93,11 +98,6 @@ export default function useGameLogic(
     },
     [chain, bonusTotal, notesTotal, bigTotal]
   );
-
-  const goodSec = 0.04;
-  const okSec = 0.08;
-  const badLateSec = 0.15;
-  const badFastSec = -0.25;
 
   // キーを押したときの判定
   const hit = () => {

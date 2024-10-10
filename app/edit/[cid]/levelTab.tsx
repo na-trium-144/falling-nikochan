@@ -4,9 +4,11 @@ import {
   levelColors,
   levelTypes,
 } from "@/chartFormat/chart";
+import { difficulty } from "@/chartFormat/difficulty";
 import Button from "@/common/button";
 import Input from "@/common/input";
 import { CheckCorrect, RightOne, Square } from "@icon-park/react";
+import { useEffect, useState } from "react";
 
 interface Props {
   chart?: Chart;
@@ -55,6 +57,16 @@ export default function LevelTab(props: Props) {
       props.setCurrentLevelIndex(0);
     }
   };
+
+  const [levelsDifficulty, setLevelsDifficulty] = useState<number[]>([]);
+  useEffect(() => {
+    if (props.chart) {
+      setLevelsDifficulty(
+        props.chart.levels.map((level) => difficulty(level, level.type))
+      );
+    }
+  }, [props.chart]);
+
   return (
     <>
       <p>
@@ -89,7 +101,8 @@ export default function LevelTab(props: Props) {
                   levelColors[levelTypes.indexOf(level.type)]
                 }
               >
-                {level.type}
+                {level.type}-
+                <span className="text-lg">{levelsDifficulty[i]}</span>
               </span>
               <span
                 className={
@@ -106,7 +119,7 @@ export default function LevelTab(props: Props) {
       <hr className="mb-3 " />
       {currentLevel && (
         <>
-          <p className="flex flex-row items-baseline">
+          <p className="flex flex-row items-baseline mb-1">
             <span className="w-max">Level Name:</span>
             <Input
               className="font-title shrink"
@@ -118,28 +131,29 @@ export default function LevelTab(props: Props) {
               left
             />
           </p>
-          <p>Difficulty:</p>
-          <ul className="ml-2 ">
+          <p>
+            <span>Difficulty:</span>
             {levelTypes.map((t, i) => (
-              <li key={t}>
-                <button
-                  className={
-                    (t === currentLevel.type ? levelColors[i] : "") +
-                    "hover:text-slate-500 "
-                  }
-                  onClick={() => {
-                    currentLevel.type = t;
-                    props.changeChart({ ...props.chart! });
-                  }}
-                >
-                  <span className="inline-block w-5 translate-y-0.5">
-                    {t === currentLevel.type ? <CheckCorrect /> : <Square />}
-                  </span>
-                  <span>{t}</span>
-                </button>
-              </li>
+              <button
+                key={t}
+                className={
+                  "ml-2 " +
+                  (t === currentLevel.type
+                    ? levelColors[i]
+                    : "hover:text-slate-500 ")
+                }
+                onClick={() => {
+                  currentLevel.type = t;
+                  props.changeChart({ ...props.chart! });
+                }}
+              >
+                <span className="inline-block w-5 translate-y-0.5">
+                  {t === currentLevel.type ? <CheckCorrect /> : <Square />}
+                </span>
+                <span>{t}</span>
+              </button>
             ))}
-          </ul>
+          </p>
         </>
       )}
     </>
