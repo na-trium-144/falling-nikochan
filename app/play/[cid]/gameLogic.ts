@@ -11,6 +11,7 @@ export default function useGameLogic(
   const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
   const notesBigYetDone = useRef<Note[]>([]); // 通常判定がおわってbig判定がまだのNote
 
+  // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<number[]>([0, 0, 0, 0]);
   const notesTotal = notesAll.length;
   const okScore = 0.5;
@@ -23,8 +24,6 @@ export default function useGameLogic(
       : (bonusMax * (bonusMax + 1)) / 2 + bonusMax * (notesTotal - bonusMax);
   const [bigCount, setBigCount] = useState<number>(0);
   const [bigTotal, setBigTotal] = useState<number>(0);
-  // const score =
-  //   ((judgeScore + bonusScore) / (notesTotal + bonusTotal || 1)) * 100;
   const baseScoreRate = 70;
   const chainScoreRate = 30;
   const bigScoreRate = 20;
@@ -73,16 +72,13 @@ export default function useGameLogic(
           const thisChain = chain + 1;
           n.chain = thisChain;
           n.chainBonus =
-            1 +
             ((Math.min(thisChain, bonusMax) / bonusTotal) * chainScoreRate) /
-              ((1 / notesTotal) * baseScoreRate);
+            ((1 / notesTotal) * baseScoreRate);
+          setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
           if (j === 1) {
-            setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
+            n.chainBonus += 1;
           } else {
-            n.chainBonus *= okScore;
-            setBonus(
-              (bonus) => bonus + Math.min(thisChain, bonusMax) * okScore
-            );
+            n.chainBonus += okScore;
           }
           setChain((chain) => chain + 1);
         } else {
