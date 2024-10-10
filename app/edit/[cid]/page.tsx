@@ -42,6 +42,7 @@ import {
   luaUpdateNote,
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
+import LevelTab from "./levelTab";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -717,7 +718,7 @@ export default function Page(context: { params: Params }) {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Meta", "Timing", "Notes", "Code"].map((tabName, i) =>
+            {["Meta", "Timing", "Levels", "Notes", "Code"].map((tabName, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
@@ -778,6 +779,13 @@ export default function Page(context: { params: Params }) {
                 currentStep={currentStep}
               />
             ) : tab === 2 ? (
+              <LevelTab
+                chart={chart}
+                currentLevelIndex={currentLevelIndex}
+                setCurrentLevelIndex={setCurrentLevelIndex}
+                changeChart={changeChart}
+              />
+            ) : tab === 3 ? (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
                 addNote={addNote}

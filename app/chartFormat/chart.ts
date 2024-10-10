@@ -47,12 +47,20 @@ export interface Chart {
   editPasswd: string;
 }
 export interface Level {
+  name: string;
+  type: string;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
   speedChanges: BPMChangeWithLua[];
   lua: string[];
 }
+export const levelTypes = ["Single", "Double", "Maniac"];
+export const levelColors = [
+  "text-emerald-700 ",
+  "text-yellow-700 ",
+  "text-pink-700 ",
+];
 
 export const chartMaxSize = 100000;
 
@@ -73,6 +81,8 @@ export function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Chart {
   return chart;
 }
 export function validateLevel(level: Level): Level {
+  if (typeof level.name !== "string") throw "level.name is invalid";
+  if (typeof level.type !== "string") throw "level.type is invalid";
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(level.rest)) throw "level.rest is invalid";
@@ -116,15 +126,24 @@ export function emptyChart(): Chart {
   };
   return chart;
 }
-export function emptyLevel(): Level {
+// prevLevelからbpmとspeedだけはコピー
+export function emptyLevel(prevLevel?: Level): Level {
   let level: Level = {
+    name: "",
+    type: levelTypes[0],
     notes: [],
     rest: [],
-    bpmChanges: [],
-    speedChanges: [],
+    bpmChanges: prevLevel?.bpmChanges.slice() || [],
+    speedChanges: prevLevel?.speedChanges.slice() || [],
     lua: [],
   };
-  level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
-  level = luaAddSpeedChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+  if (!prevLevel) {
+    level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+    level = luaAddSpeedChange(level, {
+      bpm: 120,
+      step: stepZero(),
+      timeSec: 0,
+    })!;
+  }
   return level;
 }
