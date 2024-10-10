@@ -46,7 +46,10 @@ export function difficulty(level: Level, type: string): number {
   const averageNPS = level.notes.length / notesHitSec.at(-1)!;
 
   const maxLv = 20;
-  for (let lv = Math.floor(npsToLv(averageNPS)); lv < maxLv; lv += 0.5) {
+  for (let lv = Math.floor(npsToLv(averageNPS)); ; lv += 0.5) {
+    if (clv === null && lv >= maxLv) {
+      return maxLv;
+    }
     const agentScore = agentsPlay(level, type, notesHitSec, lvToNps(lv));
     if (agentScore >= 80 && clv === null) {
       clv = lv;
@@ -55,13 +58,12 @@ export function difficulty(level: Level, type: string): number {
       plv = lv;
     }
     if (clv !== null && plv !== null) {
-      return Math.round((clv + plv) / 2);
+      return Math.min(Math.round((clv + plv) / 2), maxLv);
     }
     if (clv !== null && lv >= clv + 4) {
-      return Math.round(clv + 2);
+      return Math.min(Math.round(clv + 2), maxLv);
     }
   }
-  return maxLv;
 }
 
 function agentsPlay(
