@@ -1,6 +1,6 @@
 "use client"; // あとでけす
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import { ChartSeqData, loadChart, Note } from "@/chartFormat/seq";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
@@ -30,7 +30,14 @@ import BPMSign from "./bpmSign";
 import { getSession } from "./session";
 
 export default function Home() {
-  const router = useRouter();
+  return (
+    <Suspense fallback={<Loading />}>
+      <Play />
+    </Suspense>
+  );
+}
+
+function Play() {
   const searchParams = useSearchParams();
   const sid = Number(searchParams.get("sid"));
 

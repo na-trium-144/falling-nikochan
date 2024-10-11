@@ -1,5 +1,5 @@
-import { Chart } from "../chart";
 import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command";
+import { Chart4 } from "./chart4";
 
 export interface Chart3 {
   falling: "nikochan"; // magic
@@ -17,7 +17,7 @@ export interface Chart3 {
   editPasswd: string;
 }
 
-export function convert3To4(chart: Chart3): Chart {
+export function convert3To4(chart: Chart3): Chart4 {
   return {
     falling: "nikochan",
     ver: 4,
