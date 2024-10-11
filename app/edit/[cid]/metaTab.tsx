@@ -91,6 +91,8 @@ export function MetaEdit(props: Props) {
 }
 
 interface Props2 {
+  sessionId?: number;
+  setSessionId: (id: number) => void;
   chart?: Chart;
   setChart: (chart: Chart) => void;
   cid: string | undefined;
@@ -193,7 +195,6 @@ export function MetaTab(props: Props2) {
     }
   };
 
-  const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
   useEffect(() => {
     if (props.chart) {
@@ -202,27 +203,28 @@ export function MetaTab(props: Props2) {
         lvIndex: props.currentLevelIndex,
         brief: createBrief(props.chart),
         chart: props.chart,
+        editing: true,
       };
       setSessionData(data);
-      if (sessionId === undefined) {
-        setSessionId(initSession(data));
+      if (props.sessionId === undefined) {
+        props.setSessionId(initSession(data));
       } else {
-        initSession(data, sessionId);
+        initSession(data, props.sessionId);
       }
     }
-  }, [sessionId, props]);
+  }, [props]);
 
   return (
     <>
           <p className="mb-1">
             <a
               className="hover:text-blue-600 underline relative inline-block"
-              href={`/play?sid=${sessionId}`}
+              href={`/play?sid=${props.sessionId}`}
               target="_blank"
             >
               <button
                 onClick={() =>
-                  sessionData && initSession(sessionData, sessionId)
+                  sessionData && initSession(sessionData, props.sessionId)
                 }
               >
                 <span className="mr-5">テストプレイ</span>

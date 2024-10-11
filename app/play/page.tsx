@@ -45,6 +45,7 @@ function Play() {
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
+  const [editing, setEditing] = useState<boolean>(false);
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
@@ -60,6 +61,7 @@ function Play() {
     setCid(session.cid);
     setLvIndex(session.lvIndex);
     setChartBrief(session.brief);
+    setEditing(!!session.editing);
     if (session.chart) {
       setChartSeq(loadChart(session.chart, session.lvIndex));
       setErrorStatus(undefined);
@@ -406,6 +408,7 @@ function Play() {
               exit={exit}
               auto={auto}
               setAuto={setAuto}
+              editing={editing}
             />
           ) : stopped ? (
             <StopMessage isTouch={isTouch} start={start} exit={exit} />

@@ -5,6 +5,7 @@ export interface SessionData {
   lvIndex: number;
   brief: ChartBrief;
   chart?: Chart;
+  editing?: boolean;
 }
 // sessionStorageとlocalStorageの両方に保存し、sessionIdを返す
 export function initSession(

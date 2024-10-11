@@ -148,6 +148,8 @@ export default function Page(context: { params: Params }) {
     }
   };
 
+  const [sessionId, setSessionId] = useState<number>();
+
   const ref = useRef<HTMLDivElement>(null!);
 
   // 現在時刻 offsetを引く前
@@ -743,7 +745,7 @@ export default function Page(context: { params: Params }) {
                   key={i}
                   className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200"
                   onClick={() => {
-                    setTab(i)
+                    setTab(i);
                     ref.current.focus();
                   }}
                 >
@@ -761,6 +763,8 @@ export default function Page(context: { params: Params }) {
           >
             {tab === 0 ? (
               <MetaTab
+                sessionId={sessionId}
+                setSessionId={setSessionId}
                 chart={chart}
                 setChart={changeChart}
                 cid={cid}
