@@ -7,6 +7,8 @@ interface MessageProps {
   isTouch: boolean;
   start: () => void;
   exit: () => void;
+  auto: boolean;
+  setAuto: (a: boolean) => void;
 }
 export function ReadyMessage(props: MessageProps) {
   return (
@@ -29,10 +31,29 @@ export function ReadyMessage(props: MessageProps) {
         <br />
         ページを再読み込みしてください
       </p>
+      <div className="mt-2 mb-2 border-b border-black" />
+      <p>オプション</p>
+      <p className="mt-2">
+        <input
+          className="ml-1 mr-1"
+          type="checkbox"
+          id="auto"
+          checked={props.auto}
+          onChange={(v) => props.setAuto(v.target.checked)}
+        />
+        <label htmlFor="auto">
+          <span>オートプレイ</span>
+        </label>
+      </p>
     </CenterBox>
   );
 }
-export function StopMessage(props: MessageProps) {
+interface MessageProps2 {
+  isTouch: boolean;
+  start: () => void;
+  exit: () => void;
+}
+export function StopMessage(props: MessageProps2) {
   return (
     <CenterBox>
       <p className="mb-1">&lt;Stopped&gt;</p>

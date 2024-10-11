@@ -10,7 +10,12 @@ import useGameLogic from "./gameLogic";
 import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
-import { Chart, ChartBrief } from "@/chartFormat/chart";
+import {
+  Chart,
+  ChartBrief,
+  levelColors,
+  levelTypes,
+} from "@/chartFormat/chart";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import msgpack from "@ygoe/msgpack";
 import { stepSub, stepToFloat } from "@/chartFormat/step";
@@ -21,37 +26,40 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
 import BPMSign from "./bpmSign";
+import { getSession } from "./session";
 
-export default function Home(context: { params: Params }) {
-  const cid = context.params.cid;
-  const searchParams = useSearchParams();
+export default function Home() {
   const router = useRouter();
-  const auto = !!Number(searchParams.get("auto"));
 
+  const [cid, setCid] = useState<string>();
+  const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
 
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
-    void (async () => {
-      const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-      if (res.ok) {
-        // cidからタイトルなどを取得
-        const resBody = await res.json();
-        setChartBrief(resBody);
-      }
-    })();
+    const session = getSession();
+    if (session === null) {
+      setErrorMsg("Failed to get session data");
+      return;
+    }
+    setCid(session.cid);
+    setLvIndex(session.lvIndex);
+    setChartBrief(session.brief);
 
     void (async () => {
-      const res = await fetch(`/api/seqFile/${cid}`, { cache: "no-store" });
+      const res = await fetch(
+        `/api/seqFile/${session.cid}/${session.lvIndex}`,
+        { cache: "no-store" }
+      );
       if (res.ok) {
         try {
           const seq = msgpack.deserialize(await res.arrayBuffer());
           setChartSeq(seq);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
-          addRecent("play", cid);
+          addRecent("play", session.cid);
         } catch (e) {
           setChartSeq(undefined);
           setErrorStatus(undefined);
@@ -67,7 +75,9 @@ export default function Home(context: { params: Params }) {
         }
       }
     })();
-  }, [cid]);
+  }, []);
+
+  const [auto, setAuto] = useState<boolean>(false);
 
   const ref = useRef<HTMLDivElement>(null!);
   const { isTouch, screenWidth, screenHeight, rem, playUIScale } =
@@ -84,7 +94,7 @@ export default function Home(context: { params: Params }) {
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
-    if (!auto) {
+    if (!auto && cid) {
       setBestScoreState(getBestScore(cid));
     }
   }, [cid, auto]);
@@ -159,7 +169,7 @@ export default function Home(context: { params: Params }) {
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
   useEffect(() => {
-    if (chartSeq && playedOnce && end) {
+    if (chartSeq && playedOnce && end && cid) {
       if (!auto && score > bestScoreState) {
         setBestScore(cid, score);
       }
@@ -212,7 +222,8 @@ export default function Home(context: { params: Params }) {
     }
   };
   const exit = () => {
-    router.replace(`/share/${cid}`);
+    // router.replace(`/share/${cid}`);
+    history.back();
   };
 
   // キーを押したとき一定時間光らせる
@@ -228,7 +239,6 @@ export default function Home(context: { params: Params }) {
   if (chartSeq === undefined) {
     return <Loading />;
   }
-
   return (
     <main
       className="overflow-hidden w-screen h-screen relative select-none"
@@ -295,6 +305,23 @@ export default function Home(context: { params: Params }) {
                   {chartBrief?.chartCreator}
                 </span>
               </p>
+              <p>
+                {lvIndex !== undefined && chartBrief?.levels[lvIndex] && (
+                  <>
+                    {chartBrief?.levels[lvIndex].name && (
+                      <span className="text-sm font-title mr-1">
+                        {chartBrief?.levels[lvIndex].name}
+                      </span>
+                    )}
+                    <span className="text-xs">
+                      {chartBrief?.levels[lvIndex]?.type}-
+                    </span>
+                    <span className="text-sm">
+                      {chartBrief?.levels[lvIndex]?.difficulty}
+                    </span>
+                  </>
+                )}
+              </p>
             </div>
           </div>
           {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
@@ -339,7 +366,13 @@ export default function Home(context: { params: Params }) {
               exit={exit}
             />
           ) : ready ? (
-            <ReadyMessage isTouch={isTouch} start={start} exit={exit} />
+            <ReadyMessage
+              isTouch={isTouch}
+              start={start}
+              exit={exit}
+              auto={auto}
+              setAuto={setAuto}
+            />
           ) : stopped ? (
             <StopMessage isTouch={isTouch} start={start} exit={exit} />
           ) : null}
