@@ -34,6 +34,7 @@ export default function LevelTab(props: Props) {
         levels: props.chart.levels.concat([
           {
             name: currentLevel.name,
+            hash: currentLevel.hash,
             type: currentLevel.type,
             notes: currentLevel.notes.slice(),
             rest: currentLevel.rest.slice(),

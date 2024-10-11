@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, context: { params: Params }) {
   let chart: Chart;
   try {
     chart = msgpack.deserialize(fsData.data);
-    chart = validateChart(chart);
+    chart = await validateChart(chart);
   } catch (e) {
     return NextResponse.json(
       { message: "invalid chart data" },

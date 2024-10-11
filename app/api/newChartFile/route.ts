@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   let chart: Chart;
   try {
     chart = msgpack.deserialize(chartBuf);
-    chart = validateChart(chart);
+    chart = await validateChart(chart);
     chartBlob = new Blob([msgpack.serialize(chart)]);
   } catch (e) {
     console.log(e);

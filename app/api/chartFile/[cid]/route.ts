@@ -37,7 +37,7 @@ async function getChart(
   let chart: Chart;
   try {
     chart = msgpack.deserialize(fsData.data);
-    chart = validateChart(chart);
+    chart = await validateChart(chart);
   } catch (e) {
     return {
       res: NextResponse.json(
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   let newChart: Chart;
   try {
     newChart = msgpack.deserialize(chartBuf);
-    newChart = validateChart(newChart);
+    newChart = await validateChart(newChart);
   } catch (e) {
     console.error(e);
     return NextResponse.json(

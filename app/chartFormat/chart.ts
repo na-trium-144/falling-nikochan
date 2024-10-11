@@ -82,11 +82,11 @@ export const levelBgColors = [
 
 export const chartMaxSize = 1000000;
 
-export function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Chart {
+export async function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver === 1) chart = convert1To2(chart);
   if (chart.ver === 2) chart = convert2To3(chart);
-  if (chart.ver === 3) chart = convert3To4(chart);
+  if (chart.ver === 3) chart = await convert3To4(chart);
   if (chart.ver !== 4) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
   chart.levels.forEach((l) => validateLevel(l));

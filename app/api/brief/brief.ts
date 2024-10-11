@@ -29,7 +29,7 @@ export async function getBrief(cid: string): Promise<NextResponse> {
     let chart: Chart;
     try {
       chart = msgpack.deserialize(fsData.data);
-      chart = validateChart(chart);
+      chart = await validateChart(chart);
     } catch (e) {
       return NextResponse.json(
         { message: "invalid chart data" },
