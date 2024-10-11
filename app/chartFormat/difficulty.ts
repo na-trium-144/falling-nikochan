@@ -27,11 +27,25 @@ import { getTimeSec } from "./seq";
   上限は20 (適当)
 */
 
-function npsToLv(nps: number) {
-  return Math.log(nps) * 5 - 2;
+function npsToLv(nps: number, type: string) {
+  switch (type) {
+    case "Single":
+      return Math.log(nps) * 5 - 2;
+    case "Double":
+      return Math.log(nps * 2) * 5 - 2;
+    default:
+      return Math.log(nps * 4) * 5 - 2;
+  }
 }
-function lvToNps(lv: number) {
-  return Math.exp((lv + 2) / 5);
+function lvToNps(lv: number, type: string) {
+  switch (type) {
+    case "Single":
+      return Math.exp((lv + 2) / 5);
+    case "Double":
+      return Math.exp((lv + 2) / 5) / 2;
+    default:
+      return Math.exp((lv + 2) / 5) / 4;
+  }
 }
 
 export function difficulty(level: Level, type: string): number {
@@ -46,22 +60,34 @@ export function difficulty(level: Level, type: string): number {
   );
   let clv: number | null = null;
   let plv: number | null = null;
-  const averageNPS = Math.max(
+  let averageNPS = Math.max(
     1,
     level.notes.length / Math.max(1, notesHitSec.at(-1) || 0)
   );
+  switch (type) {
+    case "Single":
+      averageNPS /= 1;
+      break;
+    case "Double":
+      averageNPS /= 2;
+      break;
+    default:
+      averageNPS /= 4;
+      break;
+  }
 
-  for (let lv = Math.floor(npsToLv(averageNPS)); ; lv += 0.5) {
+  for (let lv = Math.floor(npsToLv(averageNPS, type)); ; lv += 0.5) {
     if (clv === null && lv >= maxLv) {
       return maxLv;
     }
-    const agentScore = agentsPlay(level, type, notesHitSec, lvToNps(lv));
+    const agentScore = agentsPlay(level, type, notesHitSec, lvToNps(lv, type));
     if (agentScore >= 80 && clv === null) {
       clv = lv;
     }
     if (agentScore >= 99 && plv === null) {
       plv = lv;
     }
+    console.log(lv, lvToNps(lv, type), agentScore);
     if (clv !== null && plv !== null) {
       return Math.max(Math.min(Math.round((clv + plv) / 2), maxLv), minLv);
     }
