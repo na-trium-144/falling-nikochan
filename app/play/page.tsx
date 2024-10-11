@@ -112,7 +112,7 @@ function Play() {
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
-    if (!auto && cid && lvIndex && chartBrief?.levels[lvIndex]) {
+    if (!auto && cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
       setBestScoreState(getBestScore(cid, chartBrief.levels[lvIndex].hash));
     }
   }, [cid, auto, lvIndex, chartBrief]);
@@ -192,7 +192,7 @@ function Play() {
       playedOnce &&
       end &&
       cid &&
-      lvIndex &&
+      lvIndex !== undefined &&
       chartBrief?.levels[lvIndex]
     ) {
       if (!auto && score > bestScoreState) {
