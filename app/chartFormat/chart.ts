@@ -67,8 +67,13 @@ export interface Level {
 export const levelTypes = ["Single", "Double", "Maniac"];
 export const levelColors = [
   "text-emerald-700 ",
-  "text-yellow-700 ",
-  "text-pink-700 ",
+  "text-amber-700 ",
+  "text-rose-700 ",
+];
+export const levelBgColors = [
+  "bg-emerald-500 ",
+  "bg-amber-500 ",
+  "bg-rose-500 ",
 ];
 
 export const chartMaxSize = 1000000;

@@ -21,7 +21,14 @@ import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
-import { Chart, emptyChart, hashPasswd, Level } from "@/chartFormat/chart";
+import {
+  Chart,
+  emptyChart,
+  hashPasswd,
+  Level,
+  levelBgColors,
+  levelTypes,
+} from "@/chartFormat/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
 import Header from "@/common/header";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
@@ -580,7 +587,9 @@ export default function Page(context: { params: Params }) {
           <Header reload>Edit</Header>
           <div
             className={
-              "grow-0 shrink-0 mt-3 p-3 bg-amber-600 rounded-lg flex flex-col items-center "
+              "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
+              (levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
+                levelBgColors[1])
             }
           >
             <FlexYouTube

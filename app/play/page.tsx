@@ -13,6 +13,7 @@ import { useResizeDetector } from "react-resize-detector";
 import {
   Chart,
   ChartBrief,
+  levelBgColors,
   levelColors,
   levelTypes,
 } from "@/chartFormat/chart";
@@ -35,6 +36,8 @@ export default function Home() {
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
+  const lvType: string =
+    (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
@@ -279,7 +282,9 @@ export default function Home() {
         >
           <div
             className={
-              "z-10 grow-0 shrink-0 p-3 bg-amber-600 rounded-lg flex " +
+              "z-10 grow-0 shrink-0 p-3 rounded-lg flex " +
+              (levelBgColors.at(levelTypes.indexOf(lvType)) ||
+                levelBgColors[1]) +
               (isMobile ? "mt-3 mx-3 flex-row-reverse " : "my-3 mr-3 flex-col ")
             }
           >
@@ -313,9 +318,7 @@ export default function Home() {
                         {chartBrief?.levels[lvIndex].name}
                       </span>
                     )}
-                    <span className="text-xs">
-                      {chartBrief?.levels[lvIndex]?.type}-
-                    </span>
+                    <span className="text-xs">{lvType}-</span>
                     <span className="text-sm">
                       {chartBrief?.levels[lvIndex]?.difficulty}
                     </span>
