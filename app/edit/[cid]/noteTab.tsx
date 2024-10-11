@@ -72,7 +72,16 @@ export default function NoteTab(props: Props) {
           <span className="inline-block ml-1">{notesCountInStep}</span>
         </div>
         <div className="inline-block">
-          <Button keyName="N" text={`Add`} onClick={() => props.addNote()} />
+          <Button
+            keyName="N"
+            text={`Add`}
+            onClick={() => props.addNote()}
+            disabled={
+              (props.currentLevel?.type === "Single" &&
+                notesCountInStep >= 1) ||
+              (props.currentLevel?.type === "Double" && notesCountInStep >= 2)
+            }
+          />
           {hasNoteHere && <Button text="Delete" onClick={props.deleteNote} />}
         </div>
       </p>

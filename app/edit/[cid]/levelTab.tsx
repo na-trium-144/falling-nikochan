@@ -5,6 +5,7 @@ import {
   levelTypes,
 } from "@/chartFormat/chart";
 import { difficulty } from "@/chartFormat/difficulty";
+import { Step, stepCmp } from "@/chartFormat/step";
 import Button from "@/common/button";
 import Input from "@/common/input";
 import { CheckCorrect, RightOne, Square } from "@icon-park/react";
@@ -67,6 +68,27 @@ export default function LevelTab(props: Props) {
       );
     }
   }, [props.chart]);
+  const [maxHitNum, setMaxHitNum] = useState<number>(0);
+  useEffect(() => {
+    if (currentLevel) {
+      let prevStep: Step = { fourth: -1, numerator: 0, denominator: 4 };
+      let maxHitNum = 1;
+      let hitNum = 0;
+      for (let i = 0; i < currentLevel.notes.length; i++) {
+        const n = currentLevel.notes[i];
+        if (stepCmp(prevStep, n.step) < 0) {
+          prevStep = n.step;
+          hitNum = 1;
+          continue;
+        } else if (stepCmp(prevStep, n.step) == 0) {
+          hitNum++;
+          maxHitNum = Math.max(hitNum, maxHitNum);
+        }
+      }
+      setMaxHitNum(maxHitNum);
+    }
+  }, [currentLevel]);
+  const levelTypeDisabled = [maxHitNum > 1, maxHitNum > 2, false];
 
   return (
     <>
@@ -145,12 +167,14 @@ export default function LevelTab(props: Props) {
                   "ml-2 " +
                   (t === currentLevel.type
                     ? levelColors[i]
-                    : "hover:text-slate-500 ")
+                    : "hover:text-slate-500 ") +
+                  "disabled:text-slate-400 "
                 }
                 onClick={() => {
                   currentLevel.type = t;
                   props.changeChart({ ...props.chart! });
                 }}
+                disabled={levelTypeDisabled[i]}
               >
                 <span className="inline-block w-5 translate-y-0.5">
                   {t === currentLevel.type ? <CheckCorrect /> : <Square />}

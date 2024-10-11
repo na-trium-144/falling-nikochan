@@ -232,7 +232,6 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
       display,
     });
   }
-  console.log(notes);
   return {
     offset: chart.offset,
     bpmChanges: level.bpmChanges,

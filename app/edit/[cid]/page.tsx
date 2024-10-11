@@ -527,7 +527,7 @@ export default function Page(context: { params: Params }) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (ready && tab !== 3) {
+        if (ready && tab !== 4) {
           if (e.key === " " && !playing) {
             start();
           } else if (
@@ -742,7 +742,10 @@ export default function Page(context: { params: Params }) {
                 <button
                   key={i}
                   className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200"
-                  onClick={() => setTab(i)}
+                  onClick={() => {
+                    setTab(i)
+                    ref.current.focus();
+                  }}
                 >
                   {tabName}
                 </button>

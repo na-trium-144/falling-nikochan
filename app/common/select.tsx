@@ -7,7 +7,6 @@ interface Props {
   onChange: (value: string) => void;
 }
 export default function Select(props: Props) {
-  console.log(props.value)
   return (
     <select
       className={buttonStyle}
