@@ -24,6 +24,7 @@ import { addRecent } from "@/common/recent";
 import {
   Chart,
   emptyChart,
+  hashLevel,
   hashPasswd,
   Level,
   levelBgColors,
@@ -116,8 +117,13 @@ export default function Page(context: { params: Params }) {
 
   const [hasChange, setHasChange] = useState<boolean>(false);
   const changeChart = (chart: Chart) => {
-    setHasChange(true);
-    setChart(chart);
+    void (async () => {
+      for (const level of chart.levels) {
+        level.hash = await hashLevel(level);
+      }
+      setHasChange(true);
+      setChart(chart);
+    })();
   };
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {

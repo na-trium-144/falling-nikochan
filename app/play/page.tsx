@@ -112,10 +112,10 @@ function Play() {
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
-    if (!auto && cid) {
-      setBestScoreState(getBestScore(cid));
+    if (!auto && cid && lvIndex && chartBrief?.levels[lvIndex]) {
+      setBestScoreState(getBestScore(cid, chartBrief.levels[lvIndex].hash));
     }
-  }, [cid, auto]);
+  }, [cid, auto, lvIndex, chartBrief]);
   useEffect(reloadBestScore, [reloadBestScore]);
 
   // start後true
@@ -187,9 +187,16 @@ function Play() {
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
   useEffect(() => {
-    if (chartSeq && playedOnce && end && cid) {
+    if (
+      chartSeq &&
+      playedOnce &&
+      end &&
+      cid &&
+      lvIndex &&
+      chartBrief?.levels[lvIndex]
+    ) {
       if (!auto && score > bestScoreState) {
-        setBestScore(cid, score);
+        setBestScore(cid, chartBrief.levels[lvIndex].hash, score);
       }
       const t = setTimeout(() => {
         setShowResult(true);
@@ -199,7 +206,17 @@ function Play() {
     } else {
       setShowResult(false);
     }
-  }, [playedOnce, end, chartSeq, score, bestScoreState, cid, auto]);
+  }, [
+    playedOnce,
+    end,
+    chartSeq,
+    score,
+    bestScoreState,
+    cid,
+    auto,
+    lvIndex,
+    chartBrief,
+  ]);
 
   const onReady = useCallback(() => {
     console.log("ready");

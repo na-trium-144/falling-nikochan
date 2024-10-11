@@ -22,6 +22,7 @@ export interface ChartBrief {
   chartCreator: string;
   levels: {
     name: string;
+    hash: string;
     type: string;
     difficulty: number;
     noteCount: number;
@@ -39,10 +40,12 @@ export interface ChartBrief {
  * bpmChanges: bpm変化の情報
  * offset: step=0に対応する時刻(秒)
  * (offsetの処理はgetCurrentTimeSec()の中に含まれる)
- * waveOffset: edit画面で波形の表示位置を補正(仮)
  *
  * 時刻は開始からのstep数(60/BPM*step=秒)で管理する。
  * プレイ時に秒単位の時刻に変換
+ *
+ * hashはbestScoreの管理のためだけに使う
+ *
  */
 export interface Chart {
   falling: "nikochan"; // magic
@@ -58,6 +61,7 @@ export interface Chart {
 export interface Level {
   name: string;
   type: string;
+  hash: string;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
@@ -96,6 +100,7 @@ export function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Chart {
 }
 export function validateLevel(level: Level): Level {
   if (typeof level.name !== "string") throw "level.name is invalid";
+  if (typeof level.hash !== "string") throw "level.hash is invalid";
   if (typeof level.type !== "string") throw "level.type is invalid";
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
@@ -112,7 +117,7 @@ export function validateLevel(level: Level): Level {
   return level;
 }
 
-export async function hashPasswd(text: string) {
+export async function hash(text: string) {
   const msgUint8 = new TextEncoder().encode(text); // (utf-8 の) Uint8Array にエンコードする
   const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // メッセージをハッシュする
   const hashArray = Array.from(new Uint8Array(hashBuffer)); // バッファーをバイト列に変換する
@@ -120,6 +125,14 @@ export async function hashPasswd(text: string) {
     .map((b) => b.toString(16).padStart(2, "0"))
     .join(""); // バイト列を 16 進文字列に変換する
   return hashHex;
+}
+export async function hashPasswd(text: string) {
+  return await hash(text);
+}
+export async function hashLevel(level: Level) {
+  return await hash(
+    JSON.stringify([level.notes, level.bpmChanges, level.speedChanges])
+  );
 }
 
 export function validCId(cid: string) {
@@ -144,6 +157,7 @@ export function emptyChart(): Chart {
 export function emptyLevel(prevLevel?: Level): Level {
   let level: Level = {
     name: "",
+    hash: "",
     type: levelTypes[0],
     notes: [],
     rest: [],
@@ -165,6 +179,7 @@ export function emptyLevel(prevLevel?: Level): Level {
 export function createBrief(chart: Chart) {
   const levelBrief = chart.levels.map((level) => ({
     name: level.name,
+    hash: level.hash,
     type: level.type,
     noteCount: level.notes.length,
     difficulty: difficulty(level, level.type),

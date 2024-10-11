@@ -50,8 +50,10 @@ export function PlayOption(props: Props) {
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   useEffect(() => {
-    setBestScoreState(getBestScore(props.cid));
-  }, [props]);
+    setBestScoreState(
+      getBestScore(props.cid, props.brief.levels[selectedLevel].hash)
+    );
+  }, [props, selectedLevel]);
 
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();

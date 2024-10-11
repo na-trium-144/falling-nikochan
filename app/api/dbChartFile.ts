@@ -34,6 +34,7 @@ async function createLevelsEntry(cid: string, brief: ChartBrief) {
     data: brief.levels.map((level) => ({
       cid: cid,
       name: level.name,
+      hash: level.hash,
       type: level.type,
       noteCount: level.noteCount,
       difficulty: level.difficulty,

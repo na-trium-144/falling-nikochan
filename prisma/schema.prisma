@@ -27,6 +27,7 @@ model LevelBrief {
   chart ChartFile @relation(fields: [cid], references: [cid])
   cid String
   name String
+  hash String
   type String
   difficulty Int
   noteCount Int
