@@ -35,17 +35,22 @@ function lvToNps(lv: number) {
 }
 
 export function difficulty(level: Level, type: string): number {
+  const maxLv = 20;
+  const minLv = 1;
   if (level.notes.length === 0) {
-    return 0;
+    return minLv;
   }
+
   const notesHitSec = level.notes.map((n) =>
     getTimeSec(level.bpmChanges, n.step)
   );
   let clv: number | null = null;
   let plv: number | null = null;
-  const averageNPS = level.notes.length / notesHitSec.at(-1)!;
+  const averageNPS = Math.max(
+    1,
+    level.notes.length / Math.max(1, notesHitSec.at(-1) || 0)
+  );
 
-  const maxLv = 20;
   for (let lv = Math.floor(npsToLv(averageNPS)); ; lv += 0.5) {
     if (clv === null && lv >= maxLv) {
       return maxLv;
@@ -58,10 +63,10 @@ export function difficulty(level: Level, type: string): number {
       plv = lv;
     }
     if (clv !== null && plv !== null) {
-      return Math.min(Math.round((clv + plv) / 2), maxLv);
+      return Math.max(Math.min(Math.round((clv + plv) / 2), maxLv), minLv);
     }
     if (clv !== null && lv >= clv + 4) {
-      return Math.min(Math.round(clv + 2), maxLv);
+      return Math.max(Math.min(Math.round(clv + 2), maxLv), minLv);
     }
   }
 }
@@ -74,7 +79,11 @@ function agentsPlay(
 ): number {
   const interval = 1 / targetNPS;
   const agentsHitSec =
-    type === "Single" ? [0] : type === "Double" ? [0, 0] : [0, 0, 0, 0];
+    type === "Single"
+      ? [-Infinity]
+      : type === "Double"
+      ? [-Infinity, -Infinity]
+      : [-Infinity, -Infinity, -Infinity, -Infinity];
   const judgeCount = [0, 0];
   let bonus = 0;
   let chain = 0;
