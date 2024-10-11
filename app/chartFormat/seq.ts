@@ -150,13 +150,17 @@ export function findBpmIndexFromStep(
 /**
  * chartを読み込む
  */
-export function loadChart(chart: Chart): ChartSeqData {
+export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
   const notes: Note[] = [];
-  for (let id = 0; id < chart.notes.length; id++) {
-    const c = chart.notes[id];
+  const level = chart.levels.at(levelIndex);
+  if (!level) {
+    return { notes: [], bpmChanges: [], offset: chart.offset };
+  }
+  for (let id = 0; id < level.notes.length; id++) {
+    const c = level.notes[id];
 
     // hitの時刻
-    const hitTimeSec: number = getTimeSec(chart.bpmChanges, c.step);
+    const hitTimeSec: number = getTimeSec(level.bpmChanges, c.step);
 
     const display: DisplayParam[] = [];
     let tBegin = hitTimeSec;
@@ -168,8 +172,8 @@ export function loadChart(chart: Chart): ChartSeqData {
     let vy = c.hitVY;
     const ay = 1;
     let appearTimeSec = hitTimeSec;
-    for (let ti = chart.speedChanges.length - 1; ti >= 0; ti--) {
-      const ts = chart.speedChanges[ti];
+    for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
+      const ts = level.speedChanges[ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
         continue;
       }
@@ -197,24 +201,24 @@ export function loadChart(chart: Chart): ChartSeqData {
           appearTimeSec = tBegin - t;
         }
       }
-      if(ti == 0){
+      if (ti == 0) {
         // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
         for (let t = 0; t < 999; t += 0.01) {
-        const xt = x + vx_ * t;
-        const yt = y + vy_ * t - (ay_ * t * t) / 2;
-        if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
-          appearTimeSec = tBegin - t;
-        }else{
-          break;
+          const xt = x + vx_ * t;
+          const yt = y + vy_ * t - (ay_ * t * t) / 2;
+          if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
+            appearTimeSec = tBegin - t;
+          } else {
+            break;
+          }
         }
-      }
       }
 
       const dt = tBegin - tEnd;
       x += vx_ * dt;
       // y += ∫ (vy + ay * t) dt
       y += vy_ * dt - (ay_ * dt * dt) / 2;
-      vy -= ay * ts.bpm / 120 * dt;
+      vy -= ((ay * ts.bpm) / 120) * dt;
 
       tBegin = tEnd;
     }
@@ -228,10 +232,9 @@ export function loadChart(chart: Chart): ChartSeqData {
       display,
     });
   }
-  console.log(notes);
   return {
     offset: chart.offset,
-    bpmChanges: chart.bpmChanges,
+    bpmChanges: level.bpmChanges,
     notes,
   };
 }

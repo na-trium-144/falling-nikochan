@@ -4,10 +4,16 @@ import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
 import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
-import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
+import {
+  Chart,
+  createBrief,
+  hashPasswd,
+  validateChart,
+} from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
 import { EfferentThree } from "@icon-park/react";
+import { initSession, SessionData } from "@/play/session";
 
 interface Props {
   chart?: Chart;
@@ -91,12 +97,12 @@ interface Props2 {
   setCid: (cid: string) => void;
   hasChange: boolean;
   setHasChange: (h: boolean) => void;
+  currentLevelIndex: number;
 }
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [uploadMsg, setUploadMsg] = useState<string>("");
-  const [auto, setAuto] = useState<boolean>(false);
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   useEffect(() => {
@@ -176,7 +182,7 @@ export function MetaTab(props: Props2) {
       const f = target.files[0];
       try {
         let newChart = msgpack.deserialize(await f.arrayBuffer());
-        newChart = validateChart(newChart);
+        newChart = await validateChart(newChart);
         if (confirm("このファイルで譜面データを上書きしますか?")) {
           props.setChart(newChart);
         }
@@ -186,9 +192,45 @@ export function MetaTab(props: Props2) {
       target.files = null;
     }
   };
+
+  const [sessionId, setSessionId] = useState<number>();
+  const [sessionData, setSessionData] = useState<SessionData>();
+  useEffect(() => {
+    if (props.chart) {
+      const data = {
+        cid: props.cid,
+        lvIndex: props.currentLevelIndex,
+        brief: createBrief(props.chart),
+        chart: props.chart,
+      };
+      setSessionData(data);
+      if (sessionId === undefined) {
+        setSessionId(initSession(data));
+      } else {
+        initSession(data, sessionId);
+      }
+    }
+  }, [sessionId, props]);
+
   return (
     <>
-      <p className="mb-1">
+          <p className="mb-1">
+            <a
+              className="hover:text-blue-600 underline relative inline-block"
+              href={`/play?sid=${sessionId}`}
+              target="_blank"
+            >
+              <button
+                onClick={() =>
+                  sessionData && initSession(sessionData, sessionId)
+                }
+              >
+                <span className="mr-5">テストプレイ</span>
+                <EfferentThree className="absolute bottom-1 right-0" />
+              </button>
+            </a>
+          </p>
+      <p className="">
         譜面ID:
         <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
         <Button text="サーバーに保存" onClick={save} />
@@ -222,26 +264,6 @@ export function MetaTab(props: Props2) {
                 }
               />
             )}
-          </p>
-          <p className="ml-2 mb-1">
-            <a
-              className="hover:text-blue-600 underline relative inline-block"
-              href={`/play/${props.cid}?auto=${auto ? 1 : 0}`}
-              target="_blank"
-            >
-              <span className="mr-5">ゲーム画面へ</span>
-              <EfferentThree className="absolute bottom-1 right-0" />
-            </a>
-            <input
-              className="ml-2 mr-1"
-              type="checkbox"
-              id="auto"
-              checked={auto}
-              onChange={(v) => setAuto(v.target.checked)}
-            />
-            <label htmlFor="auto">
-              <span>オートプレイ</span>
-            </label>
           </p>
         </>
       )}

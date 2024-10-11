@@ -1,13 +1,8 @@
-import { Chart } from "@/chartFormat/chart";
+import { Chart, Level } from "@/chartFormat/chart";
 import { NoteCommand } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
-import {
-  stepDenominator,
-  stepFourth,
-  stepMeasure,
-  stepNumerator,
-} from "./str";
+import { stepDenominator, stepFourth, stepMeasure, stepNumerator } from "./str";
 import { Step, stepCmp } from "@/chartFormat/step";
 import { Key } from "@/common/key";
 import { Mouse } from "@icon-park/react";
@@ -21,17 +16,17 @@ interface Props {
   pasteNote: (i: number) => void;
   hasCopyBuf: boolean[];
   currentStep: Step;
-  chart?: Chart;
+  currentLevel?: Level;
 }
 export default function NoteTab(props: Props) {
   const hasNoteHere =
     props.currentNoteIndex >= 0 &&
-    props.chart?.notes[props.currentNoteIndex] !== undefined;
+    props.currentLevel?.notes[props.currentNoteIndex] !== undefined;
   let notesCountInStep = 0;
   let notesIndexInStep = 0;
-  if (props.chart) {
-    for (let i = 0; i < props.chart.notes.length; i++) {
-      const n = props.chart.notes[i];
+  if (props.currentLevel) {
+    for (let i = 0; i < props.currentLevel.notes.length; i++) {
+      const n = props.currentLevel.notes[i];
       if (stepCmp(props.currentStep, n.step) > 0) {
         continue;
       } else if (stepCmp(props.currentStep, n.step) == 0) {
@@ -77,7 +72,16 @@ export default function NoteTab(props: Props) {
           <span className="inline-block ml-1">{notesCountInStep}</span>
         </div>
         <div className="inline-block">
-          <Button keyName="N" text={`Add`} onClick={() => props.addNote()} />
+          <Button
+            keyName="N"
+            text={`Add`}
+            onClick={() => props.addNote()}
+            disabled={
+              (props.currentLevel?.type === "Single" &&
+                notesCountInStep >= 1) ||
+              (props.currentLevel?.type === "Double" && notesCountInStep >= 2)
+            }
+          />
           {hasNoteHere && <Button text="Delete" onClick={props.deleteNote} />}
         </div>
       </p>
@@ -87,7 +91,7 @@ export default function NoteTab(props: Props) {
           {hasNoteHere ? props.currentNoteIndex + 1 : "-"}
         </span>
         <span className="mx-1">/</span>
-        <span className="">{props.chart?.notes.length || 0}</span>
+        <span className="">{props.currentLevel?.notes.length || 0}</span>
       </p>
       <NoteEdit {...props} />
       <span className="flex-1" />
@@ -127,9 +131,13 @@ function CopyPasteButton(props: Props) {
 }
 
 function NoteEdit(props: Props) {
-  const { currentNoteIndex, chart } = props;
-  if (chart && currentNoteIndex >= 0 && chart.notes[currentNoteIndex]) {
-    const n = chart.notes[currentNoteIndex];
+  const { currentNoteIndex, currentLevel } = props;
+  if (
+    currentLevel &&
+    currentNoteIndex >= 0 &&
+    currentLevel.notes[currentNoteIndex]
+  ) {
+    const n = currentLevel.notes[currentNoteIndex];
     const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
       <>

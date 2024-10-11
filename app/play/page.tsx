@@ -1,6 +1,6 @@
 "use client"; // あとでけす
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import { ChartSeqData, loadChart, Note } from "@/chartFormat/seq";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
@@ -10,7 +10,13 @@ import useGameLogic from "./gameLogic";
 import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
-import { Chart, ChartBrief } from "@/chartFormat/chart";
+import {
+  Chart,
+  ChartBrief,
+  levelBgColors,
+  levelColors,
+  levelTypes,
+} from "@/chartFormat/chart";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import msgpack from "@ygoe/msgpack";
 import { stepSub, stepToFloat } from "@/chartFormat/step";
@@ -21,53 +27,75 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
 import BPMSign from "./bpmSign";
+import { getSession } from "./session";
 
-export default function Home(context: { params: Params }) {
-  const cid = context.params.cid;
+export default function Home() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Play />
+    </Suspense>
+  );
+}
+
+function Play() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const auto = !!Number(searchParams.get("auto"));
+  const sid = Number(searchParams.get("sid"));
 
+  const [cid, setCid] = useState<string>();
+  const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
+  const lvType: string =
+    (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
-    void (async () => {
-      const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-      if (res.ok) {
-        // cidからタイトルなどを取得
-        const resBody = await res.json();
-        setChartBrief(resBody);
-      }
-    })();
-
-    void (async () => {
-      const res = await fetch(`/api/seqFile/${cid}`, { cache: "no-store" });
-      if (res.ok) {
-        try {
-          const seq = msgpack.deserialize(await res.arrayBuffer());
-          setChartSeq(seq);
-          setErrorStatus(undefined);
-          setErrorMsg(undefined);
-          addRecent("play", cid);
-        } catch (e) {
+    const session = getSession(sid);
+    // history.replaceState(null, "", location.pathname);
+    if (session === null) {
+      setErrorMsg("Failed to get session data");
+      return;
+    }
+    setCid(session.cid);
+    setLvIndex(session.lvIndex);
+    setChartBrief(session.brief);
+    if (session.chart) {
+      setChartSeq(loadChart(session.chart, session.lvIndex));
+      setErrorStatus(undefined);
+      setErrorMsg(undefined);
+    } else {
+      void (async () => {
+        const res = await fetch(
+          `/api/seqFile/${session.cid}/${session.lvIndex}`,
+          { cache: "no-store" }
+        );
+        if (res.ok) {
+          try {
+            const seq = msgpack.deserialize(await res.arrayBuffer());
+            setChartSeq(seq);
+            setErrorStatus(undefined);
+            setErrorMsg(undefined);
+            addRecent("play", session.cid!);
+          } catch (e) {
+            setChartSeq(undefined);
+            setErrorStatus(undefined);
+            setErrorMsg(String(e));
+          }
+        } else {
           setChartSeq(undefined);
-          setErrorStatus(undefined);
-          setErrorMsg(String(e));
+          setErrorStatus(res.status);
+          try {
+            setErrorMsg(String((await res.json()).message));
+          } catch {
+            setErrorMsg("");
+          }
         }
-      } else {
-        setChartSeq(undefined);
-        setErrorStatus(res.status);
-        try {
-          setErrorMsg(String((await res.json()).message));
-        } catch {
-          setErrorMsg("");
-        }
-      }
-    })();
-  }, [cid]);
+      })();
+    }
+  }, [sid]);
+
+  const [auto, setAuto] = useState<boolean>(false);
 
   const ref = useRef<HTMLDivElement>(null!);
   const { isTouch, screenWidth, screenHeight, rem, playUIScale } =
@@ -84,10 +112,10 @@ export default function Home(context: { params: Params }) {
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
-    if (!auto) {
-      setBestScoreState(getBestScore(cid));
+    if (!auto && cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
+      setBestScoreState(getBestScore(cid, chartBrief.levels[lvIndex].hash));
     }
-  }, [cid, auto]);
+  }, [cid, auto, lvIndex, chartBrief]);
   useEffect(reloadBestScore, [reloadBestScore]);
 
   // start後true
@@ -159,9 +187,16 @@ export default function Home(context: { params: Params }) {
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
   useEffect(() => {
-    if (chartSeq && playedOnce && end) {
+    if (
+      chartSeq &&
+      playedOnce &&
+      end &&
+      cid &&
+      lvIndex !== undefined &&
+      chartBrief?.levels[lvIndex]
+    ) {
       if (!auto && score > bestScoreState) {
-        setBestScore(cid, score);
+        setBestScore(cid, chartBrief.levels[lvIndex].hash, score);
       }
       const t = setTimeout(() => {
         setShowResult(true);
@@ -171,7 +206,17 @@ export default function Home(context: { params: Params }) {
     } else {
       setShowResult(false);
     }
-  }, [playedOnce, end, chartSeq, score, bestScoreState, cid, auto]);
+  }, [
+    playedOnce,
+    end,
+    chartSeq,
+    score,
+    bestScoreState,
+    cid,
+    auto,
+    lvIndex,
+    chartBrief,
+  ]);
 
   const onReady = useCallback(() => {
     console.log("ready");
@@ -212,7 +257,8 @@ export default function Home(context: { params: Params }) {
     }
   };
   const exit = () => {
-    router.replace(`/share/${cid}`);
+    // router.replace(`/share/${cid}`);
+    history.back();
   };
 
   // キーを押したとき一定時間光らせる
@@ -228,7 +274,6 @@ export default function Home(context: { params: Params }) {
   if (chartSeq === undefined) {
     return <Loading />;
   }
-
   return (
     <main
       className="overflow-hidden w-screen h-screen relative select-none"
@@ -269,7 +314,9 @@ export default function Home(context: { params: Params }) {
         >
           <div
             className={
-              "z-10 grow-0 shrink-0 p-3 bg-amber-600 rounded-lg flex " +
+              "z-10 grow-0 shrink-0 p-3 rounded-lg flex " +
+              (levelBgColors.at(levelTypes.indexOf(lvType)) ||
+                levelBgColors[1]) +
               (isMobile ? "mt-3 mx-3 flex-row-reverse " : "my-3 mr-3 flex-col ")
             }
           >
@@ -294,6 +341,21 @@ export default function Home(context: { params: Params }) {
                 <span className="ml-2 font-title text-sm">
                   {chartBrief?.chartCreator}
                 </span>
+              </p>
+              <p>
+                {lvIndex !== undefined && chartBrief?.levels[lvIndex] && (
+                  <>
+                    {chartBrief?.levels[lvIndex].name && (
+                      <span className="text-sm font-title mr-1">
+                        {chartBrief?.levels[lvIndex].name}
+                      </span>
+                    )}
+                    <span className="text-xs">{lvType}-</span>
+                    <span className="text-sm">
+                      {chartBrief?.levels[lvIndex]?.difficulty}
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -339,7 +401,13 @@ export default function Home(context: { params: Params }) {
               exit={exit}
             />
           ) : ready ? (
-            <ReadyMessage isTouch={isTouch} start={start} exit={exit} />
+            <ReadyMessage
+              isTouch={isTouch}
+              start={start}
+              exit={exit}
+              auto={auto}
+              setAuto={setAuto}
+            />
           ) : stopped ? (
             <StopMessage isTouch={isTouch} start={start} exit={exit} />
           ) : null}

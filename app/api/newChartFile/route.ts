@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createFileEntry, getFileEntry } from "@/api/dbChartFile";
 import { fsAssign, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
-import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
+import { Chart, chartMaxSize, createBrief, validateChart } from "@/chartFormat/chart";
 import { updateLastCreate } from "../dbRateLimit";
 import { headers } from "next/headers";
 
@@ -22,12 +22,12 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     console.error("ip is null");
     return new Response(null, { status: 500 });
   }
-  if (!(await updateLastCreate(ip))) {
-    return NextResponse.json(
-      { message: "Too many requests, please retry 30 minutes later" },
-      { status: 429, headers: [["retry-after", (30 * 60).toString()]] }
-    );
-  }
+  // if (!(await updateLastCreate(ip))) {
+  //   return NextResponse.json(
+  //     { message: "Too many requests, please retry 30 minutes later" },
+  //     { status: 429, headers: [["retry-after", (30 * 60).toString()]] }
+  //   );
+  // }
 
   const chartBuf = await request.arrayBuffer();
   if (chartBuf.byteLength > chartMaxSize) {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   let chart: Chart;
   try {
     chart = msgpack.deserialize(chartBuf);
-    chart = validateChart(chart);
+    chart = await validateChart(chart);
     chartBlob = new Blob([msgpack.serialize(chart)]);
   } catch (e) {
     console.log(e);
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     return NextResponse.json({ message: "fsAssign() failed" }, { status: 500 });
   } else {
     fid = fsRes.fid;
-    await createFileEntry(cid, fid, chart);
+    await createFileEntry(cid, fid, createBrief(chart));
   }
 
   if (!(await fsWrite(fid, chartBlob))) {

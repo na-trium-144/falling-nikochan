@@ -6,6 +6,7 @@ import msgpack from "@ygoe/msgpack";
 import {
   Chart,
   chartMaxSize,
+  createBrief,
   hashPasswd,
   validateChart,
 } from "@/chartFormat/chart";
@@ -36,7 +37,7 @@ async function getChart(
   let chart: Chart;
   try {
     chart = msgpack.deserialize(fsData.data);
-    chart = validateChart(chart);
+    chart = await validateChart(chart);
   } catch (e) {
     return {
       res: NextResponse.json(
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   let newChart: Chart;
   try {
     newChart = msgpack.deserialize(chartBuf);
-    newChart = validateChart(newChart);
+    newChart = await validateChart(newChart);
   } catch (e) {
     console.error(e);
     return NextResponse.json(
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     );
   }
 
-  await updateFileEntry(cid, newChart);
+  await updateFileEntry(cid, createBrief(newChart));
   if (
     !(await fsWrite(fileEntry.fid, new Blob([msgpack.serialize(newChart)])))
   ) {

@@ -8,6 +8,7 @@ import { loadChart } from "@/chartFormat/seq";
 
 export async function GET(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
+  const lvIndex = Number(context.params.lvIndex);
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
     return NextResponse.json(
@@ -23,14 +24,21 @@ export async function GET(request: NextRequest, context: { params: Params }) {
   let chart: Chart;
   try {
     chart = msgpack.deserialize(fsData.data);
-    chart = validateChart(chart);
+    chart = await validateChart(chart);
   } catch (e) {
     return NextResponse.json(
       { message: "invalid chart data" },
       { status: 500 }
     );
   }
-
-  const seq = loadChart(chart);
+  if (!chart.levels[lvIndex]) {
+    return NextResponse.json(
+      {
+        message: "Level not found",
+      },
+      { status: 404 }
+    );
+  }
+  const seq = loadChart(chart, lvIndex);
   return new Response(new Blob([msgpack.serialize(seq)]));
 }

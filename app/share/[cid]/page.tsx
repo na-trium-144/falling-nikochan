@@ -5,7 +5,7 @@ import Button from "@/common/button";
 import Footer from "@/common/footer";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import Link from "next/link";
-import { PlayOption } from "./playOption";
+import { PlayOption, ShareLink } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
 
@@ -35,9 +35,7 @@ export default async function ShareChart(context: { params: Params }) {
 
   return (
     <main className="flex flex-col items-center w-full min-h-screen h-max">
-      <div className="main-wide:hidden w-full">
-        <Header>ID: {cid}</Header>
-      </div>
+      <Header className="main-wide:hidden">ID: {cid}</Header>
       <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
         <Box
           className="m-auto max-w-full flex flex-col p-6 shrink"
@@ -46,7 +44,9 @@ export default async function ShareChart(context: { params: Params }) {
           <div className="main-wide:flex main-wide:flex-row-reverse main-wide:items-center">
             <FlexYouTubeShare ytId={brief.ytId} />
             <div className="main-wide:flex-1 main-wide:self-start">
-              <p className="hidden main-wide:block mb-1">ID: {cid}</p>
+              <Header className="hidden main-wide:block mb-2 pl-0">
+                ID: {cid}
+              </Header>
               <p className="font-title text-2xl">{brief?.title}</p>
               <p className="font-title text-lg">{brief?.composer}</p>
               <p className="text-sm mt-1">
@@ -57,7 +57,8 @@ export default async function ShareChart(context: { params: Params }) {
               </p>
             </div>
           </div>
-          <PlayOption cid={cid} />
+          <ShareLink cid={cid} brief={brief} />
+          <PlayOption cid={cid} brief={brief} />
         </Box>
       </div>
       <Footer nav />

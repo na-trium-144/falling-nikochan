@@ -6,7 +6,7 @@ import {
   updateBpmTimeSec,
 } from "../command";
 import { Step, stepZero } from "../step";
-import { emptyChart } from "../chart";
+import { emptyLevel } from "../chart";
 import { luaAccel, luaBPM, luaNote, luaStep } from "./api";
 
 export interface Result {
@@ -52,8 +52,12 @@ export async function luaExec(code: string): Promise<Result> {
     lua.global.set("StepStatic", (...args: any[]) => luaStep(result, ...args));
     lua.global.set("BPM", (...args: any[]) => luaBPM(result, null, ...args));
     lua.global.set("BPMStatic", (...args: any[]) => luaBPM(result, ...args));
-    lua.global.set("Accel", (...args: any[]) => luaAccel(result, null, ...args));
-    lua.global.set("AccelStatic", (...args: any[]) => luaAccel(result, ...args));
+    lua.global.set("Accel", (...args: any[]) =>
+      luaAccel(result, null, ...args)
+    );
+    lua.global.set("AccelStatic", (...args: any[]) =>
+      luaAccel(result, ...args)
+    );
 
     const codeStatic = code.split("\n").map((lineStr, ln) =>
       lineStr
@@ -66,7 +70,10 @@ export async function luaExec(code: string): Promise<Result> {
           `$1StepStatic(${ln},$2)$3`
         )
         .replace(/^( *)BPM\(( *[\d\.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
-        .replace(/^( *)Accel\(( *[\d\.]+ *)\)( *)$/, `$1AccelStatic(${ln},$2)$3`)
+        .replace(
+          /^( *)Accel\(( *[\d\.]+ *)\)( *)$/,
+          `$1AccelStatic(${ln},$2)$3`
+        )
     );
     console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
@@ -96,7 +103,7 @@ export async function luaExec(code: string): Promise<Result> {
   }
   updateBpmTimeSec(result.bpmChanges, []);
   if (result.bpmChanges.length === 0) {
-    result.bpmChanges = emptyChart().bpmChanges;
+    result.bpmChanges = emptyLevel().bpmChanges;
   }
   return result;
 }
