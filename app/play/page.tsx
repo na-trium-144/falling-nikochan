@@ -187,15 +187,14 @@ function Play() {
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
   useEffect(() => {
-    if (
-      chartSeq &&
-      playedOnce &&
-      end &&
-      cid &&
-      lvIndex !== undefined &&
-      chartBrief?.levels[lvIndex]
-    ) {
-      if (!auto && score > bestScoreState) {
+    if (chartSeq && playedOnce && end) {
+      if (
+        cid &&
+        !auto &&
+        score > bestScoreState &&
+        lvIndex !== undefined &&
+        chartBrief?.levels[lvIndex]
+      ) {
         setBestScore(cid, chartBrief.levels[lvIndex].hash, score);
       }
       const t = setTimeout(() => {
