@@ -1,24 +1,22 @@
-import { ChartBrief } from "@/chartFormat/chart";
+import { Chart, ChartBrief, Level } from "@/chartFormat/chart";
 
-interface SessionData {
-  cid: string;
+export interface SessionData {
+  cid?: string;
   lvIndex: number;
   brief: ChartBrief;
+  chart?: Chart;
 }
 // sessionStorageとlocalStorageの両方に保存し、sessionIdを返す
 export function initSession(
-  cid: string,
-  lvIndex: number,
-  brief: ChartBrief,
+  data: SessionData,
   sessionId?: number,
 ): number {
-  const sessionData = { cid, lvIndex, brief } as SessionData;
   if(sessionId === undefined) {
     sessionId = (Number(localStorage.getItem("lastSessionId")) || 0) + 1;
     localStorage.setItem("lastSessionId", String(sessionId));
   }
-  sessionStorage.setItem("session", JSON.stringify(sessionData));
-  localStorage.setItem(`session-${sessionId}`, JSON.stringify(sessionData));
+  sessionStorage.setItem("session", JSON.stringify(data));
+  localStorage.setItem(`session-${sessionId}`, JSON.stringify(data));
   return sessionId;
 }
 // sessionIdがあればlocalStorageからsessionを取得し、sessionStorageにも保存

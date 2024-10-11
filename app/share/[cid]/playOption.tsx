@@ -4,7 +4,7 @@ import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
 import { getBestScore } from "@/common/bestScore";
 import Button from "@/common/button";
 import { rankStr } from "@/common/rank";
-import { initSession } from "@/play/session";
+import { initSession, SessionData } from "@/play/session";
 import { RightOne, SmilingFace } from "@icon-park/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,7 +46,6 @@ export function ShareLink(props: Props) {
   );
 }
 export function PlayOption(props: Props) {
-  const router = useRouter();
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
@@ -54,14 +53,19 @@ export function PlayOption(props: Props) {
     setBestScoreState(getBestScore(props.cid));
   }, [props]);
 
-  const [auto, setAuto] = useState<boolean>(false);
-
   const [sessionId, setSessionId] = useState<number>();
+  const [sessionData, setSessionData] = useState<SessionData>();
   useEffect(() => {
+    const data = {
+      cid: props.cid,
+      lvIndex: selectedLevel,
+      brief: props.brief,
+    };
+    setSessionData(data);
     if (sessionId === undefined) {
-      setSessionId(initSession(props.cid, selectedLevel, props.brief));
+      setSessionId(initSession(data));
     } else {
-      initSession(props.cid, selectedLevel, props.brief, sessionId);
+      initSession(data, sessionId);
     }
   }, [sessionId, selectedLevel, props]);
 
@@ -140,7 +144,7 @@ export function PlayOption(props: Props) {
             text="ゲーム開始！"
             onClick={() =>
               // 押したときにも再度sessionを初期化
-              initSession(props.cid, selectedLevel, props.brief, sessionId)
+              sessionData && initSession(sessionData, sessionId)
             }
           />
         </Link>

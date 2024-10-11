@@ -53,34 +53,39 @@ export default function Home() {
     setCid(session.cid);
     setLvIndex(session.lvIndex);
     setChartBrief(session.brief);
-
-    void (async () => {
-      const res = await fetch(
-        `/api/seqFile/${session.cid}/${session.lvIndex}`,
-        { cache: "no-store" }
-      );
-      if (res.ok) {
-        try {
-          const seq = msgpack.deserialize(await res.arrayBuffer());
-          setChartSeq(seq);
-          setErrorStatus(undefined);
-          setErrorMsg(undefined);
-          addRecent("play", session.cid);
-        } catch (e) {
+    if (session.chart) {
+      setChartSeq(loadChart(session.chart, session.lvIndex));
+      setErrorStatus(undefined);
+      setErrorMsg(undefined);
+    } else {
+      void (async () => {
+        const res = await fetch(
+          `/api/seqFile/${session.cid}/${session.lvIndex}`,
+          { cache: "no-store" }
+        );
+        if (res.ok) {
+          try {
+            const seq = msgpack.deserialize(await res.arrayBuffer());
+            setChartSeq(seq);
+            setErrorStatus(undefined);
+            setErrorMsg(undefined);
+            addRecent("play", session.cid!);
+          } catch (e) {
+            setChartSeq(undefined);
+            setErrorStatus(undefined);
+            setErrorMsg(String(e));
+          }
+        } else {
           setChartSeq(undefined);
-          setErrorStatus(undefined);
-          setErrorMsg(String(e));
+          setErrorStatus(res.status);
+          try {
+            setErrorMsg(String((await res.json()).message));
+          } catch {
+            setErrorMsg("");
+          }
         }
-      } else {
-        setChartSeq(undefined);
-        setErrorStatus(res.status);
-        try {
-          setErrorMsg(String((await res.json()).message));
-        } catch {
-          setErrorMsg("");
-        }
-      }
-    })();
+      })();
+    }
   }, [sid]);
 
   const [auto, setAuto] = useState<boolean>(false);
