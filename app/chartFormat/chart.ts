@@ -82,7 +82,9 @@ export const levelBgColors = [
 
 export const chartMaxSize = 1000000;
 
-export async function validateChart(chart: Chart | Chart1 | Chart2 | Chart3): Promise<Chart> {
+export async function validateChart(
+  chart: Chart | Chart1 | Chart2 | Chart3
+): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver === 1) chart = convert1To2(chart);
   if (chart.ver === 2) chart = convert2To3(chart);
@@ -161,8 +163,9 @@ export function emptyLevel(prevLevel?: Level): Level {
     type: levelTypes[0],
     notes: [],
     rest: [],
-    bpmChanges: prevLevel?.bpmChanges.slice() || [],
-    speedChanges: prevLevel?.speedChanges.slice() || [],
+    bpmChanges: prevLevel?.bpmChanges.map((change) => ({ ...change })) || [],
+    speedChanges:
+      prevLevel?.speedChanges.map((change) => ({ ...change })) || [],
     lua: [],
   };
   if (!prevLevel) {
@@ -174,6 +177,18 @@ export function emptyLevel(prevLevel?: Level): Level {
     })!;
   }
   return level;
+}
+export function copyLevel(level: Level) {
+  return {
+    name: level.name,
+    hash: level.hash,
+    type: level.type,
+    notes: level.notes.map((n) => ({ ...n })),
+    rest: level.rest.map((r) => ({ ...r })),
+    bpmChanges: level.bpmChanges.map((b) => ({ ...b })),
+    speedChanges: level.speedChanges.map((b) => ({ ...b })),
+    lua: level.lua.slice(),
+  };
 }
 
 export function createBrief(chart: Chart) {

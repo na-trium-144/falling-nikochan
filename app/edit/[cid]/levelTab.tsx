@@ -1,6 +1,7 @@
 import {
   Chart,
   emptyLevel,
+  copyLevel,
   levelColors,
   levelTypes,
 } from "@/chartFormat/chart";
@@ -32,18 +33,7 @@ export default function LevelTab(props: Props) {
     if (props.chart && currentLevel) {
       props.changeChart({
         ...props.chart,
-        levels: props.chart.levels.concat([
-          {
-            name: currentLevel.name,
-            hash: currentLevel.hash,
-            type: currentLevel.type,
-            notes: currentLevel.notes.slice(),
-            rest: currentLevel.rest.slice(),
-            bpmChanges: currentLevel.bpmChanges.slice(),
-            speedChanges: currentLevel.speedChanges.slice(),
-            lua: currentLevel.lua.slice(),
-          },
-        ]),
+        levels: props.chart.levels.concat([copyLevel(currentLevel)]),
       });
       props.setCurrentLevelIndex(props.chart.levels.length);
     }
