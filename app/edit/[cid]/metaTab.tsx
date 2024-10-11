@@ -4,10 +4,16 @@ import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
 import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
-import { Chart, hashPasswd, validateChart } from "@/chartFormat/chart";
+import {
+  Chart,
+  createBrief,
+  hashPasswd,
+  validateChart,
+} from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
 import { EfferentThree } from "@icon-park/react";
+import { initSession } from "@/play/session";
 
 interface Props {
   chart?: Chart;
@@ -91,12 +97,12 @@ interface Props2 {
   setCid: (cid: string) => void;
   hasChange: boolean;
   setHasChange: (h: boolean) => void;
+  currentLevelIndex: number;
 }
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [uploadMsg, setUploadMsg] = useState<string>("");
-  const [auto, setAuto] = useState<boolean>(false);
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   useEffect(() => {
@@ -186,6 +192,28 @@ export function MetaTab(props: Props2) {
       target.files = null;
     }
   };
+
+  const [sessionId, setSessionId] = useState<number>();
+  useEffect(() => {
+    if (props.cid && props.chart)
+      if (sessionId === undefined) {
+        setSessionId(
+          initSession(
+            props.cid,
+            props.currentLevelIndex,
+            createBrief(props.chart)
+          )
+        );
+      } else {
+        initSession(
+          props.cid,
+          props.currentLevelIndex,
+          createBrief(props.chart),
+          sessionId
+        );
+      }
+  }, [sessionId, props]);
+
   return (
     <>
       <p className="mb-1">
@@ -226,22 +254,25 @@ export function MetaTab(props: Props2) {
           <p className="ml-2 mb-1">
             <a
               className="hover:text-blue-600 underline relative inline-block"
-              href={`/play/${props.cid}?auto=${auto ? 1 : 0}`}
+              href={`/play?sid=${sessionId}`}
               target="_blank"
             >
-              <span className="mr-5">ゲーム画面へ</span>
-              <EfferentThree className="absolute bottom-1 right-0" />
+              <button
+                onClick={() =>
+                  props.cid &&
+                  props.chart &&
+                  initSession(
+                    props.cid,
+                    props.currentLevelIndex,
+                    createBrief(props.chart),
+                    sessionId
+                  )
+                }
+              >
+                <span className="mr-5">ゲーム画面へ</span>
+                <EfferentThree className="absolute bottom-1 right-0" />
+              </button>
             </a>
-            <input
-              className="ml-2 mr-1"
-              type="checkbox"
-              id="auto"
-              checked={auto}
-              onChange={(v) => setAuto(v.target.checked)}
-            />
-            <label htmlFor="auto">
-              <span>オートプレイ</span>
-            </label>
           </p>
         </>
       )}

@@ -758,6 +758,7 @@ export default function Page(context: { params: Params }) {
                 setCid={(newCid: string) => setCid(newCid)}
                 hasChange={hasChange}
                 setHasChange={setHasChange}
+                currentLevelIndex={currentLevelIndex}
               />
             ) : tab === 1 ? (
               <TimingTab

@@ -56,6 +56,15 @@ export function PlayOption(props: Props) {
 
   const [auto, setAuto] = useState<boolean>(false);
 
+  const [sessionId, setSessionId] = useState<number>();
+  useEffect(() => {
+    if (sessionId === undefined) {
+      setSessionId(initSession(props.cid, selectedLevel, props.brief));
+    } else {
+      initSession(props.cid, selectedLevel, props.brief, sessionId);
+    }
+  }, [sessionId, selectedLevel, props]);
+
   return (
     <>
       <p>レベルを選択:</p>
@@ -126,13 +135,15 @@ export function PlayOption(props: Props) {
         )}
       </p>
       <p className="mt-3">
-        <Button
-          text="ゲーム開始！"
-          onClick={() => {
-            initSession(props.cid, selectedLevel, props.brief);
-            router.push("/play");
-          }}
-        />
+        <Link href={`/play?sid=${sessionId}`}>
+          <Button
+            text="ゲーム開始！"
+            onClick={() =>
+              // 押したときにも再度sessionを初期化
+              initSession(props.cid, selectedLevel, props.brief, sessionId)
+            }
+          />
+        </Link>
       </p>
     </>
   );

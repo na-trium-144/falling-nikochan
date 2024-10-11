@@ -31,6 +31,8 @@ import { getSession } from "./session";
 
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sid = Number(searchParams.get("sid"));
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -42,7 +44,8 @@ export default function Home() {
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
-    const session = getSession();
+    const session = getSession(sid);
+    // history.replaceState(null, "", location.pathname);
     if (session === null) {
       setErrorMsg("Failed to get session data");
       return;
@@ -78,7 +81,7 @@ export default function Home() {
         }
       }
     })();
-  }, []);
+  }, [sid]);
 
   const [auto, setAuto] = useState<boolean>(false);
 
