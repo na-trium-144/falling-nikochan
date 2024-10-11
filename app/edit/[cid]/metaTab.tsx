@@ -203,6 +203,7 @@ export function MetaTab(props: Props2) {
         lvIndex: props.currentLevelIndex,
         brief: createBrief(props.chart),
         chart: props.chart,
+        editing: true,
       };
       setSessionData(data);
       if (props.sessionId === undefined) {

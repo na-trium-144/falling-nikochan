@@ -9,6 +9,7 @@ interface MessageProps {
   exit: () => void;
   auto: boolean;
   setAuto: (a: boolean) => void;
+  editing: boolean;
 }
 export function ReadyMessage(props: MessageProps) {
   return (
@@ -31,6 +32,13 @@ export function ReadyMessage(props: MessageProps) {
         <br />
         ページを再読み込みしてください
       </p>
+      {props.editing && (
+        <p className="mt-2">
+          編集画面で変更した譜面は、
+          <br />
+          ページ再読み込みでこちらに反映されます。
+        </p>
+      )}
       <div className="mt-2 mb-2 border-b border-black" />
       <p>オプション</p>
       <p className="mt-2">
