@@ -9,6 +9,10 @@ import { Mouse } from "@icon-park/react";
 
 interface Props {
   currentNoteIndex: number;
+  hasCurrentNote: boolean;
+  notesCountInStep: number;
+  notesIndexInStep: number;
+  canAddNote: boolean;
   addNote: () => void;
   deleteNote: () => void;
   updateNote: (n: NoteCommand) => void;
@@ -19,27 +23,6 @@ interface Props {
   currentLevel?: Level;
 }
 export default function NoteTab(props: Props) {
-  const hasNoteHere =
-    props.currentNoteIndex >= 0 &&
-    props.currentLevel?.notes[props.currentNoteIndex] !== undefined;
-  let notesCountInStep = 0;
-  let notesIndexInStep = 0;
-  if (props.currentLevel) {
-    for (let i = 0; i < props.currentLevel.notes.length; i++) {
-      const n = props.currentLevel.notes[i];
-      if (stepCmp(props.currentStep, n.step) > 0) {
-        continue;
-      } else if (stepCmp(props.currentStep, n.step) == 0) {
-        if (i < props.currentNoteIndex) {
-          notesIndexInStep++;
-        }
-        notesCountInStep++;
-      } else {
-        break;
-      }
-    }
-  }
-
   return (
     <div className="flex flex-col h-full">
       <p>
@@ -66,29 +49,27 @@ export default function NoteTab(props: Props) {
         <div className="inline-block ml-2 w-28">
           <span>Note</span>
           <span className="inline-block text-right w-6">
-            {hasNoteHere ? notesIndexInStep + 1 : "-"}
+            {props.hasCurrentNote ? props.notesIndexInStep + 1 : "-"}
           </span>
           <span className="ml-1 ">/</span>
-          <span className="inline-block ml-1">{notesCountInStep}</span>
+          <span className="inline-block ml-1">{props.notesCountInStep}</span>
         </div>
         <div className="inline-block">
           <Button
             keyName="N"
             text={`Add`}
             onClick={() => props.addNote()}
-            disabled={
-              (props.currentLevel?.type === "Single" &&
-                notesCountInStep >= 1) ||
-              (props.currentLevel?.type === "Double" && notesCountInStep >= 2)
-            }
+            disabled={!props.canAddNote}
           />
-          {hasNoteHere && <Button text="Delete" onClick={props.deleteNote} />}
+          {props.hasCurrentNote && (
+            <Button text="Delete" onClick={props.deleteNote} />
+          )}
         </div>
       </p>
       <p className="mb-1">
         <span>Total Notes:</span>
         <span className="inline-block w-12 text-right">
-          {hasNoteHere ? props.currentNoteIndex + 1 : "-"}
+          {props.hasCurrentNote ? props.currentNoteIndex + 1 : "-"}
         </span>
         <span className="mx-1">/</span>
         <span className="">{props.currentLevel?.notes.length || 0}</span>

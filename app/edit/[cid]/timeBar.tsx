@@ -103,6 +103,7 @@ export default function TimeBar(props: Props) {
     snapDivider,
     timeBarPxPerSec,
     marginPxLeft,
+    currentLevel,
   ]);
 
   // timebarに表示するstep目盛りのリスト

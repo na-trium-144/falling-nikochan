@@ -142,7 +142,6 @@ export default function Page(context: { params: Params }) {
       } else {
         initSession(data, sessionId);
       }
-
     })();
   };
   useEffect(() => {
@@ -187,6 +186,33 @@ export default function Page(context: { params: Params }) {
   const hasCurrentNote =
     currentNoteIndex >= 0 &&
     currentLevel?.notes.at(currentNoteIndex) !== undefined;
+  const [notesCountInStep, setNotesCountInStep] = useState<number>(0);
+  const [notesIndexInStep, setNotesIndexInStep] = useState<number>(0);
+  const canAddNote = !(
+    (currentLevel?.type === "Single" && notesCountInStep >= 1) ||
+    (currentLevel?.type === "Double" && notesCountInStep >= 2)
+  );
+  useEffect(() => {
+    if (currentLevel) {
+      let notesCountInStep = 0;
+      let notesIndexInStep = 0;
+      for (let i = 0; i < currentLevel.notes.length; i++) {
+        const n = currentLevel.notes[i];
+        if (stepCmp(currentStep, n.step) > 0) {
+          continue;
+        } else if (stepCmp(currentStep, n.step) == 0) {
+          if (i < currentNoteIndex) {
+            notesIndexInStep++;
+          }
+          notesCountInStep++;
+        } else {
+          break;
+        }
+      }
+      setNotesCountInStep(notesCountInStep);
+      setNotesIndexInStep(notesIndexInStep);
+    }
+  }, [currentLevel, currentStep, currentNoteIndex]);
 
   // currentTimeが変わったときcurrentStepを更新
   const prevTimeSec = useRef<number>(-1);
@@ -450,7 +476,7 @@ export default function Page(context: { params: Params }) {
   };
 
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
-    if (chart && currentLevel && n) {
+    if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaAddNote(levelCopied, n, currentStep);
       if (newLevel !== null) {
@@ -828,6 +854,10 @@ export default function Page(context: { params: Params }) {
             ) : tab === 3 ? (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
+                hasCurrentNote={hasCurrentNote}
+                notesIndexInStep={notesIndexInStep}
+                notesCountInStep={notesCountInStep}
+                canAddNote={canAddNote}
                 addNote={addNote}
                 deleteNote={deleteNote}
                 updateNote={updateNote}
