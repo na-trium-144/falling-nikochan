@@ -101,7 +101,7 @@ export async function luaExec(code: string): Promise<Result> {
   } finally {
     lua.global.close();
   }
-  updateBpmTimeSec(result.bpmChanges, []);
+  updateBpmTimeSec(result.bpmChanges, result.speedChanges);
   if (result.bpmChanges.length === 0) {
     result.bpmChanges = emptyLevel().bpmChanges;
   }
