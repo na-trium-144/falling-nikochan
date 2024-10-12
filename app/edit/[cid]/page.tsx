@@ -23,6 +23,7 @@ import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
 import {
   Chart,
+  createBrief,
   emptyChart,
   hashLevel,
   hashPasswd,
@@ -51,6 +52,7 @@ import {
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
+import { initSession, SessionData } from "@/play/session";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -116,6 +118,9 @@ export default function Page(context: { params: Params }) {
   useEffect(() => void fetchChart(), [fetchChart]);
 
   const [hasChange, setHasChange] = useState<boolean>(false);
+  const [sessionId, setSessionId] = useState<number>();
+  const [sessionData, setSessionData] = useState<SessionData>();
+
   const changeChart = (chart: Chart) => {
     void (async () => {
       for (const level of chart.levels) {
@@ -123,6 +128,21 @@ export default function Page(context: { params: Params }) {
       }
       setHasChange(true);
       setChart(chart);
+
+      const data = {
+        cid: cid,
+        lvIndex: currentLevelIndex,
+        brief: createBrief(chart),
+        chart: chart,
+        editing: true,
+      };
+      setSessionData(data);
+      if (sessionId === undefined) {
+        setSessionId(initSession(data));
+      } else {
+        initSession(data, sessionId);
+      }
+
     })();
   };
   useEffect(() => {
@@ -147,8 +167,6 @@ export default function Page(context: { params: Params }) {
       changeChart(newChart);
     }
   };
-
-  const [sessionId, setSessionId] = useState<number>();
 
   const ref = useRef<HTMLDivElement>(null!);
 
@@ -763,7 +781,7 @@ export default function Page(context: { params: Params }) {
             {tab === 0 ? (
               <MetaTab
                 sessionId={sessionId}
-                setSessionId={setSessionId}
+                sessionData={sessionData}
                 chart={chart}
                 setChart={changeChart}
                 cid={cid}
