@@ -84,3 +84,7 @@ body {
   /*//ポップアップメニュー表示制御*/
   -webkit-touch-callout: none;
 }
+.appearance-none {
+  appearance: none;
+  -webkit-appearance: none;
+}
