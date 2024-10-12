@@ -52,7 +52,7 @@ import {
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
-import { initSession, SessionData } from "@/play/session";
+import { clearSession, initSession, SessionData } from "@/play/session";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -121,6 +121,13 @@ export default function Page(context: { params: Params }) {
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
 
+  const createSessionData = (chart: Chart) => ({
+    cid: cid,
+    lvIndex: currentLevelIndex,
+    brief: createBrief(chart),
+    chart: chart,
+    editing: true,
+  });
   const changeChart = (chart: Chart) => {
     void (async () => {
       for (const level of chart.levels) {
@@ -129,13 +136,7 @@ export default function Page(context: { params: Params }) {
       setHasChange(true);
       setChart(chart);
 
-      const data = {
-        cid: cid,
-        lvIndex: currentLevelIndex,
-        brief: createBrief(chart),
-        chart: chart,
-        editing: true,
-      };
+      const data = createSessionData(chart);
       setSessionData(data);
       if (sessionId === undefined) {
         setSessionId(initSession(data));
@@ -145,12 +146,23 @@ export default function Page(context: { params: Params }) {
     })();
   };
   useEffect(() => {
+    if (sessionId === undefined && chart) {
+      setSessionId(initSession(createSessionData(chart)));
+    }
+  }, [sessionId, chart, createSessionData]);
+
+  useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (hasChange) {
         const confirmationMessage = "未保存の変更があります";
+        if (confirmationMessage) {
+          clearSession(sessionId);
+        }
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
         return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+      } else {
+        clearSession(sessionId);
       }
     };
     window.addEventListener("beforeunload", onUnload);
