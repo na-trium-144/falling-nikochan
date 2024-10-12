@@ -334,29 +334,63 @@ function Play() {
               onStart={onStart}
               onStop={onStop}
             />
-            <div className="flex-1">
-              <p className="font-title text-lg">{chartBrief?.title}</p>
-              <p className="font-title text-sm">{chartBrief?.composer}</p>
-              <p className="text-xs">
-                <span>Chart by</span>
-                <span className="ml-2 font-title text-sm">
-                  {chartBrief?.chartCreator}
-                </span>
+            <div className="flex-1 min-w-0 ">
+              <p
+                className={
+                  "font-title text-lg leading-tight " +
+                  (isMobile
+                    ? "overflow-x-hidden w-full text-ellipsis whitespace-nowrap "
+                    : "mt-1.5 ")
+                }
+              >
+                {chartBrief?.title}
               </p>
-              <p>
+              <p
+                className={
+                  "font-title text-sm leading-tight " +
+                  (isMobile
+                    ? "overflow-x-hidden w-full text-ellipsis whitespace-nowrap "
+                    : "")
+                }
+              >
+                {chartBrief?.composer}
+              </p>
+              <p style={{ lineHeight: 0 }}>
                 {lvIndex !== undefined && chartBrief?.levels[lvIndex] && (
-                  <>
+                  <span
+                    className={
+                      "inline-block " +
+                      (isMobile
+                        ? "overflow-x-hidden max-w-full text-ellipsis whitespace-nowrap "
+                        : "")
+                    }
+                    style={{ marginTop: "-0.2rem" }}
+                  >
                     {chartBrief?.levels[lvIndex].name && (
-                      <span className="text-sm font-title mr-1">
+                      <span className="text-base font-title mr-1">
                         {chartBrief?.levels[lvIndex].name}
                       </span>
                     )}
-                    <span className="text-xs">{lvType}-</span>
-                    <span className="text-sm">
+                    <span className="text-sm">{lvType}-</span>
+                    <span className="text-lg">
                       {chartBrief?.levels[lvIndex]?.difficulty}
                     </span>
-                  </>
+                  </span>
                 )}
+                <span
+                  className={
+                    "inline-block " +
+                    (isMobile
+                      ? "overflow-x-hidden max-w-full text-ellipsis whitespace-nowrap "
+                      : "")
+                  }
+                  style={{ marginTop: "-0.2rem" }}
+                >
+                  <span className="ml-2 text-xs">by</span>
+                  <span className="ml-1.5 font-title text-sm">
+                    {chartBrief?.chartCreator}
+                  </span>
+                </span>
               </p>
             </div>
           </div>
