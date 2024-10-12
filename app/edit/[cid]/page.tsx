@@ -525,7 +525,6 @@ export default function Page(context: { params: Params }) {
       className={
         "overflow-x-hidden " + "edit-wide:h-screen edit-wide:overflow-y-hidden "
       }
-      style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
