@@ -115,10 +115,12 @@ export default function LevelTab(props: Props) {
               <span
                 className={
                   "inline-block mr-2 " +
-                  levelColors[levelTypes.indexOf(level.type)]
+                  (i === props.currentLevelIndex
+                    ? levelColors[levelTypes.indexOf(level.type)]
+                    : "")
                 }
               >
-                {level.type}-
+                <span className="text-sm">{level.type}-</span>
                 <span className="text-lg">{levelsDifficulty[i]}</span>
               </span>
               <span

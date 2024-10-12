@@ -92,7 +92,7 @@ export function MetaEdit(props: Props) {
 
 interface Props2 {
   sessionId?: number;
-  setSessionId: (id: number) => void;
+  sessionData?: SessionData;
   chart?: Chart;
   setChart: (chart: Chart) => void;
   cid: string | undefined;
@@ -186,7 +186,10 @@ export function MetaTab(props: Props2) {
         let newChart = msgpack.deserialize(await f.arrayBuffer());
         newChart = await validateChart(newChart);
         if (confirm("このファイルで譜面データを上書きしますか?")) {
-          props.setChart(newChart);
+          props.setChart({
+            ...newChart,
+            editPasswd: props.chart?.editPasswd || "",
+          });
         }
       } catch (e) {
         setUploadMsg(String(e));
@@ -195,43 +198,25 @@ export function MetaTab(props: Props2) {
     }
   };
 
-  const [sessionData, setSessionData] = useState<SessionData>();
-  useEffect(() => {
-    if (props.chart) {
-      const data = {
-        cid: props.cid,
-        lvIndex: props.currentLevelIndex,
-        brief: createBrief(props.chart),
-        chart: props.chart,
-        editing: true,
-      };
-      setSessionData(data);
-      if (props.sessionId === undefined) {
-        props.setSessionId(initSession(data));
-      } else {
-        initSession(data, props.sessionId);
-      }
-    }
-  }, [props]);
-
   return (
     <>
-          <p className="mb-1">
-            <a
-              className="hover:text-blue-600 underline relative inline-block"
-              href={`/play?sid=${props.sessionId}`}
-              target="_blank"
-            >
-              <button
-                onClick={() =>
-                  sessionData && initSession(sessionData, props.sessionId)
-                }
-              >
-                <span className="mr-5">テストプレイ</span>
-                <EfferentThree className="absolute bottom-1 right-0" />
-              </button>
-            </a>
-          </p>
+      <p className="mb-1">
+        <a
+          className="hover:text-blue-600 underline relative inline-block"
+          href={`/play?sid=${props.sessionId}`}
+          target="_blank"
+        >
+          <button
+            onClick={() =>
+              props.sessionData &&
+              initSession(props.sessionData, props.sessionId)
+            }
+          >
+            <span className="mr-5">テストプレイ</span>
+            <EfferentThree className="absolute bottom-1 right-0" />
+          </button>
+        </a>
+      </p>
       <p className="">
         譜面ID:
         <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>

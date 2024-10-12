@@ -136,7 +136,9 @@ function StatusIcon(props: { index: number }) {
 function StatusName(props: { children: ReactNode }) {
   const { screenWidth, screenHeight, rem } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  return <span className={isMobile ? "h-3 " : "flex-1"}>{props.children}</span>;
+  return (
+    <span className={isMobile ? "h-3 w-max" : "flex-1"}>{props.children}</span>
+  );
 }
 function StatusValue(props: { children: ReactNode }) {
   const { screenWidth, screenHeight, rem } = useDisplayMode();

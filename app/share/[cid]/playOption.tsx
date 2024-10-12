@@ -94,10 +94,13 @@ export function PlayOption(props: Props) {
               <span
                 className={
                   "inline-block mr-2 " +
-                  levelColors[levelTypes.indexOf(level.type)]
+                  (i === selectedLevel
+                    ? levelColors[levelTypes.indexOf(level.type)]
+                    : "")
                 }
               >
-                {level.type}-<span className="text-lg">{level.difficulty}</span>
+                <span className="text-sm">{level.type}-</span>
+                <span className="text-lg">{level.difficulty}</span>
               </span>
             </button>
           </li>

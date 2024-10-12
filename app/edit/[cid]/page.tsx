@@ -23,6 +23,7 @@ import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent";
 import {
   Chart,
+  createBrief,
   emptyChart,
   hashLevel,
   hashPasswd,
@@ -51,6 +52,7 @@ import {
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
+import { clearSession, initSession, SessionData } from "@/play/session";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -116,6 +118,16 @@ export default function Page(context: { params: Params }) {
   useEffect(() => void fetchChart(), [fetchChart]);
 
   const [hasChange, setHasChange] = useState<boolean>(false);
+  const [sessionId, setSessionId] = useState<number>();
+  const [sessionData, setSessionData] = useState<SessionData>();
+
+  const createSessionData = (chart: Chart) => ({
+    cid: cid,
+    lvIndex: currentLevelIndex,
+    brief: createBrief(chart),
+    chart: chart,
+    editing: true,
+  });
   const changeChart = (chart: Chart) => {
     void (async () => {
       for (const level of chart.levels) {
@@ -123,15 +135,34 @@ export default function Page(context: { params: Params }) {
       }
       setHasChange(true);
       setChart(chart);
+
+      const data = createSessionData(chart);
+      setSessionData(data);
+      if (sessionId === undefined) {
+        setSessionId(initSession(data));
+      } else {
+        initSession(data, sessionId);
+      }
     })();
   };
+  useEffect(() => {
+    if (sessionId === undefined && chart) {
+      setSessionId(initSession(createSessionData(chart)));
+    }
+  }, [sessionId, chart, createSessionData]);
+
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (hasChange) {
         const confirmationMessage = "未保存の変更があります";
+        if (confirmationMessage) {
+          clearSession(sessionId);
+        }
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
         return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+      } else {
+        clearSession(sessionId);
       }
     };
     window.addEventListener("beforeunload", onUnload);
@@ -147,8 +178,6 @@ export default function Page(context: { params: Params }) {
       changeChart(newChart);
     }
   };
-
-  const [sessionId, setSessionId] = useState<number>();
 
   const ref = useRef<HTMLDivElement>(null!);
 
@@ -169,6 +198,33 @@ export default function Page(context: { params: Params }) {
   const hasCurrentNote =
     currentNoteIndex >= 0 &&
     currentLevel?.notes.at(currentNoteIndex) !== undefined;
+  const [notesCountInStep, setNotesCountInStep] = useState<number>(0);
+  const [notesIndexInStep, setNotesIndexInStep] = useState<number>(0);
+  const canAddNote = !(
+    (currentLevel?.type === "Single" && notesCountInStep >= 1) ||
+    (currentLevel?.type === "Double" && notesCountInStep >= 2)
+  );
+  useEffect(() => {
+    if (currentLevel) {
+      let notesCountInStep = 0;
+      let notesIndexInStep = 0;
+      for (let i = 0; i < currentLevel.notes.length; i++) {
+        const n = currentLevel.notes[i];
+        if (stepCmp(currentStep, n.step) > 0) {
+          continue;
+        } else if (stepCmp(currentStep, n.step) == 0) {
+          if (i < currentNoteIndex) {
+            notesIndexInStep++;
+          }
+          notesCountInStep++;
+        } else {
+          break;
+        }
+      }
+      setNotesCountInStep(notesCountInStep);
+      setNotesIndexInStep(notesIndexInStep);
+    }
+  }, [currentLevel, currentStep, currentNoteIndex]);
 
   // currentTimeが変わったときcurrentStepを更新
   const prevTimeSec = useRef<number>(-1);
@@ -432,7 +488,7 @@ export default function Page(context: { params: Params }) {
   };
 
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
-    if (chart && currentLevel && n) {
+    if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaAddNote(levelCopied, n, currentStep);
       if (newLevel !== null) {
@@ -763,7 +819,7 @@ export default function Page(context: { params: Params }) {
             {tab === 0 ? (
               <MetaTab
                 sessionId={sessionId}
-                setSessionId={setSessionId}
+                sessionData={sessionData}
                 chart={chart}
                 setChart={changeChart}
                 cid={cid}
@@ -810,6 +866,10 @@ export default function Page(context: { params: Params }) {
             ) : tab === 3 ? (
               <NoteTab
                 currentNoteIndex={currentNoteIndex}
+                hasCurrentNote={hasCurrentNote}
+                notesIndexInStep={notesIndexInStep}
+                notesCountInStep={notesCountInStep}
+                canAddNote={canAddNote}
                 addNote={addNote}
                 deleteNote={deleteNote}
                 updateNote={updateNote}

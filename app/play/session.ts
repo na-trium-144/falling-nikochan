@@ -36,3 +36,7 @@ export function getSession(sessionId?: number): SessionData | null {
   }
   return JSON.parse(sessionStorage.getItem("session") || "null");
 }
+export function clearSession(sessionId?: number){
+  sessionStorage.removeItem("session");
+  localStorage.removeItem(`session-${sessionId}`);
+}

@@ -87,7 +87,6 @@ export function difficulty(level: Level, type: string): number {
     if (agentScore >= 99 && plv === null) {
       plv = lv;
     }
-    console.log(lv, lvToNps(lv, type), agentScore);
     if (clv !== null && plv !== null) {
       return Math.max(Math.min(Math.round((clv + plv) / 2), maxLv), minLv);
     }
