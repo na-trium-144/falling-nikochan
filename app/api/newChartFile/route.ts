@@ -22,12 +22,12 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     console.error("ip is null");
     return new Response(null, { status: 500 });
   }
-  // if (!(await updateLastCreate(ip))) {
-  //   return NextResponse.json(
-  //     { message: "Too many requests, please retry 30 minutes later" },
-  //     { status: 429, headers: [["retry-after", (30 * 60).toString()]] }
-  //   );
-  // }
+  if (process.env.NODE_ENV !== "development" && !(await updateLastCreate(ip))) {
+    return NextResponse.json(
+      { message: "Too many requests, please retry 30 minutes later" },
+      { status: 429, headers: [["retry-after", (30 * 60).toString()]] }
+    );
+  }
 
   const chartBuf = await request.arrayBuffer();
   if (chartBuf.byteLength > chartMaxSize) {
