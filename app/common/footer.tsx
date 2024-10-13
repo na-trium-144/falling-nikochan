@@ -9,7 +9,7 @@ interface Props {
 }
 export default function Footer(props: Props) {
   return (
-    <footer className="">
+    <footer className="pb-3">
       {props.nav && (
         <div
           className={
