@@ -8,6 +8,24 @@ import Link from "next/link";
 import { PlayOption, ShareLink } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
+import { metaDataTitle, pageTitle } from "@/common/title";
+
+export async function generateMetadata(context: { params: Params }) {
+  const cid = context.params.cid;
+  let brief: ChartBrief | undefined = undefined;
+
+  // const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+  const res = await getBrief(cid);
+  if (res.ok) {
+    // cidからタイトルなどを取得
+    brief = await res.json();
+  }
+  if (brief) {
+    return metaDataTitle(pageTitle(cid, brief));
+  } else {
+    return metaDataTitle(`Not Found (ID: ${cid})`);
+  }
+}
 
 export default async function ShareChart(context: { params: Params }) {
   const cid = context.params.cid;
