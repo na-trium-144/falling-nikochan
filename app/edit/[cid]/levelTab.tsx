@@ -49,6 +49,29 @@ export default function LevelTab(props: Props) {
       props.setCurrentLevelIndex(0);
     }
   };
+  const moveLevelUp = () => {
+    if (props.chart && props.currentLevelIndex > 0) {
+      const levels = props.chart.levels.slice();
+      const tmp = levels[props.currentLevelIndex];
+      levels[props.currentLevelIndex] = levels[props.currentLevelIndex - 1];
+      levels[props.currentLevelIndex - 1] = tmp;
+      props.changeChart({ ...props.chart, levels });
+      props.setCurrentLevelIndex(props.currentLevelIndex - 1);
+    }
+  };
+  const moveLevelDown = () => {
+    if (
+      props.chart &&
+      props.currentLevelIndex < props.chart.levels.length - 1
+    ) {
+      const levels = props.chart.levels.slice();
+      const tmp = levels[props.currentLevelIndex];
+      levels[props.currentLevelIndex] = levels[props.currentLevelIndex + 1];
+      levels[props.currentLevelIndex + 1] = tmp;
+      props.changeChart({ ...props.chart, levels });
+      props.setCurrentLevelIndex(props.currentLevelIndex + 1);
+    }
+  };
 
   const [levelsDifficulty, setLevelsDifficulty] = useState<number[]>([]);
   useEffect(() => {
@@ -89,6 +112,18 @@ export default function LevelTab(props: Props) {
           <>
             <Button text={`Duplicate`} onClick={duplicateLevel} />
             <Button text="Delete" onClick={deleteLevel} />
+            <Button
+              text="↑"
+              onClick={moveLevelUp}
+              disabled={props.currentLevelIndex === 0}
+            />
+            <Button
+              text="↓"
+              onClick={moveLevelDown}
+              disabled={
+                props.currentLevelIndex === props.chart.levels.length - 1
+              }
+            />
           </>
         )}
       </p>
