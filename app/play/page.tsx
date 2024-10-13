@@ -28,6 +28,7 @@ import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
 import BPMSign from "./bpmSign";
 import { getSession } from "./session";
+import { pageTitle } from "@/common/title";
 
 export default function Home() {
   return (
@@ -62,6 +63,10 @@ function Play() {
     setLvIndex(session.lvIndex);
     setChartBrief(session.brief);
     setEditing(!!session.editing);
+    document.title = (session.editing ? "(テストプレイ) " : "") +
+      pageTitle(session.cid || "-", session.brief) +
+      " | Falling Nikochan";
+
     if (session.chart) {
       setChartSeq(loadChart(session.chart, session.lvIndex));
       setErrorStatus(undefined);

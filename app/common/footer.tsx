@@ -1,6 +1,6 @@
 "use client";
 
-import { tabTitles, tabURLs } from "@/main/main";
+import { tabTitles, tabURLs } from "@/main/const";
 import { Github } from "@icon-park/react";
 import Link from "next/link";
 
