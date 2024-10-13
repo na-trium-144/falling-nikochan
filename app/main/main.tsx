@@ -74,9 +74,8 @@ export function IndexMain(props: Props) {
           <Box
             className={
               "flex flex-col p-6 overflow-auto " +
-              (isMobile ? "w-full my-6 " : "shrink ")
+              (isMobile ? "w-full my-6 " : "flex-1 ")
             }
-            style={{ flexBasis: isMobile ? undefined : 600 }}
           >
             {props.children}
           </Box>
