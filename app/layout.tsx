@@ -39,17 +39,6 @@ export const metadata: Metadata = {
     nocache: true,
   },
 };
-export function metaDataTitle(title: string) {
-  return {
-    title,
-    openGraph: {
-      title,
-    },
-    twitter: {
-      title,
-    }
-  }
-}
 
 export default function RootLayout({
   children,

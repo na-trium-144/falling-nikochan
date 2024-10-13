@@ -8,3 +8,14 @@ export function pageTitle(cid: string, brief: ChartBrief) {
     (brief.chartCreator ? "Chart by " + brief.chartCreator : "") +
     ` (ID: ${cid})`;
 }
+export function metaDataTitle(title: string) {
+  return {
+    title,
+    openGraph: {
+      title,
+    },
+    twitter: {
+      title,
+    }
+  }
+}

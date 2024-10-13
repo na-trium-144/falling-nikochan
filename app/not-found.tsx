@@ -1,5 +1,5 @@
 import { NotFound } from "./common/box";
-import { metaDataTitle } from "./layout";
+import { metaDataTitle } from "./common/title";
 
 export const metadata = metaDataTitle(`Not Found`);
 

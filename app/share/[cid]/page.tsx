@@ -8,8 +8,7 @@ import Link from "next/link";
 import { PlayOption, ShareLink } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
-import { metaDataTitle } from "@/layout";
-import { pageTitle } from "@/common/title";
+import { metaDataTitle, pageTitle } from "@/common/title";
 
 export async function generateMetadata(context: { params: Params }) {
   const cid = context.params.cid;

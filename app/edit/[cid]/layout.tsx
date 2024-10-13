@@ -1,4 +1,4 @@
-import { metaDataTitle } from "@/layout";
+import { metaDataTitle } from "@/common/title";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { ReactNode } from "react";
 

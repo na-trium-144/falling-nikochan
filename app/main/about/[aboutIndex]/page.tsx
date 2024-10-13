@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AboutContent2 } from "./2-play";
 import { AboutContent1 } from "./1-about";
 import { AboutContent3 } from "./3-edit";
-import { metaDataTitle } from "@/layout";
+import { metaDataTitle } from "@/common/title";
 
 const aboutTitles = [
   "",
