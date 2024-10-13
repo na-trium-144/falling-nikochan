@@ -9,7 +9,7 @@ interface Props {
 }
 export default function Footer(props: Props) {
   return (
-    <footer className="">
+    <footer className="pb-3">
       {props.nav && (
         <div
           className={
@@ -48,10 +48,6 @@ export default function Footer(props: Props) {
           <span>({process.env.buildCommit})</span>
         </div>
       </div>
-      <p className="my-1 text-center text-sm">
-        ※ FallingNikochanは開発中です。
-        予告なく仕様変更したりサーバーダウンしたりデータが消えたりする可能性があります。
-      </p>
     </footer>
   );
 }
