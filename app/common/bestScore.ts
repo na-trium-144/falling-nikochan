@@ -1,10 +1,19 @@
-function bestKey(cid: string, hash: string) {
-  return "best-" + cid + "-" + hash;
+function bestKey(cid: string, lvIndex: number) {
+  return "best-" + cid + "-" + lvIndex;
 }
-export function getBestScore(cid: string, hash: string): number {
-  return Number(localStorage.getItem(bestKey(cid, hash)) || "");
+export interface ResultData {
+  levelHash: string;
+  baseScore: number;
+  chainScore: number;
+  bigScore: number;
+  judgeCount: [number, number, number, number];
 }
-
-export function setBestScore(cid: string, hash: string, score: number) {
-  localStorage.setItem(bestKey(cid, hash), score.toString());
+export function getBestScore(cid: string, lvIndex: number): ResultData | null {
+  return JSON.parse(localStorage.getItem(bestKey(cid, lvIndex)) || "null");
+}
+export function setBestScore(cid: string, lvIndex: number, data: ResultData) {
+  localStorage.setItem(bestKey(cid, lvIndex), JSON.stringify(data));
+}
+export function clearBestScore(cid: string, lvIndex: number) {
+  localStorage.removeItem(bestKey(cid, lvIndex));
 }

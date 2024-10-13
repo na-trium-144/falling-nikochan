@@ -31,8 +31,9 @@ model LevelBrief {
   type String
   difficulty Int
   noteCount Int
-  bpmMin Int
-  bpmMax Int
+  bpmMin Float
+  bpmMax Float
+  length Float
 }
 
 model CreateRateLimit {

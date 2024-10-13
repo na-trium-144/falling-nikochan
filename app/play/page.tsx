@@ -115,7 +115,10 @@ function Play() {
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
     if (!auto && cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
-      setBestScoreState(getBestScore(cid, chartBrief.levels[lvIndex].hash));
+      const data = getBestScore(cid, lvIndex);
+      if (data && data.levelHash === chartBrief.levels[lvIndex].hash) {
+        setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
+      }
     }
   }, [cid, auto, lvIndex, chartBrief]);
   useEffect(reloadBestScore, [reloadBestScore]);
@@ -197,7 +200,13 @@ function Play() {
         lvIndex !== undefined &&
         chartBrief?.levels[lvIndex]
       ) {
-        setBestScore(cid, chartBrief.levels[lvIndex].hash, score);
+        setBestScore(cid, lvIndex, {
+          levelHash: chartBrief.levels[lvIndex].hash,
+          baseScore,
+          chainScore,
+          bigScore,
+          judgeCount,
+        });
       }
       const t = setTimeout(() => {
         setShowResult(true);
@@ -217,6 +226,10 @@ function Play() {
     auto,
     lvIndex,
     chartBrief,
+    baseScore,
+    chainScore,
+    bigScore,
+    judgeCount,
   ]);
 
   const onReady = useCallback(() => {

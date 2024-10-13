@@ -40,6 +40,7 @@ async function createLevelsEntry(cid: string, brief: ChartBrief) {
       difficulty: level.difficulty,
       bpmMin: level.bpmMin,
       bpmMax: level.bpmMax,
+      length: level.length,
     })),
   });
 }

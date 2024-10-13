@@ -13,6 +13,7 @@ import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
 import { luaAddBpmChange } from "./lua/bpm";
 import { luaAddSpeedChange } from "./lua/speed";
+import { getTimeSec } from "./seq";
 import { stepZero } from "./step";
 
 export interface ChartBrief {
@@ -28,6 +29,7 @@ export interface ChartBrief {
     noteCount: number;
     bpmMin: number;
     bpmMax: number;
+    length: number;
   }[];
 }
 
@@ -191,7 +193,7 @@ export function copyLevel(level: Level) {
   };
 }
 
-export function createBrief(chart: Chart) {
+export function createBrief(chart: Chart): ChartBrief {
   const levelBrief = chart.levels.map((level) => ({
     name: level.name,
     hash: level.hash,
@@ -200,6 +202,10 @@ export function createBrief(chart: Chart) {
     difficulty: difficulty(level, level.type),
     bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
     bpmMax: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.max(a, b)),
+    length:
+      level.notes.length >= 1
+        ? getTimeSec(level.bpmChanges, level.notes[level.notes.length - 1].step)
+        : 0,
   }));
   return {
     ytId: chart.ytId,
@@ -207,5 +213,5 @@ export function createBrief(chart: Chart) {
     composer: chart.composer,
     chartCreator: chart.chartCreator,
     levels: levelBrief,
-  } as ChartBrief;
+  };
 }

@@ -23,7 +23,9 @@ export default function useGameLogic(
   const notesBigYetDone = useRef<Note[]>([]); // 通常判定がおわってbig判定がまだのNote
 
   // good, ok, bad, missの個数
-  const [judgeCount, setJudgeCount] = useState<number[]>([0, 0, 0, 0]);
+  const [judgeCount, setJudgeCount] = useState<
+    [number, number, number, number]
+  >([0, 0, 0, 0]);
   const notesTotal = notesAll.length;
   const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okBaseScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
