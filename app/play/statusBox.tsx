@@ -120,17 +120,24 @@ function StatusIcon(props: { index: number }) {
       style={{ width: "1.25em", fontSize: "1.25em" }}
     >
       <span className="absolute bottom-0 left-0 translate-y-0.5 ">
-        {props.index === 0 ? (
-          <GrinningFaceWithSquintingEyes />
-        ) : props.index === 1 ? (
-          <SmilingFace />
-        ) : props.index === 2 ? (
-          <DisappointedFace />
-        ) : (
-          <DistraughtFace />
-        )}
+        <JudgeIcon index={props.index} />
       </span>
     </span>
+  );
+}
+export function JudgeIcon(props: { index: number }) {
+  return (
+    <>
+      {props.index === 0 ? (
+        <GrinningFaceWithSquintingEyes />
+      ) : props.index === 1 ? (
+        <SmilingFace />
+      ) : props.index === 2 ? (
+        <DisappointedFace />
+      ) : (
+        <DistraughtFace />
+      )}
+    </>
   );
 }
 function StatusName(props: { children: ReactNode }) {

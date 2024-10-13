@@ -1,11 +1,13 @@
 "use client";
 
 import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
-import { getBestScore } from "@/common/bestScore";
+import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore";
 import Button from "@/common/button";
+import { FourthNote } from "@/common/fourthNote";
 import { rankStr } from "@/common/rank";
 import { initSession, SessionData } from "@/play/session";
-import { RightOne, SmilingFace } from "@icon-park/react";
+import { JudgeIcon } from "@/play/statusBox";
+import { RightOne, SmilingFace, Timer } from "@icon-park/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,7 +27,7 @@ export function ShareLink(props: Props) {
     <p className="mt-2">
       <span className="hidden main-wide:inline-block mr-2">共有用リンク:</span>
       <Link
-        className="text-blue-600 hover:underline"
+        className="text-blue-600 hover:underline inline-block py-2"
         href={`/share/${props.cid}`}
       >
         <span className="main-wide:hidden">共有用リンク</span>
@@ -48,11 +50,20 @@ export function ShareLink(props: Props) {
 export function PlayOption(props: Props) {
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
 
-  const [bestScoreState, setBestScoreState] = useState<number>(0);
+  const [bestScoreState, setBestScoreState] = useState<ResultData>();
+  const totalScore = bestScoreState
+    ? bestScoreState.baseScore +
+      bestScoreState.chainScore +
+      bestScoreState.bigScore
+    : 0;
+
   useEffect(() => {
-    setBestScoreState(
-      getBestScore(props.cid, props.brief.levels[selectedLevel].hash)
-    );
+    const data = getBestScore(props.cid, selectedLevel);
+    if (data && data.levelHash === props.brief.levels[selectedLevel].hash) {
+      setBestScoreState(data);
+    } else {
+      clearBestScore(props.cid, selectedLevel);
+    }
   }, [props, selectedLevel]);
 
   const [sessionId, setSessionId] = useState<number>();
@@ -106,41 +117,108 @@ export function PlayOption(props: Props) {
           </li>
         ))}
       </ul>
-      <p>
-        <span className="text-lg font-title">♩</span>
-        <span className="ml-1.5 mr-1">=</span>
-        <span className="text-lg">
-          {props.brief.levels[selectedLevel]?.bpmMin}
+      <div className="flex flex-col main-wide:flex-row items-baseline">
+        <div>
+          <span className="text-lg mx-1.5 ">
+            <FourthNote />
+          </span>
+          <span className="mr-1">=</span>
+          <span className="text-lg">
+            {props.brief.levels[selectedLevel]?.bpmMin}
+          </span>
+          {props.brief.levels[selectedLevel]?.bpmMin !==
+            props.brief.levels[selectedLevel]?.bpmMax && (
+            <>
+              <span className="ml-1 mr-1">〜</span>
+              <span className="text-lg">
+                {props.brief.levels[selectedLevel]?.bpmMax}
+              </span>
+            </>
+          )}
+        </div>
+        <span className="mx-3 hidden main-wide:block">/</span>
+        <div>
+          <span className="inline-block w-5 translate-y-0.5">
+            <Timer />
+          </span>
+          <span className="text-lg">
+            {Math.floor(
+              Math.round(props.brief.levels[selectedLevel]?.length) / 60
+            )}
+          </span>
+          <span className="text-lg">:</span>
+          <span className="text-lg">
+            {Math.round(props.brief.levels[selectedLevel]?.length) % 60}
+          </span>
+        </div>
+        <span className="mx-3 hidden main-wide:block">/</span>
+        <div>
+          <span className="inline-block w-5 translate-y-0.5">
+            <SmilingFace />
+          </span>
+          <span className="mr-1">✕</span>
+          <span className="text-lg">
+            {props.brief.levels[selectedLevel]?.noteCount}
+          </span>
+        </div>
+      </div>
+      <p className="-mx-2 px-2 group hover:bg-amber-50 rounded-lg">
+        <span>Best Score:</span>
+        <span className="inline-block text-2xl w-12 text-right">
+          {Math.floor(totalScore)}
         </span>
-        {props.brief.levels[selectedLevel]?.bpmMin !==
-          props.brief.levels[selectedLevel]?.bpmMax && (
+        <span className="">.</span>
+        <span className="inline-block w-6">
+          {(Math.floor(totalScore * 100) % 100).toString().padStart(2, "0")}
+        </span>
+        {totalScore > 0 && bestScoreState && (
           <>
-            <span className="ml-1 mr-1">〜</span>
-            <span className="text-lg">
-              {props.brief.levels[selectedLevel]?.bpmMax}
+            <span className="text-xl main-wide:hidden">
+              ({rankStr(totalScore)})
+            </span>
+            <span className="hidden group-hover:inline-block mr-2 ml-2 main-wide:ml-0">
+              <span className="mr-1">=</span>
+              <span className="">{Math.floor(bestScoreState.baseScore)}</span>
+              <span className="text-sm">.</span>
+              <span className="text-sm">
+                {(Math.floor(bestScoreState.baseScore * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </span>
+              <span className="ml-0.5 mr-0.5">+</span>
+              <span className="">{Math.floor(bestScoreState.chainScore)}</span>
+              <span className="text-sm">.</span>
+              <span className="text-sm">
+                {(Math.floor(bestScoreState.chainScore * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </span>
+              <span className="ml-0.5 mr-0.5">+</span>
+              <span className="">{Math.floor(bestScoreState.bigScore)}</span>
+              <span className="text-sm">.</span>
+              <span className="text-sm">
+                {(Math.floor(bestScoreState.bigScore * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </span>
+            </span>
+            <span className="text-xl hidden main-wide:inline">
+              ({rankStr(totalScore)})
+            </span>
+            <span className="hidden group-hover:inline-block ml-2 mr-2">
+              <span className="hidden main-wide:inline mr-1">-</span>
+              {bestScoreState?.judgeCount.map((j, i) => (
+                <span key={i} className="inline-block">
+                  <span className="inline-block w-5 translate-y-0.5 ">
+                    <JudgeIcon index={i} />
+                  </span>
+                  <span className="text-lg mr-2">
+                    {bestScoreState?.judgeCount[i]}
+                  </span>
+                </span>
+              ))}
             </span>
           </>
-        )}
-        <span className="mx-3">/</span>
-        <span className="inline-block w-5 translate-y-0.5 ">
-          <SmilingFace />
-        </span>
-        <span className="mr-1">✕</span>
-        <span className="text-lg">
-          {props.brief.levels[selectedLevel]?.noteCount}
-        </span>
-      </p>
-      <p>
-        <span>Best Score:</span>
-        <span className="inline-block text-xl w-10 text-right">
-          {Math.floor(bestScoreState)}
-        </span>
-        <span>.</span>
-        <span className="inline-block w-6">
-          {(Math.floor(bestScoreState * 100) % 100).toString().padStart(2, "0")}
-        </span>
-        {bestScoreState > 0 && (
-          <span className="text-xl">({rankStr(bestScoreState)})</span>
         )}
       </p>
       <p className="mt-3">

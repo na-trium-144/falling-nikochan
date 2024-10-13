@@ -1,5 +1,6 @@
 "use client";
 
+import { FourthNote } from "@/common/fourthNote";
 import { useDisplayMode } from "@/scale";
 import { useEffect, useRef, useState } from "react";
 
@@ -52,7 +53,7 @@ export default function BPMSign(props: Props) {
           (flip ? "scale-x-0 " : "scale-x-100 ")
         }
       >
-        <span className="text-xl font-title">♩</span>
+        <span className="text-xl "><FourthNote /></span>
         <span className="text-xl ml-1.5 mr-1">=</span>
         <span className="text-right text-2xl w-auto min-w-12">
           {displayedBpm.current !== undefined &&
