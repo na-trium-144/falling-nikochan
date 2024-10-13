@@ -93,7 +93,7 @@ export default function useGameLogic(
           setChain(0);
         }
         setJudgeCount((judgeCount) => {
-          judgeCount = judgeCount.slice();
+          judgeCount = judgeCount.slice() as [number, number, number, number];
           judgeCount[j - 1]++;
           return judgeCount;
         });
