@@ -3,6 +3,7 @@
 import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
 import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore";
 import Button from "@/common/button";
+import { FourthNote } from "@/common/fourthNote";
 import { rankStr } from "@/common/rank";
 import { initSession, SessionData } from "@/play/session";
 import { JudgeIcon } from "@/play/statusBox";
@@ -118,8 +119,10 @@ export function PlayOption(props: Props) {
       </ul>
       <div className="flex flex-col main-wide:flex-row items-baseline">
         <div>
-          <span className="text-lg font-title">♩</span>
-          <span className="ml-1.5 mr-1">=</span>
+          <span className="text-lg mx-1.5 ">
+            <FourthNote />
+          </span>
+          <span className="mr-1">=</span>
           <span className="text-lg">
             {props.brief.levels[selectedLevel]?.bpmMin}
           </span>
