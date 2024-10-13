@@ -117,17 +117,23 @@ export default function Page(context: { params: Params }) {
   }, []);
   useEffect(() => void fetchChart(), [fetchChart]);
 
+  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
+  const currentLevel = chart?.levels.at(currentLevelIndex);
+
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
 
-  const createSessionData = (chart: Chart) => ({
-    cid: cid,
-    lvIndex: currentLevelIndex,
-    brief: createBrief(chart),
-    chart: chart,
-    editing: true,
-  });
+  const createSessionData = useCallback(
+    (chart: Chart) => ({
+      cid: cid,
+      lvIndex: currentLevelIndex,
+      brief: createBrief(chart),
+      chart: chart,
+      editing: true,
+    }),
+    [cid, currentLevelIndex]
+  );
   const changeChart = (chart: Chart) => {
     void (async () => {
       for (const level of chart.levels) {
@@ -145,11 +151,25 @@ export default function Page(context: { params: Params }) {
       }
     })();
   };
+  const prevLevelIndex = useRef<number>(-1);
   useEffect(() => {
-    if (sessionId === undefined && chart) {
-      setSessionId(initSession(createSessionData(chart)));
+    if (chart) {
+      if (sessionId === undefined) {
+        setSessionId(initSession(createSessionData(chart)));
+      } else if (prevLevelIndex.current !== currentLevelIndex) {
+        initSession(createSessionData(chart), sessionId);
+      }
+      prevLevelIndex.current = currentLevelIndex;
     }
-  }, [sessionId, chart, createSessionData]);
+  }, [sessionId, chart, createSessionData, currentLevelIndex]);
+
+  const changeLevel = (newLevel: Level | null) => {
+    if (chart && newLevel) {
+      const newChart: Chart = { ...chart };
+      newChart.levels[currentLevelIndex] = newLevel;
+      changeChart(newChart);
+    }
+  };
 
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
@@ -167,17 +187,7 @@ export default function Page(context: { params: Params }) {
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
-  }, [hasChange]);
-
-  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
-  const currentLevel = chart?.levels.at(currentLevelIndex);
-  const changeLevel = (newLevel: Level | null) => {
-    if (chart && newLevel) {
-      const newChart: Chart = { ...chart };
-      newChart.levels[currentLevelIndex] = newLevel;
-      changeChart(newChart);
-    }
-  };
+  }, [hasChange, sessionId]);
 
   const ref = useRef<HTMLDivElement>(null!);
 
