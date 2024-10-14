@@ -1,5 +1,10 @@
 import { getFileEntry, updateFileEntry } from "@/api/dbChartFile";
-import { Chart, ChartBrief, createBrief, validateChart } from "@/chartFormat/chart";
+import {
+  Chart,
+  ChartBrief,
+  createBrief,
+  validateChart,
+} from "@/chartFormat/chart";
 import { NextResponse } from "next/server";
 import { fsRead } from "../fsAccess";
 import msgpack from "@ygoe/msgpack";
@@ -13,7 +18,10 @@ export async function getBrief(cid: string): Promise<NextResponse> {
       { status: 404 }
     );
   }
-  if (fileEntry.levels.length > 0) {
+  if (
+    fileEntry.levels.length > 0 &&
+    fileEntry.levels.every((l, i) => l.lvIndex === i)
+  ) {
     return NextResponse.json({
       ytId: fileEntry.ytId,
       title: fileEntry.title,
@@ -22,6 +30,7 @@ export async function getBrief(cid: string): Promise<NextResponse> {
       levels: fileEntry.levels,
     } as ChartBrief);
   } else {
+    console.log(`recreating level brief information of cid:${cid}`);
     const fsData = await fsRead(fileEntry.fid);
     if (fsData === null) {
       return NextResponse.json({ message: "fsRead() failed" }, { status: 500 });
