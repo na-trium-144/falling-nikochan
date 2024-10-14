@@ -5,7 +5,8 @@ import { Github } from "@icon-park/react";
 import Link from "next/link";
 
 interface Props {
-  nav?: boolean;
+  // trueで表示、または "main-wide:hidden" などのようにクラス指定
+  nav?: boolean | string;
 }
 export default function Footer(props: Props) {
   return (
@@ -15,7 +16,8 @@ export default function Footer(props: Props) {
           className={
             "text-center mb-3 divide-solid divide-black " +
             "flex flex-col space-y-1 items-stretch w-max mx-auto " +
-            "footer-wide:divide-x footer-wide:space-y-0 footer-wide:flex-row "
+            "footer-wide:divide-x footer-wide:space-y-0 footer-wide:flex-row " +
+            (typeof props.nav === "string" ? props.nav : "")
           }
         >
           {tabTitles.map((tabName, i) => (
