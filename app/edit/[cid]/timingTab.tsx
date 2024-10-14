@@ -7,16 +7,20 @@ import {
   stepStr,
 } from "./str";
 import { Step, stepCmp, stepZero } from "@/chartFormat/step";
+import { Level } from "@/chartFormat/chart";
 
 interface Props {
   offset?: number;
   setOffset: (offset: number) => void;
   prevBpm?: number;
   prevSpeed?: number;
+  currentLevel?: Level;
+  currentBpmIndex?: number;
   currentBpm?: number;
   setCurrentBpm: (bpm: number) => void;
   bpmChangeHere: boolean;
   toggleBpmChangeHere: () => void;
+  currentSpeedIndex?: number;
   currentSpeed?: number;
   setCurrentSpeed: (bpm: number) => void;
   speedChangeHere: boolean;
@@ -28,6 +32,16 @@ export default function TimingTab(props: Props) {
     !isNaN(Number(offset)) && Number(offset) >= 0;
   const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) > 0;
   const speedValid = (bpm: string) => !isNaN(Number(bpm));
+
+  const bpmChangeable =
+    props.currentBpmIndex !== undefined &&
+    props.currentLevel?.bpmChanges[props.currentBpmIndex] &&
+    props.currentLevel?.bpmChanges[props.currentBpmIndex].luaLine !== null;
+  const speedChangeable =
+    props.currentSpeedIndex !== undefined &&
+    props.currentLevel?.speedChanges[props.currentSpeedIndex] &&
+    props.currentLevel?.speedChanges[props.currentSpeedIndex].luaLine !== null;
+
   return (
     <>
       <p className="mb-3">
@@ -75,8 +89,17 @@ export default function TimingTab(props: Props) {
               ? props.currentBpm.toString()
               : ""
           }
-          updateValue={(v: string) => props.setCurrentBpm(Number(v))}
-          disabled={props.bpmChangeHere}
+          updateValue={(v: string) => {
+            // bpmの変更時にspeedも変える
+            if (
+              !props.speedChangeHere &&
+              props.currentBpm === props.currentSpeed
+            ) {
+              props.setCurrentSpeed(Number(v));
+            }
+            props.setCurrentBpm(Number(v));
+          }}
+          disabled={props.bpmChangeHere || !bpmChangeable}
           isValid={bpmValid}
         />
         <span>→</span>
@@ -108,9 +131,16 @@ export default function TimingTab(props: Props) {
             }
             props.setCurrentBpm(Number(v));
           }}
-          disabled={!props.bpmChangeHere}
+          disabled={!props.bpmChangeHere || !bpmChangeable}
           isValid={bpmValid}
         />
+        {props.currentBpmIndex !== undefined &&
+          props.currentLevel?.bpmChanges[props.currentBpmIndex] &&
+          !bpmChangeable && (
+            <span className="ml-2 text-sm inline-block">
+              Code タブで編集されているため変更できません。
+            </span>
+          )}
       </p>
       <p className="ml-2">
         <span>Speed</span>
@@ -124,7 +154,7 @@ export default function TimingTab(props: Props) {
               : ""
           }
           updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
-          disabled={props.speedChangeHere}
+          disabled={props.speedChangeHere || !speedChangeable}
           isValid={speedValid}
         />
         <span>→</span>
@@ -141,9 +171,16 @@ export default function TimingTab(props: Props) {
           className="w-16 mx-1"
           actualValue={props.currentSpeed?.toString() || ""}
           updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
-          disabled={!props.speedChangeHere}
+          disabled={!props.speedChangeHere || !speedChangeable}
           isValid={speedValid}
         />
+        {props.currentSpeedIndex !== undefined &&
+          props.currentLevel?.speedChanges[props.currentSpeedIndex] &&
+          !speedChangeable && (
+            <span className="ml-2 text-sm inline-block">
+              Code タブで編集されているため変更できません。
+            </span>
+          )}
       </p>
     </>
   );

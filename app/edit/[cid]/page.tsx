@@ -686,6 +686,7 @@ export default function Page(context: { params: Params }) {
             }
           >
             <FallingWindow
+              inCodeTab={tab === 4}
               className="absolute inset-0"
               notes={notesAll}
               currentTimeSec={currentTimeSec || 0}
@@ -842,11 +843,13 @@ export default function Page(context: { params: Params }) {
               <TimingTab
                 offset={chart?.offset}
                 setOffset={changeOffset}
+                currentLevel={currentLevel}
                 prevBpm={
                   currentBpmIndex !== undefined && currentBpmIndex >= 1
                     ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
                     : undefined
                 }
+                currentBpmIndex={currentBpmIndex}
                 currentBpm={
                   currentBpmIndex !== undefined ? currentBpm : undefined
                 }
@@ -858,6 +861,7 @@ export default function Page(context: { params: Params }) {
                     ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
                     : undefined
                 }
+                currentSpeedIndex={currentSpeedIndex}
                 currentSpeed={
                   currentSpeedIndex !== undefined ? currentSpeed : undefined
                 }

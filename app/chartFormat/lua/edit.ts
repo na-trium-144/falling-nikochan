@@ -1,5 +1,12 @@
 import { Level } from "../chart";
-import { Step, stepAdd, stepCmp, stepSimplify, stepSub, stepZero } from "../step";
+import {
+  Step,
+  stepAdd,
+  stepCmp,
+  stepSimplify,
+  stepSub,
+  stepZero,
+} from "../step";
 
 export function findStepFromLua(chart: Level, line: number): Step | null {
   for (const n of chart.notes) {
@@ -64,23 +71,32 @@ export function replaceLua(chart: Level, line: number, content: string) {
 export function deleteLua(chart: Level, line: number) {
   chart.lua = chart.lua.slice(0, line).concat(chart.lua.slice(line + 1));
   // 以降の行番号がすべて1ずれる
+  // 削除した行のコマンドに対応するデータはとりあえずnull
   chart.notes.forEach((n) => {
-    if (n.luaLine !== null && n.luaLine >= line) {
+    if (n.luaLine === line) {
+      n.luaLine = null;
+    } else if (n.luaLine !== null && n.luaLine >= line) {
       n.luaLine--;
     }
   });
   chart.rest.forEach((n) => {
-    if (n.luaLine !== null && n.luaLine >= line) {
+    if (n.luaLine === line) {
+      n.luaLine = null;
+    } else if (n.luaLine !== null && n.luaLine >= line) {
       n.luaLine--;
     }
   });
   chart.bpmChanges.forEach((n) => {
-    if (n.luaLine !== null && n.luaLine >= line) {
+    if (n.luaLine === line) {
+      n.luaLine = null;
+    } else if (n.luaLine !== null && n.luaLine >= line) {
       n.luaLine--;
     }
   });
   chart.speedChanges.forEach((n) => {
-    if (n.luaLine !== null && n.luaLine >= line) {
+    if (n.luaLine === line) {
+      n.luaLine = null;
+    } else if (n.luaLine !== null && n.luaLine >= line) {
       n.luaLine--;
     }
   });
