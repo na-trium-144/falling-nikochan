@@ -5,17 +5,24 @@ import { Box } from "@/common/box";
 import Footer from "@/common/footer";
 import { useDisplayMode } from "@/scale";
 import Link from "next/link";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { tabTitles, tabURLs } from "./const";
+import { useRouter } from "next/navigation";
 
 interface Props {
   children?: ReactNode | ReactNode[];
   tab: number | undefined;
 }
 export function IndexMain(props: Props) {
+  const router = useRouter();
   const { screenWidth, rem } = useDisplayMode();
 
   const isMobile = screenWidth < 40 * rem;
+  const isTitlePage = props.tab === undefined;
+
+  const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
+  const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
+
   return (
     <main className="flex flex-col w-full min-h-screen h-max">
       {props.tab !== undefined && (
@@ -25,7 +32,7 @@ export function IndexMain(props: Props) {
       )}
       <div
         className={
-          (props.tab !== undefined ? "hidden main-wide:flex " : "flex ") +
+          (!isTitlePage ? "hidden main-wide:flex " : "flex ") +
           "flex-none basis-32 flex-row items-center justify-center"
         }
       >
@@ -33,7 +40,7 @@ export function IndexMain(props: Props) {
       </div>
       <div
         className={
-          (props.tab !== undefined ? "basis-96 " : "basis-auto ") +
+          "basis-0 " +
           "main-wide:max-h-screen main-wide:overflow-hidden main-wide:mb-3 " +
           "grow shrink-0 " +
           "flex flex-row justify-center px-6 "
@@ -42,46 +49,80 @@ export function IndexMain(props: Props) {
         <div
           className={
             (props.tab === undefined ? "flex " : "hidden main-wide:flex ") +
-            "flex-col justify-center w-56 shrink-0 "
+            "flex-col justify-center w-56 shrink-0 " +
+            "transition ease-out duration-200 "
           }
+          style={{
+            transform: menuMoveRight
+              ? `translateX(${
+                  (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
+                }px)`
+              : menuMoveLeft
+              ? `translateX(-${
+                  (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
+                }px)`
+              : undefined,
+          }}
         >
           {tabTitles.map((tabName, i) =>
-            i === props.tab ? (
-              <Link key={i} href="/" scroll={false} replace={!isMobile}>
+            i === props.tab && !menuMoveRight ? (
+              <button
+                key={i}
+                onClick={() => {
+                  if (!isMobile) {
+                    setMenuMoveRight(true);
+                    setTimeout(() => {
+                      router.replace("/", { scroll: false });
+                    }, 150);
+                  } else {
+                    router.push("/", { scroll: false });
+                  }
+                }}
+              >
                 <Box className="text-center rounded-r-none py-3 pl-2 pr-2">
                   {tabName}
                 </Box>
-              </Link>
+              </button>
             ) : (
-              <Link
+              <button
                 key={i}
                 className={
                   " text-center hover:bg-sky-200 " +
-                  (props.tab !== undefined
-                    ? "rounded-l-lg py-3 pl-2 pr-2"
-                    : "rounded-lg p-3")
+                  (isTitlePage
+                    ? "rounded-lg p-3 "
+                    : "rounded-l-lg py-3 pl-2 pr-2 ")
                 }
-                href={tabURLs[i]}
-                scroll={false}
-                replace={!isMobile}
+                onClick={() => {
+                  if (isTitlePage && !isMobile) {
+                    setMenuMoveLeft(true);
+                    setTimeout(() => {
+                      router.replace(tabURLs[i], { scroll: false });
+                    }, 150);
+                  } else {
+                    router.push(tabURLs[i], { scroll: false });
+                  }
+                }}
               >
                 {tabName}
-              </Link>
+              </button>
             )
           )}
         </div>
-        {props.tab !== undefined && (
+        {!isTitlePage && (
           <Box
             className={
               "flex flex-col p-6 overflow-auto " +
-              (isMobile ? "w-full my-6 " : "flex-1 ")
+              "w-full my-6 main-wide:flex-1 main-wide:my-0 " +
+              (menuMoveRight ? "opacity-0 " : "")
             }
           >
             {props.children}
           </Box>
         )}
       </div>
-      <Footer nav={isMobile && props.tab !== undefined} />
+      <Footer
+        nav={props.tab !== undefined ? "block main-wide:hidden" : false}
+      />
     </main>
   );
 }
