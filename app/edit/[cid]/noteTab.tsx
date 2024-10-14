@@ -23,6 +23,9 @@ interface Props {
   currentLevel?: Level;
 }
 export default function NoteTab(props: Props) {
+  const noteEditable =
+    props.currentLevel?.notes[props.currentNoteIndex] &&
+    props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null;
   return (
     <div className="flex flex-col h-full">
       <p>
@@ -62,7 +65,11 @@ export default function NoteTab(props: Props) {
             disabled={!props.canAddNote}
           />
           {props.hasCurrentNote && (
-            <Button text="Delete" onClick={props.deleteNote} />
+            <Button
+              text="Delete"
+              onClick={props.deleteNote}
+              disabled={!noteEditable}
+            />
           )}
         </div>
       </p>
@@ -113,6 +120,9 @@ function CopyPasteButton(props: Props) {
 
 function NoteEdit(props: Props) {
   const { currentNoteIndex, currentLevel } = props;
+  const noteEditable =
+    props.currentLevel?.notes[props.currentNoteIndex] &&
+    props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null;
   if (
     currentLevel &&
     currentNoteIndex >= 0 &&
@@ -146,6 +156,7 @@ function NoteEdit(props: Props) {
                   isValid={(v) =>
                     !isNaN(Number(v)) && Number(v) >= -5 && Number(v) <= 5
                   }
+                  disabled={!noteEditable}
                 />
               </td>
               <td />
@@ -172,6 +183,7 @@ function NoteEdit(props: Props) {
                     props.updateNote({ ...n, hitVX: Number(v) })
                   }
                   isValid={(v) => !isNaN(Number(v))}
+                  disabled={!noteEditable}
                 />
               </td>
               <td>,</td>
@@ -184,6 +196,7 @@ function NoteEdit(props: Props) {
                     props.updateNote({ ...n, hitVY: Number(v) })
                   }
                   isValid={(v) => !isNaN(Number(v)) && Number(v) >= 0}
+                  disabled={!noteEditable}
                 />
               </td>
             </tr>
@@ -202,6 +215,7 @@ function NoteEdit(props: Props) {
                     })
                   }
                   isValid={(v) => !isNaN(Number(v)) && Number(v) > 0}
+                  disabled={!noteEditable}
                 />
               </td>
               <td>,</td>
@@ -221,6 +235,7 @@ function NoteEdit(props: Props) {
                     })
                   }
                   isValid={(v) => !isNaN(Number(v)) && nv > 0}
+                  disabled={!noteEditable}
                 />
                 °
               </td>
@@ -234,12 +249,18 @@ function NoteEdit(props: Props) {
             id="bigNote"
             checked={n.big}
             onChange={(v) => props.updateNote({ ...n, big: v.target.checked })}
+            disabled={!noteEditable}
           />
           <label htmlFor="bigNote">
             <span>Big</span>
             <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </label>
         </p>
+        {props.currentLevel?.notes[props.currentNoteIndex] && !noteEditable && (
+          <p className="ml-2 mt-4 text-sm">
+            Code タブで編集されているため変更できません。
+          </p>
+        )}
       </>
     );
   } else {

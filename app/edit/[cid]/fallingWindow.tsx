@@ -23,6 +23,7 @@ interface Props {
   currentNoteIndex: number;
   updateNote: (n: NoteCommand) => void;
   dragMode: "p" | "v" | "a";
+  inCodeTab: boolean;
 }
 
 export default function FallingWindow(props: Props) {
@@ -34,6 +35,11 @@ export default function FallingWindow(props: Props) {
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
+
+  const noteEditable =
+    props.currentLevel?.notes[props.currentNoteIndex] &&
+    props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null &&
+    !props.inCodeTab;
 
   const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] = [];
   if (
@@ -167,7 +173,8 @@ export default function FallingWindow(props: Props) {
           currentLevel.notes[currentNoteIndex] &&
           boxSize &&
           marginX !== undefined &&
-          marginY !== undefined && (
+          marginY !== undefined &&
+          noteEditable && (
             <>
               {/* xを左右に動かす矢印 */}
               {dragMode === "p" && (
