@@ -165,12 +165,18 @@ export function emptyLevel(prevLevel?: Level): Level {
     type: levelTypes[0],
     notes: [],
     rest: [],
-    bpmChanges: prevLevel?.bpmChanges.map((change) => ({ ...change })) || [],
-    speedChanges:
-      prevLevel?.speedChanges.map((change) => ({ ...change })) || [],
+    bpmChanges: [],
+    speedChanges: [],
     lua: [],
   };
-  if (!prevLevel) {
+  if (prevLevel) {
+    for (const change of prevLevel.bpmChanges) {
+      level = luaAddBpmChange(level, change)!;
+    }
+    for (const change of prevLevel.speedChanges) {
+      level = luaAddSpeedChange(level, change)!;
+    }
+  } else {
     level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
     level = luaAddSpeedChange(level, {
       bpm: 120,
