@@ -8,7 +8,6 @@ RUN apt-get update && apt-get upgrade -y && \
 COPY . /root/nikochan
 WORKDIR /root/nikochan
 RUN npm ci && \
-    npx prisma generate && \
     npm run build && \
     npm cache clean --force
-CMD ["sh", "-c", "npx prisma db push && npm run start"]
+CMD ["npm", "run", "start"]
