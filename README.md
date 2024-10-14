@@ -28,7 +28,6 @@ FS_VOLUME="http://localhost:8080"
     * working directory はfalling-nikochanのルートにしてください
 ```sh
 npm install
-npx prisma db push
 npm run dev
 ```
 
@@ -38,6 +37,12 @@ npm run dev
 ```sh
 npm run start
 ```
+
+* データベースの public.LevelBrief テーブルはstart時に削除されます (initDB.js)
+    * ただのキャッシュなので必要なときに再生成されます
+* そのため LevelBrief のschemaの変更は問題ありませんが、
+それ以外のテーブルのschemaに破壊的変更が入っている場合は、 `prisma db push` でエラーになります。
+手動でなんとかしてください。
 
 * Dockerを使うこともできます。Dockerfile をビルドするか、ビルド済みのもの(amd64, arm64)が `ghcr.io/na-trium-144/falling-nikochan/falling-nikochan:latest` としてpullできます
     * 別途postgresqlとseaweedfsを起動してください

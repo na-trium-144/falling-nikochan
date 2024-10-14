@@ -2,11 +2,12 @@
   "name": "falling-nikochan",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "prisma db push && next dev -H 0.0.0.0",
+    "build": "prisma generate && next build",
+    "start": "node ./initDB.js && prisma db push && next start",
+    "lint": "prisma generate && next lint"
   },
   "dependencies": {
     "@icon-park/react": "^1.4.2",
@@ -29,6 +30,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.14",
+    "pg": "^8.13.0",
     "postcss": "^8",
     "prisma": "^5.20.0",
     "tailwindcss": "^3.4.13",
