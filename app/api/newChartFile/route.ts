@@ -3,29 +3,39 @@ import { NextRequest, NextResponse } from "next/server";
 import { createFileEntry, getFileEntry } from "@/api/dbChartFile";
 import { fsAssign, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
-import { Chart, chartMaxSize, createBrief, validateChart } from "@/chartFormat/chart";
-import { updateLastCreate } from "../dbRateLimit";
+import {
+  Chart,
+  chartMaxSize,
+  createBrief,
+  validateChart,
+} from "@/chartFormat/chart";
+import { rateLimitMin, updateLastCreate } from "../dbRateLimit";
 import { headers } from "next/headers";
 
 // todo: password
 
 export async function GET() {
+  const headersList = headers();
+  console.log(headersList.get("x-forwarded-for"));
   return new Response(null, { status: 400 });
 }
 
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
 export async function POST(request: NextRequest, context: { params: Params }) {
   const headersList = headers();
-  const ip = headersList.get("x-forwarded-for");
-  console.log(ip);
-  if (ip === null) {
-    console.error("ip is null");
-    return new Response(null, { status: 500 });
-  }
+  console.log(headersList.get("x-forwarded-for"));
+  const ip = String(
+    headersList.get("x-forwarded-for")?.split(",").at(-1)?.trim()
+  ); // nullもundefinedも文字列にしちゃう
   if (process.env.NODE_ENV !== "development" && !(await updateLastCreate(ip))) {
     return NextResponse.json(
-      { message: "Too many requests, please retry 30 minutes later" },
-      { status: 429, headers: [["retry-after", (30 * 60).toString()]] }
+      {
+        message: `Too many requests, please retry ${rateLimitMin} minutes later`,
+      },
+      {
+        status: 429,
+        headers: [["retry-after", (rateLimitMin * 60).toString()]],
+      }
     );
   }
 
