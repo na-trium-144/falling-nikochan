@@ -30,26 +30,36 @@ export async function createFileEntry(
   await createLevelsEntry(cid, brief);
 }
 async function createLevelsEntry(cid: string, brief: ChartBrief) {
-  await prisma.levelBrief.createMany({
-    data: brief.levels.map((level) => ({
-      cid: cid,
-      name: level.name,
-      hash: level.hash,
-      type: level.type,
-      noteCount: level.noteCount,
-      difficulty: level.difficulty,
-      bpmMin: level.bpmMin,
-      bpmMax: level.bpmMax,
-      length: level.length,
-    })),
-  });
-}
-export async function updateFileEntry(cid: string, brief: ChartBrief) {
+  await Promise.all(
+    brief.levels.map((level, i) =>
+      prisma.levelBrief.upsert({
+        where: {
+          cid_lvIndex: {
+            cid,
+            lvIndex: i,
+          },
+        },
+        update: {
+          ...level,
+        },
+        create: {
+          ...level,
+          cid,
+          lvIndex: i,
+        },
+      })
+    )
+  );
   await prisma.levelBrief.deleteMany({
     where: {
       cid: cid,
+      lvIndex: {
+        gte: brief.levels.length,
+      },
     },
   });
+}
+export async function updateFileEntry(cid: string, brief: ChartBrief) {
   await prisma.chartFile.update({
     where: {
       cid: cid,

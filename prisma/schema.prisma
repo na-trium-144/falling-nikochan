@@ -26,6 +26,8 @@ model LevelBrief {
   id Int @id @default(autoincrement())
   chart ChartFile @relation(fields: [cid], references: [cid])
   cid String
+  lvIndex Int
+  @@unique([cid, lvIndex])
   name String
   hash String
   type String
