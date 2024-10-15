@@ -668,7 +668,6 @@ export default function Page(context: { params: Params }) {
             <FlexYouTube
               fixedSide="width"
               className={"w-full h-max " + "edit-wide:w-full edit-wide:h-auto "}
-              isMobile={false}
               control={true}
               id={chart?.ytId}
               ytPlayer={ytPlayer}

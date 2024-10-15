@@ -1,34 +1,27 @@
-"use client"; // あとでけす
+"use client";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
-import { ChartSeqData, loadChart, Note } from "@/chartFormat/seq";
-import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
+import { ChartSeqData, loadChart } from "@/chartFormat/seq";
+import { YouTubePlayer } from "@/common/youtube";
 import { ChainDisp, ScoreDisp } from "./score";
 import RhythmicalSlime from "./rhythmicalSlime";
 import useGameLogic from "./gameLogic";
 import { ReadyMessage, StopMessage } from "./messageBox";
 import StatusBox from "./statusBox";
 import { useResizeDetector } from "react-resize-detector";
-import {
-  Chart,
-  ChartBrief,
-  levelBgColors,
-  levelColors,
-  levelTypes,
-} from "@/chartFormat/chart";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
+import { ChartBrief } from "@/chartFormat/chart";
 import msgpack from "@ygoe/msgpack";
-import { stepSub, stepToFloat } from "@/chartFormat/step";
 import { Loading, Error } from "@/common/box";
 import { useDisplayMode } from "@/scale";
 import { addRecent } from "@/common/recent";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
 import BPMSign from "./bpmSign";
 import { getSession } from "./session";
 import { pageTitle } from "@/common/title";
+import { MusicArea } from "./musicArea";
 
 export default function Home() {
   return (
@@ -63,7 +56,8 @@ function Play() {
     setLvIndex(session.lvIndex);
     setChartBrief(session.brief);
     setEditing(!!session.editing);
-    document.title = (session.editing ? "(テストプレイ) " : "") +
+    document.title =
+      (session.editing ? "(テストプレイ) " : "") +
       pageTitle(session.cid || "-", session.brief) +
       " | Falling Nikochan";
 
@@ -331,87 +325,16 @@ function Play() {
             "flex-none flex flex-col items-stretch"
           }
         >
-          <div
-            className={
-              "z-10 grow-0 shrink-0 p-3 rounded-lg flex " +
-              (levelBgColors.at(levelTypes.indexOf(lvType)) ||
-                levelBgColors[1]) +
-              (isMobile ? "mt-3 mx-3 flex-row-reverse " : "my-3 mr-3 flex-col ")
-            }
-          >
-            <FlexYouTube
-              fixedSide="width"
-              className={
-                "z-10 " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "w-full")
-              }
-              isMobile={isMobile}
-              id={chartBrief?.ytId}
-              control={false}
-              ytPlayer={ytPlayer}
-              onReady={onReady}
-              onStart={onStart}
-              onStop={onStop}
-            />
-            <div className="flex-1 min-w-0 ">
-              <p
-                className={
-                  "font-title text-lg leading-tight " +
-                  (isMobile
-                    ? "overflow-x-hidden w-full text-ellipsis whitespace-nowrap "
-                    : "mt-1.5 ")
-                }
-              >
-                {chartBrief?.title}
-              </p>
-              <p
-                className={
-                  "font-title text-sm leading-tight " +
-                  (isMobile
-                    ? "overflow-x-hidden w-full text-ellipsis whitespace-nowrap "
-                    : "")
-                }
-              >
-                {chartBrief?.composer}
-              </p>
-              <p style={{ lineHeight: 0 }}>
-                {lvIndex !== undefined && chartBrief?.levels[lvIndex] && (
-                  <span
-                    className={
-                      "inline-block " +
-                      (isMobile
-                        ? "overflow-x-hidden max-w-full text-ellipsis whitespace-nowrap "
-                        : "")
-                    }
-                    style={{ marginTop: "-0.2rem" }}
-                  >
-                    {chartBrief?.levels[lvIndex].name && (
-                      <span className="text-base font-title mr-1">
-                        {chartBrief?.levels[lvIndex].name}
-                      </span>
-                    )}
-                    <span className="text-sm">{lvType}-</span>
-                    <span className="text-lg">
-                      {chartBrief?.levels[lvIndex]?.difficulty}
-                    </span>
-                  </span>
-                )}
-                <span
-                  className={
-                    "inline-block " +
-                    (isMobile
-                      ? "overflow-x-hidden max-w-full text-ellipsis whitespace-nowrap "
-                      : "")
-                  }
-                  style={{ marginTop: "-0.2rem" }}
-                >
-                  <span className="ml-2 text-xs">by</span>
-                  <span className="ml-1.5 font-title text-sm">
-                    {chartBrief?.chartCreator}
-                  </span>
-                </span>
-              </p>
-            </div>
-          </div>
+          <MusicArea
+            lvType={lvType}
+            lvIndex={lvIndex}
+            isMobile={isMobile}
+            ytPlayer={ytPlayer}
+            chartBrief={chartBrief}
+            onReady={onReady}
+            onStart={onStart}
+            onStop={onStop}
+          />
           {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
             {fps} FPS
           </div>*/}
