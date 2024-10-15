@@ -28,6 +28,7 @@ export async function getBrief(cid: string): Promise<NextResponse> {
       chartCreator: fileEntry.chartCreator,
       levels: fileEntry.levels,
       updatedAt: fileEntry.updatedAt.getTime(),
+      playCount: fileEntry.playCount?.count || 0,
     } as ChartBrief);
   } else {
     console.log(`recreating level brief information of cid:${cid}`);

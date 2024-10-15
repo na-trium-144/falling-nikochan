@@ -9,6 +9,7 @@ export async function getFileEntry(cid: string) {
     },
     include: {
       levels: true,
+      playCount: true,
     },
   });
   if (entry) {
@@ -78,4 +79,20 @@ export async function updateFileEntry(cid: string, brief: ChartBrief) {
     },
   });
   await createLevelsEntry(cid, brief);
+}
+export async function updatePlayCount(cid: string) {
+  await prisma.playCount.upsert({
+    where: {
+      cid,
+    },
+    update: {
+      count: {
+        increment: 1,
+      },
+    },
+    create: {
+      cid,
+      count: 1,
+    },
+  });
 }

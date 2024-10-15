@@ -22,6 +22,7 @@ export interface ChartBrief {
   composer: string;
   chartCreator: string;
   updatedAt: number;
+  playCount?: number;
   levels: {
     name: string;
     hash: string;
