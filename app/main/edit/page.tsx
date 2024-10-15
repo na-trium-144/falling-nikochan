@@ -17,6 +17,7 @@ import { IndexMain } from "../main";
 import { setPasswd } from "@/common/passwdCache";
 import Input from "@/common/input";
 import { ChartListItem } from "../chartList";
+import { rateLimitMin } from "@/api/dbRateLimit";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -110,7 +111,8 @@ export default function EditTab() {
           </Link>
         </h3>
         <p className="pl-2">
-          新規譜面作成は30分ごとに1回までできます。
+          新しくサーバーに譜面を保存するのは{rateLimitMin}分ごとに1回までに制限しています。
+          (1度保存した譜面の上書きは何回でもできます。)
         </p>
       </div>
     </IndexMain>

@@ -53,11 +53,14 @@ import {
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
 import { clearSession, initSession, SessionData } from "@/play/session";
+import { GuideMain } from "../guide/guideMain";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>(context.params.cid);
   const [cid, setCid] = useState<string | undefined>(context.params.cid);
+
+  const [guidePage, setGuidePage] = useState<number | null>(null);
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -75,6 +78,7 @@ export default function Page(context: { params: Params }) {
       setPasswdFailed(false);
       setLoading(false);
       setCid(undefined);
+      setGuidePage(1);
     } else {
       setPasswdFailed(false);
       setLoading(true);
@@ -902,6 +906,13 @@ export default function Page(context: { params: Params }) {
           </Box>
         </div>
       </div>
+      {guidePage !== null && (
+        <GuideMain
+          index={guidePage}
+          setIndex={setGuidePage}
+          close={() => setGuidePage(null)}
+        />
+      )}
     </main>
   );
 }
