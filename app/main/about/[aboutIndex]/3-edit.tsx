@@ -82,7 +82,7 @@ export function AboutContent3() {
               className={
                 "absolute bg-amber-600 rounded-sm m-1 " +
                 "top-0 inset-x-0 p-1 pl-10 h-12 " +
-                "main-wide:left-auto main-wide:pb-2 main-wide:w-20 main-wide:h-14 "
+                "main-wide:left-auto main-wide:pl-1 main-wide:pb-3 main-wide:w-20 main-wide:h-14 "
               }
             >
               <div className="bg-black w-full h-full text-center flex items-center justify-center">

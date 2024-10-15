@@ -30,17 +30,15 @@ export function AboutContent1() {
           <wbr />
           遊べます。
           <wbr />
-          音ゲーマー
-          <wbr />
-          だけでなく、
-          <wbr />
-          音楽ゲームに
+          音ゲーを
           <wbr />
           あまり
           <wbr />
-          馴染みが
+          プレイ
           <wbr />
-          ない方でも
+          しない
+          <wbr />
+          方でも
           <wbr />
           楽しめる
           <wbr />
@@ -56,6 +54,14 @@ export function AboutContent1() {
           遊ぶ
           <wbr />
           だけでなく
+          <wbr />
+          アカウント
+          <wbr />
+          登録や
+          <wbr />
+          ログイン
+          <wbr />
+          不要で
           <wbr />
           誰でも
           <wbr />

@@ -7,12 +7,7 @@ import { useRouter } from "next/navigation";
 import msgpack from "@ygoe/msgpack";
 import Link from "next/link";
 import { getRecent, removeRecent } from "@/common/recent";
-import {
-  Chart,
-  ChartBrief,
-  emptyChart,
-  validCId,
-} from "@/chartFormat/chart";
+import { Chart, ChartBrief, emptyChart, validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import { setPasswd } from "@/common/passwdCache";
 import Input from "@/common/input";
@@ -70,6 +65,28 @@ export default function EditTab() {
   const [uploadMsg, setUploadMsg] = useState<string>("");
   return (
     <IndexMain tab={2}>
+      <p className="mb-3 break-keep break-words">
+        Falling Nikochan の<wbr />
+        譜面
+        <wbr />
+        エディタに
+        <wbr />
+        ようこそ。
+        <wbr />
+        アカウント
+        <wbr />
+        登録
+        <wbr />
+        不要で
+        <wbr />
+        誰でも
+        <wbr />
+        譜面を
+        <wbr />
+        作成する
+        <wbr />
+        ことができます。
+      </p>
       <div className="mb-3">
         <h3 className="mb-2">
           <span className="text-xl font-bold font-title ">譜面IDを入力:</span>
@@ -82,7 +99,37 @@ export default function EditTab() {
           />
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
-        <ChartIdDesc />
+        <p className="pl-2 break-keep break-words">
+          編集したい
+          <wbr />
+          譜面の
+          <wbr />
+          IDを
+          <wbr />
+          知って
+          <wbr />
+          いる
+          <wbr />
+          場合は
+          <wbr />
+          こちらに
+          <wbr />
+          入力して
+          <wbr />
+          ください。
+          <wbr />
+          ID
+          <wbr />
+          入力後、
+          <wbr />
+          編集用
+          <wbr />
+          パスワード
+          <wbr />も<wbr />
+          必要に
+          <wbr />
+          なります。
+        </p>
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
@@ -111,48 +158,36 @@ export default function EditTab() {
           </Link>
         </h3>
         <p className="pl-2">
-          新しくサーバーに譜面を保存するのは{rateLimitMin}分ごとに1回までに制限しています。
-          (1度保存した譜面の上書きは何回でもできます。)
+          新しく
+          <wbr />
+          サーバーに
+          <wbr />
+          譜面を
+          <wbr />
+          保存
+          <wbr />
+          するのは {rateLimitMin} 分<wbr />
+          ごとに
+          <wbr />
+          1回
+          <wbr />
+          までに
+          <wbr />
+          制限して
+          <wbr />
+          います。 (1度
+          <wbr />
+          保存した
+          <wbr />
+          譜面の
+          <wbr />
+          上書きは
+          <wbr />
+          何回でも
+          <wbr />
+          できます。)
         </p>
       </div>
     </IndexMain>
-  );
-}
-
-function ChartIdDesc() {
-  return (
-    <>
-      <p className="pl-2 break-keep break-words">
-        編集したい
-        <wbr />
-        譜面の
-        <wbr />
-        IDを
-        <wbr />
-        知って
-        <wbr />
-        いる
-        <wbr />
-        場合は
-        <wbr />
-        こちらに
-        <wbr />
-        入力して
-        <wbr />
-        ください。
-        <wbr />
-        ID
-        <wbr />
-        入力後、
-        <wbr />
-        編集用
-        <wbr />
-        パスワード
-        <wbr />も<wbr />
-        必要に
-        <wbr />
-        なります。
-      </p>
-    </>
   );
 }

@@ -40,16 +40,15 @@ export function IndexMain(props: Props) {
       </div>
       <div
         className={
-          "basis-0 " +
           "main-wide:max-h-screen main-wide:overflow-hidden main-wide:mb-3 " +
-          "grow shrink-0 " +
-          "flex flex-row justify-center px-6 "
+          "grow shrink-0 basis-56 " +
+          "flex flex-row items-stretch justify-center px-6 "
         }
       >
         <div
           className={
             (props.tab === undefined ? "flex " : "hidden main-wide:flex ") +
-            "flex-col justify-center w-56 shrink-0 " +
+            "flex-col h-max w-56 shrink-0 my-auto " +
             "transition ease-out duration-200 "
           }
           style={{
@@ -112,7 +111,7 @@ export function IndexMain(props: Props) {
           <Box
             className={
               "flex flex-col p-6 overflow-auto " +
-              "w-full my-6 main-wide:flex-1 main-wide:my-0 " +
+              "w-full min-h-0 my-6 main-wide:flex-1 main-wide:my-0 " +
               (menuMoveRight ? "opacity-0 " : "")
             }
           >
