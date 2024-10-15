@@ -7,6 +7,7 @@ import { useResizeDetector } from "react-resize-detector";
 interface Props {
   className?: string;
   style?: object;
+  scale?: number;
   isMobile?: boolean;
   control: boolean;
   id?: string;
@@ -29,6 +30,7 @@ export function FlexYouTube(props: Props) {
     fixedSide,
   } = props;
   const { width, height, ref } = useResizeDetector();
+  const scale = props.scale || 1;
   const resizeYouTube = useRef<() => void>();
   const onReadyRef = useRef<() => void>();
   const onStartRef = useRef<() => void>();
@@ -41,11 +43,11 @@ export function FlexYouTube(props: Props) {
         if (width && height) {
           const iframe = ytPlayer.current.getIframe();
           if (fixedSide === "width") {
-            iframe.width = String(width);
-            iframe.height = String((width * 9) / 16);
+            iframe.width = String(width / scale);
+            iframe.height = String((width * 9) / 16 / scale);
           } else {
-            iframe.height = String(height);
-            iframe.width = String((height * 16) / 9);
+            iframe.height = String(height / scale);
+            iframe.width = String((height * 16) / 9 / scale);
           }
         }
       }
@@ -96,7 +98,9 @@ export function FlexYouTube(props: Props) {
             },
             onPlaybackRateChange: () => {
               if (onPlaybackRateChangeRef.current) {
-                onPlaybackRateChangeRef.current(ytPlayer.current?.getPlaybackRate() || 1);
+                onPlaybackRateChangeRef.current(
+                  ytPlayer.current?.getPlaybackRate() || 1
+                );
               }
             },
           },
@@ -132,7 +136,12 @@ export function FlexYouTube(props: Props) {
       }}
       ref={ref}
     >
-      <div className="absolute inset-0">
+      <div
+        className="absolute right-0 top-0 origin-top-right "
+        style={{
+          transform: `scale(${scale})`,
+        }}
+      >
         <div id="youtube-player" />
       </div>
     </div>

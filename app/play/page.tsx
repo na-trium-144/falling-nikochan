@@ -342,8 +342,9 @@ function Play() {
             <FlexYouTube
               fixedSide="width"
               className={
-                "z-10 " + (isMobile ? "grow-0 shrink-0 basis-6/12" : "w-full")
+                "z-10 " + (isMobile ? "grow-0 shrink-0 w-1/2" : "w-full")
               }
+              scale={isMobile ? 0.5 : 1}
               isMobile={isMobile}
               id={chartBrief?.ytId}
               control={false}
@@ -352,7 +353,7 @@ function Play() {
               onStart={onStart}
               onStop={onStop}
             />
-            <div className="flex-1 min-w-0 ">
+            <div className="flex-1 min-w-0 mr-1 ">
               <p
                 className={
                   "font-title text-lg leading-tight " +
@@ -373,7 +374,7 @@ function Play() {
               >
                 {chartBrief?.composer}
               </p>
-              <p style={{ lineHeight: 0 }}>
+              <p className="w-full" style={{ lineHeight: 0 }}>
                 {lvIndex !== undefined && chartBrief?.levels[lvIndex] && (
                   <span
                     className={
