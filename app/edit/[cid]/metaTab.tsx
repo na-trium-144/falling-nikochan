@@ -104,6 +104,7 @@ interface Props2 {
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
+  const [saving, setSaving] = useState<boolean>(false);
   const [uploadMsg, setUploadMsg] = useState<string>("");
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
@@ -115,6 +116,7 @@ export function MetaTab(props: Props2) {
   }, [props.chart]);
 
   const save = async () => {
+    setSaving(true);
     if (props.cid === undefined) {
       const res = await fetch(`/api/newChartFile/`, {
         method: "POST",
@@ -168,6 +170,7 @@ export function MetaTab(props: Props2) {
         }
       }
     }
+    setSaving(false);
   };
   const download = () => {
     // editPasswdだけ消す
@@ -220,7 +223,7 @@ export function MetaTab(props: Props2) {
       <p className="">
         譜面ID:
         <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
-        <Button text="サーバーに保存" onClick={save} />
+        <Button text="サーバーに保存" onClick={save} loading={saving} />
         <span className="ml-1">{errorMsg}</span>
         {props.hasChange && (
           <span className="ml-1">(未保存の変更があります)</span>
