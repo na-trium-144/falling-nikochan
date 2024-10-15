@@ -62,6 +62,7 @@ export function PlayOption(props: Props) {
     if (data && data.levelHash === props.brief.levels[selectedLevel].hash) {
       setBestScoreState(data);
     } else {
+      setBestScoreState(undefined);
       clearBestScore(props.cid, selectedLevel);
     }
   }, [props, selectedLevel]);
