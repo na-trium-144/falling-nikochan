@@ -93,6 +93,16 @@ export async function POST(request: NextRequest, context: { params: Params }) {
       { status: 400 }
     );
   }
+
+  // update Time
+  const prevHashes = chart.levels.map((l) => l.hash);
+  const newHashes = newChart.levels.map((l) => l.hash);
+  if(newHashes.every((h, i) => h === prevHashes[i])) {
+    newChart.updatedAt = chart.updatedAt;
+  }else{
+    newChart.updatedAt = new Date().getTime();
+  }
+
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
     return NextResponse.json(

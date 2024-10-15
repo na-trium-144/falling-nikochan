@@ -17,11 +17,19 @@ model ChartFile {
   fid String @id
   cid String @unique
   ytId String
-  title String @default("")
-  composer String @default("")
-  chartCreator String @default("")
+  title String
+  composer String
+  chartCreator String
   levels LevelBrief[]
+  updatedAt DateTime
+  playCount PlayCount?
 }
+
+model PlayCount {
+  cid String @id
+  chart ChartFile @relation(fields: [cid], references: [cid])
+}
+
 model LevelBrief {
   id Int @id @default(autoincrement())
   chart ChartFile @relation(fields: [cid], references: [cid])

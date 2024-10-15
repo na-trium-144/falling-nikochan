@@ -67,10 +67,15 @@ export default async function ShareChart(context: { params: Params }) {
               </Header>
               <p className="font-title text-2xl">{brief?.title}</p>
               <p className="font-title text-lg">{brief?.composer}</p>
-              <p className="text-sm mt-1">
-                <span>Chart by</span>
-                <span className="ml-3 font-title text-lg">
-                  {brief.chartCreator}
+              <p className="mt-1">
+                <span className="inline-block">
+                  <span className="text-sm">Chart by</span>
+                  <span className="ml-3 font-title text-lg">
+                    {brief.chartCreator}
+                  </span>
+                </span>
+                <span className="inline-block ml-3">
+                  ({new Date(brief.updatedAt).toLocaleDateString()})
                 </span>
               </p>
             </div>

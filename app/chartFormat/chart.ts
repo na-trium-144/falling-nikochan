@@ -21,6 +21,7 @@ export interface ChartBrief {
   title: string;
   composer: string;
   chartCreator: string;
+  updatedAt: number;
   levels: {
     name: string;
     hash: string;
@@ -48,6 +49,10 @@ export interface ChartBrief {
  *
  * hashはbestScoreの管理のためだけに使う
  *
+ * updatedAtは new Date().getTime()
+ * サーバーに送信時に前のchartのhashと比較してサーバーがアップデートする
+ * クライアント側は全く使わない
+ *
  */
 export interface Chart {
   falling: "nikochan"; // magic
@@ -59,6 +64,7 @@ export interface Chart {
   composer: string;
   chartCreator: string;
   editPasswd: string;
+  updatedAt: number;
 }
 export interface Level {
   name: string;
@@ -100,6 +106,8 @@ export async function validateChart(
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
+  if (typeof chart.updatedAt !== "number")
+    chart.updatedAt = new Date().getTime();
   return chart;
 }
 export function validateLevel(level: Level): Level {
@@ -154,6 +162,7 @@ export function emptyChart(): Chart {
     composer: "",
     chartCreator: "",
     editPasswd: "",
+    updatedAt: 0,
   };
   return chart;
 }
@@ -219,5 +228,6 @@ export function createBrief(chart: Chart): ChartBrief {
     composer: chart.composer,
     chartCreator: chart.chartCreator,
     levels: levelBrief,
+    updatedAt: chart.updatedAt,
   };
 }

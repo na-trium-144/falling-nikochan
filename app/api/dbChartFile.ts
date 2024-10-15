@@ -29,6 +29,7 @@ export async function createFileEntry(
       title: brief.title,
       composer: brief.composer,
       chartCreator: brief.chartCreator,
+      updatedAt: new Date(brief.updatedAt),
     },
   });
   await createLevelsEntry(cid, brief);
@@ -73,6 +74,7 @@ export async function updateFileEntry(cid: string, brief: ChartBrief) {
       title: brief.title,
       composer: brief.composer,
       chartCreator: brief.chartCreator,
+      updatedAt: new Date(brief.updatedAt),
     },
   });
   await createLevelsEntry(cid, brief);

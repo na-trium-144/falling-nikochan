@@ -8,7 +8,6 @@ import {
 import { NextResponse } from "next/server";
 import { fsRead } from "../fsAccess";
 import msgpack from "@ygoe/msgpack";
-import { difficulty } from "@/chartFormat/difficulty";
 
 export async function getBrief(cid: string): Promise<NextResponse> {
   const fileEntry = await getFileEntry(cid);
@@ -28,6 +27,7 @@ export async function getBrief(cid: string): Promise<NextResponse> {
       composer: fileEntry.composer,
       chartCreator: fileEntry.chartCreator,
       levels: fileEntry.levels,
+      updatedAt: fileEntry.updatedAt.getTime(),
     } as ChartBrief);
   } else {
     console.log(`recreating level brief information of cid:${cid}`);
