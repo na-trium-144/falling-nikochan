@@ -8,6 +8,7 @@ import Link from "next/link";
 import Input from "@/common/input";
 import { IndexMain } from "../main";
 import { ChartListItem } from "../chartList";
+import { LoadingSlime } from "@/common/loadingSlime";
 
 const sampleCId = ["762237"];
 
@@ -16,12 +17,15 @@ export default function PlayTab() {
   const [recentBrief, setRecentBrief] = useState<{
     [key in string]: ChartBrief;
   }>({});
+  const [fetching, setFetching] = useState<number>(0);
   const router = useRouter();
 
   useEffect(() => {
     const recentCId = getRecent("play");
     setRecentCId(recentCId);
-    for (const cid of recentCId.concat(sampleCId)) {
+    const recentAndSampleCId = [...new Set(recentCId.concat(sampleCId))];
+    setFetching(recentAndSampleCId.length);
+    for (const cid of recentAndSampleCId) {
       // recentCIdもsampleCIdもまとめて扱い、受信したデータをrecentBriefに全部入れる
       void (async () => {
         const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
@@ -39,6 +43,7 @@ export default function PlayTab() {
             recentCId.filter((oldCId) => oldCId !== cid)
           );
         }
+        setFetching((fetching) => fetching - 1);
       })();
     }
   }, []);
@@ -62,9 +67,7 @@ export default function PlayTab() {
     <IndexMain tab={1}>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title">
-            譜面IDを入力:
-          </span>
+          <span className="text-xl font-bold font-title">譜面IDを入力:</span>
           <Input
             className="ml-4 w-20"
             actualValue=""
@@ -80,7 +83,12 @@ export default function PlayTab() {
         <h3 className="text-xl font-bold font-title mb-2">
           最近プレイした譜面
         </h3>
-        {recentCId.length > 0 ? (
+        {fetching > 0 ? (
+          <p className="pl-2">
+            <LoadingSlime />
+            Loading...
+          </p>
+        ) : recentCId.length > 0 ? (
           <ul className="ml-3">
             {recentCId.map((cid) => (
               <ChartListItem
@@ -98,18 +106,27 @@ export default function PlayTab() {
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">サンプル譜面</h3>
-        <p className="pl-2">はじめての方はこちらから</p>
-        <ul className="list-disc list-inside ml-3">
-          {sampleCId.map((cid) => (
-            <ChartListItem
-              key={cid}
-              cid={cid}
-              brief={recentBrief[cid]}
-              href={`/share/${cid}`}
-              creator
-            />
-          ))}
-        </ul>
+        {fetching > 0 ? (
+          <p className="pl-2">
+            <LoadingSlime />
+            Loading...
+          </p>
+        ) : (
+          <>
+            <p className="pl-2">はじめての方はこちらから</p>
+            <ul className="list-disc list-inside ml-3">
+              {sampleCId.map((cid) => (
+                <ChartListItem
+                  key={cid}
+                  cid={cid}
+                  brief={recentBrief[cid]}
+                  href={`/share/${cid}`}
+                  creator
+                />
+              ))}
+            </ul>
+          </>
+        )}
       </div>
     </IndexMain>
   );

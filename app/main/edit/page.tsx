@@ -17,19 +17,21 @@ import { IndexMain } from "../main";
 import { setPasswd } from "@/common/passwdCache";
 import Input from "@/common/input";
 import { ChartListItem } from "../chartList";
+import { rateLimitMin } from "@/api/dbRateLimit";
+import { LoadingSlime } from "@/common/loadingSlime";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
     [key in string]: ChartBrief;
   }>({});
-  const [chart, setChart] = useState<Chart>(emptyChart());
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [fetching, setFetching] = useState<number>(0);
   const router = useRouter();
 
   useEffect(() => {
     const recentCId = getRecent("edit");
     setRecentCId(recentCId);
+    setFetching(recentCId.length);
     for (const cid of recentCId) {
       void (async () => {
         const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
@@ -47,6 +49,7 @@ export default function EditTab() {
             recentCId.filter((oldCId) => oldCId !== cid)
           );
         }
+        setFetching((fetching) => fetching - 1);
       })();
     }
   }, []);
@@ -85,7 +88,12 @@ export default function EditTab() {
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
-        {recentCId.length > 0 ? (
+        {fetching > 0 ? (
+          <p className="pl-2">
+            <LoadingSlime />
+            Loading...
+          </p>
+        ) : recentCId.length > 0 ? (
           <ul className="ml-3">
             {recentCId.map((cid) => (
               <ChartListItem

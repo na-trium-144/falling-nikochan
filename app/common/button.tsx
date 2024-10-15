@@ -1,9 +1,10 @@
 import { Key } from "./key";
+import { LoadingSlime } from "./loadingSlime";
 
 export const buttonStyleDisabled =
   "m-0.5 h-10 py-1.5 px-2.5 text-center content-center " +
   "border border-gray-600 rounded cursor-pointer " +
-  "bg-gray-500 ";
+  "bg-gray-400 ";
 export const buttonStyle =
   "m-0.5 h-10 px-2.5 text-center content-center " +
   "border border-gray-600 rounded cursor-pointer " +
@@ -17,17 +18,21 @@ interface Props {
   text?: string;
   keyName?: string | string[];
   disabled?: boolean;
+  loading?: boolean;
 }
 export default function Button(props: Props) {
   return (
     <button
       className={
-        (props.disabled ? buttonStyleDisabled : buttonStyle) + props.className
+        (props.disabled || props.loading ? buttonStyleDisabled : buttonStyle) +
+        (props.loading ? "cursor-wait " : "") +
+        props.className
       }
       onClick={() => props.onClick && props.onClick()}
       onKeyDown={(e) => e.stopPropagation()}
-      disabled={props.disabled}
+      disabled={props.disabled || props.loading}
     >
+      {props.loading && <LoadingSlime />}
       <span className={props.keyName ? "mr-1" : ""}>{props.text}</span>
       {Array.isArray(props.keyName)
         ? props.keyName.map((k, i) => (
