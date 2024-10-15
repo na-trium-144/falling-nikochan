@@ -17,6 +17,18 @@
     U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* noto-sans-jp-japanese-400-normal */
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.woff2)
+      format("woff2"),
+    url(https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.woff)
+      format("woff");
+}
+
 /* merriweather-latin-400-normal */
 @font-face {
   font-family: "Merriweather";
@@ -32,25 +44,25 @@
     U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* noto-serif-jp-japanese-400-normal */
+/* kaisei-opti-japanese-400-normal */
 @font-face {
-  font-family: "Noto Serif JP";
+  font-family: "Kaisei Opti";
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url(https://cdn.jsdelivr.net/fontsource/fonts/noto-serif-jp@latest/japanese-400-normal.woff2)
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/kaisei-opti@latest/japanese-400-normal.woff2)
       format("woff2"),
-    url(https://cdn.jsdelivr.net/fontsource/fonts/noto-serif-jp@latest/japanese-400-normal.woff)
+    url(https://cdn.jsdelivr.net/fontsource/fonts/kaisei-opti@latest/japanese-400-normal.woff)
       format("woff");
 }
 
 .font-title,
 .font-main-ui.font-title {
-  font-family: "Noto Sans", sans-serif;
+  font-family: "Noto Sans", "Noto Sans JP", sans-serif;
 }
 .font-main-ui,
 body {
-  font-family: "Merriweather", "Noto Serif JP", serif;
+  font-family: "Merriweather", "Kaisei Opti", serif;
 }
 
 /* https://cssloaders.github.io より */
