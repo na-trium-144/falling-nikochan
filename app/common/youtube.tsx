@@ -8,7 +8,6 @@ interface Props {
   className?: string;
   style?: object;
   scale?: number;
-  isMobile?: boolean;
   control: boolean;
   id?: string;
   ytPlayer: { current?: YouTubePlayer };
