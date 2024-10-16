@@ -808,7 +808,7 @@ export default function Page(context: { params: Params }) {
               ) : (
                 <button
                   key={i}
-                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200"
+                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 active:shadow-inner "
                   onClick={() => {
                     setTab(i);
                     ref.current.focus();
