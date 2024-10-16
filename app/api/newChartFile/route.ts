@@ -84,7 +84,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     await createFileEntry(cid, fid, createBrief(chart));
   }
 
-  if (!(await fsWrite(fid, new Blob([msgpack.serialize(chart)])))) {
+  if (!(await fsWrite(fid, fsRes.volumeUrl, new Blob([msgpack.serialize(chart)])))) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
 

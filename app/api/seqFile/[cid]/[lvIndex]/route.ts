@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, context: { params: Params }) {
       { status: 404 }
     );
   }
-  const fsData = await fsRead(fileEntry.fid);
+  const fsData = await fsRead(fileEntry.fid, null);
   if (fsData === null) {
     return NextResponse.json({ message: "fsRead() failed" }, { status: 500 });
   }

@@ -17,7 +17,6 @@ docker compose up
 ```
 DATABASE_URL="postgresql://postgres:example@localhost:5432/postgres"
 FS_MASTER="http://localhost:9333"
-FS_VOLUME="http://localhost:8080"
 ```
 
 * (install git)
@@ -40,10 +39,14 @@ npm run start
 
 * データベースの public.LevelBrief テーブルはstart時に削除されます (initDB.js)
     * ただのキャッシュなので必要なときに再生成されます
-* そのため LevelBrief のschemaの変更は問題ありませんが、
-それ以外のテーブルのschemaに破壊的変更が入っている場合は、 `prisma db push` でエラーになります。
-手動でなんとかしてください。
-
+    * そのため LevelBrief のschemaの変更は問題ありませんが、
+    それ以外のテーブルのschemaに破壊的変更が入っている場合は、 `prisma db push` でエラーになります。
+    手動でなんとかしてください。
+* seaweedfsのボリュームを複数起動してバックアップしたい場合は、
+masterのコマンドを `master -defaultReplication=010`,
+volumeのコマンドを `volume ... -rack=rack1 -publicUrl=http://localhost:8080`,
+`volume ... -rack=rack2 -publicUrl=http://localhost:8081`
+などとすればできそう?
 * Dockerを使うこともできます。Dockerfile をビルドするか、ビルド済みのもの(amd64, arm64)が `ghcr.io/na-trium-144/falling-nikochan/falling-nikochan:latest` としてpullできます
     * 別途postgresqlとseaweedfsを起動してください
     * .env ファイルを用意し、 /root/nikochan/.env としてマウントしてください
