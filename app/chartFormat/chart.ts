@@ -107,8 +107,7 @@ export async function validateChart(
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
-  if (typeof chart.updatedAt !== "number")
-    chart.updatedAt = new Date().getTime();
+  if (typeof chart.updatedAt !== "number") chart.updatedAt = 0;
   return chart;
 }
 export function validateLevel(level: Level): Level {

@@ -22,22 +22,25 @@ export async function convert3To4(chart: Chart3): Promise<Chart4> {
   const newChart: Chart4 = {
     falling: "nikochan",
     ver: 4,
-    levels: [{
-      name: "",
-      hash: "",
-      type: "Single",
-      notes: chart.notes,
-      rest: chart.rest,
-      bpmChanges: chart.bpmChanges,
-      speedChanges: chart.speedChanges,
-      lua: chart.lua,
-    }],
+    levels: [
+      {
+        name: "",
+        hash: "",
+        type: "Single",
+        notes: chart.notes,
+        rest: chart.rest,
+        bpmChanges: chart.bpmChanges,
+        speedChanges: chart.speedChanges,
+        lua: chart.lua,
+      },
+    ],
     offset: chart.offset,
     ytId: chart.ytId,
     title: chart.title,
     composer: chart.composer,
     chartCreator: chart.chartCreator,
     editPasswd: chart.editPasswd,
+    updatedAt: 0,
   };
   newChart.levels[0].hash = await hashLevel(newChart.levels[0]);
   return newChart;
