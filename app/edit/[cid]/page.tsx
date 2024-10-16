@@ -52,7 +52,7 @@ import {
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
-import { clearSession, initSession, SessionData } from "@/play/session";
+import { initSession, SessionData } from "@/play/session";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -164,14 +164,9 @@ export default function Page(context: { params: Params }) {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (hasChange) {
         const confirmationMessage = "未保存の変更があります";
-        if (confirmationMessage) {
-          clearSession(sessionId);
-        }
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
         return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
-      } else {
-        clearSession(sessionId);
       }
     };
     window.addEventListener("beforeunload", onUnload);
