@@ -1,6 +1,11 @@
 import { Chart } from "./chart";
-import { BPMChange } from "./command";
-import { Step, stepCmp, stepToFloat, stepZero } from "./step";
+import {
+  BPMChange,
+  defaultSignature,
+  getBarLength,
+  Signature,
+} from "./command";
+import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 
 export interface ChartSeqData {
   notes: Note[];
@@ -109,6 +114,37 @@ export function getStep(
   };
 }
 /**
+ * 時刻(step)→小節数+小節内の拍数
+ */
+export function getSignatureState(
+  signature: Signature[],
+  step: Step
+): SignatureState {
+  const targetSignature = signature[findBpmIndexFromStep(signature, step)];
+  let barBegin = stepSub(targetSignature.step, targetSignature.offset);
+  const barLength = getBarLength(targetSignature);
+  let barNum = targetSignature.barNum;
+  let bi = 0;
+  while (true) {
+    const barEnd = stepAdd(barBegin, barLength[bi % barLength.length]);
+    if (stepCmp(barEnd, step) > 0) {
+      return {
+        barNum,
+        offset: stepSub(step, barBegin),
+      };
+    }
+    barNum += 1;
+    barBegin = barEnd;
+    bi += 1;
+  }
+}
+
+export interface SignatureState {
+  barNum: number;
+  offset: Step;
+}
+
+/**
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromSec(
@@ -131,7 +167,7 @@ export function findBpmIndexFromSec(
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromStep(
-  bpmChanges: BPMChange[],
+  bpmChanges: BPMChange[] | Signature[],
   step: Step
 ): number {
   if (bpmChanges.length === 0) {

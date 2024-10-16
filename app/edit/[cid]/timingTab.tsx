@@ -182,6 +182,10 @@ export default function TimingTab(props: Props) {
             </span>
           )}
       </p>
+      <p className="ml-2 mt-2">
+        <span>Beat</span>
+
+      </p>
     </>
   );
 }

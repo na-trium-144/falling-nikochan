@@ -3,6 +3,12 @@
  * 4分音符の個数 = fourth + numerator / denominator
  * パラメーターはいずれも自然数で、 numerator < denominator
  * ただし既約分数であるとは限らない
+ *
+ * signatureによらず常に4分音符の個数を数える。
+ *
+ * ややこしいことにedit画面でカーソルを動かす刻み幅
+ * (1 / snapDivider) もstepと呼んでいるが別物。
+ *
  */
 export interface Step {
   fourth: number;

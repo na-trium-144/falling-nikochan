@@ -1,4 +1,12 @@
-import { Step, stepCmp, stepToFloat, stepZero, validateStep } from "./step";
+import {
+  Step,
+  stepAdd,
+  stepCmp,
+  stepSub,
+  stepToFloat,
+  stepZero,
+  validateStep,
+} from "./step";
 
 /**
  * 音符コマンド
@@ -56,16 +64,77 @@ export function validateRestStep(n: RestStep) {
 }
 
 /**
- *       timeSec +=
-        (60 / bpmChanges[bi].bpm) *
-        (bpmChanges[bi + 1].step - bpmChanges[bi].step);
+ * 例: 15/8 = 4/4 + 7/8 の場合
+ * (4分, 4分, 4分, 4分) + (4分, 4分, 4分, 8分)
+ * → [[4, 4, 4, 4], [4, 4, 4, 8]]
+ * 4分、8分、16分の和で表せる拍子のみしか対応しない。
+ *
+ * step: 変化位置
+ * offset: n拍目からカウントを始める
+ *  (step - offset がこのSignatureの1拍目になる)
+ *
+ * barNum: このSignatureが始まる時点の小節番号
+ *
+ */
+export interface Signature {
+  step: Step;
+  offset: Step;
+  barNum: number;
+  bars: (4 | 8 | 16)[][];
+}
+export function validateSignature(s: Signature) {
+  validateStep(s.step);
+  validateStep(s.offset);
+  if (!Array.isArray(s.bars)) throw "signature.bars is invalid";
+  s.bars.forEach((b) => {
+    if (!Array.isArray(b)) throw "signature.bars is invalid";
+    b.forEach((bs) => {
+      if (bs !== 4 && bs !== 8 && bs !== 16) throw "signature.bars is invalid";
+    });
+  });
+}
+export function getBarLength(s: Signature): Step[] {
+  return s.bars.map((b) =>
+    b.reduce(
+      (len, bs) =>
+        stepAdd(len, { fourth: 0, numerator: 1, denominator: bs / 4 } as Step),
+      stepZero()
+    )
+  );
+}
+export function updateBarNum(signatures: Signature[]) {
+  let barNum = 0;
+  signatures[0].barNum = 0;
+  for (let si = 1; si < signatures.length; si++) {
+    let prevBarBegin = stepSub(
+      signatures[si - 1].step,
+      signatures[si - 1].offset
+    );
+    const prevBarLength = getBarLength(signatures[si - 1]);
+    let bi = 0;
+    while (stepCmp(prevBarBegin, signatures[si].step) < 0) {
+      barNum += 1;
+      prevBarBegin = stepAdd(
+        prevBarBegin,
+        prevBarLength[bi % prevBarLength.length]
+      );
+      bi += 1;
+    }
+    signatures[si].barNum = barNum;
+  }
+}
+
+/**
+ * timeSec +=
+ *  (60 / bpmChanges[bi].bpm) *
+ *  (bpmChanges[bi + 1].step - bpmChanges[bi].step);
  */
 export interface BPMChange {
   step: Step;
   timeSec: number;
   bpm: number;
 }
-export interface BPMChangeWithLua extends BPMChange{
+export interface BPMChangeWithLua extends BPMChange {
   luaLine: number | null;
 }
 export function validateBpmChange(b: BPMChangeWithLua) {
