@@ -87,7 +87,7 @@ export function IndexMain(props: Props) {
               <button
                 key={i}
                 className={
-                  " text-center hover:bg-sky-200 " +
+                  " text-center hover:bg-sky-200 active:shadow-inner " +
                   (isTitlePage
                     ? "rounded-lg p-3 "
                     : "rounded-l-lg py-3 pl-2 pr-2 ")

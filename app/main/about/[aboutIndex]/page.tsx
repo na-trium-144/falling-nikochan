@@ -34,7 +34,7 @@ export default function AboutTab(context: { params: Params }) {
             <Link
               className={
                 "px-2 text-center inline-block w-7 rounded-full " +
-                "text-lg text-bold hover:bg-gray-200 active:bg-gray-300 "
+                "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 "
               }
               href={`/main/about/${aboutIndex - 1}`}
               scroll={false}
@@ -54,7 +54,7 @@ export default function AboutTab(context: { params: Params }) {
             <Link
               className={
                 "px-2 text-center inline-block w-7 rounded-full " +
-                "text-lg text-bold hover:bg-gray-200 active:bg-gray-300 "
+                "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 "
               }
               href={`/main/about/${aboutIndex + 1}`}
               scroll={false}

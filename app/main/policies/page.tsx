@@ -3,6 +3,7 @@ import { tabTitles } from "../const";
 import { IndexMain } from "../main";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { linkStyle2 } from "@/common/linkStyle";
 
 export function generateMetadata() {
   return metaDataTitle(tabTitles[3]);
@@ -27,7 +28,7 @@ export default function PolicyTab() {
         <li>
           Falling Nikochan はオープンソースのソフトウェアであり、
           <Link
-            className="mx-1 text-blue-800 underline hover:text-blue-600"
+            className={"mx-1 text-blue-800 " + linkStyle2}
             href="https://github.com/na-trium-144/falling-nikochan"
           >
             GitHub 上に
@@ -38,7 +39,7 @@ export default function PolicyTab() {
           MIT License で公開しており、複製、改変、再配布などをしても構いません。
           ライセンス本文は
           <Link
-            className="mx-1 text-blue-800 underline hover:text-blue-600"
+            className={"mx-1 text-blue-800 " + linkStyle2}
             href="https://github.com/na-trium-144/falling-nikochan/blob/main/LICENSE"
           >
             こちら
