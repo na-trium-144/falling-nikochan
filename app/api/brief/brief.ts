@@ -32,7 +32,7 @@ export async function getBrief(cid: string): Promise<NextResponse> {
     } as ChartBrief);
   } else {
     console.log(`recreating level brief information of cid:${cid}`);
-    const fsData = await fsRead(fileEntry.fid);
+    const fsData = await fsRead(fileEntry.fid, null);
     if (fsData === null) {
       return NextResponse.json({ message: "fsRead() failed" }, { status: 500 });
     }
