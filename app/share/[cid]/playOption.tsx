@@ -58,6 +58,8 @@ export function ShareLink(props: Props) {
   );
 }
 export function PlayOption(props: Props) {
+  const router = useRouter();
+
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
@@ -76,22 +78,6 @@ export function PlayOption(props: Props) {
       clearBestScore(props.cid, selectedLevel);
     }
   }, [props, selectedLevel]);
-
-  const [sessionId, setSessionId] = useState<number>();
-  const [sessionData, setSessionData] = useState<SessionData>();
-  useEffect(() => {
-    const data = {
-      cid: props.cid,
-      lvIndex: selectedLevel,
-      brief: props.brief,
-    };
-    setSessionData(data);
-    if (sessionId === undefined) {
-      setSessionId(initSession(data));
-    } else {
-      initSession(data, sessionId);
-    }
-  }, [sessionId, selectedLevel, props]);
 
   return (
     <>
@@ -238,15 +224,18 @@ export function PlayOption(props: Props) {
         )}
       </p>
       <p className="mt-3">
-        <Link href={`/play?sid=${sessionId}`}>
-          <Button
-            text="ゲーム開始！"
-            onClick={() =>
-              // 押したときにも再度sessionを初期化
-              sessionData && initSession(sessionData, sessionId)
-            }
-          />
-        </Link>
+        <Button
+          text="ゲーム開始！"
+          onClick={() => {
+            // 押したときにも再度sessionを初期化
+            const sessionId = initSession({
+              cid: props.cid,
+              lvIndex: selectedLevel,
+              brief: props.brief,
+            });
+            router.push(`/play?sid=${sessionId}`);
+          }}
+        />
       </p>
     </>
   );

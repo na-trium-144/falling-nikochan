@@ -52,7 +52,7 @@ import {
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
-import { clearSession, initSession, SessionData } from "@/play/session";
+import { initSession, SessionData } from "@/play/session";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -124,16 +124,6 @@ export default function Page(context: { params: Params }) {
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
 
-  const createSessionData = useCallback(
-    (chart: Chart) => ({
-      cid: cid,
-      lvIndex: currentLevelIndex,
-      brief: createBrief(chart),
-      chart: chart,
-      editing: true,
-    }),
-    [cid, currentLevelIndex]
-  );
   const changeChart = (chart: Chart) => {
     void (async () => {
       for (const level of chart.levels) {
@@ -141,27 +131,26 @@ export default function Page(context: { params: Params }) {
       }
       setHasChange(true);
       setChart(chart);
-
-      const data = createSessionData(chart);
-      setSessionData(data);
-      if (sessionId === undefined) {
-        setSessionId(initSession(data));
-      } else {
-        initSession(data, sessionId);
-      }
     })();
   };
-  const prevLevelIndex = useRef<number>(-1);
   useEffect(() => {
     if (chart) {
       if (sessionId === undefined) {
-        setSessionId(initSession(createSessionData(chart)));
-      } else if (prevLevelIndex.current !== currentLevelIndex) {
-        initSession(createSessionData(chart), sessionId);
+        setSessionId(initSession(null));
       }
-      prevLevelIndex.current = currentLevelIndex;
+      const data = {
+        cid: cid,
+        lvIndex: currentLevelIndex,
+        brief: createBrief(chart),
+        chart: chart,
+        editing: true,
+      };
+      setSessionData(data);
+      initSession(data, sessionId);
+      // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
+      // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
     }
-  }, [sessionId, chart, createSessionData, currentLevelIndex]);
+  }, [sessionId, chart, currentLevelIndex, cid]);
 
   const changeLevel = (newLevel: Level | null) => {
     if (chart && newLevel) {
@@ -175,14 +164,9 @@ export default function Page(context: { params: Params }) {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (hasChange) {
         const confirmationMessage = "未保存の変更があります";
-        if (confirmationMessage) {
-          clearSession(sessionId);
-        }
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
         return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
-      } else {
-        clearSession(sessionId);
       }
     };
     window.addEventListener("beforeunload", onUnload);

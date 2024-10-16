@@ -205,21 +205,18 @@ export function MetaTab(props: Props2) {
   return (
     <>
       <p className="mb-1">
-        <a
+        <button
           className={"relative inline-block " + linkStyle1}
-          href={`/play?sid=${props.sessionId}`}
-          target="_blank"
-        >
-          <button
-            onClick={() =>
-              props.sessionData &&
-              initSession(props.sessionData, props.sessionId)
+          onClick={() => {
+            if (props.sessionData) {
+              initSession(props.sessionData, props.sessionId);
+              window.open(`/play?sid=${props.sessionId}`, "_blank")?.focus();
             }
-          >
-            <span className="mr-5">テストプレイ</span>
-            <EfferentThree className="absolute bottom-1 right-0" />
-          </button>
-        </a>
+          }}
+        >
+          <span className="mr-5">テストプレイ</span>
+          <EfferentThree className="absolute bottom-1 right-0" />
+        </button>
       </p>
       <p className="">
         譜面ID:
