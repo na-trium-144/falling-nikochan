@@ -9,6 +9,7 @@ export async function getFileEntry(cid: string) {
     },
     include: {
       levels: true,
+      playCount: true,
     },
   });
   if (entry) {
@@ -29,6 +30,7 @@ export async function createFileEntry(
       title: brief.title,
       composer: brief.composer,
       chartCreator: brief.chartCreator,
+      updatedAt: new Date(brief.updatedAt),
     },
   });
   await createLevelsEntry(cid, brief);
@@ -73,7 +75,24 @@ export async function updateFileEntry(cid: string, brief: ChartBrief) {
       title: brief.title,
       composer: brief.composer,
       chartCreator: brief.chartCreator,
+      updatedAt: new Date(brief.updatedAt),
     },
   });
   await createLevelsEntry(cid, brief);
+}
+export async function updatePlayCount(cid: string) {
+  await prisma.playCount.upsert({
+    where: {
+      cid,
+    },
+    update: {
+      count: {
+        increment: 1,
+      },
+    },
+    create: {
+      cid,
+      count: 1,
+    },
+  });
 }

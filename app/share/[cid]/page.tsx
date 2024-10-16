@@ -5,7 +5,7 @@ import Button from "@/common/button";
 import Footer from "@/common/footer";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import Link from "next/link";
-import { PlayOption, ShareLink } from "./playOption";
+import { PlayCount, PlayOption, ShareLink } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
 import { metaDataTitle, pageTitle } from "@/common/title";
@@ -67,10 +67,18 @@ export default async function ShareChart(context: { params: Params }) {
               </Header>
               <p className="font-title text-2xl">{brief?.title}</p>
               <p className="font-title text-lg">{brief?.composer}</p>
-              <p className="text-sm mt-1">
-                <span>Chart by</span>
-                <span className="ml-3 font-title text-lg">
-                  {brief.chartCreator}
+              <p className="mt-1">
+                <span className="inline-block">
+                  <span className="text-sm">Chart by</span>
+                  <span className="ml-3 font-title text-lg">
+                    {brief.chartCreator}
+                  </span>
+                </span>
+                <span className="inline-block ml-3 text-slate-500">
+                  ({new Date(brief.updatedAt).toLocaleDateString()})
+                  <span className="ml-3">
+                    <PlayCount count={brief.playCount || 0} />
+                  </span>
                 </span>
               </p>
             </div>

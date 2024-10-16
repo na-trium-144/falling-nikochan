@@ -7,10 +7,19 @@ import { FourthNote } from "@/common/fourthNote";
 import { rankStr } from "@/common/rank";
 import { initSession, SessionData } from "@/play/session";
 import { JudgeIcon } from "@/play/statusBox";
-import { RightOne, SmilingFace, Timer } from "@icon-park/react";
+import { PlayOne, RightOne, SmilingFace, Timer } from "@icon-park/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+export function PlayCount(props: { count: number }) {
+  return (
+    <>
+      <PlayOne className="inline-block w-5 translate-y-0.5" theme="filled" />
+      <span>{props.count}</span>
+    </>
+  );
+}
 
 interface Props {
   cid: string;
@@ -163,8 +172,13 @@ export function PlayOption(props: Props) {
           </span>
         </div>
       </div>
-      <p className="-mx-2 px-2 group hover:bg-amber-50 rounded-lg">
-        <span>Best Score:</span>
+      <p
+        className={
+          "-mx-2 px-2 group rounded-lg " +
+          (bestScoreState ? "hover:bg-amber-50 " : "text-slate-400 ")
+        }
+      >
+        <span className="text-black ">Best Score:</span>
         <span className="inline-block text-2xl w-12 text-right">
           {Math.floor(totalScore)}
         </span>
@@ -172,7 +186,7 @@ export function PlayOption(props: Props) {
         <span className="inline-block w-6">
           {(Math.floor(totalScore * 100) % 100).toString().padStart(2, "0")}
         </span>
-        {totalScore > 0 && bestScoreState && (
+        {bestScoreState && (
           <>
             <span className="text-xl main-wide:hidden">
               ({rankStr(totalScore)})
