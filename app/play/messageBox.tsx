@@ -2,6 +2,7 @@
 
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
+import CheckBox from "@/common/checkBox";
 
 interface MessageProps {
   isTouch: boolean;
@@ -42,16 +43,13 @@ export function ReadyMessage(props: MessageProps) {
       <div className="mt-2 mb-2 border-b border-black" />
       <p>オプション</p>
       <p className="mt-2">
-        <input
+        <CheckBox
           className="ml-1 mr-1"
-          type="checkbox"
-          id="auto"
-          checked={props.auto}
-          onChange={(v) => props.setAuto(v.target.checked)}
-        />
-        <label htmlFor="auto">
+          value={props.auto}
+          onChange={(v) => props.setAuto(v)}
+        >
           <span>オートプレイ</span>
-        </label>
+        </CheckBox>
       </p>
     </CenterBox>
   );

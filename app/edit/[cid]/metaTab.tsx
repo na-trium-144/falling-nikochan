@@ -14,6 +14,7 @@ import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
 import { EfferentThree } from "@icon-park/react";
 import { initSession, SessionData } from "@/play/session";
+import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 
 interface Props {
   chart?: Chart;
@@ -205,7 +206,7 @@ export function MetaTab(props: Props2) {
     <>
       <p className="mb-1">
         <a
-          className="hover:text-blue-600 underline relative inline-block"
+          className={"relative inline-block " + linkStyle1}
           href={`/play?sid=${props.sessionId}`}
           target="_blank"
         >
@@ -236,12 +237,12 @@ export function MetaTab(props: Props2) {
               共有用リンク:
             </span>
             <a
-              className="text-blue-600 hover:underline"
+              className={linkStyle2}
               href={`/share/${props.cid}`}
               target="_blank"
             >
               <span className="edit-wide:hidden">共有用リンク</span>
-              <span className="hidden edit-wide:inline-block text-sm">
+              <span className="hidden edit-wide:inline text-sm">
                 {origin}/share/{props.cid}
               </span>
             </a>

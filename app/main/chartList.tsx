@@ -1,4 +1,5 @@
 import { ChartBrief } from "@/chartFormat/chart";
+import { linkStyle1 } from "@/common/linkStyle";
 import Link from "next/link";
 
 interface CProps {
@@ -11,7 +12,7 @@ export function ChartListItem(props: CProps) {
   return (
     <li className="flex flex-row items-start w-full">
       <span className="flex-none mr-2">•</span>
-      <Link href={props.href} className="flex-1 min-w-0 hover:text-slate-500 ">
+      <Link href={props.href} className={"flex-1 min-w-0 " + linkStyle1}>
         <span className="inline-block">
           <span className="inline-block ">{props.cid}:</span>
           <span className="inline-block ml-2 font-title">

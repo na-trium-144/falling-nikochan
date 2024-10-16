@@ -8,6 +8,7 @@ import {
 } from "./str";
 import { Step, stepCmp, stepZero } from "@/chartFormat/step";
 import { Level } from "@/chartFormat/chart";
+import CheckBox from "@/common/checkBox";
 
 interface Props {
   offset?: number;
@@ -103,11 +104,9 @@ export default function TimingTab(props: Props) {
           isValid={bpmValid}
         />
         <span>→</span>
-        <input
+        <CheckBox
           className="ml-4 mr-1"
-          type="checkbox"
-          id="bpmChangeHere"
-          checked={props.bpmChangeHere}
+          value={props.bpmChangeHere}
           onChange={() => {
             // bpmの変更時にspeedも変える
             if (props.currentBpm == props.currentSpeed) {
@@ -116,8 +115,9 @@ export default function TimingTab(props: Props) {
             props.toggleBpmChangeHere();
           }}
           disabled={stepCmp(props.currentStep, stepZero()) <= 0}
-        />
-        <label htmlFor="bpmChangeHere">ここで変化</label>
+        >
+          ここで変化
+        </CheckBox>
         <Input
           className="w-16 mx-1"
           actualValue={props.currentBpm?.toString() || ""}
@@ -158,15 +158,14 @@ export default function TimingTab(props: Props) {
           isValid={speedValid}
         />
         <span>→</span>
-        <input
+        <CheckBox
           className="ml-4 mr-1"
-          type="checkbox"
-          id="speedChangeHere"
-          checked={props.speedChangeHere}
+          value={props.speedChangeHere}
           onChange={props.toggleSpeedChangeHere}
           disabled={stepCmp(props.currentStep, stepZero()) <= 0}
-        />
-        <label htmlFor="speedChangeHere">ここで変化</label>
+        >
+          ここで変化
+        </CheckBox>
         <Input
           className="w-16 mx-1"
           actualValue={props.currentSpeed?.toString() || ""}

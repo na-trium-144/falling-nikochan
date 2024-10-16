@@ -3,6 +3,7 @@
 import { tabTitles, tabURLs } from "@/main/const";
 import { Github } from "@icon-park/react";
 import Link from "next/link";
+import { linkStyle1, linkStyle2 } from "./linkStyle";
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定
@@ -21,11 +22,7 @@ export default function Footer(props: Props) {
           }
         >
           {tabTitles.map((tabName, i) => (
-            <Link
-              key={i}
-              className="px-2 hover:text-slate-500 "
-              href={tabURLs[i]}
-            >
+            <Link key={i} className={"px-2 " + linkStyle1} href={tabURLs[i]}>
               {tabName}
             </Link>
           ))}
@@ -38,7 +35,7 @@ export default function Footer(props: Props) {
         }
       >
         <Link
-          className="relative w-max hover:text-blue-600 hover:underline"
+          className={"relative w-max " + linkStyle2}
           href="https://github.com/na-trium-144/falling-nikochan"
         >
           <Github className="absolute bottom-1 left-0" />
