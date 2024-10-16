@@ -1,11 +1,16 @@
 "use client";
 
-import { defaultNoteCommand, NoteCommand } from "@/chartFormat/command";
+import {
+  defaultNoteCommand,
+  NoteCommand,
+  Signature,
+} from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
   findBpmIndexFromStep,
+  getSignatureState,
   getStep,
   getTimeSec,
   loadChart,
@@ -53,6 +58,7 @@ import {
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
 import { clearSession, initSession, SessionData } from "@/play/session";
+import { cursorTo } from "readline";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -497,6 +503,47 @@ export default function Page(context: { params: Params }) {
     }
   };
 
+  const currentSignatureIndex =
+    currentLevel && findBpmIndexFromStep(currentLevel.signature, currentStep);
+  const currentSignature = currentLevel?.signature.at(
+    currentSignatureIndex || 0
+  );
+  const signatureChangeHere =
+    currentSignature && stepCmp(currentSignature.step, currentStep) === 0;
+  const changeSignature = (s: Signature) => {
+    if (chart && currentLevel && currentSignatureIndex !== undefined) {
+      const newLevel = luaUpdateSignatureChange(
+        currentLevel,
+        currentSpeedIndex,
+        s
+      );
+      changeLevel(newLevel);
+    }
+  };
+  const toggleSignatureChangeHere = () => {
+    if (
+      chart &&
+      currentLevel &&
+      currentSignatureIndex !== undefined &&
+      currentSignature &&
+      stepCmp(currentStep, stepZero()) > 0
+    ) {
+      if (signatureChangeHere) {
+        const newLevel = luaDeleteSignatureChange(
+          currentLevel,
+          currentSignatureIndex
+        );
+        changeLevel(newLevel);
+      } else {
+        const newLevel = luaAddSignatureChange(currentLevel, {
+          step: currentStep,
+          offset: getSignatureState(currentLevel.signature, currentStep).offset,
+          bars: currentSignature.bars,
+        });
+        changeLevel(newLevel);
+      }
+    }
+  };
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
     if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
