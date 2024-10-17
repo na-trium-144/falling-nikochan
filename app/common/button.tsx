@@ -3,12 +3,12 @@ import { LoadingSlime } from "./loadingSlime";
 
 export const buttonStyleDisabled =
   "appearance-none " +
-  "m-0.5 h-10 py-1.5 px-2.5 text-center content-center " +
+  "m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center " +
   "border border-slate-400 rounded-lg cursor-default " +
   "bg-slate-400 ";
 export const buttonStyle =
   "appearance-none " +
-  "m-0.5 h-10 px-2.5 text-center content-center " +
+  "m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center " +
   "border border-slate-400 rounded-lg cursor-pointer " +
   "bg-gradient-to-t from-blue-100 to-blue-50 " +
   "hover:from-blue-50 hover:to-white " +

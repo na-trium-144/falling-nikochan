@@ -102,7 +102,7 @@ function CopyPasteButton(props: Props) {
         />
         <Button onClick={() => props.copyNote(0)} text="Copy" keyName="C" />
       </div>
-      {Array.from(new Array(7)).map((_, i) => (
+      {Array.from(new Array(9)).map((_, i) => (
         <div key={i} className="flex flex-col items-stretch">
           <Button
             onClick={() => props.pasteNote(i + 1)}

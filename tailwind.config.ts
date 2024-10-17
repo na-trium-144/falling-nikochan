@@ -1,16 +1,14 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./app/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     screens: {
-      'main-wide': '40rem',
-      'footer-wide': '25rem',
-      'footer-wide2': '45rem',
-      'edit-wide': '50rem',
-      'share-yt-wide': '60rem',
+      "main-wide": "40rem", // タイトルと各タブの内容が別ページ
+      "footer-wide": "35rem", // Footerのナビゲーションを横並びにする & build情報表示
+      "footer-wide2": "45rem", // build情報を横並びにする
+      "edit-wide": "50rem", // editのPC表示
+      "share-yt-wide": "60rem", // shareでYouTubeを表示する場所が変わる
     },
   },
   plugins: [],
