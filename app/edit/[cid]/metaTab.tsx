@@ -24,10 +24,10 @@ export function MetaEdit(props: Props) {
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
   return (
     <>
-      <p className="flex flex-row items-baseline mb-2">
+      <p className="mb-2">
         <span className="w-max">YouTube URL または動画ID</span>
         <Input
-          className="flex-1"
+          className=""
           actualValue={props.chart?.ytId || ""}
           updateValue={(v: string) =>
             props.chart &&
@@ -38,10 +38,10 @@ export function MetaEdit(props: Props) {
         />
       </p>
       <p>楽曲情報:</p>
-      <p className="flex flex-row items-baseline ml-2">
-        <span className="w-max">楽曲タイトル</span>
+      <p className="ml-2">
+        <span className="inline-block w-max">楽曲タイトル</span>
         <Input
-          className="font-title shrink w-80"
+          className="font-title shrink w-80 max-w-full "
           actualValue={props.chart?.title || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, title: v })
@@ -49,10 +49,10 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row items-baseline ml-2 ">
-        <span className="w-max">作曲者など</span>
+      <p className="ml-2 ">
+        <span className="inline-block w-max">作曲者など</span>
         <Input
-          className="text-sm font-title shrink w-80"
+          className="text-sm font-title shrink w-80 max-w-full"
           actualValue={props.chart?.composer || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, composer: v })
@@ -60,10 +60,10 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row items-baseline ml-2 mb-2">
-        <span className="w-max">譜面作成者(あなたの名前)</span>
+      <p className="ml-2 mb-2">
+        <span className="inline-block w-max">譜面作成者(あなたの名前)</span>
         <Input
-          className="font-title shrink w-40"
+          className="font-title shrink w-40 max-w-full"
           actualValue={props.chart?.chartCreator || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, chartCreator: v })
@@ -71,18 +71,20 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row items-baseline">
-        <span className="w-max">編集用パスワード</span>
-        <Input
-          className="font-title shrink w-40"
-          actualValue={props.chart?.editPasswd || ""}
-          updateValue={(v: string) =>
-            props.chart && props.setChart({ ...props.chart, editPasswd: v })
-          }
-          left
-          passwd={hidePasswd}
-        />
-        <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
+      <p className="">
+        <span className="inline-block w-max">編集用パスワード</span>
+        <span className="inline-flex flex-row items-baseline">
+          <Input
+            className="font-title shrink w-40 "
+            actualValue={props.chart?.editPasswd || ""}
+            updateValue={(v: string) =>
+              props.chart && props.setChart({ ...props.chart, editPasswd: v })
+            }
+            left
+            passwd={hidePasswd}
+          />
+          <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
+        </span>
       </p>
       <p className="text-sm ml-2">
         (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
@@ -186,6 +188,7 @@ export function MetaTab(props: Props2) {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files.length >= 1) {
       const f = target.files[0];
+      setUploadMsg("");
       try {
         let newChart = msgpack.deserialize(await f.arrayBuffer());
         newChart = await validateChart(newChart);
@@ -198,7 +201,7 @@ export function MetaTab(props: Props2) {
       } catch (e) {
         setUploadMsg(String(e));
       }
-      target.files = null;
+      target.value = "";
     }
   };
 
@@ -219,12 +222,16 @@ export function MetaTab(props: Props2) {
         </button>
       </p>
       <p className="">
-        譜面ID:
-        <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
+        <span className="inline-block">
+          譜面ID:
+          <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
+        </span>
         <Button text="サーバーに保存" onClick={save} loading={saving} />
-        <span className="ml-1">{errorMsg}</span>
+        <span className="inline-block ml-1 ">{errorMsg}</span>
         {props.hasChange && (
-          <span className="ml-1">(未保存の変更があります)</span>
+          <span className="inline-block ml-1 text-amber-600 ">
+            (未保存の変更があります)
+          </span>
         )}
       </p>
       {props.cid && (
@@ -256,19 +263,21 @@ export function MetaTab(props: Props2) {
         </>
       )}
       <p className="mb-4">
-        <span className="mr-1">ローカルに保存/読み込み:</span>
-        <Button text="ダウンロードして保存" onClick={download} />
-        <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
-          アップロード
-        </label>
-        <span className="ml-1">{saveMsg || uploadMsg}</span>
-        <input
-          type="file"
-          className="hidden"
-          id="upload-bin"
-          name="upload-bin"
-          onChange={upload}
-        />
+        <span className="">ローカルに保存/読み込み:</span>
+        <span className="inline-block ml-1">
+          <Button text="保存" onClick={download} />
+          <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
+            ファイルを開く
+          </label>
+          <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>
+          <input
+            type="file"
+            className="hidden"
+            id="upload-bin"
+            name="upload-bin"
+            onChange={upload}
+          />
+        </span>
       </p>
       <MetaEdit {...props} />
     </>
