@@ -125,6 +125,7 @@ export default function Page(context: { params: Params }) {
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
+  const [fileSize, setFileSize] = useState<number>(0);
 
   const changeChart = (chart: Chart) => {
     void (async () => {
@@ -147,6 +148,7 @@ export default function Page(context: { params: Params }) {
         chart: chart,
         editing: true,
       };
+      setFileSize(msgpack.serialize(chart).byteLength);
       setSessionData(data);
       initSession(data, sessionId);
       // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
@@ -823,6 +825,7 @@ export default function Page(context: { params: Params }) {
               <MetaTab
                 sessionId={sessionId}
                 sessionData={sessionData}
+                fileSize={fileSize}
                 chart={chart}
                 setChart={changeChart}
                 cid={cid}

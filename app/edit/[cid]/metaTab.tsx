@@ -6,8 +6,10 @@ import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import {
   Chart,
+  chartMaxSize,
   createBrief,
   hashPasswd,
+  levelBgColors,
   validateChart,
 } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
@@ -96,6 +98,7 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   sessionId?: number;
   sessionData?: SessionData;
+  fileSize: number;
   chart?: Chart;
   setChart: (chart: Chart) => void;
   cid: string | undefined;
@@ -207,6 +210,28 @@ export function MetaTab(props: Props2) {
 
   return (
     <>
+      <p className="mb-2">
+        <span className="">現在のファイルサイズ:</span>
+        <span className="inline-block">
+          <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
+          <span className="ml-1 text-sm ">(Max. {chartMaxSize / 1000} kB)</span>
+        </span>
+        <div className="relative bg-slate-300 h-1 rounded-full shadow">
+          <div
+            className={
+              "absolute inset-y-0 rounded-full " +
+              (props.fileSize / chartMaxSize < 0.5
+                ? levelBgColors[0]
+                : props.fileSize / chartMaxSize < 0.75
+                ? levelBgColors[1]
+                : levelBgColors[2])
+            }
+            style={{
+              width: (props.fileSize / chartMaxSize) * 100 + "%",
+            }}
+          />
+        </div>
+      </p>
       <p className="mb-1">
         <button
           className={"relative inline-block " + linkStyle1}
