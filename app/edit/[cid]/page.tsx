@@ -60,8 +60,6 @@ export default function Page(context: { params: Params }) {
   const cidInitial = useRef<string>(context.params.cid);
   const [cid, setCid] = useState<string | undefined>(context.params.cid);
 
-  const [guidePage, setGuidePage] = useState<number | null>(null);
-
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
   const [editPasswd, setEditPasswd] = useState<string>("");
@@ -389,6 +387,10 @@ export default function Page(context: { params: Params }) {
   }, [chart, currentLevelIndex]);
 
   const [tab, setTab] = useState<number>(0);
+  const [guidePage, setGuidePage] = useState<number | null>(null);
+  const tabNames = ["Meta", "Timing", "Levels", "Notes", "Code"];
+  const isCodeTab = tab === 4;
+  const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
   const [dragMode, setDragMode] = useState<"p" | "v">("p");
 
@@ -535,7 +537,7 @@ export default function Page(context: { params: Params }) {
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
     ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(7)).map(() => null)
+      Array.from(new Array(9)).map(() => null)
     )
   );
   const copyNote = (copyIndex: number) => {
@@ -598,7 +600,7 @@ export default function Page(context: { params: Params }) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (ready && tab !== 4) {
+        if (ready && !isCodeTab) {
           if (e.key === " " && !playing) {
             start();
           } else if (
@@ -661,7 +663,10 @@ export default function Page(context: { params: Params }) {
             "grow-0 shrink-0 flex flex-col items-stretch p-3"
           }
         >
-          <Header reload>Edit</Header>
+          <div className="flex flex-row items-center">
+            <Header reload>Edit</Header>
+            <Button text="？" onClick={openGuide} />
+          </div>
           <div
             className={
               "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
@@ -689,7 +694,7 @@ export default function Page(context: { params: Params }) {
             }
           >
             <FallingWindow
-              inCodeTab={tab === 4}
+              inCodeTab={isCodeTab}
               className="absolute inset-0"
               notes={notesAll}
               currentTimeSec={currentTimeSec || 0}
@@ -804,7 +809,7 @@ export default function Page(context: { params: Params }) {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Meta", "Timing", "Levels", "Notes", "Code"].map((tabName, i) =>
+            {tabNames.map((tabName, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
