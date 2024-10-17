@@ -14,6 +14,7 @@ import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
 import { EfferentThree } from "@icon-park/react";
 import { initSession, SessionData } from "@/play/session";
+import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 
 interface Props {
   chart?: Chart;
@@ -104,6 +105,7 @@ interface Props2 {
 export function MetaTab(props: Props2) {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
+  const [saving, setSaving] = useState<boolean>(false);
   const [uploadMsg, setUploadMsg] = useState<string>("");
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
@@ -115,6 +117,7 @@ export function MetaTab(props: Props2) {
   }, [props.chart]);
 
   const save = async () => {
+    setSaving(true);
     if (props.cid === undefined) {
       const res = await fetch(`/api/newChartFile/`, {
         method: "POST",
@@ -168,6 +171,7 @@ export function MetaTab(props: Props2) {
         }
       }
     }
+    setSaving(false);
   };
   const download = () => {
     // editPasswdだけ消す
@@ -201,26 +205,23 @@ export function MetaTab(props: Props2) {
   return (
     <>
       <p className="mb-1">
-        <a
-          className="hover:text-blue-600 underline relative inline-block"
-          href={`/play?sid=${props.sessionId}`}
-          target="_blank"
-        >
-          <button
-            onClick={() =>
-              props.sessionData &&
-              initSession(props.sessionData, props.sessionId)
+        <button
+          className={"relative inline-block " + linkStyle1}
+          onClick={() => {
+            if (props.sessionData) {
+              initSession(props.sessionData, props.sessionId);
+              window.open(`/play?sid=${props.sessionId}`, "_blank")?.focus();
             }
-          >
-            <span className="mr-5">テストプレイ</span>
-            <EfferentThree className="absolute bottom-1 right-0" />
-          </button>
-        </a>
+          }}
+        >
+          <span className="mr-5">テストプレイ</span>
+          <EfferentThree className="absolute bottom-1 right-0" />
+        </button>
       </p>
       <p className="">
         譜面ID:
         <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
-        <Button text="サーバーに保存" onClick={save} />
+        <Button text="サーバーに保存" onClick={save} loading={saving} />
         <span className="ml-1">{errorMsg}</span>
         {props.hasChange && (
           <span className="ml-1">(未保存の変更があります)</span>
@@ -233,12 +234,12 @@ export function MetaTab(props: Props2) {
               共有用リンク:
             </span>
             <a
-              className="text-blue-600 hover:underline"
+              className={linkStyle2}
               href={`/share/${props.cid}`}
               target="_blank"
             >
               <span className="edit-wide:hidden">共有用リンク</span>
-              <span className="hidden edit-wide:inline-block text-sm">
+              <span className="hidden edit-wide:inline text-sm">
                 {origin}/share/{props.cid}
               </span>
             </a>

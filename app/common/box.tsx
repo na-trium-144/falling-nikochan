@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { LoadingSlime } from "./loadingSlime";
 
 interface Props {
   children: ReactNode | ReactNode[];
@@ -62,7 +63,7 @@ export function Loading() {
   return (
     <CenterBoxOnlyPage>
       <p>
-        <span className="loader" />
+        <LoadingSlime />
         Loading...
       </p>
     </CenterBoxOnlyPage>

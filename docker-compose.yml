@@ -22,10 +22,8 @@ services:
   fs-volume:
     image: chrislusf/seaweedfs
     restart: always
-    command: "volume -dir=/tmp/data -mserver=fs-master:9333 -port=8080"
+    command: "volume -dir=/tmp/data -mserver=fs-master:9333 -port=8080 -rack=rack1 -publicUrl=http://localhost:8080"
     ports:
       - 8080:8080
     volumes:
       - "./data/volume:/tmp/data"
-
-

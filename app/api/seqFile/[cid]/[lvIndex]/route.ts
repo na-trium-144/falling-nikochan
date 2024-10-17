@@ -1,6 +1,6 @@
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
-import { getFileEntry, updateFileEntry } from "@/api/dbChartFile";
+import { getFileEntry, updateFileEntry, updatePlayCount } from "@/api/dbChartFile";
 import { fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, context: { params: Params }) {
       { status: 404 }
     );
   }
-  const fsData = await fsRead(fileEntry.fid);
+  const fsData = await fsRead(fileEntry.fid, null);
   if (fsData === null) {
     return NextResponse.json({ message: "fsRead() failed" }, { status: 500 });
   }
@@ -40,5 +40,8 @@ export async function GET(request: NextRequest, context: { params: Params }) {
     );
   }
   const seq = loadChart(chart, lvIndex);
+  
+  await updatePlayCount(cid);
+
   return new Response(new Blob([msgpack.serialize(seq)]));
 }

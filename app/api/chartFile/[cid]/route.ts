@@ -27,7 +27,7 @@ async function getChart(
       ),
     };
   }
-  const fsData = await fsRead(fileEntry.fid);
+  const fsData = await fsRead(fileEntry.fid, null);
   if (fsData === null) {
     return {
       res: NextResponse.json({ message: "fsRead() failed" }, { status: 500 }),
@@ -93,6 +93,16 @@ export async function POST(request: NextRequest, context: { params: Params }) {
       { status: 400 }
     );
   }
+
+  // update Time
+  const prevHashes = chart.levels.map((l) => l.hash);
+  const newHashes = newChart.levels.map((l) => l.hash);
+  if(newHashes.every((h, i) => h === prevHashes[i])) {
+    newChart.updatedAt = chart.updatedAt;
+  }else{
+    newChart.updatedAt = new Date().getTime();
+  }
+
   const fileEntry = await getFileEntry(cid);
   if (fileEntry === null) {
     return NextResponse.json(
@@ -103,7 +113,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
 
   await updateFileEntry(cid, createBrief(newChart));
   if (
-    !(await fsWrite(fileEntry.fid, new Blob([msgpack.serialize(newChart)])))
+    !(await fsWrite(fileEntry.fid, null, new Blob([msgpack.serialize(newChart)])))
   ) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
@@ -129,7 +139,7 @@ export async function DELETE(
       { status: 404 }
     );
   }
-  if (!(await fsDelete(fileEntry.fid))) {
+  if (!(await fsDelete(fileEntry.fid, null))) {
     return NextResponse.json({ message: "fsDelete() failed" }, { status: 500 });
   }
   return new Response(null);

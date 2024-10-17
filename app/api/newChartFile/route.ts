@@ -12,8 +12,6 @@ import {
 import { rateLimitMin, updateLastCreate } from "../dbRateLimit";
 import { headers } from "next/headers";
 
-// todo: password
-
 export async function GET() {
   const headersList = headers();
   console.log(headersList.get("x-forwarded-for"));
@@ -51,12 +49,10 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     );
   }
 
-  let chartBlob: Blob;
   let chart: Chart;
   try {
     chart = msgpack.deserialize(chartBuf);
     chart = await validateChart(chart);
-    chartBlob = new Blob([msgpack.serialize(chart)]);
   } catch (e) {
     console.log(e);
     return NextResponse.json(
@@ -64,6 +60,9 @@ export async function POST(request: NextRequest, context: { params: Params }) {
       { status: 400 }
     );
   }
+
+  // update Time
+  chart.updatedAt = new Date().getTime();
 
   let cid: string;
   while (true) {
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     await createFileEntry(cid, fid, createBrief(chart));
   }
 
-  if (!(await fsWrite(fid, chartBlob))) {
+  if (!(await fsWrite(fid, fsRes.volumeUrl, new Blob([msgpack.serialize(chart)])))) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
 

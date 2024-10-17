@@ -1,4 +1,4 @@
-import { Chart, ChartBrief, Level } from "@/chartFormat/chart";
+import { Chart, ChartBrief } from "@/chartFormat/chart";
 
 export interface SessionData {
   cid?: string;
@@ -7,16 +7,24 @@ export interface SessionData {
   chart?: Chart;
   editing?: boolean;
 }
-// sessionStorageとlocalStorageの両方に保存し、sessionIdを返す
+// プレイボタンを押した時にlocalStorageに保存し、sessionIdを返す
+// share->play では押すたびにidを発行、edit->playでは使い回し
+// localStorageのsessionは多くても1回しか呼ばれないので、容量節約のため定期的に消す
+// (initSession時に過去のsessionをぜんぶ消すことにしている)
 export function initSession(
-  data: SessionData,
+  data: SessionData | null,
   sessionId?: number,
 ): number {
+  for(let si = 0; si < localStorage.length; si++){
+    if(localStorage.key(si)?.startsWith("session")){
+      localStorage.removeItem(localStorage.key(si) || "");
+    }
+  }
+
   if(sessionId === undefined) {
     sessionId = (Number(localStorage.getItem("lastSessionId")) || 0) + 1;
     localStorage.setItem("lastSessionId", String(sessionId));
   }
-  sessionStorage.setItem("session", JSON.stringify(data));
   localStorage.setItem(`session-${sessionId}`, JSON.stringify(data));
   return sessionId;
 }
@@ -35,8 +43,4 @@ export function getSession(sessionId?: number): SessionData | null {
     }
   }
   return JSON.parse(sessionStorage.getItem("session") || "null");
-}
-export function clearSession(sessionId?: number){
-  sessionStorage.removeItem("session");
-  localStorage.removeItem(`session-${sessionId}`);
 }

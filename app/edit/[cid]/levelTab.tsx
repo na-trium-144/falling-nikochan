@@ -8,8 +8,9 @@ import {
 import { difficulty } from "@/chartFormat/difficulty";
 import { Step, stepCmp } from "@/chartFormat/step";
 import Button from "@/common/button";
+import CheckBox from "@/common/checkBox";
 import Input from "@/common/input";
-import { CheckCorrect, RightOne, Square } from "@icon-park/react";
+import { RightOne } from "@icon-park/react";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -188,26 +189,18 @@ export default function LevelTab(props: Props) {
           <p>
             <span>Difficulty:</span>
             {levelTypes.map((t, i) => (
-              <button
+              <CheckBox
                 key={t}
-                className={
-                  "ml-2 " +
-                  (t === currentLevel.type
-                    ? levelColors[i]
-                    : "hover:text-slate-500 ") +
-                  "disabled:text-slate-400 "
-                }
-                onClick={() => {
+                value={t === currentLevel.type}
+                className={t === currentLevel.type ? levelColors[i] : ""}
+                onChange={() => {
                   currentLevel.type = t;
                   props.changeChart({ ...props.chart! });
                 }}
                 disabled={levelTypeDisabled[i]}
               >
-                <span className="inline-block w-5 translate-y-0.5">
-                  {t === currentLevel.type ? <CheckCorrect /> : <Square />}
-                </span>
-                <span>{t}</span>
-              </button>
+                {t}
+              </CheckBox>
             ))}
           </p>
         </>

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const buttonClass =
   "px-2 text-center inline-block w-7 rounded-full " +
-  "text-lg text-bold hover:bg-gray-200 active:bg-gray-300 ";
+  "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 ";
 interface Props {
   index: number;
   maxIndex: number;
