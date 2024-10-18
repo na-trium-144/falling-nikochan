@@ -9,10 +9,6 @@ export interface ChartSeqData {
 }
 
 /**
- * 音符の大きさ (画面サイズに対する割合)
- */
-export const noteSize = 0.05;
-/**
  * 判定線の位置
  */
 export const targetY = 0.2;
