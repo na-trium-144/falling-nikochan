@@ -43,6 +43,7 @@ export default function useGameLogic(
   const end = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
 
   const [chain, setChain] = useState<number>(0);
+  const chainRef = useRef<number>(0);
 
   const resetNotesAll = useCallback((notes: Note[]) => {
     // note.done などを書き換えるため、元データを壊さないようdeepcopy
@@ -76,8 +77,9 @@ export default function useGameLogic(
           n.hitPos = displayNote(n, now)?.pos; // 位置を固定
         }
         n.done = j;
+        let thisChain: number;
         if (j <= 2) {
-          const thisChain = chain + 1;
+          thisChain = chainRef.current + 1;
           n.chain = thisChain;
           n.chainBonus =
             ((Math.min(thisChain, bonusMax) / bonusTotal) * chainScoreRate) /
@@ -88,10 +90,11 @@ export default function useGameLogic(
           } else {
             n.chainBonus += okBaseScore;
           }
-          setChain((chain) => chain + 1);
         } else {
-          setChain(0);
+          thisChain = 0;
         }
+        chainRef.current = thisChain;
+        setChain(thisChain);
         setJudgeCount((judgeCount) => {
           judgeCount = judgeCount.slice() as [number, number, number, number];
           judgeCount[j - 1]++;
@@ -99,7 +102,7 @@ export default function useGameLogic(
         });
       }
     },
-    [chain, bonusTotal, notesTotal, bigTotal]
+    [bonusTotal, notesTotal, bigTotal]
   );
 
   // キーを押したときの判定
