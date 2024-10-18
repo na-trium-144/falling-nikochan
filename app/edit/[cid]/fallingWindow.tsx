@@ -3,7 +3,6 @@
 import {
   Note,
   DisplayNote,
-  noteSize,
   targetY,
   bigScale,
   displayNote,
@@ -13,6 +12,7 @@ import { NoteCommand } from "@/chartFormat/command";
 import Arrow from "./arrow";
 import DragHandle from "./dragHandle";
 import { Chart, Level } from "@/chartFormat/chart";
+import { useDisplayMode } from "@/scale";
 
 interface Props {
   className?: string;
@@ -35,6 +35,9 @@ export default function FallingWindow(props: Props) {
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
+
+  const { rem } = useDisplayMode();
+  const noteSize = Math.max(1.5 * rem, 0.05 * (boxSize || 0));
 
   const noteEditable =
     props.currentLevel?.notes[props.currentNoteIndex] &&
@@ -110,20 +113,16 @@ export default function FallingWindow(props: Props) {
                       : "bg-yellow-400 ")
                   }
                   style={{
-                    width:
-                      noteSize * boxSize * bigScale(notes[d.current.id].big),
-                    height:
-                      noteSize * boxSize * bigScale(notes[d.current.id].big),
+                    width: noteSize * bigScale(notes[d.current.id].big),
+                    height: noteSize * bigScale(notes[d.current.id].big),
                     left:
-                      (d.current.pos.x -
-                        (noteSize * bigScale(notes[d.current.id].big)) / 2) *
-                        boxSize +
+                      d.current.pos.x * boxSize -
+                      (noteSize * bigScale(notes[d.current.id].big)) / 2 +
                       marginX,
                     bottom:
-                      (d.current.pos.y +
-                        targetY -
-                        (noteSize * bigScale(notes[d.current.id].big)) / 2) *
-                        boxSize +
+                      d.current.pos.y * boxSize +
+                      targetY * boxSize -
+                      (noteSize * bigScale(notes[d.current.id].big)) / 2 +
                       marginY,
                   }}
                 />
@@ -184,7 +183,7 @@ export default function FallingWindow(props: Props) {
                       ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
                         boxSize +
                       marginX -
-                      (0.12 + noteSize / 2) * boxSize
+                      (0.12 * boxSize + noteSize / 2)
                     }
                     bottom={targetY * boxSize + marginY}
                     length={0.1 * boxSize}
@@ -196,7 +195,7 @@ export default function FallingWindow(props: Props) {
                       ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
                         boxSize +
                       marginX +
-                      (0.12 + noteSize / 2) * boxSize
+                      (0.12 * boxSize + noteSize / 2)
                     }
                     bottom={targetY * boxSize + marginY}
                     length={0.1 * boxSize}

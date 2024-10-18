@@ -53,6 +53,7 @@ export default function useGameLogic(
     notesBigYetDone.current = [];
     setJudgeCount([0, 0, 0, 0]);
     setChain(0);
+    chainRef.current = 0;
     setBonus(0);
     setBigCount(0);
     setBigTotal(notesCopy.filter((n) => n.big).length);

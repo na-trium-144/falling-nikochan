@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   Note,
   DisplayNote,
-  noteSize,
   targetY,
   displayNote,
   bigScale,
 } from "@/chartFormat/seq";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine";
+import { useDisplayMode } from "@/scale";
 
 interface Props {
   className?: string;
@@ -33,6 +33,9 @@ export default function FallingWindow(props: Props) {
     height && boxSize && (height - boxSize) / 2;
   const fpsCount = useRef<number>(0);
   const fpsCountBegin = useRef<Date>(new Date());
+
+  const { rem } = useDisplayMode();
+  const noteSize = Math.max(1.5 * rem, 0.05 * (boxSize || 0));
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -100,17 +103,16 @@ export default function FallingWindow(props: Props) {
                 }
                 style={{
                   /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-                  width: noteSize * boxSize * bigScale(notes[d.id].big),
-                  height: noteSize * boxSize * bigScale(notes[d.id].big),
+                  width: noteSize * bigScale(notes[d.id].big),
+                  height: noteSize * bigScale(notes[d.id].big),
                   left:
-                    (d.pos.x - (noteSize * bigScale(notes[d.id].big)) / 2) *
-                      boxSize +
+                    d.pos.x * boxSize -
+                    (noteSize * bigScale(notes[d.id].big)) / 2 +
                     marginX,
                   bottom:
-                    (d.pos.y +
-                      targetY -
-                      (noteSize * bigScale(notes[d.id].big)) / 2) *
-                      boxSize +
+                    d.pos.y * boxSize +
+                    targetY * boxSize -
+                    (noteSize * bigScale(notes[d.id].big)) / 2 +
                     marginY,
                 }}
               >
@@ -122,7 +124,7 @@ export default function FallingWindow(props: Props) {
                 {d.chainBonus && d.chain && (
                   <span
                     className={
-                      "absolute w-16 " +
+                      "absolute w-12 text-xs " +
                       (d.chain >= 100 || d.bigDone ? "text-orange-500 " : "")
                     }
                     style={{ bottom: "100%", left: "100%" }}
