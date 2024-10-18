@@ -70,7 +70,14 @@ export function AboutContent2() {
             ルールです。
           </p>
           <p>
-            PC なら (<Key className="px-0.5 mx-0.5">Esc</Key> 以外の) どれかの
+            ニコチャンの
+            <wbr />
+            位置や
+            <wbr />
+            飛び方に
+            <wbr />
+            よらず、 PC なら (<Key className="px-0.5 mx-0.5">Esc</Key> 以外の)
+            どれかの
             <wbr />
             キーを
             <wbr />
@@ -81,11 +88,15 @@ export function AboutContent2() {
             <wbr />
             どこかを
             <wbr />
-            タップで
+            タップする
+            <wbr />
+            ことで
             <wbr />
             音符を
             <wbr />
-            叩きます。
+            叩くことが
+            <wbr />
+            できます。
           </p>
         </div>
         <div
@@ -131,13 +142,21 @@ export function AboutContent2() {
           <p>
             大きい
             <wbr />
-            ニコチャンは
+            ニコチャンも
+            <wbr />
+            通常の
+            <wbr />
+            ニコチャンと
+            <wbr />
+            同じように
+            <wbr />
+            叩けますが、
             <wbr />
             2つの
             <wbr />
             キーを
             <wbr />
-            同時押し、
+            同時押し
             <wbr />
             または
             <wbr />
@@ -145,7 +164,7 @@ export function AboutContent2() {
             <wbr />
             タップする
             <wbr />
-            ことで、
+            と、
             <wbr />
             通常より
             <wbr />
@@ -162,13 +181,15 @@ export function AboutContent2() {
             <wbr />
             ニコチャンを
             <wbr />
-            叩くと、
+            叩くほど Chain ボーナス点が
             <wbr />
-            得られる
+            入り、
             <wbr />
-            スコアも
+            より多くの
             <wbr />
-            増えます。
+            スコアが
+            <wbr />
+            もらえます。
           </p>
         </div>
         <div
