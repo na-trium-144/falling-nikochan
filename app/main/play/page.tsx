@@ -164,7 +164,7 @@ function InputIdDesc() {
           <wbr />
           share
           <wbr />
-          &#47;*
+          &#47;〜
         </span>
         ) に<wbr />
         アクセス
