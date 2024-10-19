@@ -396,7 +396,7 @@ function Play() {
       >
         <div
           className={
-            "-z-20 absolute inset-x-0 bottom-0 " +
+            "-z-30 absolute inset-x-0 bottom-0 " +
             "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 "
           }
           style={{ top: "-1rem" }}
@@ -407,7 +407,7 @@ function Play() {
             bottom: "100%",
             right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
           }}
-          num={4}
+          signature={chartSeq.signature}
           getCurrentTimeSec={getCurrentTimeSec}
           playing={playing}
           bpmChanges={chartSeq?.bpmChanges}

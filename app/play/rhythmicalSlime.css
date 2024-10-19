@@ -1,0 +1,22 @@
+@keyframes rhythmical-slime-appearing {
+  0% {
+    transform: translateY(20vh);
+  }
+  80% {
+    transform: translateY(-1rem);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+@keyframes rhythmical-slime-disappearing {
+  0% {
+    transform: translateY(0%);
+  }
+  20% {
+    transform: translateY(-1rem);
+  }
+  100% {
+    transform: translateY(20vh);
+  }
+}

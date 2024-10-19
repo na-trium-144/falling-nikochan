@@ -1,7 +1,6 @@
 import { Chart } from "./chart";
 import {
   BPMChange,
-  defaultSignature,
   getBarLength,
   Signature,
   toStepArray,
@@ -11,6 +10,7 @@ import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 export interface ChartSeqData {
   notes: Note[];
   bpmChanges: BPMChange[];
+  signature: Signature[];
   offset: number;
 }
 
@@ -135,6 +135,8 @@ export function getSignatureState(
         if (stepCmp(barStepEnd, step) > 0) {
           return {
             barNum,
+            bar: targetSignature.bars[bi % barLength.length],
+            stepAligned: barStepBegin,
             offset: stepSub(step, barBegin),
             count: stepAdd(stepSub(step, barStepBegin), {
               fourth: si,
@@ -155,7 +157,9 @@ export function getSignatureState(
 
 export interface SignatureState {
   barNum: number;
-  offset: Step;
+  bar: (4 | 8 | 16)[];
+  stepAligned: Step; // このカウントの開始にあわせた時刻
+  offset: Step; // barの最初からの時刻
   count: Step; // これは時刻表現ではなく表示用、count.fourthはbar内のカウントに対応するので時間が飛ぶこともある
 }
 
@@ -205,7 +209,7 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
   const notes: Note[] = [];
   const level = chart.levels.at(levelIndex);
   if (!level) {
-    return { notes: [], bpmChanges: [], offset: chart.offset };
+    return { notes: [], bpmChanges: [], signature: [], offset: chart.offset };
   }
   for (let id = 0; id < level.notes.length; id++) {
     const c = level.notes[id];
@@ -285,6 +289,7 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
   }
   return {
     offset: chart.offset,
+    signature: level.signature,
     bpmChanges: level.bpmChanges,
     notes,
   };
