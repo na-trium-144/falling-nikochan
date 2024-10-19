@@ -18,6 +18,7 @@ import {
   toStepArray,
 } from "@/chartFormat/command";
 import { useEffect, useRef, useState } from "react";
+import { Close, CornerDownLeft } from "@icon-park/react";
 
 interface Props {
   offset?: number;
@@ -33,6 +34,7 @@ interface Props {
   currentSpeedIndex?: number;
   currentSpeed?: number;
   setCurrentSpeed: (bpm: number) => void;
+  prevSignature?: Signature;
   speedChangeHere: boolean;
   toggleSpeedChangeHere: () => void;
   currentSignature?: Signature;
@@ -59,6 +61,10 @@ export default function TimingTab(props: Props) {
   const ss =
     props.currentLevel &&
     getSignatureState(props.currentLevel.signature, props.currentStep);
+  const currentBarLength =
+    props.currentSignature && getBarLength(props.currentSignature);
+  const prevBarLength =
+    props.prevSignature && getBarLength(props.prevSignature);
 
   return (
     <>
@@ -202,31 +208,96 @@ export default function TimingTab(props: Props) {
             </span>
           )}
       </p>
-      <p className="mt-3">Beat:</p>
-      <p className="ml-2 text-sm">
-        <span>(Offset:</span>
-        <InputSig
-          className="text-sm"
-          allowZero
-          actualValue={props.currentSignature?.offset}
-          updateValue={(v: Step) =>
-            props.currentSignature &&
-            props.setCurrentSignature({
-              ...props.currentSignature,
-              offset: v,
-            })
-          }
-        />
-        <span>)</span>
+      <p className="mt-3">
+        <span>Beat:</span>
+        <span className="inline-block">
+          <span className="ml-2">
+            {props.signatureChangeHere
+              ? prevBarLength &&
+                stepImproper(
+                  prevBarLength.reduce(
+                    (len, bl) => stepAdd(len, bl),
+                    stepZero()
+                  )
+                )
+              : currentBarLength &&
+                stepImproper(
+                  currentBarLength.reduce(
+                    (len, bl) => stepAdd(len, bl),
+                    stepZero()
+                  )
+                )}
+          </span>
+          <span className="mx-1">/</span>
+          <span className="">
+            {props.signatureChangeHere
+              ? prevBarLength &&
+                prevBarLength.reduce((len, bl) => stepAdd(len, bl), stepZero())
+                  .denominator * 4
+              : currentBarLength &&
+                currentBarLength.reduce(
+                  (len, bl) => stepAdd(len, bl),
+                  stepZero()
+                ).denominator * 4}
+          </span>
+        </span>
+        <span className="inline-block ml-1">
+          <span>→</span>
+          <CheckBox
+            className="ml-4 mr-1"
+            value={props.signatureChangeHere}
+            onChange={() => {
+              props.toggleSignatureChangeHere();
+            }}
+            disabled={stepCmp(props.currentStep, stepZero()) <= 0}
+          >
+            ここで変化
+          </CheckBox>
+        </span>
+        {props.signatureChangeHere && currentBarLength && (
+          <>
+            <span className="ml-2">
+              {stepImproper(
+                currentBarLength.reduce(
+                  (len, bl) => stepAdd(len, bl),
+                  stepZero()
+                )
+              )}
+            </span>
+            <span className="mx-1">/</span>
+            <span className="">
+              {currentBarLength.reduce(
+                (len, bl) => stepAdd(len, bl),
+                stepZero()
+              ).denominator * 4}
+            </span>
+            <span className="inline-block ml-2 text-sm">
+              <span>(Offset:</span>
+              <InputSig
+                className="text-sm"
+                allowZero
+                actualValue={props.currentSignature?.offset}
+                updateValue={(v: Step) =>
+                  props.currentSignature &&
+                  props.setCurrentSignature({
+                    ...props.currentSignature,
+                    offset: v,
+                  })
+                }
+              />
+              <span>)</span>
+            </span>
+          </>
+        )}
       </p>
       <ul className="list-disc list-inside mt-1">
         {props.currentSignature?.bars.map((bar, i) => (
           <li className="ml-2" key={i}>
             <InputSig
               limitedDenominator
-              actualValue={getBarLength(props.currentSignature!)[i]}
+              actualValue={currentBarLength![i]}
               updateValue={(newSig: Step) => {
-                const currentSig = getBarLength(props.currentSignature!)[i];
+                const currentSig = currentBarLength![i];
                 let newBar: (4 | 8 | 16)[];
                 if (stepCmp(newSig, currentSig) >= 0) {
                   newBar = bar.concat(
@@ -300,6 +371,32 @@ export default function TimingTab(props: Props) {
                   />
                 </button>
               ))}
+            <button
+              className="inline-block ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
+              onClick={() => {
+                props.setCurrentSignature({
+                  ...props.currentSignature!,
+                  bars: props
+                    .currentSignature!.bars.slice(0, i)
+                    .concat([[4, 4, 4, 4]])
+                    .concat(props.currentSignature!.bars.slice(i)),
+                });
+              }}
+            >
+              <CornerDownLeft />
+            </button>
+            <button
+              className="inline-block ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
+              onClick={() => {
+                props.setCurrentSignature({
+                  ...props.currentSignature!,
+                  bars: props.currentSignature!.bars.filter((_, k) => k !== i),
+                });
+              }}
+              disabled={props.currentSignature!.bars.length <= 1}
+            >
+              <Close />
+            </button>
           </li>
         ))}
       </ul>

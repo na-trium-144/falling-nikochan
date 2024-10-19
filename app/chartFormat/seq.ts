@@ -126,22 +126,24 @@ export function getSignatureState(
   while (true) {
     const barEnd = stepAdd(barBegin, barLength[bi % barLength.length]);
     if (stepCmp(barEnd, step) > 0) {
+      let barStepBegin = barBegin;
       for (let si = 0; si < barSteps[bi % barLength.length].length; si++) {
         const barStepEnd = stepAdd(
-          barBegin,
+          barStepBegin,
           barSteps[bi % barLength.length][si]
         );
         if (stepCmp(barStepEnd, step) > 0) {
           return {
             barNum,
-            count: stepAdd(stepSub(step, barBegin), {
+            offset: stepSub(step, barBegin),
+            count: stepAdd(stepSub(step, barStepBegin), {
               fourth: si,
               numerator: 0,
               denominator: 1,
             }),
           };
         }
-        barBegin = barStepEnd;
+        barStepBegin = barStepEnd;
       }
       throw new Error("should not reach here");
     }
@@ -153,6 +155,7 @@ export function getSignatureState(
 
 export interface SignatureState {
   barNum: number;
+  offset: Step;
   count: Step; // これは時刻表現ではなく表示用、count.fourthはbar内のカウントに対応するので時間が飛ぶこともある
 }
 

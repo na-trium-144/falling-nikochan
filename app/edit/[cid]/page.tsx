@@ -505,6 +505,10 @@ export default function Page(context: { params: Params }) {
   const currentSignature = currentLevel?.signature.at(
     currentSignatureIndex || 0
   );
+  const prevSignature =
+    currentSignatureIndex && currentSignatureIndex > 0
+      ? currentLevel?.signature.at(currentSignatureIndex - 1)
+      : undefined;
   const signatureChangeHere =
     currentSignature && stepCmp(currentSignature.step, currentStep) === 0;
   const changeSignature = (s: Signature) => {
@@ -916,6 +920,7 @@ export default function Page(context: { params: Params }) {
                 setCurrentSpeed={changeSpeed}
                 speedChangeHere={!!speedChangeHere}
                 toggleSpeedChangeHere={toggleSpeedChangeHere}
+                prevSignature={prevSignature}
                 currentSignature={currentSignature}
                 setCurrentSignature={changeSignature}
                 signatureChangeHere={!!signatureChangeHere}
