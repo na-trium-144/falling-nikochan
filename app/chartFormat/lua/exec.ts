@@ -3,11 +3,13 @@ import {
   BPMChangeWithLua,
   NoteCommandWithLua,
   RestStep,
+  SignatureWithLua,
+  updateBarNum,
   updateBpmTimeSec,
 } from "../command";
 import { Step, stepZero } from "../step";
 import { emptyLevel } from "../chart";
-import { luaAccel, luaBPM, luaNote, luaStep } from "./api";
+import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api";
 
 export interface Result {
   stdout: string[];
@@ -17,6 +19,7 @@ export interface Result {
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
   speedChanges: BPMChangeWithLua[];
+  signature: SignatureWithLua[];
   step: Step;
 }
 export async function luaExec(code: string): Promise<Result> {
@@ -30,6 +33,7 @@ export async function luaExec(code: string): Promise<Result> {
     rest: [],
     bpmChanges: [],
     speedChanges: [],
+    signature: [],
     step: stepZero(),
   };
   try {
@@ -50,6 +54,8 @@ export async function luaExec(code: string): Promise<Result> {
     lua.global.set("NoteStatic", (...args: any[]) => luaNote(result, ...args));
     lua.global.set("Step", (...args: any[]) => luaStep(result, null, ...args));
     lua.global.set("StepStatic", (...args: any[]) => luaStep(result, ...args));
+    lua.global.set("Beat", (...args: any[]) => luaBeat(result, null, ...args));
+    lua.global.set("BeatStatic", (...args: any[]) => luaBeat(result, ...args));
     lua.global.set("BPM", (...args: any[]) => luaBPM(result, null, ...args));
     lua.global.set("BPMStatic", (...args: any[]) => luaBPM(result, ...args));
     lua.global.set("Accel", (...args: any[]) =>
@@ -68,6 +74,10 @@ export async function luaExec(code: string): Promise<Result> {
         .replace(
           /^( *)Step\(( *[\d\.]+ *, *[\d\.]+ *)\)( *)$/,
           `$1StepStatic(${ln},$2)$3`
+        )
+        .replace(
+          /^( *)Beat\(( *{[-\d\.,{} ]+} *(?:, *[\d\.]+ *){2})\)( *)$/,
+          `$1BeatStatic(${ln},$2)$3`
         )
         .replace(/^( *)BPM\(( *[\d\.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
         .replace(
@@ -102,6 +112,7 @@ export async function luaExec(code: string): Promise<Result> {
     lua.global.close();
   }
   updateBpmTimeSec(result.bpmChanges, result.speedChanges);
+  updateBarNum(result.signature)
   if (result.bpmChanges.length === 0) {
     result.bpmChanges = emptyLevel().bpmChanges;
   }

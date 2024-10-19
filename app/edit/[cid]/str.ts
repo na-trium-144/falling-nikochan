@@ -1,3 +1,5 @@
+import { Signature } from "@/chartFormat/command";
+import { getSignatureState } from "@/chartFormat/seq";
 import { Step } from "@/chartFormat/step";
 
 export function timeStr(timeSec: number): string {
@@ -21,32 +23,10 @@ export function timeSecStr(timeSec: number): string {
   }
 }
 
-// todo: 拍子を考慮
-export function stepMeasure(s: Step): string {
-  return (Math.floor(s.fourth / 4) + 1).toString();
-}
-export function stepFourth(s: Step): string {
-  return ((s.fourth % 4) + 1).toString();
-}
-export function stepNumerator(s: Step): string {
-  return s.numerator.toString();
-}
-export function stepDenominator(s: Step): string {
-  return (s.denominator * 4).toString();
-}
-export function stepStr(s: Step): string {
-  if (s.numerator === 0) {
-    return `${stepMeasure(s)};${stepFourth(s)}`;
-  } else {
-    return (
-      `${stepMeasure(s)};${stepFourth(s)}` +
-      `+${stepNumerator(s)}/${stepDenominator(s)}`
-    );
-  }
-}
-export function stepNStr(s: Step): string {
-  if (s.numerator === 0) {
-    return `${stepMeasure(s)};${stepFourth(s)}`;
+export function stepNStr(s: Step, sig: Signature[]): string {
+  const ss = getSignatureState(sig, s);
+  if (ss.offset.numerator === 0) {
+    return `${ss.barNum + 1};${ss.offset.fourth + 1}`;
   } else {
     return "";
   }

@@ -60,6 +60,11 @@ import LevelTab from "./levelTab";
 import { initSession, SessionData } from "@/play/session";
 import { cursorTo } from "readline";
 import { GuideMain } from "../guide/guideMain";
+import {
+  luaAddBeatChange,
+  luaDeleteBeatChange,
+  luaUpdateBeatChange,
+} from "@/chartFormat/lua/signature";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -504,9 +509,9 @@ export default function Page(context: { params: Params }) {
     currentSignature && stepCmp(currentSignature.step, currentStep) === 0;
   const changeSignature = (s: Signature) => {
     if (chart && currentLevel && currentSignatureIndex !== undefined) {
-      const newLevel = luaUpdateSignatureChange(
+      const newLevel = luaUpdateBeatChange(
         currentLevel,
-        currentSpeedIndex,
+        currentSignatureIndex,
         s
       );
       changeLevel(newLevel);
@@ -521,16 +526,17 @@ export default function Page(context: { params: Params }) {
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (signatureChangeHere) {
-        const newLevel = luaDeleteSignatureChange(
+        const newLevel = luaDeleteBeatChange(
           currentLevel,
           currentSignatureIndex
         );
         changeLevel(newLevel);
       } else {
-        const newLevel = luaAddSignatureChange(currentLevel, {
+        const newLevel = luaAddBeatChange(currentLevel, {
           step: currentStep,
           offset: getSignatureState(currentLevel.signature, currentStep).offset,
           bars: currentSignature.bars,
+          barNum: 0,
         });
         changeLevel(newLevel);
       }

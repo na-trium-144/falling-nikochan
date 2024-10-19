@@ -82,7 +82,10 @@ export interface Signature {
   barNum: number;
   bars: (4 | 8 | 16)[][];
 }
-export function validateSignature(s: Signature) {
+export interface SignatureWithLua extends Signature {
+  luaLine: number | null;
+}
+export function validateSignature(s: SignatureWithLua) {
   validateStep(s.step);
   validateStep(s.offset);
   if (!Array.isArray(s.bars)) throw "signature.bars is invalid";
@@ -92,6 +95,8 @@ export function validateSignature(s: Signature) {
       if (bs !== 4 && bs !== 8 && bs !== 16) throw "signature.bars is invalid";
     });
   });
+  if (typeof s.luaLine !== "number" && s.luaLine !== null)
+    throw "signature.luaLine is invalid";
 }
 export function getBarLength(s: Signature): Step[] {
   return s.bars.map((b) =>

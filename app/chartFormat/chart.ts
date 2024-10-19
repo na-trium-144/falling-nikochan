@@ -3,6 +3,7 @@ import {
   NoteCommandWithLua,
   RestStep,
   Signature,
+  SignatureWithLua,
   updateBpmTimeSec,
   validateBpmChange,
   validateNoteCommand,
@@ -14,6 +15,7 @@ import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
 import { luaAddBpmChange } from "./lua/bpm";
+import { luaAddBeatChange } from "./lua/signature";
 import { luaAddSpeedChange } from "./lua/speed";
 import { getTimeSec } from "./seq";
 import { stepZero } from "./step";
@@ -77,7 +79,7 @@ export interface Level {
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
   speedChanges: BPMChangeWithLua[];
-  signature: Signature[];
+  signature: SignatureWithLua[];
   lua: string[];
 }
 export const levelTypes = ["Single", "Double", "Maniac"];
@@ -192,8 +194,8 @@ export function emptyLevel(prevLevel?: Level): Level {
     for (const change of prevLevel.speedChanges) {
       level = luaAddSpeedChange(level, change)!;
     }
-    for (const change of prevLevel.signature) {
-      level = luaAddSignatureChange(level, signature)!;
+    for (const s of prevLevel.signature) {
+      level = luaAddBeatChange(level, s)!;
     }
   } else {
     level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
@@ -202,7 +204,7 @@ export function emptyLevel(prevLevel?: Level): Level {
       step: stepZero(),
       timeSec: 0,
     })!;
-    level = luaAddSignatureChange(level, {
+    level = luaAddBeatChange(level, {
       step: stepZero(),
       offset: stepZero(),
       barNum: 0,

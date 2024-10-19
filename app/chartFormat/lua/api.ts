@@ -50,6 +50,35 @@ export function luaStep(state: Result, ...args: any[]) {
   }
 }
 
+export function luaBeat(state: Result, ...args: any[]) {
+  if (args.length === 2) {
+    args.push(0);
+    args.push(1);
+  }
+  if (
+    args.length === 4 &&
+    (typeof args[0] === "number" || args[0] === null) &&
+    Array.isArray(args[1]) &&
+    args[1].every(
+      (x: any) =>
+        Array.isArray(x) && x.every((b) => b === 4 || b === 8 || b === 16)
+    ) &&
+    typeof args[2] === "number" &&
+    args[2] >= 0 &&
+    typeof args[3] === "number" &&
+    args[3] > 0
+  ) {
+    state.signature.push({
+      bars: args[1],
+      offset: { fourth: 0, numerator: args[2] * 4, denominator: args[3] },
+      step: { ...state.step },
+      barNum: 0,
+      luaLine: args[0],
+    });
+  } else {
+    throw "invalid argument for Beat()";
+  }
+}
 export function luaBPM(state: Result, ...args: any[]) {
   if (
     args.length === 2 &&

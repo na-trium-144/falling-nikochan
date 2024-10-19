@@ -2,11 +2,11 @@ import { Chart, Level } from "@/chartFormat/chart";
 import { NoteCommand } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
-import { stepDenominator, stepFourth, stepMeasure, stepNumerator } from "./str";
 import { Step, stepCmp } from "@/chartFormat/step";
 import { Key } from "@/common/key";
 import { Mouse } from "@icon-park/react";
 import CheckBox from "@/common/checkBox";
+import { getSignatureState } from "@/chartFormat/seq";
 
 interface Props {
   currentNoteIndex: number;
@@ -27,26 +27,30 @@ export default function NoteTab(props: Props) {
   const noteEditable =
     props.currentLevel?.notes[props.currentNoteIndex] &&
     props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null;
+
+  const ss =
+    props.currentLevel &&
+    getSignatureState(props.currentLevel.signature, props.currentStep);
   return (
     <div className="flex flex-col h-full">
       <p>
         <span>Step</span>
         <span className="inline-block text-right w-6">
-          {stepMeasure(props.currentStep)}
+          {ss && ss.barNum + 1}
         </span>
         <span className="ml-1 ">;</span>
         <span className="inline-block text-right w-6">
-          {stepFourth(props.currentStep)}
+          {ss && ss.offset.fourth + 1}
         </span>
         <div className="w-20 inline-block">
           {props.currentStep.numerator > 0 && (
             <>
               <span className="ml-2 ">+</span>
               <span className="inline-block text-right w-6">
-                {stepNumerator(props.currentStep)}
+                {ss?.offset.numerator}
               </span>
               <span className="ml-1 mr-1">/</span>
-              <span>{stepDenominator(props.currentStep)}</span>
+              <span>{ss && ss.offset.denominator * 4}</span>
             </>
           )}
         </div>

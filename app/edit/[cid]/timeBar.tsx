@@ -171,7 +171,10 @@ export default function TimeBar(props: Props) {
                 left: timeBarPos(timeSec), // offsetはtimeBarStepsに足されている
               }}
             >
-              <span className="absolute bottom-0">{stepNStr(step)}</span>
+              <span className="absolute bottom-0">
+                {props.currentLevel &&
+                  stepNStr(step, props.currentLevel.signature)}
+              </span>
             </span>
           )
       )}

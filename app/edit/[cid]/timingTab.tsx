@@ -1,14 +1,8 @@
 import Input from "@/common/input";
-import {
-  stepDenominator,
-  stepFourth,
-  stepMeasure,
-  stepNumerator,
-  stepStr,
-} from "./str";
 import { Step, stepCmp, stepZero } from "@/chartFormat/step";
 import { Level } from "@/chartFormat/chart";
 import CheckBox from "@/common/checkBox";
+import { getSignatureState } from "@/chartFormat/seq";
 
 interface Props {
   offset?: number;
@@ -43,6 +37,10 @@ export default function TimingTab(props: Props) {
     props.currentLevel?.speedChanges[props.currentSpeedIndex] &&
     props.currentLevel?.speedChanges[props.currentSpeedIndex].luaLine !== null;
 
+  const ss =
+    props.currentLevel &&
+    getSignatureState(props.currentLevel.signature, props.currentStep);
+
   return (
     <>
       <p className="mb-3">
@@ -60,21 +58,21 @@ export default function TimingTab(props: Props) {
       <p>
         <span>Step</span>
         <span className="inline-block text-right w-6">
-          {stepMeasure(props.currentStep)}
+          {ss && ss.barNum + 1}
         </span>
         <span className="ml-1 ">;</span>
         <span className="inline-block text-right w-6">
-          {stepFourth(props.currentStep)}
+          {ss && ss.offset.fourth + 1}
         </span>
         <div className="w-20 inline-block">
           {props.currentStep.numerator > 0 && (
             <>
               <span className="ml-2 ">+</span>
               <span className="inline-block text-right w-6">
-                {stepNumerator(props.currentStep)}
+                {ss?.offset.numerator}
               </span>
               <span className="ml-1 mr-1">/</span>
-              <span>{stepDenominator(props.currentStep)}</span>
+              <span>{ss && ss.offset.denominator * 4}</span>
             </>
           )}
         </div>
@@ -187,7 +185,6 @@ export default function TimingTab(props: Props) {
       </p>
       <p className="ml-2 mt-2">
         <span>Beat</span>
-
       </p>
     </>
   );
