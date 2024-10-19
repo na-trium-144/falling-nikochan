@@ -2,6 +2,7 @@ import {
   Step,
   stepAdd,
   stepCmp,
+  stepSimplify,
   stepSub,
   stepToFloat,
   stepZero,
@@ -99,13 +100,42 @@ export function validateSignature(s: SignatureWithLua) {
     throw "signature.luaLine is invalid";
 }
 export function getBarLength(s: Signature): Step[] {
+  const barLength = toStepArray(s).map((b) =>
+    b.reduce((len, bs) => stepAdd(len, bs), stepZero())
+  );
+  barLength.forEach((len) => {
+    if (stepCmp(len, stepZero()) <= 0) {
+      throw new Error("Invalid signature (empty bar): " + JSON.stringify(s));
+    }
+  });
+  return barLength;
+}
+export function toStepArray(s: Signature): Step[][] {
   return s.bars.map((b) =>
-    b.reduce(
-      (len, bs) =>
-        stepAdd(len, { fourth: 0, numerator: 1, denominator: bs / 4 } as Step),
-      stepZero()
+    b.map((bs) =>
+      stepSimplify({ fourth: 0, numerator: 1, denominator: bs / 4 })
     )
   );
+}
+export function barFromLength(len: Step): (4 | 8 | 16)[] {
+  const newBar: (4 | 8 | 16)[] = [];
+  for (const d of [4, 8, 16]) {
+    while (
+      stepCmp(len, {
+        fourth: 0,
+        numerator: 1,
+        denominator: d / 4,
+      }) >= 0
+    ) {
+      len = stepSub(len, {
+        fourth: 0,
+        numerator: 1,
+        denominator: d / 4,
+      });
+      newBar.push(d as 4 | 8 | 16);
+    }
+  }
+  return newBar;
 }
 export function updateBarNum(signatures: Signature[]) {
   let barNum = 0;

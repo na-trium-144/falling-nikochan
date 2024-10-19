@@ -2,6 +2,7 @@
 
 import {
   findBpmIndexFromStep,
+  getSignatureState,
   getStep,
   getTimeSec,
   Note,
@@ -159,25 +160,32 @@ export default function TimeBar(props: Props) {
         )
       )}
       {/* step目盛り 目盛りのリストは別で計算してある */}
-      {timeBarSteps.map(
-        ({ step, timeSec }, dt) =>
-          stepCmp(step, stepZero()) >= 0 && (
-            <span
-              key={dt}
-              className="absolute border-l border-red-400 "
-              style={{
-                top: -4,
-                bottom: step.numerator === 0 ? -1.25 * rem : -4,
-                left: timeBarPos(timeSec), // offsetはtimeBarStepsに足されている
-              }}
-            >
-              <span className="absolute bottom-0">
-                {props.currentLevel &&
-                  stepNStr(step, props.currentLevel.signature)}
-              </span>
-            </span>
-          )
-      )}
+      {props.currentLevel &&
+        timeBarSteps
+          .map(({ step, timeSec }) => ({
+            step,
+            timeSec,
+            ss: getSignatureState(props.currentLevel!.signature, step),
+          }))
+          .map(
+            ({ step, timeSec, ss }, dt) =>
+              stepCmp(step, stepZero()) >= 0 && (
+                <span
+                  key={dt}
+                  className="absolute border-l border-red-400 "
+                  style={{
+                    top: -4,
+                    bottom: ss.count.numerator === 0 ? -1.25 * rem : -4,
+                    left: timeBarPos(timeSec), // offsetはtimeBarStepsに足されている
+                  }}
+                >
+                  <span className="absolute bottom-0">
+                    {ss.count.numerator === 0 &&
+                      `${ss.barNum + 1};${ss.count.fourth + 1}`}
+                  </span>
+                </span>
+              )
+          )}
       {/* bpm変化 */}
       <div className="absolute" style={{ bottom: -2.5 * rem, left: 0 }}>
         <span className="mr-1">BPM:</span>

@@ -40,17 +40,17 @@ export default function NoteTab(props: Props) {
         </span>
         <span className="ml-1 ">;</span>
         <span className="inline-block text-right w-6">
-          {ss && ss.offset.fourth + 1}
+          {ss && ss.count.fourth + 1}
         </span>
         <div className="w-20 inline-block">
           {props.currentStep.numerator > 0 && (
             <>
               <span className="ml-2 ">+</span>
               <span className="inline-block text-right w-6">
-                {ss?.offset.numerator}
+                {ss?.count.numerator}
               </span>
               <span className="ml-1 mr-1">/</span>
-              <span>{ss && ss.offset.denominator * 4}</span>
+              <span>{ss && ss.count.denominator * 4}</span>
             </>
           )}
         </div>

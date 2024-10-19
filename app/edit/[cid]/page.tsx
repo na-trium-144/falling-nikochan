@@ -916,6 +916,10 @@ export default function Page(context: { params: Params }) {
                 setCurrentSpeed={changeSpeed}
                 speedChangeHere={!!speedChangeHere}
                 toggleSpeedChangeHere={toggleSpeedChangeHere}
+                currentSignature={currentSignature}
+                setCurrentSignature={changeSignature}
+                signatureChangeHere={!!signatureChangeHere}
+                toggleSignatureChangeHere={toggleSignatureChangeHere}
                 currentStep={currentStep}
               />
             ) : tab === 2 ? (

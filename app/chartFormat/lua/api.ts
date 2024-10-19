@@ -1,5 +1,5 @@
 import { NoteCommandWithLua } from "../command";
-import { Step, stepAdd } from "../step";
+import { Step, stepAdd, stepSimplify } from "../step";
 import { Result } from "./exec";
 
 export function luaNote(state: Result, ...args: any[]) {
@@ -70,7 +70,11 @@ export function luaBeat(state: Result, ...args: any[]) {
   ) {
     state.signature.push({
       bars: args[1],
-      offset: { fourth: 0, numerator: args[2] * 4, denominator: args[3] },
+      offset: stepSimplify({
+        fourth: 0,
+        numerator: args[2],
+        denominator: args[3],
+      }),
       step: { ...state.step },
       barNum: 0,
       luaLine: args[0],

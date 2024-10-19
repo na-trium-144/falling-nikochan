@@ -21,7 +21,7 @@ export function validateStep(s: Step) {
   if (typeof s.denominator !== "number") throw "step.denominator is invalid";
 }
 export function stepZero(): Step {
-  return { fourth: 0, numerator: 0, denominator: 4 };
+  return { fourth: 0, numerator: 0, denominator: 1 };
 }
 export function stepToFloat(s: Step) {
   return s.fourth + s.numerator / s.denominator;
@@ -72,7 +72,10 @@ export function stepSimplify(s: Step) {
     }
   }
   if (s.numerator === 0) {
-    s.denominator = 4;
+    s.denominator = 1;
   }
   return s;
+}
+export function stepImproper(s: Step) {
+  return s.fourth * s.denominator + s.numerator;
 }

@@ -4,6 +4,7 @@ import {
   defaultSignature,
   getBarLength,
   Signature,
+  toStepArray,
 } from "./command";
 import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 
@@ -118,16 +119,31 @@ export function getSignatureState(
 ): SignatureState {
   const targetSignature = signature[findBpmIndexFromStep(signature, step)];
   let barBegin = stepSub(targetSignature.step, targetSignature.offset);
+  const barSteps = toStepArray(targetSignature);
   const barLength = getBarLength(targetSignature);
   let barNum = targetSignature.barNum;
   let bi = 0;
   while (true) {
     const barEnd = stepAdd(barBegin, barLength[bi % barLength.length]);
     if (stepCmp(barEnd, step) > 0) {
-      return {
-        barNum,
-        offset: stepSub(step, barBegin),
-      };
+      for (let si = 0; si < barSteps[bi % barLength.length].length; si++) {
+        const barStepEnd = stepAdd(
+          barBegin,
+          barSteps[bi % barLength.length][si]
+        );
+        if (stepCmp(barStepEnd, step) > 0) {
+          return {
+            barNum,
+            count: stepAdd(stepSub(step, barBegin), {
+              fourth: si,
+              numerator: 0,
+              denominator: 1,
+            }),
+          };
+        }
+        barBegin = barStepEnd;
+      }
+      throw new Error("should not reach here");
     }
     barNum += 1;
     barBegin = barEnd;
@@ -137,7 +153,7 @@ export function getSignatureState(
 
 export interface SignatureState {
   barNum: number;
-  offset: Step;
+  count: Step; // これは時刻表現ではなく表示用、count.fourthはbar内のカウントに対応するので時間が飛ぶこともある
 }
 
 /**
