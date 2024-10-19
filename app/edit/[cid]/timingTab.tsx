@@ -377,9 +377,9 @@ export default function TimingTab(props: Props) {
                 props.setCurrentSignature({
                   ...props.currentSignature!,
                   bars: props
-                    .currentSignature!.bars.slice(0, i)
+                    .currentSignature!.bars.slice(0, i + 1)
                     .concat([[4, 4, 4, 4]])
-                    .concat(props.currentSignature!.bars.slice(i)),
+                    .concat(props.currentSignature!.bars.slice(i + 1)),
                 });
               }}
             >

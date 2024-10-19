@@ -25,9 +25,7 @@ interface SlimeState {
 }
 export default function RhythmicalSlime(props: Props) {
   const { playing, getCurrentTimeSec, bpmChanges } = props;
-  const step = useRef<Step>(
-    stepSub(stepZero(), { fourth: 0, numerator: 0, denominator: 4 })
-  );
+  const step = useRef<Step>(stepZero());
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
   const [currentBar, setCurrentBar] = useState<(4 | 8 | 16)[]>([]);
   const [slimeStates, setSlimeStates] = useState<(SlimeState | undefined)[]>(
@@ -53,10 +51,16 @@ export default function RhythmicalSlime(props: Props) {
             currentBar.length !== ss.bar.length ||
             !currentBar.every((v, i) => v === ss.bar[i])
           ) {
-            setTimeout(() => {
+            const barChangeSec = getTimeSec(bpmChanges, ss.stepAligned);
+            const barChange =() => {
               setMaxSlimeNum((num) => Math.max(num, ss.bar.length));
               setCurrentBar(ss.bar);
-            }, (getTimeSec(bpmChanges, ss.stepAligned) - now) * 1000);
+            };
+            if(barChangeSec > now){
+              setTimeout(barChange, (barChangeSec - now) * 1000);
+            }else{
+              barChange();
+            }
           }
           const preparingSec = getTimeSec(
             bpmChanges,
@@ -116,11 +120,7 @@ export default function RhythmicalSlime(props: Props) {
         }
       };
     } else {
-      step.current = stepSub(stepZero(), {
-        fourth: 1,
-        numerator: 0,
-        denominator: 4,
-      });
+      step.current = stepZero();
       setSlimeStates([]);
       setMaxSlimeNum((num) =>
         Math.max(num, props.signature[0]?.bars[0].length)
@@ -206,7 +206,7 @@ function Slime(props: PropsS) {
             ? "rhythmical-slime-appearing"
             : "rhythmical-slime-disappearing",
           animationIterationCount: 1,
-          animationDuration: "0.4s",
+          animationDuration: "0.25s",
           animationTimingFunction: "linear",
           animationFillMode: "forwards",
         }}

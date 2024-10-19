@@ -2,7 +2,7 @@
   0% {
     transform: translateY(20vh);
   }
-  80% {
+  70% {
     transform: translateY(-1rem);
   }
   100% {
@@ -13,7 +13,7 @@
   0% {
     transform: translateY(0%);
   }
-  20% {
+  30% {
     transform: translateY(-1rem);
   }
   100% {
