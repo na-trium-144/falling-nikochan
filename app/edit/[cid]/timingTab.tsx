@@ -8,6 +8,7 @@ import {
 } from "./str";
 import { Step, stepCmp, stepZero } from "@/chartFormat/step";
 import { Level } from "@/chartFormat/chart";
+import CheckBox from "@/common/checkBox";
 
 interface Props {
   offset?: number;
@@ -81,7 +82,7 @@ export default function TimingTab(props: Props) {
       <p className="ml-2">
         <span>BPM</span>
         <Input
-          className="w-16 mx-1"
+          className="w-16 ml-1"
           actualValue={
             props.bpmChangeHere
               ? props.prevBpm?.toString() || ""
@@ -102,38 +103,39 @@ export default function TimingTab(props: Props) {
           disabled={props.bpmChangeHere || !bpmChangeable}
           isValid={bpmValid}
         />
-        <span>→</span>
-        <input
-          className="ml-4 mr-1"
-          type="checkbox"
-          id="bpmChangeHere"
-          checked={props.bpmChangeHere}
-          onChange={() => {
-            // bpmの変更時にspeedも変える
-            if (props.currentBpm == props.currentSpeed) {
-              props.toggleSpeedChangeHere();
-            }
-            props.toggleBpmChangeHere();
-          }}
-          disabled={stepCmp(props.currentStep, stepZero()) <= 0}
-        />
-        <label htmlFor="bpmChangeHere">ここで変化</label>
-        <Input
-          className="w-16 mx-1"
-          actualValue={props.currentBpm?.toString() || ""}
-          updateValue={(v: string) => {
-            // bpmの変更時にspeedも変える
-            if (
-              props.speedChangeHere &&
-              props.currentBpm === props.currentSpeed
-            ) {
-              props.setCurrentSpeed(Number(v));
-            }
-            props.setCurrentBpm(Number(v));
-          }}
-          disabled={!props.bpmChangeHere || !bpmChangeable}
-          isValid={bpmValid}
-        />
+        <span className="inline-block ml-1">
+          <span>→</span>
+          <CheckBox
+            className="ml-4 mr-1"
+            value={props.bpmChangeHere}
+            onChange={() => {
+              // bpmの変更時にspeedも変える
+              if (props.currentBpm == props.currentSpeed) {
+                props.toggleSpeedChangeHere();
+              }
+              props.toggleBpmChangeHere();
+            }}
+            disabled={stepCmp(props.currentStep, stepZero()) <= 0}
+          >
+            ここで変化
+          </CheckBox>
+          <Input
+            className="w-16 mx-1"
+            actualValue={props.currentBpm?.toString() || ""}
+            updateValue={(v: string) => {
+              // bpmの変更時にspeedも変える
+              if (
+                props.speedChangeHere &&
+                props.currentBpm === props.currentSpeed
+              ) {
+                props.setCurrentSpeed(Number(v));
+              }
+              props.setCurrentBpm(Number(v));
+            }}
+            disabled={!props.bpmChangeHere || !bpmChangeable}
+            isValid={bpmValid}
+          />
+        </span>
         {props.currentBpmIndex !== undefined &&
           props.currentLevel?.bpmChanges[props.currentBpmIndex] &&
           !bpmChangeable && (
@@ -145,7 +147,7 @@ export default function TimingTab(props: Props) {
       <p className="ml-2">
         <span>Speed</span>
         <Input
-          className="w-16 mx-1"
+          className="w-16 ml-1"
           actualValue={
             props.speedChangeHere
               ? props.prevSpeed?.toString() || ""
@@ -157,23 +159,24 @@ export default function TimingTab(props: Props) {
           disabled={props.speedChangeHere || !speedChangeable}
           isValid={speedValid}
         />
-        <span>→</span>
-        <input
-          className="ml-4 mr-1"
-          type="checkbox"
-          id="speedChangeHere"
-          checked={props.speedChangeHere}
-          onChange={props.toggleSpeedChangeHere}
-          disabled={stepCmp(props.currentStep, stepZero()) <= 0}
-        />
-        <label htmlFor="speedChangeHere">ここで変化</label>
-        <Input
-          className="w-16 mx-1"
-          actualValue={props.currentSpeed?.toString() || ""}
-          updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
-          disabled={!props.speedChangeHere || !speedChangeable}
-          isValid={speedValid}
-        />
+        <span className="inline-block ml-1">
+          <span>→</span>
+          <CheckBox
+            className="ml-4 mr-1"
+            value={props.speedChangeHere}
+            onChange={props.toggleSpeedChangeHere}
+            disabled={stepCmp(props.currentStep, stepZero()) <= 0}
+          >
+            ここで変化
+          </CheckBox>
+          <Input
+            className="w-16 mx-1"
+            actualValue={props.currentSpeed?.toString() || ""}
+            updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
+            disabled={!props.speedChangeHere || !speedChangeable}
+            isValid={speedValid}
+          />
+        </span>
         {props.currentSpeedIndex !== undefined &&
           props.currentLevel?.speedChanges[props.currentSpeedIndex] &&
           !speedChangeable && (

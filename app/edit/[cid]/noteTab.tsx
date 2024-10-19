@@ -6,6 +6,7 @@ import { stepDenominator, stepFourth, stepMeasure, stepNumerator } from "./str";
 import { Step, stepCmp } from "@/chartFormat/step";
 import { Key } from "@/common/key";
 import { Mouse } from "@icon-park/react";
+import CheckBox from "@/common/checkBox";
 
 interface Props {
   currentNoteIndex: number;
@@ -101,7 +102,7 @@ function CopyPasteButton(props: Props) {
         />
         <Button onClick={() => props.copyNote(0)} text="Copy" keyName="C" />
       </div>
-      {Array.from(new Array(7)).map((_, i) => (
+      {Array.from(new Array(9)).map((_, i) => (
         <div key={i} className="flex flex-col items-stretch">
           <Button
             onClick={() => props.pasteNote(i + 1)}
@@ -243,18 +244,15 @@ function NoteEdit(props: Props) {
           </tbody>
         </table>
         <p>
-          <input
+          <CheckBox
             className="mr-1"
-            type="checkbox"
-            id="bigNote"
-            checked={n.big}
-            onChange={(v) => props.updateNote({ ...n, big: v.target.checked })}
+            value={n.big}
+            onChange={(v) => props.updateNote({ ...n, big: v })}
             disabled={!noteEditable}
-          />
-          <label htmlFor="bigNote">
+          >
             <span>Big</span>
             <Key className="text-xs p-0.5 ml-1 ">B</Key>
-          </label>
+          </CheckBox>
         </p>
         {props.currentLevel?.notes[props.currentNoteIndex] && !noteEditable && (
           <p className="ml-2 mt-4 text-sm">

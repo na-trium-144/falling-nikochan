@@ -6,14 +6,17 @@ import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import {
   Chart,
+  chartMaxSize,
   createBrief,
   hashPasswd,
+  levelBgColors,
   validateChart,
 } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
 import { EfferentThree } from "@icon-park/react";
 import { initSession, SessionData } from "@/play/session";
+import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 
 interface Props {
   chart?: Chart;
@@ -23,10 +26,10 @@ export function MetaEdit(props: Props) {
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
   return (
     <>
-      <p className="flex flex-row items-baseline mb-2">
+      <p className="mb-2">
         <span className="w-max">YouTube URL または動画ID</span>
         <Input
-          className="flex-1"
+          className=""
           actualValue={props.chart?.ytId || ""}
           updateValue={(v: string) =>
             props.chart &&
@@ -37,10 +40,10 @@ export function MetaEdit(props: Props) {
         />
       </p>
       <p>楽曲情報:</p>
-      <p className="flex flex-row items-baseline ml-2">
-        <span className="w-max">楽曲タイトル</span>
+      <p className="ml-2">
+        <span className="inline-block w-max">楽曲タイトル</span>
         <Input
-          className="font-title shrink w-80"
+          className="font-title shrink w-80 max-w-full "
           actualValue={props.chart?.title || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, title: v })
@@ -48,10 +51,10 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row items-baseline ml-2 ">
-        <span className="w-max">作曲者など</span>
+      <p className="ml-2 ">
+        <span className="inline-block w-max">作曲者など</span>
         <Input
-          className="text-sm font-title shrink w-80"
+          className="text-sm font-title shrink w-80 max-w-full"
           actualValue={props.chart?.composer || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, composer: v })
@@ -59,10 +62,10 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row items-baseline ml-2 mb-2">
-        <span className="w-max">譜面作成者(あなたの名前)</span>
+      <p className="ml-2 mb-2">
+        <span className="inline-block w-max">譜面作成者(あなたの名前)</span>
         <Input
-          className="font-title shrink w-40"
+          className="font-title shrink w-40 max-w-full"
           actualValue={props.chart?.chartCreator || ""}
           updateValue={(v: string) =>
             props.chart && props.setChart({ ...props.chart, chartCreator: v })
@@ -70,18 +73,20 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p className="flex flex-row items-baseline">
-        <span className="w-max">編集用パスワード</span>
-        <Input
-          className="font-title shrink w-40"
-          actualValue={props.chart?.editPasswd || ""}
-          updateValue={(v: string) =>
-            props.chart && props.setChart({ ...props.chart, editPasswd: v })
-          }
-          left
-          passwd={hidePasswd}
-        />
-        <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
+      <p className="">
+        <span className="inline-block w-max">編集用パスワード</span>
+        <span className="inline-flex flex-row items-baseline">
+          <Input
+            className="font-title shrink w-40 "
+            actualValue={props.chart?.editPasswd || ""}
+            updateValue={(v: string) =>
+              props.chart && props.setChart({ ...props.chart, editPasswd: v })
+            }
+            left
+            passwd={hidePasswd}
+          />
+          <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
+        </span>
       </p>
       <p className="text-sm ml-2">
         (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
@@ -93,6 +98,7 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   sessionId?: number;
   sessionData?: SessionData;
+  fileSize: number;
   chart?: Chart;
   setChart: (chart: Chart) => void;
   cid: string | undefined;
@@ -185,6 +191,7 @@ export function MetaTab(props: Props2) {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files.length >= 1) {
       const f = target.files[0];
+      setUploadMsg("");
       try {
         let newChart = msgpack.deserialize(await f.arrayBuffer());
         newChart = await validateChart(newChart);
@@ -197,36 +204,59 @@ export function MetaTab(props: Props2) {
       } catch (e) {
         setUploadMsg(String(e));
       }
-      target.files = null;
+      target.value = "";
     }
   };
 
   return (
     <>
-      <p className="mb-1">
-        <a
-          className="hover:text-blue-600 underline relative inline-block"
-          href={`/play?sid=${props.sessionId}`}
-          target="_blank"
-        >
-          <button
-            onClick={() =>
-              props.sessionData &&
-              initSession(props.sessionData, props.sessionId)
+      <p className="mb-2">
+        <span className="">現在のファイルサイズ:</span>
+        <span className="inline-block">
+          <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
+          <span className="ml-1 text-sm ">(Max. {chartMaxSize / 1000} kB)</span>
+        </span>
+        <div className="relative bg-slate-300 h-1 rounded-full shadow">
+          <div
+            className={
+              "absolute inset-y-0 rounded-full " +
+              (props.fileSize / chartMaxSize < 0.5
+                ? levelBgColors[0]
+                : props.fileSize / chartMaxSize < 0.75
+                ? levelBgColors[1]
+                : levelBgColors[2])
             }
-          >
-            <span className="mr-5">テストプレイ</span>
-            <EfferentThree className="absolute bottom-1 right-0" />
-          </button>
-        </a>
+            style={{
+              width: (props.fileSize / chartMaxSize) * 100 + "%",
+            }}
+          />
+        </div>
+      </p>
+      <p className="mb-1">
+        <button
+          className={"relative inline-block " + linkStyle1}
+          onClick={() => {
+            if (props.sessionData) {
+              initSession(props.sessionData, props.sessionId);
+              window.open(`/play?sid=${props.sessionId}`, "_blank")?.focus();
+            }
+          }}
+        >
+          <span className="mr-5">テストプレイ</span>
+          <EfferentThree className="absolute bottom-1 right-0" />
+        </button>
       </p>
       <p className="">
-        譜面ID:
-        <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
+        <span className="inline-block">
+          譜面ID:
+          <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
+        </span>
         <Button text="サーバーに保存" onClick={save} loading={saving} />
-        <span className="ml-1">{errorMsg}</span>
+        <span className="inline-block ml-1 ">{errorMsg}</span>
         {props.hasChange && (
-          <span className="ml-1">(未保存の変更があります)</span>
+          <span className="inline-block ml-1 text-amber-600 ">
+            (未保存の変更があります)
+          </span>
         )}
       </p>
       {props.cid && (
@@ -236,12 +266,12 @@ export function MetaTab(props: Props2) {
               共有用リンク:
             </span>
             <a
-              className="text-blue-600 hover:underline"
+              className={linkStyle2}
               href={`/share/${props.cid}`}
               target="_blank"
             >
               <span className="edit-wide:hidden">共有用リンク</span>
-              <span className="hidden edit-wide:inline-block text-sm">
+              <span className="hidden edit-wide:inline text-sm">
                 {origin}/share/{props.cid}
               </span>
             </a>
@@ -258,19 +288,21 @@ export function MetaTab(props: Props2) {
         </>
       )}
       <p className="mb-4">
-        <span className="mr-1">ローカルに保存/読み込み:</span>
-        <Button text="ダウンロードして保存" onClick={download} />
-        <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
-          アップロード
-        </label>
-        <span className="ml-1">{saveMsg || uploadMsg}</span>
-        <input
-          type="file"
-          className="hidden"
-          id="upload-bin"
-          name="upload-bin"
-          onChange={upload}
-        />
+        <span className="">ローカルに保存/読み込み:</span>
+        <span className="inline-block ml-1">
+          <Button text="保存" onClick={download} />
+          <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
+            ファイルを開く
+          </label>
+          <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>
+          <input
+            type="file"
+            className="hidden"
+            id="upload-bin"
+            name="upload-bin"
+            onChange={upload}
+          />
+        </span>
       </p>
       <MetaEdit {...props} />
     </>

@@ -57,8 +57,9 @@ import {
 } from "@/chartFormat/lua/note";
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
-import { clearSession, initSession, SessionData } from "@/play/session";
+import { initSession, SessionData } from "@/play/session";
 import { cursorTo } from "readline";
+import { GuideMain } from "../guide/guideMain";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -81,6 +82,7 @@ export default function Page(context: { params: Params }) {
       setPasswdFailed(false);
       setLoading(false);
       setCid(undefined);
+      setGuidePage(1);
     } else {
       setPasswdFailed(false);
       setLoading(true);
@@ -129,17 +131,8 @@ export default function Page(context: { params: Params }) {
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
+  const [fileSize, setFileSize] = useState<number>(0);
 
-  const createSessionData = useCallback(
-    (chart: Chart) => ({
-      cid: cid,
-      lvIndex: currentLevelIndex,
-      brief: createBrief(chart),
-      chart: chart,
-      editing: true,
-    }),
-    [cid, currentLevelIndex]
-  );
   const changeChart = (chart: Chart) => {
     void (async () => {
       for (const level of chart.levels) {
@@ -147,27 +140,27 @@ export default function Page(context: { params: Params }) {
       }
       setHasChange(true);
       setChart(chart);
-
-      const data = createSessionData(chart);
-      setSessionData(data);
-      if (sessionId === undefined) {
-        setSessionId(initSession(data));
-      } else {
-        initSession(data, sessionId);
-      }
     })();
   };
-  const prevLevelIndex = useRef<number>(-1);
   useEffect(() => {
     if (chart) {
       if (sessionId === undefined) {
-        setSessionId(initSession(createSessionData(chart)));
-      } else if (prevLevelIndex.current !== currentLevelIndex) {
-        initSession(createSessionData(chart), sessionId);
+        setSessionId(initSession(null));
       }
-      prevLevelIndex.current = currentLevelIndex;
+      const data = {
+        cid: cid,
+        lvIndex: currentLevelIndex,
+        brief: createBrief(chart),
+        chart: chart,
+        editing: true,
+      };
+      setFileSize(msgpack.serialize(chart).byteLength);
+      setSessionData(data);
+      initSession(data, sessionId);
+      // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
+      // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
     }
-  }, [sessionId, chart, createSessionData, currentLevelIndex]);
+  }, [sessionId, chart, currentLevelIndex, cid]);
 
   const changeLevel = (newLevel: Level | null) => {
     if (chart && newLevel) {
@@ -181,14 +174,9 @@ export default function Page(context: { params: Params }) {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (hasChange) {
         const confirmationMessage = "未保存の変更があります";
-        if (confirmationMessage) {
-          clearSession(sessionId);
-        }
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
         return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
-      } else {
-        clearSession(sessionId);
       }
     };
     window.addEventListener("beforeunload", onUnload);
@@ -391,6 +379,10 @@ export default function Page(context: { params: Params }) {
   }, [chart, currentLevelIndex]);
 
   const [tab, setTab] = useState<number>(0);
+  const [guidePage, setGuidePage] = useState<number | null>(null);
+  const tabNames = ["Meta", "Timing", "Levels", "Notes", "Code"];
+  const isCodeTab = tab === 4;
+  const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
   const [dragMode, setDragMode] = useState<"p" | "v">("p");
 
@@ -578,7 +570,7 @@ export default function Page(context: { params: Params }) {
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
     ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(7)).map(() => null)
+      Array.from(new Array(9)).map(() => null)
     )
   );
   const copyNote = (copyIndex: number) => {
@@ -641,7 +633,7 @@ export default function Page(context: { params: Params }) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (ready && tab !== 4) {
+        if (ready && !isCodeTab) {
           if (e.key === " " && !playing) {
             start();
           } else if (
@@ -704,7 +696,10 @@ export default function Page(context: { params: Params }) {
             "grow-0 shrink-0 flex flex-col items-stretch p-3"
           }
         >
-          <Header reload>Edit</Header>
+          <div className="flex flex-row items-center">
+            <Header reload>Edit</Header>
+            <Button text="？" onClick={openGuide} />
+          </div>
           <div
             className={
               "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
@@ -732,7 +727,7 @@ export default function Page(context: { params: Params }) {
             }
           >
             <FallingWindow
-              inCodeTab={tab === 4}
+              inCodeTab={isCodeTab}
               className="absolute inset-0"
               notes={notesAll}
               currentTimeSec={currentTimeSec || 0}
@@ -847,7 +842,7 @@ export default function Page(context: { params: Params }) {
             />
           </p>
           <div className="flex flex-row ml-3 mt-3">
-            {["Meta", "Timing", "Levels", "Notes", "Code"].map((tabName, i) =>
+            {tabNames.map((tabName, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
                   {tabName}
@@ -855,7 +850,7 @@ export default function Page(context: { params: Params }) {
               ) : (
                 <button
                   key={i}
-                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200"
+                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 active:shadow-inner "
                   onClick={() => {
                     setTab(i);
                     ref.current.focus();
@@ -877,6 +872,7 @@ export default function Page(context: { params: Params }) {
               <MetaTab
                 sessionId={sessionId}
                 sessionData={sessionData}
+                fileSize={fileSize}
                 chart={chart}
                 setChart={changeChart}
                 cid={cid}
@@ -949,6 +945,13 @@ export default function Page(context: { params: Params }) {
           </Box>
         </div>
       </div>
+      {guidePage !== null && (
+        <GuideMain
+          index={guidePage}
+          setIndex={setGuidePage}
+          close={() => setGuidePage(null)}
+        />
+      )}
     </main>
   );
 }

@@ -4,6 +4,7 @@ import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
 import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore";
 import Button from "@/common/button";
 import { FourthNote } from "@/common/fourthNote";
+import { linkStyle2 } from "@/common/linkStyle";
 import { rankStr } from "@/common/rank";
 import { initSession, SessionData } from "@/play/session";
 import { JudgeIcon } from "@/play/statusBox";
@@ -36,7 +37,7 @@ export function ShareLink(props: Props) {
     <p className="mt-2">
       <span className="hidden main-wide:inline-block mr-2">共有用リンク:</span>
       <Link
-        className="text-blue-600 hover:underline inline-block py-2"
+        className={"inline-block py-2 " + linkStyle2}
         href={`/share/${props.cid}`}
       >
         <span className="main-wide:hidden">共有用リンク</span>
@@ -57,6 +58,8 @@ export function ShareLink(props: Props) {
   );
 }
 export function PlayOption(props: Props) {
+  const router = useRouter();
+
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
@@ -75,22 +78,6 @@ export function PlayOption(props: Props) {
       clearBestScore(props.cid, selectedLevel);
     }
   }, [props, selectedLevel]);
-
-  const [sessionId, setSessionId] = useState<number>();
-  const [sessionData, setSessionData] = useState<SessionData>();
-  useEffect(() => {
-    const data = {
-      cid: props.cid,
-      lvIndex: selectedLevel,
-      brief: props.brief,
-    };
-    setSessionData(data);
-    if (sessionId === undefined) {
-      setSessionId(initSession(data));
-    } else {
-      initSession(data, sessionId);
-    }
-  }, [sessionId, selectedLevel, props]);
 
   return (
     <>
@@ -237,15 +224,18 @@ export function PlayOption(props: Props) {
         )}
       </p>
       <p className="mt-3">
-        <Link href={`/play?sid=${sessionId}`}>
-          <Button
-            text="ゲーム開始！"
-            onClick={() =>
-              // 押したときにも再度sessionを初期化
-              sessionData && initSession(sessionData, sessionId)
-            }
-          />
-        </Link>
+        <Button
+          text="ゲーム開始！"
+          onClick={() => {
+            // 押したときにも再度sessionを初期化
+            const sessionId = initSession({
+              cid: props.cid,
+              lvIndex: selectedLevel,
+              brief: props.brief,
+            });
+            router.push(`/play?sid=${sessionId}`);
+          }}
+        />
       </p>
     </>
   );

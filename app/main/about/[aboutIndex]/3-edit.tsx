@@ -82,7 +82,7 @@ export function AboutContent3() {
               className={
                 "absolute bg-amber-600 rounded-sm m-1 " +
                 "top-0 inset-x-0 p-1 pl-10 h-12 " +
-                "main-wide:left-auto main-wide:pb-2 main-wide:w-20 main-wide:h-14 "
+                "main-wide:left-auto main-wide:pl-1 main-wide:pb-3 main-wide:w-20 main-wide:h-14 "
               }
             >
               <div className="bg-black w-full h-full text-center flex items-center justify-center">
@@ -120,13 +120,22 @@ export function AboutContent3() {
       </div>
       <div className="mb-4 space-y-2 text-center">
         <p>
-          作った譜面は、
+          譜面を作って Falling Nikochan の
           <wbr />
-          譜面ID (6桁の数字)
-          <wbr />を<wbr />
-          入力
+          サーバーに
           <wbr />
-          するか、
+          アップロード
+          <wbr />
+          すると、
+          <wbr />
+          譜面ID (6桁の数字) が<wbr />
+          発行されます。
+          <wbr />
+        </p>
+        <p>
+          その譜面ID
+          <wbr />
+          または
           <wbr />
           譜面のURL (
           <span className="text-sm">
@@ -134,18 +143,22 @@ export function AboutContent3() {
             <wbr />
             share
             <wbr />
-            &#47;*
+            &#47;〜
           </span>
-          ) に<wbr />
-          アクセス
+          ) を<wbr />
+          SNS
           <wbr />
-          する
+          などで
           <wbr />
-          ことで
+          共有する
           <wbr />
-          他の人も
+          ことで、
           <wbr />
-          遊ぶことが
+          遊んで
+          <wbr />
+          もらう
+          <wbr />
+          ことが
           <wbr />
           できます。
         </p>
