@@ -16,6 +16,7 @@ import {
   barFromLength,
   getBarLength,
   Signature,
+  SignatureWithLua,
   toStepArray,
 } from "@/chartFormat/command";
 import { useEffect, useRef, useState } from "react";
@@ -38,7 +39,7 @@ interface Props {
   prevSignature?: Signature;
   speedChangeHere: boolean;
   toggleSpeedChangeHere: () => void;
-  currentSignature?: Signature;
+  currentSignature?: SignatureWithLua;
   setCurrentSignature: (sig: Signature) => void;
   signatureChangeHere: boolean;
   toggleSignatureChangeHere: () => void;
@@ -58,6 +59,8 @@ export default function TimingTab(props: Props) {
     props.currentSpeedIndex !== undefined &&
     props.currentLevel?.speedChanges[props.currentSpeedIndex] &&
     props.currentLevel?.speedChanges[props.currentSpeedIndex].luaLine !== null;
+  const signatureChangeable =
+    props.currentSignature && props.currentSignature.luaLine !== null;
 
   const ss =
     props.currentLevel &&
@@ -91,7 +94,7 @@ export default function TimingTab(props: Props) {
           {ss && ss.count.fourth + 1}
         </span>
         <div className="w-20 inline-block">
-          {props.currentStep.numerator > 0 && (
+          {ss && ss.count.numerator > 0 && (
             <>
               <span className="ml-2 ">+</span>
               <span className="inline-block text-right w-6">
@@ -285,6 +288,7 @@ export default function TimingTab(props: Props) {
                     offset: v,
                   })
                 }
+                disabled={!signatureChangeable}
               />
               <span>)</span>
             </span>
@@ -315,6 +319,7 @@ export default function TimingTab(props: Props) {
                     ),
                   });
                 }}
+                disabled={!signatureChangeable}
               />
               <span
                 className="shrink grow-0 text-right min-w-max "
@@ -378,6 +383,7 @@ export default function TimingTab(props: Props) {
                           }
                         }
                       }}
+                      disabled={!signatureChangeable}
                     >
                       <BeatSlime size={bs} />
                     </button>
@@ -394,6 +400,7 @@ export default function TimingTab(props: Props) {
                       .concat(props.currentSignature!.bars.slice(i + 1)),
                   });
                 }}
+                disabled={!signatureChangeable}
               >
                 <CornerDownLeft />
               </button>
@@ -407,7 +414,10 @@ export default function TimingTab(props: Props) {
                     ),
                   });
                 }}
-                disabled={props.currentSignature!.bars.length <= 1}
+                disabled={
+                  props.currentSignature!.bars.length <= 1 ||
+                  !signatureChangeable
+                }
               >
                 <Close />
               </button>
@@ -415,6 +425,9 @@ export default function TimingTab(props: Props) {
           </li>
         ))}
       </ul>
+      {props.currentSignature !== undefined && !signatureChangeable && (
+        <p className="text-sm">Code タブで編集されているため変更できません。</p>
+      )}
     </>
   );
 }
@@ -425,6 +438,7 @@ interface PropsS {
   updateValue: (v: Step) => void;
   limitedDenominator?: boolean;
   allowZero?: boolean;
+  disabled?: boolean;
 }
 function InputSig(props: PropsS) {
   const [num, setNum] = useState<number>(0);
@@ -474,6 +488,7 @@ function InputSig(props: PropsS) {
           setNum(Number(v));
         }}
         isValid={beatNumValid}
+        disabled={props.disabled}
       />
       <span className={"mx-1 " + props.className}>/</span>
       <Input
@@ -490,6 +505,7 @@ function InputSig(props: PropsS) {
           setDenom(Number(v) / 4);
         }}
         isValid={beatDenomValid}
+        disabled={props.disabled}
       />
     </>
   );

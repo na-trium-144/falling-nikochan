@@ -43,7 +43,7 @@ export default function NoteTab(props: Props) {
           {ss && ss.count.fourth + 1}
         </span>
         <div className="w-20 inline-block">
-          {props.currentStep.numerator > 0 && (
+          {ss && ss.count.numerator > 0 && (
             <>
               <span className="ml-2 ">+</span>
               <span className="inline-block text-right w-6">

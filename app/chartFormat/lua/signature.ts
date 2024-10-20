@@ -14,12 +14,12 @@ function beatLuaCommand(s: Signature) {
   }
   if (num === 0) {
     return `Beat({${s.bars
-      .map((bar) => "{" + bar.join(",") + "}")
-      .join(".")}})`;
+      .map((bar) => "{" + bar.join(", ") + "}")
+      .join(", ")}})`;
   } else {
     return `Beat({${s.bars
-      .map((bar) => "{" + bar.join(",") + "}")
-      .join(".")}}, ${num}, ${denom})`;
+      .map((bar) => "{" + bar.join(", ") + "}")
+      .join(", ")}}, ${num}, ${denom})`;
   }
 }
 export function luaAddBeatChange(chart: Level, change: Signature) {

@@ -58,7 +58,6 @@ import {
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
 import { initSession, SessionData } from "@/play/session";
-import { cursorTo } from "readline";
 import { GuideMain } from "../guide/guideMain";
 import {
   luaAddBeatChange,

@@ -72,7 +72,7 @@ export function luaBeat(state: Result, ...args: any[]) {
       bars: args[1],
       offset: stepSimplify({
         fourth: 0,
-        numerator: args[2],
+        numerator: args[2] * 4,
         denominator: args[3],
       }),
       step: { ...state.step },
