@@ -10,7 +10,7 @@ import { IndexMain } from "../main";
 import { ChartListItem } from "../chartList";
 import { LoadingSlime } from "@/common/loadingSlime";
 
-const sampleCId = ["762237"];
+const sampleCId = ["596134", "592994", "488006"];
 
 export default function PlayTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -106,6 +106,10 @@ export default function PlayTab() {
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">サンプル譜面</h3>
+        <p className="pl-2 mb-1">
+          Falling Nikochan の作者 (natrium144) が作った譜面です。
+          初めての方はこちらからどうぞ。
+        </p>
         {fetching > 0 ? (
           <p className="pl-2">
             <LoadingSlime />
@@ -113,7 +117,6 @@ export default function PlayTab() {
           </p>
         ) : (
           <>
-            <p className="pl-2">はじめての方はこちらから</p>
             <ul className="list-disc list-inside ml-3">
               {sampleCId.map((cid) => (
                 <ChartListItem
@@ -121,7 +124,6 @@ export default function PlayTab() {
                   cid={cid}
                   brief={recentBrief[cid]}
                   href={`/share/${cid}`}
-                  creator
                 />
               ))}
             </ul>
