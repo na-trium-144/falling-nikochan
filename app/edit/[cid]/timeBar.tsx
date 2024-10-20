@@ -9,7 +9,7 @@ import {
 } from "@/chartFormat/seq";
 import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { stepNStr, timeSecStr, timeStr } from "./str";
+import { timeSecStr, timeStr } from "./str";
 import { Step, stepAdd, stepCmp, stepImproper, stepZero } from "@/chartFormat/step";
 import { Chart, Level } from "@/chartFormat/chart";
 import { useDisplayMode } from "@/scale";

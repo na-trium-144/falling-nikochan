@@ -1,4 +1,4 @@
-import { hashLevel } from "../chart";
+import { hashLevel, hashLevel4 } from "../chart";
 import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command";
 import { Chart4 } from "./chart4";
 
@@ -42,6 +42,6 @@ export async function convert3To4(chart: Chart3): Promise<Chart4> {
     editPasswd: chart.editPasswd,
     updatedAt: 0,
   };
-  newChart.levels[0].hash = await hashLevel(newChart.levels[0]);
+  newChart.levels[0].hash = await hashLevel4(newChart.levels[0]);
   return newChart;
 }
