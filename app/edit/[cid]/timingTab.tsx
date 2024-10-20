@@ -6,6 +6,7 @@ import {
   stepImproper,
   stepSimplify,
   stepSub,
+  stepToFloat,
   stepZero,
 } from "@/chartFormat/step";
 import { Level } from "@/chartFormat/chart";
@@ -290,9 +291,10 @@ export default function TimingTab(props: Props) {
           </>
         )}
       </p>
-      <ul className="list-disc list-inside mt-1">
+      <ul className="list-disc mt-1">
         {props.currentSignature?.bars.map((bar, i) => (
-          <li className="ml-2" key={i}>
+          <li className="ml-6 w-full" key={i}>
+            <div className="flex flex-row w-full items-baseline ">
             <InputSig
               limitedDenominator
               actualValue={currentBarLength![i]}
@@ -314,7 +316,11 @@ export default function TimingTab(props: Props) {
                 });
               }}
             />
-            <span className="mr-3 " />
+            <span className="shrink grow-0 text-right min-w-max "
+            style={{
+              width: currentBarLength!.reduce((max, len) => Math.max(max, stepToFloat(len)), 0) * 2 * 2 + "rem"
+            }}>
+              
             {bar
               .slice()
               .reverse()
@@ -371,8 +377,9 @@ export default function TimingTab(props: Props) {
                   />
                 </button>
               ))}
+            </span>
             <button
-              className="inline-block ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
+              className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
               onClick={() => {
                 props.setCurrentSignature({
                   ...props.currentSignature!,
@@ -386,7 +393,7 @@ export default function TimingTab(props: Props) {
               <CornerDownLeft />
             </button>
             <button
-              className="inline-block ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
+              className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
               onClick={() => {
                 props.setCurrentSignature({
                   ...props.currentSignature!,
@@ -397,6 +404,7 @@ export default function TimingTab(props: Props) {
             >
               <Close />
             </button>
+            </div>
           </li>
         ))}
       </ul>

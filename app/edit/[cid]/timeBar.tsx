@@ -10,9 +10,10 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { stepNStr, timeSecStr, timeStr } from "./str";
-import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
+import { Step, stepAdd, stepCmp, stepImproper, stepZero } from "@/chartFormat/step";
 import { Chart, Level } from "@/chartFormat/chart";
 import { useDisplayMode } from "@/scale";
+import { getBarLength } from "@/chartFormat/command";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
@@ -137,10 +138,16 @@ export default function TimeBar(props: Props) {
     currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
       ? findBpmIndexFromStep(currentLevel.speedChanges, timeBarBeginStep)
       : undefined;
+  const beginSignatureIndex =
+    currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(currentLevel.signature, timeBarBeginStep)
+      : undefined;
+  const beginBarLength =
+    currentLevel && beginSignatureIndex !== undefined ? getBarLength(currentLevel.signature[beginSignatureIndex]) : undefined;
 
   return (
     <div
-      className={"h-6 bg-gray-200 relative mt-10 mb-16 overflow-visible"}
+      className={"h-6 bg-gray-200 relative mt-10 mb-20 overflow-visible"}
       ref={timeBarRef}
     >
       {/* 秒数目盛り */}
@@ -181,7 +188,12 @@ export default function TimeBar(props: Props) {
                 >
                   <span className="absolute bottom-0">
                     {ss.count.numerator === 0 &&
-                      `${ss.barNum + 1};${ss.count.fourth + 1}`}
+                      <>
+                        {ss.count.fourth === 0 && (ss.barNum + 1).toString()}
+                        ;
+                        {ss.count.fourth + 1}
+                      </>
+                    }
                   </span>
                 </span>
               )
@@ -238,12 +250,52 @@ export default function TimeBar(props: Props) {
               </span>
             )
         )}
+      {/* signature変化 */}
+      <div className="absolute" style={{ bottom: -5 * rem, left: 0 }}>
+        <span className="mr-1">Beat:</span>
+        {beginBarLength?.map((len, i) => (
+          <>
+            {i >= 1 && <span className="mx-0.5">+</span>}
+            <span>{stepImproper(len)}</span>
+            <span>/</span>
+            <span>{len.denominator*4}</span>
+          </>
+        ))}
+      </div>
+      {chart &&
+        currentLevel?.signature.map((sig) => ({sig, len: getBarLength(sig), sec: getTimeSec(currentLevel.bpmChanges, sig.step)})).map(
+          ({sig, len, sec}, i) =>
+            sec + chart.offset >= timeBarBeginSec &&
+            sec + chart.offset <
+              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+              <span
+                key={i}
+                className="absolute border-l-2 border-slate-600 "
+                style={{
+                  top: -4,
+                  bottom: -5 * rem,
+                  left: timeBarPos(sec + chart.offset),
+                }}
+              >
+                <span className="absolute bottom-0">
+                  {len.map((len, i) => (
+                    <>
+                      {i >= 1 && <span className="mx-0.5">+</span>}
+                      <span>{stepImproper(len)}</span>
+                      <span>/</span>
+                      <span>{len.denominator*4}</span>
+                    </>
+                  ))}
+                </span>
+              </span>
+            )
+        )}
       {/* 現在位置カーソル */}
       <div
         className="absolute border-l border-amber-400 shadow shadow-yellow-400"
         style={{
           top: -2.5 * rem,
-          bottom: -4 * rem,
+          bottom: -5 * rem,
           left: timeBarPos(currentTimeSecWithoutOffset),
         }}
       />
