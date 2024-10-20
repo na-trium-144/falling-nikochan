@@ -53,6 +53,9 @@ export async function getBrief(
     }
     const brief = createBrief(chart);
     await updateFileEntry(cid, brief);
-    return NextResponse.json(brief);
+    return NextResponse.json({
+      ...brief,
+      playCount: fileEntry.playCount?.count || 0,
+    });
   }
 }
