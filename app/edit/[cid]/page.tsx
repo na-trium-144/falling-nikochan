@@ -1,11 +1,16 @@
 "use client";
 
-import { defaultNoteCommand, NoteCommand } from "@/chartFormat/command";
+import {
+  defaultNoteCommand,
+  NoteCommand,
+  Signature,
+} from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
   findBpmIndexFromStep,
+  getSignatureState,
   getStep,
   getTimeSec,
   loadChart,
@@ -54,6 +59,11 @@ import Select from "@/common/select";
 import LevelTab from "./levelTab";
 import { initSession, SessionData } from "@/play/session";
 import { GuideMain } from "../guide/guideMain";
+import {
+  luaAddBeatChange,
+  luaDeleteBeatChange,
+  luaUpdateBeatChange,
+} from "@/chartFormat/lua/signature";
 
 export default function Page(context: { params: Params }) {
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -489,6 +499,52 @@ export default function Page(context: { params: Params }) {
     }
   };
 
+  const currentSignatureIndex =
+    currentLevel && findBpmIndexFromStep(currentLevel.signature, currentStep);
+  const currentSignature = currentLevel?.signature.at(
+    currentSignatureIndex || 0
+  );
+  const prevSignature =
+    currentSignatureIndex && currentSignatureIndex > 0
+      ? currentLevel?.signature.at(currentSignatureIndex - 1)
+      : undefined;
+  const signatureChangeHere =
+    currentSignature && stepCmp(currentSignature.step, currentStep) === 0;
+  const changeSignature = (s: Signature) => {
+    if (chart && currentLevel && currentSignatureIndex !== undefined) {
+      const newLevel = luaUpdateBeatChange(
+        currentLevel,
+        currentSignatureIndex,
+        s
+      );
+      changeLevel(newLevel);
+    }
+  };
+  const toggleSignatureChangeHere = () => {
+    if (
+      chart &&
+      currentLevel &&
+      currentSignatureIndex !== undefined &&
+      currentSignature &&
+      stepCmp(currentStep, stepZero()) > 0
+    ) {
+      if (signatureChangeHere) {
+        const newLevel = luaDeleteBeatChange(
+          currentLevel,
+          currentSignatureIndex
+        );
+        changeLevel(newLevel);
+      } else {
+        const newLevel = luaAddBeatChange(currentLevel, {
+          step: currentStep,
+          offset: getSignatureState(currentLevel.signature, currentStep).offset,
+          bars: currentSignature.bars,
+          barNum: 0,
+        });
+        changeLevel(newLevel);
+      }
+    }
+  };
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
     if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
@@ -863,6 +919,11 @@ export default function Page(context: { params: Params }) {
                 setCurrentSpeed={changeSpeed}
                 speedChangeHere={!!speedChangeHere}
                 toggleSpeedChangeHere={toggleSpeedChangeHere}
+                prevSignature={prevSignature}
+                currentSignature={currentSignature}
+                setCurrentSignature={changeSignature}
+                signatureChangeHere={!!signatureChangeHere}
+                toggleSignatureChangeHere={toggleSignatureChangeHere}
                 currentStep={currentStep}
               />
             ) : tab === 2 ? (

@@ -1,3 +1,6 @@
+import { CornerDownLeft } from "@icon-park/react";
+import { BeatSlime } from "../[cid]/timingTab";
+
 export function GuideContent4() {
   return (
     <>
@@ -25,7 +28,54 @@ export function GuideContent4() {
         も指定可能です。 いじりすぎるとクソゲーになるので注意。
       </li>
       <li>
-        Offsetは全Level共通の設定ですが、BPMとSpeedはLevelごとに違う値に設定することができます。
+        Beat: 拍子を設定できます。デフォルトでは 4/4 になっています。
+        <br />
+        途中で拍子を変化させたい場合は「ここで変化」にチェックを入れると、
+        その位置から拍子が変化します。
+        <br />
+      </li>
+      <li className="ml-6">
+        Offset は通常は 0 (0/4)
+        のままでよいですが、指定すると拍子の途中から始めることができます。
+        <br />
+        例えば Offset を 2/4
+        にすると、4分音符2拍分を飛ばして、3拍目からカウントが始まります。
+      </li>
+      <li className="ml-6">
+        拍子の分母には 4, 8, 16 のいずれかのみが使用できます。
+        指定した拍子の数だけ右側に
+        <BeatSlime size={4} />
+        (4分音符)、
+        <BeatSlime size={8} />
+        (8分音符)、
+        <BeatSlime size={16} />
+        (16分音符) が表示されます。 (プレイ時と同様右から左にカウントします。)
+        <br />
+        <BeatSlime size={4} />
+        をクリックするとサイズを変更することができます。 例えば 7/8
+        拍子ならデフォルトでは
+        {[8, 4, 4, 4].map((bs, i) => (
+          <BeatSlime size={bs as 4 | 8} key={i} />
+        ))}
+        となっていますが、楽曲のリズムにあわせて
+        {[4, 4, 8, 4].map((bs, i) => (
+          <BeatSlime size={bs as 4 | 8} key={i} />
+        ))}
+        などのように変更することもできます。
+      </li>
+      <li className="ml-6">
+        <span className="inline-block w-5 ">
+          <CornerDownLeft />
+        </span>
+        をクリックすると、拍子の表示が1段増えます。
+        <br />
+        スマホなど横幅が狭い画面で表示したとき 1列に並べられるのは
+        <BeatSlime size={4} />
+        5〜6 匹程度なので、 例えば 7/4 などのように大きい拍子は、 4/4 + 3/4
+        のように分けて指定するとよいです。
+      </li>
+      <li>
+        Offsetは全Level共通の設定ですが、BPM、Speed、拍子はLevelごとに違う値に設定することもできます。
       </li>
     </>
   );

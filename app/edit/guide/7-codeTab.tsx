@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { BeatSlime } from "../[cid]/timingTab";
 
 export function GuideContent7() {
   return (
@@ -50,6 +51,22 @@ export function GuideContent7() {
       <li className="ml-6">
         <Code>Accel(speedの値)</Code>: Speedを変更します。0や負の値も使えます。
       </li>
+      <li className="ml-6">
+        <Code>Beat(拍子)</Code> または <Code>Beat(拍子, a, b)</Code>:
+        拍子を変更します。
+        <br />
+        拍子は 4/4 拍子なら <Code>&#123;&#123;4, 4, 4, 4&#125;&#125;</Code>
+        <br />
+        7/8 拍子なら <Code>&#123;&#123;4, 4, 4, 8&#125;&#125;</Code> (
+        <BeatSlime size={4} /> とは逆に左から右にカウントします),
+        <br />
+        4/4 + 3/4 拍子なら{" "}
+        <Code>&#123;&#123;4, 4, 4, 4&#125;, &#123;4, 4, 4&#125;&#125;</Code>
+        のように指定します。
+        <br />
+        拍子カウントのオフセット(a/b)を拍子の後ろに指定できます。
+        aは0以上の整数、bは1以上の整数です。 (詳細は Timing タブの説明を参照)
+      </li>
       <li>
         <Code>--</Code>
         (半角のマイナス2つ)で始まる行はコメントです(何を書いても無視されます)。
@@ -63,6 +80,8 @@ export function GuideContent7() {
 
 function Code(props: { children: ReactNode }) {
   return (
-    <span className="font-mono text-sm mx-1 rounded-sm ">{props.children}</span>
+    <span className="font-mono text-sm mx-1 p-0.5 bg-white border border-slate-300 rounded ">
+      {props.children}
+    </span>
   );
 }

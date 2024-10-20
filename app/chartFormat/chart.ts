@@ -2,16 +2,21 @@ import {
   BPMChangeWithLua,
   NoteCommandWithLua,
   RestStep,
+  Signature,
+  SignatureWithLua,
   updateBpmTimeSec,
   validateBpmChange,
   validateNoteCommand,
   validateRestStep,
+  validateSignature,
 } from "./command";
 import { difficulty } from "./difficulty";
 import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
+import { Chart4, convert4To5, Level4 } from "./legacy/chart4";
 import { luaAddBpmChange } from "./lua/bpm";
+import { luaAddBeatChange } from "./lua/signature";
 import { luaAddSpeedChange } from "./lua/speed";
 import { getTimeSec } from "./seq";
 import { stepZero } from "./step";
@@ -57,7 +62,7 @@ export interface ChartBrief {
  */
 export interface Chart {
   falling: "nikochan"; // magic
-  ver: 4;
+  ver: 5;
   levels: Level[];
   offset: number;
   ytId: string;
@@ -75,6 +80,7 @@ export interface Level {
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
   speedChanges: BPMChangeWithLua[];
+  signature: SignatureWithLua[];
   lua: string[];
 }
 export const levelTypes = ["Single", "Double", "Maniac"];
@@ -92,13 +98,14 @@ export const levelBgColors = [
 export const chartMaxSize = 1000000;
 
 export async function validateChart(
-  chart: Chart | Chart1 | Chart2 | Chart3
+  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4
 ): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver === 1) chart = convert1To2(chart);
   if (chart.ver === 2) chart = convert2To3(chart);
   if (chart.ver === 3) chart = await convert3To4(chart);
-  if (chart.ver !== 4) throw "chart.ver is invalid";
+  if (chart.ver === 4) chart = convert4To5(chart);
+  if (chart.ver !== 5) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
   chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
@@ -123,6 +130,9 @@ export function validateLevel(level: Level): Level {
   if (!Array.isArray(level.speedChanges)) throw "level.speedChanges is invalid";
   level.speedChanges.forEach((n) => validateBpmChange(n));
   updateBpmTimeSec(level.bpmChanges, level.speedChanges);
+  if (!Array.isArray(level.signature))
+    throw "level.signatureChanges is invalid";
+  level.signature.forEach((n) => validateSignature(n));
   if (!Array.isArray(level.lua)) throw "level.lua is invalid";
   if (level.lua.filter((l) => typeof l !== "string").length > 0)
     throw "level.lua is invalid";
@@ -143,6 +153,16 @@ export async function hashPasswd(text: string) {
 }
 export async function hashLevel(level: Level) {
   return await hash(
+    JSON.stringify([
+      level.notes,
+      level.bpmChanges,
+      level.speedChanges,
+      level.signature,
+    ])
+  );
+}
+export async function hashLevel4(level: Level4) {
+  return await hash(
     JSON.stringify([level.notes, level.bpmChanges, level.speedChanges])
   );
 }
@@ -154,8 +174,8 @@ export function validCId(cid: string) {
 export function emptyChart(): Chart {
   let chart: Chart = {
     falling: "nikochan",
-    ver: 4,
-    levels: [],
+    ver: 5,
+    levels: [emptyLevel()],
     offset: 0,
     ytId: "",
     title: "",
@@ -176,6 +196,7 @@ export function emptyLevel(prevLevel?: Level): Level {
     rest: [],
     bpmChanges: [],
     speedChanges: [],
+    signature: [],
     lua: [],
   };
   if (prevLevel) {
@@ -185,6 +206,9 @@ export function emptyLevel(prevLevel?: Level): Level {
     for (const change of prevLevel.speedChanges) {
       level = luaAddSpeedChange(level, change)!;
     }
+    for (const s of prevLevel.signature) {
+      level = luaAddBeatChange(level, s)!;
+    }
   } else {
     level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
     level = luaAddSpeedChange(level, {
@@ -192,10 +216,16 @@ export function emptyLevel(prevLevel?: Level): Level {
       step: stepZero(),
       timeSec: 0,
     })!;
+    level = luaAddBeatChange(level, {
+      step: stepZero(),
+      offset: stepZero(),
+      barNum: 0,
+      bars: [[4, 4, 4, 4]],
+    })!;
   }
   return level;
 }
-export function copyLevel(level: Level) {
+export function copyLevel(level: Level): Level {
   return {
     name: level.name,
     hash: level.hash,
@@ -204,6 +234,7 @@ export function copyLevel(level: Level) {
     rest: level.rest.map((r) => ({ ...r })),
     bpmChanges: level.bpmChanges.map((b) => ({ ...b })),
     speedChanges: level.speedChanges.map((b) => ({ ...b })),
+    signature: level.signature.map((s) => ({ ...s })),
     lua: level.lua.slice(),
   };
 }

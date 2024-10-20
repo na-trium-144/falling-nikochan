@@ -1,10 +1,16 @@
 import { Chart } from "./chart";
-import { BPMChange } from "./command";
-import { Step, stepCmp, stepToFloat, stepZero } from "./step";
+import {
+  BPMChange,
+  getBarLength,
+  Signature,
+  toStepArray,
+} from "./command";
+import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 
 export interface ChartSeqData {
   notes: Note[];
   bpmChanges: BPMChange[];
+  signature: Signature[];
   offset: number;
 }
 
@@ -105,6 +111,59 @@ export function getStep(
   };
 }
 /**
+ * 時刻(step)→小節数+小節内の拍数
+ */
+export function getSignatureState(
+  signature: Signature[],
+  step: Step
+): SignatureState {
+  const targetSignature = signature[findBpmIndexFromStep(signature, step)];
+  let barBegin = stepSub(targetSignature.step, targetSignature.offset);
+  const barSteps = toStepArray(targetSignature);
+  const barLength = getBarLength(targetSignature);
+  let barNum = targetSignature.barNum;
+  let bi = 0;
+  while (true) {
+    const barEnd = stepAdd(barBegin, barLength[bi % barLength.length]);
+    if (stepCmp(barEnd, step) > 0) {
+      let barStepBegin = barBegin;
+      for (let si = 0; si < barSteps[bi % barLength.length].length; si++) {
+        const barStepEnd = stepAdd(
+          barStepBegin,
+          barSteps[bi % barLength.length][si]
+        );
+        if (stepCmp(barStepEnd, step) > 0) {
+          return {
+            barNum,
+            bar: targetSignature.bars[bi % barLength.length],
+            stepAligned: barStepBegin,
+            offset: stepSub(step, barBegin),
+            count: stepAdd(stepSub(step, barStepBegin), {
+              fourth: si,
+              numerator: 0,
+              denominator: 1,
+            }),
+          };
+        }
+        barStepBegin = barStepEnd;
+      }
+      throw new Error("should not reach here");
+    }
+    barNum += 1;
+    barBegin = barEnd;
+    bi += 1;
+  }
+}
+
+export interface SignatureState {
+  barNum: number;
+  bar: (4 | 8 | 16)[];
+  stepAligned: Step; // このカウントの開始にあわせた時刻
+  offset: Step; // barの最初からの時刻
+  count: Step; // これは時刻表現ではなく表示用、count.fourthはbar内のカウントに対応するので時間が飛ぶこともある
+}
+
+/**
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromSec(
@@ -127,7 +186,7 @@ export function findBpmIndexFromSec(
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromStep(
-  bpmChanges: BPMChange[],
+  bpmChanges: BPMChange[] | Signature[],
   step: Step
 ): number {
   if (bpmChanges.length === 0) {
@@ -150,7 +209,7 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
   const notes: Note[] = [];
   const level = chart.levels.at(levelIndex);
   if (!level) {
-    return { notes: [], bpmChanges: [], offset: chart.offset };
+    return { notes: [], bpmChanges: [], signature: [], offset: chart.offset };
   }
   for (let id = 0; id < level.notes.length; id++) {
     const c = level.notes[id];
@@ -230,6 +289,7 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
   }
   return {
     offset: chart.offset,
+    signature: level.signature,
     bpmChanges: level.bpmChanges,
     notes,
   };
