@@ -2,17 +2,17 @@ import { ChartBrief } from "@/chartFormat/chart";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export async function getFileEntry(cid: string) {
+export async function getFileEntry(cid: string, includeLevels: boolean) {
   const entry = await prisma.chartFile.findUnique({
     where: {
       cid: cid,
     },
     include: {
-      levels: true,
+      levels: includeLevels,
       playCount: true,
     },
   });
-  if (entry) {
+  if (entry?.levels !== undefined) {
     entry.levels = entry.levels.sort((a, b) => a.lvIndex - b.lvIndex);
   }
   return entry;

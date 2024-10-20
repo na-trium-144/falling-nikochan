@@ -9,8 +9,11 @@ import { NextResponse } from "next/server";
 import { fsRead } from "../fsAccess";
 import msgpack from "@ygoe/msgpack";
 
-export async function getBrief(cid: string): Promise<NextResponse> {
-  const fileEntry = await getFileEntry(cid);
+export async function getBrief(
+  cid: string,
+  includeLevels: boolean
+): Promise<NextResponse> {
+  const fileEntry = await getFileEntry(cid, includeLevels);
   if (fileEntry === null) {
     return NextResponse.json(
       { message: "Chart ID Not Found" },
@@ -18,15 +21,17 @@ export async function getBrief(cid: string): Promise<NextResponse> {
     );
   }
   if (
-    fileEntry.levels.length > 0 &&
-    fileEntry.levels.every((l, i) => l.lvIndex === i)
+    !includeLevels ||
+    (Array.isArray(fileEntry.levels) &&
+      fileEntry.levels.length > 0 &&
+      fileEntry.levels.every((l, i) => l.lvIndex === i))
   ) {
     return NextResponse.json({
       ytId: fileEntry.ytId,
       title: fileEntry.title,
       composer: fileEntry.composer,
       chartCreator: fileEntry.chartCreator,
-      levels: fileEntry.levels,
+      levels: fileEntry.levels || [],
       updatedAt: fileEntry.updatedAt.getTime(),
       playCount: fileEntry.playCount?.count || 0,
     } as ChartBrief);

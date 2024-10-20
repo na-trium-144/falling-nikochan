@@ -9,7 +9,7 @@ import { loadChart } from "@/chartFormat/seq";
 export async function GET(request: NextRequest, context: { params: Params }) {
   const cid: string = context.params.cid;
   const lvIndex = Number(context.params.lvIndex);
-  const fileEntry = await getFileEntry(cid);
+  const fileEntry = await getFileEntry(cid, false);
   if (fileEntry === null) {
     return NextResponse.json(
       { message: "Chart ID Not Found" },

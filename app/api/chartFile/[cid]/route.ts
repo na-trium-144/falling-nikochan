@@ -18,7 +18,7 @@ async function getChart(
   cid: string,
   p: string
 ): Promise<{ res?: Response; chart?: Chart }> {
-  const fileEntry = await getFileEntry(cid);
+  const fileEntry = await getFileEntry(cid, false);
   if (fileEntry === null) {
     return {
       res: NextResponse.json(
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
     newChart.updatedAt = new Date().getTime();
   }
 
-  const fileEntry = await getFileEntry(cid);
+  const fileEntry = await getFileEntry(cid, false);
   if (fileEntry === null) {
     return NextResponse.json(
       { message: "Chart ID Not Found" },
@@ -132,7 +132,7 @@ export async function DELETE(
     return res;
   }
 
-  const fileEntry = await getFileEntry(cid);
+  const fileEntry = await getFileEntry(cid, false);
   if (fileEntry === null) {
     return NextResponse.json(
       { message: "Chart ID Not Found" },

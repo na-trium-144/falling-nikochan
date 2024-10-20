@@ -67,7 +67,7 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   let cid: string;
   while (true) {
     cid = Math.floor(Math.random() * 900000 + 100000).toString();
-    const fileEntry = await getFileEntry(cid);
+    const fileEntry = await getFileEntry(cid, false);
     if (fileEntry !== null) {
       // cidかぶり
       continue;

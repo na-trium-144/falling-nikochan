@@ -1,10 +1,8 @@
 import { ChartBrief } from "@/chartFormat/chart";
 import Header from "@/common/header";
 import { Box, Error } from "@/common/box";
-import Button from "@/common/button";
 import Footer from "@/common/footer";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
-import Link from "next/link";
 import { PlayCount, PlayOption, ShareLink } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
@@ -14,8 +12,8 @@ export async function generateMetadata(context: { params: Params }) {
   const cid = context.params.cid;
   let brief: ChartBrief | undefined = undefined;
 
-  // const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-  const res = await getBrief(cid);
+  // const res = await fetch(`/api/brief/${cid}?levels=1`, { cache: "no-store" });
+  const res = await getBrief(cid, true);
   if (res.ok) {
     // cidからタイトルなどを取得
     brief = await res.json();
@@ -33,8 +31,8 @@ export default async function ShareChart(context: { params: Params }) {
   let errorMsg: string | undefined = undefined;
   let errorStatus: number | undefined = undefined;
 
-  // const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-  const res = await getBrief(cid);
+  // const res = await fetch(`/api/brief/${cid}?levels=1`, { cache: "no-store" });
+  const res = await getBrief(cid, true);
   if (res.ok) {
     // cidからタイトルなどを取得
     brief = await res.json();
