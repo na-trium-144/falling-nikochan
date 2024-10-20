@@ -14,6 +14,7 @@ import { difficulty } from "./difficulty";
 import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
+import { Chart4, Level4 } from "./legacy/chart4";
 import { luaAddBpmChange } from "./lua/bpm";
 import { luaAddBeatChange } from "./lua/signature";
 import { luaAddSpeedChange } from "./lua/speed";
@@ -97,7 +98,7 @@ export const levelBgColors = [
 export const chartMaxSize = 1000000;
 
 export async function validateChart(
-  chart: Chart | Chart1 | Chart2 | Chart3
+  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4
 ): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver === 1) chart = convert1To2(chart);
@@ -163,7 +164,7 @@ export function emptyChart(): Chart {
   let chart: Chart = {
     falling: "nikochan",
     ver: 5,
-    levels: [],
+    levels: [emptyLevel()],
     offset: 0,
     ytId: "",
     title: "",

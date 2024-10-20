@@ -111,10 +111,32 @@ export async function luaExec(code: string): Promise<Result> {
   } finally {
     lua.global.close();
   }
-  updateBpmTimeSec(result.bpmChanges, result.speedChanges);
-  updateBarNum(result.signature)
   if (result.bpmChanges.length === 0) {
-    result.bpmChanges = emptyLevel().bpmChanges;
+    result.bpmChanges.push({
+      bpm: 120,
+      step: stepZero(),
+      timeSec: 0,
+      luaLine: null,
+    });
   }
+  if (result.speedChanges.length === 0) {
+    result.speedChanges.push({
+      bpm: 120,
+      step: stepZero(),
+      timeSec: 0,
+      luaLine: null,
+    });
+  }
+  if (result.signature.length === 0) {
+    result.signature.push({
+      step: stepZero(),
+      offset: stepZero(),
+      barNum: 0,
+      bars: [[4, 4, 4, 4]],
+      luaLine: null,
+    });
+  }
+  updateBpmTimeSec(result.bpmChanges, result.speedChanges);
+  updateBarNum(result.signature);
   return result;
 }
