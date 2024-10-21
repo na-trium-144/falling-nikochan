@@ -4,11 +4,8 @@ import { Box } from "@/common/box";
 import TargetLine from "@/common/targetLine";
 import { useDisplayMode } from "@/scale";
 import { Youtube } from "@icon-park/react";
-import { useEffect, useState } from "react";
 
 export function AboutContent3() {
-  const [hostname, setHostname] = useState("");
-  useEffect(() => setHostname(window.location.host), []);
   const { screenWidth, rem } = useDisplayMode();
   const isMobile = screenWidth < 40 * rem;
 
@@ -139,7 +136,13 @@ export function AboutContent3() {
           <wbr />
           譜面のURL (
           <span className="text-sm">
-            {hostname}&#47;
+            nikochan.
+            <wbr />
+            natrium144.
+            <wbr />
+            org
+            <wbr />
+            &#47;
             <wbr />
             share
             <wbr />
