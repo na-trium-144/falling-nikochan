@@ -184,12 +184,52 @@ function Play() {
 
   // ytPlayer準備完了
   const [ready, setReady] = useState<boolean>(false);
-  // 停止後 (最初に戻してリセットしてからスタートしないといけない)
+  // 中断した
   const [stopped, setStopped] = useState<boolean>(false);
   // 少なくとも1回以上startした
   const [playedOnce, setPlayedOnce] = useState<boolean>(false);
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
+  // 開始時の音量を保存しておく
+  const initialVolume = useRef<number>();
+
+  const start = () => {
+    if (ytPlayer.current?.playVideo) {
+      // なぜか playVideo is not a function な場合がある
+      // 再生中に呼んでもとくになにも起こらない
+      ytPlayer.current?.playVideo();
+    }
+  };
+  const stop = useCallback(() => {
+    // if (ytPlayer.current?.pauseVideo) {
+    //   ytPlayer.current?.pauseVideo();
+    // }
+    if (playing) {
+      setStopped(true);
+      setPlaying(false);
+      if (initialVolume.current !== undefined) {
+        for (let i = 1; i < 10; i++) {
+          setTimeout(() => {
+            if (initialVolume.current !== undefined) {
+              ytPlayer.current?.setVolume(
+                ((10 - i) * initialVolume.current) / 10
+              );
+            }
+          }, i * 100);
+        }
+        setTimeout(() => {
+          ytPlayer.current?.pauseVideo();
+        }, 1000);
+      } else {
+        ytPlayer.current?.pauseVideo();
+      }
+    }
+  }, [playing]);
+  const exit = () => {
+    // router.replace(`/share/${cid}`);
+    history.back();
+  };
+
   useEffect(() => {
     if (chartSeq && playedOnce && end) {
       if (
@@ -229,6 +269,7 @@ function Play() {
     chainScore,
     bigScore,
     judgeCount,
+    stop,
   ]);
 
   const onReady = useCallback(() => {
@@ -246,6 +287,11 @@ function Play() {
       setPlaying(true);
       setPlayedOnce(true);
       reloadBestScore();
+      if (initialVolume.current !== undefined) {
+        ytPlayer.current?.setVolume(initialVolume.current);
+      } else {
+        initialVolume.current = ytPlayer.current?.getVolume();
+      }
     }
     ref.current?.focus();
   }, [chartSeq, ref, resetNotesAll, reloadBestScore]);
@@ -254,25 +300,10 @@ function Play() {
     if (playing) {
       setStopped(true);
       setPlaying(false);
-      ytPlayer.current?.seekTo(0, true);
     }
+    ytPlayer.current?.seekTo(0, true);
     ref.current?.focus();
   }, [playing, ref]);
-  const start = () => {
-    if (ytPlayer.current?.playVideo) {
-      // なぜか playVideo is not a function な場合がある
-      ytPlayer.current?.playVideo();
-    }
-  };
-  const stop = () => {
-    if (ytPlayer.current?.pauseVideo) {
-      ytPlayer.current?.pauseVideo();
-    }
-  };
-  const exit = () => {
-    // router.replace(`/share/${cid}`);
-    history.back();
-  };
 
   // キーを押したとき一定時間光らせる
   const [barFlash, setBarFlash] = useState<boolean>(false);
