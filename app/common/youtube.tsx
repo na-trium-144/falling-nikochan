@@ -52,7 +52,7 @@ export function FlexYouTube(props: Props) {
       }
     };
     resizeYouTube.current();
-  }, [width, height, ytPlayer, fixedSide]);
+  }, [width, height, ytPlayer, fixedSide, scale]);
 
   onReadyRef.current = onReady;
   onStartRef.current = onStart;

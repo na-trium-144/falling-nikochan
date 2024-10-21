@@ -2,16 +2,16 @@
 
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
-import { Key } from "@/common/key";
 import { rankStr } from "@/common/rank";
 import { ReactNode, useEffect, useState } from "react";
 
 interface Props {
+  isTouch: boolean;
   baseScore: number;
   chainScore: number;
   bigScore: number;
   score: number;
-  start: () => void;
+  reset: () => void;
   exit: () => void;
 }
 export default function Result(props: Props) {
@@ -77,11 +77,15 @@ export default function Result(props: Props) {
       </ResultRow>
       <div className="text-center">
         <Button
-          text="再スタート"
-          keyName="Space"
-          onClick={() => props.start()}
+          text="もう一度"
+          keyName={props.isTouch ? undefined : "Space"}
+          onClick={() => props.reset()}
         />
-        <Button text="やめる" keyName="Esc" onClick={() => props.exit()} />
+        <Button
+          text="やめる"
+          keyName={props.isTouch ? undefined : "Esc"}
+          onClick={() => props.exit()}
+        />
       </div>
     </CenterBox>
   );

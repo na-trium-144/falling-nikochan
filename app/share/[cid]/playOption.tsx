@@ -233,7 +233,8 @@ export function PlayOption(props: Props) {
               lvIndex: selectedLevel,
               brief: props.brief,
             });
-            router.push(`/play?sid=${sessionId}`);
+            // router.push(`/play?sid=${sessionId}`);
+            location.href = `/play?sid=${sessionId}`;
           }}
         />
       </p>

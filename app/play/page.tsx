@@ -26,12 +26,12 @@ import { MusicArea } from "./musicArea";
 export default function Home() {
   return (
     <Suspense fallback={<Loading />}>
-      <Play />
+      <InitPlay />
     </Suspense>
   );
 }
 
-function Play() {
+function InitPlay() {
   const searchParams = useSearchParams();
   const sid = Number(searchParams.get("sid"));
 
@@ -40,8 +40,6 @@ function Play() {
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
   const [editing, setEditing] = useState<boolean>(false);
-  const lvType: string =
-    (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
@@ -96,6 +94,36 @@ function Play() {
     }
   }, [sid]);
 
+  if (errorStatus !== undefined || errorMsg !== undefined) {
+    return <Error status={errorStatus} message={errorMsg} />;
+  }
+  if (chartBrief === undefined || chartSeq === undefined) {
+    return <Loading />;
+  }
+
+  return (
+    <Play
+      cid={cid}
+      lvIndex={lvIndex || 0}
+      chartBrief={chartBrief}
+      chartSeq={chartSeq}
+      editing={editing}
+    />
+  );
+}
+
+interface Props {
+  cid?: string;
+  lvIndex: number;
+  chartBrief: ChartBrief;
+  chartSeq: ChartSeqData;
+  editing: boolean;
+}
+function Play(props: Props) {
+  const { cid, lvIndex, chartBrief, chartSeq, editing } = props;
+  const lvType: string =
+    (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
+
   const [auto, setAuto] = useState<boolean>(false);
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -126,6 +154,7 @@ function Play() {
   const [playing, setPlaying] = useState<boolean>(false);
 
   const ytPlayer = useRef<YouTubePlayer>();
+
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
@@ -184,14 +213,61 @@ function Play() {
 
   // ytPlayer準備完了
   const [ready, setReady] = useState<boolean>(false);
-  // 停止後 (最初に戻してリセットしてからスタートしないといけない)
+  // 中断した
   const [stopped, setStopped] = useState<boolean>(false);
-  // 少なくとも1回以上startした
-  const [playedOnce, setPlayedOnce] = useState<boolean>(false);
+  // startした
+  const [started, setStarted] = useState<boolean>(false);
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
+  // 開始時の音量を保存しておく
+  const initialVolume = useRef<number>();
+
+  const start = () => {
+    // 再生中に呼んでもとくになにも起こらない
+    ytPlayer.current?.playVideo();
+  };
+  const stop = useCallback(() => {
+    // if (ytPlayer.current?.pauseVideo) {
+    //   ytPlayer.current?.pauseVideo();
+    // }
+    if (playing) {
+      setStopped(true);
+      setPlaying(false);
+      if (initialVolume.current !== undefined) {
+        for (let i = 1; i < 10; i++) {
+          setTimeout(() => {
+            if (initialVolume.current !== undefined) {
+              ytPlayer.current?.setVolume(
+                ((10 - i) * initialVolume.current) / 10
+              );
+            }
+          }, i * 100);
+        }
+        setTimeout(() => {
+          ytPlayer.current?.pauseVideo();
+        }, 1000);
+      } else {
+        ytPlayer.current?.pauseVideo();
+      }
+    }
+  }, [playing]);
+  const reset = useCallback(() => {
+    ytPlayer.current?.seekTo(0, true);
+    setStopped(false);
+    setStarted(false);
+    setPlaying(false);
+    setReady(true);
+    resetNotesAll(chartSeq.notes);
+    setCurrentBpmIndex(0);
+    reloadBestScore();
+  }, [chartSeq, resetNotesAll, reloadBestScore]);
+  const exit = () => {
+    // router.replace(`/share/${cid}`);
+    history.back();
+  };
+
   useEffect(() => {
-    if (chartSeq && playedOnce && end) {
+    if (started && end) {
       if (
         cid &&
         !auto &&
@@ -216,7 +292,7 @@ function Play() {
       setShowResult(false);
     }
   }, [
-    playedOnce,
+    started,
     end,
     chartSeq,
     score,
@@ -229,50 +305,38 @@ function Play() {
     chainScore,
     bigScore,
     judgeCount,
+    stop,
   ]);
 
   const onReady = useCallback(() => {
     console.log("ready");
-    setReady(true);
+    reset();
     ref.current?.focus();
-  }, []);
+  }, [reset]);
   const onStart = useCallback(() => {
     console.log("start");
     if (chartSeq) {
       setStopped(false);
       setReady(false);
-      resetNotesAll(chartSeq.notes);
-      setCurrentBpmIndex(0);
       setPlaying(true);
-      setPlayedOnce(true);
-      reloadBestScore();
+      setStarted(true);
+      if (initialVolume.current !== undefined) {
+        ytPlayer.current?.setVolume(initialVolume.current);
+      } else {
+        initialVolume.current = ytPlayer.current?.getVolume();
+      }
     }
     ref.current?.focus();
-  }, [chartSeq, ref, resetNotesAll, reloadBestScore]);
+  }, [chartSeq]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (playing) {
       setStopped(true);
       setPlaying(false);
-      ytPlayer.current?.seekTo(0, true);
     }
+    ytPlayer.current?.seekTo(0, true);
     ref.current?.focus();
   }, [playing, ref]);
-  const start = () => {
-    if (ytPlayer.current?.playVideo) {
-      // なぜか playVideo is not a function な場合がある
-      ytPlayer.current?.playVideo();
-    }
-  };
-  const stop = () => {
-    if (ytPlayer.current?.pauseVideo) {
-      ytPlayer.current?.pauseVideo();
-    }
-  };
-  const exit = () => {
-    // router.replace(`/share/${cid}`);
-    history.back();
-  };
 
   // キーを押したとき一定時間光らせる
   const [barFlash, setBarFlash] = useState<boolean>(false);
@@ -281,12 +345,6 @@ function Play() {
     setTimeout(() => setBarFlash(false), 100);
   };
 
-  if (errorStatus !== undefined || errorMsg !== undefined) {
-    return <Error status={errorStatus} message={errorMsg} />;
-  }
-  if (chartSeq === undefined) {
-    return <Loading />;
-  }
   return (
     <main
       className="overflow-hidden w-screen h-screen relative select-none"
@@ -294,8 +352,10 @@ function Play() {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (e.key === " " && (ready || stopped) && !playing) {
+        if (e.key === " " && ready && !playing) {
           start();
+        } else if (e.key === " " && (stopped || showResult) && !playing) {
+          reset();
         } else if ((e.key === "Escape" || e.key === "Esc") && playing) {
           stop();
         } else if ((e.key === "Escape" || e.key === "Esc") && !playing) {
@@ -373,8 +433,9 @@ function Play() {
               chainScore={chainScore}
               bigScore={bigScore}
               score={score}
-              start={start}
+              reset={reset}
               exit={exit}
+              isTouch={isTouch}
             />
           ) : ready ? (
             <ReadyMessage
@@ -386,7 +447,7 @@ function Play() {
               editing={editing}
             />
           ) : stopped ? (
-            <StopMessage isTouch={isTouch} start={start} exit={exit} />
+            <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
           ) : null}
         </div>
       </div>
