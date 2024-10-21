@@ -1,7 +1,6 @@
 import { metaDataTitle } from "@/common/title";
 import { tabTitles } from "../const";
 import { IndexMain } from "../main";
-import Link from "next/link";
 import { ReactNode } from "react";
 import { linkStyle2 } from "@/common/linkStyle";
 
@@ -15,7 +14,7 @@ interface PProps {
 }
 function Paragraph(props: PProps) {
   return (
-    <div className="mb-3">
+    <div className="mb-3 text-justify">
       <h3 className="text-xl font-bold font-title mb-2">{props.header}</h3>
       <ul className="pl-2 list-inside list-disc">{props.children}</ul>
     </div>
@@ -27,23 +26,25 @@ export default function PolicyTab() {
       <Paragraph header="ソフトウェアとして">
         <li>
           Falling Nikochan はオープンソースのソフトウェアであり、
-          <Link
+          <a
             className={"mx-1 text-blue-800 " + linkStyle2}
             href="https://github.com/na-trium-144/falling-nikochan"
+            target="_blank"
           >
             GitHub 上に
-          </Link>
+          </a>
           ソースコードを公開しています。
         </li>
         <li>
           MIT License で公開しており、複製、改変、再配布などをしても構いません。
           ライセンス本文は
-          <Link
+          <a
             className={"mx-1 text-blue-800 " + linkStyle2}
             href="https://github.com/na-trium-144/falling-nikochan/blob/main/LICENSE"
+            target="_blank"
           >
             こちら
-          </Link>
+          </a>
           を参照してください。
         </li>
         <li>
@@ -54,10 +55,22 @@ export default function PolicyTab() {
       </Paragraph>
       <Paragraph header="サービスとして">
         <li>
-          以下の規約は、作者が管理しているドメイン (nikochan.natrium144.org)
+          以下の規約は、作者が管理しているドメイン
+          <span className="text-sm mx-1">
+            (nikochan.
+            <wbr />
+            natrium
+            <wbr />
+            144.
+            <wbr />
+            org)
+          </span>
           で提供される Falling Nikochan のサービス (以下、本サービス)
-          を利用する利用者とサービス提供者 (= Falling Nikochan の作者,
-          na-trium-144) の間の関係に適用されます。
+          を利用する利用者とサービス提供者
+          <span className="text-sm mx-1">
+            (= Falling Nikochan の作者, na-trium-144)
+          </span>
+          の間の関係に適用されます。
         </li>
         <li>
           第三者がこれ以外のドメインで Falling Nikochan

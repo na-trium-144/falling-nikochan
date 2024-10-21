@@ -19,6 +19,12 @@ export function ChartListItem(props: CProps) {
             {props.brief?.title}
           </span>
         </span>
+        {props.brief?.composer && (
+          <span className="hidden main-wide:inline-block ml-1 text-sm">
+            <span className="">/</span>
+            <span className="ml-1 font-title ">{props.brief.composer}</span>
+          </span>
+        )}
         {props.creator && (
           <span className="inline-block ml-2 text-sm">
             <span className="">by</span>
