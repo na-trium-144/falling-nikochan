@@ -28,10 +28,10 @@ export function ReadyMessage(props: MessageProps) {
           onClick={() => props.exit()}
         />
       </p>
-      <p className="mt-2">
-        ※スタートされない場合は
+      <p className="mt-2 text-sm">
+        または右上の動画を{props.isTouch ? "タップ" : "クリック"}で
         <br />
-        ページを再読み込みしてください
+        スタート・停止
       </p>
       {props.editing && (
         <p className="mt-2">
@@ -56,7 +56,7 @@ export function ReadyMessage(props: MessageProps) {
 }
 interface MessageProps2 {
   isTouch: boolean;
-  start: () => void;
+  reset: () => void;
   exit: () => void;
 }
 export function StopMessage(props: MessageProps2) {
@@ -65,9 +65,9 @@ export function StopMessage(props: MessageProps2) {
       <p className="mb-1">&lt;Stopped&gt;</p>
       <p>
         <Button
-          text="再スタート"
+          text="もう一度"
           keyName={props.isTouch ? undefined : "Space"}
-          onClick={() => props.start()}
+          onClick={() => props.reset()}
         />
         <Button
           text="やめる"
