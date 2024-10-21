@@ -26,12 +26,12 @@ import { MusicArea } from "./musicArea";
 export default function Home() {
   return (
     <Suspense fallback={<Loading />}>
-      <Play />
+      <InitPlay />
     </Suspense>
   );
 }
 
-function Play() {
+function InitPlay() {
   const searchParams = useSearchParams();
   const sid = Number(searchParams.get("sid"));
 
@@ -40,8 +40,6 @@ function Play() {
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
   const [chartSeq, setChartSeq] = useState<ChartSeqData>();
   const [editing, setEditing] = useState<boolean>(false);
-  const lvType: string =
-    (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
@@ -96,6 +94,36 @@ function Play() {
     }
   }, [sid]);
 
+  if (errorStatus !== undefined || errorMsg !== undefined) {
+    return <Error status={errorStatus} message={errorMsg} />;
+  }
+  if (chartBrief === undefined || chartSeq === undefined) {
+    return <Loading />;
+  }
+
+  return (
+    <Play
+      cid={cid}
+      lvIndex={lvIndex || 0}
+      chartBrief={chartBrief}
+      chartSeq={chartSeq}
+      editing={editing}
+    />
+  );
+}
+
+interface Props {
+  cid?: string;
+  lvIndex: number;
+  chartBrief: ChartBrief;
+  chartSeq: ChartSeqData;
+  editing: boolean;
+}
+function Play(props: Props) {
+  const { cid, lvIndex, chartBrief, chartSeq, editing } = props;
+  const lvType: string =
+    (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
+
   const [auto, setAuto] = useState<boolean>(false);
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -126,6 +154,7 @@ function Play() {
   const [playing, setPlaying] = useState<boolean>(false);
 
   const ytPlayer = useRef<YouTubePlayer>();
+
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
@@ -312,12 +341,6 @@ function Play() {
     setTimeout(() => setBarFlash(false), 100);
   };
 
-  if (errorStatus !== undefined || errorMsg !== undefined) {
-    return <Error status={errorStatus} message={errorMsg} />;
-  }
-  if (chartSeq === undefined) {
-    return <Loading />;
-  }
   return (
     <main
       className="overflow-hidden w-screen h-screen relative select-none"
