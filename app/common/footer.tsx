@@ -34,18 +34,21 @@ export default function Footer(props: Props) {
           "footer-wide2:flex-row footer-wide2:items-baseline footer-wide2:space-x-3"
         }
       >
-        <Link
+        <a
           className={"relative w-max " + linkStyle2}
           href="https://github.com/na-trium-144/falling-nikochan"
+          target="_blank"
         >
           <Github className="absolute bottom-1 left-0" />
           <span className="ml-5">na-trium-144/falling-nikochan</span>
-        </Link>
-        <div className="hidden footer-wide:inline-block space-x-2">
-          <span>Build</span>
-          <span>{process.env.buildDate}</span>
-          <span>({process.env.buildCommit})</span>
-        </div>
+        </a>
+        <a
+          className={"hidden footer-wide:inline-block " + linkStyle2}
+          href="https://github.com/na-trium-144/falling-nikochan/commits/main/"
+          target="_blank"
+        >
+          Build {process.env.buildDate} ({process.env.buildCommit})
+        </a>
       </div>
     </footer>
   );

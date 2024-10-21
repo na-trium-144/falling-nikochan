@@ -4,13 +4,36 @@ import { useEffect, useState } from "react";
 import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { useRouter } from "next/navigation";
 import { getRecent, removeRecent } from "@/common/recent";
-import Link from "next/link";
 import Input from "@/common/input";
 import { IndexMain } from "../main";
 import { ChartListItem } from "../chartList";
 import { LoadingSlime } from "@/common/loadingSlime";
 
 const sampleCId = ["596134", "592994", "488006"];
+
+function InputIdDesc() {
+  const [hostname, setHostname] = useState("");
+  useEffect(() => setHostname(window.location.host), []);
+
+  return (
+    <>
+      <p className="pl-2 text-justify">
+        プレイしたい譜面の ID を知っている場合はこちらに入力してください。
+      </p>
+      <p className="pl-2 text-justify">
+        ※譜面のURL (
+        <span className="text-sm">
+          {hostname}&#47;
+          <wbr />
+          share
+          <wbr />
+          &#47;〜
+        </span>
+        ) にアクセスすることでもプレイできます。
+      </p>
+    </>
+  );
+}
 
 export default function PlayTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -106,8 +129,10 @@ export default function PlayTab() {
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">サンプル譜面</h3>
-        <p className="pl-2 mb-1">
-          Falling Nikochan の作者 (natrium144) が作った譜面です。
+        <p className="pl-2 mb-1 text-justify ">
+          Falling Nikochan の作者
+          <span className="text-sm mx-0.5">(na-trium-144)</span>
+          が作った譜面です。
           初めての方はこちらからどうぞ。
         </p>
         {fetching > 0 ? (
@@ -131,54 +156,5 @@ export default function PlayTab() {
         )}
       </div>
     </IndexMain>
-  );
-}
-
-function InputIdDesc() {
-  const [hostname, setHostname] = useState("");
-  useEffect(() => setHostname(window.location.host), []);
-
-  return (
-    <>
-      <p className="pl-2 break-keep break-words">
-        プレイしたい
-        <wbr />
-        譜面の
-        <wbr />
-        IDを
-        <wbr />
-        知って
-        <wbr />
-        いる
-        <wbr />
-        場合は
-        <wbr />
-        こちらに
-        <wbr />
-        入力して
-        <wbr />
-        ください。
-      </p>
-      <p className="pl-2 break-keep break-words">
-        ※譜面のURL (
-        <span className="text-sm">
-          {hostname}&#47;
-          <wbr />
-          share
-          <wbr />
-          &#47;〜
-        </span>
-        ) に<wbr />
-        アクセス
-        <wbr />
-        する
-        <wbr />
-        ことでも
-        <wbr />
-        プレイ
-        <wbr />
-        できます。
-      </p>
-    </>
   );
 }

@@ -4,7 +4,6 @@ import Header from "@/common/header";
 import { Box } from "@/common/box";
 import Footer from "@/common/footer";
 import { useDisplayMode } from "@/scale";
-import Link from "next/link";
 import { ReactNode, useState } from "react";
 import { tabTitles, tabURLs } from "./const";
 import { useRouter } from "next/navigation";
