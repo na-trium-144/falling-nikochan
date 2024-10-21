@@ -11,30 +11,6 @@ import { LoadingSlime } from "@/common/loadingSlime";
 
 const sampleCId = ["596134", "592994", "488006"];
 
-function InputIdDesc() {
-  const [hostname, setHostname] = useState("");
-  useEffect(() => setHostname(window.location.host), []);
-
-  return (
-    <>
-      <p className="pl-2 text-justify">
-        プレイしたい譜面の ID を知っている場合はこちらに入力してください。
-      </p>
-      <p className="pl-2 text-justify">
-        ※譜面のURL (
-        <span className="text-sm">
-          {hostname}&#47;
-          <wbr />
-          share
-          <wbr />
-          &#47;〜
-        </span>
-        ) にアクセスすることでもプレイできます。
-      </p>
-    </>
-  );
-}
-
 export default function PlayTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
@@ -100,7 +76,26 @@ export default function PlayTab() {
           />
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
-        <InputIdDesc />
+        <p className="pl-2 text-justify">
+          プレイしたい譜面の ID を知っている場合はこちらに入力してください。
+        </p>
+        <p className="pl-2 text-justify">
+          ※譜面のURL (
+          <span className="text-sm">
+            nikochan.
+            <wbr />
+            natrium144.
+            <wbr />
+            org
+            <wbr />
+            &#47;
+            <wbr />
+            share
+            <wbr />
+            &#47;〜
+          </span>
+          ) にアクセスすることでもプレイできます。
+        </p>
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">
@@ -132,8 +127,7 @@ export default function PlayTab() {
         <p className="pl-2 mb-1 text-justify ">
           Falling Nikochan の作者
           <span className="text-sm mx-0.5">(na-trium-144)</span>
-          が作った譜面です。
-          初めての方はこちらからどうぞ。
+          が作った譜面です。 初めての方はこちらからどうぞ。
         </p>
         {fetching > 0 ? (
           <p className="pl-2">
