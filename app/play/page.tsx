@@ -219,8 +219,6 @@ function Play(props: Props) {
   const [started, setStarted] = useState<boolean>(false);
   // 終了した
   const [showResult, setShowResult] = useState<boolean>(false);
-  // 開始時の音量を保存しておく
-  const initialVolume = useRef<number>();
 
   const start = () => {
     // 再生中に呼んでもとくになにも起こらない
@@ -233,26 +231,18 @@ function Play(props: Props) {
     if (playing) {
       setStopped(true);
       setPlaying(false);
-      if (initialVolume.current !== undefined) {
-        for (let i = 1; i < 10; i++) {
-          setTimeout(() => {
-            if (initialVolume.current !== undefined) {
-              ytPlayer.current?.setVolume(
-                ((10 - i) * initialVolume.current) / 10
-              );
-            }
-          }, i * 100);
-        }
+      // 開始時の音量は問答無用で100っぽい?
+      for (let i = 1; i < 10; i++) {
+        setTimeout(() => {
+          ytPlayer.current?.setVolume(((10 - i) * 100) / 10);
+        }, i * 100);
         setTimeout(() => {
           ytPlayer.current?.pauseVideo();
         }, 1000);
-      } else {
-        ytPlayer.current?.pauseVideo();
       }
     }
   }, [playing]);
   const reset = useCallback(() => {
-    ytPlayer.current?.seekTo(0, true);
     setStopped(false);
     setStarted(false);
     setPlaying(false);
@@ -320,11 +310,7 @@ function Play(props: Props) {
       setReady(false);
       setPlaying(true);
       setStarted(true);
-      if (initialVolume.current !== undefined) {
-        ytPlayer.current?.setVolume(initialVolume.current);
-      } else {
-        initialVolume.current = ytPlayer.current?.getVolume();
-      }
+      ytPlayer.current?.setVolume(100);
     }
     ref.current?.focus();
   }, [chartSeq]);
