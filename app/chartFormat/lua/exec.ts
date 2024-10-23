@@ -76,7 +76,7 @@ export async function luaExec(code: string): Promise<Result> {
           `$1StepStatic(${ln},$2)$3`
         )
         .replace(
-          /^( *)Beat\(( *{[-\d\.,{} ]+} *(?:, *[\d\.]+ *){2})\)( *)$/,
+          /^( *)Beat\(( *{[-\d\.,{} ]+} *(?:, *[\d\.]+ *){0,2})\)( *)$/,
           `$1BeatStatic(${ln},$2)$3`
         )
         .replace(/^( *)BPM\(( *[\d\.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
