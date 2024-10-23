@@ -4,6 +4,6 @@ import { ReactNode } from "react";
 
 export const metadata = metaDataTitle(tabTitles[1]);
 
-export default function Page(props: {children:ReactNode[]}) {
-    return props.children;
+export default function Page(props: { children: ReactNode[] }) {
+  return props.children;
 }

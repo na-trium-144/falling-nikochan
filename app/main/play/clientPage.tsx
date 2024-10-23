@@ -1,20 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { buttonStyle } from "@/common/button";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { getRecent, removeRecent } from "@/common/recent";
 import { ChartBrief, validCId } from "@/chartFormat/chart";
-import { IndexMain } from "../main";
+import { useRouter } from "next/navigation";
+import { getRecent, removeRecent } from "@/common/recent";
 import Input from "@/common/input";
+import { IndexMain } from "../main";
 import { ChartListItem } from "../chartList";
-import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
-import { linkStyle1 } from "@/common/linkStyle";
-import { EfferentThree } from "@icon-park/react";
 
-export default function EditTab() {
+export default function PlayTab(props: {
+  sampleBrief: { cid: string; brief?: ChartBrief }[];
+}) {
   const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
     [key in string]: ChartBrief;
@@ -23,7 +20,7 @@ export default function EditTab() {
   const router = useRouter();
 
   useEffect(() => {
-    const recentCId = getRecent("edit");
+    const recentCId = getRecent("play");
     setRecentCId(recentCId);
     setFetching(recentCId.length);
     for (const cid of recentCId) {
@@ -38,7 +35,7 @@ export default function EditTab() {
           });
         } else if (res.status === 404) {
           // 存在しない譜面のデータは消す
-          removeRecent("edit", cid);
+          removeRecent("play", cid);
           setRecentCId((recentCId) =>
             recentCId.filter((oldCId) => oldCId !== cid)
           );
@@ -55,26 +52,22 @@ export default function EditTab() {
     setCidFetching(true);
     const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
     if (res.ok) {
-      router.push(`/edit/${cid}`);
+      router.push(`/share/${cid}`);
     } else {
       setCidFetching(false);
       try {
         setCIdErrorMsg((await res.json()).message);
-      } catch {
-        setCIdErrorMsg("");
+      } catch (e) {
+        setCIdErrorMsg(String(e));
       }
     }
   };
 
   return (
-    <IndexMain tab={2}>
-      <p className="mb-3 text-justify">
-        Falling Nikochan の譜面エディタにようこそ。
-        アカウント登録不要で誰でも譜面を作成することができます。
-      </p>
+    <IndexMain tab={1}>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">譜面IDを入力:</span>
+          <span className="text-xl font-bold font-title">譜面IDを入力:</span>
           <Input
             className="ml-4 w-20"
             actualValue=""
@@ -89,12 +82,32 @@ export default function EditTab() {
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
         <p className="pl-2 text-justify">
-          編集したい譜面の ID を知っている場合はこちらに入力してください。 ID
-          入力後、編集用パスワードも必要になります。
+          プレイしたい譜面の ID を知っている場合はこちらに入力してください。
+        </p>
+        <p className="pl-2 text-justify">
+          ※譜面のURL (
+          <span className="text-sm">
+            nikochan.
+            <wbr />
+            natrium
+            <wbr />
+            144.
+            <wbr />
+            org
+            <wbr />
+            &#47;
+            <wbr />
+            share
+            <wbr />
+            &#47;〜
+          </span>
+          ) にアクセスすることでもプレイできます。
         </p>
       </div>
       <div className="mb-3">
-        <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
+        <h3 className="text-xl font-bold font-title mb-2">
+          最近プレイした譜面
+        </h3>
         <p className={"pl-2 " + (fetching > 0 ? "" : "hidden ")}>
           <LoadingSlime />
           Loading...
@@ -107,7 +120,8 @@ export default function EditTab() {
                   key={cid}
                   cid={cid}
                   brief={recentBrief[cid]}
-                  href={`/edit/${cid}`}
+                  href={`/share/${cid}`}
+                  creator
                 />
               ))}
             </ul>
@@ -117,26 +131,22 @@ export default function EditTab() {
         </div>
       </div>
       <div className="mb-3">
-        <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">
-            新しく譜面を作る:
-          </span>
-          <a
-            className={"ml-3 inline-block " + linkStyle1}
-            href="/edit/new"
-            target="_blank"
-          >
-            <span className="">新規作成</span>
-            <span className="relative inline-block w-5">
-              <EfferentThree className="absolute right-0 bottom-0 translate-y-0.5" />
-            </span>
-          </a>
-        </h3>
-        <p className="pl-2 text-justify">
-          新しくサーバーに譜面を保存するのは{rateLimitMin}
-          分ごとに1回までに制限しています。
-          (1度保存した譜面の上書きは何回でもできます。)
+        <h3 className="text-xl font-bold font-title mb-2">サンプル譜面</h3>
+        <p className="pl-2 mb-1 text-justify ">
+          Falling Nikochan の作者
+          <span className="text-sm mx-0.5">(na-trium-144)</span>
+          が作った譜面です。 初めての方はこちらからどうぞ。
         </p>
+        <ul className={"list-disc list-inside ml-3 "}>
+          {props.sampleBrief.map(({ cid, brief }) => (
+            <ChartListItem
+              key={cid}
+              cid={cid}
+              brief={brief}
+              href={`/share/${cid}`}
+            />
+          ))}
+        </ul>
       </div>
     </IndexMain>
   );

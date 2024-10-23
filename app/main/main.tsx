@@ -7,6 +7,7 @@ import { useDisplayMode } from "@/scale";
 import { ReactNode, useState } from "react";
 import { tabTitles, tabURLs } from "./const";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -64,45 +65,47 @@ export function IndexMain(props: Props) {
         >
           {tabTitles.map((tabName, i) =>
             i === props.tab && !menuMoveRight ? (
-              <button
+              <Link
                 key={i}
-                onClick={() => {
+                href="/"
+                onClick={(e) => {
                   if (!isMobile) {
                     setMenuMoveRight(true);
                     setTimeout(() => {
                       router.replace("/", { scroll: false });
                     }, 150);
-                  } else {
-                    router.push("/", { scroll: false });
+                    e.preventDefault();
                   }
                 }}
+                scroll={false}
               >
                 <Box className="text-center rounded-r-none py-3 pl-2 pr-2">
                   {tabName}
                 </Box>
-              </button>
+              </Link>
             ) : (
-              <button
+              <Link
                 key={i}
+                href={tabURLs[i]}
                 className={
                   " text-center hover:bg-sky-200 active:shadow-inner " +
                   (isTitlePage
                     ? "rounded-lg p-3 "
                     : "rounded-l-lg py-3 pl-2 pr-2 ")
                 }
-                onClick={() => {
+                onClick={(e) => {
                   if (isTitlePage && !isMobile) {
                     setMenuMoveLeft(true);
                     setTimeout(() => {
                       router.replace(tabURLs[i], { scroll: false });
                     }, 150);
-                  } else {
-                    router.push(tabURLs[i], { scroll: false });
+                    e.preventDefault();
                   }
                 }}
+                scroll={false}
               >
                 {tabName}
-              </button>
+              </Link>
             )
           )}
         </div>
