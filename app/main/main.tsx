@@ -35,8 +35,8 @@ export function IndexMain(props: Props) {
       <Link
         href="/"
         className={
-          (!isTitlePage ? "hidden main-wide:block " : "") +
-          "shrink-0 basis-24 overflow-hidden " +
+          (!isTitlePage ? "hidden main-wide:block " : " ") +
+          "shrink-0 basis-24 overflow-hidden relative " +
           linkStyle1
         }
         style={{
@@ -45,7 +45,7 @@ export function IndexMain(props: Props) {
           marginRight: "-20rem",
         }}
       >
-        <Title anim={isTitlePage} />
+        <Title className="absolute inset-0 " anim={isTitlePage} />
       </Link>
       <div
         className={

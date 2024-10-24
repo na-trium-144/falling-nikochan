@@ -27,7 +27,7 @@ export default function Title(props: Props) {
   }, [nikochanPhase]);
 
   return (
-    <div className={"relative leading-none text-center mx-auto w-96 min-h-24 h-full " + props.className}>
+    <div className={"leading-none text-center mx-auto w-96 " + props.className}>
       <TargetLine barFlash={barFlash} left={0} right={0} bottom="2.2rem" />
       <span className="text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7 ">
         Falling Nikochan
