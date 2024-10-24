@@ -8,6 +8,8 @@ import { ReactNode, useState } from "react";
 import { tabTitles, tabURLs } from "./const";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Title from "@/common/titleLogo";
+import { linkStyle1 } from "@/common/linkStyle";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -21,27 +23,34 @@ export function IndexMain(props: Props) {
   const isTitlePage = props.tab === undefined;
 
   const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
-  const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
+  // const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
 
   return (
-    <main className="flex flex-col w-full min-h-screen h-max">
+    <main className="flex flex-col w-screen overflow-x-hidden min-h-screen h-max">
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
           <Header>{tabTitles[props.tab]}</Header>
         </div>
       )}
-      <div
+      <Link
+        href="/"
         className={
-          (!isTitlePage ? "hidden main-wide:flex " : "flex ") +
-          "flex-none basis-32 flex-row items-center justify-center"
+          (!isTitlePage ? "hidden main-wide:block " : "") +
+          "shrink-0 basis-24 overflow-hidden " +
+          linkStyle1
         }
+        style={{
+          flexGrow: !isTitlePage ? 0 : 0.5,
+          marginLeft: "-20rem",
+          marginRight: "-20rem",
+        }}
       >
-        <div className="text-4xl">Falling Nikochan</div>
-      </div>
+        <Title anim={isTitlePage} />
+      </Link>
       <div
         className={
           "main-wide:max-h-screen main-wide:overflow-hidden main-wide:mb-3 " +
-          "grow shrink-0 basis-56 " +
+          "shrink-0 basis-56 grow " +
           "flex flex-row items-stretch justify-center px-6 "
         }
       >
@@ -52,11 +61,7 @@ export function IndexMain(props: Props) {
             "transition ease-out duration-200 "
           }
           style={{
-            transform: menuMoveRight
-              ? `translateX(${
-                  (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
-                }px)`
-              : menuMoveLeft
+            transform: menuMoveLeft
               ? `translateX(-${
                   (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
                 }px)`
@@ -64,25 +69,13 @@ export function IndexMain(props: Props) {
           }}
         >
           {tabTitles.map((tabName, i) =>
-            i === props.tab && !menuMoveRight ? (
-              <Link
+            i === props.tab ? (
+              <Box
                 key={i}
-                href="/"
-                onClick={(e) => {
-                  if (!isMobile) {
-                    setMenuMoveRight(true);
-                    setTimeout(() => {
-                      router.replace("/", { scroll: false });
-                    }, 150);
-                    e.preventDefault();
-                  }
-                }}
-                scroll={false}
+                className="text-center rounded-r-none py-3 pl-2 pr-2"
               >
-                <Box className="text-center rounded-r-none py-3 pl-2 pr-2">
-                  {tabName}
-                </Box>
-              </Link>
+                {tabName}
+              </Box>
             ) : (
               <Link
                 key={i}
@@ -113,8 +106,7 @@ export function IndexMain(props: Props) {
           <Box
             className={
               "flex flex-col p-6 overflow-auto " +
-              "w-full min-h-0 my-6 main-wide:flex-1 main-wide:my-0 " +
-              (menuMoveRight ? "opacity-0 " : "")
+              "w-full min-h-0 my-6 main-wide:flex-1 main-wide:my-0 "
             }
           >
             {props.children}
