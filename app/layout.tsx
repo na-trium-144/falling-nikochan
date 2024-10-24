@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const description = "Simple and cute rhythm game, where anyone can create and share charts.";
+const description =
+  "Simple and cute rhythm game, where anyone can create and share charts.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://nikochan.natrium144.org'),
+  metadataBase: new URL("https://nikochan.natrium144.org"),
   title: {
     template: "%s | Falling Nikochan",
     default: "Falling Nikochan",
   },
   description,
-  generator: 'Next.js',
-  applicationName: 'Falling Nikochan',
-  referrer: 'origin-when-cross-origin',
+  generator: "Next.js",
+  applicationName: "Falling Nikochan",
+  referrer: "origin-when-cross-origin",
+  icons: {
+    // これを1つでも書くと /app にファイルを置く metadata API が無効になるっぽい?
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+    shortcut: "/favicon.ico",
+  },
   openGraph: {
     title: {
       template: "%s",
@@ -20,7 +27,7 @@ export const metadata: Metadata = {
     },
     description,
     // todo: images
-    type: 'website',
+    type: "website",
     locale: "ja_JP",
     siteName: "Falling Nikochan",
   },
