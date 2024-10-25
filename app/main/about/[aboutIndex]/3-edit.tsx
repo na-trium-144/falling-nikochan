@@ -66,6 +66,53 @@ export function AboutContent3() {
             <wbr />
             使用できます。
           </p>
+          <p>
+            音源を
+            <wbr />
+            再配布
+            <wbr />
+            している
+            <wbr />
+            わけでは
+            <wbr />
+            ないので、
+            <span className="text-sm mx-1">
+              (違法
+              <wbr />
+              アップロード
+              <wbr />
+              されている
+              <wbr />
+              ものや YouTube 埋め込み
+              <wbr />
+              での
+              <wbr />
+              利用を
+              <wbr />
+              禁止
+              <wbr />
+              されている
+              <wbr />
+              もの
+              <wbr />
+              などを
+              <wbr />
+              除き)
+            </span>
+            ほとんどの
+            <wbr />
+            場合
+            <wbr />
+            著作権などで
+            <wbr />
+            問題に
+            <wbr />
+            なる
+            <wbr />
+            ことは
+            <wbr />
+            ありません。
+          </p>
         </div>
         {screenWidth >= 25 * rem && (
           <Box
@@ -134,9 +181,9 @@ export function AboutContent3() {
           <wbr />
           または
           <wbr />
-          譜面のURL (
-          <span className="text-sm">
-            nikochan.
+          譜面のURL
+          <span className="text-sm mx-1">
+            (nikochan.
             <wbr />
             natrium144.
             <wbr />
@@ -146,9 +193,9 @@ export function AboutContent3() {
             <wbr />
             share
             <wbr />
-            &#47;〜
+            &#47;〜)
           </span>
-          ) を<wbr />
+          を<wbr />
           SNS
           <wbr />
           などで

@@ -15,7 +15,7 @@ export function AboutContent1() {
           <wbr />
           かわいい
           <wbr />
-          リズムゲームです。
+          リズムゲーム (音ゲー) です。
         </p>
         <p>
           PC だけでなく
@@ -29,22 +29,6 @@ export function AboutContent1() {
           手軽に
           <wbr />
           遊べます。
-          <wbr />
-          音ゲーを
-          <wbr />
-          あまり
-          <wbr />
-          プレイ
-          <wbr />
-          しない
-          <wbr />
-          方でも
-          <wbr />
-          楽しめる
-          <wbr />
-          ように
-          <wbr />
-          しています。
         </p>
       </div>
       <div className="mb-4 space-y-2">
@@ -53,7 +37,7 @@ export function AboutContent1() {
           <wbr />
           遊ぶ
           <wbr />
-          だけでなく
+          だけでなく、
           <wbr />
           アカウント
           <wbr />
@@ -80,7 +64,9 @@ export function AboutContent1() {
           <wbr />
           SNS などで
           <wbr />
-          共有すれば
+          簡単に
+          <wbr />
+          共有して
           <wbr />
           他の人に
           <wbr />
