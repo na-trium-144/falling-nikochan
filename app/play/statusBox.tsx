@@ -6,7 +6,7 @@ import { useDisplayMode } from "@/scale";
 import {
   DisappointedFace,
   DistraughtFace,
-  GrinningFaceWithSquintingEyes,
+  GrinningFaceWithTightlyClosedEyesOpenMouth,
   SmilingFace,
 } from "@icon-park/react";
 import { ReactNode } from "react";
@@ -129,7 +129,7 @@ export function JudgeIcon(props: { index: number }) {
   return (
     <>
       {props.index === 0 ? (
-        <GrinningFaceWithSquintingEyes />
+        <GrinningFaceWithTightlyClosedEyesOpenMouth />
       ) : props.index === 1 ? (
         <SmilingFace />
       ) : props.index === 2 ? (
