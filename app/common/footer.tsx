@@ -1,7 +1,7 @@
 "use client";
 
 import { tabTitles, tabURLs } from "@/main/const";
-import { Github } from "@icon-park/react";
+import { EfferentThree, Github } from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1, linkStyle2 } from "./linkStyle";
 
@@ -21,9 +21,9 @@ export default function Footer(props: Props) {
             (typeof props.nav === "string" ? props.nav : "")
           }
         >
-          {tabTitles.map((tabName, i) => (
-            <Link key={i} className={"px-2 " + linkStyle1} href={tabURLs[i]}>
-              {tabName}
+          {tabURLs.map((tabURL, i) => (
+            <Link key={i} className={"px-2 " + linkStyle1} href={tabURL}>
+              {tabTitles[i]}
             </Link>
           ))}
         </div>
@@ -40,15 +40,14 @@ export default function Footer(props: Props) {
           target="_blank"
         >
           <Github className="absolute bottom-1 left-0" />
-          <span className="ml-5">na-trium-144/falling-nikochan</span>
+          <span className="ml-5 mr-5">na-trium-144/falling-nikochan</span>
+          <EfferentThree className="absolute bottom-1 right-0" />
         </a>
-        <a
-          className={"hidden footer-wide:inline-block " + linkStyle2}
-          href="https://github.com/na-trium-144/falling-nikochan/commits/main/"
-          target="_blank"
-        >
-          Build {process.env.buildDate} ({process.env.buildCommit})
-        </a>
+        <Link className={"inline-block " + linkStyle1} href="/main/version">
+          <span>ver.</span>
+          <span className="mx-1">{process.env.buildVersion}</span>
+          <span className="text-xs">(更新履歴はこちら)</span>
+        </Link>
       </div>
     </footer>
   );
