@@ -372,6 +372,7 @@ function Play(props: Props) {
           }
         >
           <MusicArea
+            offset={chartSeq.offset}
             lvType={lvType}
             lvIndex={lvIndex}
             isMobile={isMobile}
