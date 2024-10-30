@@ -4,7 +4,7 @@ import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
 import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore";
 import Button from "@/common/button";
 import { FourthNote } from "@/common/fourthNote";
-import { linkStyle2 } from "@/common/linkStyle";
+import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { rankStr } from "@/common/rank";
 import { initSession, SessionData } from "@/play/session";
 import { JudgeIcon } from "@/play/statusBox";
@@ -37,7 +37,7 @@ export function ShareLink(props: Props) {
     <p className="mt-2">
       <span className="hidden main-wide:inline-block mr-2">共有用リンク:</span>
       <Link
-        className={"inline-block py-2 " + linkStyle2}
+        className={"inline-block py-2 " + linkStyle1}
         href={`/share/${props.cid}`}
       >
         <span className="main-wide:hidden">共有用リンク</span>

@@ -1,9 +1,10 @@
 "use client";
 
 import { tabTitles, tabURLs } from "@/main/const";
-import { EfferentThree, Github } from "@icon-park/react";
+import { Github } from "@icon-park/react";
 import Link from "next/link";
-import { linkStyle1, linkStyle2 } from "./linkStyle";
+import { linkStyle1 } from "./linkStyle";
+import { ExternalLink } from "./extLink";
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定
@@ -34,15 +35,13 @@ export default function Footer(props: Props) {
           "footer-wide2:flex-row footer-wide2:items-baseline footer-wide2:space-x-3"
         }
       >
-        <a
-          className={"relative w-max " + linkStyle2}
+        <ExternalLink
+          noColor
           href="https://github.com/na-trium-144/falling-nikochan"
-          target="_blank"
+          icon={<Github className="absolute bottom-1 left-0" />}
         >
-          <Github className="absolute bottom-1 left-0" />
-          <span className="ml-5 mr-5">na-trium-144/falling-nikochan</span>
-          <EfferentThree className="absolute bottom-1 right-0" />
-        </a>
+          na-trium-144/falling-nikochan
+        </ExternalLink>
         <Link className={"inline-block " + linkStyle1} href="/main/version">
           <span>ver.</span>
           <span className="mx-1">{process.env.buildVersion}</span>
