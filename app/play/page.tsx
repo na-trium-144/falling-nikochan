@@ -471,6 +471,15 @@ function Play(props: Props) {
             isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
           />
         )}
+        {!isMobile && (
+          <div className="absolute bottom-2 left-3 opacity-40">
+            <span className="inline-block">Falling Nikochan</span>
+            <span className="inline-block">
+              <span className="ml-2">ver.</span>
+              <span className="ml-1">{process.env.buildVersion}</span>
+            </span>
+          </div>
+        )}
       </div>
       {!isMobile && statusHide && showResult && (
         <StatusBox
