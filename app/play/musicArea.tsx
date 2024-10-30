@@ -77,7 +77,7 @@ export function MusicArea(props: Props) {
               "font-title leading-tight " +
               (largeTitle ? "text-2xl " : "text-lg ") +
               (props.isMobile
-                ? "overflow-x-hidden w-full text-ellipsis whitespace-nowrap "
+                ? "overflow-hidden w-full text-ellipsis whitespace-nowrap "
                 : "")
             }
           >
@@ -88,7 +88,7 @@ export function MusicArea(props: Props) {
               "font-title leading-tight " +
               (largeTitle ? "text-lg " : "text-sm ") +
               (props.isMobile
-                ? "overflow-x-hidden w-full text-ellipsis whitespace-nowrap "
+                ? "overflow-hidden w-full text-ellipsis whitespace-nowrap "
                 : "")
             }
           >
@@ -107,7 +107,7 @@ export function MusicArea(props: Props) {
                   className={
                     "inline-block " +
                     (props.isMobile
-                      ? "overflow-x-hidden max-w-full text-ellipsis whitespace-nowrap "
+                      ? "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
                       : "")
                   }
                 >
@@ -126,7 +126,7 @@ export function MusicArea(props: Props) {
               className={
                 "inline-block " +
                 (props.isMobile
-                  ? "overflow-x-hidden max-w-full text-ellipsis whitespace-nowrap "
+                  ? "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
                   : "")
               }
             >
