@@ -14,9 +14,9 @@ import {
 } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
-import { EfferentThree } from "@icon-park/react";
 import { initSession, SessionData } from "@/play/session";
 import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
+import { ExternalLink } from "@/common/extLink";
 
 interface Props {
   chart?: Chart;
@@ -233,8 +233,7 @@ export function MetaTab(props: Props2) {
         </div>
       </p>
       <p className="mb-1">
-        <button
-          className={"relative inline-block " + linkStyle1}
+        <ExternalLink
           onClick={() => {
             if (props.sessionData) {
               initSession(props.sessionData, props.sessionId);
@@ -242,9 +241,8 @@ export function MetaTab(props: Props2) {
             }
           }}
         >
-          <span className="mr-5">テストプレイ</span>
-          <EfferentThree className="absolute bottom-1 right-0" />
-        </button>
+          テストプレイ
+        </ExternalLink>
       </p>
       <p className="">
         <span className="inline-block">
@@ -265,16 +263,12 @@ export function MetaTab(props: Props2) {
             <span className="hidden edit-wide:inline-block mr-2">
               共有用リンク:
             </span>
-            <a
-              className={linkStyle2}
-              href={`/share/${props.cid}`}
-              target="_blank"
-            >
+            <ExternalLink href={`/share/${props.cid}`}>
               <span className="edit-wide:hidden">共有用リンク</span>
               <span className="hidden edit-wide:inline text-sm">
                 {origin}/share/{props.cid}
               </span>
-            </a>
+            </ExternalLink>
             {hasClipboard && (
               <Button
                 className="ml-2"

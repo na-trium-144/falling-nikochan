@@ -21,6 +21,7 @@ export function IndexMain(props: Props) {
 
   const isMobile = screenWidth < 40 * rem;
   const isTitlePage = props.tab === undefined;
+  const isHiddenPage = props.tab !== undefined && props.tab >= tabURLs.length;
 
   const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
   // const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
@@ -54,54 +55,56 @@ export function IndexMain(props: Props) {
           "flex flex-row items-stretch justify-center px-6 "
         }
       >
-        <div
-          className={
-            (props.tab === undefined ? "flex " : "hidden main-wide:flex ") +
-            "flex-col h-max w-56 shrink-0 my-auto " +
-            "transition ease-out duration-200 "
-          }
-          style={{
-            transform: menuMoveLeft
-              ? `translateX(-${
-                  (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
-                }px)`
-              : undefined,
-          }}
-        >
-          {tabTitles.map((tabName, i) =>
-            i === props.tab ? (
-              <Box
-                key={i}
-                className="text-center rounded-r-none py-3 pl-2 pr-2"
-              >
-                {tabName}
-              </Box>
-            ) : (
-              <Link
-                key={i}
-                href={tabURLs[i]}
-                className={
-                  " text-center hover:bg-sky-200 active:shadow-inner " +
-                  (isTitlePage
-                    ? "rounded-lg p-3 "
-                    : "rounded-l-lg py-3 pl-2 pr-2 ")
-                }
-                onClick={(e) => {
-                  if (isTitlePage && !isMobile) {
-                    setMenuMoveLeft(true);
-                    setTimeout(() => {
-                      router.replace(tabURLs[i], { scroll: false });
-                    }, 150);
-                    e.preventDefault();
+        {!isHiddenPage && (
+          <div
+            className={
+              (props.tab === undefined ? "flex " : "hidden main-wide:flex ") +
+              "flex-col h-max w-56 shrink-0 my-auto " +
+              "transition ease-out duration-200 "
+            }
+            style={{
+              transform: menuMoveLeft
+                ? `translateX(-${
+                    (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
+                  }px)`
+                : undefined,
+            }}
+          >
+            {tabURLs.map((tabURL, i) =>
+              i === props.tab ? (
+                <Box
+                  key={i}
+                  className="text-center rounded-r-none py-3 pl-2 pr-2"
+                >
+                  {tabTitles[i]}
+                </Box>
+              ) : (
+                <Link
+                  key={i}
+                  href={tabURL}
+                  className={
+                    " text-center hover:bg-sky-200 active:shadow-inner " +
+                    (isTitlePage
+                      ? "rounded-lg p-3 "
+                      : "rounded-l-lg py-3 pl-2 pr-2 ")
                   }
-                }}
-                scroll={false}
-              >
-                {tabName}
-              </Link>
-            )
-          )}
-        </div>
+                  onClick={(e) => {
+                    if (isTitlePage && !isMobile) {
+                      setMenuMoveLeft(true);
+                      setTimeout(() => {
+                        router.replace(tabURL, { scroll: false });
+                      }, 150);
+                      e.preventDefault();
+                    }
+                  }}
+                  scroll={false}
+                >
+                  {tabTitles[i]}
+                </Link>
+              )
+            )}
+          </div>
+        )}
         {!isTitlePage && (
           <Box
             className={

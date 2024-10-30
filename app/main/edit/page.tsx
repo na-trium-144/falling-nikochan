@@ -13,6 +13,7 @@ import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
 import { linkStyle1 } from "@/common/linkStyle";
 import { EfferentThree } from "@icon-park/react";
+import { ExternalLink } from "@/common/extLink";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
@@ -121,16 +122,9 @@ export default function EditTab() {
           <span className="text-xl font-bold font-title ">
             新しく譜面を作る:
           </span>
-          <a
-            className={"ml-3 inline-block " + linkStyle1}
-            href="/edit/new"
-            target="_blank"
-          >
-            <span className="">新規作成</span>
-            <span className="relative inline-block w-5">
-              <EfferentThree className="absolute right-0 bottom-0 translate-y-0.5" />
-            </span>
-          </a>
+          <ExternalLink className="ml-3" href="/edit/new">
+            新規作成
+          </ExternalLink>
         </h3>
         <p className="pl-2 text-justify">
           新しくサーバーに譜面を保存するのは{rateLimitMin}
