@@ -4,6 +4,15 @@
 * さらに、アカウント登録やログイン不要で誰でも譜面を作成でき、SNSなどで譜面IDを共有することで他の人に遊んでもらうことができます。
 * 音源としてYouTube埋め込みを利用しています。
 
+## バージョン番号について
+
+* [拍子変化の実装 #80](https://github.com/na-trium-144/falling-nikochan/pull/80) をver5.0として、今後はPRごとにminorバージョンを上げます
+    * majorバージョンはChartデータフォーマットのバージョンに合わせます
+    * dependabotや、update README.md など、 app/ に変更を加えていないものはカウントしないことにします
+* バージョンは package.json に記述します
+* ChangeLog は CHANGELOG.md に記述し、 /main/version からも閲覧できます
+    * なのでどちらかというとユーザー向けの説明
+
 ## development
 
 * database + storage
