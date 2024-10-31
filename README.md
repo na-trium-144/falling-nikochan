@@ -10,6 +10,7 @@
     * majorバージョンはChartデータフォーマットのバージョンに合わせます
     * dependabotや、update README.md など、 app/ に変更を加えていないものはカウントしないことにします
 * バージョンは package.json に記述します
+    * 各PRのマージ前に `npm version minor` コマンドで上げます
 * ChangeLog は CHANGELOG.md に記述し、 /main/version からも閲覧できます
     * なのでどちらかというとユーザー向けの説明
 
