@@ -17,6 +17,7 @@ import { addRecent } from "@/common/recent";
 import { initSession, SessionData } from "@/play/session";
 import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { ExternalLink } from "@/common/extLink";
+import ProgressBar from "@/common/progressBar";
 
 interface Props {
   chart?: Chart;
@@ -216,21 +217,7 @@ export function MetaTab(props: Props2) {
           <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
           <span className="ml-1 text-sm ">(Max. {chartMaxSize / 1000} kB)</span>
         </span>
-        <div className="relative bg-slate-300 h-1 rounded-full shadow">
-          <div
-            className={
-              "absolute inset-y-0 rounded-full " +
-              (props.fileSize / chartMaxSize < 0.5
-                ? levelBgColors[0]
-                : props.fileSize / chartMaxSize < 0.75
-                ? levelBgColors[1]
-                : levelBgColors[2])
-            }
-            style={{
-              width: (props.fileSize / chartMaxSize) * 100 + "%",
-            }}
-          />
-        </div>
+        <ProgressBar value={props.fileSize / chartMaxSize} />
       </p>
       <p className="mb-1">
         <ExternalLink
