@@ -19,7 +19,7 @@ export default async function Page() {
           Build at {process.env.buildDate}.
         </span>
       </div>
-      <h3 className="text-xl font-bold font-title">更新履歴</h3>
+      <h3 className="text-xl font-bold font-title">主な更新履歴</h3>
       <Markdown
         components={{
           h2: (props) => (
