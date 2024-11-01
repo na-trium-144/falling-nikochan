@@ -7,7 +7,7 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get clean
 COPY . /root/nikochan
 WORKDIR /root/nikochan
-RUN npm ci && \
+RUN npm ci -f && \
     npm run build && \
     npm cache clean --force
 CMD ["npm", "run", "start"]
