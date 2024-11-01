@@ -2,14 +2,14 @@ import { ChartBrief } from "@/chartFormat/chart";
 import Header from "@/common/header";
 import { Box, Error } from "@/common/box";
 import Footer from "@/common/footer";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { PlayCount, PlayOption, ShareLink } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
 import { metaDataTitle, pageTitle } from "@/common/title";
+import { Params } from "next/dist/server/request/params";
 
 export async function generateMetadata(context: { params: Promise<Params> }) {
-  const cid = (await context.params).cid;
+  const cid = String((await context.params).cid);
   let brief: ChartBrief | undefined = undefined;
 
   // const res = await fetch(`/api/brief/${cid}?levels=1`, { cache: "no-store" });
@@ -26,7 +26,7 @@ export async function generateMetadata(context: { params: Promise<Params> }) {
 }
 
 export default async function ShareChart(context: { params: Promise<Params> }) {
-  const cid = (await context.params).cid;
+  const cid = String((await context.params).cid);
   let brief: ChartBrief | undefined = undefined;
   let errorMsg: string | undefined = undefined;
   let errorStatus: number | undefined = undefined;

@@ -1,7 +1,4 @@
 import { IndexMain } from "@/main/main";
-import { useDisplayMode } from "@/scale";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
-import Link from "next/link";
 import { AboutContent2 } from "./2-play";
 import { AboutContent1 } from "./1-about";
 import { AboutContent3 } from "./3-edit";
@@ -9,6 +6,7 @@ import { metaDataTitle } from "@/common/title";
 import { Pager } from "@/common/pager";
 import { AboutContent4 } from "./4-level";
 import { AboutContent5 } from "./5-judge";
+import { Params } from "next/dist/server/request/params";
 
 const aboutTitles = ["", "概要", "遊び方", "譜面を作ろう", "難易度について", "ゲームの仕様"];
 const maxIndex = 5;

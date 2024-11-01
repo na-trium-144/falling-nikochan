@@ -1,4 +1,3 @@
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
 import { createFileEntry, getFileEntry } from "@/api/dbChartFile";
 import { fsAssign, fsWrite } from "@/api/fsAccess";
@@ -19,7 +18,7 @@ export async function GET() {
 }
 
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
-export async function POST(request: NextRequest, context: { params: Promise<Params> }) {
+export async function POST(request: NextRequest) {
   const headersList = await headers();
   console.log(headersList.get("x-forwarded-for"));
   const ip = String(
@@ -84,7 +83,9 @@ export async function POST(request: NextRequest, context: { params: Promise<Para
     await createFileEntry(cid, fid, createBrief(chart));
   }
 
-  if (!(await fsWrite(fid, fsRes.volumeUrl, new Blob([msgpack.serialize(chart)])))) {
+  if (
+    !(await fsWrite(fid, fsRes.volumeUrl, new Blob([msgpack.serialize(chart)])))
+  ) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
 
