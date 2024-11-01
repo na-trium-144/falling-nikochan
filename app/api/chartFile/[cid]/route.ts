@@ -52,8 +52,8 @@ async function getChart(
   }
   return { chart };
 }
-export async function GET(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
+export async function GET(request: NextRequest, context: { params: Promise<Params> }) {
+  const cid: string = (await context.params).cid;
   const passwdHash = new URL(request.url).searchParams.get("p");
   const { res, chart } = await getChart(cid, passwdHash || "");
   if (chart) {
@@ -62,8 +62,8 @@ export async function GET(request: NextRequest, context: { params: Params }) {
   return res;
 }
 
-export async function POST(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
+export async function POST(request: NextRequest, context: { params: Promise<Params> }) {
+  const cid: string = (await context.params).cid;
   const passwdHash = new URL(request.url).searchParams.get("p");
   const { res, chart } = await getChart(cid, passwdHash || "");
   if (!chart) {
@@ -123,9 +123,9 @@ export async function POST(request: NextRequest, context: { params: Params }) {
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Params }
+  context: { params: Promise<Params> }
 ) {
-  const cid: string = context.params.cid;
+  const cid: string = (await context.params).cid;
   const passwdHash = new URL(request.url).searchParams.get("p");
   const { res, chart } = await getChart(cid, passwdHash || "");
   if (!chart) {

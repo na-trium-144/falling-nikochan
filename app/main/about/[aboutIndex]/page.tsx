@@ -13,13 +13,13 @@ import { AboutContent5 } from "./5-judge";
 const aboutTitles = ["", "概要", "遊び方", "譜面を作ろう", "難易度について", "ゲームの仕様"];
 const maxIndex = 5;
 
-export function generateMetadata(context: { params: Params }) {
-  const aboutIndex = Number(context.params.aboutIndex);
+export async function generateMetadata(context: { params: Promise<Params> }) {
+  const aboutIndex = Number((await context.params).aboutIndex);
   return metaDataTitle(aboutTitles[aboutIndex]);
 }
 
-export default function AboutTab(context: { params: Params }) {
-  const aboutIndex = Number(context.params.aboutIndex);
+export default async function AboutTab(context: { params: Promise<Params> }) {
+  const aboutIndex = Number((await context.params).aboutIndex);
 
   return (
     <IndexMain tab={0}>

@@ -6,9 +6,9 @@ import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
 
-export async function GET(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
-  const lvIndex = Number(context.params.lvIndex);
+export async function GET(request: NextRequest, context: { params: Promise<Params> }) {
+  const cid: string = (await context.params).cid;
+  const lvIndex = Number((await context.params).lvIndex);
   const fileEntry = await getFileEntry(cid, false);
   if (fileEntry === null) {
     return NextResponse.json(

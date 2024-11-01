@@ -7,7 +7,7 @@ interface Props {
   ytId: string;
 }
 export function FlexYouTubeShare(props: Props) {
-  const ytPlayer = useRef<YouTubePlayer>();
+  const ytPlayer = useRef<YouTubePlayer>(undefined);
   return (
     <FlexYouTube
       fixedSide="width"

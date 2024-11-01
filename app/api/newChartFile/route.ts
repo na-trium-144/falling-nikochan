@@ -13,14 +13,14 @@ import { rateLimitMin, updateLastCreate } from "../dbRateLimit";
 import { headers } from "next/headers";
 
 export async function GET() {
-  const headersList = headers();
+  const headersList = await headers();
   console.log(headersList.get("x-forwarded-for"));
   return new Response(null, { status: 400 });
 }
 
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
-export async function POST(request: NextRequest, context: { params: Params }) {
-  const headersList = headers();
+export async function POST(request: NextRequest, context: { params: Promise<Params> }) {
+  const headersList = await headers();
   console.log(headersList.get("x-forwarded-for"));
   const ip = String(
     headersList.get("x-forwarded-for")?.split(",").at(-1)?.trim()

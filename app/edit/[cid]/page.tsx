@@ -6,7 +6,7 @@ import {
   Signature,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, use } from "react";
 import FallingWindow from "./fallingWindow";
 import {
   findBpmIndexFromStep,
@@ -65,10 +65,11 @@ import {
   luaUpdateBeatChange,
 } from "@/chartFormat/lua/signature";
 
-export default function Page(context: { params: Params }) {
+export default function Page(context: { params: Promise<Params> }) {
+  const params = use(context.params);
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
-  const cidInitial = useRef<string>(context.params.cid);
-  const [cid, setCid] = useState<string | undefined>(context.params.cid);
+  const cidInitial = useRef<string>(params.cid);
+  const [cid, setCid] = useState<string | undefined>(params.cid);
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -275,7 +276,7 @@ export default function Page(context: { params: Params }) {
     hasCurrentNote,
   ]);
 
-  const ytPlayer = useRef<YouTubePlayer>();
+  const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = (rate: number) => {
     ytPlayer.current?.setPlaybackRate(rate);
