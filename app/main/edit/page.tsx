@@ -1,53 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { buttonStyle } from "@/common/button";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { getRecent, removeRecent } from "@/common/recent";
 import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
-import { ChartListItem } from "../chartList";
+import { ChartList } from "../chartList";
 import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
-import { linkStyle1 } from "@/common/linkStyle";
-import { EfferentThree } from "@icon-park/react";
 import { ExternalLink } from "@/common/extLink";
 
 export default function EditTab() {
   const [recentCId, setRecentCId] = useState<string[]>([]);
+  const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
     [key in string]: ChartBrief;
   }>({});
   const [fetching, setFetching] = useState<number>(1);
+  const [fetchingAdditional, setFetchingAdditional] = useState<number>(1);
   const router = useRouter();
 
+  const fetchBrief = useCallback(async (cid: string) => {
+    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    if (res.ok) {
+      // cidからタイトルなどを取得
+      const resBody = await res.json();
+      setRecentBrief((recentBrief) => {
+        recentBrief[cid] = resBody;
+        return { ...recentBrief };
+      });
+    } else if (res.status === 404) {
+      // 存在しない譜面のデータは消す
+      removeRecent("play", cid);
+      setRecentCId((recentCId) => recentCId.filter((oldCId) => oldCId !== cid));
+      setRecentCIdAdditional((recentCId) =>
+        recentCId.filter((oldCId) => oldCId !== cid)
+      );
+    }
+  }, []);
   useEffect(() => {
-    const recentCId = getRecent("edit");
+    const recentCIdAll = getRecent("edit").reverse();
+    const recentCId = recentCIdAll.slice(0, 5);
+    const recentCIdAdditional = recentCIdAll.slice(5);
     setRecentCId(recentCId);
+    setRecentCIdAdditional(recentCIdAdditional);
     setFetching(recentCId.length);
+    setFetchingAdditional(recentCIdAdditional.length);
     for (const cid of recentCId) {
       void (async () => {
-        const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-        if (res.ok) {
-          // cidからタイトルなどを取得
-          const resBody = await res.json();
-          setRecentBrief((recentBrief) => {
-            recentBrief[cid] = resBody;
-            return { ...recentBrief };
-          });
-        } else if (res.status === 404) {
-          // 存在しない譜面のデータは消す
-          removeRecent("edit", cid);
-          setRecentCId((recentCId) =>
-            recentCId.filter((oldCId) => oldCId !== cid)
-          );
-        }
+        await fetchBrief(cid);
         setFetching((fetching) => fetching - 1);
       })();
     }
-  }, []);
+  }, [fetchBrief]);
+  const fetchAdditional = () => {
+    for (const cid of recentCIdAdditional) {
+      void (async () => {
+        await fetchBrief(cid);
+        setFetchingAdditional((fetchingAdditional) => fetchingAdditional - 1);
+      })();
+    }
+  };
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
@@ -96,26 +110,15 @@ export default function EditTab() {
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
-        <p className={"pl-2 " + (fetching > 0 ? "" : "hidden ")}>
-          <LoadingSlime />
-          Loading...
-        </p>
-        <div className={fetching > 0 ? "hidden " : ""}>
-          {recentCId.length > 0 ? (
-            <ul className="ml-3">
-              {recentCId.map((cid) => (
-                <ChartListItem
-                  key={cid}
-                  cid={cid}
-                  brief={recentBrief[cid]}
-                  href={`/edit/${cid}`}
-                />
-              ))}
-            </ul>
-          ) : (
-            <p className="pl-2">まだありません</p>
-          )}
-        </div>
+        <ChartList
+          recentCId={recentCId}
+          recentCIdAdditional={recentCIdAdditional}
+          recentBrief={recentBrief}
+          fetching={fetching > 0}
+          fetchingAdditional={fetchingAdditional > 0}
+          fetchAdditional={fetchAdditional}
+          href={(cid) => `/edit/${cid}`}
+        />
       </div>
       <div className="mb-3">
         <h3 className="mb-2">
