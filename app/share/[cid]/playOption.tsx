@@ -145,7 +145,9 @@ export function PlayOption(props: Props) {
           </span>
           <span className="text-lg">:</span>
           <span className="text-lg">
-            {Math.round(props.brief.levels[selectedLevel]?.length) % 60}
+            {(Math.round(props.brief.levels[selectedLevel]?.length) % 60)
+              .toString()
+              .padStart(2, "0")}
           </span>
         </div>
         <span className="mx-3 hidden main-wide:block">/</span>
