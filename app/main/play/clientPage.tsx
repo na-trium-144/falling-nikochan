@@ -8,9 +8,13 @@ import Input from "@/common/input";
 import { IndexMain } from "../main";
 import { ChartList, ChartListItem } from "../chartList";
 import { LoadingSlime } from "@/common/loadingSlime";
+import { Youtube } from "@icon-park/react";
+import { ExternalLink } from "@/common/extLink";
 
 export default function PlayTab(props: {
-  sampleBrief: { cid: string; brief?: ChartBrief }[];
+  sampleCId: string[];
+  originalCId: string[];
+  sampleBrief: { [key in string]: ChartBrief };
 }) {
   const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
@@ -142,14 +146,34 @@ export default function PlayTab(props: {
         <p className="pl-2 mb-1 text-justify ">
           Falling Nikochan の作者
           <span className="text-sm mx-0.5">(na-trium-144)</span>
-          が作った譜面です。 初めての方はこちらからどうぞ。
+          が作った譜面です。 初めての方はこちらからどうぞ。 また、これ以外にも
+          Falling Nikochan の YouTube チャンネル
+          <ExternalLink
+            className="mx-1"
+            href="https://www.youtube.com/@nikochan144"
+            icon={
+              <Youtube className="absolute left-0 bottom-1" theme="filled" />
+            }
+          >
+            <span className="text-sm">@nikochan144</span>
+          </ExternalLink>
+          で譜面を公開しています。
         </p>
         <ul className={"list-disc list-inside ml-3 "}>
-          {props.sampleBrief.map(({ cid, brief }) => (
+          {props.originalCId.map((cid) => (
             <ChartListItem
               key={cid}
               cid={cid}
-              brief={brief}
+              brief={props.sampleBrief[cid]}
+              href={`/share/${cid}`}
+              original
+            />
+          ))}
+          {props.sampleCId.map((cid) => (
+            <ChartListItem
+              key={cid}
+              cid={cid}
+              brief={props.sampleBrief[cid]}
               href={`/share/${cid}`}
             />
           ))}

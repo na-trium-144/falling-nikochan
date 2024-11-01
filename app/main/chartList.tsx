@@ -98,6 +98,7 @@ interface CProps {
   brief?: ChartBrief;
   href: string;
   creator?: boolean;
+  original?: boolean;
 }
 export function ChartListItem(props: CProps) {
   return (
@@ -106,11 +107,14 @@ export function ChartListItem(props: CProps) {
       <Link href={props.href} className={"flex-1 min-w-0 " + linkStyle1}>
         <span className="inline-block">
           <span className="inline-block ">{props.cid}:</span>
+          {props.original && (
+            <span className="inline-block ml-2 text-sm">(オリジナル曲)</span>
+          )}
           <span className="inline-block ml-2 font-title">
             {props.brief?.title}
           </span>
         </span>
-        {props.brief?.composer && (
+        {!props.original && props.brief?.composer && (
           <span className="hidden main-wide:inline-block ml-1 text-sm">
             <span className="">/</span>
             <span className="ml-1 font-title ">{props.brief.composer}</span>
