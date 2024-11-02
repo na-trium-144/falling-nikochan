@@ -34,8 +34,9 @@ FS_MASTER="http://localhost:9333"
 
 * backend + frontend
     * working directory はfalling-nikochanのルートにしてください
+    * React 19 が正式リリースされるまでの間、 `npm install` または `npm ci` 時に `-f` を指定しないとエラーになります
 ```sh
-npm install
+npm ci -f
 npm run dev
 ```
 

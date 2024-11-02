@@ -1,14 +1,17 @@
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
-import { getFileEntry, updateFileEntry, updatePlayCount } from "@/api/dbChartFile";
-import { fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
+import { getFileEntry, updatePlayCount } from "@/api/dbChartFile";
+import { fsRead } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
+import { Params } from "next/dist/server/request/params";
 
-export async function GET(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
-  const lvIndex = Number(context.params.lvIndex);
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<Params> }
+) {
+  const cid: string = String((await context.params).cid);
+  const lvIndex = Number((await context.params).lvIndex);
   const fileEntry = await getFileEntry(cid, false);
   if (fileEntry === null) {
     return NextResponse.json(
@@ -40,7 +43,7 @@ export async function GET(request: NextRequest, context: { params: Params }) {
     );
   }
   const seq = loadChart(chart, lvIndex);
-  
+
   await updatePlayCount(cid);
 
   return new Response(new Blob([msgpack.serialize(seq)]));

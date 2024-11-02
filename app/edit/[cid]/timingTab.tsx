@@ -443,7 +443,7 @@ interface PropsS {
 function InputSig(props: PropsS) {
   const [num, setNum] = useState<number>(0);
   const [denom, setDenom] = useState<number>(1);
-  const prevValue = useRef<Step>();
+  const prevValue = useRef<Step>(undefined);
   useEffect(() => {
     const currentState = {
       fourth: 0,

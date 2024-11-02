@@ -6,7 +6,7 @@ import {
   Signature,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, use } from "react";
 import FallingWindow from "./fallingWindow";
 import {
   findBpmIndexFromStep,
@@ -21,7 +21,6 @@ import TimeBar from "./timeBar";
 import Input from "@/common/input";
 import TimingTab from "./timingTab";
 import NoteTab from "./noteTab";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
 import { MetaTab } from "./metaTab";
 import msgpack from "@ygoe/msgpack";
@@ -64,11 +63,13 @@ import {
   luaDeleteBeatChange,
   luaUpdateBeatChange,
 } from "@/chartFormat/lua/signature";
+import { Params } from "next/dist/server/request/params";
 
-export default function Page(context: { params: Params }) {
+export default function Page(context: { params: Promise<Params> }) {
+  const params = use(context.params);
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
-  const cidInitial = useRef<string>(context.params.cid);
-  const [cid, setCid] = useState<string | undefined>(context.params.cid);
+  const cidInitial = useRef<string>(String(params.cid));
+  const [cid, setCid] = useState<string | undefined>(String(params.cid));
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -275,7 +276,7 @@ export default function Page(context: { params: Params }) {
     hasCurrentNote,
   ]);
 
-  const ytPlayer = useRef<YouTubePlayer>();
+  const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = (rate: number) => {
     ytPlayer.current?.setPlaybackRate(rate);

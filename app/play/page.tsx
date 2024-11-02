@@ -153,7 +153,7 @@ function Play(props: Props) {
   // start後true
   const [playing, setPlaying] = useState<boolean>(false);
 
-  const ytPlayer = useRef<YouTubePlayer>();
+  const ytPlayer = useRef<YouTubePlayer>(undefined);
 
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値

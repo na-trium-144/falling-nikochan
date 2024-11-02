@@ -1,4 +1,3 @@
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextRequest, NextResponse } from "next/server";
 import { getFileEntry, updateFileEntry } from "@/api/dbChartFile";
 import { fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
@@ -10,6 +9,7 @@ import {
   hashPasswd,
   validateChart,
 } from "@/chartFormat/chart";
+import { Params } from "next/dist/server/request/params";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
@@ -52,8 +52,11 @@ async function getChart(
   }
   return { chart };
 }
-export async function GET(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<Params> }
+) {
+  const cid: string = String((await context.params).cid);
   const passwdHash = new URL(request.url).searchParams.get("p");
   const { res, chart } = await getChart(cid, passwdHash || "");
   if (chart) {
@@ -62,8 +65,11 @@ export async function GET(request: NextRequest, context: { params: Params }) {
   return res;
 }
 
-export async function POST(request: NextRequest, context: { params: Params }) {
-  const cid: string = context.params.cid;
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<Params> }
+) {
+  const cid: string = String((await context.params).cid);
   const passwdHash = new URL(request.url).searchParams.get("p");
   const { res, chart } = await getChart(cid, passwdHash || "");
   if (!chart) {
@@ -97,9 +103,9 @@ export async function POST(request: NextRequest, context: { params: Params }) {
   // update Time
   const prevHashes = chart.levels.map((l) => l.hash);
   const newHashes = newChart.levels.map((l) => l.hash);
-  if(newHashes.every((h, i) => h === prevHashes[i])) {
+  if (newHashes.every((h, i) => h === prevHashes[i])) {
     newChart.updatedAt = chart.updatedAt;
-  }else{
+  } else {
     newChart.updatedAt = new Date().getTime();
   }
 
@@ -113,7 +119,11 @@ export async function POST(request: NextRequest, context: { params: Params }) {
 
   await updateFileEntry(cid, createBrief(newChart));
   if (
-    !(await fsWrite(fileEntry.fid, null, new Blob([msgpack.serialize(newChart)])))
+    !(await fsWrite(
+      fileEntry.fid,
+      null,
+      new Blob([msgpack.serialize(newChart)])
+    ))
   ) {
     return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
   }
@@ -123,9 +133,9 @@ export async function POST(request: NextRequest, context: { params: Params }) {
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Params }
+  context: { params: Promise<Params> }
 ) {
-  const cid: string = context.params.cid;
+  const cid: string = String((await context.params).cid);
   const passwdHash = new URL(request.url).searchParams.get("p");
   const { res, chart } = await getChart(cid, passwdHash || "");
   if (!chart) {

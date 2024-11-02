@@ -30,11 +30,11 @@ export function FlexYouTube(props: Props) {
   } = props;
   const { width, height, ref } = useResizeDetector();
   const scale = props.scale || 1;
-  const resizeYouTube = useRef<() => void>();
-  const onReadyRef = useRef<() => void>();
-  const onStartRef = useRef<() => void>();
-  const onStopRef = useRef<() => void>();
-  const onPlaybackRateChangeRef = useRef<(rate: number) => void>();
+  const resizeYouTube = useRef<() => void>(undefined);
+  const onReadyRef = useRef<() => void>(undefined);
+  const onStartRef = useRef<() => void>(undefined);
+  const onStopRef = useRef<() => void>(undefined);
+  const onPlaybackRateChangeRef = useRef<(rate: number) => void>(undefined);
   useEffect(() => {
     resizeYouTube.current = () => {
       console.log("resize");
