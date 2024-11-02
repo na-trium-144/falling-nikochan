@@ -1,49 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { useRouter } from "next/navigation";
 import { getRecent, removeRecent } from "@/common/recent";
 import Input from "@/common/input";
 import { IndexMain } from "../main";
-import { ChartListItem } from "../chartList";
+import { ChartList, ChartListItem } from "../chartList";
 import { LoadingSlime } from "@/common/loadingSlime";
+import { Youtube } from "@icon-park/react";
+import { ExternalLink } from "@/common/extLink";
 
 export default function PlayTab(props: {
-  sampleBrief: { cid: string; brief?: ChartBrief }[];
+  sampleCId: string[];
+  originalCId: string[];
+  sampleBrief: { [key in string]: ChartBrief };
 }) {
   const [recentCId, setRecentCId] = useState<string[]>([]);
+  const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
   const [recentBrief, setRecentBrief] = useState<{
     [key in string]: ChartBrief;
   }>({});
   const [fetching, setFetching] = useState<number>(1);
+  const [fetchingAdditional, setFetchingAdditional] = useState<number>(1);
   const router = useRouter();
 
+  const fetchBrief = useCallback(async (cid: string) => {
+    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    if (res.ok) {
+      // cidからタイトルなどを取得
+      const resBody = await res.json();
+      setRecentBrief((recentBrief) => {
+        recentBrief[cid] = resBody;
+        return { ...recentBrief };
+      });
+    } else if (res.status === 404) {
+      // 存在しない譜面のデータは消す
+      removeRecent("play", cid);
+      setRecentCId((recentCId) => recentCId.filter((oldCId) => oldCId !== cid));
+      setRecentCIdAdditional((recentCId) =>
+        recentCId.filter((oldCId) => oldCId !== cid)
+      );
+    }
+  }, []);
   useEffect(() => {
-    const recentCId = getRecent("play");
+    const recentCIdAll = getRecent("play").reverse();
+    const recentCId = recentCIdAll.slice(0, 5);
+    const recentCIdAdditional = recentCIdAll.slice(5);
     setRecentCId(recentCId);
+    setRecentCIdAdditional(recentCIdAdditional);
     setFetching(recentCId.length);
+    setFetchingAdditional(recentCIdAdditional.length);
     for (const cid of recentCId) {
       void (async () => {
-        const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
-        if (res.ok) {
-          // cidからタイトルなどを取得
-          const resBody = await res.json();
-          setRecentBrief((recentBrief) => {
-            recentBrief[cid] = resBody;
-            return { ...recentBrief };
-          });
-        } else if (res.status === 404) {
-          // 存在しない譜面のデータは消す
-          removeRecent("play", cid);
-          setRecentCId((recentCId) =>
-            recentCId.filter((oldCId) => oldCId !== cid)
-          );
-        }
+        await fetchBrief(cid);
         setFetching((fetching) => fetching - 1);
       })();
     }
-  }, []);
+  }, [fetchBrief]);
+  const fetchAdditional = () => {
+    for (const cid of recentCIdAdditional) {
+      void (async () => {
+        await fetchBrief(cid);
+        setFetchingAdditional((fetchingAdditional) => fetchingAdditional - 1);
+      })();
+    }
+  };
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
@@ -108,41 +130,50 @@ export default function PlayTab(props: {
         <h3 className="text-xl font-bold font-title mb-2">
           最近プレイした譜面
         </h3>
-        <p className={"pl-2 " + (fetching > 0 ? "" : "hidden ")}>
-          <LoadingSlime />
-          Loading...
-        </p>
-        <div className={fetching > 0 ? "hidden " : ""}>
-          {recentCId.length > 0 ? (
-            <ul className="ml-3">
-              {recentCId.map((cid) => (
-                <ChartListItem
-                  key={cid}
-                  cid={cid}
-                  brief={recentBrief[cid]}
-                  href={`/share/${cid}`}
-                  creator
-                />
-              ))}
-            </ul>
-          ) : (
-            <p className="pl-2">まだありません</p>
-          )}
-        </div>
+        <ChartList
+          recentCId={recentCId}
+          recentCIdAdditional={recentCIdAdditional}
+          recentBrief={recentBrief}
+          fetching={fetching > 0}
+          fetchingAdditional={fetchingAdditional > 0}
+          fetchAdditional={fetchAdditional}
+          creator
+          href={(cid) => `/share/${cid}`}
+        />
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">サンプル譜面</h3>
         <p className="pl-2 mb-1 text-justify ">
           Falling Nikochan の作者
           <span className="text-sm mx-0.5">(na-trium-144)</span>
-          が作った譜面です。 初めての方はこちらからどうぞ。
+          が作った譜面です。 初めての方はこちらからどうぞ。 また、これ以外にも
+          Falling Nikochan の YouTube チャンネル
+          <ExternalLink
+            className="mx-1"
+            href="https://www.youtube.com/@nikochan144"
+            icon={
+              <Youtube className="absolute left-0 bottom-1" theme="filled" />
+            }
+          >
+            <span className="text-sm">@nikochan144</span>
+          </ExternalLink>
+          で譜面を公開しています。
         </p>
         <ul className={"list-disc list-inside ml-3 "}>
-          {props.sampleBrief.map(({ cid, brief }) => (
+          {props.originalCId.map((cid) => (
             <ChartListItem
               key={cid}
               cid={cid}
-              brief={brief}
+              brief={props.sampleBrief[cid]}
+              href={`/share/${cid}`}
+              original
+            />
+          ))}
+          {props.sampleCId.map((cid) => (
+            <ChartListItem
+              key={cid}
+              cid={cid}
+              brief={props.sampleBrief[cid]}
               href={`/share/${cid}`}
             />
           ))}
