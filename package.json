@@ -25,6 +25,8 @@
     "wasmoon": "^1.16.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.14.0",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^22",
     "@types/react": "npm:types-react@19.0.0-rc.1",
