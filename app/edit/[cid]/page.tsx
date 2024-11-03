@@ -366,6 +366,11 @@ export default function Page(context: { params: Promise<Params> }) {
       ref.current.focus();
     }
   };
+  const seekSec = (moveSec: number, focus = true) => {
+    if (chart) {
+      changeCurrentTimeSec(currentTimeSec + chart.offset + moveSec, focus);
+    }
+  };
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -652,17 +657,17 @@ export default function Page(context: { params: Promise<Params> }) {
           ) {
             stop();
           } else if (e.key === "Left" || e.key === "ArrowLeft") {
-            if (e.shiftKey) {
-              seekStepRel(-snapDivider * 4);
-            } else {
-              seekLeft1();
-            }
+            seekLeft1();
           } else if (e.key === "Right" || e.key === "ArrowRight") {
-            if (e.shiftKey) {
-              seekStepRel(snapDivider * 4);
-            } else {
-              seekRight1();
-            }
+            seekRight1();
+          } else if (e.key === "PageUp") {
+            seekStepRel(-snapDivider * 4);
+          } else if (e.key === "PageDown") {
+            seekStepRel(snapDivider * 4);
+          } else if (e.key === ",") {
+            seekSec(-1 / 30);
+          } else if (e.key === ".") {
+            seekSec(1 / 30);
           } else if (e.key === "c") {
             copyNote(0);
           } else if (e.key === "v") {
@@ -776,42 +781,66 @@ export default function Page(context: { params: Promise<Params> }) {
               text={playing ? "Pause" : "Play"}
               keyName="Space"
             />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekStepRel(-snapDivider * 4);
-                }
-              }}
-              text={`-${snapDivider * 4} Step`}
-              keyName={["Shift", "←"]}
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekLeft1();
-                }
-              }}
-              text="-1 Step"
-              keyName="←"
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekRight1();
-                }
-              }}
-              text="+1 Step"
-              keyName="→"
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekStepRel(snapDivider * 4);
-                }
-              }}
-              text={`+${snapDivider * 4} Step`}
-              keyName={["Shift", "→"]}
-            />
+            <span className="inline-block">
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekStepRel(-snapDivider * 4);
+                  }
+                }}
+                text={`-${snapDivider * 4} Step`}
+                keyName="PageUp"
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekStepRel(snapDivider * 4);
+                  }
+                }}
+                text={`+${snapDivider * 4} Step`}
+                keyName="PageDn"
+              />
+            </span>
+            <span className="inline-block">
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekLeft1();
+                  }
+                }}
+                text="-1 Step"
+                keyName="←"
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekRight1();
+                  }
+                }}
+                text="+1 Step"
+                keyName="→"
+              />
+            </span>
+            <span className="inline-block">
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekSec(-1 / 30);
+                  }
+                }}
+                text="-1/30 s"
+                keyName=","
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekSec(1 / 30);
+                  }
+                }}
+                text="+1/30 s"
+                keyName="."
+              />
+            </span>
           </div>
           <div className="flex-none">
             <TimeBar
