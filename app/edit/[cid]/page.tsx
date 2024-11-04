@@ -64,12 +64,16 @@ import {
   luaUpdateBeatChange,
 } from "@/chartFormat/lua/signature";
 import { Params } from "next/dist/server/request/params";
+import { useDisplayMode } from "@/scale";
+import { Forbid, Move } from "@icon-park/react";
+import { linkStyle1 } from "@/common/linkStyle";
 
 export default function Page(context: { params: Promise<Params> }) {
   const params = use(context.params);
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>(String(params.cid));
   const [cid, setCid] = useState<string | undefined>(String(params.cid));
+  const { isTouch } = useDisplayMode();
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -366,6 +370,11 @@ export default function Page(context: { params: Promise<Params> }) {
       ref.current.focus();
     }
   };
+  const seekSec = (moveSec: number, focus = true) => {
+    if (chart) {
+      changeCurrentTimeSec(currentTimeSec + chart.offset + moveSec, focus);
+    }
+  };
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -389,7 +398,10 @@ export default function Page(context: { params: Promise<Params> }) {
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
-  const [dragMode, setDragMode] = useState<"p" | "v">("p");
+  const [dragMode, setDragMode] = useState<null | "p" | "v" | "a">(null);
+  if (dragMode === null && !isTouch) {
+    setDragMode("p");
+  }
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
@@ -638,7 +650,8 @@ export default function Page(context: { params: Promise<Params> }) {
   return (
     <main
       className={
-        "overflow-x-hidden " + "edit-wide:h-screen edit-wide:overflow-y-hidden "
+        "overflow-x-hidden edit-wide:h-screen edit-wide:overflow-y-hidden " +
+        (dragMode !== null ? "touch-none " : "")
       }
       tabIndex={0}
       ref={ref}
@@ -652,17 +665,17 @@ export default function Page(context: { params: Promise<Params> }) {
           ) {
             stop();
           } else if (e.key === "Left" || e.key === "ArrowLeft") {
-            if (e.shiftKey) {
-              seekStepRel(-snapDivider * 4);
-            } else {
-              seekLeft1();
-            }
+            seekLeft1();
           } else if (e.key === "Right" || e.key === "ArrowRight") {
-            if (e.shiftKey) {
-              seekStepRel(snapDivider * 4);
-            } else {
-              seekRight1();
-            }
+            seekRight1();
+          } else if (e.key === "PageUp") {
+            seekStepRel(-snapDivider * 4);
+          } else if (e.key === "PageDown") {
+            seekStepRel(snapDivider * 4);
+          } else if (e.key === ",") {
+            seekSec(-1 / 30);
+          } else if (e.key === ".") {
+            seekSec(1 / 30);
           } else if (e.key === "c") {
             copyNote(0);
           } else if (e.key === "v") {
@@ -745,8 +758,42 @@ export default function Page(context: { params: Promise<Params> }) {
               currentLevel={currentLevel}
               updateNote={updateNote}
               dragMode={dragMode}
+              setDragMode={setDragMode}
             />
           </div>
+          {isTouch && (
+            <button
+              className={"self-start flex flex-row items-center " + linkStyle1}
+              onClick={() => {
+                setDragMode(
+                  dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                );
+              }}
+            >
+              <span className="relative inline-block w-8 h-8 ">
+                {dragMode === null ? (
+                  <>
+                    <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                    <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                  </>
+                ) : (
+                  <>
+                    <Move
+                      className="absolute text-xl inset-0 w-max h-max m-auto "
+                      theme="two-tone"
+                      fill={["#333", "#fc5"]}
+                    />
+                  </>
+                )}
+              </span>
+              <span className="mr-1">Touch:</span>
+              {dragMode === "p"
+                ? "move x"
+                : dragMode === "v"
+                ? "move vx, vy"
+                : "off"}
+            </button>
+          )}
         </div>
         <div
           className={
@@ -776,42 +823,66 @@ export default function Page(context: { params: Promise<Params> }) {
               text={playing ? "Pause" : "Play"}
               keyName="Space"
             />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekStepRel(-snapDivider * 4);
-                }
-              }}
-              text={`-${snapDivider * 4} Step`}
-              keyName={["Shift", "←"]}
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekLeft1();
-                }
-              }}
-              text="-1 Step"
-              keyName="←"
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekRight1();
-                }
-              }}
-              text="+1 Step"
-              keyName="→"
-            />
-            <Button
-              onClick={() => {
-                if (ready) {
-                  seekStepRel(snapDivider * 4);
-                }
-              }}
-              text={`+${snapDivider * 4} Step`}
-              keyName={["Shift", "→"]}
-            />
+            <span className="inline-block">
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekStepRel(-snapDivider * 4);
+                  }
+                }}
+                text={`-${snapDivider * 4} Step`}
+                keyName="PageUp"
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekStepRel(snapDivider * 4);
+                  }
+                }}
+                text={`+${snapDivider * 4} Step`}
+                keyName="PageDn"
+              />
+            </span>
+            <span className="inline-block">
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekLeft1();
+                  }
+                }}
+                text="-1 Step"
+                keyName="←"
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekRight1();
+                  }
+                }}
+                text="+1 Step"
+                keyName="→"
+              />
+            </span>
+            <span className="inline-block">
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekSec(-1 / 30);
+                  }
+                }}
+                text="-1/30 s"
+                keyName=","
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    seekSec(1 / 30);
+                  }
+                }}
+                text="+1/30 s"
+                keyName="."
+              />
+            </span>
           </div>
           <div className="flex-none">
             <TimeBar
@@ -826,7 +897,7 @@ export default function Page(context: { params: Promise<Params> }) {
               timeBarPxPerSec={timeBarPxPerSec}
             />
           </div>
-          <p className="flex flex-row items-baseline">
+          <div className="flex flex-row items-baseline">
             <span>Step =</span>
             <span className="ml-2">1</span>
             <span className="ml-1">/</span>
@@ -850,7 +921,7 @@ export default function Page(context: { params: Promise<Params> }) {
               text="+"
               onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
             />
-          </p>
+          </div>
           <div className="flex flex-row ml-3 mt-3">
             {tabNames.map((tabName, i) =>
               i === tab ? (

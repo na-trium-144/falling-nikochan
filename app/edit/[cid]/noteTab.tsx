@@ -87,7 +87,7 @@ export default function NoteTab(props: Props) {
         <span className="">{props.currentLevel?.notes.length || 0}</span>
       </p>
       <NoteEdit {...props} />
-      <span className="flex-1" />
+      <span className="flex-1 mb-4 " />
       <div className="flex flex-row ">
         <CopyPasteButton {...props} />
       </div>
