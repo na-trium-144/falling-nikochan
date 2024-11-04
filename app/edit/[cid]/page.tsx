@@ -650,7 +650,8 @@ export default function Page(context: { params: Promise<Params> }) {
   return (
     <main
       className={
-        "overflow-x-hidden " + "edit-wide:h-screen edit-wide:overflow-y-hidden "
+        "overflow-x-hidden edit-wide:h-screen edit-wide:overflow-y-hidden " +
+        (dragMode !== null ? "touch-none " : "")
       }
       tabIndex={0}
       ref={ref}
