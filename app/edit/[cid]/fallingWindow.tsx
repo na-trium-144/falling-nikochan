@@ -22,7 +22,8 @@ interface Props {
   currentTimeSec: number;
   currentNoteIndex: number;
   updateNote: (n: NoteCommand) => void;
-  dragMode: "p" | "v" | "a";
+  dragMode: null | "p" | "v" | "a";
+  setDragMode: (mode: null | "p" | "v" | "a") => void;
   inCodeTab: boolean;
 }
 
@@ -96,75 +97,20 @@ export default function FallingWindow(props: Props) {
           />
         )}
         {displayNotes.map(
-          (d) =>
+          (d, di) =>
             boxSize &&
             marginX !== undefined &&
             marginY !== undefined && (
-              <>
-                {/* にこちゃん
-                  currentNoteIndexと一致していたら赤色にする
-                */}
-                <div
-                  key={d.current.id}
-                  className={
-                    "absolute rounded-full " +
-                    (d.current.id === currentNoteIndex
-                      ? "bg-red-400 "
-                      : "bg-yellow-400 ")
-                  }
-                  style={{
-                    width: noteSize * bigScale(notes[d.current.id].big),
-                    height: noteSize * bigScale(notes[d.current.id].big),
-                    left:
-                      d.current.pos.x * boxSize -
-                      (noteSize * bigScale(notes[d.current.id].big)) / 2 +
-                      marginX,
-                    bottom:
-                      d.current.pos.y * boxSize +
-                      targetY * boxSize -
-                      (noteSize * bigScale(notes[d.current.id].big)) / 2 +
-                      marginY,
-                  }}
-                />
-                {d.history.slice(1).map((_, di) => (
-                  /* 軌跡
-                  短い時間ごとに区切って位置を計算したものがd.historyで、
-                  width=d.historyの2点間の距離, height=0のspanを用意し
-                  border-b でその長さの水平な線を引いて
-                  origin-bottom-left から d.historyの2点のatan2だけ回転することで
-                  軌跡の線を引いている
-                  */
-                  <span
-                    key={di}
-                    className={
-                      "absolute border-b origin-bottom-left " +
-                      (d.history[di].id === currentNoteIndex
-                        ? "border-red-300 z-10 "
-                        : "border-gray-300 ")
-                    }
-                    style={{
-                      width:
-                        Math.sqrt(
-                          Math.pow(
-                            d.history[di].pos.x - d.history[di + 1].pos.x,
-                            2
-                          ) +
-                            Math.pow(
-                              d.history[di].pos.y - d.history[di + 1].pos.y,
-                              2
-                            )
-                        ) * boxSize,
-                      left: d.history[di].pos.x * boxSize + marginX,
-                      bottom:
-                        (d.history[di].pos.y + targetY) * boxSize + marginY,
-                      transform: `rotate(${-Math.atan2(
-                        d.history[di + 1].pos.y - d.history[di].pos.y,
-                        d.history[di + 1].pos.x - d.history[di].pos.x
-                      )}rad)`,
-                    }}
-                  />
-                ))}
-              </>
+              <NikochanAndTrace
+                key={di}
+                displayNote={d}
+                currentNoteIndex={currentNoteIndex}
+                boxSize={boxSize}
+                marginX={marginX}
+                marginY={marginY}
+                noteSize={noteSize}
+                notes={notes}
+              />
             )
         )}
         {currentLevel &&
@@ -176,7 +122,7 @@ export default function FallingWindow(props: Props) {
           noteEditable && (
             <>
               {/* xを左右に動かす矢印 */}
-              {dragMode === "p" && (
+              {dragMode === "p" ? (
                 <>
                   <Arrow
                     left={
@@ -218,8 +164,7 @@ export default function FallingWindow(props: Props) {
                     }}
                   />
                 </>
-              )}
-              {dragMode === "v" && (
+              ) : dragMode === "v" ? (
                 <>
                   {/* vx,vyを動かす矢印 */}
                   <Arrow
@@ -292,10 +237,109 @@ export default function FallingWindow(props: Props) {
                     }}
                   />
                 </>
+              ) : (
+                <div
+                  className="absolute inset-0 z-10 "
+                  onPointerDown={(e) => {
+                    // touch環境でマウスを使ってクリックしようとしたときモードをリセットする
+                    if (e.pointerType === "mouse") {
+                      props.setDragMode("p");
+                    }
+                  }}
+                />
               )}
             </>
           )}
       </div>
     </div>
+  );
+}
+
+interface NProps {
+  displayNote: { current: DisplayNote; history: DisplayNote[] };
+  currentNoteIndex: number;
+  boxSize: number;
+  marginX: number;
+  marginY: number;
+  noteSize: number;
+  notes: Note[];
+}
+function NikochanAndTrace(props: NProps) {
+  const {
+    displayNote,
+    currentNoteIndex,
+    boxSize,
+    marginX,
+    marginY,
+    noteSize,
+    notes,
+  } = props;
+  return (
+    <>
+      {/* にこちゃん
+        currentNoteIndexと一致していたら赤色にする
+      */}
+      <div
+        className={
+          "absolute rounded-full " +
+          (displayNote.current.id === currentNoteIndex
+            ? "bg-red-400 "
+            : "bg-yellow-400 ")
+        }
+        style={{
+          width: noteSize * bigScale(notes[displayNote.current.id].big),
+          height: noteSize * bigScale(notes[displayNote.current.id].big),
+          left:
+            displayNote.current.pos.x * boxSize -
+            (noteSize * bigScale(notes[displayNote.current.id].big)) / 2 +
+            marginX,
+          bottom:
+            displayNote.current.pos.y * boxSize +
+            targetY * boxSize -
+            (noteSize * bigScale(notes[displayNote.current.id].big)) / 2 +
+            marginY,
+        }}
+      />
+      {displayNote.history.slice(1).map((_, di) => (
+        /* 軌跡
+                  短い時間ごとに区切って位置を計算したものがd.historyで、
+                  width=displayNote.historyの2点間の距離, height=0のspanを用意し
+                  border-b でその長さの水平な線を引いて
+                  origin-bottom-left から displayNote.historyの2点のatan2だけ回転することで
+                  軌跡の線を引いている
+                  */
+        <span
+          key={di}
+          className={
+            "absolute border-b origin-bottom-left " +
+            (displayNote.history[di].id === currentNoteIndex
+              ? "border-red-300 z-10 "
+              : "border-gray-300 ")
+          }
+          style={{
+            width:
+              Math.sqrt(
+                Math.pow(
+                  displayNote.history[di].pos.x -
+                    displayNote.history[di + 1].pos.x,
+                  2
+                ) +
+                  Math.pow(
+                    displayNote.history[di].pos.y -
+                      displayNote.history[di + 1].pos.y,
+                    2
+                  )
+              ) * boxSize,
+            left: displayNote.history[di].pos.x * boxSize + marginX,
+            bottom:
+              (displayNote.history[di].pos.y + targetY) * boxSize + marginY,
+            transform: `rotate(${-Math.atan2(
+              displayNote.history[di + 1].pos.y - displayNote.history[di].pos.y,
+              displayNote.history[di + 1].pos.x - displayNote.history[di].pos.x
+            )}rad)`,
+          }}
+        />
+      ))}
+    </>
   );
 }
