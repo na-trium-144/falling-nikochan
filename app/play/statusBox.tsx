@@ -34,7 +34,6 @@ export default function StatusBox(props: Props) {
       style={{
         ...props.style,
         fontSize: textScale * rem,
-        margin: isMobile ? 1 * rem * mobileStatusScale : 0,
       }}
     >
       <div

@@ -469,6 +469,9 @@ function Play(props: Props) {
         {isMobile && (
           <StatusBox
             className="absolute inset-0 z-10"
+            style={{
+              margin: 1 * rem * mobileStatusScale,
+            }}
             judgeCount={judgeCount}
             bigCount={bigCount}
             bigTotal={bigTotal}
