@@ -127,8 +127,14 @@ function Play(props: Props) {
   const [auto, setAuto] = useState<boolean>(false);
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isTouch, screenWidth, screenHeight, rem, playUIScale } =
-    useDisplayMode();
+  const {
+    isTouch,
+    screenWidth,
+    screenHeight,
+    rem,
+    playUIScale,
+    mobileStatusScale,
+  } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
 
   const statusSpace = useResizeDetector();
@@ -333,7 +339,7 @@ function Play(props: Props) {
 
   return (
     <main
-      className="overflow-hidden w-screen h-screen relative select-none"
+      className="overflow-hidden w-screen h-screen relative select-none flex flex-col"
       style={{ touchAction: "none" }}
       tabIndex={0}
       ref={ref}
@@ -358,12 +364,9 @@ function Play(props: Props) {
     >
       <div
         className={
-          "w-full overflow-y-visible flex items-stretch " +
+          "flex-1 w-full overflow-y-visible flex items-stretch " +
           (isMobile ? "flex-col" : "flex-row-reverse")
         }
-        style={{
-          height: isMobile ? screenHeight - 6 * rem : screenHeight * 0.9,
-        }}
       >
         <div
           className={
@@ -440,7 +443,10 @@ function Play(props: Props) {
       </div>
       <div
         className={"relative w-full "}
-        style={{ height: isMobile ? "6rem" : "10%" }}
+        style={{
+          height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
+          maxHeight: "15vh",
+        }}
       >
         <div
           className={
@@ -463,7 +469,7 @@ function Play(props: Props) {
         <BPMSign currentBpm={chartSeq?.bpmChanges[currentBpmIndex]?.bpm} />
         {isMobile && (
           <StatusBox
-            className="absolute inset-4 z-10"
+            className="absolute inset-0 z-10"
             judgeCount={judgeCount}
             bigCount={bigCount}
             bigTotal={bigTotal}

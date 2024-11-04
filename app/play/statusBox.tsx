@@ -1,7 +1,6 @@
 "use client";
 
 import { Box } from "@/common/box";
-import { Key } from "@/common/key";
 import { useDisplayMode } from "@/scale";
 import {
   DisappointedFace,
@@ -22,12 +21,10 @@ interface Props {
   isTouch: boolean;
 }
 export default function StatusBox(props: Props) {
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
+  const { screenWidth, screenHeight, rem, mobileStatusScale } =
+    useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  let textScale: number = 0.8;
-  if (isMobile) {
-    textScale = Math.min(screenWidth / (31 * rem), 1);
-  }
+  const textScale = isMobile ? mobileStatusScale : 0.8;
 
   return (
     <Box
@@ -37,6 +34,7 @@ export default function StatusBox(props: Props) {
       style={{
         ...props.style,
         fontSize: textScale * rem,
+        margin: isMobile ? 1 * rem * mobileStatusScale : 0,
       }}
     >
       <div
@@ -141,10 +139,12 @@ export function JudgeIcon(props: { index: number }) {
   );
 }
 function StatusName(props: { children: ReactNode }) {
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
+  const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   return (
-    <span className={isMobile ? "h-3 w-max" : "flex-1"}>{props.children}</span>
+    <span className={isMobile ? "h-max w-max" : "flex-1"}>
+      {props.children}
+    </span>
   );
 }
 function StatusValue(props: { children: ReactNode }) {

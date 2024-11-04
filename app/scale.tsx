@@ -8,6 +8,7 @@ interface DisplayMode {
   screenHeight: number;
   rem: number;
   playUIScale: number;
+  mobileStatusScale: number;
 }
 export function useDisplayMode(): DisplayMode {
   const [size, setSize] = useState([1, 1]);
@@ -27,6 +28,7 @@ export function useDisplayMode(): DisplayMode {
   const isMobile = width < height;
   const scalingWidthThreshold = isMobile ? 400 : 600;
   const playUIScale = Math.min(width / scalingWidthThreshold, 1);
+  const mobileStatusScale = Math.min(width / (31 * rem), 1);
 
   // タッチ操作かどうか (操作説明が変わる)
   const isTouch = isTouchEventsEnabled();
@@ -37,6 +39,7 @@ export function useDisplayMode(): DisplayMode {
     screenHeight: height,
     rem,
     playUIScale,
+    mobileStatusScale,
   };
 }
 
