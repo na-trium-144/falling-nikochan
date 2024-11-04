@@ -211,15 +211,15 @@ export function MetaTab(props: Props2) {
 
   return (
     <>
-      <p className="mb-2">
+      <div className="mb-2">
         <span className="">現在のファイルサイズ:</span>
         <span className="inline-block">
           <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
           <span className="ml-1 text-sm ">(Max. {chartMaxSize / 1000} kB)</span>
         </span>
         <ProgressBar value={props.fileSize / chartMaxSize} />
-      </p>
-      <p className="mb-1">
+      </div>
+      <div className="mb-1">
         <ExternalLink
           onClick={() => {
             if (props.sessionData) {
@@ -230,8 +230,8 @@ export function MetaTab(props: Props2) {
         >
           テストプレイ
         </ExternalLink>
-      </p>
-      <p className="">
+      </div>
+      <div className="">
         <span className="inline-block">
           譜面ID:
           <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
@@ -243,10 +243,10 @@ export function MetaTab(props: Props2) {
             (未保存の変更があります)
           </span>
         )}
-      </p>
+      </div>
       {props.cid && (
         <>
-          <p className="ml-2">
+          <div className="ml-2">
             <span className="hidden edit-wide:inline-block mr-2">
               共有用リンク:
             </span>
@@ -265,10 +265,10 @@ export function MetaTab(props: Props2) {
                 }
               />
             )}
-          </p>
+          </div>
         </>
       )}
-      <p className="mb-4">
+      <div className="mb-4">
         <span className="">ローカルに保存/読み込み:</span>
         <span className="inline-block ml-1">
           <Button text="保存" onClick={download} />
@@ -284,7 +284,7 @@ export function MetaTab(props: Props2) {
             onChange={upload}
           />
         </span>
-      </p>
+      </div>
       <MetaEdit {...props} />
     </>
   );

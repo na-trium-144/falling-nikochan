@@ -897,7 +897,7 @@ export default function Page(context: { params: Promise<Params> }) {
               timeBarPxPerSec={timeBarPxPerSec}
             />
           </div>
-          <p className="flex flex-row items-baseline">
+          <div className="flex flex-row items-baseline">
             <span>Step =</span>
             <span className="ml-2">1</span>
             <span className="ml-1">/</span>
@@ -921,7 +921,7 @@ export default function Page(context: { params: Promise<Params> }) {
               text="+"
               onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
             />
-          </p>
+          </div>
           <div className="flex flex-row ml-3 mt-3">
             {tabNames.map((tabName, i) =>
               i === tab ? (
