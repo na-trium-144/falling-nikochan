@@ -1,4 +1,5 @@
 import { Key } from "@/common/key";
+import { Move } from "@icon-park/react";
 
 export function GuideContent6() {
   return (
@@ -29,6 +30,12 @@ export function GuideContent6() {
         現在のカーソル位置に音符がある状態でプレビュー画面内をドラッグすると音符の位置が動き、
         <Key className="text-sm p-0.5 mx-0.5">Shift</Key>
         を押しながらドラッグすると音符の速度が変わります。
+        <br />
+        タッチ操作の場合は
+        <span className="inline-block w-5 translate-y-0.5 ">
+          <Move  />
+        </span>
+        Touch ボタンを押すと音符の位置/速度をタッチ操作で動かせるモードに切り替えることができます。
       </li>
       <li>
         下にある Copy, Paste, 1 〜 9

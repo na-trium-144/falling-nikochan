@@ -339,8 +339,7 @@ function Play(props: Props) {
 
   return (
     <main
-      className="overflow-hidden w-screen h-screen relative select-none flex flex-col"
-      style={{ touchAction: "none" }}
+      className="overflow-hidden w-screen h-screen relative select-none touch-none flex flex-col"
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
