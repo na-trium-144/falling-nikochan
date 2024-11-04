@@ -22,7 +22,8 @@ interface Props {
   currentTimeSec: number;
   currentNoteIndex: number;
   updateNote: (n: NoteCommand) => void;
-  dragMode: "p" | "v" | "a";
+  dragMode: null | "p" | "v" | "a";
+  setDragMode: (mode: null | "p" | "v" | "a") => void;
   inCodeTab: boolean;
 }
 
@@ -176,7 +177,7 @@ export default function FallingWindow(props: Props) {
           noteEditable && (
             <>
               {/* xを左右に動かす矢印 */}
-              {dragMode === "p" && (
+              {dragMode === "p" ? (
                 <>
                   <Arrow
                     left={
@@ -218,8 +219,7 @@ export default function FallingWindow(props: Props) {
                     }}
                   />
                 </>
-              )}
-              {dragMode === "v" && (
+              ) : dragMode === "v" ? (
                 <>
                   {/* vx,vyを動かす矢印 */}
                   <Arrow
@@ -292,6 +292,16 @@ export default function FallingWindow(props: Props) {
                     }}
                   />
                 </>
+              ) : (
+                <div
+                  className="absolute inset-0 z-10 "
+                  onPointerDown={(e) => {
+                    // touch環境でマウスを使ってクリックしようとしたときモードをリセットする
+                    if (e.pointerType === "mouse") {
+                      props.setDragMode("p");
+                    }
+                  }}
+                />
               )}
             </>
           )}

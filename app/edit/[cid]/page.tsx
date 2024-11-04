@@ -64,12 +64,16 @@ import {
   luaUpdateBeatChange,
 } from "@/chartFormat/lua/signature";
 import { Params } from "next/dist/server/request/params";
+import { useDisplayMode } from "@/scale";
+import { Forbid, Move } from "@icon-park/react";
+import { linkStyle1 } from "@/common/linkStyle";
 
 export default function Page(context: { params: Promise<Params> }) {
   const params = use(context.params);
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>(String(params.cid));
   const [cid, setCid] = useState<string | undefined>(String(params.cid));
+  const { isTouch } = useDisplayMode();
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -394,7 +398,10 @@ export default function Page(context: { params: Promise<Params> }) {
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
-  const [dragMode, setDragMode] = useState<"p" | "v">("p");
+  const [dragMode, setDragMode] = useState<null | "p" | "v" | "a">(null);
+  if (dragMode === null && !isTouch) {
+    setDragMode("p");
+  }
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
@@ -750,8 +757,42 @@ export default function Page(context: { params: Promise<Params> }) {
               currentLevel={currentLevel}
               updateNote={updateNote}
               dragMode={dragMode}
+              setDragMode={setDragMode}
             />
           </div>
+          {isTouch && (
+            <button
+              className={"self-start flex flex-row items-center " + linkStyle1}
+              onClick={() => {
+                setDragMode(
+                  dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                );
+              }}
+            >
+              <span className="relative inline-block w-8 h-8 ">
+                {dragMode === null ? (
+                  <>
+                    <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                    <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                  </>
+                ) : (
+                  <>
+                    <Move
+                      className="absolute text-xl inset-0 w-max h-max m-auto "
+                      theme="two-tone"
+                      fill={["#333", "#fc5"]}
+                    />
+                  </>
+                )}
+              </span>
+              <span className="mr-1">Touch:</span>
+              {dragMode === "p"
+                ? "move x"
+                : dragMode === "v"
+                ? "move vx, vy"
+                : "off"}
+            </button>
+          )}
         </div>
         <div
           className={
