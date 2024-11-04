@@ -151,17 +151,17 @@ function Play(props: Props) {
   useEffect(reloadBestScore, [reloadBestScore]);
 
   // start後true
-  const [playing, setPlaying] = useState<boolean>(false);
+  const [chartPlaying, setChartPlaying] = useState<boolean>(false);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
 
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
-    if (ytPlayer.current?.getCurrentTime && chartSeq && playing) {
+    if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       return ytPlayer.current?.getCurrentTime() - chartSeq.offset;
     }
-  }, [chartSeq, playing]);
+  }, [chartSeq, chartPlaying]);
   const {
     baseScore,
     chainScore,
@@ -211,26 +211,24 @@ function Play(props: Props) {
     };
   }, [chartSeq, currentBpmIndex, getCurrentTimeSec]);
 
-  // ytPlayer準備完了
+  // 準備完了画面を表示する
   const [ready, setReady] = useState<boolean>(false);
-  // 中断した
-  const [stopped, setStopped] = useState<boolean>(false);
-  // startした
-  const [started, setStarted] = useState<boolean>(false);
-  // 終了した
+  // 譜面を中断した
+  const [chartStopped, setChartStopped] = useState<boolean>(false);
+  // 譜面をstartした (playingとは異なり、stop後も終了後もtrueのまま)
+  const [chartStarted, setChartStarted] = useState<boolean>(false);
+  // result画面を表示する
   const [showResult, setShowResult] = useState<boolean>(false);
 
   const start = () => {
     // 再生中に呼んでもとくになにも起こらない
     ytPlayer.current?.playVideo();
+    // 譜面の開始はonStart()で処理
   };
   const stop = useCallback(() => {
-    // if (ytPlayer.current?.pauseVideo) {
-    //   ytPlayer.current?.pauseVideo();
-    // }
-    if (playing) {
-      setStopped(true);
-      setPlaying(false);
+    if (chartPlaying) {
+      setChartStopped(true);
+      setChartPlaying(false);
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
@@ -241,11 +239,11 @@ function Play(props: Props) {
         }, 1000);
       }
     }
-  }, [playing]);
+  }, [chartPlaying]);
   const reset = useCallback(() => {
-    setStopped(false);
-    setStarted(false);
-    setPlaying(false);
+    setChartStopped(false);
+    setChartStarted(false);
+    setChartPlaying(false);
     setReady(true);
     resetNotesAll(chartSeq.notes);
     setCurrentBpmIndex(0);
@@ -257,7 +255,7 @@ function Play(props: Props) {
   };
 
   useEffect(() => {
-    if (started && end) {
+    if (chartStarted && end) {
       if (
         cid &&
         !auto &&
@@ -282,7 +280,7 @@ function Play(props: Props) {
       setShowResult(false);
     }
   }, [
-    started,
+    chartStarted,
     end,
     chartSeq,
     score,
@@ -306,23 +304,26 @@ function Play(props: Props) {
   const onStart = useCallback(() => {
     console.log("start");
     if (chartSeq) {
-      setStopped(false);
+      setChartStopped(false);
       setReady(false);
-      setPlaying(true);
-      setStarted(true);
+      setChartPlaying(true);
+      setChartStarted(true);
       ytPlayer.current?.setVolume(100);
     }
     ref.current?.focus();
   }, [chartSeq]);
   const onStop = useCallback(() => {
     console.log("stop");
-    if (playing) {
-      setStopped(true);
-      setPlaying(false);
+    if (chartPlaying) {
+      setChartStopped(true);
+      setChartPlaying(false);
     }
-    ytPlayer.current?.seekTo(0, true);
+    if (ytPlayer.current?.getPlayerState() === 2) {
+      // 終了ではなくpauseの場合のみ
+      ytPlayer.current?.seekTo(0, true);
+    }
     ref.current?.focus();
-  }, [playing, ref]);
+  }, [chartPlaying, ref]);
 
   // キーを押したとき一定時間光らせる
   const [barFlash, setBarFlash] = useState<boolean>(false);
@@ -338,13 +339,17 @@ function Play(props: Props) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (e.key === " " && ready && !playing) {
+        if (e.key === " " && ready && !chartPlaying) {
           start();
-        } else if (e.key === " " && (stopped || showResult) && !playing) {
+        } else if (
+          e.key === " " &&
+          (chartStopped || showResult) &&
+          !chartPlaying
+        ) {
           reset();
-        } else if ((e.key === "Escape" || e.key === "Esc") && playing) {
+        } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
           stop();
-        } else if ((e.key === "Escape" || e.key === "Esc") && !playing) {
+        } else if ((e.key === "Escape" || e.key === "Esc") && !chartPlaying) {
           exit();
         } else {
           flash();
@@ -408,7 +413,7 @@ function Play(props: Props) {
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
-            playing={playing}
+            playing={chartPlaying}
             setFPS={setFps}
             barFlash={barFlash}
           />
@@ -433,7 +438,7 @@ function Play(props: Props) {
               setAuto={setAuto}
               editing={editing}
             />
-          ) : stopped ? (
+          ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
           ) : null}
         </div>
@@ -457,7 +462,7 @@ function Play(props: Props) {
           }}
           signature={chartSeq.signature}
           getCurrentTimeSec={getCurrentTimeSec}
-          playing={playing}
+          playing={chartPlaying}
           bpmChanges={chartSeq?.bpmChanges}
         />
         <BPMSign currentBpm={chartSeq?.bpmChanges[currentBpmIndex]?.bpm} />
