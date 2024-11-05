@@ -228,6 +228,9 @@ function Play(props: Props) {
 
   const start = () => {
     // 再生中に呼んでもとくになにも起こらない
+    if (ytPlayer.current?.getPlayerState() === 0) {
+      ytPlayer.current?.seekTo(0, true);
+    }
     ytPlayer.current?.playVideo();
     // 譜面の開始はonStart()で処理
   };
