@@ -371,7 +371,7 @@ function Play(props: Props) {
     >
       <div
         className={
-          "flex-1 w-full overflow-y-visible flex items-stretch " +
+          "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch " +
           (isMobile ? "flex-col" : "flex-row-reverse")
         }
       >
