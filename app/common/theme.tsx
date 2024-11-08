@@ -20,6 +20,26 @@ function currentThemeIsDark() {
       );
   }
 }
+const applyTheme = () => {
+  if (typeof document !== "undefined") {
+    document.body.classList.add(
+      "bg-gradient-to-t",
+      "from-sky-50",
+      "to-sky-200",
+      "text-black",
+      "dark:from-orange-800",
+      "dark:to-orange-950",
+      "dark:text-white"
+    );
+    if (currentThemeIsDark()) {
+      /* ダークテーマの時 */
+      document.body.classList.add("dark");
+    } else {
+      /* ライトテーマの時 */
+      document.body.classList.remove("dark");
+    }
+  }
+};
 export interface ThemeContext {
   theme: "dark" | "light" | null;
   isDark: boolean;
@@ -30,24 +50,6 @@ export interface ThemeContext {
 export function useTheme(): ThemeContext {
   const [theme, setTheme] = useState<"dark" | "light" | null>(null);
   const [isDark, setIsDark] = useState<boolean>(false);
-  const applyTheme = () => {
-    document.body.classList.add(
-      "bg-gradient-to-t",
-      "from-sky-50",
-      "to-sky-200",
-      "text-black",
-      "dark:from-orange-800",
-      "dark:to-orange-950",
-      "dark:text-white"
-    );
-    if (isDark) {
-      /* ダークテーマの時 */
-      document.body.classList.add("dark");
-    } else {
-      /* ライトテーマの時 */
-      document.body.classList.remove("dark");
-    }
-  };
   applyTheme(); // できるだけ早く、useEffectとかよりも先に実行する
   const updateTheme = () => {
     setTheme(getCurrentTheme());
