@@ -54,7 +54,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-gradient-to-t from-sky-50 to-sky-200 min-w-screen min-h-screen overflow-auto ">
+      <body className="min-w-screen min-h-screen overflow-auto ">
         {children}
       </body>
     </html>

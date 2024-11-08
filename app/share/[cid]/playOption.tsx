@@ -235,8 +235,9 @@ export function PlayOption(props: Props) {
               lvIndex: selectedLevel,
               brief: props.brief,
             });
-            // router.push(`/play?sid=${sessionId}`);
-            location.href = `/play?sid=${sessionId}`;
+            // router.push(`/play?sid=${sessionId}`);  youtubeAPIが初期化されない
+            // location.href = `/play?sid=${sessionId}`;  テーマが引き継がれない
+            window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
           }}
         />
       </p>

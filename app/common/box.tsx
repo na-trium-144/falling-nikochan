@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { LoadingSlime } from "./loadingSlime";
+import { ThemeHandler } from "./theme";
 
 interface Props {
   children: ReactNode | ReactNode[];
@@ -41,6 +42,7 @@ export function CenterBoxOnlyPage(props: {
   return (
     <main className="w-screen h-screen">
       <CenterBox>{props.children}</CenterBox>
+      <ThemeHandler />
     </main>
   );
 }

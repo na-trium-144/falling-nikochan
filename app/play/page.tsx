@@ -22,6 +22,7 @@ import BPMSign from "./bpmSign";
 import { getSession } from "./session";
 import { pageTitle } from "@/common/title";
 import { MusicArea } from "./musicArea";
+import { ThemeHandler } from "@/common/theme";
 
 export default function Home() {
   return (
@@ -260,7 +261,8 @@ function Play(props: Props) {
   }, [chartSeq, resetNotesAll, reloadBestScore]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
-    history.back();
+    // history.back();
+    window.close();
   };
 
   useEffect(() => {
@@ -536,6 +538,7 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
+      <ThemeHandler />
     </main>
   );
 }
