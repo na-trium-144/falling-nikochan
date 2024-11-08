@@ -134,8 +134,8 @@ export default function LevelTab(props: Props) {
             <button
               className={
                 i === props.currentLevelIndex
-                  ? "text-blue-600 "
-                  : "hover:text-slate-500 "
+                  ? "text-blue-600 dark:text-blue-400 "
+                  : "hover:text-slate-500 hover:dark:text-stone-400 "
               }
               onClick={() => props.setCurrentLevelIndex(i)}
             >
@@ -162,7 +162,9 @@ export default function LevelTab(props: Props) {
               <span
                 className={
                   "inline-block " +
-                  (level.notes.length ? "text-black " : "text-slate-300 ")
+                  (level.notes.length
+                    ? "text-black dark:text-white "
+                    : "text-slate-400 dark:text-stone-600 ")
                 }
               >
                 ({level.notes.length} notes)

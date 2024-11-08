@@ -67,6 +67,7 @@ import { Params } from "next/dist/server/request/params";
 import { useDisplayMode } from "@/scale";
 import { Forbid, Move } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle";
+import { useTheme } from "@/common/theme";
 
 export default function Page(context: { params: Promise<Params> }) {
   const params = use(context.params);
@@ -74,6 +75,7 @@ export default function Page(context: { params: Promise<Params> }) {
   const cidInitial = useRef<string>(String(params.cid));
   const [cid, setCid] = useState<string | undefined>(String(params.cid));
   const { isTouch } = useDisplayMode();
+  const themeContext = useTheme();
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
@@ -931,7 +933,7 @@ export default function Page(context: { params: Promise<Params> }) {
               ) : (
                 <button
                   key={i}
-                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 active:shadow-inner "
+                  className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
                   onClick={() => {
                     setTab(i);
                     ref.current.focus();
@@ -1026,6 +1028,7 @@ export default function Page(context: { params: Promise<Params> }) {
                 currentLevel={currentLevel}
                 changeLevel={changeLevel}
                 seekStepAbs={(s: Step) => seekStepAbs(s, false)}
+                themeContext={themeContext}
               />
             )}
           </Box>

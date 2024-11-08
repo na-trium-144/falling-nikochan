@@ -87,7 +87,9 @@ export function PlayOption(props: Props) {
           <li key={i}>
             <button
               className={
-                i === selectedLevel ? "text-blue-600 " : "hover:text-slate-500 "
+                i === selectedLevel
+                  ? "text-blue-600 dark:text-blue-400 "
+                  : "hover:text-slate-500 hover:dark:text-stone-400 "
               }
               onClick={() => setSelectedLevel(i)}
             >
@@ -164,10 +166,10 @@ export function PlayOption(props: Props) {
       <p
         className={
           "-mx-2 px-2 group rounded-lg " +
-          (bestScoreState ? "hover:bg-amber-50 " : "text-slate-400 ")
+          (bestScoreState ? "hover:bg-amber-50 hover:dark:bg-amber-950 " : "text-slate-400 dark:text-stone-600 ")
         }
       >
-        <span className="text-black ">Best Score:</span>
+        <span className="text-black dark:text-white ">Best Score:</span>
         <span className="inline-block text-2xl w-12 text-right">
           {Math.floor(totalScore)}
         </span>

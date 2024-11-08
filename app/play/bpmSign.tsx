@@ -40,14 +40,15 @@ export default function BPMSign(props: Props) {
       }}
     >
       <div
-        className="absolute inset-0 m-auto w-3 bg-amber-700 "
+        className="absolute inset-0 m-auto w-3 bg-amber-700 dark:bg-amber-950 "
         style={{ borderRadius: "100%/6px" }}
       />
       <div
         className={
           "rounded-sm mb-6 py-1 px-1.5 " +
           "bg-gradient-to-t from-amber-600 to-amber-500 " +
-          "border-b-2 border-r-2 border-amber-800 " +
+          "dark:from-amber-900 dark:to-amber-800 " + 
+          "border-b-2 border-r-2 border-amber-800 dark:border-amber-950 " +
           "flex flex-row items-baseline " +
           "transition-transform duration-100 " +
           (flip ? "scale-x-0 " : "scale-x-100 ")

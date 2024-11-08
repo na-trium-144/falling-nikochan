@@ -64,7 +64,7 @@ export default function Result(props: Props) {
           {(Math.floor(props.bigScore * 100) % 100).toString().padStart(2, "0")}
         </span>
       </ResultRow>
-      <div className="mt-2 mb-1 border-b border-black" />
+      <div className="mt-2 mb-1 border-b border-black dark:border-white " />
       <ResultRow visible={showing >= 4} name="Total Score">
         <span className="text-3xl text-right">{Math.floor(props.score)}</span>
         <span className="">.</span>

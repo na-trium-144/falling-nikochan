@@ -35,8 +35,10 @@ export function useTheme(): ThemeContext {
       "bg-gradient-to-t",
       "from-sky-50",
       "to-sky-200",
+      "text-black",
       "dark:from-orange-800",
-      "dark:to-orange-950"
+      "dark:to-orange-950",
+      "dark:text-white"
     );
     if (isDark) {
       /* ダークテーマの時 */

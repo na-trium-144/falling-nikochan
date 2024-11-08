@@ -21,10 +21,11 @@ function Cloud(props: CProps) {
         transform: `scale(${playUIScale * 0.8})`,
       }}
     >
+      <img src="/cloud.svg" className="absolute inset-0 -z-10 dark:hidden " />
+      <img src="/cloud-black.svg" className="absolute inset-0 -z-10 hidden dark:block" />
       <div
         className={props.className}
         style={{
-          backgroundImage: "url(/cloud.svg)",
           width: 225,
           height: 115,
           paddingLeft: 16,
