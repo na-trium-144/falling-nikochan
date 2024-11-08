@@ -83,7 +83,7 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={tabURL}
                   className={
-                    " text-center hover:bg-sky-200 active:shadow-inner " +
+                    " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
                     (isTitlePage
                       ? "rounded-lg p-3 "
                       : "rounded-l-lg py-3 pl-2 pr-2 ")

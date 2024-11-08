@@ -7,8 +7,7 @@ interface Props {
 export default function ProgressBar(props: Props) {
   return (
     <div
-      className="relative h-1 rounded-full shadow"
-      style={{ background: "rgba(0, 0, 0, 0.3)" }}
+      className="relative h-1 rounded-full shadow bg-black/25 dark:bg-white/25 "
     >
       <div
         className={

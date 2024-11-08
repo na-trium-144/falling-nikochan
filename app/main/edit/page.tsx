@@ -70,7 +70,8 @@ export default function EditTab() {
     setCidFetching(true);
     const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
     if (res.ok) {
-      router.push(`/edit/${cid}`);
+      // router.push(`/edit/${cid}`);
+      window.open(`/edit/${cid}`, "_blank")?.focus();
     } else {
       setCidFetching(false);
       try {
@@ -118,6 +119,7 @@ export default function EditTab() {
           fetchingAdditional={fetchingAdditional > 0}
           fetchAdditional={fetchAdditional}
           href={(cid) => `/edit/${cid}`}
+          newTab
         />
       </div>
       <div className="mb-3">

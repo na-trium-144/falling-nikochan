@@ -72,7 +72,7 @@ export default async function ShareChart(context: { params: Promise<Params> }) {
                     {brief.chartCreator}
                   </span>
                 </span>
-                <span className="inline-block ml-3 text-slate-500">
+                <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
                   ({new Date(brief.updatedAt).toLocaleDateString()})
                   <span className="ml-3">
                     <PlayCount count={brief.playCount || 0} />

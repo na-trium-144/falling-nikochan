@@ -2,6 +2,7 @@
 
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/mode-lua";
 import "ace-builds/src-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
@@ -10,11 +11,13 @@ import { Chart, Level } from "@/chartFormat/chart";
 import { luaExec } from "@/chartFormat/lua/exec";
 import { Step } from "@/chartFormat/step";
 import { findStepFromLua } from "@/chartFormat/lua/edit";
+import { ThemeContext } from "@/common/theme";
 
 interface Props {
   currentLevel?: Level;
   changeLevel: (chart: Level) => void;
   seekStepAbs: (s: Step) => void;
+  themeContext: ThemeContext;
 }
 export default function LuaTab(props: Props) {
   const { currentLevel, changeLevel, seekStepAbs } = props;
@@ -56,7 +59,7 @@ export default function LuaTab(props: Props) {
       <div className="flex-1 w-full">
         <AceEditor
           mode="lua"
-          theme="github"
+          theme={props.themeContext.isDark ? "monokai" : "github"}
           width="100%"
           height="100%"
           tabSize={2}

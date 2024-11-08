@@ -11,6 +11,7 @@ const config: Config = {
       "share-yt-wide": "60rem", // shareでYouTubeを表示する場所が変わる
     },
   },
+  darkMode: 'selector',
   plugins: [],
 };
 export default config;

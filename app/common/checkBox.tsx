@@ -10,7 +10,12 @@ interface Props {
 export default function CheckBox(props: Props) {
   return (
     <button
-      className={"ml-2 hover:text-slate-500 disabled:text-slate-400 " + props.className}
+      className={
+        "ml-2 " +
+        "hover:text-slate-500 disabled:text-slate-400 " +
+        "hover:dark:text-stone-400 disabled:text-stone-700 " +
+        props.className
+      }
       onClick={() => props.onChange(!props.value)}
       disabled={props.disabled}
     >

@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { LoadingSlime } from "./loadingSlime";
+import { ThemeHandler } from "./theme";
 
 interface Props {
   children: ReactNode | ReactNode[];
@@ -9,10 +10,9 @@ interface Props {
 export function Box(props: Props) {
   return (
     <div
-      className={"rounded-lg " + (props.className || "")}
+      className={"rounded-lg bg-white/75 dark:bg-stone-900/75 " + (props.className || "")}
       style={{
-        background: "rgba(255, 255, 255, 0.7)",
-        backdropFilter: "blur(1px)",
+        backdropFilter: "blur(2px)",
         ...props.style,
       }}
     >
@@ -41,6 +41,7 @@ export function CenterBoxOnlyPage(props: {
   return (
     <main className="w-screen h-screen">
       <CenterBox>{props.children}</CenterBox>
+      <ThemeHandler />
     </main>
   );
 }

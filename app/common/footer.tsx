@@ -5,12 +5,15 @@ import { Github } from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle";
 import { ExternalLink } from "./extLink";
+import { ThemeSwitcher, useTheme } from "./theme";
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定
   nav?: boolean | string;
 }
 export default function Footer(props: Props) {
+  const themeContext = useTheme();
+
   return (
     <footer className="pb-3">
       {props.nav && (
@@ -42,11 +45,14 @@ export default function Footer(props: Props) {
         >
           na-trium-144/falling-nikochan
         </ExternalLink>
-        <Link className={"inline-block " + linkStyle1} href="/main/version">
-          <span>ver.</span>
-          <span className="mx-1">{process.env.buildVersion}</span>
-          <span className="text-xs">(更新履歴はこちら)</span>
-        </Link>
+        <span className="space-x-3">
+          <Link className={"inline-block " + linkStyle1} href="/main/version">
+            <span>ver.</span>
+            <span className="mx-1">{process.env.buildVersion}</span>
+            <span className="text-xs">(更新履歴はこちら)</span>
+          </Link>
+          <ThemeSwitcher {...themeContext} />
+        </span>
       </div>
     </footer>
   );

@@ -22,6 +22,7 @@ import BPMSign from "./bpmSign";
 import { getSession } from "./session";
 import { pageTitle } from "@/common/title";
 import { MusicArea } from "./musicArea";
+import { ThemeHandler } from "@/common/theme";
 
 export default function Home() {
   return (
@@ -260,7 +261,8 @@ function Play(props: Props) {
   }, [chartSeq, resetNotesAll, reloadBestScore]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
-    history.back();
+    // history.back();
+    window.close();
   };
 
   useEffect(() => {
@@ -484,7 +486,8 @@ function Play(props: Props) {
         <div
           className={
             "-z-30 absolute inset-x-0 bottom-0 " +
-            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 "
+            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 " +
+            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700 "
           }
           style={{ top: "-1rem" }}
         />
@@ -536,6 +539,7 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
+      <ThemeHandler />
     </main>
   );
 }

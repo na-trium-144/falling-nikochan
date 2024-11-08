@@ -16,6 +16,7 @@ interface Props {
   fetchAdditional: () => void;
   creator?: boolean;
   href: (cid: string) => string;
+  newTab?: boolean;
 }
 export function ChartList(props: Props) {
   const [additionalOpen, setAdditionalOpen] = useState<boolean>(false);
@@ -37,6 +38,7 @@ export function ChartList(props: Props) {
                   brief={props.recentBrief[cid]}
                   href={props.href(cid)}
                   creator={props.creator}
+                  newTab={props.newTab}
                 />
               ))}
             </ul>
@@ -60,6 +62,7 @@ export function ChartList(props: Props) {
                           brief={props.recentBrief[cid]}
                           href={props.href(cid)}
                           creator={props.creator}
+                          newTab={props.newTab}
                         />
                       ))}
                     </ul>
@@ -99,36 +102,52 @@ interface CProps {
   href: string;
   creator?: boolean;
   original?: boolean;
+  newTab?: boolean;
 }
 export function ChartListItem(props: CProps) {
   return (
     <li className="flex flex-row items-start w-full">
       <span className="flex-none mr-2">•</span>
-      <Link href={props.href} className={"flex-1 min-w-0 " + linkStyle1}>
-        <span className="inline-block">
-          <span className="inline-block ">{props.cid}:</span>
-          {props.original && (
-            <span className="inline-block ml-2 text-sm">(オリジナル曲)</span>
-          )}
-          <span className="inline-block ml-2 font-title">
-            {props.brief?.title}
-          </span>
-        </span>
-        {!props.original && props.brief?.composer && (
-          <span className="hidden main-wide:inline-block ml-1 text-sm">
-            <span className="">/</span>
-            <span className="ml-1 font-title ">{props.brief.composer}</span>
-          </span>
-        )}
-        {props.creator && (
-          <span className="inline-block ml-2 text-sm">
-            <span className="">by</span>
-            <span className="ml-1 font-title ">
-              {props.brief?.chartCreator}
-            </span>
-          </span>
-        )}
-      </Link>
+      {props.newTab ? (
+        <a
+          href={props.href}
+          className={"flex-1 min-w-0 " + linkStyle1}
+          target="_blank"
+        >
+          <ChartListItemChildren {...props} />
+        </a>
+      ) : (
+        <Link href={props.href} className={"flex-1 min-w-0 " + linkStyle1}>
+          <ChartListItemChildren {...props} />
+        </Link>
+      )}
     </li>
+  );
+}
+function ChartListItemChildren(props: CProps) {
+  return (
+    <>
+      <span className="inline-block">
+        <span className="inline-block ">{props.cid}:</span>
+        {props.original && (
+          <span className="inline-block ml-2 text-sm">(オリジナル曲)</span>
+        )}
+        <span className="inline-block ml-2 font-title">
+          {props.brief?.title}
+        </span>
+      </span>
+      {!props.original && props.brief?.composer && (
+        <span className="hidden main-wide:inline-block ml-1 text-sm">
+          <span className="">/</span>
+          <span className="ml-1 font-title ">{props.brief.composer}</span>
+        </span>
+      )}
+      {props.creator && (
+        <span className="inline-block ml-2 text-sm">
+          <span className="">by</span>
+          <span className="ml-1 font-title ">{props.brief?.chartCreator}</span>
+        </span>
+      )}
+    </>
   );
 }
