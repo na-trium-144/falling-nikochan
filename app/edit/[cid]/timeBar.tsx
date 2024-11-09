@@ -294,12 +294,12 @@ export default function TimeBar(props: Props) {
                 >
                   <span className="absolute bottom-0">
                     {len.map((len, i) => (
-                      <>
+                      <span key={i}>
                         {i >= 1 && <span className="mx-0.5">+</span>}
                         <span>{stepImproper(len)}</span>
                         <span>/</span>
                         <span>{len.denominator * 4}</span>
-                      </>
+                      </span>
                     ))}
                   </span>
                 </span>
