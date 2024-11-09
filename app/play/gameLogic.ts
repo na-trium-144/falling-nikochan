@@ -66,11 +66,9 @@ export default function useGameLogic(
         n.bigDone = true;
         if (j <= 2) {
           setBigCount((big) => big + 1);
-          if (n.chainBonus !== undefined) {
-            n.chainBonus +=
-              ((1 / (bigTotal || 1)) * bigScoreRate) /
-              ((1 / notesTotal) * baseScoreRate);
-          }
+          n.bigBonus =
+            ((1 / (bigTotal || 1)) * bigScoreRate) /
+            ((1 / notesTotal) * baseScoreRate);
         }
       } else {
         // j = 1 ~ 4
@@ -87,9 +85,9 @@ export default function useGameLogic(
             ((1 / notesTotal) * baseScoreRate);
           setBonus((bonus) => bonus + Math.min(thisChain, bonusMax));
           if (j === 1) {
-            n.chainBonus += 1;
+            n.baseScore = 1;
           } else {
-            n.chainBonus += okBaseScore;
+            n.baseScore = okBaseScore;
           }
         } else {
           thisChain = 0;

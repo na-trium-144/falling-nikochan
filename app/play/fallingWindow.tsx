@@ -11,6 +11,7 @@ import {
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine";
 import { useDisplayMode } from "@/scale";
+import { bonusMax } from "@/common/gameConstant";
 
 interface Props {
   className?: string;
@@ -81,61 +82,195 @@ export default function FallingWindow(props: Props) {
             boxSize &&
             marginX !== undefined &&
             marginY !== undefined && (
-              /* にこちゃん
-                d.done に応じて画像と動きを変える
-                0: 通常
-                1〜3: good, ok, bad
-                4: miss は画像が0と同じ
-                */
-              <div
+              <Nikochan
                 key={d.id}
-                className={
-                  "absolute " +
-                  (d.done === 0
-                    ? ""
-                    : d.done === 1
-                    ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
-                    : d.done === 2
-                    ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
-                    : d.done === 3
-                    ? "transition ease-linear duration-300 opacity-0"
-                    : "")
-                }
-                style={{
-                  /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-                  width: noteSize * bigScale(notes[d.id].big),
-                  height: noteSize * bigScale(notes[d.id].big),
-                  left:
-                    d.pos.x * boxSize -
-                    (noteSize * bigScale(notes[d.id].big)) / 2 +
-                    marginX,
-                  bottom:
-                    d.pos.y * boxSize +
-                    targetY * boxSize -
-                    (noteSize * bigScale(notes[d.id].big)) / 2 +
-                    marginY,
-                }}
-              >
-                <img
-                  src={`/nikochan${d.done <= 3 ? d.done : 0}.svg`}
-                  className="w-full h-full "
-                />
-                {/* chainBonusをにこちゃんの右上に表示する */}
-                {d.chainBonus && d.chain && (
-                  <span
-                    className={
-                      "absolute w-12 text-xs " +
-                      (d.chain >= 100 || d.bigDone ? "text-orange-500 " : "")
-                    }
-                    style={{ bottom: "100%", left: "100%" }}
-                  >
-                    × {d.chainBonus.toFixed(2)}
-                  </span>
-                )}
-              </div>
+                displayNote={d}
+                note={notes[d.id]}
+                noteSize={noteSize}
+                marginX={marginX}
+                marginY={marginY}
+                boxSize={boxSize}
+              />
             )
         )}
       </div>
+    </div>
+  );
+}
+
+interface NProps {
+  displayNote: DisplayNote;
+  noteSize: number;
+  note: Note;
+  marginX: number;
+  marginY: number;
+  boxSize: number;
+}
+function Nikochan(props: NProps) {
+  /* にこちゃん
+  d.done に応じて画像と動きを変える
+  0: 通常
+  1〜3: good, ok, bad
+  4: miss は画像が0と同じ
+  */
+  const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
+
+  const particleMaxNum = 15;
+  const particleNum =
+    displayNote.chain && displayNote.baseScore !== undefined
+      ? Math.min(
+          Math.round(
+            (1 + displayNote.chain / bonusMax) *
+              (particleMaxNum / 2) *
+              displayNote.baseScore
+          ),
+          particleMaxNum
+        )
+      : 0;
+  const [particleStartAngle, setParticleStartAngle] = useState<number>();
+  useEffect(() => {
+    setParticleStartAngle(Math.random() * 360);
+  }, []);
+
+  return (
+    <>
+      <div
+        className={
+          "absolute " +
+          (displayNote.done === 0
+            ? ""
+            : displayNote.done === 1
+            ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+            : displayNote.done === 2
+            ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
+            : displayNote.done === 3
+            ? "transition ease-linear duration-300 opacity-0"
+            : "")
+        }
+        style={{
+          /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
+          width: noteSize * bigScale(note.big),
+          height: noteSize * bigScale(note.big),
+          left:
+            displayNote.pos.x * boxSize -
+            (noteSize * bigScale(note.big)) / 2 +
+            marginX,
+          bottom:
+            displayNote.pos.y * boxSize +
+            targetY * boxSize -
+            (noteSize * bigScale(note.big)) / 2 +
+            marginY,
+        }}
+      >
+        <img
+          src={`/nikochan${displayNote.done <= 3 ? displayNote.done : 0}.svg`}
+          className="w-full h-full "
+        />
+        {/* chainBonusをにこちゃんの右上に表示する */}
+        {/*{displayNote.baseScore !== undefined &&
+          displayNote.chainBonus !== undefined &&
+          displayNote.chain && (
+            <span
+              className={
+                "absolute w-12 text-xs " +
+                (displayNote.chain >= 100 || displayNote.bigDone
+                  ? "text-orange-500 "
+                  : "")
+              }
+              style={{ bottom: "100%", left: "100%" }}
+            >
+              ×{" "}
+              {(
+                displayNote.baseScore +
+                displayNote.chainBonus +
+                (displayNote.bigBonus || 0)
+              ).toFixed(2)}
+            </span>
+          )}*/}
+      </div>
+      {particleStartAngle !== undefined &&
+        particleNum > 0 &&
+        Array.from(new Array(particleNum /*particleMaxNum*/)).map((_, i) => (
+          <Particle
+            key={i}
+            angle={particleStartAngle + (360 * i) / particleNum}
+            visible={i < particleNum}
+            left={note.targetX * boxSize + marginX}
+            bottom={targetY * boxSize + marginY}
+            noteSize={noteSize}
+            big={displayNote.bigDone}
+            chain={displayNote.chain || 0}
+          />
+        ))}
+    </>
+  );
+}
+
+interface PProps {
+  angle: number;
+  left: number;
+  bottom: number;
+  noteSize: number;
+  visible: boolean;
+  big: boolean;
+  chain: number;
+}
+function Particle(props: PProps) {
+  const ref = useRef<HTMLDivElement>(null!);
+  const animateDone = useRef<boolean>(false);
+  const angleRandom = useRef<number>(0);
+  const bigParam = useRef<number>(1);
+  const hueParam = useRef<number>(0);
+  const hue =
+    50 - (20 * hueParam.current * Math.max(props.chain, bonusMax)) / bonusMax;
+  const { noteSize } = props;
+  const particleSize = noteSize / 6;
+  useEffect(() => {
+    if (!animateDone.current) {
+      const distance = noteSize * (0.5 + Math.random() * Math.random() * 1);
+      ref.current.animate(
+        [
+          { transform: "translateX(0px)", opacity: 1 },
+          {
+            transform: `translateX(${distance / 2}px)`,
+            opacity: 1,
+            offset: 0.7,
+          },
+          { transform: `translateX(${distance}px)`, opacity: 0 },
+        ],
+        { duration: 400, fill: "forwards", easing: "ease-out" }
+      );
+      angleRandom.current = Math.random() * Math.random() * 120;
+      bigParam.current = Math.random() * 1 + 1;
+      hueParam.current = Math.random() * 1;
+    }
+    animateDone.current = true;
+  }, [noteSize]);
+  return (
+    <div
+      className="absolute -z-10 "
+      style={{
+        width: 1,
+        height: 1,
+        left: props.left,
+        bottom: props.bottom,
+        transform:
+          `rotate(${props.angle + angleRandom.current}deg) ` +
+          `scale(${props.big ? bigParam.current : 1})`,
+        opacity: props.visible ? 1 : 0,
+      }}
+    >
+      <div
+        ref={ref}
+        className="absolute rounded-full "
+        style={{
+          background: `hsl(${hue} 100% 50%)`,
+          width: particleSize,
+          height: particleSize,
+          left: -particleSize / 2,
+          bottom: -particleSize / 2,
+        }}
+      />
     </div>
   );
 }
