@@ -39,7 +39,8 @@ export default function FallingWindow(props: Props) {
   const noteSize = Math.max(1.5 * rem, 0.05 * (boxSize || 0));
 
   useEffect(() => {
-    const i = setInterval(() => {
+    let anim: number;
+    const update = () => {
       const now = getCurrentTimeSec();
       if (
         playing &&
@@ -61,8 +62,10 @@ export default function FallingWindow(props: Props) {
         fpsCountBegin.current = new Date();
         fpsCount.current = 0;
       }
-    }, 10);
-    return () => clearInterval(i);
+      anim = requestAnimationFrame(update);
+    };
+    anim = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(anim);
   }, [notes, playing, getCurrentTimeSec, marginX, marginY, boxSize, setFPS]);
 
   return (
