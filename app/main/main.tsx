@@ -117,7 +117,13 @@ export function IndexMain(props: Props) {
         )}
       </div>
       <Footer
-        nav={props.tab !== undefined ? "block main-wide:hidden" : false}
+        nav={
+          isHiddenPage
+            ? "block"
+            : isTitlePage
+            ? false
+            : "block main-wide:hidden"
+        }
       />
     </main>
   );

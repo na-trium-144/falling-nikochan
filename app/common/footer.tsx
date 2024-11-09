@@ -19,7 +19,7 @@ export default function Footer(props: Props) {
       {props.nav && (
         <div
           className={
-            "text-center mb-3 divide-solid divide-black " +
+            "text-center mb-3 divide-solid divide-black dark:divide-white " +
             "flex flex-col space-y-1 items-stretch w-max mx-auto " +
             "footer-wide:divide-x footer-wide:space-y-0 footer-wide:flex-row " +
             (typeof props.nav === "string" ? props.nav : "")
