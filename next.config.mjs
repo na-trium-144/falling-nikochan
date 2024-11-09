@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
-import packageJson from "./package.json" assert { type: "json" };
+import packageJson from "./package.json" with { type: "json" };
 
 const date = new Date().toUTCString();
 const commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
