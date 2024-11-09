@@ -65,20 +65,24 @@ export default function EditTab() {
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
+  const [inputCId, setInputCId] = useState<string>("");
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
     const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    setCidFetching(false);
     if (res.ok) {
       // router.push(`/edit/${cid}`);
-      window.open(`/edit/${cid}`, "_blank")?.focus();
+      window.open(`/edit/${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
+      setCIdErrorMsg("");
+      setInputCId(cid);
     } else {
-      setCidFetching(false);
       try {
         setCIdErrorMsg((await res.json()).message);
       } catch {
         setCIdErrorMsg("");
       }
+      setInputCId("");
     }
   };
 
@@ -93,11 +97,18 @@ export default function EditTab() {
           <span className="text-xl font-bold font-title ">譜面IDを入力:</span>
           <Input
             className="ml-4 w-20"
-            actualValue=""
+            actualValue={inputCId}
             updateValue={gotoCId}
+            updateInvalidValue={() => setInputCId("")}
             isValid={validCId}
             left
           />
+          <ExternalLink
+            className={"ml-1 " + (inputCId !== "" ? "" : "hidden ")}
+            href={`/edit/${inputCId}`}
+          >
+            新しいタブで開く
+          </ExternalLink>
           <span className={cidFetching ? "inline-block " : "hidden "}>
             <LoadingSlime />
             Loading...

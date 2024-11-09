@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)
 // updatevalue: 値を更新 isValidがtrueの場合にのみ呼ばれる
+// updateinvalidvalue: isValidがfalseだった場合呼ばれる
 // isvalid: 値が有効かチェックする関数
 interface Props {
   actualValue: string;
   updateValue: (v: string) => void;
+  updateInvalidValue?: (v: string) => void;
   isValid?: (v: string) => boolean;
   left?: boolean;
   right?: boolean;
@@ -42,6 +44,8 @@ export default function Input(props: Props) {
         setValue(e.target.value);
         if (!props.isValid || props.isValid(e.target.value)) {
           props.updateValue(e.target.value);
+        } else if (props.updateInvalidValue) {
+          props.updateInvalidValue(e.target.value);
         }
       }}
       onFocus={() => setFocus(true)}

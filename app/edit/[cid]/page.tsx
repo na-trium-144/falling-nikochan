@@ -87,7 +87,7 @@ export default function Page(context: { params: Promise<Params> }) {
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
 
-  const fetchChart = useCallback(async () => {
+  const fetchChart = useCallback(async (isFirst: boolean) => {
     if (cidInitial.current === "new") {
       setChart(emptyChart());
       setPasswdFailed(false);
@@ -108,7 +108,11 @@ export default function Page(context: { params: Promise<Params> }) {
         try {
           const chart = msgpack.deserialize(await res.arrayBuffer());
           // validateはサーバー側でやってる
-          setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
+          try {
+            setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
+          } catch (e) {
+            // ignore hash error on iOS development mode
+          }
           setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
@@ -120,7 +124,9 @@ export default function Page(context: { params: Promise<Params> }) {
         }
       } else {
         if (res.status === 401) {
-          setPasswdFailed(true);
+          if (!isFirst) {
+            setPasswdFailed(true);
+          }
           setChart(undefined);
         } else {
           setChart(undefined);
@@ -134,7 +140,7 @@ export default function Page(context: { params: Promise<Params> }) {
       }
     }
   }, []);
-  useEffect(() => void fetchChart(), [fetchChart]);
+  useEffect(() => void fetchChart(true), [fetchChart]);
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel = chart?.levels.at(currentLevelIndex);
@@ -641,10 +647,25 @@ export default function Page(context: { params: Promise<Params> }) {
           onClick={() => {
             void (async () => {
               setPasswd(cidInitial.current || "", await hashPasswd(editPasswd));
-              await fetchChart();
+              await fetchChart(false);
             })();
           }}
         />
+        {process.env.NODE_ENV === "development" && (
+          <p className="mt-2 ">
+            <button
+              className={linkStyle1 + "w-max m-auto "}
+              onClick={() => {
+                void (async () => {
+                  setPasswd(cidInitial.current || "", "bypass");
+                  await fetchChart(false);
+                })();
+              }}
+            >
+              パスワード入力をスキップ (dev環境限定)
+            </button>
+          </p>
+        )}
       </CenterBoxOnlyPage>
     );
   }
