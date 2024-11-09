@@ -135,11 +135,15 @@ export function MetaTab(props: Props2) {
           const resBody = await res.json();
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
-            setPasswd(resBody.cid, await hashPasswd(props.chart!.editPasswd));
             history.replaceState(null, "", `/edit/${resBody.cid}`);
             setErrorMsg("保存しました！");
             addRecent("edit", resBody.cid);
             props.setHasChange(false);
+            try {
+              setPasswd(resBody.cid, await hashPasswd(props.chart!.editPasswd));
+            } catch (e) {
+              setErrorMsg(String(e));
+            }
           } else {
             setErrorMsg("Invalid response");
           }
@@ -167,7 +171,11 @@ export function MetaTab(props: Props2) {
         props.setHasChange(false);
         setErrorMsg("保存しました！");
         // 次からは新しいパスワードが必要
-        setPasswd(props.cid, await hashPasswd(props.chart!.editPasswd));
+        try {
+          setPasswd(props.cid, await hashPasswd(props.chart!.editPasswd));
+        } catch (e) {
+          setErrorMsg("保存しました！ (パスワードの保存は失敗)");
+        }
       } else {
         try {
           const resBody = await res.json();
