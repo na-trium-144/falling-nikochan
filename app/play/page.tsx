@@ -56,10 +56,10 @@ function InitPlay() {
     setLvIndex(session.lvIndex);
     setChartBrief(session.brief);
     setEditing(!!session.editing);
-    document.title =
-      (session.editing ? "(テストプレイ) " : "") +
-      pageTitle(session.cid || "-", session.brief) +
-      " | Falling Nikochan";
+    // document.title =
+    //   (session.editing ? "(テストプレイ) " : "") +
+    //   pageTitle(session.cid || "-", session.brief) +
+    //   " | Falling Nikochan";
 
     if (session.chart) {
       setChartSeq(loadChart(session.chart, session.lvIndex));
