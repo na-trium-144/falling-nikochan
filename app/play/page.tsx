@@ -22,7 +22,7 @@ import BPMSign from "./bpmSign";
 import { getSession } from "./session";
 import { pageTitle } from "@/common/title";
 import { MusicArea } from "./musicArea";
-import { ThemeHandler } from "@/common/theme";
+import { ThemeHandler, useTheme } from "@/common/theme";
 
 export default function Home() {
   return (
@@ -140,6 +140,7 @@ function Play(props: Props) {
     mobileStatusScale,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
+  const themeContext = useTheme();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -449,6 +450,7 @@ function Play(props: Props) {
             playing={chartPlaying}
             setFPS={setFps}
             barFlash={barFlash}
+            themeContext={themeContext}
           />
           <ScoreDisp score={score} best={bestScoreState} auto={auto} />
           <ChainDisp chain={chain} />
@@ -545,7 +547,6 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
-      <ThemeHandler />
     </main>
   );
 }

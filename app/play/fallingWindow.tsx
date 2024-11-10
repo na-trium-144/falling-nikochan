@@ -12,6 +12,7 @@ import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine";
 import { useDisplayMode } from "@/scale";
 import { bonusMax } from "@/common/gameConstant";
+import { ThemeContext } from "@/common/theme";
 
 interface Props {
   className?: string;
@@ -21,6 +22,7 @@ interface Props {
   playing: boolean;
   setFPS?: (fps: number) => void;
   barFlash: boolean;
+  themeContext: ThemeContext;
 }
 
 export default function FallingWindow(props: Props) {
@@ -93,6 +95,7 @@ export default function FallingWindow(props: Props) {
                 marginX={marginX}
                 marginY={marginY}
                 boxSize={boxSize}
+                themeContext={props.themeContext}
               />
             )
         )}
@@ -108,6 +111,7 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
+  themeContext: ThemeContext;
 }
 function Nikochan(props: NProps) {
   /* にこちゃん
@@ -212,6 +216,7 @@ function Nikochan(props: NProps) {
             noteSize={noteSize}
             big={displayNote.bigDone}
             chain={displayNote.chain || 0}
+            themeContext={props.themeContext}
           />
         ))}
     </>
@@ -269,8 +274,8 @@ function Ripple(props: RProps) {
           className={
             "absolute origin-center scale-0 " +
             (props.chain >= bonusMax
-              ? "bg-amber-200 border-amber-300 "
-              : "bg-yellow-200 border-yellow-300 ")
+              ? "bg-amber-200 border-amber-300 dark:bg-yellow-700 dark:border-yellow-600 "
+              : "bg-yellow-200 border-yellow-300 dark:bg-amber-700 dark:border-amber-600 ")
           }
           style={{
             borderWidth: rippleWidth / 20,
@@ -294,6 +299,7 @@ interface PProps {
   visible: boolean;
   big: boolean;
   chain: number;
+  themeContext: ThemeContext;
 }
 function Particle(props: PProps) {
   const ref = useRef<HTMLDivElement>(null!);
@@ -302,8 +308,11 @@ function Particle(props: PProps) {
   const bigParam = useRef<number>(1);
   const sizeParam = useRef<number>(1);
   const hueParam = useRef<number>(0);
-  const hue =
+  let hue =
     55 - (15 * hueParam.current * Math.min(props.chain, bonusMax)) / bonusMax;
+  if (props.themeContext.isDark) {
+    hue = 85 - hue;
+  }
   const { noteSize } = props;
   const particleSize = (noteSize / 4) * sizeParam.current;
   useEffect(() => {
@@ -311,10 +320,10 @@ function Particle(props: PProps) {
       const distance = noteSize * (0.5 + Math.random() * Math.random() * 1);
       ref.current.animate(
         [
-          { transform: "translateX(0px)", opacity: 1 },
+          { transform: "translateX(0px)", opacity: 0.8 },
           {
             transform: `translateX(${distance * 0.8}px)`,
-            opacity: 1,
+            opacity: 0.8,
             offset: 0.8,
           },
           { transform: `translateX(${distance}px)`, opacity: 0 },
