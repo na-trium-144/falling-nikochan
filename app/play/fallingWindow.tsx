@@ -123,8 +123,8 @@ function Nikochan(props: NProps) {
     displayNote.chain && displayNote.baseScore !== undefined
       ? Math.min(
           Math.round(
-            (1 + displayNote.chain / bonusMax) *
-              (particleMaxNum / 2) *
+            ((1 + (2 * displayNote.chain) / bonusMax) / 3) *
+              particleMaxNum *
               displayNote.baseScore
           ),
           particleMaxNum
@@ -225,7 +225,7 @@ function Particle(props: PProps) {
   const bigParam = useRef<number>(1);
   const hueParam = useRef<number>(0);
   const hue =
-    50 - (20 * hueParam.current * Math.max(props.chain, bonusMax)) / bonusMax;
+    55 - (15 * hueParam.current * Math.min(props.chain, bonusMax)) / bonusMax;
   const { noteSize } = props;
   const particleSize = noteSize / 6;
   useEffect(() => {
@@ -235,17 +235,17 @@ function Particle(props: PProps) {
         [
           { transform: "translateX(0px)", opacity: 1 },
           {
-            transform: `translateX(${distance / 2}px)`,
+            transform: `translateX(${distance * 0.8}px)`,
             opacity: 1,
-            offset: 0.7,
+            offset: 0.8,
           },
           { transform: `translateX(${distance}px)`, opacity: 0 },
         ],
-        { duration: 400, fill: "forwards", easing: "ease-out" }
+        { duration: 500, fill: "forwards", easing: "ease-out" }
       );
       angleRandom.current = Math.random() * Math.random() * 120;
       bigParam.current = Math.random() * 1 + 1;
-      hueParam.current = Math.random() * 1;
+      hueParam.current = Math.random() * Math.random() * 1;
     }
     animateDone.current = true;
   }, [noteSize]);
@@ -265,7 +265,7 @@ function Particle(props: PProps) {
     >
       <div
         ref={ref}
-        className="absolute rounded-full "
+        className="absolute rounded-full shadow-xl shadow-yellow-500 "
         style={{
           background: `hsl(${hue} 100% 50%)`,
           width: particleSize,
