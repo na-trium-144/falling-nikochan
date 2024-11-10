@@ -22,7 +22,10 @@ function Cloud(props: CProps) {
       }}
     >
       <img src="/cloud.svg" className="absolute inset-0 -z-10 dark:hidden " />
-      <img src="/cloud-black.svg" className="absolute inset-0 -z-10 hidden dark:block" />
+      <img
+        src="/cloud-black.svg"
+        className="absolute inset-0 -z-10 hidden dark:block"
+      />
       <div
         className={props.className}
         style={{
@@ -72,7 +75,8 @@ export function ChainDisp(props: ChainProps) {
   return (
     <Cloud
       className={
-        "flex flex-col " + (props.chain >= 100 ? "text-orange-500 " : "")
+        "flex flex-col " +
+        (props.chain >= 100 ? "text-orange-500 dark:text-yellow-400 " : "")
       }
       left
     >

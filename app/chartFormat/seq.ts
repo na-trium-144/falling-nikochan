@@ -1,10 +1,5 @@
 import { Chart } from "./chart";
-import {
-  BPMChange,
-  getBarLength,
-  Signature,
-  toStepArray,
-} from "./command";
+import { BPMChange, getBarLength, Signature, toStepArray } from "./command";
 import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
 
 export interface ChartSeqData {
@@ -47,9 +42,12 @@ export interface Note {
   bigDone: boolean;
   hitTimeSec: number;
   appearTimeSec: number;
+  targetX: number;
   hitPos?: Pos;
   done: number;
+  baseScore?: number;
   chainBonus?: number;
+  bigBonus?: number;
   chain?: number;
   display: DisplayParam[];
 }
@@ -71,7 +69,9 @@ export interface DisplayNote {
   pos: Pos;
   done: number;
   bigDone: boolean;
+  baseScore?: number;
   chainBonus?: number;
+  bigBonus?: number;
   chain?: number;
 }
 
@@ -222,6 +222,7 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
     // noteCommandの座標系 (-5<=x<=5) から
     //  displayの座標系に変換するのもここでやる
     let x = (c.hitX + 5) / 10;
+    const targetX = x;
     let y = 0;
     let vx = c.hitVX;
     let vy = c.hitVY;
@@ -285,6 +286,7 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
       done: 0,
       bigDone: false,
       display,
+      targetX,
     });
   }
   return {
@@ -304,7 +306,9 @@ export function displayNote(note: Note, timeSec: number): DisplayNote | null {
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
+      baseScore: note.baseScore,
       chainBonus: note.chainBonus,
+      bigBonus: note.bigBonus,
     };
   } else if (timeSec < note.appearTimeSec) {
     return null;
@@ -327,7 +331,9 @@ export function displayNote(note: Note, timeSec: number): DisplayNote | null {
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
+      baseScore: note.baseScore,
       chainBonus: note.chainBonus,
+      bigBonus: note.bigBonus,
     };
   }
 }

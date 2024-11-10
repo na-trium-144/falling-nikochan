@@ -22,7 +22,7 @@ import BPMSign from "./bpmSign";
 import { getSession } from "./session";
 import { pageTitle } from "@/common/title";
 import { MusicArea } from "./musicArea";
-import { ThemeHandler } from "@/common/theme";
+import { ThemeHandler, useTheme } from "@/common/theme";
 
 export default function Home() {
   return (
@@ -35,6 +35,7 @@ export default function Home() {
 function InitPlay() {
   const searchParams = useSearchParams();
   const sid = Number(searchParams.get("sid"));
+  const showFps = searchParams.get("fps") !== null;
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -55,10 +56,10 @@ function InitPlay() {
     setLvIndex(session.lvIndex);
     setChartBrief(session.brief);
     setEditing(!!session.editing);
-    document.title =
-      (session.editing ? "(テストプレイ) " : "") +
-      pageTitle(session.cid || "-", session.brief) +
-      " | Falling Nikochan";
+    // document.title =
+    //   (session.editing ? "(テストプレイ) " : "") +
+    //   pageTitle(session.cid || "-", session.brief) +
+    //   " | Falling Nikochan";
 
     if (session.chart) {
       setChartSeq(loadChart(session.chart, session.lvIndex));
@@ -109,6 +110,7 @@ function InitPlay() {
       chartBrief={chartBrief}
       chartSeq={chartSeq}
       editing={editing}
+      showFps={showFps}
     />
   );
 }
@@ -119,9 +121,10 @@ interface Props {
   chartBrief: ChartBrief;
   chartSeq: ChartSeqData;
   editing: boolean;
+  showFps: boolean;
 }
 function Play(props: Props) {
-  const { cid, lvIndex, chartBrief, chartSeq, editing } = props;
+  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps } = props;
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
@@ -137,6 +140,7 @@ function Play(props: Props) {
     mobileStatusScale,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
+  const themeContext = useTheme();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -420,9 +424,6 @@ function Play(props: Props) {
             onStart={onStart}
             onStop={onStop}
           />
-          {/*<div className={"text-right mr-4 " + (isMobile ? "" : "flex-1 ")}>
-            {fps} FPS
-          </div>*/}
           {!isMobile && (
             <>
               <StatusBox
@@ -449,6 +450,7 @@ function Play(props: Props) {
             playing={chartPlaying}
             setFPS={setFps}
             barFlash={barFlash}
+            themeContext={themeContext}
           />
           <ScoreDisp score={score} best={bestScoreState} auto={auto} />
           <ChainDisp chain={chain} />
@@ -504,18 +506,23 @@ function Play(props: Props) {
         />
         <BPMSign currentBpm={chartSeq?.bpmChanges[currentBpmIndex]?.bpm} />
         {isMobile && (
-          <StatusBox
-            className="absolute inset-0 z-10"
-            style={{
-              margin: 1 * rem * mobileStatusScale,
-            }}
-            judgeCount={judgeCount}
-            bigCount={bigCount}
-            bigTotal={bigTotal}
-            notesTotal={notesAll.length}
-            isMobile={true}
-            isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
-          />
+          <>
+            <StatusBox
+              className="absolute inset-0 z-10"
+              style={{
+                margin: 1 * rem * mobileStatusScale,
+              }}
+              judgeCount={judgeCount}
+              bigCount={bigCount}
+              bigTotal={bigTotal}
+              notesTotal={notesAll.length}
+              isMobile={true}
+              isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
+            />
+            {showFps && (
+              <span className="absolute left-3 bottom-full">[{fps} FPS]</span>
+            )}
+          </>
         )}
         {!isMobile && (
           <div className="absolute bottom-2 left-3 opacity-40">
@@ -524,6 +531,7 @@ function Play(props: Props) {
               <span className="ml-2">ver.</span>
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
+            {showFps && <span className="inline-block ml-3">[{fps} FPS]</span>}
           </div>
         )}
       </div>
@@ -539,7 +547,6 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
-      <ThemeHandler />
     </main>
   );
 }
