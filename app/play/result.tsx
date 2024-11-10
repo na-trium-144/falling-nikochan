@@ -4,6 +4,12 @@ import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
 import { rankStr } from "@/common/rank";
 import { ReactNode, useEffect, useState } from "react";
+import "./result.css";
+import {
+  baseScoreRate,
+  bigScoreRate,
+  chainScoreRate,
+} from "@/common/gameConstant";
 
 interface Props {
   isTouch: boolean;
@@ -11,70 +17,169 @@ interface Props {
   chainScore: number;
   bigScore: number;
   score: number;
+  newRecord: number;
   reset: () => void;
   exit: () => void;
 }
 export default function Result(props: Props) {
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
-    const t1 = setTimeout(() => setShowing(1), 100);
-    const t2 = setTimeout(() => setShowing(2), 600);
-    const t3 = setTimeout(() => setShowing(3), 1100);
-    const t4 = setTimeout(() => setShowing(4), 1600);
-    const t5 = setTimeout(() => setShowing(5), 2350);
+    const delay = [100, 500, 500, 500, 750, 750, 750];
+    const offset: number[] = [];
+    for (let i = 0; i < delay.length; i++) {
+      offset.push((i > 0 ? offset[i - 1] : 0) + delay[i]);
+    }
+    const timers = offset.map((o, i) => setTimeout(() => setShowing(i + 1), o));
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(t5);
+      timers.forEach((t) => clearTimeout(t));
     };
   }, []);
+
+  const jumpingAnimation = (index: number) => ({
+    animationName: showing >= index ? "result-score-jumping" : undefined,
+    animationIterationCount: 1,
+    animationDuration: "200ms",
+    animationTimingFunction: "ease-in-out",
+    animationFillMode: "forwards",
+  });
+  const appearingAnimation = (index: number) => ({
+    transitionProperty: "all",
+    transitionTimingFunction: "ease-in",
+    transitionDuration: "100ms",
+    opacity: showing >= index ? 1 : 0,
+    transform: showing >= index ? "scale(1)" : "scale(4)",
+  });
   return (
     <CenterBox>
-      <p>Result</p>
-      <ResultRow visible={showing >= 1} name="Base Score">
-        <span className="text-3xl text-right">
-          {Math.floor(props.baseScore)}
-        </span>
-        <span className="">.</span>
-        <span className="text-left w-5">
-          {(Math.floor(props.baseScore * 100) % 100)
-            .toString()
-            .padStart(2, "0")}
-        </span>
-      </ResultRow>
-      <ResultRow visible={showing >= 2} name="Chain Bonus">
-        <span className="text-3xl text-right">
-          {Math.floor(props.chainScore)}
-        </span>
-        <span className="">.</span>
-        <span className="text-left w-5">
-          {(Math.floor(props.chainScore * 100) % 100)
-            .toString()
-            .padStart(2, "0")}
-        </span>
-      </ResultRow>
-      <ResultRow visible={showing >= 3} name="Big Note Bonus">
-        <span className="text-3xl text-right">
-          {Math.floor(props.bigScore)}
-        </span>
-        <span className="">.</span>
-        <span className="text-left w-5">
-          {(Math.floor(props.bigScore * 100) % 100).toString().padStart(2, "0")}
-        </span>
-      </ResultRow>
-      <div className="mt-2 mb-1 border-b border-black dark:border-white " />
-      <ResultRow visible={showing >= 4} name="Total Score">
-        <span className="text-3xl text-right">{Math.floor(props.score)}</span>
-        <span className="">.</span>
-        <span className="text-left w-5">
-          {(Math.floor(props.score * 100) % 100).toString().padStart(2, "0")}
-        </span>
-      </ResultRow>
-      <ResultRow className="mt-1 mb-3" visible={showing >= 5} name="Rank">
-        <span className="text-4xl">{rankStr(props.score)}</span>
-      </ResultRow>
+      <p className="text-lg font-title font-bold">&lt;Result&gt;</p>
+      <div className={"my-2 flex flex-row justify-center space-x-2 "}>
+        <div className="flex-none">
+          <ResultRow visible={showing >= 1} name="Base Score">
+            <span
+              className="text-3xl text-right "
+              style={{
+                ...jumpingAnimation(1),
+              }}
+            >
+              {Math.floor(props.baseScore)}
+            </span>
+            <span className="">.</span>
+            <span
+              className="w-16 text-left w-5 "
+              style={{
+                ...jumpingAnimation(1),
+              }}
+            >
+              {(Math.floor(props.baseScore * 100) % 100)
+                .toString()
+                .padStart(2, "0")}
+            </span>
+          </ResultRow>
+          <ResultRow visible={showing >= 2} name="Chain Bonus">
+            <span
+              className="w-16 text-3xl text-right "
+              style={{
+                ...jumpingAnimation(2),
+              }}
+            >
+              {Math.floor(props.chainScore)}
+            </span>
+            <span className="">.</span>
+            <span
+              className="text-left w-5 "
+              style={{
+                ...jumpingAnimation(2),
+              }}
+            >
+              {(Math.floor(props.chainScore * 100) % 100)
+                .toString()
+                .padStart(2, "0")}
+            </span>
+          </ResultRow>
+          <ResultRow visible={showing >= 3} name="Big Note Bonus">
+            <span
+              className="w-16 text-3xl text-right "
+              style={{
+                ...jumpingAnimation(3),
+              }}
+            >
+              {Math.floor(props.bigScore)}
+            </span>
+            <span className="">.</span>
+            <span
+              className="text-left w-5 "
+              style={{
+                ...jumpingAnimation(3),
+              }}
+            >
+              {(Math.floor(props.bigScore * 100) % 100)
+                .toString()
+                .padStart(2, "0")}
+            </span>
+          </ResultRow>
+          <div className="mt-2 mb-1 border-b border-black dark:border-white " />
+          <ResultRow visible={showing >= 4} name="Total Score">
+            <span
+              className="w-16 text-3xl text-right "
+              style={{
+                ...jumpingAnimation(4),
+              }}
+            >
+              {Math.floor(props.score)}
+            </span>
+            <span className="">.</span>
+            <span
+              className="text-left w-5 "
+              style={{
+                ...jumpingAnimation(4),
+              }}
+            >
+              {(Math.floor(props.score * 100) % 100)
+                .toString()
+                .padStart(2, "0")}
+            </span>
+          </ResultRow>
+          {/*          <ResultRow className="mt-1 mb-3" visible={showing >= 5} name="Rank">
+            <span className="text-4xl">{rankStr(props.score)}</span>
+          </ResultRow>
+*/}
+        </div>
+        <div className="flex-none w-56 flex flex-col justify-center items-center space-y-2">
+          <div style={{ ...appearingAnimation(5) }}>
+            <span className="mr-2">Rank:</span>
+            <span className="text-4xl">{rankStr(props.score)}</span>
+          </div>
+          {props.chainScore === chainScoreRate && (
+            <div className="text-2xl" style={{ ...appearingAnimation(5) }}>
+              <span className="">
+                {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
+              </span>
+              <span className="ml-2">Chain</span>
+              {props.bigScore === bigScoreRate && (
+                <span className="font-bold">+</span>
+              )}
+              <span>!</span>
+            </div>
+          )}
+          {props.newRecord > 0 && (
+            <div
+              className={
+                "transition duration-300 ease-in " +
+                (showing >= 6 ? "opacity-1 " : "opacity-0 ")
+              }
+            >
+              <span className="text-xl ">New Record!</span>
+              <span className="ml-1">
+                (+
+                {(Math.floor(props.newRecord * 100) / 100)
+                  .toString()
+                  .padStart(2, "0")}
+                )
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
       <div className="text-center">
         <Button
           text="もう一度"

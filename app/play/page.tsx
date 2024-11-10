@@ -463,6 +463,14 @@ function Play(props: Props) {
               reset={reset}
               exit={exit}
               isTouch={isTouch}
+              newRecord={
+                score > bestScoreState &&
+                !auto &&
+                lvIndex !== undefined &&
+                chartBrief?.levels[lvIndex] !== undefined
+                  ? score - bestScoreState
+                  : 0
+              }
             />
           ) : ready ? (
             <ReadyMessage

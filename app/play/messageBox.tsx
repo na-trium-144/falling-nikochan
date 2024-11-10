@@ -15,7 +15,7 @@ interface MessageProps {
 export function ReadyMessage(props: MessageProps) {
   return (
     <CenterBox>
-      <p className="mb-1">Ready to start!</p>
+      <p className="text-lg font-title font-bold mb-1">Ready to start!</p>
       <p>
         <Button
           text="スタート"
@@ -62,7 +62,7 @@ interface MessageProps2 {
 export function StopMessage(props: MessageProps2) {
   return (
     <CenterBox>
-      <p className="mb-1">&lt;Stopped&gt;</p>
+      <p className="text-lg font-title font-bold mb-1">&lt;Stopped&gt;</p>
       <p>
         <Button
           text="もう一度"
