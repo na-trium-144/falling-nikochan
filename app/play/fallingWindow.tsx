@@ -191,6 +191,15 @@ function Nikochan(props: NProps) {
             </span>
           )}*/}
       </div>
+      {[1, 2].includes(displayNote.done) && (
+        <Ripple
+          noteSize={noteSize}
+          left={note.targetX * boxSize + marginX}
+          bottom={targetY * boxSize + marginY}
+          big={displayNote.bigDone}
+          chain={displayNote.chain || 0}
+        />
+      )}
       {particleStartAngle !== undefined &&
         particleNum > 0 &&
         Array.from(new Array(particleNum /*particleMaxNum*/)).map((_, i) => (
@@ -206,6 +215,74 @@ function Nikochan(props: NProps) {
           />
         ))}
     </>
+  );
+}
+
+interface RProps {
+  noteSize: number;
+  left: number;
+  bottom: number;
+  big: boolean;
+  chain: number;
+}
+function Ripple(props: RProps) {
+  const ref = useRef<HTMLDivElement>(null!);
+  const ref2 = useRef<HTMLDivElement>(null!);
+  const animateDone = useRef<boolean>(false);
+  const { noteSize } = props;
+  const rippleWidth = noteSize * 1.5 * (props.big ? 1.5 : 1);
+  const rippleHeight = rippleWidth * 0.6;
+  useEffect(() => {
+    if (!animateDone.current) {
+      [ref, ref2].forEach((r, i) => {
+        r.current.animate(
+          [
+            { transform: "scale(0)", opacity: 0.6 },
+            { transform: "scale(0.8)", opacity: 0.6, offset: 0.8 },
+            { transform: `scale(1)`, opacity: 0 },
+          ],
+          {
+            duration: 500 - 200 * i,
+            delay: 200 * i,
+            fill: "forwards",
+            easing: "ease-out",
+          }
+        );
+      });
+    }
+    animateDone.current = true;
+  }, [noteSize]);
+  return (
+    <div
+      className="absolute -z-20 "
+      style={{
+        width: 1,
+        height: 1,
+        left: props.left,
+        bottom: props.bottom,
+      }}
+    >
+      {[ref, ref2].map((r, i) => (
+        <div
+          key={i}
+          ref={r}
+          className={
+            "absolute origin-center scale-0 " +
+            (props.chain >= bonusMax
+              ? "bg-amber-200 border-amber-300 "
+              : "bg-yellow-200 border-yellow-300 ")
+          }
+          style={{
+            borderWidth: rippleWidth / 20,
+            borderRadius: "50%",
+            width: rippleWidth,
+            height: rippleHeight,
+            left: -rippleWidth / 2,
+            bottom: -rippleHeight / 2,
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
