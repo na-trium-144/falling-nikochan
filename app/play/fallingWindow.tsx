@@ -223,11 +223,12 @@ function Particle(props: PProps) {
   const animateDone = useRef<boolean>(false);
   const angleRandom = useRef<number>(0);
   const bigParam = useRef<number>(1);
+  const sizeParam = useRef<number>(1);
   const hueParam = useRef<number>(0);
   const hue =
     55 - (15 * hueParam.current * Math.min(props.chain, bonusMax)) / bonusMax;
   const { noteSize } = props;
-  const particleSize = noteSize / 6;
+  const particleSize = (noteSize / 4) * sizeParam.current;
   useEffect(() => {
     if (!animateDone.current) {
       const distance = noteSize * (0.5 + Math.random() * Math.random() * 1);
@@ -245,6 +246,7 @@ function Particle(props: PProps) {
       );
       angleRandom.current = Math.random() * Math.random() * 120;
       bigParam.current = Math.random() * 1 + 1;
+      sizeParam.current = Math.random() * Math.random() * 0.5 + 0.5;
       hueParam.current = Math.random() * Math.random() * 1;
     }
     animateDone.current = true;
@@ -265,7 +267,7 @@ function Particle(props: PProps) {
     >
       <div
         ref={ref}
-        className="absolute rounded-full shadow-xl shadow-yellow-500 "
+        className="absolute rounded-full "
         style={{
           background: `hsl(${hue} 100% 50%)`,
           width: particleSize,
