@@ -10,6 +10,7 @@ import {
   bigScoreRate,
   chainScoreRate,
 } from "@/common/gameConstant";
+import { praiseMessage } from "./praise";
 
 interface Props {
   isTouch: boolean;
@@ -23,6 +24,11 @@ interface Props {
   largeResult: boolean;
 }
 export default function Result(props: Props) {
+  const [message, setMessage] = useState<string>("");
+  useEffect(() => {
+    setMessage(praiseMessage(props.score));
+  }, [props.score]);
+
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
     const delay = [100, 500, 500, 500, 750, 750, 750];
@@ -40,7 +46,7 @@ export default function Result(props: Props) {
     animationName: showing >= index ? "result-score-jumping" : undefined,
     animationIterationCount: 1,
     animationDuration: "200ms",
-    animationTimingFunction: "ease-in-out",
+    animationTimingFunction: "linear",
     animationFillMode: "forwards",
   });
   const appearingAnimation = (index: number) => ({
@@ -50,10 +56,21 @@ export default function Result(props: Props) {
     opacity: showing >= index ? 1 : 0,
     transform: showing >= index ? "scale(1)" : "scale(4)",
   });
+  const appearingAnimation2 = (index: number) => ({
+    transitionProperty: "opacity",
+    transitionTimingFunction: "ease-out",
+    transitionDuration: "300ms",
+    opacity: showing >= index ? 1 : 0,
+  });
   return (
     <CenterBox>
       <p className="text-lg font-title font-bold">&lt;Result&gt;</p>
-      <div className={"my-2 flex flex-row justify-center space-x-2 "}>
+      <div
+        className={
+          "my-2 flex justify-center " +
+          (props.largeResult ? "flwx-row space-x-2 " : "flex-col space-y-1 ")
+        }
+      >
         <div className="flex-1 w-56">
           <ResultRow visible={showing >= 1} name="Base Score">
             <span
@@ -140,66 +157,57 @@ export default function Result(props: Props) {
                 .padStart(2, "0")}
             </span>
           </ResultRow>
-          {!props.largeResult && (
-            <>
-              <div className="mt-1" style={{ ...appearingAnimation(5) }}>
-                <span className="mr-2">Rank:</span>
-                <span className="text-3xl">{rankStr(props.score)}</span>
-              </div>
-              <div
-                className="text-xl mt-1"
-                style={{ ...appearingAnimation(5) }}
-              >
-                <span className="">
-                  {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
-                </span>
-                <span className="ml-2">Chain</span>
-                {props.bigScore === bigScoreRate && (
-                  <span className="font-bold">+</span>
-                )}
-                <span>!</span>
-              </div>
-            </>
+        </div>
+        <div
+          className={
+            "flex-none w-56 flex flex-col justify-center items-center " +
+            (props.largeResult ? "space-y-2 " : "space-y-1 ")
+          }
+        >
+          <div style={{ ...appearingAnimation(5) }}>
+            <span className="mr-2">Rank:</span>
+            <span className={props.largeResult ? "text-4xl" : "text-3xl"}>
+              {rankStr(props.score)}
+            </span>
+          </div>
+          {props.chainScore === chainScoreRate ? (
+            <div
+              className={props.largeResult ? "text-2xl" : "text-xl"}
+              style={{ ...appearingAnimation(5) }}
+            >
+              <span className="">
+                {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
+              </span>
+              <span className="ml-2">Chain</span>
+              {props.bigScore === bigScoreRate && (
+                <span className="font-bold">+</span>
+              )}
+              <span>!</span>
+            </div>
+          ) : (
+            <div
+              className={props.largeResult ? "text-xl" : ""}
+              style={{ ...appearingAnimation2(6) }}
+            >
+              {message}
+            </div>
+          )}
+          {props.newRecord > 0 && (
+            <div style={{ ...appearingAnimation2(6) }}>
+              <span className={props.largeResult ? "text-xl " : ""}>
+                New Record!
+              </span>
+              <span className={"ml-1 " + (props.largeResult ? "" : "text-sm")}>
+                (+
+                {Math.floor(props.newRecord)}.
+                {(Math.floor(props.newRecord * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+                )
+              </span>
+            </div>
           )}
         </div>
-        {props.largeResult && (
-          <div className="flex-none w-56 flex flex-col justify-center items-center space-y-2">
-            <div style={{ ...appearingAnimation(5) }}>
-              <span className="mr-2">Rank:</span>
-              <span className="text-4xl">{rankStr(props.score)}</span>
-            </div>
-            {props.chainScore === chainScoreRate && (
-              <div className="text-2xl" style={{ ...appearingAnimation(5) }}>
-                <span className="">
-                  {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
-                </span>
-                <span className="ml-2">Chain</span>
-                {props.bigScore === bigScoreRate && (
-                  <span className="font-bold">+</span>
-                )}
-                <span>!</span>
-              </div>
-            )}
-            {props.newRecord > 0 && (
-              <div
-                className={
-                  "transition duration-300 ease-in " +
-                  (showing >= 6 ? "opacity-1 " : "opacity-0 ")
-                }
-              >
-                <span className="text-xl ">New Record!</span>
-                <span className="ml-1">
-                  (+
-                  {Math.floor(props.newRecord)}.
-                  {(Math.floor(props.newRecord * 100) % 100)
-                    .toString()
-                    .padStart(2, "0")}
-                  )
-                </span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
       <div className="text-center">
         <Button
