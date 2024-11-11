@@ -138,6 +138,7 @@ function Play(props: Props) {
     rem,
     playUIScale,
     mobileStatusScale,
+    largeResult,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   const themeContext = useTheme();
@@ -463,6 +464,15 @@ function Play(props: Props) {
               reset={reset}
               exit={exit}
               isTouch={isTouch}
+              newRecord={
+                score > bestScoreState &&
+                !auto &&
+                lvIndex !== undefined &&
+                chartBrief?.levels[lvIndex] !== undefined
+                  ? score - bestScoreState
+                  : 0
+              }
+              largeResult={largeResult}
             />
           ) : ready ? (
             <ReadyMessage
