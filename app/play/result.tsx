@@ -3,7 +3,7 @@
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
 import { rankStr } from "@/common/rank";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import "./result.css";
 import {
   baseScoreRate,
@@ -20,6 +20,7 @@ interface Props {
   newRecord: number;
   reset: () => void;
   exit: () => void;
+  largeResult: boolean;
 }
 export default function Result(props: Props) {
   const [showing, setShowing] = useState<number>(0);
@@ -53,7 +54,7 @@ export default function Result(props: Props) {
     <CenterBox>
       <p className="text-lg font-title font-bold">&lt;Result&gt;</p>
       <div className={"my-2 flex flex-row justify-center space-x-2 "}>
-        <div className="flex-none">
+        <div className="flex-1 w-56">
           <ResultRow visible={showing >= 1} name="Base Score">
             <span
               className="text-3xl text-right "
@@ -139,46 +140,66 @@ export default function Result(props: Props) {
                 .padStart(2, "0")}
             </span>
           </ResultRow>
-          {/*          <ResultRow className="mt-1 mb-3" visible={showing >= 5} name="Rank">
-            <span className="text-4xl">{rankStr(props.score)}</span>
-          </ResultRow>
-*/}
+          {!props.largeResult && (
+            <>
+              <div className="mt-1" style={{ ...appearingAnimation(5) }}>
+                <span className="mr-2">Rank:</span>
+                <span className="text-3xl">{rankStr(props.score)}</span>
+              </div>
+              <div
+                className="text-xl mt-1"
+                style={{ ...appearingAnimation(5) }}
+              >
+                <span className="">
+                  {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
+                </span>
+                <span className="ml-2">Chain</span>
+                {props.bigScore === bigScoreRate && (
+                  <span className="font-bold">+</span>
+                )}
+                <span>!</span>
+              </div>
+            </>
+          )}
         </div>
-        <div className="flex-none w-56 flex flex-col justify-center items-center space-y-2">
-          <div style={{ ...appearingAnimation(5) }}>
-            <span className="mr-2">Rank:</span>
-            <span className="text-4xl">{rankStr(props.score)}</span>
+        {props.largeResult && (
+          <div className="flex-none w-56 flex flex-col justify-center items-center space-y-2">
+            <div style={{ ...appearingAnimation(5) }}>
+              <span className="mr-2">Rank:</span>
+              <span className="text-4xl">{rankStr(props.score)}</span>
+            </div>
+            {props.chainScore === chainScoreRate && (
+              <div className="text-2xl" style={{ ...appearingAnimation(5) }}>
+                <span className="">
+                  {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
+                </span>
+                <span className="ml-2">Chain</span>
+                {props.bigScore === bigScoreRate && (
+                  <span className="font-bold">+</span>
+                )}
+                <span>!</span>
+              </div>
+            )}
+            {props.newRecord > 0 && (
+              <div
+                className={
+                  "transition duration-300 ease-in " +
+                  (showing >= 6 ? "opacity-1 " : "opacity-0 ")
+                }
+              >
+                <span className="text-xl ">New Record!</span>
+                <span className="ml-1">
+                  (+
+                  {Math.floor(props.newRecord)}.
+                  {(Math.floor(props.newRecord * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+                  )
+                </span>
+              </div>
+            )}
           </div>
-          {props.chainScore === chainScoreRate && (
-            <div className="text-2xl" style={{ ...appearingAnimation(5) }}>
-              <span className="">
-                {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
-              </span>
-              <span className="ml-2">Chain</span>
-              {props.bigScore === bigScoreRate && (
-                <span className="font-bold">+</span>
-              )}
-              <span>!</span>
-            </div>
-          )}
-          {props.newRecord > 0 && (
-            <div
-              className={
-                "transition duration-300 ease-in " +
-                (showing >= 6 ? "opacity-1 " : "opacity-0 ")
-              }
-            >
-              <span className="text-xl ">New Record!</span>
-              <span className="ml-1">
-                (+
-                {(Math.floor(props.newRecord * 100) / 100)
-                  .toString()
-                  .padStart(2, "0")}
-                )
-              </span>
-            </div>
-          )}
-        </div>
+        )}
       </div>
       <div className="text-center">
         <Button

@@ -138,6 +138,7 @@ function Play(props: Props) {
     rem,
     playUIScale,
     mobileStatusScale,
+    largeResult,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   const themeContext = useTheme();
@@ -471,6 +472,7 @@ function Play(props: Props) {
                   ? score - bestScoreState
                   : 0
               }
+              largeResult={largeResult}
             />
           ) : ready ? (
             <ReadyMessage
