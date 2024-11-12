@@ -3,11 +3,14 @@ function choice(arr: string[]): string {
 }
 
 export function praiseMessage(score: number): string {
-  if (score >= 80) {
+  if (score >= 90) {
+    // A
     return choice(["Fantastic!", "Amazing!", "Excellent!"]);
-  } else if (score >= 60) {
+  } else if (score >= 70) {
+    // B
     return choice(["Nice job!", "Great!", "Cool!"]);
   } else {
+    // C
     return choice(["Good effort!", "Keep trying!", "Better luck next time!"]);
   }
 }
