@@ -1,71 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFileEntry, updateFileEntry } from "@/api/dbChartFile";
-import { fsDelete, fsRead, fsWrite } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
-import {
-  Chart,
-  chartMaxSize,
-  createBrief,
-  hashPasswd,
-  validateChart,
-} from "@/chartFormat/chart";
+import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
 import { Params } from "next/dist/server/request/params";
+import { MongoClient } from "mongodb";
+import "dotenv/config";
+import { chartToEntry, getChartEntry, zipEntry } from "@/api/chart";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
 
-async function getChart(
-  cid: string,
-  p: string
-): Promise<{ res?: Response; chart?: Chart }> {
-  const fileEntry = await getFileEntry(cid, false);
-  if (fileEntry === null) {
-    return {
-      res: NextResponse.json(
-        { message: "Chart ID Not Found" },
-        { status: 404 }
-      ),
-    };
-  }
-  const fsData = await fsRead(fileEntry.fid, null);
-  if (fsData === null) {
-    return {
-      res: NextResponse.json({ message: "fsRead() failed" }, { status: 500 }),
-    };
-  }
-
-  let chart: Chart;
-  try {
-    chart = msgpack.deserialize(fsData.data);
-    chart = await validateChart(chart);
-  } catch (e) {
-    return {
-      res: NextResponse.json(
-        { message: "invalid chart data" },
-        { status: 500 }
-      ),
-    };
-  }
-
-  if (process.env.NODE_ENV === "development" && p === "bypass") {
-    return { chart };
-  }
-  if (p !== (await hashPasswd(chart.editPasswd))) {
-    return { res: new Response(null, { status: 401 }) };
-  }
-  return { chart };
-}
 export async function GET(
   request: NextRequest,
   context: { params: Promise<Params> }
 ) {
   const cid: string = String((await context.params).cid);
   const passwdHash = new URL(request.url).searchParams.get("p");
-  const { res, chart } = await getChart(cid, passwdHash || "");
-  if (chart) {
+
+  const client = new MongoClient(process.env.MONGODB_URI!);
+  try {
+    await client.connect();
+    const db = client.db("nikochan");
+    let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
+    if (!chart) {
+      return res;
+    }
+    try {
+      chart = await validateChart(chart);
+    } catch (e) {
+      return NextResponse.json(
+        { message: "invalid chart data" },
+        { status: 500 }
+      );
+    }
     return new Response(new Blob([msgpack.serialize(chart)]));
+  } catch (e) {
+    console.error(e);
+    return new Response(null, { status: 500 });
+  } finally {
+    await client.close();
   }
-  return res;
 }
 
 export async function POST(
@@ -74,64 +47,66 @@ export async function POST(
 ) {
   const cid: string = String((await context.params).cid);
   const passwdHash = new URL(request.url).searchParams.get("p");
-  const { res, chart } = await getChart(cid, passwdHash || "");
-  if (!chart) {
-    return res;
-  }
 
-  const chartBuf = await request.arrayBuffer();
-  if (chartBuf.byteLength > chartMaxSize) {
-    return NextResponse.json(
-      {
-        message:
-          `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
-          `Max ${Math.round(chartMaxSize / 1000)}kB`,
-      },
-      { status: 413 }
-    );
-  }
-
-  let newChart: Chart;
+  const client = new MongoClient(process.env.MONGODB_URI!);
   try {
-    newChart = msgpack.deserialize(chartBuf);
-    newChart = await validateChart(newChart);
+    await client.connect();
+    const db = client.db("nikochan");
+    const { res, entry, chart } = await getChartEntry(
+      db,
+      cid,
+      passwdHash || ""
+    );
+    if (!chart) {
+      return res;
+    }
+
+    const chartBuf = await request.arrayBuffer();
+    if (chartBuf.byteLength > chartMaxSize) {
+      return NextResponse.json(
+        {
+          message:
+            `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
+            `Max ${Math.round(chartMaxSize / 1000)}kB`,
+        },
+        { status: 413 }
+      );
+    }
+
+    let newChart: Chart;
+    try {
+      newChart = msgpack.deserialize(chartBuf);
+      newChart = await validateChart(newChart);
+    } catch (e) {
+      console.error(e);
+      return NextResponse.json(
+        { message: "invalid chart data" },
+        { status: 400 }
+      );
+    }
+
+    // update Time
+    const prevHashes = chart.levels.map((l) => l.hash);
+    const newHashes = newChart.levels.map((l) => l.hash);
+    if (newHashes.every((h, i) => h === prevHashes[i])) {
+      newChart.updatedAt = chart.updatedAt;
+    } else {
+      newChart.updatedAt = new Date().getTime();
+    }
+
+    await db.collection("chart").updateOne(
+      { cid },
+      {
+        $set: await zipEntry(chartToEntry(newChart, cid, entry)),
+      }
+    );
+    return new Response(null);
   } catch (e) {
     console.error(e);
-    return NextResponse.json(
-      { message: "invalid chart data" },
-      { status: 400 }
-    );
+    return new Response(null, { status: 500 });
+  } finally {
+    await client.close();
   }
-
-  // update Time
-  const prevHashes = chart.levels.map((l) => l.hash);
-  const newHashes = newChart.levels.map((l) => l.hash);
-  if (newHashes.every((h, i) => h === prevHashes[i])) {
-    newChart.updatedAt = chart.updatedAt;
-  } else {
-    newChart.updatedAt = new Date().getTime();
-  }
-
-  const fileEntry = await getFileEntry(cid, false);
-  if (fileEntry === null) {
-    return NextResponse.json(
-      { message: "Chart ID Not Found" },
-      { status: 404 }
-    );
-  }
-
-  await updateFileEntry(cid, createBrief(newChart));
-  if (
-    !(await fsWrite(
-      fileEntry.fid,
-      null,
-      new Blob([msgpack.serialize(newChart)])
-    ))
-  ) {
-    return NextResponse.json({ message: "fsWrite() failed" }, { status: 500 });
-  }
-
-  return new Response(null);
 }
 
 export async function DELETE(
@@ -140,20 +115,30 @@ export async function DELETE(
 ) {
   const cid: string = String((await context.params).cid);
   const passwdHash = new URL(request.url).searchParams.get("p");
-  const { res, chart } = await getChart(cid, passwdHash || "");
-  if (!chart) {
-    return res;
-  }
 
-  const fileEntry = await getFileEntry(cid, false);
-  if (fileEntry === null) {
-    return NextResponse.json(
-      { message: "Chart ID Not Found" },
-      { status: 404 }
+  const client = new MongoClient(process.env.MONGODB_URI!);
+  try {
+    await client.connect();
+    const db = client.db("nikochan");
+    const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
+    if (!chart) {
+      return res;
+    }
+
+    await db.collection("chart").updateOne(
+      { cid },
+      {
+        $set: {
+          levelsCompressed: "",
+          deleted: true,
+        },
+      }
     );
+    return new Response(null);
+  } catch (e) {
+    console.error(e);
+    return new Response(null, { status: 500 });
+  } finally {
+    await client.close();
   }
-  if (!(await fsDelete(fileEntry.fid, null))) {
-    return NextResponse.json({ message: "fsDelete() failed" }, { status: 500 });
-  }
-  return new Response(null);
 }

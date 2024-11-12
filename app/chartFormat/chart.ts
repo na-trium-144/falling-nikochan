@@ -21,6 +21,9 @@ import { luaAddSpeedChange } from "./lua/speed";
 import { getTimeSec } from "./seq";
 import { stepZero } from "./step";
 
+/**
+ * share時など情報表示に使われるデータ形式
+ */
 export interface ChartBrief {
   ytId: string;
   title: string;
@@ -41,7 +44,7 @@ export interface ChartBrief {
 }
 
 /**
- * 譜面データを保存しておく形式
+ * edit時に使われるデータ形式
  * notes: 1音符1要素
  * rest: 休符
  *   notesそれぞれにstepの情報は入っているので、譜面を読むだけなら無くてもいい

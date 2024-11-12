@@ -16,22 +16,12 @@
 
 ## development
 
-* database + storage
-    * docker-compose.yml にpostgresqlと[seaweedfs](https://github.com/seaweedfs/seaweedfs)を記述してあるので、それを起動すると簡単です
-```sh
-docker compose up
+* MongoDB のサーバーをインストールし、起動してください
+    * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
+* `.env` ファイルにデータベースのurlなどを記述、または環境変数で設定
 ```
-
-* `.env` ファイルにデータベースのurlなどを記述
-    * docker-compose.yml をそのまま使っている場合は以下
+MONGODB_URI="mongodb://localhost:27017"
 ```
-DATABASE_URL="postgresql://postgres:example@localhost:5432/postgres"
-FS_MASTER="http://localhost:9333"
-```
-
-* (install git)
-    * ビルド中にコミットIDを取得する箇所があるので必要です
-
 * backend + frontend
     * working directory はfalling-nikochanのルートにしてください
     * React 19 が正式リリースされるまでの間、 `npm install` または `npm ci` 時に `-f` を指定しないとエラーになります
@@ -42,22 +32,11 @@ npm run dev
 
 ## deploy
 
-* developmentの場合と同様にpostgresqlとseaweedfsを起動して
+* developmentの場合と同様に`.env`ファイルまたは環境変数でMONGODB_URIを設定して
 ```sh
 npm run start
 ```
-
-* データベースの public.LevelBrief テーブルはstart時に削除されます (initDB.js)
-    * ただのキャッシュなので必要なときに再生成されます
-    * そのため LevelBrief のschemaの変更は問題ありませんが、
-    それ以外のテーブルのschemaに破壊的変更が入っている場合は、 `prisma db push` でエラーになります。
-    手動でなんとかしてください。
-* seaweedfsのボリュームを複数起動してバックアップしたい場合は、
-masterのコマンドを `master -defaultReplication=010`,
-volumeのコマンドを `volume ... -rack=rack1 -publicUrl=http://localhost:8080`,
-`volume ... -rack=rack2 -publicUrl=http://localhost:8081`
-などとすればできそう?
 * Dockerを使うこともできます。Dockerfile をビルドするか、ビルド済みのもの(amd64, arm64)が `ghcr.io/na-trium-144/falling-nikochan/falling-nikochan:latest` としてpullできます
     * 別途postgresqlとseaweedfsを起動してください
-    * .env ファイルを用意し、 /root/nikochan/.env としてマウントしてください
+    * .env ファイルは /root/nikochan/.env としてマウントしてください
     * ポート3000で起動します

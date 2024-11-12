@@ -4,18 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "prisma db push && next dev -H 0.0.0.0",
-    "build": "prisma generate && next build",
-    "start": "node ./initDB.js && prisma db push && next start",
-    "lint": "prisma generate && next lint"
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@icon-park/react": "^1.4.2",
-    "@prisma/client": "^5.21.1",
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.36.4",
     "dotenv": "^16.4.5",
     "file-saver": "^2.0.5",
+    "mongodb": "^6.10.0",
     "next": "^15.0.3",
     "react": "^19.0.0-rc-66855b96-20241106",
     "react-ace": "^12.0.0",
@@ -33,9 +33,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "eslint": "^9.14.0",
     "eslint-config-next": "^15.0.3",
-    "pg": "^8.13.1",
     "postcss": "^8",
-    "prisma": "^5.21.1",
     "tailwindcss": "^3.4.14",
     "typescript": "^5"
   },

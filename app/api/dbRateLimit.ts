@@ -1,28 +1,26 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { Db } from "mongodb";
 
 export const rateLimitMin = 10;
 
-export async function updateLastCreate(ip: string) {
-  const rateLimit = await prisma.createRateLimit.findUnique({
-    where: {
-      ip: ip,
-    },
-  });
+interface IpEntry {
+  ip: string;
+  lastCreate: Date;
+}
+
+export async function updateIpLastCreate(db: Db, ip: string): Promise<boolean> {
+  const entry = (await db
+    .collection("rateLimit")
+    .findOne({ ip })) as IpEntry | null;
   if (
-    rateLimit &&
-    new Date().getTime() - rateLimit.lastCreate.getTime() <
-      rateLimitMin * 60 * 1000
+    entry &&
+    new Date().getTime() - entry.lastCreate.getTime() < rateLimitMin * 60 * 1000
   ) {
     return false;
   } else {
-    await prisma.createRateLimit.upsert({
-      where: {
-        ip: ip,
-      },
-      update: {},
-      create: { ip: ip },
-    });
+    const newEntry: IpEntry = { ip, lastCreate: new Date() };
+    await db
+      .collection("rateLimit")
+      .updateOne({ ip }, { $set: newEntry }, { upsert: true });
     return true;
   }
 }

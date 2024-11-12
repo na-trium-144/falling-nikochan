@@ -1,6 +1,5 @@
 .github/
 .next/
-.venv/
 .env
 node_modules/
 data/
