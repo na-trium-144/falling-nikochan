@@ -135,7 +135,10 @@ export default function LevelTab(props: Props) {
               className={
                 i === props.currentLevelIndex
                   ? "text-blue-600 dark:text-blue-400 "
-                  : "hover:text-slate-500 hover:dark:text-stone-400 "
+                  : "hover:text-slate-500 hover:dark:text-stone-400 " +
+                    (level.unlisted
+                      ? "text-slate-400 dark:text-stone-600 "
+                      : "")
               }
               onClick={() => props.setCurrentLevelIndex(i)}
             >
@@ -148,6 +151,7 @@ export default function LevelTab(props: Props) {
                   {level.name}
                 </span>
               )}
+              {level.unlisted && <span className="text-sm mr-2">(非表示)</span>}
               <span
                 className={
                   "inline-block mr-2 " +
@@ -163,7 +167,7 @@ export default function LevelTab(props: Props) {
                 className={
                   "inline-block " +
                   (level.notes.length
-                    ? "text-black dark:text-white "
+                    ? ""
                     : "text-slate-400 dark:text-stone-600 ")
                 }
               >
@@ -188,7 +192,7 @@ export default function LevelTab(props: Props) {
               left
             />
           </p>
-          <p>
+          <p className="mb-2">
             <span>Difficulty:</span>
             {levelTypes.map((t, i) => (
               <CheckBox
@@ -204,6 +208,21 @@ export default function LevelTab(props: Props) {
                 {t}
               </CheckBox>
             ))}
+          </p>
+          <p>
+            <CheckBox
+              value={currentLevel.unlisted}
+              className="ml-0"
+              onChange={() => {
+                currentLevel.unlisted = !currentLevel.unlisted;
+                props.changeChart({ ...props.chart! });
+              }}
+            >
+              このレベルを非表示にする
+            </CheckBox>
+          </p>
+          <p className="ml-6 text-sm">
+            (未完成のレベルなどを共有用リンクから開いたときに表示されないようにできます)
           </p>
         </>
       )}

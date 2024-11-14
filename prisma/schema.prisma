@@ -45,6 +45,7 @@ model LevelBrief {
   bpmMin Float
   bpmMax Float
   length Float
+  unlisted Boolean @default(false)
 }
 
 model CreateRateLimit {

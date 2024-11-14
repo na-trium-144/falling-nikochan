@@ -37,6 +37,7 @@ export interface ChartBrief {
     bpmMin: number;
     bpmMax: number;
     length: number;
+    unlisted: boolean;
   }[];
 }
 
@@ -82,6 +83,7 @@ export interface Level {
   speedChanges: BPMChangeWithLua[];
   signature: SignatureWithLua[];
   lua: string[];
+  unlisted: boolean;
 }
 export const levelTypes = ["Single", "Double", "Maniac"];
 export const levelColors = [
@@ -136,6 +138,7 @@ export function validateLevel(level: Level): Level {
   if (!Array.isArray(level.lua)) throw "level.lua is invalid";
   if (level.lua.filter((l) => typeof l !== "string").length > 0)
     throw "level.lua is invalid";
+  if (typeof level.unlisted !== "boolean") level.unlisted = false;
   return level;
 }
 
@@ -198,6 +201,7 @@ export function emptyLevel(prevLevel?: Level): Level {
     speedChanges: [],
     signature: [],
     lua: [],
+    unlisted: false,
   };
   if (prevLevel) {
     for (const change of prevLevel.bpmChanges) {
@@ -236,6 +240,7 @@ export function copyLevel(level: Level): Level {
     speedChanges: level.speedChanges.map((b) => ({ ...b })),
     signature: level.signature.map((s) => ({ ...s })),
     lua: level.lua.slice(),
+    unlisted: level.unlisted,
   };
 }
 
@@ -252,6 +257,7 @@ export function createBrief(chart: Chart): ChartBrief {
       level.notes.length >= 1
         ? getTimeSec(level.bpmChanges, level.notes[level.notes.length - 1].step)
         : 0,
+    unlisted: level.unlisted,
   }));
   return {
     ytId: chart.ytId,
