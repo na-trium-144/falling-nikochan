@@ -32,7 +32,7 @@ export function convert4To5(chart: Chart4): Chart5 {
     ...chart,
     ver: 5,
     levels: chart.levels.map((l) => {
-      let newLevel: Level = { ...l, signature: [] };
+      let newLevel: Level = { ...l, signature: [], unlisted: false };
       newLevel =
         luaAddBeatChange(newLevel, {
           step: stepZero(),
