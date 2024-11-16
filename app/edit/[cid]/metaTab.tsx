@@ -18,6 +18,7 @@ import { initSession, SessionData } from "@/play/session";
 import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { ExternalLink } from "@/common/extLink";
 import ProgressBar from "@/common/progressBar";
+import YAML from "yaml";
 
 interface Props {
   chart?: Chart;
@@ -189,29 +190,39 @@ export function MetaTab(props: Props2) {
   };
   const download = () => {
     // editPasswdだけ消す
-    const blob = new Blob([
-      msgpack.serialize({ ...props.chart, editPasswd: "" }),
-    ]);
-    const filename = `${props.cid}_${props.chart?.title}.fn${props.chart?.ver}.mpk`;
-    saveAs(blob, filename);
+    const yml = YAML.stringify({ ...props.chart, editPasswd: "" });
+    const filename = `${props.cid}_${props.chart?.title}.fn${props.chart?.ver}.yml`;
+    saveAs(new Blob([yml]), filename);
     setSaveMsg(`保存しました！ (${filename})`);
   };
   const upload = async (e: ChangeEvent) => {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files.length >= 1) {
       const f = target.files[0];
+      const buffer = await f.arrayBuffer();
       setUploadMsg("");
+      let newChart: Chart | null = null;
       try {
-        let newChart = msgpack.deserialize(await f.arrayBuffer());
-        newChart = await validateChart(newChart);
+        newChart = await validateChart(
+          YAML.parse(new TextDecoder().decode(buffer))
+        );
+      } catch (e) {
+        console.error(e);
+        console.warn("fallback to msgpack deserialize");
+        try {
+          newChart = await validateChart(msgpack.deserialize(buffer));
+        } catch (e) {
+          console.error(e);
+          setUploadMsg("ファイルの読み込みに失敗しました");
+        }
+      }
+      if (newChart) {
         if (confirm("このファイルで譜面データを上書きしますか?")) {
           props.setChart({
             ...newChart,
             editPasswd: props.chart?.editPasswd || "",
           });
         }
-      } catch (e) {
-        setUploadMsg(String(e));
       }
       target.value = "";
     }

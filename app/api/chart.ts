@@ -151,7 +151,6 @@ export function entryToChart(entry: ChartEntry): Chart {
     levels: entry.levels.map((level, i) => ({
       name: entry.levelBrief.at(i)?.name || "",
       type: entry.levelBrief.at(i)?.type || "",
-      hash: entry.levelBrief.at(i)?.hash || "",
       unlisted: entry.levelBrief.at(i)?.unlisted || false,
       notes: level.notes,
       rest: level.rest,
