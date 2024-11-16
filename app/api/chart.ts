@@ -72,7 +72,7 @@ export interface ChartEntryCompressed {
   cid: string;
   levelsCompressed: Binary | null;
   deleted: boolean;
-  ver: 6;
+  ver: number;
   offset: number;
   ytId: string;
   title: string;
