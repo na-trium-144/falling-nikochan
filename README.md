@@ -25,9 +25,8 @@ MONGODB_URI="mongodb://localhost:27017"
 ```
 * backend + frontend
     * working directory はfalling-nikochanのルートにしてください
-    * React 19 が正式リリースされるまでの間、 `npm install` または `npm ci` 時に `-f` を指定しないとエラーになります
 ```sh
-npm ci -f
+npm ci
 npm run dev
 ```
 
