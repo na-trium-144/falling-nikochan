@@ -13,7 +13,9 @@ export default async function Page() {
         <span className="inline-block">
           <span className="ml-2">ver.</span>
           <span className="ml-1">{process.env.buildVersion}</span>
-          <span className="ml-1 text-sm">({process.env.buildCommit})</span>
+          {process.env.buildCommit && (
+            <span className="ml-1 text-sm">({process.env.buildCommit})</span>
+          )}
         </span>
         <span className="ml-2 text-sm inline-block">
           Build at {process.env.buildDate}.

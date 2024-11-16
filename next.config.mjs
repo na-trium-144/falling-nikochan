@@ -4,9 +4,14 @@ import { execFileSync } from "node:child_process";
 import packageJson from "./package.json" with { type: "json" };
 
 const date = new Date().toUTCString();
-const commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
-  encoding: "utf8",
-}).trim();
+let commit = "";
+try {
+  commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+} catch (e) {
+  console.error("Failed to get commit hash");
+}
 
 const nextConfig = {
   env: {
