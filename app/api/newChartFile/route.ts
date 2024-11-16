@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // update Time
-    chart.updatedAt = new Date().getTime();
+    const updatedAt = new Date().getTime();
 
     let cid: string;
     while (true) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     await db
       .collection("chart")
-      .insertOne(await zipEntry(chartToEntry(chart, cid)));
+      .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
 
     return NextResponse.json({ cid: cid });
   } catch (e) {

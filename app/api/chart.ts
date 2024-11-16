@@ -72,7 +72,7 @@ export interface ChartEntryCompressed {
   cid: string;
   levelsCompressed: Binary | null;
   deleted: boolean;
-  ver: 5;
+  ver: 6;
   offset: number;
   ytId: string;
   title: string;
@@ -146,7 +146,7 @@ export async function zipEntry(
 export function entryToChart(entry: ChartEntry): Chart {
   return {
     falling: "nikochan",
-    ver: 5,
+    ver: entry.ver,
     levels: entry.levels.map((level, i) => ({
       name: entry.levelBrief.at(i)?.name || "",
       type: entry.levelBrief.at(i)?.type || "",
@@ -164,16 +164,16 @@ export function entryToChart(entry: ChartEntry): Chart {
     composer: entry.composer,
     chartCreator: entry.chartCreator,
     editPasswd: entry.editPasswd,
-    updatedAt: entry.updatedAt,
   };
 }
 
-export function chartToEntry(
+export async function chartToEntry(
   chart: Chart,
   cid: string,
+  updatedAt: number,
   prevEntry?: ChartEntry
-): ChartEntry {
-  const chartBrief = createBrief(chart);
+): Promise<ChartEntry> {
+  const chartBrief = await createBrief(chart, updatedAt);
   return {
     cid,
     deleted: prevEntry?.deleted || false,

@@ -1,8 +1,8 @@
-import { Level } from "../chart";
+import { hash, Level } from "../chart";
 import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command";
 import { luaAddBeatChange } from "../lua/signature";
 import { stepZero } from "../step";
-import { Chart5 } from "./chart5";
+import { Chart5, Level5 } from "./chart5";
 
 export interface Chart4 {
   falling: "nikochan"; // magic
@@ -40,7 +40,13 @@ export function convert4To5(chart: Chart4): Chart5 {
           barNum: 0,
           bars: [[4, 4, 4, 4]],
         }) || newLevel;
-      return newLevel;
+      return { ...newLevel, hash: l.hash };
     }),
   };
+}
+
+export async function hashLevel4(level: Level4) {
+  return await hash(
+    JSON.stringify([level.notes, level.bpmChanges, level.speedChanges])
+  );
 }

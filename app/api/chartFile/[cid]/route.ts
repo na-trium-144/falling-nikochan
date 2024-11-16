@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import msgpack from "@ygoe/msgpack";
-import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
+import {
+  Chart,
+  chartMaxSize,
+  hashLevel,
+  validateChart,
+} from "@/chartFormat/chart";
 import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
@@ -57,7 +62,7 @@ export async function POST(
       cid,
       passwdHash || ""
     );
-    if (!chart) {
+    if (!chart || !entry) {
       return res;
     }
 
@@ -86,18 +91,21 @@ export async function POST(
     }
 
     // update Time
-    const prevHashes = chart.levels.map((l) => l.hash);
-    const newHashes = newChart.levels.map((l) => l.hash);
-    if (newHashes.every((h, i) => h === prevHashes[i])) {
-      newChart.updatedAt = chart.updatedAt;
-    } else {
-      newChart.updatedAt = new Date().getTime();
+    const prevHashes = entry.levelBrief.map((l) => l.hash);
+    const newHashes = await Promise.all(
+      newChart.levels.map((level) => hashLevel(level))
+    );
+    let updatedAt = entry.updatedAt;
+    if (!newHashes.every((h, i) => h === prevHashes[i])) {
+      updatedAt = new Date().getTime();
     }
 
     await db.collection("chart").updateOne(
       { cid },
       {
-        $set: await zipEntry(chartToEntry(newChart, cid, entry)),
+        $set: await zipEntry(
+          await chartToEntry(newChart, cid, updatedAt, entry)
+        ),
       }
     );
     return new Response(null);

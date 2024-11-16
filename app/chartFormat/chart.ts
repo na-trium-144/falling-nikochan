@@ -15,6 +15,7 @@ import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
 import { Chart4, convert4To5, Level4 } from "./legacy/chart4";
+import { Chart5, convert5To6 } from "./legacy/chart5";
 import { luaAddBpmChange } from "./lua/bpm";
 import { luaAddBeatChange } from "./lua/signature";
 import { luaAddSpeedChange } from "./lua/speed";
@@ -65,7 +66,7 @@ export interface ChartBrief {
  */
 export interface Chart {
   falling: "nikochan"; // magic
-  ver: 5;
+  ver: 6;
   levels: Level[];
   offset: number;
   ytId: string;
@@ -73,12 +74,10 @@ export interface Chart {
   composer: string;
   chartCreator: string;
   editPasswd: string;
-  updatedAt: number;
 }
 export interface Level {
   name: string;
   type: string;
-  hash: string;
   notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
@@ -101,14 +100,15 @@ export const levelBgColors = [
 export const chartMaxSize = 1000000;
 
 export async function validateChart(
-  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4
+  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5
 ): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver === 1) chart = convert1To2(chart);
   if (chart.ver === 2) chart = convert2To3(chart);
   if (chart.ver === 3) chart = await convert3To4(chart);
   if (chart.ver === 4) chart = convert4To5(chart);
-  if (chart.ver !== 5) throw "chart.ver is invalid";
+  if (chart.ver === 5) chart = convert5To6(chart);
+  if (chart.ver !== 6) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
   chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
@@ -117,13 +117,11 @@ export async function validateChart(
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
-  if (typeof chart.updatedAt !== "number") chart.updatedAt = 0;
   return chart;
 }
 export function validateLevel(level: Level): Level {
   if (typeof level.name !== "string") throw "level.name is invalid";
-  if (typeof level.hash !== "string") throw "level.hash is invalid";
-  if (typeof level.type !== "string") throw "level.type is invalid";
+  if (!levelTypes.includes(level.type)) throw "level.type is invalid";
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(level.rest)) throw "level.rest is invalid";
@@ -164,11 +162,6 @@ export async function hashLevel(level: Level) {
     ])
   );
 }
-export async function hashLevel4(level: Level4) {
-  return await hash(
-    JSON.stringify([level.notes, level.bpmChanges, level.speedChanges])
-  );
-}
 
 export function validCId(cid: string) {
   return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
@@ -177,7 +170,7 @@ export function validCId(cid: string) {
 export function emptyChart(): Chart {
   let chart: Chart = {
     falling: "nikochan",
-    ver: 5,
+    ver: 6,
     levels: [emptyLevel()],
     offset: 0,
     ytId: "",
@@ -185,7 +178,6 @@ export function emptyChart(): Chart {
     composer: "",
     chartCreator: "",
     editPasswd: "",
-    updatedAt: 0,
   };
   return chart;
 }
@@ -193,7 +185,6 @@ export function emptyChart(): Chart {
 export function emptyLevel(prevLevel?: Level): Level {
   let level: Level = {
     name: "",
-    hash: "",
     type: levelTypes[0],
     notes: [],
     rest: [],
@@ -231,7 +222,6 @@ export function emptyLevel(prevLevel?: Level): Level {
 export function copyLevel(level: Level): Level {
   return {
     name: level.name,
-    hash: level.hash,
     type: level.type,
     notes: level.notes.map((n) => ({ ...n })),
     rest: level.rest.map((r) => ({ ...r })),
@@ -242,11 +232,17 @@ export function copyLevel(level: Level): Level {
   };
 }
 
-export function createBrief(chart: Chart): ChartBrief {
-  const levelBrief = chart.levels.map((level) => ({
+export async function createBrief(
+  chart: Chart,
+  updatedAt?: number
+): Promise<ChartBrief> {
+  const levelHashes = await Promise.all(
+    chart.levels.map((level) => hashLevel(level))
+  );
+  const levelBrief = chart.levels.map((level, i) => ({
     name: level.name,
-    hash: level.hash,
     type: level.type,
+    hash: levelHashes[i],
     noteCount: level.notes.length,
     difficulty: difficulty(level, level.type),
     bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
@@ -262,6 +258,6 @@ export function createBrief(chart: Chart): ChartBrief {
     composer: chart.composer,
     chartCreator: chart.chartCreator,
     levels: levelBrief,
-    updatedAt: chart.updatedAt,
+    updatedAt: updatedAt || 0,
   };
 }

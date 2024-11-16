@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getFileEntry, updatePlayCount } from "@/api/dbChartFile";
-import { fsRead } from "@/api/fsAccess";
 import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
@@ -43,7 +41,7 @@ export async function GET(
     const seq = loadChart(chart, lvIndex);
 
     await db.collection("chart").updateOne({ cid }, { $inc: { playCount: 1 } });
-    
+
     return new Response(new Blob([msgpack.serialize(seq)]));
   } catch (e) {
     console.error(e);

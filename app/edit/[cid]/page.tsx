@@ -151,32 +151,29 @@ export default function Page(context: { params: Promise<Params> }) {
   const [fileSize, setFileSize] = useState<number>(0);
 
   const changeChart = (chart: Chart) => {
-    void (async () => {
-      for (const level of chart.levels) {
-        level.hash = await hashLevel(level);
-      }
-      setHasChange(true);
-      setChart(chart);
-    })();
+    setHasChange(true);
+    setChart(chart);
   };
   useEffect(() => {
-    if (chart) {
-      if (sessionId === undefined) {
-        setSessionId(initSession(null));
+    void (async () => {
+      if (chart) {
+        if (sessionId === undefined) {
+          setSessionId(initSession(null));
+        }
+        const data = {
+          cid: cid,
+          lvIndex: currentLevelIndex,
+          brief: await createBrief(chart),
+          chart: chart,
+          editing: true,
+        };
+        setFileSize(msgpack.serialize(chart).byteLength);
+        setSessionData(data);
+        initSession(data, sessionId);
+        // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
+        // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
       }
-      const data = {
-        cid: cid,
-        lvIndex: currentLevelIndex,
-        brief: createBrief(chart),
-        chart: chart,
-        editing: true,
-      };
-      setFileSize(msgpack.serialize(chart).byteLength);
-      setSessionData(data);
-      initSession(data, sessionId);
-      // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
-      // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
-    }
+    })();
   }, [sessionId, chart, currentLevelIndex, cid]);
 
   const changeLevel = (newLevel: Level | null) => {
