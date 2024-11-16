@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@icon-park/react": "^1.4.2",
+    "@vercel/analytics": "^1.4.0",
+    "@vercel/speed-insights": "^1.1.0",
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.36.4",
     "dotenv": "^16.4.5",
