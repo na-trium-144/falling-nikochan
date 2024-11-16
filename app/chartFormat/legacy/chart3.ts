@@ -1,6 +1,5 @@
-import { hashLevel, hashLevel4 } from "../chart";
 import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command";
-import { Chart4 } from "./chart4";
+import { Chart4, hashLevel4 } from "./chart4";
 
 export interface Chart3 {
   falling: "nikochan"; // magic
