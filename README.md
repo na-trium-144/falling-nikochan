@@ -36,7 +36,3 @@ npm run dev
 ```sh
 npm run start
 ```
-* Dockerを使うこともできます。Dockerfile をビルドするか、ビルド済みのもの(amd64, arm64)が `ghcr.io/na-trium-144/falling-nikochan/falling-nikochan:latest` としてpullできます
-    * 別途postgresqlとseaweedfsを起動してください
-    * .env ファイルは /root/nikochan/.env としてマウントしてください
-    * ポート3000で起動します
