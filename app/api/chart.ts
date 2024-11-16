@@ -13,7 +13,7 @@ import {
   RestStep,
   SignatureWithLua,
 } from "@/chartFormat/command";
-import { Db } from "mongodb";
+import { Binary, Db } from "mongodb";
 import { NextResponse } from "next/server";
 
 /**
@@ -70,7 +70,7 @@ export async function getChartEntry(
  */
 export interface ChartEntryCompressed {
   cid: string;
-  levelsCompressed: string; // base64
+  levelsCompressed: Binary | null;
   deleted: boolean;
   ver: 5;
   offset: number;
@@ -105,14 +105,17 @@ export type ChartEntry = ChartEntryCompressed & { levels: ChartLevelCore[] };
 export async function unzipEntry(
   entry: ChartEntryCompressed
 ): Promise<ChartEntry> {
-  const decodedChart = Buffer.from(entry.levelsCompressed, "base64");
+  if (!entry.levelsCompressed) {
+    throw new Error("levelsCompressed is null");
+  }
+  const decodedChart = entry.levelsCompressed.buffer;
   const decompressedChart = await promisify(gunzip)(decodedChart);
   const levels: ChartLevelCore[] = JSON.parse(
     new TextDecoder().decode(decompressedChart)
   );
   return {
     ...entry,
-    levelsCompressed: "",
+    levelsCompressed: null,
     levels,
   };
 }
@@ -120,7 +123,9 @@ export async function unzipEntry(
 export async function zipEntry(
   entry: ChartEntry
 ): Promise<ChartEntryCompressed> {
-  const levelsCompressed = await promisify(gzip)(JSON.stringify(entry.levels));
+  const levelsCompressed: Buffer = await promisify(gzip)(
+    JSON.stringify(entry.levels)
+  );
   return {
     cid: entry.cid,
     deleted: entry.deleted,
@@ -134,7 +139,7 @@ export async function zipEntry(
     updatedAt: entry.updatedAt,
     playCount: entry.playCount,
     levelBrief: entry.levelBrief,
-    levelsCompressed: levelsCompressed.toString("base64"),
+    levelsCompressed: new Binary(levelsCompressed),
   };
 }
 
@@ -173,7 +178,7 @@ export function chartToEntry(
     cid,
     deleted: prevEntry?.deleted || false,
     playCount: prevEntry?.playCount || 0,
-    levelsCompressed: "",
+    levelsCompressed: null,
     levels: chart.levels.map((level) => ({
       notes: level.notes,
       rest: level.rest,
