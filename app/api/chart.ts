@@ -90,6 +90,7 @@ export interface ChartEntryCompressed {
     bpmMin: number;
     bpmMax: number;
     length: number;
+    unlisted: boolean;
   }[];
 }
 export interface ChartLevelCore {
@@ -151,6 +152,7 @@ export function entryToChart(entry: ChartEntry): Chart {
       name: entry.levelBrief.at(i)?.name || "",
       type: entry.levelBrief.at(i)?.type || "",
       hash: entry.levelBrief.at(i)?.hash || "",
+      unlisted: entry.levelBrief.at(i)?.unlisted || false,
       notes: level.notes,
       rest: level.rest,
       bpmChanges: level.bpmChanges,

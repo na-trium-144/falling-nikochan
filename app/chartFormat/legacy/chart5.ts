@@ -29,11 +29,16 @@ export interface Level5 {
   speedChanges: BPMChangeWithLua[];
   signature: SignatureWithLua[];
   lua: string[];
+  unlisted?: boolean;
 }
 
 export function convert5To6(chart: Chart5): Chart6 {
   return {
     ...chart,
+    levels: chart.levels.map((level) => ({
+      ...level,
+      unlisted: !!level.unlisted,
+    })),
     ver: 6,
   };
 }
