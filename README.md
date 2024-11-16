@@ -18,6 +18,7 @@
 
 * MongoDB のサーバーをインストールし、起動してください
     * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
+    * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
 * `.env` ファイルにデータベースのurlなどを記述、または環境変数で設定
 ```
 MONGODB_URI="mongodb://localhost:27017"

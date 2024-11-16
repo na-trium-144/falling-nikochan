@@ -5,6 +5,7 @@ import { loadChart } from "@/chartFormat/seq";
 import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "@/api/chart";
+import "dotenv/config";
 
 export async function GET(
   request: NextRequest,

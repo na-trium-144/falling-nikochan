@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { entryToBrief, getChartEntry } from "../chart";
 import { MongoClient } from "mongodb";
+import "dotenv/config";
 
 export async function getBrief(
   cid: string,

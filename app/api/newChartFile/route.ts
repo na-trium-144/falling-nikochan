@@ -5,6 +5,7 @@ import { rateLimitMin, updateIpLastCreate } from "../dbRateLimit";
 import { headers } from "next/headers";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "../chart";
+import "dotenv/config";
 
 export async function GET() {
   const headersList = await headers();
