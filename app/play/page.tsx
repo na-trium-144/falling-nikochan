@@ -348,35 +348,12 @@ function Play(props: Props) {
     setTimeout(() => setBarFlash(false), 100);
   };
 
-  const [marginTop, setMarginTop] = useState<number>(0);
-  useEffect(() => {
-    // iOS用。
-    // marginBottom=80を追加しユーザーが上にスクロールすることでアドレスバーが消え、その後ゲーム画面をスクロール位置に持ってくる
-    // scrollToとかでjavascriptの側からスクロールさせようとすると自動的にアドレスバーが表示されてしまってうまくいかなかった
-    if (isTouch) {
-      let t: null | ReturnType<typeof setTimeout> = null;
-      const onScroll = () => {
-        if (t !== null) {
-          clearTimeout(t);
-        }
-        console.log(document.documentElement.scrollTop);
-        t = setTimeout(
-          () => setMarginTop(document.documentElement.scrollTop),
-          50
-        );
-      };
-      window.addEventListener("scroll", onScroll);
-      return () => window.removeEventListener("scroll", onScroll);
-    }
-  }, [isTouch]);
-
   return (
     <main
       className={
         "overflow-hidden w-screen h-dvh relative select-none flex flex-col " +
         (chartPlaying ? "touch-none " : "touch-pan-y ")
       }
-      style={{ marginTop, marginBottom: isTouch ? 80 : 0 }}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
