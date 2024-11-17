@@ -27,7 +27,7 @@ export function IndexMain(props: Props) {
   // const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
 
   return (
-    <main className="flex flex-col w-screen overflow-x-hidden min-h-screen h-max">
+    <main className="flex flex-col w-screen overflow-x-hidden min-h-dvh h-max">
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
           <Header>{tabTitles[props.tab]}</Header>
@@ -50,7 +50,7 @@ export function IndexMain(props: Props) {
       </Link>
       <div
         className={
-          "main-wide:max-h-screen main-wide:overflow-hidden main-wide:mb-3 " +
+          "main-wide:max-h-dvh main-wide:overflow-hidden main-wide:mb-3 " +
           "shrink-0 basis-56 grow " +
           "flex flex-row items-stretch justify-center px-6 "
         }
