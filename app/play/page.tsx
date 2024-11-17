@@ -373,7 +373,7 @@ function Play(props: Props) {
   return (
     <main
       className={
-        "overflow-hidden w-screen h-screen relative select-none flex flex-col " +
+        "overflow-hidden w-screen h-dvh relative select-none flex flex-col " +
         (chartPlaying ? "touch-none " : "touch-pan-y ")
       }
       style={{ marginTop, marginBottom: isTouch ? 80 : 0 }}

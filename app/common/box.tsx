@@ -39,7 +39,7 @@ export function CenterBoxOnlyPage(props: {
   children: ReactNode | ReactNode[];
 }) {
   return (
-    <main className="w-screen h-screen">
+    <main className="w-screen h-dvh">
       <CenterBox>{props.children}</CenterBox>
       <ThemeHandler />
     </main>

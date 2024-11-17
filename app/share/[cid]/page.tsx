@@ -50,7 +50,7 @@ export default async function ShareChart(context: { params: Promise<Params> }) {
   }
 
   return (
-    <main className="flex flex-col items-center w-full min-h-screen h-max">
+    <main className="flex flex-col items-center w-full min-h-dvh h-max">
       <Header className="main-wide:hidden">ID: {cid}</Header>
       <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
         <Box
