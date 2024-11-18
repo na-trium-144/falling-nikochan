@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import { description, ogDefault, twitterDefault } from "./common/title";
 
-const description =
-  "Simple and cute rhythm game, where anyone can create and share charts.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nikochan.natrium144.org"),
@@ -27,20 +26,14 @@ export const metadata: Metadata = {
       template: "%s",
       default: "Falling Nikochan",
     },
-    description,
-    // todo: images
-    type: "website",
-    locale: "ja_JP",
-    siteName: "Falling Nikochan",
+    ...ogDefault,
   },
   twitter: {
-    card: "summary",
     title: {
       template: "%s | Falling Nikochan",
       default: "Falling Nikochan",
     },
-    description,
-    // images
+    ...twitterDefault,
   },
   robots: {
     index: true,
