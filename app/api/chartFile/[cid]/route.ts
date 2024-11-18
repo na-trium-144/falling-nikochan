@@ -10,6 +10,7 @@ import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 import { chartToEntry, getChartEntry, zipEntry } from "@/api/chart";
+import { revalidateTag } from "next/cache";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
@@ -27,7 +28,7 @@ export async function GET(
     const db = client.db("nikochan");
     let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return res;
+      return NextResponse.json({message: res?.message}, {status: res?.status || 500});
     }
     try {
       chart = await validateChart(chart);
@@ -63,7 +64,10 @@ export async function POST(
       passwdHash || ""
     );
     if (!chart || !entry) {
-      return res;
+      return NextResponse.json(
+        { message: res?.message },
+        { status: res?.status || 500 }
+      );
     }
 
     const chartBuf = await request.arrayBuffer();
@@ -108,6 +112,7 @@ export async function POST(
         ),
       }
     );
+    revalidateTag("brief");
     return new Response(null);
   } catch (e) {
     console.error(e);
@@ -130,7 +135,7 @@ export async function DELETE(
     const db = client.db("nikochan");
     const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return res;
+      return NextResponse.json({message: res?.message}, {status: res?.status || 500});
     }
 
     await db.collection("chart").updateOne(
@@ -142,6 +147,7 @@ export async function DELETE(
         },
       }
     );
+    revalidateTag("brief");
     return new Response(null);
   } catch (e) {
     console.error(e);

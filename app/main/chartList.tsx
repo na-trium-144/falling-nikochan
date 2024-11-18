@@ -6,13 +6,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface Props {
-  recentCId: string[];
-  recentCIdAdditional: string[];
-  recentBrief: {
-    [key in string]: ChartBrief;
-  };
-  fetching: boolean;
-  fetchingAdditional: boolean;
+  recentBrief?: { cid?: string; brief?: ChartBrief }[];
+  hasRecentAdditional: number;
+  recentBriefAdditional?: { cid?: string; brief?: ChartBrief }[];
   fetchAdditional: () => void;
   creator?: boolean;
   href: (cid: string) => string;
@@ -21,50 +17,58 @@ interface Props {
 export function ChartList(props: Props) {
   const [additionalOpen, setAdditionalOpen] = useState<boolean>(false);
 
+  const fetching = props.recentBrief === undefined;
+  const fetchingAdditional = props.recentBriefAdditional === undefined;
   return (
     <>
-      <p className={"pl-2 " + (props.fetching ? "" : "hidden ")}>
+      <p className={"pl-2 " + (fetching ? "" : "hidden ")}>
         <LoadingSlime />
         Loading...
       </p>
-      <div className={props.fetching ? "hidden " : ""}>
-        {props.recentCId.length > 0 ? (
+      <div className={fetching ? "hidden " : ""}>
+        {props.recentBrief && props.recentBrief.length > 0 ? (
           <>
             <ul className="ml-3">
-              {props.recentCId.map((cid) => (
-                <ChartListItem
-                  key={cid}
-                  cid={cid}
-                  brief={props.recentBrief[cid]}
-                  href={props.href(cid)}
-                  creator={props.creator}
-                  newTab={props.newTab}
-                />
-              ))}
+              {props.recentBrief.map(
+                ({ cid, brief }) =>
+                  cid && (
+                    <ChartListItem
+                      key={cid}
+                      cid={cid}
+                      brief={brief}
+                      href={props.href(cid)}
+                      creator={props.creator}
+                      newTab={props.newTab}
+                    />
+                  )
+              )}
             </ul>
-            {props.recentCIdAdditional.length > 0 &&
+            {props.hasRecentAdditional > 0 &&
               (additionalOpen ? (
                 <>
                   <p
                     className={
-                      "mt-1 pl-2 " + (props.fetchingAdditional ? "" : "hidden ")
+                      "mt-1 pl-2 " + (fetchingAdditional ? "" : "hidden ")
                     }
                   >
                     <LoadingSlime />
                     Loading...
                   </p>
-                  <div className={props.fetchingAdditional ? "hidden " : ""}>
+                  <div className={fetchingAdditional ? "hidden " : ""}>
                     <ul className="ml-3">
-                      {props.recentCIdAdditional.map((cid) => (
-                        <ChartListItem
-                          key={cid}
-                          cid={cid}
-                          brief={props.recentBrief[cid]}
-                          href={props.href(cid)}
-                          creator={props.creator}
-                          newTab={props.newTab}
-                        />
-                      ))}
+                      {props.recentBriefAdditional?.map(
+                        ({ cid, brief }) =>
+                          cid && (
+                            <ChartListItem
+                              key={cid}
+                              cid={cid}
+                              brief={brief}
+                              href={props.href(cid)}
+                              creator={props.creator}
+                              newTab={props.newTab}
+                            />
+                          )
+                      )}
                     </ul>
                   </div>
                 </>
@@ -73,7 +77,7 @@ export function ChartList(props: Props) {
                   className={"block relative ml-5 mt-1 " + linkStyle1}
                   onClick={() => {
                     setAdditionalOpen(!additionalOpen);
-                    if (props.fetchingAdditional) {
+                    if (fetchingAdditional) {
                       props.fetchAdditional();
                     }
                   }}
@@ -83,9 +87,7 @@ export function ChartList(props: Props) {
                     theme="filled"
                   />
                   <span className="ml-5">すべて表示</span>
-                  <span className="ml-1">
-                    ({props.recentCIdAdditional.length})
-                  </span>
+                  <span className="ml-1">({props.hasRecentAdditional})</span>
                 </button>
               ))}
           </>

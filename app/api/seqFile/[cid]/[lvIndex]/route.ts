@@ -20,7 +20,10 @@ export async function GET(
     const db = client.db("nikochan");
     let { res, entry, chart } = await getChartEntry(db, cid, null);
     if (!chart) {
-      return res!;
+      return NextResponse.json(
+        { message: res?.message },
+        { status: res?.status || 500 }
+      );
     }
 
     try {

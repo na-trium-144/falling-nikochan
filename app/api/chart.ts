@@ -14,7 +14,6 @@ import {
   SignatureWithLua,
 } from "@/chartFormat/command";
 import { Binary, Db } from "mongodb";
-import { NextResponse } from "next/server";
 
 /**
  * pをnullにするとパスワードのチェックを行わない。
@@ -23,16 +22,17 @@ export async function getChartEntry(
   db: Db,
   cid: string,
   p: string | null
-): Promise<{ res?: Response; entry?: ChartEntry; chart?: Chart }> {
+): Promise<{
+  res?: { message: string; status: number };
+  entry?: ChartEntry;
+  chart?: Chart;
+}> {
   const entryCompressed = (await db
     .collection("chart")
     .findOne({ cid })) as ChartEntryCompressed | null;
   if (entryCompressed === null || entryCompressed.deleted) {
     return {
-      res: NextResponse.json(
-        { message: "Chart ID Not Found" },
-        { status: 404 }
-      ),
+      res: { message: "Chart ID Not Found", status: 404 },
     };
   }
 
@@ -44,10 +44,7 @@ export async function getChartEntry(
     chart = await validateChart(chart);
   } catch (e) {
     return {
-      res: NextResponse.json(
-        { message: "invalid chart data" },
-        { status: 500 }
-      ),
+      res: { message: "invalid chart data", status: 500 },
     };
   }
 
@@ -58,7 +55,7 @@ export async function getChartEntry(
     return { entry, chart };
   }
   if (p !== (await hashPasswd(chart.editPasswd))) {
-    return { res: new Response(null, { status: 401 }) };
+    return { res: { message: "bad password", status: 401 } };
   }
   return { entry, chart };
 }
