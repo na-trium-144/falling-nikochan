@@ -12,55 +12,43 @@ import { LoadingSlime } from "@/common/loadingSlime";
 import { ExternalLink } from "@/common/extLink";
 
 export default function EditTab() {
-  const [recentCId, setRecentCId] = useState<string[]>([]);
-  const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
-  const [recentBrief, setRecentBrief] = useState<{
-    [key in string]: ChartBrief;
-  }>({});
-  const [fetching, setFetching] = useState<number>(1);
-  const [fetchingAdditional, setFetchingAdditional] = useState<number>(1);
   const router = useRouter();
 
+  const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
+  const [recentBrief, setRecentBrief] =
+    useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [recentBriefAdditional, setRecentBriefAdditional] =
+    useState<{ cid?: string; brief?: ChartBrief }[]>();
+
   const fetchBrief = useCallback(async (cid: string) => {
-    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
     if (res.ok) {
       // cidからタイトルなどを取得
       const resBody = await res.json();
-      setRecentBrief((recentBrief) => {
-        recentBrief[cid] = resBody;
-        return { ...recentBrief };
-      });
+      return { cid, brief: resBody as ChartBrief };
     } else if (res.status === 404) {
-      // 存在しない譜面のデータは消す
-      removeRecent("play", cid);
-      setRecentCId((recentCId) => recentCId.filter((oldCId) => oldCId !== cid));
-      setRecentCIdAdditional((recentCId) =>
-        recentCId.filter((oldCId) => oldCId !== cid)
-      );
+      return {};
+    } else {
+      return { cid };
     }
   }, []);
   useEffect(() => {
-    const recentCIdAll = getRecent("edit").reverse();
+    const recentCIdAll = getRecent("play").reverse();
     const recentCId = recentCIdAll.slice(0, 5);
     const recentCIdAdditional = recentCIdAll.slice(5);
-    setRecentCId(recentCId);
     setRecentCIdAdditional(recentCIdAdditional);
-    setFetching(recentCId.length);
-    setFetchingAdditional(recentCIdAdditional.length);
-    for (const cid of recentCId) {
-      void (async () => {
-        await fetchBrief(cid);
-        setFetching((fetching) => fetching - 1);
-      })();
-    }
+    void (async () => {
+      setRecentBrief(
+        await Promise.all(recentCId.map((cid) => fetchBrief(cid)))
+      );
+    })();
   }, [fetchBrief]);
   const fetchAdditional = () => {
-    for (const cid of recentCIdAdditional) {
-      void (async () => {
-        await fetchBrief(cid);
-        setFetchingAdditional((fetchingAdditional) => fetchingAdditional - 1);
-      })();
-    }
+    void (async () => {
+      setRecentBriefAdditional(
+        await Promise.all(recentCIdAdditional.map((cid) => fetchBrief(cid)))
+      );
+    })();
   };
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
@@ -123,11 +111,9 @@ export default function EditTab() {
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
         <ChartList
-          recentCId={recentCId}
-          recentCIdAdditional={recentCIdAdditional}
           recentBrief={recentBrief}
-          fetching={fetching > 0}
-          fetchingAdditional={fetchingAdditional > 0}
+          recentBriefAdditional={recentBriefAdditional}
+          hasRecentAdditional={recentCIdAdditional.length}
           fetchAdditional={fetchAdditional}
           href={(cid) => `/edit/${cid}`}
           newTab

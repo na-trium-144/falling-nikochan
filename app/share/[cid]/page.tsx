@@ -1,4 +1,3 @@
-import { ChartBrief } from "@/chartFormat/chart";
 import Header from "@/common/header";
 import { Box, Error } from "@/common/box";
 import Footer from "@/common/footer";
@@ -10,14 +9,8 @@ import { Params } from "next/dist/server/request/params";
 
 export async function generateMetadata(context: { params: Promise<Params> }) {
   const cid = String((await context.params).cid);
-  let brief: ChartBrief | undefined = undefined;
 
-  // const res = await fetch(`/api/brief/${cid}?levels=1`, { cache: "no-store" });
-  const res = await getBrief(cid, true);
-  if (res.ok) {
-    // cidからタイトルなどを取得
-    brief = await res.json();
-  }
+  const { res, brief } = await getBrief(cid, true);
   if (brief) {
     return metaDataTitle(pageTitle(cid, brief));
   } else {
@@ -27,26 +20,10 @@ export async function generateMetadata(context: { params: Promise<Params> }) {
 
 export default async function ShareChart(context: { params: Promise<Params> }) {
   const cid = String((await context.params).cid);
-  let brief: ChartBrief | undefined = undefined;
-  let errorMsg: string | undefined = undefined;
-  let errorStatus: number | undefined = undefined;
-
-  // const res = await fetch(`/api/brief/${cid}?levels=1`, { cache: "no-store" });
-  const res = await getBrief(cid, true);
-  if (res.ok) {
-    // cidからタイトルなどを取得
-    brief = await res.json();
-  } else {
-    errorStatus = res.status;
-    try {
-      errorMsg = String((await res.json()).message);
-    } catch {
-      errorMsg = "";
-    }
-  }
+  const { res, brief } = await getBrief(cid, true);
 
   if (!brief) {
-    return <Error status={errorStatus} message={errorMsg} />;
+    return <Error status={res?.status || 500} message={res?.message || ""} />;
   }
 
   return (

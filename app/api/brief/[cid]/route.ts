@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getBrief } from "../brief";
 import { Params } from "next/dist/server/request/params";
 
@@ -10,5 +10,13 @@ export async function GET(
   const includeLevels: boolean = !!Number(
     new URL(request.url).searchParams.get("levels")
   );
-  return getBrief(cid, includeLevels);
+  const { res, brief } = await getBrief(cid, includeLevels);
+  if (brief) {
+    return NextResponse.json(brief);
+  } else {
+    return NextResponse.json(
+      { message: res?.message },
+      { status: res?.status || 500 }
+    );
+  }
 }

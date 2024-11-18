@@ -12,59 +12,45 @@ import { Youtube } from "@icon-park/react";
 import { ExternalLink } from "@/common/extLink";
 
 export default function PlayTab(props: {
-  sampleCId: string[];
-  originalCId: string[];
-  sampleBrief: { [key in string]: ChartBrief };
+  sampleBrief: { cid: string; brief: ChartBrief | undefined }[];
+  originalBrief: { cid: string; brief: ChartBrief | undefined }[];
 }) {
-  const [recentCId, setRecentCId] = useState<string[]>([]);
   const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
-  const [recentBrief, setRecentBrief] = useState<{
-    [key in string]: ChartBrief;
-  }>({});
-  const [fetching, setFetching] = useState<number>(1);
-  const [fetchingAdditional, setFetchingAdditional] = useState<number>(1);
+  const [recentBrief, setRecentBrief] =
+    useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [recentBriefAdditional, setRecentBriefAdditional] =
+    useState<{ cid?: string; brief?: ChartBrief }[]>();
   const router = useRouter();
 
   const fetchBrief = useCallback(async (cid: string) => {
-    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
     if (res.ok) {
       // cidからタイトルなどを取得
       const resBody = await res.json();
-      setRecentBrief((recentBrief) => {
-        recentBrief[cid] = resBody;
-        return { ...recentBrief };
-      });
+      return { cid, brief: resBody as ChartBrief };
     } else if (res.status === 404) {
-      // 存在しない譜面のデータは消す
-      removeRecent("play", cid);
-      setRecentCId((recentCId) => recentCId.filter((oldCId) => oldCId !== cid));
-      setRecentCIdAdditional((recentCId) =>
-        recentCId.filter((oldCId) => oldCId !== cid)
-      );
+      return {};
+    } else {
+      return { cid };
     }
   }, []);
   useEffect(() => {
     const recentCIdAll = getRecent("play").reverse();
     const recentCId = recentCIdAll.slice(0, 5);
     const recentCIdAdditional = recentCIdAll.slice(5);
-    setRecentCId(recentCId);
     setRecentCIdAdditional(recentCIdAdditional);
-    setFetching(recentCId.length);
-    setFetchingAdditional(recentCIdAdditional.length);
-    for (const cid of recentCId) {
-      void (async () => {
-        await fetchBrief(cid);
-        setFetching((fetching) => fetching - 1);
-      })();
-    }
+    void (async () => {
+      setRecentBrief(
+        await Promise.all(recentCId.map((cid) => fetchBrief(cid)))
+      );
+    })();
   }, [fetchBrief]);
   const fetchAdditional = () => {
-    for (const cid of recentCIdAdditional) {
-      void (async () => {
-        await fetchBrief(cid);
-        setFetchingAdditional((fetchingAdditional) => fetchingAdditional - 1);
-      })();
-    }
+    void (async () => {
+      setRecentBriefAdditional(
+        await Promise.all(recentCIdAdditional.map((cid) => fetchBrief(cid)))
+      );
+    })();
   };
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
@@ -131,11 +117,9 @@ export default function PlayTab(props: {
           最近プレイした譜面
         </h3>
         <ChartList
-          recentCId={recentCId}
-          recentCIdAdditional={recentCIdAdditional}
           recentBrief={recentBrief}
-          fetching={fetching > 0}
-          fetchingAdditional={fetchingAdditional > 0}
+          recentBriefAdditional={recentBriefAdditional}
+          hasRecentAdditional={recentCIdAdditional.length}
           fetchAdditional={fetchAdditional}
           creator
           href={(cid) => `/share/${cid}`}
@@ -160,20 +144,20 @@ export default function PlayTab(props: {
           で譜面を公開しています。
         </p>
         <ul className={"list-disc list-inside ml-3 "}>
-          {props.originalCId.map((cid) => (
+          {props.originalBrief.map(({ cid, brief }) => (
             <ChartListItem
               key={cid}
               cid={cid}
-              brief={props.sampleBrief[cid]}
+              brief={brief}
               href={`/share/${cid}`}
               original
             />
           ))}
-          {props.sampleCId.map((cid) => (
+          {props.sampleBrief.map(({ cid, brief }) => (
             <ChartListItem
               key={cid}
               cid={cid}
-              brief={props.sampleBrief[cid]}
+              brief={brief}
               href={`/share/${cid}`}
             />
           ))}
