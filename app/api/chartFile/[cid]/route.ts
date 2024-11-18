@@ -10,7 +10,7 @@ import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 import { chartToEntry, getChartEntry, zipEntry } from "@/api/chart";
-import { revalidateTag } from "next/cache";
+import { revalidateBrief } from "@/api/brief/brief";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
@@ -112,7 +112,7 @@ export async function POST(
         ),
       }
     );
-    revalidateTag("brief");
+    revalidateBrief();
     return new Response(null);
   } catch (e) {
     console.error(e);
@@ -147,7 +147,7 @@ export async function DELETE(
         },
       }
     );
-    revalidateTag("brief");
+    revalidateBrief();
     return new Response(null);
   } catch (e) {
     console.error(e);

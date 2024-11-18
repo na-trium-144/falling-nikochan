@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "../chart";
 import "dotenv/config";
-import { revalidateTag } from "next/cache";
+import { revalidateBrief } from "../brief/brief";
 
 export async function GET() {
   const headersList = await headers();
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     await db
       .collection("chart")
       .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
-    revalidateTag("brief");
+    revalidateBrief();
 
     return NextResponse.json({ cid: cid });
   } catch (e) {

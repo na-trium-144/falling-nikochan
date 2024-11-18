@@ -33,11 +33,6 @@ export default async function PlayTabSSR() {
     })
   );
 
-  // Static Rendering ではなくSSRにさせるため、無意味なfetchをする
-  try {
-    await fetch("localhost:0", { cache: "no-store" });
-  } catch {}
-
   return (
     <PlayTab
       sampleBrief={await sampleBriefPromise}

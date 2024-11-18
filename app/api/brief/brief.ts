@@ -1,7 +1,7 @@
 import { entryToBrief, getChartEntry } from "../chart";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
-import { unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { ChartBrief } from "@/chartFormat/chart";
 
 const getBriefCache = unstable_cache(
@@ -24,6 +24,11 @@ const getBriefCache = unstable_cache(
   { tags: ["brief"], revalidate: false }
 );
 // chartFileとnewChartFileのPOSTでrevalidateする
+export function revalidateBrief(){
+  console.warn("revalidate brief");
+  revalidateTag("brief");
+  revalidatePath("/main/play");
+}
 
 export async function getBrief(
   cid: string,
