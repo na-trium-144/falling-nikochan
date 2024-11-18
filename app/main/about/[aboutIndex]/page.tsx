@@ -8,8 +8,20 @@ import { AboutContent4 } from "./4-level";
 import { AboutContent5 } from "./5-judge";
 import { Params } from "next/dist/server/request/params";
 
-const aboutTitles = ["", "概要", "遊び方", "譜面を作ろう", "難易度について", "ゲームの仕様"];
+const aboutTitles = [
+  "",
+  "概要",
+  "遊び方",
+  "譜面を作ろう",
+  "難易度について",
+  "ゲームの仕様",
+];
 const maxIndex = 5;
+
+export const dynamicParams = false;
+export function generateStaticParams() {
+  return Array.from(new Array(maxIndex)).map((_, i) => ({ aboutIndex: (i + 1).toString() }));
+}
 
 export async function generateMetadata(context: { params: Promise<Params> }) {
   const aboutIndex = Number((await context.params).aboutIndex);
