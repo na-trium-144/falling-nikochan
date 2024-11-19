@@ -33,7 +33,7 @@ export default function EditTab() {
     }
   }, []);
   useEffect(() => {
-    const recentCIdAll = getRecent("play").reverse();
+    const recentCIdAll = getRecent("edit").reverse();
     const recentCId = recentCIdAll.slice(0, 5);
     const recentCIdAdditional = recentCIdAll.slice(5);
     setRecentCIdAdditional(recentCIdAdditional);
