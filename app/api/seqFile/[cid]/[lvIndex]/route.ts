@@ -6,6 +6,7 @@ import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "@/api/chart";
 import "dotenv/config";
+import { revalidateBrief } from "@/api/brief/brief";
 
 export async function GET(
   request: NextRequest,
@@ -45,6 +46,7 @@ export async function GET(
     const seq = loadChart(chart, lvIndex);
 
     await db.collection("chart").updateOne({ cid }, { $inc: { playCount: 1 } });
+    revalidateBrief(cid);
 
     return new Response(new Blob([msgpack.serialize(seq)]));
   } catch (e) {
