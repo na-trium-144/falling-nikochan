@@ -28,7 +28,10 @@ export async function GET(
     const db = client.db("nikochan");
     let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return NextResponse.json({message: res?.message}, {status: res?.status || 500});
+      return NextResponse.json(
+        { message: res?.message },
+        { status: res?.status || 500 }
+      );
     }
     try {
       chart = await validateChart(chart);
@@ -112,7 +115,7 @@ export async function POST(
         ),
       }
     );
-    revalidateBrief();
+    revalidateBrief(cid);
     return new Response(null);
   } catch (e) {
     console.error(e);
@@ -135,7 +138,10 @@ export async function DELETE(
     const db = client.db("nikochan");
     const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return NextResponse.json({message: res?.message}, {status: res?.status || 500});
+      return NextResponse.json(
+        { message: res?.message },
+        { status: res?.status || 500 }
+      );
     }
 
     await db.collection("chart").updateOne(
@@ -147,7 +153,7 @@ export async function DELETE(
         },
       }
     );
-    revalidateBrief();
+    revalidateBrief(cid);
     return new Response(null);
   } catch (e) {
     console.error(e);

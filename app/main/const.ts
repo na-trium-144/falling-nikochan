@@ -12,3 +12,6 @@ export const tabURLs = [
   "/main/edit",
   "/main/policies",
 ];
+
+export const originalCId = ["602399"];
+export const sampleCId = ["596134", "592994", "488006"];
