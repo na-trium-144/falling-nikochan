@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     await db
       .collection("chart")
       .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
-    revalidateBrief();
+    revalidateBrief(cid);
 
     return NextResponse.json({ cid: cid });
   } catch (e) {

@@ -1,9 +1,7 @@
 import { ChartBrief } from "@/chartFormat/chart";
 import PlayTab from "./clientPage";
 import { getBrief } from "@/api/brief/brief";
-
-const originalCId = ["602399"];
-const sampleCId = ["596134", "592994", "488006"];
+import { originalCId, sampleCId } from "../const";
 
 export default async function PlayTabSSR() {
   const originalBriefPromise = Promise.all(
@@ -12,9 +10,9 @@ export default async function PlayTabSSR() {
       if (brief) {
         return { cid, brief };
       } else {
-        console.warn(
-          `Failed to fetch brief of ${cid}: ${res?.status} ${res?.message}`
-        );
+        // console.warn(
+        //   `Failed to fetch brief of ${cid}: ${res?.status} ${res?.message}`
+        // );
         return { cid, brief: undefined };
       }
     })
@@ -25,9 +23,9 @@ export default async function PlayTabSSR() {
       if (brief) {
         return { cid, brief };
       } else {
-        console.warn(
-          `Failed to fetch brief of ${cid}: ${res?.status} ${res?.message}`
-        );
+        // console.warn(
+        //   `Failed to fetch brief of ${cid}: ${res?.status} ${res?.message}`
+        // );
         return { cid, brief: undefined };
       }
     })
