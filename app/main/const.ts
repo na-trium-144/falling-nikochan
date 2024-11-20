@@ -13,5 +13,5 @@ export const tabURLs = [
   "/main/policies",
 ];
 
-export const originalCId = ["602399"];
-export const sampleCId = ["596134", "592994", "488006"];
+export const originalCId = ["602399", "983403"];
+export const sampleCId = ["596134", "592994", "488006", "850858", "768743"];
