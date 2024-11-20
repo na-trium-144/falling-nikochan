@@ -20,6 +20,7 @@ const nextConfig = {
     buildDate: date,
     buildCommit: commit,
     buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
+    ASSET_PREFIX: process.env.ASSET_PREFIX || "",
   },
   webpack: (config, options) => {
     config.resolve = {

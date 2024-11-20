@@ -125,7 +125,10 @@ export function AboutContent2() {
             }}
           >
             <img
-              src={`/nikochan${[0, 0, 1][nikochanPhase]}.svg`}
+              src={
+                process.env.ASSET_PREFIX +
+                `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+              }
               className="w-full h-full "
             />
           </div>
@@ -222,7 +225,10 @@ export function AboutContent2() {
             }}
           >
             <img
-              src={`/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg`}
+              src={
+                process.env.ASSET_PREFIX +
+                `/assets/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg`
+              }
               className="w-full h-full "
             />
           </div>

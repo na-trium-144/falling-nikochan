@@ -146,7 +146,10 @@ export function AboutContent3() {
                 bottom: isMobile ? 35 : 20,
               }}
             >
-              <img src={`/nikochan0.svg`} className="w-full h-full " />
+              <img
+                src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg`}
+                className="w-full h-full "
+              />
             </div>
             <div
               className="absolute "
@@ -157,7 +160,10 @@ export function AboutContent3() {
                 bottom: isMobile ? 70 : 55,
               }}
             >
-              <img src={`/nikochan0.svg`} className="w-full h-full " />
+              <img
+                src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg`}
+                className="w-full h-full "
+              />
             </div>
           </Box>
         )}

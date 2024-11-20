@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   referrer: "origin-when-cross-origin",
   icons: {
     // これを1つでも書くと /app にファイルを置く metadata API が無効になるっぽい?
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
+    icon: process.env.ASSET_PREFIX + "/assets/icon.png",
+    apple: process.env.ASSET_PREFIX + "/assets/apple-icon.png",
     shortcut: "/favicon.ico",
   },
   openGraph: {
