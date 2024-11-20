@@ -2,6 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import packageJson from "./package.json" with { type: "json" };
+import "dotenv/config";
 
 const date = new Date().toUTCString();
 let commit = "";
@@ -14,6 +15,7 @@ try {
 }
 
 const nextConfig = {
+  assetPrefix: process.env.ASSET_PREFIX || undefined,
   env: {
     buildDate: date,
     buildCommit: commit,
