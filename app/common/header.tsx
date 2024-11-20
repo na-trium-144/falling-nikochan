@@ -15,7 +15,7 @@ export default function Header(props: Props) {
           FallingNikochan
         </a>
       ) : (
-        <Link href="/" className={"text-xl " + linkStyle1}>
+        <Link href="/" className={"text-xl " + linkStyle1} prefetch={false}>
           FallingNikochan
         </Link>
       )}

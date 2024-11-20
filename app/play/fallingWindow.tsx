@@ -170,7 +170,12 @@ function Nikochan(props: NProps) {
         }}
       >
         <img
-          src={`/nikochan${displayNote.done <= 3 ? displayNote.done : 0}.svg`}
+          src={
+            process.env.ASSET_PREFIX +
+            `/assets/nikochan${
+              displayNote.done <= 3 ? displayNote.done : 0
+            }.svg`
+          }
           className="w-full h-full "
         />
         {/* chainBonusをにこちゃんの右上に表示する */}

@@ -52,13 +52,13 @@ export default function RhythmicalSlime(props: Props) {
             !currentBar.every((v, i) => v === ss.bar[i])
           ) {
             const barChangeSec = getTimeSec(bpmChanges, ss.stepAligned);
-            const barChange =() => {
+            const barChange = () => {
               setMaxSlimeNum((num) => Math.max(num, ss.bar.length));
               setCurrentBar(ss.bar);
             };
-            if(barChangeSec > now){
+            if (barChangeSec > now) {
               setTimeout(barChange, (barChangeSec - now) * 1000);
-            }else{
+            } else {
               barChange();
             }
           }
@@ -212,7 +212,7 @@ function Slime(props: PropsS) {
         }}
       >
         <img
-          src="/slime.svg"
+          src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
           className={
             "absolute bottom-0 inset-x-0 " +
             "transition-transform origin-bottom " +

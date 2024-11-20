@@ -3,7 +3,7 @@ export function FourthNote() {
     <>
       <img
         className="inline-block dark:hidden"
-        src="/note.svg"
+        src={process.env.ASSET_PREFIX + "/assets/note.svg"}
         style={{
           transform: "translateY(-0.125em)",
           height: "0.9em",
@@ -12,7 +12,7 @@ export function FourthNote() {
       />
       <img
         className="hidden dark:inline-block"
-        src="/note-white.svg"
+        src={process.env.ASSET_PREFIX + "/assets/note-white.svg"}
         style={{
           transform: "translateY(-0.125em)",
           height: "0.9em",

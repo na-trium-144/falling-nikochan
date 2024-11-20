@@ -21,9 +21,12 @@ function Cloud(props: CProps) {
         transform: `scale(${playUIScale * 0.8})`,
       }}
     >
-      <img src="/cloud.svg" className="absolute inset-0 -z-10 dark:hidden " />
       <img
-        src="/cloud-black.svg"
+        src={process.env.ASSET_PREFIX + "/assets/cloud.svg"}
+        className="absolute inset-0 -z-10 dark:hidden "
+      />
+      <img
+        src={process.env.ASSET_PREFIX + "/assets/cloud-black.svg"}
         className="absolute inset-0 -z-10 hidden dark:block"
       />
       <div

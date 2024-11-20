@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import TargetLine from "./targetLine";
 
-interface Props{
-   anim: boolean
-   className?:string;
+interface Props {
+  anim: boolean;
+  className?: string;
 }
 export default function Title(props: Props) {
   const [nikochanPhase, setNikochanPhase] = useState<number>(
@@ -50,7 +50,10 @@ export default function Title(props: Props) {
         }}
       >
         <img
-          src={`/nikochan${[0, 0, 1][nikochanPhase]}.svg`}
+          src={
+            process.env.ASSET_PREFIX +
+            `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+          }
           className="w-full h-full "
         />
       </div>

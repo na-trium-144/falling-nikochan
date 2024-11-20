@@ -36,3 +36,6 @@ npm run dev
 ```sh
 npm run start
 ```
+* 環境変数`ASSET_PREFIX`を設定すると、`/_next/static`以下および`/assets/`以下のファイルを別のCDNから取得することができます
+(前者はNext.jsのconfigの [assetPrefix](https://nextjs.org/docs/app/api-reference/next-config-js/assetPrefix))
+

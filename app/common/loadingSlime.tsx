@@ -3,7 +3,7 @@ import "./loadingSlime.css";
 export function LoadingSlime() {
   return (
     <img
-      src="/slime.svg"
+      src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
       className="inline-block h-4 origin-bottom mx-1 "
       style={{
         animationName: "loading-slime",
