@@ -119,7 +119,11 @@ export function ChartListItem(props: CProps) {
           <ChartListItemChildren {...props} />
         </a>
       ) : (
-        <Link href={props.href} className={"flex-1 min-w-0 " + linkStyle1}>
+        <Link
+          href={props.href}
+          className={"flex-1 min-w-0 " + linkStyle1}
+          prefetch={false}
+        >
           <ChartListItemChildren {...props} />
         </Link>
       )}

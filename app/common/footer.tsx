@@ -26,7 +26,12 @@ export default function Footer(props: Props) {
           }
         >
           {tabURLs.map((tabURL, i) => (
-            <Link key={i} className={"px-2 " + linkStyle1} href={tabURL}>
+            <Link
+              key={i}
+              className={"px-2 " + linkStyle1}
+              href={tabURL}
+              prefetch={false}
+            >
               {tabTitles[i]}
             </Link>
           ))}
@@ -46,7 +51,11 @@ export default function Footer(props: Props) {
           na-trium-144/falling-nikochan
         </ExternalLink>
         <span className="space-x-3">
-          <Link className={"inline-block " + linkStyle1} href="/main/version">
+          <Link
+            className={"inline-block " + linkStyle1}
+            href="/main/version"
+            prefetch={false}
+          >
             <span>ver.</span>
             <span className="mx-1">{process.env.buildVersion}</span>
             <span className="text-xs">(更新履歴はこちら)</span>

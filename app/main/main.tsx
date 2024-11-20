@@ -45,6 +45,7 @@ export function IndexMain(props: Props) {
           marginLeft: "-20rem",
           marginRight: "-20rem",
         }}
+        prefetch={false}
       >
         <Title className="absolute inset-0 " anim={isTitlePage} />
       </Link>
@@ -88,6 +89,7 @@ export function IndexMain(props: Props) {
                       ? "rounded-lg p-3 "
                       : "rounded-l-lg py-3 pl-2 pr-2 ")
                   }
+                  prefetch={false}
                   onClick={(e) => {
                     if (isTitlePage && !isMobile) {
                       setMenuMoveLeft(true);

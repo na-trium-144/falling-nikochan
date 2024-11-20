@@ -39,6 +39,7 @@ export function ShareLink(props: Props) {
       <Link
         className={"inline-block py-2 " + linkStyle1}
         href={`/share/${props.cid}`}
+        prefetch={false}
       >
         <span className="main-wide:hidden">共有用リンク</span>
         <span className="hidden main-wide:inline-block">
