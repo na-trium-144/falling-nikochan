@@ -40,5 +40,6 @@ export function convert5To6(chart: Chart5): Chart6 {
       unlisted: !!level.unlisted,
     })),
     ver: 6,
+    published: false,
   };
 }
