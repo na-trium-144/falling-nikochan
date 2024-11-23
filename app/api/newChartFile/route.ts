@@ -7,6 +7,7 @@ import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "../chart";
 import "dotenv/config";
 import { revalidateBrief } from "../brief/brief";
+import { revalidateLatest } from "../latest/latest";
 
 export async function GET() {
   const headersList = await headers();
@@ -68,6 +69,10 @@ export async function POST(request: NextRequest) {
 
     // update Time
     const updatedAt = new Date().getTime();
+
+    if (chart.published) {
+      revalidateLatest();
+    }
 
     let cid: string;
     while (true) {

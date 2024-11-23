@@ -10,6 +10,7 @@ import { ChartList, ChartListItem } from "../chartList";
 import { LoadingSlime } from "@/common/loadingSlime";
 import { Youtube } from "@icon-park/react";
 import { ExternalLink } from "@/common/extLink";
+import { numLatest } from "@/api/latest/const";
 
 export default function PlayTab(props: {
   sampleBrief: { cid: string; brief: ChartBrief | undefined }[];
@@ -19,6 +20,8 @@ export default function PlayTab(props: {
   const [recentBrief, setRecentBrief] =
     useState<{ cid?: string; brief?: ChartBrief }[]>();
   const [recentBriefAdditional, setRecentBriefAdditional] =
+    useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [latestBrief, setLatestBrief] =
     useState<{ cid?: string; brief?: ChartBrief }[]>();
   const router = useRouter();
 
@@ -42,6 +45,14 @@ export default function PlayTab(props: {
     void (async () => {
       setRecentBrief(
         await Promise.all(recentCId.map((cid) => fetchBrief(cid)))
+      );
+    })();
+    void (async () => {
+      const latestCIds = (await (
+        await fetch(`/api/latest`, { cache: "default" })
+      ).json()) as { cid: string }[];
+      setLatestBrief(
+        await Promise.all(latestCIds.map(({ cid }) => fetchBrief(cid)))
       );
     })();
   }, [fetchBrief]);
@@ -121,6 +132,22 @@ export default function PlayTab(props: {
           recentBriefAdditional={recentBriefAdditional}
           hasRecentAdditional={recentCIdAdditional.length}
           fetchAdditional={fetchAdditional}
+          creator
+          href={(cid) => `/share/${cid}`}
+        />
+      </div>
+      <div className="mb-3">
+        <h3 className="text-xl font-bold font-title mb-2">新着譜面</h3>
+        <p className="pl-2 text-justify ">
+          最近作成・更新された譜面の一覧です。
+          <span className="text-sm ">(最新の{numLatest}件まで)</span>
+        </p>
+        <p className="pl-2 mb-1 text-justify text-sm ">
+          (譜面を制作する方へ:
+          譜面編集から「一般公開する」にチェックを入れたもののみが対象です)
+        </p>
+        <ChartList
+          recentBrief={latestBrief}
           creator
           href={(cid) => `/share/${cid}`}
         />

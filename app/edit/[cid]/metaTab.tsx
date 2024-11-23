@@ -19,6 +19,7 @@ import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { ExternalLink } from "@/common/extLink";
 import ProgressBar from "@/common/progressBar";
 import YAML from "yaml";
+import CheckBox from "@/common/checkBox";
 
 interface Props {
   chart?: Chart;
@@ -33,10 +34,16 @@ export function MetaEdit(props: Props) {
         <Input
           className=""
           actualValue={props.chart?.ytId || ""}
-          updateValue={(v: string) =>
-            props.chart &&
-            props.setChart({ ...props.chart, ytId: getYouTubeId(v) })
-          }
+          updateValue={(v: string) => {
+            if (props.chart) {
+              const ytId = getYouTubeId(v);
+              props.setChart({
+                ...props.chart,
+                ytId,
+                published: ytId ? props.chart.published : false,
+              });
+            }
+          }}
           isValid={checkYouTubeId}
           left
         />
@@ -82,7 +89,12 @@ export function MetaEdit(props: Props) {
             className="font-title shrink w-40 "
             actualValue={props.chart?.editPasswd || ""}
             updateValue={(v: string) =>
-              props.chart && props.setChart({ ...props.chart, editPasswd: v })
+              props.chart &&
+              props.setChart({
+                ...props.chart,
+                editPasswd: v,
+                published: v ? props.chart.published : false,
+              })
             }
             left
             passwd={hidePasswd}
@@ -90,8 +102,31 @@ export function MetaEdit(props: Props) {
           <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
         </span>
       </p>
-      <p className="text-sm ml-2">
+      <p className="text-sm ml-2 mb-2">
         (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
+      </p>
+      <p>
+        <CheckBox
+          className="ml-0 "
+          value={props.chart?.published || false}
+          onChange={(v: boolean) =>
+            props.chart && props.setChart({ ...props.chart, published: v })
+          }
+          disabled={!props.chart?.editPasswd || !props.chart?.ytId}
+        >
+          この譜面を一般公開する
+        </CheckBox>
+        {!props.chart?.ytId ? (
+          <span className="inline-block ml-2 text-sm">
+            (YouTube 動画IDを指定してください)
+          </span>
+        ) : (
+          !props.chart?.editPasswd && (
+            <span className="inline-block ml-2 text-sm">
+              (編集用パスワードを設定してください)
+            </span>
+          )
+        )}
       </p>
     </>
   );
