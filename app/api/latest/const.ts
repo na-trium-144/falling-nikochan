@@ -1,1 +1,1 @@
-export const numLatest = 5;
+export const numLatest = 25;

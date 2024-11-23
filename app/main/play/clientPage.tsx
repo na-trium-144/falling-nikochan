@@ -21,7 +21,10 @@ export default function PlayTab(props: {
     useState<{ cid?: string; brief?: ChartBrief }[]>();
   const [recentBriefAdditional, setRecentBriefAdditional] =
     useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [latestCIdAdditional, setLatestCIdAdditional] = useState<string[]>([]);
   const [latestBrief, setLatestBrief] =
+    useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [latestBriefAdditional, setLatestBriefAdditional] =
     useState<{ cid?: string; brief?: ChartBrief }[]>();
   const router = useRouter();
 
@@ -48,11 +51,14 @@ export default function PlayTab(props: {
       );
     })();
     void (async () => {
-      const latestCIds = (await (
+      const latestCIdAll = (await (
         await fetch(`/api/latest`, { cache: "default" })
       ).json()) as { cid: string }[];
+      const latestCId = latestCIdAll.slice(0, 5);
+      const latestCIdAdditional = latestCIdAll.slice(5);
+      setLatestCIdAdditional(latestCIdAdditional.map(({ cid }) => cid));
       setLatestBrief(
-        await Promise.all(latestCIds.map(({ cid }) => fetchBrief(cid)))
+        await Promise.all(latestCId.map(({ cid }) => fetchBrief(cid)))
       );
     })();
   }, [fetchBrief]);
@@ -60,6 +66,13 @@ export default function PlayTab(props: {
     void (async () => {
       setRecentBriefAdditional(
         await Promise.all(recentCIdAdditional.map((cid) => fetchBrief(cid)))
+      );
+    })();
+  };
+  const fetchLatestAdditional = () => {
+    void (async () => {
+      setLatestBriefAdditional(
+        await Promise.all(latestCIdAdditional.map((cid) => fetchBrief(cid)))
       );
     })();
   };
@@ -148,6 +161,9 @@ export default function PlayTab(props: {
         </p>
         <ChartList
           recentBrief={latestBrief}
+          recentBriefAdditional={latestBriefAdditional}
+          hasRecentAdditional={latestCIdAdditional.length}
+          fetchAdditional={fetchLatestAdditional}
           creator
           href={(cid) => `/share/${cid}`}
         />
