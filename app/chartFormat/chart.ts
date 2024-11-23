@@ -32,6 +32,7 @@ export interface ChartBrief {
   chartCreator: string;
   updatedAt: number;
   playCount?: number;
+  published: boolean;
   levels: {
     name: string;
     hash: string;
@@ -75,6 +76,7 @@ export interface Chart {
   composer: string;
   chartCreator: string;
   editPasswd: string;
+  published: boolean;
 }
 export interface Level {
   name: string;
@@ -119,6 +121,7 @@ export async function validateChart(
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
+  if (typeof chart.published !== "boolean") chart.published = false;
   return chart;
 }
 export function validateLevel(level: Level): Level {
@@ -181,6 +184,7 @@ export function emptyChart(): Chart {
     composer: "",
     chartCreator: "",
     editPasswd: "",
+    published: false,
   };
   return chart;
 }
@@ -265,5 +269,6 @@ export async function createBrief(
     chartCreator: chart.chartCreator,
     levels: levelBrief,
     updatedAt: updatedAt || 0,
+    published: chart.published,
   };
 }

@@ -6,18 +6,51 @@ import Button from "@/common/button";
 import { FourthNote } from "@/common/fourthNote";
 import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { rankStr } from "@/common/rank";
+import { isSample } from "@/main/const";
 import { initSession, SessionData } from "@/play/session";
 import { JudgeIcon } from "@/play/statusBox";
-import { PlayOne, RightOne, SmilingFace, Timer } from "@icon-park/react";
+import {
+  International,
+  LinkTwo,
+  PlayOne,
+  RightOne,
+  SmilingFace,
+  Timer,
+} from "@icon-park/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function PlayCount(props: { count: number }) {
+export function ShareState(props: Props) {
   return (
     <>
-      <PlayOne className="inline-block w-5 translate-y-0.5" theme="filled" />
-      <span>{props.count}</span>
+      <span className="inline-block">
+        ({new Date(props.brief.updatedAt).toLocaleDateString()})
+      </span>
+      <span>
+        {isSample(props.cid) ? (
+          <span className="ml-2">
+            <International className="inline-block w-5 translate-y-0.5" />
+            <span>サンプル譜面</span>
+          </span>
+        ) : props.brief.published ? (
+          <span className="ml-2">
+            <International className="inline-block w-5 translate-y-0.5" />
+            <span>一般公開</span>
+          </span>
+        ) : (
+          <>
+            {/*
+              <LinkTwo className="inline-block w-5 translate-y-0.5" />
+              <span></span>
+            */}
+          </>
+        )}
+      </span>
+      <span className="ml-2">
+        <PlayOne className="inline-block w-5 translate-y-0.5" theme="filled" />
+        <span>{props.brief.playCount || 0}</span>
+      </span>
     </>
   );
 }

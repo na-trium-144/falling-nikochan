@@ -11,6 +11,7 @@ import { MongoClient } from "mongodb";
 import "dotenv/config";
 import { chartToEntry, getChartEntry, zipEntry } from "@/api/chart";
 import { revalidateBrief } from "@/api/brief/brief";
+import { revalidateLatest } from "@/api/latest/latest";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
@@ -106,6 +107,9 @@ export async function POST(
     if (!newHashes.every((h, i) => h === prevHashes[i])) {
       updatedAt = new Date().getTime();
     }
+    if (chart.published || newChart.published) {
+      revalidateLatest();
+    }
 
     await db.collection("chart").updateOne(
       { cid },
@@ -154,6 +158,9 @@ export async function DELETE(
       }
     );
     revalidateBrief(cid);
+    if (chart.published) {
+      revalidateLatest();
+    }
     return new Response(null);
   } catch (e) {
     console.error(e);

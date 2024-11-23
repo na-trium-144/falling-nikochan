@@ -35,6 +35,9 @@ export async function getChartEntry(
       res: { message: "Chart ID Not Found", status: 404 },
     };
   }
+  if (typeof entryCompressed.published !== "boolean") {
+    entryCompressed.published = false;
+  }
 
   let entry: ChartEntry;
   let chart: Chart;
@@ -69,6 +72,7 @@ export interface ChartEntryCompressed {
   cid: string;
   levelsCompressed: Binary | null;
   deleted: boolean;
+  published: boolean;
   ver: 6;
   offset: number;
   ytId: string;
@@ -127,6 +131,7 @@ export async function zipEntry(
   return {
     cid: entry.cid,
     deleted: entry.deleted,
+    published: entry.published,
     ver: entry.ver,
     offset: entry.offset,
     ytId: entry.ytId,
@@ -145,6 +150,7 @@ export function entryToChart(entry: ChartEntry): Chart {
   return {
     falling: "nikochan",
     ver: entry.ver,
+    published: entry.published,
     levels: entry.levels.map((level, i) => ({
       name: entry.levelBrief.at(i)?.name || "",
       type: entry.levelBrief.at(i)?.type || "",
@@ -186,6 +192,7 @@ export async function chartToEntry(
       lua: level.lua,
     })),
     ver: chart.ver,
+    published: chart.published,
     offset: chart.offset,
     editPasswd: chart.editPasswd,
     ytId: chartBrief.ytId,
@@ -206,5 +213,6 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
     levels: entry.levelBrief,
     updatedAt: entry.updatedAt,
     playCount: entry.playCount,
+    published: entry.published,
   };
 }

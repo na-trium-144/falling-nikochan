@@ -7,9 +7,9 @@ import { useState } from "react";
 
 interface Props {
   recentBrief?: { cid?: string; brief?: ChartBrief }[];
-  hasRecentAdditional: number;
+  hasRecentAdditional?: number;
   recentBriefAdditional?: { cid?: string; brief?: ChartBrief }[];
-  fetchAdditional: () => void;
+  fetchAdditional?: () => void;
   creator?: boolean;
   href: (cid: string) => string;
   newTab?: boolean;
@@ -43,7 +43,8 @@ export function ChartList(props: Props) {
                   )
               )}
             </ul>
-            {props.hasRecentAdditional > 0 &&
+            {props.hasRecentAdditional !== undefined &&
+              props.hasRecentAdditional > 0 &&
               (additionalOpen ? (
                 <>
                   <p
@@ -77,7 +78,7 @@ export function ChartList(props: Props) {
                   className={"block relative ml-5 mt-1 " + linkStyle1}
                   onClick={() => {
                     setAdditionalOpen(!additionalOpen);
-                    if (fetchingAdditional) {
+                    if (fetchingAdditional && props.fetchAdditional) {
                       props.fetchAdditional();
                     }
                   }}
