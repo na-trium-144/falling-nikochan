@@ -25,10 +25,6 @@ async function getBriefImpl(cid: string) {
 export function revalidateBrief(cid: string) {
   console.warn(`revalidate brief ${cid}`);
   revalidateTag(`brief-${cid}`);
-  if (originalCId.includes(cid) || sampleCId.includes(cid)) {
-    console.warn(`revalidate /main/play`);
-    revalidatePath("/main/play");
-  }
 }
 
 export async function getBrief(
