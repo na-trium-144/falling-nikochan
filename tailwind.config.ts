@@ -10,8 +10,14 @@ const config: Config = {
       "edit-wide": "50rem", // editのPC表示
       "share-yt-wide": "60rem", // shareでYouTubeを表示する場所が変わる
     },
+    extend: {
+      colors: {
+        "orange-975": "#20100a",
+        "amber-975": "#20180a",
+      },
+    },
   },
-  darkMode: 'selector',
+  darkMode: "selector",
   plugins: [],
 };
 export default config;

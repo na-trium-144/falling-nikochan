@@ -67,7 +67,7 @@ export default function Result(props: Props) {
       <p className="text-lg font-title font-bold">&lt;Result&gt;</p>
       <div
         className={
-          "my-2 flex justify-center " +
+          "my-2 flex justify-center items-center " +
           (props.largeResult ? "flwx-row space-x-2 " : "flex-col space-y-1 ")
         }
       >
@@ -135,7 +135,7 @@ export default function Result(props: Props) {
                 .padStart(2, "0")}
             </span>
           </ResultRow>
-          <div className="mt-2 mb-1 border-b border-black dark:border-white " />
+          <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
           <ResultRow visible={showing >= 4} name="Total Score">
             <span
               className="w-16 text-3xl text-right "

@@ -10,7 +10,7 @@ interface Props {
 export function Box(props: Props) {
   return (
     <div
-      className={"rounded-lg bg-white/75 dark:bg-stone-900/75 " + (props.className || "")}
+      className={"rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")}
       style={{
         backdropFilter: "blur(2px)",
         ...props.style,

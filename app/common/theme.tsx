@@ -26,10 +26,10 @@ const applyTheme = () => {
       "bg-gradient-to-t",
       "from-sky-50",
       "to-sky-200",
-      "text-black",
-      "dark:from-orange-800",
-      "dark:to-orange-950",
-      "dark:text-white"
+      "text-slate-800",
+      "dark:from-orange-950",
+      "dark:to-orange-975",
+      "dark:text-stone-300"
     );
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */
