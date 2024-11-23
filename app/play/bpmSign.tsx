@@ -40,7 +40,7 @@ export default function BPMSign(props: Props) {
       }}
     >
       <div
-        className="absolute inset-0 m-auto w-3 bg-amber-700 dark:bg-amber-950 "
+        className="absolute inset-0 m-auto w-3 bg-amber-700 dark:bg-amber-900 "
         style={{ borderRadius: "100%/6px" }}
       />
       <div

@@ -15,7 +15,7 @@ export const buttonStyle =
   "active:from-blue-200 active:to-blue-200 " + 
   "dark:from-amber-950 dark:to-amber-900 " +
   "hover:dark:from-amber-900 hover:dark:to-amber-800 " +
-  "active:dark:from-amber-950 active:dark:to-amber-950 " + 
+  "active:dark:from-amber-975 active:dark:to-amber-975 " + 
   "shadow active:shadow-inner ";
 
 interface Props {

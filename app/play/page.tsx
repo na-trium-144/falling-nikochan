@@ -512,7 +512,7 @@ function Play(props: Props) {
           </>
         )}
         {!isMobile && (
-          <div className="absolute bottom-2 left-3 opacity-40">
+          <div className="absolute bottom-2 left-3 opacity-50">
             <span className="inline-block">Falling Nikochan</span>
             <span className="inline-block">
               <span className="ml-2">ver.</span>

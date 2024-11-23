@@ -13,7 +13,7 @@ export default function CheckBox(props: Props) {
       className={
         "ml-2 " +
         "hover:text-slate-500 disabled:text-slate-400 " +
-        "hover:dark:text-stone-400 disabled:dark:text-stone-700 " +
+        "hover:dark:text-stone-500 disabled:dark:text-stone-600 " +
         props.className
       }
       onClick={() => props.onChange(!props.value)}

@@ -182,7 +182,7 @@ export function PlayOption(props: Props) {
                 : "text-slate-400 dark:text-stone-600 ")
             }
           >
-            <span className="text-black dark:text-white ">Best Score:</span>
+            <span>Best Score:</span>
             <span className="inline-block text-2xl w-12 text-right">
               {Math.floor(totalScore)}
             </span>

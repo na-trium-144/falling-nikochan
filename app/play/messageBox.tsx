@@ -40,7 +40,7 @@ export function ReadyMessage(props: MessageProps) {
           ページ再読み込みでこちらに反映されます。
         </p>
       )}
-      <div className="mt-2 mb-2 border-b border-black" />
+      <div className="mt-2 mb-2 border-b border-slate-800 dark:border-stone-300" />
       <p>オプション</p>
       <p className="mt-2">
         <CheckBox
