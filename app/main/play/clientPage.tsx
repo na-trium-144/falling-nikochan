@@ -140,7 +140,7 @@ export default function PlayTab(props: {
         <h3 className="text-xl font-bold font-title mb-2">新着譜面</h3>
         <p className="pl-2 text-justify ">
           最近作成・更新された譜面の一覧です。
-          <span className="text-sm ">(最新の{numLatest}件まで)</span>
+          {/*<span className="text-sm ">(最新の{numLatest}件まで)</span>*/}
         </p>
         <p className="pl-2 mb-1 text-justify text-sm ">
           (譜面を制作する方へ:
