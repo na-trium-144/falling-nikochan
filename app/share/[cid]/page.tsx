@@ -1,7 +1,7 @@
 import Header from "@/common/header";
 import { Box, Error } from "@/common/box";
 import Footer from "@/common/footer";
-import { PlayCount, PlayOption, ShareLink } from "./playOption";
+import { PlayOption, ShareLink, ShareState } from "./playOption";
 import { FlexYouTubeShare } from "./youtube";
 import { getBrief } from "@/api/brief/brief";
 import { metaDataTitle, pageTitle } from "@/common/title";
@@ -50,10 +50,7 @@ export default async function ShareChart(context: { params: Promise<Params> }) {
                   </span>
                 </span>
                 <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
-                  ({new Date(brief.updatedAt).toLocaleDateString()})
-                  <span className="ml-3">
-                    <PlayCount count={brief.playCount || 0} />
-                  </span>
+                  <ShareState cid={cid} brief={brief} />
                 </span>
               </p>
             </div>
