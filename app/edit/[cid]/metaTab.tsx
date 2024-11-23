@@ -27,6 +27,11 @@ interface Props {
 }
 export function MetaEdit(props: Props) {
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
+  const hasLevelData =
+    props.chart?.levels &&
+    props.chart.levels.length > 0 &&
+    props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
+
   return (
     <>
       <p className="mb-2">
@@ -112,21 +117,18 @@ export function MetaEdit(props: Props) {
           onChange={(v: boolean) =>
             props.chart && props.setChart({ ...props.chart, published: v })
           }
-          disabled={!props.chart?.editPasswd || !props.chart?.ytId}
+          disabled={!props.chart?.editPasswd || !hasLevelData || !props.chart?.ytId}
         >
           この譜面を一般公開する
         </CheckBox>
-        {!props.chart?.ytId ? (
-          <span className="inline-block ml-2 text-sm">
-            (YouTube 動画IDを指定してください)
-          </span>
-        ) : (
-          !props.chart?.editPasswd && (
-            <span className="inline-block ml-2 text-sm">
-              (編集用パスワードを設定してください)
-            </span>
-          )
-        )}
+        <span className="inline-block ml-2 text-sm">
+          {!props.chart?.ytId
+            ? "(YouTube 動画IDが未指定のため一般公開できません)"
+            : !hasLevelData
+            ? "(譜面データがすべて空または非表示になっているため一般公開できません)"
+            : !props.chart?.editPasswd &&
+              "(編集用パスワードが未設定のため一般公開できません)"}
+        </span>
       </p>
     </>
   );
