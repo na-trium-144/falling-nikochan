@@ -85,10 +85,7 @@ export default function PlayTab(props: {
         );
         if (changed) {
           setRecentBrief(briefs);
-          updateRecent(
-            "play",
-            briefs.map(({ cid }) => cid)
-          );
+          updateRecent("play", briefs.map(({ cid }) => cid).reverse());
         }
       }
     })();

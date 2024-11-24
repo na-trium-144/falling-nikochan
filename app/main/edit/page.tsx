@@ -37,10 +37,7 @@ export default function EditTab() {
         );
         if (changed) {
           setRecentBrief(briefs);
-          updateRecent(
-            "edit",
-            briefs.map(({ cid }) => cid)
-          );
+          updateRecent("edit", briefs.map(({ cid }) => cid).reverse());
         }
       }
     })();
