@@ -5,6 +5,8 @@ import { ReactNode } from "react";
 import { linkStyle2 } from "@/common/linkStyle";
 import { ExternalLink } from "@/common/extLink";
 
+export const dynamic = "force-static";
+
 export function generateMetadata() {
   return metaDataTitle(tabTitles[3]);
 }

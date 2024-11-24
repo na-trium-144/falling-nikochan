@@ -3,6 +3,8 @@ import { IndexMain } from "../main";
 import fs from "node:fs";
 import { ExternalLink } from "@/common/extLink";
 
+export const dynamic = "force-static";
+
 export default async function Page() {
   const changeLogMD = await fs.promises.readFile("CHANGELOG.md", "utf-8");
 

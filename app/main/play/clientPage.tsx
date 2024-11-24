@@ -20,7 +20,7 @@ export interface ChartLineBrief {
 }
 
 export async function fetchBrief(cid: string): Promise<ChartLineBrief | null> {
-  const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
+  const res = await fetch(`/api/brief/${cid}`, { cache: "default" });
   if (res.ok) {
     // cidからタイトルなどを取得
     const resBody = await res.json();
@@ -60,9 +60,9 @@ export default function PlayTab(props: {
   sampleBrief: { cid: string; brief: ChartBrief | undefined }[];
   originalBrief: { cid: string; brief: ChartBrief | undefined }[];
 }) {
-  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>([]);
+  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
-  const [latestBrief, setLatestBrief] = useState<ChartLineBrief[]>([]);
+  const [latestBrief, setLatestBrief] = useState<ChartLineBrief[]>();
   const [fetchLatestAll, setFetchLatestAll] = useState<boolean>(false);
   const router = useRouter();
 
@@ -78,27 +78,28 @@ export default function PlayTab(props: {
   }, []);
   useEffect(() => {
     void (async () => {
-      const { changed, briefs } = await fetchAndFilterBriefs(
-        recentBrief,
-        fetchRecentAll
-      );
-      if (changed) {
-        setRecentBrief(briefs);
-        updateRecent(
-          "play",
-          briefs.map(({ cid }) => cid)
+      if (recentBrief) {
+        const { changed, briefs } = await fetchAndFilterBriefs(
+          recentBrief,
+          fetchRecentAll
         );
+        if (changed) {
+          setRecentBrief(briefs);
+          updateRecent("play", briefs.map(({ cid }) => cid).reverse());
+        }
       }
     })();
   }, [recentBrief, fetchRecentAll]);
   useEffect(() => {
     void (async () => {
-      const { changed, briefs } = await fetchAndFilterBriefs(
-        latestBrief,
-        fetchLatestAll
-      );
-      if (changed) {
-        setLatestBrief(briefs);
+      if (latestBrief) {
+        const { changed, briefs } = await fetchAndFilterBriefs(
+          latestBrief,
+          fetchLatestAll
+        );
+        if (changed) {
+          setLatestBrief(briefs);
+        }
       }
     })();
   }, [latestBrief, fetchLatestAll]);

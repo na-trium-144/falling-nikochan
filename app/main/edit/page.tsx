@@ -16,10 +16,12 @@ import {
   fetchAndFilterBriefs,
 } from "../play/clientPage";
 
+export const dynamic = "force-static";
+
 export default function EditTab() {
   const router = useRouter();
 
-  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>([]);
+  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
 
   useEffect(() => {
@@ -28,16 +30,15 @@ export default function EditTab() {
   }, []);
   useEffect(() => {
     void (async () => {
-      const { changed, briefs } = await fetchAndFilterBriefs(
-        recentBrief,
-        fetchRecentAll
-      );
-      if (changed) {
-        setRecentBrief(briefs);
-        updateRecent(
-          "edit",
-          briefs.map(({ cid }) => cid)
+      if (recentBrief) {
+        const { changed, briefs } = await fetchAndFilterBriefs(
+          recentBrief,
+          fetchRecentAll
         );
+        if (changed) {
+          setRecentBrief(briefs);
+          updateRecent("edit", briefs.map(({ cid }) => cid).reverse());
+        }
       }
     })();
   }, [recentBrief, fetchRecentAll]);

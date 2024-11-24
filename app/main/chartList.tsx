@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface Props {
-  recentBrief: { cid: string; fetched: boolean; brief?: ChartBrief }[];
+  recentBrief?: { cid: string; fetched: boolean; brief?: ChartBrief }[];
   maxRow: number;
   fetchAdditional?: () => void;
   creator?: boolean;
@@ -16,87 +16,92 @@ interface Props {
 export function ChartList(props: Props) {
   const [additionalOpen, setAdditionalOpen] = useState<boolean>(false);
 
-  const fetching = props.recentBrief
-    .slice(0, props.maxRow)
-    .some(({ fetched }) => !fetched);
-  const fetchingAdditional = props.recentBrief.some(({ fetched }) => !fetched);
+  const fetching =
+    props.recentBrief === undefined ||
+    props.recentBrief.slice(0, props.maxRow).some(({ fetched }) => !fetched);
+  const fetchingAdditional =
+    props.recentBrief === undefined ||
+    props.recentBrief.some(({ fetched }) => !fetched);
   return (
     <div className="relative min-h-4">
       <div className={"absolute top-0 left-2 " + (fetching ? "" : "hidden ")}>
         <LoadingSlime />
         Loading...
       </div>
-      {props.recentBrief.length > 0 ? (
-        <>
-          <ul className="ml-3">
-            {props.recentBrief.slice(0, props.maxRow).map(({ cid, brief }) => (
-              <ChartListItem
-                invisible={fetching}
-                key={cid}
-                cid={cid}
-                brief={brief}
-                href={props.href(cid)}
-                creator={props.creator}
-                newTab={props.newTab}
-              />
-            ))}
-          </ul>
-          {props.recentBrief.length >= props.maxRow &&
-            (additionalOpen ? (
-              <div className="relative min-h-4">
-                <div
-                  className={
-                    "absolute top-1 left-2 " +
-                    (fetchingAdditional ? "" : "hidden ")
-                  }
-                >
-                  <LoadingSlime />
-                  Loading...
+      {props.recentBrief !== undefined &&
+        (props.recentBrief.length > 0 ? (
+          <>
+            <ul className="ml-3">
+              {props.recentBrief
+                .slice(0, props.maxRow)
+                .map(({ cid, brief }) => (
+                  <ChartListItem
+                    invisible={fetching}
+                    key={cid}
+                    cid={cid}
+                    brief={brief}
+                    href={props.href(cid)}
+                    creator={props.creator}
+                    newTab={props.newTab}
+                  />
+                ))}
+            </ul>
+            {props.recentBrief.length >= props.maxRow &&
+              (additionalOpen ? (
+                <div className="relative min-h-4">
+                  <div
+                    className={
+                      "absolute top-1 left-2 " +
+                      (fetchingAdditional ? "" : "hidden ")
+                    }
+                  >
+                    <LoadingSlime />
+                    Loading...
+                  </div>
+                  <ul className="ml-3">
+                    {props.recentBrief
+                      .slice(props.maxRow)
+                      .map(({ cid, fetched, brief }) => (
+                        <ChartListItem
+                          invisible={fetchingAdditional}
+                          key={cid}
+                          cid={cid}
+                          brief={brief}
+                          href={props.href(cid)}
+                          creator={props.creator}
+                          newTab={props.newTab}
+                        />
+                      ))}
+                  </ul>
                 </div>
-                <ul className="ml-3">
-                  {props.recentBrief
-                    .slice(props.maxRow)
-                    .map(({ cid, fetched, brief }) => (
-                      <ChartListItem
-                        invisible={fetchingAdditional}
-                        key={cid}
-                        cid={cid}
-                        brief={brief}
-                        href={props.href(cid)}
-                        creator={props.creator}
-                        newTab={props.newTab}
-                      />
-                    ))}
-                </ul>
-              </div>
-            ) : (
-              <button
-                className={
-                  "block relative ml-5 mt-1 " +
-                  (fetching ? "invisible " : "") +
-                  linkStyle1
-                }
-                onClick={() => {
-                  setAdditionalOpen(!additionalOpen);
-                  if (fetchingAdditional && props.fetchAdditional) {
-                    props.fetchAdditional();
+              ) : (
+                <button
+                  className={
+                    "block relative ml-5 mt-1 " +
+                    (fetching ? "invisible " : "") +
+                    linkStyle1
                   }
-                }}
-              >
-                <RightOne
-                  className="absolute left-0 bottom-1 "
-                  theme="filled"
-                />
-                <span className="ml-5">すべて表示</span>
-                <span className="ml-1">
-                  ({props.recentBrief.length - props.maxRow})
-                </span>
-              </button>
-            ))}
-        </>
-      ) : (
-        <div className="pl-2">まだありません</div>
-      )}
+                  onClick={() => {
+                    setAdditionalOpen(!additionalOpen);
+                    if (fetchingAdditional && props.fetchAdditional) {
+                      props.fetchAdditional();
+                    }
+                  }}
+                >
+                  <RightOne
+                    className="absolute left-0 bottom-1 "
+                    theme="filled"
+                  />
+                  <span className="ml-5">すべて表示</span>
+                  <span className="ml-1">
+                    ({props.recentBrief.length - props.maxRow})
+                  </span>
+                </button>
+              ))}
+          </>
+        ) : (
+          <div className="pl-2">まだありません</div>
+        ))}
     </div>
   );
 }
