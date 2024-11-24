@@ -20,7 +20,7 @@ export interface ChartLineBrief {
 }
 
 export async function fetchBrief(cid: string): Promise<ChartLineBrief | null> {
-  const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
+  const res = await fetch(`/api/brief/${cid}`, { cache: "default" });
   if (res.ok) {
     // cidからタイトルなどを取得
     const resBody = await res.json();
