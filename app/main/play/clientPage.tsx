@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { useRouter } from "next/navigation";
-import { getRecent, removeRecent } from "@/common/recent";
+import { getRecent, removeRecent, updateRecent } from "@/common/recent";
 import Input from "@/common/input";
 import { IndexMain } from "../main";
 import { ChartList, ChartListItem } from "../chartList";
@@ -12,70 +12,96 @@ import { Youtube } from "@icon-park/react";
 import { ExternalLink } from "@/common/extLink";
 import { numLatest } from "@/api/latest/const";
 
+export const chartListMaxRow = 5;
+export interface ChartLineBrief {
+  cid: string;
+  fetched: boolean;
+  brief?: ChartBrief;
+}
+
+export async function fetchBrief(cid: string): Promise<ChartLineBrief | null> {
+  const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
+  if (res.ok) {
+    // cidからタイトルなどを取得
+    const resBody = await res.json();
+    return { cid, fetched: true, brief: resBody as ChartBrief };
+  } else if (res.status === 404) {
+    return null;
+  } else {
+    return { cid, fetched: true };
+  }
+}
+export async function fetchAndFilterBriefs(
+  recentBrief: ChartLineBrief[],
+  fetchAll: boolean
+): Promise<{ changed: boolean; briefs: ChartLineBrief[] }> {
+  let changed = false;
+  const recentBriefNew: (ChartLineBrief | null)[] = recentBrief.slice();
+  await Promise.all(
+    recentBrief.map(async ({ cid, fetched, brief }, i) => {
+      if (fetched) {
+        return;
+      } else if (!fetchAll && i >= chartListMaxRow) {
+        return;
+      } else {
+        const brief = await fetchBrief(cid);
+        recentBriefNew[i] = brief;
+        changed = true;
+      }
+    })
+  );
+  return {
+    changed,
+    briefs: recentBriefNew.filter((brief) => brief !== null),
+  };
+}
+
 export default function PlayTab(props: {
   sampleBrief: { cid: string; brief: ChartBrief | undefined }[];
   originalBrief: { cid: string; brief: ChartBrief | undefined }[];
 }) {
-  const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
-  const [recentBrief, setRecentBrief] =
-    useState<{ cid?: string; brief?: ChartBrief }[]>();
-  const [recentBriefAdditional, setRecentBriefAdditional] =
-    useState<{ cid?: string; brief?: ChartBrief }[]>();
-  const [latestCIdAdditional, setLatestCIdAdditional] = useState<string[]>([]);
-  const [latestBrief, setLatestBrief] =
-    useState<{ cid?: string; brief?: ChartBrief }[]>();
-  const [latestBriefAdditional, setLatestBriefAdditional] =
-    useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>([]);
+  const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
+  const [latestBrief, setLatestBrief] = useState<ChartLineBrief[]>([]);
+  const [fetchLatestAll, setFetchLatestAll] = useState<boolean>(false);
   const router = useRouter();
 
-  const fetchBrief = useCallback(async (cid: string) => {
-    const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
-    if (res.ok) {
-      // cidからタイトルなどを取得
-      const resBody = await res.json();
-      return { cid, brief: resBody as ChartBrief };
-    } else if (res.status === 404) {
-      return {};
-    } else {
-      return { cid };
-    }
-  }, []);
   useEffect(() => {
-    const recentCIdAll = getRecent("play").reverse();
-    const recentCId = recentCIdAll.slice(0, 5);
-    const recentCIdAdditional = recentCIdAll.slice(5);
-    setRecentCIdAdditional(recentCIdAdditional);
+    const recentCId = getRecent("play").reverse();
+    setRecentBrief(recentCId.map((cid) => ({ cid, fetched: false })));
     void (async () => {
-      setRecentBrief(
-        await Promise.all(recentCId.map((cid) => fetchBrief(cid)))
-      );
-    })();
-    void (async () => {
-      const latestCIdAll = (await (
+      const latestCId = (await (
         await fetch(`/api/latest`, { cache: "default" })
       ).json()) as { cid: string }[];
-      const latestCId = latestCIdAll.slice(0, 5);
-      const latestCIdAdditional = latestCIdAll.slice(5);
-      setLatestCIdAdditional(latestCIdAdditional.map(({ cid }) => cid));
-      setLatestBrief(
-        await Promise.all(latestCId.map(({ cid }) => fetchBrief(cid)))
-      );
+      setLatestBrief(latestCId.map(({ cid }) => ({ cid, fetched: false })));
     })();
-  }, [fetchBrief]);
-  const fetchAdditional = () => {
+  }, []);
+  useEffect(() => {
     void (async () => {
-      setRecentBriefAdditional(
-        await Promise.all(recentCIdAdditional.map((cid) => fetchBrief(cid)))
+      const { changed, briefs } = await fetchAndFilterBriefs(
+        recentBrief,
+        fetchRecentAll
       );
+      if (changed) {
+        setRecentBrief(briefs);
+        updateRecent(
+          "play",
+          briefs.map(({ cid }) => cid)
+        );
+      }
     })();
-  };
-  const fetchLatestAdditional = () => {
+  }, [recentBrief, fetchRecentAll]);
+  useEffect(() => {
     void (async () => {
-      setLatestBriefAdditional(
-        await Promise.all(latestCIdAdditional.map((cid) => fetchBrief(cid)))
+      const { changed, briefs } = await fetchAndFilterBriefs(
+        latestBrief,
+        fetchLatestAll
       );
+      if (changed) {
+        setLatestBrief(briefs);
+      }
     })();
-  };
+  }, [latestBrief, fetchLatestAll]);
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
@@ -142,9 +168,8 @@ export default function PlayTab(props: {
         </h3>
         <ChartList
           recentBrief={recentBrief}
-          recentBriefAdditional={recentBriefAdditional}
-          hasRecentAdditional={recentCIdAdditional.length}
-          fetchAdditional={fetchAdditional}
+          maxRow={chartListMaxRow}
+          fetchAdditional={() => setFetchRecentAll(true)}
           creator
           href={(cid) => `/share/${cid}`}
         />
@@ -161,9 +186,8 @@ export default function PlayTab(props: {
         </p>
         <ChartList
           recentBrief={latestBrief}
-          recentBriefAdditional={latestBriefAdditional}
-          hasRecentAdditional={latestCIdAdditional.length}
-          fetchAdditional={fetchLatestAdditional}
+          maxRow={chartListMaxRow}
+          fetchAdditional={() => setFetchLatestAll(true)}
           creator
           href={(cid) => `/share/${cid}`}
         />

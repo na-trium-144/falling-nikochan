@@ -20,6 +20,9 @@ export function addRecent(key: string, cid: string) {
   newRecent.push(cid);
   localStorage.setItem(recentKey(key), JSON.stringify(newRecent));
 }
+export function updateRecent(key: string, cids: string[]){
+  localStorage.setItem(recentKey(key), JSON.stringify(cids));
+}
 export function removeRecent(key: string, cid: string) {
   const recent = getRecent(key);
   if (recent.indexOf(cid) >= 0) {

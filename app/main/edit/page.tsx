@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getRecent, removeRecent } from "@/common/recent";
+import { getRecent, removeRecent, updateRecent } from "@/common/recent";
 import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
@@ -10,46 +10,37 @@ import { ChartList } from "../chartList";
 import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
 import { ExternalLink } from "@/common/extLink";
+import {
+  ChartLineBrief,
+  chartListMaxRow,
+  fetchAndFilterBriefs,
+} from "../play/clientPage";
 
 export default function EditTab() {
   const router = useRouter();
 
-  const [recentCIdAdditional, setRecentCIdAdditional] = useState<string[]>([]);
-  const [recentBrief, setRecentBrief] =
-    useState<{ cid?: string; brief?: ChartBrief }[]>();
-  const [recentBriefAdditional, setRecentBriefAdditional] =
-    useState<{ cid?: string; brief?: ChartBrief }[]>();
+  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>([]);
+  const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
 
-  const fetchBrief = useCallback(async (cid: string) => {
-    const res = await fetch(`/api/brief/${cid}`, { cache: "default" }); // todo: /api/brief からのレスポンスにmax-ageがないので意味ない?
-    if (res.ok) {
-      // cidからタイトルなどを取得
-      const resBody = await res.json();
-      return { cid, brief: resBody as ChartBrief };
-    } else if (res.status === 404) {
-      return {};
-    } else {
-      return { cid };
-    }
+  useEffect(() => {
+    const recentCId = getRecent("edit").reverse();
+    setRecentBrief(recentCId.map((cid) => ({ cid, fetched: false })));
   }, []);
   useEffect(() => {
-    const recentCIdAll = getRecent("edit").reverse();
-    const recentCId = recentCIdAll.slice(0, 5);
-    const recentCIdAdditional = recentCIdAll.slice(5);
-    setRecentCIdAdditional(recentCIdAdditional);
     void (async () => {
-      setRecentBrief(
-        await Promise.all(recentCId.map((cid) => fetchBrief(cid)))
+      const { changed, briefs } = await fetchAndFilterBriefs(
+        recentBrief,
+        fetchRecentAll
       );
+      if (changed) {
+        setRecentBrief(briefs);
+        updateRecent(
+          "edit",
+          briefs.map(({ cid }) => cid)
+        );
+      }
     })();
-  }, [fetchBrief]);
-  const fetchAdditional = () => {
-    void (async () => {
-      setRecentBriefAdditional(
-        await Promise.all(recentCIdAdditional.map((cid) => fetchBrief(cid)))
-      );
-    })();
-  };
+  }, [recentBrief, fetchRecentAll]);
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
@@ -112,9 +103,8 @@ export default function EditTab() {
         <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
         <ChartList
           recentBrief={recentBrief}
-          recentBriefAdditional={recentBriefAdditional}
-          hasRecentAdditional={recentCIdAdditional.length}
-          fetchAdditional={fetchAdditional}
+          maxRow={chartListMaxRow}
+          fetchAdditional={() => setFetchRecentAll(true)}
           href={(cid) => `/edit/${cid}`}
           newTab
         />

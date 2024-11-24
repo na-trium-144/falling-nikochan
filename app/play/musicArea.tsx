@@ -21,6 +21,7 @@ export function MusicArea(props: Props) {
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
   const largeTitle = props.isMobile && height && height > 8 * rem;
+  console.log(largeTitle, height, rem)
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
