@@ -6,9 +6,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface Props {
-  recentBrief?: { cid?: string; brief?: ChartBrief }[];
-  hasRecentAdditional?: number;
-  recentBriefAdditional?: { cid?: string; brief?: ChartBrief }[];
+  recentBrief: { cid: string; fetched: boolean; brief?: ChartBrief }[];
+  maxRow: number;
   fetchAdditional?: () => void;
   creator?: boolean;
   href: (cid: string) => string;
@@ -17,86 +16,88 @@ interface Props {
 export function ChartList(props: Props) {
   const [additionalOpen, setAdditionalOpen] = useState<boolean>(false);
 
-  const fetching = props.recentBrief === undefined;
-  const fetchingAdditional = props.recentBriefAdditional === undefined;
+  const fetching = props.recentBrief
+    .slice(0, props.maxRow)
+    .some(({ fetched }) => !fetched);
+  const fetchingAdditional = props.recentBrief.some(({ fetched }) => !fetched);
   return (
-    <>
-      <p className={"pl-2 " + (fetching ? "" : "hidden ")}>
+    <div className="relative min-h-4">
+      <div className={"absolute top-0 left-2 " + (fetching ? "" : "hidden ")}>
         <LoadingSlime />
         Loading...
-      </p>
-      <div className={fetching ? "hidden " : ""}>
-        {props.recentBrief && props.recentBrief.length > 0 ? (
-          <>
-            <ul className="ml-3">
-              {props.recentBrief.map(
-                ({ cid, brief }) =>
-                  cid && (
-                    <ChartListItem
-                      key={cid}
-                      cid={cid}
-                      brief={brief}
-                      href={props.href(cid)}
-                      creator={props.creator}
-                      newTab={props.newTab}
-                    />
-                  )
-              )}
-            </ul>
-            {props.hasRecentAdditional !== undefined &&
-              props.hasRecentAdditional > 0 &&
-              (additionalOpen ? (
-                <>
-                  <p
-                    className={
-                      "mt-1 pl-2 " + (fetchingAdditional ? "" : "hidden ")
-                    }
-                  >
-                    <LoadingSlime />
-                    Loading...
-                  </p>
-                  <div className={fetchingAdditional ? "hidden " : ""}>
-                    <ul className="ml-3">
-                      {props.recentBriefAdditional?.map(
-                        ({ cid, brief }) =>
-                          cid && (
-                            <ChartListItem
-                              key={cid}
-                              cid={cid}
-                              brief={brief}
-                              href={props.href(cid)}
-                              creator={props.creator}
-                              newTab={props.newTab}
-                            />
-                          )
-                      )}
-                    </ul>
-                  </div>
-                </>
-              ) : (
-                <button
-                  className={"block relative ml-5 mt-1 " + linkStyle1}
-                  onClick={() => {
-                    setAdditionalOpen(!additionalOpen);
-                    if (fetchingAdditional && props.fetchAdditional) {
-                      props.fetchAdditional();
-                    }
-                  }}
-                >
-                  <RightOne
-                    className="absolute left-0 bottom-1 "
-                    theme="filled"
-                  />
-                  <span className="ml-5">すべて表示</span>
-                  <span className="ml-1">({props.hasRecentAdditional})</span>
-                </button>
-              ))}
-          </>
-        ) : (
-          <p className="pl-2">まだありません</p>
-        )}
       </div>
-    </>
+      {props.recentBrief.length > 0 ? (
+        <>
+          <ul className="ml-3">
+            {props.recentBrief.slice(0, props.maxRow).map(({ cid, brief }) => (
+              <ChartListItem
+                invisible={fetching}
+                key={cid}
+                cid={cid}
+                brief={brief}
+                href={props.href(cid)}
+                creator={props.creator}
+                newTab={props.newTab}
+              />
+            ))}
+          </ul>
+          {props.recentBrief.length >= props.maxRow &&
+            (additionalOpen ? (
+              <div className="relative min-h-4">
+                <div
+                  className={
+                    "absolute top-1 left-2 " +
+                    (fetchingAdditional ? "" : "hidden ")
+                  }
+                >
+                  <LoadingSlime />
+                  Loading...
+                </div>
+                <ul className="ml-3">
+                  {props.recentBrief
+                    .slice(props.maxRow)
+                    .map(({ cid, fetched, brief }) => (
+                      <ChartListItem
+                        invisible={fetchingAdditional}
+                        key={cid}
+                        cid={cid}
+                        brief={brief}
+                        href={props.href(cid)}
+                        creator={props.creator}
+                        newTab={props.newTab}
+                      />
+                    ))}
+                </ul>
+              </div>
+            ) : (
+              <button
+                className={
+                  "block relative ml-5 mt-1 " +
+                  (fetching ? "invisible " : "") +
+                  linkStyle1
+                }
+                onClick={() => {
+                  setAdditionalOpen(!additionalOpen);
+                  if (fetchingAdditional && props.fetchAdditional) {
+                    props.fetchAdditional();
+                  }
+                }}
+              >
+                <RightOne
+                  className="absolute left-0 bottom-1 "
+                  theme="filled"
+                />
+                <span className="ml-5">すべて表示</span>
+                <span className="ml-1">
+                  ({props.recentBrief.length - props.maxRow})
+                </span>
+              </button>
+            ))}
+        </>
+      ) : (
+        <div className="pl-2">まだありません</div>
+      )}
+    </div>
   );
 }
 interface CProps {
@@ -106,10 +107,16 @@ interface CProps {
   creator?: boolean;
   original?: boolean;
   newTab?: boolean;
+  invisible?: boolean;
 }
 export function ChartListItem(props: CProps) {
   return (
-    <li className="flex flex-row items-start w-full">
+    <li
+      className={
+        "flex flex-row items-start w-full " +
+        (props.invisible ? "invisible " : "")
+      }
+    >
       <span className="flex-none mr-2">•</span>
       {props.newTab ? (
         <a
