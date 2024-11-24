@@ -18,6 +18,7 @@ const aboutTitles = [
 ];
 const maxIndex = 5;
 
+export const dynamic = "force-static";
 export const dynamicParams = false;
 export function generateStaticParams() {
   return Array.from(new Array(maxIndex)).map((_, i) => ({ aboutIndex: (i + 1).toString() }));

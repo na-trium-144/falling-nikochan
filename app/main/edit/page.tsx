@@ -16,6 +16,8 @@ import {
   fetchAndFilterBriefs,
 } from "../play/clientPage";
 
+export const dynamic = "force-static";
+
 export default function EditTab() {
   const router = useRouter();
 

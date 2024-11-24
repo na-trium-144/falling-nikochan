@@ -18,7 +18,11 @@ export async function generateMetadata(context: { params: Promise<Params> }) {
   }
 }
 
+export const dynamic = "force-static";
+export const revalidate = false;
+
 export default async function ShareChart(context: { params: Promise<Params> }) {
+  console.log("share");
   const cid = String((await context.params).cid);
   const { res, brief } = await getBrief(cid, true);
 
