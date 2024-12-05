@@ -9,7 +9,7 @@
 
 YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
-[<img src="https://github.com/na-trium-144/falling-nikochan/blob/readme/screenshot.jpg?raw=true" width=960 />](https://www.youtube.com/watch?v=reUvjq5TRus)
+[<img src="https://github.com/na-trium-144/falling-nikochan/blob/main/screenshot.jpg?raw=true" width=960 />](https://www.youtube.com/watch?v=reUvjq5TRus)
 
 ## development
 
