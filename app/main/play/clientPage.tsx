@@ -183,7 +183,7 @@ export default function PlayTab(props: {
         </p>
         <p className="pl-2 mb-1 text-justify text-sm ">
           (譜面を制作する方へ:
-          譜面編集から「一般公開する」にチェックを入れると、ここに表示されるようになります。)
+          譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。)
         </p>
         <ChartList
           recentBrief={latestBrief}
