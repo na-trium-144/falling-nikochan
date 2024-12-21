@@ -98,7 +98,7 @@ export const levelColors = [
 export const levelBgColors = [
   "bg-emerald-500 dark:bg-emerald-900 ",
   "bg-amber-500 dark:bg-amber-900 ",
-  "bg-rose-500 dark:bg-rose-900 ",
+  "bg-rose-400 dark:bg-rose-900 ",
 ];
 
 export const chartMaxSize = 1000000;
