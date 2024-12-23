@@ -14,7 +14,7 @@
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
     "@ygoe/msgpack": "^1.0.3",
-    "ace-builds": "^1.36.5",
+    "ace-builds": "^1.37.1",
     "dotenv": "^16.4.7",
     "file-saver": "^2.0.5",
     "mongodb": "^6.12.0",
