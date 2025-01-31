@@ -14,8 +14,8 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 ## development
 
 * MongoDB のサーバーをインストールし、起動してください
-    * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
-    * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
+  * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
+  * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
 * `.env` ファイルにデータベースのurlなどを記述、または環境変数で設定
 ```
 MONGODB_URI="mongodb://localhost:27017"
@@ -31,9 +31,9 @@ npm run dev
 ## バージョン番号について
 
 * [拍子変化の実装 #80](https://github.com/na-trium-144/falling-nikochan/pull/80) をver5.0として、今後はPRごとにminorバージョンを上げます
-    * majorバージョンはChartデータフォーマットのバージョンに合わせます
-    * dependabotや、update README.md など、 app/ に変更を加えていないものはカウントしないことにします
+  * majorバージョンはChartデータフォーマットのバージョンに合わせます
+  * dependabotや、update README.md など、 app/ に変更を加えていないものはカウントしないことにします
 * バージョンは package.json に記述します
-    * 各PRのマージ前に `npm version minor` コマンドで上げます
+  * 各PRのマージ前に `npm version minor` コマンドで上げます
 * ChangeLog は CHANGELOG.md に記述し、 /main/version からも閲覧できます
-    * なのでどちらかというとユーザー向けの説明
+  * なのでどちらかというとユーザー向けの説明
