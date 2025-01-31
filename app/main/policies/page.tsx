@@ -2,7 +2,6 @@ import { metaDataTitle } from "@/common/title";
 import { tabTitles } from "../const";
 import { IndexMain } from "../main";
 import { ReactNode } from "react";
-import { linkStyle2 } from "@/common/linkStyle";
 import { ExternalLink } from "@/common/extLink";
 
 export const dynamic = "force-static";

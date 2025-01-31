@@ -33,7 +33,7 @@ export async function handleGetChartFile(
     }
     try {
       chart = await validateChart(chart);
-    } catch (e) {
+    } catch {
       return Response.json(
         { message: "invalid chart data" },
         {

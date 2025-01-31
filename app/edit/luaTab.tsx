@@ -7,7 +7,7 @@ import "ace-builds/src-noconflict/mode-lua";
 import "ace-builds/src-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale";
-import { Chart, Level } from "@/chartFormat/chart";
+import { Level } from "@/chartFormat/chart";
 import { luaExec } from "@/chartFormat/lua/exec";
 import { Step } from "@/chartFormat/step";
 import { findStepFromLua } from "@/chartFormat/lua/edit";
@@ -77,11 +77,11 @@ export default function LuaTab(props: Props) {
           enableBasicAutocompletion={true}
           enableLiveAutocompletion={true}
           enableSnippets={true}
-          onChange={(value, e) => {
+          onChange={(value) => {
             setCode(value);
             setCodeChanged(true);
           }}
-          onCursorChange={(sel, e) => {
+          onCursorChange={(sel) => {
             if (currentLevel) {
               const step = findStepFromLua(currentLevel, sel.cursor.row);
               if (step !== null) {

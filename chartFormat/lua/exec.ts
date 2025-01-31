@@ -8,7 +8,6 @@ import {
   updateBpmTimeSec,
 } from "../command";
 import { Step, stepZero } from "../step";
-import { emptyLevel } from "../chart";
 import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api";
 
 export interface Result {
@@ -68,20 +67,20 @@ export async function luaExec(code: string): Promise<Result> {
     const codeStatic = code.split("\n").map((lineStr, ln) =>
       lineStr
         .replace(
-          /^( *)Note\(( *-?[\d\.]+ *(?:, *-?[\d\.]+ *){2}, *(?:true|false) *)\)( *)$/,
+          /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}, *(?:true|false) *)\)( *)$/,
           `$1NoteStatic(${ln},$2)$3`
         )
         .replace(
-          /^( *)Step\(( *[\d\.]+ *, *[\d\.]+ *)\)( *)$/,
+          /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
           `$1StepStatic(${ln},$2)$3`
         )
         .replace(
-          /^( *)Beat\(( *{[-\d\.,{} ]+} *(?:, *[\d\.]+ *){0,2})\)( *)$/,
+          /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
           `$1BeatStatic(${ln},$2)$3`
         )
-        .replace(/^( *)BPM\(( *[\d\.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
+        .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
         .replace(
-          /^( *)Accel\(( *[\d\.]+ *)\)( *)$/,
+          /^( *)Accel\(( *[\d.]+ *)\)( *)$/,
           `$1AccelStatic(${ln},$2)$3`
         )
     );

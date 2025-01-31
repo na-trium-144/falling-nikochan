@@ -20,9 +20,8 @@ import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
 import BPMSign from "./bpmSign";
 import { getSession } from "./session";
-import { pageTitle } from "@/common/title";
 import { MusicArea } from "./musicArea";
-import { ThemeHandler, useTheme } from "@/common/theme";
+import { useTheme } from "@/common/theme";
 
 export default function Home() {
   return (

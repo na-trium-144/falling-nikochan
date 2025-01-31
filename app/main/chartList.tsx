@@ -69,7 +69,7 @@ export function ChartList(props: Props) {
                   <ul className="ml-3">
                     {props.recentBrief
                       .slice(props.maxRow)
-                      .map(({ cid, fetched, brief }) => (
+                      .map(({ cid, brief }) => (
                         <ChartListItem
                           invisible={fetchingAdditional}
                           key={cid}

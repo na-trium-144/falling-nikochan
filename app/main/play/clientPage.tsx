@@ -1,16 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { ChartBrief, validCId } from "@/chartFormat/chart";
-import { useRouter } from "next/navigation";
-import { getRecent, removeRecent, updateRecent } from "@/common/recent";
-import Input from "@/common/input";
-import { IndexMain } from "../main";
-import { ChartList, ChartListItem } from "../chartList";
-import { LoadingSlime } from "@/common/loadingSlime";
-import { Youtube } from "@icon-park/react";
-import { ExternalLink } from "@/common/extLink";
-import { numLatest } from "@/api/latest/const";
+import { ChartBrief } from "@/chartFormat/chart";
 
 export const chartListMaxRow = 5;
 export interface ChartLineBrief {
@@ -38,7 +28,7 @@ export async function fetchAndFilterBriefs(
   let changed = false;
   const recentBriefNew: (ChartLineBrief | null)[] = recentBrief.slice();
   await Promise.all(
-    recentBrief.map(async ({ cid, fetched, brief }, i) => {
+    recentBrief.map(async ({ cid, fetched }, i) => {
       if (fetched) {
         return;
       } else if (!fetchAll && i >= chartListMaxRow) {

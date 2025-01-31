@@ -1,6 +1,5 @@
 import { entryToBrief, getChartEntry } from "./chart";
 import { MongoClient } from "mongodb";
-import { ChartBrief } from "@/chartFormat/chart";
 
 // chartFileとnewChartFileのPOSTでrevalidateする
 export function revalidateBrief(cid: string) {

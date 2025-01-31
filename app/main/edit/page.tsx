@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getRecent, removeRecent, updateRecent } from "@/common/recent";
-import { ChartBrief, validCId } from "@/chartFormat/chart";
+import { useEffect, useState } from "react";
+import { getRecent, updateRecent } from "@/common/recent";
+import { validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
 import { ChartList } from "../chartList";
@@ -19,8 +18,6 @@ import { rateLimitMin } from "@/chartFormat/apiConfig";
 export const dynamic = "force-static";
 
 export default function EditTab() {
-  const router = useRouter();
-
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
 

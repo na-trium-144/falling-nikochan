@@ -1,8 +1,8 @@
-import { Chart, Level } from "@/chartFormat/chart";
+import { Level } from "@/chartFormat/chart";
 import { NoteCommand } from "@/chartFormat/command";
 import Button from "@/common/button";
 import Input from "@/common/input";
-import { Step, stepCmp } from "@/chartFormat/step";
+import { Step } from "@/chartFormat/step";
 import { Key } from "@/common/key";
 import { Mouse } from "@icon-park/react";
 import CheckBox from "@/common/checkBox";

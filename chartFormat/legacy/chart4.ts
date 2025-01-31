@@ -2,7 +2,7 @@ import { hash, Level } from "../chart";
 import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command";
 import { luaAddBeatChange } from "../lua/signature";
 import { stepZero } from "../step";
-import { Chart5, Level5 } from "./chart5";
+import { Chart5 } from "./chart5";
 
 export interface Chart4 {
   falling: "nikochan"; // magic

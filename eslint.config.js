@@ -27,6 +27,9 @@ export default [
       "@next/next/no-html-link-for-pages": "warn",
       "@next/next/no-img-element": "warn",
       "jsx-a11y/alt-text": "warn",
+      "prefer-const": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-unexpected-multiline": "off",
     },
   },
 ];

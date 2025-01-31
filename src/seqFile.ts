@@ -1,5 +1,5 @@
 import msgpack from "@ygoe/msgpack";
-import { Chart, validateChart } from "@/chartFormat/chart";
+import { validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart";
@@ -10,7 +10,7 @@ export async function handleGetSeqFile(env: Env, cid: string, lvIndex: number) {
   try {
     await client.connect();
     const db = client.db("nikochan");
-    let { res, entry, chart } = await getChartEntry(db, cid, null);
+    let { res, chart } = await getChartEntry(db, cid, null);
     if (!chart) {
       return Response.json(
         { message: res?.message },
@@ -22,7 +22,7 @@ export async function handleGetSeqFile(env: Env, cid: string, lvIndex: number) {
 
     try {
       chart = await validateChart(chart);
-    } catch (e) {
+    } catch {
       return Response.json(
         { message: "invalid chart data" },
         {

@@ -22,7 +22,7 @@ import { handleGetNewChartFile, handlePostNewChartFile } from "./newChartFile";
 import { handleGetSeqFile } from "./seqFile";
 
 export default {
-  async fetch(request: Request, env: Env, ctx): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api")) {
       let res: Response = new Response(null, { status: 404 });
