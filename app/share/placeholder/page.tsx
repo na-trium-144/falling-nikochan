@@ -6,7 +6,6 @@ import Footer from "@/common/footer";
 import { PlayOption } from "./playOption";
 import { ChartBrief } from "@/chartFormat/chart";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
 import Link from "next/link";
 import Button from "@/common/button";
@@ -17,13 +16,13 @@ import { International, PlayOne } from "@icon-park/react";
 export const dynamic = "force-static";
 
 export default function ShareChart() {
-  const searchParams = useSearchParams();
-  const cid = searchParams.get("cid") || "";
+  const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
 
   useEffect(() => {
     try {
+      setCId(window.location.href.split("/").pop()!);
       setBrief(JSON.parse("PLACEHOLDER_BRIEF"));
     } catch {
       setBrief({
@@ -36,7 +35,7 @@ export default function ShareChart() {
         levels: [],
       });
     }
-  }, [cid]);
+  }, []);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [origin, setOrigin] = useState<string>("");

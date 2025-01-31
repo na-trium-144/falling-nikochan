@@ -67,7 +67,8 @@ function InitPlay() {
     } else {
       void (async () => {
         const res = await fetch(
-          process.env.BACKEND_PREFIX + `/api/seqFile/${session.cid}/${session.lvIndex}`,
+          process.env.BACKEND_PREFIX +
+            `/api/seqFile/${session.cid}/${session.lvIndex}`,
           { cache: "no-store" }
         );
         if (res.ok) {
@@ -86,7 +87,9 @@ function InitPlay() {
           setChartSeq(undefined);
           setErrorStatus(res.status);
           try {
-            setErrorMsg(String((await res.json()).message));
+            setErrorMsg(
+              String(((await res.json()) as { message?: string }).message)
+            );
           } catch {
             setErrorMsg("");
           }

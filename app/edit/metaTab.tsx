@@ -172,7 +172,10 @@ export function MetaTab(props: Props2) {
       );
       if (res.ok) {
         try {
-          const resBody = await res.json();
+          const resBody = (await res.json()) as {
+            message?: string;
+            cid?: string;
+          };
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
             history.replaceState(null, "", `/edit?cid=${resBody.cid}`);
@@ -192,7 +195,10 @@ export function MetaTab(props: Props2) {
         }
       } else {
         try {
-          const resBody = await res.json();
+          const resBody = (await res.json()) as {
+            message?: string;
+            cid?: string;
+          };
           setErrorMsg(`${res.status}: ${resBody.message}`);
         } catch {
           setErrorMsg(`${res.status} Error`);
@@ -219,7 +225,10 @@ export function MetaTab(props: Props2) {
         }
       } else {
         try {
-          const resBody = await res.json();
+          const resBody = (await res.json()) as {
+            message?: string;
+            cid?: string;
+          };
           setErrorMsg(`${res.status}: ${resBody.message}`);
         } catch {
           setErrorMsg(`${res.status} Error`);

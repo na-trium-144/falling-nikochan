@@ -57,7 +57,9 @@ export default function EditTab() {
       setInputCId(cid);
     } else {
       try {
-        setCIdErrorMsg((await res.json()).message);
+        setCIdErrorMsg(
+          String(((await res.json()) as { message?: string }).message)
+        );
       } catch {
         setCIdErrorMsg("");
       }

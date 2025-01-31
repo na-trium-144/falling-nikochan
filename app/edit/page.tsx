@@ -6,7 +6,7 @@ import {
   Signature,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
   findBpmIndexFromStep,
@@ -68,7 +68,15 @@ import { useTheme } from "@/common/theme";
 import { useSearchParams } from "next/navigation";
 import { GuideMain } from "./guide/guideMain";
 
-export default function Page() {
+export default function Home() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Page />
+    </Suspense>
+  );
+}
+
+function Page() {
   const searchParams = useSearchParams();
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>(searchParams.get("cid") || "");
@@ -134,7 +142,9 @@ export default function Page() {
           setChart(undefined);
           setErrorStatus(res.status);
           try {
-            setErrorMsg(String((await res.json()).message));
+            setErrorMsg(
+              String(((await res.json()) as { message?: string }).message)
+            );
           } catch {
             setErrorMsg("");
           }

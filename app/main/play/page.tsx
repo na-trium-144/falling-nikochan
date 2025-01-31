@@ -111,7 +111,9 @@ export default function PlayTab() {
     } else {
       setCidFetching(false);
       try {
-        setCIdErrorMsg((await res.json()).message);
+        setCIdErrorMsg(
+          String(((await res.json()) as { message?: string }).message)
+        );
       } catch (e) {
         setCIdErrorMsg(String(e));
       }
