@@ -58,9 +58,12 @@ export async function handlePostNewChartFile(
       chart = await validateChart(chart);
     } catch (e) {
       console.log(e);
-      return new Response(JSON.stringify({ message: "invalid chart data" }), {
-        status: 400,
-      });
+      return Response.json(
+        { message: "invalid chart data" },
+        {
+          status: 400,
+        }
+      );
     }
 
     // update Time
@@ -87,7 +90,7 @@ export async function handlePostNewChartFile(
       .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
     revalidateBrief(cid);
 
-    return new Response(JSON.stringify({ cid: cid }));
+    return Response.json({ cid: cid });
   } catch (e) {
     console.error(e);
     return new Response(null, { status: 500 });

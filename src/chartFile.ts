@@ -24,16 +24,22 @@ export async function handleGetChartFile(
     const db = client.db("nikochan");
     let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return new Response(JSON.stringify({ message: res?.message }), {
-        status: res?.status || 500,
-      });
+      return Response.json(
+        { message: res?.message },
+        {
+          status: res?.status || 500,
+        }
+      );
     }
     try {
       chart = await validateChart(chart);
     } catch (e) {
-      return new Response(JSON.stringify({ message: "invalid chart data" }), {
-        status: 500,
-      });
+      return Response.json(
+        { message: "invalid chart data" },
+        {
+          status: 500,
+        }
+      );
     }
     return new Response(new Blob([msgpack.serialize(chart)]));
   } catch (e) {
@@ -60,9 +66,12 @@ export async function handlePostChartFile(
       passwdHash || ""
     );
     if (!chart || !entry) {
-      return new Response(JSON.stringify({ message: res?.message }), {
-        status: res?.status || 500,
-      });
+      return Response.json(
+        { message: res?.message },
+        {
+          status: res?.status || 500,
+        }
+      );
     }
 
     if (chartBuf.byteLength > chartMaxSize) {
@@ -82,9 +91,12 @@ export async function handlePostChartFile(
       newChart = await validateChart(newChart);
     } catch (e) {
       console.error(e);
-      return new Response(JSON.stringify({ message: "invalid chart data" }), {
-        status: 400,
-      });
+      return Response.json(
+        { message: "invalid chart data" },
+        {
+          status: 400,
+        }
+      );
     }
 
     // update Time
@@ -129,9 +141,12 @@ export async function handleDeleteChartFile(
     const db = client.db("nikochan");
     const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return new Response(JSON.stringify({ message: res?.message }), {
-        status: res?.status || 500,
-      });
+      return Response.json(
+        { message: res?.message },
+        {
+          status: res?.status || 500,
+        }
+      );
     }
 
     await db.collection("chart").updateOne(

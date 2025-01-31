@@ -21,75 +21,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function ShareState(props: Props) {
-  return (
-    <>
-      <span className="inline-block">
-        ({new Date(props.brief.updatedAt).toLocaleDateString()})
-      </span>
-      <span>
-        {isSample(props.cid) ? (
-          <span className="ml-2">
-            <International className="inline-block w-5 translate-y-0.5" />
-            <span>サンプル譜面</span>
-          </span>
-        ) : props.brief.published ? (
-          <span className="ml-2">
-            <International className="inline-block w-5 translate-y-0.5" />
-            <span>一般公開</span>
-          </span>
-        ) : (
-          <>
-            {/*
-              <LinkTwo className="inline-block w-5 translate-y-0.5" />
-              <span></span>
-            */}
-          </>
-        )}
-      </span>
-      <span className="ml-2">
-        <PlayOne className="inline-block w-5 translate-y-0.5" theme="filled" />
-        <span>{props.brief.playCount || 0}</span>
-      </span>
-    </>
-  );
-}
-
 interface Props {
   cid: string;
   brief: ChartBrief;
-}
-export function ShareLink(props: Props) {
-  const [origin, setOrigin] = useState<string>("");
-  const [hasClipboard, setHasClipboard] = useState<boolean>(false);
-  useEffect(() => {
-    setOrigin(window.location.origin);
-    setHasClipboard(!!navigator?.clipboard);
-  }, [props]);
-  return (
-    <p className="mt-2">
-      <span className="hidden main-wide:inline-block mr-2">共有用リンク:</span>
-      <Link
-        className={"inline-block py-2 " + linkStyle1}
-        href={`/share/${props.cid}`}
-        prefetch={false}
-      >
-        <span className="main-wide:hidden">共有用リンク</span>
-        <span className="hidden main-wide:inline-block">
-          {origin}/share/{props.cid}
-        </span>
-      </Link>
-      {hasClipboard && (
-        <Button
-          className="ml-2"
-          text="コピー"
-          onClick={() =>
-            navigator.clipboard.writeText(`${origin}/share/${props.cid}`)
-          }
-        />
-      )}
-    </p>
-  );
 }
 export function PlayOption(props: Props) {
   const router = useRouter();

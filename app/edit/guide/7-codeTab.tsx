@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { BeatSlime } from "../[cid]/timingTab";
+import { BeatSlime } from "../timingTab";
 
 export function GuideContent7() {
   return (

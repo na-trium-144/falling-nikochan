@@ -21,15 +21,18 @@ export async function handleGetBrief(
     const db = client.db("nikochan");
     const { res, entry } = await getChartEntry(db, cid, null);
     if (!entry) {
-      return new Response(JSON.stringify({ message: res?.message }), {
-        status: res?.status || 500,
-      });
+      return Response.json(
+        { message: res?.message },
+        {
+          status: res?.status || 500,
+        }
+      );
     }
     const brief = entryToBrief(entry);
     if (!includeLevels) {
       brief.levels = [];
     }
-    return new Response(JSON.stringify(brief));
+    return Response.json(brief);
   } finally {
     await client.close();
   }

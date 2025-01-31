@@ -22,7 +22,7 @@ export async function handleGetLatest(env: Env) {
       .project({ _id: 0, cid: 1 })
       .toArray();
     console.log(latest);
-    return new Response(JSON.stringify(latest));
+    return Response.json(latest);
   } finally {
     await client.close();
   }

@@ -57,23 +57,23 @@ import {
 import Select from "@/common/select";
 import LevelTab from "./levelTab";
 import { initSession, SessionData } from "@/play/session";
-import { GuideMain } from "../guide/guideMain";
 import {
   luaAddBeatChange,
   luaDeleteBeatChange,
   luaUpdateBeatChange,
 } from "@/chartFormat/lua/signature";
-import { Params } from "next/dist/server/request/params";
 import { useDisplayMode } from "@/scale";
 import { Forbid, Move } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle";
 import { useTheme } from "@/common/theme";
+import { useSearchParams } from "next/navigation";
+import { GuideMain } from "./guide/guideMain";
 
-export default function Page(context: { params: Promise<Params> }) {
-  const params = use(context.params);
+export default function Page() {
+  const searchParams = useSearchParams();
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
-  const cidInitial = useRef<string>(String(params.cid));
-  const [cid, setCid] = useState<string | undefined>(String(params.cid));
+  const cidInitial = useRef<string>(searchParams.get("cid") || "");
+  const [cid, setCid] = useState<string | undefined>(searchParams.get("cid") || "");
   const { isTouch } = useDisplayMode();
   const themeContext = useTheme();
 

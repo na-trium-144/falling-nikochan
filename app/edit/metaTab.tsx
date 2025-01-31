@@ -163,7 +163,7 @@ export function MetaTab(props: Props2) {
   const save = async () => {
     setSaving(true);
     if (props.cid === undefined) {
-      const res = await fetch(process.env.BACKEND_PREFIX + `/api/newChartFile/`, {
+      const res = await fetch(process.env.BACKEND_PREFIX + `/api/newChartFile`, {
         method: "POST",
         body: msgpack.serialize(props.chart),
         cache: "no-store",
@@ -173,7 +173,7 @@ export function MetaTab(props: Props2) {
           const resBody = await res.json();
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
-            history.replaceState(null, "", `/edit/${resBody.cid}`);
+            history.replaceState(null, "", `/edit?cid=${resBody.cid}`);
             setErrorMsg("保存しました！");
             addRecent("edit", resBody.cid);
             props.setHasChange(false);

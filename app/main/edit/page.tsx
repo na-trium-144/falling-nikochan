@@ -54,8 +54,8 @@ export default function EditTab() {
     });
     setCidFetching(false);
     if (res.ok) {
-      // router.push(`/edit/${cid}`);
-      window.open(`/edit/${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
+      // router.push(`/edit?cid=${cid}`);
+      window.open(`/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
       setCIdErrorMsg("");
       setInputCId(cid);
     } else {
@@ -87,7 +87,7 @@ export default function EditTab() {
           />
           <ExternalLink
             className={"ml-1 " + (inputCId !== "" ? "" : "hidden ")}
-            href={`/edit/${inputCId}`}
+            href={`/edit?cid=${inputCId}`}
           >
             新しいタブで開く
           </ExternalLink>
@@ -108,7 +108,7 @@ export default function EditTab() {
           recentBrief={recentBrief}
           maxRow={chartListMaxRow}
           fetchAdditional={() => setFetchRecentAll(true)}
-          href={(cid) => `/edit/${cid}`}
+          href={(cid) => `/edit?cid=${cid}`}
           newTab
           showLoading
         />
@@ -118,7 +118,7 @@ export default function EditTab() {
           <span className="text-xl font-bold font-title ">
             新しく譜面を作る:
           </span>
-          <ExternalLink className="ml-3" href="/edit/new">
+          <ExternalLink className="ml-3" href="/edit?cid=new">
             新規作成
           </ExternalLink>
         </h3>

@@ -12,17 +12,23 @@ export async function handleGetSeqFile(env: Env, cid: string, lvIndex: number) {
     const db = client.db("nikochan");
     let { res, entry, chart } = await getChartEntry(db, cid, null);
     if (!chart) {
-      return new Response(JSON.stringify({ message: res?.message }), {
-        status: res?.status || 500,
-      });
+      return Response.json(
+        { message: res?.message },
+        {
+          status: res?.status || 500,
+        }
+      );
     }
 
     try {
       chart = await validateChart(chart);
     } catch (e) {
-      return new Response(JSON.stringify({ message: "invalid chart data" }), {
-        status: 500,
-      });
+      return Response.json(
+        { message: "invalid chart data" },
+        {
+          status: 500,
+        }
+      );
     }
     if (!chart.levels.at(lvIndex)) {
       return new Response(
