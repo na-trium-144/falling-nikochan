@@ -1,11 +1,11 @@
 {
-  "name": "falling-nikochan7",
-  "version": "0.0.0",
+  "name": "falling-nikochan",
+  "version": "7.0.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
+    "wdeploy": "wrangler deploy",
+    "wdev": "wrangler dev",
+    "wstart": "wrangler dev",
     "test": "vitest",
     "cf-typegen": "wrangler types"
   },
