@@ -22,45 +22,51 @@ import { handleGetNewChartFile, handlePostNewChartFile } from "./newChartFile";
 import { handleGetSeqFile } from "./seqFile";
 
 export default {
-  async fetch(request: Request, env, ctx): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx): Promise<Response> {
     const url = new URL(request.url);
+    let res: Response = new Response(null, { status: 404 });
     if (url.pathname.match(/^\/api\/brief\/[0-9]+$/)) {
       const cid: string = url.pathname.split("/").pop()!;
       const includeLevels: boolean = !!Number(url.searchParams.get("levels"));
-      return await handleGetBrief(cid, includeLevels);
-    }
-    if (url.pathname.match(/^\/api\/chartFile\/[0-9]+$/)) {
+      res = await handleGetBrief(env, cid, includeLevels);
+      if (res.ok) {
+        res.headers.set("Cache-Control", "max-age=3600");
+      }
+    } else if (url.pathname.match(/^\/api\/latest$/)) {
+      res = await handleGetLatest(env);
+      if (res.ok) {
+        res.headers.set("Cache-Control", "max-age=3600");
+      }
+    } else if (url.pathname.match(/^\/api\/chartFile\/[0-9]+$/)) {
       const cid: string = url.pathname.split("/").pop()!;
       const passwdHash = new URL(request.url).searchParams.get("p");
       if (request.method === "GET") {
-        return await handleGetChartFile(cid, passwdHash);
+        res = await handleGetChartFile(env, cid, passwdHash);
       } else if (request.method === "POST") {
-        return await handlePostChartFile(
+        res = await handlePostChartFile(
+          env,
           cid,
           passwdHash,
           await request.arrayBuffer()
         );
       } else if (request.method === "DELETE") {
-        return await handleDeleteChartFile(cid, passwdHash);
+        res = await handleDeleteChartFile(env, cid, passwdHash);
       }
-    }
-    if (url.pathname.match(/^\/api\/newChartFile$/)) {
+    } else if (url.pathname.match(/^\/api\/newChartFile$/)) {
       if (request.method === "GET") {
-        return await handleGetNewChartFile(request.headers);
+        res = await handleGetNewChartFile(env, request.headers);
       } else if (request.method === "POST") {
-        return await handlePostNewChartFile(
+        res = await handlePostNewChartFile(
+          env,
           request.headers,
           await request.arrayBuffer()
         );
       }
-    }
-    if (url.pathname.match(/^\/api\/seqFile\/[0-9]+\/[0-9]+/)) {
+    } else if (url.pathname.match(/^\/api\/seqFile\/[0-9]+\/[0-9]+/)) {
       const [cid, lvIndex] = url.pathname.split("/").slice(-2);
-      return await handleGetSeqFile(cid, Number(lvIndex));
+      res = await handleGetSeqFile(env, cid, Number(lvIndex));
     }
-    if (url.pathname.match(/^\/api\/latest$/)) {
-      return await handleGetLatest();
-    }
-    return new Response(null, { status: 404 });
+    res.headers.set("Access-Control-Allow-Origin", "*");
+    return res;
   },
 } satisfies ExportedHandler<Env>;

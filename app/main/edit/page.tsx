@@ -7,7 +7,6 @@ import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
 import { ChartList } from "../chartList";
-import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
 import { ExternalLink } from "@/common/extLink";
 import {
@@ -15,6 +14,7 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/clientPage";
+import { rateLimitMin } from "@/chartFormat/apiConfig";
 
 export const dynamic = "force-static";
 
@@ -49,7 +49,7 @@ export default function EditTab() {
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
-    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, { cache: "no-store" });
     setCidFetching(false);
     if (res.ok) {
       // router.push(`/edit/${cid}`);

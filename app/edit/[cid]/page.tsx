@@ -98,7 +98,7 @@ export default function Page(context: { params: Promise<Params> }) {
       setPasswdFailed(false);
       setLoading(true);
       const res = await fetch(
-        `/api/chartFile/${cidInitial.current}?p=${getPasswd(
+        process.env.BACKEND_PREFIX + `/api/chartFile/${cidInitial.current}?p=${getPasswd(
           cidInitial.current
         )}`,
         { cache: "no-store" }

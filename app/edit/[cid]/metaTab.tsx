@@ -163,7 +163,7 @@ export function MetaTab(props: Props2) {
   const save = async () => {
     setSaving(true);
     if (props.cid === undefined) {
-      const res = await fetch(`/api/newChartFile/`, {
+      const res = await fetch(process.env.BACKEND_PREFIX + `/api/newChartFile/`, {
         method: "POST",
         body: msgpack.serialize(props.chart),
         cache: "no-store",
@@ -198,7 +198,7 @@ export function MetaTab(props: Props2) {
       }
     } else {
       const res = await fetch(
-        `/api/chartFile/${props.cid}?p=${getPasswd(props.cid)}`,
+        process.env.BACKEND_PREFIX + `/api/chartFile/${props.cid}?p=${getPasswd(props.cid)}`,
         {
           method: "POST",
           body: msgpack.serialize(props.chart),

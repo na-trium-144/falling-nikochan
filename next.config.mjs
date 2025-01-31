@@ -2,7 +2,6 @@
 
 import { execFileSync } from "node:child_process";
 import packageJson from "./package.json" with { type: "json" };
-import "dotenv/config";
 
 const date = new Date().toUTCString();
 let commit = "";
@@ -14,6 +13,7 @@ try {
   console.error("Failed to get commit hash");
 }
 
+console.log("NODE_ENV=", process.env.NODE_ENV);
 const nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
@@ -22,6 +22,7 @@ const nextConfig = {
     buildCommit: commit,
     buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
     ASSET_PREFIX: process.env.ASSET_PREFIX || "",
+    BACKEND_PREFIX: process.env.NODE_ENV !== "development" ? "http://localhost:8787" : "",
   },
   webpack: (config, options) => {
     config.resolve = {

@@ -6,7 +6,6 @@ import {
   validateChart,
 } from "@/chartFormat/chart";
 import { MongoClient } from "mongodb";
-import "dotenv/config";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart";
 import { revalidateBrief } from "./brief";
 import { revalidateLatest } from "./latest";
@@ -15,10 +14,11 @@ import { revalidateLatest } from "./latest";
 // クエリパラメータのpで渡す
 
 export async function handleGetChartFile(
+  env: Env,
   cid: string,
   passwdHash: string | null
 ) {
-  const client = new MongoClient(process.env.MONGODB_URI!);
+  const client = new MongoClient(env.MONGODB_URI);
   try {
     await client.connect();
     const db = client.db("nikochan");
@@ -45,11 +45,12 @@ export async function handleGetChartFile(
 }
 
 export async function handlePostChartFile(
+  env: Env,
   cid: string,
   passwdHash: string | null,
   chartBuf: ArrayBuffer
 ) {
-  const client = new MongoClient(process.env.MONGODB_URI!);
+  const client = new MongoClient(env.MONGODB_URI);
   try {
     await client.connect();
     const db = client.db("nikochan");
@@ -118,10 +119,11 @@ export async function handlePostChartFile(
 }
 
 export async function handleDeleteChartFile(
+  env: Env,
   cid: string,
   passwdHash: string | null
 ) {
-  const client = new MongoClient(process.env.MONGODB_URI!);
+  const client = new MongoClient(env.MONGODB_URI);
   try {
     await client.connect();
     const db = client.db("nikochan");

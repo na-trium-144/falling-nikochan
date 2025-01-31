@@ -3,25 +3,25 @@ import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
 import { updateIpLastCreate } from "./dbRateLimit";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart";
-import "dotenv/config";
 import { revalidateBrief } from "./brief";
 import { revalidateLatest } from "./latest";
 import { rateLimitMin } from "@/chartFormat/apiConfig";
 
-export async function handleGetNewChartFile(headers: Headers) {
+export async function handleGetNewChartFile(env: Env, headers: Headers) {
   console.log(headers.get("x-forwarded-for"));
   return new Response(null, { status: 400 });
 }
 
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
 export async function handlePostNewChartFile(
+  env: Env,
   headers: Headers,
   chartBuf: ArrayBuffer
 ) {
   console.log(headers.get("x-forwarded-for"));
   const ip = String(headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()); // nullもundefinedも文字列にしちゃう
 
-  const client = new MongoClient(process.env.MONGODB_URI!);
+  const client = new MongoClient(env.MONGODB_URI);
   try {
     await client.connect();
     const db = client.db("nikochan");

@@ -3,11 +3,10 @@ import { Chart, validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart";
-import "dotenv/config";
 import { revalidateBrief } from "./brief";
 
-export async function handleGetSeqFile(cid: string, lvIndex: number) {
-  const client = new MongoClient(process.env.MONGODB_URI!);
+export async function handleGetSeqFile(env: Env, cid: string, lvIndex: number) {
+  const client = new MongoClient(env.MONGODB_URI);
   try {
     await client.connect();
     const db = client.db("nikochan");

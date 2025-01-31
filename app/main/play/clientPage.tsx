@@ -20,7 +20,7 @@ export interface ChartLineBrief {
 }
 
 export async function fetchBrief(cid: string): Promise<ChartLineBrief | null> {
-  const res = await fetch(`/api/brief/${cid}`, { cache: "default" });
+  const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, { cache: "default" });
   if (res.ok) {
     // cidからタイトルなどを取得
     const resBody = await res.json();
@@ -71,7 +71,7 @@ export default function PlayTab(props: {
     setRecentBrief(recentCId.map((cid) => ({ cid, fetched: false })));
     void (async () => {
       const latestCId = (await (
-        await fetch(`/api/latest`, { cache: "default" })
+        await fetch(process.env.BACKEND_PREFIX + `/api/latest`, { cache: "default" })
       ).json()) as { cid: string }[];
       setLatestBrief(latestCId.map(({ cid }) => ({ cid, fetched: false })));
     })();
@@ -109,7 +109,7 @@ export default function PlayTab(props: {
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
-    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, { cache: "no-store" });
     if (res.ok) {
       router.push(`/share/${cid}`);
     } else {

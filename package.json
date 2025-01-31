@@ -10,14 +10,13 @@
     "nstart": "next start",
     "test": "vitest",
     "wdeploy": "wrangler types && wrangler deploy",
-    "wdev": "wrangler types && wrangler dev",
+    "wdev": "wrangler types && wrangler dev -e dev",
     "wstart": "wrangler types && wrangler dev"
   },
   "dependencies": {
     "@icon-park/react": "^1.4.2",
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.36.5",
-    "dotenv": "^16.4.7",
     "file-saver": "^2.0.5",
     "mongodb": "^6.12.0",
     "next": "^15.1.2",
