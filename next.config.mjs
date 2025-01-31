@@ -22,7 +22,7 @@ const nextConfig = {
     buildCommit: commit,
     buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
     ASSET_PREFIX: process.env.ASSET_PREFIX || "",
-    BACKEND_PREFIX: process.env.NODE_ENV !== "development" ? "http://localhost:8787" : "",
+    BACKEND_PREFIX: process.env.NODE_ENV === "development" ? "http://localhost:8787" : "",
   },
   webpack: (config, options) => {
     config.resolve = {

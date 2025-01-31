@@ -49,7 +49,9 @@ export default function EditTab() {
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
-    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, { cache: "no-store" });
+    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
+      cache: "no-store",
+    });
     setCidFetching(false);
     if (res.ok) {
       // router.push(`/edit/${cid}`);
@@ -108,6 +110,7 @@ export default function EditTab() {
           fetchAdditional={() => setFetchRecentAll(true)}
           href={(cid) => `/edit/${cid}`}
           newTab
+          showLoading
         />
       </div>
       <div className="mb-3">
