@@ -4,15 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "cf-typegen": "wrangler types",
     "lint": "eslint src/ app/ chartFormat/",
     "nbuild": "next build",
     "ndev": "next dev -H 0.0.0.0",
     "nstart": "next start",
     "test": "vitest",
-    "wdeploy": "wrangler deploy",
-    "wdev": "wrangler dev",
-    "wstart": "wrangler dev"
+    "wdeploy": "wrangler types && wrangler deploy",
+    "wdev": "wrangler types && wrangler dev",
+    "wstart": "wrangler types && wrangler dev"
   },
   "dependencies": {
     "@icon-park/react": "^1.4.2",
