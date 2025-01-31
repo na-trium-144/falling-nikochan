@@ -1,45 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
 import msgpack from "@ygoe/msgpack";
 import { Chart, validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
-import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
-import { getChartEntry } from "@/api/chart";
+import { getChartEntry } from "./chart";
 import "dotenv/config";
-import { revalidateBrief } from "@/api/brief/brief";
+import { revalidateBrief } from "./brief";
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<Params> }
-) {
-  const cid: string = String((await context.params).cid);
-  const lvIndex = Number((await context.params).lvIndex);
-
+export async function handleGetSeqFile(cid: string, lvIndex: number) {
   const client = new MongoClient(process.env.MONGODB_URI!);
   try {
     await client.connect();
     const db = client.db("nikochan");
     let { res, entry, chart } = await getChartEntry(db, cid, null);
     if (!chart) {
-      return NextResponse.json(
-        { message: res?.message },
-        { status: res?.status || 500 }
-      );
+      return new Response(JSON.stringify({ message: res?.message }), {
+        status: res?.status || 500,
+      });
     }
 
     try {
       chart = await validateChart(chart);
     } catch (e) {
-      return NextResponse.json(
-        { message: "invalid chart data" },
-        { status: 500 }
-      );
+      return new Response(JSON.stringify({ message: "invalid chart data" }), {
+        status: 500,
+      });
     }
     if (!chart.levels.at(lvIndex)) {
-      return NextResponse.json(
-        {
+      return new Response(
+        JSON.stringify({
           message: "Level not found",
-        },
+        }),
         { status: 404 }
       );
     }

@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
 import msgpack from "@ygoe/msgpack";
 import {
   Chart,
@@ -6,41 +5,35 @@ import {
   hashLevel,
   validateChart,
 } from "@/chartFormat/chart";
-import { Params } from "next/dist/server/request/params";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
-import { chartToEntry, getChartEntry, zipEntry } from "@/api/chart";
-import { revalidateBrief } from "@/api/brief/brief";
-import { revalidateLatest } from "@/api/latest/latest";
+import { chartToEntry, getChartEntry, zipEntry } from "./chart";
+import { revalidateBrief } from "./brief";
+import { revalidateLatest } from "./latest";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<Params> }
+export async function handleGetChartFile(
+  cid: string,
+  passwdHash: string | null
 ) {
-  const cid: string = String((await context.params).cid);
-  const passwdHash = new URL(request.url).searchParams.get("p");
-
   const client = new MongoClient(process.env.MONGODB_URI!);
   try {
     await client.connect();
     const db = client.db("nikochan");
     let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return NextResponse.json(
-        { message: res?.message },
-        { status: res?.status || 500 }
-      );
+      return new Response(JSON.stringify({ message: res?.message }), {
+        status: res?.status || 500,
+      });
     }
     try {
       chart = await validateChart(chart);
     } catch (e) {
-      return NextResponse.json(
-        { message: "invalid chart data" },
-        { status: 500 }
-      );
+      return new Response(JSON.stringify({ message: "invalid chart data" }), {
+        status: 500,
+      });
     }
     return new Response(new Blob([msgpack.serialize(chart)]));
   } catch (e) {
@@ -51,13 +44,11 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<Params> }
+export async function handlePostChartFile(
+  cid: string,
+  passwdHash: string | null,
+  chartBuf: ArrayBuffer
 ) {
-  const cid: string = String((await context.params).cid);
-  const passwdHash = new URL(request.url).searchParams.get("p");
-
   const client = new MongoClient(process.env.MONGODB_URI!);
   try {
     await client.connect();
@@ -68,20 +59,18 @@ export async function POST(
       passwdHash || ""
     );
     if (!chart || !entry) {
-      return NextResponse.json(
-        { message: res?.message },
-        { status: res?.status || 500 }
-      );
+      return new Response(JSON.stringify({ message: res?.message }), {
+        status: res?.status || 500,
+      });
     }
 
-    const chartBuf = await request.arrayBuffer();
     if (chartBuf.byteLength > chartMaxSize) {
-      return NextResponse.json(
-        {
+      return new Response(
+        JSON.stringify({
           message:
             `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
             `Max ${Math.round(chartMaxSize / 1000)}kB`,
-        },
+        }),
         { status: 413 }
       );
     }
@@ -92,10 +81,9 @@ export async function POST(
       newChart = await validateChart(newChart);
     } catch (e) {
       console.error(e);
-      return NextResponse.json(
-        { message: "invalid chart data" },
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ message: "invalid chart data" }), {
+        status: 400,
+      });
     }
 
     // update Time
@@ -129,23 +117,19 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  context: { params: Promise<Params> }
+export async function handleDeleteChartFile(
+  cid: string,
+  passwdHash: string | null
 ) {
-  const cid: string = String((await context.params).cid);
-  const passwdHash = new URL(request.url).searchParams.get("p");
-
   const client = new MongoClient(process.env.MONGODB_URI!);
   try {
     await client.connect();
     const db = client.db("nikochan");
     const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
     if (!chart) {
-      return NextResponse.json(
-        { message: res?.message },
-        { status: res?.status || 500 }
-      );
+      return new Response(JSON.stringify({ message: res?.message }), {
+        status: res?.status || 500,
+      });
     }
 
     await db.collection("chart").updateOne(

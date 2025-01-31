@@ -1,7 +1,6 @@
-import { entryToBrief, getChartEntry } from "../chart";
+import { entryToBrief, getChartEntry } from "./chart";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { ChartBrief } from "@/chartFormat/chart";
 import { originalCId, sampleCId } from "@/main/const";
 
@@ -24,19 +23,20 @@ async function getBriefImpl(cid: string) {
 // chartFileとnewChartFileのPOSTでrevalidateする
 export function revalidateBrief(cid: string) {
   console.warn(`revalidate brief ${cid}`);
-  revalidateTag(`brief-${cid}`);
+  // todo
+  // revalidateTag(`brief-${cid}`);
 }
 
 export async function getBrief(
   cid: string,
   includeLevels: boolean
 ): Promise<{ res?: { message: string; status: number }; brief?: ChartBrief }> {
-  const getBriefCache = unstable_cache(() => getBriefImpl(cid), [cid], {
-    tags: [`brief-${cid}`],
-    revalidate: false,
-  });
+  // const getBriefCache = unstable_cache(() => getBriefImpl(cid), [cid], {
+  //   tags: [`brief-${cid}`],
+  //   revalidate: false,
+  // });
   try {
-    const { res, brief } = await getBriefCache();
+    const { res, brief } = await getBriefImpl(cid);
     if (brief && !includeLevels) {
       return { res, brief: { ...brief, levels: [] } };
     }
@@ -44,5 +44,23 @@ export async function getBrief(
   } catch (e) {
     console.error(e);
     return { res: { message: "internal server error", status: 500 } };
+  }
+}
+
+export async function handleGetBrief(cid: string, includeLevels: boolean) {
+  const { res, brief } = await getBrief(cid, includeLevels);
+  if (brief) {
+    return new Response(JSON.stringify(brief), {
+      headers: {
+        "cache-control": "max-age=3600",
+      },
+    });
+  } else {
+    return new Response(JSON.stringify({ message: res?.message }), {
+      status: res?.status || 500,
+      headers: {
+        "cache-control": "max-age=3600",
+      },
+    });
   }
 }

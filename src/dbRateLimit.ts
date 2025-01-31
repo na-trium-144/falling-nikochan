@@ -1,6 +1,5 @@
+import { rateLimitMin } from "@/chartFormat/apiConfig";
 import { Db } from "mongodb";
-
-export const rateLimitMin = 10;
 
 interface IpEntry {
   ip: string;

@@ -16,6 +16,7 @@ try {
 
 const nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
+  output: "export",
   env: {
     buildDate: date,
     buildCommit: commit,

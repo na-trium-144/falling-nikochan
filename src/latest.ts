@@ -1,8 +1,7 @@
 import { MongoClient } from "mongodb";
 import "dotenv/config";
-import { revalidateTag, unstable_cache } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
-import { numLatest } from "./const";
+
+export const numLatest = 25;
 
 async function getLatestImpl() {
   console.log("getLatestImpl");
@@ -23,13 +22,25 @@ async function getLatestImpl() {
 }
 export function revalidateLatest() {
   console.warn(`revalidate latest`);
-  revalidateTag(`latest`);
+  // todo
+  // revalidateTag(`latest`);
 }
 
 export async function getLatest() {
-  const getLatestCache = unstable_cache(getLatestImpl, [], {
-    tags: ["latest"],
-    revalidate: false,
+  // const getLatestCache = unstable_cache(getLatestImpl, [], {
+  //   tags: ["latest"],
+  //   revalidate: false,
+  // });
+  // return await getLatestCache();
+  return await getLatestImpl();
+}
+
+export async function handleGetLatest() {
+  const latest = await getLatest();
+  console.log(latest);
+  return new Response(JSON.stringify(latest), {
+    headers: {
+      "cache-control": "max-age=3600",
+    },
   });
-  return await getLatestCache();
 }

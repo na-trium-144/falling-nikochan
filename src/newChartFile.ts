@@ -1,27 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
 import msgpack from "@ygoe/msgpack";
 import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
-import { rateLimitMin, updateIpLastCreate } from "../dbRateLimit";
-import { headers } from "next/headers";
+import { rateLimitMin, updateIpLastCreate } from "./dbRateLimit";
 import { MongoClient } from "mongodb";
-import { chartToEntry, getChartEntry, zipEntry } from "../chart";
+import { chartToEntry, getChartEntry, zipEntry } from "./chart";
 import "dotenv/config";
-import { revalidateBrief } from "../brief/brief";
-import { revalidateLatest } from "../latest/latest";
+import { revalidateBrief } from "./brief";
+import { revalidateLatest } from "./latest";
 
-export async function GET() {
-  const headersList = await headers();
-  console.log(headersList.get("x-forwarded-for"));
+export async function handleGetNewChartFile(headers: Headers) {
+  console.log(headers.get("x-forwarded-for"));
   return new Response(null, { status: 400 });
 }
 
 // cidとfidを生成し、bodyのデータを保存して、cidを返す
-export async function POST(request: NextRequest) {
-  const headersList = await headers();
-  console.log(headersList.get("x-forwarded-for"));
-  const ip = String(
-    headersList.get("x-forwarded-for")?.split(",").at(-1)?.trim()
-  ); // nullもundefinedも文字列にしちゃう
+export async function handlePostNewChartFile(
+  headers: Headers,
+  chartBuf: ArrayBuffer
+) {
+  console.log(headers.get("x-forwarded-for"));
+  const ip = String(headers.get("x-forwarded-for")?.split(",").at(-1)?.trim()); // nullもundefinedも文字列にしちゃう
 
   const client = new MongoClient(process.env.MONGODB_URI!);
   try {
@@ -32,10 +29,10 @@ export async function POST(request: NextRequest) {
       /*process.env.NODE_ENV !== "development" &&*/
       !(await updateIpLastCreate(db, ip))
     ) {
-      return NextResponse.json(
-        {
+      return new Response(
+        JSON.stringify({
           message: `Too many requests, please retry ${rateLimitMin} minutes later`,
-        },
+        }),
         {
           status: 429,
           headers: [["retry-after", (rateLimitMin * 60).toString()]],
@@ -43,14 +40,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const chartBuf = await request.arrayBuffer();
     if (chartBuf.byteLength > chartMaxSize) {
-      return NextResponse.json(
-        {
+      return new Response(
+        JSON.stringify({
           message:
             `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
             `Max ${Math.round(chartMaxSize / 1000)}kB`,
-        },
+        }),
         { status: 413 }
       );
     }
@@ -61,10 +57,9 @@ export async function POST(request: NextRequest) {
       chart = await validateChart(chart);
     } catch (e) {
       console.log(e);
-      return NextResponse.json(
-        { message: "invalid chart data" },
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ message: "invalid chart data" }), {
+        status: 400,
+      });
     }
 
     // update Time
@@ -91,7 +86,7 @@ export async function POST(request: NextRequest) {
       .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
     revalidateBrief(cid);
 
-    return NextResponse.json({ cid: cid });
+    return new Response(JSON.stringify({ cid: cid }));
   } catch (e) {
     console.error(e);
     return new Response(null, { status: 500 });
