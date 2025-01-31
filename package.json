@@ -2,18 +2,53 @@
   "name": "falling-nikochan",
   "version": "7.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
+    "cf-typegen": "wrangler types",
+    "nbuild": "next build",
+    "ndev": "next dev -H 0.0.0.0",
+    "nlint": "next lint",
+    "nstart": "next start",
+    "test": "vitest",
     "wdeploy": "wrangler deploy",
     "wdev": "wrangler dev",
-    "wstart": "wrangler dev",
-    "test": "vitest",
-    "cf-typegen": "wrangler types"
+    "wstart": "wrangler dev"
+  },
+  "dependencies": {
+    "@icon-park/react": "^1.4.2",
+    "@ygoe/msgpack": "^1.0.3",
+    "ace-builds": "^1.36.5",
+    "dotenv": "^16.4.7",
+    "file-saver": "^2.0.5",
+    "mongodb": "^6.12.0",
+    "next": "^15.1.2",
+    "react": "^19.0.0",
+    "react-ace": "^13.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.1",
+    "react-resize-detector": "^11.0.1",
+    "wasmoon": "^1.16.0",
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.6.4",
     "@cloudflare/workers-types": "^4.20250129.0",
-    "typescript": "^5.5.2",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.17.0",
+    "@types/file-saver": "^2.0.7",
+    "@types/node": "^22",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.1.2",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5",
     "vitest": "2.1.8",
     "wrangler": "^3.107.0"
+  },
+  "overrides": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
