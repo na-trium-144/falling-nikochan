@@ -1,11 +1,12 @@
 import msgpack from "@ygoe/msgpack";
 import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
-import { rateLimitMin, updateIpLastCreate } from "./dbRateLimit";
+import { updateIpLastCreate } from "./dbRateLimit";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart";
 import "dotenv/config";
 import { revalidateBrief } from "./brief";
 import { revalidateLatest } from "./latest";
+import { rateLimitMin } from "@/chartFormat/apiConfig";
 
 export async function handleGetNewChartFile(headers: Headers) {
   console.log(headers.get("x-forwarded-for"));

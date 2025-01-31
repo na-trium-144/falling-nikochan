@@ -7,6 +7,7 @@ import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
 import { ChartList } from "../chartList";
+import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
 import { ExternalLink } from "@/common/extLink";
 import {
@@ -14,7 +15,6 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/clientPage";
-import { rateLimitMin } from "@/chartFormat/apiConfig";
 
 export const dynamic = "force-static";
 

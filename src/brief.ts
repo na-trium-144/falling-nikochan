@@ -2,7 +2,6 @@ import { entryToBrief, getChartEntry } from "./chart";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 import { ChartBrief } from "@/chartFormat/chart";
-import { originalCId, sampleCId } from "@/main/const";
 
 async function getBriefImpl(cid: string) {
   console.log("getBriefImpl", cid);
