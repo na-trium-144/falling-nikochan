@@ -1,8 +1,14 @@
 {
+  "buildCommand": "next build",
+  "outputDirectory": "out",
+  "devCommand": null,
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/route/vercel"
+      "destination": "/api"
     }
   ]
 }

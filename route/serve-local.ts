@@ -1,13 +1,13 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import app from "../app";
+import app from "./app";
 
 const port = 8787;
 console.log(`Server is running on http://localhost:${port}`);
 
 serve({
-  fetch: app.use(
+  fetch: app.use("/", serveStatic({ path: "./out/index.html" })).use(
     "/*",
     serveStatic({
       root: "./out",
