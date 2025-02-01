@@ -14,7 +14,9 @@
   "env": {
     "dev": {
       "vars": {
-        "MONGODB_URI": "mongodb://localhost:27017"
+        "MONGODB_URI": "mongodb://localhost:27017",
+        "FRONTEND_PREFIX": "http://localhost:3000/",
+        "NODE_ENV": "development"
       }
     }
   },
@@ -47,7 +49,7 @@
    * https://developers.cloudflare.com/workers/static-assets/binding/
    */
   "assets": {
-    "directory": "./public/",
+    "directory": "./out",
     "binding": "ASSETS",
     "html_handling": "drop-trailing-slash",
     "not_found_handling": "404-page"

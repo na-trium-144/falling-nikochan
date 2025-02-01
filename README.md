@@ -13,21 +13,30 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## development
 
-* MongoDB のサーバーをインストールし、起動してください
+* MongoDB のサーバーをインストールし、起動してください (`localhost:27017`)
   * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
   * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
 * 依存パッケージのインストール
-```sh
-npm ci
-```
-* バックエンドを起動 (`http://localhost:8787`、ソースは src/)
-```sh
-npm run wdev
-```
-* フロントエンドを起動 (`http://localhost:3000`、ソースは app/)
-```sh
-npm run ndev
-```
+  ```sh
+  npm ci
+  ```
+* バックエンド(wrangler)を起動 (`http://localhost:8787`、ソースは src/ )
+  ```sh
+  npm run wdev
+  ```
+* フロントエンド (ソースは app/ )
+  * Next.jsのdev環境 (`http://localhost:3000`)
+    * `/share/[cid]` のパスに関してはビルド済みのhtmlファイルをバックエンドが書き換えることによりSSRしているため、このページのみ機能しません。
+    * 代わりに `/share/placeholder` にアクセスするとダミーのページが開きます。
+    ```sh
+    npm run ndev
+    ```
+  * または、ビルド済みファイルを使ったSSR
+    * こちらは起動したあとバックエンド(`http://localhost:8787`)にアクセスすれば全ページ動作するはずですが、ホットリロードが効きません。
+    ```sh
+    npm run nbuild
+    npm run nstart
+    ```
 
 ## バージョン番号について
 

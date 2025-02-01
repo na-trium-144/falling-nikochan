@@ -11,7 +11,8 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { handleGetBrief } from "./brief";
+import { pageTitle } from "@/chartFormat/chart";
+import { getBrief, handleGetBrief } from "./brief";
 import {
   handleDeleteChartFile,
   handleGetChartFile,
@@ -23,6 +24,14 @@ import { handleGetSeqFile } from "./seqFile";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const fetchAssets = async (url: URL) => {
+      if (env.NODE_ENV === "development") {
+        const res = await fetch(env.FRONTEND_PREFIX + url.pathname);
+        return res;
+      } else {
+        return await env.ASSETS.fetch(url);
+      }
+    };
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api")) {
       let res: Response = new Response(null, { status: 404 });
@@ -31,12 +40,12 @@ export default {
         const includeLevels: boolean = !!Number(url.searchParams.get("levels"));
         res = await handleGetBrief(env, cid, includeLevels);
         if (res.ok) {
-          res.headers.set("Cache-Control", "max-age=3600");
+          res.headers.set("Cache-Control", "max-age=300");
         }
       } else if (url.pathname.match(/^\/api\/latest$/)) {
         res = await handleGetLatest(env);
         if (res.ok) {
-          res.headers.set("Cache-Control", "max-age=3600");
+          res.headers.set("Cache-Control", "max-age=300");
         }
       } else if (url.pathname.match(/^\/api\/chartFile\/[0-9]+$/)) {
         const cid: string = url.pathname.split("/").pop()!;
@@ -71,11 +80,35 @@ export default {
       return res;
     } else if (url.pathname.match(/^\/edit\/[^?]+/)) {
       return Response.redirect(
-        `/edit?cid=${url.pathname.split("/").slice(-1)}`,
+        `${url.origin}/edit?cid=${url.pathname.split("/").slice(-1)}`,
         301
       );
+    } else if (url.pathname.match(/share\/[0-9]+/)) {
+      const cid = url.pathname.match(/share\/([0-9]+)/)!.at(1)!;
+      const pBrief = getBrief(env, cid, true);
+      const pRes = fetchAssets(
+        new URL(request.url.replace(/share\/[0-9]+/, "share/placeholder"))
+      );
+      const { brief } = await pBrief;
+      if (brief) {
+        const res = await pRes;
+        const res2 = new Response(
+          (await res.text())
+            .replaceAll("share/placeholder", `share/${cid}`)
+            .replaceAll("PLACEHOLDER_TITLE", pageTitle(cid, brief))
+            .replaceAll(
+              '"PLACEHOLDER_BRIEF"',
+              JSON.stringify(JSON.stringify(brief))
+            ),
+          { headers: res.headers }
+        );
+        res2.headers.set("Cache-Control", "max-age=300");
+        return res2;
+      } else {
+        return await fetchAssets(url); // 404
+      }
     } else {
-      return await env.ASSETS.fetch(request);
+      return await fetchAssets(url);
     }
   },
 } satisfies ExportedHandler<Env>;
