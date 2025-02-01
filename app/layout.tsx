@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { description, ogDefault, twitterDefault } from "./common/title";
+import { description, ogDefault, twitterDefault } from "./common/title.js";
 
 
 export const metadata: Metadata = {

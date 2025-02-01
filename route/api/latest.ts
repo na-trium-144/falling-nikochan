@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { MongoClient } from "mongodb";
-import { Bindings } from "../env";
+import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 
 export const numLatest = 25;

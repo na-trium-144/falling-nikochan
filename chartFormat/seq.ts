@@ -1,6 +1,6 @@
-import { Chart } from "./chart";
-import { BPMChange, getBarLength, Signature, toStepArray } from "./command";
-import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step";
+import { Chart } from "./chart.js";
+import { BPMChange, getBarLength, Signature, toStepArray } from "./command.js";
+import { Step, stepAdd, stepCmp, stepSub, stepToFloat, stepZero } from "./step.js";
 
 export interface ChartSeqData {
   notes: Note[];

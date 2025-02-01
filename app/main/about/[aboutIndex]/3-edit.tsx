@@ -1,8 +1,8 @@
 "use client";
 
-import { Box } from "@/common/box";
-import TargetLine from "@/common/targetLine";
-import { useDisplayMode } from "@/scale";
+import { Box } from "@/common/box.js";
+import TargetLine from "@/common/targetLine.js";
+import { useDisplayMode } from "@/scale.js";
 import { Youtube } from "@icon-park/react";
 
 export function AboutContent3() {

@@ -1,27 +1,27 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow";
-import { ChartSeqData, loadChart } from "@/chartFormat/seq";
-import { YouTubePlayer } from "@/common/youtube";
-import { ChainDisp, ScoreDisp } from "./score";
-import RhythmicalSlime from "./rhythmicalSlime";
-import useGameLogic from "./gameLogic";
-import { ReadyMessage, StopMessage } from "./messageBox";
-import StatusBox from "./statusBox";
+import FallingWindow from "./fallingWindow.js";
+import { ChartSeqData, loadChart } from "@/chartFormat/seq.js";
+import { YouTubePlayer } from "@/common/youtube.js";
+import { ChainDisp, ScoreDisp } from "./score.js";
+import RhythmicalSlime from "./rhythmicalSlime.js";
+import useGameLogic from "./gameLogic.js";
+import { ReadyMessage, StopMessage } from "./messageBox.js";
+import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
-import { ChartBrief } from "@/chartFormat/chart";
+import { ChartBrief } from "@/chartFormat/chart.js";
 import msgpack from "@ygoe/msgpack";
-import { Loading, Error } from "@/common/box";
-import { useDisplayMode } from "@/scale";
-import { addRecent } from "@/common/recent";
+import { Loading, Error } from "@/common/box.js";
+import { useDisplayMode } from "@/scale.js";
+import { addRecent } from "@/common/recent.js";
 import { useSearchParams } from "next/navigation";
-import Result from "./result";
-import { getBestScore, setBestScore } from "@/common/bestScore";
-import BPMSign from "./bpmSign";
-import { getSession } from "./session";
-import { MusicArea } from "./musicArea";
-import { useTheme } from "@/common/theme";
+import Result from "./result.js";
+import { getBestScore, setBestScore } from "@/common/bestScore.js";
+import BPMSign from "./bpmSign.js";
+import { getSession } from "./session.js";
+import { MusicArea } from "./musicArea.js";
+import { useTheme } from "@/common/theme.js";
 
 export default function Home() {
   return (

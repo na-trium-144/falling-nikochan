@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BPMChange, Signature } from "@/chartFormat/command";
-import { getSignatureState, getTimeSec } from "@/chartFormat/seq";
-import { Step, stepAdd, stepSub, stepZero } from "@/chartFormat/step";
-import { useDisplayMode } from "@/scale";
+import { BPMChange, Signature } from "@/chartFormat/command.js";
+import { getSignatureState, getTimeSec } from "@/chartFormat/seq.js";
+import { Step, stepAdd, stepSub, stepZero } from "@/chartFormat/step.js";
+import { useDisplayMode } from "@/scale.js";
 import "./rhythmicalSlime.css";
 
 interface Props {

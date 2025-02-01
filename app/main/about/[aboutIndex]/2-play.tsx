@@ -1,7 +1,7 @@
 "use client";
 
-import { Key } from "@/common/key";
-import TargetLine from "@/common/targetLine";
+import { Key } from "@/common/key.js";
+import TargetLine from "@/common/targetLine.js";
 import { useCallback, useEffect, useState } from "react";
 
 export function AboutContent2() {

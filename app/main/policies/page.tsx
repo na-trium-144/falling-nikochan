@@ -1,8 +1,8 @@
-import { metaDataTitle } from "@/common/title";
-import { tabTitles } from "../const";
-import { IndexMain } from "../main";
+import { metaDataTitle } from "@/common/title.js";
+import { tabTitles } from "../const.js";
+import { IndexMain } from "../main.js";
 import { ReactNode } from "react";
-import { ExternalLink } from "@/common/extLink";
+import { ExternalLink } from "@/common/extLink.js";
 
 export const dynamic = "force-static";
 

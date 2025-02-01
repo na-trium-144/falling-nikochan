@@ -4,10 +4,10 @@ import {
   defaultNoteCommand,
   NoteCommand,
   Signature,
-} from "@/chartFormat/command";
-import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
+} from "@/chartFormat/command.js";
+import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow";
+import FallingWindow from "./fallingWindow.js";
 import {
   findBpmIndexFromStep,
   getSignatureState,
@@ -15,16 +15,16 @@ import {
   getTimeSec,
   loadChart,
   Note,
-} from "@/chartFormat/seq";
-import Button from "@/common/button";
-import TimeBar from "./timeBar";
-import Input from "@/common/input";
-import TimingTab from "./timingTab";
-import NoteTab from "./noteTab";
-import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box";
-import { MetaTab } from "./metaTab";
+} from "@/chartFormat/seq.js";
+import Button from "@/common/button.js";
+import TimeBar from "./timeBar.js";
+import Input from "@/common/input.js";
+import TimingTab from "./timingTab.js";
+import NoteTab from "./noteTab.js";
+import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box.js";
+import { MetaTab } from "./metaTab.js";
 import msgpack from "@ygoe/msgpack";
-import { addRecent } from "@/common/recent";
+import { addRecent } from "@/common/recent.js";
 import {
   Chart,
   createBrief,
@@ -33,40 +33,40 @@ import {
   Level,
   levelBgColors,
   levelTypes,
-} from "@/chartFormat/chart";
-import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step";
-import Header from "@/common/header";
-import { getPasswd, setPasswd } from "@/common/passwdCache";
-import LuaTab from "./luaTab";
+} from "@/chartFormat/chart.js";
+import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step.js";
+import Header from "@/common/header.js";
+import { getPasswd, setPasswd } from "@/common/passwdCache.js";
+import LuaTab from "./luaTab.js";
 import {
   luaAddBpmChange,
   luaDeleteBpmChange,
   luaUpdateBpmChange,
-} from "@/chartFormat/lua/bpm";
+} from "@/chartFormat/lua/bpm.js";
 import {
   luaAddSpeedChange,
   luaDeleteSpeedChange,
   luaUpdateSpeedChange,
-} from "@/chartFormat/lua/speed";
+} from "@/chartFormat/lua/speed.js";
 import {
   luaAddNote,
   luaDeleteNote,
   luaUpdateNote,
-} from "@/chartFormat/lua/note";
-import Select from "@/common/select";
-import LevelTab from "./levelTab";
-import { initSession, SessionData } from "@/play/session";
+} from "@/chartFormat/lua/note.js";
+import Select from "@/common/select.js";
+import LevelTab from "./levelTab.js";
+import { initSession, SessionData } from "@/play/session.js";
 import {
   luaAddBeatChange,
   luaDeleteBeatChange,
   luaUpdateBeatChange,
-} from "@/chartFormat/lua/signature";
-import { useDisplayMode } from "@/scale";
+} from "@/chartFormat/lua/signature.js";
+import { useDisplayMode } from "@/scale.js";
 import { Forbid, Move } from "@icon-park/react";
-import { linkStyle1 } from "@/common/linkStyle";
-import { useTheme } from "@/common/theme";
+import { linkStyle1 } from "@/common/linkStyle.js";
+import { useTheme } from "@/common/theme.js";
 import { useSearchParams } from "next/navigation";
-import { GuideMain } from "./guide/guideMain";
+import { GuideMain } from "./guide/guideMain.js";
 
 export default function Home() {
   return (

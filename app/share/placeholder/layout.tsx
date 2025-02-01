@@ -1,4 +1,4 @@
-import { metaDataTitle } from "@/common/title";
+import { metaDataTitle } from "@/common/title.js";
 import { ReactNode } from "react";
 
 export const metadata = metaDataTitle("PLACEHOLDER_TITLE");

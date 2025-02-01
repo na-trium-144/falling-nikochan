@@ -8,18 +8,18 @@ import {
   validateNoteCommand,
   validateRestStep,
   validateSignature,
-} from "./command";
-import { difficulty } from "./difficulty";
-import { Chart1, convert1To2 } from "./legacy/chart1";
-import { Chart2, convert2To3 } from "./legacy/chart2";
-import { Chart3, convert3To4 } from "./legacy/chart3";
-import { Chart4, convert4To5 } from "./legacy/chart4";
-import { Chart5, convert5To6 } from "./legacy/chart5";
-import { luaAddBpmChange } from "./lua/bpm";
-import { luaAddBeatChange } from "./lua/signature";
-import { luaAddSpeedChange } from "./lua/speed";
-import { getTimeSec } from "./seq";
-import { stepZero } from "./step";
+} from "./command.js";
+import { difficulty } from "./difficulty.js";
+import { Chart1, convert1To2 } from "./legacy/chart1.js";
+import { Chart2, convert2To3 } from "./legacy/chart2.js";
+import { Chart3, convert3To4 } from "./legacy/chart3.js";
+import { Chart4, convert4To5 } from "./legacy/chart4.js";
+import { Chart5, convert5To6 } from "./legacy/chart5.js";
+import { luaAddBpmChange } from "./lua/bpm.js";
+import { luaAddBeatChange } from "./lua/signature.js";
+import { luaAddSpeedChange } from "./lua/speed.js";
+import { getTimeSec } from "./seq.js";
+import { stepZero } from "./step.js";
 
 /**
  * share時など情報表示に使われるデータ形式

@@ -6,20 +6,20 @@ import {
   getStep,
   getTimeSec,
   Note,
-} from "@/chartFormat/seq";
+} from "@/chartFormat/seq.js";
 import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { timeSecStr, timeStr } from "./str";
+import { timeSecStr, timeStr } from "./str.js";
 import {
   Step,
   stepAdd,
   stepCmp,
   stepImproper,
   stepZero,
-} from "@/chartFormat/step";
-import { Chart, Level } from "@/chartFormat/chart";
-import { useDisplayMode } from "@/scale";
-import { getBarLength } from "@/chartFormat/command";
+} from "@/chartFormat/step.js";
+import { Chart, Level } from "@/chartFormat/chart.js";
+import { useDisplayMode } from "@/scale.js";
+import { getBarLength } from "@/chartFormat/command.js";
 
 interface Props {
   currentTimeSecWithoutOffset: number;

@@ -11,7 +11,7 @@ try {
     encoding: "utf8",
   }).trim();
 } catch (e) {
-  console.error("Failed to get commit hash");
+  console.error("Failed to get commit hash: ", e);
 }
 
 console.log("NODE_ENV=", process.env.NODE_ENV);
@@ -23,11 +23,15 @@ const nextConfig = {
     buildCommit: commit,
     buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
     ASSET_PREFIX: process.env.ASSET_PREFIX || "",
-    BACKEND_PREFIX: process.env.NODE_ENV === "development" ? process.env.BACKEND_PREFIX : "",
+    BACKEND_PREFIX:
+      process.env.NODE_ENV === "development" ? process.env.BACKEND_PREFIX : "",
   },
   webpack: (config, options) => {
     config.resolve = {
       ...config.resolve,
+      extensionAlias: {
+        ".js": [".js", ".ts", ".tsx"],
+      },
       fallback: {
         path: false,
         fs: false,

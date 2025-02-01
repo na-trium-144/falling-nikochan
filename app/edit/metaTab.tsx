@@ -1,6 +1,6 @@
-import Button, { buttonStyle } from "@/common/button";
-import Input from "@/common/input";
-import { checkYouTubeId, getYouTubeId } from "@/common/ytId";
+import Button, { buttonStyle } from "@/common/button.js";
+import Input from "@/common/input.js";
+import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
 import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
@@ -9,14 +9,14 @@ import {
   chartMaxSize,
   hashPasswd,
   validateChart,
-} from "@/chartFormat/chart";
-import { getPasswd, setPasswd } from "@/common/passwdCache";
-import { addRecent } from "@/common/recent";
-import { initSession, SessionData } from "@/play/session";
-import { ExternalLink } from "@/common/extLink";
-import ProgressBar from "@/common/progressBar";
+} from "@/chartFormat/chart.js";
+import { getPasswd, setPasswd } from "@/common/passwdCache.js";
+import { addRecent } from "@/common/recent.js";
+import { initSession, SessionData } from "@/play/session.js";
+import { ExternalLink } from "@/common/extLink.js";
+import ProgressBar from "@/common/progressBar.js";
 import YAML from "yaml";
-import CheckBox from "@/common/checkBox";
+import CheckBox from "@/common/checkBox.js";
 
 interface Props {
   chart?: Chart;

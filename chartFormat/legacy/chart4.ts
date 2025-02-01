@@ -1,8 +1,8 @@
-import { hash, Level } from "../chart";
-import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command";
-import { luaAddBeatChange } from "../lua/signature";
-import { stepZero } from "../step";
-import { Chart5 } from "./chart5";
+import { hash, Level } from "../chart.js";
+import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command.js";
+import { luaAddBeatChange } from "../lua/signature.js";
+import { stepZero } from "../step.js";
+import { Chart5 } from "./chart5.js";
 
 export interface Chart4 {
   falling: "nikochan"; // magic

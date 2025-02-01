@@ -3,8 +3,8 @@ import {
   NoteCommandWithLua,
   RestStep,
   SignatureWithLua,
-} from "../command";
-import { Chart6 } from "./chart6";
+} from "../command.js";
+import { Chart6 } from "./chart6.js";
 
 export interface Chart5 {
   falling: "nikochan"; // magic

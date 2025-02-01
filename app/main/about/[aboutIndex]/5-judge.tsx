@@ -7,9 +7,9 @@ import {
   goodSec,
   okBaseScore,
   okSec,
-} from "@/common/gameConstant";
-import { rankStr } from "@/common/rank";
-import { JudgeIcon } from "@/play/statusBox";
+} from "@/common/gameConstant.js";
+import { rankStr } from "@/common/rank.js";
+import { JudgeIcon } from "@/play/statusBox.js";
 
 export function AboutContent5() {
   return (

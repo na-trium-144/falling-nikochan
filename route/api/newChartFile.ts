@@ -1,11 +1,11 @@
 import msgpack from "@ygoe/msgpack";
-import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart";
-import { updateIpLastCreate } from "./dbRateLimit";
-import { rateLimitMin } from "@/chartFormat/apiConfig";
+import { Chart, chartMaxSize, validateChart } from "@/chartFormat/chart.js";
+import { updateIpLastCreate } from "./dbRateLimit.js";
+import { rateLimitMin } from "@/chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
-import { chartToEntry, getChartEntry, zipEntry } from "./chart";
+import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";
-import { Bindings } from "../env";
+import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 
 const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })

@@ -5,10 +5,10 @@ import {
   chartMaxSize,
   hashLevel,
   validateChart,
-} from "@/chartFormat/chart";
+} from "@/chartFormat/chart.js";
 import { MongoClient } from "mongodb";
-import { chartToEntry, getChartEntry, zipEntry } from "./chart";
-import { Bindings } from "../env";
+import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
+import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 
 // 他のAPIと違って編集用パスワードのチェックが入る

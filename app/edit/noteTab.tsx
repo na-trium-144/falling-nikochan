@@ -1,12 +1,12 @@
-import { Level } from "@/chartFormat/chart";
-import { NoteCommand } from "@/chartFormat/command";
-import Button from "@/common/button";
-import Input from "@/common/input";
-import { Step } from "@/chartFormat/step";
-import { Key } from "@/common/key";
+import { Level } from "@/chartFormat/chart.js";
+import { NoteCommand } from "@/chartFormat/command.js";
+import Button from "@/common/button.js";
+import Input from "@/common/input.js";
+import { Step } from "@/chartFormat/step.js";
+import { Key } from "@/common/key.js";
 import { Mouse } from "@icon-park/react";
-import CheckBox from "@/common/checkBox";
-import { getSignatureState } from "@/chartFormat/seq";
+import CheckBox from "@/common/checkBox.js";
+import { getSignatureState } from "@/chartFormat/seq.js";
 
 interface Props {
   currentNoteIndex: number;

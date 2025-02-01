@@ -1,21 +1,21 @@
 "use client";
 
-import { validCId } from "@/chartFormat/chart";
+import { validCId } from "@/chartFormat/chart.js";
 import {
   ChartLineBrief,
   chartListMaxRow,
   fetchAndFilterBriefs,
-} from "./clientPage";
+} from "./clientPage.js";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getRecent, updateRecent } from "@/common/recent";
-import { IndexMain } from "../main";
-import Input from "@/common/input";
-import { LoadingSlime } from "@/common/loadingSlime";
-import { ChartList } from "../chartList";
-import { ExternalLink } from "@/common/extLink";
+import { getRecent, updateRecent } from "@/common/recent.js";
+import { IndexMain } from "../main.js";
+import Input from "@/common/input.js";
+import { LoadingSlime } from "@/common/loadingSlime.js";
+import { ChartList } from "../chartList.js";
+import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
-import { originalCId, sampleCId } from "../const";
+import { originalCId, sampleCId } from "../const.js";
 
 export const dynamic = "force-static";
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { Box } from "@/common/box";
-import { useDisplayMode } from "@/scale";
+import { Box } from "@/common/box.js";
+import { useDisplayMode } from "@/scale.js";
 import {
   DisappointedFace,
   DistraughtFace,

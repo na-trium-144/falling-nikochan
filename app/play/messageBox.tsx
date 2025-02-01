@@ -1,8 +1,8 @@
 "use client";
 
-import { CenterBox } from "@/common/box";
-import Button from "@/common/button";
-import CheckBox from "@/common/checkBox";
+import { CenterBox } from "@/common/box.js";
+import Button from "@/common/button.js";
+import CheckBox from "@/common/checkBox.js";
 
 interface MessageProps {
   isTouch: boolean;

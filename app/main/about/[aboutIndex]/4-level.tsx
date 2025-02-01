@@ -1,4 +1,4 @@
-import { levelColors, levelTypes } from "@/chartFormat/chart";
+import { levelColors, levelTypes } from "@/chartFormat/chart.js";
 
 export function AboutContent4() {
   return (

@@ -7,7 +7,7 @@ import {
   stepToFloat,
   stepZero,
   validateStep,
-} from "./step";
+} from "./step.js";
 
 /**
  * 音符コマンド

@@ -6,9 +6,9 @@ import {
   SignatureWithLua,
   updateBarNum,
   updateBpmTimeSec,
-} from "../command";
-import { Step, stepZero } from "../step";
-import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api";
+} from "../command.js";
+import { Step, stepZero } from "../step.js";
+import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
 
 export interface Result {
   stdout: string[];

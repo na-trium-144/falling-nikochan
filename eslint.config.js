@@ -21,7 +21,8 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
-  ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("next/core-web-vitals", "plugin:require-extensions/recommended"),
+  ...compat.plugins("require-extensions"),
   {
     rules: {
       "@next/next/no-html-link-for-pages": "warn",

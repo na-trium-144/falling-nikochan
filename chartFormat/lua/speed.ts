@@ -1,7 +1,7 @@
-import { Level } from "../chart";
-import { BPMChange } from "../command";
-import { stepCmp } from "../step";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
+import { Level } from "../chart.js";
+import { BPMChange } from "../command.js";
+import { stepCmp } from "../step.js";
+import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
 function accelLuaCommand(bpm: number) {
   return `Accel(${bpm})`;

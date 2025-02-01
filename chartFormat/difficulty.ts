@@ -5,9 +5,9 @@ import {
   goodSec,
   okBaseScore,
   okSec,
-} from "@/common/gameConstant";
-import { Level } from "./chart";
-import { getTimeSec } from "./seq";
+} from "@/common/gameConstant.js";
+import { Level } from "./chart.js";
+import { getTimeSec } from "./seq.js";
 
 /*
   lv(難易度の数値) と NPS(1秒あたりに叩ける音符数) の対応は

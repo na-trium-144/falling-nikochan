@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import briefApp from "./brief";
-import { Bindings } from "../env";
-import chartFileApp from "./chartFile";
-import latestApp from "./latest";
-import newChartFileApp from "./newChartFile";
-import seqFileApp from "./seqFile";
+import briefApp from "./brief.js";
+import { Bindings } from "../env.js";
+import chartFileApp from "./chartFile.js";
+import latestApp from "./latest.js";
+import newChartFileApp from "./newChartFile.js";
+import seqFileApp from "./seqFile.js";
 
 const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use("/*", cors())

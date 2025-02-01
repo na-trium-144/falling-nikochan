@@ -1,6 +1,6 @@
-import { ChartBrief } from "@/chartFormat/chart";
-import { linkStyle1 } from "@/common/linkStyle";
-import { LoadingSlime } from "@/common/loadingSlime";
+import { ChartBrief } from "@/chartFormat/chart.js";
+import { linkStyle1 } from "@/common/linkStyle.js";
+import { LoadingSlime } from "@/common/loadingSlime.js";
 import { RightOne } from "@icon-park/react";
 import Link from "next/link";
 import { useState } from "react";

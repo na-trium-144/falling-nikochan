@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { entryToBrief, getChartEntry } from "./chart";
+import { entryToBrief, getChartEntry } from "./chart.js";
 import { MongoClient } from "mongodb";
-import { Bindings } from "../env";
+import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 
 const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(

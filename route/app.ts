@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import apiApp from "./api/app";
-import { Bindings } from "./env";
-import briefApp from "./api/brief";
-import { fetchStatic } from "./static";
-import { ChartBrief, pageTitle } from "@/chartFormat/chart";
+import apiApp from "./api/app.js";
+import { Bindings } from "./env.js";
+import briefApp from "./api/brief.js";
+import { fetchStatic } from "./static.js";
+import { ChartBrief, pageTitle } from "@/chartFormat/chart.js";
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)

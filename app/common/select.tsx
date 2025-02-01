@@ -1,5 +1,5 @@
 import { Down } from "@icon-park/react";
-import { buttonStyle } from "./button";
+import { buttonStyle } from "./button.js";
 
 interface Props {
   options: string[];

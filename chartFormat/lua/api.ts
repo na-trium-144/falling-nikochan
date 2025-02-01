@@ -1,6 +1,6 @@
-import { NoteCommandWithLua } from "../command";
-import { Step, stepAdd, stepSimplify } from "../step";
-import { Result } from "./exec";
+import { NoteCommandWithLua } from "../command.js";
+import { Step, stepAdd, stepSimplify } from "../step.js";
+import { Result } from "./exec.js";
 
 export function luaNote(state: Result, ...args: any[]) {
   if (

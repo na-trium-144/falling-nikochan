@@ -1,4 +1,4 @@
-import { Level } from "../chart";
+import { Level } from "../chart.js";
 import {
   Step,
   stepAdd,
@@ -6,7 +6,7 @@ import {
   stepSimplify,
   stepSub,
   stepZero,
-} from "../step";
+} from "../step.js";
 
 export function findStepFromLua(chart: Level, line: number): Step | null {
   for (const n of chart.notes) {

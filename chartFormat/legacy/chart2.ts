@@ -1,11 +1,11 @@
-import { emptyLevel } from "../chart";
-import { BPMChange } from "../command";
-import { luaAddBpmChange } from "../lua/bpm";
-import { luaAddNote } from "../lua/note";
-import { luaAddSpeedChange } from "../lua/speed";
-import { findBpmIndexFromStep, getTimeSec } from "../seq";
-import { Step, stepZero } from "../step";
-import { Chart3 } from "./chart3";
+import { emptyLevel } from "../chart.js";
+import { BPMChange } from "../command.js";
+import { luaAddBpmChange } from "../lua/bpm.js";
+import { luaAddNote } from "../lua/note.js";
+import { luaAddSpeedChange } from "../lua/speed.js";
+import { findBpmIndexFromStep, getTimeSec } from "../seq.js";
+import { Step, stepZero } from "../step.js";
+import { Chart3 } from "./chart3.js";
 
 export interface Chart2 {
   falling: "nikochan"; // magic

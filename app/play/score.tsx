@@ -1,6 +1,6 @@
 "use client";
 
-import { useDisplayMode } from "@/scale";
+import { useDisplayMode } from "@/scale.js";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 interface CProps {

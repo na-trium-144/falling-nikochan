@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { linkStyle1 } from "./linkStyle";
+import { linkStyle1 } from "./linkStyle.js";
 import { Moon, Sun } from "@icon-park/react";
 
 function getCurrentTheme(): "dark" | "light" | null {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartBrief } from "@/chartFormat/chart";
+import { ChartBrief } from "@/chartFormat/chart.js";
 
 export const chartListMaxRow = 5;
 export interface ChartLineBrief {

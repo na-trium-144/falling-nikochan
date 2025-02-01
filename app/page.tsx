@@ -1,4 +1,4 @@
-import { IndexMain } from "./main/main";
+import { IndexMain } from "./main/main.js";
 
 export const dynamic = "force-static";
 

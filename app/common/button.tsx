@@ -1,5 +1,5 @@
-import { Key } from "./key";
-import { LoadingSlime } from "./loadingSlime";
+import { Key } from "./key.js";
+import { LoadingSlime } from "./loadingSlime.js";
 
 export const buttonStyleDisabled =
   "appearance-none " +

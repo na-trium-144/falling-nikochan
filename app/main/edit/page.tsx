@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getRecent, updateRecent } from "@/common/recent";
-import { validCId } from "@/chartFormat/chart";
-import { IndexMain } from "../main";
-import Input from "@/common/input";
-import { ChartList } from "../chartList";
-import { LoadingSlime } from "@/common/loadingSlime";
-import { ExternalLink } from "@/common/extLink";
+import { getRecent, updateRecent } from "@/common/recent.js";
+import { validCId } from "@/chartFormat/chart.js";
+import { IndexMain } from "../main.js";
+import Input from "@/common/input.js";
+import { ChartList } from "../chartList.js";
+import { LoadingSlime } from "@/common/loadingSlime.js";
+import { ExternalLink } from "@/common/extLink.js";
 import {
   ChartLineBrief,
   chartListMaxRow,
   fetchAndFilterBriefs,
-} from "../play/clientPage";
-import { rateLimitMin } from "@/chartFormat/apiConfig";
+} from "../play/clientPage.js";
+import { rateLimitMin } from "@/chartFormat/apiConfig.js";
 
 export const dynamic = "force-static";
 

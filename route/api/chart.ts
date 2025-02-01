@@ -4,7 +4,7 @@ import {
   createBrief,
   hashPasswd,
   validateChart,
-} from "@/chartFormat/chart";
+} from "@/chartFormat/chart.js";
 import { gzip, gunzip } from "node:zlib";
 import { promisify } from "node:util";
 import {
@@ -12,7 +12,7 @@ import {
   NoteCommandWithLua,
   RestStep,
   SignatureWithLua,
-} from "@/chartFormat/command";
+} from "@/chartFormat/command.js";
 import { Binary, Db } from "mongodb";
 
 /**

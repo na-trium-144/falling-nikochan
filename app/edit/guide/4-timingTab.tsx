@@ -1,5 +1,5 @@
 import { CornerDownLeft } from "@icon-park/react";
-import { BeatSlime } from "../timingTab";
+import { BeatSlime } from "../timingTab.js";
 
 export function GuideContent4() {
   return (

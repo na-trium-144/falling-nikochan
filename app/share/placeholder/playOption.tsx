@@ -1,12 +1,12 @@
 "use client";
 
-import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
-import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore";
-import Button from "@/common/button";
-import { FourthNote } from "@/common/fourthNote";
-import { rankStr } from "@/common/rank";
-import { initSession } from "@/play/session";
-import { JudgeIcon } from "@/play/statusBox";
+import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart.js";
+import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore.js";
+import Button from "@/common/button.js";
+import { FourthNote } from "@/common/fourthNote.js";
+import { rankStr } from "@/common/rank.js";
+import { initSession } from "@/play/session.js";
+import { JudgeIcon } from "@/play/statusBox.js";
 import {
   RightOne,
   SmilingFace,

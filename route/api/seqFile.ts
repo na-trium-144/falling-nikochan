@@ -1,9 +1,9 @@
 import msgpack from "@ygoe/msgpack";
-import { validateChart } from "@/chartFormat/chart";
-import { loadChart } from "@/chartFormat/seq";
+import { validateChart } from "@/chartFormat/chart.js";
+import { loadChart } from "@/chartFormat/seq.js";
 import { MongoClient } from "mongodb";
-import { getChartEntry } from "./chart";
-import { Bindings } from "../env";
+import { getChartEntry } from "./chart.js";
+import { Bindings } from "../env.js";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { tabTitles, tabURLs } from "@/main/const";
+import { tabTitles, tabURLs } from "@/main/const.js";
 import { Github } from "@icon-park/react";
 import Link from "next/link";
-import { linkStyle1 } from "./linkStyle";
-import { ExternalLink } from "./extLink";
-import { ThemeSwitcher, useTheme } from "./theme";
+import { linkStyle1 } from "./linkStyle.js";
+import { ExternalLink } from "./extLink.js";
+import { ThemeSwitcher, useTheme } from "./theme.js";
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定

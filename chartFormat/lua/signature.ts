@@ -1,7 +1,7 @@
-import { Level } from "../chart";
-import { Signature, updateBarNum } from "../command";
-import { stepCmp } from "../step";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
+import { Level } from "../chart.js";
+import { Signature, updateBarNum } from "../command.js";
+import { stepCmp } from "../step.js";
+import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
 function beatLuaCommand(s: Signature) {
   let num = s.offset.fourth * s.offset.denominator + s.offset.numerator;

@@ -1,6 +1,6 @@
-import { BPMChange } from "../command";
-import { stepZero } from "../step";
-import { Chart2, NoteCommand2 } from "./chart2";
+import { BPMChange } from "../command.js";
+import { stepZero } from "../step.js";
+import { Chart2, NoteCommand2 } from "./chart2.js";
 
 export interface Chart1 {
   falling: "nikochan"; // magic

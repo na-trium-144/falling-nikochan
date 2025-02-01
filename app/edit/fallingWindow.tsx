@@ -6,13 +6,13 @@ import {
   targetY,
   bigScale,
   displayNote,
-} from "@/chartFormat/seq";
+} from "@/chartFormat/seq.js";
 import { useResizeDetector } from "react-resize-detector";
-import { NoteCommand } from "@/chartFormat/command";
-import Arrow from "./arrow";
-import DragHandle from "./dragHandle";
-import { Level } from "@/chartFormat/chart";
-import { useDisplayMode } from "@/scale";
+import { NoteCommand } from "@/chartFormat/command.js";
+import Arrow from "./arrow.js";
+import DragHandle from "./dragHandle.js";
+import { Level } from "@/chartFormat/chart.js";
+import { useDisplayMode } from "@/scale.js";
 
 interface Props {
   className?: string;

@@ -1,7 +1,7 @@
 import Markdown from "react-markdown";
-import { IndexMain } from "../main";
+import { IndexMain } from "../main.js";
 import fs from "node:fs";
-import { ExternalLink } from "@/common/extLink";
+import { ExternalLink } from "@/common/extLink.js";
 
 export const dynamic = "force-static";
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ReactNode } from "react";
-import { linkStyle1 } from "./linkStyle";
+import { linkStyle1 } from "./linkStyle.js";
 
 interface Props {
   className?: string;

@@ -1,7 +1,7 @@
-import { Level } from "../chart";
-import { BPMChange, updateBpmTimeSec } from "../command";
-import { stepCmp } from "../step";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
+import { Level } from "../chart.js";
+import { BPMChange, updateBpmTimeSec } from "../command.js";
+import { stepCmp } from "../step.js";
+import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
 function bpmLuaCommand(bpm: number) {
   return `BPM(${bpm})`;

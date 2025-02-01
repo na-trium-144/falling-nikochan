@@ -1,16 +1,16 @@
 "use client";
 
-import Header from "@/common/header";
-import { Box } from "@/common/box";
-import Footer from "@/common/footer";
-import { PlayOption } from "./playOption";
-import { ChartBrief } from "@/chartFormat/chart";
+import Header from "@/common/header.js";
+import { Box } from "@/common/box.js";
+import Footer from "@/common/footer.js";
+import { PlayOption } from "./playOption.js";
+import { ChartBrief } from "@/chartFormat/chart.js";
 import { useEffect, useRef, useState } from "react";
-import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
+import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Link from "next/link";
-import Button from "@/common/button";
-import { linkStyle1 } from "@/common/linkStyle";
-import { isSample } from "@/main/const";
+import Button from "@/common/button.js";
+import { linkStyle1 } from "@/common/linkStyle.js";
+import { isSample } from "@/main/const.js";
 import { International, PlayOne } from "@icon-park/react";
 
 export const dynamic = "force-static";

@@ -1,7 +1,7 @@
-import { Level } from "../chart";
-import { NoteCommand } from "../command";
-import { Step, stepCmp } from "../step";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
+import { Level } from "../chart.js";
+import { NoteCommand } from "../command.js";
+import { Step, stepCmp } from "../step.js";
+import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
 function noteLuaCommand(n: NoteCommand) {
   return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${n.big ? "true" : "false"})`;
