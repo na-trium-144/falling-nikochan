@@ -10,6 +10,8 @@ interface Props {
   maxRow: number;
   fetchAdditional?: () => void;
   creator?: boolean;
+  original?: boolean;
+  showLoading?: boolean;
   href: (cid: string) => string;
   newTab?: boolean;
 }
@@ -24,7 +26,12 @@ export function ChartList(props: Props) {
     props.recentBrief.some(({ fetched }) => !fetched);
   return (
     <div className="relative min-h-4">
-      <div className={"absolute top-0 left-2 " + (fetching ? "" : "hidden ")}>
+      <div
+        className={
+          "absolute top-0 left-2 " +
+          (fetching && props.showLoading ? "" : "hidden ")
+        }
+      >
         <LoadingSlime />
         Loading...
       </div>
@@ -42,6 +49,7 @@ export function ChartList(props: Props) {
                     brief={brief}
                     href={props.href(cid)}
                     creator={props.creator}
+                    original={props.original}
                     newTab={props.newTab}
                   />
                 ))}
@@ -52,7 +60,7 @@ export function ChartList(props: Props) {
                   <div
                     className={
                       "absolute top-1 left-2 " +
-                      (fetchingAdditional ? "" : "hidden ")
+                      (fetchingAdditional && props.showLoading ? "" : "hidden ")
                     }
                   >
                     <LoadingSlime />
@@ -69,6 +77,7 @@ export function ChartList(props: Props) {
                           brief={brief}
                           href={props.href(cid)}
                           creator={props.creator}
+                          original={props.original}
                           newTab={props.newTab}
                         />
                       ))}

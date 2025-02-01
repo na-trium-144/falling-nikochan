@@ -7,7 +7,6 @@ import { ChartBrief, validCId } from "@/chartFormat/chart";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
 import { ChartList } from "../chartList";
-import { rateLimitMin } from "@/api/dbRateLimit";
 import { LoadingSlime } from "@/common/loadingSlime";
 import { ExternalLink } from "@/common/extLink";
 import {
@@ -15,6 +14,7 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/clientPage";
+import { rateLimitMin } from "@/chartFormat/apiConfig";
 
 export const dynamic = "force-static";
 
@@ -49,11 +49,13 @@ export default function EditTab() {
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
-    const res = await fetch(`/api/brief/${cid}`, { cache: "no-store" });
+    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
+      cache: "no-store",
+    });
     setCidFetching(false);
     if (res.ok) {
-      // router.push(`/edit/${cid}`);
-      window.open(`/edit/${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
+      // router.push(`/edit?cid=${cid}`);
+      window.open(`/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
       setCIdErrorMsg("");
       setInputCId(cid);
     } else {
@@ -85,7 +87,7 @@ export default function EditTab() {
           />
           <ExternalLink
             className={"ml-1 " + (inputCId !== "" ? "" : "hidden ")}
-            href={`/edit/${inputCId}`}
+            href={`/edit?cid=${inputCId}`}
           >
             新しいタブで開く
           </ExternalLink>
@@ -106,8 +108,9 @@ export default function EditTab() {
           recentBrief={recentBrief}
           maxRow={chartListMaxRow}
           fetchAdditional={() => setFetchRecentAll(true)}
-          href={(cid) => `/edit/${cid}`}
+          href={(cid) => `/edit?cid=${cid}`}
           newTab
+          showLoading
         />
       </div>
       <div className="mb-3">
@@ -115,7 +118,7 @@ export default function EditTab() {
           <span className="text-xl font-bold font-title ">
             新しく譜面を作る:
           </span>
-          <ExternalLink className="ml-3" href="/edit/new">
+          <ExternalLink className="ml-3" href="/edit?cid=new">
             新規作成
           </ExternalLink>
         </h3>

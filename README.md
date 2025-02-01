@@ -19,6 +19,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 * `.env` ファイルに以下を記述、または環境変数で設定
     ```sh
     MONGODB_URI="mongodb://localhost:27017"
+    BACKEND_PREFIX="http://localhost:8787"
     ```
 * 依存パッケージのインストール
     ```sh

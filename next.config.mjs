@@ -14,6 +14,7 @@ try {
   console.error("Failed to get commit hash");
 }
 
+console.log("NODE_ENV=", process.env.NODE_ENV);
 const nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
@@ -22,6 +23,7 @@ const nextConfig = {
     buildCommit: commit,
     buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
     ASSET_PREFIX: process.env.ASSET_PREFIX || "",
+    BACKEND_PREFIX: process.env.NODE_ENV === "development" ? process.env.BACKEND_PREFIX : "",
   },
   webpack: (config, options) => {
     config.resolve = {
