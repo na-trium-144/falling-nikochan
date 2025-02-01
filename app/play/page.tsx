@@ -20,9 +20,8 @@ import Result from "./result";
 import { getBestScore, setBestScore } from "@/common/bestScore";
 import BPMSign from "./bpmSign";
 import { getSession } from "./session";
-import { pageTitle } from "@/common/title";
 import { MusicArea } from "./musicArea";
-import { ThemeHandler, useTheme } from "@/common/theme";
+import { useTheme } from "@/common/theme";
 
 export default function Home() {
   return (
@@ -68,7 +67,8 @@ function InitPlay() {
     } else {
       void (async () => {
         const res = await fetch(
-          process.env.BACKEND_PREFIX + `/api/seqFile/${session.cid}/${session.lvIndex}`,
+          process.env.BACKEND_PREFIX +
+            `/api/seqFile/${session.cid}/${session.lvIndex}`,
           { cache: "no-store" }
         );
         if (res.ok) {
@@ -87,7 +87,9 @@ function InitPlay() {
           setChartSeq(undefined);
           setErrorStatus(res.status);
           try {
-            setErrorMsg(String((await res.json()).message));
+            setErrorMsg(
+              String(((await res.json()) as { message?: string }).message)
+            );
           } catch {
             setErrorMsg("");
           }

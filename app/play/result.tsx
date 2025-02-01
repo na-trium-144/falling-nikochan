@@ -3,7 +3,7 @@
 import { CenterBox } from "@/common/box";
 import Button from "@/common/button";
 import { rankStr } from "@/common/rank";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import "./result.css";
 import {
   baseScoreRate,

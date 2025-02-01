@@ -1,5 +1,5 @@
 import msgpack from "@ygoe/msgpack";
-import { Chart, validateChart } from "@/chartFormat/chart";
+import { validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart";
@@ -16,14 +16,14 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      let { res, entry, chart } = await getChartEntry(db, cid, null);
+      let { res, chart } = await getChartEntry(db, cid, null);
       if (!chart) {
         return c.json({ message: res?.message }, res?.status || 500);
       }
 
       try {
         chart = await validateChart(chart);
-      } catch (e) {
+      } catch {
         return c.json({ message: "invalid chart data" }, 500);
       }
       if (!chart.levels.at(lvIndex)) {

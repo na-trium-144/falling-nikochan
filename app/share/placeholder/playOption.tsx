@@ -4,21 +4,14 @@ import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart";
 import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore";
 import Button from "@/common/button";
 import { FourthNote } from "@/common/fourthNote";
-import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { rankStr } from "@/common/rank";
-import { isSample } from "@/main/const";
-import { initSession, SessionData } from "@/play/session";
+import { initSession } from "@/play/session";
 import { JudgeIcon } from "@/play/statusBox";
 import {
-  International,
-  LinkTwo,
-  PlayOne,
   RightOne,
   SmilingFace,
   Timer,
 } from "@icon-park/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -26,8 +19,6 @@ interface Props {
   brief: ChartBrief;
 }
 export function PlayOption(props: Props) {
-  const router = useRouter();
-
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number>(
     props.brief.levels.findIndex((l) => !l.unlisted)

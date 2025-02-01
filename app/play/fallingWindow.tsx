@@ -60,7 +60,9 @@ export default function FallingWindow(props: Props) {
 
       fpsCount.current++;
       if (new Date().getTime() - fpsCountBegin.current.getTime() >= 1000) {
-        setFPS && setFPS(fpsCount.current);
+        if (setFPS) {
+          setFPS(fpsCount.current);
+        }
         fpsCountBegin.current = new Date();
         fpsCount.current = 0;
       }

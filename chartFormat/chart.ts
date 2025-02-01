@@ -2,7 +2,6 @@ import {
   BPMChangeWithLua,
   NoteCommandWithLua,
   RestStep,
-  Signature,
   SignatureWithLua,
   updateBpmTimeSec,
   validateBpmChange,
@@ -14,7 +13,7 @@ import { difficulty } from "./difficulty";
 import { Chart1, convert1To2 } from "./legacy/chart1";
 import { Chart2, convert2To3 } from "./legacy/chart2";
 import { Chart3, convert3To4 } from "./legacy/chart3";
-import { Chart4, convert4To5, Level4 } from "./legacy/chart4";
+import { Chart4, convert4To5 } from "./legacy/chart4";
 import { Chart5, convert5To6 } from "./legacy/chart5";
 import { luaAddBpmChange } from "./lua/bpm";
 import { luaAddBeatChange } from "./lua/signature";

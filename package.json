@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint src/ app/ chartFormat/",
+    "lint": "eslint route/ app/ chartFormat/",
     "ndev": "next dev -H 0.0.0.0",
     "nbuild": "next build",
     "vdev": "vercel dev --listen 0.0.0.0:8787",

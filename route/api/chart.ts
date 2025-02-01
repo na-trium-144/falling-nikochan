@@ -45,7 +45,7 @@ export async function getChartEntry(
     entry = await unzipEntry(entryCompressed);
     chart = entryToChart(entry);
     chart = await validateChart(chart);
-  } catch (e) {
+  } catch {
     return {
       res: { message: "invalid chart data", status: 500 },
     };

@@ -279,7 +279,7 @@ export default function TimeBar(props: Props) {
             sec: getTimeSec(currentLevel.bpmChanges, sig.step),
           }))
           .map(
-            ({ sig, len, sec }, i) =>
+            ({ len, sec }, i) =>
               sec + chart.offset >= timeBarBeginSec &&
               sec + chart.offset <
                 timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (

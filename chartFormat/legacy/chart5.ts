@@ -1,4 +1,3 @@
-import { Chart } from "../chart";
 import {
   BPMChangeWithLua,
   NoteCommandWithLua,

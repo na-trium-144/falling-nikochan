@@ -27,7 +27,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       }
       try {
         chart = await validateChart(chart);
-      } catch (e) {
+      } catch {
         return c.json({ message: "invalid chart data" }, 500);
       }
       return c.body(new Blob([msgpack.serialize(chart)]).stream());

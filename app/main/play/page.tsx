@@ -12,7 +12,7 @@ import { getRecent, updateRecent } from "@/common/recent";
 import { IndexMain } from "../main";
 import Input from "@/common/input";
 import { LoadingSlime } from "@/common/loadingSlime";
-import { ChartList, ChartListItem } from "../chartList";
+import { ChartList } from "../chartList";
 import { ExternalLink } from "@/common/extLink";
 import { Youtube } from "@icon-park/react";
 import { originalCId, sampleCId } from "../const";
@@ -111,7 +111,9 @@ export default function PlayTab() {
     } else {
       setCidFetching(false);
       try {
-        setCIdErrorMsg((await res.json()).message);
+        setCIdErrorMsg(
+          String(((await res.json()) as { message?: string }).message)
+        );
       } catch (e) {
         setCIdErrorMsg(String(e));
       }

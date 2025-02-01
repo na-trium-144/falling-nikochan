@@ -11,7 +11,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { NoteCommand } from "@/chartFormat/command";
 import Arrow from "./arrow";
 import DragHandle from "./dragHandle";
-import { Chart, Level } from "@/chartFormat/chart";
+import { Level } from "@/chartFormat/chart";
 import { useDisplayMode } from "@/scale";
 
 interface Props {
@@ -150,10 +150,9 @@ export default function FallingWindow(props: Props) {
                   />
                   <DragHandle
                     className="absolute inset-0"
-                    onMove={(_x, _y, cx, cy) => {
+                    onMove={(_x, _y, cx /*, cy*/) => {
                       const winLeft = ref.current.getBoundingClientRect().left;
-                      const winBottom =
-                        ref.current.getBoundingClientRect().bottom;
+                      // const winBottom = ref.current.getBoundingClientRect().bottom;
                       // cx-winLeft, winBottom-cy が divのabsolute基準からマウスカーソル位置までの相対位置になる
                       props.updateNote({
                         ...currentLevel.notes[currentNoteIndex],
@@ -198,7 +197,7 @@ export default function FallingWindow(props: Props) {
                   />
                   <DragHandle
                     className="absolute inset-0"
-                    onMove={(x, y, cx, cy) => {
+                    onMove={(_x, _y, cx, cy) => {
                       const winLeft = ref.current.getBoundingClientRect().left;
                       const winBottom =
                         ref.current.getBoundingClientRect().bottom;
@@ -212,19 +211,19 @@ export default function FallingWindow(props: Props) {
                       // 音符位置からマウスまでの距離
                       const mouseVX = (cx - winLeft - originLeft) / boxSize;
                       const mouseVY = (winBottom - cy - originBottom) / boxSize;
-                      const mouseDist = Math.sqrt(
-                        Math.pow(mouseVX, 2) + Math.pow(mouseVY, 2)
-                      );
-                      const hitVDist = Math.sqrt(
-                        Math.pow(
-                          currentLevel.notes[currentNoteIndex].hitVX,
-                          2
-                        ) +
-                          Math.pow(
-                            currentLevel.notes[currentNoteIndex].hitVY,
-                            2
-                          )
-                      );
+                      // const mouseDist = Math.sqrt(
+                      //   Math.pow(mouseVX, 2) + Math.pow(mouseVY, 2)
+                      // );
+                      // const hitVDist = Math.sqrt(
+                      //   Math.pow(
+                      //     currentLevel.notes[currentNoteIndex].hitVX,
+                      //     2
+                      //   ) +
+                      //     Math.pow(
+                      //       currentLevel.notes[currentNoteIndex].hitVY,
+                      //       2
+                      //     )
+                      // );
                       console.log(
                         mouseVY,
                         currentLevel.notes[currentNoteIndex].hitVY

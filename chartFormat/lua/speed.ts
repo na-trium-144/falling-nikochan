@@ -1,5 +1,5 @@
 import { Level } from "../chart";
-import { BPMChange, updateBpmTimeSec } from "../command";
+import { BPMChange } from "../command";
 import { stepCmp } from "../step";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit";
 

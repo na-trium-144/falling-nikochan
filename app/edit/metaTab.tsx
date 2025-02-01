@@ -7,15 +7,12 @@ import { saveAs } from "file-saver";
 import {
   Chart,
   chartMaxSize,
-  createBrief,
   hashPasswd,
-  levelBgColors,
   validateChart,
 } from "@/chartFormat/chart";
 import { getPasswd, setPasswd } from "@/common/passwdCache";
 import { addRecent } from "@/common/recent";
 import { initSession, SessionData } from "@/play/session";
-import { linkStyle1, linkStyle2 } from "@/common/linkStyle";
 import { ExternalLink } from "@/common/extLink";
 import ProgressBar from "@/common/progressBar";
 import YAML from "yaml";
@@ -117,7 +114,9 @@ export function MetaEdit(props: Props) {
           onChange={(v: boolean) =>
             props.chart && props.setChart({ ...props.chart, published: v })
           }
-          disabled={!props.chart?.editPasswd || !hasLevelData || !props.chart?.ytId}
+          disabled={
+            !props.chart?.editPasswd || !hasLevelData || !props.chart?.ytId
+          }
         >
           この譜面を一般公開する
         </CheckBox>
@@ -163,14 +162,20 @@ export function MetaTab(props: Props2) {
   const save = async () => {
     setSaving(true);
     if (props.cid === undefined) {
-      const res = await fetch(process.env.BACKEND_PREFIX + `/api/newChartFile`, {
-        method: "POST",
-        body: msgpack.serialize(props.chart),
-        cache: "no-store",
-      });
+      const res = await fetch(
+        process.env.BACKEND_PREFIX + `/api/newChartFile`,
+        {
+          method: "POST",
+          body: msgpack.serialize(props.chart),
+          cache: "no-store",
+        }
+      );
       if (res.ok) {
         try {
-          const resBody = await res.json();
+          const resBody = (await res.json()) as {
+            message?: string;
+            cid?: string;
+          };
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
             history.replaceState(null, "", `/edit?cid=${resBody.cid}`);
@@ -190,7 +195,10 @@ export function MetaTab(props: Props2) {
         }
       } else {
         try {
-          const resBody = await res.json();
+          const resBody = (await res.json()) as {
+            message?: string;
+            cid?: string;
+          };
           setErrorMsg(`${res.status}: ${resBody.message}`);
         } catch {
           setErrorMsg(`${res.status} Error`);
@@ -198,7 +206,8 @@ export function MetaTab(props: Props2) {
       }
     } else {
       const res = await fetch(
-        process.env.BACKEND_PREFIX + `/api/chartFile/${props.cid}?p=${getPasswd(props.cid)}`,
+        process.env.BACKEND_PREFIX +
+          `/api/chartFile/${props.cid}?p=${getPasswd(props.cid)}`,
         {
           method: "POST",
           body: msgpack.serialize(props.chart),
@@ -211,12 +220,15 @@ export function MetaTab(props: Props2) {
         // 次からは新しいパスワードが必要
         try {
           setPasswd(props.cid, await hashPasswd(props.chart!.editPasswd));
-        } catch (e) {
+        } catch {
           setErrorMsg("保存しました！ (パスワードの保存は失敗)");
         }
       } else {
         try {
-          const resBody = await res.json();
+          const resBody = (await res.json()) as {
+            message?: string;
+            cid?: string;
+          };
           setErrorMsg(`${res.status}: ${resBody.message}`);
         } catch {
           setErrorMsg(`${res.status} Error`);

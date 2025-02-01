@@ -6,7 +6,7 @@ import {
   Signature,
 } from "@/chartFormat/command";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
-import { useCallback, useEffect, useRef, useState, use } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow";
 import {
   findBpmIndexFromStep,
@@ -29,7 +29,6 @@ import {
   Chart,
   createBrief,
   emptyChart,
-  hashLevel,
   hashPasswd,
   Level,
   levelBgColors,
@@ -69,11 +68,21 @@ import { useTheme } from "@/common/theme";
 import { useSearchParams } from "next/navigation";
 import { GuideMain } from "./guide/guideMain";
 
-export default function Page() {
+export default function Home() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Page />
+    </Suspense>
+  );
+}
+
+function Page() {
   const searchParams = useSearchParams();
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>(searchParams.get("cid") || "");
-  const [cid, setCid] = useState<string | undefined>(searchParams.get("cid") || "");
+  const [cid, setCid] = useState<string | undefined>(
+    searchParams.get("cid") || ""
+  );
   const { isTouch } = useDisplayMode();
   const themeContext = useTheme();
 
@@ -98,9 +107,10 @@ export default function Page() {
       setPasswdFailed(false);
       setLoading(true);
       const res = await fetch(
-        process.env.BACKEND_PREFIX + `/api/chartFile/${cidInitial.current}?p=${getPasswd(
-          cidInitial.current
-        )}`,
+        process.env.BACKEND_PREFIX +
+          `/api/chartFile/${cidInitial.current}?p=${getPasswd(
+            cidInitial.current
+          )}`,
         { cache: "no-store" }
       );
       setLoading(false);
@@ -110,14 +120,14 @@ export default function Page() {
           // validateはサーバー側でやってる
           try {
             setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
-          } catch (e) {
+          } catch {
             // ignore hash error on iOS development mode
           }
           setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
           addRecent("edit", cidInitial.current);
-        } catch (e) {
+        } catch {
           setChart(undefined);
           setErrorStatus(undefined);
           setErrorMsg("invalid response");
@@ -132,8 +142,10 @@ export default function Page() {
           setChart(undefined);
           setErrorStatus(res.status);
           try {
-            setErrorMsg(String((await res.json()).message));
-          } catch (e) {
+            setErrorMsg(
+              String(((await res.json()) as { message?: string }).message)
+            );
+          } catch {
             setErrorMsg("");
           }
         }
@@ -718,6 +730,7 @@ export default function Page() {
           } else if (e.key === "Shift") {
             setDragMode("v");
           } else {
+            //
           }
         }
       }}

@@ -79,6 +79,7 @@ export function useTheme(): ThemeContext {
 
 // switcherは不要だけどサーバーサイドでテーマを処理したい時に使う
 export function ThemeHandler() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const themeContext = useTheme();
   return null;
 }

@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 /*
 使い方:
   <div className="absolute">

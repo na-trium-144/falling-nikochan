@@ -7,7 +7,9 @@ export function getRecent(key: string): string[] {
     if (Array.isArray(items) && items.every((b) => typeof b === "string")) {
       return items;
     }
-  } catch {}
+  } catch {
+    //
+  }
   return [];
 }
 
