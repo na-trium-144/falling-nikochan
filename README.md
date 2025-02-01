@@ -13,20 +13,26 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## development
 
-* MongoDB のサーバーをインストールし、起動してください
+* MongoDB のサーバーをインストールし、起動してください (`localhost:27017`)
     * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
     * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
-* `.env` ファイルにデータベースのurlなどを記述、または環境変数で設定
-```
-MONGODB_URI="mongodb://localhost:27017"
-```
-* 環境変数または `.env` に `ASSET_PREFIX` を設定すると、`/_next/static`以下および`/assets/`以下のファイルを別のCDNから取得することができます
-(前者はNext.jsのconfigの [assetPrefix](https://nextjs.org/docs/app/api-reference/next-config-js/assetPrefix))
-* working directory はfalling-nikochanのルートにしてください
-```sh
-npm ci
-npm run dev
-```
+* `.env` ファイルに以下を記述、または環境変数で設定
+    ```sh
+    MONGODB_URI="mongodb://localhost:27017"
+    ```
+* 依存パッケージのインストール
+    ```sh
+    npm ci
+    ```
+* バックエンドサーバー (`http://localhost:8787`)
+    ```sh
+    npm run ldev
+    ```
+* フロントエンド
+    * Next.js の開発環境 (`http://localhost:3000`)
+    ```sh
+    npm run ndev
+    ```
 
 ## バージョン番号について
 

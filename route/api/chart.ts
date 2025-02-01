@@ -23,7 +23,7 @@ export async function getChartEntry(
   cid: string,
   p: string | null
 ): Promise<{
-  res?: { message: string; status: number };
+  res?: { message: string; status: 401 | 404 | 500 };
   entry?: ChartEntry;
   chart?: Chart;
 }> {

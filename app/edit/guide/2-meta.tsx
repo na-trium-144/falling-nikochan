@@ -1,4 +1,4 @@
-import { rateLimitMin } from "@/api/dbRateLimit";
+import { rateLimitMin } from "@/chartFormat/apiConfig";
 import { chartMaxSize } from "@/chartFormat/chart";
 
 export function GuideContent2() {
