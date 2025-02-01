@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { MongoClient } from "mongodb";
-import "dotenv/config";
 import { Bindings } from "../env";
+import { env } from "hono/adapter";
 
 export const numLatest = 25;
 
 const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
   async (c) => {
-    const client = new MongoClient(c.env.MONGODB_URI);
+    const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");

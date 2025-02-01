@@ -31,9 +31,16 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     ```
 * フロントエンド
     * Next.js の開発環境 (`http://localhost:3000`)
-    ```sh
-    npm run ndev
-    ```
+        * `/share/[cid]` のパスに関してはビルド済みのhtmlファイルをバックエンドが書き換えることによりSSRしているため、このページのみ機能しません。
+        * 代わりに `/share/placeholder` にアクセスするとダミーのページが開きます。
+        ```sh
+        npm run ndev
+        ```
+    * または、ビルド済みファイルを使ったSSR
+        * ビルドしたあとバックエンド(`http://localhost:8787`)にアクセスすれば全ページ動作するはずですが、ホットリロードが効きません。
+        ```sh
+        npm run nbuild
+        ```
 
 ## バージョン番号について
 

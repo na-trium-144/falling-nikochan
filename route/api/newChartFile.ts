@@ -4,9 +4,9 @@ import { updateIpLastCreate } from "./dbRateLimit";
 import { rateLimitMin } from "@/chartFormat/apiConfig";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart";
-import "dotenv/config";
 import { Hono } from "hono";
 import { Bindings } from "../env";
+import { env } from "hono/adapter";
 
 const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/", async (c) => {
@@ -20,7 +20,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
     ); // nullもundefinedも文字列にしちゃう
     const chartBuf = await c.req.arrayBuffer();
-    const client = new MongoClient(c.env.MONGODB_URI);
+    const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");

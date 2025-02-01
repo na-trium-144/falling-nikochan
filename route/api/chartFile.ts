@@ -7,9 +7,9 @@ import {
   validateChart,
 } from "@/chartFormat/chart";
 import { MongoClient } from "mongodb";
-import "dotenv/config";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart";
 import { Bindings } from "../env";
+import { env } from "hono/adapter";
 
 // 他のAPIと違って編集用パスワードのチェックが入る
 // クエリパラメータのpで渡す
@@ -17,7 +17,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:cid", async (c) => {
     const cid = c.req.param("cid");
     const passwdHash = c.req.query("p");
-    const client = new MongoClient(c.env.MONGODB_URI);
+    const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
@@ -42,7 +42,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     const cid = c.req.param("cid");
     const passwdHash = c.req.query("p");
     const chartBuf = await c.req.arrayBuffer();
-    const client = new MongoClient(c.env.MONGODB_URI);
+    const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
@@ -108,7 +108,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .delete("/:cid", async (c) => {
     const cid = c.req.param("cid");
     const passwdHash = c.req.query("p");
-    const client = new MongoClient(c.env.MONGODB_URI);
+    const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");

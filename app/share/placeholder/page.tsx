@@ -21,19 +21,32 @@ export default function ShareChart() {
   const [brief, setBrief] = useState<ChartBrief | null>(null);
 
   useEffect(() => {
-    try {
-      setCId(window.location.href.split("/").pop()!);
-      setBrief(JSON.parse("PLACEHOLDER_BRIEF"));
-    } catch {
+    setCId(window.location.href.split("/").pop()!);
+    if (process.env.NODE_ENV === "development") {
       setBrief({
         title: "placeholder",
         composer: "placeholder",
         chartCreator: "placeholder",
         ytId: "",
         updatedAt: 0,
-        published: false,
-        levels: [],
+        published: true,
+        playCount: 999,
+        levels: [
+          {
+            name: "placeholder",
+            hash: "",
+            type: "Single",
+            difficulty: 10,
+            noteCount: 100,
+            bpmMin: 1,
+            bpmMax: 999,
+            length: 1,
+            unlisted: false,
+          },
+        ],
       });
+    } else {
+      setBrief(JSON.parse("PLACEHOLDER_BRIEF"));
     }
   }, []);
 

@@ -3,16 +3,16 @@ import { validateChart } from "@/chartFormat/chart";
 import { loadChart } from "@/chartFormat/seq";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart";
-import "dotenv/config";
 import { Bindings } from "../env";
 import { Hono } from "hono";
+import { env } from "hono/adapter";
 
 const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
   async (c) => {
     const cid = c.req.param("cid");
     const lvIndex = Number(c.req.param("lvIndex"));
-    const client = new MongoClient(c.env.MONGODB_URI);
+    const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
