@@ -1,6 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@theme {
+  --breakpoint-main-wide: 40rem; /*タイトルと各タブの内容が別ページ*/
+  --breakpoint-footer-wide: 35rem; /*Footerのナビゲーションを横並びにする & build情報表示*/
+  --breakpoint-footer-wide2: 35rem; /*build情報を横並びにする*/
+  --breakpoint-edit-wide: 50rem; /*editのPC表示*/
+  --breakpoint-share-yt-wide: 60rem; /*shareでYouTubeを表示する場所が変わる*/
+  --color-orange-975: #20100a;
+  --color-amber-975: #20180a;
+}
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* noto-sans-latin-400-normal */
 @font-face {
