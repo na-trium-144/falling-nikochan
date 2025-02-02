@@ -8,7 +8,6 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
     const cid = c.req.param("cid");
-    console.log("brief", cid)
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -17,7 +16,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       if (!entry) {
         return c.json({ message: res?.message }, res?.status || 500);
       }
-      return c.json({ brief: entryToBrief(entry) }, 200, {
+      return c.json(entryToBrief(entry), 200, {
         "cache-control": "max-age=600",
       });
     } finally {

@@ -17,15 +17,13 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     ["/share/:cid{[0-9]+}", "_next/static/chunks/app/share/:cid/:f"],
     async (c) => {
       const cid = c.req.param("cid");
-      const pBrief = briefApp.request(`/${cid}`);
+      const pBriefRes = briefApp.request(`/${cid}`);
       const pRes = fetchStatic(
         c.req.path.replace(/share\/[0-9]+/, "share/placeholder")
       );
-      const { message, brief } = (await (await pBrief).json()) as {
-        message?: string;
-        brief?: ChartBrief;
-      };
-      if (brief) {
+      const briefRes = await pBriefRes;
+      if (briefRes.ok) {
+        const brief = (await briefRes.json()) as ChartBrief;
         const res = await pRes;
         const replacedBody = (await res.text())
           .replaceAll("share/placeholder", `share/${cid}`)
@@ -39,7 +37,12 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           "Cache-Control": "max-age=600",
         });
       } else {
-        console.error(message);
+        try {
+          const { message } = (await briefRes.json()) as { message?: string };
+          console.error(message);
+        } catch {
+          //
+        }
         return c.notFound();
       }
     }
