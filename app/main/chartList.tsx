@@ -54,7 +54,7 @@ export function ChartList(props: Props) {
                   />
                 ))}
             </ul>
-            {props.recentBrief.length >= props.maxRow &&
+            {props.recentBrief.length > props.maxRow &&
               (additionalOpen ? (
                 <div className="relative min-h-4">
                   <div
