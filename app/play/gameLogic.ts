@@ -12,7 +12,7 @@ import {
   baseScoreRate,
   chainScoreRate,
   bigScoreRate,
-} from "@/common/gameConstant.js";
+} from "@/../chartFormat/gameConstant.js";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,

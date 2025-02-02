@@ -7,7 +7,7 @@ import {
   goodSec,
   okBaseScore,
   okSec,
-} from "@/common/gameConstant.js";
+} from "@/../chartFormat/gameConstant.js";
 import { rankStr } from "@/common/rank.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 

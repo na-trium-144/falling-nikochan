@@ -5,7 +5,7 @@ import {
   goodSec,
   okBaseScore,
   okSec,
-} from "@/common/gameConstant.js";
+} from "./gameConstant.js";
 import { Level } from "./chart.js";
 import { getTimeSec } from "./seq.js";
 

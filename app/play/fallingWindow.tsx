@@ -11,7 +11,7 @@ import {
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { bonusMax } from "@/common/gameConstant.js";
+import { bonusMax } from "@/../chartFormat/gameConstant.js";
 import { ThemeContext } from "@/common/theme.js";
 
 interface Props {

@@ -9,7 +9,7 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
-} from "@/common/gameConstant.js";
+} from "@/../chartFormat/gameConstant.js";
 import { praiseMessage } from "./praise.js";
 
 interface Props {
