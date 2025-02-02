@@ -6,6 +6,7 @@ interface DisplayMode {
   isTouch: boolean;
   screenWidth: number;
   screenHeight: number;
+  isMobileMain: boolean;
   rem: number;
   playUIScale: number;
   mobileStatusScale: number;
@@ -26,11 +27,12 @@ export function useDisplayMode(): DisplayMode {
 
   const [width, height] = size;
 
-  const isMobile = width < height;
-  const scalingWidthThreshold = 400 * (isMobile ? 1 : 1.5);
+  const isMobileMain = width < 48 * rem; // global.css と合わせる
+  const isMobileGame = width < height;
+  const scalingWidthThreshold = 400 * (isMobileGame ? 1 : 1.5);
   const playUIScale = Math.min(width / scalingWidthThreshold, 1);
   const mobileStatusScale = Math.min(width / (31 * rem), 1);
-  const largeResultThreshold = 32 * rem * (isMobile ? 1 : 1.5);
+  const largeResultThreshold = 32 * rem * (isMobileGame ? 1 : 1.5);
   const largeResult = width >= largeResultThreshold;
 
   // タッチ操作かどうか (操作説明が変わる)
@@ -40,6 +42,7 @@ export function useDisplayMode(): DisplayMode {
     isTouch,
     screenWidth: width,
     screenHeight: height,
+    isMobileMain,
     rem,
     playUIScale,
     mobileStatusScale,

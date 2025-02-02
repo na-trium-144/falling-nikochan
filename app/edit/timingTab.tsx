@@ -295,9 +295,9 @@ export default function TimingTab(props: Props) {
           </>
         )}
       </p>
-      <ul className="list-disc mt-1">
+      <ul className="list-disc mt-1 pl-6">
         {props.currentSignature?.bars.map((bar, i) => (
-          <li className="ml-6 w-full" key={i}>
+          <li className="w-full" key={i}>
             <div className="flex flex-row w-full items-baseline ">
               <InputSig
                 limitedDenominator

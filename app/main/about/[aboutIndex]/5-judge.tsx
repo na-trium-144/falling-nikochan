@@ -10,6 +10,7 @@ import {
 } from "@/../chartFormat/gameConstant.js";
 import { rankStr } from "@/common/rank.js";
 import { JudgeIcon } from "@/play/statusBox.js";
+import { Fragment } from "react";
 
 export function AboutContent5() {
   return (
@@ -170,10 +171,10 @@ export function AboutContent5() {
           <span className="mx-0.5">
             {rankStr(0)}
             {[70, 80, 90, 100, 110, 120].map((s) => (
-              <>
+              <Fragment key={s}>
                 , {rankStr(s)}
                 <span className="text-sm ml-0.5">({s}〜)</span>
-              </>
+              </Fragment>
             ))}
           </span>
           のランクで

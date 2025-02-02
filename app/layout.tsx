@@ -47,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-w-screen min-h-dvh overflow-auto ">
+      <body className="min-w-full min-h-dvh overflow-auto ">
         {children}
       </body>
     </html>

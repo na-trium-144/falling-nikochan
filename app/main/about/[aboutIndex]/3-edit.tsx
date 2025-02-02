@@ -6,8 +6,7 @@ import { useDisplayMode } from "@/scale.js";
 import { Youtube } from "@icon-park/react";
 
 export function AboutContent3() {
-  const { screenWidth, rem } = useDisplayMode();
-  const isMobile = screenWidth < 40 * rem;
+  const { screenWidth, rem, isMobileMain } = useDisplayMode();
 
   return (
     <>
@@ -117,7 +116,7 @@ export function AboutContent3() {
         {screenWidth >= 25 * rem && (
           <Box
             className={
-              "rounded-none relative " +
+              "override:rounded-none relative " +
               "basis-1/3 shrink max-w-32 h-48 " +
               "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24 "
             }
@@ -136,14 +135,14 @@ export function AboutContent3() {
                 />
               </div>
             </div>
-            <TargetLine left={0} right={0} bottom={isMobile ? 30 : 15} />
+            <TargetLine left={0} right={0} bottom={isMobileMain ? 30 : 15} />
             <div
               className="absolute "
               style={{
                 width: 20,
                 height: 20,
                 left: 40,
-                bottom: isMobile ? 35 : 20,
+                bottom: isMobileMain ? 35 : 20,
               }}
             >
               <img
@@ -157,7 +156,7 @@ export function AboutContent3() {
                 width: 20,
                 height: 20,
                 left: 70,
-                bottom: isMobile ? 70 : 55,
+                bottom: isMobileMain ? 70 : 55,
               }}
             >
               <img
