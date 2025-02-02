@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartBrief, levelColors, levelTypes } from "@/chartFormat/chart.js";
+import { ChartBrief, levelColors, levelTypes } from "@/../chartFormat/chart.js";
 import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore.js";
 import Button from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";

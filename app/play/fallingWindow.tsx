@@ -7,7 +7,7 @@ import {
   targetY,
   displayNote,
   bigScale,
-} from "@/chartFormat/seq.js";
+} from "@/../chartFormat/seq.js";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";

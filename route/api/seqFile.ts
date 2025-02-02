@@ -1,6 +1,6 @@
 import msgpack from "@ygoe/msgpack";
-import { validateChart } from "@/chartFormat/chart.js";
-import { loadChart } from "@/chartFormat/seq.js";
+import { validateChart } from "../../chartFormat/chart.js";
+import { loadChart } from "../../chartFormat/seq.js";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";

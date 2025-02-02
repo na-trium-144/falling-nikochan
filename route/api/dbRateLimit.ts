@@ -1,4 +1,4 @@
-import { rateLimitMin } from "@/chartFormat/apiConfig.js";
+import { rateLimitMin } from "../../chartFormat/apiConfig.js";
 import { Db } from "mongodb";
 
 interface IpEntry {

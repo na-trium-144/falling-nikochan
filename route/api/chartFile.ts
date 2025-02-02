@@ -5,7 +5,7 @@ import {
   chartMaxSize,
   hashLevel,
   validateChart,
-} from "@/chartFormat/chart.js";
+} from "../../chartFormat/chart.js";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Bindings } from "../env.js";

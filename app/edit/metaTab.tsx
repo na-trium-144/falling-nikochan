@@ -9,7 +9,7 @@ import {
   chartMaxSize,
   hashPasswd,
   validateChart,
-} from "@/chartFormat/chart.js";
+} from "@/../chartFormat/chart.js";
 import { getPasswd, setPasswd } from "@/common/passwdCache.js";
 import { addRecent } from "@/common/recent.js";
 import { initSession, SessionData } from "@/play/session.js";

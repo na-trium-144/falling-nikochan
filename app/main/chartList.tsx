@@ -1,4 +1,4 @@
-import { ChartBrief } from "@/chartFormat/chart.js";
+import { ChartBrief } from "@/../chartFormat/chart.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { LoadingSlime } from "@/common/loadingSlime.js";
 import { RightOne } from "@icon-park/react";

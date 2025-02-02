@@ -4,7 +4,7 @@ import {
   defaultNoteCommand,
   NoteCommand,
   Signature,
-} from "@/chartFormat/command.js";
+} from "@/../chartFormat/command.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -15,7 +15,7 @@ import {
   getTimeSec,
   loadChart,
   Note,
-} from "@/chartFormat/seq.js";
+} from "@/../chartFormat/seq.js";
 import Button from "@/common/button.js";
 import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
@@ -33,8 +33,8 @@ import {
   Level,
   levelBgColors,
   levelTypes,
-} from "@/chartFormat/chart.js";
-import { Step, stepAdd, stepCmp, stepZero } from "@/chartFormat/step.js";
+} from "@/../chartFormat/chart.js";
+import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
 import Header from "@/common/header.js";
 import { getPasswd, setPasswd } from "@/common/passwdCache.js";
 import LuaTab from "./luaTab.js";
@@ -42,17 +42,17 @@ import {
   luaAddBpmChange,
   luaDeleteBpmChange,
   luaUpdateBpmChange,
-} from "@/chartFormat/lua/bpm.js";
+} from "@/../chartFormat/lua/bpm.js";
 import {
   luaAddSpeedChange,
   luaDeleteSpeedChange,
   luaUpdateSpeedChange,
-} from "@/chartFormat/lua/speed.js";
+} from "@/../chartFormat/lua/speed.js";
 import {
   luaAddNote,
   luaDeleteNote,
   luaUpdateNote,
-} from "@/chartFormat/lua/note.js";
+} from "@/../chartFormat/lua/note.js";
 import Select from "@/common/select.js";
 import LevelTab from "./levelTab.js";
 import { initSession, SessionData } from "@/play/session.js";
@@ -60,7 +60,7 @@ import {
   luaAddBeatChange,
   luaDeleteBeatChange,
   luaUpdateBeatChange,
-} from "@/chartFormat/lua/signature.js";
+} from "@/../chartFormat/lua/signature.js";
 import { useDisplayMode } from "@/scale.js";
 import { Forbid, Move } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle.js";

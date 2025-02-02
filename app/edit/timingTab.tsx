@@ -8,17 +8,17 @@ import {
   stepSub,
   stepToFloat,
   stepZero,
-} from "@/chartFormat/step.js";
-import { Level } from "@/chartFormat/chart.js";
+} from "@/../chartFormat/step.js";
+import { Level } from "@/../chartFormat/chart.js";
 import CheckBox from "@/common/checkBox.js";
-import { getSignatureState } from "@/chartFormat/seq.js";
+import { getSignatureState } from "@/../chartFormat/seq.js";
 import {
   barFromLength,
   getBarLength,
   Signature,
   SignatureWithLua,
   toStepArray,
-} from "@/chartFormat/command.js";
+} from "@/../chartFormat/command.js";
 import { useEffect, useRef, useState } from "react";
 import { Close, CornerDownLeft } from "@icon-park/react";
 

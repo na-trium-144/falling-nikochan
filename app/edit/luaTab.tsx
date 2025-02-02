@@ -7,10 +7,10 @@ import "ace-builds/src-noconflict/mode-lua";
 import "ace-builds/src-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale.js";
-import { Level } from "@/chartFormat/chart.js";
-import { luaExec } from "@/chartFormat/lua/exec.js";
-import { Step } from "@/chartFormat/step.js";
-import { findStepFromLua } from "@/chartFormat/lua/edit.js";
+import { Level } from "@/../chartFormat/chart.js";
+import { luaExec } from "@/../chartFormat/lua/exec.js";
+import { Step } from "@/../chartFormat/step.js";
+import { findStepFromLua } from "@/../chartFormat/lua/edit.js";
 import { ThemeContext } from "@/common/theme.js";
 
 interface Props {

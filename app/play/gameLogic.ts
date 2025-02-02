@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { displayNote, Note } from "@/chartFormat/seq.js";
+import { displayNote, Note } from "@/../chartFormat/seq.js";
 import {
   goodSec,
   okSec,

@@ -1,4 +1,4 @@
-import { Chart, ChartBrief } from "@/chartFormat/chart.js";
+import { Chart, ChartBrief } from "@/../chartFormat/chart.js";
 
 export interface SessionData {
   cid?: string;

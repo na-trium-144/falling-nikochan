@@ -4,7 +4,7 @@ import Header from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import Footer from "@/common/footer.js";
 import { PlayOption } from "./playOption.js";
-import { ChartBrief } from "@/chartFormat/chart.js";
+import { ChartBrief } from "@/../chartFormat/chart.js";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Link from "next/link";

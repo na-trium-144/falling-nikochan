@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData, loadChart } from "@/chartFormat/seq.js";
+import { ChartSeqData, loadChart } from "@/../chartFormat/seq.js";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -10,7 +10,7 @@ import useGameLogic from "./gameLogic.js";
 import { ReadyMessage, StopMessage } from "./messageBox.js";
 import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
-import { ChartBrief } from "@/chartFormat/chart.js";
+import { ChartBrief } from "@/../chartFormat/chart.js";
 import msgpack from "@ygoe/msgpack";
 import { Loading, Error } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";

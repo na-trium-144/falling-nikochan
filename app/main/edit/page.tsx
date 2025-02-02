@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getRecent, updateRecent } from "@/common/recent.js";
-import { validCId } from "@/chartFormat/chart.js";
+import { validCId } from "@/../chartFormat/chart.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
 import { ChartList } from "../chartList.js";
@@ -13,7 +13,7 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/clientPage.js";
-import { rateLimitMin } from "@/chartFormat/apiConfig.js";
+import { rateLimitMin } from "@/../chartFormat/apiConfig.js";
 
 export const dynamic = "force-static";
 

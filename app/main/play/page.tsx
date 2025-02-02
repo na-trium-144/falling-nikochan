@@ -1,6 +1,6 @@
 "use client";
 
-import { validCId } from "@/chartFormat/chart.js";
+import { validCId } from "@/../chartFormat/chart.js";
 import {
   ChartLineBrief,
   chartListMaxRow,
