@@ -41,7 +41,9 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         .updateOne({ cid }, { $inc: { playCount: 1 } });
       // revalidateBrief(cid);
 
-      return c.body(new Blob([msgpack.serialize(seq)]).stream());
+      return c.body(new Blob([msgpack.serialize(seq)]).stream(), 200, {
+        "Cache-Control": "no-cache",
+      });
     } catch (e) {
       console.error(e);
       return c.body(null, 500);

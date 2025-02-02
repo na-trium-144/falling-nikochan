@@ -30,7 +30,9 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       } catch {
         return c.json({ message: "invalid chart data" }, 500);
       }
-      return c.body(new Blob([msgpack.serialize(chart)]).stream());
+      return c.body(new Blob([msgpack.serialize(chart)]).stream(), 200, {
+        "Cache-Control": "no-cache",
+      });
     } catch (e) {
       console.error(e);
       return c.body(null, 500);

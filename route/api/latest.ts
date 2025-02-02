@@ -22,7 +22,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           .toArray(),
         200,
         {
-          "cache-control": "max-age=600",
+          "cache-control": "max-age=600,stale-while-revalidate=86400",
         }
       );
     } finally {

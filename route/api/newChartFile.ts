@@ -82,7 +82,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
       // revalidateBrief(cid);
 
-      return c.json({ cid: cid });
+      return c.json({ cid: cid }, 200, {
+        "Cache-Control": "no-store",
+      });
     } catch (e) {
       console.error(e);
       return c.body(null, 500);
