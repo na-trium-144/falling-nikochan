@@ -1,3 +1,7 @@
+## ver. 6.17 - 2025/02/02 [#214](https://github.com/na-trium-144/falling-nikochan/pull/214)
+
+* TailwindCSS4へ移行、CSSが崩れているところを一部修正
+
 ## ver. 6.16 - 2025/02/02 [#212](https://github.com/na-trium-144/falling-nikochan/pull/212)
 
 * フロントエンドとバックエンドのコードを分離 

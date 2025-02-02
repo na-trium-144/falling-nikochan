@@ -11,7 +11,6 @@ export default function CheckBox(props: Props) {
   return (
     <button
       className={
-        "ml-2 " +
         "hover:text-slate-500 disabled:text-slate-400 " +
         "hover:dark:text-stone-500 disabled:dark:text-stone-600 " +
         props.className

@@ -17,9 +17,9 @@ interface Props {
 }
 export function IndexMain(props: Props) {
   const router = useRouter();
-  const { screenWidth, rem } = useDisplayMode();
+  const { screenWidth, rem, isMobileMain } = useDisplayMode();
+  console.log(screenWidth / rem)
 
-  const isMobile = screenWidth < 40 * rem;
   const isTitlePage = props.tab === undefined;
   const isHiddenPage = props.tab !== undefined && props.tab >= tabURLs.length;
 
@@ -27,7 +27,7 @@ export function IndexMain(props: Props) {
   // const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
 
   return (
-    <main className="flex flex-col w-screen overflow-x-hidden min-h-dvh h-max">
+    <main className="flex flex-col w-full overflow-x-hidden min-h-dvh h-max">
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
           <Header>{tabTitles[props.tab]}</Header>
@@ -91,7 +91,7 @@ export function IndexMain(props: Props) {
                   }
                   prefetch={false}
                   onClick={(e) => {
-                    if (isTitlePage && !isMobile) {
+                    if (isTitlePage && !isMobileMain) {
                       setMenuMoveLeft(true);
                       setTimeout(() => {
                         router.replace(tabURL, { scroll: false });

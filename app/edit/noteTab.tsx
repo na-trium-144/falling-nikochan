@@ -249,7 +249,7 @@ function NoteEdit(props: Props) {
         </table>
         <p>
           <CheckBox
-            className="mr-1"
+            className="ml-2 mr-1"
             value={n.big}
             onChange={(v) => props.updateNote({ ...n, big: v })}
             disabled={!noteEditable}
