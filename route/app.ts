@@ -16,7 +16,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     [
       "/share/:cid{[0-9]+}",
       "/share/:cid_txt{[0-9]+\\.txt}",
-      "_next/static/chunks/app/share/:cid/:f",
+      "_next/static/chunks/app/share/:cid{[0-9]+}/:f",
     ],
     async (c) => {
       const cid = c.req.param("cid") || c.req.param("cid_txt").slice(0, -4);
