@@ -198,7 +198,7 @@ export default function LevelTab(props: Props) {
               <CheckBox
                 key={t}
                 value={t === currentLevel.type}
-                className={t === currentLevel.type ? levelColors[i] : ""}
+                className={"ml-2 " + (t === currentLevel.type ? levelColors[i] : "")}
                 onChange={() => {
                   currentLevel.type = t;
                   props.changeChart({ ...props.chart! });
