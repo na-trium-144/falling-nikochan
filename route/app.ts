@@ -45,7 +45,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           );
         return c.text(replacedBody, 200, {
           "Content-Type": res.headers.get("Content-Type") || "text/plain",
-          "Cache-Control": "max-age=600,stale-while-revalidate=86400",
+          "Cache-Control": "max-age=600, stale-while-revalidate=86400",
         });
       } else {
         try {

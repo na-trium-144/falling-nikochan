@@ -17,7 +17,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         return c.json({ message: res?.message }, res?.status || 500);
       }
       return c.json(entryToBrief(entry), 200, {
-        "cache-control": "max-age=600,stale-while-revalidate=86400",
+        "cache-control": "max-age=600, stale-while-revalidate=86400",
       });
     } finally {
       await client.close();
