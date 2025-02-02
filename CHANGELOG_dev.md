@@ -1,3 +1,9 @@
+## ver. 6.18 - 2025/02/02 [#215](https://github.com/na-trium-144/falling-nikochan/pull/215)
+
+* apiのレスポンスのcache-controlでrevalidate条件も指定
+    * share/cid, brief, latestは `max-age=600,stale-while-revalidate=86400`
+    * chartFile, seqFile は `no-cache`
+
 ## ver. 6.17 - 2025/02/02 [#214](https://github.com/na-trium-144/falling-nikochan/pull/214)
 
 * TailwindCSS4へ移行、CSSが崩れているところを一部修正
