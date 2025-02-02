@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { displayNote, Note } from "@/chartFormat/seq";
+import { displayNote, Note } from "@/../chartFormat/seq.js";
 import {
   goodSec,
   okSec,
@@ -12,7 +12,7 @@ import {
   baseScoreRate,
   chainScoreRate,
   bigScoreRate,
-} from "@/common/gameConstant";
+} from "@/../chartFormat/gameConstant.js";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,

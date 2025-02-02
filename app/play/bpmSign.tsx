@@ -1,7 +1,7 @@
 "use client";
 
-import { FourthNote } from "@/common/fourthNote";
-import { useDisplayMode } from "@/scale";
+import { FourthNote } from "@/common/fourthNote.js";
+import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {

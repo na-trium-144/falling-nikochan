@@ -1,15 +1,15 @@
 "use client";
 
-import Header from "@/common/header";
-import { Box } from "@/common/box";
-import Footer from "@/common/footer";
-import { useDisplayMode } from "@/scale";
+import Header from "@/common/header.js";
+import { Box } from "@/common/box.js";
+import Footer from "@/common/footer.js";
+import { useDisplayMode } from "@/scale.js";
 import { ReactNode, useState } from "react";
-import { tabTitles, tabURLs } from "./const";
+import { tabTitles, tabURLs } from "./const.js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Title from "@/common/titleLogo";
-import { linkStyle1 } from "@/common/linkStyle";
+import Title from "@/common/titleLogo.js";
+import { linkStyle1 } from "@/common/linkStyle.js";
 
 interface Props {
   children?: ReactNode | ReactNode[];

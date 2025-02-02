@@ -1,7 +1,8 @@
-import { ChartBrief, levelBgColors, levelTypes } from "@/chartFormat/chart";
-import ProgressBar from "@/common/progressBar";
-import { FlexYouTube, YouTubePlayer } from "@/common/youtube";
-import { useDisplayMode } from "@/scale";
+import { ChartBrief, levelTypes } from "@/../chartFormat/chart.js";
+import { levelBgColors } from "@/common/levelColors";
+import ProgressBar from "@/common/progressBar.js";
+import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
+import { useDisplayMode } from "@/scale.js";
 import { useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 

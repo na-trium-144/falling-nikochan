@@ -1,5 +1,5 @@
-import { metaDataTitle } from "@/common/title";
-import { tabTitles } from "../const";
+import { metaDataTitle } from "@/common/title.js";
+import { tabTitles } from "../const.js";
 import { ReactNode } from "react";
 
 export const metadata = metaDataTitle(tabTitles[2]);

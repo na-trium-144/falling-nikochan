@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TargetLine from "./targetLine";
+import TargetLine from "./targetLine.js";
 
 interface Props {
   anim: boolean;

@@ -7,12 +7,12 @@ import {
   targetY,
   displayNote,
   bigScale,
-} from "@/chartFormat/seq";
+} from "@/../chartFormat/seq.js";
 import { useResizeDetector } from "react-resize-detector";
-import TargetLine from "@/common/targetLine";
-import { useDisplayMode } from "@/scale";
-import { bonusMax } from "@/common/gameConstant";
-import { ThemeContext } from "@/common/theme";
+import TargetLine from "@/common/targetLine.js";
+import { useDisplayMode } from "@/scale.js";
+import { bonusMax } from "@/../chartFormat/gameConstant.js";
+import { ThemeContext } from "@/common/theme.js";
 
 interface Props {
   className?: string;
@@ -60,7 +60,9 @@ export default function FallingWindow(props: Props) {
 
       fpsCount.current++;
       if (new Date().getTime() - fpsCountBegin.current.getTime() >= 1000) {
-        setFPS && setFPS(fpsCount.current);
+        if (setFPS) {
+          setFPS(fpsCount.current);
+        }
         fpsCountBegin.current = new Date();
         fpsCount.current = 0;
       }

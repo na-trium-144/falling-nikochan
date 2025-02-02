@@ -1,6 +1,6 @@
 "use client";
 
-import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle";
+import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle.js";
 import { EfferentThree } from "@icon-park/react";
 
 interface Props {

@@ -1,15 +1,15 @@
 "use client";
 
-import { Box } from "@/common/box";
-import { Pager } from "@/common/pager";
-import { GuideContent1 } from "./1-welcome";
-import { GuideContent2 } from "./2-meta";
-import { GuideContent3 } from "./3-timeBar";
-import { GuideContent4 } from "./4-timingTab";
-import { GuideContent5 } from "./5-levelsTab";
-import { GuideContent6 } from "./6-noteTab";
-import { GuideContent7 } from "./7-codeTab";
-import Button from "@/common/button";
+import { Box } from "@/common/box.js";
+import { Pager } from "@/common/pager.js";
+import { GuideContent1 } from "./1-welcome.js";
+import { GuideContent2 } from "./2-meta.js";
+import { GuideContent3 } from "./3-timeBar.js";
+import { GuideContent4 } from "./4-timingTab.js";
+import { GuideContent5 } from "./5-levelsTab.js";
+import { GuideContent6 } from "./6-noteTab.js";
+import { GuideContent7 } from "./7-codeTab.js";
+import Button from "@/common/button.js";
 
 const guideTitles = [
   "",

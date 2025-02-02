@@ -1,6 +1,6 @@
-import { ChartBrief } from "@/chartFormat/chart";
-import { linkStyle1 } from "@/common/linkStyle";
-import { LoadingSlime } from "@/common/loadingSlime";
+import { ChartBrief } from "@/../chartFormat/chart.js";
+import { linkStyle1 } from "@/common/linkStyle.js";
+import { LoadingSlime } from "@/common/loadingSlime.js";
 import { RightOne } from "@icon-park/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -10,6 +10,8 @@ interface Props {
   maxRow: number;
   fetchAdditional?: () => void;
   creator?: boolean;
+  original?: boolean;
+  showLoading?: boolean;
   href: (cid: string) => string;
   newTab?: boolean;
 }
@@ -24,7 +26,12 @@ export function ChartList(props: Props) {
     props.recentBrief.some(({ fetched }) => !fetched);
   return (
     <div className="relative min-h-4">
-      <div className={"absolute top-0 left-2 " + (fetching ? "" : "hidden ")}>
+      <div
+        className={
+          "absolute top-0 left-2 " +
+          (fetching && props.showLoading ? "" : "hidden ")
+        }
+      >
         <LoadingSlime />
         Loading...
       </div>
@@ -42,17 +49,18 @@ export function ChartList(props: Props) {
                     brief={brief}
                     href={props.href(cid)}
                     creator={props.creator}
+                    original={props.original}
                     newTab={props.newTab}
                   />
                 ))}
             </ul>
-            {props.recentBrief.length >= props.maxRow &&
+            {props.recentBrief.length > props.maxRow &&
               (additionalOpen ? (
                 <div className="relative min-h-4">
                   <div
                     className={
                       "absolute top-1 left-2 " +
-                      (fetchingAdditional ? "" : "hidden ")
+                      (fetchingAdditional && props.showLoading ? "" : "hidden ")
                     }
                   >
                     <LoadingSlime />
@@ -61,7 +69,7 @@ export function ChartList(props: Props) {
                   <ul className="ml-3">
                     {props.recentBrief
                       .slice(props.maxRow)
-                      .map(({ cid, fetched, brief }) => (
+                      .map(({ cid, brief }) => (
                         <ChartListItem
                           invisible={fetchingAdditional}
                           key={cid}
@@ -69,6 +77,7 @@ export function ChartList(props: Props) {
                           brief={brief}
                           href={props.href(cid)}
                           creator={props.creator}
+                          original={props.original}
                           newTab={props.newTab}
                         />
                       ))}

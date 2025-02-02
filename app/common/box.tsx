@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { LoadingSlime } from "./loadingSlime";
-import { ThemeHandler } from "./theme";
+import { LoadingSlime } from "./loadingSlime.js";
+import { ThemeHandler } from "./theme.js";
 
 interface Props {
   children: ReactNode | ReactNode[];

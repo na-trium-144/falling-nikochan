@@ -1,11 +1,11 @@
-import { IndexMain } from "@/main/main";
-import { AboutContent2 } from "./2-play";
-import { AboutContent1 } from "./1-about";
-import { AboutContent3 } from "./3-edit";
-import { metaDataTitle } from "@/common/title";
-import { Pager } from "@/common/pager";
-import { AboutContent4 } from "./4-level";
-import { AboutContent5 } from "./5-judge";
+import { IndexMain } from "@/main/main.js";
+import { AboutContent2 } from "./2-play.js";
+import { AboutContent1 } from "./1-about.js";
+import { AboutContent3 } from "./3-edit.js";
+import { metaDataTitle } from "@/common/title.js";
+import { Pager } from "@/common/pager.js";
+import { AboutContent4 } from "./4-level.js";
+import { AboutContent5 } from "./5-judge.js";
 import { Params } from "next/dist/server/request/params";
 
 const aboutTitles = [

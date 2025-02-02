@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { linkStyle1 } from "./linkStyle";
+import { linkStyle1 } from "./linkStyle.js";
 import { Moon, Sun } from "@icon-park/react";
 
 function getCurrentTheme(): "dark" | "light" | null {
@@ -79,6 +79,7 @@ export function useTheme(): ThemeContext {
 
 // switcherは不要だけどサーバーサイドでテーマを処理したい時に使う
 export function ThemeHandler() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const themeContext = useTheme();
   return null;
 }

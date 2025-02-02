@@ -1,16 +1,16 @@
 "use client";
 
-import { CenterBox } from "@/common/box";
-import Button from "@/common/button";
-import { rankStr } from "@/common/rank";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { CenterBox } from "@/common/box.js";
+import Button from "@/common/button.js";
+import { rankStr } from "@/common/rank.js";
+import { ReactNode, useEffect, useState } from "react";
 import "./result.css";
 import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
-} from "@/common/gameConstant";
-import { praiseMessage } from "./praise";
+} from "@/../chartFormat/gameConstant.js";
+import { praiseMessage } from "./praise.js";
 
 interface Props {
   isTouch: boolean;

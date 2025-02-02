@@ -1,7 +1,7 @@
 "use client";
 
-import { Box } from "@/common/box";
-import { useDisplayMode } from "@/scale";
+import { Box } from "@/common/box.js";
+import { useDisplayMode } from "@/scale.js";
 import {
   DisappointedFace,
   DistraughtFace,
@@ -92,7 +92,7 @@ export default function StatusBox(props: Props) {
 }
 
 function StatusItem(props: { wide?: boolean; children: ReactNode[] }) {
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
+  const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   return (
     <div
@@ -147,8 +147,6 @@ function StatusName(props: { children: ReactNode }) {
   );
 }
 function StatusValue(props: { children: ReactNode }) {
-  const { screenWidth, screenHeight, rem } = useDisplayMode();
-  const isMobile = screenWidth < screenHeight;
   return (
     <span
       className="text-right mt-1"

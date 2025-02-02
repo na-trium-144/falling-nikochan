@@ -1,4 +1,4 @@
-import { Key } from "@/common/key";
+import { Key } from "@/common/key.js";
 import { Move } from "@icon-park/react";
 
 export function GuideContent6() {
