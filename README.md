@@ -44,10 +44,8 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## バージョン番号について
 
-* [拍子変化の実装 #80](https://github.com/na-trium-144/falling-nikochan/pull/80) をver5.0として、今後はPRごとにminorバージョンを上げます
-    * majorバージョンはChartデータフォーマットのバージョンに合わせます
+* majorバージョンはChartデータフォーマットのバージョンに合わせます
+* minorバージョンをPRごとに `npm version minor` コマンドで上げます
     * dependabotや、update README.md など、 app/ に変更を加えていないものはカウントしないことにします
-* バージョンは package.json に記述します
-    * 各PRのマージ前に `npm version minor` コマンドで上げます
-* ChangeLog は CHANGELOG.md に記述し、 /main/version からも閲覧できます
-    * なのでどちらかというとユーザー向けの説明
+* ChangeLog は [CHANGELOG.md](CHANGELOG.md) に記述し /main/version からも閲覧できるユーザー向けの説明と、
+[CHANGELOG_dev.md](CHANGELOG_dev.md) に記述したより詳細な説明があります
