@@ -2,7 +2,6 @@ import {
   Chart,
   emptyLevel,
   copyLevel,
-  levelColors,
   levelTypes,
 } from "@/../chartFormat/chart.js";
 import { difficulty } from "@/../chartFormat/difficulty.js";
@@ -10,6 +9,7 @@ import { Step, stepCmp } from "@/../chartFormat/step.js";
 import Button from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input.js";
+import { levelColors } from "@/common/levelColors";
 import { RightOne } from "@icon-park/react";
 import { useEffect, useState } from "react";
 

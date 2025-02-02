@@ -1,4 +1,4 @@
-import { levelBgColors } from "@/../chartFormat/chart.js";
+import { levelBgColors } from "./levelColors.js";
 
 interface Props {
   value: number;

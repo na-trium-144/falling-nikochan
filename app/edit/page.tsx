@@ -31,7 +31,6 @@ import {
   emptyChart,
   hashPasswd,
   Level,
-  levelBgColors,
   levelTypes,
 } from "@/../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
@@ -67,6 +66,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { useTheme } from "@/common/theme.js";
 import { useSearchParams } from "next/navigation";
 import { GuideMain } from "./guide/guideMain.js";
+import { levelBgColors } from "@/common/levelColors.js";
 
 export default function Home() {
   return (

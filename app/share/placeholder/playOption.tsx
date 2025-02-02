@@ -1,17 +1,18 @@
 "use client";
 
-import { ChartBrief, levelColors, levelTypes } from "@/../chartFormat/chart.js";
-import { clearBestScore, getBestScore, ResultData } from "@/common/bestScore.js";
+import { ChartBrief, levelTypes } from "@/../chartFormat/chart.js";
+import {
+  clearBestScore,
+  getBestScore,
+  ResultData,
+} from "@/common/bestScore.js";
 import Button from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
+import { levelColors } from "@/common/levelColors";
 import { rankStr } from "@/common/rank.js";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
-import {
-  RightOne,
-  SmilingFace,
-  Timer,
-} from "@icon-park/react";
+import { RightOne, SmilingFace, Timer } from "@icon-park/react";
 import { useEffect, useState } from "react";
 
 interface Props {

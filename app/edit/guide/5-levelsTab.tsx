@@ -1,4 +1,5 @@
-import { levelColors, levelTypes } from "@/../chartFormat/chart.js";
+import { levelTypes } from "@/../chartFormat/chart.js";
+import { levelColors } from "@/common/levelColors";
 
 export function GuideContent5() {
   return (

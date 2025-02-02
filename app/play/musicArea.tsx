@@ -1,4 +1,5 @@
-import { ChartBrief, levelBgColors, levelTypes } from "@/../chartFormat/chart.js";
+import { ChartBrief, levelTypes } from "@/../chartFormat/chart.js";
+import { levelBgColors } from "@/common/levelColors";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
