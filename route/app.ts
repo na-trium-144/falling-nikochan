@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import briefApp from "./api/brief.js";
-import { fetchStatic } from "./static.js";
 import { ChartBrief, pageTitle } from "../chartFormat/chart.js";
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -14,12 +13,24 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .on(
     "get",
-    ["/share/:cid{[0-9]+}", "_next/static/chunks/app/share/:cid/:f"],
+    [
+      "/share/:cid{[0-9]+}",
+      "/share/:cid_txt{[0-9]+\\.txt}",
+      "_next/static/chunks/app/share/:cid/:f",
+    ],
     async (c) => {
-      const cid = c.req.param("cid");
+      const cid = c.req.param("cid") || c.req.param("cid_txt").slice(0, -4);
       const pBriefRes = briefApp.request(`/${cid}`);
-      const pRes = fetchStatic(
-        c.req.path.replace(/share\/[0-9]+/, "share/placeholder")
+      const pRes = fetch(
+        c.req.url.replace(/share\/[0-9]+/, "share/placeholder"),
+        {
+          headers: {
+            // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
+            // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
+            "x-vercel-protection-bypass":
+              process.env.VERCEL_AUTOMATION_BYPASS_SECRET_PREVIEW_ONLY || "",
+          },
+        }
       );
       const briefRes = await pBriefRes;
       if (briefRes.ok) {
