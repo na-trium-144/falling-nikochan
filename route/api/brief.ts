@@ -8,6 +8,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
     const cid = c.req.param("cid");
+    console.log("brief", cid)
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
