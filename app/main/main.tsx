@@ -18,7 +18,6 @@ interface Props {
 export function IndexMain(props: Props) {
   const router = useRouter();
   const { screenWidth, rem, isMobileMain } = useDisplayMode();
-  console.log(screenWidth / rem)
 
   const isTitlePage = props.tab === undefined;
   const isHiddenPage = props.tab !== undefined && props.tab >= tabURLs.length;
