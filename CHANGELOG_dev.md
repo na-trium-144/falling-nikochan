@@ -1,3 +1,7 @@
+## ver. 6.20 - 2025/02/03 [#221](https://github.com/na-trium-144/falling-nikochan/pull/221)
+
+* メインページで、過去にfetchしたbriefデータをlocalStorageに保存しておいてfetchしている間それを表示するようにした
+
 ## ver. 6.17 - 2025/02/02 [#214](https://github.com/na-trium-144/falling-nikochan/pull/214)
 
 * TailwindCSS4へ移行、CSSが崩れているところを一部修正
