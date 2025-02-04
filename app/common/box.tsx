@@ -46,7 +46,7 @@ export function CenterBoxOnlyPage(props: {
   );
 }
 
-export function Error(props: { status?: number; message?: string }) {
+export function Error(props: { status?: number | string; message?: string }) {
   return (
     <CenterBoxOnlyPage>
       <p>

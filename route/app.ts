@@ -3,8 +3,38 @@ import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import briefApp from "./api/brief.js";
 import { ChartBrief, pageTitle } from "../chartFormat/chart.js";
+import { fetchStatic } from "./static.js";
+
+async function errorResponse(origin: string, status: number, message: string) {
+  return (
+    await (await fetchStatic(new URL("/errorPlaceholder", origin))).text()
+  )
+    .replaceAll("PLACEHOLDER_STATUS", String(status))
+    .replaceAll("PLACEHOLDER_MESSAGE", message)
+    .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
+  // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+}
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .notFound(async (c) =>
+    c.body(
+      (await fetchStatic(new URL("/404", new URL(c.req.url).origin))).body!,
+      404,
+      { "Content-Type": "text/html" }
+    )
+  )
+  .onError(async (err, c) => {
+    console.error(err);
+    if (c.req.path.startsWith("/api")) {
+      return c.json({ message: "Server Error" }, 500);
+    } else {
+      return c.body(
+        await errorResponse(new URL(c.req.url).origin, 500, "Server Error"),
+        500,
+        { "Content-Type": "text/html" }
+      );
+    }
+  })
   .route("/api", apiApp)
   .get("/edit/:cid", (c) => {
     // deprecated (used until ver6.15)
@@ -21,16 +51,8 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     async (c) => {
       const cid = c.req.param("cid") || c.req.param("cid_txt").slice(0, -4);
       const pBriefRes = briefApp.request(`/${cid}`);
-      const pRes = fetch(
-        c.req.url.replace(/share\/[0-9]+/, "share/placeholder"),
-        {
-          headers: {
-            // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
-            // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
-            "x-vercel-protection-bypass":
-              process.env.VERCEL_AUTOMATION_BYPASS_SECRET_PREVIEW_ONLY || "",
-          },
-        }
+      const pRes = fetchStatic(
+        new URL(c.req.url.replace(/share\/[0-9]+/, "share/placeholder"))
       );
       const briefRes = await pBriefRes;
       if (briefRes.ok) {
@@ -48,13 +70,27 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           "Cache-Control": "max-age=600",
         });
       } else {
-        try {
-          const { message } = (await briefRes.json()) as { message?: string };
-          console.error(message);
-        } catch {
-          //
+        if (c.req.routePath === "/share/:cid{[0-9]+}") {
+          let message = "";
+          try {
+            message =
+              ((await briefRes.json()) as { message?: string }).message || "";
+          } catch {
+            //
+          }
+          return c.body(
+            await errorResponse(
+              new URL(c.req.url).origin,
+              briefRes.status,
+              message
+            ),
+            briefRes.status as 401 | 404 | 500,
+            { "Content-Type": "text/html" }
+          );
+          // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+        } else {
+          return c.notFound();
         }
-        return c.notFound();
       }
     }
   );

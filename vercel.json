@@ -7,7 +7,15 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/share/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/edit/(.*)",
       "destination": "/api"
     }
   ]

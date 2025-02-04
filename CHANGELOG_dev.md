@@ -1,3 +1,8 @@
+## ver. 6.22 - 2025/02/04 [#229](https://github.com/na-trium-144/falling-nikochan/pull/229)
+
+* 404エラー時に404ページが表示されるようにした
+* /share/cidのエラー時に返すerrorPlaceholderページを作成
+
 ## ver. 6.20 - 2025/02/03 [#221](https://github.com/na-trium-144/falling-nikochan/pull/221)
 
 * メインページで、過去にfetchしたbriefデータをlocalStorageに保存しておいてfetchしている間それを表示するようにした
