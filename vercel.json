@@ -11,7 +11,11 @@
       "destination": "/api"
     },
     {
-      "source": "/share/(.*)",
+      "source": "/share/([0-9]+.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "_next/static/chunks/app/share/([0-9]+.*)",
       "destination": "/api"
     },
     {
