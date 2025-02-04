@@ -4,13 +4,8 @@ import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
 import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
-import {
-  Chart,
-  chartMaxSize,
-  hashPasswd,
-  validateChart,
-} from "@/../chartFormat/chart.js";
-import { getPasswd, setPasswd } from "@/common/passwdCache.js";
+import { Chart, chartMaxSize, validateChart } from "@/../chartFormat/chart.js";
+import { getPasswd, getV6Passwd, setPasswd } from "@/common/passwdCache.js";
 import { addRecent } from "@/common/recent.js";
 import { initSession, SessionData } from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
@@ -182,11 +177,12 @@ export function MetaTab(props: Props2) {
             setErrorMsg("保存しました！");
             addRecent("edit", resBody.cid);
             props.setHasChange(false);
-            try {
-              setPasswd(resBody.cid, await hashPasswd(props.chart!.editPasswd));
-            } catch (e) {
-              setErrorMsg(String(e));
-            }
+            fetch(
+              process.env.BACKEND_PREFIX +
+                `/api/hashPasswd/${resBody.cid}?pw=${props.chart!.editPasswd}`
+            ).then(async (res) => {
+              setPasswd(resBody.cid!, await res.text());
+            });
           } else {
             setErrorMsg("Invalid response");
           }
@@ -207,7 +203,8 @@ export function MetaTab(props: Props2) {
     } else {
       const res = await fetch(
         process.env.BACKEND_PREFIX +
-          `/api/chartFile/${props.cid}?p=${getPasswd(props.cid)}`,
+          `/api/chartFile/${props.cid}` +
+          `?p=${getV6Passwd(props.cid)}&ph=${getPasswd(props.cid)}`,
         {
           method: "POST",
           body: msgpack.serialize(props.chart),
@@ -218,11 +215,12 @@ export function MetaTab(props: Props2) {
         props.setHasChange(false);
         setErrorMsg("保存しました！");
         // 次からは新しいパスワードが必要
-        try {
-          setPasswd(props.cid, await hashPasswd(props.chart!.editPasswd));
-        } catch {
-          setErrorMsg("保存しました！ (パスワードの保存は失敗)");
-        }
+        fetch(
+          process.env.BACKEND_PREFIX +
+            `/api/hashPasswd/${props.cid}?pw=${props.chart!.editPasswd}`
+        ).then(async (res) => {
+          setPasswd(props.cid!, await res.text());
+        });
       } else {
         try {
           const resBody = (await res.json()) as {

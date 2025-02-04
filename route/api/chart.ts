@@ -2,7 +2,7 @@ import {
   Chart,
   ChartBrief,
   createBrief,
-  hashPasswd,
+  hash,
   validateChart,
 } from "../../chartFormat/chart.js";
 import { gzip, gunzip } from "node:zlib";
@@ -15,13 +15,30 @@ import {
 } from "../../chartFormat/command.js";
 import { Binary, Db } from "mongodb";
 
+export function hashPasswd(
+  cid: string,
+  pw: string,
+  hashKey: string
+): Promise<string> {
+  return hash(cid + pw + hashKey);
+}
+
+interface Passwd {
+  bypass?: boolean;
+  v6PasswdHash?: string;
+  rawPasswd?: string;
+  v7PasswdHash?: string;
+  v7HashKey?: string;
+}
 /**
- * pをnullにするとパスワードのチェックを行わない。
+ * パスワードについては chartFile のコメントを参照
+ *
+ * パスワードが不要なアクセス (/api/brief など) ではpをnullにする
  */
 export async function getChartEntry(
   db: Db,
   cid: string,
-  p: string | null
+  p: Passwd | null
 ): Promise<{
   res?: { message: string; status: 401 | 404 | 500 };
   entry?: ChartEntry;
@@ -51,16 +68,21 @@ export async function getChartEntry(
     };
   }
 
-  if (p === null) {
+  if (
+    p === null ||
+    p.bypass ||
+    (p.rawPasswd !== undefined && p.rawPasswd === chart.editPasswd) ||
+    (p.v6PasswdHash !== undefined &&
+      chart.ver <= 6 &&
+      p.v6PasswdHash === (await hash(chart.editPasswd))) ||
+    (p.v7PasswdHash !== undefined &&
+      p.v7HashKey !== undefined &&
+      p.v7PasswdHash === (await hashPasswd(cid, chart.editPasswd, p.v7HashKey)))
+  ) {
     return { entry, chart };
-  }
-  if (process.env.NODE_ENV === "development" && p === "bypass") {
-    return { entry, chart };
-  }
-  if (p !== (await hashPasswd(chart.editPasswd))) {
+  } else {
     return { res: { message: "bad password", status: 401 } };
   }
-  return { entry, chart };
 }
 
 /**

@@ -29,13 +29,12 @@ import {
   Chart,
   createBrief,
   emptyChart,
-  hashPasswd,
   Level,
   levelTypes,
 } from "@/../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
 import Header from "@/common/header.js";
-import { getPasswd, setPasswd } from "@/common/passwdCache.js";
+import { getPasswd, getV6Passwd, setPasswd } from "@/common/passwdCache.js";
 import LuaTab from "./luaTab.js";
 import {
   luaAddBpmChange,
@@ -108,21 +107,22 @@ function Page() {
       setLoading(true);
       const res = await fetch(
         process.env.BACKEND_PREFIX +
-          `/api/chartFile/${cidInitial.current}?p=${getPasswd(
-            cidInitial.current
-          )}`,
+          `/api/chartFile/${cidInitial.current}` +
+          `?p=${getV6Passwd(cidInitial.current)}` +
+          `&ph=${getPasswd(cidInitial.current)}` +
+          `&pw=${editPasswd}`,
         { cache: "no-store" }
       );
       setLoading(false);
       if (res.ok) {
         try {
           const chart = msgpack.deserialize(await res.arrayBuffer());
-          // validateはサーバー側でやってる
-          try {
-            setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
-          } catch {
-            // ignore hash error on iOS development mode
-          }
+          fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`
+          ).then(async (res) => {
+            setPasswd(cidInitial.current, await res.text());
+          });
           setChart(chart);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
@@ -651,15 +651,7 @@ function Page() {
           left
           passwd
         />
-        <Button
-          text="進む"
-          onClick={() => {
-            void (async () => {
-              setPasswd(cidInitial.current || "", await hashPasswd(editPasswd));
-              await fetchChart(false);
-            })();
-          }}
-        />
+        <Button text="進む" onClick={() => fetchChart(false)} />
         {process.env.NODE_ENV === "development" && (
           <p className="mt-2 ">
             <button
