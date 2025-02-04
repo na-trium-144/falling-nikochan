@@ -95,64 +95,80 @@ function Page() {
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
 
-  const fetchChart = useCallback(async (isFirst: boolean) => {
-    if (cidInitial.current === "new") {
-      setChart(emptyChart());
-      setPasswdFailed(false);
-      setLoading(false);
-      setCid(undefined);
-      setGuidePage(1);
-    } else {
-      setPasswdFailed(false);
-      setLoading(true);
-      const res = await fetch(
-        process.env.BACKEND_PREFIX +
-          `/api/chartFile/${cidInitial.current}` +
-          `?p=${getV6Passwd(cidInitial.current)}` +
-          `&ph=${getPasswd(cidInitial.current)}` +
-          `&pw=${editPasswd}`,
-        { cache: "no-store" }
-      );
-      setLoading(false);
-      if (res.ok) {
-        try {
-          const chart = msgpack.deserialize(await res.arrayBuffer());
-          fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`
-          ).then(async (res) => {
-            setPasswd(cidInitial.current, await res.text());
-          });
-          setChart(chart);
-          setErrorStatus(undefined);
-          setErrorMsg(undefined);
-          addRecent("edit", cidInitial.current);
-        } catch {
-          setChart(undefined);
-          setErrorStatus(undefined);
-          setErrorMsg("invalid response");
-        }
+  const fetchChart = useCallback(
+    async (isFirst: boolean, bypass: boolean) => {
+      if (cidInitial.current === "new") {
+        setChart(emptyChart());
+        setPasswdFailed(false);
+        setLoading(false);
+        setCid(undefined);
+        setGuidePage(1);
       } else {
-        if (res.status === 401) {
-          if (!isFirst) {
-            setPasswdFailed(true);
+        setPasswdFailed(false);
+        setLoading(true);
+        const res = await fetch(
+          process.env.BACKEND_PREFIX +
+            `/api/chartFile/${cidInitial.current}` +
+            `?p=${getV6Passwd(cidInitial.current)}` +
+            `&ph=${getPasswd(cidInitial.current)}` +
+            `&pw=${editPasswd}` +
+            (bypass ? "&pbypass=1" : ""),
+          {
+            cache: "no-store",
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
           }
-          setChart(undefined);
-        } else {
-          setChart(undefined);
-          setErrorStatus(res.status);
+        );
+        setLoading(false);
+        if (res.ok) {
           try {
-            setErrorMsg(
-              String(((await res.json()) as { message?: string }).message)
-            );
+            const chart = msgpack.deserialize(await res.arrayBuffer());
+            fetch(
+              process.env.BACKEND_PREFIX +
+                `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`,
+              {
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              }
+            ).then(async (res) => {
+              setPasswd(cidInitial.current, await res.text());
+            });
+            setChart(chart);
+            setErrorStatus(undefined);
+            setErrorMsg(undefined);
+            addRecent("edit", cidInitial.current);
           } catch {
-            setErrorMsg("");
+            setChart(undefined);
+            setErrorStatus(undefined);
+            setErrorMsg("invalid response");
+          }
+        } else {
+          if (res.status === 401) {
+            if (!isFirst) {
+              setPasswdFailed(true);
+            }
+            setChart(undefined);
+          } else {
+            setChart(undefined);
+            setErrorStatus(res.status);
+            try {
+              setErrorMsg(
+                String(((await res.json()) as { message?: string }).message)
+              );
+            } catch {
+              setErrorMsg("");
+            }
           }
         }
       }
-    }
-  }, []);
-  useEffect(() => void fetchChart(true), [fetchChart]);
+    },
+    [editPasswd]
+  );
+  useEffect(() => void fetchChart(true, false), []);
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel = chart?.levels.at(currentLevelIndex);
@@ -651,15 +667,14 @@ function Page() {
           left
           passwd
         />
-        <Button text="進む" onClick={() => fetchChart(false)} />
+        <Button text="進む" onClick={() => fetchChart(false, false)} />
         {process.env.NODE_ENV === "development" && (
           <p className="mt-2 ">
             <button
               className={linkStyle1 + "w-max m-auto "}
               onClick={() => {
                 void (async () => {
-                  setPasswd(cidInitial.current || "", "bypass");
-                  await fetchChart(false);
+                  await fetchChart(false, true);
                 })();
               }}
             >

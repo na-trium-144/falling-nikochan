@@ -19,8 +19,6 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       setCookie(c, "hashKey", key, {
         httpOnly: true,
         maxAge: 400 * 24 * 3600,
-        path: "/",
-        sameSite: "Strict",
       });
     } else {
       key =

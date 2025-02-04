@@ -30,7 +30,12 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     const v6PasswdHash = c.req.query("p");
     const rawPasswd = c.req.query("pw");
     const v7PasswdHash = c.req.query("ph");
-    const v7HashKey = getCookie(c, "hashKey", "host");
+    let v7HashKey: string;
+    if (env(c).NODE_ENV === "development") {
+      v7HashKey = getCookie(c, "hashKey") || "";
+    } else {
+      v7HashKey = getCookie(c, "hashKey", "host") || "";
+    }
     const bypass =
       c.req.query("pbypass") === "1" && env(c).NODE_ENV === "development";
     const client = new MongoClient(env(c).MONGODB_URI);
@@ -65,7 +70,13 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     const v6PasswdHash = c.req.query("p");
     const rawPasswd = c.req.query("pw");
     const v7PasswdHash = c.req.query("ph");
-    const v7HashKey = getCookie(c, "hashKey", "host");
+    let v7HashKey: string;
+    if (env(c).NODE_ENV === "development") {
+      v7HashKey = getCookie(c, "hashKey") || "";
+    } else {
+      v7HashKey = getCookie(c, "hashKey", "host") || "";
+    }
+    console.log(v7PasswdHash,v7HashKey);
     const bypass =
       c.req.query("pbypass") === "1" && env(c).NODE_ENV === "development";
     const chartBuf = await c.req.arrayBuffer();
@@ -139,7 +150,12 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     const v6PasswdHash = c.req.query("p");
     const rawPasswd = c.req.query("pw");
     const v7PasswdHash = c.req.query("ph");
-    const v7HashKey = getCookie(c, "hashKey", "host");
+    let v7HashKey: string;
+    if (env(c).NODE_ENV === "development") {
+      v7HashKey = getCookie(c, "hashKey") || "";
+    } else {
+      v7HashKey = getCookie(c, "hashKey", "host") || "";
+    }
     const bypass =
       c.req.query("pbypass") === "1" && env(c).NODE_ENV === "development";
     const client = new MongoClient(env(c).MONGODB_URI);

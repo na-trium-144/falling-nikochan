@@ -163,6 +163,8 @@ export function MetaTab(props: Props2) {
           method: "POST",
           body: msgpack.serialize(props.chart),
           cache: "no-store",
+          credentials:
+            process.env.NODE_ENV === "development" ? "include" : "same-origin",
         }
       );
       if (res.ok) {
@@ -179,7 +181,13 @@ export function MetaTab(props: Props2) {
             props.setHasChange(false);
             fetch(
               process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${resBody.cid}?pw=${props.chart!.editPasswd}`
+                `/api/hashPasswd/${resBody.cid}?pw=${props.chart!.editPasswd}`,
+              {
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              }
             ).then(async (res) => {
               setPasswd(resBody.cid!, await res.text());
             });
@@ -209,6 +217,8 @@ export function MetaTab(props: Props2) {
           method: "POST",
           body: msgpack.serialize(props.chart),
           cache: "no-store",
+          credentials:
+            process.env.NODE_ENV === "development" ? "include" : "same-origin",
         }
       );
       if (res.ok) {
@@ -217,7 +227,13 @@ export function MetaTab(props: Props2) {
         // 次からは新しいパスワードが必要
         fetch(
           process.env.BACKEND_PREFIX +
-            `/api/hashPasswd/${props.cid}?pw=${props.chart!.editPasswd}`
+            `/api/hashPasswd/${props.cid}?pw=${props.chart!.editPasswd}`,
+          {
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
+          }
         ).then(async (res) => {
           setPasswd(props.cid!, await res.text());
         });

@@ -26,7 +26,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const db = client.db("nikochan");
 
       if (
-        /*process.env.NODE_ENV !== "development" &&*/
+        env(c).NODE_ENV !== "development" &&
         !(await updateIpLastCreate(db, ip))
       ) {
         return c.json(
