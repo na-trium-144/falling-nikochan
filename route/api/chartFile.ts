@@ -23,7 +23,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const db = client.db("nikochan");
       let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
       if (!chart) {
-        return c.json({ message: res?.message }, 500);
+        return c.json({ message: res?.message }, res?.status || 500);
       }
       try {
         chart = await validateChart(chart);
@@ -52,7 +52,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         passwdHash || ""
       );
       if (!chart || !entry) {
-        return c.json({ message: res?.message }, 500);
+        return c.json({ message: res?.message }, res?.status || 500);
       }
 
       if (chartBuf.byteLength > chartMaxSize) {
@@ -114,7 +114,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const db = client.db("nikochan");
       const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
       if (!chart) {
-        return c.json({ message: res?.message }, 500);
+        return c.json({ message: res?.message }, res?.status || 500);
       }
 
       await db.collection("chart").updateOne(
