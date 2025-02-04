@@ -13,8 +13,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## development
 
-* MongoDB のサーバーをインストールし、起動してください (`localhost:27017`)
-    * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
+* 適当なバージョンの [Node.js](https://nodejs.org/ja/download) をインストールしてください
+* [MongoDB](https://www.mongodb.com/docs/manual/installation/) をインストールし、起動してください (`localhost:27017`)
+    * Dockerをインストールしているなら、Dockerを使うのが手軽でおすすめ
+        ```sh
+        docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest
+        ```
     * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
 * `.env` ファイルに以下を記述、または環境変数で設定
     ```sh
@@ -25,11 +29,14 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     ```sh
     npm ci
     ```
-* バックエンドサーバー (`http://localhost:8787`)
-    ```sh
-    npm run ldev
-    ```
-* フロントエンド
+* バックエンド (route/)
+    * Honoを使用しており、さまざまなランタイムで動かすことができます
+    * ローカルの開発環境としてはNode.jsでサーバーを起動できます (`http://localhost:8787`)
+        ```sh
+        npm run ldev
+        ```
+    * デプロイはVercelを使っています
+* フロントエンド (app/)
     * Next.js の開発環境 (`http://localhost:3000`)
         * `/share/[cid]` のパスに関してはビルド済みのhtmlファイルをバックエンドが書き換えることによりSSRしているため、このページのみ機能しません。
         * 代わりに `/share/placeholder` にアクセスするとダミーのページが開きます。
