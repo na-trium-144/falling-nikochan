@@ -15,7 +15,7 @@
       "destination": "/api"
     },
     {
-      "source": "_next/static/chunks/app/share/([0-9]+.*)",
+      "source": "/_next/static/chunks/app/share/([0-9]+/.*)",
       "destination": "/api"
     },
     {
