@@ -5,7 +5,36 @@ import briefApp from "./api/brief.js";
 import { ChartBrief, pageTitle } from "../chartFormat/chart.js";
 import { fetchStatic } from "./static.js";
 
+async function errorResponse(origin: string, status: number, message: string) {
+  return (
+    await (await fetchStatic(new URL("/errorPlaceholder", origin))).text()
+  )
+    .replaceAll("PLACEHOLDER_STATUS", String(status))
+    .replaceAll("PLACEHOLDER_MESSAGE", message)
+    .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
+  // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+}
+
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .notFound(async (c) =>
+    c.body(
+      (await fetchStatic(new URL("/404", new URL(c.req.url).origin))).body!,
+      404,
+      { "Content-Type": "text/html" }
+    )
+  )
+  .onError(async (err, c) => {
+    console.error(err);
+    if (c.req.path.startsWith("/api")) {
+      return c.json({ message: "Server Error" }, 500);
+    } else {
+      return c.body(
+        await errorResponse(new URL(c.req.url).origin, 500, "Server Error"),
+        500,
+        { "Content-Type": "text/html" }
+      );
+    }
+  })
   .route("/api", apiApp)
   .get("/edit/:cid", (c) => {
     // deprecated (used until ver6.15)
@@ -50,19 +79,11 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
             //
           }
           return c.body(
-            (
-              await (
-                await fetchStatic(
-                  new URL("/errorPlaceholder", new URL(c.req.url).origin)
-                )
-              ).text()
-            )
-              .replaceAll("PLACEHOLDER_STATUS", String(briefRes.status))
-              .replaceAll("PLACEHOLDER_MESSAGE", message)
-              .replaceAll(
-                "PLACEHOLDER_TITLE",
-                briefRes.status == 404 ? "Not Found" : "Error"
-              ),
+            await errorResponse(
+              new URL(c.req.url).origin,
+              briefRes.status,
+              message
+            ),
             briefRes.status as 401 | 404 | 500,
             { "Content-Type": "text/html" }
           );
@@ -72,13 +93,6 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         }
       }
     }
-  )
-  .get("/share/*", async (c) =>
-    c.body(
-      (await fetchStatic(new URL("/404", new URL(c.req.url).origin))).body!,
-      404,
-      { "Content-Type": "text/html" }
-    )
   );
 
 export default app;
