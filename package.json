@@ -56,7 +56,6 @@
     "ts-node": "^10",
     "typescript": "^5",
     "undici": "^5.28.5",
-    "path-to-regexp": "^6.3.0",
     "tar": "^7"
   }
 }
