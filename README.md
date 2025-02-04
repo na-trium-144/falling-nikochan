@@ -13,8 +13,15 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## development
 
+* 適当なバージョンの Bun または Node.js をインストールしてください
+    * [Node.js](https://nodejs.org/ja/download)
+    * [bun](https://bun.sh/docs/installation)
 * MongoDB のサーバーをインストールし、起動してください (`localhost:27017`)
     * [公式ドキュメント](https://www.mongodb.com/docs/manual/installation/)
+    * Dockerをインストールしているなら、Dockerを使うのが手軽でおすすめ
+        ```sh
+        docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest
+        ```
     * Falling Nikochan はその中に `nikochan` という名前のデータベースを作成、使用します
 * `.env` ファイルに以下を記述、または環境変数で設定
     ```sh
@@ -23,10 +30,14 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     ```
 * 依存パッケージのインストール
     ```sh
+    bun i
+    # or
     npm ci
     ```
 * バックエンドサーバー (`http://localhost:8787`)
     ```sh
+    bun bdev
+    # or
     npm run ldev
     ```
 * フロントエンド
@@ -34,11 +45,15 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * `/share/[cid]` のパスに関してはビルド済みのhtmlファイルをバックエンドが書き換えることによりSSRしているため、このページのみ機能しません。
         * 代わりに `/share/placeholder` にアクセスするとダミーのページが開きます。
         ```sh
+        bun -b ndev
+        # or
         npm run ndev
         ```
     * または、ビルド済みファイルを使ったSSR
         * ビルドしたあとバックエンド(`http://localhost:8787`)にアクセスすれば全ページ動作するはずですが、ホットリロードが効きません。
         ```sh
+        bun -b nbuild
+        # or
         npm run nbuild
         ```
 
