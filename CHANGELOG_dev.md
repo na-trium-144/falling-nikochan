@@ -1,3 +1,7 @@
+## ver. 6.24 - 2025/02/04 [#233](https://github.com/na-trium-144/falling-nikochan/pull/233)
+
+* /main/playから譜面を選択したとき違う譜面のページが表示されるバグを回避するため、/share/[cid].txt はapi側で書き換えず404のままにする
+
 ## ver. 6.22 - 2025/02/04 [#229](https://github.com/na-trium-144/falling-nikochan/pull/229)
 
 * 404エラー時に404ページが表示されるようにした
