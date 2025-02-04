@@ -6,7 +6,10 @@ jobs:
   purge:
     runs-on: ubuntu-latest
     steps:
-    - run: >
+    - name: Wait 2 min before Vercel builds
+      run: sleep 120
+    - name: Purge Cloudflare Cache
+      run: >
         curl https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/purge_cache
         -H 'Content-Type: application/json'
         -H "Authorization: Bearer $CLOUDFLARE_API_KEY"
