@@ -3,6 +3,7 @@ import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import briefApp from "./api/brief.js";
 import { ChartBrief, pageTitle } from "../chartFormat/chart.js";
+import { fetchStatic } from "./static.js";
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)
@@ -21,16 +22,8 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     async (c) => {
       const cid = c.req.param("cid") || c.req.param("cid_txt").slice(0, -4);
       const pBriefRes = briefApp.request(`/${cid}`);
-      const pRes = fetch(
-        c.req.url.replace(/share\/[0-9]+/, "share/placeholder"),
-        {
-          headers: {
-            // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
-            // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
-            "x-vercel-protection-bypass":
-              process.env.VERCEL_AUTOMATION_BYPASS_SECRET_PREVIEW_ONLY || "",
-          },
-        }
+      const pRes = fetchStatic(
+        new URL(c.req.url.replace(/share\/[0-9]+/, "share/placeholder"))
       );
       const briefRes = await pBriefRes;
       if (briefRes.ok) {
@@ -48,15 +41,44 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           "Cache-Control": "max-age=600",
         });
       } else {
-        try {
-          const { message } = (await briefRes.json()) as { message?: string };
-          console.error(message);
-        } catch {
-          //
+        if (c.req.routePath === "/share/:cid{[0-9]+}") {
+          let message = "";
+          try {
+            message =
+              ((await briefRes.json()) as { message?: string }).message || "";
+          } catch {
+            //
+          }
+          return c.body(
+            (
+              await (
+                await fetchStatic(
+                  new URL("/errorPlaceholder", new URL(c.req.url).origin)
+                )
+              ).text()
+            )
+              .replaceAll("PLACEHOLDER_STATUS", String(briefRes.status))
+              .replaceAll("PLACEHOLDER_MESSAGE", message)
+              .replaceAll(
+                "PLACEHOLDER_TITLE",
+                briefRes.status == 404 ? "Not Found" : "Error"
+              ),
+            briefRes.status as 401 | 404 | 500,
+            { "Content-Type": "text/html" }
+          );
+          // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+        } else {
+          return c.notFound();
         }
-        return c.notFound();
       }
     }
+  )
+  .get("/share/*", async (c) =>
+    c.body(
+      (await fetchStatic(new URL("/404", new URL(c.req.url).origin))).body!,
+      404,
+      { "Content-Type": "text/html" }
+    )
   );
 
 export default app;
