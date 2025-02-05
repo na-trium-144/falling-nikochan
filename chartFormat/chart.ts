@@ -6,7 +6,8 @@ import { Chart2, convert1To2 } from "./legacy/chart2.js";
 import { Chart3, convert2To3 } from "./legacy/chart3.js";
 import { Chart4, convert3To4 } from "./legacy/chart4.js";
 import { Chart5, convert4To5 } from "./legacy/chart5.js";
-import { Chart6, Level6, convert5To6 } from "./legacy/chart6.js";
+import { Chart6, convert5To6 } from "./legacy/chart6.js";
+import { Chart7, convert6To7, hashLevel7, Level7 } from "./legacy/chart7.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
@@ -68,14 +69,14 @@ export function pageTitle(cid: string, brief: ChartBrief) {
  * クライアント側は全く使わない
  *
  */
-export type Chart = Chart6;
-export type Level = Level6;
+export type Chart = Chart7;
+export type Level = Level7;
 export const levelTypes = ["Single", "Double", "Maniac"];
 
 export const chartMaxSize = 1000000;
 
 export async function validateChart(
-  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5
+  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6
 ): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver === 1) chart = convert1To2(chart);
@@ -83,7 +84,8 @@ export async function validateChart(
   if (chart.ver === 3) chart = await convert3To4(chart);
   if (chart.ver === 4) chart = convert4To5(chart);
   if (chart.ver === 5) chart = convert5To6(chart);
-  if (chart.ver !== 6) throw "chart.ver is invalid";
+  if (chart.ver === 6) chart = convert6To7(chart);
+  if (chart.ver !== 7) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
   chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
@@ -129,16 +131,7 @@ export async function hash(text: string) {
 export async function hashPasswd(text: string) {
   return await hash(text);
 }
-export async function hashLevel(level: Level) {
-  return await hash(
-    JSON.stringify([
-      level.notes,
-      level.bpmChanges,
-      level.speedChanges,
-      level.signature,
-    ])
-  );
-}
+export const hashLevel = hashLevel7;
 
 export function validCId(cid: string) {
   return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
@@ -147,7 +140,7 @@ export function validCId(cid: string) {
 export function emptyChart(): Chart {
   let chart: Chart = {
     falling: "nikochan",
-    ver: 6,
+    ver: 7,
     levels: [emptyLevel()],
     offset: 0,
     ytId: "",

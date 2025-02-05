@@ -51,20 +51,23 @@ export interface Note {
   hitTimeSec: number;
   appearTimeSec: number;
   targetX: number;
+  vx: number;
+  vy: number;
+  ay: number;
+  display: DisplayParam[];
   hitPos?: Pos;
   done: number;
   baseScore?: number;
   chainBonus?: number;
   bigBonus?: number;
   chain?: number;
-  display: DisplayParam[];
 }
 interface DisplayParam {
   // 時刻(判定時刻 - 秒数)
   timeSecBefore: number;
-  // x = a0 + a1 t, y = b0 + b1 t + b2 t^2
-  a: [number, number];
-  b: [number, number, number];
+  // u = u0 + du t
+  u0: number;
+  du: number;
 }
 
 /**
@@ -229,12 +232,32 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
     let tBegin = hitTimeSec;
     // noteCommandの座標系 (-5<=x<=5) から
     //  displayの座標系に変換するのもここでやる
-    let x = (c.hitX + 5) / 10;
-    const targetX = x;
-    let y = 0;
-    let vx = c.hitVX;
-    let vy = c.hitVY;
-    const ay = 1;
+    const targetX = (c.hitX + 5) / 10;
+    const targetY = 0;
+    const vx = c.hitVX / 4;
+    const vy = c.hitVY / 4;
+    const ay = 1 / 4;
+    let u = 0;
+    // u(t) = ∫t→tBegin, dt * speed / 120
+    // x(t) = targetX + vx * u(t)
+    // y(t) = targetY + vy * u(t) - (ay * u(t)^2) / 2
+
+    let uAppear: number;
+    if (c.fall) {
+      // dy/du = 0 or y(t) = 1.5 or x(t) = 2 or x(t) = -0.5
+      const uTop = vy / ay;
+      const uAppearY =
+        (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - 1.5))) / ay;
+      const uAppearX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      uAppear = Math.min(uAppearX, isNaN(uAppearY) ? uTop : uAppearY);
+    } else {
+      // y(t) = -0.5 or x(t) = 2 or x(t) = -0.5
+      const uAppearY =
+        (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      const uAppearX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      uAppear = Math.max(uAppearX, uAppearY);
+    }
+
     let appearTimeSec = hitTimeSec;
     for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
       const ts = level.speedChanges[ti];
@@ -242,49 +265,24 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
         continue;
       }
       const tEnd = ts.timeSec;
-
-      const vx_ = (vx * ts.bpm) / 4 / 120;
-      const vy_ = (vy * ts.bpm) / 4 / 120;
-      const ay_ = (ay * ts.bpm * ts.bpm) / 4 / 120 / 120;
-
+      const du = ts.bpm / 120;
       // tEnd <= 時刻 <= tBegin の間、
       //  t = tBegin - 時刻  > 0
-      //  x = x(tBegin) + vx * t
-      //  y = y(tBegin) + vy * t - (ay * t * t) / 2;
+      //  u = u(tBegin) + du * t
       display.push({
         timeSecBefore: hitTimeSec - tBegin,
-        a: [x, vx_],
-        b: [y, vy_, -ay_ / 2],
+        u0: u,
+        du: du,
       });
 
-      // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
-      for (let t = 0; t < tBegin - tEnd; t += 0.01) {
-        const xt = x + vx_ * t;
-        const yt = y + vy_ * t - (ay_ * t * t) / 2;
-        if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
-          appearTimeSec = tBegin - t;
-        }
-      }
-      if (ti == 0) {
-        // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
-        for (let t = 0; t < 999; t += 0.01) {
-          const xt = x + vx_ * t;
-          const yt = y + vy_ * t - (ay_ * t * t) / 2;
-          if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
-            appearTimeSec = tBegin - t;
-          } else {
-            break;
-          }
-        }
-      }
+      const uEnd = u + du * (tBegin - tEnd);
 
-      const dt = tBegin - tEnd;
-      x += vx_ * dt;
-      // y += ∫ (vy + ay * t) dt
-      y += vy_ * dt - (ay_ * dt * dt) / 2;
-      vy -= ((ay * ts.bpm) / 120) * dt;
-
+      if (u < uAppear && uEnd > uAppear) {
+        const tAppear = (uAppear - u) / du;
+        appearTimeSec = tBegin - tAppear;
+      }
       tBegin = tEnd;
+      u = uEnd;
     }
     notes.push({
       id,
@@ -295,6 +293,9 @@ export function loadChart(chart: Chart, levelIndex: number): ChartSeqData {
       bigDone: false,
       display,
       targetX,
+      vx,
+      vy,
+      ay,
     });
   }
   return {
@@ -328,13 +329,14 @@ export function displayNote(note: Note, timeSec: number): DisplayNote | null {
       }
     }
     const dispParam = note.display[di];
-    const { a, b } = dispParam;
+    const { u0, du } = dispParam;
     const t = note.hitTimeSec - dispParam.timeSecBefore - timeSec;
+    const u = u0 + du * t;
     return {
       id: note.id,
       pos: {
-        x: a[0] + a[1] * t,
-        y: b[0] + b[1] * t + b[2] * t * t,
+        x: note.targetX + note.vx * u,
+        y: note.vy * u - (note.ay * u * u) / 2,
       },
       done: note.done,
       bigDone: note.bigDone,

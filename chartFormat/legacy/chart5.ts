@@ -1,7 +1,9 @@
+import { hash } from "../chart.js";
 import { luaAddBeatChange } from "../lua/signature.js";
 import { Step, stepZero } from "../step.js";
 import { BPMChangeWithLua3, NoteCommandWithLua3, RestStep3 } from "./chart3.js";
 import { Chart4 } from "./chart4.js";
+import { Level6 } from "./chart6.js";
 
 export interface Chart5 {
   falling: "nikochan"; // magic
@@ -35,6 +37,17 @@ export interface Signature5 {
 }
 export interface SignatureWithLua5 extends Signature5 {
   luaLine: number | null;
+}
+
+export async function hashLevel5(level: Level5 | Level6) {
+  return await hash(
+    JSON.stringify([
+      level.notes,
+      level.bpmChanges,
+      level.speedChanges,
+      level.signature,
+    ])
+  );
 }
 
 export function convert4To5(chart: Chart4): Chart5 {
