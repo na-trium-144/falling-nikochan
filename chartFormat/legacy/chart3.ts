@@ -1,13 +1,19 @@
-import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command.js";
-import { Chart4, hashLevel4 } from "./chart4.js";
+import { emptyLevel } from "../chart.js";
+import { luaAddBpmChange } from "../lua/bpm.js";
+import { luaAddNote } from "../lua/note.js";
+import { luaAddSpeedChange } from "../lua/speed.js";
+import { findBpmIndexFromStep, getTimeSec } from "../seq.js";
+import { Step, stepZero } from "../step.js";
+import { BPMChange1 } from "./chart1.js";
+import { Chart2 } from "./chart2.js";
 
 export interface Chart3 {
   falling: "nikochan"; // magic
   ver: 3;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
   offset: number;
   lua: string[];
   ytId: string;
@@ -17,30 +23,109 @@ export interface Chart3 {
   editPasswd: string;
 }
 
-export async function convert3To4(chart: Chart3): Promise<Chart4> {
-  const newChart: Chart4 = {
+export interface BPMChangeWithLua3 extends BPMChange1 {
+  luaLine: number | null;
+}
+export interface NoteCommand3 {
+  step: Step;
+  big: boolean;
+  hitX: number;
+  hitVX: number;
+  hitVY: number;
+}
+export interface NoteCommandWithLua3 extends NoteCommand3 {
+  luaLine: number | null;
+}
+export interface RestStep3 {
+  begin: Step;
+  duration: Step;
+  luaLine: number | null;
+}
+
+export function convert2To3(chart: Chart2): Chart3 {
+  let newChart: Chart3 = {
     falling: "nikochan",
-    ver: 4,
-    levels: [
-      {
-        name: "",
-        hash: "",
-        type: "Single",
-        notes: chart.notes,
-        rest: chart.rest,
-        bpmChanges: chart.bpmChanges,
-        speedChanges: chart.speedChanges,
-        lua: chart.lua,
-      },
-    ],
+    ver: 3,
+    notes: [],
+    rest: [],
+    bpmChanges: [],
+    speedChanges: [],
     offset: chart.offset,
+    lua: [],
     ytId: chart.ytId,
     title: chart.title,
     composer: chart.composer,
     chartCreator: chart.chartCreator,
     editPasswd: chart.editPasswd,
-    updatedAt: 0,
   };
-  newChart.levels[0].hash = await hashLevel4(newChart.levels[0]);
+  for (const n of chart.bpmChanges) {
+    newChart = {
+      ...newChart,
+      ...luaAddBpmChange({ ...emptyLevel(), ...newChart }, n)!,
+    };
+  }
+  if (chart.bpmChanges.length === 0) {
+    newChart = {
+      ...newChart,
+      ...luaAddBpmChange(
+        { ...emptyLevel(), ...newChart },
+        {
+          bpm: 120,
+          step: stepZero(),
+          timeSec: 0,
+        }
+      )!,
+    };
+  }
+  for (const n of chart.scaleChanges) {
+    newChart = {
+      ...newChart,
+      ...luaAddSpeedChange({ ...emptyLevel(), ...newChart }, n)!,
+    };
+  }
+  if (chart.scaleChanges.length === 0) {
+    newChart = {
+      ...newChart,
+      ...luaAddSpeedChange(
+        { ...emptyLevel(), ...newChart },
+        {
+          bpm: 120,
+          step: stepZero(),
+          timeSec: 0,
+        }
+      )!,
+    };
+  }
+  for (const n of chart.notes) {
+    const nScale2 =
+      chart.scaleChanges[findBpmIndexFromStep(chart.scaleChanges, n.step)].bpm;
+    const currentSpeed3 =
+      newChart.speedChanges[findBpmIndexFromStep(newChart.speedChanges, n.step)]
+        .bpm;
+    const newSpeed3 = Math.sqrt(nScale2 * nScale2 * n.accelY);
+    const newVX = (nScale2 * n.hitVX) / newSpeed3;
+    const newVY = (nScale2 * n.hitVY) / newSpeed3;
+    if (currentSpeed3 !== newSpeed3) {
+      newChart = {
+        ...newChart,
+        ...luaAddSpeedChange(
+          { ...emptyLevel(), ...newChart },
+          {
+            bpm: newSpeed3,
+            step: n.step,
+            timeSec: getTimeSec(newChart.bpmChanges, n.step),
+          }
+        )!,
+      };
+    }
+    newChart = {
+      ...newChart,
+      ...luaAddNote(
+        { ...emptyLevel(), ...newChart },
+        { hitX: n.hitX, hitVX: newVX, hitVY: newVY, step: n.step, big: n.big },
+        n.step
+      )!,
+    };
+  }
   return newChart;
 }

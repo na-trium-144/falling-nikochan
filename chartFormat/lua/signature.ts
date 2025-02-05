@@ -1,5 +1,6 @@
 import { Level } from "../chart.js";
-import { Signature, updateBarNum } from "../command.js";
+import { Signature, updateBarNum } from "../signature.js";
+import { Level5 } from "../legacy/chart5.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
@@ -22,7 +23,10 @@ function beatLuaCommand(s: Signature) {
       .join(", ")}}, ${num}, ${denom})`;
   }
 }
-export function luaAddBeatChange(chart: Level, change: Signature) {
+export function luaAddBeatChange<L extends Level | Level5>(
+  chart: L,
+  change: Signature
+): L | null {
   const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
     return null;

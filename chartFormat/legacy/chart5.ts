@@ -1,10 +1,7 @@
-import {
-  BPMChangeWithLua,
-  NoteCommandWithLua,
-  RestStep,
-  SignatureWithLua,
-} from "../command.js";
-import { Chart6 } from "./chart6.js";
+import { luaAddBeatChange } from "../lua/signature.js";
+import { Step, stepZero } from "../step.js";
+import { BPMChangeWithLua3, NoteCommandWithLua3, RestStep3 } from "./chart3.js";
+import { Chart4 } from "./chart4.js";
 
 export interface Chart5 {
   falling: "nikochan"; // magic
@@ -22,23 +19,38 @@ export interface Level5 {
   name: string;
   type: string;
   hash: string;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
-  signature: SignatureWithLua[];
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
+  signature: SignatureWithLua5[];
   lua: string[];
   unlisted?: boolean;
 }
+export interface Signature5 {
+  step: Step;
+  offset: Step;
+  barNum: number;
+  bars: (4 | 8 | 16)[][];
+}
+export interface SignatureWithLua5 extends Signature5 {
+  luaLine: number | null;
+}
 
-export function convert5To6(chart: Chart5): Chart6 {
+export function convert4To5(chart: Chart4): Chart5 {
   return {
     ...chart,
-    levels: chart.levels.map((level) => ({
-      ...level,
-      unlisted: !!level.unlisted,
-    })),
-    ver: 6,
-    published: false,
+    ver: 5,
+    levels: chart.levels.map((l) => {
+      let newLevel: Level5 = { ...l, signature: [], unlisted: false };
+      newLevel =
+        (luaAddBeatChange(newLevel, {
+          step: stepZero(),
+          offset: stepZero(),
+          barNum: 0,
+          bars: [[4, 4, 4, 4]],
+        }) as Level5) || newLevel;
+      return { ...newLevel, hash: l.hash };
+    }),
   };
 }

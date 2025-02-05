@@ -1,8 +1,5 @@
-import { hash, Level } from "../chart.js";
-import { BPMChangeWithLua, NoteCommandWithLua, RestStep } from "../command.js";
-import { luaAddBeatChange } from "../lua/signature.js";
-import { stepZero } from "../step.js";
-import { Chart5 } from "./chart5.js";
+import { hash } from "../chart.js";
+import { BPMChangeWithLua3, Chart3, NoteCommandWithLua3, RestStep3 } from "./chart3.js";
 
 export interface Chart4 {
   falling: "nikochan"; // magic
@@ -20,29 +17,11 @@ export interface Level4 {
   name: string;
   type: string;
   hash: string;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
   lua: string[];
-}
-
-export function convert4To5(chart: Chart4): Chart5 {
-  return {
-    ...chart,
-    ver: 5,
-    levels: chart.levels.map((l) => {
-      let newLevel: Level = { ...l, signature: [], unlisted: false };
-      newLevel =
-        luaAddBeatChange(newLevel, {
-          step: stepZero(),
-          offset: stepZero(),
-          barNum: 0,
-          bars: [[4, 4, 4, 4]],
-        }) || newLevel;
-      return { ...newLevel, hash: l.hash };
-    }),
-  };
 }
 
 export async function hashLevel4(level: Level4) {
@@ -50,3 +29,32 @@ export async function hashLevel4(level: Level4) {
     JSON.stringify([level.notes, level.bpmChanges, level.speedChanges])
   );
 }
+
+export async function convert3To4(chart: Chart3): Promise<Chart4> {
+  const newChart: Chart4 = {
+    falling: "nikochan",
+    ver: 4,
+    levels: [
+      {
+        name: "",
+        hash: "",
+        type: "Single",
+        notes: chart.notes,
+        rest: chart.rest,
+        bpmChanges: chart.bpmChanges,
+        speedChanges: chart.speedChanges,
+        lua: chart.lua,
+      },
+    ],
+    offset: chart.offset,
+    ytId: chart.ytId,
+    title: chart.title,
+    composer: chart.composer,
+    chartCreator: chart.chartCreator,
+    editPasswd: chart.editPasswd,
+    updatedAt: 0,
+  };
+  newChart.levels[0].hash = await hashLevel4(newChart.levels[0]);
+  return newChart;
+}
+

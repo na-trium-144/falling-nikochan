@@ -7,13 +7,9 @@ import {
 } from "../../chartFormat/chart.js";
 import { gzip, gunzip } from "node:zlib";
 import { promisify } from "node:util";
-import {
-  BPMChangeWithLua,
-  NoteCommandWithLua,
-  RestStep,
-  SignatureWithLua,
-} from "../../chartFormat/command.js";
 import { Binary, Db } from "mongodb";
+import { BPMChangeWithLua3, NoteCommandWithLua3, RestStep3 } from "../../chartFormat/legacy/chart3.js";
+import { SignatureWithLua5 } from "../../chartFormat/legacy/chart5.js";
 
 /**
  * pをnullにするとパスワードのチェックを行わない。
@@ -95,11 +91,11 @@ export interface ChartEntryCompressed {
   }[];
 }
 export interface ChartLevelCore {
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
-  signature: SignatureWithLua[];
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
+  signature: SignatureWithLua5[];
   lua: string[];
 }
 export type ChartEntry = ChartEntryCompressed & { levels: ChartLevelCore[] };

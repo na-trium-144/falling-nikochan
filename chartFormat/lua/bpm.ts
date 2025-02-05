@@ -1,5 +1,5 @@
 import { Level } from "../chart.js";
-import { BPMChange, updateBpmTimeSec } from "../command.js";
+import { BPMChange, updateBpmTimeSec } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 

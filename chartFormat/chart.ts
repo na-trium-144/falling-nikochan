@@ -1,24 +1,17 @@
-import {
-  BPMChangeWithLua,
-  NoteCommandWithLua,
-  RestStep,
-  SignatureWithLua,
-  updateBpmTimeSec,
-  validateBpmChange,
-  validateNoteCommand,
-  validateRestStep,
-  validateSignature,
-} from "./command.js";
+import { updateBpmTimeSec, validateBpmChange } from "./bpm.js";
+import { validateNoteCommand, validateRestStep } from "./command.js";
 import { difficulty } from "./difficulty.js";
-import { Chart1, convert1To2 } from "./legacy/chart1.js";
-import { Chart2, convert2To3 } from "./legacy/chart2.js";
-import { Chart3, convert3To4 } from "./legacy/chart3.js";
-import { Chart4, convert4To5 } from "./legacy/chart4.js";
-import { Chart5, convert5To6 } from "./legacy/chart5.js";
+import { Chart1 } from "./legacy/chart1.js";
+import { Chart2, convert1To2 } from "./legacy/chart2.js";
+import { Chart3, convert2To3 } from "./legacy/chart3.js";
+import { Chart4, convert3To4 } from "./legacy/chart4.js";
+import { Chart5, convert4To5 } from "./legacy/chart5.js";
+import { Chart6, Level6, convert5To6 } from "./legacy/chart6.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { getTimeSec } from "./seq.js";
+import { validateSignature } from "./signature.js";
 import { stepZero } from "./step.js";
 
 /**
@@ -75,29 +68,8 @@ export function pageTitle(cid: string, brief: ChartBrief) {
  * クライアント側は全く使わない
  *
  */
-export interface Chart {
-  falling: "nikochan"; // magic
-  ver: 6;
-  levels: Level[];
-  offset: number;
-  ytId: string;
-  title: string;
-  composer: string;
-  chartCreator: string;
-  editPasswd: string;
-  published: boolean;
-}
-export interface Level {
-  name: string;
-  type: string;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
-  signature: SignatureWithLua[];
-  lua: string[];
-  unlisted: boolean;
-}
+export type Chart = Chart6;
+export type Level = Level6;
 export const levelTypes = ["Single", "Double", "Maniac"];
 
 export const chartMaxSize = 1000000;
@@ -208,7 +180,7 @@ export function emptyLevel(prevLevel?: Level): Level {
       level = luaAddSpeedChange(level, change)!;
     }
     for (const s of prevLevel.signature) {
-      level = luaAddBeatChange(level, s)!;
+      level = luaAddBeatChange(level, s)! as Level;
     }
   } else {
     level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
@@ -222,7 +194,7 @@ export function emptyLevel(prevLevel?: Level): Level {
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
-    })!;
+    })! as Level;
   }
   return level;
 }

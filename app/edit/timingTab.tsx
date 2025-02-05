@@ -18,7 +18,7 @@ import {
   Signature,
   SignatureWithLua,
   toStepArray,
-} from "@/../chartFormat/command.js";
+} from "@/../chartFormat/signature.js";
 import { useEffect, useRef, useState } from "react";
 import { Close, CornerDownLeft } from "@icon-park/react";
 

@@ -19,7 +19,7 @@ import {
 } from "@/../chartFormat/step.js";
 import { Chart, Level } from "@/../chartFormat/chart.js";
 import { useDisplayMode } from "@/scale.js";
-import { getBarLength } from "@/../chartFormat/command.js";
+import { getBarLength } from "@/../chartFormat/signature.js";
 
 interface Props {
   currentTimeSecWithoutOffset: number;

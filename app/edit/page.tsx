@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  defaultNoteCommand,
-  NoteCommand,
-  Signature,
-} from "@/../chartFormat/command.js";
+import { defaultNoteCommand, NoteCommand } from "@/../chartFormat/command.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -67,6 +63,7 @@ import { useTheme } from "@/common/theme.js";
 import { useSearchParams } from "next/navigation";
 import { GuideMain } from "./guide/guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
+import { Signature } from "../../chartFormat/signature.js";
 
 export default function Home() {
   return (
