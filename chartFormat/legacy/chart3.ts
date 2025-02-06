@@ -4,8 +4,8 @@ import { luaAddNote } from "../lua/note.js";
 import { luaAddSpeedChange } from "../lua/speed.js";
 import { findBpmIndexFromStep, getTimeSec } from "../seq.js";
 import { Step, stepZero } from "../step.js";
-import { BPMChange1 } from "./chart1.js";
-import { Chart2 } from "./chart2.js";
+import { BPMChange1, Chart1 } from "./chart1.js";
+import { Chart2, convertTo2 } from "./chart2.js";
 
 export interface Chart3 {
   falling: "nikochan"; // magic
@@ -42,7 +42,8 @@ export interface RestStep3 {
   luaLine: number | null;
 }
 
-export function convert2To3(chart: Chart2): Chart3 {
+export function convertTo3(chart: Chart1 | Chart2): Chart3 {
+  if(chart.ver !== 2) chart = convertTo2(chart);
   let newChart: Chart3 = {
     falling: "nikochan",
     ver: 3,

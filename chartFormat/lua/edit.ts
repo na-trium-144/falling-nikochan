@@ -1,4 +1,5 @@
 import { Level } from "../chart.js";
+import { Chart3 } from "../legacy/chart3.js";
 import { Level5 } from "../legacy/chart5.js";
 import {
   Step,
@@ -34,7 +35,11 @@ export function findStepFromLua(chart: Level, line: number): Step | null {
 }
 
 // コマンドを挿入
-export function insertLua<L extends Level | Level5>(chart: L, line: number, content: string) {
+export function insertLua<L extends Level | Level5 | Chart3>(
+  chart: L,
+  line: number,
+  content: string
+) {
   chart.lua = chart.lua
     .slice(0, line)
     .concat([content])
@@ -62,7 +67,11 @@ export function insertLua<L extends Level | Level5>(chart: L, line: number, cont
   });
 }
 // コマンドを置き換え
-export function replaceLua<L extends Level | Level5>(chart: L, line: number, content: string) {
+export function replaceLua<L extends Level | Level5 | Chart3>(
+  chart: L,
+  line: number,
+  content: string
+) {
   chart.lua = chart.lua
     .slice(0, line)
     .concat([content])
@@ -118,7 +127,7 @@ function stepLuaCommand(s: Step) {
 // 挿入する行、またはnullを返す。
 // 既存のStepコマンドを分割する必要がある場合は分割し、
 // Stepコマンドを追加する必要がある場合は追加する。
-export function findInsertLine<L extends Level | Level5>(
+export function findInsertLine<L extends Level | Level5 | Chart3>(
   chart: L,
   step: Step
 ): { chart: L; luaLine: number | null } {

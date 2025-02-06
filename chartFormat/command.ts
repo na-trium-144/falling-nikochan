@@ -1,8 +1,5 @@
-import {
-  NoteCommand3,
-  NoteCommandWithLua3,
-  RestStep3,
-} from "./legacy/chart3.js";
+import { RestStep3 } from "./legacy/chart3.js";
+import { NoteCommand7, NoteCommandWithLua7 } from "./legacy/chart7.js";
 import { Step, stepZero, validateStep } from "./step.js";
 
 /**
@@ -15,9 +12,10 @@ import { Step, stepZero, validateStep } from "./step.js";
  * (accelX = 0)
  * accelY: Y加速度
  * timeScale: { 時刻(判定時刻 - step数), VX,VY,accelYの倍率 } のリスト
+ * fall: 音符出現位置を画面上にする(true) or 下にする(false)
  */
-export type NoteCommand = NoteCommand3;
-export type NoteCommandWithLua = NoteCommandWithLua3;
+export type NoteCommand = NoteCommand7;
+export type NoteCommandWithLua = NoteCommandWithLua7;
 
 export function validateNoteCommand(n: NoteCommandWithLua) {
   validateStep(n.step);
@@ -37,6 +35,7 @@ export function defaultNoteCommand(
     hitX: -3,
     hitVX: +1,
     hitVY: +3,
+    fall: true,
     // luaLine
   };
 }

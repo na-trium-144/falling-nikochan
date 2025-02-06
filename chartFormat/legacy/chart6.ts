@@ -1,5 +1,13 @@
-import { BPMChangeWithLua3, NoteCommandWithLua3, RestStep3 } from "./chart3.js";
-import { Chart5, SignatureWithLua5 } from "./chart5.js";
+import { Chart1 } from "./chart1.js";
+import { Chart2 } from "./chart2.js";
+import {
+  BPMChangeWithLua3,
+  Chart3,
+  NoteCommandWithLua3,
+  RestStep3,
+} from "./chart3.js";
+import { Chart4 } from "./chart4.js";
+import { Chart5, convertTo5, SignatureWithLua5 } from "./chart5.js";
 
 export interface Chart6 {
   falling: "nikochan"; // magic
@@ -25,7 +33,10 @@ export interface Level6 {
   unlisted: boolean;
 }
 
-export function convert5To6(chart: Chart5): Chart6 {
+export async function convertTo6(
+  chart: Chart1 | Chart2 | Chart3 | Chart4 | Chart5
+): Promise<Chart6> {
+  if (chart.ver !== 5) chart = await convertTo5(chart);
   return {
     ...chart,
     levels: chart.levels.map((level) => ({

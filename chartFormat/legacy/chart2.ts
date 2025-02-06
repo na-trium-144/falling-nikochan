@@ -15,7 +15,7 @@ export interface Chart2 {
   editPasswd: string;
 }
 
-export function convert1To2(chart: Chart1): Chart2 {
+export function convertTo2(chart: Chart1): Chart2 {
   return {
     falling: "nikochan",
     ver: 2,

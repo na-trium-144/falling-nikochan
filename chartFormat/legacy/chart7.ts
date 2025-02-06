@@ -1,8 +1,11 @@
 import { hash } from "../chart.js";
 import { Step } from "../step.js";
-import { BPMChangeWithLua3, RestStep3 } from "./chart3.js";
-import { SignatureWithLua5 } from "./chart5.js";
-import { Chart6 } from "./chart6.js";
+import { Chart1 } from "./chart1.js";
+import { Chart2 } from "./chart2.js";
+import { BPMChangeWithLua3, Chart3, RestStep3 } from "./chart3.js";
+import { Chart4 } from "./chart4.js";
+import { Chart5, SignatureWithLua5 } from "./chart5.js";
+import { Chart6, convertTo6 } from "./chart6.js";
 
 export interface Chart7 {
   falling: "nikochan"; // magic
@@ -51,14 +54,17 @@ export async function hashLevel7(level: Level7) {
   );
 }
 
-export function convert6To7(chart: Chart6): Chart7 {
+export async function convertTo7(
+  chart: Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6
+): Promise<Chart7> {
+  if (chart.ver !== 6) chart = await convertTo6(chart);
   return {
     ...chart,
     levels: chart.levels.map((level) => ({
       ...level,
       notes: level.notes.map((note) => ({
         ...note,
-        fall: true, //todo!,
+        fall: true,
       })),
     })),
     ver: 7,
