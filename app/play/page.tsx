@@ -23,6 +23,7 @@ import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
+import { fetchBrief } from "@/common/briefCache.js";
 
 export default function Home() {
   return (
@@ -35,6 +36,8 @@ export default function Home() {
 function InitPlay() {
   const searchParams = useSearchParams();
   const sid = Number(searchParams.get("sid"));
+  const cidFromParam: string | null = searchParams.get("cid");
+  const lvIndexFromParam = Number(searchParams.get("lvIndex"));
   const showFps = searchParams.get("fps") !== null;
 
   const [cid, setCid] = useState<string>();
@@ -48,20 +51,29 @@ function InitPlay() {
   useEffect(() => {
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
-    if (session === null) {
-      setErrorMsg("Failed to get session data");
-      return;
+    if (session !== null) {
+      setCid(session.cid);
+      setLvIndex(session.lvIndex);
+      setChartBrief(session.brief);
+      setEditing(!!session.editing);
+    } else {
+      if (cidFromParam) {
+        setCid(cidFromParam);
+        setLvIndex(lvIndexFromParam);
+        void (async () =>
+          setChartBrief((await fetchBrief(cidFromParam)).brief))();
+        setEditing(false);
+      } else {
+        setErrorMsg("Failed to get session data");
+        return;
+      }
     }
-    setCid(session.cid);
-    setLvIndex(session.lvIndex);
-    setChartBrief(session.brief);
-    setEditing(!!session.editing);
     // document.title =
     //   (session.editing ? "(テストプレイ) " : "") +
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
-    if (session.chart) {
+    if (session?.chart) {
       setChartSeq(loadChart7(session.chart, session.lvIndex));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
@@ -69,18 +81,19 @@ function InitPlay() {
       void (async () => {
         const res = await fetch(
           process.env.BACKEND_PREFIX +
-            `/api/seqFile/${session.cid}/${session.lvIndex}`,
+            `/api/seqFile/${session?.cid || cidFromParam}` +
+            `/${session?.lvIndex || lvIndexFromParam}`,
           { cache: "no-store" }
         );
         if (res.ok) {
           try {
             const seq = msgpack.deserialize(await res.arrayBuffer());
-            if(seq.ver === 6 || seq.ver === 7){
+            if (seq.ver === 6 || seq.ver === 7) {
               setChartSeq(seq);
               setErrorStatus(undefined);
               setErrorMsg(undefined);
-              addRecent("play", session.cid!);
-            }else{
+              addRecent("play", session?.cid || cidFromParam || "");
+            } else {
               setChartSeq(undefined);
               setErrorStatus(undefined);
               setErrorMsg(`Invalid chart version: ${seq.ver}`);
@@ -103,7 +116,7 @@ function InitPlay() {
         }
       })();
     }
-  }, [sid]);
+  }, [sid, cidFromParam, lvIndexFromParam]);
 
   if (errorStatus !== undefined || errorMsg !== undefined) {
     return <ErrorPage status={errorStatus} message={errorMsg} />;

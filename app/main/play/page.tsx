@@ -161,6 +161,27 @@ export default function PlayTab() {
           ) にアクセスすることでもプレイできます。
         </p>
       </div>
+      {process.env.NODE_ENV === "development" && (
+        <div className="mb-3 ml-2">
+          <h4 className="mb-2">
+            <span className="text-lg font-bold font-title">
+              譜面IDを指定し直接プレイ画面に飛ぶ:
+            </span>
+            <Input
+              className="ml-4 w-20"
+              actualValue=""
+              updateValue={(cid) =>
+                window.open(`/play?cid=${cid}&lvIndex=0`, "_blank")?.focus()
+              }
+              isValid={validCId}
+              left
+            />
+          </h4>
+          <p className="pl-2 text-justify">
+            (dev環境限定、 /share/cid のパスが使えない代わり)
+          </p>
+        </div>
+      )}
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">
           最近プレイした譜面
