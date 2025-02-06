@@ -17,7 +17,7 @@ import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
 import NoteTab from "./noteTab.js";
-import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box.js";
+import { Box, CenterBoxOnlyPage, ErrorPage, Loading } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent.js";
@@ -641,7 +641,7 @@ function Page() {
       return <Loading />;
     }
     if (errorStatus !== undefined || errorMsg !== undefined) {
-      return <Error status={errorStatus} message={errorMsg} />;
+      return <ErrorPage status={errorStatus} message={errorMsg} />;
     }
     return (
       <CenterBoxOnlyPage>

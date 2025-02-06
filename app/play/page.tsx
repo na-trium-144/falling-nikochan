@@ -2,7 +2,8 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData, loadChart } from "@/../chartFormat/seq.js";
+import { ChartSeqData6 } from "@/../chartFormat/legacy/seq6.js";
+import { ChartSeqData7, loadChart7 } from "@/../chartFormat/legacy/seq7.js";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -12,7 +13,7 @@ import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@/../chartFormat/chart.js";
 import msgpack from "@ygoe/msgpack";
-import { Loading, Error } from "@/common/box.js";
+import { Loading, ErrorPage } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
 import { useSearchParams } from "next/navigation";
@@ -39,7 +40,7 @@ function InitPlay() {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData7>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -61,7 +62,7 @@ function InitPlay() {
     //   " | Falling Nikochan";
 
     if (session.chart) {
-      setChartSeq(loadChart(session.chart, session.lvIndex));
+      setChartSeq(loadChart7(session.chart, session.lvIndex));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
@@ -74,10 +75,16 @@ function InitPlay() {
         if (res.ok) {
           try {
             const seq = msgpack.deserialize(await res.arrayBuffer());
-            setChartSeq(seq);
-            setErrorStatus(undefined);
-            setErrorMsg(undefined);
-            addRecent("play", session.cid!);
+            if(seq.ver === 6 || seq.ver === 7){
+              setChartSeq(seq);
+              setErrorStatus(undefined);
+              setErrorMsg(undefined);
+              addRecent("play", session.cid!);
+            }else{
+              setChartSeq(undefined);
+              setErrorStatus(undefined);
+              setErrorMsg(`Invalid chart version: ${seq.ver}`);
+            }
           } catch (e) {
             setChartSeq(undefined);
             setErrorStatus(undefined);
@@ -99,7 +106,7 @@ function InitPlay() {
   }, [sid]);
 
   if (errorStatus !== undefined || errorMsg !== undefined) {
-    return <Error status={errorStatus} message={errorMsg} />;
+    return <ErrorPage status={errorStatus} message={errorMsg} />;
   }
   if (chartBrief === undefined || chartSeq === undefined) {
     return <Loading />;
@@ -121,7 +128,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief: ChartBrief;
-  chartSeq: ChartSeqData;
+  chartSeq: ChartSeqData6 | ChartSeqData7;
   editing: boolean;
   showFps: boolean;
 }
