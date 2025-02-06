@@ -21,11 +21,6 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         return c.json({ message: res?.message }, res?.status || 500);
       }
 
-      try {
-        chart = await validateChart(chart);
-      } catch {
-        return c.json({ message: "invalid chart data" }, 500);
-      }
       if (!chart.levels.at(lvIndex)) {
         return c.json(
           {

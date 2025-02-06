@@ -28,6 +28,7 @@ import {
   hashPasswd,
   Level,
   levelTypes,
+  validateChart,
 } from "@/../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
 import Header from "@/common/header.js";
@@ -64,6 +65,9 @@ import { useSearchParams } from "next/navigation";
 import { GuideMain } from "./guide/guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
 import { Signature } from "../../chartFormat/signature.js";
+import { Chart5 } from "../../chartFormat/legacy/chart5.js";
+import { Chart6 } from "../../chartFormat/legacy/chart6.js";
+import { Chart7 } from "../../chartFormat/legacy/chart7.js";
 
 export default function Home() {
   return (
@@ -92,6 +96,7 @@ function Page() {
   const [chart, setChart] = useState<Chart>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
+  const [convertedFrom, setConvertedFrom] = useState<number>(7);
 
   const fetchChart = useCallback(async (isFirst: boolean) => {
     if (cidInitial.current === "new") {
@@ -113,8 +118,9 @@ function Page() {
       setLoading(false);
       if (res.ok) {
         try {
-          const chart = msgpack.deserialize(await res.arrayBuffer());
-          // validateはサーバー側でやってる
+          const chartRes: Chart5 | Chart6 | Chart7 = msgpack.deserialize(await res.arrayBuffer());
+          setConvertedFrom(chartRes.ver);
+          const chart: Chart = await validateChart(chartRes);
           try {
             setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
           } catch {
@@ -986,6 +992,8 @@ function Page() {
                 fileSize={fileSize}
                 chart={chart}
                 setChart={changeChart}
+                convertedFrom={convertedFrom}
+                setConvertedFrom={setConvertedFrom}
                 cid={cid}
                 setCid={(newCid: string) => setCid(newCid)}
                 hasChange={hasChange}
