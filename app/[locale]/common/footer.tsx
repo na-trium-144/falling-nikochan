@@ -15,8 +15,9 @@ interface Props {
 }
 export default function Footer(props: Props) {
   const themeContext = useTheme();
-  const t = useTranslations("main");
-  const tabTitles = (i: number) => t(tabTitleKeys[i] + ".title");
+  const tm = useTranslations("main");
+  const t = useTranslations("footer");
+  const tabTitles = (i: number) => tm(tabTitleKeys[i] + ".title");
 
   return (
     <footer className="pb-3">
@@ -62,7 +63,7 @@ export default function Footer(props: Props) {
           >
             <span>ver.</span>
             <span className="mx-1">{process.env.buildVersion}</span>
-            <span className="text-xs">(更新履歴はこちら)</span>
+            <span className="text-xs">({t("history")})</span>
           </Link>
           <ThemeSwitcher {...themeContext} />
         </span>

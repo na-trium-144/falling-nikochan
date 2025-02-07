@@ -16,8 +16,11 @@ import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
 import { originalCId, sampleCId } from "../const.js";
+import { useTranslations } from "next-intl";
 
 export default function PlayTab({ locale }: { locale: string }) {
+  const t = useTranslations("main.play");
+
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
   const [latestBrief, setLatestBrief] = useState<ChartLineBrief[]>();
@@ -122,7 +125,7 @@ export default function PlayTab({ locale }: { locale: string }) {
     <IndexMain tab={1} locale={locale}>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title">譜面IDを入力:</span>
+          <span className="text-xl font-bold font-title">{t("input-id")}:</span>
           <Input
             className="ml-4 w-20"
             actualValue=""
@@ -136,53 +139,53 @@ export default function PlayTab({ locale }: { locale: string }) {
           </span>
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
+        <p className="pl-2 text-justify">{t("input-id-desc")}</p>
         <p className="pl-2 text-justify">
-          プレイしたい譜面の ID を知っている場合はこちらに入力してください。
-        </p>
-        <p className="pl-2 text-justify">
-          ※譜面のURL (
-          <span className="text-sm">
-            nikochan.
-            <wbr />
-            natrium
-            <wbr />
-            144.
-            <wbr />
-            org
-            <wbr />
-            &#47;
-            <wbr />
-            share
-            <wbr />
-            &#47;〜
-          </span>
-          ) にアクセスすることでもプレイできます。
+          {t.rich("input-id-desc2", {
+            url: () => (
+              <span className="text-sm">
+                nikochan.
+                <wbr />
+                natrium
+                <wbr />
+                144.
+                <wbr />
+                org
+                <wbr />
+                &#47;
+                <wbr />
+                share
+                <wbr />
+                &#47;〜
+              </span>
+            ),
+          })}
         </p>
       </div>
       {process.env.NODE_ENV === "development" && (
         <div className="mb-3 ml-2">
-          <h4 className="mb-2">
+          <h4 className="mb-1 ">
             <span className="text-lg font-bold font-title">
-              譜面IDを指定し直接プレイ画面に飛ぶ:
+              {t("input-direct")}:
             </span>
             <Input
               className="ml-4 w-20"
               actualValue=""
               updateValue={(cid) =>
-                window.open(`/${locale}/play?cid=${cid}&lvIndex=0`, "_blank")?.focus()
+                window
+                  .open(`/${locale}/play?cid=${cid}&lvIndex=0`, "_blank")
+                  ?.focus()
               }
               isValid={validCId}
               left
             />
           </h4>
-          <p className="pl-2 text-justify">
-            (dev環境限定、 /share/cid のパスが使えない代わり)
-          </p>
+          <p className="pl-2 text-justify text-sm ">({t("input-direct-devonly")})</p>
         </div>
       )}
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">
-          最近プレイした譜面
+          {t("recent-play")}
         </h3>
         <ChartList
           recentBrief={recentBrief}
@@ -194,15 +197,12 @@ export default function PlayTab({ locale }: { locale: string }) {
         />
       </div>
       <div className="mb-3">
-        <h3 className="text-xl font-bold font-title mb-2">新着譜面</h3>
+        <h3 className="text-xl font-bold font-title mb-2">{t("latest")}</h3>
         <p className="pl-2 text-justify ">
-          最近作成・更新された譜面の一覧です。
+          {t("latest-desc")}
           {/*<span className="text-sm ">(最新の{numLatest}件まで)</span>*/}
         </p>
-        <p className="pl-2 mb-1 text-justify text-sm ">
-          (譜面を制作する方へ:
-          譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。)
-        </p>
+        <p className="pl-2 mb-1 text-justify text-sm ">({t("latest-desc2")})</p>
         <ChartList
           recentBrief={latestBrief}
           maxRow={chartListMaxRow}
@@ -213,22 +213,27 @@ export default function PlayTab({ locale }: { locale: string }) {
         />
       </div>
       <div className="mb-3">
-        <h3 className="text-xl font-bold font-title mb-2">サンプル譜面</h3>
+        <h3 className="text-xl font-bold font-title mb-2">{t("sample")}</h3>
         <p className="pl-2 mb-1 text-justify ">
-          Falling Nikochan の作者
-          <span className="text-sm mx-0.5">(na-trium-144)</span>
-          が作った譜面です。 初めての方はこちらからどうぞ。 また、これ以外にも
-          Falling Nikochan の YouTube チャンネル
-          <ExternalLink
-            className="mx-1"
-            href="https://www.youtube.com/@nikochan144"
-            icon={
-              <Youtube className="absolute left-0 bottom-1" theme="filled" />
-            }
-          >
-            <span className="text-sm">@nikochan144</span>
-          </ExternalLink>
-          で譜面を公開しています。
+          {t.rich("sample-desc", {
+            small: (c) => <span className="text-sm mx-0.5">{c}</span>,
+          })}
+          {t.rich("sample-desc2", {
+            youtube: (c) => (
+              <ExternalLink
+                className="mx-1"
+                href="https://www.youtube.com/@nikochan144"
+                icon={
+                  <Youtube
+                    className="absolute left-0 bottom-1"
+                    theme="filled"
+                  />
+                }
+              >
+                <span className="text-sm">{c}</span>
+              </ExternalLink>
+            ),
+          })}
         </p>
         <ul className={"list-disc list-inside ml-3 "}>
           <ChartList

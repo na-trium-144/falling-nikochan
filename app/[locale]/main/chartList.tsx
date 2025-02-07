@@ -2,6 +2,7 @@ import { ChartBrief } from "@/../../chartFormat/chart.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { LoadingSlime } from "@/common/loadingSlime.js";
 import { RightOne } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -16,6 +17,7 @@ interface Props {
   newTab?: boolean;
 }
 export function ChartList(props: Props) {
+  const t = useTranslations("main.chartList");
   const [additionalOpen, setAdditionalOpen] = useState<boolean>(false);
 
   const fetching =
@@ -101,7 +103,7 @@ export function ChartList(props: Props) {
                     className="absolute left-0 bottom-1 "
                     theme="filled"
                   />
-                  <span className="ml-5">すべて表示</span>
+                  <span className="ml-5">{t("show-all")}</span>
                   <span className="ml-1">
                     ({props.recentBrief.length - props.maxRow})
                   </span>
@@ -109,7 +111,7 @@ export function ChartList(props: Props) {
               ))}
           </>
         ) : (
-          <div className="pl-2">まだありません</div>
+          <div className="pl-2">{t("empty")}</div>
         ))}
     </div>
   );

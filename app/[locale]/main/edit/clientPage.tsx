@@ -14,8 +14,11 @@ import {
   fetchAndFilterBriefs,
 } from "../play/fetch.js";
 import { rateLimitMin } from "@/../../chartFormat/apiConfig.js";
+import { useTranslations } from "next-intl";
 
 export default function EditTab({ locale }: { locale: string }) {
+  const t = useTranslations("main.edit");
+
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
 
@@ -67,13 +70,12 @@ export default function EditTab({ locale }: { locale: string }) {
 
   return (
     <IndexMain tab={2} locale={locale}>
-      <p className="mb-3 text-justify">
-        Falling Nikochan の譜面エディタにようこそ。
-        アカウント登録不要で誰でも譜面を作成することができます。
-      </p>
+      <p className="mb-3 text-justify">{t("welcome")}</p>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">譜面IDを入力:</span>
+          <span className="text-xl font-bold font-title ">
+            {t("input-id")}:
+          </span>
           <Input
             className="ml-4 w-20"
             actualValue={inputCId}
@@ -86,7 +88,7 @@ export default function EditTab({ locale }: { locale: string }) {
             className={"ml-1 " + (inputCId !== "" ? "" : "override:hidden ")}
             href={`/${locale}/edit?cid=${inputCId}`}
           >
-            新しいタブで開く
+            {t("new-tab")}
           </ExternalLink>
           <span className={cidFetching ? "inline-block " : "hidden "}>
             <LoadingSlime />
@@ -94,13 +96,12 @@ export default function EditTab({ locale }: { locale: string }) {
           </span>
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
-        <p className="pl-2 text-justify">
-          編集したい譜面の ID を知っている場合はこちらに入力してください。 ID
-          入力後、編集用パスワードも必要になります。
-        </p>
+        <p className="pl-2 text-justify">{t("input-id-desc")}</p>
       </div>
       <div className="mb-3">
-        <h3 className="text-xl font-bold font-title mb-2">最近編集した譜面</h3>
+        <h3 className="text-xl font-bold font-title mb-2">
+          {t("recent-edit")}
+        </h3>
         <ChartList
           recentBrief={recentBrief}
           maxRow={chartListMaxRow}
@@ -112,18 +113,12 @@ export default function EditTab({ locale }: { locale: string }) {
       </div>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">
-            新しく譜面を作る:
-          </span>
+          <span className="text-xl font-bold font-title ">{t("new")}:</span>
           <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
-            新規作成
+            {t("new-button")}
           </ExternalLink>
         </h3>
-        <p className="pl-2 text-justify">
-          新しくサーバーに譜面を保存するのは{rateLimitMin}
-          分ごとに1回までに制限しています。
-          (1度保存した譜面の上書きは何回でもできます。)
-        </p>
+        <p className="pl-2 text-justify">{t("new-desc", { rateLimitMin })}</p>
       </div>
     </IndexMain>
   );

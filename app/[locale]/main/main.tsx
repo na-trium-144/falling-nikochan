@@ -64,7 +64,7 @@ export function IndexMain(props: Props) {
           <div
             className={
               (props.tab === undefined ? "flex " : "hidden main-wide:flex ") +
-              "flex-col h-max w-56 shrink-0 my-auto " +
+              "flex-col h-max w-60 shrink-0 my-auto " +
               "transition ease-out duration-200 "
             }
             style={{

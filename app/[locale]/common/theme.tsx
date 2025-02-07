@@ -90,7 +90,7 @@ export function ThemeSwitcher(props: ThemeContext) {
   return (
     <span className={"inline-block relative " + linkStyle1}>
       <select
-        className="absolute inset-0 opacity-0 z-10 cursor-pointer appearance-none "
+        className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
         value={String(theme)}
         onChange={(e) => {
           if (e.target.value === "dark" || e.target.value === "light") {
