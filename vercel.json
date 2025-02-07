@@ -1,5 +1,6 @@
 {
-  "buildCommand": "next build",
+  "installCommand": "rm -f package-lock.json && bun i --frozen-lockfile",
+  "buildCommand": "bun nbuild",
   "outputDirectory": "out",
   "devCommand": null,
   "framework": null,
