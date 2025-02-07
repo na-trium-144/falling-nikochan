@@ -12,8 +12,8 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(
     "/*",
     cors({
-      origin: process.env.NODE_ENV === "development" ? (origin) => origin : "*",
-      credentials: process.env.NODE_ENV === "development",
+      origin: process.env.API_ENV === "development" ? (origin) => origin : "*",
+      credentials: process.env.API_ENV === "development",
     })
   )
   .route("/brief", briefApp)

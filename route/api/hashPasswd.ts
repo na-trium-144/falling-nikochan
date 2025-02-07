@@ -13,7 +13,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     const cid = c.req.param("cid");
     const pw = c.req.query("pw") || "";
     let key: string;
-    if (env(c).NODE_ENV === "development") {
+    if (env(c).API_ENV === "development") {
       // secure がつかない
       key = getCookie(c, "hashKey") || Math.random().toString(36).substring(2);
       setCookie(c, "hashKey", key, {
