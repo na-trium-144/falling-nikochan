@@ -1,5 +1,6 @@
 {
-  "buildCommand": "next build",
+  "installCommand": "bun i",
+  "buildCommand": "bun -b nbuild",
   "outputDirectory": "out",
   "devCommand": null,
   "framework": null,
