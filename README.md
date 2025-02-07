@@ -13,7 +13,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## development
 
-* 適当なバージョンの [Bun](https://bun.sh/docs/installation) または [Node.js](https://nodejs.org/ja/download) をインストールしてください
+* 適当なバージョンの [Node.js](https://nodejs.org/ja/download) または [Bun](https://bun.sh/docs/installation) をインストールしてください
 * [MongoDB](https://www.mongodb.com/docs/manual/installation/) をインストールし、起動してください (`localhost:27017`)
     * Dockerをインストールしているなら、Dockerを使うのが手軽でおすすめ
         ```sh
@@ -27,17 +27,17 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     ```
 * 依存パッケージのインストール
     ```sh
-    bun i
-    # or
     npm ci
+    # or
+    bun i
     ```
 * バックエンド (route/)
     * Honoを使用しており、さまざまなランタイムで動かすことができます
-    * ローカルの開発環境としてはBun,Node.jsでサーバーを起動できます (`http://localhost:8787`)
+    * ローカルの開発環境としてはNode.js,Bunでサーバーを起動できます (`http://localhost:8787`)
         ```sh
-        bun bdev
-        # or
         npm run ldev
+        # or
+        bun bdev
         ```
     * デプロイはVercelを使っています
 * フロントエンド (app/)
@@ -45,17 +45,18 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * `/share/[cid]` のパスに関してはビルド済みのhtmlファイルをバックエンドが書き換えることによりSSRしているため、このページのみ機能しません。
         * 代わりに `/share/placeholder` にアクセスするとダミーのページが開きます。
         ```sh
-        bun -b ndev
-        # or
         npm run ndev
+        # or
+        bun ndev
         ```
     * または、ビルド済みファイルを使ったSSR
         * ビルドしたあとバックエンド(`http://localhost:8787`)にアクセスすれば全ページ動作するはずですが、ホットリロードが効きません。
         ```sh
-        bun -b nbuild
-        # or
         npm run nbuild
+        # or
+        bun nbuild
         ```
+    * Bun v1.2.2 時点では `bun -b nbuild` は確率的にセグフォするようです
 
 ## バージョン番号について
 
