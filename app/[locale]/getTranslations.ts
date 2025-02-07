@@ -1,19 +1,16 @@
 import { createTranslator } from "next-intl";
 
-interface TranslatorOptions {
-  locale: string;
-  namespace?: string;
+export async function getMessages(locale: string) {
+  const messageModule = await import(`../i18n/${locale}.json`);
+  return messageModule.default;
 }
 
-export const getTranslations = async (config: TranslatorOptions) => {
-  const { locale, namespace } = config;
-  const messagesModule = await import(`../i18n/${locale}.json`);
-
+export async function getTranslations(params: Promise<{ locale: string }>, namespace?: string) {
+  const locale = (await params).locale;
   const translator = createTranslator({
     locale,
-    messages: messagesModule.default,
+    messages: await getMessages(locale),
     namespace,
   });
-
-  return translator.rich;
-};
+  return translator;
+}

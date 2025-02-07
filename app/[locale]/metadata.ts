@@ -15,7 +15,16 @@ export async function locales() {
 const description =
   "Simple and cute rhythm game, where anyone can create and share charts.";
 
-export async function initMetadata(path: string, title: string): Promise<Metadata> {
+export interface MetadataProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function initMetadata(
+  params: Promise<{ locale: string }>,
+  path: string | null,
+  title: string
+): Promise<Metadata> {
+  const locale = (await params).locale;
   const titleWithSiteName = title
     ? `${title} | Falling Nikochan`
     : "Falling Nikochan";
@@ -23,13 +32,15 @@ export async function initMetadata(path: string, title: string): Promise<Metadat
   return {
     metadataBase: new URL("https://nikochan.natrium144.org"),
     title: titleWithSiteName,
-    alternates: {
-      canonical: path,
-      languages: (await locales()).reduce((prev, locale) => {
-        prev[locale] = `/${locale}${path}`;
-        return prev;
-      }, {} as { [key: string]: string }),
-    },
+    alternates: path
+      ? {
+          canonical: path,
+          languages: (await locales()).reduce((prev, locale) => {
+            prev[locale] = `/${locale}${path}`;
+            return prev;
+          }, {} as { [key: string]: string }),
+        }
+      : undefined,
     description,
     generator: "Next.js",
     applicationName: "Falling Nikochan",
@@ -40,23 +51,27 @@ export async function initMetadata(path: string, title: string): Promise<Metadat
       apple: process.env.ASSET_PREFIX + "/assets/apple-icon.png",
       shortcut: "/favicon.ico",
     },
-    openGraph: {
-      title: titleWithoutSiteName,
-      description,
-      // todo: images
-      type: "website",
-      locale: "ja_JP",
-      siteName: "Falling Nikochan",
-    },
-    twitter: {
-      title: titleWithSiteName,
-      card: "summary",
-      description,
-      // images
-    },
+    openGraph: path
+      ? {
+          title: titleWithoutSiteName,
+          description,
+          // todo: images
+          type: "website",
+          locale,
+          siteName: "Falling Nikochan",
+        }
+      : undefined,
+    twitter: path
+      ? {
+          title: titleWithSiteName,
+          card: "summary",
+          description,
+          // images
+        }
+      : undefined,
     robots: {
-      index: true,
-      follow: true,
+      index: path ? true : false,
+      follow: path ? true : false,
       nocache: true,
     },
   };

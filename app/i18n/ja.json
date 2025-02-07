@@ -1,7 +1,22 @@
 {
   "main": {
     "about": {
-      "title": "Falling Nikochan とは？"
+      "title": "Falling Nikochan とは？",
+      "1": {
+        "title": "概要"
+      },
+      "2": {
+        "title": "遊び方"
+      },
+      "3": {
+        "title": "譜面を作ろう"
+      },
+      "4": {
+        "title": "難易度について"
+      },
+      "5": {
+        "title": "ゲームの仕様"
+      }
     },
     "play": {
       "title": "プレイする"
@@ -15,5 +30,8 @@
     "version": {
       "title": "バージョン情報"
     }
+  },
+  "edit": {
+    "title": "譜面編集"
   }
 }

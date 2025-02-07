@@ -15,9 +15,11 @@ import { useTranslations } from "next-intl";
 interface Props {
   children?: ReactNode | ReactNode[];
   tab: number | undefined;
+  locale: string;
 }
 export function IndexMain(props: Props) {
   const router = useRouter();
+  const locale = props.locale;
   const t = useTranslations("main");
   const tabTitles = (i: number) => t(tabTitleKeys[i] + ".title");
   const { screenWidth, rem, isMobileMain } = useDisplayMode();
@@ -84,7 +86,7 @@ export function IndexMain(props: Props) {
               ) : (
                 <Link
                   key={i}
-                  href={tabURL}
+                  href={`/${locale}${tabURL}`}
                   className={
                     " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
                     (isTitlePage
@@ -96,7 +98,9 @@ export function IndexMain(props: Props) {
                     if (isTitlePage && !isMobileMain) {
                       setMenuMoveLeft(true);
                       setTimeout(() => {
-                        router.replace(tabURL, { scroll: false });
+                        router.replace(`/${locale}${tabURL}`, {
+                          scroll: false,
+                        });
                       }, 150);
                       e.preventDefault();
                     }
@@ -121,6 +125,7 @@ export function IndexMain(props: Props) {
         )}
       </div>
       <Footer
+        locale={locale}
         nav={
           isHiddenPage
             ? "block"

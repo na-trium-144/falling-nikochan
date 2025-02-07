@@ -1,15 +1,20 @@
+import { getTranslations } from "@/getTranslations";
+import { initMetadata, MetadataProps } from "@/metadata";
 import Markdown from "react-markdown";
 import { IndexMain } from "../main.js";
 import fs from "node:fs";
 import { ExternalLink } from "@/common/extLink.js";
 
-export const dynamic = "force-static";
+export async function generateMetadata({ params }: MetadataProps) {
+  const t = await getTranslations(params, "main.version");
+  return initMetadata(params, "/main/version", t("title"));
+}
 
-export default async function Page() {
+export default async function Page({ params }: MetadataProps) {
   const changeLogMD = await fs.promises.readFile("CHANGELOG.md", "utf-8");
 
   return (
-    <IndexMain tab={4}>
+    <IndexMain tab={4} locale={(await params).locale}>
       <div className="mb-2">
         <span className="inline-block">Falling Nikochan</span>
         <span className="inline-block">

@@ -1,7 +1,6 @@
 import { IndexMain } from "./main/main.js";
+import { MetadataProps } from "./metadata.js";
 
-export const dynamic = "force-static";
-
-export default function MainPage() {
-  return <IndexMain tab={undefined} />;
+export default async function MainPage({ params }: MetadataProps) {
+  return <IndexMain tab={undefined} locale={(await params).locale} />;
 }

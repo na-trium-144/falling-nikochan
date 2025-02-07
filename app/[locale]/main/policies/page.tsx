@@ -1,13 +1,12 @@
-import { metaDataTitle } from "@/common/title.js";
-import { tabTitles } from "../const.js";
 import { IndexMain } from "../main.js";
 import { ReactNode } from "react";
 import { ExternalLink } from "@/common/extLink.js";
+import { initMetadata, MetadataProps } from "@/metadata.js";
+import { getTranslations } from "@/getTranslations.js";
 
-export const dynamic = "force-static";
-
-export function generateMetadata() {
-  return metaDataTitle(tabTitles[3]);
+export async function generateMetadata({ params }: MetadataProps) {
+  const t = await getTranslations(params, "main.policies");
+  return initMetadata(params, "/main/policies", t("title"));
 }
 
 interface PProps {
@@ -22,9 +21,9 @@ function Paragraph(props: PProps) {
     </div>
   );
 }
-export default function PolicyTab() {
+export default async function PolicyTab({ params }: MetadataProps) {
   return (
-    <IndexMain tab={3}>
+    <IndexMain tab={3} locale={(await params).locale}>
       <Paragraph header="ソフトウェアとして">
         <li>
           Falling Nikochan はオープンソースのソフトウェアであり、

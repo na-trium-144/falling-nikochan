@@ -1,7 +1,22 @@
 {
   "main": {
     "about": {
-      "title": "What is Falling Nikochan?"
+      "title": "What is Falling Nikochan?",
+      "1": {
+        "title": "Overview"
+      },
+      "2": {
+        "title": "How to Play"
+      },
+      "3": {
+        "title": "Create Charts"
+      },
+      "4": {
+        "title": "Difficulty"
+      },
+      "5": {
+        "title": "Game Specs"
+      }
     },
     "play": {
       "title": "Play"
@@ -15,5 +30,8 @@
     "version": {
       "title": "Version Info"
     }
+  },
+  "edit": {
+    "title": "Chart Editor"
   }
 }

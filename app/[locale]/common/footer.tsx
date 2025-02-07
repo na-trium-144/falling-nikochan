@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定
   nav?: boolean | string;
+  locale: string;
 }
 export default function Footer(props: Props) {
   const themeContext = useTheme();
@@ -32,7 +33,7 @@ export default function Footer(props: Props) {
             <Link
               key={i}
               className={"px-2 " + linkStyle1}
-              href={tabURL}
+              href={`/${props.locale}${tabURL}`}
               prefetch={false}
             >
               {tabTitles(i)}
@@ -56,7 +57,7 @@ export default function Footer(props: Props) {
         <span className="space-x-3">
           <Link
             className={"inline-block " + linkStyle1}
-            href="/main/version"
+            href={`/${props.locale}/main/version`}
             prefetch={false}
           >
             <span>ver.</span>
