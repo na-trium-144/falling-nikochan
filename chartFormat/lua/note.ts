@@ -5,7 +5,17 @@ import { Step, stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
 function noteLuaCommand(n: NoteCommand | NoteCommand3) {
-  return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${n.big ? "true" : "false"})`;
+  if ("fall" in n) {
+    return (
+      `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
+      `${n.big ? "true" : "false"}, ${n.fall ? "true" : "false"})`
+    );
+  } else {
+    return (
+      `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
+      `${n.big ? "true" : "false"})`
+    );
+  }
 }
 export function luaAddNote<
   L extends Level | Chart3,

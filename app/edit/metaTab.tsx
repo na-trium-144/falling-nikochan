@@ -264,7 +264,6 @@ export function MetaTab(props: Props2) {
         }
         newChart = await validateChart(content);
       } catch (e) {
-        console.error(e);
         console.warn("fallback to msgpack deserialize");
         try {
           const content = msgpack.deserialize(buffer);

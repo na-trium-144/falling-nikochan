@@ -64,7 +64,9 @@ export async function convertTo7(
       ...level,
       notes: level.notes.map((note) => ({
         ...note,
-        fall: true,
+        // 新規譜面のfallのデフォルト値はtrueだが、
+        // 既存の譜面についてはfalseとする
+        fall: false,
       })),
     })),
     ver: 7,
