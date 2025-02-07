@@ -49,8 +49,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.2",
     "typescript": "^5",
-    "typescript-eslint": "^8.23.0",
-    "vercel": "^40.1.0"
+    "typescript-eslint": "^8.23.0"
   },
   "overrides": {
     "react": "^19.0.0",
