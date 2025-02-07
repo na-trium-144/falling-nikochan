@@ -56,17 +56,8 @@ export async function getChartEntry(
     entryCompressed.published = false;
   }
 
-  let entry: ChartEntry;
-  let chart: Chart;
-  try {
-    entry = await unzipEntry(entryCompressed);
-    chart = entryToChart(entry);
-    chart = await validateChart(chart);
-  } catch {
-    return {
-      res: { message: "invalid chart data", status: 500 },
-    };
-  }
+  const entry = await unzipEntry(entryCompressed);
+  let chart = entryToChart(entry);
 
   if (
     p === null ||
@@ -79,6 +70,13 @@ export async function getChartEntry(
       p.v7HashKey !== undefined &&
       p.v7PasswdHash === (await hashPasswd(cid, chart.editPasswd, p.v7HashKey)))
   ) {
+    try {
+      chart = await validateChart(chart);
+    } catch {
+      return {
+        res: { message: "invalid chart data", status: 500 },
+      };
+    }
     return { entry, chart };
   } else {
     return { res: { message: "bad password", status: 401 } };
