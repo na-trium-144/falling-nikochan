@@ -125,7 +125,9 @@ export default function EditAuth() {
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 = msgpack.deserialize(await res.arrayBuffer());
+            const chartRes: Chart5 | Chart6 | Chart7 = msgpack.deserialize(
+              await res.arrayBuffer()
+            );
             setConvertedFrom(chartRes.ver);
             const chart: Chart = await validateChart(chartRes);
             if (savePasswd) {
@@ -239,6 +241,8 @@ export default function EditAuth() {
         setCid={setCid}
         themeContext={themeContext}
         guidePageInit={cidInitial.current === "new" ? 1 : null}
+        convertedFrom={convertedFrom}
+        setConvertedFrom={setConvertedFrom}
       />
     );
   }
@@ -251,9 +255,19 @@ interface Props {
   setCid: (cid: string | undefined) => void;
   themeContext: ThemeContext;
   guidePageInit: number | null;
+  convertedFrom: number;
+  setConvertedFrom: (v: number) => void;
 }
 function Page(props: Props) {
-  const { chart, setChart, cid, setCid, themeContext } = props;
+  const {
+    chart,
+    setChart,
+    cid,
+    setCid,
+    themeContext,
+    convertedFrom,
+    setConvertedFrom,
+  } = props;
   const { isTouch } = useDisplayMode();
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);

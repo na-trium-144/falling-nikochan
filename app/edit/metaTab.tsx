@@ -287,7 +287,7 @@ export function MetaTab(props: Props2) {
           originalVer = content.ver;
         }
         newChart = await validateChart(content);
-      } catch (e) {
+      } catch (e1) {
         console.warn("fallback to msgpack deserialize");
         try {
           const content = msgpack.deserialize(buffer);
@@ -295,8 +295,9 @@ export function MetaTab(props: Props2) {
             originalVer = content.ver;
           }
           newChart = await validateChart(content);
-        } catch (e) {
-          console.error(e);
+        } catch (e2) {
+          console.error(e1);
+          console.error(e2);
           setUploadMsg("ファイルの読み込みに失敗しました");
         }
       }
