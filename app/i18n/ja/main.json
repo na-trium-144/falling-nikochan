@@ -52,7 +52,8 @@
       "title": "利用規約っぽいもの"
     },
     "version": {
-      "title": "バージョン情報"
+      "title": "バージョン情報",
+      "changelog": "主な更新履歴"
     }
   },
   "edit": {

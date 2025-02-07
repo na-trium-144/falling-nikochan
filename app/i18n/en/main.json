@@ -52,7 +52,8 @@
       "title": "Terms of Service"
     },
     "version": {
-      "title": "Version Info"
+      "title": "Version Info",
+      "changelog": "Main Change Logs"
     }
   },
   "edit": {

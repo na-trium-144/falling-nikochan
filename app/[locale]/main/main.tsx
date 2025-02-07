@@ -34,11 +34,11 @@ export function IndexMain(props: Props) {
     <main className="flex flex-col w-full overflow-x-hidden min-h-dvh h-max">
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
-          <Header>{tabTitles(props.tab)}</Header>
+          <Header locale={locale}>{tabTitles(props.tab)}</Header>
         </div>
       )}
       <Link
-        href="/"
+        href={`/${locale}`}
         className={
           (!isTitlePage ? "hidden main-wide:block " : " ") +
           "shrink-0 basis-24 overflow-hidden relative " +

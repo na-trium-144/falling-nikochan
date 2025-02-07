@@ -64,5 +64,5 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 * majorバージョンはChartデータフォーマットのバージョンに合わせます
 * minorバージョンをPRごとに `npm version minor` コマンドで上げます
     * dependabotや、update README.md など、 app/ に変更を加えていないものはカウントしないことにします
-* ChangeLog は [CHANGELOG.md](CHANGELOG.md) に記述し /main/version からも閲覧できるユーザー向けの説明と、
+* ChangeLog は [app/i18n/[locale]/changelog.mdx](app/i18n/ja/changelog.mdx) に記述し /main/version からも閲覧できるユーザー向けの説明と、
 [CHANGELOG_dev.md](CHANGELOG_dev.md) に記述したより詳細な説明があります

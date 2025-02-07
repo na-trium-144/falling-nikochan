@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
+import createMDX from '@next/mdx'
 import packageJson from "./package.json" with { type: "json" };
 import "dotenv/config";
 
@@ -17,6 +18,7 @@ try {
 const nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   env: {
     buildDate: date,
     buildCommit: commit,
@@ -45,4 +47,7 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+const withMDX = createMDX({
+  // Add markdown plugins here, as desired
+})
+export default withMDX(nextConfig)

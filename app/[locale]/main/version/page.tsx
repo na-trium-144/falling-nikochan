@@ -1,9 +1,8 @@
 import { getTranslations } from "@/getTranslations";
 import { initMetadata, MetadataProps } from "@/metadata";
-import Markdown from "react-markdown";
 import { IndexMain } from "../main.js";
-import fs from "node:fs";
-import { ExternalLink } from "@/common/extLink.js";
+import ChangeLogJa from "@/../i18n/ja/changelog.mdx";
+import ChangeLogEn from "@/../i18n/en/changelog.mdx";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.version");
@@ -11,10 +10,11 @@ export async function generateMetadata({ params }: MetadataProps) {
 }
 
 export default async function Page({ params }: MetadataProps) {
-  const changeLogMD = await fs.promises.readFile("CHANGELOG.md", "utf-8");
+  const locale = (await params).locale;
+  const t = await getTranslations(params, "main.version");
 
   return (
-    <IndexMain tab={4} locale={(await params).locale}>
+    <IndexMain tab={4} locale={locale}>
       <div className="mb-2">
         <span className="inline-block">Falling Nikochan</span>
         <span className="inline-block">
@@ -28,20 +28,14 @@ export default async function Page({ params }: MetadataProps) {
           Build at {process.env.buildDate}.
         </span>
       </div>
-      <h3 className="text-xl font-bold font-title">主な更新履歴</h3>
-      <Markdown
-        components={{
-          h2: (props) => (
-            <h4 className="text-lg font-bold font-title mt-1 " {...props} />
-          ),
-          a: (props) => (
-            <ExternalLink href={props.href}>{props.children}</ExternalLink>
-          ),
-          ul: (props) => <ul className="list-disc ml-6 " {...props} />,
-        }}
-      >
-        {changeLogMD}
-      </Markdown>
+      <h3 className="text-xl font-bold font-title">{t("changelog")}</h3>
+      {locale === "ja" ? (
+        <ChangeLogJa />
+      ) : locale === "en" ? (
+        <ChangeLogEn />
+      ) : (
+        (console.error("unsupported locale"), null)
+      )}
     </IndexMain>
   );
 }

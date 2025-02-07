@@ -16,15 +16,13 @@ export default async function RootLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
+  const locale = (await params).locale;
   return (
-    <html lang={params.locale}>
+    <html lang={locale}>
       <body className="min-w-full min-h-dvh overflow-auto ">
-        <IntlProvider
-          locale={params.locale}
-          messages={await getMessages(params.locale)}
-        >
+        <IntlProvider locale={locale} messages={await getMessages(locale)}>
           {children}
         </IntlProvider>
       </body>

@@ -6,16 +6,21 @@ interface Props {
   className?: string;
   children: ReactNode | ReactNode[];
   reload?: boolean;
+  locale: string;
 }
 export default function Header(props: Props) {
   return (
     <div className={"p-3 pb-0 w-full " + props.className}>
       {props.reload ? (
-        <a href="/" className={"text-xl " + linkStyle1}>
+        <a href={`/${props.locale}`} className={"text-xl " + linkStyle1}>
           FallingNikochan
         </a>
       ) : (
-        <Link href="/" className={"text-xl " + linkStyle1} prefetch={false}>
+        <Link
+          href={`/${props.locale}`}
+          className={"text-xl " + linkStyle1}
+          prefetch={false}
+        >
           FallingNikochan
         </Link>
       )}
