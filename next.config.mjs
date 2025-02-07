@@ -14,7 +14,6 @@ try {
   console.error("Failed to get commit hash: ", e);
 }
 
-console.log("NODE_ENV=", process.env.NODE_ENV);
 const nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
