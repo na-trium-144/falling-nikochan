@@ -6,13 +6,21 @@ import chartFileApp from "./chartFile.js";
 import latestApp from "./latest.js";
 import newChartFileApp from "./newChartFile.js";
 import seqFileApp from "./seqFile.js";
+import hashPasswdApp from "./hashPasswd.js";
 
 const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .use("/*", cors())
+  .use(
+    "/*",
+    cors({
+      origin: process.env.NODE_ENV === "development" ? (origin) => origin : "*",
+      credentials: process.env.NODE_ENV === "development",
+    })
+  )
   .route("/brief", briefApp)
   .route("/chartFile", chartFileApp)
   .route("/newChartFile", newChartFileApp)
   .route("/seqFile", seqFileApp)
-  .route("/latest", latestApp);
+  .route("/latest", latestApp)
+  .route("/hashPasswd", hashPasswdApp);
 
 export default apiApp;

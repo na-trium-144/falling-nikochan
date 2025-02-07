@@ -6,7 +6,7 @@ import {
   Signature,
 } from "@/../chartFormat/command.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
   findBpmIndexFromStep,
@@ -29,13 +29,18 @@ import {
   Chart,
   createBrief,
   emptyChart,
-  hashPasswd,
   Level,
   levelTypes,
 } from "@/../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
 import Header from "@/common/header.js";
-import { getPasswd, setPasswd } from "@/common/passwdCache.js";
+import {
+  getPasswd,
+  getV6Passwd,
+  preferSavePasswd,
+  setPasswd,
+  unsetPasswd,
+} from "@/common/passwdCache.js";
 import LuaTab from "./luaTab.js";
 import {
   luaAddBpmChange,
@@ -63,32 +68,22 @@ import {
 import { useDisplayMode } from "@/scale.js";
 import { Forbid, Move } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { useTheme } from "@/common/theme.js";
-import { useSearchParams } from "next/navigation";
+import { ThemeContext, useTheme } from "@/common/theme.js";
 import { GuideMain } from "./guide/guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
+import CheckBox from "@/common/checkBox";
 
-export default function Home() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <Page />
-    </Suspense>
-  );
-}
-
-function Page() {
-  const searchParams = useSearchParams();
-  // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
-  const cidInitial = useRef<string>(searchParams.get("cid") || "");
-  const [cid, setCid] = useState<string | undefined>(
-    searchParams.get("cid") || ""
-  );
-  const { isTouch } = useDisplayMode();
+export default function EditAuth() {
   const themeContext = useTheme();
+
+  // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
+  const cidInitial = useRef<string>("");
+  const [cid, setCid] = useState<string | undefined>("");
 
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
   const [editPasswd, setEditPasswd] = useState<string>("");
+  const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -96,63 +91,166 @@ function Page() {
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
 
-  const fetchChart = useCallback(async (isFirst: boolean) => {
-    if (cidInitial.current === "new") {
-      setChart(emptyChart());
-      setPasswdFailed(false);
-      setLoading(false);
-      setCid(undefined);
-      setGuidePage(1);
-    } else {
-      setPasswdFailed(false);
-      setLoading(true);
-      const res = await fetch(
-        process.env.BACKEND_PREFIX +
-          `/api/chartFile/${cidInitial.current}?p=${getPasswd(
-            cidInitial.current
-          )}`,
-        { cache: "no-store" }
-      );
-      setLoading(false);
-      if (res.ok) {
-        try {
-          const chart = msgpack.deserialize(await res.arrayBuffer());
-          // validateはサーバー側でやってる
-          try {
-            setPasswd(cidInitial.current, await hashPasswd(chart.editPasswd));
-          } catch {
-            // ignore hash error on iOS development mode
-          }
-          setChart(chart);
-          setErrorStatus(undefined);
-          setErrorMsg(undefined);
-          addRecent("edit", cidInitial.current);
-        } catch {
-          setChart(undefined);
-          setErrorStatus(undefined);
-          setErrorMsg("invalid response");
-        }
+  const fetchChart = useCallback(
+    async (
+      isFirst: boolean,
+      bypass: boolean,
+      editPasswd: string,
+      savePasswd: boolean
+    ) => {
+      if (cidInitial.current === "new") {
+        setChart(emptyChart());
+        setPasswdFailed(false);
+        setLoading(false);
+        setCid(undefined);
       } else {
-        if (res.status === 401) {
-          if (!isFirst) {
-            setPasswdFailed(true);
+        setPasswdFailed(false);
+        setLoading(true);
+        const res = await fetch(
+          process.env.BACKEND_PREFIX +
+            `/api/chartFile/${cidInitial.current}` +
+            `?p=${getV6Passwd(cidInitial.current)}` +
+            `&ph=${getPasswd(cidInitial.current)}` +
+            `&pw=${editPasswd}` +
+            (bypass ? "&pbypass=1" : ""),
+          {
+            cache: "no-store",
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
           }
-          setChart(undefined);
-        } else {
-          setChart(undefined);
-          setErrorStatus(res.status);
+        );
+        if (res.ok) {
           try {
-            setErrorMsg(
-              String(((await res.json()) as { message?: string }).message)
-            );
+            const chart = msgpack.deserialize(await res.arrayBuffer());
+            if (savePasswd) {
+              const res = await fetch(
+                process.env.BACKEND_PREFIX +
+                  `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`,
+                {
+                  credentials:
+                    process.env.NODE_ENV === "development"
+                      ? "include"
+                      : "same-origin",
+                }
+              );
+              setPasswd(cidInitial.current, await res.text());
+            } else {
+              unsetPasswd(cidInitial.current);
+            }
+            setChart(chart);
+            setErrorStatus(undefined);
+            setErrorMsg(undefined);
+            addRecent("edit", cidInitial.current);
           } catch {
-            setErrorMsg("");
+            setChart(undefined);
+            setErrorStatus(undefined);
+            setErrorMsg("invalid response");
+          }
+        } else {
+          if (res.status === 401) {
+            if (!isFirst) {
+              setPasswdFailed(true);
+            }
+            setChart(undefined);
+          } else {
+            setChart(undefined);
+            setErrorStatus(res.status);
+            try {
+              setErrorMsg(
+                String(((await res.json()) as { message?: string }).message)
+              );
+            } catch {
+              setErrorMsg("");
+            }
           }
         }
+        setLoading(false);
       }
+    },
+    []
+  );
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    if (params.has("cid")) {
+      cidInitial.current = params.get("cid")!;
+      setCid(cidInitial.current);
     }
+    setSavePasswd(preferSavePasswd());
+    // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
+    void fetchChart(true, false, "", true);
   }, []);
-  useEffect(() => void fetchChart(true), [fetchChart]);
+
+  if (chart === undefined) {
+    if (loading) {
+      return <Loading />;
+    }
+    if (errorStatus !== undefined || errorMsg !== undefined) {
+      return <Error status={errorStatus} message={errorMsg} />;
+    }
+    return (
+      <CenterBoxOnlyPage>
+        <Header reload>Edit</Header>
+        <p>編集用パスワードを入力してください。</p>
+        {passwdFailed && <p>パスワードが違います。</p>}
+        <Input
+          actualValue={editPasswd}
+          updateValue={setEditPasswd}
+          left
+          passwd
+        />
+        <Button
+          text="進む"
+          onClick={() => fetchChart(false, false, editPasswd, savePasswd)}
+        />
+        <p>
+          <CheckBox value={savePasswd} onChange={setSavePasswd}>
+            パスワードを保存
+          </CheckBox>
+        </p>
+        {process.env.NODE_ENV === "development" && (
+          <p className="mt-2 ">
+            <button
+              className={linkStyle1 + "w-max m-auto "}
+              onClick={() => {
+                void (async () => {
+                  await fetchChart(false, true, editPasswd, savePasswd);
+                })();
+              }}
+            >
+              パスワード入力をスキップ (dev環境限定)
+            </button>
+          </p>
+        )}
+      </CenterBoxOnlyPage>
+    );
+  } else {
+    return (
+      <Page
+        chart={chart}
+        setChart={setChart}
+        cid={cid}
+        setCid={setCid}
+        themeContext={themeContext}
+        guidePageInit={cidInitial.current === "new" ? 1 : null}
+      />
+    );
+  }
+}
+
+interface Props {
+  chart: Chart;
+  setChart: (chart: Chart) => void;
+  cid: string | undefined;
+  setCid: (cid: string | undefined) => void;
+  themeContext: ThemeContext;
+  guidePageInit: number | null;
+}
+function Page(props: Props) {
+  const { chart, setChart, cid, setCid, themeContext } = props;
+  const { isTouch } = useDisplayMode();
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel = chart?.levels.at(currentLevelIndex);
@@ -410,7 +508,9 @@ function Page() {
   }, [chart, currentLevelIndex]);
 
   const [tab, setTab] = useState<number>(0);
-  const [guidePage, setGuidePage] = useState<number | null>(null);
+  const [guidePage, setGuidePage] = useState<number | null>(
+    props.guidePageInit
+  );
   const tabNames = ["Meta", "Timing", "Levels", "Notes", "Code"];
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
@@ -632,52 +732,6 @@ function Page() {
     }
     ref.current.focus();
   };
-
-  if (chart === undefined) {
-    if (loading) {
-      return <Loading />;
-    }
-    if (errorStatus !== undefined || errorMsg !== undefined) {
-      return <Error status={errorStatus} message={errorMsg} />;
-    }
-    return (
-      <CenterBoxOnlyPage>
-        <Header reload>Edit</Header>
-        <p>編集用パスワードを入力してください。</p>
-        {passwdFailed && <p>パスワードが違います。</p>}
-        <Input
-          actualValue={editPasswd}
-          updateValue={setEditPasswd}
-          left
-          passwd
-        />
-        <Button
-          text="進む"
-          onClick={() => {
-            void (async () => {
-              setPasswd(cidInitial.current || "", await hashPasswd(editPasswd));
-              await fetchChart(false);
-            })();
-          }}
-        />
-        {process.env.NODE_ENV === "development" && (
-          <p className="mt-2 ">
-            <button
-              className={linkStyle1 + "w-max m-auto "}
-              onClick={() => {
-                void (async () => {
-                  setPasswd(cidInitial.current || "", "bypass");
-                  await fetchChart(false);
-                })();
-              }}
-            >
-              パスワード入力をスキップ (dev環境限定)
-            </button>
-          </p>
-        )}
-      </CenterBoxOnlyPage>
-    );
-  }
 
   return (
     <main

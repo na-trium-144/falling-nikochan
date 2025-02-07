@@ -154,9 +154,6 @@ export async function hash(text: string) {
     .join(""); // バイト列を 16 進文字列に変換する
   return hashHex;
 }
-export async function hashPasswd(text: string) {
-  return await hash(text);
-}
 export async function hashLevel(level: Level) {
   return await hash(
     JSON.stringify([

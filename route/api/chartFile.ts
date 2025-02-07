@@ -10,18 +10,45 @@ import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
+import { getCookie } from "hono/cookie";
 
-// 他のAPIと違って編集用パスワードのチェックが入る
-// クエリパラメータのpで渡す
+/**
+ *
+ * v6まで /api/chartFile/cid?p=(sha256 of passwd) の形式で、
+ * sha256をそのままlocalStorageに保存していたのでlocalStorageを読めばアクセスできてしまう状態だった
+ *
+ * v7以降は直接アクセスするための /api/chartFile/cid?pw=(base64 of passwd) と、
+ * localStorageに保存できるハッシュ済みのtokenを使った /api/chartFile/cid?ph=(sha256 of cid + passwd + cookie)
+ * の2つの方法を用意する
+ * cookieは /api/hashPasswd でランダムにセットされる
+ *
+ * また、development環境に限り /api/chartFile/cid?pbypass=1 でスキップできる
+ */
 const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:cid", async (c) => {
     const cid = c.req.param("cid");
-    const passwdHash = c.req.query("p");
+    const v6PasswdHash = c.req.query("p");
+    const rawPasswd = c.req.query("pw");
+    const v7PasswdHash = c.req.query("ph");
+    let v7HashKey: string;
+    if (env(c).NODE_ENV === "development") {
+      v7HashKey = getCookie(c, "hashKey") || "";
+    } else {
+      v7HashKey = getCookie(c, "hashKey", "host") || "";
+    }
+    const bypass =
+      c.req.query("pbypass") === "1" && env(c).NODE_ENV === "development";
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
-      let { res, chart } = await getChartEntry(db, cid, passwdHash || "");
+      let { res, chart } = await getChartEntry(db, cid, {
+        bypass,
+        v6PasswdHash,
+        rawPasswd,
+        v7PasswdHash,
+        v7HashKey,
+      });
       if (!chart) {
         return c.json({ message: res?.message }, res?.status || 500);
       }
@@ -40,17 +67,30 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .post("/:cid", async (c) => {
     const cid = c.req.param("cid");
-    const passwdHash = c.req.query("p");
+    const v6PasswdHash = c.req.query("p");
+    const rawPasswd = c.req.query("pw");
+    const v7PasswdHash = c.req.query("ph");
+    let v7HashKey: string;
+    if (env(c).NODE_ENV === "development") {
+      v7HashKey = getCookie(c, "hashKey") || "";
+    } else {
+      v7HashKey = getCookie(c, "hashKey", "host") || "";
+    }
+    console.log(v7PasswdHash,v7HashKey);
+    const bypass =
+      c.req.query("pbypass") === "1" && env(c).NODE_ENV === "development";
     const chartBuf = await c.req.arrayBuffer();
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { res, entry, chart } = await getChartEntry(
-        db,
-        cid,
-        passwdHash || ""
-      );
+      const { res, entry, chart } = await getChartEntry(db, cid, {
+        bypass,
+        v6PasswdHash,
+        rawPasswd,
+        v7PasswdHash,
+        v7HashKey,
+      });
       if (!chart || !entry) {
         return c.json({ message: res?.message }, res?.status || 500);
       }
@@ -107,12 +147,28 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .delete("/:cid", async (c) => {
     const cid = c.req.param("cid");
-    const passwdHash = c.req.query("p");
+    const v6PasswdHash = c.req.query("p");
+    const rawPasswd = c.req.query("pw");
+    const v7PasswdHash = c.req.query("ph");
+    let v7HashKey: string;
+    if (env(c).NODE_ENV === "development") {
+      v7HashKey = getCookie(c, "hashKey") || "";
+    } else {
+      v7HashKey = getCookie(c, "hashKey", "host") || "";
+    }
+    const bypass =
+      c.req.query("pbypass") === "1" && env(c).NODE_ENV === "development";
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { res, chart } = await getChartEntry(db, cid, passwdHash || "");
+      const { res, chart } = await getChartEntry(db, cid, {
+        bypass,
+        v6PasswdHash,
+        rawPasswd,
+        v7PasswdHash,
+        v7HashKey,
+      });
       if (!chart) {
         return c.json({ message: res?.message }, res?.status || 500);
       }

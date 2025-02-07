@@ -24,6 +24,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     ```sh
     MONGODB_URI="mongodb://localhost:27017"
     BACKEND_PREFIX="http://localhost:8787"
+    NODE_ENV="development"
     ```
 * 依存パッケージのインストール
     ```sh
