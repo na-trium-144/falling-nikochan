@@ -1,3 +1,8 @@
+## ver. 6.26 - 2025/02/08 [#234](https://github.com/na-trium-144/falling-nikochan/pull/234)
+
+* bun.lock追加、インストールとバックエンドの実行をbunでもできるようにした
+* PRでlockfileを更新するCIを追加
+
 ## ver. 6.24 - 2025/02/04 [#233](https://github.com/na-trium-144/falling-nikochan/pull/233)
 
 * /main/playから譜面を選択したとき違う譜面のページが表示されるバグを回避するため、/share/[cid].txt はapi側で書き換えず404のままにする

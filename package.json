@@ -1,6 +1,6 @@
 {
   "name": "falling-nikochan",
-  "version": "6.25.0",
+  "version": "6.26.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,8 @@
     "ndev": "next dev -H 0.0.0.0",
     "nbuild": "next build",
     "vdev": "vercel dev --listen 0.0.0.0:8787",
-    "ldev": "tsx watch route/serve-local.ts"
+    "ldev": "tsx watch route/serve-local.ts",
+    "bdev": "bun run --hot route/serve-bun.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.8",
@@ -34,6 +35,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.19.0",
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "^1.2.2",
     "@types/file-saver": "^2.0.7",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^22",
