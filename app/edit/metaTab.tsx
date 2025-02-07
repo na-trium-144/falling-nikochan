@@ -5,7 +5,13 @@ import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import { Chart, chartMaxSize, validateChart } from "@/../chartFormat/chart.js";
-import { getPasswd, getV6Passwd, setPasswd } from "@/common/passwdCache.js";
+import {
+  getPasswd,
+  getV6Passwd,
+  preferSavePasswd,
+  setPasswd,
+  unsetPasswd,
+} from "@/common/passwdCache.js";
 import { addRecent } from "@/common/recent.js";
 import { initSession, SessionData } from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
@@ -16,6 +22,8 @@ import CheckBox from "@/common/checkBox.js";
 interface Props {
   chart?: Chart;
   setChart: (chart: Chart) => void;
+  savePasswd: boolean;
+  setSavePasswd: (b: boolean) => void;
 }
 export function MetaEdit(props: Props) {
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
@@ -98,6 +106,13 @@ export function MetaEdit(props: Props) {
           />
           <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
         </span>
+        <CheckBox
+          value={props.savePasswd}
+          onChange={props.setSavePasswd}
+          className="ml-2"
+        >
+          パスワードを保存
+        </CheckBox>
       </p>
       <p className="text-sm ml-2 mb-2">
         (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
@@ -147,15 +162,37 @@ export function MetaTab(props: Props2) {
   const [uploadMsg, setUploadMsg] = useState<string>("");
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
+  const [savePasswd, setSavePasswd] = useState<boolean>(false);
   useEffect(() => {
     setErrorMsg("");
     setSaveMsg("");
     setOrigin(window.location.origin);
     setHasClipboard(!!navigator?.clipboard);
+    setSavePasswd(preferSavePasswd());
   }, [props.chart]);
 
   const save = async () => {
     setSaving(true);
+    const onSave = async (cid: string, editPasswd: string) => {
+      setErrorMsg("保存しました！");
+      props.setHasChange(false);
+      if (savePasswd) {
+        fetch(
+          process.env.BACKEND_PREFIX +
+            `/api/hashPasswd/${cid}?pw=${editPasswd}`,
+          {
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
+          }
+        ).then(async (res) => {
+          setPasswd(cid!, await res.text());
+        });
+      } else {
+        unsetPasswd(cid!);
+      }
+    };
     if (props.cid === undefined) {
       const res = await fetch(
         process.env.BACKEND_PREFIX + `/api/newChartFile`,
@@ -176,21 +213,8 @@ export function MetaTab(props: Props2) {
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
             history.replaceState(null, "", `/edit?cid=${resBody.cid}`);
-            setErrorMsg("保存しました！");
             addRecent("edit", resBody.cid);
-            props.setHasChange(false);
-            fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${resBody.cid}?pw=${props.chart!.editPasswd}`,
-              {
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              }
-            ).then(async (res) => {
-              setPasswd(resBody.cid!, await res.text());
-            });
+            onSave(resBody.cid, props.chart!.editPasswd);
           } else {
             setErrorMsg("Invalid response");
           }
@@ -223,20 +247,7 @@ export function MetaTab(props: Props2) {
       );
       if (res.ok) {
         props.setHasChange(false);
-        setErrorMsg("保存しました！");
-        // 次からは新しいパスワードが必要
-        fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/hashPasswd/${props.cid}?pw=${props.chart!.editPasswd}`,
-          {
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          }
-        ).then(async (res) => {
-          setPasswd(props.cid!, await res.text());
-        });
+        onSave(props.cid, props.chart!.editPasswd);
       } else {
         try {
           const resBody = (await res.json()) as {
@@ -367,7 +378,11 @@ export function MetaTab(props: Props2) {
           />
         </span>
       </div>
-      <MetaEdit {...props} />
+      <MetaEdit
+        {...props}
+        savePasswd={savePasswd}
+        setSavePasswd={setSavePasswd}
+      />
     </>
   );
 }

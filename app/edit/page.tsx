@@ -34,7 +34,13 @@ import {
 } from "@/../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
 import Header from "@/common/header.js";
-import { getPasswd, getV6Passwd, setPasswd } from "@/common/passwdCache.js";
+import {
+  getPasswd,
+  getV6Passwd,
+  preferSavePasswd,
+  setPasswd,
+  unsetPasswd,
+} from "@/common/passwdCache.js";
 import LuaTab from "./luaTab.js";
 import {
   luaAddBpmChange,
@@ -65,6 +71,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { ThemeContext, useTheme } from "@/common/theme.js";
 import { GuideMain } from "./guide/guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
+import CheckBox from "@/common/checkBox";
 
 export default function EditAuth() {
   const themeContext = useTheme();
@@ -76,6 +83,7 @@ export default function EditAuth() {
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
   const [editPasswd, setEditPasswd] = useState<string>("");
+  const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -84,7 +92,12 @@ export default function EditAuth() {
   const [errorMsg, setErrorMsg] = useState<string>();
 
   const fetchChart = useCallback(
-    async (isFirst: boolean, bypass: boolean, editPasswd: string) => {
+    async (
+      isFirst: boolean,
+      bypass: boolean,
+      editPasswd: string,
+      savePasswd: boolean
+    ) => {
       if (cidInitial.current === "new") {
         setChart(emptyChart());
         setPasswdFailed(false);
@@ -108,22 +121,24 @@ export default function EditAuth() {
                 : "same-origin",
           }
         );
-        setLoading(false);
         if (res.ok) {
           try {
             const chart = msgpack.deserialize(await res.arrayBuffer());
-            fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`,
-              {
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              }
-            ).then(async (res) => {
+            if (savePasswd) {
+              const res = await fetch(
+                process.env.BACKEND_PREFIX +
+                  `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`,
+                {
+                  credentials:
+                    process.env.NODE_ENV === "development"
+                      ? "include"
+                      : "same-origin",
+                }
+              );
               setPasswd(cidInitial.current, await res.text());
-            });
+            } else {
+              unsetPasswd(cidInitial.current);
+            }
             setChart(chart);
             setErrorStatus(undefined);
             setErrorMsg(undefined);
@@ -151,6 +166,7 @@ export default function EditAuth() {
             }
           }
         }
+        setLoading(false);
       }
     },
     []
@@ -162,7 +178,9 @@ export default function EditAuth() {
       cidInitial.current = params.get("cid")!;
       setCid(cidInitial.current);
     }
-    void fetchChart(true, false, "");
+    setSavePasswd(preferSavePasswd());
+    // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
+    void fetchChart(true, false, "", true);
   }, []);
 
   if (chart === undefined) {
@@ -185,15 +203,20 @@ export default function EditAuth() {
         />
         <Button
           text="進む"
-          onClick={() => fetchChart(false, false, editPasswd)}
+          onClick={() => fetchChart(false, false, editPasswd, savePasswd)}
         />
+        <p>
+          <CheckBox value={savePasswd} onChange={setSavePasswd}>
+            パスワードを保存
+          </CheckBox>
+        </p>
         {process.env.NODE_ENV === "development" && (
           <p className="mt-2 ">
             <button
               className={linkStyle1 + "w-max m-auto "}
               onClick={() => {
                 void (async () => {
-                  await fetchChart(false, true, editPasswd);
+                  await fetchChart(false, true, editPasswd, savePasswd);
                 })();
               }}
             >
