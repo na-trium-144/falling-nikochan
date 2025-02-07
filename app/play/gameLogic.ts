@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { displayNote, Note } from "@/../chartFormat/seq.js";
 import {
   goodSec,
   okSec,
@@ -13,14 +12,16 @@ import {
   chainScoreRate,
   bigScoreRate,
 } from "@/../chartFormat/gameConstant.js";
+import { displayNote6, Note6 } from "../../chartFormat/legacy/seq6.js";
+import { displayNote7, Note7 } from "../../chartFormat/legacy/seq7.js";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean
 ) {
-  const [notesAll, setNotesAll] = useState<Note[]>([]);
-  const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
-  const notesBigYetDone = useRef<Note[]>([]); // 通常判定がおわってbig判定がまだのNote
+  const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
+  const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
+  const notesBigYetDone = useRef<(Note6 | Note7)[]>([]); // 通常判定がおわってbig判定がまだのNote
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
@@ -45,9 +46,9 @@ export default function useGameLogic(
   const [chain, setChain] = useState<number>(0);
   const chainRef = useRef<number>(0);
 
-  const resetNotesAll = useCallback((notes: Note[]) => {
+  const resetNotesAll = useCallback((notes: Note6[] | Note7[]) => {
     // note.done などを書き換えるため、元データを壊さないようdeepcopy
-    const notesCopy = notes.map((n) => ({ ...n }));
+    const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note7[];
     setNotesAll(notesCopy.slice());
     notesYetDone.current = notesCopy;
     notesBigYetDone.current = [];
@@ -61,7 +62,7 @@ export default function useGameLogic(
 
   // Noteに判定を保存し、scoreとchainを更新
   const judge = useCallback(
-    (n: Note, now: number, j: number) => {
+    (n: Note6 | Note7, now: number, j: number) => {
       if (n.big && n.done > 0) {
         n.bigDone = true;
         if (j <= 2) {
@@ -73,7 +74,9 @@ export default function useGameLogic(
       } else {
         // j = 1 ~ 4
         if (j <= 3) {
-          n.hitPos = displayNote(n, now)?.pos; // 位置を固定
+          n.hitPos = (
+            n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)
+          )?.pos; // 位置を固定
         }
         n.done = j;
         let thisChain: number;
@@ -107,7 +110,7 @@ export default function useGameLogic(
   // キーを押したときの判定
   const hit = () => {
     const now = getCurrentTimeSec();
-    let candidate: Note | null = null;
+    let candidate: Note6 | Note7 | null = null;
     let candidateJudge: number = 0;
     while (now !== undefined && notesYetDone.current.length >= 1) {
       const n = notesYetDone.current[0];
@@ -138,7 +141,7 @@ export default function useGameLogic(
         break;
       }
     }
-    let candidateBig: Note | null = null;
+    let candidateBig: Note6 | Note7 | null = null;
     let candidateJudgeBig: number = 0;
     while (now !== undefined && notesBigYetDone.current.length >= 1) {
       const n = notesBigYetDone.current[0];

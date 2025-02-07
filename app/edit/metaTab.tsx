@@ -18,6 +18,7 @@ import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
 import YAML from "yaml";
 import CheckBox from "@/common/checkBox.js";
+import { Caution } from "@icon-park/react";
 
 interface Props {
   chart?: Chart;
@@ -149,6 +150,8 @@ interface Props2 {
   fileSize: number;
   chart?: Chart;
   setChart: (chart: Chart) => void;
+  convertedFrom: number;
+  setConvertedFrom: (c: number) => void;
   cid: string | undefined;
   setCid: (cid: string) => void;
   hasChange: boolean;
@@ -176,6 +179,7 @@ export function MetaTab(props: Props2) {
     const onSave = async (cid: string, editPasswd: string) => {
       setErrorMsg("保存しました！");
       props.setHasChange(false);
+      props.setConvertedFrom(props.chart!.ver);
       if (savePasswd) {
         fetch(
           process.env.BACKEND_PREFIX +
@@ -275,16 +279,22 @@ export function MetaTab(props: Props2) {
       const f = target.files[0];
       const buffer = await f.arrayBuffer();
       setUploadMsg("");
+      let originalVer: number = 0;
       let newChart: Chart | null = null;
       try {
-        newChart = await validateChart(
-          YAML.parse(new TextDecoder().decode(buffer))
-        );
+        const content = YAML.parse(new TextDecoder().decode(buffer));
+        if (typeof content.ver === "number") {
+          originalVer = content.ver;
+        }
+        newChart = await validateChart(content);
       } catch (e) {
-        console.error(e);
         console.warn("fallback to msgpack deserialize");
         try {
-          newChart = await validateChart(msgpack.deserialize(buffer));
+          const content = msgpack.deserialize(buffer);
+          if (typeof content.ver === "number") {
+            originalVer = content.ver;
+          }
+          newChart = await validateChart(content);
         } catch (e) {
           console.error(e);
           setUploadMsg("ファイルの読み込みに失敗しました");
@@ -296,6 +306,7 @@ export function MetaTab(props: Props2) {
             ...newChart,
             editPasswd: props.chart?.editPasswd || "",
           });
+          props.setConvertedFrom(originalVer);
         }
       }
       target.value = "";
@@ -334,6 +345,16 @@ export function MetaTab(props: Props2) {
         {props.hasChange && (
           <span className="inline-block ml-1 text-amber-600 ">
             (未保存の変更があります)
+          </span>
+        )}
+        {props.convertedFrom < 7 && (
+          <span className="inline-block ml-1 text-amber-600 text-sm ">
+            <Caution className="inline-block mr-1 translate-y-0.5 " />
+            この譜面は旧バージョンのフォーマット (ver.{props.convertedFrom})
+            から変換されており、
+            一部の音符の挙動が変わっている可能性があります。
+            保存すると変換後の譜面データで上書きされます。
+            (詳細はトップページ下部の更新履歴を確認してください。)
           </span>
         )}
       </div>

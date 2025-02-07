@@ -1,23 +1,27 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  Note,
-  DisplayNote,
-  targetY,
-  displayNote,
-  bigScale,
-} from "@/../chartFormat/seq.js";
+import { targetY, bigScale } from "@/../chartFormat/seq.js";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { bonusMax } from "@/../chartFormat/gameConstant.js";
 import { ThemeContext } from "@/common/theme.js";
+import {
+  displayNote6,
+  DisplayNote6,
+  Note6,
+} from "../../chartFormat/legacy/seq6.js";
+import {
+  displayNote7,
+  DisplayNote7,
+  Note7,
+} from "../../chartFormat/legacy/seq7.js";
 
 interface Props {
   className?: string;
   style?: object;
-  notes: Note[];
+  notes: Note6[] | Note7[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
@@ -27,7 +31,9 @@ interface Props {
 
 export default function FallingWindow(props: Props) {
   const { notes, playing, getCurrentTimeSec, setFPS } = props;
-  const [displayNotes, setDisplayNotes] = useState<DisplayNote[]>([]);
+  const [displayNotes, setDisplayNotes] = useState<
+    DisplayNote6[] | DisplayNote7[]
+  >([]);
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -52,7 +58,11 @@ export default function FallingWindow(props: Props) {
         now !== undefined
       ) {
         setDisplayNotes(
-          notes.map((n) => displayNote(n, now)).filter((n) => n !== null)
+          notes
+            .map((n) =>
+              n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)
+            )
+            .filter((n) => n !== null)
         );
       } else {
         setDisplayNotes([]);
@@ -107,9 +117,9 @@ export default function FallingWindow(props: Props) {
 }
 
 interface NProps {
-  displayNote: DisplayNote;
+  displayNote: DisplayNote6 | DisplayNote7;
   noteSize: number;
-  note: Note;
+  note: Note6 | Note7;
   marginX: number;
   marginY: number;
   boxSize: number;

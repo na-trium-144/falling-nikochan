@@ -1,15 +1,18 @@
-import { NoteCommandWithLua } from "../command.js";
 import { Step, stepAdd, stepSimplify } from "../step.js";
 import { Result } from "./exec.js";
 
 export function luaNote(state: Result, ...args: any[]) {
+  if (args.length === 5) {
+    args.push(false);
+  }
   if (
-    args.length === 5 &&
+    args.length === 6 &&
     (typeof args[0] === "number" || args[0] === null) &&
     typeof args[1] === "number" &&
     typeof args[2] === "number" &&
     typeof args[3] === "number" &&
-    typeof args[4] === "boolean"
+    typeof args[4] === "boolean" &&
+    typeof args[5] === "boolean"
   ) {
     state.notes.push({
       hitX: args[1],
@@ -18,7 +21,8 @@ export function luaNote(state: Result, ...args: any[]) {
       big: !!args[4],
       step: { ...state.step },
       luaLine: args[0],
-    } as NoteCommandWithLua);
+      fall: args[5],
+    });
   } else {
     throw "invalid argument for Note()";
   }

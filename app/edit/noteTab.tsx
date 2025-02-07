@@ -7,6 +7,7 @@ import { Key } from "@/common/key.js";
 import { Mouse } from "@icon-park/react";
 import CheckBox from "@/common/checkBox.js";
 import { getSignatureState } from "@/../chartFormat/seq.js";
+import Select from "@/common/select";
 
 interface Props {
   currentNoteIndex: number;
@@ -257,6 +258,16 @@ function NoteEdit(props: Props) {
             <span>Big</span>
             <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </CheckBox>
+        </p>
+        <p>
+          <span>出現位置:</span>
+          <Select
+            value={n.fall ? "1" : "0"}
+            values={["0", "1"]}
+            options={["下から", "上から"]}
+            onChange={(v) => props.updateNote({ ...n, fall: !!Number(v) })}
+            disabled={!noteEditable}
+          />
         </p>
         {props.currentLevel?.notes[props.currentNoteIndex] && !noteEditable && (
           <p className="ml-2 mt-4 text-sm">

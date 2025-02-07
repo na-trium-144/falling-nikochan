@@ -37,8 +37,8 @@ export function GuideContent7() {
       </li>
       <li>Falling Nikochan 特有のコマンドは以下の通りです。</li>
       <li className="ml-6">
-        <Code>Note(x, vx, vy, big)</Code>: 音符を置きます。 x, vx, vy は数値、
-        big は<Code>true</Code>または<Code>false</Code>
+        <Code>Note(x, vx, vy, big, fall)</Code>: 音符を置きます。 x, vx, vy は数値、
+        big, fall は<Code>true</Code>または<Code>false</Code>
         を指定してください。
       </li>
       <li className="ml-6">

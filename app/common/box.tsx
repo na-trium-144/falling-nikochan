@@ -46,7 +46,7 @@ export function CenterBoxOnlyPage(props: {
   );
 }
 
-export function Error(props: { status?: number | string; message?: string }) {
+export function ErrorPage(props: { status?: number | string; message?: string }) {
   return (
     <CenterBoxOnlyPage>
       <p>
@@ -57,7 +57,7 @@ export function Error(props: { status?: number | string; message?: string }) {
   );
 }
 export function NotFound() {
-  return <Error status={404} message={"Not Found"} />;
+  return <ErrorPage status={404} message={"Not Found"} />;
 }
 
 export function Loading() {

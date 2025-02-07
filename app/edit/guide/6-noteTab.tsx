@@ -26,6 +26,10 @@ export function GuideContent6() {
       </li>
       <li>Big にチェックを入れると大きい音符になります。</li>
       <li>
+        出現位置を「上から」にすると音符は画面上側から降ってくるのみになり、
+        「下から」にすると画面下側から投げ上げるような形になります。
+      </li>
+      <li>
         左に表示されている音符のプレビューからマウス操作で音符の位置や速度を変更することもできます。
         現在のカーソル位置に音符がある状態でプレビュー画面内をドラッグすると音符の位置が動き、
         <Key className="text-sm p-0.5 mx-0.5">Shift</Key>
@@ -33,9 +37,10 @@ export function GuideContent6() {
         <br />
         タッチ操作の場合は
         <span className="inline-block w-5 translate-y-0.5 ">
-          <Move  />
+          <Move />
         </span>
-        Touch ボタンを押すと音符の位置/速度をタッチ操作で動かせるモードに切り替えることができます。
+        Touch
+        ボタンを押すと音符の位置/速度をタッチ操作で動かせるモードに切り替えることができます。
       </li>
       <li>
         下にある Copy, Paste, 1 〜 9

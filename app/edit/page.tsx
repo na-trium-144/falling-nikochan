@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  defaultNoteCommand,
-  NoteCommand,
-  Signature,
-} from "@/../chartFormat/command.js";
+import { defaultNoteCommand, NoteCommand } from "@/../chartFormat/command.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -21,7 +17,7 @@ import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
 import NoteTab from "./noteTab.js";
-import { Box, CenterBoxOnlyPage, Error, Loading } from "@/common/box.js";
+import { Box, CenterBoxOnlyPage, ErrorPage, Loading } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent.js";
@@ -31,6 +27,7 @@ import {
   emptyChart,
   Level,
   levelTypes,
+  validateChart,
 } from "@/../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../chartFormat/step.js";
 import Header from "@/common/header.js";
@@ -71,6 +68,10 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { ThemeContext, useTheme } from "@/common/theme.js";
 import { GuideMain } from "./guide/guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
+import { Signature } from "../../chartFormat/signature.js";
+import { Chart5 } from "../../chartFormat/legacy/chart5.js";
+import { Chart6 } from "../../chartFormat/legacy/chart6.js";
+import { Chart7 } from "../../chartFormat/legacy/chart7.js";
 import CheckBox from "@/common/checkBox";
 
 export default function EditAuth() {
@@ -90,6 +91,7 @@ export default function EditAuth() {
   const [chart, setChart] = useState<Chart>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
+  const [convertedFrom, setConvertedFrom] = useState<number>(7);
 
   const fetchChart = useCallback(
     async (
@@ -123,7 +125,9 @@ export default function EditAuth() {
         );
         if (res.ok) {
           try {
-            const chart = msgpack.deserialize(await res.arrayBuffer());
+            const chartRes: Chart5 | Chart6 | Chart7 = msgpack.deserialize(await res.arrayBuffer());
+            setConvertedFrom(chartRes.ver);
+            const chart: Chart = await validateChart(chartRes);
             if (savePasswd) {
               const res = await fetch(
                 process.env.BACKEND_PREFIX +
@@ -188,7 +192,7 @@ export default function EditAuth() {
       return <Loading />;
     }
     if (errorStatus !== undefined || errorMsg !== undefined) {
-      return <Error status={errorStatus} message={errorMsg} />;
+      return <ErrorPage status={errorStatus} message={errorMsg} />;
     }
     return (
       <CenterBoxOnlyPage>
@@ -1043,6 +1047,8 @@ function Page(props: Props) {
                 fileSize={fileSize}
                 chart={chart}
                 setChart={changeChart}
+                convertedFrom={convertedFrom}
+                setConvertedFrom={setConvertedFrom}
                 cid={cid}
                 setCid={(newCid: string) => setCid(newCid)}
                 hasChange={hasChange}
