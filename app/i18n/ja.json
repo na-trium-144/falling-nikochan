@@ -1,0 +1,19 @@
+{
+  "main": {
+    "about": {
+      "title": "Falling Nikochan とは？"
+    },
+    "play": {
+      "title": "プレイする"
+    },
+    "edit": {
+      "title": "譜面作成"
+    },
+    "policies": {
+      "title": "利用規約っぽいもの"
+    },
+    "version": {
+      "title": "バージョン情報"
+    }
+  }
+}
