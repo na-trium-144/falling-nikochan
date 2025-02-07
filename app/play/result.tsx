@@ -83,7 +83,7 @@ export default function Result(props: Props) {
             </span>
             <span className="">.</span>
             <span
-              className="w-16 text-left w-5 "
+              className="text-left w-5 "
               style={{
                 ...jumpingAnimation(1),
               }}
