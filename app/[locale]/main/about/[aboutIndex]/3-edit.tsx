@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@/common/box.js";
-import { SmallDomain } from "@/common/smallDomain";
+import { SmallDomainShare } from "@/common/small";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { Youtube } from "@icon-park/react";
@@ -99,7 +99,7 @@ export function AboutContent3() {
         <p>{t("content4")}</p>
         <p>
           {t.rich("content5", {
-            url: () => <SmallDomain />,
+            url: () => <SmallDomainShare />,
           })}
         </p>
       </div>
