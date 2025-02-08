@@ -106,8 +106,8 @@ export function ChainDisp(props: ChainProps) {
             alignAt2nd
           />
         </span>
-        <span className="text-left " style={{ fontSize: 16 }}>
-          {t("chain")}
+        <span className="text-left w-14 overflow-visible " style={{ fontSize: 16 }}>
+          {t("chain", { chain: props.chain })}
         </span>
       </div>
     </Cloud>

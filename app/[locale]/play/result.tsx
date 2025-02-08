@@ -98,7 +98,7 @@ export default function Result(props: Props) {
           </ResultRow>
           <ResultRow visible={showing >= 2} name={t("chainBonus")}>
             <span
-              className="w-16 text-3xl text-right "
+              className="text-3xl text-right "
               style={{
                 ...jumpingAnimation(2),
               }}
@@ -119,7 +119,7 @@ export default function Result(props: Props) {
           </ResultRow>
           <ResultRow visible={showing >= 3} name={t("bigNoteBonus")}>
             <span
-              className="w-16 text-3xl text-right "
+              className="text-3xl text-right "
               style={{
                 ...jumpingAnimation(3),
               }}
@@ -141,7 +141,7 @@ export default function Result(props: Props) {
           <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
           <ResultRow visible={showing >= 4} name={t("totalScore")}>
             <span
-              className="w-16 text-3xl text-right "
+              className="text-3xl text-right "
               style={{
                 ...jumpingAnimation(4),
               }}
@@ -242,7 +242,7 @@ function ResultRow(props: RowProps) {
         (props.className || "")
       }
     >
-      <span className="flex-1 text-left mr-2">{props.name}:</span>
+      <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">{props.name}:</span>
       {props.children}
     </p>
   );
