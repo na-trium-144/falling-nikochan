@@ -34,6 +34,23 @@
       "perfect": "Perfect Chain",
       "full": "Full Chain",
       "newRecord": "New Record!",
+      "message": {
+        "A": {
+          "1": "Fantastic!",
+          "2": "Amazing!",
+          "3": "Excellent!"
+        },
+        "B": {
+          "1": "Nice job!",
+          "2": "Great!",
+          "3": "Cool!"
+        },
+        "C": {
+          "1": "Good effort!",
+          "2": "Keep trying!",
+          "3": "Better luck next time!"
+        }
+      },
       "reset": "Restart",
       "exit": "Exit"
     }

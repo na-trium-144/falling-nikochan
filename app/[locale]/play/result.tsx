@@ -3,14 +3,13 @@
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import { rankStr } from "@/common/rank.js";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import "./result.css";
 import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
 } from "@/../../chartFormat/gameConstant.js";
-import { praiseMessage } from "./praise.js";
 import { useTranslations } from "next-intl";
 
 interface Props {
@@ -27,10 +26,7 @@ interface Props {
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
 
-  const [message, setMessage] = useState<string>("");
-  useEffect(() => {
-    setMessage(praiseMessage(props.score));
-  }, [props.score]);
+  const messageRandom = useRef<number>(Math.random());
 
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
@@ -191,7 +187,11 @@ export default function Result(props: Props) {
               className={props.largeResult ? "text-xl" : ""}
               style={{ ...appearingAnimation2(6) }}
             >
-              {message}
+              {t(
+                "message." +
+                  (props.score >= 90 ? "A." : props.score >= 70 ? "B." : "C.") +
+                  (Math.floor(messageRandom.current * 3) + 1)
+              )}
             </div>
           )}
           {props.newRecord > 0 && (
@@ -242,7 +242,9 @@ function ResultRow(props: RowProps) {
         (props.className || "")
       }
     >
-      <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">{props.name}:</span>
+      <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">
+        {props.name}:
+      </span>
       {props.children}
     </p>
   );
