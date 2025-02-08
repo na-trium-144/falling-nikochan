@@ -14,10 +14,28 @@
       "reset": "もう一度",
       "exit": "やめる"
     },
-    "score":{
+    "score": {
       "auto": "オートプレイ",
       "score": "スコア",
-      "bestScore": "ベストスコア"
+      "bestScore": "ベストスコア",
+      "chain": "コンボ"
+    },
+    "status": {
+      "big": "Big 判定数",
+      "remains": "残り音符数"
+    },
+    "result": {
+      "result": "結果",
+      "baseScore": "ベーススコア",
+      "chainBonus": "コンボボーナス",
+      "bigNoteBonus": "Big ボーナス",
+      "totalScore": "合計スコア",
+      "rank": "ランク",
+      "perfect": "パーフェクト",
+      "full": "フルコンボ",
+      "newRecord": "ベストスコア更新！",
+      "reset": "もう一度",
+      "exit": "やめる"
     }
   }
 }

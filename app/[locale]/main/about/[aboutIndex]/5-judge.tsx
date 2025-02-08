@@ -54,9 +54,10 @@ export async function AboutContent5(props: Props) {
           })}
         </p>
         <p>
-          {t("content2", {
+          {t.rich("content2", {
             total: baseScoreRate + chainScoreRate + bigScoreRate,
             totalSmall: baseScoreRate + chainScoreRate,
+            b: (c) => <span className="font-bold">{c}</span>,
           })}
         </p>
         <ul className="list-inside list-disc">
@@ -82,14 +83,21 @@ export async function AboutContent5(props: Props) {
                   <span className="ml-5 mr-1">OK</span>
                 </span>
               ),
+              b: (c) => <span className="font-bold">{c}</span>,
             })}
           </li>
           <li>
-            {t("content4", {
+            {t.rich("content4", {
               chainScoreRate,
+              b: (c) => <span className="font-bold">{c}</span>,
             })}
           </li>
-          <li>{t("content5", { bigScoreRate })}</li>
+          <li>
+            {t.rich("content5", {
+              bigScoreRate,
+              b: (c) => <span className="font-bold">{c}</span>,
+            })}
+          </li>
         </ul>
       </div>
       <div className="mb-4 space-y-2">

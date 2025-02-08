@@ -118,7 +118,7 @@ export function AboutContent2() {
         >
           <div className="absolute top-0 left-0">
             <span className="inline-block text-lg w-6 text-right">{chain}</span>
-            <span className="text-xs ml-1">Chains</span>
+            <span className="text-xs ml-1">{t("chain", {chain})}</span>
           </div>
           <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
           <div

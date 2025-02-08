@@ -162,11 +162,11 @@ export function MusicArea(props: Props) {
             </p>
           </div>
           <p className="leading-4 mt-0.5 ">
-            <div className="inline-flex flex-row justify-end w-3 overflow-visible ">
+            <span className="inline-flex flex-row justify-end w-3 overflow-visible ">
               <span className="text-right leading-4 ">
                 {Math.floor(currentSec / 60)}
               </span>
-            </div>
+            </span>
             <span>:</span>
             <span className="inline-block w-6 leading-4 ">
               {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}

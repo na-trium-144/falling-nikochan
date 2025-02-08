@@ -84,6 +84,7 @@ interface ChainProps {
   chain: number;
 }
 export function ChainDisp(props: ChainProps) {
+  const t = useTranslations("play.score");
   return (
     <Cloud
       className={
@@ -106,7 +107,7 @@ export function ChainDisp(props: ChainProps) {
           />
         </span>
         <span className="text-left " style={{ fontSize: 16 }}>
-          Chains
+          {t("chain")}
         </span>
       </div>
     </Cloud>

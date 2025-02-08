@@ -12,7 +12,8 @@
       "content1": "ニコチャンが線に重なったときに音符を叩くだけの簡単なルールです。",
       "content2": "ニコチャンの位置や飛び方によらず、 PC なら <inlineBlock>(<key>Esc</key> 以外の)</inlineBlock> どれかのキーを押して、<inlineBlock>タブレット・スマホなら</inlineBlock>画面のどこかをタップすることで音符を叩くことができます。",
       "content3": "大きいニコチャンも通常のニコチャンと同じように叩けますが、2つのキーを同時押しまたは2本指でタップすると、通常より多くのスコアが入ります。",
-      "content4": "ミスせず連続でニコチャンを叩くほど Chain ボーナス点が入り、より多くのスコアがもらえます。"
+      "content4": "ミスせず連続でニコチャンを叩くほどコンボボーナス点が入り、より多くのスコアがもらえます。",
+      "chain": "コンボ"
     },
     "3": {
       "title": "譜面を作ろう",
@@ -31,10 +32,10 @@
     "5": {
       "title": "ゲームの仕様",
       "content1": "ニコチャンを叩いたタイミングによって、<good></good>、<ok></ok>、<bad></bad> の判定があります。",
-      "content2": "スコアは Base Score, Chain Bonus, Big Note Bonus の3つからなり、合計 {total} 点 (大きいニコチャンを2本指で叩かない場合 {totalSmall} 点) が最高となります。",
-      "content3": "Base Score ({baseScoreRate} 点満点) は叩いた音符の判定をもとに計算されます。すべて<good></good>判定なら合計 {baseScoreRate} 点になり、<ok></ok>判定はGood判定の {okBaseScore} 倍の点数が入ります。",
-      "content4": "Chain Bonus ({chainScoreRate} 点満点) はChainに応じて入るボーナス得点です。Chainをつなげればつなげるほど増えます。",
-      "content5": "Big Note Bonus ({bigScoreRate} 点満点) は大きいニコチャンを2本指で叩いた場合に入るボーナス得点です。",
+      "content2": "スコアは「<b>ベーススコア</b>」「<b>コンボボーナス</b>」「<b>Big ボーナス</b>」の3つからなり、合計 {total} 点 (大きいニコチャンを2本指で叩かない場合 {totalSmall} 点) が最高となります。",
+      "content3": "<b>ベーススコア</b> ({baseScoreRate} 点満点) は叩いた音符の判定をもとに計算されます。すべて<good></good>判定なら合計 {baseScoreRate} 点になり、<ok></ok>判定はGood判定の {okBaseScore} 倍の点数が入ります。",
+      "content4": "<b>コンボボーナス</b> ({chainScoreRate} 点満点) はChainに応じて入るボーナス得点です。コンボをつなげればつなげるほど増えます。",
+      "content5": "<b>Big ボーナス</b> ({bigScoreRate} 点満点) は大きいニコチャンを2本指で叩いた場合に入るボーナス得点です。",
       "content6": "合計スコアに応じて、<rank>70</rank>、<rank>80</rank>、<rank>90</rank>、<rank>100</rank>、<rank>110</rank>、<rank>120</rank> のランクで評価されます。"
     }
   }

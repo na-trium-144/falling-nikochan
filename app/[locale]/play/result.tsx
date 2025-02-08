@@ -11,6 +11,7 @@ import {
   chainScoreRate,
 } from "@/../../chartFormat/gameConstant.js";
 import { praiseMessage } from "./praise.js";
+import { useTranslations } from "next-intl";
 
 interface Props {
   isTouch: boolean;
@@ -24,6 +25,8 @@ interface Props {
   largeResult: boolean;
 }
 export default function Result(props: Props) {
+  const t = useTranslations("play.result");
+
   const [message, setMessage] = useState<string>("");
   useEffect(() => {
     setMessage(praiseMessage(props.score));
@@ -64,7 +67,7 @@ export default function Result(props: Props) {
   });
   return (
     <CenterBox>
-      <p className="text-lg font-title font-bold">&lt;Result&gt;</p>
+      <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
       <div
         className={
           "my-2 flex justify-center items-center " +
@@ -72,7 +75,7 @@ export default function Result(props: Props) {
         }
       >
         <div className="flex-1 w-56">
-          <ResultRow visible={showing >= 1} name="Base Score">
+          <ResultRow visible={showing >= 1} name={t("baseScore")}>
             <span
               className="text-3xl text-right "
               style={{
@@ -93,7 +96,7 @@ export default function Result(props: Props) {
                 .padStart(2, "0")}
             </span>
           </ResultRow>
-          <ResultRow visible={showing >= 2} name="Chain Bonus">
+          <ResultRow visible={showing >= 2} name={t("chainBonus")}>
             <span
               className="w-16 text-3xl text-right "
               style={{
@@ -114,7 +117,7 @@ export default function Result(props: Props) {
                 .padStart(2, "0")}
             </span>
           </ResultRow>
-          <ResultRow visible={showing >= 3} name="Big Note Bonus">
+          <ResultRow visible={showing >= 3} name={t("bigNoteBonus")}>
             <span
               className="w-16 text-3xl text-right "
               style={{
@@ -136,7 +139,7 @@ export default function Result(props: Props) {
             </span>
           </ResultRow>
           <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
-          <ResultRow visible={showing >= 4} name="Total Score">
+          <ResultRow visible={showing >= 4} name={t("totalScore")}>
             <span
               className="w-16 text-3xl text-right "
               style={{
@@ -165,7 +168,7 @@ export default function Result(props: Props) {
           }
         >
           <div style={{ ...appearingAnimation(5) }}>
-            <span className="mr-2">Rank:</span>
+            <span className="mr-2">{t("rank")}:</span>
             <span className={props.largeResult ? "text-4xl" : "text-3xl"}>
               {rankStr(props.score)}
             </span>
@@ -176,9 +179,8 @@ export default function Result(props: Props) {
               style={{ ...appearingAnimation(5) }}
             >
               <span className="">
-                {props.baseScore === baseScoreRate ? "Perfect" : "Full"}
+                {props.baseScore === baseScoreRate ? t("perfect") : t("full")}
               </span>
-              <span className="ml-2">Chain</span>
               {props.bigScore === bigScoreRate && (
                 <span className="font-bold">+</span>
               )}
@@ -195,7 +197,7 @@ export default function Result(props: Props) {
           {props.newRecord > 0 && (
             <div style={{ ...appearingAnimation2(6) }}>
               <span className={props.largeResult ? "text-xl " : ""}>
-                New Record!
+                {t("newRecord")}
               </span>
               <span className={"ml-1 " + (props.largeResult ? "" : "text-sm")}>
                 (+
@@ -211,12 +213,12 @@ export default function Result(props: Props) {
       </div>
       <div className="text-center">
         <Button
-          text="もう一度"
+          text={t("reset")}
           keyName={props.isTouch ? undefined : "Space"}
           onClick={() => props.reset()}
         />
         <Button
-          text="やめる"
+          text={t("exit")}
           keyName={props.isTouch ? undefined : "Esc"}
           onClick={() => props.exit()}
         />

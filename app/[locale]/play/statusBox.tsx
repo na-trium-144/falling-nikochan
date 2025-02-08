@@ -8,6 +8,7 @@ import {
   GrinningFaceWithTightlyClosedEyesOpenMouth,
   SmilingFace,
 } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
   isTouch: boolean;
 }
 export default function StatusBox(props: Props) {
+  const t = useTranslations("play.status");
   const { screenWidth, screenHeight, rem, mobileStatusScale } =
     useDisplayMode();
   const isMobile = screenWidth < screenHeight;
@@ -53,7 +55,7 @@ export default function StatusBox(props: Props) {
           </StatusItem>
         ))}
         <StatusItem wide>
-          <StatusName>{props.isMobile ? "Big" : "Big Notes"}</StatusName>
+          <StatusName>{t("big")}</StatusName>
           <StatusValue>{props.bigCount}</StatusValue>
           {!props.isMobile && (
             <span className="w-12 pl-1 flex flex-row items-baseline">
@@ -69,7 +71,7 @@ export default function StatusBox(props: Props) {
           </span>
         )}
         <StatusItem wide>
-          <StatusName>Remains</StatusName>
+          <StatusName>{t("remains")}</StatusName>
           <StatusValue>
             {props.notesTotal - props.judgeCount.reduce((sum, j) => sum + j, 0)}
           </StatusValue>
