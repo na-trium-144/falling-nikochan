@@ -32,7 +32,7 @@
     "5": {
       "title": "Game Specs",
       "content1": "There are <good></good>, <ok></ok>, and <bad></bad> judgments depending on the timing of hitting Nikochan.",
-      "content2": "The score consists of '<b>Base Score</b>,' '<b>Chain Bonus</b>,' and '<b>Big Notes Bonus</b>,' totaling {total} points (if you don't hit big Nikochans with two fingers, {totalSmall} points).",
+      "content2": "The score consists of <b>Base Score</b>, <b>Chain Bonus</b>, and <b>Big Notes Bonus</b>, totaling {total} points (if you don't hit big Nikochans with two fingers, {totalSmall} points).",
       "content3": "<b>Base Score</b> (out of {baseScoreRate} points) is calculated based on the judgment of the notes you hit. If all notes are judged <good></good>, the total score will be {baseScoreRate}, and <ok></ok> judgments will receive {okBaseScore} times the score of <good></good> judgments.",
       "content4": "<b>Chain Bonus</b> (out of {chainScoreRate} points) is a bonus score that increases depending on the Chain. The longer the Chain, the higher the score.",
       "content5": "<b>Big Notes Bonus</b> (out of {bigScoreRate} points) is a bonus score that you get when you hit big Nikochans with two fingers.",
