@@ -96,7 +96,7 @@ export default function ShareChart({ locale }: { locale: string }) {
                   ID: {cid}
                 </Header>
                 <p className="font-title text-2xl">{brief?.title}</p>
-                <p className="font-title text-xl">{brief?.composer}</p>
+                <p className="font-title text-lg">{brief?.composer}</p>
                 <p className="mt-1">
                   <span className="inline-block">
                     <span className="text-sm">{t("chartCreator")}:</span>

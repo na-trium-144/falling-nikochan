@@ -1,6 +1,7 @@
 "use client";
 
 import { useDisplayMode } from "@/scale.js";
+import { useTranslations } from "next-intl";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 interface CProps {
@@ -50,19 +51,25 @@ interface Props {
   auto: boolean;
 }
 export function ScoreDisp(props: Props) {
+  const t = useTranslations("play.score");
   const { score, best } = props;
   return (
     <Cloud className="flex flex-col">
       <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
-        <span className="flex-1 text-md">Score</span>
+        <span className="flex-1 min-w-0 text-base overflow-visible text-nowrap ">
+          {t("score")}
+        </span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim />
       </div>
       {props.auto ? (
-        <div className="text-center">&lt;&lt; AutoPlay &gt;&gt;</div>
+        <div className="text-center text-lg mt-1 ">&lt;&lt; {t("auto")} &gt;&gt;</div>
       ) : (
         <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
-          <span className="flex-1 " style={{ fontSize: 16, marginRight: 8 }}>
-            Best Score
+          <span
+            className="flex-1 min-w-0 text-base overflow-visible text-nowrap "
+            style={{ fontSize: 16, marginRight: 8 }}
+          >
+            {t("bestScore")}
           </span>
           <NumDisp num={best} fontSize1={24} fontSize2={24} />
         </div>

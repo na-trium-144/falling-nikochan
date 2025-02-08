@@ -21,7 +21,7 @@ export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
-  const largeTitle = props.isMobile && height && height > 8 * rem;
+  const largeTitle = props.isMobile ? height && height > 8 * rem : true;
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
@@ -72,85 +72,106 @@ export function MusicArea(props: Props) {
             onStop={props.onStop}
           />
         )}
-        <div className="flex-1 min-w-0 mr-1 flex flex-col ">
-          <p
-            className={
-              "font-title leading-tight " +
-              (largeTitle ? "text-2xl " : "text-lg ") +
-              (props.isMobile
-                ? "overflow-hidden w-full text-ellipsis whitespace-nowrap "
-                : "")
-            }
-          >
-            {props.chartBrief?.title}
-          </p>
-          <p
-            className={
-              "font-title leading-tight " +
-              (largeTitle ? "text-lg " : "text-sm ") +
-              (props.isMobile
-                ? "overflow-hidden w-full text-ellipsis whitespace-nowrap "
-                : "")
-            }
-          >
-            {props.chartBrief?.composer}
-          </p>
-          <p
-            className="w-full flex-1 "
-            style={{
-              fontSize: largeTitle ? "1.25rem" : "1rem",
-              lineHeight: 1.1,
-            }}
-          >
-            {props.lvIndex !== undefined &&
-              props.chartBrief?.levels[props.lvIndex] && (
-                <span
-                  className={
-                    "inline-block " +
-                    (props.isMobile
-                      ? "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
-                      : "")
-                  }
-                >
-                  {props.chartBrief?.levels[props.lvIndex].name && (
-                    <span className="font-title mr-1">
-                      {props.chartBrief?.levels[props.lvIndex].name}
-                    </span>
-                  )}
-                  <span style={{ fontSize: "0.875em" }}>{props.lvType}-</span>
-                  <span style={{ fontSize: "1.125em" }}>
-                    {props.chartBrief?.levels[props.lvIndex]?.difficulty}
-                  </span>
-                </span>
-              )}
-            <span
-              className={
-                "inline-block " +
-                (props.isMobile
-                  ? "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
-                  : "")
-              }
-            >
-              <span className="ml-2 " style={{ fontSize: "0.75em" }}>
-                by
+        <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">
+          <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
+            <p className={largeTitle ? "leading-5" : "leading-4"}>
+              <span
+                className={
+                  "inline-block font-title " +
+                  (largeTitle ? "text-2xl leading-6 " : "text-lg leading-4 ") +
+                  "align-bottom " +
+                  "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                }
+              >
+                {props.chartBrief?.title}
               </span>
               <span
-                className="ml-1.5 font-title "
-                style={{ fontSize: "0.875em" }}
+                className={
+                  "inline-block font-title " +
+                  (largeTitle ? "text-lg leading-4 " : "text-sm leading-3 ") +
+                  "align-bottom " +
+                  "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                }
               >
-                {props.chartBrief?.chartCreator}
+                <span className="mx-1">/</span>
+                {props.chartBrief?.composer}
               </span>
-            </span>
-          </p>
-          <p className="" style={{ marginBottom: "-0.2rem" }}>
-            <span className="inline-block w-3 text-right">
-              {Math.floor(currentSec / 60)}
-            </span>
+            </p>
+            <p className={"mt-0.5 " + (largeTitle ? "leading-4" : "leading-3")}>
+              {props.lvIndex !== undefined &&
+                props.chartBrief?.levels[props.lvIndex] && (
+                  <span
+                    className={
+                      "inline-block align-bottom " +
+                      "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                    }
+                  >
+                    {props.chartBrief?.levels[props.lvIndex].name && (
+                      <span
+                        className={
+                          "font-title mr-1 " +
+                          (largeTitle
+                            ? "text-lg leading-6 "
+                            : "text-base leading-5 ")
+                        }
+                      >
+                        {props.chartBrief?.levels[props.lvIndex].name}
+                      </span>
+                    )}
+                    <span
+                      className={
+                        largeTitle
+                          ? "text-base leading-6 "
+                          : "text-sm leading-5 "
+                      }
+                    >
+                      {props.lvType}-
+                    </span>
+                    <span
+                      className={
+                        largeTitle ? "text-xl leading-6 " : "text-lg leading-5 "
+                      }
+                    >
+                      {props.chartBrief?.levels[props.lvIndex]?.difficulty}
+                    </span>
+                  </span>
+                )}
+              <span
+                className={
+                  "inline-block align-bottom " +
+                  "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                }
+              >
+                <span
+                  className={
+                    "ml-2 " +
+                    (largeTitle ? "text-sm leading-5 " : "text-xs leading-3 ")
+                  }
+                >
+                  by
+                </span>
+                <span
+                  className={
+                    "ml-1.5 font-title " +
+                    (largeTitle ? "text-lg leading-5 " : "text-sm leading-3 ")
+                  }
+                >
+                  {props.chartBrief?.chartCreator}
+                </span>
+              </span>
+            </p>
+          </div>
+          <p className="leading-4 mt-0.5 ">
+            <div className="inline-flex flex-row justify-end w-3 overflow-visible ">
+              <span className="text-right leading-4 ">
+                {Math.floor(currentSec / 60)}
+              </span>
+            </div>
             <span>:</span>
-            <span className="inline-block w-6 ">
+            <span className="inline-block w-6 leading-4 ">
               {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
             </span>
-            <span className="text-sm ">
+            <span className="text-sm leading-4 ">
               <span>/</span>
               <span className="ml-1 ">{Math.floor(levelLength / 60)}</span>
               <span>:</span>
