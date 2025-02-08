@@ -23,14 +23,14 @@ interface Props {
 }
 export async function generateMetadata({ params }: Props) {
   const aboutIndex = (await params).aboutIndex;
-  const t = await getTranslations(params, `main.about.${aboutIndex}`);
+  const t = await getTranslations(params, `about.${aboutIndex}`);
   return initMetadata(params, `/main/about/${aboutIndex}`, t("title"));
 }
 
 export default async function AboutTab({ params }: Props) {
   const aboutIndex = Number((await params).aboutIndex);
   const locale = (await params).locale;
-  const t = await getTranslations(params, `main.about.${aboutIndex}`);
+  const t = await getTranslations(params, `about.${aboutIndex}`);
 
   return (
     <IndexMain tab={0} locale={locale}>
@@ -41,17 +41,17 @@ export default async function AboutTab({ params }: Props) {
         hrefAfter={`/${locale}/main/about/${aboutIndex + 1}`}
         title={t("title")}
       />
-      <div className="flex-1 text-center break-keep break-words">
+      <div className="flex-1 text-center">
         {aboutIndex === 1 ? (
-          <AboutContent1 />
+          <AboutContent1 locale={locale} />
         ) : aboutIndex === 2 ? (
           <AboutContent2 />
         ) : aboutIndex === 3 ? (
           <AboutContent3 />
         ) : aboutIndex === 4 ? (
-          <AboutContent4 />
+          <AboutContent4 locale={locale} />
         ) : aboutIndex === 5 ? (
-          <AboutContent5 />
+          <AboutContent5 locale={locale} />
         ) : (
           <p> Not Found</p>
         )}

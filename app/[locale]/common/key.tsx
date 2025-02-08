@@ -1,5 +1,7 @@
+import { ReactNode } from "react";
+
 interface KeyProps {
-  children: string;
+  children: ReactNode;
   className?: string;
 }
 export function Key(props: KeyProps) {

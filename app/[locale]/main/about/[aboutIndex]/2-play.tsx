@@ -2,9 +2,11 @@
 
 import { Key } from "@/common/key.js";
 import TargetLine from "@/common/targetLine.js";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
 export function AboutContent2() {
+  const t = useTranslations("about.2");
   const [nikochanPhase, setNikochanPhase] = useState<number>(0);
   const [barFlash, setBarFlash] = useState<boolean>(false);
   const [chain, setChain] = useState<number>(0);
@@ -52,51 +54,13 @@ export function AboutContent2() {
         }
       >
         <div className="flex-1 space-y-2">
+          <p>{t("content1")}</p>
           <p>
-            ニコチャンが
-            <wbr />
-            線に
-            <wbr />
-            重なった
-            <wbr />
-            ときに
-            <wbr />
-            音符を
-            <wbr />
-            叩くだけの
-            <wbr />
-            簡単な
-            <wbr />
-            ルールです。
-          </p>
-          <p>
-            ニコチャンの
-            <wbr />
-            位置や
-            <wbr />
-            飛び方に
-            <wbr />
-            よらず、 PC なら (<Key className="px-0.5 mx-0.5">Esc</Key> 以外の)
-            どれかの
-            <wbr />
-            キーを
-            <wbr />
-            押して、
-            {/*優先的にここで改行してほしい*/}
-            <span className="inline-block">タブレット・スマホなら</span>
-            画面の
-            <wbr />
-            どこかを
-            <wbr />
-            タップする
-            <wbr />
-            ことで
-            <wbr />
-            音符を
-            <wbr />
-            叩くことが
-            <wbr />
-            できます。
+            {/*優先的に改行してほしい位置にinlineBlockを入れる*/}
+            {t.rich("content2", {
+              key: (c) => <Key className="px-0.5 mx-0.5">{c}</Key>,
+              inlineBlock: (c) => <span className="inline-block">{c}</span>,
+            })}
           </p>
         </div>
         <div
@@ -142,58 +106,8 @@ export function AboutContent2() {
         }
       >
         <div className="flex-1 space-y-2 text-center">
-          <p>
-            大きい
-            <wbr />
-            ニコチャンも
-            <wbr />
-            通常の
-            <wbr />
-            ニコチャンと
-            <wbr />
-            同じように
-            <wbr />
-            叩けますが、
-            <wbr />
-            2つの
-            <wbr />
-            キーを
-            <wbr />
-            同時押し
-            <wbr />
-            または
-            <wbr />
-            2本指で
-            <wbr />
-            タップする
-            <wbr />
-            と、
-            <wbr />
-            通常より
-            <wbr />
-            多くの
-            <wbr />
-            スコアが
-            <wbr />
-            入ります。
-          </p>
-          <p>
-            ミスせず
-            <wbr />
-            連続で
-            <wbr />
-            ニコチャンを
-            <wbr />
-            叩くほど Chain ボーナス点が
-            <wbr />
-            入り、
-            <wbr />
-            より多くの
-            <wbr />
-            スコアが
-            <wbr />
-            もらえます。
-          </p>
+          <p>{t("content3")}</p>
+          <p>{t("content4")}</p>
         </div>
         <div
           className={

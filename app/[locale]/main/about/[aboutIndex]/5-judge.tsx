@@ -9,179 +9,99 @@ import {
   okSec,
 } from "@/../../chartFormat/gameConstant.js";
 import { rankStr } from "@/common/rank.js";
+import { getTranslations } from "@/getTranslations";
 import { JudgeIcon } from "@/play/statusBox.js";
-import { Fragment } from "react";
 
-export function AboutContent5() {
+interface Props {
+  locale: string;
+}
+export async function AboutContent5(props: Props) {
+  const t = await getTranslations(props.locale, "about.5");
   return (
     <>
       <div className="mb-4 space-y-2">
         <p>
-          ニコチャンを
-          <wbr />
-          叩いた
-          <wbr />
-          タイミングに
-          <wbr />
-          よって、
-          <span className="relative inline-block">
-            <span className="absolute left-0.5 bottom-1">
-              <JudgeIcon index={0} />
-            </span>
-            <span className="ml-5">Good</span>
-            <span className="text-sm mx-0.5">(±{goodSec * 1000}ms)</span>
-          </span>
-          ,
-          <span className="relative inline-block">
-            <span className="absolute left-0.5 bottom-1">
-              <JudgeIcon index={1} />
-            </span>
-            <span className="ml-5">OK</span>
-            <span className="text-sm mx-0.5">(±{okSec * 1000}ms)</span>
-          </span>
-          ,
-          <span className="relative inline-block">
-            <span className="absolute left-0.5 bottom-1">
-              <JudgeIcon index={2} />
-            </span>
-            <span className="ml-5">Bad</span>
-            <span className="text-sm mx-0.5">
-              (+{badLateSec * 1000}ms 〜 {badFastSec * 1000}ms)
-            </span>
-          </span>
-          の<wbr />
-          判定が
-          <wbr />
-          あります。
+          {t.rich("content1", {
+            good: () => (
+              <span className="relative inline-block">
+                <span className="absolute left-0.5 bottom-1">
+                  <JudgeIcon index={0} />
+                </span>
+                <span className="ml-5">Good</span>
+                <span className="text-sm mx-0.5">(±{goodSec * 1000}ms)</span>
+              </span>
+            ),
+            ok: () => (
+              <span className="relative inline-block">
+                <span className="absolute left-0.5 bottom-1">
+                  <JudgeIcon index={1} />
+                </span>
+                <span className="ml-5">OK</span>
+                <span className="text-sm mx-0.5">(±{okSec * 1000}ms)</span>
+              </span>
+            ),
+            bad: () => (
+              <span className="relative inline-block">
+                <span className="absolute left-0.5 bottom-1">
+                  <JudgeIcon index={2} />
+                </span>
+                <span className="ml-5">Bad</span>
+                <span className="text-sm mx-0.5">
+                  (+{badLateSec * 1000}ms 〜 {badFastSec * 1000}ms)
+                </span>
+              </span>
+            ),
+          })}
         </p>
         <p>
-          スコアは Base Score, Chain Bonus, Big Note Bonus の<wbr />
-          3つから
-          <wbr />
-          なり、
-          <wbr />
-          合計
-          <span className="mx-0.5">
-            {baseScoreRate + chainScoreRate + bigScoreRate}
-          </span>
-          点 (大きい
-          <wbr />
-          ニコチャンを
-          <wbr />
-          2本指で
-          <wbr />
-          叩かない
-          <wbr />
-          場合
-          <span className="mx-0.5">{baseScoreRate + chainScoreRate}</span>
-          点) が<wbr />
-          最高と
-          <wbr />
-          なります。
+          {t("content2", {
+            total: baseScoreRate + chainScoreRate + bigScoreRate,
+            totalSmall: baseScoreRate + chainScoreRate,
+          })}
         </p>
         <ul className="list-inside list-disc">
           <li>
-            Base Score ({baseScoreRate} 点満点) は<wbr />
-            叩いた
-            <wbr />
-            音符の
-            <wbr />
-            判定を
-            <wbr />
-            もとに
-            <wbr />
-            計算
-            <wbr />
-            されます。
-            <wbr />
-            すべて
-            <span className="relative inline-block">
-              <span className="absolute left-0.5 bottom-1">
-                <JudgeIcon index={0} />
-              </span>
-              <span className="ml-5 mr-1">Good</span>
-            </span>
-            判定なら
-            <wbr />
-            合計 {baseScoreRate} 点に
-            <wbr />
-            なり、
-            <span className="relative inline-block">
-              <span className="absolute left-0.5 bottom-1">
-                <JudgeIcon index={1} />
-              </span>
-              <span className="ml-5 mr-1">OK</span>
-            </span>
-            判定は
-            <wbr />
-            Good判定の {okBaseScore} 倍の
-            <wbr />
-            点数が
-            <wbr />
-            入ります。
+            {t.rich("content3", {
+              baseScoreRate,
+              okBaseScore,
+              chainScoreRate,
+              bigScoreRate,
+              good: () => (
+                <span className="relative inline-block">
+                  <span className="absolute left-0.5 bottom-1">
+                    <JudgeIcon index={0} />
+                  </span>
+                  <span className="ml-5 mr-1">Good</span>
+                </span>
+              ),
+              ok: () => (
+                <span className="relative inline-block">
+                  <span className="absolute left-0.5 bottom-1">
+                    <JudgeIcon index={1} />
+                  </span>
+                  <span className="ml-5 mr-1">OK</span>
+                </span>
+              ),
+            })}
           </li>
           <li>
-            Chain Bonus ({chainScoreRate} 点満点) は<wbr />
-            Chainに
-            <wbr />
-            応じて
-            <wbr />
-            入る
-            <wbr />
-            ボーナス
-            <wbr />
-            得点です。
-            <wbr />
-            Chainを
-            <wbr />
-            つなげれば
-            <wbr />
-            つなげる
-            <wbr />
-            ほど
-            <wbr />
-            増えます。
+            {t("content4", {
+              chainScoreRate,
+            })}
           </li>
-          <li>
-            Big Note Bonus ({bigScoreRate} 点満点) は<wbr />
-            大きい
-            <wbr />
-            ニコチャンを
-            <wbr />
-            2本指で
-            <wbr />
-            叩いた
-            <wbr />
-            場合に
-            <wbr />
-            入る
-            <wbr />
-            ボーナス
-            <wbr />
-            得点です。
-            <wbr />
-          </li>
+          <li>{t("content5", { bigScoreRate })}</li>
         </ul>
       </div>
       <div className="mb-4 space-y-2">
         <p>
-          合計スコアに
-          <wbr />
-          応じて、
-          <span className="mx-0.5">
-            {rankStr(0)}
-            {[70, 80, 90, 100, 110, 120].map((s) => (
-              <Fragment key={s}>
-                , {rankStr(s)}
-                <span className="text-sm ml-0.5">({s}〜)</span>
-              </Fragment>
-            ))}
-          </span>
-          のランクで
-          <wbr />
-          評価
-          <wbr />
-          されます。
+          {t.rich("content6", {
+            rank: (c) => (
+              <span>
+                {rankStr(Number(c))}
+                <span className="text-sm ml-0.5">({c}〜)</span>
+              </span>
+            ),
+          })}
         </p>
       </div>
     </>

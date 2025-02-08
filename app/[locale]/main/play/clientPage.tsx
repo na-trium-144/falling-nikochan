@@ -17,6 +17,7 @@ import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
 import { originalCId, sampleCId } from "../const.js";
 import { useTranslations } from "next-intl";
+import { SmallDomain } from "@/common/smallDomain.js";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
@@ -142,23 +143,7 @@ export default function PlayTab({ locale }: { locale: string }) {
         <p className="pl-2 text-justify">{t("input-id-desc")}</p>
         <p className="pl-2 text-justify">
           {t.rich("input-id-desc2", {
-            url: () => (
-              <span className="text-sm">
-                nikochan.
-                <wbr />
-                natrium
-                <wbr />
-                144.
-                <wbr />
-                org
-                <wbr />
-                &#47;
-                <wbr />
-                share
-                <wbr />
-                &#47;〜
-              </span>
-            ),
+            url: () => <SmallDomain />,
           })}
         </p>
       </div>
@@ -180,7 +165,9 @@ export default function PlayTab({ locale }: { locale: string }) {
               left
             />
           </h4>
-          <p className="pl-2 text-justify text-sm ">({t("input-direct-devonly")})</p>
+          <p className="pl-2 text-justify text-sm ">
+            ({t("input-direct-devonly")})
+          </p>
         </div>
       )}
       <div className="mb-3">

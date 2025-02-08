@@ -1,11 +1,14 @@
 "use client";
 
 import { Box } from "@/common/box.js";
+import { SmallDomain } from "@/common/smallDomain";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { Youtube } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 
 export function AboutContent3() {
+  const t = useTranslations("about.3");
   const { screenWidth, rem, isMobileMain } = useDisplayMode();
 
   return (
@@ -18,99 +21,24 @@ export function AboutContent3() {
         }
       >
         <div className="flex-1 space-y-2 text-center">
+          <p>{t("content1")}</p>
           <p>
-            好きな楽曲を
-            <wbr />
-            使って
-            <wbr />
-            譜面を
-            <wbr />
-            作ることが
-            <wbr />
-            できます。
+            {t.rich("content2", {
+              youtube: (c) => (
+                <span className="relative inline-block">
+                  <Youtube
+                    className="absolute left-0.5 bottom-1"
+                    theme="filled"
+                  />
+                  <span className="ml-5 mr-1">{c}</span>
+                </span>
+              ),
+            })}
           </p>
           <p>
-            Falling Nikochan では
-            <wbr />
-            音源を
-            <wbr />
-            ダウンロード
-            <wbr />
-            する必要は
-            <wbr />
-            なく、
-            <span className="relative inline-block">
-              <Youtube className="absolute left-0.5 bottom-1" theme="filled" />
-              <span className="ml-5 mr-1">YouTube</span>
-            </span>
-            を<wbr />
-            埋め込んで
-            <wbr />
-            音源を
-            <wbr />
-            再生する
-            <wbr />
-            ので、
-            <wbr />
-            YouTube に<wbr />
-            アップロード
-            <wbr />
-            されている
-            <wbr />
-            楽曲で
-            <wbr />
-            あれば
-            <wbr />
-            なんでも
-            <wbr />
-            使用できます。
-          </p>
-          <p>
-            音源を
-            <wbr />
-            再配布
-            <wbr />
-            している
-            <wbr />
-            わけでは
-            <wbr />
-            ないので、
-            <span className="text-sm mx-1">
-              (違法
-              <wbr />
-              アップロード
-              <wbr />
-              されている
-              <wbr />
-              ものや YouTube 埋め込み
-              <wbr />
-              での
-              <wbr />
-              利用を
-              <wbr />
-              禁止
-              <wbr />
-              されている
-              <wbr />
-              もの
-              <wbr />
-              などを
-              <wbr />
-              除き)
-            </span>
-            ほとんどの
-            <wbr />
-            場合
-            <wbr />
-            著作権などで
-            <wbr />
-            問題に
-            <wbr />
-            なる
-            <wbr />
-            ことは
-            <wbr />
-            ありません。
+            {t.rich("content3", {
+              small: (c) => <span className="text-sm">{c}</span>,
+            })}
           </p>
         </div>
         {screenWidth >= 25 * rem && (
@@ -168,54 +96,11 @@ export function AboutContent3() {
         )}
       </div>
       <div className="mb-4 space-y-2 text-center">
+        <p>{t("content4")}</p>
         <p>
-          譜面を作って Falling Nikochan の
-          <wbr />
-          サーバーに
-          <wbr />
-          アップロード
-          <wbr />
-          すると、
-          <wbr />
-          譜面ID (6桁の数字) が<wbr />
-          発行されます。
-          <wbr />
-        </p>
-        <p>
-          その譜面ID
-          <wbr />
-          または
-          <wbr />
-          譜面のURL
-          <span className="text-sm mx-1">
-            (nikochan.
-            <wbr />
-            natrium144.
-            <wbr />
-            org
-            <wbr />
-            &#47;
-            <wbr />
-            share
-            <wbr />
-            &#47;〜)
-          </span>
-          を<wbr />
-          SNS
-          <wbr />
-          などで
-          <wbr />
-          共有する
-          <wbr />
-          ことで、
-          <wbr />
-          遊んで
-          <wbr />
-          もらう
-          <wbr />
-          ことが
-          <wbr />
-          できます。
+          {t.rich("content5", {
+            url: () => <SmallDomain />,
+          })}
         </p>
       </div>
     </>
