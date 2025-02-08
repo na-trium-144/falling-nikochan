@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @theme {
-  --breakpoint-override: 0;
   --breakpoint-main-wide: 48rem; /* タイトルと各タブの内容が別ページ */
   --breakpoint-footer-wide: 36rem; /* Footerのナビゲーションを横並びにする */
   --breakpoint-footer-wide2: 36rem; /* build情報を横並びにする */

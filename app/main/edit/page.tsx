@@ -85,7 +85,7 @@ export default function EditTab() {
             left
           />
           <ExternalLink
-            className={"ml-1 " + (inputCId !== "" ? "" : "override:hidden ")}
+            className={"ml-1 " + (inputCId !== "" ? "" : "hidden! ")}
             href={`/edit?cid=${inputCId}`}
           >
             新しいタブで開く
