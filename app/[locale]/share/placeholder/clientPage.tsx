@@ -12,18 +12,23 @@ import Button from "@/common/button.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@/main/const.js";
 import { International, PlayOne } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 
 export const dynamic = "force-static";
 
 export default function ShareChart({ locale }: { locale: string }) {
+  const t = useTranslations("share");
+
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string>("");
 
   useEffect(() => {
     setCId(window.location.href.split("/").pop()!);
+    let brief: ChartBrief;
     if (process.env.NODE_ENV === "development") {
-      setBrief({
+      brief = {
         title: "placeholder",
         composer: "placeholder",
         chartCreator: "placeholder",
@@ -44,10 +49,12 @@ export default function ShareChart({ locale }: { locale: string }) {
             unlisted: false,
           },
         ],
-      });
+      };
     } else {
-      setBrief(JSON.parse("PLACEHOLDER_BRIEF"));
+      brief = JSON.parse("PLACEHOLDER_BRIEF");
     }
+    setBrief(brief);
+    setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
   }, []);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
@@ -60,7 +67,9 @@ export default function ShareChart({ locale }: { locale: string }) {
 
   return (
     <main className="flex flex-col items-center w-full min-h-dvh h-max">
-      <Header className="main-wide:hidden">ID: {cid}</Header>
+      <Header className="main-wide:hidden" locale={locale}>
+        ID: {cid}
+      </Header>
       <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
         {brief !== null && (
           <Box
@@ -80,32 +89,33 @@ export default function ShareChart({ locale }: { locale: string }) {
                 ytPlayer={ytPlayer}
               />
               <div className="main-wide:flex-1 main-wide:self-start">
-                <Header className="hidden main-wide:block mb-2 pl-0">
+                <Header
+                  className="hidden main-wide:block mb-2 pl-0"
+                  locale={locale}
+                >
                   ID: {cid}
                 </Header>
                 <p className="font-title text-2xl">{brief?.title}</p>
-                <p className="font-title text-lg">{brief?.composer}</p>
+                <p className="font-title text-xl">{brief?.composer}</p>
                 <p className="mt-1">
                   <span className="inline-block">
-                    <span className="text-sm">Chart by</span>
-                    <span className="ml-3 font-title text-lg">
+                    <span className="text-sm">{t("chartCreator")}:</span>
+                    <span className="ml-2 font-title text-lg">
                       {brief.chartCreator}
                     </span>
                   </span>
                   <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
-                    <span className="inline-block">
-                      ({new Date(brief.updatedAt).toLocaleDateString()})
-                    </span>
+                    <span className="inline-block">({updatedAt})</span>
                     <span>
                       {isSample(cid) ? (
                         <span className="ml-2">
                           <International className="inline-block w-5 translate-y-0.5" />
-                          <span>サンプル譜面</span>
+                          <span>{t("isSample")}</span>
                         </span>
                       ) : brief.published ? (
                         <span className="ml-2">
                           <International className="inline-block w-5 translate-y-0.5" />
-                          <span>一般公開</span>
+                          <span>{t("isPublished")}</span>
                         </span>
                       ) : (
                         <>
@@ -129,14 +139,14 @@ export default function ShareChart({ locale }: { locale: string }) {
             </div>
             <p className="mt-2">
               <span className="hidden main-wide:inline-block mr-2">
-                共有用リンク:
+                {t("shareLink")}:
               </span>
               <Link
                 className={"inline-block py-2 " + linkStyle1}
                 href={`/share/${cid}`}
                 prefetch={false}
               >
-                <span className="main-wide:hidden">共有用リンク</span>
+                <span className="main-wide:hidden">{t("shareLink")}</span>
                 <span className="hidden main-wide:inline-block">
                   {origin}/share/{cid}
                 </span>
@@ -144,7 +154,7 @@ export default function ShareChart({ locale }: { locale: string }) {
               {hasClipboard && (
                 <Button
                   className="ml-2"
-                  text="コピー"
+                  text={t("copy")}
                   onClick={() =>
                     navigator.clipboard.writeText(`${origin}/share/${cid}`)
                   }

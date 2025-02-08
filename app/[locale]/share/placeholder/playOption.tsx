@@ -13,6 +13,7 @@ import { rankStr } from "@/common/rank.js";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 import { RightOne, SmilingFace, Timer } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -20,6 +21,8 @@ interface Props {
   brief: ChartBrief;
 }
 export function PlayOption(props: Props) {
+  const t = useTranslations("share");
+
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number>(
     props.brief.levels.findIndex((l) => !l.unlisted)
@@ -46,7 +49,7 @@ export function PlayOption(props: Props) {
 
   return (
     <>
-      <p>レベルを選択:</p>
+      <p>{t("selectLevel")}:</p>
       <ul className="ml-2 mt-1 mb-2">
         {props.brief.levels.map(
           (level, i) =>
@@ -141,7 +144,7 @@ export function PlayOption(props: Props) {
                 : "text-slate-400 dark:text-stone-600 ")
             }
           >
-            <span>Best Score:</span>
+            <span>{t("bestScore")}:</span>
             <span className="inline-block text-2xl w-12 text-right">
               {Math.floor(totalScore)}
             </span>
@@ -207,7 +210,7 @@ export function PlayOption(props: Props) {
           </p>
           <p className="mt-3">
             <Button
-              text="ゲーム開始！"
+              text={t("start")}
               onClick={() => {
                 // 押したときにも再度sessionを初期化
                 const sessionId = initSession({
@@ -223,7 +226,7 @@ export function PlayOption(props: Props) {
           </p>
         </>
       ) : (
-        <p className="ml-2 ">公開されている譜面がまだありません。</p>
+        <p className="ml-2 ">{t("unavailable")}</p>
       )}
     </>
   );

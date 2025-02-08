@@ -4,6 +4,7 @@ export async function getMessages(locale: string) {
   return {
     ...(await import(`../i18n/${locale}/main.json`)).default,
     ...(await import(`../i18n/${locale}/about.json`)).default,
+    ...(await import(`../i18n/${locale}/share.json`)).default,
   };
 }
 
