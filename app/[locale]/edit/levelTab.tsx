@@ -7,6 +7,7 @@ import {
 import { difficulty } from "@/../../chartFormat/difficulty.js";
 import { Step, stepCmp } from "@/../../chartFormat/step.js";
 import Button from "@/common/button.js";
+import { HelpIcon } from "@/common/caption";
 import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input.js";
 import { levelColors } from "@/common/levelColors";
@@ -226,8 +227,8 @@ export default function LevelTab(props: Props) {
             >
               {t("unlistLevel")}
             </CheckBox>
+            <HelpIcon>{t.rich("unlistHelp", {br:() => <br/>})}</HelpIcon>
           </p>
-          <p className="ml-6 text-sm">{t("unlistDesc")}</p>
         </>
       )}
     </>

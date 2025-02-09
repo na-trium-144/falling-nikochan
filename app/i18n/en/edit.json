@@ -1,6 +1,7 @@
 {
   "edit": {
     "title": "Chart Editor",
+    "help": "Help",
     "enterPasswd": "Enter the password to edit.",
     "passwdFailed": "Password is incorrect.",
     "submitPasswd": "Go",

@@ -22,6 +22,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Close, CornerDownLeft } from "@icon-park/react";
 import { useTranslations } from "next-intl";
+import { HelpIcon } from "@/common/caption";
 
 interface Props {
   offset?: number;
@@ -86,9 +87,11 @@ export default function TimingTab(props: Props) {
           isValid={offsetValid}
         />
         <span>{t("offsetSecond")}</span>
+        <HelpIcon>{t.rich("offsetHelp", { br: () => <br /> })}</HelpIcon>
       </div>
       <div>
         <span>{t("step")}</span>
+        <HelpIcon>{t.rich("stepHelp", {br:() => <br/>})}</HelpIcon>
         <span className="inline-block text-right w-6">
           {ss && ss.barNum + 1}
         </span>
@@ -111,6 +114,7 @@ export default function TimingTab(props: Props) {
       </div>
       <div className="ml-2">
         <span>{t("bpm")}</span>
+        <HelpIcon>{t.rich("bpmHelp", { br: () => <br /> })}</HelpIcon>
         <Input
           className="w-16 ml-1"
           actualValue={
@@ -176,6 +180,11 @@ export default function TimingTab(props: Props) {
       </div>
       <div className="ml-2">
         <span>{t("speed")}</span>
+        <HelpIcon>
+          <p>{t.rich("speedHelp1", { br: () => <br /> })}</p>
+          <p className="mt-2">{t.rich("speedHelp2", { br: () => <br /> })}</p>
+          <p className="mt-2">{t.rich("speedHelp3", { br: () => <br /> })}</p>
+        </HelpIcon>
         <Input
           className="w-16 ml-1"
           actualValue={
@@ -215,8 +224,12 @@ export default function TimingTab(props: Props) {
             </span>
           )}
       </div>
-      <div className="mt-3">
-        <span>{t("beat")}:</span>
+      <div className="ml-2">
+        <span>{t("beat")}</span>
+        <HelpIcon>
+          <p>{t.rich("beatHelp1", { br: () => <br /> })}</p>
+          <p className="mt-2">{t.rich("beatHelp2", { br: () => <br /> })}</p>
+        </HelpIcon>
         <span className="inline-block">
           <span className="ml-2">
             {props.signatureChangeHere
@@ -298,7 +311,7 @@ export default function TimingTab(props: Props) {
           </>
         )}
       </div>
-      <ul className="list-disc mt-1 pl-6">
+      <ul className="list-disc ml-2 pl-6">
         {props.currentSignature?.bars.map((bar, i) => (
           <li className="w-full" key={i}>
             <div className="flex flex-row w-full items-baseline ">
@@ -343,7 +356,7 @@ export default function TimingTab(props: Props) {
                   .map((bs, j) => (
                     <button
                       key={j}
-                      className="rounded-full hover:bg-slate-200 active:bg-slate-300 "
+                      className="rounded-full hover:bg-slate-200 active:bg-slate-300 p-1 "
                       onClick={() => {
                         const countIndex = bar.length - 1 - j;
                         while (true) {
@@ -424,6 +437,27 @@ export default function TimingTab(props: Props) {
               >
                 <Close />
               </button>
+              {i === 0 && <HelpIcon className="self-center">
+                <p>
+                  {t.rich("beatBarHelp1", {
+                    br: () => <br />,
+                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
+                  })}
+                </p>
+                <p className="mt-2">
+                  {t.rich("beatBarHelp2", {
+                    br: () => <br />,
+                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
+                  })}
+                </p>
+                <p className="mt-2">
+                  {t.rich("beatBarHelp3", {
+                    br: () => <br />,
+                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
+                    add: () => <CornerDownLeft className="inline-block align-middle"/>,
+                  })}
+                </p>
+              </HelpIcon>}
             </div>
           </li>
         ))}
@@ -518,7 +552,7 @@ export function BeatSlime(props: { size: 4 | 8 | 16 }) {
   return (
     <img
       src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
-      className="inline-block m-1 "
+      className="inline-block"
       style={{
         width:
           (props.size === 4 ? 1 : props.size === 8 ? 0.75 : 0.5) * 2 + "rem",

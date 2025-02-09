@@ -9,6 +9,7 @@ import CheckBox from "@/common/checkBox.js";
 import { getSignatureState } from "@/../../chartFormat/seq.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
+import { HelpIcon } from "@/common/caption";
 
 interface Props {
   currentNoteIndex: number;
@@ -158,6 +159,9 @@ function NoteEdit(props: Props) {
                   </span>
                   )
                 </span>
+                <HelpIcon>
+                  {t.rich("positionHelp", { br: () => <br /> })}
+                </HelpIcon>
               </td>
               <td>x =</td>
               <td>
@@ -187,6 +191,12 @@ function NoteEdit(props: Props) {
                   </span>
                   )
                 </span>
+                <HelpIcon>
+                  <p>{t.rich("velocityHelp1", { br: () => <br /> })}</p>
+                  <p className="mt-2">
+                    {t.rich("velocityHelp2", { br: () => <br /> })}
+                  </p>
+                </HelpIcon>
               </td>
               <td>vx =</td>
               <td>
@@ -267,12 +277,13 @@ function NoteEdit(props: Props) {
             <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </CheckBox>
         </div>
-        <div>
-          <span>{t("fallMode")}:</span>
+        <div className="mt-2 ml-2">
+          <span>{t("fallMode")}</span>
+          <HelpIcon>{t.rich("fallModeHelp", { br: () => <br /> })}</HelpIcon>
           <Select
             value={n.fall ? "1" : "0"}
-            values={["0", "1"]}
-            options={[t("fallModeFalse"), t("fallModeTrue")]}
+            values={["1", "0"]}
+            options={[t("fallModeTrue"), t("fallModeFalse")]}
             onChange={(v) => props.updateNote({ ...n, fall: !!Number(v) })}
             disabled={!noteEditable}
           />

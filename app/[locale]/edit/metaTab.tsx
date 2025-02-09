@@ -24,6 +24,7 @@ import YAML from "yaml";
 import CheckBox from "@/common/checkBox.js";
 import { Caution } from "@icon-park/react";
 import { useTranslations } from "next-intl";
+import { HelpIcon } from "@/common/caption";
 
 interface Props {
   chart?: Chart;
@@ -43,6 +44,7 @@ export function MetaEdit(props: Props) {
     <>
       <p className="mb-2">
         <span className="w-max">{t("youtubeId")}</span>
+        <HelpIcon>{t.rich("youtubeIdHelp", { br: () => <br /> })}</HelpIcon>
         <Input
           className=""
           actualValue={props.chart?.ytId || ""}
@@ -60,7 +62,7 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p>{t("musicInfo")}:</p>
+      <p>{t("musicInfo")}</p>
       <p className="ml-2">
         <span className="inline-block w-max">{t("musicTitle")}</span>
         <Input
@@ -96,6 +98,7 @@ export function MetaEdit(props: Props) {
       </p>
       <p className="">
         <span className="inline-block w-max">{t("passwd")}</span>
+        <HelpIcon>{t.rich("passwdHelp", { br: () => <br /> })}</HelpIcon>
         <span className="inline-flex flex-row items-baseline">
           <Input
             className="font-title shrink w-40 "
@@ -123,8 +126,8 @@ export function MetaEdit(props: Props) {
         >
           {t("savePasswd")}
         </CheckBox>
+        <HelpIcon>{t.rich("savePasswdHelp", { br: () => <br /> })}</HelpIcon>
       </p>
-      <p className="text-sm ml-2 mb-2">{t("passwdDesc")}</p>
       <p>
         <CheckBox
           className="ml-0 "
@@ -138,6 +141,7 @@ export function MetaEdit(props: Props) {
         >
           {t("publish")}
         </CheckBox>
+        <HelpIcon>{t.rich("publishHelp", { br: () => <br /> })}</HelpIcon>
         <span className="inline-block ml-2 text-sm">
           {!props.chart?.ytId
             ? t("publishFail.noId")
@@ -273,10 +277,11 @@ export function MetaTab(props: Props2) {
     }
     setSaving(false);
   };
+  const downloadExtension = `fn${props.chart?.ver}.yml`;
   const download = () => {
     // editPasswdだけ消す
     const yml = YAML.stringify({ ...props.chart, editPasswd: "" });
-    const filename = `${props.cid}_${props.chart?.title}.fn${props.chart?.ver}.yml`;
+    const filename = `${props.cid}_${props.chart?.title}.${downloadExtension}`;
     saveAs(new Blob([yml]), filename);
     setSaveMsg(`${t("saveDone")} (${filename})`);
   };
@@ -344,12 +349,14 @@ export function MetaTab(props: Props2) {
         >
           {t("testPlay")}
         </ExternalLink>
+        <HelpIcon>{t.rich("testPlayHelp", { br: () => <br /> })}</HelpIcon>
       </div>
       <div className="">
         <span className="inline-block">
           {t("chartId")}:
           <span className="ml-1 mr-2 ">{props.cid || t("unsaved")}</span>
         </span>
+        <HelpIcon>{t.rich("saveToServerHelp", { br: () => <br /> })}</HelpIcon>
         <Button text={t("saveToServer")} onClick={save} loading={saving} />
         <span className="inline-block ml-1 ">{errorMsg}</span>
         {props.hasChange && (
@@ -389,7 +396,13 @@ export function MetaTab(props: Props2) {
         </>
       )}
       <div className="mb-4">
-        <span className="">{t("localSaveLoad")}:</span>
+        <span className="">{t("localSaveLoad")}</span>
+        <HelpIcon>
+          {t.rich("localSaveLoadHelp", {
+            br: () => <br />,
+            extension: downloadExtension,
+          })}
+        </HelpIcon>
         <span className="inline-block ml-1">
           <Button text={t("saveToLocal")} onClick={download} />
           <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
