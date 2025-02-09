@@ -539,7 +539,7 @@ function Page(props: Props) {
   const [guidePage, setGuidePage] = useState<number | null>(
     props.guidePageInit
   );
-  const tabNameKeys = ["meta", "timing", "levels", "notes", "code"];
+  const tabNameKeys = ["meta", "timing", "level", "note", "code"];
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 

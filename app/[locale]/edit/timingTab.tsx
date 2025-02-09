@@ -21,6 +21,7 @@ import {
 } from "@/../../chartFormat/signature.js";
 import { useEffect, useRef, useState } from "react";
 import { Close, CornerDownLeft } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   offset?: number;
@@ -46,6 +47,8 @@ interface Props {
   currentStep: Step;
 }
 export default function TimingTab(props: Props) {
+  const t = useTranslations("edit.timing");
+
   const offsetValid = (offset: string) =>
     !isNaN(Number(offset)) && Number(offset) >= 0;
   const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) > 0;
@@ -73,7 +76,7 @@ export default function TimingTab(props: Props) {
   return (
     <>
       <div className="mb-3">
-        <span>Offset</span>
+        <span>{t("offset")}</span>
         <Input
           className="w-16"
           actualValue={
@@ -82,10 +85,10 @@ export default function TimingTab(props: Props) {
           updateValue={(v: string) => props.setOffset(Number(v))}
           isValid={offsetValid}
         />
-        <span>s</span>
+        <span>{t("offsetSecond")}</span>
       </div>
       <div>
-        <span>Step</span>
+        <span>{t("step")}</span>
         <span className="inline-block text-right w-6">
           {ss && ss.barNum + 1}
         </span>
@@ -107,7 +110,7 @@ export default function TimingTab(props: Props) {
         </div>
       </div>
       <div className="ml-2">
-        <span>BPM</span>
+        <span>{t("bpm")}</span>
         <Input
           className="w-16 ml-1"
           actualValue={
@@ -144,7 +147,7 @@ export default function TimingTab(props: Props) {
             }}
             disabled={stepCmp(props.currentStep, stepZero()) <= 0}
           >
-            ここで変化
+            {t("changeHere")}
           </CheckBox>
           <Input
             className="w-16 mx-1"
@@ -167,12 +170,12 @@ export default function TimingTab(props: Props) {
           props.currentLevel?.bpmChanges[props.currentBpmIndex] &&
           !bpmChangeable && (
             <span className="ml-2 text-sm inline-block">
-              Code タブで編集されているため変更できません。
+              {t("editedInCode")}
             </span>
           )}
       </div>
       <div className="ml-2">
-        <span>Speed</span>
+        <span>{t("speed")}</span>
         <Input
           className="w-16 ml-1"
           actualValue={
@@ -194,7 +197,7 @@ export default function TimingTab(props: Props) {
             onChange={props.toggleSpeedChangeHere}
             disabled={stepCmp(props.currentStep, stepZero()) <= 0}
           >
-            ここで変化
+            {t("changeHere")}
           </CheckBox>
           <Input
             className="w-16 mx-1"
@@ -208,12 +211,12 @@ export default function TimingTab(props: Props) {
           props.currentLevel?.speedChanges[props.currentSpeedIndex] &&
           !speedChangeable && (
             <span className="ml-2 text-sm inline-block">
-              Code タブで編集されているため変更できません。
+              {t("editedInCode")}
             </span>
           )}
       </div>
       <div className="mt-3">
-        <span>Beat:</span>
+        <span>{t("beat")}:</span>
         <span className="inline-block">
           <span className="ml-2">
             {props.signatureChangeHere
@@ -255,7 +258,7 @@ export default function TimingTab(props: Props) {
             }}
             disabled={stepCmp(props.currentStep, stepZero()) <= 0}
           >
-            ここで変化
+            {t("changeHere")}
           </CheckBox>
         </span>
         {props.signatureChangeHere && currentBarLength && (
@@ -276,7 +279,7 @@ export default function TimingTab(props: Props) {
               ).denominator * 4}
             </span>
             <span className="inline-block ml-2 text-sm">
-              <span>(Offset:</span>
+              <span>({t("beatOffset")}:</span>
               <InputSig
                 className="text-sm"
                 allowZero
@@ -426,7 +429,7 @@ export default function TimingTab(props: Props) {
         ))}
       </ul>
       {props.currentSignature !== undefined && !signatureChangeable && (
-        <p className="text-sm">Code タブで編集されているため変更できません。</p>
+        <p className="text-sm">{t("editedInCode")}</p>
       )}
     </>
   );

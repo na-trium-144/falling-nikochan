@@ -11,6 +11,7 @@ import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input.js";
 import { levelColors } from "@/common/levelColors";
 import { RightOne } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
   changeChart: (chart: Chart) => void;
 }
 export default function LevelTab(props: Props) {
+  const t = useTranslations("edit.level");
   const currentLevel = props.chart?.levels.at(props.currentLevelIndex);
   const addLevel = () => {
     if (props.chart) {
@@ -107,12 +109,12 @@ export default function LevelTab(props: Props) {
   return (
     <>
       <p>
-        <span className="mr-1">Levels:</span>
-        <Button text={`Add`} onClick={addLevel} />
+        <span className="mr-1">{t("levelsList")}:</span>
+        <Button text={t("levelAdd")} onClick={addLevel} />
         {props.chart?.levels.at(props.currentLevelIndex) && (
           <>
-            <Button text={`Duplicate`} onClick={duplicateLevel} />
-            <Button text="Delete" onClick={deleteLevel} />
+            <Button text={t("levelDuplicate")} onClick={duplicateLevel} />
+            <Button text={t("levelDelete")} onClick={deleteLevel} />
             <Button
               text="↑"
               onClick={moveLevelUp}
@@ -151,7 +153,9 @@ export default function LevelTab(props: Props) {
                   {level.name}
                 </span>
               )}
-              {level.unlisted && <span className="text-sm mr-2">(非表示)</span>}
+              {level.unlisted && (
+                <span className="text-sm mr-2">{t("unlisted")}</span>
+              )}
               <span
                 className={
                   "inline-block mr-2 " +
@@ -181,7 +185,7 @@ export default function LevelTab(props: Props) {
       {currentLevel && (
         <>
           <p className="flex flex-row items-baseline mb-1">
-            <span className="w-max">Level Name:</span>
+            <span className="w-max">{t("levelName")}:</span>
             <Input
               className="font-title shrink"
               actualValue={currentLevel.name}
@@ -193,12 +197,14 @@ export default function LevelTab(props: Props) {
             />
           </p>
           <p className="mb-2">
-            <span>Difficulty:</span>
+            <span>{t("difficulty")}:</span>
             {levelTypes.map((t, i) => (
               <CheckBox
                 key={t}
                 value={t === currentLevel.type}
-                className={"ml-2 " + (t === currentLevel.type ? levelColors[i] : "")}
+                className={
+                  "ml-2 " + (t === currentLevel.type ? levelColors[i] : "")
+                }
                 onChange={() => {
                   currentLevel.type = t;
                   props.changeChart({ ...props.chart! });
@@ -218,12 +224,10 @@ export default function LevelTab(props: Props) {
                 props.changeChart({ ...props.chart! });
               }}
             >
-              このレベルを非表示にする
+              {t("unlistLevel")}
             </CheckBox>
           </p>
-          <p className="ml-6 text-sm">
-            (未完成のレベルなどを共有用リンクから開いたときに表示されないようにできます)
-          </p>
+          <p className="ml-6 text-sm">{t("unlistDesc")}</p>
         </>
       )}
     </>

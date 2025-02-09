@@ -8,6 +8,7 @@ import { Mouse } from "@icon-park/react";
 import CheckBox from "@/common/checkBox.js";
 import { getSignatureState } from "@/../../chartFormat/seq.js";
 import Select from "@/common/select";
+import { useTranslations } from "next-intl";
 
 interface Props {
   currentNoteIndex: number;
@@ -25,6 +26,7 @@ interface Props {
   currentLevel?: Level;
 }
 export default function NoteTab(props: Props) {
+  const t = useTranslations("edit.note");
   const noteEditable =
     props.currentLevel?.notes[props.currentNoteIndex] &&
     props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null;
@@ -34,8 +36,8 @@ export default function NoteTab(props: Props) {
     getSignatureState(props.currentLevel.signature, props.currentStep);
   return (
     <div className="flex flex-col h-full">
-      <p>
-        <span>Step</span>
+      <div>
+        <span>{t("step")}</span>
         <span className="inline-block text-right w-6">
           {ss && ss.barNum + 1}
         </span>
@@ -56,7 +58,7 @@ export default function NoteTab(props: Props) {
           )}
         </div>
         <div className="inline-block ml-2 w-28">
-          <span>Note</span>
+          <span>{t("noteNum")}</span>
           <span className="inline-block text-right w-6">
             {props.hasCurrentNote ? props.notesIndexInStep + 1 : "-"}
           </span>
@@ -66,27 +68,27 @@ export default function NoteTab(props: Props) {
         <div className="inline-block">
           <Button
             keyName="N"
-            text={`Add`}
+            text={t("noteAdd")}
             onClick={() => props.addNote()}
             disabled={!props.canAddNote}
           />
           {props.hasCurrentNote && (
             <Button
-              text="Delete"
+              text={t("noteDelete")}
               onClick={props.deleteNote}
               disabled={!noteEditable}
             />
           )}
         </div>
-      </p>
-      <p className="mb-1">
-        <span>Total Notes:</span>
+      </div>
+      <div className="mb-1">
+        <span>{t("totalNotes")}:</span>
         <span className="inline-block w-12 text-right">
           {props.hasCurrentNote ? props.currentNoteIndex + 1 : "-"}
         </span>
         <span className="mx-1">/</span>
         <span className="">{props.currentLevel?.notes.length || 0}</span>
-      </p>
+      </div>
       <NoteEdit {...props} />
       <span className="flex-1 mb-4 " />
       <div className="flex flex-row ">
@@ -96,16 +98,21 @@ export default function NoteTab(props: Props) {
   );
 }
 function CopyPasteButton(props: Props) {
+  const t = useTranslations("edit.note");
   return (
     <>
       <div className="flex flex-col items-stretch">
         <Button
           onClick={() => props.pasteNote(0)}
-          text="Paste"
+          text={t("paste")}
           keyName="V"
           disabled={!props.hasCopyBuf[0]}
         />
-        <Button onClick={() => props.copyNote(0)} text="Copy" keyName="C" />
+        <Button
+          onClick={() => props.copyNote(0)}
+          text={t("copy")}
+          keyName="C"
+        />
       </div>
       {Array.from(new Array(9)).map((_, i) => (
         <div key={i} className="flex flex-col items-stretch">
@@ -125,6 +132,7 @@ function CopyPasteButton(props: Props) {
 }
 
 function NoteEdit(props: Props) {
+  const t = useTranslations("edit.note");
   const { currentNoteIndex, currentLevel } = props;
   const noteEditable =
     props.currentLevel?.notes[props.currentNoteIndex] &&
@@ -142,7 +150,7 @@ function NoteEdit(props: Props) {
           <tbody className="text-center">
             <tr>
               <td className="pr-2 ">
-                <span>Position</span>
+                <span>{t("position")}</span>
                 <span className="inline-block ml-1">
                   (
                   <span className="inline-block">
@@ -171,7 +179,7 @@ function NoteEdit(props: Props) {
             </tr>
             <tr>
               <td className="pr-2">
-                <span>Velocity</span>
+                <span>{t("velocity")}</span>
                 <span className="inline-block ml-1">
                   (<Key className="px-1 py-0.5 mx-0.5 text-sm">Shift</Key>+
                   <span className="inline-block">
@@ -248,31 +256,29 @@ function NoteEdit(props: Props) {
             </tr>
           </tbody>
         </table>
-        <p>
+        <div>
           <CheckBox
             className="ml-2 mr-1"
             value={n.big}
             onChange={(v) => props.updateNote({ ...n, big: v })}
             disabled={!noteEditable}
           >
-            <span>Big</span>
+            <span>{t("big")}</span>
             <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </CheckBox>
-        </p>
-        <p>
-          <span>出現位置:</span>
+        </div>
+        <div>
+          <span>{t("fallMode")}:</span>
           <Select
             value={n.fall ? "1" : "0"}
             values={["0", "1"]}
-            options={["下から", "上から"]}
+            options={[t("fallModeFalse"), t("fallModeTrue")]}
             onChange={(v) => props.updateNote({ ...n, fall: !!Number(v) })}
             disabled={!noteEditable}
           />
-        </p>
+        </div>
         {props.currentLevel?.notes[props.currentNoteIndex] && !noteEditable && (
-          <p className="ml-2 mt-4 text-sm">
-            Code タブで編集されているため変更できません。
-          </p>
+          <p className="ml-2 mt-4 text-sm">{t("editedInCode")}</p>
         )}
       </>
     );

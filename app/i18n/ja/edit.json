@@ -58,13 +58,45 @@
       "loadFromLocal": "ファイルを開く"
     },
     "timing": {
-      "title": "タイミング"
+      "title": "タイミング",
+      "offset": "オフセット",
+      "offsetSecond": "秒",
+      "step": "ステップ",
+      "bpm": "BPM",
+      "speed": "速度",
+      "beat": "拍子",
+      "beatOffset": "オフセット",
+      "changeHere": "ここで変化",
+      "editedInCode": "Code タブで編集されているため変更できません。"
     },
-    "levels": {
-      "title": "レベル"
+    "level": {
+      "title": "レベル",
+      "levelsList": "レベル",
+      "levelAdd": "追加",
+      "levelDuplicate": "コピーを作成",
+      "levelDelete": "削除",
+      "unlisted": "(非表示)",
+      "levelName": "レベル名",
+      "difficulty": "難易度",
+      "unlistLevel": "このレベルを非表示にする",
+      "unlistDesc": "(未完成のレベルなどを共有用リンクから開いたときに表示されないようにできます)"
     },
-    "notes": {
-      "title": "音符"
+    "note": {
+      "title": "音符",
+      "step": "ステップ",
+      "noteNum": "音符数",
+      "noteAdd": "追加",
+      "noteDelete": "削除",
+      "totalNotes": "全体の音符数",
+      "copy": "コピー",
+      "paste": "貼り付け",
+      "position": "位置",
+      "velocity": "速度",
+      "big": "Big (大きい音符)",
+      "fallMode": "音符の出現位置",
+      "fallModeFalse": "下から",
+      "fallModeTrue": "上から",
+      "editedInCode": "Code タブで編集されているため変更できません。"
     },
     "code": {
       "title": "コード"
