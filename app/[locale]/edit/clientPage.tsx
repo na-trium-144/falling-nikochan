@@ -1164,6 +1164,7 @@ function Page(props: Props) {
           index={guidePage}
           setIndex={setGuidePage}
           close={() => setGuidePage(null)}
+          locale={locale}
         />
       )}
     </main>
