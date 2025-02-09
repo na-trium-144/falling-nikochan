@@ -1,0 +1,73 @@
+{
+  "edit": {
+    "title": "譜面編集",
+    "enterPasswd": "編集用パスワードを入力してください。",
+    "passwdFailed": "パスワードが違います。",
+    "submitPasswd": "進む",
+    "savePasswd": "パスワードを保存",
+    "bypassPasswd": "パスワード入力をスキップ (dev環境限定)",
+    "confirmUnsaved": "未保存の変更があります",
+    "touchMode": "タッチ操作モード: {mode, select, p {x 移動} v {vx, vy 移動} other {オフ}}",
+    "playerControl": "動画の操作",
+    "playerControls": {
+      "play": "再生",
+      "pause": "停止",
+      "moveStep": "{step, number, ::+!} ステップ",
+      "moveMinus1F": "-1/30 秒",
+      "movePlus1F": "+1/30 秒"
+    },
+    "stepUnit": "1 ステップ",
+    "zoom": "拡大",
+    "timeBar": {
+      "bpm": "BPM",
+      "speed": "速度",
+      "beat": "拍子"
+    },
+    "meta": {
+      "title": "メタ",
+      "youtubeId": "YouTube URL または動画ID",
+      "musicInfo": "楽曲情報",
+      "musicTitle": "楽曲タイトル",
+      "musicComposer": "作曲者など",
+      "chartCreator": "譜面作成者(あなたの名前)",
+      "passwd": "編集用パスワード",
+      "displayPasswd": "表示",
+      "savePasswd": "パスワードを保存",
+      "passwdDesc": "(編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)",
+      "publish": "この譜面を一般公開する",
+      "publishFail": {
+        "noId": "(YouTube 動画IDが未指定のため一般公開できません)",
+        "empty": "(譜面データがすべて空または非表示になっているため一般公開できません)",
+        "noPasswd": "(編集用パスワードが未設定のため一般公開できません)"
+      },
+      "saveDone": "保存しました！",
+      "loadFail": "ファイルの読み込みに失敗しました",
+      "confirmLoad": "このファイルで譜面データを上書きしますか?",
+      "fileSize": "現在のファイルサイズ",
+      "fileSizeMax": "(最大 {max} kB まで)",
+      "testPlay": "テストプレイ",
+      "chartId": "譜面ID",
+      "unsaved": "(未保存)",
+      "saveToServer": "サーバーに保存",
+      "hasUnsaved": "(未保存の変更があります)",
+      "convertingWarning": "この譜面は旧バージョンのフォーマット (ver.{ver}) から変換されており、一部の音符の挙動が変わっている可能性があります。保存すると変換後の譜面データで上書きされます。(詳細はトップページ下部の更新履歴を確認してください。)",
+      "shareLink": "共有用リンク",
+      "copy": "コピー",
+      "localSaveLoad": "ローカルに保存/読み込み",
+      "saveToLocal": "保存",
+      "loadFromLocal": "ファイルを開く"
+    },
+    "timing": {
+      "title": "タイミング"
+    },
+    "levels": {
+      "title": "レベル"
+    },
+    "notes": {
+      "title": "音符"
+    },
+    "code": {
+      "title": "コード"
+    }
+  }
+}

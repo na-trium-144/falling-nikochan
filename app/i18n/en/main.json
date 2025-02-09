@@ -41,9 +41,6 @@
       "changelog": "Main Change Logs"
     }
   },
-  "edit": {
-    "title": "Chart Editor"
-  },
   "footer": {
     "history": "ChangeLog here"
   }

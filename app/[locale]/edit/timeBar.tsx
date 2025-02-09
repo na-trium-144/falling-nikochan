@@ -20,6 +20,7 @@ import {
 import { Chart, Level } from "@/../../chartFormat/chart.js";
 import { useDisplayMode } from "@/scale.js";
 import { getBarLength } from "@/../../chartFormat/signature.js";
+import { useTranslations } from "next-intl";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
@@ -33,6 +34,7 @@ interface Props {
   timeBarPxPerSec: number;
 }
 export default function TimeBar(props: Props) {
+  const t = useTranslations("edit.timeBar");
   const {
     currentTimeSecWithoutOffset,
     currentNoteIndex,
@@ -209,7 +211,7 @@ export default function TimeBar(props: Props) {
           )}
       {/* bpm変化 */}
       <div className="absolute" style={{ bottom: -2.5 * rem, left: 0 }}>
-        <span className="mr-1">BPM:</span>
+        <span className="mr-1">{t("bpm")}:</span>
         {beginBpmIndex !== undefined && (
           <span>{currentLevel?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
         )}
@@ -234,7 +236,7 @@ export default function TimeBar(props: Props) {
         )}
       {/* speed変化 */}
       <div className="absolute" style={{ bottom: -3.75 * rem, left: 0 }}>
-        <span className="mr-1">Speed:</span>
+        <span className="mr-1">{t("speed")}:</span>
         {beginSpeedIndex !== undefined && (
           <span>
             {currentLevel?.speedChanges[beginSpeedIndex]?.bpm.toString()}
@@ -261,7 +263,7 @@ export default function TimeBar(props: Props) {
         )}
       {/* signature変化 */}
       <div className="absolute" style={{ bottom: -5 * rem, left: 0 }}>
-        <span className="mr-1">Beat:</span>
+        <span className="mr-1">{t("beat")}:</span>
         {beginBarLength?.map((len, i) => (
           <>
             {i >= 1 && <span className="mx-0.5">+</span>}

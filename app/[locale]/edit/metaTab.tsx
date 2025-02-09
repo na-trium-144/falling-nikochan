@@ -4,7 +4,11 @@ import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
 import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
-import { Chart, chartMaxSize, validateChart } from "@/../../chartFormat/chart.js";
+import {
+  Chart,
+  chartMaxSize,
+  validateChart,
+} from "@/../../chartFormat/chart.js";
 import {
   getPasswd,
   getV6Passwd,
@@ -19,6 +23,7 @@ import ProgressBar from "@/common/progressBar.js";
 import YAML from "yaml";
 import CheckBox from "@/common/checkBox.js";
 import { Caution } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   chart?: Chart;
@@ -27,6 +32,7 @@ interface Props {
   setSavePasswd: (b: boolean) => void;
 }
 export function MetaEdit(props: Props) {
+  const t = useTranslations("edit.meta");
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
   const hasLevelData =
     props.chart?.levels &&
@@ -36,7 +42,7 @@ export function MetaEdit(props: Props) {
   return (
     <>
       <p className="mb-2">
-        <span className="w-max">YouTube URL または動画ID</span>
+        <span className="w-max">{t("youtubeId")}</span>
         <Input
           className=""
           actualValue={props.chart?.ytId || ""}
@@ -54,9 +60,9 @@ export function MetaEdit(props: Props) {
           left
         />
       </p>
-      <p>楽曲情報:</p>
+      <p>{t("musicInfo")}:</p>
       <p className="ml-2">
-        <span className="inline-block w-max">楽曲タイトル</span>
+        <span className="inline-block w-max">{t("musicTitle")}</span>
         <Input
           className="font-title shrink w-80 max-w-full "
           actualValue={props.chart?.title || ""}
@@ -67,7 +73,7 @@ export function MetaEdit(props: Props) {
         />
       </p>
       <p className="ml-2 ">
-        <span className="inline-block w-max">作曲者など</span>
+        <span className="inline-block w-max">{t("musicComposer")}</span>
         <Input
           className="text-sm font-title shrink w-80 max-w-full"
           actualValue={props.chart?.composer || ""}
@@ -78,7 +84,7 @@ export function MetaEdit(props: Props) {
         />
       </p>
       <p className="ml-2 mb-2">
-        <span className="inline-block w-max">譜面作成者(あなたの名前)</span>
+        <span className="inline-block w-max">{t("chartCreator")}</span>
         <Input
           className="font-title shrink w-40 max-w-full"
           actualValue={props.chart?.chartCreator || ""}
@@ -89,7 +95,7 @@ export function MetaEdit(props: Props) {
         />
       </p>
       <p className="">
-        <span className="inline-block w-max">編集用パスワード</span>
+        <span className="inline-block w-max">{t("passwd")}</span>
         <span className="inline-flex flex-row items-baseline">
           <Input
             className="font-title shrink w-40 "
@@ -105,19 +111,20 @@ export function MetaEdit(props: Props) {
             left
             passwd={hidePasswd}
           />
-          <Button text="表示" onClick={() => setHidePasswd(!hidePasswd)} />
+          <Button
+            text={t("displayPasswd")}
+            onClick={() => setHidePasswd(!hidePasswd)}
+          />
         </span>
         <CheckBox
           value={props.savePasswd}
           onChange={props.setSavePasswd}
           className="ml-2"
         >
-          パスワードを保存
+          {t("savePasswd")}
         </CheckBox>
       </p>
-      <p className="text-sm ml-2 mb-2">
-        (編集用パスワードは譜面を別のPCから編集するとき、ブラウザのキャッシュを消したときなどに必要になります)
-      </p>
+      <p className="text-sm ml-2 mb-2">{t("passwdDesc")}</p>
       <p>
         <CheckBox
           className="ml-0 "
@@ -129,15 +136,14 @@ export function MetaEdit(props: Props) {
             !props.chart?.editPasswd || !hasLevelData || !props.chart?.ytId
           }
         >
-          この譜面を一般公開する
+          {t("publish")}
         </CheckBox>
         <span className="inline-block ml-2 text-sm">
           {!props.chart?.ytId
-            ? "(YouTube 動画IDが未指定のため一般公開できません)"
+            ? t("publishFail.noId")
             : !hasLevelData
-            ? "(譜面データがすべて空または非表示になっているため一般公開できません)"
-            : !props.chart?.editPasswd &&
-              "(編集用パスワードが未設定のため一般公開できません)"}
+            ? t("publishFail.empty")
+            : !props.chart?.editPasswd && t("publishFail.noPasswd")}
         </span>
       </p>
     </>
@@ -159,6 +165,7 @@ interface Props2 {
   currentLevelIndex: number;
 }
 export function MetaTab(props: Props2) {
+  const t = useTranslations("edit.meta");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [saving, setSaving] = useState<boolean>(false);
@@ -177,7 +184,7 @@ export function MetaTab(props: Props2) {
   const save = async () => {
     setSaving(true);
     const onSave = async (cid: string, editPasswd: string) => {
-      setErrorMsg("保存しました！");
+      setErrorMsg(t("saveDone"));
       props.setHasChange(false);
       props.setConvertedFrom(props.chart!.ver);
       if (savePasswd) {
@@ -271,7 +278,7 @@ export function MetaTab(props: Props2) {
     const yml = YAML.stringify({ ...props.chart, editPasswd: "" });
     const filename = `${props.cid}_${props.chart?.title}.fn${props.chart?.ver}.yml`;
     saveAs(new Blob([yml]), filename);
-    setSaveMsg(`保存しました！ (${filename})`);
+    setSaveMsg(`${t("saveDone")} (${filename})`);
   };
   const upload = async (e: ChangeEvent) => {
     const target = e.target as HTMLInputElement;
@@ -298,11 +305,11 @@ export function MetaTab(props: Props2) {
         } catch (e2) {
           console.error(e1);
           console.error(e2);
-          setUploadMsg("ファイルの読み込みに失敗しました");
+          setUploadMsg(t("loadFail"));
         }
       }
       if (newChart) {
-        if (confirm("このファイルで譜面データを上書きしますか?")) {
+        if (confirm(t("confirmLoad"))) {
           props.setChart({
             ...newChart,
             editPasswd: props.chart?.editPasswd || "",
@@ -317,10 +324,12 @@ export function MetaTab(props: Props2) {
   return (
     <>
       <div className="mb-2">
-        <span className="">現在のファイルサイズ:</span>
+        <span className="">{t("fileSize")}:</span>
         <span className="inline-block">
           <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
-          <span className="ml-1 text-sm ">(Max. {chartMaxSize / 1000} kB)</span>
+          <span className="ml-1 text-sm ">
+            {t("fileSizeMax", { max: chartMaxSize / 1000 })}
+          </span>
         </span>
         <ProgressBar value={props.fileSize / chartMaxSize} />
       </div>
@@ -333,29 +342,25 @@ export function MetaTab(props: Props2) {
             }
           }}
         >
-          テストプレイ
+          {t("testPlay")}
         </ExternalLink>
       </div>
       <div className="">
         <span className="inline-block">
-          譜面ID:
-          <span className="ml-1 mr-2 ">{props.cid || "(未保存)"}</span>
+          {t("chartId")}:
+          <span className="ml-1 mr-2 ">{props.cid || t("unsaved")}</span>
         </span>
-        <Button text="サーバーに保存" onClick={save} loading={saving} />
+        <Button text={t("saveToServer")} onClick={save} loading={saving} />
         <span className="inline-block ml-1 ">{errorMsg}</span>
         {props.hasChange && (
           <span className="inline-block ml-1 text-amber-600 ">
-            (未保存の変更があります)
+            {t("hasUnsaved")}
           </span>
         )}
         {props.convertedFrom < 7 && (
           <span className="inline-block ml-1 text-amber-600 text-sm ">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
-            この譜面は旧バージョンのフォーマット (ver.{props.convertedFrom})
-            から変換されており、
-            一部の音符の挙動が変わっている可能性があります。
-            保存すると変換後の譜面データで上書きされます。
-            (詳細はトップページ下部の更新履歴を確認してください。)
+            {t("convertingWarning", { ver: props.convertedFrom })}
           </span>
         )}
       </div>
@@ -363,10 +368,10 @@ export function MetaTab(props: Props2) {
         <>
           <div className="ml-2">
             <span className="hidden edit-wide:inline-block mr-2">
-              共有用リンク:
+              {t("shareLink")}:
             </span>
             <ExternalLink href={`/share/${props.cid}`}>
-              <span className="edit-wide:hidden">共有用リンク</span>
+              <span className="edit-wide:hidden">{t("shareLink")}</span>
               <span className="hidden edit-wide:inline text-sm">
                 {origin}/share/{props.cid}
               </span>
@@ -374,7 +379,7 @@ export function MetaTab(props: Props2) {
             {hasClipboard && (
               <Button
                 className="ml-2"
-                text="コピー"
+                text={t("copy")}
                 onClick={() =>
                   navigator.clipboard.writeText(`${origin}/share/${props.cid}`)
                 }
@@ -384,11 +389,11 @@ export function MetaTab(props: Props2) {
         </>
       )}
       <div className="mb-4">
-        <span className="">ローカルに保存/読み込み:</span>
+        <span className="">{t("localSaveLoad")}:</span>
         <span className="inline-block ml-1">
-          <Button text="保存" onClick={download} />
+          <Button text={t("saveToLocal")} onClick={download} />
           <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
-            ファイルを開く
+            {t("loadFromLocal")}
           </label>
           <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>
           <input

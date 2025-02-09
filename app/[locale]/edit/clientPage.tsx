@@ -1,6 +1,9 @@
 "use client";
 
-import { defaultNoteCommand, NoteCommand } from "@/../../chartFormat/command.js";
+import {
+  defaultNoteCommand,
+  NoteCommand,
+} from "@/../../chartFormat/command.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -73,8 +76,10 @@ import { Chart5 } from "@/../../chartFormat/legacy/chart5.js";
 import { Chart6 } from "@/../../chartFormat/legacy/chart6.js";
 import { Chart7 } from "@/../../chartFormat/legacy/chart7.js";
 import CheckBox from "@/common/checkBox";
+import { useTranslations } from "next-intl";
 
-export default function EditAuth({locale}: {locale: string}) {
+export default function EditAuth({ locale }: { locale: string }) {
+  const t = useTranslations("edit");
   const themeContext = useTheme();
 
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -197,9 +202,11 @@ export default function EditAuth({locale}: {locale: string}) {
     }
     return (
       <CenterBoxOnlyPage>
-        <Header reload>Edit</Header>
-        <p>編集用パスワードを入力してください。</p>
-        {passwdFailed && <p>パスワードが違います。</p>}
+        <Header reload locale={locale}>
+          {t("title")}
+        </Header>
+        <p>{t("enterPasswd")}</p>
+        {passwdFailed && <p>{t("passwdFailed")}</p>}
         <Input
           actualValue={editPasswd}
           updateValue={setEditPasswd}
@@ -207,12 +214,12 @@ export default function EditAuth({locale}: {locale: string}) {
           passwd
         />
         <Button
-          text="進む"
+          text={t("submitPasswd")}
           onClick={() => fetchChart(false, false, editPasswd, savePasswd)}
         />
         <p>
           <CheckBox value={savePasswd} onChange={setSavePasswd}>
-            パスワードを保存
+            {t("savePasswd")}
           </CheckBox>
         </p>
         {process.env.NODE_ENV === "development" && (
@@ -225,7 +232,7 @@ export default function EditAuth({locale}: {locale: string}) {
                 })();
               }}
             >
-              パスワード入力をスキップ (dev環境限定)
+              {t("bypassPasswd")}
             </button>
           </p>
         )}
@@ -270,6 +277,7 @@ function Page(props: Props) {
     setConvertedFrom,
     locale,
   } = props;
+  const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
@@ -317,7 +325,7 @@ function Page(props: Props) {
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (hasChange) {
-        const confirmationMessage = "未保存の変更があります";
+        const confirmationMessage = t("confirmUnsaved");
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
         return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
@@ -325,7 +333,7 @@ function Page(props: Props) {
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
-  }, [hasChange, sessionId]);
+  }, [hasChange, sessionId, t]);
 
   const ref = useRef<HTMLDivElement>(null!);
 
@@ -531,7 +539,7 @@ function Page(props: Props) {
   const [guidePage, setGuidePage] = useState<number | null>(
     props.guidePageInit
   );
-  const tabNames = ["Meta", "Timing", "Levels", "Notes", "Code"];
+  const tabNameKeys = ["meta", "timing", "levels", "notes", "code"];
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
@@ -827,7 +835,9 @@ function Page(props: Props) {
           }
         >
           <div className="flex flex-row items-center">
-            <Header reload>Edit</Header>
+            <Header reload locale={locale}>
+              {t("title")}
+            </Header>
             <Button text="？" onClick={openGuide} />
           </div>
           <div
@@ -893,12 +903,7 @@ function Page(props: Props) {
                   </>
                 )}
               </span>
-              <span className="mr-1">Touch:</span>
-              {dragMode === "p"
-                ? "move x"
-                : dragMode === "v"
-                ? "move vx, vy"
-                : "off"}
+              <span className="">{t("touchMode", { mode: dragMode })}</span>
             </button>
           )}
         </div>
@@ -910,7 +915,7 @@ function Page(props: Props) {
           }
         >
           <div>
-            <span>Player Control:</span>
+            <span>{t("playerControl")}:</span>
             <Select
               options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
               values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
@@ -927,7 +932,9 @@ function Page(props: Props) {
                   }
                 }
               }}
-              text={playing ? "Pause" : "Play"}
+              text={
+                playing ? t("playerControls.pause") : t("playerControls.play")
+              }
               keyName="Space"
             />
             <span className="inline-block">
@@ -937,7 +944,7 @@ function Page(props: Props) {
                     seekStepRel(-snapDivider * 4);
                   }
                 }}
-                text={`-${snapDivider * 4} Step`}
+                text={t("playerControls.moveStep", { step: -snapDivider * 4 })}
                 keyName="PageUp"
               />
               <Button
@@ -946,7 +953,7 @@ function Page(props: Props) {
                     seekStepRel(snapDivider * 4);
                   }
                 }}
-                text={`+${snapDivider * 4} Step`}
+                text={t("playerControls.moveStep", { step: snapDivider * 4 })}
                 keyName="PageDn"
               />
             </span>
@@ -957,7 +964,7 @@ function Page(props: Props) {
                     seekLeft1();
                   }
                 }}
-                text="-1 Step"
+                text={t("playerControls.moveStep", { step: -1 })}
                 keyName="←"
               />
               <Button
@@ -966,7 +973,7 @@ function Page(props: Props) {
                     seekRight1();
                   }
                 }}
-                text="+1 Step"
+                text={t("playerControls.moveStep", { step: 1 })}
                 keyName="→"
               />
             </span>
@@ -977,7 +984,7 @@ function Page(props: Props) {
                     seekSec(-1 / 30);
                   }
                 }}
-                text="-1/30 s"
+                text={t("playerControls.moveMinus1F")}
                 keyName=","
               />
               <Button
@@ -986,7 +993,7 @@ function Page(props: Props) {
                     seekSec(1 / 30);
                   }
                 }}
-                text="+1/30 s"
+                text={t("playerControls.movePlus1F")}
                 keyName="."
               />
             </span>
@@ -1005,7 +1012,7 @@ function Page(props: Props) {
             />
           </div>
           <div className="flex flex-row items-baseline">
-            <span>Step =</span>
+            <span>{t("stepUnit")} =</span>
             <span className="ml-2">1</span>
             <span className="ml-1">/</span>
             <Input
@@ -1019,7 +1026,7 @@ function Page(props: Props) {
               }
             />
             <div className="flex-1" />
-            <span>Zoom</span>
+            <span>{t("zoom")}</span>
             <Button
               text="-"
               onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
@@ -1030,10 +1037,10 @@ function Page(props: Props) {
             />
           </div>
           <div className="flex flex-row ml-3 mt-3">
-            {tabNames.map((tabName, i) =>
+            {tabNameKeys.map((key, i) =>
               i === tab ? (
                 <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
-                  {tabName}
+                  {t(`${key}.title`)}
                 </Box>
               ) : (
                 <button
@@ -1044,7 +1051,7 @@ function Page(props: Props) {
                     ref.current.focus();
                   }}
                 >
-                  {tabName}
+                  {t(`${key}.title`)}
                 </button>
               )
             )}

@@ -72,7 +72,7 @@ export default function TimingTab(props: Props) {
 
   return (
     <>
-      <p className="mb-3">
+      <div className="mb-3">
         <span>Offset</span>
         <Input
           className="w-16"
@@ -83,8 +83,8 @@ export default function TimingTab(props: Props) {
           isValid={offsetValid}
         />
         <span>s</span>
-      </p>
-      <p>
+      </div>
+      <div>
         <span>Step</span>
         <span className="inline-block text-right w-6">
           {ss && ss.barNum + 1}
@@ -105,8 +105,8 @@ export default function TimingTab(props: Props) {
             </>
           )}
         </div>
-      </p>
-      <p className="ml-2">
+      </div>
+      <div className="ml-2">
         <span>BPM</span>
         <Input
           className="w-16 ml-1"
@@ -170,8 +170,8 @@ export default function TimingTab(props: Props) {
               Code タブで編集されているため変更できません。
             </span>
           )}
-      </p>
-      <p className="ml-2">
+      </div>
+      <div className="ml-2">
         <span>Speed</span>
         <Input
           className="w-16 ml-1"
@@ -211,8 +211,8 @@ export default function TimingTab(props: Props) {
               Code タブで編集されているため変更できません。
             </span>
           )}
-      </p>
-      <p className="mt-3">
+      </div>
+      <div className="mt-3">
         <span>Beat:</span>
         <span className="inline-block">
           <span className="ml-2">
@@ -294,7 +294,7 @@ export default function TimingTab(props: Props) {
             </span>
           </>
         )}
-      </p>
+      </div>
       <ul className="list-disc mt-1 pl-6">
         {props.currentSignature?.bars.map((bar, i) => (
           <li className="w-full" key={i}>
