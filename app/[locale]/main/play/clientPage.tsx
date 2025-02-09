@@ -126,7 +126,7 @@ export default function PlayTab({ locale }: { locale: string }) {
     <IndexMain tab={1} locale={locale}>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title">{t("input-id")}:</span>
+          <span className="text-xl font-bold font-title">{t("inputId")}:</span>
           <Input
             className="ml-4 w-20"
             actualValue=""
@@ -140,9 +140,9 @@ export default function PlayTab({ locale }: { locale: string }) {
           </span>
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
-        <p className="pl-2 text-justify">{t("input-id-desc")}</p>
+        <p className="pl-2 text-justify">{t("inputIdDesc")}</p>
         <p className="pl-2 text-justify">
-          {t.rich("input-id-desc2", {
+          {t.rich("inputIdDesc2", {
             url: () => <SmallDomainShare />,
           })}
         </p>
@@ -151,7 +151,7 @@ export default function PlayTab({ locale }: { locale: string }) {
         <div className="mb-3 ml-2">
           <h4 className="mb-1 ">
             <span className="text-lg font-bold font-title">
-              {t("input-direct")}:
+              {t("inputDirect")}:
             </span>
             <Input
               className="ml-4 w-20"
@@ -166,13 +166,13 @@ export default function PlayTab({ locale }: { locale: string }) {
             />
           </h4>
           <p className="pl-2 text-justify text-sm ">
-            ({t("input-direct-devonly")})
+            ({t("inputDirectDevonly")})
           </p>
         </div>
       )}
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">
-          {t("recent-play")}
+          {t("recentPlay")}
         </h3>
         <ChartList
           recentBrief={recentBrief}
@@ -186,10 +186,10 @@ export default function PlayTab({ locale }: { locale: string }) {
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">{t("latest")}</h3>
         <p className="pl-2 text-justify ">
-          {t("latest-desc")}
+          {t("latestDesc")}
           {/*<span className="text-sm ">(最新の{numLatest}件まで)</span>*/}
         </p>
-        <p className="pl-2 mb-1 text-justify text-sm ">({t("latest-desc2")})</p>
+        <p className="pl-2 mb-1 text-justify text-sm ">({t("latestDesc2")})</p>
         <ChartList
           recentBrief={latestBrief}
           maxRow={chartListMaxRow}
@@ -202,10 +202,10 @@ export default function PlayTab({ locale }: { locale: string }) {
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">{t("sample")}</h3>
         <p className="pl-2 mb-1 text-justify ">
-          {t.rich("sample-desc", {
+          {t.rich("sampleDesc", {
             small: (c) => <span className="text-sm mx-0.5">{c}</span>,
           })}
-          {t.rich("sample-desc2", {
+          {t.rich("sampleDesc2", {
             youtube: (c) => (
               <ExternalLink
                 className="mx-1"

@@ -74,7 +74,7 @@ export default function EditTab({ locale }: { locale: string }) {
       <div className="mb-3">
         <h3 className="mb-2">
           <span className="text-xl font-bold font-title ">
-            {t("input-id")}:
+            {t("inputId")}:
           </span>
           <Input
             className="ml-4 w-20"
@@ -88,7 +88,7 @@ export default function EditTab({ locale }: { locale: string }) {
             className={"ml-1 " + (inputCId !== "" ? "" : "hidden! ")}
             href={`/${locale}/edit?cid=${inputCId}`}
           >
-            {t("new-tab")}
+            {t("newTab")}
           </ExternalLink>
           <span className={cidFetching ? "inline-block " : "hidden "}>
             <LoadingSlime />
@@ -96,11 +96,11 @@ export default function EditTab({ locale }: { locale: string }) {
           </span>
           <span className="ml-1 inline-block">{cidErrorMsg}</span>
         </h3>
-        <p className="pl-2 text-justify">{t("input-id-desc")}</p>
+        <p className="pl-2 text-justify">{t("inputIdDesc")}</p>
       </div>
       <div className="mb-3">
         <h3 className="text-xl font-bold font-title mb-2">
-          {t("recent-edit")}
+          {t("recentEdit")}
         </h3>
         <ChartList
           recentBrief={recentBrief}
@@ -115,10 +115,10 @@ export default function EditTab({ locale }: { locale: string }) {
         <h3 className="mb-2">
           <span className="text-xl font-bold font-title ">{t("new")}:</span>
           <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
-            {t("new-button")}
+            {t("newButton")}
           </ExternalLink>
         </h3>
-        <p className="pl-2 text-justify">{t("new-desc", { rateLimitMin })}</p>
+        <p className="pl-2 text-justify">{t("newDesc", { rateLimitMin })}</p>
       </div>
     </IndexMain>
   );

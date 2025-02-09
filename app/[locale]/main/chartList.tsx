@@ -103,7 +103,7 @@ export function ChartList(props: Props) {
                     className="absolute left-0 bottom-1 "
                     theme="filled"
                   />
-                  <span className="ml-5">{t("show-all")}</span>
+                  <span className="ml-5">{t("showAll")}</span>
                   <span className="ml-1">
                     ({props.recentBrief.length - props.maxRow})
                   </span>
