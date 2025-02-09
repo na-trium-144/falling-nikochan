@@ -141,8 +141,7 @@ interface Props {
   locale: string;
 }
 function Play(props: Props) {
-  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps, locale } =
-    props;
+  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps } = props;
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
