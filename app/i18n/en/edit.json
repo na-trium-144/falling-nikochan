@@ -1,5 +1,105 @@
 {
   "edit": {
-    "title": "Chart Editor"
+    "title": "Chart Editor",
+    "enterPasswd": "Enter the password to edit.",
+    "passwdFailed": "Password is incorrect.",
+    "submitPasswd": "Go",
+    "savePasswd": "Save password",
+    "bypassPasswd": "Skip password input (dev only)",
+    "confirmUnsaved": "There are unsaved changes.",
+    "touchMode": "Touch mode: {mode, select, p {Move x} v {Move vx, vy} other {Off}}",
+    "playerControl": "Player controls",
+    "playerControls": {
+      "play": "Play",
+      "pause": "Pause",
+      "moveStep": "{step, number, ::+!} {step, plural, =1 {step} other {steps}}",
+      "moveMinus1F": "-1/30 sec",
+      "movePlus1F": "+1/30 sec"
+    },
+    "stepUnit": "1 step",
+    "zoom": "Zoom",
+    "timeBar": {
+      "bpm": "BPM",
+      "speed": "Speed",
+      "beat": "Beat"
+    },
+    "meta": {
+      "title": "Meta",
+      "youtubeId": "YouTube URL or video ID",
+      "musicInfo": "Song info",
+      "musicTitle": "Song title",
+      "musicComposer": "Composer, etc.",
+      "chartCreator": "Chart creator (your name)",
+      "passwd": "Editing password",
+      "displayPasswd": "Show",
+      "savePasswd": "Save password",
+      "passwdDesc": "(Editing password is required when editing the chart from another PC, clearing the browser cache, etc.)",
+      "publish": "Publish this chart",
+      "publishFail": {
+        "noId": "(Cannot publish because YouTube video ID is not specified)",
+        "empty": "(Cannot publish because all chart data is empty or hidden)",
+        "noPasswd": "(Cannot publish because edit password is not set)"
+      },
+      "saveDone": "Saved!",
+      "loadFail": "Failed to load file",
+      "confirmLoad": "Overwrite the chart data with this file?",
+      "fileSize": "Current file size",
+      "fileSizeMax": "(Up to {max} kB)",
+      "testPlay": "Test play",
+      "chartId": "Chart ID",
+      "unsaved": "(Unsaved)",
+      "saveToServer": "Save to server",
+      "hasUnsaved": "(There are unsaved changes)",
+      "convertingWarning": "This chart has been converted from the old format (ver.{ver}), and some notes may behave differently. Saving will overwrite the chart data with the converted data. (For details, please check the update history at the bottom of the top page.)",
+      "shareLink": "Share link",
+      "copy": "Copy",
+      "localSaveLoad": "Save/load locally",
+      "saveToLocal": "Save",
+      "loadFromLocal": "Open file"
+    },
+    "timing": {
+      "title": "Timing",
+      "offset": "Offset",
+      "offsetSecond": "sec",
+      "step": "Step",
+      "bpm": "BPM",
+      "speed": "Speed",
+      "beat": "Beat",
+      "beatOffset": "Offset",
+      "changeHere": "Change here",
+      "editedInCode": "Cannot be changed because it is edited in the Code tab."
+    },
+    "level": {
+      "title": "Levels",
+      "levelsList": "Levels",
+      "levelAdd": "Add",
+      "levelDuplicate": "Duplicate",
+      "levelDelete": "Delete",
+      "unlisted": "(Unlisted)",
+      "levelName": "Level name",
+      "difficulty": "Difficulty",
+      "unlistLevel": "Hide this level",
+      "unlistDesc": "(You can hide this level so that it will not be displayed when opened from the shared link, such as an unfinished level or the like.)"
+    },
+    "note": {
+      "title": "Notes",
+      "step": "Step",
+      "noteNum": "Note",
+      "noteAdd": "Add",
+      "noteDelete": "Delete",
+      "totalNotes": "Total Notes",
+      "copy": "Copy",
+      "paste": "Paste",
+      "position": "Position",
+      "velocity": "Velocity",
+      "big": "Big",
+      "fallMode": "Note appearance",
+      "fallModeFalse": "from bottom",
+      "fallModeTrue": "from top",
+      "editedInCode": "Cannot be changed because it is edited in the Code tab."
+    },
+    "code": {
+      "title": "Code"
+    }
   }
 }
