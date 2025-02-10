@@ -28,6 +28,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
 
       let seq: ChartSeqData6 | ChartSeqData7;
       switch (chart.ver) {
+        case 4:
         case 5:
           seq = loadChart6(await convertTo6(chart), lvIndex);
           break;

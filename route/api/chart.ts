@@ -18,6 +18,7 @@ import {
   NoteCommandWithLua7,
 } from "../../chartFormat/legacy/chart7.js";
 import { Chart6 } from "../../chartFormat/legacy/chart6.js";
+import { Chart4 } from "../../chartFormat/legacy/chart4.js";
 
 export function hashPasswd(
   cid: string,
@@ -46,7 +47,7 @@ export async function getChartEntry(
 ): Promise<{
   res?: { message: string; status: 401 | 404 | 500 };
   entry?: ChartEntry;
-  chart?: Chart5 | Chart6 | Chart7;
+  chart?: Chart4 | Chart5 | Chart6 | Chart7;
 }> {
   const entryCompressed = (await db
     .collection("chart")
@@ -90,7 +91,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null;
   deleted: boolean;
   published: boolean;
-  ver: 5 | 6 | 7;
+  ver: 4 | 5 | 6 | 7;
   offset: number;
   ytId: string;
   title: string;
@@ -112,6 +113,13 @@ export interface ChartEntryCompressed {
     unlisted: boolean;
   }[];
 }
+export interface ChartLevelCore3 {
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
+  lua: string[];
+}
 export interface ChartLevelCore5 {
   notes: NoteCommandWithLua3[];
   rest: RestStep3[];
@@ -131,6 +139,7 @@ export interface ChartLevelCore7 {
 
 export type ChartEntry = ChartEntryCompressed &
   (
+    | { ver: 4; levels: ChartLevelCore3[] }
     | { ver: 5 | 6; levels: ChartLevelCore5[] }
     | { ver: 7; levels: ChartLevelCore7[] }
   );
@@ -223,8 +232,33 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
   };
 }
 
-export function entryToChart(entry: ChartEntry): Chart5 | Chart6 | Chart7 {
+export function entryToChart(
+  entry: ChartEntry
+): Chart4 | Chart5 | Chart6 | Chart7 {
   switch (entry.ver) {
+    case 4:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          hash: entry.levelBrief.at(i)?.hash || "",
+          type: entry.levelBrief.at(i)?.type || "",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          lua: level.lua,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        editPasswd: entry.editPasswd,
+        updatedAt: entry.updatedAt,
+      };
     case 5:
       return {
         falling: "nikochan",
