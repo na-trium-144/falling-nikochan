@@ -1,10 +1,6 @@
 const versionKey = "lastVisited";
-function versionMajor() {
-  return Number((process.env.buildVersion as string).split(".")[0]);
-}
-function versionMinor() {
-  return Number((process.env.buildVersion as string).split(".")[1]);
-}
+const latestChangelogMajor = 7;
+const latestChangelogMinor = 0;
 export function lastVisitedOld(): boolean {
   try {
     const lastVisited = localStorage.getItem(versionKey);
@@ -13,8 +9,8 @@ export function lastVisitedOld(): boolean {
     }
     const [major, minor] = JSON.parse(lastVisited);
     return (
-      major < versionMajor() ||
-      (major === versionMajor() && minor < versionMinor())
+      major < latestChangelogMajor ||
+      (major === latestChangelogMajor && minor < latestChangelogMinor)
     );
   } catch {
     return true;
@@ -23,6 +19,6 @@ export function lastVisitedOld(): boolean {
 export function updateLastVisited() {
   localStorage.setItem(
     versionKey,
-    JSON.stringify([versionMajor(), versionMinor()])
+    JSON.stringify([latestChangelogMajor, latestChangelogMinor])
   );
 }
