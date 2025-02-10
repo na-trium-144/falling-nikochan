@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { getTranslations } from "./getTranslations.js";
 
 export async function locales() {
   try {
@@ -14,23 +15,22 @@ export async function locales() {
   }
 }
 
-const description =
-  "Simple and cute rhythm game, where anyone can create and share charts.";
-
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
 }
 
 export async function initMetadata(
-  params: Promise<{ locale: string }>,
+  params: Promise<{ locale?: string }>,
   path: string | null,
   title: string
 ): Promise<Metadata> {
-  const locale = (await params).locale;
+  const locale = (await params).locale || "en";
   const titleWithSiteName = title
     ? `${title} | Falling Nikochan`
     : "Falling Nikochan";
   const titleWithoutSiteName = title || "Falling Nikochan";
+  const t = await getTranslations(locale, "main");
+  const description = t("description");
   return {
     metadataBase: new URL("https://nikochan.natrium144.org"),
     title: titleWithSiteName,

@@ -1,5 +1,7 @@
 export default {
   main: {
+    description:
+      "シンプルでかわいい音ゲーです。誰でも譜面を作成し共有することができます。",
     about: {
       title: "Falling Nikochan とは？",
     },

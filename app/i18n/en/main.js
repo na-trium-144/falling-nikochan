@@ -1,5 +1,7 @@
 export default {
   main: {
+    description:
+      "Simple and cute rhythm game, where anyone can create and share charts.",
     about: {
       title: "What is Falling Nikochan?",
     },
