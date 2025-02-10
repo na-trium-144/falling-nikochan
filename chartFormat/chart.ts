@@ -205,9 +205,14 @@ export async function createBrief(
   chart: Chart,
   updatedAt?: number
 ): Promise<ChartBrief> {
-  const levelHashes = await Promise.all(
-    chart.levels.map((level) => hashLevel(level))
-  );
+  let levelHashes: string[] = [];
+  try {
+    levelHashes = await Promise.all(
+      chart.levels.map((level) => hashLevel(level))
+    );
+  } catch {
+    //
+  }
   const levelBrief = chart.levels.map((level, i) => ({
     name: level.name,
     type: level.type,

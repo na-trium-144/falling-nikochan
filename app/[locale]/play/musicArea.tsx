@@ -74,45 +74,41 @@ export function MusicArea(props: Props) {
         )}
         <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">
           <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
-            <p className={largeTitle ? "leading-5" : "leading-4"}>
+            <p className="leading-0">
               <span
                 className={
-                  "inline-block font-title " +
-                  (largeTitle ? "text-2xl leading-6 " : "text-lg leading-4 ") +
-                  "align-bottom " +
-                  "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                  "inline-block font-title align-bottom " +
+                  (largeTitle ? "text-2xl/6 " : "text-lg/5 ") +
+                  "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
                 }
               >
                 {props.chartBrief?.title}
               </span>
               <span
                 className={
-                  "inline-block font-title " +
-                  (largeTitle ? "text-lg leading-4 " : "text-sm leading-3 ") +
-                  "align-bottom " +
-                  "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                  "inline-block font-title align-bottom " +
+                  (largeTitle ? "text-lg/5 " : "text-sm/3.5 ") +
+                  "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
                 }
               >
                 <span className="mx-1">/</span>
                 {props.chartBrief?.composer}
               </span>
             </p>
-            <p className={"mt-0.5 " + (largeTitle ? "leading-4" : "leading-3")}>
+            <p className="mt-1 leading-0">
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
                     className={
-                      "inline-block align-bottom " +
-                      "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                      "inline-block leading-0 align-bottom " +
+                      "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
                     }
                   >
                     {props.chartBrief?.levels[props.lvIndex].name && (
                       <span
                         className={
-                          "font-title mr-1 " +
-                          (largeTitle
-                            ? "text-lg leading-6 "
-                            : "text-base leading-5 ")
+                          "font-title mr-1 align-bottom " +
+                          (largeTitle ? "text-lg/4 " : "text-sm/3.5 ")
                         }
                       >
                         {props.chartBrief?.levels[props.lvIndex].name}
@@ -120,16 +116,16 @@ export function MusicArea(props: Props) {
                     )}
                     <span
                       className={
-                        largeTitle
-                          ? "text-base leading-6 "
-                          : "text-sm leading-5 "
+                        "align-bottom " +
+                        (largeTitle ? "text-base/3 " : "text-xs/2.5 ")
                       }
                     >
                       {props.lvType}-
                     </span>
                     <span
                       className={
-                        largeTitle ? "text-xl leading-6 " : "text-lg leading-5 "
+                        "align-bottom " +
+                        (largeTitle ? "text-xl/4 " : "text-lg/3.5 ")
                       }
                     >
                       {props.chartBrief?.levels[props.lvIndex]?.difficulty}
@@ -139,21 +135,21 @@ export function MusicArea(props: Props) {
               <span
                 className={
                   "inline-block align-bottom " +
-                  "overflow-hidden max-w-full text-ellipsis whitespace-nowrap "
+                  "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
                 }
               >
                 <span
                   className={
-                    "ml-2 " +
-                    (largeTitle ? "text-sm leading-5 " : "text-xs leading-3 ")
+                    "ml-2 align-bottom " +
+                    (largeTitle ? "text-sm/3 " : "text-xs/2.5")
                   }
                 >
                   by
                 </span>
                 <span
                   className={
-                    "ml-1.5 font-title " +
-                    (largeTitle ? "text-lg leading-5 " : "text-sm leading-3 ")
+                    "ml-1.5 font-title align-bottom " +
+                    (largeTitle ? "text-lg/4 " : "text-sm/3.5 ")
                   }
                 >
                   {props.chartBrief?.chartCreator}
@@ -161,17 +157,17 @@ export function MusicArea(props: Props) {
               </span>
             </p>
           </div>
-          <p className="leading-4 mt-0.5 ">
+          <p className="leading-0 mt-1 ">
             <span className="inline-flex flex-row justify-end w-3 overflow-visible ">
-              <span className="text-right leading-4 ">
+              <span className="text-right text-base/4 ">
                 {Math.floor(currentSec / 60)}
               </span>
             </span>
             <span>:</span>
-            <span className="inline-block w-6 leading-4 ">
+            <span className="inline-block w-6 text-base/4 ">
               {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
             </span>
-            <span className="text-sm leading-4 ">
+            <span className="text-sm/4 ">
               <span>/</span>
               <span className="ml-1 ">{Math.floor(levelLength / 60)}</span>
               <span>:</span>
