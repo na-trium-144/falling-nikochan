@@ -79,7 +79,11 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .on("get", ["/", "/edit", "/main/*", "/play"], (c) => {
     const lang = c.get("language");
-    return c.redirect(`/${lang}${c.req.path}`, 307);
+    const params = new URLSearchParams(new URL(c.req.url).search);
+    return c.redirect(
+      `/${lang}${c.req.path}${params ? "?" + params : ""}`,
+      307
+    );
   })
   .on(
     "get",
@@ -92,9 +96,18 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       const lang = c.get("language");
       const cid = c.req.param("cid"); /*|| c.req.param("cid_txt").slice(0, -4)*/
       const pBriefRes = briefApp.request(`/${cid}`);
-      const pRes = fetchStatic(
-        new URL(c.req.url.replace(/share\/[0-9]+/, "share/placeholder"))
-      );
+      let placeholderUrl: URL;
+      if (c.req.path.startsWith("/share")) {
+        placeholderUrl = new URL(
+          `/${lang}/share/placeholder`,
+          new URL(c.req.url).origin
+        );
+      } else {
+        placeholderUrl = new URL(
+          c.req.url.replace(/share\/[0-9]+/, "share/placeholder")
+        );
+      }
+      const pRes = fetchStatic(placeholderUrl);
       const briefRes = await pBriefRes;
       if (briefRes.ok) {
         const brief = (await briefRes.json()) as ChartBrief;

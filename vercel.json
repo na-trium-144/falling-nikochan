@@ -32,7 +32,7 @@
       "destination": "/api"
     },
     {
-      "source": "/(edit|play|main/.*)",
+      "source": "/(edit|edit/.*|play|main/.*)",
       "destination": "/api"
     }
   ]
