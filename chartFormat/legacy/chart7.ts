@@ -18,6 +18,7 @@ export interface Chart7 {
   chartCreator: string;
   editPasswd: string;
   published: boolean;
+  locale: string;
 }
 export interface Level7 {
   name: string;
@@ -65,11 +66,11 @@ export async function convertTo7(
       notes: level.notes.map((note) => ({
         ...note,
         // 新規譜面のfallのデフォルト値はtrueだが、
-        // 既存の譜面についてはfalseとする
+        // 既存の譜面についてはfalseとする (luaを修正するのがめんどい)
         fall: false,
       })),
     })),
+    locale: "ja", // ver6以前は日本語にしか対応していない
     ver: 7,
-    published: false,
   };
 }

@@ -36,6 +36,7 @@ export default function ShareChart({ locale }: { locale: string }) {
         updatedAt: 0,
         published: true,
         playCount: 999,
+        locale: "ja",
         levels: [
           {
             name: "placeholder",

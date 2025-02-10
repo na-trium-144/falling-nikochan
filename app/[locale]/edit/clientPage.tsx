@@ -107,7 +107,7 @@ export default function EditAuth({ locale }: { locale: string }) {
       savePasswd: boolean
     ) => {
       if (cidInitial.current === "new") {
-        setChart(emptyChart());
+        setChart(emptyChart(locale));
         setPasswdFailed(false);
         setLoading(false);
         setCid(undefined);

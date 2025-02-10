@@ -99,6 +99,7 @@ export interface ChartEntryCompressed {
   editPasswd: string;
   updatedAt: number;
   playCount: number;
+  locale?: string; // new in v7
   levelBrief: {
     name: string;
     hash: string;
@@ -169,6 +170,7 @@ export async function zipEntry(
     editPasswd: entry.editPasswd,
     updatedAt: entry.updatedAt,
     playCount: entry.playCount,
+    locale: entry.locale,
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
   };
@@ -204,6 +206,7 @@ export async function chartToEntry(
     chartCreator: chartBrief.chartCreator,
     updatedAt: chartBrief.updatedAt,
     levelBrief: chartBrief.levels,
+    locale: chartBrief.locale,
   };
 }
 export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
@@ -216,6 +219,7 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
     updatedAt: entry.updatedAt,
     playCount: entry.playCount,
     published: entry.published,
+    locale: entry.locale || "ja",
   };
 }
 
@@ -269,6 +273,9 @@ export function entryToChart(entry: ChartEntry): Chart5 | Chart6 | Chart7 {
         editPasswd: entry.editPasswd,
       };
     case 7:
+      if (!entry.locale) {
+        throw new Error("locale is required in v7");
+      }
       return {
         falling: "nikochan",
         ver: entry.ver,
@@ -290,6 +297,7 @@ export function entryToChart(entry: ChartEntry): Chart5 | Chart6 | Chart7 {
         composer: entry.composer,
         chartCreator: entry.chartCreator,
         editPasswd: entry.editPasswd,
+        locale: entry.locale,
       };
   }
 }

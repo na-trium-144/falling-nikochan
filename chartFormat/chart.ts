@@ -26,6 +26,7 @@ export interface ChartBrief {
   updatedAt: number;
   playCount?: number;
   published: boolean;
+  locale: string;
   levels: {
     name: string;
     hash: string;
@@ -91,6 +92,7 @@ export async function validateChart(
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
   if (typeof chart.published !== "boolean") chart.published = false;
+  if (typeof chart.locale !== "string") throw "chart.locale is invalid";
   return chart;
 }
 export function validateLevel(level: Level): Level {
@@ -130,7 +132,7 @@ export function validCId(cid: string) {
   return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
 }
 
-export function emptyChart(): Chart {
+export function emptyChart(locale: string): Chart {
   let chart: Chart = {
     falling: "nikochan",
     ver: currentChartVer,
@@ -142,6 +144,7 @@ export function emptyChart(): Chart {
     chartCreator: "",
     editPasswd: "",
     published: false,
+    locale,
   };
   return chart;
 }
@@ -227,5 +230,6 @@ export async function createBrief(
     levels: levelBrief,
     updatedAt: updatedAt || 0,
     published: chart.published,
+    locale: chart.locale,
   };
 }
