@@ -42,6 +42,10 @@
     }
   },
   "footer": {
-    "history": "更新履歴はこちら"
+    "history": "更新履歴はこちら",
+    "theme": "テーマ色",
+    "light": "ライト",
+    "dark": "ダーク",
+    "default": "自動"
   }
 }

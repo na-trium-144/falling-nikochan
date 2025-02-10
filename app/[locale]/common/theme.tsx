@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { Moon, Sun } from "@icon-park/react";
+import { useTranslations } from "next-intl";
 
 function getCurrentTheme(): "dark" | "light" | null {
   const theme = localStorage?.getItem("theme");
@@ -85,6 +86,7 @@ export function ThemeHandler() {
 }
 
 export function ThemeSwitcher(props: ThemeContext) {
+  const t = useTranslations("footer");
   const { isDark, theme, setTheme } = props;
 
   return (
@@ -100,16 +102,16 @@ export function ThemeSwitcher(props: ThemeContext) {
           }
         }}
       >
-        <option value="dark">Dark</option>
-        <option value="light">Light</option>
-        <option value="null">System Default</option>
+        <option value="dark">{t("dark")}</option>
+        <option value="light">{t("light")}</option>
+        <option value="null">{t("default")}</option>
       </select>
       {isDark ? (
         <Moon className="absolute bottom-1 left-0 " />
       ) : (
         <Sun className="absolute bottom-1 left-0 " />
       )}
-      <span className="ml-5 ">Theme</span>
+      <span className="ml-5 ">{t("theme")}</span>
     </span>
   );
 }
