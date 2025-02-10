@@ -1,12 +1,13 @@
 "use client";
 
 import { tabTitleKeys, tabURLs } from "@/main/const.js";
-import { Github } from "@icon-park/react";
+import { Github, International } from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
 import { ExternalLink } from "./extLink.js";
 import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation.js";
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定
@@ -55,7 +56,12 @@ export default function Footer(props: Props) {
         >
           na-trium-144/falling-nikochan
         </ExternalLink>
-        <span className="space-x-3">
+        <div
+          className={
+            "flex flex-col items-center justify-center " +
+            "footer-wide3:flex-row footer-wide3:items-baseline footer-wide3:space-x-3"
+          }
+        >
           <Link
             className={"inline-block " + linkStyle1}
             href={`/${props.locale}/main/version`}
@@ -65,9 +71,54 @@ export default function Footer(props: Props) {
             <span className="mx-1">{process.env.buildVersion}</span>
             <span className="text-xs">({t("history")})</span>
           </Link>
-          <ThemeSwitcher {...themeContext} />
-        </span>
+          <span className="space-x-3">
+            <LangSwitcher locale={props.locale} />
+            <ThemeSwitcher {...themeContext} />
+          </span>
+        </div>
       </div>
     </footer>
+  );
+}
+
+const langNames: { [key: string]: string } = {
+  ja: "日本語",
+  en: "English",
+};
+interface LangProps {
+  locale: string;
+}
+export function LangSwitcher(props: LangProps) {
+  const router = useRouter();
+  return (
+    <span className={"inline-block relative " + linkStyle1}>
+      <select
+        className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
+        value={props.locale}
+        onChange={(e) => {
+          document.cookie = `language=${e.target.value};path=/;max-age=31536000`;
+          if (window.location.pathname.startsWith(`/${props.locale}`)) {
+            router.replace(
+              window.location.pathname.replace(
+                `/${props.locale}`,
+                `/${e.target.value}`
+              ),
+              { scroll: false }
+            );
+          } else {
+            // /share/cid など
+            router.refresh();
+          }
+        }}
+      >
+        {Object.keys(langNames).map((lang) => (
+          <option key={lang} value={lang}>
+            {langNames[lang]}
+          </option>
+        ))}
+      </select>
+      <International className="absolute bottom-1 left-0 " />
+      <span className="ml-5 ">Language</span>
+    </span>
   );
 }

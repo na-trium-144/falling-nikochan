@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @theme {
   --breakpoint-main-wide: 48rem; /* タイトルと各タブの内容が別ページ */
-  --breakpoint-footer-wide: 36rem; /* Footerのナビゲーションを横並びにする */
-  --breakpoint-footer-wide2: 36rem; /* build情報を横並びにする */
+  --breakpoint-footer-wide: 35rem; /* Footerのナビゲーションを横並びにする */
+  --breakpoint-footer-wide2: 45rem; /* GitHubリンク&バージョンを横並びにする */
+  --breakpoint-footer-wide3: 25rem; /* バージョン&Languageを横並びにする */
   --breakpoint-edit-wide: 50rem; /* editのPC表示 */
   --breakpoint-share-yt-wide: 60rem; /* shareでYouTubeを表示する場所が変わる */
   --color-orange-975: #20100a;

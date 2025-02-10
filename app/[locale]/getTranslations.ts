@@ -10,7 +10,6 @@ export async function getMessages(locale: string) {
   };
 }
 
-
 export async function getTranslations(
   params: Promise<{ locale: string }> | string,
   namespace?: string
