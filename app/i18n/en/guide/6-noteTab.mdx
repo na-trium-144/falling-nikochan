@@ -1,0 +1,13 @@
+import { Key } from "@/common/key.js";
+import { Move } from "@icon-park/react";
+
+- You can add a note at the current cursor position and change the note's position, angle, and speed.
+- Instead of specifying the note's position and speed numerically,
+you can change them with the mouse from the note preview displayed on the left.
+  - When there is a note at the current cursor position, dragging in the preview screen will move the note's position, and dragging while holding down <Key className="text-sm p-0.5 mx-0.5">Shift</Key> will change the note's speed.
+  - For touch operation, press the <span className="inline-block w-5 translate-y-0.5 "><Move /></span>Touch mode
+  button to switch to a mode in which you can move the note's position/speed by touch operation.
+- The copy, paste, and 1 to 9 buttons below allow you to copy and paste notes.
+  - The buttons in the lower row copy the settings of the note at the current cursor position.
+  - Pressing the corresponding buttons in the upper row will overwrite and paste the note at the current cursor position.
+  - Or if there are no notes present when you paste, notes will be added.

@@ -8,6 +8,18 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/_next/static/chunks/app/(.*)/share/([0-9]+/.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/_next/static/chunks/app/%5Blocale%5D/main/about/%5BaboutIndex%5D/:path*",
+      "destination": "/_next/static/chunks/app/[locale]/main/about/[aboutIndex]/:path*"
+    },
+    {
+      "source": "/_next/static/chunks/app/%5Blocale%5D/:path*",
+      "destination": "/_next/static/chunks/app/[locale]/:path*"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api"
     },
@@ -16,11 +28,11 @@
       "destination": "/api"
     },
     {
-      "source": "/_next/static/chunks/app/share/([0-9]+/.*)",
+      "source": "/",
       "destination": "/api"
     },
     {
-      "source": "/edit/(.*)",
+      "source": "/(edit|edit/.*|play|main/.*)",
       "destination": "/api"
     }
   ]

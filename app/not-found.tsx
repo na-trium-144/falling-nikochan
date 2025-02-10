@@ -1,8 +1,16 @@
-import { NotFound } from "./common/box.js";
-import { metaDataTitle } from "./common/title.js";
+import { NotFound } from "@/common/box.js";
+import { initMetadata, MetadataProps } from "@/metadata.js";
 
-export const metadata = metaDataTitle(`Not Found`);
+export async function generateMetadata({ params }: MetadataProps) {
+  return initMetadata(params, null, "Not Found");
+}
 
 export default function NotFoundPage() {
-  return <NotFound />;
+  return (
+    <html>
+      <body>
+        <NotFound />
+      </body>
+    </html>
+  );
 }
