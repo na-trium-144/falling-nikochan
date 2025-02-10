@@ -4,8 +4,10 @@ import { join } from "node:path";
 
 export async function locales() {
   try {
-    const files = await readdir(join(process.cwd(), "app", "i18n"));
-    return files.map((name) => name.split(".")[0]);
+    const files = await readdir(join(process.cwd(), "app", "i18n"), {
+      withFileTypes: true,
+    });
+    return files.filter((ent) => ent.isDirectory()).map((ent) => ent.name);
   } catch (err) {
     console.error("Unable to scan directory: " + err);
     return [];
