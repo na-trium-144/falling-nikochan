@@ -1,3 +1,7 @@
+## ver. 7.1 - 2025/02/11 [#244](https://github.com/na-trium-144/falling-nikochan/pull/244)
+
+* /api にmiddlewareが適用されないようにした
+
 ## ver. 7.0 - 2025/02/11 [#236](https://github.com/na-trium-144/falling-nikochan/pull/236), [#239](https://github.com/na-trium-144/falling-nikochan/pull/239), [#241](https://github.com/na-trium-144/falling-nikochan/pull/241), [#240](https://github.com/na-trium-144/falling-nikochan/pull/240)
 
 * パスワード保存機能の改善
