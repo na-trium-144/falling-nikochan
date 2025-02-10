@@ -3,6 +3,7 @@ import { initMetadata, MetadataProps } from "@/metadata";
 import { IndexMain } from "../main.js";
 import ChangeLogJa from "@/../i18n/ja/changelog.mdx";
 import ChangeLogEn from "@/../i18n/en/changelog.mdx";
+import { UpdateVersionState } from "./updateState.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.version");
@@ -36,6 +37,7 @@ export default async function Page({ params }: MetadataProps) {
       ) : (
         (console.error("unsupported locale"), null)
       )}
+      <UpdateVersionState />
     </IndexMain>
   );
 }

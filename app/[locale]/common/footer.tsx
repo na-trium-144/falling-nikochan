@@ -1,13 +1,15 @@
 "use client";
 
 import { tabTitleKeys, tabURLs } from "@/main/const.js";
-import { Github, Translate } from "@icon-park/react";
+import { Comment, Github, Translate } from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
 import { ExternalLink } from "./extLink.js";
 import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation.js";
+import { useEffect, useState } from "react";
+import { lastVisitedOld } from "./version.js";
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定
@@ -17,8 +19,10 @@ interface Props {
 export default function Footer(props: Props) {
   const themeContext = useTheme();
   const tm = useTranslations("main");
-  const t = useTranslations("footer");
+  // const t = useTranslations("footer");
   const tabTitles = (i: number) => tm(tabTitleKeys[i] + ".title");
+  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
+  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
 
   return (
     <footer className="pb-3">
@@ -58,23 +62,30 @@ export default function Footer(props: Props) {
         </ExternalLink>
         <div
           className={
-            "flex flex-col items-center justify-center " +
-            "footer-wide3:flex-row footer-wide3:items-baseline footer-wide3:space-x-3"
+            // "flex flex-col items-center justify-center " +
+            /*footer-wide3:*/ "flex-row items-baseline space-x-3"
           }
         >
           <Link
-            className={"inline-block " + linkStyle1}
+            className={"inline-block relative group " + linkStyle1}
             href={`/${props.locale}/main/version`}
             prefetch={false}
           >
             <span>ver.</span>
-            <span className="mx-1">{process.env.buildVersion}</span>
-            <span className="text-xs">({t("history")})</span>
+            <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
+            <Comment className="inline-block translate-y-0.5 " />
+            <span
+              className={
+                "absolute w-3 h-3 rounded-full bg-red-500 " +
+                (isLastVisitedOld ? "inline-block " : "hidden ")
+              }
+              style={{ top: "-0.1rem", right: "-0.25rem" }}
+            />
           </Link>
-          <span className="space-x-3">
-            <LangSwitcher locale={props.locale} />
-            <ThemeSwitcher {...themeContext} />
-          </span>
+          {/*<span className="space-x-3">*/}
+          <LangSwitcher locale={props.locale} />
+          <ThemeSwitcher {...themeContext} />
+          {/*</span>*/}
         </div>
       </div>
     </footer>

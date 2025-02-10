@@ -56,7 +56,6 @@ export default {
     },
   },
   footer: {
-    history: "更新履歴はこちら",
     theme: "テーマ色",
     light: "ライト",
     dark: "ダーク",

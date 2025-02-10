@@ -54,7 +54,6 @@ export default {
     },
   },
   footer: {
-    history: "ChangeLog here",
     theme: "Theme",
     light: "Light",
     dark: "Dark",
