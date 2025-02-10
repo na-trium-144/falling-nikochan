@@ -1,3 +1,29 @@
+## ver. 7.0 - 2025/02/?? [#236](https://github.com/na-trium-144/falling-nikochan/pull/236), [#239](https://github.com/na-trium-144/falling-nikochan/pull/239), [#241](https://github.com/na-trium-144/falling-nikochan/pull/241), [#240](https://github.com/na-trium-144/falling-nikochan/pull/240)
+
+* パスワード保存機能の改善
+    * localStorageに保存されたhashだけではアクセスできないようにした (追加でsecure&httpOnlyのcookieがhashに含まれているものと合致していないといけない)
+    * hashにcidを加え、同じパスワードでも別の譜面に同じhashを使いまわせないようにした
+    * ver6以下の譜面データに限り、localStorageに保存されている旧仕様のパスワードハッシュ(pass-cid)でもアクセス可能で、次回アクセス時に削除され新しいパスワードハッシュ(ph-cid)に置き換えられる
+    * パスワードを保存するかどうかをユーザーが選択できるようにした (preferSavePasswd としてlocalStorageに保存される)
+* chartデータバージョン7
+    * 音符の表示開始位置を上か下で選べるようにする
+    * localeの情報を追加
+    * ver6の譜面をeditで読み込むと、音符の表示開始位置はすべて下からに置き換えられる
+        * Metaタブに警告が表示される
+    * ver6の譜面をplayで読み込むと、ver6のコードを使って今までと同じように動作する
+    * GET /api/chartFile はvalidateChart()をせずデータベースに保存されている譜面データ(ver5,6,7)をそのまま返すようにした
+    * POST /api/chartFile は送られたchartデータのバージョン番号が古いとき自動的にアップグレードせず409を返すようにした
+    * chartファイルのvalidationエラーで400ではなく415を返すようにした
+    * /api/seqFile はChartSeqData6または7を返す
+* i18n
+    * next-intlを導入し、 /en と /ja を作成
+    * chain→コンボ
+    * version, policy, editGuide はmdxに移行
+    * editGuideの文量を減らし、UI中に(WebCFaceからコピペした)ヘルプアイコンを入れた
+* スコアとchainを右寄せではなく10の桁基準にした
+* dev環境でのテスト用に /play に直接cid指定で飛べるようにした
+* 最後に開いたバージョンを記録し、更新履歴ボタンに未読マークをつける
+
 ## ver. 6.26 - 2025/02/08 [#234](https://github.com/na-trium-144/falling-nikochan/pull/234)
 
 * bun.lock追加、インストールとバックエンドの実行をbunでもできるようにした
