@@ -24,6 +24,7 @@ async function errorResponse(
 }
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .route("/api", apiApp)
   .use(
     languageDetector({
       supportedLanguages: ["en", "ja"],
@@ -71,7 +72,6 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       );
     }
   })
-  .route("/api", apiApp)
   .get("/edit/:cid", (c) => {
     // deprecated (used until ver6.15)
     const cid = c.req.param("cid");
