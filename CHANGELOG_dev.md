@@ -23,6 +23,7 @@
 * スコアとchainを右寄せではなく10の桁基準にした
 * dev環境でのテスト用に /play に直接cid指定で飛べるようにした
 * 最後に開いたバージョンを記録し、更新履歴ボタンに未読マークをつける
+* nbuild時のeslintとtypeチェックを無効化
 
 ## ver. 6.26 - 2025/02/08 [#234](https://github.com/na-trium-144/falling-nikochan/pull/234)
 
