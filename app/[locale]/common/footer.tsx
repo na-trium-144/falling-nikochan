@@ -1,7 +1,7 @@
 "use client";
 
 import { tabTitleKeys, tabURLs } from "@/main/const.js";
-import { Github, International } from "@icon-park/react";
+import { Github, Translate } from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
 import { ExternalLink } from "./extLink.js";
@@ -117,7 +117,7 @@ export function LangSwitcher(props: LangProps) {
           </option>
         ))}
       </select>
-      <International className="absolute bottom-1 left-0 " />
+      <Translate className="absolute bottom-1 left-0 " />
       <span className="ml-5 ">Language</span>
     </span>
   );
