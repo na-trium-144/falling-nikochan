@@ -69,6 +69,7 @@ export function pageTitle(cid: string, brief: ChartBrief) {
  * クライアント側は全く使わない
  *
  */
+export const currentChartVer = 7;
 export type Chart = Chart7;
 export type Level = Level7;
 export const levelTypes = ["Single", "Double", "Maniac"];
@@ -80,7 +81,7 @@ export async function validateChart(
 ): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 7) chart = await convertTo7(chart);
-  if (chart.ver !== 7) throw "chart.ver is invalid";
+  if (chart.ver !== currentChartVer) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
   chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
@@ -132,7 +133,7 @@ export function validCId(cid: string) {
 export function emptyChart(): Chart {
   let chart: Chart = {
     falling: "nikochan",
-    ver: 7,
+    ver: currentChartVer,
     levels: [emptyLevel()],
     offset: 0,
     ytId: "",

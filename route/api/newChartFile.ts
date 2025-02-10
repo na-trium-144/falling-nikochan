@@ -1,5 +1,10 @@
 import msgpack from "@ygoe/msgpack";
-import { Chart, chartMaxSize, validateChart } from "../../chartFormat/chart.js";
+import {
+  Chart,
+  chartMaxSize,
+  currentChartVer,
+  validateChart,
+} from "../../chartFormat/chart.js";
 import { updateIpLastCreate } from "./dbRateLimit.js";
 import { rateLimitMin } from "../../chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
@@ -49,13 +54,20 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         );
       }
 
-      let chart: Chart;
+      const newChartObj = msgpack.deserialize(chartBuf);
+      if (
+        typeof newChartObj.ver === "number" &&
+        newChartObj.ver < currentChartVer
+      ) {
+        return c.json({ message: "chart version is old" }, 409);
+      }
+
+      let newChart: Chart;
       try {
-        chart = msgpack.deserialize(chartBuf);
-        chart = await validateChart(chart);
+        newChart = await validateChart(newChartObj);
       } catch (e) {
-        console.log(e);
-        return c.json({ message: "invalid chart data" }, 400);
+        console.error(e);
+        return c.json({ message: "invalid chart data" }, 415);
       }
 
       // update Time
@@ -79,7 +91,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
 
       await db
         .collection("chart")
-        .insertOne(await zipEntry(await chartToEntry(chart, cid, updatedAt)));
+        .insertOne(
+          await zipEntry(await chartToEntry(newChart, cid, updatedAt))
+        );
       // revalidateBrief(cid);
 
       return c.json({ cid: cid });

@@ -3,6 +3,7 @@ import msgpack from "@ygoe/msgpack";
 import {
   Chart,
   chartMaxSize,
+  currentChartVer,
   hashLevel,
   validateChart,
 } from "../../chartFormat/chart.js";
@@ -71,7 +72,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     } else {
       v7HashKey = getCookie(c, "hashKey", "host") || "";
     }
-    console.log(v7PasswdHash,v7HashKey);
+    console.log(v7PasswdHash, v7HashKey);
     const bypass =
       c.req.query("pbypass") === "1" && env(c).API_ENV === "development";
     const chartBuf = await c.req.arrayBuffer();
@@ -101,13 +102,20 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         );
       }
 
+      const newChartObj = msgpack.deserialize(chartBuf);
+      if (
+        typeof newChartObj.ver === "number" &&
+        newChartObj.ver < currentChartVer
+      ) {
+        return c.json({ message: "chart version is old" }, 409);
+      }
+
       let newChart: Chart;
       try {
-        newChart = msgpack.deserialize(chartBuf);
-        newChart = await validateChart(newChart);
+        newChart = await validateChart(newChartObj);
       } catch (e) {
         console.error(e);
-        return c.json({ message: "invalid chart data" }, 400);
+        return c.json({ message: "invalid chart data" }, 415);
       }
 
       // update Time
