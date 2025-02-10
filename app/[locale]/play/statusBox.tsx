@@ -45,11 +45,11 @@ export default function StatusBox(props: Props) {
             : "w-48"
         }
       >
-        {["Good", "OK", "Bad", "Miss"].map((name, ji) => (
+        {["good", "ok", "bad", "miss"].map((name, ji) => (
           <StatusItem key={ji}>
             <StatusName>
               <StatusIcon index={ji} />
-              {name}
+              {t(name)}
             </StatusName>
             <StatusValue>{props.judgeCount[ji]}</StatusValue>
           </StatusItem>

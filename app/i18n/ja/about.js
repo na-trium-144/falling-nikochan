@@ -58,14 +58,14 @@ export default {
     5: {
       title: "ゲームの仕様",
       content1:
-        "ニコチャンを叩いたタイミングによって、<good></good>、<ok></ok>、<bad></bad> の判定があります。",
+        "ニコチャンを叩いたタイミングによって、<good>よい</good>、<ok>まあまあ</ok>、<bad>だめ</bad> の判定があります。",
       content2:
         "スコアは「<b>ベーススコア</b>」「<b>コンボボーナス</b>」「<b>Big ボーナス</b>」の3つからなり、" +
         "合計 {total} 点 (大きいニコチャンを2本指で叩かない場合 {totalSmall} 点) が最高となります。",
       content3:
         "<b>ベーススコア</b> ({baseScoreRate} 点満点) は叩いた音符の判定をもとに計算されます。" +
-        "すべて<good></good>判定なら合計 {baseScoreRate} 点になり、" +
-        "<ok></ok>判定はGood判定の {okBaseScore} 倍の点数が入ります。",
+        "すべて<good>よい</good>判定なら合計 {baseScoreRate} 点になり、" +
+        "<ok>まあまあ</ok>判定は よい 判定の {okBaseScore} 倍の点数が入ります。",
       content4:
         "<b>コンボボーナス</b> ({chainScoreRate} 点満点) はChainに応じて入るボーナス得点です。" +
         "コンボをつなげればつなげるほど増えます。",

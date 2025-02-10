@@ -55,20 +55,23 @@ export function ScoreDisp(props: Props) {
   const { score, best } = props;
   return (
     <Cloud className="flex flex-col">
-      <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
-        <span className="flex-1 min-w-0 text-base overflow-visible text-nowrap ">
+      <div
+        className="flex flex-row items-baseline"
+        style={{ marginTop: 4, fontSize: 16 }}
+      >
+        <span className="flex-1 min-w-0 overflow-visible text-nowrap ">
           {t("score")}
         </span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim alignAt2nd />
       </div>
       {props.auto ? (
-        <div className="text-center text-lg mt-1 ">
+        <div className="text-center mt-1 " style={{ fontSize: 20 }}>
           &lt;&lt; {t("auto")} &gt;&gt;
         </div>
       ) : (
         <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
           <span
-            className="flex-1 min-w-0 text-base overflow-visible text-nowrap "
+            className="flex-1 min-w-0 overflow-visible text-nowrap "
             style={{ fontSize: 16, marginRight: 8 }}
           >
             {t("bestScore")}
@@ -106,7 +109,10 @@ export function ChainDisp(props: ChainProps) {
             alignAt2nd
           />
         </span>
-        <span className="text-left w-14 overflow-visible " style={{ fontSize: 16 }}>
+        <span
+          className="text-left w-14 overflow-visible "
+          style={{ fontSize: 16 }}
+        >
           {t("chain", { chain: props.chain })}
         </span>
       </div>

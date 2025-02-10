@@ -25,6 +25,10 @@ export default {
       chain: "コンボ",
     },
     status: {
+      good: "よい",
+      ok: "まあまあ",
+      bad: "だめ",
+      miss: "ミス",
       big: "Big 判定数",
       remains: "残り音符数",
     },

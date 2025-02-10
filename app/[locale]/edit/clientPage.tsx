@@ -1087,6 +1087,7 @@ function Page(props: Props) {
                   hasChange={hasChange}
                   setHasChange={setHasChange}
                   currentLevelIndex={currentLevelIndex}
+                  locale={locale}
                 />
               ) : tab === 1 ? (
                 <TimingTab

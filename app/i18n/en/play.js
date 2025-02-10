@@ -8,7 +8,8 @@ export default {
         "Or start/stop by {isTouch, select, true {tapping} false {clicking} other {other}} the video<br></br>" +
         "on the top right",
       editingNotification:
-        "Changes made in the editing screen will be reflected here after reloading the page.",
+        "Changes made in the editing screen will be <br></br>" +
+        "reflected here after reloading the page.",
       option: "Options",
       auto: "Auto Play",
     },
@@ -24,6 +25,10 @@ export default {
       chain: "{chain, plural, =1 {chain} other {chains}}",
     },
     status: {
+      good: "Good",
+      ok: "OK",
+      bad: "Bad",
+      miss: "Miss",
       big: "Big Notes",
       remains: "Remaining",
     },

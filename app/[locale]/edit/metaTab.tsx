@@ -168,6 +168,7 @@ interface Props2 {
   hasChange: boolean;
   setHasChange: (h: boolean) => void;
   currentLevelIndex: number;
+  locale: string;
 }
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
@@ -344,7 +345,9 @@ export function MetaTab(props: Props2) {
           onClick={() => {
             if (props.sessionData) {
               initSession(props.sessionData, props.sessionId);
-              window.open(`/play?sid=${props.sessionId}`, "_blank")?.focus();
+              window
+                .open(`/${props.locale}/play?sid=${props.sessionId}`, "_blank")
+                ?.focus();
             }
           }}
         >

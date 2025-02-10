@@ -22,30 +22,30 @@ export async function AboutContent5(props: Props) {
       <div className="mb-4 space-y-2">
         <p>
           {t.rich("content1", {
-            good: () => (
+            good: (c) => (
               <span className="relative inline-block">
                 <span className="absolute left-0.5 bottom-1">
                   <JudgeIcon index={0} />
                 </span>
-                <span className="ml-5">Good</span>
+                <span className="ml-5">{c}</span>
                 <span className="text-sm mx-0.5">(±{goodSec * 1000}ms)</span>
               </span>
             ),
-            ok: () => (
+            ok: (c) => (
               <span className="relative inline-block">
                 <span className="absolute left-0.5 bottom-1">
                   <JudgeIcon index={1} />
                 </span>
-                <span className="ml-5">OK</span>
+                <span className="ml-5">{c}</span>
                 <span className="text-sm mx-0.5">(±{okSec * 1000}ms)</span>
               </span>
             ),
-            bad: () => (
+            bad: (c) => (
               <span className="relative inline-block">
                 <span className="absolute left-0.5 bottom-1">
                   <JudgeIcon index={2} />
                 </span>
-                <span className="ml-5">Bad</span>
+                <span className="ml-5">{c}</span>
                 <span className="text-sm mx-0.5">
                   (+{badLateSec * 1000}ms 〜 {badFastSec * 1000}ms)
                 </span>
@@ -67,20 +67,20 @@ export async function AboutContent5(props: Props) {
               okBaseScore,
               chainScoreRate,
               bigScoreRate,
-              good: () => (
+              good: (c) => (
                 <span className="relative inline-block">
                   <span className="absolute left-0.5 bottom-1">
                     <JudgeIcon index={0} />
                   </span>
-                  <span className="ml-5 mr-1">Good</span>
+                  <span className="ml-5 mr-1">{c}</span>
                 </span>
               ),
-              ok: () => (
+              ok: (c) => (
                 <span className="relative inline-block">
                   <span className="absolute left-0.5 bottom-1">
                     <JudgeIcon index={1} />
                   </span>
-                  <span className="ml-5 mr-1">OK</span>
+                  <span className="ml-5 mr-1">{c}</span>
                 </span>
               ),
               b: (c) => <span className="font-bold">{c}</span>,
