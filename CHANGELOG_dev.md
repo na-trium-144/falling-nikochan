@@ -1,4 +1,4 @@
-## ver. 7.0 - 2025/02/?? [#236](https://github.com/na-trium-144/falling-nikochan/pull/236), [#239](https://github.com/na-trium-144/falling-nikochan/pull/239), [#241](https://github.com/na-trium-144/falling-nikochan/pull/241), [#240](https://github.com/na-trium-144/falling-nikochan/pull/240)
+## ver. 7.0 - 2025/02/11 [#236](https://github.com/na-trium-144/falling-nikochan/pull/236), [#239](https://github.com/na-trium-144/falling-nikochan/pull/239), [#241](https://github.com/na-trium-144/falling-nikochan/pull/241), [#240](https://github.com/na-trium-144/falling-nikochan/pull/240)
 
 * パスワード保存機能の改善
     * localStorageに保存されたhashだけではアクセスできないようにした (追加でsecure&httpOnlyのcookieがhashに含まれているものと合致していないといけない)
