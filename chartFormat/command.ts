@@ -25,6 +25,7 @@ export function validateNoteCommand(n: NoteCommandWithLua) {
   if (typeof n.hitVY !== "number") throw "note.hitVY is invalid";
   if (typeof n.luaLine !== "number" && n.luaLine !== null)
     throw "note.luaLine is invalid";
+  if (typeof n.fall !== "boolean") throw "note.fall is invalid";
 }
 export function defaultNoteCommand(
   currentStep: Step = stepZero()
