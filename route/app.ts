@@ -1,13 +1,21 @@
 import { Hono } from "hono";
+import { languageDetector } from "hono/language";
 import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import briefApp from "./api/brief.js";
 import { ChartBrief, pageTitle } from "../chartFormat/chart.js";
 import { fetchStatic } from "./static.js";
 
-async function errorResponse(origin: string, status: number, message: string) {
+async function errorResponse(
+  origin: string,
+  lang: string,
+  status: number,
+  message: string
+) {
   return (
-    await (await fetchStatic(new URL("/errorPlaceholder", origin))).text()
+    await (
+      await fetchStatic(new URL(`/${lang}/errorPlaceholder`, origin))
+    ).text()
   )
     .replaceAll("PLACEHOLDER_STATUS", String(status))
     .replaceAll("PLACEHOLDER_MESSAGE", message)
@@ -16,20 +24,48 @@ async function errorResponse(origin: string, status: number, message: string) {
 }
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .notFound(async (c) =>
-    c.body(
-      (await fetchStatic(new URL("/404", new URL(c.req.url).origin))).body!,
+  .use(
+    languageDetector({
+      supportedLanguages: ["en", "ja"],
+      fallbackLanguage: "en",
+      order: ["cookie", "header"],
+      lookupCookie: "language",
+      cookieOptions: {
+        sameSite: "Lax",
+        secure: process.env.API_ENV !== "development",
+        maxAge: 60 * 60 * 24 * 365,
+        httpOnly: false,
+      },
+      // debug: process.env.API_ENV === "development",
+    })
+  )
+  .notFound(async (c) => {
+    const lang = c.get("language");
+    // return c.body(
+    //   (await fetchStatic(new URL(`/${lang}/404`, new URL(c.req.url).origin)))
+    //     .body!,
+    //   404,
+    //   { "Content-Type": "text/html" }
+    // );
+    return c.body(
+      await errorResponse(new URL(c.req.url).origin, lang, 404, "Not Found"),
       404,
       { "Content-Type": "text/html" }
-    )
-  )
+    );
+  })
   .onError(async (err, c) => {
     console.error(err);
+    const lang = c.get("language");
     if (c.req.path.startsWith("/api")) {
       return c.json({ message: "Server Error" }, 500);
     } else {
       return c.body(
-        await errorResponse(new URL(c.req.url).origin, 500, "Server Error"),
+        await errorResponse(
+          new URL(c.req.url).origin,
+          lang,
+          500,
+          "Server Error"
+        ),
         500,
         { "Content-Type": "text/html" }
       );
@@ -41,15 +77,20 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     const cid = c.req.param("cid");
     return c.redirect(`/edit?cid=${cid}`, 301);
   })
+  .on("get", ["/", "/edit", "/main/*", "/play"], (c) => {
+    const lang = c.get("language");
+    return c.redirect(`/${lang}${c.req.path}`, 307);
+  })
   .on(
     "get",
     [
       "/share/:cid{[0-9]+}",
       // "/share/:cid_txt{[0-9]+\\.txt}",
-      "_next/static/chunks/app/share/:cid{[0-9]+}/:f",
+      "_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
     ],
     async (c) => {
-      const cid = c.req.param("cid") /*|| c.req.param("cid_txt").slice(0, -4)*/;
+      const lang = c.get("language");
+      const cid = c.req.param("cid"); /*|| c.req.param("cid_txt").slice(0, -4)*/
       const pBriefRes = briefApp.request(`/${cid}`);
       const pRes = fetchStatic(
         new URL(c.req.url.replace(/share\/[0-9]+/, "share/placeholder"))
@@ -59,7 +100,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         const brief = (await briefRes.json()) as ChartBrief;
         const res = await pRes;
         const replacedBody = (await res.text())
-          .replaceAll("share/placeholder", `share/${cid}`)
+          .replaceAll("/share/placeholder", `/share/${cid}`)
           .replaceAll("PLACEHOLDER_TITLE", pageTitle(cid, brief))
           .replaceAll(
             '"PLACEHOLDER_BRIEF"',
@@ -81,6 +122,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           return c.body(
             await errorResponse(
               new URL(c.req.url).origin,
+              lang,
               briefRes.status,
               message
             ),
