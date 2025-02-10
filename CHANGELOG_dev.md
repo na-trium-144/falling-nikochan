@@ -1,3 +1,7 @@
+## ver. 7.2 - 2025/02/11 [#245](https://github.com/na-trium-144/falling-nikochan/pull/245)
+
+* 譜面を新規作成したときのパスワード周りの処理を修正
+
 ## ver. 7.1 - 2025/02/11 [#244](https://github.com/na-trium-144/falling-nikochan/pull/244)
 
 * /api にmiddlewareが適用されないようにした

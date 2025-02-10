@@ -251,6 +251,8 @@ export default function EditAuth({ locale }: { locale: string }) {
         convertedFrom={convertedFrom}
         setConvertedFrom={setConvertedFrom}
         locale={locale}
+        editPasswdInitial={editPasswd}
+        savePasswdInitial={savePasswd}
       />
     );
   }
@@ -266,6 +268,8 @@ interface Props {
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
+  editPasswdInitial?: string;
+  savePasswdInitial: boolean;
 }
 function Page(props: Props) {
   const {
@@ -288,6 +292,14 @@ function Page(props: Props) {
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
   const [fileSize, setFileSize] = useState<number>(0);
+  const [savePasswd, setSavePasswd] = useState<boolean>(
+    props.savePasswdInitial
+  );
+  // パスワードの変更前の値を保存
+  // post後に chart.editPasswd で上書き
+  const [editPasswdPrev, setEditPasswdPrev] = useState<string>(
+    props.editPasswdInitial || ""
+  );
 
   const changeChart = (chart: Chart) => {
     setHasChange(true);
@@ -1034,7 +1046,9 @@ function Page(props: Props) {
                   String(Math.floor(Number(v) / 4) * 4) === v
                 }
               />
-              <HelpIcon className="self-center">{t.rich("stepUnitHelp", {br: () => <br/>})}</HelpIcon>
+              <HelpIcon className="self-center">
+                {t.rich("stepUnitHelp", { br: () => <br /> })}
+              </HelpIcon>
               <div className="flex-1" />
               <span className="mr-1">{t("zoom")}</span>
               <Button
@@ -1088,6 +1102,10 @@ function Page(props: Props) {
                   setHasChange={setHasChange}
                   currentLevelIndex={currentLevelIndex}
                   locale={locale}
+                  editPasswdPrev={editPasswdPrev}
+                  setEditPasswdPrev={setEditPasswdPrev}
+                  savePasswd={savePasswd}
+                  setSavePasswd={setSavePasswd}
                 />
               ) : tab === 1 ? (
                 <TimingTab

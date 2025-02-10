@@ -13,7 +13,6 @@ import {
 import {
   getPasswd,
   getV6Passwd,
-  preferSavePasswd,
   setPasswd,
   unsetPasswd,
 } from "@/common/passwdCache.js";
@@ -169,6 +168,10 @@ interface Props2 {
   setHasChange: (h: boolean) => void;
   currentLevelIndex: number;
   locale: string;
+  savePasswd: boolean;
+  setSavePasswd: (b: boolean) => void;
+  editPasswdPrev: string;
+  setEditPasswdPrev: (s: string) => void;
 }
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
@@ -178,13 +181,11 @@ export function MetaTab(props: Props2) {
   const [uploadMsg, setUploadMsg] = useState<string>("");
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
-  const [savePasswd, setSavePasswd] = useState<boolean>(false);
   useEffect(() => {
     setErrorMsg("");
     setSaveMsg("");
     setOrigin(window.location.origin);
     setHasClipboard(!!navigator?.clipboard);
-    setSavePasswd(preferSavePasswd());
   }, [props.chart]);
 
   const save = async () => {
@@ -193,7 +194,7 @@ export function MetaTab(props: Props2) {
       setErrorMsg(t("saveDone"));
       props.setHasChange(false);
       props.setConvertedFrom(props.chart!.ver);
-      if (savePasswd) {
+      if (props.savePasswd) {
         fetch(
           process.env.BACKEND_PREFIX +
             `/api/hashPasswd/${cid}?pw=${editPasswd}`,
@@ -204,11 +205,12 @@ export function MetaTab(props: Props2) {
                 : "same-origin",
           }
         ).then(async (res) => {
-          setPasswd(cid!, await res.text());
+          setPasswd(cid, await res.text());
         });
       } else {
-        unsetPasswd(cid!);
+        unsetPasswd(cid);
       }
+      props.setEditPasswdPrev(editPasswd);
     };
     if (props.cid === undefined) {
       const res = await fetch(
@@ -229,7 +231,7 @@ export function MetaTab(props: Props2) {
           };
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
-            history.replaceState(null, "", `/edit?cid=${resBody.cid}`);
+            history.replaceState(null, "", `/${props.locale}/edit?cid=${resBody.cid}`);
             addRecent("edit", resBody.cid);
             onSave(resBody.cid, props.chart!.editPasswd);
           } else {
@@ -253,7 +255,9 @@ export function MetaTab(props: Props2) {
       const res = await fetch(
         process.env.BACKEND_PREFIX +
           `/api/chartFile/${props.cid}` +
-          `?p=${getV6Passwd(props.cid)}&ph=${getPasswd(props.cid)}`,
+          `?p=${getV6Passwd(props.cid)}` +
+          `&ph=${getPasswd(props.cid)}` +
+          `&pw=${props.editPasswdPrev}`,
         {
           method: "POST",
           body: msgpack.serialize(props.chart),
@@ -424,8 +428,8 @@ export function MetaTab(props: Props2) {
       </div>
       <MetaEdit
         {...props}
-        savePasswd={savePasswd}
-        setSavePasswd={setSavePasswd}
+        savePasswd={props.savePasswd}
+        setSavePasswd={props.setSavePasswd}
       />
     </>
   );
