@@ -1,12 +1,10 @@
-import { BPMChange } from "../command.js";
-import { stepZero } from "../step.js";
-import { Chart2, NoteCommand2 } from "./chart2.js";
+import { Step } from "../step.js";
 
 export interface Chart1 {
   falling: "nikochan"; // magic
   ver: 1;
-  notes: NoteCommand2[];
-  bpmChanges: BPMChange[];
+  notes: NoteCommand1[];
+  bpmChanges: BPMChange1[];
   offset: number;
   waveOffset: number;
   ytId: string;
@@ -15,26 +13,16 @@ export interface Chart1 {
   chartCreator: string;
   editPasswd: string;
 }
-
-export function convert1To2(chart: Chart1): Chart2 {
-  return {
-    falling: "nikochan",
-    ver: 2,
-    notes: chart.notes.map((n) => ({
-      step: n.step,
-      big: n.big,
-      hitX: n.hitX * 10 - 5,
-      hitVX: n.hitVX * 4,
-      hitVY: n.hitVY * 4,
-      accelY: n.accelY * 4,
-    })),
-    bpmChanges: chart.bpmChanges,
-    scaleChanges: [{ step: stepZero(), timeSec: 0, bpm: 120 }],
-    offset: chart.offset,
-    ytId: chart.ytId,
-    title: chart.title,
-    composer: chart.composer,
-    chartCreator: chart.chartCreator,
-    editPasswd: chart.editPasswd,
-  };
+export interface NoteCommand1 {
+  step: Step;
+  big: boolean;
+  hitX: number;
+  hitVX: number;
+  hitVY: number;
+  accelY: number;
+}
+export interface BPMChange1 {
+  step: Step;
+  timeSec: number;
+  bpm: number;
 }

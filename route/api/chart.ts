@@ -2,30 +2,52 @@ import {
   Chart,
   ChartBrief,
   createBrief,
-  hashPasswd,
-  validateChart,
+  hash,
 } from "../../chartFormat/chart.js";
 import { gzip, gunzip } from "node:zlib";
 import { promisify } from "node:util";
-import {
-  BPMChangeWithLua,
-  NoteCommandWithLua,
-  RestStep,
-  SignatureWithLua,
-} from "../../chartFormat/command.js";
 import { Binary, Db } from "mongodb";
+import {
+  BPMChangeWithLua3,
+  NoteCommandWithLua3,
+  RestStep3,
+} from "../../chartFormat/legacy/chart3.js";
+import { Chart5, SignatureWithLua5 } from "../../chartFormat/legacy/chart5.js";
+import {
+  Chart7,
+  NoteCommandWithLua7,
+} from "../../chartFormat/legacy/chart7.js";
+import { Chart6 } from "../../chartFormat/legacy/chart6.js";
+import { Chart4 } from "../../chartFormat/legacy/chart4.js";
 
+export function hashPasswd(
+  cid: string,
+  pw: string,
+  hashKey: string
+): Promise<string> {
+  return hash(cid + pw + hashKey);
+}
+
+interface Passwd {
+  bypass?: boolean;
+  v6PasswdHash?: string;
+  rawPasswd?: string;
+  v7PasswdHash?: string;
+  v7HashKey?: string;
+}
 /**
- * pをnullにするとパスワードのチェックを行わない。
+ * パスワードについては chartFile のコメントを参照
+ *
+ * パスワードが不要なアクセス (/api/brief など) ではpをnullにする
  */
 export async function getChartEntry(
   db: Db,
   cid: string,
-  p: string | null
+  p: Passwd | null
 ): Promise<{
   res?: { message: string; status: 401 | 404 | 500 };
   entry?: ChartEntry;
-  chart?: Chart;
+  chart?: Chart4 | Chart5 | Chart6 | Chart7;
 }> {
   const entryCompressed = (await db
     .collection("chart")
@@ -39,28 +61,24 @@ export async function getChartEntry(
     entryCompressed.published = false;
   }
 
-  let entry: ChartEntry;
-  let chart: Chart;
-  try {
-    entry = await unzipEntry(entryCompressed);
-    chart = entryToChart(entry);
-    chart = await validateChart(chart);
-  } catch {
-    return {
-      res: { message: "invalid chart data", status: 500 },
-    };
-  }
+  const entry = await unzipEntry(entryCompressed);
+  const chart = entryToChart(entry);
 
-  if (p === null) {
+  if (
+    p === null ||
+    p.bypass ||
+    (p.rawPasswd !== undefined && p.rawPasswd === chart.editPasswd) ||
+    (p.v6PasswdHash !== undefined &&
+      chart.ver <= 6 &&
+      p.v6PasswdHash === (await hash(chart.editPasswd))) ||
+    (p.v7PasswdHash !== undefined &&
+      p.v7HashKey !== undefined &&
+      p.v7PasswdHash === (await hashPasswd(cid, chart.editPasswd, p.v7HashKey)))
+  ) {
     return { entry, chart };
-  }
-  if (process.env.NODE_ENV === "development" && p === "bypass") {
-    return { entry, chart };
-  }
-  if (p !== (await hashPasswd(chart.editPasswd))) {
+  } else {
     return { res: { message: "bad password", status: 401 } };
   }
-  return { entry, chart };
 }
 
 /**
@@ -73,7 +91,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null;
   deleted: boolean;
   published: boolean;
-  ver: 6;
+  ver: 4 | 5 | 6 | 7;
   offset: number;
   ytId: string;
   title: string;
@@ -82,6 +100,7 @@ export interface ChartEntryCompressed {
   editPasswd: string;
   updatedAt: number;
   playCount: number;
+  locale?: string; // new in v7
   levelBrief: {
     name: string;
     hash: string;
@@ -94,15 +113,36 @@ export interface ChartEntryCompressed {
     unlisted: boolean;
   }[];
 }
-export interface ChartLevelCore {
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
-  signature: SignatureWithLua[];
+export interface ChartLevelCore3 {
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
   lua: string[];
 }
-export type ChartEntry = ChartEntryCompressed & { levels: ChartLevelCore[] };
+export interface ChartLevelCore5 {
+  notes: NoteCommandWithLua3[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
+  signature: SignatureWithLua5[];
+  lua: string[];
+}
+export interface ChartLevelCore7 {
+  notes: NoteCommandWithLua7[];
+  rest: RestStep3[];
+  bpmChanges: BPMChangeWithLua3[];
+  speedChanges: BPMChangeWithLua3[];
+  signature: SignatureWithLua5[];
+  lua: string[];
+}
+
+export type ChartEntry = ChartEntryCompressed &
+  (
+    | { ver: 4; levels: ChartLevelCore3[] }
+    | { ver: 5 | 6; levels: ChartLevelCore5[] }
+    | { ver: 7; levels: ChartLevelCore7[] }
+  );
 
 export async function unzipEntry(
   entry: ChartEntryCompressed
@@ -112,14 +152,12 @@ export async function unzipEntry(
   }
   const decodedChart = entry.levelsCompressed.buffer;
   const decompressedChart = await promisify(gunzip)(decodedChart);
-  const levels: ChartLevelCore[] = JSON.parse(
-    new TextDecoder().decode(decompressedChart)
-  );
+  const levels = JSON.parse(new TextDecoder().decode(decompressedChart));
   return {
     ...entry,
     levelsCompressed: null,
     levels,
-  };
+  } as ChartEntry;
 }
 
 export async function zipEntry(
@@ -141,33 +179,9 @@ export async function zipEntry(
     editPasswd: entry.editPasswd,
     updatedAt: entry.updatedAt,
     playCount: entry.playCount,
+    locale: entry.locale,
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
-  };
-}
-
-export function entryToChart(entry: ChartEntry): Chart {
-  return {
-    falling: "nikochan",
-    ver: entry.ver,
-    published: entry.published,
-    levels: entry.levels.map((level, i) => ({
-      name: entry.levelBrief.at(i)?.name || "",
-      type: entry.levelBrief.at(i)?.type || "",
-      unlisted: entry.levelBrief.at(i)?.unlisted || false,
-      notes: level.notes,
-      rest: level.rest,
-      bpmChanges: level.bpmChanges,
-      speedChanges: level.speedChanges,
-      signature: level.signature,
-      lua: level.lua,
-    })),
-    offset: entry.offset,
-    ytId: entry.ytId,
-    title: entry.title,
-    composer: entry.composer,
-    chartCreator: entry.chartCreator,
-    editPasswd: entry.editPasswd,
   };
 }
 
@@ -201,9 +215,9 @@ export async function chartToEntry(
     chartCreator: chartBrief.chartCreator,
     updatedAt: chartBrief.updatedAt,
     levelBrief: chartBrief.levels,
+    locale: chartBrief.locale,
   };
 }
-
 export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
   return {
     ytId: entry.ytId,
@@ -214,5 +228,110 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
     updatedAt: entry.updatedAt,
     playCount: entry.playCount,
     published: entry.published,
+    locale: entry.locale || "ja",
   };
+}
+
+export function entryToChart(
+  entry: ChartEntry
+): Chart4 | Chart5 | Chart6 | Chart7 {
+  switch (entry.ver) {
+    case 4:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          hash: entry.levelBrief.at(i)?.hash || "",
+          type: entry.levelBrief.at(i)?.type || "",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          lua: level.lua,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        editPasswd: entry.editPasswd,
+        updatedAt: entry.updatedAt,
+      };
+    case 5:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          hash: entry.levelBrief.at(i)?.hash || "",
+          type: entry.levelBrief.at(i)?.type || "",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+          lua: level.lua,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        editPasswd: entry.editPasswd,
+        updatedAt: entry.updatedAt,
+      };
+    case 6:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        published: entry.published,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          type: entry.levelBrief.at(i)?.type || "",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+          lua: level.lua,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        editPasswd: entry.editPasswd,
+      };
+    case 7:
+      if (!entry.locale) {
+        throw new Error("locale is required in v7");
+      }
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        published: entry.published,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          type: entry.levelBrief.at(i)?.type || "",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+          lua: level.lua,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        editPasswd: entry.editPasswd,
+        locale: entry.locale,
+      };
+  }
 }

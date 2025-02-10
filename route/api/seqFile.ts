@@ -1,11 +1,12 @@
 import msgpack from "@ygoe/msgpack";
-import { validateChart } from "../../chartFormat/chart.js";
-import { loadChart } from "../../chartFormat/seq.js";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
+import { convertTo6 } from "../../chartFormat/legacy/chart6.js";
+import { ChartSeqData6, loadChart6 } from "../../chartFormat/legacy/seq6.js";
+import { ChartSeqData7, loadChart7 } from "../../chartFormat/legacy/seq7.js";
 
 const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
@@ -21,20 +22,23 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         return c.json({ message: res?.message }, res?.status || 500);
       }
 
-      try {
-        chart = await validateChart(chart);
-      } catch {
-        return c.json({ message: "invalid chart data" }, 500);
-      }
       if (!chart.levels.at(lvIndex)) {
-        return c.json(
-          {
-            message: "Level not found",
-          },
-          404
-        );
+        return c.json({ message: "Level not found" }, 404);
       }
-      const seq = loadChart(chart, lvIndex);
+
+      let seq: ChartSeqData6 | ChartSeqData7;
+      switch (chart.ver) {
+        case 4:
+        case 5:
+          seq = loadChart6(await convertTo6(chart), lvIndex);
+          break;
+        case 6:
+          seq = loadChart6(chart, lvIndex);
+          break;
+        case 7:
+          seq = loadChart7(chart, lvIndex);
+          break;
+      }
 
       await db
         .collection("chart")

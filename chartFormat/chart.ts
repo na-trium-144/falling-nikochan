@@ -1,24 +1,18 @@
-import {
-  BPMChangeWithLua,
-  NoteCommandWithLua,
-  RestStep,
-  SignatureWithLua,
-  updateBpmTimeSec,
-  validateBpmChange,
-  validateNoteCommand,
-  validateRestStep,
-  validateSignature,
-} from "./command.js";
+import { updateBpmTimeSec, validateBpmChange } from "./bpm.js";
+import { validateNoteCommand, validateRestStep } from "./command.js";
 import { difficulty } from "./difficulty.js";
-import { Chart1, convert1To2 } from "./legacy/chart1.js";
-import { Chart2, convert2To3 } from "./legacy/chart2.js";
-import { Chart3, convert3To4 } from "./legacy/chart3.js";
-import { Chart4, convert4To5 } from "./legacy/chart4.js";
-import { Chart5, convert5To6 } from "./legacy/chart5.js";
+import { Chart1 } from "./legacy/chart1.js";
+import { Chart2 } from "./legacy/chart2.js";
+import { Chart3 } from "./legacy/chart3.js";
+import { Chart4 } from "./legacy/chart4.js";
+import { Chart5 } from "./legacy/chart5.js";
+import { Chart6 } from "./legacy/chart6.js";
+import { Chart7, convertTo7, hashLevel7, Level7 } from "./legacy/chart7.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { getTimeSec } from "./seq.js";
+import { validateSignature } from "./signature.js";
 import { stepZero } from "./step.js";
 
 /**
@@ -32,6 +26,7 @@ export interface ChartBrief {
   updatedAt: number;
   playCount?: number;
   published: boolean;
+  locale: string;
   levels: {
     name: string;
     hash: string;
@@ -75,43 +70,19 @@ export function pageTitle(cid: string, brief: ChartBrief) {
  * クライアント側は全く使わない
  *
  */
-export interface Chart {
-  falling: "nikochan"; // magic
-  ver: 6;
-  levels: Level[];
-  offset: number;
-  ytId: string;
-  title: string;
-  composer: string;
-  chartCreator: string;
-  editPasswd: string;
-  published: boolean;
-}
-export interface Level {
-  name: string;
-  type: string;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
-  signature: SignatureWithLua[];
-  lua: string[];
-  unlisted: boolean;
-}
+export const currentChartVer = 7;
+export type Chart = Chart7;
+export type Level = Level7;
 export const levelTypes = ["Single", "Double", "Maniac"];
 
 export const chartMaxSize = 1000000;
 
 export async function validateChart(
-  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5
+  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6
 ): Promise<Chart> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver === 1) chart = convert1To2(chart);
-  if (chart.ver === 2) chart = convert2To3(chart);
-  if (chart.ver === 3) chart = await convert3To4(chart);
-  if (chart.ver === 4) chart = convert4To5(chart);
-  if (chart.ver === 5) chart = convert5To6(chart);
-  if (chart.ver !== 6) throw "chart.ver is invalid";
+  if (chart.ver !== 7) chart = await convertTo7(chart);
+  if (chart.ver !== currentChartVer) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
   chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
@@ -121,6 +92,7 @@ export async function validateChart(
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
   if (typeof chart.published !== "boolean") chart.published = false;
+  if (typeof chart.locale !== "string") throw "chart.locale is invalid";
   return chart;
 }
 export function validateLevel(level: Level): Level {
@@ -154,28 +126,16 @@ export async function hash(text: string) {
     .join(""); // バイト列を 16 進文字列に変換する
   return hashHex;
 }
-export async function hashPasswd(text: string) {
-  return await hash(text);
-}
-export async function hashLevel(level: Level) {
-  return await hash(
-    JSON.stringify([
-      level.notes,
-      level.bpmChanges,
-      level.speedChanges,
-      level.signature,
-    ])
-  );
-}
+export const hashLevel = hashLevel7;
 
 export function validCId(cid: string) {
   return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
 }
 
-export function emptyChart(): Chart {
+export function emptyChart(locale: string): Chart {
   let chart: Chart = {
     falling: "nikochan",
-    ver: 6,
+    ver: currentChartVer,
     levels: [emptyLevel()],
     offset: 0,
     ytId: "",
@@ -184,6 +144,7 @@ export function emptyChart(): Chart {
     chartCreator: "",
     editPasswd: "",
     published: false,
+    locale,
   };
   return chart;
 }
@@ -208,7 +169,7 @@ export function emptyLevel(prevLevel?: Level): Level {
       level = luaAddSpeedChange(level, change)!;
     }
     for (const s of prevLevel.signature) {
-      level = luaAddBeatChange(level, s)!;
+      level = luaAddBeatChange(level, s)! as Level;
     }
   } else {
     level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
@@ -222,7 +183,7 @@ export function emptyLevel(prevLevel?: Level): Level {
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
-    })!;
+    })! as Level;
   }
   return level;
 }
@@ -244,9 +205,14 @@ export async function createBrief(
   chart: Chart,
   updatedAt?: number
 ): Promise<ChartBrief> {
-  const levelHashes = await Promise.all(
-    chart.levels.map((level) => hashLevel(level))
-  );
+  let levelHashes: string[] = [];
+  try {
+    levelHashes = await Promise.all(
+      chart.levels.map((level) => hashLevel(level))
+    );
+  } catch {
+    //
+  }
   const levelBrief = chart.levels.map((level, i) => ({
     name: level.name,
     type: level.type,
@@ -269,5 +235,6 @@ export async function createBrief(
     levels: levelBrief,
     updatedAt: updatedAt || 0,
     published: chart.published,
+    locale: chart.locale,
   };
 }

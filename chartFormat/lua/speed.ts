@@ -1,12 +1,16 @@
 import { Level } from "../chart.js";
-import { BPMChange } from "../command.js";
+import { BPMChange } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
+import { Chart3 } from "../legacy/chart3.js";
 
 function accelLuaCommand(bpm: number) {
   return `Accel(${bpm})`;
 }
-export function luaAddSpeedChange(chart: Level, change: BPMChange) {
+export function luaAddSpeedChange<L extends Level | Chart3>(
+  chart: L,
+  change: BPMChange
+): L | null {
   const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
     return null;

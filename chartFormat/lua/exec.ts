@@ -1,14 +1,9 @@
 import { LuaFactory } from "wasmoon";
-import {
-  BPMChangeWithLua,
-  NoteCommandWithLua,
-  RestStep,
-  SignatureWithLua,
-  updateBarNum,
-  updateBpmTimeSec,
-} from "../command.js";
+import { NoteCommandWithLua, RestStep } from "../command.js";
 import { Step, stepZero } from "../step.js";
 import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
+import { BPMChangeWithLua, updateBpmTimeSec } from "../bpm.js";
+import { SignatureWithLua, updateBarNum } from "../signature.js";
 
 export interface Result {
   stdout: string[];
@@ -67,7 +62,7 @@ export async function luaExec(code: string): Promise<Result> {
     const codeStatic = code.split("\n").map((lineStr, ln) =>
       lineStr
         .replace(
-          /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}, *(?:true|false) *)\)( *)$/,
+          /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
           `$1NoteStatic(${ln},$2)$3`
         )
         .replace(
@@ -79,10 +74,7 @@ export async function luaExec(code: string): Promise<Result> {
           `$1BeatStatic(${ln},$2)$3`
         )
         .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
-        .replace(
-          /^( *)Accel\(( *[\d.]+ *)\)( *)$/,
-          `$1AccelStatic(${ln},$2)$3`
-        )
+        .replace(/^( *)Accel\(( *[\d.]+ *)\)( *)$/, `$1AccelStatic(${ln},$2)$3`)
     );
     console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));

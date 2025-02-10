@@ -1,16 +1,26 @@
 import { Level } from "../chart.js";
-import { NoteCommand } from "../command.js";
+import { NoteCommand, NoteCommandWithLua } from "../command.js";
+import { Chart3, NoteCommand3 } from "../legacy/chart3.js";
 import { Step, stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
-function noteLuaCommand(n: NoteCommand) {
-  return `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${n.big ? "true" : "false"})`;
+function noteLuaCommand(n: NoteCommand | NoteCommand3) {
+  if ("fall" in n) {
+    return (
+      `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
+      `${n.big ? "true" : "false"}, ${n.fall ? "true" : "false"})`
+    );
+  } else {
+    return (
+      `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
+      `${n.big ? "true" : "false"})`
+    );
+  }
 }
-export function luaAddNote(
-  chart: Level,
-  n: NoteCommand,
-  step: Step
-): Level | null {
+export function luaAddNote<
+  L extends Level | Chart3,
+  N extends NoteCommand | NoteCommand3
+>(chart: L, n: N, step: Step): L | null {
   const insert = findInsertLine(chart, step);
   if (insert.luaLine === null) {
     return null;
@@ -20,7 +30,7 @@ export function luaAddNote(
   const newNote = { ...n, step, luaLine: insert.luaLine };
   insertLua(chart, insert.luaLine, noteLuaCommand(n));
 
-  chart.notes.push(newNote);
+  chart.notes.push(newNote as NoteCommandWithLua);
   chart.notes = chart.notes.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }

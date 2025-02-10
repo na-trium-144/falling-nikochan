@@ -1,0 +1,27 @@
+import { BeatSlime } from "@/edit/timingTab.js";
+
+- In the Code tab, you can edit the music data as text (Lua language program).
+  - Edits made in the Timing tab or Note tab are automatically reflected in the Code tab, and conversely, edits made in the Code tab are automatically reflected in the other tabs.
+- You can create music charts without using the Code tab at all, but it may be useful to master it, as you can select and copy and paste multiple notes at once, and you can also use variables, loops, and functions if you can write Lua.
+- The basic rules are that the text is read from top to bottom, `Note()` represents one note, and `Step()` represents a rest (the empty time between notes).
+  - In the Note tab, you can only add and delete notes, and you cannot shift the timing of all the notes already placed, but in the Code tab, inserting or deleting `Step()` will shift the timing of all the notes after it.
+- When you edit the Code tab, the edited code is automatically executed.
+  - If an error occurs (such as incorrect syntax), a message will be displayed in red at the bottom.
+  - Please note that if you move to a tab other than the Code tab while an error is displayed, the changes in the Code tab will not be saved and will revert to the last time the command was executed without errors.
+- When you place the cursor over various commands such as `Note()` in the Code tab, the time bar will also move to the time corresponding to that note (but this is not 100% accurate).
+- Falling Nikochan's unique commands are as follows.
+  - `Note(x, vx, vy, big, fall)`: Places a note.
+    - Specify x, vx, vy as numbers, and big, fall as `true` or `false`.
+  - `Step(a, b)`: Represents a rest for a b-note.
+    - a must be an integer greater than or equal to 0, and b must be an integer greater than or equal to 1.
+  - `BPM(bpm value)`: Changes the BPM. Must be a positive number.
+  - `Accel(speed value)`: Changes the speed. 0 and negative values can also be used.
+  - `Beat(beat)` or `Beat(beat, a, b)`: Changes the beat.
+    - For 4/4 beat, use `[[4, 4, 4, 4]]`,
+    for 7/8 beat, use `[[4, 4, 4, 8]]`,
+    for 4/4 + 3/4 beat, use `[[4, 4, 4, 4], [4, 4, 4]]`.
+      - (Counts from left to right, the opposite of <BeatSlime size={4} />)
+    - You can specify a beat count offset ( a / b ) after the beat.
+    a is an integer 0 or greater, and b is an integer 1 or greater.
+- Lines beginning with `--` (two minus signs) are comments (anything written will be ignored).
+- I will not explain more about the grammar of Lua languages here, so please look them up yourself.
