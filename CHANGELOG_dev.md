@@ -1,3 +1,13 @@
+## ver. 7.5 - 2025-02-12 [#256](https://github.com/na-trium-144/falling-nikochan/pull/256)
+
+* プレイ中のchain数の表示色の仕様を変更
+    * 従来のように100chain到達時に突然色が変わるのではなく、chain数に応じて徐々に色が変わる
+    * Bad,Miss判定が1つでもある場合はchainによらず色が変わらない
+
+## ver. 7.4 - 2025-02-12 [#255](https://github.com/na-trium-144/falling-nikochan/pull/255)
+
+* ver7の譜面の1小節目の音符の表示位置が正しく計算されないバグを修正
+
 ## ver. 7.2 - 2025/02/11 [#245](https://github.com/na-trium-144/falling-nikochan/pull/245)
 
 * 譜面を新規作成したときのパスワード周りの処理を修正

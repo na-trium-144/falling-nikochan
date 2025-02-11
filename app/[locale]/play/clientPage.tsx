@@ -448,7 +448,7 @@ function Play(props: Props) {
             themeContext={themeContext}
           />
           <ScoreDisp score={score} best={bestScoreState} auto={auto} />
-          <ChainDisp chain={chain} />
+          <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
           {showResult ? (
             <Result
               baseScore={baseScore}
