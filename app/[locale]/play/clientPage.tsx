@@ -23,6 +23,7 @@ import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
+import Title from "@/common/titleLogo.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
@@ -551,6 +552,13 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
+      <Title className="absolute left-0 top-0 h-24 scale-175 origin-top-left " anim={false} />
+      <div className="absolute left-12 top-60 text-8xl font-title">
+        aaaaa
+      </div>
+      <div className="absolute left-12 top-88 text-6xl font-title">
+        bbbbb
+      </div>
     </main>
   );
 }
