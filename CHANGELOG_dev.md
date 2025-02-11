@@ -1,3 +1,7 @@
+## ver. 7.4 - 2025-02-12 [#255](https://github.com/na-trium-144/falling-nikochan/pull/255)
+
+* ver7の譜面の1小節目の音符の表示位置が正しく計算されないバグを修正
+
 ## ver. 7.2 - 2025/02/11 [#245](https://github.com/na-trium-144/falling-nikochan/pull/245)
 
 * 譜面を新規作成したときのパスワード周りの処理を修正
