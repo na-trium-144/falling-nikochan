@@ -1,11 +1,12 @@
 import { ChartBrief } from "@/../../chartFormat/chart.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { LoadingSlime } from "@/common/loadingSlime.js";
-import { RightOne } from "@icon-park/react";
+import { ArrowLeft, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ChartLineBrief } from "./play/fetch.js";
+import { pagerButtonClass } from "@/common/pager.js";
 
 interface Props {
   recentBrief?: ChartLineBrief[];
@@ -16,10 +17,11 @@ interface Props {
   dateDiff?: boolean;
   href: (cid: string) => string;
   newTab?: boolean;
+  additionalOpen: boolean;
+  setAdditionalOpen: (open: boolean) => void;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
-  const [additionalOpen, setAdditionalOpen] = useState<boolean>(false);
 
   const fetching =
     props.recentBrief === undefined ||
@@ -52,31 +54,28 @@ export function ChartList(props: Props) {
                   dateDiff={props.dateDiff}
                 />
               ))}
-            {additionalOpen && (
-              <>
-                {props.recentBrief
-                  .slice(props.maxRow)
-                  .map(({ cid, brief, original }) => (
-                    <ChartListItem
-                      invisible={fetchingAdditional}
-                      key={cid}
-                      cid={cid}
-                      brief={brief}
-                      href={props.href(cid)}
-                      creator={props.creator}
-                      original={original}
-                      newTab={props.newTab}
-                      dateDiff={props.dateDiff}
-                    />
-                  ))}
-              </>
-            )}
+            {props.recentBrief
+              .slice(props.maxRow)
+              .map(({ cid, brief, original }) => (
+                <ChartListItem
+                  invisible={fetchingAdditional}
+                  hidden={!props.additionalOpen}
+                  key={cid}
+                  cid={cid}
+                  brief={brief}
+                  href={props.href(cid)}
+                  creator={props.creator}
+                  original={original}
+                  newTab={props.newTab}
+                  dateDiff={props.dateDiff}
+                />
+              ))}
           </>
         )}
         <div
           className={
             "w-max pl-6 " +
-            ((fetching || (additionalOpen && fetchingAdditional)) &&
+            ((fetching || (props.additionalOpen && fetchingAdditional)) &&
             props.showLoading
               ? ""
               : "hidden ")
@@ -91,15 +90,15 @@ export function ChartList(props: Props) {
       </ul>
       {props.recentBrief !== undefined &&
         props.recentBrief.length > props.maxRow &&
-        !additionalOpen && (
+        !props.additionalOpen && (
           <button
             className={
-              "block relative ml-5 mt-1 " +
+              "block relative ml-1 mt-1 " +
               (fetching ? "invisible " : "") +
               linkStyle1
             }
             onClick={() => {
-              setAdditionalOpen(!additionalOpen);
+              props.setAdditionalOpen(!props.additionalOpen);
               if (fetchingAdditional && props.fetchAdditional) {
                 props.fetchAdditional();
               }
@@ -108,7 +107,7 @@ export function ChartList(props: Props) {
             <RightOne className="absolute left-0 bottom-1 " theme="filled" />
             <span className="ml-5">{t("showAll")}</span>
             <span className="ml-1">
-              ({props.recentBrief.length - props.maxRow})
+              ({props.recentBrief.length /*- props.maxRow*/})
             </span>
           </button>
         )}
@@ -133,12 +132,24 @@ interface CProps {
   newTab?: boolean;
   dateDiff?: boolean;
   invisible?: boolean;
+  hidden?: boolean;
 }
 export function ChartListItem(props: CProps) {
+  const [appearing, setAppearing] = useState<boolean>(false);
+  useEffect(() => {
+    setTimeout(() => setAppearing(!props.hidden && !props.invisible), 0);
+  }, [props.hidden, props.invisible]);
   return (
     <li
       className={
-        "w-full h-max " + (props.invisible ? "hidden " /*invisible*/ : "")
+        "w-full h-max transition-opacity ease-out duration-200 " +
+        (props.hidden
+          ? "hidden opacity-0 "
+          : props.invisible
+          ? "hidden opacity-0 " /*invisible*/
+          : appearing
+          ? "opacity-100 "
+          : "opacity-0 ")
       }
     >
       {props.newTab ? (
@@ -247,4 +258,40 @@ function DateDiff(props: DProps) {
   } else {
     return null;
   }
+}
+
+export function AccordionLike(props: {
+  hidden: boolean;
+  expanded?: boolean;
+  children: ReactNode;
+  header?: ReactNode;
+  reset?: () => void;
+}) {
+  return (
+    <div
+      className={
+        "transition-all duration-200 " +
+        (props.hidden
+          ? "ease-out opacity-0 max-h-0 pointer-events-none "
+          : "mb-3 ease-in opacity-100 max-h-full ")
+      }
+    >
+      {props.header && (
+        <h3 className="mb-2">
+          <button
+            className={
+              pagerButtonClass +
+              "mr-4 align-bottom " +
+              (props.expanded ? "" : "hidden! ")
+            }
+            onClick={props.reset || (() => undefined)}
+          >
+            <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+          </button>
+          {props.header}
+        </h3>
+      )}
+      {props.children}
+    </div>
+  );
 }
