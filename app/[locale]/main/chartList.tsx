@@ -212,7 +212,7 @@ interface DProps {
   date: number;
 }
 function DateDiff(props: DProps) {
-  const [output, setOutput] = useState<string>("");
+  const [output, setOutput] = useState<string | null>(null);
   useEffect(() => {
     const update = () => {
       const diffMilliSec =
@@ -220,16 +220,21 @@ function DateDiff(props: DProps) {
       const diffMin = diffMilliSec / 60000;
       const diffHour = diffMin / 60;
       const diffDay = diffHour / 24;
+      const diffMonth = diffDay / 30;
       const formatter = new Intl.RelativeTimeFormat(undefined, {
-        numeric: "auto",
+        numeric: "always",
         style: "narrow",
       });
       if (Math.abs(diffHour) < 1) {
-        setOutput(formatter.format(Math.floor(diffMin), "minutes"));
+        setOutput(formatter.format(Math.trunc(diffMin), "minutes"));
       } else if (Math.abs(diffDay) < 1) {
-        setOutput(formatter.format(Math.floor(diffHour), "hours"));
-      } else if (Math.abs(diffDay) < 30) {
-        setOutput(formatter.format(Math.floor(diffDay), "days"));
+        setOutput(formatter.format(Math.trunc(diffHour), "hours"));
+      } else if (Math.abs(diffMonth) < 1) {
+        setOutput(formatter.format(Math.trunc(diffDay), "days"));
+      } else if (Math.abs(diffMonth) < 12) {
+        setOutput(formatter.format(Math.trunc(diffMonth), "months"));
+      } else {
+        setOutput(null);
       }
     };
     update();
@@ -237,5 +242,9 @@ function DateDiff(props: DProps) {
     return () => clearInterval(i);
   }, [props.date]);
 
-  return <span className={props.className}>{output && `(${output})`}</span>;
+  if (output) {
+    return <span className={props.className}>({output})</span>;
+  } else {
+    return null;
+  }
 }
