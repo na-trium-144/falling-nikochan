@@ -18,9 +18,11 @@ import { Youtube } from "@icon-park/react";
 import { originalCId, sampleCId } from "../const.js";
 import { useTranslations } from "next-intl";
 import { SmallDomainShare } from "@/common/small";
+import { useDisplayMode } from "@/scale.js";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
+  const { isMobileMain } = useDisplayMode();
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
@@ -125,6 +127,7 @@ export default function PlayTab({ locale }: { locale: string }) {
   };
 
   // exclusiveをセット(指定したもの以外を非表示にする) → 200ms後、showAllをセット(指定したものの内容を全て表示する)
+  // mobileではごちゃごちゃやってもスクロールが入るせいできれいに見えないので瞬時に切り替える
   const [showExclusiveMode, setShowExclusiveMode] = useState<
     null | "recent" | "latest"
   >(null);
@@ -209,7 +212,12 @@ export default function PlayTab({ locale }: { locale: string }) {
           additionalOpen={showAllMode === "recent"}
           setAdditionalOpen={(open) => {
             setShowExclusiveMode(open ? "recent" : null);
-            setTimeout(() => setShowAllMode(open ? "recent" : null), 200);
+            if (isMobileMain) {
+              setShowAllMode(open ? "recent" : null);
+              window.scrollTo(0, 0);
+            } else {
+              setTimeout(() => setShowAllMode(open ? "recent" : null), 200);
+            }
           }}
         />
       </AccordionLike>
@@ -240,7 +248,12 @@ export default function PlayTab({ locale }: { locale: string }) {
           additionalOpen={showAllMode === "latest"}
           setAdditionalOpen={(open) => {
             setShowExclusiveMode(open ? "latest" : null);
-            setTimeout(() => setShowAllMode(open ? "latest" : null), 200);
+            if (isMobileMain) {
+              setShowAllMode(open ? "latest" : null);
+              window.scrollTo(0, 0);
+            } else {
+              setTimeout(() => setShowAllMode(open ? "latest" : null), 200);
+            }
           }}
         />
       </AccordionLike>

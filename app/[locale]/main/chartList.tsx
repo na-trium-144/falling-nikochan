@@ -282,7 +282,7 @@ export function AccordionLike(props: {
   return (
     <div
       className={
-        "transition-all duration-200 " +
+        "main-wide:transition-all main-wide:duration-200 " +
         (hidden ? "hidden " : "") +
         (transparent
           ? "ease-out opacity-0 max-h-0 pointer-events-none "
