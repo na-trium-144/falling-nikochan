@@ -62,6 +62,7 @@
     "ts-node": "^10",
     "typescript": "^5",
     "undici": "^5.28.5",
-    "tar": "^7"
+    "tar": "^7",
+    "esbuild": "^0.25"
   }
 }
