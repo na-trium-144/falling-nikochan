@@ -24,6 +24,7 @@ import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import Title from "@/common/titleLogo.js";
+import { levelColors } from "@/common/levelColors.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
@@ -146,7 +147,7 @@ function Play(props: Props) {
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
-  const [auto, setAuto] = useState<boolean>(false);
+  const [auto, setAuto] = useState<boolean>(true);
 
   const ref = useRef<HTMLDivElement>(null!);
   const {
@@ -469,7 +470,7 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
             />
-          ) : ready ? (
+          ) : false ? (
             <ReadyMessage
               isTouch={isTouch}
               start={start}
@@ -552,12 +553,24 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
-      <Title className="absolute left-0 top-0 h-24 scale-175 origin-top-left " anim={false} />
-      <div className="absolute left-12 top-60 text-8xl font-title">
-        aaaaa
+      <Title className="absolute left-0 top-0 h-32 scale-175 origin-top-left " anim={false} />
+      <div className="absolute left-4 top-64 ">
+        <span className="text-7xl font-bold font-title">
+          title
+        </span>
       </div>
-      <div className="absolute left-12 top-88 text-6xl font-title">
-        bbbbb
+      <div className="absolute left-12 top-88">
+        <span className="text-6xl font-title">
+          composer etc
+        </span>
+      </div>
+      <div className={"absolute left-48 top-112 " + levelColors[0]}>
+        <span className="text-4xl mr-6">
+          Level:
+        </span>
+        <span className="text-5xl ">
+          Single-
+        </span>
       </div>
     </main>
   );
