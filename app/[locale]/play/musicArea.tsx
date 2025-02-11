@@ -75,11 +75,13 @@ export function MusicArea(props: Props) {
         <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">
           <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
             <p className="leading-0">
+              {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
               <span
                 className={
                   "inline-block font-title align-bottom " +
                   (largeTitle ? "text-2xl/6 " : "text-lg/5 ") +
-                  "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
+                  "overflow-x-clip overflow-y-visible " +
+                  "max-w-full text-ellipsis text-nowrap "
                 }
               >
                 {props.chartBrief?.title}
@@ -88,20 +90,22 @@ export function MusicArea(props: Props) {
                 className={
                   "inline-block font-title align-bottom " +
                   (largeTitle ? "text-lg/5 " : "text-sm/3.5 ") +
-                  "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
+                  "overflow-x-clip overflow-y-visible " +
+                  "max-w-full text-ellipsis text-nowrap "
                 }
               >
                 <span className="mx-1">/</span>
                 {props.chartBrief?.composer}
               </span>
             </p>
-            <p className="mt-1 leading-0">
+            <p className="mt-1 leading-0 ">
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
                     className={
                       "inline-block leading-0 align-bottom " +
-                      "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
+                      "overflow-x-clip overflow-y-visible " +
+                      "max-w-full text-ellipsis text-nowrap "
                     }
                   >
                     {props.chartBrief?.levels[props.lvIndex].name && (
@@ -135,7 +139,8 @@ export function MusicArea(props: Props) {
               <span
                 className={
                   "inline-block align-bottom " +
-                  "overflow-visible max-w-full text-ellipsis whitespace-nowrap "
+                  "overflow-x-clip overflow-y-visible " +
+                  "max-w-full text-ellipsis text-nowrap "
                 }
               >
                 <span
