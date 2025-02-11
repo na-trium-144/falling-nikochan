@@ -113,7 +113,7 @@ export function loadChart7(chart: Chart7, levelIndex: number): ChartSeqData7 {
       uAppear = Math.max(uAppearX, uAppearY);
     }
 
-    let appearTimeSec = hitTimeSec;
+    let appearTimeSec: number | null = null;
     for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
       const ts = level.speedChanges[ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
@@ -132,12 +132,18 @@ export function loadChart7(chart: Chart7, levelIndex: number): ChartSeqData7 {
 
       const uEnd = u + du * (tBegin - tEnd);
 
-      if (u < uAppear && uEnd > uAppear) {
+      if ((u <= uAppear && uAppear <= uEnd) || (u <= uAppear && ti === 0)) {
         const tAppear = (uAppear - u) / du;
         appearTimeSec = tBegin - tAppear;
       }
       tBegin = tEnd;
       u = uEnd;
+    }
+    if (appearTimeSec === null) {
+      console.error("speedChanges:", level.speedChanges);
+      console.error("hitTimeSec:", hitTimeSec);
+      console.error("uAppear:", uAppear);
+      throw new Error("Failed to calculate appearTimeSec");
     }
     notes.push({
       ver: 7,
