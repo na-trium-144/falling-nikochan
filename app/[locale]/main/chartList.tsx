@@ -5,13 +5,13 @@ import { RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ChartLineBrief } from "./play/fetch.js";
 
 interface Props {
-  recentBrief?: { cid: string; fetched: boolean; brief?: ChartBrief }[];
+  recentBrief?: ChartLineBrief[];
   maxRow: number;
   fetchAdditional?: () => void;
   creator?: boolean;
-  original?: boolean;
   showLoading?: boolean;
   dateDiff?: boolean;
   href: (cid: string) => string;
@@ -37,34 +37,38 @@ export function ChartList(props: Props) {
       >
         {props.recentBrief !== undefined && props.recentBrief.length > 0 && (
           <>
-            {props.recentBrief.slice(0, props.maxRow).map(({ cid, brief }) => (
-              <ChartListItem
-                invisible={fetching}
-                key={cid}
-                cid={cid}
-                brief={brief}
-                href={props.href(cid)}
-                creator={props.creator}
-                original={props.original}
-                newTab={props.newTab}
-                dateDiff={props.dateDiff}
-              />
-            ))}
+            {props.recentBrief
+              .slice(0, props.maxRow)
+              .map(({ cid, brief, original }) => (
+                <ChartListItem
+                  invisible={fetching}
+                  key={cid}
+                  cid={cid}
+                  brief={brief}
+                  href={props.href(cid)}
+                  creator={props.creator}
+                  original={original}
+                  newTab={props.newTab}
+                  dateDiff={props.dateDiff}
+                />
+              ))}
             {additionalOpen && (
               <>
-                {props.recentBrief.slice(props.maxRow).map(({ cid, brief }) => (
-                  <ChartListItem
-                    invisible={fetchingAdditional}
-                    key={cid}
-                    cid={cid}
-                    brief={brief}
-                    href={props.href(cid)}
-                    creator={props.creator}
-                    original={props.original}
-                    newTab={props.newTab}
-                    dateDiff={props.dateDiff}
-                  />
-                ))}
+                {props.recentBrief
+                  .slice(props.maxRow)
+                  .map(({ cid, brief, original }) => (
+                    <ChartListItem
+                      invisible={fetchingAdditional}
+                      key={cid}
+                      cid={cid}
+                      brief={brief}
+                      href={props.href(cid)}
+                      creator={props.creator}
+                      original={original}
+                      newTab={props.newTab}
+                      dateDiff={props.dateDiff}
+                    />
+                  ))}
               </>
             )}
           </>
@@ -116,7 +120,8 @@ export function ChartList(props: Props) {
 }
 
 const chartListStyle =
-  "block hover:shadow hover:-translate-y-0.5 active:shadow-inner active:translate-y-0 rounded-lg " +
+  "block hover:shadow active:shadow-inner rounded-lg px-1 py-0.5 my-0.5 " +
+  "hover:mt-0 hover:mb-1 active:mt-0.5 active:mb-0.5 " +
   "hover:bg-sky-200/50 active:bg-sky-300/50 " +
   "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 ";
 interface CProps {
@@ -150,7 +155,7 @@ export function ChartListItem(props: CProps) {
 }
 function ChartListItemChildren(props: CProps) {
   return (
-    <div className="flex flex-row items-center p-1 space-x-2 ">
+    <div className="flex flex-row items-center space-x-2 ">
       <div className="flex-none ">
         {props.brief?.ytId && (
           <img

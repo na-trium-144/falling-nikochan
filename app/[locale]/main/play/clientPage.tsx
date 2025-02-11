@@ -35,7 +35,7 @@ export default function PlayTab({ locale }: { locale: string }) {
   useEffect(() => {
     const recentCId = getRecent("play").reverse();
     setRecentBrief(recentCId.map((cid) => ({ cid, fetched: false })));
-    setOriginalBrief(originalCId.map((cid) => ({ cid, fetched: false })));
+    setOriginalBrief(originalCId.map((cid) => ({ cid, fetched: false, original: true })));
     setSampleBrief(sampleCId.map((cid) => ({ cid, fetched: false })));
     void (async () => {
       const latestCId = (await (
@@ -222,16 +222,10 @@ export default function PlayTab({ locale }: { locale: string }) {
           })}
         </p>
         <ChartList
-          recentBrief={originalBrief}
-          maxRow={originalBrief?.length || 0}
+          recentBrief={originalBrief?.concat(sampleBrief || [])}
+          maxRow={(originalBrief?.length || 0) + (sampleBrief?.length || 0)}
           href={(cid) => `/share/${cid}`}
-          original
           showLoading
-        />
-        <ChartList
-          recentBrief={sampleBrief}
-          maxRow={sampleBrief?.length || 0}
-          href={(cid) => `/share/${cid}`}
         />
       </div>
     </IndexMain>
