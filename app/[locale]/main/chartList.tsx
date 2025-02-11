@@ -267,11 +267,24 @@ export function AccordionLike(props: {
   header?: ReactNode;
   reset?: () => void;
 }) {
+  const [hidden, setHidden] = useState<boolean>(false);
+  const [transparent, setTransparent] = useState<boolean>(false);
+  useEffect(() => {
+    if (props.hidden) {
+      setTransparent(true);
+      setTimeout(() => setHidden(true), 200);
+    } else {
+      setHidden(false);
+      setTimeout(() => setTransparent(false), 0);
+    }
+  }, [props.hidden]);
+
   return (
     <div
       className={
         "transition-all duration-200 " +
-        (props.hidden
+        (hidden ? "hidden " : "") +
+        (transparent
           ? "ease-out opacity-0 max-h-0 pointer-events-none "
           : "mb-3 ease-in opacity-100 max-h-full ")
       }
