@@ -3,7 +3,7 @@
 import { ChartBrief } from "@/../../chartFormat/chart.js";
 import { fetchBrief } from "@/common/briefCache";
 
-export const chartListMaxRow = 5;
+export const chartListMaxRow = 6;
 export interface ChartLineBrief {
   cid: string;
   fetched: boolean;
