@@ -82,12 +82,30 @@ export function ScoreDisp(props: Props) {
     </Cloud>
   );
 }
+
+function lerp(start: number, end: number, t: number) {
+  return start + t * (end - start);
+}
 interface ChainProps {
   style?: object;
   chain: number;
+  fc: boolean;
 }
+// slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
+// stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
   const t = useTranslations("play.score");
+  const factorClip = (c: number) => props.fc ? Math.min(1, Math.max(0, c)) : 0;
+  const lchLight = [
+    lerp(0.279, 0.705, factorClip((props.chain - 10) / 90)),
+    lerp(0.041, 0.213, factorClip((props.chain - 25) / 75)),
+    lerp(260.031, 47.604, factorClip(props.chain / 25)),
+  ];
+  const lchDark = [
+    lerp(0.869, 0.852, factorClip(props.chain / 100)),
+    lerp(0.005, 0.199, factorClip((props.chain - 10) / 90)),
+    lerp(56.366, 91.936, factorClip(props.chain / 10)),
+  ];
   return (
     <Cloud
       className={
@@ -96,26 +114,38 @@ export function ChainDisp(props: ChainProps) {
       }
       left
     >
-      <div
-        className="flex flex-row items-baseline justify-center "
-        style={{ marginTop: 20 }}
-      >
-        <span className="" style={{ width: 112, marginRight: 8 }}>
-          <NumDisp
-            num={props.chain}
-            fontSize1={40}
-            fontSize2={null}
-            anim
-            alignAt2nd
-          />
-        </span>
-        <span
-          className="text-left w-14 overflow-visible "
-          style={{ fontSize: 16 }}
+      {[0, 1].map((i) => (
+        <div
+          key={i}
+          className={
+            (i === 0 ? "flex dark:hidden " : "hidden dark:flex ") +
+            "flex-row items-baseline justify-center "
+          }
+          style={{
+            marginTop: 20,
+            color:
+              i === 0
+                ? `oklch(${lchLight[0]} ${lchLight[1]} ${lchLight[2]})`
+                : `oklch(${lchDark[0]} ${lchDark[1]} ${lchDark[2]})`,
+          }}
         >
-          {t("chain", { chain: props.chain })}
-        </span>
-      </div>
+          <span style={{ width: 112, marginRight: 8 }}>
+            <NumDisp
+              num={props.chain}
+              fontSize1={40}
+              fontSize2={null}
+              anim
+              alignAt2nd
+            />
+          </span>
+          <span
+            className="text-left w-14 overflow-visible "
+            style={{ fontSize: 16 }}
+          >
+            {t("chain", { chain: props.chain })}
+          </span>
+        </div>
+      ))}
     </Cloud>
   );
 }
