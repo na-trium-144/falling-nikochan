@@ -116,6 +116,11 @@ export function ChartList(props: Props) {
     </div>
   );
 }
+
+const chartListStyle =
+  "block hover:shadow hover:-translate-y-0.5 active:shadow-inner active:translate-y-0 rounded-lg " +
+  "hover:bg-sky-200/50 active:bg-sky-300/50 " +
+  "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 ";
 interface CProps {
   cid: string;
   brief?: ChartBrief;
@@ -127,27 +132,13 @@ interface CProps {
 }
 export function ChartListItem(props: CProps) {
   return (
-    <li
-      className={
-        "flex flex-row items-start w-full " +
-        (props.invisible ? "invisible " : "")
-      }
-    >
-      <span className="flex-none mr-2">•</span>
+    <li className={"w-full " + (props.invisible ? "invisible " : "")}>
       {props.newTab ? (
-        <a
-          href={props.href}
-          className={"flex-1 min-w-0 " + linkStyle1}
-          target="_blank"
-        >
+        <a href={props.href} className={chartListStyle} target="_blank">
           <ChartListItemChildren {...props} />
         </a>
       ) : (
-        <Link
-          href={props.href}
-          className={"flex-1 min-w-0 " + linkStyle1}
-          prefetch={false}
-        >
+        <Link href={props.href} className={chartListStyle} prefetch={false}>
           <ChartListItemChildren {...props} />
         </Link>
       )}
@@ -156,28 +147,40 @@ export function ChartListItem(props: CProps) {
 }
 function ChartListItemChildren(props: CProps) {
   return (
-    <>
-      <span className="inline-block">
-        <span className="inline-block ">{props.cid}:</span>
-        {props.original && (
-          <span className="inline-block ml-2 text-sm">(オリジナル曲)</span>
+    <div className="flex flex-row items-center p-1 space-x-1 ">
+      <div className="flex-none h-9 w-12">
+        {props.brief?.ytId && (
+          <img
+            className="max-w-full max-h-full"
+            src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
+          />
         )}
-        <span className="inline-block ml-2 font-title">
-          {props.brief?.title}
-        </span>
-      </span>
-      {!props.original && props.brief?.composer && (
-        <span className="hidden main-wide:inline-block ml-1 text-sm">
-          <span className="">/</span>
-          <span className="ml-1 font-title ">{props.brief.composer}</span>
-        </span>
-      )}
-      {props.creator && (
-        <span className="inline-block ml-2 text-sm">
-          <span className="">by</span>
-          <span className="ml-1 font-title ">{props.brief?.chartCreator}</span>
-        </span>
-      )}
-    </>
+      </div>
+      <div className="flex-1 min-w-0 flex flex-col items-begin justify-center">
+        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 ">
+          {props.original && (
+            <span className="text-sm/3 mr-2">(オリジナル曲)</span>
+          )}
+          <span className="font-title text-base/4 ">{props.brief?.title}</span>
+          {!props.original && props.brief?.composer && (
+            <span className="ml-1 text-sm/3">
+              <span className="">/</span>
+              <span className="ml-1 font-title ">{props.brief.composer}</span>
+            </span>
+          )}
+        </div>
+        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 mt-0.5 ">
+          <span className="text-xs/4">{props.cid}:</span>
+          {props.creator && (
+            <span className="ml-1 text-xs/4">
+              <span className="">by</span>
+              <span className="ml-1 font-title text-sm/4">
+                {props.brief?.chartCreator}
+              </span>
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
