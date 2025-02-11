@@ -171,9 +171,7 @@ export default function PlayTab({ locale }: { locale: string }) {
         </div>
       )}
       <div className="mb-3">
-        <h3 className="text-xl font-bold font-title mb-2">
-          {t("recentPlay")}
-        </h3>
+        <h3 className="text-xl font-bold font-title mb-2">{t("recentPlay")}</h3>
         <ChartList
           recentBrief={recentBrief}
           maxRow={chartListMaxRow}
@@ -197,6 +195,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           creator
           href={(cid) => `/share/${cid}`}
           showLoading
+          dateDiff
         />
       </div>
       <div className="mb-3">
@@ -222,20 +221,18 @@ export default function PlayTab({ locale }: { locale: string }) {
             ),
           })}
         </p>
-        <ul className={"list-disc list-inside ml-3 "}>
-          <ChartList
-            recentBrief={originalBrief}
-            maxRow={originalBrief?.length || 0}
-            href={(cid) => `/share/${cid}`}
-            original
-            showLoading
-          />
-          <ChartList
-            recentBrief={sampleBrief}
-            maxRow={sampleBrief?.length || 0}
-            href={(cid) => `/share/${cid}`}
-          />
-        </ul>
+        <ChartList
+          recentBrief={originalBrief}
+          maxRow={originalBrief?.length || 0}
+          href={(cid) => `/share/${cid}`}
+          original
+          showLoading
+        />
+        <ChartList
+          recentBrief={sampleBrief}
+          maxRow={sampleBrief?.length || 0}
+          href={(cid) => `/share/${cid}`}
+        />
       </div>
     </IndexMain>
   );

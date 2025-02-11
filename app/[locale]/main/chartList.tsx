@@ -4,7 +4,7 @@ import { LoadingSlime } from "@/common/loadingSlime.js";
 import { RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   recentBrief?: { cid: string; fetched: boolean; brief?: ChartBrief }[];
@@ -13,6 +13,7 @@ interface Props {
   creator?: boolean;
   original?: boolean;
   showLoading?: boolean;
+  dateDiff?: boolean;
   href: (cid: string) => string;
   newTab?: boolean;
 }
@@ -53,6 +54,7 @@ export function ChartList(props: Props) {
                     creator={props.creator}
                     original={props.original}
                     newTab={props.newTab}
+                    dateDiff={props.dateDiff}
                   />
                 ))}
             </ul>
@@ -81,6 +83,7 @@ export function ChartList(props: Props) {
                           creator={props.creator}
                           original={props.original}
                           newTab={props.newTab}
+                          dateDiff={props.dateDiff}
                         />
                       ))}
                   </ul>
@@ -128,6 +131,7 @@ interface CProps {
   creator?: boolean;
   original?: boolean;
   newTab?: boolean;
+  dateDiff?: boolean;
   invisible?: boolean;
 }
 export function ChartListItem(props: CProps) {
@@ -148,39 +152,86 @@ export function ChartListItem(props: CProps) {
 function ChartListItemChildren(props: CProps) {
   return (
     <div className="flex flex-row items-center p-1 space-x-1 ">
-      <div className="flex-none h-9 w-12">
+      <div className="flex-none ">
         {props.brief?.ytId && (
           <img
-            className="max-w-full max-h-full"
+            className="h-9 w-16 object-cover object-center "
             src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
           />
         )}
       </div>
-      <div className="flex-1 min-w-0 flex flex-col items-begin justify-center">
-        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 ">
+      <div className="flex-1 min-w-0 flex flex-col items-begin justify-center space-y-0.5">
+        <div className="leading-4 overflow-x-clip overflow-y-visible ">
+          <span className="text-xs/3">ID:</span>
+          <span className="ml-1 text-sm/3">{props.cid}</span>
+          {props.dateDiff && (
+            <DateDiff
+              className="ml-2 text-xs/3 text-nowrap text-slate-500 dark:text-stone-400"
+              date={props.brief?.updatedAt || 0}
+            />
+          )}
           {props.original && (
-            <span className="text-sm/3 mr-2">(オリジナル曲)</span>
+            <span className="ml-2 text-xs/3">(オリジナル曲)</span>
           )}
-          <span className="font-title text-base/4 ">{props.brief?.title}</span>
-          {!props.original && props.brief?.composer && (
-            <span className="ml-1 text-sm/3">
-              <span className="">/</span>
-              <span className="ml-1 font-title ">{props.brief.composer}</span>
-            </span>
-          )}
-        </div>
-        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 mt-0.5 ">
-          <span className="text-xs/4">{props.cid}:</span>
           {props.creator && (
-            <span className="ml-1 text-xs/4">
-              <span className="">by</span>
-              <span className="ml-1 font-title text-sm/4">
+            <span
+              className={
+                "inline-block leading-3 max-w-full " +
+                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis "
+              }
+            >
+              <span className="ml-2 text-xs/3">by</span>
+              <span className="ml-1 font-title text-sm/3">
                 {props.brief?.chartCreator}
               </span>
             </span>
           )}
         </div>
+        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 ">
+          <span className="font-title text-base/4 ">{props.brief?.title}</span>
+          {!props.original && props.brief?.composer && (
+            <>
+              <span className="ml-1 text-sm/4">/</span>
+              <span className="ml-1 font-title text-sm/4">
+                {props.brief.composer}
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
+}
+
+interface DProps {
+  className?: string;
+  date: number;
+}
+function DateDiff(props: DProps) {
+  const [output, setOutput] = useState<string>("");
+  useEffect(() => {
+    const update = () => {
+      const diffMilliSec =
+        new Date(props.date).getTime() - new Date().getTime();
+      const diffMin = diffMilliSec / 60000;
+      const diffHour = diffMin / 60;
+      const diffDay = diffHour / 24;
+      const formatter = new Intl.RelativeTimeFormat(undefined, {
+        numeric: "auto",
+        style: "narrow",
+      });
+      if (Math.abs(diffHour) < 1) {
+        setOutput(formatter.format(Math.floor(diffMin), "minutes"));
+      } else if (Math.abs(diffDay) < 1) {
+        setOutput(formatter.format(Math.floor(diffHour), "hours"));
+      } else if (Math.abs(diffDay) < 30) {
+        setOutput(formatter.format(Math.floor(diffDay), "days"));
+      }
+    };
+    update();
+    const i = setInterval(update, 60000);
+    return () => clearInterval(i);
+  }, [props.date]);
+
+  return <span className={props.className}>{output && `(${output})`}</span>;
 }
