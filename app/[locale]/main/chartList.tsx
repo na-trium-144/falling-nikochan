@@ -28,25 +28,33 @@ export function ChartList(props: Props) {
     props.recentBrief === undefined ||
     props.recentBrief.some(({ fetched }) => !fetched);
   return (
-    <div className="relative min-h-4">
-      <div
-        className={
-          "absolute top-0 left-2 " +
-          (fetching && props.showLoading ? "" : "hidden ")
-        }
+    <>
+      <ul
+        className="grid w-full overflow-hidden justify-items-start items-center "
+        style={{
+          gridTemplateColumns: `repeat(auto-fit, minmax(15rem, 1fr))`,
+        }}
       >
-        <LoadingSlime />
-        Loading...
-      </div>
-      {props.recentBrief !== undefined &&
-        (props.recentBrief.length > 0 ? (
+        {props.recentBrief !== undefined && props.recentBrief.length > 0 && (
           <>
-            <ul className="ml-3">
-              {props.recentBrief
-                .slice(0, props.maxRow)
-                .map(({ cid, brief }) => (
+            {props.recentBrief.slice(0, props.maxRow).map(({ cid, brief }) => (
+              <ChartListItem
+                invisible={fetching}
+                key={cid}
+                cid={cid}
+                brief={brief}
+                href={props.href(cid)}
+                creator={props.creator}
+                original={props.original}
+                newTab={props.newTab}
+                dateDiff={props.dateDiff}
+              />
+            ))}
+            {additionalOpen && (
+              <>
+                {props.recentBrief.slice(props.maxRow).map(({ cid, brief }) => (
                   <ChartListItem
-                    invisible={fetching}
+                    invisible={fetchingAdditional}
                     key={cid}
                     cid={cid}
                     brief={brief}
@@ -57,66 +65,53 @@ export function ChartList(props: Props) {
                     dateDiff={props.dateDiff}
                   />
                 ))}
-            </ul>
-            {props.recentBrief.length > props.maxRow &&
-              (additionalOpen ? (
-                <div className="relative min-h-4">
-                  <div
-                    className={
-                      "absolute top-1 left-2 " +
-                      (fetchingAdditional && props.showLoading ? "" : "hidden ")
-                    }
-                  >
-                    <LoadingSlime />
-                    Loading...
-                  </div>
-                  <ul className="ml-3">
-                    {props.recentBrief
-                      .slice(props.maxRow)
-                      .map(({ cid, brief }) => (
-                        <ChartListItem
-                          invisible={fetchingAdditional}
-                          key={cid}
-                          cid={cid}
-                          brief={brief}
-                          href={props.href(cid)}
-                          creator={props.creator}
-                          original={props.original}
-                          newTab={props.newTab}
-                          dateDiff={props.dateDiff}
-                        />
-                      ))}
-                  </ul>
-                </div>
-              ) : (
-                <button
-                  className={
-                    "block relative ml-5 mt-1 " +
-                    (fetching ? "invisible " : "") +
-                    linkStyle1
-                  }
-                  onClick={() => {
-                    setAdditionalOpen(!additionalOpen);
-                    if (fetchingAdditional && props.fetchAdditional) {
-                      props.fetchAdditional();
-                    }
-                  }}
-                >
-                  <RightOne
-                    className="absolute left-0 bottom-1 "
-                    theme="filled"
-                  />
-                  <span className="ml-5">{t("showAll")}</span>
-                  <span className="ml-1">
-                    ({props.recentBrief.length - props.maxRow})
-                  </span>
-                </button>
-              ))}
+              </>
+            )}
           </>
-        ) : (
-          <div className="pl-2">{t("empty")}</div>
+        )}
+        <div
+          className={
+            "w-max pl-6 " +
+            ((fetching || (additionalOpen && fetchingAdditional)) &&
+            props.showLoading
+              ? ""
+              : "hidden ")
+          }
+        >
+          <LoadingSlime />
+          Loading...
+        </div>
+        {Array.from(new Array(5)).map((_, i) => (
+          <span key={i} />
         ))}
-    </div>
+      </ul>
+      {props.recentBrief !== undefined &&
+        props.recentBrief.length > props.maxRow &&
+        !additionalOpen && (
+          <button
+            className={
+              "block relative ml-5 mt-1 " +
+              (fetching ? "invisible " : "") +
+              linkStyle1
+            }
+            onClick={() => {
+              setAdditionalOpen(!additionalOpen);
+              if (fetchingAdditional && props.fetchAdditional) {
+                props.fetchAdditional();
+              }
+            }}
+          >
+            <RightOne className="absolute left-0 bottom-1 " theme="filled" />
+            <span className="ml-5">{t("showAll")}</span>
+            <span className="ml-1">
+              ({props.recentBrief.length - props.maxRow})
+            </span>
+          </button>
+        )}
+      {props.recentBrief !== undefined && props.recentBrief.length === 0 && (
+        <div className="pl-2">{t("empty")}</div>
+      )}
+    </>
   );
 }
 
@@ -136,7 +131,11 @@ interface CProps {
 }
 export function ChartListItem(props: CProps) {
   return (
-    <li className={"w-full " + (props.invisible ? "invisible " : "")}>
+    <li
+      className={
+        "w-full h-max " + (props.invisible ? "hidden " /*invisible*/ : "")
+      }
+    >
       {props.newTab ? (
         <a href={props.href} className={chartListStyle} target="_blank">
           <ChartListItemChildren {...props} />
@@ -151,7 +150,7 @@ export function ChartListItem(props: CProps) {
 }
 function ChartListItemChildren(props: CProps) {
   return (
-    <div className="flex flex-row items-center p-1 space-x-1 ">
+    <div className="flex flex-row items-center p-1 space-x-2 ">
       <div className="flex-none ">
         {props.brief?.ytId && (
           <img
