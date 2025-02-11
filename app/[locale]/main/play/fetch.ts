@@ -3,11 +3,12 @@
 import { ChartBrief } from "@/../../chartFormat/chart.js";
 import { fetchBrief } from "@/common/briefCache";
 
-export const chartListMaxRow = 5;
+export const chartListMaxRow = 6;
 export interface ChartLineBrief {
   cid: string;
   fetched: boolean;
   brief?: ChartBrief;
+  original?: boolean;
 }
 
 export async function fetchAndFilterBriefs(
@@ -17,14 +18,14 @@ export async function fetchAndFilterBriefs(
   let changed = false;
   const recentBriefNew: (ChartLineBrief | null)[] = recentBrief.slice();
   await Promise.all(
-    recentBrief.map(async ({ cid, fetched }, i) => {
+    recentBrief.map(async ({ cid, fetched, original }, i) => {
       if (fetched) {
         return;
       } else if (!fetchAll && i >= chartListMaxRow) {
         return;
       } else {
         const {brief, is404} = await fetchBrief(cid);
-        recentBriefNew[i] = is404 ? null : {cid, fetched: true, brief };
+        recentBriefNew[i] = is404 ? null : {cid, fetched: true, brief, original };
         changed = true;
       }
     })
