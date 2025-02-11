@@ -119,7 +119,7 @@ export function ChartList(props: Props) {
 }
 
 const chartListStyle =
-  "block hover:shadow active:shadow-inner rounded-lg px-1 py-0.5 my-0.5 " +
+  "block hover:shadow active:shadow-inner rounded px-1 py-0.5 my-0.5 " +
   "hover:mt-0 hover:mb-1 active:mt-0.5 active:mb-0.5 " +
   "hover:bg-sky-200/50 active:bg-sky-300/50 " +
   "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 ";
