@@ -17,7 +17,7 @@ export default {
       latest: "Latest Charts",
       latestDesc: "List of charts recently created or updated.",
       latestDesc2:
-        "For chart creators: Check 'Make public' in chart editor to reflect here after a few minutes.",
+        "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       sample: "Sample Charts",
       sampleDesc:
         "Charts created by Falling Nikochan author <small>(na-trium-144)</small>. Start here if you are new. ",
