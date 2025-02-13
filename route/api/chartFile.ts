@@ -2,11 +2,11 @@ import { Hono } from "hono";
 import msgpack from "@ygoe/msgpack";
 import {
   Chart,
-  chartMaxSize,
   currentChartVer,
   hashLevel,
   validateChart,
 } from "../../chartFormat/chart.js";
+import { chartMaxSize } from "../../chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Bindings } from "../env.js";

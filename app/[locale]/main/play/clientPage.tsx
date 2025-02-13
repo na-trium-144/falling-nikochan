@@ -1,6 +1,5 @@
 "use client";
 
-import { validCId } from "@/../../chartFormat/chart.js";
 import {
   ChartLineBrief,
   chartListMaxRow,
@@ -15,7 +14,11 @@ import { LoadingSlime } from "@/common/loadingSlime.js";
 import { AccordionLike, ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
-import { originalCId, sampleCId } from "../const.js";
+import {
+  originalCId,
+  sampleCId,
+  validCId,
+} from "@/../../chartFormat/apiConfig.js";
 import { useTranslations } from "next-intl";
 import { SmallDomainShare } from "@/common/small";
 import { useDisplayMode } from "@/scale.js";
@@ -284,6 +287,11 @@ export default function PlayTab({ locale }: { locale: string }) {
             ),
           })}
         </p>
+        {process.env.NODE_ENV === "development" && (
+          <p className="pl-2 mb-1 text-justify text-sm ">
+            ({t("sampleDevonly")})
+          </p>
+        )}
         <ChartList
           recentBrief={originalBrief?.concat(sampleBrief || [])}
           maxRow={(originalBrief?.length || 0) + (sampleBrief?.length || 0)}

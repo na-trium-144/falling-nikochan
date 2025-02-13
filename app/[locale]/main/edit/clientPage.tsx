@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { getRecent, updateRecent } from "@/common/recent.js";
-import { validCId } from "@/../../chartFormat/chart.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
 import { AccordionLike, ChartList } from "../chartList.js";
@@ -13,7 +12,7 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/fetch.js";
-import { rateLimitMin } from "@/../../chartFormat/apiConfig.js";
+import { rateLimitMin, validCId } from "@/../../chartFormat/apiConfig.js";
 import { useTranslations } from "next-intl";
 
 export default function EditTab({ locale }: { locale: string }) {
