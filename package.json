@@ -1,10 +1,10 @@
 {
   "name": "falling-nikochan",
-  "version": "7.5.0",
+  "version": "7.10.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "tsc --noEmit && eslint route/ api/ app/ chartFormat/",
+    "lint": "tsc --noEmit && eslint route/ api/ app/ chartFormat/ i18n/",
     "ndev": "next dev -H 0.0.0.0",
     "nbuild": "next build",
     "vdev": "vercel dev --listen 0.0.0.0:8787",

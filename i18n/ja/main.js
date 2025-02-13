@@ -25,6 +25,8 @@ export default {
         "初めての方はこちらからどうぞ。",
       sampleDesc2:
         "また、これ以外にも Falling Nikochan の YouTube チャンネル <youtube>@nikochan144</youtube> で譜面を公開しています。",
+      sampleDevonly:
+        "dev環境ではタイトルや作曲者だけ入力したダミーのファイルが表示されます",
     },
     edit: {
       title: "譜面作成",

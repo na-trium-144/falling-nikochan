@@ -1,10 +1,29 @@
-## ver. 7.5 - 2025-02-12 [#256](https://github.com/na-trium-144/falling-nikochan/pull/256)
+## ver. 7.9 - 2025/02/13 [#262](https://github.com/na-trium-144/falling-nikochan/pull/262)
+
+* originalCId/sampleCIdの定義をchartFormat/に移動
+* dev環境でのみサンプル譜面枠にダミーのファイルが表示されるようにした
+
+## ver. 7.8 - 2025/02/13 [#261](https://github.com/na-trium-144/falling-nikochan/pull/261)
+
+* i18n ディレクトリを app/ 以下からルートに移動 (バックエンドからもアクセスできるようにするため)
+* share/placeholder と edit ページのタイトルをi18nで管理するようにした
+    * share/placeholder についてはcomposerの有無で2通りのみ (なので今までより条件分岐が減った)
+
+## ver. 7.6 - 2025/02/12 [#253](https://github.com/na-trium-144/falling-nikochan/pull/253)
+
+* トップページの譜面リストのレイアウトを改良
+    * それぞれの譜面にYouTubeのサムネイル画像を追加
+    * 新着譜面リストに譜面の日時(n分前)が表示されるようにした
+    * リストではなくグリッド表示に変更し、ホバー時の背景色などを設定
+    * 「すべて表示」ボタンでそれ以外の項目を非表示にするアニメーションを追加 (モバイル表示時以外)
+
+## ver. 7.5 - 2025/02/12 [#256](https://github.com/na-trium-144/falling-nikochan/pull/256)
 
 * プレイ中のchain数の表示色の仕様を変更
     * 従来のように100chain到達時に突然色が変わるのではなく、chain数に応じて徐々に色が変わる
     * Bad,Miss判定が1つでもある場合はchainによらず色が変わらない
 
-## ver. 7.4 - 2025-02-12 [#255](https://github.com/na-trium-144/falling-nikochan/pull/255)
+## ver. 7.4 - 2025/02/12 [#255](https://github.com/na-trium-144/falling-nikochan/pull/255)
 
 * ver7の譜面の1小節目の音符の表示位置が正しく計算されないバグを修正
 

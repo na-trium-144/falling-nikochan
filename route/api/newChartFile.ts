@@ -1,12 +1,11 @@
 import msgpack from "@ygoe/msgpack";
 import {
   Chart,
-  chartMaxSize,
   currentChartVer,
   validateChart,
 } from "../../chartFormat/chart.js";
 import { updateIpLastCreate } from "./dbRateLimit.js";
-import { rateLimitMin } from "../../chartFormat/apiConfig.js";
+import { chartMaxSize, rateLimitMin } from "../../chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";

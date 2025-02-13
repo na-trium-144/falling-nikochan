@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-const buttonClass =
-  "px-2 text-center inline-block w-7 rounded-full " +
+export const pagerButtonClass =
+  "text-center inline-block w-7 h-7 rounded-full " +
   "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 " +
-  "hover:dark:bg-stone-700 active:dark:bg-stone-600";
+  "hover:dark:bg-stone-700 active:dark:bg-stone-600 ";
 interface Props {
   index: number;
   maxIndex: number;
@@ -25,7 +25,7 @@ export function Pager(props: Props) {
         {props.index > 1 ? (
           props.hrefBefore ? (
             <Link
-              className={buttonClass}
+              className={pagerButtonClass}
               href={props.hrefBefore}
               scroll={false}
               replace
@@ -34,7 +34,7 @@ export function Pager(props: Props) {
               &lt;
             </Link>
           ) : (
-            <button className={buttonClass} onClick={props.onClickBefore}>
+            <button className={pagerButtonClass} onClick={props.onClickBefore}>
               &lt;
             </button>
           )
@@ -49,7 +49,7 @@ export function Pager(props: Props) {
         {props.index < props.maxIndex ? (
           props.hrefAfter ? (
             <Link
-              className={buttonClass}
+              className={pagerButtonClass}
               href={props.hrefAfter}
               scroll={false}
               replace
@@ -58,7 +58,7 @@ export function Pager(props: Props) {
               &gt;
             </Link>
           ) : (
-            <button className={buttonClass} onClick={props.onClickAfter}>
+            <button className={pagerButtonClass} onClick={props.onClickAfter}>
               &gt;
             </button>
           )

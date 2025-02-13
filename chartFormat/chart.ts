@@ -39,16 +39,6 @@ export interface ChartBrief {
     unlisted: boolean;
   }[];
 }
-export function pageTitle(cid: string, brief: ChartBrief) {
-  return (
-    brief.title +
-    (brief.title && brief.composer ? " / " : brief.title ? " " : "") +
-    brief.composer +
-    (brief.composer ? " - " : brief.title ? "- " : "") +
-    (brief.chartCreator ? "Chart by " + brief.chartCreator : "") +
-    ` (ID: ${cid})`
-  );
-}
 
 /**
  * edit時に使われるデータ形式
@@ -74,8 +64,6 @@ export const currentChartVer = 7;
 export type Chart = Chart7;
 export type Level = Level7;
 export const levelTypes = ["Single", "Double", "Maniac"];
-
-export const chartMaxSize = 1000000;
 
 export async function validateChart(
   chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6
@@ -127,10 +115,6 @@ export async function hash(text: string) {
   return hashHex;
 }
 export const hashLevel = hashLevel7;
-
-export function validCId(cid: string) {
-  return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
-}
 
 export function emptyChart(locale: string): Chart {
   let chart: Chart = {

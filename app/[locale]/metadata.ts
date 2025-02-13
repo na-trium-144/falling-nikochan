@@ -1,19 +1,6 @@
 import type { Metadata } from "next";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
-import { getTranslations } from "./getTranslations.js";
-
-export async function locales() {
-  try {
-    const files = await readdir(join(process.cwd(), "app", "i18n"), {
-      withFileTypes: true,
-    });
-    return files.filter((ent) => ent.isDirectory()).map((ent) => ent.name);
-  } catch (err) {
-    console.error("Unable to scan directory: " + err);
-    return [];
-  }
-}
+import { getTranslations, locales } from "../../i18n/i18n.js";
+import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
@@ -25,15 +12,11 @@ export async function initMetadata(
   title: string
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
-  const titleWithSiteName = title
-    ? `${title} | Falling Nikochan`
-    : "Falling Nikochan";
-  const titleWithoutSiteName = title || "Falling Nikochan";
   const t = await getTranslations(locale, "main");
   const description = t("description");
   return {
     metadataBase: new URL("https://nikochan.natrium144.org"),
-    title: titleWithSiteName,
+    title: titleWithSiteName(title),
     alternates: path
       ? {
           canonical: path,
@@ -55,7 +38,7 @@ export async function initMetadata(
     },
     openGraph: path
       ? {
-          title: titleWithoutSiteName,
+          title: titleWithoutSiteName(title),
           description,
           // todo: images
           type: "website",
@@ -65,7 +48,7 @@ export async function initMetadata(
       : undefined,
     twitter: path
       ? {
-          title: titleWithSiteName,
+          title: titleWithSiteName(title),
           card: "summary",
           description,
           // images

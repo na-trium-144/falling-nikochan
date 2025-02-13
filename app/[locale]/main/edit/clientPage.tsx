@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { getRecent, updateRecent } from "@/common/recent.js";
-import { validCId } from "@/../../chartFormat/chart.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
-import { ChartList } from "../chartList.js";
+import { AccordionLike, ChartList } from "../chartList.js";
 import { LoadingSlime } from "@/common/loadingSlime.js";
 import { ExternalLink } from "@/common/extLink.js";
 import {
@@ -13,7 +12,7 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/fetch.js";
-import { rateLimitMin } from "@/../../chartFormat/apiConfig.js";
+import { rateLimitMin, validCId } from "@/../../chartFormat/apiConfig.js";
 import { useTranslations } from "next-intl";
 
 export default function EditTab({ locale }: { locale: string }) {
@@ -68,40 +67,60 @@ export default function EditTab({ locale }: { locale: string }) {
     }
   };
 
+  const [showExclusiveMode, setShowExclusiveMode] = useState<null | "recent">(
+    null
+  );
+  const [showAllMode, setShowAllMode] = useState<null | "recent">(null);
+
   return (
     <IndexMain tab={2} locale={locale}>
-      <p className="mb-3 text-justify">{t("welcome")}</p>
-      <div className="mb-3">
-        <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">
-            {t("inputId")}:
-          </span>
-          <Input
-            className="ml-4 w-20"
-            actualValue={inputCId}
-            updateValue={gotoCId}
-            updateInvalidValue={() => setInputCId("")}
-            isValid={validCId}
-            left
-          />
-          <ExternalLink
-            className={"ml-1 " + (inputCId !== "" ? "" : "hidden! ")}
-            href={`/${locale}/edit?cid=${inputCId}`}
-          >
-            {t("newTab")}
-          </ExternalLink>
-          <span className={cidFetching ? "inline-block " : "hidden "}>
-            <LoadingSlime />
-            Loading...
-          </span>
-          <span className="ml-1 inline-block">{cidErrorMsg}</span>
-        </h3>
+      <AccordionLike hidden={showExclusiveMode !== null}>
+        <p className="mb-3 text-justify">{t("welcome")}</p>
+      </AccordionLike>
+      <AccordionLike
+        hidden={showExclusiveMode !== null}
+        header={
+          <>
+            <span className="text-xl font-bold font-title ">
+              {t("inputId")}:
+            </span>
+            <Input
+              className="ml-4 w-20"
+              actualValue={inputCId}
+              updateValue={gotoCId}
+              updateInvalidValue={() => setInputCId("")}
+              isValid={validCId}
+              left
+            />
+            <ExternalLink
+              className={"ml-1 " + (inputCId !== "" ? "" : "hidden! ")}
+              href={`/${locale}/edit?cid=${inputCId}`}
+            >
+              {t("newTab")}
+            </ExternalLink>
+            <span className={cidFetching ? "inline-block " : "hidden "}>
+              <LoadingSlime />
+              Loading...
+            </span>
+            <span className="ml-1 inline-block">{cidErrorMsg}</span>
+          </>
+        }
+      >
         <p className="pl-2 text-justify">{t("inputIdDesc")}</p>
-      </div>
-      <div className="mb-3">
-        <h3 className="text-xl font-bold font-title mb-2">
-          {t("recentEdit")}
-        </h3>
+      </AccordionLike>
+      <AccordionLike
+        hidden={showExclusiveMode !== null && showExclusiveMode !== "recent"}
+        expanded={showAllMode === "recent"}
+        reset={() => {
+          setShowAllMode(null);
+          setShowExclusiveMode(null);
+        }}
+        header={
+          <span className="text-xl font-bold font-title">
+            {t("recentEdit")}
+          </span>
+        }
+      >
         <ChartList
           recentBrief={recentBrief}
           maxRow={chartListMaxRow}
@@ -109,17 +128,26 @@ export default function EditTab({ locale }: { locale: string }) {
           href={(cid) => `/${locale}/edit?cid=${cid}`}
           newTab
           showLoading
+          additionalOpen={showAllMode === "recent"}
+          setAdditionalOpen={(open) => {
+            setShowExclusiveMode(open ? "recent" : null);
+            setTimeout(() => setShowAllMode(open ? "recent" : null), 200);
+          }}
         />
-      </div>
-      <div className="mb-3">
-        <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">{t("new")}:</span>
-          <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
-            {t("newButton")}
-          </ExternalLink>
-        </h3>
+      </AccordionLike>
+      <AccordionLike
+        hidden={showExclusiveMode !== null}
+        header={
+          <>
+            <span className="text-xl font-bold font-title ">{t("new")}:</span>
+            <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
+              {t("newButton")}
+            </ExternalLink>
+          </>
+        }
+      >
         <p className="pl-2 text-justify">{t("newDesc", { rateLimitMin })}</p>
-      </div>
+      </AccordionLike>
     </IndexMain>
   );
 }

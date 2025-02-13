@@ -6,10 +6,10 @@ import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import {
   Chart,
-  chartMaxSize,
   currentChartVer,
   validateChart,
 } from "@/../../chartFormat/chart.js";
+import { chartMaxSize } from "@/../../chartFormat/apiConfig.js";
 import {
   getPasswd,
   getV6Passwd,
@@ -231,7 +231,11 @@ export function MetaTab(props: Props2) {
           };
           if (typeof resBody.cid === "string") {
             props.setCid(resBody.cid);
-            history.replaceState(null, "", `/${props.locale}/edit?cid=${resBody.cid}`);
+            history.replaceState(
+              null,
+              "",
+              `/${props.locale}/edit?cid=${resBody.cid}`
+            );
             addRecent("edit", resBody.cid);
             onSave(resBody.cid, props.chart!.editPasswd);
           } else {

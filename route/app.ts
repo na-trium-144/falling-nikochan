@@ -3,8 +3,9 @@ import { languageDetector } from "hono/language";
 import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import briefApp from "./api/brief.js";
-import { ChartBrief, pageTitle } from "../chartFormat/chart.js";
+import { ChartBrief } from "../chartFormat/chart.js";
 import { fetchStatic } from "./static.js";
+import { getTranslations } from "../i18n/i18n.js";
 
 async function errorResponse(
   origin: string,
@@ -96,6 +97,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       const lang = c.get("language");
       const cid = c.req.param("cid"); /*|| c.req.param("cid_txt").slice(0, -4)*/
       const pBriefRes = briefApp.request(`/${cid}`);
+      const t = await getTranslations(lang, "share");
       let placeholderUrl: URL;
       if (c.req.path.startsWith("/share")) {
         placeholderUrl = new URL(
@@ -114,7 +116,21 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         const res = await pRes;
         const replacedBody = (await res.text())
           .replaceAll("/share/placeholder", `/share/${cid}`)
-          .replaceAll("PLACEHOLDER_TITLE", pageTitle(cid, brief))
+          .replaceAll(
+            "PLACEHOLDER_TITLE",
+            brief.composer
+              ? t("titleWithComposer", {
+                  title: brief.title,
+                  composer: brief.composer,
+                  chartCreator: brief.chartCreator,
+                  cid: cid,
+                })
+              : t("title", {
+                  title: brief.title,
+                  chartCreator: brief.chartCreator,
+                  cid: cid,
+                })
+          )
           .replaceAll(
             '"PLACEHOLDER_BRIEF"',
             JSON.stringify(JSON.stringify(brief))
