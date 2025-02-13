@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations, locales } from "../../i18n/i18n.js";
+import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
 }
-
-export const titleWithSiteName = (title: string) =>
-  title ? `${title} | Falling Nikochan` : "Falling Nikochan";
-export const titleWithoutSiteName = (title: string) =>
-  title || "Falling Nikochan";
 
 export async function initMetadata(
   params: Promise<{ locale?: string }>,

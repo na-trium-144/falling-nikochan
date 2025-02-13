@@ -78,7 +78,7 @@ import { Chart7 } from "@/../../chartFormat/legacy/chart7.js";
 import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
-import { titleWithSiteName } from "@/metadata.js";
+import { titleWithSiteName } from "@/common/title.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
@@ -196,6 +196,8 @@ export default function EditAuth({ locale }: { locale: string }) {
   }, []);
 
   if (chart === undefined) {
+    document.title = titleWithSiteName(t("title", { title: "", cid: cidInitial.current }));
+
     if (loading) {
       return <Loading />;
     }
