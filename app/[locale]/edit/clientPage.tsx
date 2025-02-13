@@ -191,13 +191,12 @@ export default function EditAuth({ locale }: { locale: string }) {
       setCid(cidInitial.current);
     }
     setSavePasswd(preferSavePasswd());
+    document.title = titleWithSiteName(t("title", { title: "", cid: cidInitial.current }));
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     void fetchChart(true, false, "", true);
   }, []);
 
   if (chart === undefined) {
-    document.title = titleWithSiteName(t("title", { title: "", cid: cidInitial.current }));
-
     if (loading) {
       return <Loading />;
     }
