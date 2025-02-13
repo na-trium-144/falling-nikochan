@@ -1,3 +1,8 @@
+## ver. 7.9 - 2025/02/13 [#262](https://github.com/na-trium-144/falling-nikochan/pull/262)
+
+* originalCId/sampleCIdの定義をchartFormat/に移動
+* dev環境でのみサンプル譜面枠にダミーのファイルが表示されるようにした
+
 ## ver. 7.8 - 2025/02/13 [#261](https://github.com/na-trium-144/falling-nikochan/pull/261)
 
 * i18n ディレクトリを app/ 以下からルートに移動 (バックエンドからもアクセスできるようにするため)
