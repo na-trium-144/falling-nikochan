@@ -10,7 +10,7 @@ import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Link from "next/link";
 import Button from "@/common/button.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { isSample } from "@/main/const.js";
+import { isSample } from "@/../../chartFormat/apiConfig.js";
 import { International, PlayOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 

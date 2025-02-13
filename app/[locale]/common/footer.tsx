@@ -1,6 +1,5 @@
 "use client";
 
-import { tabTitleKeys, tabURLs } from "@/main/const.js";
 import { Comment, Github, Translate } from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
@@ -10,6 +9,21 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation.js";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
+
+export const tabTitleKeys = [
+  "about",
+  "play",
+  "edit",
+  "policies",
+  // ↓ hidden page (トップページにリンクが表示されない)
+  "version",
+];
+export const tabURLs = [
+  "/main/about/1",
+  "/main/play",
+  "/main/edit",
+  "/main/policies",
+];
 
 interface Props {
   // trueで表示、または "main-wide:hidden" などのようにクラス指定

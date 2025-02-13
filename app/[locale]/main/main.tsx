@@ -2,10 +2,9 @@
 
 import Header from "@/common/header.js";
 import { Box } from "@/common/box.js";
-import Footer from "@/common/footer.js";
+import Footer, { tabTitleKeys, tabURLs } from "@/common/footer.js";
 import { useDisplayMode } from "@/scale.js";
 import { ReactNode, useState } from "react";
-import { tabTitleKeys, tabURLs } from "./const.js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Title from "@/common/titleLogo.js";
