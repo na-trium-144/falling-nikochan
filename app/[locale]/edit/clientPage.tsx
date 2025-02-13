@@ -78,6 +78,7 @@ import { Chart7 } from "@/../../chartFormat/legacy/chart7.js";
 import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
+import { titleWithSiteName } from "@/metadata.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
@@ -305,7 +306,7 @@ function Page(props: Props) {
     setHasChange(true);
     setChart(chart);
   };
-  document.title = t("title", { title: chart?.title, cid: cid });
+  document.title = titleWithSiteName(t("title", { title: chart?.title, cid: cid }));
   useEffect(() => {
     void (async () => {
       if (chart) {

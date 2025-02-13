@@ -5,21 +5,22 @@ export interface MetadataProps {
   params: Promise<{ locale: string }>;
 }
 
+export const titleWithSiteName = (title: string) =>
+  title ? `${title} | Falling Nikochan` : "Falling Nikochan";
+export const titleWithoutSiteName = (title: string) =>
+  title || "Falling Nikochan";
+
 export async function initMetadata(
   params: Promise<{ locale?: string }>,
   path: string | null,
   title: string
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
-  const titleWithSiteName = title
-    ? `${title} | Falling Nikochan`
-    : "Falling Nikochan";
-  const titleWithoutSiteName = title || "Falling Nikochan";
   const t = await getTranslations(locale, "main");
   const description = t("description");
   return {
     metadataBase: new URL("https://nikochan.natrium144.org"),
-    title: titleWithSiteName,
+    title: titleWithSiteName(title),
     alternates: path
       ? {
           canonical: path,
@@ -41,7 +42,7 @@ export async function initMetadata(
     },
     openGraph: path
       ? {
-          title: titleWithoutSiteName,
+          title: titleWithoutSiteName(title),
           description,
           // todo: images
           type: "website",
@@ -51,7 +52,7 @@ export async function initMetadata(
       : undefined,
     twitter: path
       ? {
-          title: titleWithSiteName,
+          title: titleWithSiteName(title),
           card: "summary",
           description,
           // images
