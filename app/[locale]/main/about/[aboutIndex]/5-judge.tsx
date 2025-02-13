@@ -9,7 +9,7 @@ import {
   okSec,
 } from "@/../../chartFormat/gameConstant.js";
 import { rankStr } from "@/common/rank.js";
-import { getTranslations } from "@/getTranslations";
+import { getTranslations } from "@/../../i18n/i18n.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 
 interface Props {

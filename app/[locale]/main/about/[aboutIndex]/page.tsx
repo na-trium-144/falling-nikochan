@@ -5,7 +5,7 @@ import { AboutContent3 } from "./3-edit.js";
 import { Pager } from "@/common/pager.js";
 import { AboutContent4 } from "./4-level.js";
 import { AboutContent5 } from "./5-judge.js";
-import { getTranslations } from "@/getTranslations.js";
+import { getTranslations } from "@/../../i18n/i18n.js";
 import { initMetadata } from "@/metadata.js";
 
 const maxIndex = 5;

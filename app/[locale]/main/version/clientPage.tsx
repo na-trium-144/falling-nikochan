@@ -1,8 +1,8 @@
 "use client";
 
 import { IndexMain } from "../main.js";
-import ChangeLogJa from "@/../i18n/ja/changelog.mdx";
-import ChangeLogEn from "@/../i18n/en/changelog.mdx";
+import ChangeLogJa from "@/../../i18n/ja/changelog.mdx";
+import ChangeLogEn from "@/../../i18n/en/changelog.mdx";
 import { useTranslations } from "next-intl";
 import { updateLastVisited } from "@/common/version.js";
 import { useEffect } from "react";

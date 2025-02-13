@@ -1,6 +1,6 @@
 import PlayTab from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { getTranslations } from "@/getTranslations.js";
+import { getTranslations } from "@/../../i18n/i18n.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");

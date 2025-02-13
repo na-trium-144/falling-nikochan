@@ -1,4 +1,4 @@
-import { getTranslations } from "@/getTranslations.js";
+import { getTranslations } from "@/../../i18n/i18n.js";
 import ChangelogPage from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 

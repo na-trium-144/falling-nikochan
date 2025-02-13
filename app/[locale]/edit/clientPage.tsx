@@ -204,7 +204,7 @@ export default function EditAuth({ locale }: { locale: string }) {
     return (
       <CenterBoxOnlyPage>
         <Header reload locale={locale}>
-          {t("title")}
+          {t("titleShort")}
         </Header>
         <p>{t("enterPasswd")}</p>
         {passwdFailed && <p>{t("passwdFailed")}</p>}
@@ -305,6 +305,7 @@ function Page(props: Props) {
     setHasChange(true);
     setChart(chart);
   };
+  document.title = t("title", { title: chart?.title, cid: cid });
   useEffect(() => {
     void (async () => {
       if (chart) {
@@ -850,7 +851,7 @@ function Page(props: Props) {
           >
             <div className="flex flex-row items-center">
               <Header reload locale={locale}>
-                {t("title")}
+                {t("titleShort")}
               </Header>
               <Button text={t("help")} onClick={openGuide} />
             </div>
