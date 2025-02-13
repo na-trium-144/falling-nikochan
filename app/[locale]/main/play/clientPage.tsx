@@ -287,6 +287,11 @@ export default function PlayTab({ locale }: { locale: string }) {
             ),
           })}
         </p>
+        {process.env.NODE_ENV === "development" && (
+          <p className="pl-2 mb-1 text-justify text-sm ">
+            ({t("sampleDevonly")})
+          </p>
+        )}
         <ChartList
           recentBrief={originalBrief?.concat(sampleBrief || [])}
           maxRow={(originalBrief?.length || 0) + (sampleBrief?.length || 0)}

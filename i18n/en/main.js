@@ -23,6 +23,8 @@ export default {
         "Charts created by Falling Nikochan author <small>(na-trium-144)</small>. Start here if you are new. ",
       sampleDesc2:
         "Also, more charts are available on Falling Nikochan's YouTube channel <youtube>@nikochan144</youtube>.",
+      sampleDevonly:
+        "In dev environment, dummy files with only title and composer are displayed.",
     },
     edit: {
       title: "Chart Editor",

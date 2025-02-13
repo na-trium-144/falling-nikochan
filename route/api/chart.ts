@@ -19,6 +19,8 @@ import {
 } from "../../chartFormat/legacy/chart7.js";
 import { Chart6 } from "../../chartFormat/legacy/chart6.js";
 import { Chart4 } from "../../chartFormat/legacy/chart4.js";
+import { isSample } from "../../chartFormat/apiConfig.js";
+import { getSample } from "../../chartFormat/dummySamples.js";
 
 export function hashPasswd(
   cid: string,
@@ -53,9 +55,17 @@ export async function getChartEntry(
     .collection("chart")
     .findOne({ cid })) as ChartEntryCompressed | null;
   if (entryCompressed === null || entryCompressed.deleted) {
-    return {
-      res: { message: "Chart ID Not Found", status: 404 },
-    };
+    if (process.env.API_ENV === "development" && isSample(cid)) {
+      const chart = getSample(cid);
+      return {
+        chart,
+        entry: await chartToEntry(chart, cid, 0),
+      };
+    } else {
+      return {
+        res: { message: "Chart ID Not Found", status: 404 },
+      };
+    }
   }
   if (typeof entryCompressed.published !== "boolean") {
     entryCompressed.published = false;
