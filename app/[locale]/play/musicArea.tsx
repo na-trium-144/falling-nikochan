@@ -74,7 +74,7 @@ export function MusicArea(props: Props) {
         )}
         <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">
           <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
-            <p className="leading-0">
+            <p className={largeTitle ? "leading-5 " : "leading-3.5 "}>
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
               <span
                 className={
@@ -98,7 +98,7 @@ export function MusicArea(props: Props) {
                 {props.chartBrief?.composer}
               </span>
             </p>
-            <p className="mt-1 leading-0 ">
+            <p className={largeTitle ? "leading-4.5 " : "leading-3.5 "}>
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
@@ -146,7 +146,7 @@ export function MusicArea(props: Props) {
                 <span
                   className={
                     "ml-2 align-bottom " +
-                    (largeTitle ? "text-sm/3 " : "text-xs/2.5")
+                    (largeTitle ? "text-sm/3.5 " : "text-xs/2.5")
                   }
                 >
                   by
