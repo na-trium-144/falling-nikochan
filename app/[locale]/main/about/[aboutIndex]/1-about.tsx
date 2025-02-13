@@ -1,4 +1,4 @@
-import { getTranslations } from "@/getTranslations";
+import { getTranslations } from "@/../../i18n/i18n.js";
 
 interface Props {
   locale: string;

@@ -1,5 +1,5 @@
 import EditTab from "./clientPage.js";
-import { getTranslations } from "@/getTranslations.js";
+import { getTranslations } from "@/../../i18n/i18n.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 
 export async function generateMetadata({ params }: MetadataProps) {

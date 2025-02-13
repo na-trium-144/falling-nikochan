@@ -2,20 +2,20 @@
 
 import { Box } from "@/common/box.js";
 import { Pager } from "@/common/pager.js";
-import GuideContent1Ja from "@/../i18n/ja/guide/1-welcome.mdx";
-import GuideContent2Ja from "@/../i18n/ja/guide/2-metaTab.mdx";
-import GuideContent3Ja from "@/../i18n/ja/guide/3-timeBar.mdx";
-import GuideContent4Ja from "@/../i18n/ja/guide/4-timingTab.mdx";
-import GuideContent5Ja from "@/../i18n/ja/guide/5-levelTab.mdx";
-import GuideContent6Ja from "@/../i18n/ja/guide/6-noteTab.mdx";
-import GuideContent7Ja from "@/../i18n/ja/guide/7-codeTab.mdx";
-import GuideContent1En from "@/../i18n/en/guide/1-welcome.mdx";
-import GuideContent2En from "@/../i18n/en/guide/2-metaTab.mdx";
-import GuideContent3En from "@/../i18n/en/guide/3-timeBar.mdx";
-import GuideContent4En from "@/../i18n/en/guide/4-timingTab.mdx";
-import GuideContent5En from "@/../i18n/en/guide/5-levelTab.mdx";
-import GuideContent6En from "@/../i18n/en/guide/6-noteTab.mdx";
-import GuideContent7En from "@/../i18n/en/guide/7-codeTab.mdx";
+import GuideContent1Ja from "@/../../i18n/ja/guide/1-welcome.mdx";
+import GuideContent2Ja from "@/../../i18n/ja/guide/2-metaTab.mdx";
+import GuideContent3Ja from "@/../../i18n/ja/guide/3-timeBar.mdx";
+import GuideContent4Ja from "@/../../i18n/ja/guide/4-timingTab.mdx";
+import GuideContent5Ja from "@/../../i18n/ja/guide/5-levelTab.mdx";
+import GuideContent6Ja from "@/../../i18n/ja/guide/6-noteTab.mdx";
+import GuideContent7Ja from "@/../../i18n/ja/guide/7-codeTab.mdx";
+import GuideContent1En from "@/../../i18n/en/guide/1-welcome.mdx";
+import GuideContent2En from "@/../../i18n/en/guide/2-metaTab.mdx";
+import GuideContent3En from "@/../../i18n/en/guide/3-timeBar.mdx";
+import GuideContent4En from "@/../../i18n/en/guide/4-timingTab.mdx";
+import GuideContent5En from "@/../../i18n/en/guide/5-levelTab.mdx";
+import GuideContent6En from "@/../../i18n/en/guide/6-noteTab.mdx";
+import GuideContent7En from "@/../../i18n/en/guide/7-codeTab.mdx";
 import Button from "@/common/button.js";
 import { useTranslations } from "next-intl";
 

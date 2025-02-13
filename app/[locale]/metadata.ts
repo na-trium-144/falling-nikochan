@@ -1,19 +1,5 @@
 import type { Metadata } from "next";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
-import { getTranslations } from "./getTranslations.js";
-
-export async function locales() {
-  try {
-    const files = await readdir(join(process.cwd(), "app", "i18n"), {
-      withFileTypes: true,
-    });
-    return files.filter((ent) => ent.isDirectory()).map((ent) => ent.name);
-  } catch (err) {
-    console.error("Unable to scan directory: " + err);
-    return [];
-  }
-}
+import { getTranslations, locales } from "../../i18n/i18n.js";
 
 export interface MetadataProps {
   params: Promise<{ locale: string }>;

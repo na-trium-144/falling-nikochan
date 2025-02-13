@@ -1,7 +1,7 @@
-import { getMessages } from "./getTranslations.js";
+import { getMessages, locales } from "@/../../i18n/i18n.js";
 import "./globals.css";
 import IntlProvider from "./intlProvider.js";
-import { initMetadata, locales, MetadataProps } from "./metadata.js";
+import { initMetadata, MetadataProps } from "./metadata.js";
 
 export async function generateStaticParams() {
   return (await locales()).map((locale) => ({ locale }));

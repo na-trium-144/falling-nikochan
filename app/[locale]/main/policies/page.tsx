@@ -1,8 +1,8 @@
 import { IndexMain } from "../main.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { getTranslations } from "@/getTranslations.js";
-import PoliciesJa from "@/../i18n/ja/policies.mdx";
-import PoliciesEn from "@/../i18n/en/policies.mdx";
+import { getTranslations } from "@/../../i18n/i18n.js";
+import PoliciesJa from "@/../../i18n/ja/policies.mdx";
+import PoliciesEn from "@/../../i18n/en/policies.mdx";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.policies");
