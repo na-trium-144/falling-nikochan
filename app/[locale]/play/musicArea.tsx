@@ -98,7 +98,7 @@ export function MusicArea(props: Props) {
                 {props.chartBrief?.composer}
               </span>
             </p>
-            <p className={largeTitle ? "leading-4.5 " : "leading-3.5 "}>
+            <p className={largeTitle ? "leading-4.5 " : "leading-4 "}>
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
