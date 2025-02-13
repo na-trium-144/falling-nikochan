@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, locales } from "../../i18n/i18n.js";
+import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
@@ -11,15 +12,11 @@ export async function initMetadata(
   title: string
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
-  const titleWithSiteName = title
-    ? `${title} | Falling Nikochan`
-    : "Falling Nikochan";
-  const titleWithoutSiteName = title || "Falling Nikochan";
   const t = await getTranslations(locale, "main");
   const description = t("description");
   return {
     metadataBase: new URL("https://nikochan.natrium144.org"),
-    title: titleWithSiteName,
+    title: titleWithSiteName(title),
     alternates: path
       ? {
           canonical: path,
@@ -41,7 +38,7 @@ export async function initMetadata(
     },
     openGraph: path
       ? {
-          title: titleWithoutSiteName,
+          title: titleWithoutSiteName(title),
           description,
           // todo: images
           type: "website",
@@ -51,7 +48,7 @@ export async function initMetadata(
       : undefined,
     twitter: path
       ? {
-          title: titleWithSiteName,
+          title: titleWithSiteName(title),
           card: "summary",
           description,
           // images
