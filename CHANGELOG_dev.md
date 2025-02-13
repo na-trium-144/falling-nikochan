@@ -1,3 +1,9 @@
+## ver. 7.8 - 2025/02/13 [#261](https://github.com/na-trium-144/falling-nikochan/pull/261)
+
+* i18n ディレクトリを app/ 以下からルートに移動 (バックエンドからもアクセスできるようにするため)
+* share/placeholder と edit ページのタイトルをi18nで管理するようにした
+    * share/placeholder についてはcomposerの有無で2通りのみ (なので今までより条件分岐が減った)
+
 ## ver. 7.6 - 2025/02/12 [#253](https://github.com/na-trium-144/falling-nikochan/pull/253)
 
 * トップページの譜面リストのレイアウトを改良
