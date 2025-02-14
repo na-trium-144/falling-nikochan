@@ -219,7 +219,8 @@ function Play(props: Props) {
     bigCount,
     bigTotal,
     end,
-  } = useGameLogic(getCurrentTimeSec, auto);
+    lateTimes,
+  } = useGameLogic(getCurrentTimeSec, auto, userOffset);
 
   const [fps, setFps] = useState<number>(0);
 
@@ -356,6 +357,7 @@ function Play(props: Props) {
       setReady(false);
       setChartPlaying(true);
       setChartStarted(true);
+      lateTimes.current = [];
       ytPlayer.current?.setVolume(100);
     }
     ref.current?.focus();
@@ -493,6 +495,7 @@ function Play(props: Props) {
               userOffset={userOffset}
               setUserOffset={setUserOffset}
               editing={editing}
+              lateTimes={lateTimes.current}
             />
           ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />

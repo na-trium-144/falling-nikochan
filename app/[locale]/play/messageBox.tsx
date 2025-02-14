@@ -15,6 +15,7 @@ interface MessageProps {
   userOffset: number;
   setUserOffset: (o: number) => void;
   editing: boolean;
+  lateTimes: number[];
 }
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.readyMessage");
@@ -48,40 +49,71 @@ export function ReadyMessage(props: MessageProps) {
         </p>
       )}
       <div className="mt-2 mb-2 border-b border-slate-800 dark:border-stone-300" />
-      <p>{t("option")}</p>
-      <p className="mt-2">
-        <CheckBox
-          className="ml-1 mr-1"
-          value={props.auto}
-          onChange={(v) => props.setAuto(v)}
-        >
-          {t("auto")}
-        </CheckBox>
-      </p>
-      <p className="">
-        <span className="">{t("offset")}</span>
-        <Input
-          className="w-16"
-          actualValue={
-            (props.userOffset >= 0 ? "+" : "-") +
-            Math.abs(props.userOffset).toFixed(2)
-          }
-          updateValue={(v) => props.setUserOffset(Number(v))}
-          isValid={(v) => !isNaN(Number(v))}
-        />
-        <span className="mr-1 ">{t("offsetSecond")}</span>
-        <Button
-          text="-"
-          onClick={() => props.setUserOffset(props.userOffset - 0.01)}
-        />
-        <Button
-          text="+"
-          onClick={() => props.setUserOffset(props.userOffset + 0.01)}
-        />
-      </p>
+      <div className="relative px-6">
+        <p>{t("option")}</p>
+        <p className="mt-2">
+          <CheckBox
+            className="ml-1 mr-1"
+            value={props.auto}
+            onChange={(v) => props.setAuto(v)}
+          >
+            {t("auto")}
+          </CheckBox>
+        </p>
+        <p className="">
+          <span className="">{t("offset")}</span>
+          <Input
+            className="w-16"
+            actualValue={
+              (props.userOffset >= 0 ? "+" : "-") +
+              Math.abs(props.userOffset).toFixed(2)
+            }
+            updateValue={(v) => props.setUserOffset(Number(v))}
+            isValid={(v) => !isNaN(Number(v))}
+          />
+          <span className="mr-1 ">{t("offsetSecond")}</span>
+          <Button
+            text="-"
+            onClick={() => props.setUserOffset(props.userOffset - 0.01)}
+          />
+          <Button
+            text="+"
+            onClick={() => props.setUserOffset(props.userOffset + 0.01)}
+          />
+        </p>
+        <TimeAdjustBar userOffset={props.userOffset} times={props.lateTimes} />
+      </div>
     </CenterBox>
   );
 }
+function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
+  const diffMaxSec = 0.3;
+  return (
+    <div className="absolute inset-y-0 right-0 w-4 overflow-x-visible overflow-y-clip ">
+      <div className="absolute inset-y-2 inset-x-0.5 bg-slate-200 dark:bg-stone-700 " />
+      <div
+        className="absolute inset-x-0 h-0 border-b border-gray-400 "
+        style={{ top: `${(props.userOffset / diffMaxSec) * 50 + 50}%` }}
+      />
+      <span className="absolute top-0 right-1/2 translate-x-1/2 text-xs">
+        Fast
+      </span>
+      <span className="absolute bottom-0 right-1/2 translate-x-1/2 text-xs">
+        Slow
+      </span>
+      {props.times.map((t, i) => (
+        <div
+          key={i}
+          className="absolute inset-x-1.5 h-0 border-b-2 border-amber-400 "
+          style={{
+            top: `${(t / diffMaxSec) * 50 + 50}%`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 interface MessageProps2 {
   isTouch: boolean;
   reset: () => void;
