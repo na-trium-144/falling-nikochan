@@ -146,6 +146,21 @@ function Play(props: Props) {
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
   const [auto, setAuto] = useState<boolean>(false);
+  const [userOffset, setUserOffset_] = useState<number>(0);
+  useEffect(() => {
+    if (cid) {
+      setUserOffset_(Number(localStorage.getItem(`offset-${cid}`)));
+    }
+  }, [cid]);
+  const setUserOffset = useCallback(
+    (v: number) => {
+      setUserOffset_(v);
+      if (cid) {
+        localStorage.setItem(`offset-${cid}`, String(v));
+      }
+    },
+    [cid]
+  );
 
   const ref = useRef<HTMLDivElement>(null!);
   const {
@@ -188,7 +203,7 @@ function Play(props: Props) {
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
-      return ytPlayer.current?.getCurrentTime() - chartSeq.offset;
+      return ytPlayer.current?.getCurrentTime() - chartSeq.offset - userOffset;
     }
   }, [chartSeq, chartPlaying]);
   const {
@@ -409,7 +424,7 @@ function Play(props: Props) {
           }
         >
           <MusicArea
-            offset={chartSeq.offset}
+            offset={chartSeq.offset + userOffset}
             lvType={lvType}
             lvIndex={lvIndex}
             isMobile={isMobile}
@@ -475,6 +490,8 @@ function Play(props: Props) {
               exit={exit}
               auto={auto}
               setAuto={setAuto}
+              userOffset={userOffset}
+              setUserOffset={setUserOffset}
               editing={editing}
             />
           ) : chartStopped ? (
