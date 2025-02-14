@@ -14,6 +14,8 @@ export default {
       auto: "オートプレイ",
       offset: "オフセット調整",
       offsetSecond: "秒",
+      offsetFast: "早",
+      offsetLate: "遅",
     },
     stopMessage: {
       stopped: "停止しました",
