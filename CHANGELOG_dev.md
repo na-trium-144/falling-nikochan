@@ -1,3 +1,9 @@
+## ver. 7.11 - 2025/02/14 [#264](https://github.com/na-trium-144/falling-nikochan/pull/264)
+
+* プレイ時の音源オフセット調整機能を追加
+* 画面が小さいときプレイ時のオプションを別画面に
+* ついでにcomposerが空の時区切りのスラッシュが表示されていたのを修正
+
 ## ver. 7.9 - 2025/02/13 [#262](https://github.com/na-trium-144/falling-nikochan/pull/262)
 
 * originalCId/sampleCIdの定義をchartFormat/に移動
