@@ -193,7 +193,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
       {props.times.map((t, i) => (
         <div
           key={i}
-          className="absolute inset-x-1.5 h-0 border-b-2 border-amber-500 "
+          className="absolute inset-x-1.5 h-0 rounded-xs border border-amber-500/40 "
           style={{
             top: `${(t / diffMaxSec) * 50 + 50}%`,
           }}
