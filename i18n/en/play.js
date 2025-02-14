@@ -12,6 +12,10 @@ export default {
         "reflected here after reloading the page.",
       option: "Options",
       auto: "Auto Play",
+      offset: "Offset Adjustment",
+      offsetSecond: "sec",
+      offsetFast: "Fast",
+      offsetLate: "Late",
     },
     stopMessage: {
       stopped: "Stopped",
