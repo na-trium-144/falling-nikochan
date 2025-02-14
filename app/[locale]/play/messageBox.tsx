@@ -14,7 +14,7 @@ import {
   badLateSec,
   goodSec,
   okSec,
-} from "../../../chartFormat/gameConstant";
+} from "../../../chartFormat/gameConstant.js";
 
 interface MessageProps {
   isTouch: boolean;
