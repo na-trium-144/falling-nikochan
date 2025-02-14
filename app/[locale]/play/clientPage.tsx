@@ -182,6 +182,9 @@ function Play(props: Props) {
     statusSpace.height &&
     statusSpace.height < 30 * playUIScale &&
     !statusHide;
+  const mainWindowSpace = useResizeDetector();
+  const readySmall =
+    !!mainWindowSpace.height && mainWindowSpace.height < 27 * rem;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -454,7 +457,7 @@ function Play(props: Props) {
             </>
           )}
         </div>
-        <div className={"relative flex-1"}>
+        <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
           <FallingWindow
             className="absolute inset-0"
             notes={notesAll}
@@ -496,6 +499,7 @@ function Play(props: Props) {
               setUserOffset={setUserOffset}
               editing={editing}
               lateTimes={lateTimes.current}
+              small={readySmall}
             />
           ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
