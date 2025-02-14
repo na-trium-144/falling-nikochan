@@ -9,6 +9,12 @@ import { pagerButtonClass } from "@/common/pager";
 import { ArrowLeft, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import {
+  badFastSec,
+  badLateSec,
+  goodSec,
+  okSec,
+} from "../../../chartFormat/gameConstant";
 
 interface MessageProps {
   isTouch: boolean;
@@ -91,10 +97,10 @@ export function ReadyMessage(props: MessageProps) {
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.readyMessage");
   return (
-    <div className="relative pr-8 min-h-32 max-w-full flex flex-col">
+    <div className="relative pr-8 min-h-32 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <ul className="flex-1 flex flex-col w-auto justify-center text-left list-disc ml-6">
-        <li className="w-auto">
+      <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6">
+        <li className="">
           <CheckBox
             className=""
             value={props.auto}
@@ -103,7 +109,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             {t("auto")}
           </CheckBox>
         </li>
-        <li className="w-fit">
+        <li className="">
           <div className="">{t("offset")}</div>
           <div className="">
             <Input
@@ -132,14 +138,50 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   );
 }
 function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
-  const diffMaxSec = 0.3;
+  const diffMaxSec = 0.25;
   return (
     <div className="absolute inset-y-0 right-0 w-4 overflow-x-visible overflow-y-clip ">
       <div className="absolute inset-y-2 inset-x-0.5 bg-slate-200 dark:bg-stone-700 " />
       <div
-        className="absolute inset-x-0 h-0 border-b border-gray-400 "
+        className="absolute inset-x-0 h-full "
         style={{ top: `${(props.userOffset / diffMaxSec) * 50 + 50}%` }}
-      />
+      >
+        {props.times.length > 0 && (
+          <>
+            <div
+              className={
+                "absolute inset-x-0.5 rounded-xs border " +
+                "border-red-200 bg-red-300/20 dark:border-red-800 dark:bg-red-600/20 "
+              }
+              style={{
+                top: `${(badFastSec / diffMaxSec) * 50}%`,
+                height: `${((-badFastSec + badLateSec) / diffMaxSec) * 50}%`,
+              }}
+            />
+            <div
+              className={
+                "absolute inset-x-0.5 rounded-xs border " +
+                "border-sky-200 bg-sky-300/30 dark:border-sky-800 dark:bg-sky-600/30 "
+              }
+              style={{
+                top: `${-(okSec / diffMaxSec) * 50}%`,
+                height: `${2 * (okSec / diffMaxSec) * 50}%`,
+              }}
+            />
+            <div
+              className={
+                "absolute inset-x-0.5 rounded-xs border " +
+                "border-lime-200 bg-lime-300/40 dark:border-lime-800 dark:bg-lime-600/40 "
+              }
+              style={{
+                top: `${-(goodSec / diffMaxSec) * 50}%`,
+                height: `${2 * (goodSec / diffMaxSec) * 50}%`,
+              }}
+            />
+          </>
+        )}
+        <div className="absolute top-0 inset-x-0 h-0 border-b border-gray-400 " />
+      </div>
       <span className="absolute top-0 right-1/2 translate-x-1/2 text-xs">
         Fast
       </span>
@@ -149,7 +191,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
       {props.times.map((t, i) => (
         <div
           key={i}
-          className="absolute inset-x-1.5 h-0 border-b-2 border-amber-400 "
+          className="absolute inset-x-1.5 h-0 border-b-2 border-amber-500 "
           style={{
             top: `${(t / diffMaxSec) * 50 + 50}%`,
           }}
