@@ -86,17 +86,19 @@ export function MusicArea(props: Props) {
               >
                 {props.chartBrief?.title}
               </span>
-              <span
-                className={
-                  "inline-block font-title align-bottom " +
-                  (largeTitle ? "text-lg/5 " : "text-sm/3.5 ") +
-                  "overflow-x-clip overflow-y-visible " +
-                  "max-w-full text-ellipsis text-nowrap "
-                }
-              >
-                <span className="mx-1">/</span>
-                {props.chartBrief?.composer}
-              </span>
+              {props.chartBrief?.composer && (
+                <span
+                  className={
+                    "inline-block font-title align-bottom " +
+                    (largeTitle ? "text-lg/5 " : "text-sm/3.5 ") +
+                    "overflow-x-clip overflow-y-visible " +
+                    "max-w-full text-ellipsis text-nowrap "
+                  }
+                >
+                  <span className="mx-1">/</span>
+                  {props.chartBrief?.composer}
+                </span>
+              )}
             </p>
             <p className={largeTitle ? "leading-4.5 " : "leading-4 "}>
               {props.lvIndex !== undefined &&
