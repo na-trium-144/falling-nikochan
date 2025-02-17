@@ -1,3 +1,7 @@
+## ver. 7.12 - 2025/02/18 [#276](https://github.com/na-trium-144/falling-nikochan/pull/276)
+
+* プレイ中のBPM表示の切り替え処理のバグを修正
+
 ## ver. 7.11 - 2025/02/14 [#264](https://github.com/na-trium-144/falling-nikochan/pull/264)
 
 * プレイ時の音源オフセット調整機能を追加
