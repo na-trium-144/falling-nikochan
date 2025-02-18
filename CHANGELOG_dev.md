@@ -1,3 +1,7 @@
+## ver. 7.13 - 2025/02/19 [#283](https://github.com/na-trium-144/falling-nikochan/pull/283)
+
+* BPM表示が4桁以上の場合も看板のサイズが変わらないようにした
+
 ## ver. 7.12 - 2025/02/18 [#276](https://github.com/na-trium-144/falling-nikochan/pull/276)
 
 * プレイ中のBPM表示の切り替え処理のバグを修正
