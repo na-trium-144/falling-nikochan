@@ -1,4 +1,4 @@
-import { Level } from "../chart.js";
+import { LevelEdit } from "../chart.js";
 import { Signature, updateBarNum } from "../signature.js";
 import { Level5 } from "../legacy/chart5.js";
 import { stepCmp } from "../step.js";
@@ -23,43 +23,55 @@ function beatLuaCommand(s: Signature) {
       .join(", ")}}, ${num}, ${denom})`;
   }
 }
-export function luaAddBeatChange<L extends Level | Level5>(
+export function luaAddBeatChange<L extends LevelEdit | Level5>(
   chart: L,
+  lua: string[],
   change: Signature
-): L | null {
-  const insert = findInsertLine(chart, change.step);
+): { chart: L; lua: string[] } | null {
+  const insert = findInsertLine(chart, lua, change.step);
   if (insert.luaLine === null) {
     return null;
   }
   chart = insert.chart;
-  insertLua(chart, insert.luaLine, beatLuaCommand(change));
+  lua = insert.lua;
+  lua = insertLua(chart, lua, insert.luaLine, beatLuaCommand(change));
   chart.signature.push({ ...change, luaLine: insert.luaLine });
   chart.signature = chart.signature.sort((a, b) => stepCmp(a.step, b.step));
   updateBarNum(chart.signature);
-  return chart;
+  return { chart, lua };
 }
 export function luaUpdateBeatChange(
-  chart: Level,
+  chart: LevelEdit,
+  lua: string[],
   index: number,
   change: Signature
-) {
+): { chart: LevelEdit; lua: string[] } | null {
   if (chart.signature[index].luaLine === null) {
     return null;
   }
-  replaceLua(chart, chart.signature[index].luaLine, beatLuaCommand(change));
+  lua = replaceLua(
+    chart,
+    lua,
+    chart.signature[index].luaLine,
+    beatLuaCommand(change)
+  );
   chart.signature[index] = {
     ...change,
     luaLine: chart.signature[index].luaLine,
   };
   updateBarNum(chart.signature);
-  return chart;
+  return { chart, lua };
 }
-export function luaDeleteBeatChange(chart: Level, index: number) {
+export function luaDeleteBeatChange(
+  chart: LevelEdit,
+  lua: string[],
+  index: number
+): { chart: LevelEdit; lua: string[] } | null {
   if (chart.signature[index].luaLine === null) {
     return null;
   }
-  deleteLua(chart, chart.signature[index].luaLine);
+  lua = deleteLua(chart, lua, chart.signature[index].luaLine);
   chart.signature = chart.signature.filter((_ch, i) => i !== index);
   updateBarNum(chart.signature);
-  return chart;
+  return { chart, lua };
 }

@@ -25,10 +25,12 @@ import { MetaTab } from "./metaTab.js";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent.js";
 import {
-  Chart,
+  ChartEdit,
+  convertToPlay,
   createBrief,
+  currentChartVer,
   emptyChart,
-  Level,
+  LevelMin,
   levelTypes,
   validateChart,
 } from "@/../../chartFormat/chart.js";
@@ -79,6 +81,8 @@ import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
+import { Chart8Edit } from "../../../chartFormat/legacy/chart8.js";
+import { luaExec } from "../../../chartFormat/lua/exec.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
@@ -95,10 +99,10 @@ export default function EditAuth({ locale }: { locale: string }) {
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [chart, setChart] = useState<Chart>();
+  const [chart, setChart] = useState<ChartEdit>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
-  const [convertedFrom, setConvertedFrom] = useState<number>(7);
+  const [convertedFrom, setConvertedFrom] = useState<number>(currentChartVer);
 
   const fetchChart = useCallback(
     async (
@@ -132,11 +136,10 @@ export default function EditAuth({ locale }: { locale: string }) {
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 = msgpack.deserialize(
-              await res.arrayBuffer()
-            );
+            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit =
+              msgpack.deserialize(await res.arrayBuffer());
             setConvertedFrom(chartRes.ver);
-            const chart: Chart = await validateChart(chartRes);
+            const chart: ChartEdit = await validateChart(chartRes);
             if (savePasswd) {
               const res = await fetch(
                 process.env.BACKEND_PREFIX +
@@ -191,7 +194,9 @@ export default function EditAuth({ locale }: { locale: string }) {
       setCid(cidInitial.current);
     }
     setSavePasswd(preferSavePasswd());
-    document.title = titleWithSiteName(t("title", { title: "", cid: cidInitial.current }));
+    document.title = titleWithSiteName(
+      t("title", { title: "", cid: cidInitial.current })
+    );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     void fetchChart(true, false, "", true);
   }, []);
@@ -261,8 +266,8 @@ export default function EditAuth({ locale }: { locale: string }) {
 }
 
 interface Props {
-  chart: Chart;
-  setChart: (chart: Chart) => void;
+  chart: Chart8Edit;
+  setChart: (chart: Chart8Edit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
   themeContext: ThemeContext;
@@ -288,7 +293,8 @@ function Page(props: Props) {
   const { isTouch } = useDisplayMode();
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
-  const currentLevel = chart?.levels.at(currentLevelIndex);
+  const currentLevelMin = chart?.levels.at(currentLevelIndex);
+  const currentLevel = chart?.levelsFreezed.at(currentLevelIndex);
 
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
@@ -303,14 +309,28 @@ function Page(props: Props) {
     props.editPasswdInitial || ""
   );
 
-  const changeChart = (chart: Chart) => {
+  const changeChart = (chart: Chart8Edit) => {
     setHasChange(true);
     setChart(chart);
   };
-  document.title = titleWithSiteName(t("title", { title: chart?.title, cid: cid }));
+  document.title = titleWithSiteName(
+    t("title", { title: chart?.title, cid: cid })
+  );
+  console.log(chart);
   useEffect(() => {
     void (async () => {
       if (chart) {
+        if (chart.levelsFreezed.length <= chart.levels.length) {
+          chart.levelsFreezed = await Promise.all(
+            chart.levels.map(
+              async (level) =>
+                (
+                  await luaExec(level.lua.join("\n"))
+                ).levelFreezed
+            )
+          );
+          setChart(chart);
+        }
         if (sessionId === undefined) {
           setSessionId(initSession(null));
         }
@@ -330,10 +350,31 @@ function Page(props: Props) {
     })();
   }, [sessionId, chart, currentLevelIndex, cid]);
 
-  const changeLevel = (newLevel: Level | null) => {
+  const changeLevel = async (
+    newLevel: LevelMin | string[] | null | undefined
+  ) => {
     if (chart && newLevel) {
-      const newChart: Chart = { ...chart };
-      newChart.levels[currentLevelIndex] = newLevel;
+      const newChart: ChartEdit = { ...chart };
+      let newLua: string[];
+      if (Array.isArray(newLevel)) {
+        newChart.levels[currentLevelIndex].lua = newLevel;
+        newLua = newLevel;
+      } else {
+        newChart.levels[currentLevelIndex] = newLevel;
+        newLua = newLevel.lua;
+      }
+      const result = await luaExec(newLua.join("\n"));
+      console.log(result)
+      while (newChart.levelsFreezed.length <= currentLevelIndex) {
+        newChart.levelsFreezed.push({
+          notes: [],
+          rest: [],
+          bpmChanges: [],
+          speedChanges: [],
+          signature: [],
+        });
+      }
+      newChart.levelsFreezed[currentLevelIndex] = result.levelFreezed;
       changeChart(newChart);
     }
   };
@@ -373,8 +414,8 @@ function Page(props: Props) {
   const [notesCountInStep, setNotesCountInStep] = useState<number>(0);
   const [notesIndexInStep, setNotesIndexInStep] = useState<number>(0);
   const canAddNote = !(
-    (currentLevel?.type === "Single" && notesCountInStep >= 1) ||
-    (currentLevel?.type === "Double" && notesCountInStep >= 2)
+    (currentLevelMin?.type === "Single" && notesCountInStep >= 1) ||
+    (currentLevelMin?.type === "Double" && notesCountInStep >= 2)
   );
   useEffect(() => {
     if (currentLevel) {
@@ -547,7 +588,7 @@ function Page(props: Props) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
     if (chart) {
-      setNotesAll(loadChart(chart, currentLevelIndex).notes);
+      setNotesAll(loadChart(convertToPlay(chart, currentLevelIndex)).notes);
     }
   }, [chart, currentLevelIndex]);
 
@@ -578,7 +619,7 @@ function Page(props: Props) {
       ? currentLevel.bpmChanges[currentBpmIndex].bpm
       : 120;
   const changeBpm = (bpm: number) => {
-    if (currentLevel && currentBpmIndex !== undefined) {
+    if (currentLevel && currentLevelMin && currentBpmIndex !== undefined) {
       if (currentLevel.bpmChanges.length === 0) {
         throw "bpmChanges empty";
         // chart.bpmChanges.push({
@@ -587,8 +628,13 @@ function Page(props: Props) {
         //   timeSec: 0,
         // });
       } else {
-        const newLevel = luaUpdateBpmChange(currentLevel, currentBpmIndex, bpm);
-        changeLevel(newLevel);
+        const newLevel = luaUpdateBpmChange(
+          currentLevel,
+          currentLevelMin.lua,
+          currentBpmIndex,
+          bpm
+        );
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -601,19 +647,24 @@ function Page(props: Props) {
     if (
       chart &&
       currentLevel &&
+      currentLevelMin &&
       currentBpmIndex !== undefined &&
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (bpmChangeHere) {
-        const newLevel = luaDeleteBpmChange(currentLevel, currentBpmIndex);
-        changeLevel(newLevel);
+        const newLevel = luaDeleteBpmChange(
+          currentLevel,
+          currentLevelMin.lua,
+          currentBpmIndex
+        );
+        changeLevel(newLevel?.lua);
       } else {
-        const newLevel = luaAddBpmChange(currentLevel, {
+        const newLevel = luaAddBpmChange(currentLevel, currentLevelMin.lua, {
           step: currentStep,
           bpm: currentBpm,
           timeSec: currentTimeSec,
         });
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -628,7 +679,12 @@ function Page(props: Props) {
       ? currentLevel.speedChanges[currentSpeedIndex].bpm
       : 120;
   const changeSpeed = (bpm: number) => {
-    if (chart && currentLevel && currentSpeedIndex !== undefined) {
+    if (
+      chart &&
+      currentLevel &&
+      currentLevelMin &&
+      currentSpeedIndex !== undefined
+    ) {
       if (currentLevel.speedChanges.length === 0) {
         throw "speedChanges empty";
         // chart.speedChanges.push({
@@ -639,10 +695,11 @@ function Page(props: Props) {
       } else {
         const newLevel = luaUpdateSpeedChange(
           currentLevel,
+          currentLevelMin.lua,
           currentSpeedIndex,
           bpm
         );
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -656,19 +713,24 @@ function Page(props: Props) {
     if (
       chart &&
       currentLevel &&
+      currentLevelMin &&
       currentSpeedIndex !== undefined &&
       stepCmp(currentStep, stepZero()) > 0
     ) {
       if (speedChangeHere) {
-        const newLevel = luaDeleteSpeedChange(currentLevel, currentSpeedIndex);
-        changeLevel(newLevel);
+        const newLevel = luaDeleteSpeedChange(
+          currentLevel,
+          currentLevelMin.lua,
+          currentSpeedIndex
+        );
+        changeLevel(newLevel?.lua);
       } else {
-        const newLevel = luaAddSpeedChange(currentLevel, {
+        const newLevel = luaAddSpeedChange(currentLevel, currentLevelMin.lua, {
           step: currentStep,
           bpm: currentSpeed,
           timeSec: currentTimeSec,
         });
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -685,19 +747,26 @@ function Page(props: Props) {
   const signatureChangeHere =
     currentSignature && stepCmp(currentSignature.step, currentStep) === 0;
   const changeSignature = (s: Signature) => {
-    if (chart && currentLevel && currentSignatureIndex !== undefined) {
+    if (
+      chart &&
+      currentLevel &&
+      currentLevelMin &&
+      currentSignatureIndex !== undefined
+    ) {
       const newLevel = luaUpdateBeatChange(
         currentLevel,
+        currentLevelMin.lua,
         currentSignatureIndex,
         s
       );
-      changeLevel(newLevel);
+      changeLevel(newLevel?.lua);
     }
   };
   const toggleSignatureChangeHere = () => {
     if (
       chart &&
       currentLevel &&
+      currentLevelMin &&
       currentSignatureIndex !== undefined &&
       currentSignature &&
       stepCmp(currentStep, stepZero()) > 0
@@ -705,24 +774,30 @@ function Page(props: Props) {
       if (signatureChangeHere) {
         const newLevel = luaDeleteBeatChange(
           currentLevel,
+          currentLevelMin.lua,
           currentSignatureIndex
         );
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       } else {
-        const newLevel = luaAddBeatChange(currentLevel, {
+        const newLevel = luaAddBeatChange(currentLevel, currentLevelMin.lua, {
           step: currentStep,
           offset: getSignatureState(currentLevel.signature, currentStep).offset,
           bars: currentSignature.bars,
           barNum: 0,
         });
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
-    if (chart && currentLevel && n && canAddNote) {
+    if (chart && currentLevel && currentLevelMin && n && canAddNote) {
       const levelCopied = { ...currentLevel };
-      const newLevel = luaAddNote(levelCopied, n, currentStep);
+      const newLevel = luaAddNote(
+        levelCopied,
+        currentLevelMin.lua,
+        n,
+        currentStep
+      );
       if (newLevel !== null) {
         // 追加したnoteは同じ時刻の音符の中でも最後
         setCurrentNoteIndex(
@@ -730,24 +805,33 @@ function Page(props: Props) {
             (n) => stepCmp(n.step, currentStep) == 0
           )
         );
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
     ref.current.focus();
   };
   const deleteNote = () => {
-    if (chart && currentLevel && hasCurrentNote) {
+    if (chart && currentLevel && currentLevelMin && hasCurrentNote) {
       const levelCopied = { ...currentLevel };
-      const newLevel = luaDeleteNote(levelCopied, currentNoteIndex);
-      changeLevel(newLevel);
+      const newLevel = luaDeleteNote(
+        levelCopied,
+        currentLevelMin.lua,
+        currentNoteIndex
+      );
+      changeLevel(newLevel?.lua);
     }
     ref.current.focus();
   };
   const updateNote = (n: NoteCommand) => {
-    if (chart && currentLevel && hasCurrentNote) {
+    if (chart && currentLevel && currentLevelMin && hasCurrentNote) {
       const levelCopied = { ...currentLevel };
-      const newLevel = luaUpdateNote(levelCopied, currentNoteIndex, n);
-      changeLevel(newLevel);
+      const newLevel = luaUpdateNote(
+        levelCopied,
+        currentLevelMin.lua,
+        currentNoteIndex,
+        n
+      );
+      changeLevel(newLevel?.lua);
     }
     // ref.current.focus();
   };
@@ -860,8 +944,9 @@ function Page(props: Props) {
             <div
               className={
                 "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
-                (levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
-                  levelBgColors[1])
+                (levelBgColors[
+                  levelTypes.indexOf(currentLevelMin?.type || "")
+                ] || levelBgColors[1])
               }
             >
               <FlexYouTube
@@ -1172,6 +1257,7 @@ function Page(props: Props) {
               ) : (
                 <LuaTab
                   currentLevel={currentLevel}
+                  currentLevelMin={currentLevelMin}
                   changeLevel={changeLevel}
                   seekStepAbs={(s: Step) => seekStepAbs(s, false)}
                   themeContext={themeContext}

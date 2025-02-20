@@ -7,22 +7,25 @@ import "ace-builds/src-noconflict/mode-lua";
 import "ace-builds/src-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale.js";
-import { Level } from "@/../../chartFormat/chart.js";
 import { luaExec } from "@/../../chartFormat/lua/exec.js";
 import { Step } from "@/../../chartFormat/step.js";
 import { findStepFromLua } from "@/../../chartFormat/lua/edit.js";
 import { ThemeContext } from "@/common/theme.js";
+import { LevelEdit, LevelMin } from "../../../chartFormat/chart.js";
 
 interface Props {
-  currentLevel?: Level;
-  changeLevel: (chart: Level) => void;
+  currentLevel: LevelEdit | undefined;
+  currentLevelMin: LevelMin | undefined;
+  changeLevel: (lua: string[]) => void;
   seekStepAbs: (s: Step) => void;
   themeContext: ThemeContext;
 }
 export default function LuaTab(props: Props) {
-  const { currentLevel, changeLevel, seekStepAbs } = props;
+  const { currentLevel, currentLevelMin, changeLevel, seekStepAbs } = props;
   const { rem } = useDisplayMode();
-  const [code, setCode] = useState<string>(currentLevel?.lua.join("\n") || "");
+  const [code, setCode] = useState<string>(
+    currentLevelMin?.lua.join("\n") || ""
+  );
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
@@ -37,22 +40,14 @@ export default function LuaTab(props: Props) {
           setStdout(result.stdout);
           setErr(result.err);
           setErrLine(result.errorLine);
-          if (currentLevel && result.err.length === 0) {
-            changeLevel({
-              ...currentLevel,
-              lua: code.split("\n"),
-              notes: result.notes,
-              rest: result.rest,
-              bpmChanges: result.bpmChanges,
-              speedChanges: result.speedChanges,
-              signature: result.signature,
-            });
+          if (result.err.length === 0) {
+            changeLevel(code.split("\n"));
           }
         })();
       }, 500);
       return () => clearTimeout(t);
     }
-  }, [code, codeChanged, currentLevel, changeLevel]);
+  }, [code, codeChanged, changeLevel]);
 
   return (
     <div className="flex flex-col absolute inset-3 space-y-3">

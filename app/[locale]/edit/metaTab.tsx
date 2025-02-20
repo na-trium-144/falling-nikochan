@@ -5,8 +5,11 @@ import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import {
-  Chart,
+  ChartEdit,
+  ChartMin,
+  convertToMin,
   currentChartVer,
+  lastIncompatibleVer,
   validateChart,
 } from "@/../../chartFormat/chart.js";
 import { chartMaxSize } from "@/../../chartFormat/apiConfig.js";
@@ -25,10 +28,11 @@ import CheckBox from "@/common/checkBox.js";
 import { Caution } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
+import { luaExec } from "../../../chartFormat/lua/exec.js";
 
 interface Props {
-  chart?: Chart;
-  setChart: (chart: Chart) => void;
+  chart?: ChartEdit;
+  setChart: (chart: ChartEdit) => void;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
 }
@@ -38,7 +42,12 @@ export function MetaEdit(props: Props) {
   const hasLevelData =
     props.chart?.levels &&
     props.chart.levels.length > 0 &&
-    props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
+    props.chart.levels.some(
+      (l, i) =>
+        props.chart!.levelsFreezed[i] &&
+        props.chart!.levelsFreezed[i].notes.length > 0 &&
+        !l.unlisted
+    );
 
   return (
     <>
@@ -158,8 +167,8 @@ interface Props2 {
   sessionId?: number;
   sessionData?: SessionData;
   fileSize: number;
-  chart?: Chart;
-  setChart: (chart: Chart) => void;
+  chart?: ChartEdit;
+  setChart: (chart: ChartEdit) => void;
   convertedFrom: number;
   setConvertedFrom: (c: number) => void;
   cid: string | undefined;
@@ -289,8 +298,7 @@ export function MetaTab(props: Props2) {
   };
   const downloadExtension = `fn${props.chart?.ver}.yml`;
   const download = () => {
-    // editPasswdだけ消す
-    const yml = YAML.stringify({ ...props.chart, editPasswd: "" });
+    const yml = YAML.stringify(convertToMin(props.chart!));
     const filename = `${props.cid}_${props.chart?.title}.${downloadExtension}`;
     saveAs(new Blob([yml]), filename);
     setSaveMsg(`${t("saveDone")} (${filename})`);
@@ -302,21 +310,41 @@ export function MetaTab(props: Props2) {
       const buffer = await f.arrayBuffer();
       setUploadMsg("");
       let originalVer: number = 0;
-      let newChart: Chart | null = null;
+      let newChart: ChartEdit | null = null;
       try {
-        const content = YAML.parse(new TextDecoder().decode(buffer));
+        const content: ChartMin = YAML.parse(new TextDecoder().decode(buffer));
         if (typeof content.ver === "number") {
           originalVer = content.ver;
         }
-        newChart = await validateChart(content);
+        newChart = await validateChart({
+          ...content,
+          levelsFreezed: [],
+          editPasswd: props.chart?.editPasswd || "",
+          published: false,
+        });
+        newChart.levelsFreezed = await Promise.all(
+          newChart.levels.map(
+            async (l) => (await luaExec(l.lua.join("\n"))).levelFreezed
+          )
+        );
       } catch (e1) {
         console.warn("fallback to msgpack deserialize");
         try {
-          const content = msgpack.deserialize(buffer);
+          const content: ChartMin = msgpack.deserialize(buffer);
           if (typeof content.ver === "number") {
             originalVer = content.ver;
           }
-          newChart = await validateChart(content);
+          newChart = await validateChart({
+            ...content,
+            levelsFreezed: [],
+            editPasswd: props.chart?.editPasswd || "",
+            published: false,
+          });
+          newChart.levelsFreezed = await Promise.all(
+            newChart.levels.map(
+              async (l) => (await luaExec(l.lua.join("\n"))).levelFreezed
+            )
+          );
         } catch (e2) {
           console.error(e1);
           console.error(e2);
@@ -376,7 +404,7 @@ export function MetaTab(props: Props2) {
             {t("hasUnsaved")}
           </span>
         )}
-        {props.convertedFrom < currentChartVer && (
+        {props.convertedFrom <= lastIncompatibleVer && (
           <span className="inline-block ml-1 text-amber-600 text-sm ">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
             {t("convertingWarning", { ver: props.convertedFrom })}

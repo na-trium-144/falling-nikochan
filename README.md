@@ -106,7 +106,7 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
                 * The cookie value `hashKey` must be set and match with that used for the hash.
             * `pbypass=1` (only on development environment) bypass the password check
     * Response
-        * [Chart4](chartFormat/legacy/chart4.ts), [Chart5](chartFormat/legacy/chart5.ts), [Chart6](chartFormat/legacy/chart6.ts) or [Chart7](chartFormat/legacy/chart7.ts) serialized with MessagePack with status code 200
+        * [Chart4](chartFormat/legacy/chart4.ts), [Chart5](chartFormat/legacy/chart5.ts), [Chart6](chartFormat/legacy/chart6.ts), [Chart7](chartFormat/legacy/chart7.ts) or [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),
@@ -114,13 +114,13 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 * `POST /api/chartFile/:cid` - Post the chart file. The previous password is required. If the posted chart data has a different password, it will be used next time.
     * `:cid` - Chart ID
     * Query Parameters: same as GET
-    * Request Body: [Chart7](chartFormat/legacy/chart7.ts) serialized with MessagePack
+    * Request Body: [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack
     * Response
         * empty response with status code 200
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),
-            * 409 (chart data is Chart6 or older),
+            * 409 (chart data is Chart7 or older),
             * 413 (too large),
             * 415 (invalid data),
             * or 500 (other error)
@@ -135,7 +135,7 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
             * or 500 (other error)
 * `GET /api/newChartFile` - returns 400.
 * `POST /api/newChartFile` - Create a new chart file.
-    * Request Body: [Chart7](chartFormat/legacy/chart7.ts) serialized with MessagePack
+    * Request Body: [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack
     * Response
         * `{cid: string}` as JSON with status code 200
         * `{message?: string}` as JSON with status code

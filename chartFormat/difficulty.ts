@@ -1,3 +1,4 @@
+import { LevelEdit } from "./chart.js";
 import {
   baseScoreRate,
   bonusMax,
@@ -6,7 +7,6 @@ import {
   okBaseScore,
   okSec,
 } from "./gameConstant.js";
-import { Level } from "./chart.js";
 import { getTimeSec } from "./seq.js";
 
 /*
@@ -48,7 +48,7 @@ function lvToNps(lv: number, type: string) {
   }
 }
 
-export function difficulty(level: Level, type: string): number {
+export function difficulty(level: LevelEdit, type: string): number {
   const maxLv = 20;
   const minLv = 1;
   if (level.notes.length === 0) {
@@ -97,7 +97,7 @@ export function difficulty(level: Level, type: string): number {
 }
 
 function agentsPlay(
-  level: Level,
+  level: LevelEdit,
   type: string,
   notesHitSec: number[],
   targetNPS: number
