@@ -1,3 +1,7 @@
+## ver. 7.14 - 2025/02/20 [#287](https://github.com/na-trium-144/falling-nikochan/pull/287)
+
+* signatureの編集時にluaコードの違う行が変更されるバグを修正
+
 ## ver. 7.13 - 2025/02/19 [#283](https://github.com/na-trium-144/falling-nikochan/pull/283)
 
 * BPM表示が4桁以上の場合も看板のサイズが変わらないようにした
