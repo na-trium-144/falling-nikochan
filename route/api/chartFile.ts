@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import msgpack from "@ygoe/msgpack";
 import {
-  Chart,
+    ChartEdit,
   currentChartVer,
   hashLevel,
   validateChart,
@@ -110,7 +110,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         return c.json({ message: "chart version is old" }, 409);
       }
 
-      let newChart: Chart;
+      let newChart: ChartEdit;
       try {
         newChart = await validateChart(newChartObj);
       } catch (e) {
@@ -121,7 +121,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       // update Time
       const prevHashes = entry.levelBrief.map((l) => l.hash);
       const newHashes = await Promise.all(
-        newChart.levels.map((level) => hashLevel(level))
+        newChart.levelsFreezed.map((level) => hashLevel(level))
       );
       let updatedAt = entry.updatedAt;
       if (!newHashes.every((h, i) => h === prevHashes[i])) {

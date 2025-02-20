@@ -1,6 +1,6 @@
 import msgpack from "@ygoe/msgpack";
 import {
-  Chart,
+    ChartEdit,
   currentChartVer,
   validateChart,
 } from "../../chartFormat/chart.js";
@@ -61,7 +61,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         return c.json({ message: "chart version is old" }, 409);
       }
 
-      let newChart: Chart;
+      let newChart: ChartEdit;
       try {
         newChart = await validateChart(newChartObj);
       } catch (e) {

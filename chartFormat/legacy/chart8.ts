@@ -13,6 +13,9 @@ import {
 
 /**
  * ローカル保存に使われる、情報量を失わない最小サイズの形式
+ * 
+ * Level8Min -> Level8Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
+ * Chart8Edit -> Chart8Min: convertToMin8(chart)
  */
 export interface Chart8Min {
   falling: "nikochan"; // magic
