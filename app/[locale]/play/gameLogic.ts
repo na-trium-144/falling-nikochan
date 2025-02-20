@@ -17,7 +17,8 @@ import { displayNote7, Note7 } from "@/../../chartFormat/legacy/seq7.js";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
-  auto: boolean
+  auto: boolean,
+  userOffset: number,
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
   const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
@@ -45,6 +46,8 @@ export default function useGameLogic(
 
   const [chain, setChain] = useState<number>(0);
   const chainRef = useRef<number>(0);
+
+  const lateTimes = useRef<number[]>([]);
 
   const resetNotesAll = useCallback((notes: Note6[] | Note7[]) => {
     // note.done などを書き換えるため、元データを壊さないようdeepcopy
@@ -112,6 +115,7 @@ export default function useGameLogic(
     const now = getCurrentTimeSec();
     let candidate: Note6 | Note7 | null = null;
     let candidateJudge: number = 0;
+    let candidateLate: number | null = null;
     while (now !== undefined && notesYetDone.current.length >= 1) {
       const n = notesYetDone.current[0];
       const late = now - n.hitTimeSec;
@@ -119,22 +123,26 @@ export default function useGameLogic(
         console.log(`Good (${late} s)`);
         candidate = n;
         candidateJudge = 1;
+        candidateLate = late;
         break;
       } else if (Math.abs(late) <= okSec) {
         console.log(`OK (${late} s)`);
         candidate = n;
         candidateJudge = 2;
+        candidateLate = late;
         break;
       } else if (late <= badLateSec && late >= badFastSec) {
         console.log(`Bad (${late} s)`);
         candidate = n;
         candidateJudge = 3;
+        candidateLate = late;
         break;
       } else if (late > badLateSec) {
         // miss
         console.log("miss in hit()");
         judge(n, now, 4);
         notesYetDone.current.shift();
+        candidateLate = late;
         continue;
       } else {
         // not yet
@@ -143,6 +151,7 @@ export default function useGameLogic(
     }
     let candidateBig: Note6 | Note7 | null = null;
     let candidateJudgeBig: number = 0;
+    let candidateLateBig: number | null = null;
     while (now !== undefined && notesBigYetDone.current.length >= 1) {
       const n = notesBigYetDone.current[0];
       const late = now - n.hitTimeSec;
@@ -150,22 +159,26 @@ export default function useGameLogic(
         console.log(`Big Good (${late} s)`);
         candidateBig = n;
         candidateJudgeBig = 1;
+        candidateLateBig = late;
         break;
       } else if (Math.abs(late) <= okSec) {
         console.log(`Big OK (${late} s)`);
         candidateBig = n;
         candidateJudgeBig = 2;
+        candidateLateBig = late;
         break;
       } else if (late <= badLateSec && late >= badFastSec) {
         console.log(`Big Bad (${late} s)`);
         candidateBig = n;
         candidateJudgeBig = 3;
+        candidateLateBig = late;
         break;
       } else if (late > badLateSec) {
         // miss
         console.log("Big miss in hit()");
         judge(n, now, 4);
         notesBigYetDone.current.shift();
+        candidateLateBig = late;
         continue;
       } else {
         // not yet
@@ -183,9 +196,15 @@ export default function useGameLogic(
       if (candidate.big) {
         notesBigYetDone.current.push(candidate);
       }
+      if(candidateLate !== null){
+        lateTimes.current.push(candidateLate + userOffset);
+      }
     } else if (now && candidateBig !== null) {
       judge(candidateBig, now, candidateJudgeBig);
       notesBigYetDone.current.shift();
+      if(candidateLateBig !== null){
+        lateTimes.current.push(candidateLateBig + userOffset);
+      }
     }
   };
   // 0.1s以上過ぎたものをmiss判定にする
@@ -260,5 +279,6 @@ export default function useGameLogic(
     bigCount,
     bigTotal,
     end,
+    lateTimes,
   };
 }

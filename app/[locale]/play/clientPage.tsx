@@ -146,6 +146,21 @@ function Play(props: Props) {
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
 
   const [auto, setAuto] = useState<boolean>(false);
+  const [userOffset, setUserOffset_] = useState<number>(0);
+  useEffect(() => {
+    if (cid) {
+      setUserOffset_(Number(localStorage.getItem(`offset-${cid}`)));
+    }
+  }, [cid]);
+  const setUserOffset = useCallback(
+    (v: number) => {
+      setUserOffset_(v);
+      if (cid) {
+        localStorage.setItem(`offset-${cid}`, String(v));
+      }
+    },
+    [cid]
+  );
 
   const ref = useRef<HTMLDivElement>(null!);
   const {
@@ -167,6 +182,9 @@ function Play(props: Props) {
     statusSpace.height &&
     statusSpace.height < 30 * playUIScale &&
     !statusHide;
+  const mainWindowSpace = useResizeDetector();
+  const readySmall =
+    !!mainWindowSpace.height && mainWindowSpace.height < 27 * rem;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -188,7 +206,7 @@ function Play(props: Props) {
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
-      return ytPlayer.current?.getCurrentTime() - chartSeq.offset;
+      return ytPlayer.current?.getCurrentTime() - chartSeq.offset - userOffset;
     }
   }, [chartSeq, chartPlaying]);
   const {
@@ -204,7 +222,8 @@ function Play(props: Props) {
     bigCount,
     bigTotal,
     end,
-  } = useGameLogic(getCurrentTimeSec, auto);
+    lateTimes,
+  } = useGameLogic(getCurrentTimeSec, auto, userOffset);
 
   const [fps, setFps] = useState<number>(0);
 
@@ -341,6 +360,7 @@ function Play(props: Props) {
       setReady(false);
       setChartPlaying(true);
       setChartStarted(true);
+      lateTimes.current = [];
       ytPlayer.current?.setVolume(100);
     }
     ref.current?.focus();
@@ -409,7 +429,7 @@ function Play(props: Props) {
           }
         >
           <MusicArea
-            offset={chartSeq.offset}
+            offset={chartSeq.offset + userOffset}
             lvType={lvType}
             lvIndex={lvIndex}
             isMobile={isMobile}
@@ -437,7 +457,7 @@ function Play(props: Props) {
             </>
           )}
         </div>
-        <div className={"relative flex-1"}>
+        <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
           <FallingWindow
             className="absolute inset-0"
             notes={notesAll}
@@ -475,7 +495,11 @@ function Play(props: Props) {
               exit={exit}
               auto={auto}
               setAuto={setAuto}
+              userOffset={userOffset}
+              setUserOffset={setUserOffset}
               editing={editing}
+              lateTimes={lateTimes.current}
+              small={readySmall}
             />
           ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
