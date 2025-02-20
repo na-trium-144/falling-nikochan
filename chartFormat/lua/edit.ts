@@ -31,6 +31,11 @@ export function findStepFromLua(chart: Level, line: number): Step | null {
       return n.step;
     }
   }
+  for (const n of chart.signature) {
+    if (n.luaLine === line) {
+      return n.step;
+    }
+  }
   return null;
 }
 
@@ -65,6 +70,13 @@ export function insertLua<L extends Level | Level5 | Chart3>(
       n.luaLine++;
     }
   });
+  if ("signature" in chart) {
+    chart.signature.forEach((n) => {
+      if (n.luaLine !== null && n.luaLine >= line) {
+        n.luaLine++;
+      }
+    });
+  }
 }
 // コマンドを置き換え
 export function replaceLua<L extends Level | Level5 | Chart3>(
@@ -104,6 +116,13 @@ export function deleteLua(chart: Level, line: number) {
     }
   });
   chart.speedChanges.forEach((n) => {
+    if (n.luaLine === line) {
+      n.luaLine = null;
+    } else if (n.luaLine !== null && n.luaLine >= line) {
+      n.luaLine--;
+    }
+  });
+  chart.signature.forEach((n) => {
     if (n.luaLine === line) {
       n.luaLine = null;
     } else if (n.luaLine !== null && n.luaLine >= line) {
