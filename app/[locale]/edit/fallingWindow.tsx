@@ -11,14 +11,14 @@ import { useResizeDetector } from "react-resize-detector";
 import { NoteCommand } from "@/../../chartFormat/command.js";
 import Arrow from "./arrow.js";
 import DragHandle from "./dragHandle.js";
-import { Level } from "@/../../chartFormat/chart.js";
 import { useDisplayMode } from "@/scale.js";
+import { LevelEdit } from "../../../chartFormat/chart.js";
 
 interface Props {
   className?: string;
   style?: object;
   notes: Note[];
-  currentLevel?: Level;
+  currentLevel: LevelEdit | undefined;
   currentTimeSec: number;
   currentNoteIndex: number;
   updateNote: (n: NoteCommand) => void;

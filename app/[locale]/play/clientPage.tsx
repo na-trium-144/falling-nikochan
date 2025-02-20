@@ -100,7 +100,7 @@ export function InitPlay({ locale }: { locale: string }) {
             } else {
               setChartSeq(undefined);
               setErrorStatus(undefined);
-              setErrorMsg(`Invalid chart version: ${seq.ver}`);
+              setErrorMsg(`Invalid chart version: ${(seq as any)?.ver}`);
             }
           } catch (e) {
             setChartSeq(undefined);

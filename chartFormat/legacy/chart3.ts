@@ -43,7 +43,7 @@ export interface RestStep3 {
 }
 
 export function convertTo3(chart: Chart1 | Chart2): Chart3 {
-  if(chart.ver !== 2) chart = convertTo2(chart);
+  if (chart.ver !== 2) chart = convertTo2(chart);
   let newChart: Chart3 = {
     falling: "nikochan",
     ver: 3,
@@ -60,41 +60,59 @@ export function convertTo3(chart: Chart1 | Chart2): Chart3 {
     editPasswd: chart.editPasswd,
   };
   for (const n of chart.bpmChanges) {
+    const { chart, lua } = luaAddBpmChange(
+      { ...emptyLevel(), ...newChart },
+      newChart.lua,
+      n
+    )!;
     newChart = {
       ...newChart,
-      ...luaAddBpmChange({ ...emptyLevel(), ...newChart }, n)!,
+      ...chart,
+      lua,
     };
   }
   if (chart.bpmChanges.length === 0) {
+    const { chart, lua } = luaAddBpmChange(
+      { ...emptyLevel(), ...newChart },
+      newChart.lua,
+      {
+        bpm: 120,
+        step: stepZero(),
+        timeSec: 0,
+      }
+    )!;
     newChart = {
       ...newChart,
-      ...luaAddBpmChange(
-        { ...emptyLevel(), ...newChart },
-        {
-          bpm: 120,
-          step: stepZero(),
-          timeSec: 0,
-        }
-      )!,
+      ...chart,
+      lua,
     };
   }
   for (const n of chart.scaleChanges) {
+    const { chart, lua } = luaAddSpeedChange(
+      { ...emptyLevel(), ...newChart },
+      newChart.lua,
+      n
+    )!;
     newChart = {
       ...newChart,
-      ...luaAddSpeedChange({ ...emptyLevel(), ...newChart }, n)!,
+      ...chart,
+      lua,
     };
   }
   if (chart.scaleChanges.length === 0) {
+    const { chart, lua } = luaAddSpeedChange(
+      { ...emptyLevel(), ...newChart },
+      newChart.lua,
+      {
+        bpm: 120,
+        step: stepZero(),
+        timeSec: 0,
+      }
+    )!;
     newChart = {
       ...newChart,
-      ...luaAddSpeedChange(
-        { ...emptyLevel(), ...newChart },
-        {
-          bpm: 120,
-          step: stepZero(),
-          timeSec: 0,
-        }
-      )!,
+      ...chart,
+      lua,
     };
   }
   for (const n of chart.notes) {
@@ -107,26 +125,34 @@ export function convertTo3(chart: Chart1 | Chart2): Chart3 {
     const newVX = (nScale2 * n.hitVX) / newSpeed3;
     const newVY = (nScale2 * n.hitVY) / newSpeed3;
     if (currentSpeed3 !== newSpeed3) {
+      const { chart, lua } = luaAddSpeedChange(
+        { ...emptyLevel(), ...newChart },
+        newChart.lua,
+        {
+          bpm: newSpeed3,
+          step: n.step,
+          timeSec: getTimeSec(newChart.bpmChanges, n.step),
+        }
+      )!;
       newChart = {
         ...newChart,
-        ...luaAddSpeedChange(
-          { ...emptyLevel(), ...newChart },
-          {
-            bpm: newSpeed3,
-            step: n.step,
-            timeSec: getTimeSec(newChart.bpmChanges, n.step),
-          }
-        )!,
+        ...chart,
+        lua,
       };
     }
-    newChart = {
-      ...newChart,
-      ...luaAddNote(
+    {
+      const { chart, lua } = luaAddNote(
         { ...emptyLevel(), ...newChart },
+        newChart.lua,
         { hitX: n.hitX, hitVX: newVX, hitVY: newVY, step: n.step, big: n.big },
         n.step
-      )!,
-    };
+      )!;
+      newChart = {
+        ...newChart,
+        ...chart,
+        lua,
+      };
+    }
   }
   return newChart;
 }

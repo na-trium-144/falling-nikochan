@@ -1,4 +1,3 @@
-import { Level } from "@/../../chartFormat/chart.js";
 import { NoteCommand } from "@/../../chartFormat/command.js";
 import Button from "@/common/button.js";
 import Input from "@/common/input.js";
@@ -10,6 +9,7 @@ import { getSignatureState } from "@/../../chartFormat/seq.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
+import { LevelEdit } from "../../../chartFormat/chart.js";
 
 interface Props {
   currentNoteIndex: number;
@@ -24,7 +24,7 @@ interface Props {
   pasteNote: (i: number) => void;
   hasCopyBuf: boolean[];
   currentStep: Step;
-  currentLevel?: Level;
+  currentLevel: LevelEdit | undefined;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");

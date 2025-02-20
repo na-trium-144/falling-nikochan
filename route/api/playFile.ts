@@ -4,11 +4,7 @@ import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
-import {
-  convertTo6,
-  Level6,
-  Level6Play,
-} from "../../chartFormat/legacy/chart6.js";
+import { convertTo6, Level6Play } from "../../chartFormat/legacy/chart6.js";
 import {
   convertTo8,
   convertToPlay8,
