@@ -46,6 +46,7 @@ import {
   convertToMin8,
   convertToPlay8,
   Level8Edit,
+  Level8Freeze,
   Level8Min,
   Level8Play,
 } from "./legacy/chart8.js";
@@ -83,6 +84,7 @@ export const lastIncompatibleVer = 6;
 export type ChartMin = Chart8Min;
 export type LevelMin = Level8Min;
 export type ChartEdit = Chart8Edit;
+export type LevelFreeze = Level8Freeze;
 export type LevelEdit = Level8Edit;
 export type LevelPlay = Level8Play;
 export const convertToMin = convertToMin8;
@@ -104,8 +106,7 @@ export async function validateChart(
   if (chart.ver !== 8) chart = await convertTo8(chart);
   if (chart.ver !== currentChartVer) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
-  chart.levels.forEach((l) => validateLevelMin(l));
-  chart.levelsFreezed.forEach((l) => validateLevelEdit(l));
+  chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
@@ -116,16 +117,13 @@ export async function validateChart(
   if (typeof chart.locale !== "string") throw "chart.locale is invalid";
   return chart;
 }
-export function validateLevelMin(level: LevelMin): LevelMin {
+export function validateLevel(level: LevelEdit): LevelEdit {
   if (typeof level.name !== "string") throw "level.name is invalid";
   if (!levelTypes.includes(level.type)) throw "level.type is invalid";
   if (!Array.isArray(level.lua)) throw "level.lua is invalid";
   if (level.lua.filter((l) => typeof l !== "string").length > 0)
     throw "level.lua is invalid";
   if (typeof level.unlisted !== "boolean") level.unlisted = false;
-  return level;
-}
-export function validateLevelEdit(level: LevelEdit): LevelEdit {
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(level.rest)) throw "level.rest is invalid";
@@ -157,7 +155,6 @@ export function emptyChart(locale: string): ChartEdit {
     falling: "nikochan",
     ver: currentChartVer,
     levels: [emptyLevel()],
-    levelsFreezed: [],
     offset: 0,
     ytId: "",
     title: "",
@@ -170,14 +167,12 @@ export function emptyChart(locale: string): ChartEdit {
   return chart;
 }
 // prevLevelからbpmとspeedだけはコピー
-export function emptyLevel(prevLevel?: LevelEdit): LevelMin {
-  let level: LevelMin = {
+export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
+  let level: LevelEdit = {
     name: "",
     type: levelTypes[0],
     lua: [],
     unlisted: false,
-  };
-  let levelEdit: LevelEdit = {
     notes: [],
     rest: [],
     bpmChanges: [],
@@ -186,48 +181,45 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelMin {
   };
   if (prevLevel) {
     for (const change of prevLevel.bpmChanges) {
-      const res = luaAddBpmChange(levelEdit, level.lua, change);
-      levelEdit = res!.chart;
-      level.lua = res!.lua;
+      level = luaAddBpmChange(level, change)!;
     }
     for (const change of prevLevel.speedChanges) {
-      const res = luaAddSpeedChange(levelEdit, level.lua, change);
-      levelEdit = res!.chart;
-      level.lua = res!.lua;
+      level = luaAddSpeedChange(level, change)!;
     }
     for (const s of prevLevel.signature) {
-      const res = luaAddBeatChange(levelEdit, level.lua, s);
-      levelEdit = res!.chart;
-      level.lua = res!.lua;
+      level = luaAddBeatChange(level, s)!;
     }
   } else {
-    const res = luaAddBpmChange(levelEdit, level.lua, {
-      bpm: 120,
-      step: stepZero(),
-      timeSec: 0,
-    });
-    const res2 = luaAddSpeedChange(res!.chart, res!.lua, {
+    level = luaAddBpmChange(level, {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
     })!;
-    const res3 = luaAddBeatChange(res2!.chart, res2!.lua, {
+    level = luaAddSpeedChange(level, {
+      bpm: 120,
+      step: stepZero(),
+      timeSec: 0,
+    })!;
+    level = luaAddBeatChange(level, {
       step: stepZero(),
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
-    });
-    levelEdit = res3!.chart;
-    level.lua = res3!.lua;
+    })!;
   }
   return level;
 }
-export function copyLevel(level: LevelMin): LevelMin {
+export function copyLevel(level: LevelEdit): LevelEdit {
   return {
     name: level.name,
     type: level.type,
     lua: level.lua.slice(),
     unlisted: level.unlisted,
+    notes: level.notes.map((n) => ({ ...n })),
+    rest: level.rest.map((n) => ({ ...n })),
+    bpmChanges: level.bpmChanges.map((n) => ({ ...n })),
+    speedChanges: level.speedChanges.map((n) => ({ ...n })),
+    signature: level.signature.map((n) => ({ ...n })),
   };
 }
 
@@ -238,18 +230,18 @@ export async function createBrief(
   let levelHashes: string[] = [];
   try {
     levelHashes = await Promise.all(
-      chart.levelsFreezed.map((level) => hashLevel(level))
+      chart.levels.map((level) => hashLevel(level))
     );
   } catch {
     //
   }
-  const levelBrief = chart.levelsFreezed.map((level, i) => ({
-    name: chart.levels[i].name,
-    type: chart.levels[i].type,
-    unlisted: chart.levels[i].unlisted,
+  const levelBrief = chart.levels.map((level, i) => ({
+    name: level.name,
+    type: level.type,
+    unlisted: level.unlisted,
     hash: levelHashes[i],
     noteCount: level.notes.length,
-    difficulty: difficulty(level, chart.levels[i].type),
+    difficulty: difficulty(level, level.type),
     bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
     bpmMax: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.max(a, b)),
     length:

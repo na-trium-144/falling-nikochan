@@ -3,16 +3,19 @@ import { Step, stepZero } from "../step.js";
 import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
-import { LevelEdit } from "../chart.js";
+import { LevelFreeze } from "../chart.js";
 
 export interface Result {
   stdout: string[];
   err: string[];
   errorLine: number | null;
-  levelFreezed: LevelEdit;
+  levelFreezed: LevelFreeze;
   step: Step;
 }
-export async function luaExec(code: string): Promise<Result> {
+export async function luaExec(
+  code: string,
+  catchError: boolean
+): Promise<Result> {
   const factory = new LuaFactory();
   const lua = await factory.createEngine();
   const result: Result = {
@@ -77,6 +80,9 @@ export async function luaExec(code: string): Promise<Result> {
     console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
   } catch (e) {
+    if (!catchError) {
+      throw e;
+    }
     result.err = String(e).split("\n");
     let firstErrorLine: number | null = null;
     // tracebackをパース
@@ -125,7 +131,10 @@ export async function luaExec(code: string): Promise<Result> {
       luaLine: null,
     });
   }
-  updateBpmTimeSec(result.levelFreezed.bpmChanges, result.levelFreezed.speedChanges);
+  updateBpmTimeSec(
+    result.levelFreezed.bpmChanges,
+    result.levelFreezed.speedChanges
+  );
   updateBarNum(result.levelFreezed.signature);
   return result;
 }

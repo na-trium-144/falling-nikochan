@@ -25,53 +25,41 @@ function beatLuaCommand(s: Signature) {
 }
 export function luaAddBeatChange<L extends LevelEdit | Level5>(
   chart: L,
-  lua: string[],
   change: Signature
-): { chart: L; lua: string[] } | null {
-  const insert = findInsertLine(chart, lua, change.step);
+): L | null {
+  const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
     return null;
   }
   chart = insert.chart;
-  lua = insert.lua;
-  lua = insertLua(chart, lua, insert.luaLine, beatLuaCommand(change));
+  insertLua(chart, insert.luaLine, beatLuaCommand(change));
   chart.signature.push({ ...change, luaLine: insert.luaLine });
   chart.signature = chart.signature.sort((a, b) => stepCmp(a.step, b.step));
   updateBarNum(chart.signature);
-  return { chart, lua };
+  return chart;
 }
 export function luaUpdateBeatChange(
   chart: LevelEdit,
-  lua: string[],
   index: number,
   change: Signature
-): { chart: LevelEdit; lua: string[] } | null {
+) {
   if (chart.signature[index].luaLine === null) {
     return null;
   }
-  lua = replaceLua(
-    chart,
-    lua,
-    chart.signature[index].luaLine,
-    beatLuaCommand(change)
-  );
+  replaceLua(chart, chart.signature[index].luaLine, beatLuaCommand(change));
   chart.signature[index] = {
     ...change,
     luaLine: chart.signature[index].luaLine,
   };
   updateBarNum(chart.signature);
-  return { chart, lua };
+  return chart;
 }
-export function luaDeleteBeatChange(
-  chart: LevelEdit,
-  lua: string[],
-  index: number
-): { chart: LevelEdit; lua: string[] } | null {
+export function luaDeleteBeatChange(chart: LevelEdit, index: number) {
   if (chart.signature[index].luaLine === null) {
     return null;
   }
-  lua = deleteLua(chart, lua, chart.signature[index].luaLine);
+  deleteLua(chart, chart.signature[index].luaLine);
   chart.signature = chart.signature.filter((_ch, i) => i !== index);
   updateBarNum(chart.signature);
-  return { chart, lua };
+  return chart;
 }

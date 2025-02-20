@@ -11,21 +11,18 @@ import { luaExec } from "@/../../chartFormat/lua/exec.js";
 import { Step } from "@/../../chartFormat/step.js";
 import { findStepFromLua } from "@/../../chartFormat/lua/edit.js";
 import { ThemeContext } from "@/common/theme.js";
-import { LevelEdit, LevelMin } from "../../../chartFormat/chart.js";
+import { LevelEdit } from "../../../chartFormat/chart.js";
 
 interface Props {
   currentLevel: LevelEdit | undefined;
-  currentLevelMin: LevelMin | undefined;
   changeLevel: (lua: string[]) => void;
   seekStepAbs: (s: Step) => void;
   themeContext: ThemeContext;
 }
 export default function LuaTab(props: Props) {
-  const { currentLevel, currentLevelMin, changeLevel, seekStepAbs } = props;
+  const { currentLevel, changeLevel, seekStepAbs } = props;
   const { rem } = useDisplayMode();
-  const [code, setCode] = useState<string>(
-    currentLevelMin?.lua.join("\n") || ""
-  );
+  const [code, setCode] = useState<string>(currentLevel?.lua.join("\n") || "");
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
@@ -36,7 +33,7 @@ export default function LuaTab(props: Props) {
       const t = setTimeout(() => {
         setCodeChanged(false);
         void (async () => {
-          const result = await luaExec(code);
+          const result = await luaExec(code, true);
           setStdout(result.stdout);
           setErr(result.err);
           setErrLine(result.errorLine);

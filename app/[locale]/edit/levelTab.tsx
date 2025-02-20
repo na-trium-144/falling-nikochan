@@ -23,8 +23,7 @@ interface Props {
 }
 export default function LevelTab(props: Props) {
   const t = useTranslations("edit.level");
-  const currentLevel = props.chart?.levelsFreezed.at(props.currentLevelIndex);
-  const currentLevelMin = props.chart?.levels.at(props.currentLevelIndex);
+  const currentLevel = props.chart?.levels.at(props.currentLevelIndex);
   const addLevel = () => {
     if (props.chart) {
       props.changeChart({
@@ -35,10 +34,10 @@ export default function LevelTab(props: Props) {
     }
   };
   const duplicateLevel = () => {
-    if (props.chart && currentLevelMin) {
+    if (props.chart && currentLevel) {
       props.changeChart({
         ...props.chart,
-        levels: props.chart.levels.concat([copyLevel(currentLevelMin)]),
+        levels: props.chart.levels.concat([copyLevel(currentLevel)]),
       });
       props.setCurrentLevelIndex(props.chart.levels.length);
     }
@@ -82,9 +81,7 @@ export default function LevelTab(props: Props) {
   useEffect(() => {
     if (props.chart) {
       setLevelsDifficulty(
-        props.chart.levelsFreezed.map((level, i) =>
-          difficulty(level, props.chart!.levels[i].type)
-        )
+        props.chart.levels.map((level) => difficulty(level, level.type))
       );
     }
   }, [props.chart]);
@@ -135,14 +132,14 @@ export default function LevelTab(props: Props) {
         )}
       </p>
       <ul className="ml-2 mt-2 mb-2 space-y-1 max-h-32 overflow-y-auto">
-        {props.chart?.levelsFreezed.map((level, i) => (
+        {props.chart?.levels.map((level, i) => (
           <li key={i}>
             <button
               className={
                 i === props.currentLevelIndex
                   ? "text-blue-600 dark:text-blue-400 "
                   : "hover:text-slate-500 hover:dark:text-stone-400 " +
-                    (props.chart!.levels[i].unlisted
+                    (level.unlisted
                       ? "text-slate-400 dark:text-stone-600 "
                       : "")
               }
@@ -152,25 +149,23 @@ export default function LevelTab(props: Props) {
                 {i === props.currentLevelIndex && <RightOne theme="filled" />}
               </span>
               <span className="inline-block w-4 mr-2 text-right">{i + 1}.</span>
-              {props.chart!.levels[i].name && (
+              {level.name && (
                 <span className="inline-block mr-2 font-title">
-                  {props.chart!.levels[i].name}
+                  {level.name}
                 </span>
               )}
-              {props.chart!.levels[i].unlisted && (
+              {level.unlisted && (
                 <span className="text-sm mr-2">{t("unlisted")}</span>
               )}
               <span
                 className={
                   "inline-block mr-2 " +
                   (i === props.currentLevelIndex
-                    ? levelColors[
-                        levelTypes.indexOf(props.chart!.levels[i].type)
-                      ]
+                    ? levelColors[levelTypes.indexOf(level.type)]
                     : "")
                 }
               >
-                <span className="text-sm">{props.chart!.levels[i].type}-</span>
+                <span className="text-sm">{level.type}-</span>
                 <span className="text-lg">{levelsDifficulty[i]}</span>
               </span>
               <span
@@ -188,15 +183,15 @@ export default function LevelTab(props: Props) {
         ))}
       </ul>
       <hr className="mb-3 " />
-      {currentLevel && currentLevelMin && (
+      {currentLevel && (
         <>
           <p className="flex flex-row items-baseline mb-1">
             <span className="w-max">{t("levelName")}:</span>
             <Input
               className="font-title shrink"
-              actualValue={currentLevelMin.name}
+              actualValue={currentLevel.name}
               updateValue={(n) => {
-                currentLevelMin.name = n;
+                currentLevel.name = n;
                 props.changeChart({ ...props.chart! });
               }}
               left
@@ -207,12 +202,12 @@ export default function LevelTab(props: Props) {
             {levelTypes.map((t, i) => (
               <CheckBox
                 key={t}
-                value={t === currentLevelMin.type}
+                value={t === currentLevel.type}
                 className={
-                  "ml-2 " + (t === currentLevelMin.type ? levelColors[i] : "")
+                  "ml-2 " + (t === currentLevel.type ? levelColors[i] : "")
                 }
                 onChange={() => {
-                  currentLevelMin.type = t;
+                  currentLevel.type = t;
                   props.changeChart({ ...props.chart! });
                 }}
                 disabled={levelTypeDisabled[i]}
@@ -223,10 +218,10 @@ export default function LevelTab(props: Props) {
           </p>
           <p>
             <CheckBox
-              value={currentLevelMin.unlisted}
+              value={currentLevel.unlisted}
               className="ml-0"
               onChange={() => {
-                currentLevelMin.unlisted = !currentLevelMin.unlisted;
+                currentLevel.unlisted = !currentLevel.unlisted;
                 props.changeChart({ ...props.chart! });
               }}
             >

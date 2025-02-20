@@ -41,12 +41,7 @@ export function MetaEdit(props: Props) {
   const hasLevelData =
     props.chart?.levels &&
     props.chart.levels.length > 0 &&
-    props.chart.levels.some(
-      (l, i) =>
-        props.chart!.levelsFreezed[i] &&
-        props.chart!.levelsFreezed[i].notes.length > 0 &&
-        !l.unlisted
-    );
+    props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
 
   return (
     <>
@@ -315,17 +310,18 @@ export function MetaTab(props: Props2) {
         if (typeof content.ver === "number") {
           originalVer = content.ver;
         }
+        const levels = await Promise.all(
+          content.levels.map(async (l) => ({
+            ...l,
+            ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
+          }))
+        );
         newChart = await validateChart({
           ...content,
-          levelsFreezed: [],
+          levels,
           editPasswd: props.chart?.editPasswd || "",
           published: false,
         });
-        newChart.levelsFreezed = await Promise.all(
-          newChart.levels.map(
-            async (l) => (await luaExec(l.lua.join("\n"))).levelFreezed
-          )
-        );
       } catch (e1) {
         console.warn("fallback to msgpack deserialize");
         try {
@@ -333,17 +329,18 @@ export function MetaTab(props: Props2) {
           if (typeof content.ver === "number") {
             originalVer = content.ver;
           }
+          const levels = await Promise.all(
+            content.levels.map(async (l) => ({
+              ...l,
+              ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
+            }))
+          );
           newChart = await validateChart({
             ...content,
-            levelsFreezed: [],
+            levels,
             editPasswd: props.chart?.editPasswd || "",
             published: false,
           });
-          newChart.levelsFreezed = await Promise.all(
-            newChart.levels.map(
-              async (l) => (await luaExec(l.lua.join("\n"))).levelFreezed
-            )
-          );
         } catch (e2) {
           console.error(e1);
           console.error(e2);

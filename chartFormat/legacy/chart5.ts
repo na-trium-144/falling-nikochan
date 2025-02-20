@@ -3,12 +3,7 @@ import { luaAddBeatChange } from "../lua/signature.js";
 import { Step, stepZero } from "../step.js";
 import { Chart1 } from "./chart1.js";
 import { Chart2 } from "./chart2.js";
-import {
-  BPMChangeWithLua3,
-  Chart3,
-  NoteCommandWithLua3,
-  RestStep3,
-} from "./chart3.js";
+import { BPMChangeWithLua3, Chart3, NoteCommandWithLua3, RestStep3 } from "./chart3.js";
 import { Chart4, convertTo4 } from "./chart4.js";
 import { Level6 } from "./chart6.js";
 
@@ -57,24 +52,20 @@ export async function hashLevel5(level: Level5 | Level6) {
   );
 }
 
-export async function convertTo5(
-  chart: Chart1 | Chart2 | Chart3 | Chart4
-): Promise<Chart5> {
+export async function convertTo5(chart: Chart1 | Chart2 | Chart3 | Chart4): Promise<Chart5> {
   if (chart.ver !== 4) chart = await convertTo4(chart);
   return {
     ...chart,
     ver: 5,
     levels: chart.levels.map((l) => {
       let newLevel: Level5 = { ...l, signature: [], unlisted: false };
-      const change = luaAddBeatChange(newLevel, newLevel.lua, {
-        step: stepZero(),
-        offset: stepZero(),
-        barNum: 0,
-        bars: [[4, 4, 4, 4]],
-      });
-      if (change) {
-        newLevel = { ...newLevel, ...change.chart, lua: change.lua };
-      }
+      newLevel =
+        (luaAddBeatChange(newLevel, {
+          step: stepZero(),
+          offset: stepZero(),
+          barNum: 0,
+          bars: [[4, 4, 4, 4]],
+        }) as Level5) || newLevel;
       return { ...newLevel, hash: l.hash };
     }),
   };

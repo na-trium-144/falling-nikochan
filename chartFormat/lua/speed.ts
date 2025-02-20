@@ -9,52 +9,36 @@ function accelLuaCommand(bpm: number) {
 }
 export function luaAddSpeedChange<L extends LevelEdit | Chart3>(
   chart: L,
-  lua: string[],
   change: BPMChange
-): { chart: L; lua: string[] } | null {
-  const insert = findInsertLine(chart, lua, change.step);
+): L | null {
+  const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
     return null;
   }
   chart = insert.chart;
-  lua = insert.lua;
 
-  lua = insertLua(chart, lua, insert.luaLine, accelLuaCommand(change.bpm));
+  insertLua(chart, insert.luaLine, accelLuaCommand(change.bpm));
   chart.speedChanges.push({ ...change, luaLine: insert.luaLine });
   chart.speedChanges = chart.speedChanges.sort((a, b) =>
     stepCmp(a.step, b.step)
   );
-  return { chart, lua };
+  return chart;
 }
-export function luaUpdateSpeedChange(
-  chart: LevelEdit,
-  lua: string[],
-  index: number,
-  bpm: number
-): { chart: LevelEdit; lua: string[] } | null {
+export function luaUpdateSpeedChange(chart: LevelEdit, index: number, bpm: number) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }
-  lua = replaceLua(
-    chart,
-    lua,
-    chart.speedChanges[index].luaLine,
-    accelLuaCommand(bpm)
-  );
+  replaceLua(chart, chart.speedChanges[index].luaLine, accelLuaCommand(bpm));
   chart.speedChanges[index].bpm = bpm;
   // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
-  return { chart, lua };
+  return chart;
 }
-export function luaDeleteSpeedChange(
-  chart: LevelEdit,
-  lua: string[],
-  index: number
-): { chart: LevelEdit; lua: string[] } | null {
+export function luaDeleteSpeedChange(chart: LevelEdit, index: number) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }
-  lua = deleteLua(chart, lua, chart.speedChanges[index].luaLine);
+  deleteLua(chart, chart.speedChanges[index].luaLine);
   chart.speedChanges = chart.speedChanges.filter((_ch, i) => i !== index);
   // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
-  return { chart, lua };
+  return chart;
 }

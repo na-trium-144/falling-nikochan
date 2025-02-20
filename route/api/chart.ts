@@ -208,13 +208,13 @@ export async function chartToEntry(
     deleted: prevEntry?.deleted || false,
     playCount: prevEntry?.playCount || 0,
     levelsCompressed: null,
-    levels: chart.levelsFreezed.map((level, i) => ({
+    levels: chart.levels.map((level) => ({
       notes: level.notes,
       rest: level.rest,
       bpmChanges: level.bpmChanges,
       speedChanges: level.speedChanges,
       signature: level.signature,
-      lua: chart.levels[i].lua,
+      lua: level.lua,
     })),
     ver: chart.ver,
     published: chart.published,
@@ -357,8 +357,6 @@ export function entryToChart(
           type: entry.levelBrief.at(i)?.type || "",
           unlisted: entry.levelBrief.at(i)?.unlisted || false,
           lua: level.lua,
-        })),
-        levelsFreezed: entry.levels.map((level) => ({
           notes: level.notes,
           rest: level.rest,
           bpmChanges: level.bpmChanges,

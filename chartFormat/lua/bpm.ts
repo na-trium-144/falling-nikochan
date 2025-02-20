@@ -9,49 +9,33 @@ function bpmLuaCommand(bpm: number) {
 }
 export function luaAddBpmChange<L extends LevelEdit | Chart3>(
   chart: L,
-  lua: string[],
   change: BPMChange
-): { chart: L; lua: string[] } | null {
-  const insert = findInsertLine(chart, lua, change.step);
+): L | null {
+  const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
     return null;
   }
   chart = insert.chart;
-  lua = insert.lua;
-  lua = insertLua(chart, lua, insert.luaLine, bpmLuaCommand(change.bpm));
+  insertLua(chart, insert.luaLine, bpmLuaCommand(change.bpm));
   chart.bpmChanges.push({ ...change, luaLine: insert.luaLine });
   chart.bpmChanges = chart.bpmChanges.sort((a, b) => stepCmp(a.step, b.step));
-  return { chart, lua };
+  return chart;
 }
-export function luaUpdateBpmChange(
-  chart: LevelEdit,
-  lua: string[],
-  index: number,
-  bpm: number
-): { chart: LevelEdit; lua: string[] } | null {
+export function luaUpdateBpmChange(chart: LevelEdit, index: number, bpm: number) {
   if (chart.bpmChanges[index].luaLine === null) {
     return null;
   }
-  lua = replaceLua(
-    chart,
-    lua,
-    chart.bpmChanges[index].luaLine,
-    bpmLuaCommand(bpm)
-  );
+  replaceLua(chart, chart.bpmChanges[index].luaLine, bpmLuaCommand(bpm));
   chart.bpmChanges[index].bpm = bpm;
   updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
-  return { chart, lua };
+  return chart;
 }
-export function luaDeleteBpmChange(
-  chart: LevelEdit,
-  lua: string[],
-  index: number
-): { chart: LevelEdit; lua: string[] } | null {
+export function luaDeleteBpmChange(chart: LevelEdit, index: number) {
   if (chart.bpmChanges[index].luaLine === null) {
     return null;
   }
-  lua = deleteLua(chart, lua, chart.bpmChanges[index].luaLine);
+  deleteLua(chart, chart.bpmChanges[index].luaLine);
   chart.bpmChanges = chart.bpmChanges.filter((_ch, i) => i !== index);
   updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
-  return { chart, lua };
+  return chart;
 }

@@ -48,17 +48,18 @@ export interface Level8Min {
  *
  */
 export interface Chart8Edit extends Chart8Min {
-  levelsFreezed: Level8Edit[];
+  levels: Level8Edit[];
   editPasswd: string;
   published: boolean;
 }
-export interface Level8Edit {
+export interface Level8Freeze {
   notes: NoteCommandWithLua7[];
   rest: RestStep3[];
   bpmChanges: BPMChangeWithLua3[];
   speedChanges: BPMChangeWithLua3[];
   signature: SignatureWithLua5[];
 }
+export type Level8Edit = Level8Min & Level8Freeze;
 
 export interface Level8Play {
   ver: 8;
@@ -69,7 +70,7 @@ export interface Level8Play {
   offset: number;
 }
 export function convertToPlay8(chart: Chart8Edit, lvIndex: number): Level8Play {
-  const level = chart.levelsFreezed[lvIndex];
+  const level = chart.levels[lvIndex];
   return {
     ver: 8,
     offset: chart.offset,
@@ -135,8 +136,6 @@ export async function convertTo8(
       type: level.type,
       lua: level.lua,
       unlisted: level.unlisted,
-    })),
-    levelsFreezed: chart.levels.map((level) => ({
       notes: level.notes,
       rest: level.rest,
       bpmChanges: level.bpmChanges,

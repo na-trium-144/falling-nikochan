@@ -42,14 +42,13 @@ export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
 // コマンドを挿入
 export function insertLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
-  lua: string[],
   line: number,
   content: string
-): string[] {
-  lua = lua
+) {
+  chart.lua = chart.lua
     .slice(0, line)
     .concat([content])
-    .concat(lua.slice(line));
+    .concat(chart.lua.slice(line));
   // 以降の行番号がすべて1ずれる
   chart.notes.forEach((n) => {
     if (n.luaLine !== null && n.luaLine >= line) {
@@ -78,23 +77,21 @@ export function insertLua<L extends LevelEdit | Level5 | Chart3>(
       }
     });
   }
-  return lua;
 }
 // コマンドを置き換え
 export function replaceLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
-  lua: string[],
   line: number,
   content: string
-) : string[]{
-  return lua
+) {
+  chart.lua = chart.lua
     .slice(0, line)
     .concat([content])
-    .concat(lua.slice(line + 1));
+    .concat(chart.lua.slice(line + 1));
 }
 // コマンドを削除
-export function deleteLua(chart: LevelEdit, lua: string[], line: number): string[] {
-  lua = lua.slice(0, line).concat(lua.slice(line + 1));
+export function deleteLua(chart: LevelEdit, line: number) {
+  chart.lua = chart.lua.slice(0, line).concat(chart.lua.slice(line + 1));
   // 以降の行番号がすべて1ずれる
   // 削除した行のコマンドに対応するデータはとりあえずnull
   chart.notes.forEach((n) => {
@@ -132,7 +129,6 @@ export function deleteLua(chart: LevelEdit, lua: string[], line: number): string
       n.luaLine--;
     }
   });
-  return lua;
 }
 
 function stepLuaCommand(s: Step) {
@@ -152,23 +148,22 @@ function stepLuaCommand(s: Step) {
 // Stepコマンドを追加する必要がある場合は追加する。
 export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
-  lua: string[],
   step: Step
-): { chart: L; lua: string[], luaLine: number | null } {
+): { chart: L; luaLine: number | null } {
   for (let ri = 0; ri < chart.rest.length; ri++) {
     const rest = chart.rest[ri];
     if (stepCmp(rest.begin, step) === 0) {
-      return { chart, lua, luaLine: rest.luaLine };
+      return { chart, luaLine: rest.luaLine };
     } else {
       const restEnd = stepAdd(rest.begin, rest.duration);
       if (stepCmp(restEnd, step) > 0) {
         if (rest.luaLine === null) {
-          return { chart, lua, luaLine: null };
+          return { chart, luaLine: null };
         }
         const stepBefore = stepSub(step, rest.begin);
         const stepAfter = stepSub(restEnd, step);
-        lua = replaceLua(chart, lua, rest.luaLine, stepLuaCommand(stepBefore));
-        lua = insertLua(chart, lua, rest.luaLine + 1, stepLuaCommand(stepAfter));
+        replaceLua(chart, rest.luaLine, stepLuaCommand(stepBefore));
+        insertLua(chart, rest.luaLine + 1, stepLuaCommand(stepAfter));
         chart.rest = chart.rest
           .slice(0, ri)
           .concat([
@@ -176,7 +171,7 @@ export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
             { begin: step, duration: stepAfter, luaLine: rest.luaLine + 1 },
           ])
           .concat(chart.rest.slice(ri + 1));
-        return { chart, lua, luaLine: rest.luaLine + 1 };
+        return { chart, luaLine: rest.luaLine + 1 };
       }
     }
   }
@@ -190,16 +185,16 @@ export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
     restBegin = stepZero();
     stepBefore = stepSimplify(step);
   }
-  const newLine = lua.length;
+  const newLine = chart.lua.length;
   if (stepCmp(stepBefore, stepZero()) === 0) {
-    return { chart, lua, luaLine: newLine };
+    return { chart, luaLine: newLine };
   } else {
-    insertLua(chart, lua, newLine, stepLuaCommand(stepBefore));
+    insertLua(chart, newLine, stepLuaCommand(stepBefore));
     chart.rest.push({
       begin: restBegin,
       duration: stepBefore,
       luaLine: newLine,
     });
-    return { chart, lua, luaLine: newLine + 1 };
+    return { chart, luaLine: newLine + 1 };
   }
 }
