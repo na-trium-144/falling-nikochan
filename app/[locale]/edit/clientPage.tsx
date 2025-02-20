@@ -337,7 +337,7 @@ function Page(props: Props) {
           cid: cid,
           lvIndex: currentLevelIndex,
           brief: await createBrief(chart),
-          chart: chart,
+          level: convertToPlay(chart, currentLevelIndex),
           editing: true,
         };
         setFileSize(msgpack.serialize(chart).byteLength);

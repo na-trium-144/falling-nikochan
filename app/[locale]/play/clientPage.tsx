@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import { ChartSeqData6 } from "@/../../chartFormat/legacy/seq6.js";
-import { ChartSeqData7, loadChart7 } from "@/../../chartFormat/legacy/seq7.js";
+import { ChartSeqData8, loadChart8 } from "@/../../chartFormat/legacy/seq8.js";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -30,7 +30,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData7>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData8>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -66,8 +66,8 @@ export function InitPlay({ locale }: { locale: string }) {
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
-    if (session?.chart) {
-      setChartSeq(loadChart7(session.chart, session.lvIndex));
+    if (session?.level) {
+      setChartSeq(loadChart8(session.level));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
@@ -135,7 +135,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief: ChartBrief;
-  chartSeq: ChartSeqData6 | ChartSeqData7;
+  chartSeq: ChartSeqData6 | ChartSeqData8;
   editing: boolean;
   showFps: boolean;
   locale: string;

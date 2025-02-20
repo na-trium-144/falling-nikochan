@@ -8,7 +8,6 @@ import {
   ChartEdit,
   ChartMin,
   convertToMin,
-  currentChartVer,
   lastIncompatibleVer,
   validateChart,
 } from "@/../../chartFormat/chart.js";
