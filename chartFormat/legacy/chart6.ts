@@ -32,6 +32,10 @@ export interface Level6 {
   lua: string[];
   unlisted: boolean;
 }
+export interface Level6Play extends Level6 {
+  ver: 6;
+  offset: number;
+}
 
 export async function convertTo6(
   chart: Chart1 | Chart2 | Chart3 | Chart4 | Chart5

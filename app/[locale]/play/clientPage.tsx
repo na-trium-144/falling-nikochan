@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6 } from "@/../../chartFormat/legacy/seq6.js";
+import { ChartSeqData6, loadChart6 } from "@/../../chartFormat/legacy/seq6.js";
 import { ChartSeqData8, loadChart8 } from "@/../../chartFormat/legacy/seq8.js";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -23,6 +23,8 @@ import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
+import { Level6Play } from "../../../chartFormat/legacy/chart6.js";
+import { Level8Play } from "../../../chartFormat/legacy/chart8.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
@@ -74,15 +76,24 @@ export function InitPlay({ locale }: { locale: string }) {
       void (async () => {
         const res = await fetch(
           process.env.BACKEND_PREFIX +
-            `/api/seqFile/${session?.cid || cidFromParam}` +
+            `/api/playFile/${session?.cid || cidFromParam}` +
             `/${session?.lvIndex || lvIndexFromParam}`,
           { cache: "no-store" }
         );
         if (res.ok) {
           try {
-            const seq = msgpack.deserialize(await res.arrayBuffer());
-            if (seq.ver === 6 || seq.ver === 7) {
-              setChartSeq(seq);
+            const seq: Level6Play | Level8Play = msgpack.deserialize(
+              await res.arrayBuffer()
+            );
+            if (seq.ver === 6 || seq.ver === 8) {
+              switch (seq.ver) {
+                case 6:
+                  setChartSeq(loadChart6(seq));
+                  break;
+                case 8:
+                  setChartSeq(loadChart8(seq));
+                  break;
+              }
               setErrorStatus(undefined);
               setErrorMsg(undefined);
               addRecent("play", session?.cid || cidFromParam || "");

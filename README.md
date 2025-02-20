@@ -81,11 +81,12 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 * `GET /api/latest` - Get the list of 25 latest updated charts.
     * Response
         * `{cid: string}[]` as JSON with status code 200
-* `GET /api/seqFile/:cid/:lvIndex` - Get the sequence file for the chart. Used only when playing chart, not for editing.
+* `GET /api/seqFile/:cid/:lvIndex` - Deprecated. Returns 410.
+* `GET /api/playFile/:cid/:lvIndex` - Get the level file. Used only when playing chart, not for editing.
     * `:cid` - Chart ID
     * `:lvIndex` - Level index number
     * Response
-        * [ChartSeqData6](chartFormat/legacy/seq6.ts) or [ChartSeqData7](chartFormat/legacy/seq7.ts) serialized with MessagePack with status code 200
+        * [Level6Play](chartFormat/legacy/chart6.ts) or [Level8Play](chartFormat/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 404 (cid or level not found),
             * or 500 (other error)

@@ -4,11 +4,18 @@ import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
-import { convertTo6 } from "../../chartFormat/legacy/chart6.js";
-import { ChartSeqData6, loadChart6 } from "../../chartFormat/legacy/seq6.js";
-import { ChartSeqData7, loadChart7 } from "../../chartFormat/legacy/seq7.js";
+import {
+  convertTo6,
+  Level6,
+  Level6Play,
+} from "../../chartFormat/legacy/chart6.js";
+import {
+  convertTo8,
+  convertToPlay8,
+  Level8Play,
+} from "../../chartFormat/legacy/chart8.js";
 
-const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
   async (c) => {
     const cid = c.req.param("cid");
@@ -26,17 +33,28 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         return c.json({ message: "Level not found" }, 404);
       }
 
-      let seq: ChartSeqData6 | ChartSeqData7;
+      let level: Level6Play | Level8Play;
       switch (chart.ver) {
         case 4:
         case 5:
-          seq = loadChart6(await convertTo6(chart), lvIndex);
+          level = {
+            ...(await convertTo6(chart)).levels.at(lvIndex)!,
+            ver: 6,
+            offset: chart.offset,
+          };
           break;
         case 6:
-          seq = loadChart6(chart, lvIndex);
+          level = {
+            ...chart.levels.at(lvIndex)!,
+            ver: 6,
+            offset: chart.offset,
+          };
           break;
         case 7:
-          seq = loadChart7(chart, lvIndex);
+          level = convertToPlay8(await convertTo8(chart), lvIndex);
+          break;
+        case 8:
+          level = convertToPlay8(chart, lvIndex);
           break;
       }
 
@@ -45,7 +63,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         .updateOne({ cid }, { $inc: { playCount: 1 } });
       // revalidateBrief(cid);
 
-      return c.body(new Blob([msgpack.serialize(seq)]).stream());
+      return c.body(new Blob([msgpack.serialize(level)]).stream());
     } catch (e) {
       console.error(e);
       return c.body(null, 500);
@@ -55,4 +73,4 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   }
 );
 
-export default seqFileApp;
+export default playFileApp;

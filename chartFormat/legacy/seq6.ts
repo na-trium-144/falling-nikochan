@@ -1,7 +1,7 @@
 import { getTimeSec, Pos } from "../seq.js";
 import { BPMChange1 } from "./chart1.js";
 import { Signature5 } from "./chart5.js";
-import { Chart6 } from "./chart6.js";
+import { Chart6, Level6Play } from "./chart6.js";
 
 export interface ChartSeqData6 {
   ver: 6;
@@ -62,16 +62,24 @@ export interface DisplayNote6 {
 /**
  * chartを読み込む
  */
-export function loadChart6(chart: Chart6, levelIndex: number): ChartSeqData6 {
+export function loadChart6(
+  chart: Level6Play | Chart6,
+  levelIndex?: number
+): ChartSeqData6 {
   const notes: Note6[] = [];
-  const level = chart.levels.at(levelIndex);
+  let level: Level6Play | undefined;
+  if (chart && "levels" in chart && levelIndex && chart.levels.at(levelIndex)) {
+    level = { ...chart.levels.at(levelIndex)!, ver: 6, offset: chart.offset };
+  } else {
+    level = chart as Level6Play;
+  }
   if (!level) {
     return {
       ver: 6,
       notes: [],
       bpmChanges: [],
       signature: [],
-      offset: chart.offset,
+      offset: 0,
     };
   }
   for (let id = 0; id < level.notes.length; id++) {
