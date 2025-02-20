@@ -316,7 +316,6 @@ function Page(props: Props) {
   document.title = titleWithSiteName(
     t("title", { title: chart?.title, cid: cid })
   );
-  console.log(chart);
   useEffect(() => {
     void (async () => {
       if (chart) {
@@ -364,7 +363,6 @@ function Page(props: Props) {
         newLua = newLevel.lua;
       }
       const result = await luaExec(newLua.join("\n"));
-      console.log(result)
       while (newChart.levelsFreezed.length <= currentLevelIndex) {
         newChart.levelsFreezed.push({
           notes: [],
