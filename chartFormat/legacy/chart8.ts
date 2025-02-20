@@ -115,7 +115,12 @@ export function convertToMin8(chart: Chart8Edit): Chart8Min {
     composer: chart.composer,
     chartCreator: chart.chartCreator,
     locale: chart.locale,
-    levels: chart.levels,
+    levels: chart.levels.map((level) => ({
+      name: level.name,
+      type: level.type,
+      unlisted: level.unlisted,
+      lua: level.lua,
+    })),
   };
 }
 export async function convertTo8(
