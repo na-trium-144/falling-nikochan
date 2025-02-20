@@ -11,12 +11,6 @@ import {
   NoteCommandWithLua7,
 } from "./chart7.js";
 
-/**
- * ローカル保存に使われる、情報量を失わない最小サイズの形式
- * 
- * Level8Min -> Level8Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
- * Chart8Edit -> Chart8Min: convertToMin8(chart)
- */
 export interface Chart8Min {
   falling: "nikochan"; // magic
   ver: 8;
@@ -35,7 +29,6 @@ export interface Level8Min {
   unlisted: boolean;
 }
 /**
- * edit時と、api/chartFile の送受信に使われるデータ形式
  * notes: 1音符1要素
  * rest: 休符
  *   notesそれぞれにstepの情報は入っているので、譜面を読むだけなら無くてもいい
@@ -67,9 +60,6 @@ export interface Level8Edit {
   signature: SignatureWithLua5[];
 }
 
-/**
- * play時に使われるデータ形式
- */
 export interface Level8Play {
   ver: 8;
   notes: NoteCommand7[];

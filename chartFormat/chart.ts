@@ -1,3 +1,34 @@
+/*
+v8現在、譜面データを表す形式は以下の通り
+Chart〜 は複数レベルを含むデータ、 Level〜 は単一レベルのデータ
+
+chartFormat/ 内の定義
+(Min, Edit, Play は型名にそれぞれバージョン番号がつき、legacy/ 以下にバージョンごとに定義が置かれる)
+
+* ChartBrief: /share 内や /api/brief などで情報表示に使われる
+  * Edit -> Brief: createBrief(chart)
+  * EntryCompressed -> Brief: entryToBrief(chart)
+* ChartMin, LevelMin: ローカル保存に使われる、情報量を失わない最小サイズの形式
+  * Edit -> Min: convertToMin8(chart)
+* ChartEdit, LevelEdit: 譜面の編集時と、 /api/chartFile の送受信に使われる
+  * 旧バージョンからの変換: convertTo8(chart)
+  * Min -> Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
+  * Entry -> Edit: entryToChart(chart)
+* LevelPlay: /api/playFile で使われる、プレイ時の譜面データ
+  * Edit -> Play: convertToPlay8(chart, lvIndex)
+* ChartSeqData, Note: プレイ中の譜面データ (過去 /api/seqFile でも使われていた)
+  * Play -> SeqData: loadChart8(level)
+
+route/ 内の定義
+
+* ChartEntry, ChartLevelCore: データベースにアクセスする際の中間形式
+  * Edit -> Entry: chartToEntry(chart)
+  * EntryCompressed -> Entry: unzipEntry(entry)
+* ChartEntryCompressed: データベース内の形式
+  * Entry -> EntryCompressed: zipEntry(entry)
+
+*/
+
 import { updateBpmTimeSec, validateBpmChange } from "./bpm.js";
 import { validateNoteCommand, validateRestStep } from "./command.js";
 import { difficulty } from "./difficulty.js";
@@ -25,9 +56,6 @@ import { getTimeSec } from "./seq.js";
 import { validateSignature } from "./signature.js";
 import { stepZero } from "./step.js";
 
-/**
- * share時など情報表示に使われるデータ形式
- */
 export interface ChartBrief {
   ytId: string;
   title: string;

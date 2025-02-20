@@ -71,6 +71,8 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 
 <details><summary>API List</summary>
 
+See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the chart data formats.
+
 * `GET /api/brief/:cid` - Get the brief information of the chart.
     * `:cid` - Chart ID
     * Response
