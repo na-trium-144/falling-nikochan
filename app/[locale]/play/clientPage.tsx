@@ -219,7 +219,7 @@ function Play(props: Props) {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       return ytPlayer.current?.getCurrentTime() - chartSeq.offset - userOffset;
     }
-  }, [chartSeq, chartPlaying]);
+  }, [chartSeq, chartPlaying, userOffset]);
   const {
     baseScore,
     chainScore,
