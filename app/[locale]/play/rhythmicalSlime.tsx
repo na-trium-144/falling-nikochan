@@ -216,12 +216,27 @@ function Slime(props: PropsS) {
           src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
           className={
             "absolute bottom-0 inset-x-0 " +
-            "transition-transform origin-bottom " +
+            "transition origin-bottom " +
             (action === 1
               ? "ease-out -translate-y-1/2 scale-y-110 "
               : action === 0
               ? "ease-out translate-y-0 scale-y-75 "
               : "ease-in translate-y-0 scale-y-100 ")
+          }
+          style={{
+            transitionDuration: durationSec.current + "s",
+          }}
+        />
+        <img
+          src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
+          className={
+            "absolute bottom-0 inset-x-0 " +
+            "transition origin-bottom " +
+            (action === 1
+              ? "ease-out -translate-y-1/2 scale-y-110 opacity-0 "
+              : action === 0
+              ? "ease-out translate-y-0 scale-y-75 opacity-100 "
+              : "ease-in translate-y-0 scale-y-100 opacity-100 ")
           }
           style={{
             transitionDuration: durationSec.current + "s",
