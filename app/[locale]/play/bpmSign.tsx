@@ -3,42 +3,68 @@
 import { FourthNote } from "@/common/fourthNote.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
+import { ChartSeqData8 } from "../../../chartFormat/legacy/seq8.js";
+import { ChartSeqData6 } from "../../../chartFormat/legacy/seq6.js";
 
 interface Props {
-  currentBpm?: number;
+  chartSeq: ChartSeqData6 | ChartSeqData8;
+  getCurrentTimeSec: () => number | undefined;
 }
 export default function BPMSign(props: Props) {
   const { playUIScale } = useDisplayMode();
+  const { chartSeq, getCurrentTimeSec } = props;
 
-  const prevBpm = useRef<number | undefined>(undefined);
-  const [displayBpm, setDisplayBpm] = useState<number | undefined>(undefined);
-  const nextBpm = useRef<number | undefined>(undefined);
+  // chart.bpmChanges 内の現在のインデックス
+  const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
+  const displayBpm = chartSeq.bpmChanges.at(currentBpmIndex)?.bpm;
+  const prevTimeSec = useRef<number | undefined>(undefined);
   const [flip, setFlip] = useState<boolean>(false);
+  const nextBpmIndex = useRef<number | null>(null);
+  // bpmを更新
   useEffect(() => {
-    if (nextBpm.current !== undefined) {
-      // すでにアニメーションしはじめている
-      nextBpm.current = props.currentBpm;
-      prevBpm.current = props.currentBpm;
+    const now = getCurrentTimeSec();
+    if (
+      prevTimeSec.current !== undefined &&
+      now !== undefined &&
+      now < prevTimeSec.current
+    ) {
+      setCurrentBpmIndex(0);
     } else {
+      prevTimeSec.current = now;
+      let timer: ReturnType<typeof setTimeout> | null = null;
       if (
-        prevBpm.current !== undefined &&
-        props.currentBpm !== undefined &&
-        Math.abs(prevBpm.current - props.currentBpm) >= 10
+        now !== undefined &&
+        currentBpmIndex + 1 < chartSeq.bpmChanges.length
       ) {
-        setFlip(true);
-        nextBpm.current = props.currentBpm;
-        prevBpm.current = props.currentBpm;
-        setTimeout(() => {
-          setDisplayBpm(nextBpm.current);
-          nextBpm.current = undefined;
-          setFlip(false);
-        }, 100);
-      } else {
-        setDisplayBpm(props.currentBpm);
-        prevBpm.current = props.currentBpm;
+        // chartのvalidateでtimesecは再計算されたことが保証されている
+        const nextBpmChangeTime =
+          chartSeq.bpmChanges[currentBpmIndex + 1].timeSec;
+        timer = setTimeout(() => {
+          timer = null;
+          const prevBpm = chartSeq.bpmChanges[currentBpmIndex].bpm;
+          const nextBpm = chartSeq.bpmChanges[currentBpmIndex + 1].bpm;
+          if (nextBpmIndex.current !== null) {
+            nextBpmIndex.current = currentBpmIndex + 1;
+          } else if (Math.abs(prevBpm - nextBpm) >= 10) {
+            setFlip(true);
+            nextBpmIndex.current = currentBpmIndex + 1;
+            setTimeout(() => {
+              setCurrentBpmIndex(nextBpmIndex.current!);
+              nextBpmIndex.current = null;
+              setFlip(false);
+            }, 100);
+          } else {
+            setCurrentBpmIndex(currentBpmIndex + 1);
+          }
+        }, (nextBpmChangeTime - now) * 1000 - 100);
       }
+      return () => {
+        if (timer !== null) {
+          clearTimeout(timer);
+        }
+      };
     }
-  }, [props.currentBpm]);
+  }, [chartSeq, currentBpmIndex, getCurrentTimeSec, flip]); // <- flipは使っていないが意図的に追加している
 
   return (
     <div

@@ -244,32 +244,6 @@ function Play(props: Props) {
     }
   }, [ref]);
 
-  // chart.bpmChanges 内の現在のインデックス
-  const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
-  // bpmを更新
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const now = getCurrentTimeSec();
-    if (
-      now !== undefined &&
-      chartSeq &&
-      currentBpmIndex + 1 < chartSeq.bpmChanges.length
-    ) {
-      // chartのvalidateでtimesecは再計算されたことが保証されている
-      const nextBpmChangeTime =
-        chartSeq.bpmChanges[currentBpmIndex + 1].timeSec;
-      timer = setTimeout(() => {
-        timer = null;
-        setCurrentBpmIndex(currentBpmIndex + 1);
-      }, (nextBpmChangeTime - now) * 1000);
-    }
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-    };
-  }, [chartSeq, currentBpmIndex, getCurrentTimeSec]);
-
   // 準備完了画面を表示する
   const [ready, setReady] = useState<boolean>(false);
   // 譜面を中断した
@@ -308,7 +282,6 @@ function Play(props: Props) {
     setChartPlaying(false);
     setReady(true);
     resetNotesAll(chartSeq.notes);
-    setCurrentBpmIndex(0);
     reloadBestScore();
   }, [chartSeq, resetNotesAll, reloadBestScore]);
   const exit = () => {
@@ -543,7 +516,7 @@ function Play(props: Props) {
           playing={chartPlaying}
           bpmChanges={chartSeq?.bpmChanges}
         />
-        <BPMSign currentBpm={chartSeq?.bpmChanges[currentBpmIndex]?.bpm} />
+        <BPMSign chartSeq={chartSeq} getCurrentTimeSec={getCurrentTimeSec} />
         {isMobile && (
           <>
             <StatusBox
