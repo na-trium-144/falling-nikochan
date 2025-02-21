@@ -1,3 +1,7 @@
+## ver. 7.15 - 2025/02/21 [#289](https://github.com/na-trium-144/falling-nikochan/pull/289)
+
+* slimeの画像を追加し(slime2.svg)、アニメーションするようにした
+
 ## ver. 7.14 - 2025/02/20 [#287](https://github.com/na-trium-144/falling-nikochan/pull/287)
 
 * signatureの編集時にluaコードの違う行が変更されるバグを修正
