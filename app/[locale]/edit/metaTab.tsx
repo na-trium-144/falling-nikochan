@@ -292,7 +292,9 @@ export function MetaTab(props: Props2) {
   };
   const downloadExtension = `fn${props.chart?.ver}.yml`;
   const download = () => {
-    const yml = YAML.stringify(convertToMin(props.chart!));
+    const yml = YAML.stringify(convertToMin(props.chart!), {
+      indentSeq: false,
+    });
     const filename = `${props.cid}_${props.chart?.title}.${downloadExtension}`;
     saveAs(new Blob([yml]), filename);
     setSaveMsg(`${t("saveDone")} (${filename})`);
