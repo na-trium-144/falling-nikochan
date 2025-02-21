@@ -20,11 +20,13 @@ interface Props {
 export default function Input(props: Props) {
   const [value, setValue] = useState<string>("");
   const [focus, setFocus] = useState<boolean>(false);
+  const [valueSetTimer, setValueSetTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!focus) {
+    if (!focus && valueSetTimer === null) {
       setValue(props.actualValue);
     }
-  }, [focus, props]);
+  }, [focus, props, valueSetTimer]);
+
   return (
     <input
       type={props.passwd ? "password" : "text"}
@@ -42,11 +44,19 @@ export default function Input(props: Props) {
       onKeyDown={(e) => e.stopPropagation()}
       onChange={(e) => {
         setValue(e.target.value);
-        if (!props.isValid || props.isValid(e.target.value)) {
-          props.updateValue(e.target.value);
-        } else if (props.updateInvalidValue) {
-          props.updateInvalidValue(e.target.value);
+        if (valueSetTimer !== null) {
+          clearTimeout(valueSetTimer);
         }
+        // iOSで日本語入力時にonChangeが複数回呼ばれてluaExecがうまく動作しないので、
+        // 値の更新を遅延させる
+        setValueSetTimer(setTimeout(() => {
+          if (!props.isValid || props.isValid(e.target.value)) {
+            props.updateValue(e.target.value);
+          } else if (props.updateInvalidValue) {
+            props.updateInvalidValue(e.target.value);
+          }
+          setValueSetTimer(null);
+        }, 250));
       }}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
