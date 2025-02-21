@@ -12,7 +12,7 @@ export default {
         "ページ再読み込みでこちらに反映されます。",
       option: "オプション",
       auto: "オートプレイ",
-      displaySpeed: "音符速度表示",
+      displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
       offsetSecond: "秒",
       offsetFast: "早",
