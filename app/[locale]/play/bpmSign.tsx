@@ -125,7 +125,7 @@ export default function BPMSign(props: Props) {
           (flip ? "scale-x-0 " : "scale-x-100 ")
         }
       >
-        <div className={"flex flex-row items-baseline w-27 overflow-hidden "}>
+        <div className={"flex flex-row items-baseline w-22 overflow-hidden "}>
           <span className="flex-none text-xl w-max">
             <FourthNote />
             <span className="ml-1.5">=</span>
@@ -140,11 +140,11 @@ export default function BPMSign(props: Props) {
         {hasExplicitSpeedChange && (
           <div
             className={
-              "flex flex-row items-baseline w-19 m-auto overflow-visible "
+              "flex flex-row items-baseline w-15 m-auto overflow-visible "
             }
           >
             <span className="flex-none text-sm/3 w-max">
-              <SmilingFace className="inline-block align-middle " />
+              <SmilingFace className="inline-block align-bottom " />
               <span className="ml-0.5">=</span>
             </span>
             <span className="flex-1 min-w-0 text-base/3 flex flex-row items-baseline justify-end ">
