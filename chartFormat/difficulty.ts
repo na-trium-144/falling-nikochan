@@ -47,10 +47,6 @@ export function difficulty(level: Level, type: string): number {
     getTimeSec(level.bpmChanges, n.step)
   );
   let alv: number | null = null;
-  let averageNPS = Math.max(
-    1,
-    level.notes.length / Math.max(1, notesHitSec.at(-1) || 0)
-  );
   let baseHit: number;
   switch (type) {
     case "Single":
@@ -72,12 +68,8 @@ export function difficulty(level: Level, type: string): number {
     const multiHit = baseHit + additionalHit;
     let clv: number | null = null;
     let plv: number | null = null;
-    for (
-      let lv = Math.floor(npsToLv(averageNPS / multiHit, multiHit));
-      ;
-      lv += 0.5
-    ) {
-      if (clv === null && lv >= maxLv) {
+    for (let lv = 1; ; lv += 0.5) {
+      if (clv === null && lv + additionalHit >= (alv || maxLv)) {
         alv = alv || maxLv;
         break;
       }
