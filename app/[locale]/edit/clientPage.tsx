@@ -1211,27 +1211,30 @@ function Page(props: Props) {
                 />
               )}
             </Box>
-            {luaExecutor.running ? (
-              <div className="bg-slate-200 p-1 mt-2 rounded-sm ">
-                <LoadingSlime />
-                {t("running")}
-              </div>
-            ) : (
-              (luaExecutor.stdout.length > 0 || luaExecutor.err.length > 0) && (
-                <div className="bg-slate-200 p-1 mt-2 rounded-sm text-sm max-h-24 overflow-auto ">
-                  {luaExecutor.stdout.map((s, i) => (
-                    <p className="" key={i}>
-                      {s}
-                    </p>
-                  ))}
-                  {luaExecutor.err.map((e, i) => (
-                    <p className="text-red-600" key={i}>
-                      {e}
-                    </p>
-                  ))}
+            <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
+              {luaExecutor.running ? (
+                <div className="m-1">
+                  <LoadingSlime />
+                  {t("running")}
                 </div>
-              )
-            )}
+              ) : (
+                (luaExecutor.stdout.length > 0 ||
+                  luaExecutor.err.length > 0) && (
+                  <div className="m-1">
+                    {luaExecutor.stdout.map((s, i) => (
+                      <p className="text-sm" key={i}>
+                        {s}
+                      </p>
+                    ))}
+                    {luaExecutor.err.map((e, i) => (
+                      <p className="text-sm text-red-600" key={i}>
+                        {e}
+                      </p>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </div>
       </CaptionProvider>
