@@ -29,9 +29,9 @@ import { getTimeSec } from "./seq.js";
   上限は20 (適当)
 */
 
-function npsToLv(nps: number, multiHit: number) {
-  return Math.log(nps * multiHit) * 5 - 2;
-}
+// function npsToLv(nps: number, multiHit: number) {
+//   return Math.log(nps * multiHit) * 5 - 2;
+// }
 function lvToNps(lv: number, multiHit: number) {
   return Math.exp((lv + 2) / 5) / multiHit;
 }
