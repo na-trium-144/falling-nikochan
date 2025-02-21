@@ -104,26 +104,30 @@ export async function validateChart(
 ): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 8) chart = await convertTo8(chart);
+  await validateChartMin(chart);
+  chart.levels.forEach((l) => validateLevel(l));
+  if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
+  if (typeof chart.published !== "boolean") chart.published = false;
+  return chart;
+}
+export async function validateChartMin(
+  chart: ChartMin | Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6 | Chart7
+): Promise<ChartMin> {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  if (chart.ver !== 8) chart = await convertTo8(chart);
   if (chart.ver !== currentChartVer) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
-  chart.levels.forEach((l) => validateLevel(l));
+  chart.levels.forEach((l) => validateLevelMin(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
-  if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
-  if (typeof chart.published !== "boolean") chart.published = false;
   if (typeof chart.locale !== "string") throw "chart.locale is invalid";
   return chart;
 }
 export function validateLevel(level: LevelEdit): LevelEdit {
-  if (typeof level.name !== "string") throw "level.name is invalid";
-  if (!levelTypes.includes(level.type)) throw "level.type is invalid";
-  if (!Array.isArray(level.lua)) throw "level.lua is invalid";
-  if (level.lua.filter((l) => typeof l !== "string").length > 0)
-    throw "level.lua is invalid";
-  if (typeof level.unlisted !== "boolean") level.unlisted = false;
+  level = validateLevelMin(level);
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(level.rest)) throw "level.rest is invalid";
@@ -136,6 +140,15 @@ export function validateLevel(level: LevelEdit): LevelEdit {
   if (!Array.isArray(level.signature))
     throw "level.signatureChanges is invalid";
   level.signature.forEach((n) => validateSignature(n));
+  return level;
+}
+export function validateLevelMin(level: LevelMin): LevelMin {
+  if (typeof level.name !== "string") throw "level.name is invalid";
+  if (!levelTypes.includes(level.type)) throw "level.type is invalid";
+  if (!Array.isArray(level.lua)) throw "level.lua is invalid";
+  if (level.lua.filter((l) => typeof l !== "string").length > 0)
+    throw "level.lua is invalid";
+  if (typeof level.unlisted !== "boolean") level.unlisted = false;
   return level;
 }
 

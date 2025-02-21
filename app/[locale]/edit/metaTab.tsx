@@ -10,7 +10,7 @@ import {
   convertToMin,
   currentChartVer,
   lastIncompatibleVer,
-  validateChart,
+  validateChartMin,
 } from "@/../../chartFormat/chart.js";
 import { chartMaxSize } from "@/../../chartFormat/apiConfig.js";
 import {
@@ -313,18 +313,18 @@ export function MetaTab(props: Props2) {
         if (typeof content.ver === "number") {
           originalVer = content.ver;
         }
-        const levels = await Promise.all(
-          content.levels.map(async (l) => ({
-            ...l,
-            ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
-          }))
-        );
-        newChart = await validateChart({
-          ...content,
-          levels,
+        const newChartMin = await validateChartMin(content);
+        newChart = {
+          ...newChartMin,
           editPasswd: props.chart?.editPasswd || "",
           published: false,
-        });
+          levels: await Promise.all(
+            newChartMin.levels.map(async (l) => ({
+              ...l,
+              ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
+            }))
+          ),
+        };
       } catch (e1) {
         console.warn("fallback to msgpack deserialize");
         try {
@@ -332,18 +332,18 @@ export function MetaTab(props: Props2) {
           if (typeof content.ver === "number") {
             originalVer = content.ver;
           }
-          const levels = await Promise.all(
-            content.levels.map(async (l) => ({
-              ...l,
-              ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
-            }))
-          );
-          newChart = await validateChart({
-            ...content,
-            levels,
+          const newChartMin = await validateChartMin(content);
+          newChart = {
+            ...newChartMin,
             editPasswd: props.chart?.editPasswd || "",
             published: false,
-          });
+            levels: await Promise.all(
+              newChartMin.levels.map(async (l) => ({
+                ...l,
+                ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
+              }))
+            ),
+          };
         } catch (e2) {
           console.error(e1);
           console.error(e2);
