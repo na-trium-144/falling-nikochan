@@ -1,3 +1,12 @@
+/*
+クエリパラメーター
+
+* sid=セッションID または cid=譜面ID&lvIndex=インデックス で譜面を指定
+* fps=1 でFPS表示
+* speed=1 で音符の速度変化を表示
+
+*/
+
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -28,6 +37,7 @@ import { Level8Play } from "../../../chartFormat/legacy/chart8.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
+  const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -43,6 +53,7 @@ export function InitPlay({ locale }: { locale: string }) {
     const cidFromParam = searchParams.get("cid");
     const lvIndexFromParam = Number(searchParams.get("lvIndex"));
     setShowFps(searchParams.get("fps") !== null);
+    setDisplaySpeed(searchParams.get("speed") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -137,6 +148,7 @@ export function InitPlay({ locale }: { locale: string }) {
       chartSeq={chartSeq}
       editing={editing}
       showFps={showFps}
+      displaySpeed={displaySpeed}
       locale={locale}
     />
   );
@@ -149,10 +161,12 @@ interface Props {
   chartSeq: ChartSeqData6 | ChartSeqData8;
   editing: boolean;
   showFps: boolean;
+  displaySpeed: boolean;
   locale: string;
 }
 function Play(props: Props) {
-  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps } = props;
+  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps, displaySpeed } =
+    props;
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
   const hasExplicitSpeedChange =
@@ -161,7 +175,7 @@ function Play(props: Props) {
       chartSeq.speedChanges.some(
         (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
-  const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
+  // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(false);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
@@ -490,9 +504,6 @@ function Play(props: Props) {
               editing={editing}
               lateTimes={lateTimes.current}
               small={readySmall}
-              hasExplicitSpeedChange={hasExplicitSpeedChange}
-              displaySpeed={displaySpeed}
-              setDisplaySpeed={setDisplaySpeed}
             />
           ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />

@@ -27,9 +27,9 @@ interface MessageProps {
   editing: boolean;
   lateTimes: number[];
   small: boolean;
-  hasExplicitSpeedChange: boolean;
-  displaySpeed: boolean;
-  setDisplaySpeed: (s: boolean) => void;
+  // hasExplicitSpeedChange: boolean;
+  // displaySpeed: boolean;
+  // setDisplaySpeed: (s: boolean) => void;
 }
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.readyMessage");
@@ -112,7 +112,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             {t("auto")}
           </CheckBox>
         </li>
-        <li className="">
+        {/* <li className="">
           <CheckBox
             className=""
             value={props.displaySpeed}
@@ -121,7 +121,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           >
             {t("displaySpeed")}
           </CheckBox>
-        </li>
+        </li>*/}
         <li className="">
           <div className="">{t("offset")}</div>
           <div className="">
