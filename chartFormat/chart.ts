@@ -104,15 +104,24 @@ export async function validateChart(
 ): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 8) chart = await convertTo8(chart);
-  await validateChartMin(chart);
+  chart = (await validateChartMin(chart)) as ChartEdit;
   chart.levels.forEach((l) => validateLevel(l));
   if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
   if (typeof chart.published !== "boolean") chart.published = false;
   return chart;
 }
 export async function validateChartMin(
-  chart: ChartMin | Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6 | Chart7
-): Promise<ChartMin> {
+  chart:
+    | ChartEdit
+    | ChartMin
+    | Chart1
+    | Chart2
+    | Chart3
+    | Chart4
+    | Chart5
+    | Chart6
+    | Chart7
+): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 8) chart = await convertTo8(chart);
   if (chart.ver !== currentChartVer) throw "chart.ver is invalid";
@@ -127,7 +136,7 @@ export async function validateChartMin(
   return chart;
 }
 export function validateLevel(level: LevelEdit): LevelEdit {
-  level = validateLevelMin(level);
+  validateLevelMin(level);
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(level.rest)) throw "level.rest is invalid";
@@ -142,7 +151,7 @@ export function validateLevel(level: LevelEdit): LevelEdit {
   level.signature.forEach((n) => validateSignature(n));
   return level;
 }
-export function validateLevelMin(level: LevelMin): LevelMin {
+export function validateLevelMin<L extends LevelMin>(level: L): L {
   if (typeof level.name !== "string") throw "level.name is invalid";
   if (!levelTypes.includes(level.type)) throw "level.type is invalid";
   if (!Array.isArray(level.lua)) throw "level.lua is invalid";
