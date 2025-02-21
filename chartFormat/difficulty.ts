@@ -15,37 +15,25 @@ import { getTimeSec } from "./seq.js";
 
   n本の手を持つagent(仮想的なプレイヤー)が、
   最大targetNPS(回/s)の速さで音符を叩いた場合のスコアを計算する
-    → agentsPlay(level, type, notesHitSec, targetNPS)
-  ただし n=1(type=Single), n=2(type=Double), n=4(それ以外)
+    → agentsPlay(level, n, notesHitSec, targetNPS)
+  ただし n=1(type=Single), n=2(type=Double)
   大音符は考慮していない
+
+  type=Maniac の場合、 n=4の計算結果 + 0, n=5の計算結果 + 1, ... の中で最小のものを採用する
 
   agentsのスコアが80以上となるときのlvをclv,
   99以上となるときのlvをplvとおいて、
   難易度= min(clv+2, (clv+plv)/2) としている → difficulty()
   
-  ただし上限はを設けないと高密度な譜面で無限に時間がかかるので、
+  ただし上限を設けないと高密度な譜面で無限に時間がかかるので、
   上限は20 (適当)
 */
 
-function npsToLv(nps: number, type: string) {
-  switch (type) {
-    case "Single":
-      return Math.log(nps) * 5 - 2;
-    case "Double":
-      return Math.log(nps * 2) * 5 - 2;
-    default:
-      return Math.log(nps * 4) * 5 - 2;
-  }
+function npsToLv(nps: number, multiHit: number) {
+  return Math.log(nps * multiHit) * 5 - 2;
 }
-function lvToNps(lv: number, type: string) {
-  switch (type) {
-    case "Single":
-      return Math.exp((lv + 2) / 5);
-    case "Double":
-      return Math.exp((lv + 2) / 5) / 2;
-    default:
-      return Math.exp((lv + 2) / 5) / 4;
-  }
+function lvToNps(lv: number, multiHit: number) {
+  return Math.exp((lv + 2) / 5) / multiHit;
 }
 
 export function difficulty(level: Level, type: string): number {
@@ -58,57 +46,83 @@ export function difficulty(level: Level, type: string): number {
   const notesHitSec = level.notes.map((n) =>
     getTimeSec(level.bpmChanges, n.step)
   );
-  let clv: number | null = null;
-  let plv: number | null = null;
+  let alv: number | null = null;
   let averageNPS = Math.max(
     1,
     level.notes.length / Math.max(1, notesHitSec.at(-1) || 0)
   );
+  let baseHit: number;
   switch (type) {
     case "Single":
-      averageNPS /= 1;
+      baseHit = 1;
       break;
     case "Double":
-      averageNPS /= 2;
+      baseHit = 2;
       break;
     default:
-      averageNPS /= 4;
+      baseHit = 4;
       break;
   }
 
-  for (let lv = Math.floor(npsToLv(averageNPS, type)); ; lv += 0.5) {
-    if (clv === null && lv >= maxLv) {
-      return maxLv;
+  for (
+    let additionalHit = 0;
+    alv === null || additionalHit < alv;
+    additionalHit++
+  ) {
+    const multiHit = baseHit + additionalHit;
+    let clv: number | null = null;
+    let plv: number | null = null;
+    for (
+      let lv = Math.floor(npsToLv(averageNPS / multiHit, multiHit));
+      ;
+      lv += 0.5
+    ) {
+      if (clv === null && lv >= maxLv) {
+        alv = alv || maxLv;
+        break;
+      }
+      const agentScore = agentsPlay(
+        level,
+        multiHit,
+        notesHitSec,
+        lvToNps(lv, multiHit)
+      );
+      if (agentScore >= 80 && clv === null) {
+        clv = lv;
+      }
+      if (agentScore >= 99 && plv === null) {
+        plv = lv;
+      }
+      if (clv !== null && plv !== null) {
+        alv = Math.max(
+          Math.min(Math.round((clv + plv) / 2) + additionalHit, alv || maxLv),
+          minLv
+        );
+        break;
+      }
+      if (clv !== null && lv >= clv + 4) {
+        alv = Math.max(
+          Math.min(Math.round(clv + 2) + additionalHit, alv || maxLv),
+          minLv
+        );
+        break;
+      }
     }
-    const agentScore = agentsPlay(level, type, notesHitSec, lvToNps(lv, type));
-    if (agentScore >= 80 && clv === null) {
-      clv = lv;
-    }
-    if (agentScore >= 99 && plv === null) {
-      plv = lv;
-    }
-    if (clv !== null && plv !== null) {
-      return Math.max(Math.min(Math.round((clv + plv) / 2), maxLv), minLv);
-    }
-    if (clv !== null && lv >= clv + 4) {
-      return Math.max(Math.min(Math.round(clv + 2), maxLv), minLv);
+    if (type === "Single" || type === "Double") {
+      break;
     }
   }
+  return alv;
 }
 
 function agentsPlay(
   level: Level,
-  type: string,
+  multiHit: number,
   notesHitSec: number[],
   targetNPS: number
 ): number {
   const interval = 1 / targetNPS;
-  const agentsHitSec =
-    type === "Single"
-      ? [-Infinity]
-      : type === "Double"
-      ? [-Infinity, -Infinity]
-      : [-Infinity, -Infinity, -Infinity, -Infinity];
+  const agentsHitSec: number[] = new Array(multiHit).fill(-Infinity);
   const judgeCount = [0, 0];
   let bonus = 0;
   let chain = 0;
@@ -117,7 +131,7 @@ function agentsPlay(
     let agentHit: number | null = null;
     let agentJudgeGood = false;
     let agentSec: number | null = null;
-    for (let ai = 0; ai < agentsHitSec.length; ai++) {
+    for (let ai = 0; ai < multiHit; ai++) {
       if (hitSec + goodSec >= agentsHitSec[ai] + interval) {
         agentHit = ai;
         agentJudgeGood = true;
