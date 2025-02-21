@@ -155,7 +155,13 @@ function Play(props: Props) {
   const { cid, lvIndex, chartBrief, chartSeq, editing, showFps } = props;
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
-
+  const hasExplicitSpeedChange =
+    "speedChanges" in chartSeq &&
+    (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
+      chartSeq.speedChanges.some(
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
+      ));
+  const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(false);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
@@ -484,6 +490,9 @@ function Play(props: Props) {
               editing={editing}
               lateTimes={lateTimes.current}
               small={readySmall}
+              hasExplicitSpeedChange={hasExplicitSpeedChange}
+              displaySpeed={displaySpeed}
+              setDisplaySpeed={setDisplaySpeed}
             />
           ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
@@ -516,7 +525,11 @@ function Play(props: Props) {
           playing={chartPlaying}
           bpmChanges={chartSeq?.bpmChanges}
         />
-        <BPMSign chartSeq={chartSeq} getCurrentTimeSec={getCurrentTimeSec} />
+        <BPMSign
+          chartSeq={chartSeq}
+          getCurrentTimeSec={getCurrentTimeSec}
+          hasExplicitSpeedChange={hasExplicitSpeedChange && displaySpeed}
+        />
         {isMobile && (
           <>
             <StatusBox
