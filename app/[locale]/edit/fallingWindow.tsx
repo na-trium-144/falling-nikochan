@@ -13,6 +13,7 @@ import Arrow from "./arrow.js";
 import DragHandle from "./dragHandle.js";
 import { useDisplayMode } from "@/scale.js";
 import { LevelEdit } from "../../../chartFormat/chart.js";
+import { useEffect, useState } from "react";
 
 interface Props {
   className?: string;
@@ -45,39 +46,50 @@ export default function FallingWindow(props: Props) {
     props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null &&
     !props.inCodeTab;
 
-  const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] = [];
-  if (
-    marginX !== undefined &&
-    marginY !== undefined &&
-    boxSize &&
-    currentTimeSec !== undefined
-  ) {
-    for (let ni = 0; ni < notes.length; ni++) {
-      const dn = {
-        current: displayNote(notes[ni], currentTimeSec),
-        history: [] as DisplayNote[],
-      };
-      if (dn.current !== null) {
-        for (let dt = 0; dt < 5; dt += 0.3) {
-          const dn2 = displayNote(notes[ni], currentTimeSec + dt);
-          if (dn2 !== null) {
-            dn.history.push(dn2);
-          } else {
-            break;
+  const [displayNotes, setDisplayNotes] = useState<
+    { current: DisplayNote; history: DisplayNote[] }[]
+  >([]);
+  useEffect(() => {
+    const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] = [];
+    if (
+      marginX !== undefined &&
+      marginY !== undefined &&
+      boxSize &&
+      currentTimeSec !== undefined
+    ) {
+      for (let ni = 0; ni < notes.length; ni++) {
+        const dn = {
+          current: displayNote(notes[ni], currentTimeSec),
+          history: [] as DisplayNote[],
+        };
+        if (dn.current !== null) {
+          for (let dt = 0; dt < 5; dt += 0.3) {
+            const dn2 = displayNote(notes[ni], currentTimeSec + dt);
+            if (dn2 !== null) {
+              dn.history.push(dn2);
+            } else {
+              break;
+            }
           }
-        }
-        for (let dt = 0; dt < 5; dt += 0.3) {
-          const dn2 = displayNote(notes[ni], currentTimeSec - dt);
-          if (dn2 !== null) {
-            dn.history.unshift(dn2);
-          } else {
-            break;
+          for (let dt = 0; dt < 5; dt += 0.3) {
+            const dn2 = displayNote(notes[ni], currentTimeSec - dt);
+            if (dn2 !== null) {
+              dn.history.unshift(dn2);
+            } else {
+              break;
+            }
           }
+          displayNotes.push({ current: dn.current, history: dn.history });
         }
-        displayNotes.push({ current: dn.current, history: dn.history });
       }
     }
-  }
+    setDisplayNotes(displayNotes);
+  }, [notes, boxSize, marginX, marginY, currentTimeSec]);
+
+  const [pendingNoteUpdate, setPendingNoteUpdate] =
+    useState<NoteCommand | null>(null);
+  const currentNote: NoteCommand | undefined =
+    pendingNoteUpdate || currentLevel?.notes[currentNoteIndex];
 
   return (
     <div className={props.className} style={props.style} ref={ref}>
@@ -113,21 +125,35 @@ export default function FallingWindow(props: Props) {
               />
             )
         )}
-        {currentLevel &&
-          currentNoteIndex >= 0 &&
-          currentLevel.notes[currentNoteIndex] &&
+        {currentNote &&
           boxSize &&
           marginX !== undefined &&
           marginY !== undefined &&
           noteEditable && (
             <>
+              {pendingNoteUpdate && (
+                <div
+                  className="absolute rounded-full border-2 border-yellow-500 "
+                  style={{
+                    width: noteSize * bigScale(pendingNoteUpdate.big),
+                    height: noteSize * bigScale(pendingNoteUpdate.big),
+                    left:
+                      ((pendingNoteUpdate.hitX + 5) / 10) * boxSize -
+                      (noteSize * bigScale(pendingNoteUpdate.big)) / 2 +
+                      marginX,
+                    bottom:
+                      targetY * boxSize -
+                      (noteSize * bigScale(pendingNoteUpdate.big)) / 2 +
+                      marginY,
+                  }}
+                />
+              )}
               {/* xを左右に動かす矢印 */}
               {dragMode === "p" ? (
                 <>
                   <Arrow
                     left={
-                      ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
-                        boxSize +
+                      ((currentNote.hitX + 5) / 10) * boxSize +
                       marginX -
                       (0.12 * boxSize + noteSize / 2)
                     }
@@ -138,8 +164,7 @@ export default function FallingWindow(props: Props) {
                   />
                   <Arrow
                     left={
-                      ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
-                        boxSize +
+                      ((currentNote.hitX + 5) / 10) * boxSize +
                       marginX +
                       (0.12 * boxSize + noteSize / 2)
                     }
@@ -154,12 +179,18 @@ export default function FallingWindow(props: Props) {
                       const winLeft = ref.current.getBoundingClientRect().left;
                       // const winBottom = ref.current.getBoundingClientRect().bottom;
                       // cx-winLeft, winBottom-cy が divのabsolute基準からマウスカーソル位置までの相対位置になる
-                      props.updateNote({
-                        ...currentLevel.notes[currentNoteIndex],
+                      setPendingNoteUpdate({
+                        ...currentNote,
                         hitX: Math.round(
                           ((cx - winLeft - marginX) * 10) / boxSize - 5
                         ),
                       });
+                    }}
+                    onMoveEnd={() => {
+                      if (pendingNoteUpdate) {
+                        props.updateNote(pendingNoteUpdate);
+                        setPendingNoteUpdate(null);
+                      }
                     }}
                   />
                 </>
@@ -167,33 +198,18 @@ export default function FallingWindow(props: Props) {
                 <>
                   {/* vx,vyを動かす矢印 */}
                   <Arrow
-                    left={
-                      ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
-                        boxSize +
-                      marginX
-                    }
+                    left={((currentNote.hitX + 5) / 10) * boxSize + marginX}
                     bottom={targetY * boxSize + marginY}
                     length={
                       (Math.sqrt(
-                        Math.pow(
-                          currentLevel.notes[currentNoteIndex].hitVX,
-                          2
-                        ) +
-                          Math.pow(
-                            currentLevel.notes[currentNoteIndex].hitVY,
-                            2
-                          )
+                        Math.pow(currentNote.hitVX, 2) +
+                          Math.pow(currentNote.hitVY, 2)
                       ) *
                         boxSize) /
                       4
                     }
                     lineWidth={12}
-                    rotation={
-                      -Math.atan2(
-                        currentLevel.notes[currentNoteIndex].hitVY,
-                        currentLevel.notes[currentNoteIndex].hitVX
-                      )
-                    }
+                    rotation={-Math.atan2(currentNote.hitVY, currentNote.hitVX)}
                   />
                   <DragHandle
                     className="absolute inset-0"
@@ -202,9 +218,7 @@ export default function FallingWindow(props: Props) {
                       const winBottom =
                         ref.current.getBoundingClientRect().bottom;
                       const originLeft =
-                        ((currentLevel.notes[currentNoteIndex].hitX + 5) / 10) *
-                          boxSize +
-                        marginX;
+                        ((currentNote.hitX + 5) / 10) * boxSize + marginX;
                       const originBottom = targetY * boxSize + marginY - 16;
                       // cx-winLeft, winBottom-cy が divのabsolute基準からマウスカーソル位置までの相対位置になる
 
@@ -224,15 +238,21 @@ export default function FallingWindow(props: Props) {
                       //       2
                       //     )
                       // );
-                      console.log(
-                        mouseVY,
-                        currentLevel.notes[currentNoteIndex].hitVY
-                      );
-                      props.updateNote({
-                        ...currentLevel.notes[currentNoteIndex],
+                      // console.log(
+                      //   mouseVY,
+                      //   currentLevel.notes[currentNoteIndex].hitVY
+                      // );
+                      setPendingNoteUpdate({
+                        ...currentNote,
                         hitVX: Math.round(mouseVX * 4),
                         hitVY: Math.round(mouseVY * 4),
                       });
+                    }}
+                    onMoveEnd={() => {
+                      if (pendingNoteUpdate) {
+                        props.updateNote(pendingNoteUpdate);
+                        setPendingNoteUpdate(null);
+                      }
                     }}
                   />
                 </>

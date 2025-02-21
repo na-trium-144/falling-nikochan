@@ -5,6 +5,7 @@ interface Props {
   className?: string;
   style?: object;
   onMove: (x: number, y: number, cx: number, cy: number) => void;
+  onMoveEnd: () => void;
   children?: ReactNode | ReactNode[];
 }
 export default function DragHandle(props: Props) {
@@ -24,8 +25,18 @@ export default function DragHandle(props: Props) {
         }
       }}
       onPointerDown={() => setDragging(true)}
-      onPointerUp={() => setDragging(false)}
-      onPointerLeave={() => setDragging(false)}
+      onPointerUp={() => {
+        if (dragging) {
+          props.onMoveEnd();
+        }
+        setDragging(false);
+      }}
+      onPointerLeave={() => {
+        if (dragging) {
+          props.onMoveEnd();
+        }
+        setDragging(false);
+      }}
     />
   );
 }
