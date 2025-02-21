@@ -1,5 +1,6 @@
 export const rateLimitMin = 10;
-export const chartMaxSize = 1000000;
+export const chartMaxEvent = 20000;
+export const fileMaxSize = chartMaxEvent * 100;
 
 export function validCId(cid: string) {
   return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;

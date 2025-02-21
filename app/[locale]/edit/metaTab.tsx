@@ -12,7 +12,6 @@ import {
   lastIncompatibleVer,
   validateChartMin,
 } from "@/../../chartFormat/chart.js";
-import { chartMaxSize } from "@/../../chartFormat/apiConfig.js";
 import {
   getPasswd,
   getV6Passwd,
@@ -29,6 +28,7 @@ import { Caution } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { luaExec } from "../../../chartFormat/lua/exec.js";
+import { chartMaxEvent } from "../../../chartFormat/apiConfig.js";
 
 interface Props {
   chart?: ChartEdit;
@@ -161,7 +161,7 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   sessionId?: number;
   sessionData?: SessionData;
-  fileSize: number;
+  chartNumEvent: number;
   chart?: ChartEdit;
   setChart: (chart: ChartEdit) => void;
   convertedFrom: number;
@@ -366,14 +366,14 @@ export function MetaTab(props: Props2) {
   return (
     <>
       <div className="mb-2">
-        <span className="">{t("fileSize")}:</span>
+        <span className="">{t("eventNum")}:</span>
         <span className="inline-block">
-          <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
-          <span className="ml-1 text-sm ">
-            {t("fileSizeMax", { max: chartMaxSize / 1000 })}
-          </span>
+          <span className="ml-1">{props.chartNumEvent}</span>
+          <span className="ml-1 text-sm ">/</span>
+          <span className="ml-1 text-sm ">{chartMaxEvent}</span>
         </span>
-        <ProgressBar value={props.fileSize / chartMaxSize} />
+        <HelpIcon>{t.rich("eventNumHelp", { br: () => <br /> })}</HelpIcon>
+        <ProgressBar value={props.chartNumEvent / chartMaxEvent} />
       </div>
       <div className="mb-1">
         <ExternalLink

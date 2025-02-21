@@ -73,8 +73,10 @@ export default {
       saveDone: "保存しました！",
       loadFail: "ファイルの読み込みに失敗しました",
       confirmLoad: "このファイルで譜面データを上書きしますか?",
-      fileSize: "現在のファイルサイズ",
-      fileSizeMax: "(最大 {max} kB まで)",
+      eventNum: "現在のイベント数",
+      eventNumHelp:
+        "現在の譜面に含まれる音符、休符、BPM変化、<br></br>" +
+        "速度変化、拍子変化の数の総数です。",
       testPlay: "テストプレイ",
       testPlayHelp:
         "ブラウザーの新しいタブで<br></br>" +

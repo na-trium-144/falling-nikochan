@@ -32,6 +32,7 @@ import {
   emptyChart,
   LevelMin,
   levelTypes,
+  numEvents,
   validateChart,
 } from "@/../../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../../chartFormat/step.js";
@@ -300,7 +301,7 @@ function Page(props: Props) {
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
-  const [fileSize, setFileSize] = useState<number>(0);
+  const chartNumEvent = numEvents(chart);
   const [savePasswd, setSavePasswd] = useState<boolean>(
     props.savePasswdInitial
   );
@@ -331,7 +332,6 @@ function Page(props: Props) {
           level: convertToPlay(chart, currentLevelIndex),
           editing: true,
         };
-        setFileSize(msgpack.serialize(chart).byteLength);
         setSessionData(data);
         initSession(data, sessionId);
         // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
@@ -1127,7 +1127,7 @@ function Page(props: Props) {
                 <MetaTab
                   sessionId={sessionId}
                   sessionData={sessionData}
-                  fileSize={fileSize}
+                  chartNumEvent={chartNumEvent}
                   chart={chart}
                   setChart={changeChart}
                   convertedFrom={convertedFrom}

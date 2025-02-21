@@ -72,8 +72,10 @@ export default {
       saveDone: "Saved!",
       loadFail: "Failed to load file",
       confirmLoad: "Overwrite the chart data with this file?",
-      fileSize: "Current file size",
-      fileSizeMax: "(Up to {max} kB)",
+      eventNum: "Number of events",
+      eventNumHelp:
+        "The total number of notes, rests, BPM changes, <br></br>" +
+        "speed changes, and time signature changes in the chart.",
       testPlay: "Test play",
       testPlayHelp:
         "Opens a new tab in your browser <br></br>" +

@@ -172,6 +172,19 @@ export async function hash(text: string) {
 }
 export const hashLevel = hashLevel7;
 
+export function numEvents(chart: ChartEdit): number {
+  return chart.levels
+    .map(
+      (l) =>
+        l.notes.length +
+        l.rest.length +
+        l.bpmChanges.length +
+        l.speedChanges.length +
+        l.signature.length
+    )
+    .reduce((a, b) => a + b);
+}
+
 export function emptyChart(locale: string): ChartEdit {
   let chart: ChartEdit = {
     falling: "nikochan",

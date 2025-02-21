@@ -4,9 +4,10 @@ import {
   ChartEdit,
   currentChartVer,
   hashLevel,
+  numEvents,
   validateChart,
 } from "../../chartFormat/chart.js";
-import { chartMaxSize } from "../../chartFormat/apiConfig.js";
+import { chartMaxEvent, fileMaxSize } from "../../chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Bindings } from "../env.js";
@@ -91,12 +92,10 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         return c.json({ message: res?.message }, res?.status || 500);
       }
 
-      if (chartBuf.byteLength > chartMaxSize) {
+      if (chartBuf.byteLength > fileMaxSize) {
         return c.json(
           {
-            message:
-              `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
-              `Max ${Math.round(chartMaxSize / 1000)}kB`,
+            message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
           },
           413
         );
@@ -116,6 +115,17 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       } catch (e) {
         console.error(e);
         return c.json({ message: "invalid chart data" }, 415);
+      }
+
+      if (numEvents(newChart) > chartMaxEvent) {
+        return c.json(
+          {
+            message: `Chart too large (number of events is ${numEvents(
+              newChart
+            )} / ${chartMaxEvent})`,
+          },
+          413
+        );
       }
 
       // update Time
