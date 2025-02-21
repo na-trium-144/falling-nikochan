@@ -43,7 +43,7 @@ import {
   setPasswd,
   unsetPasswd,
 } from "@/common/passwdCache.js";
-import LuaTab from "./luaTab.js";
+import LuaTab, { useLuaExecutor } from "./luaTab.js";
 import {
   luaAddBpmChange,
   luaDeleteBpmChange,
@@ -82,7 +82,7 @@ import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { Chart8Edit } from "../../../chartFormat/legacy/chart8.js";
-import { luaExec } from "../../../chartFormat/lua/exec.js";
+import { LoadingSlime } from "@/common/loadingSlime.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
@@ -295,6 +295,8 @@ function Page(props: Props) {
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel = chart?.levels.at(currentLevelIndex);
 
+  const luaExecutor = useLuaExecutor();
+
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
@@ -344,7 +346,10 @@ function Page(props: Props) {
     newLevel: LevelMin | string[] | null | undefined
   ) => {
     if (chart && newLevel && currentLevelIndex < chart.levels.length) {
-      const newChart: ChartEdit = { ...chart };
+      const newChart: ChartEdit = {
+        ...chart,
+        levels: chart.levels.map((l) => ({ ...l })),
+      };
       if (Array.isArray(newLevel)) {
         newChart.levels[currentLevelIndex].lua = newLevel;
       } else {
@@ -353,16 +358,16 @@ function Page(props: Props) {
           ...newLevel,
         };
       }
-      newChart.levels[currentLevelIndex] = {
-        ...newChart.levels[currentLevelIndex],
-        ...(
-          await luaExec(
-            newChart.levels[currentLevelIndex].lua.join("\n"),
-            false
-          )
-        ).levelFreezed,
-      };
-      changeChart(newChart);
+      const levelFreezed = await luaExecutor.exec(
+        newChart.levels[currentLevelIndex].lua.join("\n")
+      );
+      if (levelFreezed) {
+        newChart.levels[currentLevelIndex] = {
+          ...newChart.levels[currentLevelIndex],
+          ...levelFreezed,
+        };
+        changeChart(newChart);
+      }
     }
   };
 
@@ -1206,6 +1211,27 @@ function Page(props: Props) {
                 />
               )}
             </Box>
+            {luaExecutor.running ? (
+              <div className="bg-slate-200 p-1 mt-2 rounded-sm ">
+                <LoadingSlime />
+                {t("running")}
+              </div>
+            ) : (
+              (luaExecutor.stdout.length > 0 || luaExecutor.err.length > 0) && (
+                <div className="bg-slate-200 p-1 mt-2 rounded-sm text-sm max-h-24 overflow-auto ">
+                  {luaExecutor.stdout.map((s, i) => (
+                    <p className="" key={i}>
+                      {s}
+                    </p>
+                  ))}
+                  {luaExecutor.err.map((e, i) => (
+                    <p className="text-red-600" key={i}>
+                      {e}
+                    </p>
+                  ))}
+                </div>
+              )
+            )}
           </div>
         </div>
       </CaptionProvider>

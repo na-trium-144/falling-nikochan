@@ -13,6 +13,28 @@ import { findStepFromLua } from "@/../../chartFormat/lua/edit.js";
 import { ThemeContext } from "@/common/theme.js";
 import { LevelEdit } from "../../../chartFormat/chart.js";
 
+export function useLuaExecutor() {
+  const [stdout, setStdout] = useState<string[]>([]);
+  const [err, setErr] = useState<string[]>([]);
+  const [errLine, setErrLine] = useState<number | null>(null);
+  const [running, setRunning] = useState<boolean>(false);
+
+  const exec = async (code: string) => {
+    setRunning(true);
+    const result = await luaExec(code, true);
+    setRunning(false);
+    setStdout(result.stdout);
+    setErr(result.err);
+    setErrLine(result.errorLine);
+    if (result.err.length === 0) {
+      return result.levelFreezed;
+    } else {
+      return null;
+    }
+  };
+  return { stdout, err, errLine, running, exec };
+}
+
 interface Props {
   currentLevel: LevelEdit | undefined;
   changeLevel: (lua: string[]) => void;
@@ -24,23 +46,12 @@ export default function LuaTab(props: Props) {
   const { rem } = useDisplayMode();
   const [code, setCode] = useState<string>(currentLevel?.lua.join("\n") || "");
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
-  const [stdout, setStdout] = useState<string[]>([]);
-  const [err, setErr] = useState<string[]>([]);
-  const [errLine, setErrLine] = useState<number | null>(null);
 
   useEffect(() => {
     if (codeChanged) {
       const t = setTimeout(() => {
         setCodeChanged(false);
-        void (async () => {
-          const result = await luaExec(code, true);
-          setStdout(result.stdout);
-          setErr(result.err);
-          setErrLine(result.errorLine);
-          if (result.err.length === 0) {
-            changeLevel(code.split("\n"));
-          }
-        })();
+        changeLevel(code.split("\n"));
       }, 500);
       return () => clearTimeout(t);
     }
@@ -58,13 +69,11 @@ export default function LuaTab(props: Props) {
           fontSize={1 * rem}
           value={code}
           annotations={
+            /*指定すると表示位置がなんかおかしい
             errLine !== null
-              ? [
-                  /* 指定すると表示位置がなんかおかしい↓
-                  { row: errLine, column: 1, text: err[0], type: "error" }
-                  */
-                ]
-              : []
+              ? [{ row: errLine, column: 1, text: err[0], type: "error" }]
+              : []*/
+            []
           }
           enableBasicAutocompletion={true}
           enableLiveAutocompletion={true}
@@ -83,20 +92,6 @@ export default function LuaTab(props: Props) {
           }}
         />
       </div>
-      {(stdout.length > 0 || err.length > 0) && (
-        <div className="bg-slate-200 p-1 text-sm">
-          {stdout.map((s, i) => (
-            <p className="" key={i}>
-              {s}
-            </p>
-          ))}
-          {err.map((e, i) => (
-            <p className="text-red-600" key={i}>
-              {e}
-            </p>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

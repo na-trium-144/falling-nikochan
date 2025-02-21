@@ -29,6 +29,7 @@ export default {
       "Currently, only 1 / (multiple of 4) can be used.<br></br>" +
       "Use 1 / 12 or 1 / 24 for triplets, 1 / 20 for quintuplets, etc.",
     zoom: "Zoom",
+    running: "Running the script...",
     timeBar: {
       bpm: "BPM",
       speed: "Speed",
