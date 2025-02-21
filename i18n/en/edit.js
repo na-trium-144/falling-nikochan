@@ -87,8 +87,14 @@ export default {
         "You can overwrite as many times as you like <br></br>" +
         "if it is already been saved and assigned an ID.",
       hasUnsaved: "(There are unsaved changes)",
-      convertingWarning:
-        "This chart has been converted from the old format (ver.{ver}), and some notes may behave differently. Saving will overwrite the chart data with the converted data. (For details, please check the update history at the bottom of the top page.)",
+      converting:
+        "This chart has been converted from the old format (ver.{ver}), " +
+        "and saving will overwrite the previous chart data with the converted data.",
+      convertingIncompatible:
+        "This chart has been converted from the old format (ver.{ver}), " +
+        "and some notes may behave differently. " +
+        "Saving will overwrite the previous chart data with the converted data. " +
+        "(For details, please check the update history at the bottom of the top page.)",
       shareLink: "Share link",
       copy: "Copy",
       localSaveLoad: "Save/load locally",

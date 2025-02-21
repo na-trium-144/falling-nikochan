@@ -8,6 +8,7 @@ import {
   ChartEdit,
   ChartMin,
   convertToMin,
+  currentChartVer,
   lastIncompatibleVer,
   validateChart,
 } from "@/../../chartFormat/chart.js";
@@ -402,10 +403,12 @@ export function MetaTab(props: Props2) {
             {t("hasUnsaved")}
           </span>
         )}
-        {props.convertedFrom <= lastIncompatibleVer && (
+        {props.convertedFrom < currentChartVer && (
           <span className="inline-block ml-1 text-amber-600 text-sm ">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
-            {t("convertingWarning", { ver: props.convertedFrom })}
+            {props.convertedFrom <= lastIncompatibleVer
+              ? t("convertingIncompatible", { ver: props.convertedFrom })
+              : t("converting", { ver: props.convertedFrom })}
           </span>
         )}
       </div>
