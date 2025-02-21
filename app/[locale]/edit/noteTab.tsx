@@ -172,7 +172,10 @@ function NoteEdit(props: Props) {
                     props.updateNote({ ...n, hitX: Number(v) })
                   }
                   isValid={(v) =>
-                    !isNaN(Number(v)) && Number(v) >= -5 && Number(v) <= 5
+                    v !== "" &&
+                    !isNaN(Number(v)) &&
+                    Number(v) >= -5 &&
+                    Number(v) <= 5
                   }
                   disabled={!noteEditable}
                 />
@@ -206,7 +209,7 @@ function NoteEdit(props: Props) {
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVX: Number(v) })
                   }
-                  isValid={(v) => !isNaN(Number(v))}
+                  isValid={(v) => v !== "" && !isNaN(Number(v))}
                   disabled={!noteEditable}
                 />
               </td>
@@ -219,7 +222,9 @@ function NoteEdit(props: Props) {
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVY: Number(v) })
                   }
-                  isValid={(v) => !isNaN(Number(v)) && Number(v) >= 0}
+                  isValid={(v) =>
+                    v !== "" && !isNaN(Number(v)) && Number(v) >= 0
+                  }
                   disabled={!noteEditable}
                 />
               </td>
@@ -238,7 +243,9 @@ function NoteEdit(props: Props) {
                       hitVY: (Number(v) / nv) * n.hitVY,
                     })
                   }
-                  isValid={(v) => !isNaN(Number(v)) && Number(v) > 0}
+                  isValid={(v) =>
+                    v !== "" && !isNaN(Number(v)) && Number(v) > 0
+                  }
                   disabled={!noteEditable}
                 />
               </td>
@@ -258,7 +265,7 @@ function NoteEdit(props: Props) {
                       hitVY: nv * Math.sin((Number(v) / 180) * Math.PI),
                     })
                   }
-                  isValid={(v) => !isNaN(Number(v)) && nv > 0}
+                  isValid={(v) => v !== "" && !isNaN(Number(v)) && nv > 0}
                   disabled={!noteEditable}
                 />
                 °

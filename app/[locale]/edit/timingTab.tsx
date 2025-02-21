@@ -51,9 +51,9 @@ export default function TimingTab(props: Props) {
   const t = useTranslations("edit.timing");
 
   const offsetValid = (offset: string) =>
-    !isNaN(Number(offset)) && Number(offset) >= 0;
-  const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) > 0;
-  const speedValid = (bpm: string) => !isNaN(Number(bpm));
+    offset !== "" && !isNaN(Number(offset)) && Number(offset) >= 0;
+  const bpmValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm)) && Number(bpm) > 0;
+  const speedValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm));
 
   const bpmChangeable =
     props.currentBpmIndex !== undefined &&
