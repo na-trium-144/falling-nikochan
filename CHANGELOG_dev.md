@@ -1,3 +1,7 @@
+## ver. 8.1 - 2025/02/22 [#293](https://github.com/na-trium-144/falling-nikochan/pull/293)
+
+* bpmを変更してspeedも同時に変更される際にluaExecが2回連続で実行されてバグっていたのを修正
+
 ## ver. 8.0 - 2025/02/22 [#288](https://github.com/na-trium-144/falling-nikochan/pull/288),  [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
 
 * chartデータver8

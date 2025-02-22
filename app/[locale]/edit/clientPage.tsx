@@ -30,6 +30,7 @@ import {
   createBrief,
   currentChartVer,
   emptyChart,
+  LevelEdit,
   LevelMin,
   levelTypes,
   numEvents,
@@ -610,47 +611,6 @@ function Page(props: Props) {
     currentBpmIndex !== undefined
       ? currentLevel.bpmChanges[currentBpmIndex].bpm
       : 120;
-  const changeBpm = (bpm: number) => {
-    if (currentLevel && currentBpmIndex !== undefined) {
-      if (currentLevel.bpmChanges.length === 0) {
-        throw "bpmChanges empty";
-        // chart.bpmChanges.push({
-        //   step: stepZero(),
-        //   bpm: bpm,
-        //   timeSec: 0,
-        // });
-      } else {
-        const newLevel = luaUpdateBpmChange(currentLevel, currentBpmIndex, bpm);
-        changeLevel(newLevel?.lua);
-      }
-    }
-  };
-  const bpmChangeHere =
-    currentLevel &&
-    currentBpmIndex !== undefined &&
-    currentLevel.bpmChanges.length > 0 &&
-    stepCmp(currentLevel.bpmChanges[currentBpmIndex].step, currentStep) === 0;
-  const toggleBpmChangeHere = () => {
-    if (
-      chart &&
-      currentLevel &&
-      currentBpmIndex !== undefined &&
-      stepCmp(currentStep, stepZero()) > 0
-    ) {
-      if (bpmChangeHere) {
-        const newLevel = luaDeleteBpmChange(currentLevel, currentBpmIndex);
-        changeLevel(newLevel?.lua);
-      } else {
-        const newLevel = luaAddBpmChange(currentLevel, {
-          step: currentStep,
-          bpm: currentBpm,
-          timeSec: currentTimeSec,
-        });
-        changeLevel(newLevel?.lua);
-      }
-    }
-  };
-
   const currentSpeedIndex =
     currentLevel &&
     findBpmIndexFromStep(currentLevel.speedChanges, currentStep);
@@ -660,23 +620,20 @@ function Page(props: Props) {
     currentSpeedIndex !== undefined
       ? currentLevel.speedChanges[currentSpeedIndex].bpm
       : 120;
-  const changeSpeed = (bpm: number) => {
-    if (chart && currentLevel && currentSpeedIndex !== undefined) {
-      if (currentLevel.speedChanges.length === 0) {
-        throw "speedChanges empty";
-        // chart.speedChanges.push({
-        //   step: stepZero(),
-        //   bpm: bpm,
-        //   timeSec: 0,
-        // });
-      } else {
-        const newLevel = luaUpdateSpeedChange(
-          currentLevel,
-          currentSpeedIndex,
-          bpm
-        );
-        changeLevel(newLevel?.lua);
+  const changeBpm = (bpm: number | null, speed: number | null) => {
+    if (currentLevel) {
+      let newLevel: LevelEdit | null = null;
+      if (currentBpmIndex !== undefined && bpm !== null) {
+        newLevel = luaUpdateBpmChange(currentLevel, currentBpmIndex, bpm);
       }
+      if (currentSpeedIndex !== undefined && speed !== null) {
+        newLevel = luaUpdateSpeedChange(
+          newLevel || currentLevel,
+          currentSpeedIndex,
+          speed
+        );
+      }
+      changeLevel(newLevel?.lua);
     }
   };
   const speedChangeHere =
@@ -685,24 +642,40 @@ function Page(props: Props) {
     currentLevel.speedChanges.length > 0 &&
     stepCmp(currentLevel.speedChanges[currentSpeedIndex].step, currentStep) ===
       0;
-  const toggleSpeedChangeHere = () => {
-    if (
-      chart &&
-      currentLevel &&
-      currentSpeedIndex !== undefined &&
-      stepCmp(currentStep, stepZero()) > 0
-    ) {
-      if (speedChangeHere) {
-        const newLevel = luaDeleteSpeedChange(currentLevel, currentSpeedIndex);
-        changeLevel(newLevel?.lua);
-      } else {
-        const newLevel = luaAddSpeedChange(currentLevel, {
-          step: currentStep,
-          bpm: currentSpeed,
-          timeSec: currentTimeSec,
-        });
-        changeLevel(newLevel?.lua);
+  const bpmChangeHere =
+    currentLevel &&
+    currentBpmIndex !== undefined &&
+    currentLevel.bpmChanges.length > 0 &&
+    stepCmp(currentLevel.bpmChanges[currentBpmIndex].step, currentStep) === 0;
+  const toggleBpmChangeHere = (bpm: boolean | null, speed: boolean | null) => {
+    if (chart && currentLevel && stepCmp(currentStep, stepZero()) > 0) {
+      let newLevel: LevelEdit | null = null;
+      if (currentBpmIndex !== undefined && bpm !== null) {
+        if (bpm && !bpmChangeHere) {
+          newLevel = luaAddBpmChange(currentLevel, {
+            step: currentStep,
+            bpm: currentBpm,
+            timeSec: currentTimeSec,
+          });
+        } else if (!bpm && bpmChangeHere) {
+          newLevel = luaDeleteBpmChange(currentLevel, currentBpmIndex);
+        }
       }
+      if (currentSpeedIndex !== undefined && speed !== null) {
+        if (speed && !speedChangeHere) {
+          newLevel = luaAddSpeedChange(newLevel || currentLevel, {
+            step: currentStep,
+            bpm: currentSpeed,
+            timeSec: currentTimeSec,
+          });
+        } else if (!speed && speedChangeHere) {
+          newLevel = luaDeleteSpeedChange(
+            newLevel || currentLevel,
+            currentSpeedIndex
+          );
+        }
+      }
+      changeLevel(newLevel?.lua);
     }
   };
 
@@ -1169,9 +1142,7 @@ function Page(props: Props) {
                   currentSpeed={
                     currentSpeedIndex !== undefined ? currentSpeed : undefined
                   }
-                  setCurrentSpeed={changeSpeed}
                   speedChangeHere={!!speedChangeHere}
-                  toggleSpeedChangeHere={toggleSpeedChangeHere}
                   prevSignature={prevSignature}
                   currentSignature={currentSignature}
                   setCurrentSignature={changeSignature}
