@@ -142,7 +142,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
     * Response
         * `{cid: string}` as JSON with status code 200
         * `{message?: string}` as JSON with status code
-            * 409 (chart data is Chart6 or older),
+            * 409 (chart data is Chart7 or older),
             * 413 (too large),
             * 415 (invalid data),
             * 429 (rate limited),
