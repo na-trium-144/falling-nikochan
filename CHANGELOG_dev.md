@@ -1,4 +1,15 @@
+## ver. 8.0 - 2025/02/ [#288](https://github.com/na-trium-144/falling-nikochan/pull/288),  [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
 
+* chartデータver8
+    * ローカル保存用のChartMinと編集用のChartEditに分割
+    * editからローカル保存をした場合 Chart8Min 形式で保存され、譜面データはluaとしてしか記録されない
+    *  譜面の編集時に毎回luaコードが実行される
+    * /api/chartFile が扱うのは Chart8Edit (Luaと実行結果のChartの両方が含まれる)
+* /api/seqFile を削除し、 /api/playFile が Level8Play または Level6Play を返す
+* BPM看板の表示管理を改善
+* BPM看板にSpeed変化の表示を実装
+    * デフォルトでは非表示で、クエリパラメータ speed=1 でのみ表示される
+* アップロードできる譜面サイズの制限をイベント数基準に変更
 * validateChart() で未知のバージョンの譜面を変換しようとすると誤作動するのを修正
 * バックエンドの例外処理をHTTPException使って書き直した
 * POST /api/chartFile のレスポンスを200から204に変更
