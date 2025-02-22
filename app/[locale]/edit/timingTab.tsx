@@ -32,15 +32,13 @@ interface Props {
   currentLevel: LevelEdit | undefined;
   currentBpmIndex?: number;
   currentBpm?: number;
-  setCurrentBpm: (bpm: number) => void;
+  setCurrentBpm: (bpm: number | null, speed: number | null) => void;
   bpmChangeHere: boolean;
-  toggleBpmChangeHere: () => void;
+  toggleBpmChangeHere: (bpm: boolean | null, speed: boolean | null) => void;
   currentSpeedIndex?: number;
   currentSpeed?: number;
-  setCurrentSpeed: (bpm: number) => void;
   prevSignature?: Signature;
   speedChangeHere: boolean;
-  toggleSpeedChangeHere: () => void;
   currentSignature?: SignatureWithLua;
   setCurrentSignature: (sig: Signature) => void;
   signatureChangeHere: boolean;
@@ -52,7 +50,8 @@ export default function TimingTab(props: Props) {
 
   const offsetValid = (offset: string) =>
     offset !== "" && !isNaN(Number(offset)) && Number(offset) >= 0;
-  const bpmValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm)) && Number(bpm) > 0;
+  const bpmValid = (bpm: string) =>
+    bpm !== "" && !isNaN(Number(bpm)) && Number(bpm) > 0;
   const speedValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm));
 
   const bpmChangeable =
@@ -91,7 +90,7 @@ export default function TimingTab(props: Props) {
       </div>
       <div>
         <span>{t("step")}</span>
-        <HelpIcon>{t.rich("stepHelp", {br:() => <br/>})}</HelpIcon>
+        <HelpIcon>{t.rich("stepHelp", { br: () => <br /> })}</HelpIcon>
         <span className="inline-block text-right w-6">
           {ss && ss.barNum + 1}
         </span>
@@ -130,9 +129,10 @@ export default function TimingTab(props: Props) {
               !props.speedChangeHere &&
               props.currentBpm === props.currentSpeed
             ) {
-              props.setCurrentSpeed(Number(v));
+              props.setCurrentBpm(Number(v), Number(v));
+            } else {
+              props.setCurrentBpm(Number(v), null);
             }
-            props.setCurrentBpm(Number(v));
           }}
           disabled={props.bpmChangeHere || !bpmChangeable}
           isValid={bpmValid}
@@ -145,9 +145,13 @@ export default function TimingTab(props: Props) {
             onChange={() => {
               // bpmの変更時にspeedも変える
               if (props.currentBpm == props.currentSpeed) {
-                props.toggleSpeedChangeHere();
+                props.toggleBpmChangeHere(
+                  !props.bpmChangeHere,
+                  !props.bpmChangeHere
+                );
+              } else {
+                props.toggleBpmChangeHere(!props.bpmChangeHere, null);
               }
-              props.toggleBpmChangeHere();
             }}
             disabled={stepCmp(props.currentStep, stepZero()) <= 0}
           >
@@ -162,9 +166,10 @@ export default function TimingTab(props: Props) {
                 props.speedChangeHere &&
                 props.currentBpm === props.currentSpeed
               ) {
-                props.setCurrentSpeed(Number(v));
+                props.setCurrentBpm(Number(v), Number(v));
+              } else {
+                props.setCurrentBpm(Number(v), null);
               }
-              props.setCurrentBpm(Number(v));
             }}
             disabled={!props.bpmChangeHere || !bpmChangeable}
             isValid={bpmValid}
@@ -194,7 +199,7 @@ export default function TimingTab(props: Props) {
               ? props.currentSpeed.toString()
               : ""
           }
-          updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
+          updateValue={(v: string) => props.setCurrentBpm(null, Number(v))}
           disabled={props.speedChangeHere || !speedChangeable}
           isValid={speedValid}
         />
@@ -203,7 +208,9 @@ export default function TimingTab(props: Props) {
           <CheckBox
             className="ml-4 mr-1"
             value={props.speedChangeHere}
-            onChange={props.toggleSpeedChangeHere}
+            onChange={() =>
+              props.toggleBpmChangeHere(null, !props.speedChangeHere)
+            }
             disabled={stepCmp(props.currentStep, stepZero()) <= 0}
           >
             {t("changeHere")}
@@ -211,7 +218,7 @@ export default function TimingTab(props: Props) {
           <Input
             className="w-16 mx-1"
             actualValue={props.currentSpeed?.toString() || ""}
-            updateValue={(v: string) => props.setCurrentSpeed(Number(v))}
+            updateValue={(v: string) => props.setCurrentBpm(null, Number(v))}
             disabled={!props.speedChangeHere || !speedChangeable}
             isValid={speedValid}
           />
@@ -437,27 +444,37 @@ export default function TimingTab(props: Props) {
               >
                 <Close />
               </button>
-              {i === 0 && <HelpIcon className="self-center">
-                <p>
-                  {t.rich("beatBarHelp1", {
-                    br: () => <br />,
-                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
-                  })}
-                </p>
-                <p className="mt-2">
-                  {t.rich("beatBarHelp2", {
-                    br: () => <br />,
-                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
-                  })}
-                </p>
-                <p className="mt-2">
-                  {t.rich("beatBarHelp3", {
-                    br: () => <br />,
-                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
-                    add: () => <CornerDownLeft className="inline-block align-middle"/>,
-                  })}
-                </p>
-              </HelpIcon>}
+              {i === 0 && (
+                <HelpIcon className="self-center">
+                  <p>
+                    {t.rich("beatBarHelp1", {
+                      br: () => <br />,
+                      slime: (c) => (
+                        <BeatSlime size={Number(c) as 4 | 8 | 16} />
+                      ),
+                    })}
+                  </p>
+                  <p className="mt-2">
+                    {t.rich("beatBarHelp2", {
+                      br: () => <br />,
+                      slime: (c) => (
+                        <BeatSlime size={Number(c) as 4 | 8 | 16} />
+                      ),
+                    })}
+                  </p>
+                  <p className="mt-2">
+                    {t.rich("beatBarHelp3", {
+                      br: () => <br />,
+                      slime: (c) => (
+                        <BeatSlime size={Number(c) as 4 | 8 | 16} />
+                      ),
+                      add: () => (
+                        <CornerDownLeft className="inline-block align-middle" />
+                      ),
+                    })}
+                  </p>
+                </HelpIcon>
+              )}
             </div>
           </li>
         ))}
