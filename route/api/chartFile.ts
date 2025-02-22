@@ -86,8 +86,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
 
       if (chartBuf.byteLength > fileMaxSize) {
         throw new HTTPException(413, {
-          message:
-            `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
+          message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
         });
       }
 
@@ -108,13 +107,11 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       }
 
       if (numEvents(newChart) > chartMaxEvent) {
-        throw new HTTPException(413,
-          {
-            message: `Chart too large (number of events is ${numEvents(
-              newChart
-            )} / ${chartMaxEvent})`,
-          },
-        );
+        throw new HTTPException(413, {
+          message: `Chart too large (number of events is ${numEvents(
+            newChart
+          )} / ${chartMaxEvent})`,
+        });
       }
 
       // update Time

@@ -12,7 +12,7 @@ import {
   rateLimitMin,
 } from "../../chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
-import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
+import { chartToEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";
 import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
@@ -48,10 +48,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         );
       }
 
-      if (chartBuf.byteLength > chartMaxSize) {
+      if (chartBuf.byteLength > fileMaxSize) {
         throw new HTTPException(413, {
-          message:
-            `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
+          message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
         });
       }
 

@@ -7,6 +7,7 @@ import latestApp from "./latest.js";
 import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
 import hashPasswdApp from "./hashPasswd.js";
+import { HTTPException } from "hono/http-exception";
 
 const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(
@@ -19,9 +20,11 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/brief", briefApp)
   .route("/chartFile", chartFileApp)
   .route("/newChartFile", newChartFileApp)
-  .get("/seqFile", (c) =>
-    c.json({ message: "/api/seqFile is no longer supported" }, 410)
-  )
+  .get("/seqFile", () => {
+    throw new HTTPException(410, {
+      message: "/api/seqFile is no longer supported",
+    });
+  })
   .route("/playFile", playFileApp)
   .route("/latest", latestApp)
   .route("/hashPasswd", hashPasswdApp);
