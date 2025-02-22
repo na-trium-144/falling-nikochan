@@ -20,7 +20,7 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/brief", briefApp)
   .route("/chartFile", chartFileApp)
   .route("/newChartFile", newChartFileApp)
-  .get("/seqFile", () => {
+  .get("/seqFile/*", () => {
     throw new HTTPException(410, {
       message: "/api/seqFile is no longer supported",
     });
