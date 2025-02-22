@@ -1,4 +1,4 @@
-import { Level } from "../chart.js";
+import { LevelEdit } from "../chart.js";
 import { Signature, updateBarNum } from "../signature.js";
 import { Level5 } from "../legacy/chart5.js";
 import { stepCmp } from "../step.js";
@@ -23,7 +23,7 @@ function beatLuaCommand(s: Signature) {
       .join(", ")}}, ${num}, ${denom})`;
   }
 }
-export function luaAddBeatChange<L extends Level | Level5>(
+export function luaAddBeatChange<L extends LevelEdit | Level5>(
   chart: L,
   change: Signature
 ): L | null {
@@ -39,7 +39,7 @@ export function luaAddBeatChange<L extends Level | Level5>(
   return chart;
 }
 export function luaUpdateBeatChange(
-  chart: Level,
+  chart: LevelEdit,
   index: number,
   change: Signature
 ) {
@@ -54,7 +54,7 @@ export function luaUpdateBeatChange(
   updateBarNum(chart.signature);
   return chart;
 }
-export function luaDeleteBeatChange(chart: Level, index: number) {
+export function luaDeleteBeatChange(chart: LevelEdit, index: number) {
   if (chart.signature[index].luaLine === null) {
     return null;
   }

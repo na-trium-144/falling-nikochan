@@ -1,4 +1,4 @@
-import { Level } from "../chart.js";
+import { LevelEdit } from "../chart.js";
 import { NoteCommand, NoteCommandWithLua } from "../command.js";
 import { Chart3, NoteCommand3 } from "../legacy/chart3.js";
 import { Step, stepCmp } from "../step.js";
@@ -18,7 +18,7 @@ function noteLuaCommand(n: NoteCommand | NoteCommand3) {
   }
 }
 export function luaAddNote<
-  L extends Level | Chart3,
+  L extends LevelEdit | Chart3,
   N extends NoteCommand | NoteCommand3
 >(chart: L, n: N, step: Step): L | null {
   const insert = findInsertLine(chart, step);
@@ -35,9 +35,9 @@ export function luaAddNote<
   return chart;
 }
 export function luaDeleteNote(
-  chart: Level,
+  chart: LevelEdit,
   currentNoteIndex: number
-): Level | null {
+): LevelEdit | null {
   const n = chart.notes[currentNoteIndex];
   if (n.luaLine === null) {
     return null;
@@ -47,10 +47,10 @@ export function luaDeleteNote(
   return chart;
 }
 export function luaUpdateNote(
-  chart: Level,
+  chart: LevelEdit,
   currentNoteIndex: number,
   n: NoteCommand
-): Level | null {
+): LevelEdit | null {
   const oldN = chart.notes[currentNoteIndex];
   if (oldN.luaLine === null) {
     return null;

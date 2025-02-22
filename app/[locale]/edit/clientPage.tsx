@@ -25,11 +25,14 @@ import { MetaTab } from "./metaTab.js";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent.js";
 import {
-  Chart,
+  ChartEdit,
+  convertToPlay,
   createBrief,
+  currentChartVer,
   emptyChart,
-  Level,
+  LevelMin,
   levelTypes,
+  numEvents,
   validateChart,
 } from "@/../../chartFormat/chart.js";
 import { Step, stepAdd, stepCmp, stepZero } from "@/../../chartFormat/step.js";
@@ -41,7 +44,7 @@ import {
   setPasswd,
   unsetPasswd,
 } from "@/common/passwdCache.js";
-import LuaTab from "./luaTab.js";
+import LuaTab, { useLuaExecutor } from "./luaTab.js";
 import {
   luaAddBpmChange,
   luaDeleteBpmChange,
@@ -79,6 +82,8 @@ import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
+import { Chart8Edit } from "../../../chartFormat/legacy/chart8.js";
+import { LoadingSlime } from "@/common/loadingSlime.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
@@ -95,10 +100,10 @@ export default function EditAuth({ locale }: { locale: string }) {
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [chart, setChart] = useState<Chart>();
+  const [chart, setChart] = useState<ChartEdit>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
-  const [convertedFrom, setConvertedFrom] = useState<number>(7);
+  const [convertedFrom, setConvertedFrom] = useState<number>(currentChartVer);
 
   const fetchChart = useCallback(
     async (
@@ -132,11 +137,10 @@ export default function EditAuth({ locale }: { locale: string }) {
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 = msgpack.deserialize(
-              await res.arrayBuffer()
-            );
+            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit =
+              msgpack.deserialize(await res.arrayBuffer());
             setConvertedFrom(chartRes.ver);
-            const chart: Chart = await validateChart(chartRes);
+            const chart: ChartEdit = await validateChart(chartRes);
             if (savePasswd) {
               const res = await fetch(
                 process.env.BACKEND_PREFIX +
@@ -191,7 +195,9 @@ export default function EditAuth({ locale }: { locale: string }) {
       setCid(cidInitial.current);
     }
     setSavePasswd(preferSavePasswd());
-    document.title = titleWithSiteName(t("title", { title: "", cid: cidInitial.current }));
+    document.title = titleWithSiteName(
+      t("title", { title: "", cid: cidInitial.current })
+    );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     void fetchChart(true, false, "", true);
   }, []);
@@ -261,8 +267,8 @@ export default function EditAuth({ locale }: { locale: string }) {
 }
 
 interface Props {
-  chart: Chart;
-  setChart: (chart: Chart) => void;
+  chart: Chart8Edit;
+  setChart: (chart: Chart8Edit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
   themeContext: ThemeContext;
@@ -290,10 +296,12 @@ function Page(props: Props) {
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel = chart?.levels.at(currentLevelIndex);
 
+  const luaExecutor = useLuaExecutor();
+
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
-  const [fileSize, setFileSize] = useState<number>(0);
+  const chartNumEvent = numEvents(chart);
   const [savePasswd, setSavePasswd] = useState<boolean>(
     props.savePasswdInitial
   );
@@ -303,11 +311,14 @@ function Page(props: Props) {
     props.editPasswdInitial || ""
   );
 
-  const changeChart = (chart: Chart) => {
+  // 譜面の更新 (メタデータの変更など)
+  const changeChart = (chart: Chart8Edit) => {
     setHasChange(true);
     setChart(chart);
   };
-  document.title = titleWithSiteName(t("title", { title: chart?.title, cid: cid }));
+  document.title = titleWithSiteName(
+    t("title", { title: chart?.title, cid: cid })
+  );
   useEffect(() => {
     void (async () => {
       if (chart) {
@@ -318,10 +329,9 @@ function Page(props: Props) {
           cid: cid,
           lvIndex: currentLevelIndex,
           brief: await createBrief(chart),
-          chart: chart,
+          level: convertToPlay(chart, currentLevelIndex),
           editing: true,
         };
-        setFileSize(msgpack.serialize(chart).byteLength);
         setSessionData(data);
         initSession(data, sessionId);
         // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
@@ -330,11 +340,34 @@ function Page(props: Props) {
     })();
   }, [sessionId, chart, currentLevelIndex, cid]);
 
-  const changeLevel = (newLevel: Level | null) => {
-    if (chart && newLevel) {
-      const newChart: Chart = { ...chart };
-      newChart.levels[currentLevelIndex] = newLevel;
-      changeChart(newChart);
+  // レベルの更新
+  // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
+  const changeLevel = async (
+    newLevel: LevelMin | string[] | null | undefined
+  ) => {
+    if (chart && newLevel && currentLevelIndex < chart.levels.length) {
+      const newChart: ChartEdit = {
+        ...chart,
+        levels: chart.levels.map((l) => ({ ...l })),
+      };
+      if (Array.isArray(newLevel)) {
+        newChart.levels[currentLevelIndex].lua = newLevel;
+      } else {
+        newChart.levels[currentLevelIndex] = {
+          ...newChart.levels[currentLevelIndex],
+          ...newLevel,
+        };
+      }
+      const levelFreezed = await luaExecutor.exec(
+        newChart.levels[currentLevelIndex].lua.join("\n")
+      );
+      if (levelFreezed) {
+        newChart.levels[currentLevelIndex] = {
+          ...newChart.levels[currentLevelIndex],
+          ...levelFreezed,
+        };
+        changeChart(newChart);
+      }
     }
   };
 
@@ -547,7 +580,7 @@ function Page(props: Props) {
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
     if (chart) {
-      setNotesAll(loadChart(chart, currentLevelIndex).notes);
+      setNotesAll(loadChart(convertToPlay(chart, currentLevelIndex)).notes);
     }
   }, [chart, currentLevelIndex]);
 
@@ -588,7 +621,7 @@ function Page(props: Props) {
         // });
       } else {
         const newLevel = luaUpdateBpmChange(currentLevel, currentBpmIndex, bpm);
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -606,14 +639,14 @@ function Page(props: Props) {
     ) {
       if (bpmChangeHere) {
         const newLevel = luaDeleteBpmChange(currentLevel, currentBpmIndex);
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       } else {
         const newLevel = luaAddBpmChange(currentLevel, {
           step: currentStep,
           bpm: currentBpm,
           timeSec: currentTimeSec,
         });
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -642,7 +675,7 @@ function Page(props: Props) {
           currentSpeedIndex,
           bpm
         );
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -661,14 +694,14 @@ function Page(props: Props) {
     ) {
       if (speedChangeHere) {
         const newLevel = luaDeleteSpeedChange(currentLevel, currentSpeedIndex);
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       } else {
         const newLevel = luaAddSpeedChange(currentLevel, {
           step: currentStep,
           bpm: currentSpeed,
           timeSec: currentTimeSec,
         });
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -691,7 +724,7 @@ function Page(props: Props) {
         currentSignatureIndex,
         s
       );
-      changeLevel(newLevel);
+      changeLevel(newLevel?.lua);
     }
   };
   const toggleSignatureChangeHere = () => {
@@ -707,7 +740,7 @@ function Page(props: Props) {
           currentLevel,
           currentSignatureIndex
         );
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       } else {
         const newLevel = luaAddBeatChange(currentLevel, {
           step: currentStep,
@@ -715,7 +748,7 @@ function Page(props: Props) {
           bars: currentSignature.bars,
           barNum: 0,
         });
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
   };
@@ -730,7 +763,7 @@ function Page(props: Props) {
             (n) => stepCmp(n.step, currentStep) == 0
           )
         );
-        changeLevel(newLevel);
+        changeLevel(newLevel?.lua);
       }
     }
     ref.current.focus();
@@ -739,7 +772,7 @@ function Page(props: Props) {
     if (chart && currentLevel && hasCurrentNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaDeleteNote(levelCopied, currentNoteIndex);
-      changeLevel(newLevel);
+      changeLevel(newLevel?.lua);
     }
     ref.current.focus();
   };
@@ -747,7 +780,7 @@ function Page(props: Props) {
     if (chart && currentLevel && hasCurrentNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaUpdateNote(levelCopied, currentNoteIndex, n);
-      changeLevel(newLevel);
+      changeLevel(newLevel?.lua);
     }
     // ref.current.focus();
   };
@@ -1094,7 +1127,7 @@ function Page(props: Props) {
                 <MetaTab
                   sessionId={sessionId}
                   sessionData={sessionData}
-                  fileSize={fileSize}
+                  chartNumEvent={chartNumEvent}
                   chart={chart}
                   setChart={changeChart}
                   convertedFrom={convertedFrom}
@@ -1178,6 +1211,30 @@ function Page(props: Props) {
                 />
               )}
             </Box>
+            <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
+              {luaExecutor.running ? (
+                <div className="m-1">
+                  <LoadingSlime />
+                  {t("running")}
+                </div>
+              ) : (
+                (luaExecutor.stdout.length > 0 ||
+                  luaExecutor.err.length > 0) && (
+                  <div className="m-1">
+                    {luaExecutor.stdout.map((s, i) => (
+                      <p className="text-sm" key={i}>
+                        {s}
+                      </p>
+                    ))}
+                    {luaExecutor.err.map((e, i) => (
+                      <p className="text-sm text-red-600" key={i}>
+                        {e}
+                      </p>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </div>
       </CaptionProvider>

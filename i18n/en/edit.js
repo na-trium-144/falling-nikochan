@@ -29,6 +29,7 @@ export default {
       "Currently, only 1 / (multiple of 4) can be used.<br></br>" +
       "Use 1 / 12 or 1 / 24 for triplets, 1 / 20 for quintuplets, etc.",
     zoom: "Zoom",
+    running: "Running the script...",
     timeBar: {
       bpm: "BPM",
       speed: "Speed",
@@ -71,8 +72,10 @@ export default {
       saveDone: "Saved!",
       loadFail: "Failed to load file",
       confirmLoad: "Overwrite the chart data with this file?",
-      fileSize: "Current file size",
-      fileSizeMax: "(Up to {max} kB)",
+      eventNum: "Number of events",
+      eventNumHelp:
+        "The total number of notes, rests, BPM changes, <br></br>" +
+        "speed changes, and time signature changes in the chart.",
       testPlay: "Test play",
       testPlayHelp:
         "Opens a new tab in your browser <br></br>" +
@@ -87,8 +90,14 @@ export default {
         "You can overwrite as many times as you like <br></br>" +
         "if it is already been saved and assigned an ID.",
       hasUnsaved: "(There are unsaved changes)",
-      convertingWarning:
-        "This chart has been converted from the old format (ver.{ver}), and some notes may behave differently. Saving will overwrite the chart data with the converted data. (For details, please check the update history at the bottom of the top page.)",
+      converting:
+        "This chart has been converted from the old format (ver.{ver}), " +
+        "and saving will overwrite the previous chart data with the converted data.",
+      convertingIncompatible:
+        "This chart has been converted from the old format (ver.{ver}), " +
+        "and some notes may behave differently. " +
+        "Saving will overwrite the previous chart data with the converted data. " +
+        "(For details, please check the update history at the bottom of the top page.)",
       shareLink: "Share link",
       copy: "Copy",
       localSaveLoad: "Save/load locally",

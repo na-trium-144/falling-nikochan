@@ -14,7 +14,7 @@ export function luaNote(state: Result, ...args: any[]) {
     typeof args[4] === "boolean" &&
     typeof args[5] === "boolean"
   ) {
-    state.notes.push({
+    state.levelFreezed.notes.push({
       hitX: args[1],
       hitVX: args[2],
       hitVY: args[3],
@@ -43,7 +43,7 @@ export function luaStep(state: Result, ...args: any[]) {
       numerator: args[1] * 4,
       denominator: args[2],
     };
-    state.rest.push({
+    state.levelFreezed.rest.push({
       begin: { ...state.step },
       duration,
       luaLine: args[0],
@@ -72,7 +72,7 @@ export function luaBeat(state: Result, ...args: any[]) {
     typeof args[3] === "number" &&
     args[3] > 0
   ) {
-    state.signature.push({
+    state.levelFreezed.signature.push({
       bars: args[1],
       offset: stepSimplify({
         fourth: 0,
@@ -94,7 +94,7 @@ export function luaBPM(state: Result, ...args: any[]) {
     typeof args[1] === "number" &&
     args[1] > 0
   ) {
-    state.bpmChanges.push({
+    state.levelFreezed.bpmChanges.push({
       bpm: args[1],
       step: { ...state.step },
       timeSec: 0,
@@ -111,7 +111,7 @@ export function luaAccel(state: Result, ...args: any[]) {
     (typeof args[0] === "number" || args[0] === null) &&
     typeof args[1] === "number"
   ) {
-    state.speedChanges.push({
+    state.levelFreezed.speedChanges.push({
       bpm: args[1],
       step: { ...state.step },
       timeSec: 0,

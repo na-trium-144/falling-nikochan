@@ -1,6 +1,6 @@
 import {
-  Chart,
   ChartBrief,
+  ChartEdit,
   createBrief,
   hash,
 } from "../../chartFormat/chart.js";
@@ -21,6 +21,8 @@ import { Chart6 } from "../../chartFormat/legacy/chart6.js";
 import { Chart4 } from "../../chartFormat/legacy/chart4.js";
 import { isSample } from "../../chartFormat/apiConfig.js";
 import { getSample } from "../../chartFormat/dummySamples.js";
+import { Chart8Edit } from "../../chartFormat/legacy/chart8.js";
+import { HTTPException } from "hono/http-exception";
 
 export function hashPasswd(
   cid: string,
@@ -47,9 +49,8 @@ export async function getChartEntry(
   cid: string,
   p: Passwd | null
 ): Promise<{
-  res?: { message: string; status: 401 | 404 | 500 };
-  entry?: ChartEntry;
-  chart?: Chart4 | Chart5 | Chart6 | Chart7;
+  entry: ChartEntry;
+  chart: Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit;
 }> {
   const entryCompressed = (await db
     .collection("chart")
@@ -62,9 +63,7 @@ export async function getChartEntry(
         entry: await chartToEntry(chart, cid, 0),
       };
     } else {
-      return {
-        res: { message: "Chart ID Not Found", status: 404 },
-      };
+      throw new HTTPException(404, { message: "Chart ID Not Found" });
     }
   }
   if (typeof entryCompressed.published !== "boolean") {
@@ -87,7 +86,7 @@ export async function getChartEntry(
   ) {
     return { entry, chart };
   } else {
-    return { res: { message: "bad password", status: 401 } };
+    throw new HTTPException(401, { message: "bad password" });
   }
 }
 
@@ -101,7 +100,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null;
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7;
+  ver: 4 | 5 | 6 | 7 | 8;
   offset: number;
   ytId: string;
   title: string;
@@ -151,7 +150,7 @@ export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
     | { ver: 5 | 6; levels: ChartLevelCore5[] }
-    | { ver: 7; levels: ChartLevelCore7[] }
+    | { ver: 7 | 8; levels: ChartLevelCore7[] }
   );
 
 export async function unzipEntry(
@@ -196,7 +195,7 @@ export async function zipEntry(
 }
 
 export async function chartToEntry(
-  chart: Chart,
+  chart: ChartEdit,
   cid: string,
   updatedAt: number,
   prevEntry?: ChartEntry
@@ -244,7 +243,7 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
 
 export function entryToChart(
   entry: ChartEntry
-): Chart4 | Chart5 | Chart6 | Chart7 {
+): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit {
   switch (entry.ver) {
     case 4:
       return {
@@ -343,5 +342,34 @@ export function entryToChart(
         editPasswd: entry.editPasswd,
         locale: entry.locale,
       };
+    case 8:
+      if (!entry.locale) {
+        throw new Error("locale is required in v7");
+      }
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        published: entry.published,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          type: entry.levelBrief.at(i)?.type || "",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          lua: level.lua,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        editPasswd: entry.editPasswd,
+        locale: entry.locale,
+      };
+    default:
+      throw new HTTPException(500, { message: "Unsupported chart version" });
   }
 }

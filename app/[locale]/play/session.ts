@@ -1,10 +1,10 @@
-import { Chart, ChartBrief } from "@/../../chartFormat/chart.js";
+import { ChartBrief, LevelPlay } from "@/../../chartFormat/chart.js";
 
 export interface SessionData {
   cid?: string;
   lvIndex: number;
   brief: ChartBrief;
-  chart?: Chart;
+  level?: LevelPlay;
   editing?: boolean;
 }
 // プレイボタンを押した時にlocalStorageに保存し、sessionIdを返す

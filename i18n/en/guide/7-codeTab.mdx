@@ -17,11 +17,12 @@ import { BeatSlime } from "@/edit/timingTab.js";
   - `BPM(bpm value)`: Changes the BPM. Must be a positive number.
   - `Accel(speed value)`: Changes the speed. 0 and negative values can also be used.
   - `Beat(beat)` or `Beat(beat, a, b)`: Changes the beat.
-    - For 4/4 beat, use `[[4, 4, 4, 4]]`,
-    for 7/8 beat, use `[[4, 4, 4, 8]]`,
-    for 4/4 + 3/4 beat, use `[[4, 4, 4, 4], [4, 4, 4]]`.
+    - For example, `{{4, 4, 4, 4}}` is 4/4 beat,
+    `{{4, 4, 4, 8}}` is 7/8 beat,
+    `{{4, 4, 4, 4}, {4, 4, 4}}` is 4/4 + 3/4 beat.
       - (Counts from left to right, the opposite of <BeatSlime size={4} />)
     - You can specify a beat count offset ( a / b ) after the beat.
     a is an integer 0 or greater, and b is an integer 1 or greater.
 - Lines beginning with `--` (two minus signs) are comments (anything written will be ignored).
+- Be careful as there is no way to stop if you write an infinite loop, etc.
 - I will not explain more about the grammar of Lua languages here, so please look them up yourself.

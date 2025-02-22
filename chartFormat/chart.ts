@@ -1,3 +1,34 @@
+/*
+v8現在、譜面データを表す形式は以下の通り
+Chart〜 は複数レベルを含むデータ、 Level〜 は単一レベルのデータ
+
+chartFormat/ 内の定義
+(Min, Edit, Play は型名にそれぞれバージョン番号がつき、legacy/ 以下にバージョンごとに定義が置かれる)
+
+* ChartBrief: /share 内や /api/brief などで情報表示に使われる
+  * Edit -> Brief: createBrief(chart)
+  * EntryCompressed -> Brief: entryToBrief(chart)
+* ChartMin, LevelMin: ローカル保存に使われる、情報量を失わない最小サイズの形式
+  * Edit -> Min: convertToMin8(chart)
+* ChartEdit, LevelEdit: 譜面の編集時と、 /api/chartFile の送受信に使われる
+  * 旧バージョンからの変換: convertTo8(chart)
+  * Min -> Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
+  * Entry -> Edit: entryToChart(chart)
+* LevelPlay: /api/playFile で使われる、プレイ時の譜面データ
+  * Edit -> Play: convertToPlay8(chart, lvIndex)
+* ChartSeqData, Note: プレイ中の譜面データ (過去 /api/seqFile でも使われていた)
+  * Play -> SeqData: loadChart8(level)
+
+route/ 内の定義
+
+* ChartEntry, ChartLevelCore: データベースにアクセスする際の中間形式
+  * Edit -> Entry: chartToEntry(chart)
+  * EntryCompressed -> Entry: unzipEntry(entry)
+* ChartEntryCompressed: データベース内の形式
+  * Entry -> EntryCompressed: zipEntry(entry)
+
+*/
+
 import { updateBpmTimeSec, validateBpmChange } from "./bpm.js";
 import { validateNoteCommand, validateRestStep } from "./command.js";
 import { difficulty } from "./difficulty.js";
@@ -7,7 +38,18 @@ import { Chart3 } from "./legacy/chart3.js";
 import { Chart4 } from "./legacy/chart4.js";
 import { Chart5 } from "./legacy/chart5.js";
 import { Chart6 } from "./legacy/chart6.js";
-import { Chart7, convertTo7, hashLevel7, Level7 } from "./legacy/chart7.js";
+import { Chart7, hashLevel7 } from "./legacy/chart7.js";
+import {
+  Chart8Edit,
+  Chart8Min,
+  convertTo8,
+  convertToMin8,
+  convertToPlay8,
+  Level8Edit,
+  Level8Freeze,
+  Level8Min,
+  Level8Play,
+} from "./legacy/chart8.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
@@ -15,9 +57,6 @@ import { getTimeSec } from "./seq.js";
 import { validateSignature } from "./signature.js";
 import { stepZero } from "./step.js";
 
-/**
- * share時など情報表示に使われるデータ形式
- */
 export interface ChartBrief {
   ytId: string;
   title: string;
@@ -40,52 +79,64 @@ export interface ChartBrief {
   }[];
 }
 
-/**
- * edit時に使われるデータ形式
- * notes: 1音符1要素
- * rest: 休符
- *   notesそれぞれにstepの情報は入っているので、譜面を読むだけなら無くてもいい
- *   エディタがluaを編集するときどこにNoteコマンドを挿入するかの判断に使う。
- * bpmChanges: bpm変化の情報
- * offset: step=0に対応する時刻(秒)
- * (offsetの処理はgetCurrentTimeSec()の中に含まれる)
- *
- * 時刻は開始からのstep数(60/BPM*step=秒)で管理する。
- * プレイ時に秒単位の時刻に変換
- *
- * hashはbestScoreの管理のためだけに使う
- *
- * updatedAtは new Date().getTime()
- * サーバーに送信時に前のchartのhashと比較してサーバーがアップデートする
- * クライアント側は全く使わない
- *
- */
-export const currentChartVer = 7;
-export type Chart = Chart7;
-export type Level = Level7;
+export const currentChartVer = 8;
+export const lastIncompatibleVer = 6;
+export type ChartMin = Chart8Min;
+export type LevelMin = Level8Min;
+export type ChartEdit = Chart8Edit;
+export type LevelFreeze = Level8Freeze;
+export type LevelEdit = Level8Edit;
+export type LevelPlay = Level8Play;
+export const convertToMin = convertToMin8;
+export const convertToPlay = convertToPlay8;
 export const levelTypes = ["Single", "Double", "Maniac"];
 
 export async function validateChart(
-  chart: Chart | Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6
-): Promise<Chart> {
+  chart:
+    | ChartEdit
+    | Chart1
+    | Chart2
+    | Chart3
+    | Chart4
+    | Chart5
+    | Chart6
+    | Chart7
+): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 7) chart = await convertTo7(chart);
+  if (chart.ver !== 8) chart = await convertTo8(chart);
+  chart = (await validateChartMin(chart)) as ChartEdit;
+  chart.levels.forEach((l) => validateLevel(l));
+  if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
+  if (typeof chart.published !== "boolean") chart.published = false;
+  return chart;
+}
+export async function validateChartMin(
+  chart:
+    | ChartEdit
+    | ChartMin
+    | Chart1
+    | Chart2
+    | Chart3
+    | Chart4
+    | Chart5
+    | Chart6
+    | Chart7
+): Promise<ChartEdit | ChartMin> {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  if (chart.ver !== 8) chart = await convertTo8(chart);
   if (chart.ver !== currentChartVer) throw "chart.ver is invalid";
   if (!Array.isArray(chart.levels)) throw "chart.levels is invalid";
-  chart.levels.forEach((l) => validateLevel(l));
+  chart.levels.forEach((l) => validateLevelMin(l));
   if (typeof chart.offset !== "number") chart.offset = 0;
   if (typeof chart.ytId !== "string") throw "chart.ytId is invalid";
   if (typeof chart.title !== "string") chart.title = "";
   if (typeof chart.composer !== "string") chart.composer = "";
   if (typeof chart.chartCreator !== "string") chart.chartCreator = "";
-  if (typeof chart.editPasswd !== "string") chart.editPasswd = "";
-  if (typeof chart.published !== "boolean") chart.published = false;
   if (typeof chart.locale !== "string") throw "chart.locale is invalid";
   return chart;
 }
-export function validateLevel(level: Level): Level {
-  if (typeof level.name !== "string") throw "level.name is invalid";
-  if (!levelTypes.includes(level.type)) throw "level.type is invalid";
+export function validateLevel(level: LevelEdit): LevelEdit {
+  validateLevelMin(level);
   if (!Array.isArray(level.notes)) throw "level.notes is invalid";
   level.notes.forEach((n) => validateNoteCommand(n));
   if (!Array.isArray(level.rest)) throw "level.rest is invalid";
@@ -98,6 +149,11 @@ export function validateLevel(level: Level): Level {
   if (!Array.isArray(level.signature))
     throw "level.signatureChanges is invalid";
   level.signature.forEach((n) => validateSignature(n));
+  return level;
+}
+export function validateLevelMin<L extends LevelMin>(level: L): L {
+  if (typeof level.name !== "string") throw "level.name is invalid";
+  if (!levelTypes.includes(level.type)) throw "level.type is invalid";
   if (!Array.isArray(level.lua)) throw "level.lua is invalid";
   if (level.lua.filter((l) => typeof l !== "string").length > 0)
     throw "level.lua is invalid";
@@ -116,8 +172,21 @@ export async function hash(text: string) {
 }
 export const hashLevel = hashLevel7;
 
-export function emptyChart(locale: string): Chart {
-  let chart: Chart = {
+export function numEvents(chart: ChartEdit): number {
+  return chart.levels
+    .map(
+      (l) =>
+        l.notes.length +
+        l.rest.length +
+        l.bpmChanges.length +
+        l.speedChanges.length +
+        l.signature.length
+    )
+    .reduce((a, b) => a + b);
+}
+
+export function emptyChart(locale: string): ChartEdit {
+  let chart: ChartEdit = {
     falling: "nikochan",
     ver: currentChartVer,
     levels: [emptyLevel()],
@@ -133,17 +202,17 @@ export function emptyChart(locale: string): Chart {
   return chart;
 }
 // prevLevelからbpmとspeedだけはコピー
-export function emptyLevel(prevLevel?: Level): Level {
-  let level: Level = {
+export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
+  let level: LevelEdit = {
     name: "",
     type: levelTypes[0],
+    lua: [],
+    unlisted: false,
     notes: [],
     rest: [],
     bpmChanges: [],
     speedChanges: [],
     signature: [],
-    lua: [],
-    unlisted: false,
   };
   if (prevLevel) {
     for (const change of prevLevel.bpmChanges) {
@@ -153,10 +222,14 @@ export function emptyLevel(prevLevel?: Level): Level {
       level = luaAddSpeedChange(level, change)!;
     }
     for (const s of prevLevel.signature) {
-      level = luaAddBeatChange(level, s)! as Level;
+      level = luaAddBeatChange(level, s)!;
     }
   } else {
-    level = luaAddBpmChange(level, { bpm: 120, step: stepZero(), timeSec: 0 })!;
+    level = luaAddBpmChange(level, {
+      bpm: 120,
+      step: stepZero(),
+      timeSec: 0,
+    })!;
     level = luaAddSpeedChange(level, {
       bpm: 120,
       step: stepZero(),
@@ -167,26 +240,26 @@ export function emptyLevel(prevLevel?: Level): Level {
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
-    })! as Level;
+    })!;
   }
   return level;
 }
-export function copyLevel(level: Level): Level {
+export function copyLevel(level: LevelEdit): LevelEdit {
   return {
     name: level.name,
     type: level.type,
-    notes: level.notes.map((n) => ({ ...n })),
-    rest: level.rest.map((r) => ({ ...r })),
-    bpmChanges: level.bpmChanges.map((b) => ({ ...b })),
-    speedChanges: level.speedChanges.map((b) => ({ ...b })),
-    signature: level.signature.map((s) => ({ ...s })),
     lua: level.lua.slice(),
     unlisted: level.unlisted,
+    notes: level.notes.map((n) => ({ ...n })),
+    rest: level.rest.map((n) => ({ ...n })),
+    bpmChanges: level.bpmChanges.map((n) => ({ ...n })),
+    speedChanges: level.speedChanges.map((n) => ({ ...n })),
+    signature: level.signature.map((n) => ({ ...n })),
   };
 }
 
 export async function createBrief(
-  chart: Chart,
+  chart: ChartEdit,
   updatedAt?: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
@@ -200,6 +273,7 @@ export async function createBrief(
   const levelBrief = chart.levels.map((level, i) => ({
     name: level.name,
     type: level.type,
+    unlisted: level.unlisted,
     hash: levelHashes[i],
     noteCount: level.notes.length,
     difficulty: difficulty(level, level.type),
@@ -209,7 +283,6 @@ export async function createBrief(
       level.notes.length >= 1
         ? getTimeSec(level.bpmChanges, level.notes[level.notes.length - 1].step)
         : 0,
-    unlisted: level.unlisted,
   }));
   return {
     ytId: chart.ytId,

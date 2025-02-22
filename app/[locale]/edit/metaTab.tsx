@@ -5,11 +5,13 @@ import { ChangeEvent, useEffect, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { saveAs } from "file-saver";
 import {
-  Chart,
+  ChartEdit,
+  ChartMin,
+  convertToMin,
   currentChartVer,
-  validateChart,
+  lastIncompatibleVer,
+  validateChartMin,
 } from "@/../../chartFormat/chart.js";
-import { chartMaxSize } from "@/../../chartFormat/apiConfig.js";
 import {
   getPasswd,
   getV6Passwd,
@@ -25,10 +27,12 @@ import CheckBox from "@/common/checkBox.js";
 import { Caution } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
+import { luaExec } from "../../../chartFormat/lua/exec.js";
+import { chartMaxEvent } from "../../../chartFormat/apiConfig.js";
 
 interface Props {
-  chart?: Chart;
-  setChart: (chart: Chart) => void;
+  chart?: ChartEdit;
+  setChart: (chart: ChartEdit) => void;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
 }
@@ -157,9 +161,9 @@ export function MetaEdit(props: Props) {
 interface Props2 {
   sessionId?: number;
   sessionData?: SessionData;
-  fileSize: number;
-  chart?: Chart;
-  setChart: (chart: Chart) => void;
+  chartNumEvent: number;
+  chart?: ChartEdit;
+  setChart: (chart: ChartEdit) => void;
   convertedFrom: number;
   setConvertedFrom: (c: number) => void;
   cid: string | undefined;
@@ -289,8 +293,9 @@ export function MetaTab(props: Props2) {
   };
   const downloadExtension = `fn${props.chart?.ver}.yml`;
   const download = () => {
-    // editPasswdだけ消す
-    const yml = YAML.stringify({ ...props.chart, editPasswd: "" });
+    const yml = YAML.stringify(convertToMin(props.chart!), {
+      indentSeq: false,
+    });
     const filename = `${props.cid}_${props.chart?.title}.${downloadExtension}`;
     saveAs(new Blob([yml]), filename);
     setSaveMsg(`${t("saveDone")} (${filename})`);
@@ -302,21 +307,43 @@ export function MetaTab(props: Props2) {
       const buffer = await f.arrayBuffer();
       setUploadMsg("");
       let originalVer: number = 0;
-      let newChart: Chart | null = null;
+      let newChart: ChartEdit | null = null;
       try {
-        const content = YAML.parse(new TextDecoder().decode(buffer));
+        const content: ChartMin = YAML.parse(new TextDecoder().decode(buffer));
         if (typeof content.ver === "number") {
           originalVer = content.ver;
         }
-        newChart = await validateChart(content);
+        const newChartMin = await validateChartMin(content);
+        newChart = {
+          ...newChartMin,
+          editPasswd: props.chart?.editPasswd || "",
+          published: false,
+          levels: await Promise.all(
+            newChartMin.levels.map(async (l) => ({
+              ...l,
+              ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
+            }))
+          ),
+        };
       } catch (e1) {
         console.warn("fallback to msgpack deserialize");
         try {
-          const content = msgpack.deserialize(buffer);
+          const content: ChartMin = msgpack.deserialize(buffer);
           if (typeof content.ver === "number") {
             originalVer = content.ver;
           }
-          newChart = await validateChart(content);
+          const newChartMin = await validateChartMin(content);
+          newChart = {
+            ...newChartMin,
+            editPasswd: props.chart?.editPasswd || "",
+            published: false,
+            levels: await Promise.all(
+              newChartMin.levels.map(async (l) => ({
+                ...l,
+                ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
+              }))
+            ),
+          };
         } catch (e2) {
           console.error(e1);
           console.error(e2);
@@ -339,14 +366,14 @@ export function MetaTab(props: Props2) {
   return (
     <>
       <div className="mb-2">
-        <span className="">{t("fileSize")}:</span>
+        <span className="">{t("eventNum")}:</span>
         <span className="inline-block">
-          <span className="ml-2">{Math.round(props.fileSize / 1000)} kB</span>
-          <span className="ml-1 text-sm ">
-            {t("fileSizeMax", { max: chartMaxSize / 1000 })}
-          </span>
+          <span className="ml-1">{props.chartNumEvent}</span>
+          <span className="ml-1 text-sm ">/</span>
+          <span className="ml-1 text-sm ">{chartMaxEvent}</span>
         </span>
-        <ProgressBar value={props.fileSize / chartMaxSize} />
+        <HelpIcon>{t.rich("eventNumHelp", { br: () => <br /> })}</HelpIcon>
+        <ProgressBar value={props.chartNumEvent / chartMaxEvent} />
       </div>
       <div className="mb-1">
         <ExternalLink
@@ -379,7 +406,9 @@ export function MetaTab(props: Props2) {
         {props.convertedFrom < currentChartVer && (
           <span className="inline-block ml-1 text-amber-600 text-sm ">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
-            {t("convertingWarning", { ver: props.convertedFrom })}
+            {props.convertedFrom <= lastIncompatibleVer
+              ? t("convertingIncompatible", { ver: props.convertedFrom })
+              : t("converting", { ver: props.convertedFrom })}
           </span>
         )}
       </div>

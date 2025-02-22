@@ -12,6 +12,7 @@ export default {
         "reflected here after reloading the page.",
       option: "Options",
       auto: "Auto Play",
+      displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
       offsetSecond: "sec",
       offsetFast: "Fast",

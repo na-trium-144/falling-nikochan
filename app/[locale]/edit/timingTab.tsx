@@ -9,7 +9,6 @@ import {
   stepToFloat,
   stepZero,
 } from "@/../../chartFormat/step.js";
-import { Level } from "@/../../chartFormat/chart.js";
 import CheckBox from "@/common/checkBox.js";
 import { getSignatureState } from "@/../../chartFormat/seq.js";
 import {
@@ -23,13 +22,14 @@ import { useEffect, useRef, useState } from "react";
 import { Close, CornerDownLeft } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
+import { LevelEdit } from "../../../chartFormat/chart.js";
 
 interface Props {
   offset?: number;
   setOffset: (offset: number) => void;
   prevBpm?: number;
   prevSpeed?: number;
-  currentLevel?: Level;
+  currentLevel: LevelEdit | undefined;
   currentBpmIndex?: number;
   currentBpm?: number;
   setCurrentBpm: (bpm: number) => void;
@@ -51,9 +51,9 @@ export default function TimingTab(props: Props) {
   const t = useTranslations("edit.timing");
 
   const offsetValid = (offset: string) =>
-    !isNaN(Number(offset)) && Number(offset) >= 0;
-  const bpmValid = (bpm: string) => !isNaN(Number(bpm)) && Number(bpm) > 0;
-  const speedValid = (bpm: string) => !isNaN(Number(bpm));
+    offset !== "" && !isNaN(Number(offset)) && Number(offset) >= 0;
+  const bpmValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm)) && Number(bpm) > 0;
+  const speedValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm));
 
   const bpmChangeable =
     props.currentBpmIndex !== undefined &&

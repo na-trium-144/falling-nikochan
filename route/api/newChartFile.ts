@@ -1,16 +1,22 @@
 import msgpack from "@ygoe/msgpack";
 import {
-  Chart,
+  ChartEdit,
   currentChartVer,
+  numEvents,
   validateChart,
 } from "../../chartFormat/chart.js";
 import { updateIpLastCreate } from "./dbRateLimit.js";
-import { chartMaxSize, rateLimitMin } from "../../chartFormat/apiConfig.js";
+import {
+  chartMaxEvent,
+  fileMaxSize,
+  rateLimitMin,
+} from "../../chartFormat/apiConfig.js";
 import { MongoClient } from "mongodb";
-import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
+import { chartToEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";
 import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
+import { HTTPException } from "hono/http-exception";
 
 const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/", async (c) => {
@@ -42,15 +48,10 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         );
       }
 
-      if (chartBuf.byteLength > chartMaxSize) {
-        return c.json(
-          {
-            message:
-              `Chart too large (${Math.round(chartBuf.byteLength / 1000)}kB),` +
-              `Max ${Math.round(chartMaxSize / 1000)}kB`,
-          },
-          413
-        );
+      if (chartBuf.byteLength > fileMaxSize) {
+        throw new HTTPException(413, {
+          message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
+        });
       }
 
       const newChartObj = msgpack.deserialize(chartBuf);
@@ -58,15 +59,26 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         typeof newChartObj.ver === "number" &&
         newChartObj.ver < currentChartVer
       ) {
-        return c.json({ message: "chart version is old" }, 409);
+        throw new HTTPException(409, { message: "chart version is old" });
       }
 
-      let newChart: Chart;
+      let newChart: ChartEdit;
       try {
         newChart = await validateChart(newChartObj);
       } catch (e) {
         console.error(e);
-        return c.json({ message: "invalid chart data" }, 415);
+        throw new HTTPException(415, { message: "invalid chart data" });
+      }
+
+      if (numEvents(newChart) > chartMaxEvent) {
+        return c.json(
+          {
+            message: `Chart too large (number of events is ${numEvents(
+              newChart
+            )} / ${chartMaxEvent})`,
+          },
+          413
+        );
       }
 
       // update Time
@@ -79,8 +91,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       let cid: string;
       while (true) {
         cid = Math.floor(Math.random() * 900000 + 100000).toString();
-        const { entry } = await getChartEntry(db, cid, null);
-        if (entry) {
+        if ((await db.collection("chart").findOne({ cid })) !== null) {
           // cidかぶり
           continue;
         } else {
@@ -96,9 +107,6 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       // revalidateBrief(cid);
 
       return c.json({ cid: cid });
-    } catch (e) {
-      console.error(e);
-      return c.body(null, 500);
     } finally {
       await client.close();
     }
