@@ -112,7 +112,8 @@ export default function FallingWindow(props: Props) {
           (d, di) =>
             boxSize &&
             marginX !== undefined &&
-            marginY !== undefined && (
+            marginY !== undefined &&
+            d.current.id < notes.length && (
               <NikochanAndTrace
                 key={di}
                 displayNote={d}
