@@ -1,3 +1,7 @@
+## ver. 7.16 - 2025/02/22 [#290](https://github.com/na-trium-144/falling-nikochan/pull/290)
+
+* 譜面の難易度計算方法を変更: 5個以上同時押しする譜面でレベルが20に張り付くのを防止
+
 ## ver. 7.15 - 2025/02/21 [#289](https://github.com/na-trium-144/falling-nikochan/pull/289)
 
 * slimeの画像を追加し(slime2.svg)、アニメーションするようにした
