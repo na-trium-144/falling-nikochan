@@ -1,8 +1,15 @@
-## ver. 7.16 - 2025/02/22 [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
 
 * validateChart() で未知のバージョンの譜面を変換しようとすると誤作動するのを修正
 * バックエンドの例外処理をHTTPException使って書き直した
 * POST /api/chartFile のレスポンスを200から204に変更
+
+## ver. 7.17 - 2025/02/22 [#292](https://github.com/na-trium-144/falling-nikochan/pull/292)
+
+* 譜面のhashが変わった場合と別にpublishedがtrueに変わった場合にも譜面の日時を更新するようにした
+
+## ver. 7.16 - 2025/02/22 [#290](https://github.com/na-trium-144/falling-nikochan/pull/290)
+
+* 譜面の難易度計算方法を変更: 5個以上同時押しする譜面でレベルが20に張り付くのを防止
 
 ## ver. 7.15 - 2025/02/21 [#289](https://github.com/na-trium-144/falling-nikochan/pull/289)
 

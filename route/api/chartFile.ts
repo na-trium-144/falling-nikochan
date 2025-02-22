@@ -120,7 +120,10 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         newChart.levels.map((level) => hashLevel(level))
       );
       let updatedAt = entry.updatedAt;
-      if (!newHashes.every((h, i) => h === prevHashes[i])) {
+      if (
+        !newHashes.every((h, i) => h === prevHashes[i]) ||
+        (!entry.published && newChart.published)
+      ) {
         updatedAt = new Date().getTime();
       }
       // if (chart.published || newChart.published) {
