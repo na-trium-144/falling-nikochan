@@ -12,10 +12,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { res, entry } = await getChartEntry(db, cid, null);
-      if (!entry) {
-        return c.json({ message: res?.message }, res?.status || 500);
-      }
+      const { entry } = await getChartEntry(db, cid, null);
       return c.json(entryToBrief(entry), 200, {
         "cache-control": "max-age=600",
       });

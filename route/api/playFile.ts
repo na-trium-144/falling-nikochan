@@ -10,6 +10,7 @@ import {
   convertToPlay8,
   Level8Play,
 } from "../../chartFormat/legacy/chart8.js";
+import { HTTPException } from "hono/http-exception";
 
 const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
@@ -20,13 +21,10 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      let { res, chart } = await getChartEntry(db, cid, null);
-      if (!chart) {
-        return c.json({ message: res?.message }, res?.status || 500);
-      }
+      let { chart } = await getChartEntry(db, cid, null);
 
       if (!chart.levels.at(lvIndex)) {
-        return c.json({ message: "Level not found" }, 404);
+        throw new HTTPException(404, { message: "Level not found" });
       }
 
       let level: Level6Play | Level8Play;
@@ -52,6 +50,8 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         case 8:
           level = convertToPlay8(chart, lvIndex);
           break;
+        default:
+          throw new HTTPException(500, { message: "Unsupported chart version" });
       }
 
       await db
@@ -60,9 +60,6 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       // revalidateBrief(cid);
 
       return c.body(new Blob([msgpack.serialize(level)]).stream());
-    } catch (e) {
-      console.error(e);
-      return c.body(null, 500);
     } finally {
       await client.close();
     }

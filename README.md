@@ -119,7 +119,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
     * Query Parameters: same as GET
     * Request Body: [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack
     * Response
-        * empty response with status code 200
+        * empty response with status code 204
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),
@@ -131,7 +131,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
     * `:cid` - Chart ID
     * Query Parameters: same as GET
     * Response
-        * empty response with status code 200
+        * empty response with status code 204
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),

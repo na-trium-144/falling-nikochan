@@ -13,6 +13,7 @@ import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
 import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie } from "hono/cookie";
+import { HTTPException } from "hono/http-exception";
 
 /**
  *
@@ -44,20 +45,14 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     try {
       await client.connect();
       const db = client.db("nikochan");
-      let { res, chart } = await getChartEntry(db, cid, {
+      let { chart } = await getChartEntry(db, cid, {
         bypass,
         v6PasswdHash,
         rawPasswd,
         v7PasswdHash,
         v7HashKey,
       });
-      if (!chart) {
-        return c.json({ message: res?.message }, res?.status || 500);
-      }
       return c.body(new Blob([msgpack.serialize(chart)]).stream());
-    } catch (e) {
-      console.error(e);
-      return c.body(null, 500);
     } finally {
       await client.close();
     }
@@ -81,24 +76,19 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { res, entry, chart } = await getChartEntry(db, cid, {
+      const { entry } = await getChartEntry(db, cid, {
         bypass,
         v6PasswdHash,
         rawPasswd,
         v7PasswdHash,
         v7HashKey,
       });
-      if (!chart || !entry) {
-        return c.json({ message: res?.message }, res?.status || 500);
-      }
 
       if (chartBuf.byteLength > fileMaxSize) {
-        return c.json(
-          {
-            message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
-          },
-          413
-        );
+        throw new HTTPException(413, {
+          message:
+            `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
+        });
       }
 
       const newChartObj = msgpack.deserialize(chartBuf);
@@ -106,7 +96,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         typeof newChartObj.ver === "number" &&
         newChartObj.ver < currentChartVer
       ) {
-        return c.json({ message: "chart version is old" }, 409);
+        throw new HTTPException(409, { message: "chart version is old" });
       }
 
       let newChart: ChartEdit;
@@ -114,17 +104,16 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         newChart = await validateChart(newChartObj);
       } catch (e) {
         console.error(e);
-        return c.json({ message: "invalid chart data" }, 415);
+        throw new HTTPException(415, { message: "invalid chart data" });
       }
 
       if (numEvents(newChart) > chartMaxEvent) {
-        return c.json(
+        throw new HTTPException(413,
           {
             message: `Chart too large (number of events is ${numEvents(
               newChart
             )} / ${chartMaxEvent})`,
           },
-          413
         );
       }
 
@@ -150,10 +139,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         }
       );
       // revalidateBrief(cid);
-      return c.body(null);
-    } catch (e) {
-      console.error(e);
-      return c.body(null, 500);
+      return c.body(null, 204);
     } finally {
       await client.close();
     }
@@ -175,16 +161,13 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { res, chart } = await getChartEntry(db, cid, {
+      await getChartEntry(db, cid, {
         bypass,
         v6PasswdHash,
         rawPasswd,
         v7PasswdHash,
         v7HashKey,
       });
-      if (!chart) {
-        return c.json({ message: res?.message }, res?.status || 500);
-      }
 
       await db.collection("chart").updateOne(
         { cid },
@@ -199,10 +182,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       // if (chart.published) {
       //   revalidateLatest();
       // }
-      return c.body(null);
-    } catch (e) {
-      console.error(e);
-      return c.body(null, 500);
+      return c.body(null, 204);
     } finally {
       await client.close();
     }
