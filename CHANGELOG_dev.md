@@ -1,4 +1,4 @@
-## ver. 8.0 - 2025/02/ [#288](https://github.com/na-trium-144/falling-nikochan/pull/288),  [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
+## ver. 8.0 - 2025/02/22 [#288](https://github.com/na-trium-144/falling-nikochan/pull/288),  [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
 
 * chartデータver8
     * ローカル保存用のChartMinと編集用のChartEditに分割
