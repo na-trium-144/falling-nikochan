@@ -16,7 +16,7 @@ export default function BPMSign(props: Props) {
   const { playUIScale } = useDisplayMode();
   const { chartSeq, getCurrentTimeSec, hasExplicitSpeedChange } = props;
 
-  const prevTimeSec = useRef<number | undefined>(undefined);
+  const prevTimeSec = useRef<number | null>(null); // スタート時のTimeSecは0ではない
   const [flip, setFlip] = useState<boolean>(false);
 
   // chart.bpmChanges 内の現在のインデックス
@@ -33,42 +33,39 @@ export default function BPMSign(props: Props) {
   // bpmを更新
   useEffect(() => {
     const now = getCurrentTimeSec();
-    if (
-      prevTimeSec.current !== undefined &&
-      now !== undefined &&
-      now < prevTimeSec.current
-    ) {
-      setCurrentBpmIndex(0);
+    const setNextBpmIndex = (nextIndex: number) => {
+      const prevBpm = chartSeq.bpmChanges[currentBpmIndex].bpm;
+      const nextBpm = chartSeq.bpmChanges[nextIndex].bpm;
+      if (nextBpmIndex.current !== null) {
+        nextBpmIndex.current = nextIndex;
+      } else if (Math.abs(prevBpm - nextBpm) >= 10) {
+        setFlip(true);
+        nextBpmIndex.current = nextIndex;
+        setTimeout(() => {
+          setCurrentBpmIndex(nextBpmIndex.current!);
+          nextBpmIndex.current = null;
+          setFlip(false);
+        }, 100);
+      } else {
+        setCurrentBpmIndex(nextIndex);
+      }
+    };
+
+    if (now === undefined) {
+      return;
+    } else if (prevTimeSec.current !== null && now < prevTimeSec.current) {
+      setNextBpmIndex(0);
       setCurrentSpeedIndex(0);
-      nextBpmIndex.current = null;
+      prevTimeSec.current = now;
     } else {
       prevTimeSec.current = now;
       let timer: ReturnType<typeof setTimeout> | null = null;
-      if (
-        now !== undefined &&
-        currentBpmIndex + 1 < chartSeq.bpmChanges.length
-      ) {
+      if (currentBpmIndex + 1 < chartSeq.bpmChanges.length) {
         // chartのvalidateでtimesecは再計算されたことが保証されている
-        const nextBpmChangeTime =
-          chartSeq.bpmChanges[currentBpmIndex + 1].timeSec;
         timer = setTimeout(() => {
           timer = null;
-          const prevBpm = chartSeq.bpmChanges[currentBpmIndex].bpm;
-          const nextBpm = chartSeq.bpmChanges[currentBpmIndex + 1].bpm;
-          if (nextBpmIndex.current !== null) {
-            nextBpmIndex.current = currentBpmIndex + 1;
-          } else if (Math.abs(prevBpm - nextBpm) >= 10) {
-            setFlip(true);
-            nextBpmIndex.current = currentBpmIndex + 1;
-            setTimeout(() => {
-              setCurrentBpmIndex(nextBpmIndex.current!);
-              nextBpmIndex.current = null;
-              setFlip(false);
-            }, 100);
-          } else {
-            setCurrentBpmIndex(currentBpmIndex + 1);
-          }
-        }, (nextBpmChangeTime - now) * 1000 - 100);
+          setNextBpmIndex(currentBpmIndex + 1);
+        }, (chartSeq.bpmChanges[currentBpmIndex + 1].timeSec - now) * 1000 - 100);
       }
       return () => {
         if (timer !== null) {
@@ -82,8 +79,9 @@ export default function BPMSign(props: Props) {
   useEffect(() => {
     const now = getCurrentTimeSec();
     let timer: ReturnType<typeof setTimeout> | null = null;
-    if (
-      now !== undefined &&
+    if (now === undefined) {
+      return;
+    } else if (
       hasExplicitSpeedChange &&
       "speedChanges" in chartSeq &&
       currentSpeedIndex + 1 < chartSeq.speedChanges.length
@@ -100,7 +98,7 @@ export default function BPMSign(props: Props) {
         clearTimeout(timer);
       }
     };
-  }, [chartSeq, currentSpeedIndex, getCurrentTimeSec]);
+  }, [chartSeq, currentSpeedIndex, getCurrentTimeSec, hasExplicitSpeedChange]);
 
   return (
     <div
