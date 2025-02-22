@@ -116,7 +116,7 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
     * Query Parameters: same as GET
     * Request Body: [Chart7](chartFormat/legacy/chart7.ts) serialized with MessagePack
     * Response
-        * empty response with status code 200
+        * empty response with status code 204
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),
@@ -128,7 +128,7 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
     * `:cid` - Chart ID
     * Query Parameters: same as GET
     * Response
-        * empty response with status code 200
+        * empty response with status code 204
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),

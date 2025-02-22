@@ -21,6 +21,7 @@ import { Chart6 } from "../../chartFormat/legacy/chart6.js";
 import { Chart4 } from "../../chartFormat/legacy/chart4.js";
 import { isSample } from "../../chartFormat/apiConfig.js";
 import { getSample } from "../../chartFormat/dummySamples.js";
+import { HTTPException } from "hono/http-exception";
 
 export function hashPasswd(
   cid: string,
@@ -47,9 +48,8 @@ export async function getChartEntry(
   cid: string,
   p: Passwd | null
 ): Promise<{
-  res?: { message: string; status: 401 | 404 | 500 };
-  entry?: ChartEntry;
-  chart?: Chart4 | Chart5 | Chart6 | Chart7;
+  entry: ChartEntry;
+  chart: Chart4 | Chart5 | Chart6 | Chart7;
 }> {
   const entryCompressed = (await db
     .collection("chart")
@@ -62,9 +62,7 @@ export async function getChartEntry(
         entry: await chartToEntry(chart, cid, 0),
       };
     } else {
-      return {
-        res: { message: "Chart ID Not Found", status: 404 },
-      };
+      throw new HTTPException(404, { message: "Chart ID Not Found" });
     }
   }
   if (typeof entryCompressed.published !== "boolean") {
@@ -87,7 +85,7 @@ export async function getChartEntry(
   ) {
     return { entry, chart };
   } else {
-    return { res: { message: "bad password", status: 401 } };
+    throw new HTTPException(401, { message: "bad password" });
   }
 }
 
@@ -343,5 +341,7 @@ export function entryToChart(
         editPasswd: entry.editPasswd,
         locale: entry.locale,
       };
+    default:
+      throw new HTTPException(500, { message: "Unsupported chart version" });
   }
 }

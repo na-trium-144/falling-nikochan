@@ -7,6 +7,7 @@ import { env } from "hono/adapter";
 import { convertTo6 } from "../../chartFormat/legacy/chart6.js";
 import { ChartSeqData6, loadChart6 } from "../../chartFormat/legacy/seq6.js";
 import { ChartSeqData7, loadChart7 } from "../../chartFormat/legacy/seq7.js";
+import { HTTPException } from "hono/http-exception";
 
 const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
@@ -17,13 +18,10 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      let { res, chart } = await getChartEntry(db, cid, null);
-      if (!chart) {
-        return c.json({ message: res?.message }, res?.status || 500);
-      }
+      let { chart } = await getChartEntry(db, cid, null);
 
       if (!chart.levels.at(lvIndex)) {
-        return c.json({ message: "Level not found" }, 404);
+        throw new HTTPException(404, { message: "Level not found" });
       }
 
       let seq: ChartSeqData6 | ChartSeqData7;
@@ -38,6 +36,8 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         case 7:
           seq = loadChart7(chart, lvIndex);
           break;
+        default:
+          throw new HTTPException(500, { message: "Unsupported chart version" });
       }
 
       await db
@@ -46,9 +46,6 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       // revalidateBrief(cid);
 
       return c.body(new Blob([msgpack.serialize(seq)]).stream());
-    } catch (e) {
-      console.error(e);
-      return c.body(null, 500);
     } finally {
       await client.close();
     }

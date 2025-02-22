@@ -1,3 +1,9 @@
+## ver. 7.16 - 2025/02/22 [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
+
+* validateChart() で未知のバージョンの譜面を変換しようとすると誤作動するのを修正
+* バックエンドの例外処理をHTTPException使って書き直した
+* POST /api/chartFile のレスポンスを200から204に変更
+
 ## ver. 7.15 - 2025/02/21 [#289](https://github.com/na-trium-144/falling-nikochan/pull/289)
 
 * slimeの画像を追加し(slime2.svg)、アニメーションするようにした
