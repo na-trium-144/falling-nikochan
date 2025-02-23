@@ -537,6 +537,7 @@ function Play(props: Props) {
           bpmChanges={chartSeq?.bpmChanges}
         />
         <BPMSign
+          chartPlaying={chartPlaying}
           chartSeq={chartSeq}
           getCurrentTimeSec={getCurrentTimeSec}
           hasExplicitSpeedChange={hasExplicitSpeedChange && displaySpeed}

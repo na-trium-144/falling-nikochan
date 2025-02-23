@@ -8,15 +8,16 @@ import { ChartSeqData6 } from "../../../chartFormat/legacy/seq6.js";
 import { SmilingFace } from "@icon-park/react";
 
 interface Props {
+  chartPlaying: boolean;
   chartSeq: ChartSeqData6 | ChartSeqData8;
   getCurrentTimeSec: () => number | undefined;
   hasExplicitSpeedChange: boolean;
 }
 export default function BPMSign(props: Props) {
   const { playUIScale } = useDisplayMode();
-  const { chartSeq, getCurrentTimeSec, hasExplicitSpeedChange } = props;
+  const { chartPlaying, chartSeq, getCurrentTimeSec, hasExplicitSpeedChange } =
+    props;
 
-  const prevTimeSec = useRef<number | null>(null); // スタート時のTimeSecは0ではない
   const [flip, setFlip] = useState<boolean>(false);
 
   // chart.bpmChanges 内の現在のインデックス
@@ -31,6 +32,7 @@ export default function BPMSign(props: Props) {
       : undefined;
 
   // bpmを更新
+  const prevPlaying1 = useRef<boolean>(false);
   useEffect(() => {
     const now = getCurrentTimeSec();
     const setNextBpmIndex = (nextIndex: number) => {
@@ -51,14 +53,13 @@ export default function BPMSign(props: Props) {
       }
     };
 
-    if (now === undefined) {
-      return;
-    } else if (prevTimeSec.current !== null && now < prevTimeSec.current) {
+    if (now === undefined || !chartPlaying) {
+      prevPlaying1.current = false;
+    } else if (!prevPlaying1.current && currentBpmIndex !== 0) {
+      prevPlaying1.current = true;
       setNextBpmIndex(0);
-      setCurrentSpeedIndex(0);
-      prevTimeSec.current = now;
     } else {
-      prevTimeSec.current = now;
+      prevPlaying1.current = true;
       let timer: ReturnType<typeof setTimeout> | null = null;
       if (currentBpmIndex + 1 < chartSeq.bpmChanges.length) {
         // chartのvalidateでtimesecは再計算されたことが保証されている
@@ -73,19 +74,26 @@ export default function BPMSign(props: Props) {
         }
       };
     }
-  }, [chartSeq, currentBpmIndex, getCurrentTimeSec, flip]); // <- flipは使っていないが意図的に追加している
+  }, [chartPlaying, chartSeq, currentBpmIndex, getCurrentTimeSec, flip]);
+  // ↑ flipは使っていないが意図的に追加している
+  // ↑ なんでだっけ?
 
   //speed変化はアニメーションなし
+  const prevPlaying2 = useRef<boolean>(false);
   useEffect(() => {
     const now = getCurrentTimeSec();
     let timer: ReturnType<typeof setTimeout> | null = null;
-    if (now === undefined) {
-      return;
+    if (now === undefined || !chartPlaying) {
+      prevPlaying2.current = false;
+    } else if (!prevPlaying2.current && currentSpeedIndex !== 0) {
+      prevPlaying2.current = true;
+      setCurrentSpeedIndex(0);
     } else if (
       hasExplicitSpeedChange &&
       "speedChanges" in chartSeq &&
       currentSpeedIndex + 1 < chartSeq.speedChanges.length
     ) {
+      prevPlaying2.current = true;
       const nextSpeedChangeTime =
         chartSeq.speedChanges[currentSpeedIndex + 1].timeSec;
       timer = setTimeout(() => {
@@ -98,7 +106,13 @@ export default function BPMSign(props: Props) {
         clearTimeout(timer);
       }
     };
-  }, [chartSeq, currentSpeedIndex, getCurrentTimeSec, hasExplicitSpeedChange]);
+  }, [
+    chartPlaying,
+    chartSeq,
+    currentSpeedIndex,
+    getCurrentTimeSec,
+    hasExplicitSpeedChange,
+  ]);
 
   return (
     <div
