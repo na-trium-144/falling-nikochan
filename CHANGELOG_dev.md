@@ -1,3 +1,7 @@
+## ver. 8.5 - 2025/02/24 [#301](https://github.com/na-trium-144/falling-nikochan/pull/301)
+
+* XSS対策のため /share ページで楽曲タイトルをエスケープする処理を追加
+
 ## ver. 8.4 - 2025/02/23 [#300](https://github.com/na-trium-144/falling-nikochan/pull/300)
 
 * フォントをCDNから読み込むのではなく、npmでインストールしてバンドルするようにした
