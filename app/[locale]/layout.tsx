@@ -1,5 +1,9 @@
+import "@fontsource/merriweather/400.css";
+import "@fontsource/kaisei-opti/japanese-400.css";
+import "@fontsource/noto-sans/400.css";
+import "@fontsource/noto-sans-jp/japanese-400.css";
+import "@/globals.css";
 import { getMessages, locales } from "@/../../i18n/i18n.js";
-import "./globals.css";
 import IntlProvider from "./intlProvider.js";
 import { initMetadata, MetadataProps } from "./metadata.js";
 

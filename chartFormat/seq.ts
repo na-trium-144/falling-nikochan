@@ -8,12 +8,13 @@ import {
   stepToFloat,
   stepZero,
 } from "./step.js";
-import { displayNote7, DisplayNote7, loadChart7, Note7 } from "./legacy/seq7.js";
+import { displayNote7, DisplayNote7, Note7 } from "./legacy/seq7.js";
+import { loadChart8 } from "./legacy/seq8.js";
 
 export type Note = Note7;
 export type DisplayNote = DisplayNote7;
 export const displayNote = displayNote7;
-export const loadChart = loadChart7;
+export const loadChart = loadChart8;
 
 /**
  * 判定線の位置

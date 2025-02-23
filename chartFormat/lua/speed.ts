@@ -1,4 +1,4 @@
-import { Level } from "../chart.js";
+import { LevelEdit } from "../chart.js";
 import { BPMChange } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
@@ -7,7 +7,7 @@ import { Chart3 } from "../legacy/chart3.js";
 function accelLuaCommand(bpm: number) {
   return `Accel(${bpm})`;
 }
-export function luaAddSpeedChange<L extends Level | Chart3>(
+export function luaAddSpeedChange<L extends LevelEdit | Chart3>(
   chart: L,
   change: BPMChange
 ): L | null {
@@ -24,7 +24,7 @@ export function luaAddSpeedChange<L extends Level | Chart3>(
   );
   return chart;
 }
-export function luaUpdateSpeedChange(chart: Level, index: number, bpm: number) {
+export function luaUpdateSpeedChange(chart: LevelEdit, index: number, bpm: number) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }
@@ -33,7 +33,7 @@ export function luaUpdateSpeedChange(chart: Level, index: number, bpm: number) {
   // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   return chart;
 }
-export function luaDeleteSpeedChange(chart: Level, index: number) {
+export function luaDeleteSpeedChange(chart: LevelEdit, index: number) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }

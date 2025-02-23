@@ -1,4 +1,3 @@
-import { Level } from "@/../../chartFormat/chart.js";
 import { NoteCommand } from "@/../../chartFormat/command.js";
 import Button from "@/common/button.js";
 import Input from "@/common/input.js";
@@ -10,6 +9,7 @@ import { getSignatureState } from "@/../../chartFormat/seq.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
+import { LevelEdit } from "../../../chartFormat/chart.js";
 
 interface Props {
   currentNoteIndex: number;
@@ -24,7 +24,7 @@ interface Props {
   pasteNote: (i: number) => void;
   hasCopyBuf: boolean[];
   currentStep: Step;
-  currentLevel?: Level;
+  currentLevel: LevelEdit | undefined;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");
@@ -172,7 +172,10 @@ function NoteEdit(props: Props) {
                     props.updateNote({ ...n, hitX: Number(v) })
                   }
                   isValid={(v) =>
-                    !isNaN(Number(v)) && Number(v) >= -5 && Number(v) <= 5
+                    v !== "" &&
+                    !isNaN(Number(v)) &&
+                    Number(v) >= -5 &&
+                    Number(v) <= 5
                   }
                   disabled={!noteEditable}
                 />
@@ -206,7 +209,7 @@ function NoteEdit(props: Props) {
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVX: Number(v) })
                   }
-                  isValid={(v) => !isNaN(Number(v))}
+                  isValid={(v) => v !== "" && !isNaN(Number(v))}
                   disabled={!noteEditable}
                 />
               </td>
@@ -219,7 +222,7 @@ function NoteEdit(props: Props) {
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVY: Number(v) })
                   }
-                  isValid={(v) => !isNaN(Number(v)) && Number(v) >= 0}
+                  isValid={(v) => v !== "" && !isNaN(Number(v))}
                   disabled={!noteEditable}
                 />
               </td>
@@ -238,7 +241,9 @@ function NoteEdit(props: Props) {
                       hitVY: (Number(v) / nv) * n.hitVY,
                     })
                   }
-                  isValid={(v) => !isNaN(Number(v)) && Number(v) > 0}
+                  isValid={(v) =>
+                    v !== "" && !isNaN(Number(v)) && Number(v) > 0
+                  }
                   disabled={!noteEditable}
                 />
               </td>
@@ -258,7 +263,7 @@ function NoteEdit(props: Props) {
                       hitVY: nv * Math.sin((Number(v) / 180) * Math.PI),
                     })
                   }
-                  isValid={(v) => !isNaN(Number(v)) && nv > 0}
+                  isValid={(v) => v !== "" && !isNaN(Number(v)) && nv > 0}
                   disabled={!noteEditable}
                 />
                 °

@@ -1,8 +1,8 @@
 import {
-  Chart,
   emptyLevel,
   copyLevel,
   levelTypes,
+  ChartEdit,
 } from "@/../../chartFormat/chart.js";
 import { difficulty } from "@/../../chartFormat/difficulty.js";
 import { Step, stepCmp } from "@/../../chartFormat/step.js";
@@ -16,10 +16,10 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface Props {
-  chart?: Chart;
+  chart?: ChartEdit;
   currentLevelIndex: number;
   setCurrentLevelIndex: (i: number) => void;
-  changeChart: (chart: Chart) => void;
+  changeChart: (chart: ChartEdit) => void;
 }
 export default function LevelTab(props: Props) {
   const t = useTranslations("edit.level");
@@ -227,7 +227,7 @@ export default function LevelTab(props: Props) {
             >
               {t("unlistLevel")}
             </CheckBox>
-            <HelpIcon>{t.rich("unlistHelp", {br:() => <br/>})}</HelpIcon>
+            <HelpIcon>{t.rich("unlistHelp", { br: () => <br /> })}</HelpIcon>
           </p>
         </>
       )}

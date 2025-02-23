@@ -6,6 +6,7 @@ import { BPMChangeWithLua3, Chart3, RestStep3 } from "./chart3.js";
 import { Chart4 } from "./chart4.js";
 import { Chart5, SignatureWithLua5 } from "./chart5.js";
 import { Chart6, convertTo6 } from "./chart6.js";
+import { Level8Edit } from "./chart8.js";
 
 export interface Chart7 {
   falling: "nikochan"; // magic
@@ -44,7 +45,7 @@ export interface NoteCommandWithLua7 extends NoteCommand7 {
   luaLine: number | null;
 }
 
-export async function hashLevel7(level: Level7) {
+export async function hashLevel7(level: Level7 | Level8Edit) {
   return await hash(
     JSON.stringify([
       level.notes,

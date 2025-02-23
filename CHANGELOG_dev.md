@@ -1,3 +1,61 @@
+## ver. 8.5 - 2025/02/24 [#301](https://github.com/na-trium-144/falling-nikochan/pull/301)
+
+* XSS対策のため /share ページで楽曲タイトルをエスケープする処理を追加
+
+## ver. 8.4 - 2025/02/23 [#300](https://github.com/na-trium-144/falling-nikochan/pull/300)
+
+* フォントをCDNから読み込むのではなく、npmでインストールしてバンドルするようにした
+
+## ver. 8.3 - 2025/02/23 [#296](https://github.com/na-trium-144/falling-nikochan/pull/296)
+
+* 負の速度を編集できないバグの修正
+* vyまたはspeedが負のときの音符出現位置の計算を修正
+* noteタブでもvyに負の値を指定可能に
+
+## ver. 8.1 - 2025/02/22 [#293](https://github.com/na-trium-144/falling-nikochan/pull/293)
+
+* bpmを変更してspeedも同時に変更される際にluaExecが2回連続で実行されてバグっていたのを修正
+
+## ver. 8.0 - 2025/02/22 [#288](https://github.com/na-trium-144/falling-nikochan/pull/288),  [#291](https://github.com/na-trium-144/falling-nikochan/pull/291)
+
+* chartデータver8
+    * ローカル保存用のChartMinと編集用のChartEditに分割
+    * editからローカル保存をした場合 Chart8Min 形式で保存され、譜面データはluaとしてしか記録されない
+    *  譜面の編集時に毎回luaコードが実行される
+    * /api/chartFile が扱うのは Chart8Edit (Luaと実行結果のChartの両方が含まれる)
+* /api/seqFile を削除し、 /api/playFile が Level8Play または Level6Play を返す
+* BPM看板の表示管理を改善
+* BPM看板にSpeed変化の表示を実装
+    * デフォルトでは非表示で、クエリパラメータ speed=1 でのみ表示される
+* アップロードできる譜面サイズの制限をイベント数基準に変更
+* validateChart() で未知のバージョンの譜面を変換しようとすると誤作動するのを修正
+* バックエンドの例外処理をHTTPException使って書き直した
+* POST /api/chartFile のレスポンスを200から204に変更
+
+## ver. 7.17 - 2025/02/22 [#292](https://github.com/na-trium-144/falling-nikochan/pull/292)
+
+* 譜面のhashが変わった場合と別にpublishedがtrueに変わった場合にも譜面の日時を更新するようにした
+
+## ver. 7.16 - 2025/02/22 [#290](https://github.com/na-trium-144/falling-nikochan/pull/290)
+
+* 譜面の難易度計算方法を変更: 5個以上同時押しする譜面でレベルが20に張り付くのを防止
+
+## ver. 7.15 - 2025/02/21 [#289](https://github.com/na-trium-144/falling-nikochan/pull/289)
+
+* slimeの画像を追加し(slime2.svg)、アニメーションするようにした
+
+## ver. 7.14 - 2025/02/20 [#287](https://github.com/na-trium-144/falling-nikochan/pull/287)
+
+* signatureの編集時にluaコードの違う行が変更されるバグを修正
+
+## ver. 7.13 - 2025/02/19 [#283](https://github.com/na-trium-144/falling-nikochan/pull/283)
+
+* BPM表示が4桁以上の場合も看板のサイズが変わらないようにした
+
+## ver. 7.12 - 2025/02/18 [#276](https://github.com/na-trium-144/falling-nikochan/pull/276)
+
+* プレイ中のBPM表示の切り替え処理のバグを修正
+
 ## ver. 7.11 - 2025/02/14 [#264](https://github.com/na-trium-144/falling-nikochan/pull/264)
 
 * プレイ時の音源オフセット調整機能を追加

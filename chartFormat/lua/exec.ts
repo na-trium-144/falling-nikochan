@@ -1,33 +1,34 @@
 import { LuaFactory } from "wasmoon";
-import { NoteCommandWithLua, RestStep } from "../command.js";
 import { Step, stepZero } from "../step.js";
 import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
-import { BPMChangeWithLua, updateBpmTimeSec } from "../bpm.js";
-import { SignatureWithLua, updateBarNum } from "../signature.js";
+import { updateBpmTimeSec } from "../bpm.js";
+import { updateBarNum } from "../signature.js";
+import { LevelFreeze } from "../chart.js";
 
 export interface Result {
   stdout: string[];
   err: string[];
   errorLine: number | null;
-  notes: NoteCommandWithLua[];
-  rest: RestStep[];
-  bpmChanges: BPMChangeWithLua[];
-  speedChanges: BPMChangeWithLua[];
-  signature: SignatureWithLua[];
+  levelFreezed: LevelFreeze;
   step: Step;
 }
-export async function luaExec(code: string): Promise<Result> {
+export async function luaExec(
+  code: string,
+  catchError: boolean
+): Promise<Result> {
   const factory = new LuaFactory();
   const lua = await factory.createEngine();
   const result: Result = {
     stdout: [],
     err: [],
     errorLine: null,
-    notes: [],
-    rest: [],
-    bpmChanges: [],
-    speedChanges: [],
-    signature: [],
+    levelFreezed: {
+      notes: [],
+      rest: [],
+      bpmChanges: [],
+      speedChanges: [],
+      signature: [],
+    },
     step: stepZero(),
   };
   try {
@@ -74,11 +75,14 @@ export async function luaExec(code: string): Promise<Result> {
           `$1BeatStatic(${ln},$2)$3`
         )
         .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
-        .replace(/^( *)Accel\(( *[\d.]+ *)\)( *)$/, `$1AccelStatic(${ln},$2)$3`)
+        .replace(/^( *)Accel\(( *-?[\d.]+ *)\)( *)$/, `$1AccelStatic(${ln},$2)$3`)
     );
     console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
   } catch (e) {
+    if (!catchError) {
+      throw e;
+    }
     result.err = String(e).split("\n");
     let firstErrorLine: number | null = null;
     // tracebackをパース
@@ -102,24 +106,24 @@ export async function luaExec(code: string): Promise<Result> {
   } finally {
     lua.global.close();
   }
-  if (result.bpmChanges.length === 0) {
-    result.bpmChanges.push({
+  if (result.levelFreezed.bpmChanges.length === 0) {
+    result.levelFreezed.bpmChanges.push({
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
       luaLine: null,
     });
   }
-  if (result.speedChanges.length === 0) {
-    result.speedChanges.push({
+  if (result.levelFreezed.speedChanges.length === 0) {
+    result.levelFreezed.speedChanges.push({
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
       luaLine: null,
     });
   }
-  if (result.signature.length === 0) {
-    result.signature.push({
+  if (result.levelFreezed.signature.length === 0) {
+    result.levelFreezed.signature.push({
       step: stepZero(),
       offset: stepZero(),
       barNum: 0,
@@ -127,7 +131,10 @@ export async function luaExec(code: string): Promise<Result> {
       luaLine: null,
     });
   }
-  updateBpmTimeSec(result.bpmChanges, result.speedChanges);
-  updateBarNum(result.signature);
+  updateBpmTimeSec(
+    result.levelFreezed.bpmChanges,
+    result.levelFreezed.speedChanges
+  );
+  updateBarNum(result.levelFreezed.signature);
   return result;
 }

@@ -1,4 +1,4 @@
-import { Level } from "../chart.js";
+import { LevelEdit } from "../chart.js";
 import { Chart3 } from "../legacy/chart3.js";
 import { Level5 } from "../legacy/chart5.js";
 import {
@@ -10,7 +10,7 @@ import {
   stepZero,
 } from "../step.js";
 
-export function findStepFromLua(chart: Level, line: number): Step | null {
+export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
   for (const n of chart.notes) {
     if (n.luaLine === line) {
       return n.step;
@@ -31,11 +31,16 @@ export function findStepFromLua(chart: Level, line: number): Step | null {
       return n.step;
     }
   }
+  for (const n of chart.signature) {
+    if (n.luaLine === line) {
+      return n.step;
+    }
+  }
   return null;
 }
 
 // コマンドを挿入
-export function insertLua<L extends Level | Level5 | Chart3>(
+export function insertLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   line: number,
   content: string
@@ -65,9 +70,16 @@ export function insertLua<L extends Level | Level5 | Chart3>(
       n.luaLine++;
     }
   });
+  if ("signature" in chart) {
+    chart.signature.forEach((n) => {
+      if (n.luaLine !== null && n.luaLine >= line) {
+        n.luaLine++;
+      }
+    });
+  }
 }
 // コマンドを置き換え
-export function replaceLua<L extends Level | Level5 | Chart3>(
+export function replaceLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   line: number,
   content: string
@@ -78,7 +90,7 @@ export function replaceLua<L extends Level | Level5 | Chart3>(
     .concat(chart.lua.slice(line + 1));
 }
 // コマンドを削除
-export function deleteLua(chart: Level, line: number) {
+export function deleteLua(chart: LevelEdit, line: number) {
   chart.lua = chart.lua.slice(0, line).concat(chart.lua.slice(line + 1));
   // 以降の行番号がすべて1ずれる
   // 削除した行のコマンドに対応するデータはとりあえずnull
@@ -110,6 +122,13 @@ export function deleteLua(chart: Level, line: number) {
       n.luaLine--;
     }
   });
+  chart.signature.forEach((n) => {
+    if (n.luaLine === line) {
+      n.luaLine = null;
+    } else if (n.luaLine !== null && n.luaLine >= line) {
+      n.luaLine--;
+    }
+  });
 }
 
 function stepLuaCommand(s: Step) {
@@ -127,7 +146,7 @@ function stepLuaCommand(s: Step) {
 // 挿入する行、またはnullを返す。
 // 既存のStepコマンドを分割する必要がある場合は分割し、
 // Stepコマンドを追加する必要がある場合は追加する。
-export function findInsertLine<L extends Level | Level5 | Chart3>(
+export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   step: Step
 ): { chart: L; luaLine: number | null } {

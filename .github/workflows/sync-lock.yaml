@@ -1,13 +1,23 @@
 name: Sync lockfiles
 on:
-  pull_request:
-    branches: []
+  pull_request_target:
     paths: ['package.json']
 jobs:
   sync-lockfile:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT }}
+        # Checkout the fork/head-repository and push changes to the fork.
+        # If you skip this, the base repository will be checked out and changes
+        # will be committed to the base repository!
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        # Checkout the branch made in the fork. Will automatically push changes
+        # back to this branch.
+        ref: ${{ github.head_ref }}
+    - name: Abort if previous author is github action to prevent recursive runs
+      run: "! git log -1 | grep 41898282+github-actions"
     - uses: oven-sh/setup-bun@v2
     - uses: actions/setup-node@v4
       with:
@@ -17,3 +27,6 @@ jobs:
     - uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: Sync lockfiles
+        commit_user_name: github-actions[bot]
+        commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+        commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"

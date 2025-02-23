@@ -17,17 +17,17 @@ import {
   stepImproper,
   stepZero,
 } from "@/../../chartFormat/step.js";
-import { Chart, Level } from "@/../../chartFormat/chart.js";
 import { useDisplayMode } from "@/scale.js";
 import { getBarLength } from "@/../../chartFormat/signature.js";
 import { useTranslations } from "next-intl";
+import { ChartEdit, LevelEdit } from "../../../chartFormat/chart.js";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
   currentNoteIndex: number;
   currentStep: Step;
-  chart?: Chart;
-  currentLevel?: Level;
+  chart?: ChartEdit;
+  currentLevel?: LevelEdit;
   notesAll: Note[];
   snapDivider: number;
   ytId: string;

@@ -6,6 +6,7 @@ import briefApp from "./api/brief.js";
 import { ChartBrief } from "../chartFormat/chart.js";
 import { fetchStatic } from "./static.js";
 import { getTranslations } from "../i18n/i18n.js";
+import { HTTPException } from "hono/http-exception";
 
 async function errorResponse(
   origin: string,
@@ -41,37 +42,33 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       // debug: process.env.API_ENV === "development",
     })
   )
-  .notFound(async (c) => {
-    const lang = c.get("language");
-    // return c.body(
-    //   (await fetchStatic(new URL(`/${lang}/404`, new URL(c.req.url).origin)))
-    //     .body!,
-    //   404,
-    //   { "Content-Type": "text/html" }
-    // );
-    return c.body(
-      await errorResponse(new URL(c.req.url).origin, lang, 404, "Not Found"),
-      404,
-      { "Content-Type": "text/html" }
-    );
-  })
   .onError(async (err, c) => {
     console.error(err);
     const lang = c.get("language");
+    if (!(err instanceof HTTPException)) {
+      console.error(err);
+      err = new HTTPException(500, { message: "Server Error" });
+    }
     if (c.req.path.startsWith("/api")) {
-      return c.json({ message: "Server Error" }, 500);
+      return c.json(
+        { message: await (err as HTTPException).getResponse().text() },
+        (err as HTTPException).status
+      );
     } else {
       return c.body(
         await errorResponse(
           new URL(c.req.url).origin,
           lang,
-          500,
-          "Server Error"
+          (err as HTTPException).status,
+          await (err as HTTPException).getResponse().text()
         ),
-        500,
+        (err as HTTPException).status,
         { "Content-Type": "text/html" }
       );
     }
+  })
+  .notFound(() => {
+    throw new HTTPException(404, { message: "Not Found" });
   })
   .get("/edit/:cid", (c) => {
     // deprecated (used until ver6.15)
@@ -114,24 +111,31 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       if (briefRes.ok) {
         const brief = (await briefRes.json()) as ChartBrief;
         const res = await pRes;
+        const newTitle = brief.composer
+          ? t("titleWithComposer", {
+              title: brief.title,
+              composer: brief.composer,
+              chartCreator: brief.chartCreator,
+              cid: cid,
+            })
+          : t("title", {
+              title: brief.title,
+              chartCreator: brief.chartCreator,
+              cid: cid,
+            });
+        let titleEscapedJsStr = ""; // "{...\"TITLE\"}" inside script tag
+        let titleEscapedHtml = ""; // <title>TITLE</title>, "TITLE" inside meta tag
+        for (let i = 0; i < newTitle.length; i++) {
+          titleEscapedJsStr +=
+            "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
+          titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
+        }
         const replacedBody = (await res.text())
           .replaceAll("/share/placeholder", `/share/${cid}`)
+          .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
+          .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
           .replaceAll(
-            "PLACEHOLDER_TITLE",
-            brief.composer
-              ? t("titleWithComposer", {
-                  title: brief.title,
-                  composer: brief.composer,
-                  chartCreator: brief.chartCreator,
-                  cid: cid,
-                })
-              : t("title", {
-                  title: brief.title,
-                  chartCreator: brief.chartCreator,
-                  cid: cid,
-                })
-          )
-          .replaceAll(
+            // これはjsファイルの中にしか現れないのでエスケープの必要はない
             '"PLACEHOLDER_BRIEF"',
             JSON.stringify(JSON.stringify(brief))
           );
@@ -140,28 +144,16 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           "Cache-Control": "no-store",
         });
       } else {
-        if (c.req.routePath === "/share/:cid{[0-9]+}") {
-          let message = "";
-          try {
-            message =
-              ((await briefRes.json()) as { message?: string }).message || "";
-          } catch {
-            //
-          }
-          return c.body(
-            await errorResponse(
-              new URL(c.req.url).origin,
-              lang,
-              briefRes.status,
-              message
-            ),
-            briefRes.status as 401 | 404 | 500,
-            { "Content-Type": "text/html" }
-          );
-          // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
-        } else {
-          return c.notFound();
+        let message = "";
+        try {
+          message =
+            ((await briefRes.json()) as { message?: string }).message || "";
+        } catch {
+          //
         }
+        throw new HTTPException(briefRes.status as 401 | 404 | 500, {
+          message,
+        });
       }
     }
   );

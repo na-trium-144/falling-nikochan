@@ -1,6 +1,6 @@
-import { Chart, emptyChart } from "./chart.js";
+import { ChartEdit, emptyChart } from "./chart.js";
 
-export function getSample(cid: string): Chart {
+export function getSample(cid: string): ChartEdit {
   return {
     ...emptyChart("ja"),
     ...{

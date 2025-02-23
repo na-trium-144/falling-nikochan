@@ -1,9 +1,18 @@
+/*
+クエリパラメーター
+
+* sid=セッションID または cid=譜面ID&lvIndex=インデックス で譜面を指定
+* fps=1 でFPS表示
+* speed=1 で音符の速度変化を表示
+
+*/
+
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6 } from "@/../../chartFormat/legacy/seq6.js";
-import { ChartSeqData7, loadChart7 } from "@/../../chartFormat/legacy/seq7.js";
+import { ChartSeqData6, loadChart6 } from "@/../../chartFormat/legacy/seq6.js";
+import { ChartSeqData8, loadChart8 } from "@/../../chartFormat/legacy/seq8.js";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -23,16 +32,19 @@ import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
+import { Level6Play } from "../../../chartFormat/legacy/chart6.js";
+import { Level8Play } from "../../../chartFormat/legacy/chart8.js";
 import Title from "@/common/titleLogo.js";
 import { levelColors } from "@/common/levelColors.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
+  const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData7>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData8>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -43,6 +55,7 @@ export function InitPlay({ locale }: { locale: string }) {
     const cidFromParam = searchParams.get("cid");
     const lvIndexFromParam = Number(searchParams.get("lvIndex"));
     setShowFps(searchParams.get("fps") !== null);
+    setDisplaySpeed(searchParams.get("speed") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -68,30 +81,39 @@ export function InitPlay({ locale }: { locale: string }) {
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
-    if (session?.chart) {
-      setChartSeq(loadChart7(session.chart, session.lvIndex));
+    if (session?.level) {
+      setChartSeq(loadChart8(session.level));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
       void (async () => {
         const res = await fetch(
           process.env.BACKEND_PREFIX +
-            `/api/seqFile/${session?.cid || cidFromParam}` +
+            `/api/playFile/${session?.cid || cidFromParam}` +
             `/${session?.lvIndex || lvIndexFromParam}`,
           { cache: "no-store" }
         );
         if (res.ok) {
           try {
-            const seq = msgpack.deserialize(await res.arrayBuffer());
-            if (seq.ver === 6 || seq.ver === 7) {
-              setChartSeq(seq);
+            const seq: Level6Play | Level8Play = msgpack.deserialize(
+              await res.arrayBuffer()
+            );
+            if (seq.ver === 6 || seq.ver === 8) {
+              switch (seq.ver) {
+                case 6:
+                  setChartSeq(loadChart6(seq));
+                  break;
+                case 8:
+                  setChartSeq(loadChart8(seq));
+                  break;
+              }
               setErrorStatus(undefined);
               setErrorMsg(undefined);
               addRecent("play", session?.cid || cidFromParam || "");
             } else {
               setChartSeq(undefined);
               setErrorStatus(undefined);
-              setErrorMsg(`Invalid chart version: ${seq.ver}`);
+              setErrorMsg(`Invalid chart version: ${(seq as any)?.ver}`);
             }
           } catch (e) {
             setChartSeq(undefined);
@@ -128,6 +150,7 @@ export function InitPlay({ locale }: { locale: string }) {
       chartSeq={chartSeq}
       editing={editing}
       showFps={showFps}
+      displaySpeed={displaySpeed}
       locale={locale}
     />
   );
@@ -137,16 +160,24 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief: ChartBrief;
-  chartSeq: ChartSeqData6 | ChartSeqData7;
+  chartSeq: ChartSeqData6 | ChartSeqData8;
   editing: boolean;
   showFps: boolean;
+  displaySpeed: boolean;
   locale: string;
 }
 function Play(props: Props) {
-  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps } = props;
+  const { cid, lvIndex, chartBrief, chartSeq, editing, showFps, displaySpeed } =
+    props;
   const lvType: string =
     (lvIndex !== undefined && chartBrief?.levels[lvIndex]?.type) || "";
-
+  const hasExplicitSpeedChange =
+    "speedChanges" in chartSeq &&
+    (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
+      chartSeq.speedChanges.some(
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
+      ));
+  // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(true);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
@@ -210,7 +241,7 @@ function Play(props: Props) {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       return ytPlayer.current?.getCurrentTime() - chartSeq.offset - userOffset;
     }
-  }, [chartSeq, chartPlaying]);
+  }, [chartSeq, chartPlaying, userOffset]);
   const {
     baseScore,
     chainScore,
@@ -234,32 +265,6 @@ function Play(props: Props) {
       ref.current.focus();
     }
   }, [ref]);
-
-  // chart.bpmChanges 内の現在のインデックス
-  const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
-  // bpmを更新
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const now = getCurrentTimeSec();
-    if (
-      now !== undefined &&
-      chartSeq &&
-      currentBpmIndex + 1 < chartSeq.bpmChanges.length
-    ) {
-      // chartのvalidateでtimesecは再計算されたことが保証されている
-      const nextBpmChangeTime =
-        chartSeq.bpmChanges[currentBpmIndex + 1].timeSec;
-      timer = setTimeout(() => {
-        timer = null;
-        setCurrentBpmIndex(currentBpmIndex + 1);
-      }, (nextBpmChangeTime - now) * 1000);
-    }
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-    };
-  }, [chartSeq, currentBpmIndex, getCurrentTimeSec]);
 
   // 準備完了画面を表示する
   const [ready, setReady] = useState<boolean>(false);
@@ -299,7 +304,6 @@ function Play(props: Props) {
     setChartPlaying(false);
     setReady(true);
     resetNotesAll(chartSeq.notes);
-    setCurrentBpmIndex(0);
     reloadBestScore();
   }, [chartSeq, resetNotesAll, reloadBestScore]);
   const exit = () => {
@@ -534,7 +538,11 @@ function Play(props: Props) {
           playing={chartPlaying}
           bpmChanges={chartSeq?.bpmChanges}
         />
-        <BPMSign currentBpm={chartSeq?.bpmChanges[currentBpmIndex]?.bpm} />
+        <BPMSign
+          chartSeq={chartSeq}
+          getCurrentTimeSec={getCurrentTimeSec}
+          hasExplicitSpeedChange={hasExplicitSpeedChange && displaySpeed}
+        />
         {isMobile && (
           <>
             <StatusBox

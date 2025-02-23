@@ -3,32 +3,102 @@
 import { FourthNote } from "@/common/fourthNote.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
+import { ChartSeqData8 } from "../../../chartFormat/legacy/seq8.js";
+import { ChartSeqData6 } from "../../../chartFormat/legacy/seq6.js";
+import { SmilingFace } from "@icon-park/react";
 
 interface Props {
-  currentBpm?: number;
+  chartSeq: ChartSeqData6 | ChartSeqData8;
+  getCurrentTimeSec: () => number | undefined;
+  hasExplicitSpeedChange: boolean;
 }
 export default function BPMSign(props: Props) {
   const { playUIScale } = useDisplayMode();
+  const { chartSeq, getCurrentTimeSec, hasExplicitSpeedChange } = props;
 
-  const prevBpm = useRef<number | undefined>(undefined);
-  const displayedBpm = useRef<number | undefined>(undefined);
+  const prevTimeSec = useRef<number | null>(null); // スタート時のTimeSecは0ではない
   const [flip, setFlip] = useState<boolean>(false);
+
+  // chart.bpmChanges 内の現在のインデックス
+  const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
+  const displayBpm = chartSeq.bpmChanges.at(currentBpmIndex)?.bpm;
+  const nextBpmIndex = useRef<number | null>(null);
+
+  const [currentSpeedIndex, setCurrentSpeedIndex] = useState<number>(0);
+  const displaySpeed =
+    "speedChanges" in chartSeq
+      ? chartSeq.speedChanges.at(currentSpeedIndex)?.bpm
+      : undefined;
+
+  // bpmを更新
   useEffect(() => {
-    if (
-      prevBpm.current !== undefined &&
-      props.currentBpm !== undefined &&
-      Math.abs(prevBpm.current - props.currentBpm) >= 10
-    ) {
-      setFlip(true);
-      setTimeout(() => {
-        displayedBpm.current = props.currentBpm;
-        setFlip(false);
-      }, 100);
+    const now = getCurrentTimeSec();
+    const setNextBpmIndex = (nextIndex: number) => {
+      const prevBpm = chartSeq.bpmChanges[currentBpmIndex].bpm;
+      const nextBpm = chartSeq.bpmChanges[nextIndex].bpm;
+      if (nextBpmIndex.current !== null) {
+        nextBpmIndex.current = nextIndex;
+      } else if (Math.abs(prevBpm - nextBpm) >= 10) {
+        setFlip(true);
+        nextBpmIndex.current = nextIndex;
+        setTimeout(() => {
+          setCurrentBpmIndex(nextBpmIndex.current!);
+          nextBpmIndex.current = null;
+          setFlip(false);
+        }, 100);
+      } else {
+        setCurrentBpmIndex(nextIndex);
+      }
+    };
+
+    if (now === undefined) {
+      return;
+    } else if (prevTimeSec.current !== null && now < prevTimeSec.current) {
+      setNextBpmIndex(0);
+      setCurrentSpeedIndex(0);
+      prevTimeSec.current = now;
     } else {
-      displayedBpm.current = props.currentBpm;
+      prevTimeSec.current = now;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      if (currentBpmIndex + 1 < chartSeq.bpmChanges.length) {
+        // chartのvalidateでtimesecは再計算されたことが保証されている
+        timer = setTimeout(() => {
+          timer = null;
+          setNextBpmIndex(currentBpmIndex + 1);
+        }, (chartSeq.bpmChanges[currentBpmIndex + 1].timeSec - now) * 1000 - 100);
+      }
+      return () => {
+        if (timer !== null) {
+          clearTimeout(timer);
+        }
+      };
     }
-    prevBpm.current = props.currentBpm;
-  }, [props.currentBpm]);
+  }, [chartSeq, currentBpmIndex, getCurrentTimeSec, flip]); // <- flipは使っていないが意図的に追加している
+
+  //speed変化はアニメーションなし
+  useEffect(() => {
+    const now = getCurrentTimeSec();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    if (now === undefined) {
+      return;
+    } else if (
+      hasExplicitSpeedChange &&
+      "speedChanges" in chartSeq &&
+      currentSpeedIndex + 1 < chartSeq.speedChanges.length
+    ) {
+      const nextSpeedChangeTime =
+        chartSeq.speedChanges[currentSpeedIndex + 1].timeSec;
+      timer = setTimeout(() => {
+        timer = null;
+        setCurrentSpeedIndex(currentSpeedIndex + 1);
+      }, (nextSpeedChangeTime - now) * 1000);
+    }
+    return () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+    };
+  }, [chartSeq, currentSpeedIndex, getCurrentTimeSec, hasExplicitSpeedChange]);
 
   return (
     <div
@@ -45,26 +115,41 @@ export default function BPMSign(props: Props) {
       />
       <div
         className={
-          "rounded-sm mb-6 py-1 px-1.5 " +
+          "rounded-sm mb-6 py-1 px-1.5 overflow-hidden " +
           "bg-gradient-to-t from-amber-600 to-amber-500 " +
-          "dark:from-amber-900 dark:to-amber-800 " + 
+          "dark:from-amber-900 dark:to-amber-800 " +
           "border-b-2 border-r-2 border-amber-800 dark:border-amber-950 " +
-          "flex flex-row items-baseline " +
           "transition-transform duration-100 " +
           (flip ? "scale-x-0 " : "scale-x-100 ")
         }
       >
-        <span className="text-xl "><FourthNote /></span>
-        <span className="text-xl ml-1.5 mr-1">=</span>
-        <span className="text-right text-2xl w-auto min-w-12">
-          {displayedBpm.current !== undefined &&
-            Math.floor(displayedBpm.current)}
-        </span>
-        <span className="text-base">.</span>
-        <span className="text-base w-2.5 overflow-visible">
-          {displayedBpm.current !== undefined &&
-            Math.floor(displayedBpm.current * 10) % 10}
-        </span>
+        <div className={"flex flex-row items-baseline w-22 overflow-hidden "}>
+          <span className="flex-none text-xl w-max">
+            <FourthNote />
+            <span className="ml-1.5">=</span>
+          </span>
+          <span className="flex-1 min-w-0 text-2xl flex flex-row items-baseline justify-end ">
+            {displayBpm !== undefined && Math.floor(displayBpm)}
+          </span>
+          <span className="flex-none text-base w-3.5 overflow-visible">
+            .{displayBpm !== undefined && Math.floor(displayBpm * 10) % 10}
+          </span>
+        </div>
+        {hasExplicitSpeedChange && (
+          <div
+            className={
+              "flex flex-row items-baseline w-15 m-auto overflow-visible "
+            }
+          >
+            <span className="flex-none text-sm/3 w-max">
+              <SmilingFace className="inline-block align-bottom " />
+              <span className="ml-0.5">=</span>
+            </span>
+            <span className="flex-1 min-w-0 text-base/3 flex flex-row items-baseline justify-end ">
+              {displaySpeed !== undefined && Math.floor(displaySpeed)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
