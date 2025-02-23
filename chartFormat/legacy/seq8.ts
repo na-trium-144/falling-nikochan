@@ -38,20 +38,34 @@ export function loadChart8(level: Level8Play): ChartSeqData8 {
     // x(t) = targetX + vx * u(t)
     // y(t) = targetY + vy * u(t) - (ay * u(t)^2) / 2
 
-    let uAppear: number;
+    let uRangeMin: number, uRangeMax: number;
     if (c.fall) {
-      // dy/du = 0 or y(t) = 1.5 or x(t) = 2 or x(t) = -0.5
+      // max: dy/du = 0 or y(t) = 1.5 or x(t) = 2 or x(t) = -0.5
+      // min: y(t) = -0.5 or x(t) = 2 or x(t) = -0.5
       const uTop = vy / ay;
-      const uAppearY =
-        (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - 1.5))) / ay;
-      const uAppearX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
-      uAppear = Math.min(uAppearX, isNaN(uAppearY) ? uTop : uAppearY);
+      let uMaxY: number, uMinY: number;
+      if (vy === 0) {
+        uMaxY = uTop;
+        uMinY = uTop;
+      } else if (vy > 0) {
+        uMaxY = (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - 1.5))) / ay;
+        uMinY = (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      } else {
+        uMinY = (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - 1.5))) / ay;
+        uMaxY = (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      }
+      const uMaxX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      const uMinX = Math.min((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      uRangeMax = Math.min(uMaxX, isNaN(uMaxY) ? uTop : uMaxY);
+      uRangeMin = Math.max(uMinX, isNaN(uMinY) ? uTop : uMinY);
     } else {
       // y(t) = -0.5 or x(t) = 2 or x(t) = -0.5
-      const uAppearY =
-        (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
-      const uAppearX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
-      uAppear = Math.max(uAppearX, uAppearY);
+      const uMaxY = (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      const uMinY = (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      const uMaxX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      const uMinX = Math.min((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      uRangeMax = Math.min(uMaxX, uMaxY);
+      uRangeMin = Math.max(uMinX, uMinY);
     }
 
     let appearTimeSec: number | null = null;
@@ -73,18 +87,28 @@ export function loadChart8(level: Level8Play): ChartSeqData8 {
 
       const uEnd = u + du * (tBegin - tEnd);
 
-      if ((u <= uAppear && uAppear <= uEnd) || (u <= uAppear && ti === 0)) {
-        const tAppear = (uAppear - u) / du;
+      if (
+        (u <= uRangeMax && uRangeMax <= uEnd) ||
+        (u <= uRangeMax && ti === 0 && du > 0)
+      ) {
+        const tAppear = (uRangeMax - u) / du;
+        appearTimeSec = tBegin - tAppear;
+      } else if (
+        (u >= uRangeMin && uRangeMin >= uEnd) ||
+        (u >= uRangeMin && ti === 0 && du < 0)
+      ) {
+        const tAppear = (uRangeMin - u) / du;
         appearTimeSec = tBegin - tAppear;
       }
       tBegin = tEnd;
       u = uEnd;
     }
     if (appearTimeSec === null) {
+      console.error("Failed to calculate appearTimeSec");
       console.error("speedChanges:", level.speedChanges);
       console.error("hitTimeSec:", hitTimeSec);
-      console.error("uAppear:", uAppear);
-      throw new Error("Failed to calculate appearTimeSec");
+      console.error("uRange:", uRangeMin, uRangeMax);
+      appearTimeSec = hitTimeSec;
     }
     notes.push({
       ver: 7,

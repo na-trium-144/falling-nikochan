@@ -1,3 +1,9 @@
+## ver. 8.3 - 2025/02/23 [#296](https://github.com/na-trium-144/falling-nikochan/pull/296)
+
+* 負の速度を編集できないバグの修正
+* vyまたはspeedが負のときの音符出現位置の計算を修正
+* noteタブでもvyに負の値を指定可能に
+
 ## ver. 8.1 - 2025/02/22 [#293](https://github.com/na-trium-144/falling-nikochan/pull/293)
 
 * bpmを変更してspeedも同時に変更される際にluaExecが2回連続で実行されてバグっていたのを修正
