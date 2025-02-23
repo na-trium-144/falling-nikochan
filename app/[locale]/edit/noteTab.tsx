@@ -222,9 +222,7 @@ function NoteEdit(props: Props) {
                   updateValue={(v) =>
                     props.updateNote({ ...n, hitVY: Number(v) })
                   }
-                  isValid={(v) =>
-                    v !== "" && !isNaN(Number(v)) && Number(v) >= 0
-                  }
+                  isValid={(v) => v !== "" && !isNaN(Number(v))}
                   disabled={!noteEditable}
                 />
               </td>
