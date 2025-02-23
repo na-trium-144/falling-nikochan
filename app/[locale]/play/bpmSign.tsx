@@ -59,6 +59,7 @@ export default function BPMSign(props: Props) {
       prevPlaying1.current = true;
       setNextBpmIndex(0);
     } else {
+      prevPlaying1.current = true;
       let timer: ReturnType<typeof setTimeout> | null = null;
       if (currentBpmIndex + 1 < chartSeq.bpmChanges.length) {
         // chartのvalidateでtimesecは再計算されたことが保証されている
@@ -92,6 +93,7 @@ export default function BPMSign(props: Props) {
       "speedChanges" in chartSeq &&
       currentSpeedIndex + 1 < chartSeq.speedChanges.length
     ) {
+      prevPlaying2.current = true;
       const nextSpeedChangeTime =
         chartSeq.speedChanges[currentSpeedIndex + 1].timeSec;
       timer = setTimeout(() => {
