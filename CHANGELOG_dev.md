@@ -1,3 +1,7 @@
+## ver. 8.4 - 2025/02/23 [#300](https://github.com/na-trium-144/falling-nikochan/pull/300)
+
+* フォントをCDNから読み込むのではなく、npmでインストールしてバンドルするようにした
+
 ## ver. 8.3 - 2025/02/23 [#296](https://github.com/na-trium-144/falling-nikochan/pull/296)
 
 * 負の速度を編集できないバグの修正
