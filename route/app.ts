@@ -111,24 +111,31 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       if (briefRes.ok) {
         const brief = (await briefRes.json()) as ChartBrief;
         const res = await pRes;
+        const newTitle = brief.composer
+          ? t("titleWithComposer", {
+              title: brief.title,
+              composer: brief.composer,
+              chartCreator: brief.chartCreator,
+              cid: cid,
+            })
+          : t("title", {
+              title: brief.title,
+              chartCreator: brief.chartCreator,
+              cid: cid,
+            });
+        let titleEscapedJsStr = ""; // "{...\"TITLE\"}" inside script tag
+        let titleEscapedHtml = ""; // <title>TITLE</title>, "TITLE" inside meta tag
+        for (let i = 0; i < newTitle.length; i++) {
+          titleEscapedJsStr +=
+            "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
+          titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
+        }
         const replacedBody = (await res.text())
           .replaceAll("/share/placeholder", `/share/${cid}`)
+          .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
+          .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
           .replaceAll(
-            "PLACEHOLDER_TITLE",
-            brief.composer
-              ? t("titleWithComposer", {
-                  title: brief.title,
-                  composer: brief.composer,
-                  chartCreator: brief.chartCreator,
-                  cid: cid,
-                })
-              : t("title", {
-                  title: brief.title,
-                  chartCreator: brief.chartCreator,
-                  cid: cid,
-                })
-          )
-          .replaceAll(
+            // これはjsファイルの中にしか現れないのでエスケープの必要はない
             '"PLACEHOLDER_BRIEF"',
             JSON.stringify(JSON.stringify(brief))
           );
