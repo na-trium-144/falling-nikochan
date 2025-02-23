@@ -4,6 +4,10 @@
     "": {
       "name": "falling-nikochan",
       "dependencies": {
+        "@fontsource/kaisei-opti": "^5.1.1",
+        "@fontsource/merriweather": "^5.1.1",
+        "@fontsource/noto-sans": "^5.1.1",
+        "@fontsource/noto-sans-jp": "^5.1.1",
         "@hono/node-server": "^1.13.8",
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
@@ -143,6 +147,14 @@
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.2.5", "", { "dependencies": { "@eslint/core": "^0.10.0", "levn": "^0.4.1" } }, "sha512-lB05FkqEdUg2AA0xEbUz0SnkXT1LcCTa438W4IWTUh4hdOnVbQyOJ81OrDXsJk/LSiJHubgGEFoR5EHq1NsH1A=="],
 
     "@fastify/busboy": ["@fastify/busboy@2.1.1", "", {}, "sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA=="],
+
+    "@fontsource/kaisei-opti": ["@fontsource/kaisei-opti@5.1.1", "", {}, "sha512-A89m/oJnOF8jQviuKTZtr2MLuloadYqN6Uh3gxIXva+Lbfqovpq6hEQn3UT7CuZio2aywbc9vDskYcimnTIu9Q=="],
+
+    "@fontsource/merriweather": ["@fontsource/merriweather@5.1.1", "", {}, "sha512-GaO8ZHDCQAuoPJh0yiLK+NzL03OnGs64uFGKFRSouinZ1CtoEtO+3DHr4LZokFW+Au5MvWr4Am2MOhjdyvIRyA=="],
+
+    "@fontsource/noto-sans": ["@fontsource/noto-sans@5.1.1", "", {}, "sha512-WesuII3BzvzVr0JqYIgnEeJPwXvpFAo9tNCMH1AqoLSCdStKJugMaIcVJ/sT+Pw9ytIlUO3ccbqbe+BhhsXm9g=="],
+
+    "@fontsource/noto-sans-jp": ["@fontsource/noto-sans-jp@5.1.1", "", {}, "sha512-PXk7mDjiaW99xU85IIxRGekzxLz91h2usk0rfDXSVwds9Nuo4sdlDUEE8PQ1P3VLnV00FsCHfSH54uR217VXpg=="],
 
     "@formatjs/ecma402-abstract": ["@formatjs/ecma402-abstract@2.3.3", "", { "dependencies": { "@formatjs/fast-memoize": "2.2.6", "@formatjs/intl-localematcher": "0.6.0", "decimal.js": "10", "tslib": "2" } }, "sha512-pJT1OkhplSmvvr6i3CWTPvC/FGC06MbN5TNBfRO6Ox62AEz90eMq+dVvtX9Bl3jxCEkS0tATzDarRZuOLw7oFg=="],
 
