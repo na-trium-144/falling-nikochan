@@ -7,6 +7,7 @@ import { ChartBrief } from "../chartFormat/chart.js";
 import { fetchStatic } from "./static.js";
 import { getTranslations } from "../i18n/i18n.js";
 import { HTTPException } from "hono/http-exception";
+import ogApp from "./og.js";
 
 async function errorResponse(
   origin: string,
@@ -27,6 +28,7 @@ async function errorResponse(
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)
+  .route("/og", ogApp)
   .use(
     languageDetector({
       supportedLanguages: ["en", "ja"],

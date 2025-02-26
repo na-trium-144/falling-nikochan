@@ -21,6 +21,7 @@
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
     "@next/mdx": "^15.1.6",
+    "@vercel/og": "^0.6.5",
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.38.0",
     "dotenv": "^16.4.7",
