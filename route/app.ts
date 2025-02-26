@@ -26,7 +26,6 @@ async function errorResponse(
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)
-  .route("/og", ogApp)
   .use(
     languageDetector({
       supportedLanguages: ["en", "ja"],
@@ -70,6 +69,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .notFound(() => {
     throw new HTTPException(404, { message: "Not Found" });
   })
+  .route("/og", ogApp)
   .get("/edit/:cid", (c) => {
     // deprecated (used until ver6.15)
     const cid = c.req.param("cid");

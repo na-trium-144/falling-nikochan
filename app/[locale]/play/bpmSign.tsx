@@ -9,7 +9,7 @@ import { SmilingFace } from "@icon-park/react";
 
 interface Props {
   chartPlaying: boolean;
-  chartSeq: ChartSeqData6 | ChartSeqData8;
+  chartSeq: ChartSeqData6 | ChartSeqData8 | null;
   getCurrentTimeSec: () => number | undefined;
   hasExplicitSpeedChange: boolean;
 }
@@ -22,12 +22,12 @@ export default function BPMSign(props: Props) {
 
   // chart.bpmChanges 内の現在のインデックス
   const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
-  const displayBpm = chartSeq.bpmChanges.at(currentBpmIndex)?.bpm;
+  const displayBpm = chartSeq?.bpmChanges.at(currentBpmIndex)?.bpm;
   const nextBpmIndex = useRef<number | null>(null);
 
   const [currentSpeedIndex, setCurrentSpeedIndex] = useState<number>(0);
   const displaySpeed =
-    "speedChanges" in chartSeq
+    chartSeq && "speedChanges" in chartSeq
       ? chartSeq.speedChanges.at(currentSpeedIndex)?.bpm
       : undefined;
 
@@ -36,8 +36,10 @@ export default function BPMSign(props: Props) {
   useEffect(() => {
     const now = getCurrentTimeSec();
     const setNextBpmIndex = (nextIndex: number) => {
-      const prevBpm = chartSeq.bpmChanges[currentBpmIndex].bpm;
-      const nextBpm = chartSeq.bpmChanges[nextIndex].bpm;
+      const prevBpm =
+        chartSeq !== null ? chartSeq.bpmChanges[currentBpmIndex].bpm : 120;
+      const nextBpm =
+        chartSeq !== null ? chartSeq.bpmChanges[nextIndex].bpm : 120;
       if (nextBpmIndex.current !== null) {
         nextBpmIndex.current = nextIndex;
       } else if (Math.abs(prevBpm - nextBpm) >= 10) {
@@ -61,7 +63,10 @@ export default function BPMSign(props: Props) {
     } else {
       prevPlaying1.current = true;
       let timer: ReturnType<typeof setTimeout> | null = null;
-      if (currentBpmIndex + 1 < chartSeq.bpmChanges.length) {
+      if (
+        chartSeq !== null &&
+        currentBpmIndex + 1 < chartSeq.bpmChanges.length
+      ) {
         // chartのvalidateでtimesecは再計算されたことが保証されている
         timer = setTimeout(() => {
           timer = null;
@@ -90,6 +95,7 @@ export default function BPMSign(props: Props) {
       setCurrentSpeedIndex(0);
     } else if (
       hasExplicitSpeedChange &&
+      chartSeq &&
       "speedChanges" in chartSeq &&
       currentSpeedIndex + 1 < chartSeq.speedChanges.length
     ) {
@@ -124,7 +130,7 @@ export default function BPMSign(props: Props) {
       }}
     >
       <div
-        className="absolute inset-0 m-auto w-3 bg-amber-700 dark:bg-amber-900 "
+        className="absolute inset-0 m-auto mt-4 w-3 bg-amber-700 dark:bg-amber-900 "
         style={{ borderRadius: "100%/6px" }}
       />
       <div
@@ -137,7 +143,12 @@ export default function BPMSign(props: Props) {
           (flip ? "scale-x-0 " : "scale-x-100 ")
         }
       >
-        <div className={"flex flex-row items-baseline w-22 overflow-hidden "}>
+        <div
+          className={
+            "flex flex-row items-baseline w-22 overflow-hidden " +
+            (chartSeq === null ? "invisible " : "")
+          }
+        >
           <span className="flex-none text-xl w-max">
             <FourthNote />
             <span className="ml-1.5">=</span>
