@@ -51,7 +51,7 @@ export default function OGTemplate(props: { locale: string }) {
       </div>
       <div
         className={
-          "pl-20 mt-6 text-6xl font-title " +
+          "pl-20 mt-6 text-5xl font-title " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
@@ -60,14 +60,13 @@ export default function OGTemplate(props: { locale: string }) {
       </div>
       <div
         className={
-          "pl-20 mt-6 font-title text-6xl " +
+          "pl-20 mt-6 font-title text-5xl " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
       >
         <span
-          className="font-main-ui inline-block text-5xl min-w-max "
-          style={{ width: (props.locale === "ja" ? 208.517 : 402.4) + 20 }}
+          className="font-main-ui text-4xl mr-5 "
         >
           {t("chartCreator")}:
         </span>

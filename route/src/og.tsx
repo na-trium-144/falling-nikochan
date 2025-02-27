@@ -131,8 +131,8 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                 paddingLeft: 80,
                 marginTop: 24,
                 width: 2147483647,
-                // 6xl
-                fontSize: 60,
+                // 5xl
+                fontSize: 48,
                 lineHeight: 1,
                 fontFamily: fontTitle,
               }}
@@ -146,17 +146,17 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                 paddingLeft: 80,
                 marginTop: 24,
                 width: 2147483647,
-                // 6xl
-                fontSize: 60,
+                // 5xl
+                fontSize: 48,
                 lineHeight: 1,
                 fontFamily: fontTitle,
               }}
             >
               <span
                 style={{
-                  // 5xl
-                  fontSize: 48,
-                  lineHeight: 1,
+                  // 4xl
+                  fontSize: 36,
+                  lineHeight: 2.5 / 2.25,
                   marginRight: 20,
                   fontFamily: fontMainUi,
                 }}
