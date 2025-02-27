@@ -1,3 +1,4 @@
+import React from "react";
 import { Hono } from "hono";
 import { Bindings } from "./env.js";
 import { ImageResponse } from "@vercel/og";
