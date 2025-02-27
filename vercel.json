@@ -28,6 +28,10 @@
       "destination": "/api"
     },
     {
+      "source": "/og/([0-9]+.*)",
+      "destination": "/api"
+    },
+    {
       "source": "/",
       "destination": "/api"
     },
