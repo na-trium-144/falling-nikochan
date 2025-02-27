@@ -183,7 +183,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       if (imRes.ok && imRes.body) {
         return c.body(imRes.body, 200, {
           "Content-Type": imRes.headers.get("Content-Type") || "",
-          "Cache-Control": "no-store",
+          "Cache-Control": "max-age=7200",
         });
       } else {
         console.error(imRes);
