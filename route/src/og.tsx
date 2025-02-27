@@ -11,7 +11,7 @@ import { fetchStatic } from "./static.js";
 const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const lang = c.get("language");
+    const lang = "en"; // c.get("language");
     const cid = c.req.param("cid");
     const pBriefRes = briefApp.request(`/${cid}`);
     const t = await getTranslations(lang, "share");
@@ -183,7 +183,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       if (imRes.ok && imRes.body) {
         return c.body(imRes.body, 200, {
           "Content-Type": imRes.headers.get("Content-Type") || "",
-          "Cache-Control": "no-store",
+          "Cache-Control": "max-age=7200",
         });
       } else {
         console.error(imRes);
