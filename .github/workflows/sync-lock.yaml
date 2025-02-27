@@ -1,7 +1,9 @@
 name: Sync lockfiles
 on:
   pull_request_target:
-    paths: ['package.json']
+    paths: 
+    - "package.json"
+    - "*/package.json"
 jobs:
   sync-lockfile:
     runs-on: ubuntu-latest
