@@ -26,7 +26,7 @@
     "dotenv": "^16.4.7",
     "eslint-config-next": "^15.1.6",
     "postcss": "^8.4.41",
-    "tailwindcss": "^4.0.6",
+    "tailwindcss": "^4.0.9",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
 }
