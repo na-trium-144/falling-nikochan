@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "tsc --noEmit && eslint route/ api/ app/ chartFormat/ i18n/",
     "ndev": "next dev -H 0.0.0.0",
-    "nbuild": "next build",
+    "nbuild": "node ./woff2sfnt.js && next build",
     "vdev": "vercel dev --listen 0.0.0.0:8787",
     "ldev": "tsx watch route/serve-local.ts",
     "bdev": "bun run --hot route/serve-bun.ts"
@@ -59,7 +59,8 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.23.0",
-    "vercel": "^41.1.4"
+    "vercel": "^41.1.4",
+    "woff2sfnt-sfnt2woff": "^1.0.0"
   },
   "overrides": {
     "react": "$react",

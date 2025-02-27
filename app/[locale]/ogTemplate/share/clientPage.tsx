@@ -56,7 +56,8 @@ export default function OGTemplate(props: { locale: string }) {
       <div
         className={
           "pl-8 mt-6 font-title text-6xl " +
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible "
+          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
+          (showDummyData ? "" : "invisible")
         }
       >
         <span
@@ -65,7 +66,7 @@ export default function OGTemplate(props: { locale: string }) {
         >
           {t("chartCreator")}:
         </span>
-        <span className={showDummyData ? "" : "invisible"}>
+        <span>
           chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作
         </span>
       </div>
