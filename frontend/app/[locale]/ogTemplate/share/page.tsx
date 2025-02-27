@@ -6,6 +6,6 @@ export async function generateMetadata({ params }: MetadataProps) {
 }
 // pageTitle(cid, brief) or `Not Found (ID: ${cid})`
 
-export default async function Page({ params }: MetadataProps) {
+export default async function Page(/*{ params }: MetadataProps*/) {
   return <OGTemplate />;
 }
