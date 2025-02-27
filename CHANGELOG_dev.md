@@ -1,3 +1,14 @@
+## ver. 8.7 - 2025/02/28 [#309](https://github.com/na-trium-144/falling-nikochan/pull/309)
+
+* @vercel/og を使ってshareリンク用のOGP画像を生成する
+    * /og/:cid のパスで1200x630の画像を生成して返すようにした
+* ttf形式でかつファイル名にハッシュが含まれないフォントファイルが必要になったため、
+woffから変換してassets/以下に出力するスクリプト(woff2sfnt.js)を用意しビルド時に実行するようにした
+* ついでに /share のパスのSSR処理を app.ts から別ファイルに分離
+* tsconfigを route/ と app/ で分ける必要が生じたため、各ディレクトリにtsconfigを追加
+* ついでに各ディレクトリにpackage.jsonも追加して、npmのworkspace機能で管理するように変更
+    * chart/ のソースを編集するたびに `npm run t` または `bun t` の実行する必要があるが...
+
 ## ver. 8.5 - 2025/02/24 [#301](https://github.com/na-trium-144/falling-nikochan/pull/301)
 
 * XSS対策のため /share ページで楽曲タイトルをエスケープする処理を追加
