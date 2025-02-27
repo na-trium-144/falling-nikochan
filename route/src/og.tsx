@@ -50,10 +50,18 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
       ),
     }));
+    const pBgImage = fetchStatic(
+      new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin)
+    );
 
     const briefRes = await pBriefRes;
     if (briefRes.ok) {
       const brief = (await briefRes.json()) as ChartBrief;
+      const bgImageBuf = new Uint8Array(await (await pBgImage).arrayBuffer());
+      let bgImageBin = "";
+      for (let i = 0; i < bgImageBuf.byteLength; i++) {
+        bgImageBin += String.fromCharCode(bgImageBuf[i]);
+      }
       const imRes = new ImageResponse(
         (
           <div
@@ -71,10 +79,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                 width: "100%",
                 position: "absolute",
               }}
-              src={new URL(
-                `/assets/ogTemplateShare.png`,
-                new URL(c.req.url).origin
-              ).toString()}
+              src={`data:image/png;base64,${btoa(bgImageBin)}`}
             />
             <img
               style={{
