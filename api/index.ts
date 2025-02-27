@@ -4,7 +4,7 @@
 
 import "dotenv/config";
 import { handle } from "hono/vercel";
-import app from "../route/app.js";
+import app from "@falling-nikochan/route";
 
 // export const config = {
 //   runtime: "nodejs",

@@ -1,7 +1,7 @@
 {
   "installCommand": "rm -f package-lock.json && bun i --frozen-lockfile",
   "buildCommand": "bun nbuild",
-  "outputDirectory": "out",
+  "outputDirectory": "frontend/out",
   "devCommand": null,
   "framework": null,
   "cleanUrls": true,

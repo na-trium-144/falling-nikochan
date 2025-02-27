@@ -1,13 +1,13 @@
 import "dotenv/config";
 import { serveStatic } from "hono/bun";
-import app from "./app.js";
+import app from "./src/index.js";
 
 const port = 8787;
 
-app.use("/", serveStatic({ path: "./out/index.html" })).use(
+app.use(
   "/*",
   serveStatic({
-    root: "./out",
+    root: "../frontend/out",
     rewriteRequestPath: (path) => {
       if (path.match(/\/[^/]+\.[^/]+$/)) {
         // path with extension
