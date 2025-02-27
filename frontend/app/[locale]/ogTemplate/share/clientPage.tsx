@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 
-export default function OGTemplate(props: { locale: string }) {
+export default function OGTemplate() {
   const t = useTranslations("share");
   useTheme();
   const [showDummyData, setShowDummyData] = useState<boolean>(true);

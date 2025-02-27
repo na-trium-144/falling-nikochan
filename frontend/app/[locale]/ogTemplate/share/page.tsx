@@ -7,5 +7,5 @@ export async function generateMetadata({ params }: MetadataProps) {
 // pageTitle(cid, brief) or `Not Found (ID: ${cid})`
 
 export default async function Page({ params }: MetadataProps) {
-  return <OGTemplate locale={(await params).locale} />;
+  return <OGTemplate />;
 }
