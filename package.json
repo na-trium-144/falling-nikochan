@@ -42,7 +42,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.25.0",
-    "vercel": "^41.1.4"
+    "vercel": "^41.2.2"
   },
   "overrides": {
     "react": "$react",
