@@ -41,6 +41,7 @@ export async function initMetadata(
       ? {
           title: titleWithoutSiteName(title),
           description,
+          url: path,
           images: image
             ? [{ url: image, width: 1200, height: 630 }]
             : undefined,
