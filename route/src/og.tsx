@@ -50,6 +50,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
       ),
     }));
+    // [locale]/ogTemplate/share をスクショしたpng画像を /assets に置く
     const pBgImage = fetchStatic(
       new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin)
     );
@@ -86,7 +87,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                 position: "absolute",
                 top: 0,
                 right: 0,
-                width: 1200 / 3 + 1,
+                width: 480,
                 objectFit: "cover",
               }}
               src={
@@ -96,8 +97,8 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             />
             <div
               style={{
-                paddingLeft: 32 + 96,
-                marginTop: 160,
+                paddingLeft: 80 + 96,
+                marginTop: 192,
                 // 5xl
                 fontSize: 48,
                 lineHeight: 1,
@@ -108,8 +109,8 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             </div>
             <div
               style={{
-                paddingLeft: 32,
-                marginTop: 32,
+                paddingLeft: 80,
+                marginTop: 40,
                 width: 2147483647,
                 // 困ったことにellipsisが効かない
                 // width: "100%",
@@ -127,7 +128,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             </div>
             <div
               style={{
-                paddingLeft: 32,
+                paddingLeft: 80,
                 marginTop: 24,
                 width: 2147483647,
                 // 6xl
@@ -142,7 +143,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
               style={{
                 display: "flex",
                 alignItems: "baseline",
-                paddingLeft: 32,
+                paddingLeft: 80,
                 marginTop: 24,
                 width: 2147483647,
                 // 6xl

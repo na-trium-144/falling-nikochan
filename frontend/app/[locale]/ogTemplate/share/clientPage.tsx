@@ -24,20 +24,25 @@ export default function OGTemplate(props: { locale: string }) {
       className="absolute flex flex-col "
       style={{ width: 1200, height: 630 }}
     >
-      <div className="absolute top-0 right-0 w-1/3 aspect-[16/9] bg-gray-500 ">
-        Thumbnail Here
-      </div>
       <Title
-        className="absolute top-0 left-0 h-24 scale-200 origin-top-left "
+        className="absolute top-0 left-0 h-25 scale-190 origin-top-left "
         anim={false}
       />
-      <div className="pl-8 mt-40 text-5xl ">
+      <div
+        className={
+          "absolute top-0 right-0 w-[480px] aspect-[16/9] bg-gray-500 " +
+          (showDummyData ? "" : "invisible")
+        }
+      >
+        Thumbnail Here
+      </div>
+      <div className="pl-20 mt-48 text-5xl ">
         <span className="inline-block w-24 ">ID:</span>
         <span className="inline-block ">{showDummyData && 444444}</span>
       </div>
       <div
         className={
-          "pl-8 mt-8 text-7xl font-title " +
+          "pl-20 mt-10 text-7xl font-title " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
@@ -46,7 +51,7 @@ export default function OGTemplate(props: { locale: string }) {
       </div>
       <div
         className={
-          "pl-8 mt-6 text-6xl font-title " +
+          "pl-20 mt-6 text-6xl font-title " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
@@ -55,7 +60,7 @@ export default function OGTemplate(props: { locale: string }) {
       </div>
       <div
         className={
-          "pl-8 mt-6 font-title text-6xl " +
+          "pl-20 mt-6 font-title text-6xl " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
