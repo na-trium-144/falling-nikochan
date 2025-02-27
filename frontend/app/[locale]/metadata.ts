@@ -52,7 +52,7 @@ export async function initMetadata(
     twitter: path
       ? {
           title: titleWithSiteName(title),
-          card: "summary",
+          card: "summary_large_image",
           description,
           images: image ? [image] : undefined,
         }
