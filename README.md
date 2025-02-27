@@ -38,6 +38,13 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         # or
         bun i
         ```
+* Common files (chart/)
+    * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
+    ```sh
+    npm run t
+    # or
+    bun t
+    ```
 * Backend
     * Built with Hono, so it can be run with many runtimes.
     * For a local development environment, server can be run with Node.js or Bun (`http://localhost:8787`)
@@ -50,7 +57,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 * Frontend
     * development environment of Next.js (`http://localhost:3000/ja` or `/en`)
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
-        * Instead, `/share/placeholder` shows the placeholder page.
+        * Instead, `/ja/share/placeholder` shows the placeholder page.
         ```sh
         npm run ndev
         # or
