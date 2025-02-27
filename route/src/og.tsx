@@ -11,7 +11,7 @@ import { fetchStatic } from "./static.js";
 const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const lang = c.get("language");
+    const lang = "en"; // c.get("language");
     const cid = c.req.param("cid");
     const pBriefRes = briefApp.request(`/${cid}`);
     const t = await getTranslations(lang, "share");
