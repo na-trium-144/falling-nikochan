@@ -1,0 +1,10 @@
+{
+  "name": "@falling-nikochan/chart",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "wasmoon": "^1.16.0"
+  }
+}

@@ -1,16 +1,18 @@
-import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import app from "./app.js";
+import app from "./src/index.js";
+import { join, dirname } from "node:path";
+import dotenv from "dotenv";
+dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const port = 8787;
 console.log(`Server is running on http://localhost:${port}`);
 
 serve({
-  fetch: app.use("/", serveStatic({ path: "./out/index.html" })).use(
+  fetch: app.use(
     "/*",
     serveStatic({
-      root: "./out",
+      root: "../frontend/out",
       rewriteRequestPath: (path) => {
         if (path.match(/\/[^/]+\.[^/]+$/)) {
           // path with extension
