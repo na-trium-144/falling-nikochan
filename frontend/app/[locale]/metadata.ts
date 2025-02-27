@@ -9,7 +9,8 @@ export interface MetadataProps {
 export async function initMetadata(
   params: Promise<{ locale?: string }>,
   path: string | null,
-  title: string
+  title: string,
+  image?: string
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
   const t = await getTranslations(locale, "main");
@@ -40,7 +41,9 @@ export async function initMetadata(
       ? {
           title: titleWithoutSiteName(title),
           description,
-          // todo: images
+          images: image
+            ? [{ url: image, width: 1200, height: 630 }]
+            : undefined,
           type: "website",
           locale,
           siteName: "Falling Nikochan",
@@ -51,7 +54,7 @@ export async function initMetadata(
           title: titleWithSiteName(title),
           card: "summary",
           description,
-          // images
+          images: image ? [image] : undefined,
         }
       : undefined,
     robots: {

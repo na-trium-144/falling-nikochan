@@ -57,6 +57,10 @@ const shareHandler = factory.createHandlers(async (c) => {
       .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
       .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
       .replaceAll(
+        "https://placeholder_og_image/",
+        new URL(`/og/${cid}`, new URL(c.req.url).origin).toString()
+      )
+      .replaceAll(
         // これはjsファイルの中にしか現れないのでエスケープの必要はない
         '"PLACEHOLDER_BRIEF"',
         JSON.stringify(JSON.stringify(brief))
