@@ -33,7 +33,7 @@ jobs:
     - run: npm run lint
     # - run: npm run test
 
-  Deploy-Preview: # uses bun
+  vercel-build: # uses bun
     needs: [check-lockfile]
     runs-on: ubuntu-latest
     env:
@@ -48,5 +48,24 @@ jobs:
       run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
       run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+    - uses: actions/upload-artifact@v4
+      with:
+        name: vercel-build
+        path: ${{github.workspace}}
+        include-hidden-files: true
+
+  vercel-deploy:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: vercel-build
+        path: ${{github.workspace}}
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
     - name: Deploy Project Artifacts to Vercel
       run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
