@@ -7,6 +7,7 @@ import RhythmicalSlime from "@/play/rhythmicalSlime";
 import { useTranslations } from "next-intl";
 import { stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
+import { levelBgColors } from "@/common/levelColors";
 
 export default function OGTemplate() {
   const t = useTranslations("share");
@@ -30,19 +31,26 @@ export default function OGTemplate() {
       />
       <div
         className={
-          "absolute top-0 right-0 w-[480px] aspect-[16/9] bg-gray-500 " +
-          (showDummyData ? "" : "invisible")
+          "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl " +
+          levelBgColors[1]
         }
       >
-        Thumbnail Here
+        <div
+          className={
+            "w-full aspect-[16/9] bg-gray-500 " +
+            (showDummyData ? "" : "invisible")
+          }
+        >
+          Thumbnail Here
+        </div>
       </div>
-      <div className="pl-20 mt-48 text-5xl ">
+      <div className="pl-20 mt-50 text-5xl ">
         <span className="inline-block w-24 ">ID:</span>
         <span className="inline-block ">{showDummyData && 444444}</span>
       </div>
       <div
         className={
-          "pl-20 mt-10 text-7xl font-title " +
+          "pl-20 mt-12 text-7xl font-title " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
@@ -51,7 +59,7 @@ export default function OGTemplate() {
       </div>
       <div
         className={
-          "pl-20 mt-6 text-5xl font-title " +
+          "pl-20 mt-4 text-5xl font-title " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
@@ -60,14 +68,12 @@ export default function OGTemplate() {
       </div>
       <div
         className={
-          "pl-20 mt-6 font-title text-5xl " +
+          "pl-20 mt-4 font-title text-5xl " +
           "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
           (showDummyData ? "" : "invisible")
         }
       >
-        <span
-          className="font-main-ui text-4xl mr-5 "
-        >
+        <span className="font-main-ui text-4xl mr-5 ">
           {t("chartCreator")}:
         </span>
         <span>
