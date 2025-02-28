@@ -39,7 +39,7 @@
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
         "@mdx-js/react": "^3.1.0",
-        "@next/mdx": "^15.1.6",
+        "@next/mdx": "^15.2.0",
         "@ygoe/msgpack": "^1.0.3",
         "ace-builds": "^1.39.0",
         "file-saver": "^2.0.5",
@@ -270,7 +270,7 @@
 
     "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.2.0", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-jHFUG2OwmAuOASqq253RAEG/5BYcPHn27p1NoWZDCf4OdvdK0yRYWX92YKkL+Mk2s+GyJrmd/GATlL5b2IySpw=="],
 
-    "@next/mdx": ["@next/mdx@15.1.7", "", { "dependencies": { "source-map": "^0.7.0" }, "peerDependencies": { "@mdx-js/loader": ">=0.15.0", "@mdx-js/react": ">=0.15.0" } }, "sha512-olVOjKA1K8b7/cu0zqWecVkwyCUnB9xlKXxB/CeCRoZYlH0zluLHwhWBX0PR9yf3CG7eNLrK+PfuPBF+LdWODQ=="],
+    "@next/mdx": ["@next/mdx@15.2.0", "", { "dependencies": { "source-map": "^0.7.0" }, "peerDependencies": { "@mdx-js/loader": ">=0.15.0", "@mdx-js/react": ">=0.15.0" }, "optionalPeers": ["@mdx-js/loader", "@mdx-js/react"] }, "sha512-q10eCj5ERepucvG/2vos/iNXh9XZCG7qTPMi9/QIYWW4SUnaZnz7ip7F4QpyHSRp4A3afk/BTVDTwuOOZ1VZMA=="],
 
     "@next/swc-darwin-arm64": ["@next/swc-darwin-arm64@15.2.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-rlp22GZwNJjFCyL7h5wz9vtpBVuCt3ZYjFWpEPBGzG712/uL1bbSkS675rVAUCRZ4hjoTJ26Q7IKhr5DfJrHDA=="],
 
