@@ -50,6 +50,7 @@
     "typescript": "$typescript",
     "ts-node": "^10",
     "undici": "^5.28.5",
-    "tar": "^7"
+    "tar": "^7",
+    "esbuild": "^0.25"
   }
 }
