@@ -1,3 +1,7 @@
+## ver. 8.10 - 2025/02/28 [#331](https://github.com/na-trium-144/falling-nikochan/pull/331)
+
+* WebShareAPIで共有するボタンをshareページ、editページのmetaタブに追加
+
 ## ver. 8.7 - 2025/02/28 [#309](https://github.com/na-trium-144/falling-nikochan/pull/309)
 
 * @vercel/og を使ってshareリンク用のOGP画像を生成する
