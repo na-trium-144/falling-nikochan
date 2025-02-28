@@ -7,6 +7,7 @@ export default {
     isPublished: "一般公開",
     shareLink: "共有用リンク",
     copy: "コピー",
+    share: "共有",
     selectLevel: "レベルを選択",
     bestScore: "ベストスコア",
     start: "ゲーム開始！",
