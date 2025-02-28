@@ -4,12 +4,25 @@ on:
     branches: [ "main" ]
     
 jobs:
-  test:
+  check-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - run: bun i
+    - run: npm i
+    - name: Abort if lockfile changed
+      run: '[ -z "$(git status -s)" ]'
+
+  test: # uses node
+    needs: [check-lockfile]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -19,3 +32,55 @@ jobs:
     - run: npm ci
     - run: npm run lint
     # - run: npm run test
+
+  vercel-build: # uses bun
+    needs: [check-lockfile]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: bun i --frozen-lockfile
+    - name: Pull Vercel Environment Information
+      run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Build Project Artifacts
+      run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Upload frontend/out
+      uses: actions/upload-artifact@v4
+      with:
+        name: vercel-frontend
+        path: frontend/out
+        include-hidden-files: true
+    - name: Upload .vercel/output
+      uses: actions/upload-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+        include-hidden-files: true
+
+  vercel-deploy:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: bun i --frozen-lockfile
+    - name: Pull Vercel Environment Information
+      run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Download frontend/out
+      uses: actions/download-artifact@v4
+      with:
+        name: vercel-frontend
+        path: frontend/out
+    - name: Download .vercel/output
+      uses: actions/download-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+    - name: Deploy Project Artifacts to Vercel
+      run: bunx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

@@ -29,6 +29,7 @@ import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { luaExec } from "@falling-nikochan/chart";
 import { chartMaxEvent } from "@falling-nikochan/chart";
+import { titleWithSiteName } from "@/common/title";
 
 interface Props {
   chart?: ChartEdit;
@@ -185,12 +186,40 @@ export function MetaTab(props: Props2) {
   const [uploadMsg, setUploadMsg] = useState<string>("");
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
+  const [shareData, setShareData] = useState<object | null>(null);
   useEffect(() => {
     setErrorMsg("");
     setSaveMsg("");
     setOrigin(window.location.origin);
     setHasClipboard(!!navigator?.clipboard);
   }, [props.chart]);
+  const ts = useTranslations("share");
+  useEffect(() => {
+    const shareData = {
+      title: titleWithSiteName(
+        props.chart?.composer
+          ? ts("titleWithComposer", {
+              title: props.chart?.title,
+              composer: props.chart?.composer,
+              chartCreator: props.chart?.chartCreator,
+              cid: props.cid,
+            })
+          : ts("title", {
+              title: props.chart?.title,
+              chartCreator: props.chart?.chartCreator,
+              cid: props.cid,
+            })
+      ),
+      url: `${origin}/share/${props.cid}`,
+    };
+    if (
+      !!navigator?.share &&
+      !!navigator.canShare &&
+      navigator.canShare(shareData)
+    ) {
+      setShareData(shareData);
+    }
+  }, [origin, props.cid, props.chart]);
 
   const save = async () => {
     setSaving(true);
@@ -431,6 +460,13 @@ export function MetaTab(props: Props2) {
                 onClick={() =>
                   navigator.clipboard.writeText(`${origin}/share/${props.cid}`)
                 }
+              />
+            )}
+            {shareData && (
+              <Button
+                className="ml-2"
+                text={t("share")}
+                onClick={() => navigator.share(shareData)}
               />
             )}
           </div>
