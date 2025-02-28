@@ -586,22 +586,26 @@ function Play(props: Props) {
         />
       )}
       <Title className="absolute left-0 top-0 h-32 scale-175 origin-top-left " anim={false} />
-      <div className="absolute left-4 top-64 ">
+      <div className="absolute left-12 top-74 z-10 ">
         <span className="text-7xl font-bold font-title">
           title
         </span>
-      </div>
-      <div className="absolute left-12 top-88">
-        <span className="text-6xl font-title">
-          composer etc
+        <span className="text-6xl ml-6 font-bold font-title">
         </span>
       </div>
-      <div className={"absolute left-48 top-112 " + levelColors[0]}>
+      <div className="absolute left-12 top-98">
+        <span className="text-5xl font-title">
+          composer etc
+        </span>
+        <span className="text-5xl ml-4 font-title">
+        </span>
+      </div>
+      <div className={"absolute left-48 top-122 " + levelColors[0]}>
         <span className="text-4xl mr-6">
           Level:
         </span>
         <span className="text-5xl ">
-          Single-
+          Single-8
         </span>
       </div>
     </main>
