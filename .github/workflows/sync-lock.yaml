@@ -5,8 +5,22 @@ on:
     - "package.json"
     - "*/package.json"
 jobs:
+  prevent-recursive-run:
+    runs-on: ubuntu-latest
+    outputs:
+      recursive: ${{ steps.check.outputs.recursive }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.head_ref }}
+    - name: check previous author
+      id: check
+      run: "if git log -1 | grep 41898282+github-actions; then echo recursive=true >> $GITHUB_OUTPUT; fi"
   sync-lockfile:
     runs-on: ubuntu-latest
+    needs: [prevent-recursive-run]
+    if: needs.prevent-recursive-run.outputs.recursive != 'true'
     steps:
     - uses: actions/checkout@v4
       with:
@@ -18,8 +32,6 @@ jobs:
         # Checkout the branch made in the fork. Will automatically push changes
         # back to this branch.
         ref: ${{ github.head_ref }}
-    - name: Abort if previous author is github action to prevent recursive runs
-      run: "! git log -1 | grep 41898282+github-actions"
     - uses: oven-sh/setup-bun@v2
     - uses: actions/setup-node@v4
       with:
