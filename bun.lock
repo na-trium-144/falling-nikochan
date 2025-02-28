@@ -41,7 +41,7 @@
         "@mdx-js/react": "^3.1.0",
         "@next/mdx": "^15.1.6",
         "@ygoe/msgpack": "^1.0.3",
-        "ace-builds": "^1.38.0",
+        "ace-builds": "^1.39.0",
         "file-saver": "^2.0.5",
         "next": "^15.2.0",
         "react-ace": "^14.0.1",
@@ -451,7 +451,7 @@
 
     "abbrev": ["abbrev@3.0.0", "", {}, "sha512-+/kfrslGQ7TNV2ecmQwMJj/B65g5KVq1/L3SGVZ3tCYGqlzFuFCGBZJtMP99wH3NpEUyAjn0zPdPUg0D+DwrOA=="],
 
-    "ace-builds": ["ace-builds@1.38.0", "", {}, "sha512-5W3B5/5Rl/dAsp7Fb6xXOc6bCYln+4qOnpQHh4OpxZSoDsp1KFiu5lA3TJBr8/5DQu6+8rlduCGecMSnKuU2MQ=="],
+    "ace-builds": ["ace-builds@1.39.0", "", {}, "sha512-MqoZojv4gpc5QyTMor/dS6kmruDV9db9LVZbCiT4qYz6WsDiv4qyG5f7ZPc+wjUl6oLMqgCAsBjo1whdSVyMlQ=="],
 
     "acorn": ["acorn@8.14.0", "", { "bin": "bin/acorn" }, "sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA=="],
 
@@ -1568,6 +1568,8 @@
     "path-scurry/lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
 
     "raw-body/http-errors": ["http-errors@1.7.3", "", { "dependencies": { "depd": "~1.1.2", "inherits": "2.0.4", "setprototypeof": "1.1.1", "statuses": ">= 1.5.0 < 2", "toidentifier": "1.0.0" } }, "sha512-ZTTX0MWrsQ2ZAhA1cejAwDLycFsd7I7nVtnkT3Ol0aqodaKW+0CTZDQ1uBv5whptCnc8e8HeRRJxRs0kmm/Qfw=="],
+
+    "react-ace/ace-builds": ["ace-builds@1.38.0", "", {}, "sha512-5W3B5/5Rl/dAsp7Fb6xXOc6bCYln+4qOnpQHh4OpxZSoDsp1KFiu5lA3TJBr8/5DQu6+8rlduCGecMSnKuU2MQ=="],
 
     "rimraf/glob": ["glob@10.4.5", "", { "dependencies": { "foreground-child": "^3.1.0", "jackspeak": "^3.1.2", "minimatch": "^9.0.4", "minipass": "^7.1.2", "package-json-from-dist": "^1.0.0", "path-scurry": "^1.11.1" }, "bin": "dist/esm/bin.mjs" }, "sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg=="],
 
