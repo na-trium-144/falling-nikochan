@@ -51,7 +51,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: vercel-build
-        path: ${{github.workspace}}
+        path: frontend/out
         include-hidden-files: true
 
   vercel-deploy:
@@ -61,11 +61,15 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+    - name: Pull Vercel Environment Information
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - uses: actions/download-artifact@v4
       with:
         name: vercel-build
-        path: ${{github.workspace}}
-    - name: Install Vercel CLI
-      run: npm install --global vercel@latest
+        path: frontend/out
     - name: Deploy Project Artifacts to Vercel
       run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
