@@ -8,6 +8,7 @@ export default {
     isPublished: "Published",
     shareLink: "Share Link",
     copy: "Copy",
+    share: "Share",
     selectLevel: "Select Level",
     bestScore: "Best Score",
     start: "Start Game!",

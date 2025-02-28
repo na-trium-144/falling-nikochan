@@ -100,6 +100,7 @@ export default {
         "(For details, please check the update history at the bottom of the top page.)",
       shareLink: "Share link",
       copy: "Copy",
+      share: "Share",
       localSaveLoad: "Save/load locally",
       localSaveLoadHelp:
         "You can save/load the current chart on your device.<br></br>" +

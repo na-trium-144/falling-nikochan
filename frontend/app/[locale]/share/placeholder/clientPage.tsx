@@ -13,6 +13,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
 import { International, PlayOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
+import { titleWithSiteName } from "@/common/title.js";
 
 export const dynamic = "force-static";
 
@@ -61,10 +62,37 @@ export default function ShareChart({ locale }: { locale: string }) {
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [origin, setOrigin] = useState<string>("");
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
+  const [shareData, setShareData] = useState<object | null>(null);
   useEffect(() => {
     setOrigin(window.location.origin);
     setHasClipboard(!!navigator?.clipboard);
   }, []);
+  useEffect(() => {
+    const shareData = {
+      title: titleWithSiteName(
+        brief?.composer
+          ? t("titleWithComposer", {
+              title: brief?.title,
+              composer: brief?.composer,
+              chartCreator: brief?.chartCreator,
+              cid: cid,
+            })
+          : t("title", {
+              title: brief?.title,
+              chartCreator: brief?.chartCreator,
+              cid: cid,
+            })
+      ),
+      url: `${origin}/share/${cid}`,
+    };
+    if (
+      !!navigator?.share &&
+      !!navigator.canShare &&
+      navigator.canShare(shareData)
+    ) {
+      setShareData(shareData);
+    }
+  }, [origin, cid, brief]);
 
   return (
     <main className="flex flex-col items-center w-full min-h-dvh h-max">
@@ -159,6 +187,13 @@ export default function ShareChart({ locale }: { locale: string }) {
                   onClick={() =>
                     navigator.clipboard.writeText(`${origin}/share/${cid}`)
                   }
+                />
+              )}
+              {shareData && (
+                <Button
+                  className="ml-2"
+                  text={t("share")}
+                  onClick={() => navigator.share(shareData)}
                 />
               )}
             </p>

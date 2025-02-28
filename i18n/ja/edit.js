@@ -101,6 +101,7 @@ export default {
         "(詳細はトップページ下部の更新履歴を確認してください。)",
       shareLink: "共有用リンク",
       copy: "コピー",
+      share: "共有",
       localSaveLoad: "ローカルに保存/読み込み",
       localSaveLoadHelp:
         "現在の譜面をあなたの端末上に保存・読み込みできます。<br></br>" +
