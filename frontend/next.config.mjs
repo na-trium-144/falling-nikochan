@@ -2,7 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import createMDX from "@next/mdx";
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "./package.json" with { type: "json" };
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
