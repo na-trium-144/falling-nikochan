@@ -18,12 +18,13 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## Development
 
-* Install [Node.js](https://nodejs.org/ja/download) or [Bun](https://bun.sh/docs/installation).
+* Install [Node.js](https://nodejs.org/ja/download) (>=20) or [Bun](https://bun.sh/docs/installation) (>=1.2).
 * Install [MongoDB](https://www.mongodb.com/docs/manual/installation/) and run on `localhost:27017`
-    * If you have Docker installed, it is easy to use and recommended
+    * If you have Docker installed, it is easy to run and recommended
         ```sh
         docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest
         ```
+        * or `npm run mongo-docker`, `bun mongo-docker` does the same.
     * Falling Nikochan creates and uses a database named `nikochan` in it
 * Create a `.env` file with the following contents
     ```sh
@@ -32,27 +33,21 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     API_ENV="development"
     ```
 * Install dependencies
+    ```sh
+    npm ci  # or  bun i
+    ```
     * [GitHub Action ensures](.github/workflows/sync-lock.yaml) the two lockfiles synchronized with package.json.
-        ```sh
-        npm ci
-        # or
-        bun i
-        ```
 * Common files (chart/)
     * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
-    ```sh
-    npm run t
-    # or
-    bun t
-    ```
+        ```sh
+        npm run t  # or  bun t
+        ```
 * Backend
     * Serves /api, /share, /og, and / (redirect).
     * Built with Hono, so it can be run with many runtimes.
     * For a local development environment, server can be run with Node.js or Bun (`http://localhost:8787`)
         ```sh
-        npm run ldev
-        # or
-        bun bdev
+        npm run ldev  # or  bun bdev
         ```
     * For the deployment, currently using Vercel
 * Frontend
@@ -60,16 +55,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
         * Instead, `/ja/share/placeholder` shows the placeholder page.
         ```sh
-        npm run ndev
-        # or
-        bun ndev
+        npm run ndev  # or  bun ndev
         ```
     * Or, SSR with exported html files
         * All pages should work by accessing the backend (`http://localhost:8787`) after building frontend, but there is no hot-reload.
         ```sh
-        npm run nbuild
-        # or
-        bun nbuild
+        npm run nbuild  # or  bun nbuild
         ```
     * As of Bun v1.2.2, `bun -b nbuild` seems to be unstable for this project.
 
