@@ -98,7 +98,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             <div
               style={{
                 paddingLeft: 80 + 96,
-                marginTop: 192,
+                marginTop: 200,
                 // 5xl
                 fontSize: 48,
                 lineHeight: 1,
@@ -110,7 +110,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             <div
               style={{
                 paddingLeft: 80,
-                marginTop: 40,
+                marginTop: 48,
                 width: 2147483647,
                 // 困ったことにellipsisが効かない
                 // width: "100%",
@@ -129,7 +129,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             <div
               style={{
                 paddingLeft: 80,
-                marginTop: 24,
+                marginTop: 16,
                 width: 2147483647,
                 // 5xl
                 fontSize: 48,
@@ -144,7 +144,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                 display: "flex",
                 alignItems: "baseline",
                 paddingLeft: 80,
-                marginTop: 24,
+                marginTop: 16,
                 width: 2147483647,
                 // 5xl
                 fontSize: 48,

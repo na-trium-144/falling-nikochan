@@ -1,6 +1,5 @@
 {
   "name": "falling-nikochan",
-  "version": "8.10.0",
   "private": true,
   "type": "module",
   "scripts": {

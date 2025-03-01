@@ -1,3 +1,8 @@
+## ver. 8.11 - 2025/03/01 [#335](https://github.com/na-trium-144/falling-nikochan/pull/335)
+
+* OGPに載せるサムネイルの周りに枠を追加
+* ogのクエリパラメータに追加するため各workspaceにもversionを追加
+
 ## ver. 8.10 - 2025/02/28 [#331](https://github.com/na-trium-144/falling-nikochan/pull/331)
 
 * WebShareAPIで共有するボタンをshareページ、editページのmetaタブに追加
