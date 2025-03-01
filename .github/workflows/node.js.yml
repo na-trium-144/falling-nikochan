@@ -62,6 +62,10 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
+    # .vercel/output と、それとは別に node_modules も必要
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: bun i --frozen-lockfile
     - name: Install Vercel CLI
       run: npm install --global vercel@latest
     - name: Pull Vercel Environment Information
