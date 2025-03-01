@@ -42,17 +42,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v2
-    - run: bun i --frozen-lockfile
     - name: Pull Vercel Environment Information
       run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
       run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-    - name: Upload frontend/out
-      uses: actions/upload-artifact@v4
-      with:
-        name: vercel-frontend
-        path: frontend/out
-        include-hidden-files: true
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:
@@ -67,16 +60,12 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
+    # .vercel/output と、それとは別に node_modules も必要
     - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v2
     - run: bun i --frozen-lockfile
     - name: Pull Vercel Environment Information
       run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-    - name: Download frontend/out
-      uses: actions/download-artifact@v4
-      with:
-        name: vercel-frontend
-        path: frontend/out
     - name: Download .vercel/output
       uses: actions/download-artifact@v4
       with:
