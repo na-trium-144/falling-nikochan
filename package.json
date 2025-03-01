@@ -41,16 +41,10 @@
     "globals": "^16.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.25.0",
-    "vercel": "^41.2.2"
+    "typescript-eslint": "^8.25.0"
   },
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom",
-    "typescript": "$typescript",
-    "ts-node": "^10",
-    "undici": "^5.28.5",
-    "tar": "^7",
-    "esbuild": "^0.25"
+    "react-dom": "$react-dom"
   }
 }
