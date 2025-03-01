@@ -12,6 +12,7 @@
     "route:t": "cd route && tsc",
     "t": "npm run chart:t && npm run route:t",
     "prepare": "npm run t",
+    "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "ndev": "cd frontend && next dev -H 0.0.0.0",
     "nbuild": "cd frontend && node ./woff2sfnt.js && next build",
     "ldev": "cd route/ && tsx watch serve-local.ts",
