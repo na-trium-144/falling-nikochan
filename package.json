@@ -1,6 +1,5 @@
 {
   "name": "falling-nikochan",
-  "version": "8.10.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,7 +14,6 @@
     "prepare": "npm run t",
     "ndev": "cd frontend && next dev -H 0.0.0.0",
     "nbuild": "cd frontend && node ./woff2sfnt.js && next build",
-    "vdev": "vercel dev --listen 0.0.0.0:8787",
     "ldev": "cd route/ && tsx watch serve-local.ts",
     "bdev": "cd route/ && bun run --hot serve-bun.ts"
   },
@@ -41,16 +39,10 @@
     "globals": "^16.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.25.0",
-    "vercel": "^41.2.2"
+    "typescript-eslint": "^8.25.0"
   },
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom",
-    "typescript": "$typescript",
-    "ts-node": "^10",
-    "undici": "^5.28.5",
-    "tar": "^7",
-    "esbuild": "^0.25"
+    "react-dom": "$react-dom"
   }
 }

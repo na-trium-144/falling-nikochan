@@ -175,6 +175,6 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 ## Versioning
 
 * major version follows the Chart data format version.
-* minor version is increased by `npm version minor` command for each PR
+* minor version is increased by `npm version -ws minor` command for each PR
     * Changes that do not affect app/ such as dependabot or update README.md are not counted.
 * ChangeLogs are written in [app/i18n/[locale]/changelog.mdx](app/i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation.
