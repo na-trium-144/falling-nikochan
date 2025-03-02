@@ -3,6 +3,7 @@ import { getTranslations } from "@falling-nikochan/i18n";
 import {
   baseScoreRate,
   bigScoreRate,
+  chainScoreRate,
   ChartBrief,
   levelTypes,
   rankStr,
@@ -99,36 +100,30 @@ export async function OGResult(
             width: 2147483647,
           }}
         >
-          {brief.levels[params.lvIndex].name && (
+          {params.lvName && (
             <span
               style={{ fontFamily: fontTitle, ...text4xl, marginRight: 4 * 4 }}
             >
-              {brief.levels[params.lvIndex].name}
+              {params.lvName}
             </span>
           )}
           <span
             style={{
               fontFamily: fontMainUi,
               ...text4xl,
-              color:
-                levelColors[
-                  levelTypes.indexOf(brief.levels[params.lvIndex].type)
-                ],
+              color: levelColors[params.lvType],
             }}
           >
-            {brief.levels[params.lvIndex].type}-
+            {levelTypes[params.lvType]}-
           </span>
           <span
             style={{
               fontFamily: fontMainUi,
               ...text5xl,
-              color:
-                levelColors[
-                  levelTypes.indexOf(brief.levels[params.lvIndex].type)
-                ],
+              color: levelColors[params.lvType],
             }}
           >
-            {brief.levels[params.lvIndex].difficulty}
+            {params.lvDifficulty}
           </span>
         </div>
         <div
@@ -150,9 +145,9 @@ export async function OGResult(
             <div style={{ flexGrow: 1, ...flexCol }}>
               {(
                 [
-                  ["baseScore", params.baseScore],
-                  ["chainBonus", params.chainScore],
-                  ["bigNoteBonus", params.bigScore],
+                  ["baseScore", params.baseScore100],
+                  ["chainBonus", params.chainScore100],
+                  ["bigNoteBonus", params.bigScore100],
                 ] as const
               ).map(([name, score], i) => (
                 <div
@@ -160,14 +155,12 @@ export async function OGResult(
                   style={{ ...flexRow, width: "100%", marginBottom: 2 * 4 }}
                 >
                   <span style={{ flexGrow: 1, ...text2xl }}>{t(name)}:</span>
-                  <span style={{ ...text5xl }}>{Math.floor(score)}</span>
+                  <span style={{ ...text5xl }}>{Math.floor(score / 100)}</span>
                   <span style={{ ...text3xl }}>.</span>
                   <span
                     style={{ ...text3xl, textAlign: "left", width: 10 * 4 }}
                   >
-                    {(Math.floor(score * 100) % 100)
-                      .toString()
-                      .padStart(2, "0")}
+                    {(score % 100).toString().padStart(2, "0")}
                   </span>
                 </div>
               ))}
@@ -179,20 +172,11 @@ export async function OGResult(
                   {t("totalScore")}:
                 </span>
                 <span style={{ ...text5xl }}>
-                  {Math.floor(
-                    params.baseScore + params.chainScore + params.bigScore
-                  )}
+                  {Math.floor(params.score100 / 100)}
                 </span>
                 <span style={{ ...text3xl }}>.</span>
                 <span style={{ ...text3xl, textAlign: "left", width: 10 * 4 }}>
-                  {(
-                    Math.floor(
-                      (params.baseScore + params.chainScore + params.bigScore) *
-                        100
-                    ) % 100
-                  )
-                    .toString()
-                    .padStart(2, "0")}
+                  {(params.score100 % 100).toString().padStart(2, "0")}
                 </span>
               </div>
             </div>
@@ -209,22 +193,22 @@ export async function OGResult(
                   {t("rank")}:
                 </span>
                 <span style={{ ...text5xl }}>
-                  {rankStr(
-                    params.baseScore + params.chainScore + params.bigScore
+                  {rankStr(params.score100 / 100)}
+                </span>
+              </div>
+              {params.chainScore100 === chainScoreRate * 100 ? (
+                <div style={{ ...flexRow, marginTop: 4 * 4, ...text3xl }}>
+                  <span>
+                    {params.baseScore100 === baseScoreRate * 100
+                      ? t("perfect")
+                      : t("full")}
+                  </span>
+                  {params.bigScore100 === bigScoreRate * 100 && (
+                    <span style={{ ...bold }}>+</span>
                   )}
-                </span>
-              </div>
-              <div style={{ ...flexRow, marginTop: 4 * 4, ...text3xl }}>
-                <span>
-                  {params.baseScore === baseScoreRate
-                    ? t("perfect")
-                    : t("full")}
-                </span>
-                {params.bigScore === bigScoreRate && (
-                  <span style={{ ...bold }}>+</span>
-                )}
-                <span>!</span>
-              </div>
+                  <span>!</span>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

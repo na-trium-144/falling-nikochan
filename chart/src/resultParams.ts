@@ -1,21 +1,30 @@
 import msgpack from "@ygoe/msgpack";
 
+const dateBase = new Date(2025, 2, 1);
 export interface ResultParams {
-  date: number;
-  lvIndex: number;
-  baseScore: number;
-  chainScore: number;
-  bigScore: number;
+  date: Date;
+  lvName: string;
+  lvType: number;
+  lvDifficulty: number;
+  // 100倍して整数にすることでサイズを削減
+  baseScore100: number;
+  chainScore100: number;
+  bigScore100: number;
+  score100: number;
   judgeCount: readonly [number, number, number, number];
   bigCount: number;
 }
 export function serializeResultParams(params: ResultParams): string {
   const serialized = msgpack.serialize([
-    params.date,
-    params.lvIndex,
-    params.baseScore,
-    params.chainScore,
-    params.bigScore,
+    1,
+    params.date.getTime() - dateBase.getTime(),
+    params.lvName,
+    params.lvType,
+    params.lvDifficulty,
+    params.baseScore100,
+    params.chainScore100,
+    params.bigScore100,
+    params.score100,
     params.judgeCount,
     params.bigCount,
   ]);
@@ -35,13 +44,19 @@ export function deserializeResultParams(serialized: string): ResultParams {
     serializedArr[i] = serializedBin.charCodeAt(i);
   }
   const deserialized = msgpack.deserialize(serializedArr);
+  if (deserialized[0] !== 1) {
+    throw new Error("Invalid version");
+  }
   return {
-    date: deserialized[0],
-    lvIndex: deserialized[1],
-    baseScore: deserialized[2],
-    chainScore: deserialized[3],
-    bigScore: deserialized[4],
-    judgeCount: deserialized[5],
-    bigCount: deserialized[6],
+    date: new Date(dateBase.getTime() + deserialized[1]),
+    lvName: deserialized[2],
+    lvType: deserialized[3],
+    lvDifficulty: deserialized[4],
+    baseScore100: deserialized[5],
+    chainScore100: deserialized[6],
+    bigScore100: deserialized[7],
+    score100: deserialized[8],
+    judgeCount: deserialized[9],
+    bigCount: deserialized[10],
   };
 }

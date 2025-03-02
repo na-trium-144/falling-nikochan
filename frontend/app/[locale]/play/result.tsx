@@ -21,7 +21,6 @@ interface Props extends ResultParams {
   cid: string;
   brief: ChartBrief;
   isTouch: boolean;
-  score: number;
   newRecord: number;
   reset: () => void;
   exit: () => void;
@@ -44,10 +43,13 @@ export default function Result(props: Props) {
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     props.date,
-    props.lvIndex,
-    props.baseScore,
-    props.chainScore,
-    props.bigScore,
+    props.lvName,
+    props.lvType,
+    props.lvDifficulty,
+    props.baseScore100,
+    props.chainScore100,
+    props.bigScore100,
+    props.score100,
     ...props.judgeCount,
     props.bigCount,
     /* eslint-enable react-hooks/exhaustive-deps */
@@ -111,26 +113,26 @@ export default function Result(props: Props) {
             visible={showing >= 1}
             name={t("baseScore")}
             scoreStyle={jumpingAnimation(1)}
-            score={props.baseScore}
+            score100={props.baseScore100}
           />
           <ResultRow
             visible={showing >= 2}
             name={t("chainBonus")}
             scoreStyle={jumpingAnimation(2)}
-            score={props.chainScore}
+            score100={props.chainScore100}
           />
           <ResultRow
             visible={showing >= 3}
             name={t("bigNoteBonus")}
             scoreStyle={jumpingAnimation(3)}
-            score={props.bigScore}
+            score100={props.bigScore100}
           />
           <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
           <ResultRow
             visible={showing >= 4}
             name={t("totalScore")}
             scoreStyle={jumpingAnimation(4)}
-            score={props.score}
+            score100={props.score100}
           />
         </div>
         <div
@@ -142,18 +144,20 @@ export default function Result(props: Props) {
           <div style={{ ...appearingAnimation(5) }}>
             <span className="mr-2">{t("rank")}:</span>
             <span className={props.largeResult ? "text-4xl" : "text-3xl"}>
-              {rankStr(props.score)}
+              {rankStr(props.score100 / 100)}
             </span>
           </div>
-          {props.chainScore === chainScoreRate ? (
+          {props.chainScore100 === chainScoreRate * 100 ? (
             <div
               className={props.largeResult ? "text-2xl" : "text-xl"}
               style={{ ...appearingAnimation(5) }}
             >
               <span className="">
-                {props.baseScore === baseScoreRate ? t("perfect") : t("full")}
+                {props.baseScore100 === baseScoreRate * 100
+                  ? t("perfect")
+                  : t("full")}
               </span>
-              {props.bigScore === bigScoreRate && (
+              {props.bigScore100 === bigScoreRate * 100 && (
                 <span className="font-bold">+</span>
               )}
               <span>!</span>
@@ -165,7 +169,11 @@ export default function Result(props: Props) {
             >
               {t(
                 "message." +
-                  (props.score >= 90 ? "A." : props.score >= 70 ? "B." : "C.") +
+                  (props.score100 >= 9000
+                    ? "A."
+                    : props.score100 >= 7000
+                    ? "B."
+                    : "C.") +
                   (Math.floor(messageRandom.current * 3) + 1)
               )}
             </div>
@@ -227,7 +235,7 @@ interface RowProps {
   name: string;
   className?: string;
   scoreStyle?: object;
-  score: number;
+  score100: number;
 }
 function ResultRow(props: RowProps) {
   return (
@@ -242,13 +250,13 @@ function ResultRow(props: RowProps) {
         {props.name}:
       </span>
       <span className="text-3xl text-right " style={props.scoreStyle}>
-        {Math.floor(props.score)}
+        {Math.floor(props.score100 / 100)}
       </span>
       <span className="" style={props.scoreStyle}>
         .
       </span>
       <span className="text-left w-5 " style={props.scoreStyle}>
-        {(Math.floor(props.score * 100) % 100).toString().padStart(2, "0")}
+        {(props.score100 % 100).toString().padStart(2, "0")}
       </span>
     </p>
   );

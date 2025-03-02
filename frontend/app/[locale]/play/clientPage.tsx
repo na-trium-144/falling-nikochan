@@ -11,16 +11,17 @@
 "use client";
 
 const exampleResult = {
-  baseScore: 7.77,
-  chainScore: 20,
-  bigScore: 1.23,
+  baseScore100: 777,
+  chainScore100: 2000,
+  bigScore100: 123,
+  score100: 2900,
   judgeCount: [11, 22, 33, 44],
   bigCount: 55,
 } as const;
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6, loadChart6 } from "@falling-nikochan/chart";
+import { ChartSeqData6, levelTypes, loadChart6 } from "@falling-nikochan/chart";
 import { ChartSeqData8, loadChart8 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -285,7 +286,7 @@ function Play(props: Props) {
   const [chartStarted, setChartStarted] = useState<boolean>(false);
   // result画面を表示する
   const [showResult, setShowResult] = useState<boolean>(props.goResult);
-  const [resultDate, setResultDate] = useState<number>(0);
+  const [resultDate, setResultDate] = useState<Date>();
 
   const start = () => {
     // 再生中に呼んでもとくになにも起こらない
@@ -343,7 +344,7 @@ function Play(props: Props) {
       }
       const t = setTimeout(() => {
         setShowResult(true);
-        setResultDate(Date.now());
+        setResultDate(new Date());
         stop();
       }, 1000);
       return () => clearTimeout(t);
@@ -492,21 +493,33 @@ function Play(props: Props) {
           {showResult ? (
             <Result
               lang={props.locale}
-              date={resultDate}
+              date={resultDate || new Date()}
               cid={cid || ""}
               brief={chartBrief}
-              lvIndex={lvIndex}
-              baseScore={props.goResult ? exampleResult.baseScore : baseScore}
-              chainScore={
-                props.goResult ? exampleResult.chainScore : chainScore
-              }
-              bigScore={props.goResult ? exampleResult.bigScore : bigScore}
-              score={
+              lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
+              lvType={levelTypes.indexOf(
+                chartBrief.levels.at(lvIndex || 0)?.type || ""
+              )}
+              lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
+              baseScore100={
                 props.goResult
-                  ? exampleResult.baseScore +
-                    exampleResult.chainScore +
-                    exampleResult.bigScore
-                  : score
+                  ? exampleResult.baseScore100
+                  : Math.floor(baseScore * 100)
+              }
+              chainScore100={
+                props.goResult
+                  ? exampleResult.chainScore100
+                  : Math.floor(chainScore * 100)
+              }
+              bigScore100={
+                props.goResult
+                  ? exampleResult.bigScore100
+                  : Math.floor(bigScore * 100)
+              }
+              score100={
+                props.goResult
+                  ? exampleResult.score100
+                  : Math.floor(score * 100)
               }
               judgeCount={
                 props.goResult ? exampleResult.judgeCount : judgeCount

@@ -33,17 +33,17 @@ export function SharedResultBox(props: Props) {
         <div className="flex flex-col">
           {(
             [
-              ["baseScore", props.result.baseScore],
-              ["chainBonus", props.result.chainScore],
-              ["bigNoteBonus", props.result.bigScore],
+              ["baseScore", props.result.baseScore100],
+              ["chainBonus", props.result.chainScore100],
+              ["bigNoteBonus", props.result.bigScore100],
             ] as const
-          ).map(([name, score], i) => (
+          ).map(([name, score100], i) => (
             <p key={i} className="flex flex-row w-full items-baseline ">
               <span className="flex-1 text-sm ">{t(name)}:</span>
-              <span className="text-2xl">{Math.floor(score)}</span>
+              <span className="text-2xl">{Math.floor(score100 / 100)}</span>
               <span className="">.</span>
               <span className="text-left w-5 ">
-                {(Math.floor(score * 100) % 100).toString().padStart(2, "0")}
+                {(score100 % 100).toString().padStart(2, "0")}
               </span>
             </p>
           ))}
@@ -51,24 +51,11 @@ export function SharedResultBox(props: Props) {
           <p className="flex flex-row w-full items-baseline ">
             <span className="flex-1 text-sm ">{t("totalScore")}:</span>
             <span className="text-2xl">
-              {Math.floor(
-                props.result.baseScore +
-                  props.result.chainScore +
-                  props.result.bigScore
-              )}
+              {Math.floor(props.result.score100 / 100)}
             </span>
             <span className="">.</span>
             <span className="text-left w-5 ">
-              {(
-                Math.floor(
-                  (props.result.baseScore +
-                    props.result.chainScore +
-                    props.result.bigScore) *
-                    100
-                ) % 100
-              )
-                .toString()
-                .padStart(2, "0")}
+              {(props.result.score100 % 100).toString().padStart(2, "0")}
             </span>
           </p>
         </div>
@@ -76,21 +63,17 @@ export function SharedResultBox(props: Props) {
           <div>
             <span className="mr-2">{t("rank")}:</span>
             <span className="text-3xl">
-              {rankStr(
-                props.result.baseScore +
-                  props.result.chainScore +
-                  props.result.bigScore
-              )}
+              {rankStr(props.result.score100 / 100)}
             </span>
           </div>
-          {props.result.chainScore === chainScoreRate ? (
+          {props.result.chainScore100 === chainScoreRate * 100 ? (
             <div className="text-xl">
               <span className="">
-                {props.result.baseScore === baseScoreRate
+                {props.result.baseScore100 === baseScoreRate * 100
                   ? t("perfect")
                   : t("full")}
               </span>
-              {props.result.bigScore === bigScoreRate && (
+              {props.result.bigScore100 === bigScoreRate * 100 && (
                 <span className="font-bold">+</span>
               )}
               <span>!</span>
