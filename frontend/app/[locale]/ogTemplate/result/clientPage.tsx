@@ -79,39 +79,20 @@ export default function OGTemplate() {
           </p>*/}
           <div className="flex-1 w-full flex flex-row">
             <div className="flex-1 flex flex-col space-y-2 ">
-              <p
-                className={
-                  "flex flex-row w-full items-baseline " +
-                  (showDummyData ? "" : "invisible")
-                }
-              >
-                <span className="flex-1 text-2xl">{t("baseScore")}</span>
-                <span className="text-5xl">444</span>
-                <span className="text-3xl">.</span>
-                <span className="text-left w-10 text-3xl">44</span>
-              </p>
-              <p
-                className={
-                  "flex flex-row w-full items-baseline " +
-                  (showDummyData ? "" : "invisible")
-                }
-              >
-                <span className="flex-1 text-2xl">{t("chainBonus")}</span>
-                <span className="text-5xl">444</span>
-                <span className="text-3xl">.</span>
-                <span className="text-left w-10 text-3xl">44</span>
-              </p>
-              <p
-                className={
-                  "flex flex-row w-full items-baseline " +
-                  (showDummyData ? "" : "invisible")
-                }
-              >
-                <span className="flex-1 text-2xl">{t("bigNoteBonus")}</span>
-                <span className="text-5xl">444</span>
-                <span className="text-3xl">.</span>
-                <span className="text-left w-10 text-3xl">44</span>
-              </p>
+              {["baseScore", "chainBonus", "bigNoteBonus"].map((name, i) => (
+                <p
+                  key={i}
+                  className={
+                    "flex flex-row w-full items-baseline " +
+                    (showDummyData ? "" : "invisible")
+                  }
+                >
+                  <span className="flex-1 text-2xl">{t(name)}:</span>
+                  <span className="text-5xl">444</span>
+                  <span className="text-3xl">.</span>
+                  <span className="text-left w-10 text-3xl">44</span>
+                </p>
+              ))}
               <div className="border-b mt-2 w-full border-slate-800 dark:border-stone-300" />
               <p
                 className={
@@ -119,14 +100,14 @@ export default function OGTemplate() {
                   (showDummyData ? "" : "invisible")
                 }
               >
-                <span className="flex-1 text-2xl">{t("totalScore")}</span>
+                <span className="flex-1 text-2xl">{t("totalScore")}:</span>
                 <span className="text-5xl">444</span>
                 <span className="text-3xl">.</span>
                 <span className="text-left w-10 text-3xl">44</span>
               </p>
             </div>
             <div className="w-72 flex flex-col items-center justify-center space-y-4">
-              <div className={(showDummyData ? "" : "invisible")}>
+              <div className={showDummyData ? "" : "invisible"}>
                 <span className="mr-2 text-2xl ">{t("rank")}:</span>
                 <span className={"text-5xl"}>S+</span>
               </div>

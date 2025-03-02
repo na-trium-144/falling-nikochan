@@ -148,59 +148,35 @@ export async function OGResult(
             }}
           >
             <div style={{ flexGrow: 1, ...flexCol }}>
-              <div style={{ ...flexRow, width: "100%" }}>
-                <span style={{ flexGrow: 1, ...text2xl }}>
-                  {t("baseScore")}
-                </span>
-                <span style={{ ...text5xl }}>
-                  {Math.floor(params.baseScore)}
-                </span>
-                <span style={{ ...text3xl }}>.</span>
-                <span style={{ ...text3xl, textAlign: "left", width: 10 * 4 }}>
-                  {(Math.floor(params.baseScore * 100) % 100)
-                    .toString()
-                    .padStart(2, "0")}
-                </span>
-              </div>
+              {(
+                [
+                  ["baseScore", params.baseScore],
+                  ["chainBonus", params.chainScore],
+                  ["bigNoteBonus", params.bigScore],
+                ] as const
+              ).map(([name, score], i) => (
+                <div
+                  key={i}
+                  style={{ ...flexRow, width: "100%", marginBottom: 2 * 4 }}
+                >
+                  <span style={{ flexGrow: 1, ...text2xl }}>{t(name)}:</span>
+                  <span style={{ ...text5xl }}>{Math.floor(score)}</span>
+                  <span style={{ ...text3xl }}>.</span>
+                  <span
+                    style={{ ...text3xl, textAlign: "left", width: 10 * 4 }}
+                  >
+                    {(Math.floor(score * 100) % 100)
+                      .toString()
+                      .padStart(2, "0")}
+                  </span>
+                </div>
+              ))}
+              <div style={{ marginBottom: (2 + 2) * 4 }} />
               <div
-                style={{
-                  ...flexRow,
-                  width: "100%",
-                  height: 48,
-                  marginTop: 2 * 4,
-                }}
+                style={{ ...flexRow, width: "100%" /*, marginBottom: 2 * 4*/ }}
               >
                 <span style={{ flexGrow: 1, ...text2xl }}>
-                  {t("chainBonus")}
-                </span>
-                <span style={{ ...text5xl }}>
-                  {Math.floor(params.chainScore)}
-                </span>
-                <span style={{ ...text3xl }}>.</span>
-                <span style={{ ...text3xl, textAlign: "left", width: 10 * 4 }}>
-                  {(Math.floor(params.chainScore * 100) % 100)
-                    .toString()
-                    .padStart(2, "0")}
-                </span>
-              </div>
-              <div style={{ ...flexRow, width: "100%", marginTop: 2 * 4 }}>
-                <span style={{ flexGrow: 1, ...text2xl }}>
-                  {t("bigNoteBonus")}
-                </span>
-                <span style={{ ...text5xl }}>
-                  {Math.floor(params.bigScore)}
-                </span>
-                <span style={{ ...text3xl }}>.</span>
-                <span style={{ ...text3xl, textAlign: "left", width: 10 * 4 }}>
-                  {(Math.floor(params.bigScore * 100) % 100)
-                    .toString()
-                    .padStart(2, "0")}
-                </span>
-              </div>
-              <div style={{ marginTop: (2 + 2) * 4 }} />
-              <div style={{ ...flexRow, width: "100%", marginTop: 2 * 4 }}>
-                <span style={{ flexGrow: 1, ...text2xl }}>
-                  {t("totalScore")}
+                  {t("totalScore")}:
                 </span>
                 <span style={{ ...text5xl }}>
                   {Math.floor(

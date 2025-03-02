@@ -68,7 +68,11 @@ const shareHandler = factory.createHandlers(async (c) => {
         "https://placeholder_og_image/",
         // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
         new URL(
-          `/og/share/${cid}?v=${packageJson.version}`,
+          (c.req.query("result") ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
+            new URLSearchParams({
+              ...c.req.query(),
+              v: packageJson.version,
+            }).toString(),
           new URL(c.req.url).origin
         ).toString()
       )
@@ -78,10 +82,13 @@ const shareHandler = factory.createHandlers(async (c) => {
         JSON.stringify(JSON.stringify(brief))
       );
     if (c.req.path.startsWith("/share") && lang !== qLang) {
+      const q = new URLSearchParams(c.req.query());
+      q.delete("lang");
+      const newPath = c.req.path + (q.toString() ? "?" + q.toString() : "");
       replacedBody =
         replacedBody.slice(0, replacedBody.indexOf("<body")) +
         "<body><script>" +
-        `location.replace("${new URL(c.req.url).pathname}");` +
+        `location.replace("${newPath}");` +
         "</script></body></html>";
     }
     return c.text(replacedBody, 200, {

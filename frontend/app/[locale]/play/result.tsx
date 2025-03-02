@@ -2,7 +2,7 @@
 
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./result.css";
 import {
   baseScoreRate,
@@ -33,7 +33,12 @@ export default function Result(props: Props) {
   const messageRandom = useRef<number>(Math.random());
 
   const [serializedParam, setSerializedParam] = useState<string>("");
-  const shareLink = useShareLink(props.cid, props.brief, props.lang, serializedParam);
+  const shareLink = useShareLink(
+    props.cid,
+    props.brief,
+    props.lang,
+    serializedParam
+  );
   useEffect(() => {
     setSerializedParam(serializeResultParams(props));
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -50,7 +55,7 @@ export default function Result(props: Props) {
 
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
-    const delay = [100, 500, 500, 500, 750, 750, 750];
+    const delay = [100, 500, 500, 500, 750, 750, 500];
     const offset: number[] = [];
     for (let i = 0; i < delay.length; i++) {
       offset.push((i > 0 ? offset[i - 1] : 0) + delay[i]);
@@ -61,26 +66,37 @@ export default function Result(props: Props) {
     };
   }, []);
 
-  const jumpingAnimation = (index: number) => ({
-    animationName: showing >= index ? "result-score-jumping" : undefined,
-    animationIterationCount: 1,
-    animationDuration: "200ms",
-    animationTimingFunction: "linear",
-    animationFillMode: "forwards",
-  });
-  const appearingAnimation = (index: number) => ({
-    transitionProperty: "all",
-    transitionTimingFunction: "ease-in",
-    transitionDuration: "100ms",
-    opacity: showing >= index ? 1 : 0,
-    transform: showing >= index ? "scale(1)" : "scale(4)",
-  });
-  const appearingAnimation2 = (index: number) => ({
-    transitionProperty: "opacity",
-    transitionTimingFunction: "ease-out",
-    transitionDuration: "300ms",
-    opacity: showing >= index ? 1 : 0,
-  });
+  const jumpingAnimation = (index: number) =>
+    ({
+      animationName: showing >= index ? "result-score-jumping" : undefined,
+      animationIterationCount: 1,
+      animationDuration: "200ms",
+      animationTimingFunction: "linear",
+      animationFillMode: "forwards",
+    } as const);
+  const appearingAnimation = (index: number) =>
+    ({
+      transitionProperty: "all",
+      transitionTimingFunction: "ease-in",
+      transitionDuration: "100ms",
+      opacity: showing >= index ? 1 : 0,
+      transform: showing >= index ? "scale(1)" : "scale(4)",
+    } as const);
+  const appearingAnimation2 = (index: number) =>
+    ({
+      transitionProperty: "opacity",
+      transitionTimingFunction: "ease-out",
+      transitionDuration: "300ms",
+      opacity: showing >= index ? 1 : 0,
+    } as const);
+  const appearingAnimation3 = (index: number) =>
+    ({
+      transitionProperty: "opacity",
+      transitionTimingFunction: "ease-out",
+      transitionDuration: "150ms",
+      opacity: showing >= index ? 1 : 0,
+      visibility: showing >= index ? "visible" : "hidden",
+    } as const);
   return (
     <CenterBox>
       <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
@@ -91,91 +107,31 @@ export default function Result(props: Props) {
         }
       >
         <div className="flex-1 w-56">
-          <ResultRow visible={showing >= 1} name={t("baseScore")}>
-            <span
-              className="text-3xl text-right "
-              style={{
-                ...jumpingAnimation(1),
-              }}
-            >
-              {Math.floor(props.baseScore)}
-            </span>
-            <span className="">.</span>
-            <span
-              className="text-left w-5 "
-              style={{
-                ...jumpingAnimation(1),
-              }}
-            >
-              {(Math.floor(props.baseScore * 100) % 100)
-                .toString()
-                .padStart(2, "0")}
-            </span>
-          </ResultRow>
-          <ResultRow visible={showing >= 2} name={t("chainBonus")}>
-            <span
-              className="text-3xl text-right "
-              style={{
-                ...jumpingAnimation(2),
-              }}
-            >
-              {Math.floor(props.chainScore)}
-            </span>
-            <span className="">.</span>
-            <span
-              className="text-left w-5 "
-              style={{
-                ...jumpingAnimation(2),
-              }}
-            >
-              {(Math.floor(props.chainScore * 100) % 100)
-                .toString()
-                .padStart(2, "0")}
-            </span>
-          </ResultRow>
-          <ResultRow visible={showing >= 3} name={t("bigNoteBonus")}>
-            <span
-              className="text-3xl text-right "
-              style={{
-                ...jumpingAnimation(3),
-              }}
-            >
-              {Math.floor(props.bigScore)}
-            </span>
-            <span className="">.</span>
-            <span
-              className="text-left w-5 "
-              style={{
-                ...jumpingAnimation(3),
-              }}
-            >
-              {(Math.floor(props.bigScore * 100) % 100)
-                .toString()
-                .padStart(2, "0")}
-            </span>
-          </ResultRow>
+          <ResultRow
+            visible={showing >= 1}
+            name={t("baseScore")}
+            scoreStyle={jumpingAnimation(1)}
+            score={props.baseScore}
+          />
+          <ResultRow
+            visible={showing >= 2}
+            name={t("chainBonus")}
+            scoreStyle={jumpingAnimation(2)}
+            score={props.chainScore}
+          />
+          <ResultRow
+            visible={showing >= 3}
+            name={t("bigNoteBonus")}
+            scoreStyle={jumpingAnimation(3)}
+            score={props.bigScore}
+          />
           <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
-          <ResultRow visible={showing >= 4} name={t("totalScore")}>
-            <span
-              className="text-3xl text-right "
-              style={{
-                ...jumpingAnimation(4),
-              }}
-            >
-              {Math.floor(props.score)}
-            </span>
-            <span className="">.</span>
-            <span
-              className="text-left w-5 "
-              style={{
-                ...jumpingAnimation(4),
-              }}
-            >
-              {(Math.floor(props.score * 100) % 100)
-                .toString()
-                .padStart(2, "0")}
-            </span>
-          </ResultRow>
+          <ResultRow
+            visible={showing >= 4}
+            name={t("totalScore")}
+            scoreStyle={jumpingAnimation(4)}
+            score={props.score}
+          />
         </div>
         <div
           className={
@@ -232,7 +188,7 @@ export default function Result(props: Props) {
         </div>
       </div>
       {(shareLink.toClipboard || shareLink.toAPI) && (
-        <div className="mb-2">
+        <div className="mb-2 " style={{ ...appearingAnimation3(7) }}>
           <span>{t("shareResult")}</span>
           {shareLink.toClipboard && (
             <Button
@@ -250,7 +206,7 @@ export default function Result(props: Props) {
           )}
         </div>
       )}
-      <div>
+      <div style={{ ...appearingAnimation3(7) }}>
         <Button
           text={t("reset")}
           keyName={props.isTouch ? undefined : "Space"}
@@ -269,8 +225,9 @@ export default function Result(props: Props) {
 interface RowProps {
   visible: boolean;
   name: string;
-  children: ReactNode | ReactNode[];
   className?: string;
+  scoreStyle?: object;
+  score: number;
 }
 function ResultRow(props: RowProps) {
   return (
@@ -284,7 +241,15 @@ function ResultRow(props: RowProps) {
       <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">
         {props.name}:
       </span>
-      {props.children}
+      <span className="text-3xl text-right " style={props.scoreStyle}>
+        {Math.floor(props.score)}
+      </span>
+      <span className="" style={props.scoreStyle}>
+        .
+      </span>
+      <span className="text-left w-5 " style={props.scoreStyle}>
+        {(Math.floor(props.score * 100) % 100).toString().padStart(2, "0")}
+      </span>
     </p>
   );
 }

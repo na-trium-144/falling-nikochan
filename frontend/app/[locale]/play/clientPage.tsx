@@ -11,7 +11,7 @@
 "use client";
 
 const exampleResult = {
-  baseScore: 77.77,
+  baseScore: 7.77,
   chainScore: 20,
   bigScore: 1.23,
   judgeCount: [11, 22, 33, 44],

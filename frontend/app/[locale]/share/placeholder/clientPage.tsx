@@ -4,7 +4,11 @@ import Header from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import Footer from "@/common/footer.js";
 import { PlayOption } from "./playOption.js";
-import { ChartBrief } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  deserializeResultParams,
+  ResultParams,
+} from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Link from "next/link";
@@ -14,8 +18,31 @@ import { isSample } from "@falling-nikochan/chart";
 import { International, PlayOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share.js";
+import { SharedResultBox } from "./sharedResult.js";
 
-export const dynamic = "force-static";
+const dummyBrief = {
+  title: "placeholder",
+  composer: "placeholder",
+  chartCreator: "placeholder",
+  ytId: "",
+  updatedAt: 0,
+  published: true,
+  playCount: 999,
+  locale: "ja",
+  levels: [
+    {
+      name: "placeholder",
+      hash: "",
+      type: "Single",
+      difficulty: 10,
+      noteCount: 100,
+      bpmMin: 1,
+      bpmMax: 999,
+      length: 1,
+      unlisted: false,
+    },
+  ],
+};
 
 export default function ShareChart({ locale }: { locale: string }) {
   const t = useTranslations("share");
@@ -24,39 +51,26 @@ export default function ShareChart({ locale }: { locale: string }) {
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string>("");
+  const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
     setCId(window.location.pathname.split("/").pop()!);
+    const searchParams = new URLSearchParams(window.location.search);
     let brief: ChartBrief;
     if (process.env.NODE_ENV === "development") {
-      brief = {
-        title: "placeholder",
-        composer: "placeholder",
-        chartCreator: "placeholder",
-        ytId: "",
-        updatedAt: 0,
-        published: true,
-        playCount: 999,
-        locale: "ja",
-        levels: [
-          {
-            name: "placeholder",
-            hash: "",
-            type: "Single",
-            difficulty: 10,
-            noteCount: 100,
-            bpmMin: 1,
-            bpmMax: 999,
-            length: 1,
-            unlisted: false,
-          },
-        ],
-      };
+      brief = dummyBrief;
     } else {
       brief = JSON.parse("PLACEHOLDER_BRIEF");
     }
     setBrief(brief);
     setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
+    if (searchParams.get("result")) {
+      try {
+        setSharedResult(deserializeResultParams(searchParams.get("result")!));
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }, []);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
@@ -134,6 +148,7 @@ export default function ShareChart({ locale }: { locale: string }) {
                 </p>
               </div>
             </div>
+            {sharedResult && <SharedResultBox result={sharedResult} />}
             <p className="mt-2">
               <span className="hidden main-wide:inline-block mr-2">
                 {t("shareLink")}:
