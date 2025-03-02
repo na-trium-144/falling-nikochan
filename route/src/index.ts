@@ -4,7 +4,7 @@ import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import { fetchStatic } from "./static.js";
 import { HTTPException } from "hono/http-exception";
-import ogApp from "./og.js";
+import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
 
 async function errorResponse(

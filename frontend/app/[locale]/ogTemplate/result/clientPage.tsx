@@ -9,7 +9,7 @@ import { levelTypes, stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { Box } from "@/common/box";
 import { JudgeIcon } from "@/play/statusBox";
-import { levelColors } from "@/common/levelColors";
+import { levelBgColors, levelColors } from "@/common/levelColors";
 
 export default function OGTemplate() {
   const t = useTranslations("play.result");
@@ -34,11 +34,18 @@ export default function OGTemplate() {
       />
       <div
         className={
-          "absolute top-0 right-0 w-[480px] aspect-[16/9] bg-gray-500 " +
-          (showDummyData ? "" : "invisible")
+          "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl " +
+          levelBgColors[1]
         }
       >
-        Thumbnail Here
+        <div
+          className={
+            "w-full aspect-[16/9] bg-gray-500 " +
+            (showDummyData ? "" : "invisible")
+          }
+        >
+          Thumbnail Here
+        </div>
       </div>
       <div className="flex-1 min-w-0 ">
         <div className="ml-124 mt-16 text-4xl ">
@@ -54,39 +61,64 @@ export default function OGTemplate() {
         >
           TitleたいとるTitleたいとるTitleたいとるTitleたいとるTitleたいとるTitleたいとる
         </div>
-        <div className="ml-20 mt-4 flex flex-row items-baseline">
+        <div
+          className={
+            "ml-20 mt-6 flex flex-row items-baseline " +
+            (showDummyData ? "" : "invisible")
+          }
+        >
           <span className="font-title text-4xl mr-4">LevelName</span>
-            <span className={"text-4xl " + levelColors[0]}>{levelTypes[0]}-</span>
-            <span className={"text-5xl " + levelColors[0]}>44</span>
+          <span className={"text-4xl " + levelColors[0]}>{levelTypes[0]}-</span>
+          <span className={"text-5xl " + levelColors[0]}>44</span>
         </div>
         <Box
-          className={"flex-1 ml-20 mt-6 h-max p-6 flex flex-col items-center "}
+          className={"flex-1 ml-20 mt-8 h-max p-6 flex flex-col items-center "}
         >
           {/*<p className="text-3xl font-title font-bold">
             &lt; {t("result")} &gt;
           </p>*/}
           <div className="flex-1 w-full flex flex-row">
             <div className="flex-1 flex flex-col space-y-2 ">
-              <p className="flex flex-row w-full items-baseline ">
+              <p
+                className={
+                  "flex flex-row w-full items-baseline " +
+                  (showDummyData ? "" : "invisible")
+                }
+              >
                 <span className="flex-1 text-2xl">{t("baseScore")}</span>
                 <span className="text-5xl">444</span>
                 <span className="text-3xl">.</span>
                 <span className="text-left w-10 text-3xl">44</span>
               </p>
-              <p className="flex flex-row w-full items-baseline ">
+              <p
+                className={
+                  "flex flex-row w-full items-baseline " +
+                  (showDummyData ? "" : "invisible")
+                }
+              >
                 <span className="flex-1 text-2xl">{t("chainBonus")}</span>
                 <span className="text-5xl">444</span>
                 <span className="text-3xl">.</span>
                 <span className="text-left w-10 text-3xl">44</span>
               </p>
-              <p className="flex flex-row w-full items-baseline ">
+              <p
+                className={
+                  "flex flex-row w-full items-baseline " +
+                  (showDummyData ? "" : "invisible")
+                }
+              >
                 <span className="flex-1 text-2xl">{t("bigNoteBonus")}</span>
                 <span className="text-5xl">444</span>
                 <span className="text-3xl">.</span>
                 <span className="text-left w-10 text-3xl">44</span>
               </p>
-              <div className="border-b w-full border-slate-800 dark:border-stone-300" />
-              <p className="flex flex-row w-full items-baseline ">
+              <div className="border-b mt-2 w-full border-slate-800 dark:border-stone-300" />
+              <p
+                className={
+                  "flex flex-row w-full items-baseline " +
+                  (showDummyData ? "" : "invisible")
+                }
+              >
                 <span className="flex-1 text-2xl">{t("totalScore")}</span>
                 <span className="text-5xl">444</span>
                 <span className="text-3xl">.</span>
@@ -94,11 +126,11 @@ export default function OGTemplate() {
               </p>
             </div>
             <div className="w-72 flex flex-col items-center justify-center space-y-4">
-              <div className="mt-2">
+              <div className={(showDummyData ? "" : "invisible")}>
                 <span className="mr-2 text-2xl ">{t("rank")}:</span>
                 <span className={"text-5xl"}>S+</span>
               </div>
-              <div className={"text-3xl"}>
+              <div className={"text-3xl " + (showDummyData ? "" : "invisible")}>
                 <span className="">{t("perfect")}</span>
                 <span className="font-bold">+</span>
                 <span>!</span>
@@ -107,21 +139,33 @@ export default function OGTemplate() {
           </div>
         </Box>
       </div>
-      <div className="w-60 mt-74 ml-10 mr-20 flex flex-col ">
+      <div className="w-64 mt-74 ml-16 mr-20 flex flex-col space-y-1.5 ">
         {["good", "ok", "bad", "miss"].map((name, ji) => (
           <div key={ji} className="flex flex-row items-baseline ">
             <span className="flex-1">
               <span className="inline-block w-8 text-2xl translate-y-1 ">
                 <JudgeIcon index={ji} />
               </span>
-              <span className="text-2xl">{ts(name)}</span>
+              <span
+                className={"text-2xl " + (showDummyData ? "" : "invisible")}
+              >
+                {ts(name)}
+              </span>
             </span>
-            <span className="text-4xl">4444</span>
+            <span className={"text-4xl " + (showDummyData ? "" : "invisible")}>
+              4444
+            </span>
           </div>
         ))}
         <div className="flex flex-row items-baseline ">
-          <span className="flex-1 text-2xl">{ts("big")}</span>
-          <span className="text-4xl">4444</span>
+          <span
+            className={"flex-1 text-2xl " + (showDummyData ? "" : "invisible")}
+          >
+            {ts("big")}
+          </span>
+          <span className={"text-4xl " + (showDummyData ? "" : "invisible")}>
+            4444
+          </span>
         </div>
       </div>
       <div className="absolute bottom-0 w-full h-6 -z-10">

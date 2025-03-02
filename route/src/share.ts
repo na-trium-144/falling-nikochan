@@ -61,7 +61,7 @@ const shareHandler = factory.createHandlers(async (c) => {
         "https://placeholder_og_image/",
         // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
         new URL(
-          `/og/${cid}?v=${packageJson.version}`,
+          `/og/share/${cid}?v=${packageJson.version}`,
           new URL(c.req.url).origin
         ).toString()
       )

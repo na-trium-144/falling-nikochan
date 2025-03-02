@@ -2,13 +2,13 @@
 
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
-import { rankStr } from "@/common/rank.js";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import "./result.css";
 import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
+  rankStr,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 

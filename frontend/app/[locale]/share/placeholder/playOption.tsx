@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
+import { ChartBrief, levelTypes, rankStr } from "@falling-nikochan/chart";
 import {
   clearBestScore,
   getBestScore,
@@ -9,7 +9,6 @@ import {
 import Button from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
-import { rankStr } from "@/common/rank.js";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 import { RightOne, SmilingFace, Timer } from "@icon-park/react";
