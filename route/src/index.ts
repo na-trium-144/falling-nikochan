@@ -50,7 +50,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       console.error(err);
       err = new HTTPException(500, { message: "Server Error" });
     }
-    if (c.req.path.startsWith("/api")) {
+    if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
       return c.json(
         { message: await (err as HTTPException).getResponse().text() },
         (err as HTTPException).status

@@ -14,10 +14,10 @@ import {
   serializeResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { titleShareResult } from "@/common/title";
 import { useShareLink } from "@/common/share";
 
 interface Props extends ResultParams {
+  lang: string;
   cid: string;
   brief: ChartBrief;
   isTouch: boolean;
@@ -33,12 +33,11 @@ export default function Result(props: Props) {
   const messageRandom = useRef<number>(Math.random());
 
   const [serializedParam, setSerializedParam] = useState<string>("");
-  const shareLink = useShareLink(props.cid, props.brief, serializedParam);
+  const shareLink = useShareLink(props.cid, props.brief, props.lang, serializedParam);
   useEffect(() => {
     setSerializedParam(serializeResultParams(props));
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
-    props.lang,
     props.date,
     props.lvIndex,
     props.baseScore,

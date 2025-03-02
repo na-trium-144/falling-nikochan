@@ -26,7 +26,7 @@ export default function ShareChart({ locale }: { locale: string }) {
   const [updatedAt, setUpdatedAt] = useState<string>("");
 
   useEffect(() => {
-    setCId(window.location.href.split("/").pop()!);
+    setCId(window.location.pathname.split("/").pop()!);
     let brief: ChartBrief;
     if (process.env.NODE_ENV === "development") {
       brief = {

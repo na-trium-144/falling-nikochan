@@ -3,7 +3,11 @@ import { Bindings } from "../env.js";
 import { ImageResponse } from "@vercel/og";
 import briefApp from "../api/brief.js";
 import { HTTPException } from "hono/http-exception";
-import { ChartBrief } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  deserializeResultParams,
+  ResultParams,
+} from "@falling-nikochan/chart";
 import { fetchStatic } from "../static.js";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
@@ -11,8 +15,20 @@ import { OGResult } from "./ogResult.js";
 const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:type/:cid",
   async (c) => {
-    const lang = "en"; // c.get("language");
+    const lang = c.req.query("lang") || "en"; // c.get("language");
     const cid = c.req.param("cid");
+    const qResult = c.req.query("result");
+    let resultParams: ResultParams | null = null;
+    if (qResult) {
+      try {
+        resultParams = deserializeResultParams(qResult);
+      } catch (e) {
+        console.error(e);
+        throw new HTTPException(400, {
+          message: "Invalid result parameter",
+        });
+      }
+    }
     const pBriefRes = briefApp.request(`/${cid}`);
     const pFonts = (
       [
@@ -92,14 +108,12 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         cacheControl = "max-age=7200";
         break;
       case "result":
-        Image = OGResult(cid, lang, brief, bgImageBin, {
-          lvIndex: 0,
-          baseScore: 1.23,
-          chainScore: 4.56,
-          bigScore: 7.89,
-          judgeCount: [11, 22, 33, 44],
-          bigCount: 55,
-        });
+        if (!resultParams) {
+          throw new HTTPException(400, {
+            message: "Missing result parameter",
+          });
+        }
+        Image = OGResult(cid, lang, brief, bgImageBin, resultParams);
         cacheControl = "max-age=31536000";
         break;
     }

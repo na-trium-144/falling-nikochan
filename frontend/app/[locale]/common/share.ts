@@ -8,11 +8,15 @@ import { useTranslations } from "next-intl";
 export function useShareLink(
   cid: string | undefined,
   brief: ChartMin | ChartBrief | undefined | null,
+  lang?: string,
   resultParam?: string
 ) {
   const [origin, setOrigin] = useState<string>("");
-  const url = resultParam
-    ? `${origin}/share/${cid}?result=${resultParam}`
+  const searchParams = new URLSearchParams();
+  if (lang) searchParams.set("lang", lang);
+  if (resultParam) searchParams.set("result", resultParam);
+  const url = searchParams.toString()
+    ? `${origin}/share/${cid}?${searchParams.toString()}`
     : `${origin}/chart/${cid}`;
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   const toClipboard = useCallback(
