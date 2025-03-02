@@ -12,16 +12,23 @@ interface ShareParams {
   cid: string;
 }
 
+/*
+OGPの見た目を優先するため、shareページではクエリのlangを優先する。
+クエリのlangとaccept-languageが異なる場合、クライアントサイドでリダイレクトするように
+bodyを無理やり書き換える。
+*/
+
 const factory = createFactory<{ Bindings: Bindings; Variables: ShareParams }>();
 const shareHandler = factory.createHandlers(async (c) => {
   const lang = c.get("language");
+  const qLang = c.req.query("lang") || lang;
   const cid = c.get("cid");
   const pBriefRes = briefApp.request(`/${cid}`);
-  const t = await getTranslations(lang, "share");
+  const t = await getTranslations(qLang, "share");
   let placeholderUrl: URL;
   if (c.req.path.startsWith("/share")) {
     placeholderUrl = new URL(
-      `/${lang}/share/placeholder`,
+      `/${qLang}/share/placeholder`,
       new URL(c.req.url).origin
     );
   } else {
@@ -53,7 +60,7 @@ const shareHandler = factory.createHandlers(async (c) => {
         "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
       titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
     }
-    const replacedBody = (await res.text())
+    let replacedBody = (await res.text())
       .replaceAll("/share/placeholder", `/share/${cid}`)
       .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
       .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
@@ -70,6 +77,13 @@ const shareHandler = factory.createHandlers(async (c) => {
         '"PLACEHOLDER_BRIEF"',
         JSON.stringify(JSON.stringify(brief))
       );
+    if (c.req.path.startsWith("/share") && lang !== qLang) {
+      replacedBody =
+        replacedBody.slice(0, replacedBody.indexOf("<body")) +
+        "<body><script>" +
+        `location.replace("${new URL(c.req.url).pathname}");` +
+        "</script></body></html>";
+    }
     return c.text(replacedBody, 200, {
       "Content-Type": res.headers.get("Content-Type") || "text/plain",
       "Cache-Control": "no-store",
