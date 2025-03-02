@@ -6,6 +6,7 @@ import {
   ChartBrief,
   levelTypes,
   rankStr,
+  ResultParams,
 } from "@falling-nikochan/chart";
 import {
   fontMainUi,
@@ -21,14 +22,6 @@ import {
   bold,
 } from "./style.js";
 
-interface ResultParams {
-  lvIndex: number;
-  baseScore: number;
-  chainScore: number;
-  bigScore: number;
-  judgeCount: [number, number, number, number];
-  bigCount: number;
-}
 export async function OGResult(
   cid: string,
   lang: string,

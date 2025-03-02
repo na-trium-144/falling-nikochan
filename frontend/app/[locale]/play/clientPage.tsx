@@ -4,10 +4,19 @@
 * sid=セッションID または cid=譜面ID&lvIndex=インデックス で譜面を指定
 * fps=1 でFPS表示
 * speed=1 で音符の速度変化を表示
+* result=1 でリザルト表示
 
 */
 
 "use client";
+
+const exampleResult = {
+  baseScore: 77.77,
+  chainScore: 20,
+  bigScore: 1.23,
+  judgeCount: [11, 22, 33, 44],
+  bigCount: 55,
+} as const;
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -38,6 +47,7 @@ import { Level8Play } from "@falling-nikochan/chart";
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
   const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
+  const [goResult, setGoResult] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -54,6 +64,7 @@ export function InitPlay({ locale }: { locale: string }) {
     const lvIndexFromParam = Number(searchParams.get("lvIndex"));
     setShowFps(searchParams.get("fps") !== null);
     setDisplaySpeed(searchParams.get("speed") !== null);
+    setGoResult(searchParams.get("result") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -149,6 +160,7 @@ export function InitPlay({ locale }: { locale: string }) {
       editing={editing}
       showFps={showFps}
       displaySpeed={displaySpeed}
+      goResult={goResult}
       locale={locale}
     />
   );
@@ -162,6 +174,7 @@ interface Props {
   editing: boolean;
   showFps: boolean;
   displaySpeed: boolean;
+  goResult: boolean;
   locale: string;
 }
 function Play(props: Props) {
@@ -271,7 +284,8 @@ function Play(props: Props) {
   // 譜面をstartした (playingとは異なり、stop後も終了後もtrueのまま)
   const [chartStarted, setChartStarted] = useState<boolean>(false);
   // result画面を表示する
-  const [showResult, setShowResult] = useState<boolean>(false);
+  const [showResult, setShowResult] = useState<boolean>(props.goResult);
+  const [resultDate, setResultDate] = useState<number>(0);
 
   const start = () => {
     // 再生中に呼んでもとくになにも起こらない
@@ -329,11 +343,12 @@ function Play(props: Props) {
       }
       const t = setTimeout(() => {
         setShowResult(true);
+        setResultDate(Date.now());
         stop();
       }, 1000);
       return () => clearTimeout(t);
     } else {
-      setShowResult(false);
+      setShowResult(props.goResult);
     }
   }, [
     chartStarted,
@@ -350,6 +365,7 @@ function Play(props: Props) {
     bigScore,
     judgeCount,
     stop,
+    props.goResult,
   ]);
 
   const onReady = useCallback(() => {
@@ -475,10 +491,27 @@ function Play(props: Props) {
           <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
           {showResult ? (
             <Result
-              baseScore={baseScore}
-              chainScore={chainScore}
-              bigScore={bigScore}
-              score={score}
+              lang={props.locale}
+              date={resultDate}
+              cid={cid || ""}
+              brief={chartBrief}
+              lvIndex={lvIndex}
+              baseScore={props.goResult ? exampleResult.baseScore : baseScore}
+              chainScore={
+                props.goResult ? exampleResult.chainScore : chainScore
+              }
+              bigScore={props.goResult ? exampleResult.bigScore : bigScore}
+              score={
+                props.goResult
+                  ? exampleResult.baseScore +
+                    exampleResult.chainScore +
+                    exampleResult.bigScore
+                  : score
+              }
+              judgeCount={
+                props.goResult ? exampleResult.judgeCount : judgeCount
+              }
+              bigCount={props.goResult ? exampleResult.bigCount : bigCount}
               reset={reset}
               exit={exit}
               isTouch={isTouch}

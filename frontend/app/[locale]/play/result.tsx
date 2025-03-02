@@ -8,15 +8,18 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
+  ChartBrief,
   rankStr,
+  ResultParams,
+  serializeResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
+import { titleWithSiteName } from "@/common/title";
 
-interface Props {
+interface Props extends ResultParams {
+  cid: string;
+  brief: ChartBrief;
   isTouch: boolean;
-  baseScore: number;
-  chainScore: number;
-  bigScore: number;
   score: number;
   newRecord: number;
   reset: () => void;
@@ -25,8 +28,62 @@ interface Props {
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
+  const tShare = useTranslations("share");
 
   const messageRandom = useRef<number>(Math.random());
+
+  const [serializedParam, setSerializedParam] = useState<string>("");
+  useEffect(() => {
+    setSerializedParam(serializeResultParams(props));
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [
+    props.lang,
+    props.date,
+    props.lvIndex,
+    props.baseScore,
+    props.chainScore,
+    props.bigScore,
+    ...props.judgeCount,
+    props.bigCount,
+    /* eslint-enable react-hooks/exhaustive-deps */
+  ]);
+
+  const [origin, setOrigin] = useState<string>("");
+  const [shareUrl, setShareUrl] = useState<string>("");
+  const [hasClipboard, setHasClipboard] = useState<boolean>(false);
+  const [shareData, setShareData] = useState<object | null>(null);
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    setHasClipboard(!!navigator?.clipboard);
+  }, []);
+  useEffect(() => {
+    const shareUrl = `${origin}/share/${props.cid}?result=${serializedParam}`;
+    setShareUrl(shareUrl);
+    const shareData = {
+      title: titleWithSiteName(
+        tShare("sharedResult") + " | " + props.brief?.composer
+          ? tShare("titleWithComposer", {
+              title: props.brief?.title,
+              composer: props.brief?.composer,
+              chartCreator: props.brief?.chartCreator,
+              cid: props.cid,
+            })
+          : tShare("title", {
+              title: props.brief?.title,
+              chartCreator: props.brief?.chartCreator,
+              cid: props.cid,
+            })
+      ),
+      url: shareUrl,
+    };
+    if (
+      !!navigator?.share &&
+      !!navigator.canShare &&
+      navigator.canShare(shareData)
+    ) {
+      setShareData(shareData);
+    }
+  }, [origin, props.cid, props.brief, serializedParam]);
 
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
@@ -211,7 +268,26 @@ export default function Result(props: Props) {
           )}
         </div>
       </div>
-      <div className="text-center">
+      {(hasClipboard || shareData) && (
+        <div className="mb-2">
+          <span>{t("shareResult")}</span>
+          {hasClipboard && (
+            <Button
+              className="ml-2"
+              text={t("copyLink")}
+              onClick={() => navigator.clipboard.writeText(shareUrl)}
+            />
+          )}
+          {shareData && (
+            <Button
+              className="ml-2"
+              text={t("shareLink")}
+              onClick={() => navigator.share(shareData)}
+            />
+          )}
+        </div>
+      )}
+      <div>
         <Button
           text={t("reset")}
           keyName={props.isTouch ? undefined : "Space"}

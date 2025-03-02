@@ -12,5 +12,6 @@ export default {
     bestScore: "ベストスコア",
     start: "ゲーム開始！",
     unavailable: "公開されている譜面がまだありません。",
+    sharedResult: "共有されたプレイ記録",
   },
 };
