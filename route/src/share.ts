@@ -5,6 +5,7 @@ import { getTranslations } from "@falling-nikochan/i18n";
 import { fetchStatic } from "./static.js";
 import { ChartBrief } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
+import packageJson from "../package.json" with { type: "json" };
 
 interface ShareParams {
   language: string;
@@ -58,7 +59,11 @@ const shareHandler = factory.createHandlers(async (c) => {
       .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
       .replaceAll(
         "https://placeholder_og_image/",
-        new URL(`/og/${cid}`, new URL(c.req.url).origin).toString()
+        // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
+        new URL(
+          `/og/${cid}?v=${packageJson.version}`,
+          new URL(c.req.url).origin
+        ).toString()
       )
       .replaceAll(
         // これはjsファイルの中にしか現れないのでエスケープの必要はない

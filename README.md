@@ -18,12 +18,13 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
 ## Development
 
-* Install [Node.js](https://nodejs.org/ja/download) or [Bun](https://bun.sh/docs/installation).
+* Install [Node.js](https://nodejs.org/ja/download) (>=20) or [Bun](https://bun.sh/docs/installation) (>=1.2).
 * Install [MongoDB](https://www.mongodb.com/docs/manual/installation/) and run on `localhost:27017`
-    * If you have Docker installed, it is easy to use and recommended
+    * If you have Docker installed, it is easy to run and recommended
         ```sh
         docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest
         ```
+        * or `npm run mongo-docker`, `bun mongo-docker` does the same.
     * Falling Nikochan creates and uses a database named `nikochan` in it
 * Create a `.env` file with the following contents
     ```sh
@@ -32,26 +33,21 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     API_ENV="development"
     ```
 * Install dependencies
+    ```sh
+    npm ci  # or  bun i
+    ```
     * [GitHub Action ensures](.github/workflows/sync-lock.yaml) the two lockfiles synchronized with package.json.
-        ```sh
-        npm ci
-        # or
-        bun i
-        ```
 * Common files (chart/)
     * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
-    ```sh
-    npm run t
-    # or
-    bun t
-    ```
+        ```sh
+        npm run t  # or  bun t
+        ```
 * Backend
+    * Serves /api, /share, /og, and / (redirect).
     * Built with Hono, so it can be run with many runtimes.
     * For a local development environment, server can be run with Node.js or Bun (`http://localhost:8787`)
         ```sh
-        npm run ldev
-        # or
-        bun bdev
+        npm run ldev  # or  bun bdev
         ```
     * For the deployment, currently using Vercel
 * Frontend
@@ -59,16 +55,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
         * Instead, `/ja/share/placeholder` shows the placeholder page.
         ```sh
-        npm run ndev
-        # or
-        bun ndev
+        npm run ndev  # or  bun ndev
         ```
     * Or, SSR with exported html files
         * All pages should work by accessing the backend (`http://localhost:8787`) after building frontend, but there is no hot-reload.
         ```sh
-        npm run nbuild
-        # or
-        bun nbuild
+        npm run nbuild  # or  bun nbuild
         ```
     * As of Bun v1.2.2, `bun -b nbuild` seems to be unstable for this project.
 
@@ -78,12 +70,12 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 
 <details><summary>API List</summary>
 
-See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the chart data formats.
+See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart data formats.
 
 * `GET /api/brief/:cid` - Get the brief information of the chart.
     * `:cid` - Chart ID
     * Response
-        * [ChartBrief](chartFormat/chart.ts) as JSON with status code 200
+        * [ChartBrief](chart/src/chart.ts) as JSON with status code 200
         * `{message?: string}` as JSON with status code
             * 404 (cid not found),
             * or 500 (other error)
@@ -95,7 +87,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
     * `:cid` - Chart ID
     * `:lvIndex` - Level index number
     * Response
-        * [Level6Play](chartFormat/legacy/chart6.ts) or [Level8Play](chartFormat/legacy/chart8.ts) serialized with MessagePack with status code 200
+        * [Level6Play](chart/src/legacy/chart6.ts) or [Level8Play](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 404 (cid or level not found),
             * or 500 (other error)
@@ -116,7 +108,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
                 * The cookie value `hashKey` must be set and match with that used for the hash.
             * `pbypass=1` (only on development environment) bypass the password check
     * Response
-        * [Chart4](chartFormat/legacy/chart4.ts), [Chart5](chartFormat/legacy/chart5.ts), [Chart6](chartFormat/legacy/chart6.ts), [Chart7](chartFormat/legacy/chart7.ts) or [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack with status code 200
+        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts) or [Chart8Edit](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 401 (wrong passwd),
             * 404 (cid not found),
@@ -124,7 +116,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
 * `POST /api/chartFile/:cid` - Post the chart file. The previous password is required. If the posted chart data has a different password, it will be used next time.
     * `:cid` - Chart ID
     * Query Parameters: same as GET
-    * Request Body: [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack
+    * Request Body: [Chart8Edit](chart/src/legacy/chart8.ts) serialized with MessagePack
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
@@ -145,7 +137,7 @@ See also [chartFormat/chart.ts](chartFormat/chart.ts) for relations among the ch
             * or 500 (other error)
 * `GET /api/newChartFile` - returns 400.
 * `POST /api/newChartFile` - Create a new chart file.
-    * Request Body: [Chart8Edit](chartFormat/legacy/chart8.ts) serialized with MessagePack
+    * Request Body: [Chart8Edit](chart/src/legacy/chart8.ts) serialized with MessagePack
     * Response
         * `{cid: string}` as JSON with status code 200
         * `{message?: string}` as JSON with status code
@@ -175,6 +167,6 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 ## Versioning
 
 * major version follows the Chart data format version.
-* minor version is increased by `npm version minor` command for each PR
+* minor version is increased by `npm version -ws minor` command for each PR
     * Changes that do not affect app/ such as dependabot or update README.md are not counted.
-* ChangeLogs are written in [app/i18n/[locale]/changelog.mdx](app/i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation.
+* ChangeLogs are written in [i18n/[locale]/changelog.mdx](i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation.
