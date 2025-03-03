@@ -17,10 +17,10 @@ export default {
     bestScore: "ベストスコア",
     start: "ゲーム開始！",
     unavailable: "公開されている譜面がまだありません。",
-    titleWithResult: "{date} のプレイ記録 | {title}",
+    titleWithResult: "{date} のプレイ記録 - {title}",
     descriptionWithResult:
-      "{chartCreator} さん作成の {title} の譜面 ({level}) のプレイ結果は、" +
-      "{score, number, ::.00} 点{status} でした。" +
+      "{chartCreator} さん作成の {title} の譜面 ({level}) をプレイし、" +
+      "結果は {score, number, ::.00} 点{status} でした。" +
       main.main.descriptionVerbose,
     sharedResult: "共有されたプレイ記録",
   },

@@ -17,11 +17,10 @@ export default {
     bestScore: "Best Score",
     start: "Start Game!",
     unavailable: "No levels have been published yet.",
-    titleWithResult: "Play record on {date} | {title}",
+    titleWithResult: "Play record on {date} - {title}",
     descriptionWithResult:
-      "The play result of the chart ({level}) of {title} " +
-      "created by {chartCreator} on {date} was " +
-      "{score, number, ::.00} points{status}. " +
+      "Played the chart ({level}) of {title} created by {chartCreator}, " +
+      "and scored {score, number, ::.00} points{status}. " +
       main.main.descriptionVerbose,
     sharedResult: "Shared Play Record",
   },
