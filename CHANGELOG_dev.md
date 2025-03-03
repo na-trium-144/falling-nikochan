@@ -1,3 +1,15 @@
+## ver. 8.12 - 2025/03/03 [#332](https://github.com/na-trium-144/falling-nikochan/pull/332)
+
+* playでresultの表示時にその結果を共有するリンクコピーボタン、共有ボタンを追加。
+    * /share/cid?result=... のURLでresultを共有
+    * タイトルとdescription, OGP画像(/og/result/cid?result=...)に結果を表示する
+    * shareページに 共有された過去のプレイ結果 の表示が追加される
+    * タイトルはクライアントサイドで通常のものに戻す
+* /share/cid にクエリパラメーターのlangを追加。
+    * headの内容(OGプレビューに使われる言語)はクエリパラメーターのlangに従って出力し、クエリパラメータとaccept-languageが一致していない場合はクライアントサイドでクエリパラメータを消したurlにリダイレクトする。
+* shareページのheadに載せられているalternateのlocaleを削除
+* og画像の生成が遅いので、コピーボタンor共有ボタンを押した段階で1回 /og に対してfetchを飛ばし、CDNサイドでキャッシュされるようにする
+
 ## ver. 8.11 - 2025/03/01 [#335](https://github.com/na-trium-144/falling-nikochan/pull/335)
 
 * OGPに載せるサムネイルの周りに枠を追加
