@@ -1,8 +1,12 @@
+import main from "./main.js";
 export default {
   share: {
-    title: "{title} - Chart created by {chartCreator} (ID: {cid})",
-    titleWithComposer:
-      "{title} / {composer} - Chart created by {chartCreator} (ID: {cid})",
+    title: "{title} (ID: {cid})",
+    titleWithComposer: "{title} / {composer} (ID: {cid})",
+    description:
+      "Play the chart of {title} created by {chartCreator}. " +
+      main.main.descriptionVerbose,
+    chartCreatorEmpty: "(Anonymous)",
     chartCreator: "Chart created by",
     isSample: "Sample Chart",
     isPublished: "Published",
@@ -13,5 +17,12 @@ export default {
     bestScore: "Best Score",
     start: "Start Game!",
     unavailable: "No levels have been published yet.",
+    titleWithResult: "Play record on {date} | {title}",
+    descriptionWithResult:
+      "The play result of the chart ({level}) of {title} " +
+      "created by {chartCreator} on {date} was " +
+      "{score, number, ::.00} points{status}. " +
+      main.main.descriptionVerbose,
+    sharedResult: "Shared Play Record",
   },
 };

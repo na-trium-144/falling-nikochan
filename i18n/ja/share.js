@@ -1,4 +1,4 @@
-import main from "./main";
+import main from "./main.js";
 export default {
   share: {
     title: "{title} (ID: {cid})",
