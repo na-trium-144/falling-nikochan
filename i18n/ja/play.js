@@ -66,6 +66,9 @@ export default {
       },
       reset: "もう一度",
       exit: "やめる",
+      shareResult: "プレイ結果をシェアしよう！",
+      copyLink: "リンクをコピー",
+      shareLink: "共有",
     },
   },
 };

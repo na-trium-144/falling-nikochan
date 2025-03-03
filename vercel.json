@@ -28,7 +28,7 @@
       "destination": "/api"
     },
     {
-      "source": "/og/([0-9]+.*)",
+      "source": "/og/(.*)",
       "destination": "/api"
     },
     {

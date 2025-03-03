@@ -10,21 +10,30 @@ export async function initMetadata(
   params: Promise<{ locale?: string }>,
   path: string | null,
   title: string,
-  image?: string
+  options?: {
+    image?: string;
+    noAlternate?: boolean;
+    description?: string;
+  }
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
   const t = await getTranslations(locale, "main");
-  const description = t("description");
+  const description =
+    options?.description !== undefined
+      ? options?.description
+      : t("description");
   return {
     metadataBase: new URL("https://nikochan.natrium144.org"),
     title: titleWithSiteName(title),
     alternates: path
       ? {
           canonical: path,
-          languages: locales.reduce((prev, locale) => {
-            prev[locale] = `/${locale}${path}`;
-            return prev;
-          }, {} as { [key: string]: string }),
+          languages: options?.noAlternate
+            ? {}
+            : locales.reduce((prev, locale) => {
+                prev[locale] = `/${locale}${path}`;
+                return prev;
+              }, {} as { [key: string]: string }),
         }
       : undefined,
     description,
@@ -42,11 +51,11 @@ export async function initMetadata(
           title: titleWithoutSiteName(title),
           description,
           url: path,
-          images: image
-            ? [{ url: image, width: 1200, height: 630 }]
+          images: options?.image
+            ? [{ url: options?.image, width: 1200, height: 630 }]
             : undefined,
           type: "website",
-          locale,
+          locale: options?.noAlternate ? undefined : locale,
           siteName: "Falling Nikochan",
         }
       : undefined,
@@ -55,7 +64,7 @@ export async function initMetadata(
           title: titleWithSiteName(title),
           card: "summary_large_image",
           description,
-          images: image ? [image] : undefined,
+          images: options?.image ? [options?.image] : undefined,
         }
       : undefined,
     robots: {

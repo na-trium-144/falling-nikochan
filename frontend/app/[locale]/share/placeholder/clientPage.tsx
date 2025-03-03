@@ -4,7 +4,11 @@ import Header from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import Footer from "@/common/footer.js";
 import { PlayOption } from "./playOption.js";
-import { ChartBrief } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  deserializeResultParams,
+  ResultParams,
+} from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Link from "next/link";
@@ -13,9 +17,33 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
 import { International, PlayOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
-import { titleWithSiteName } from "@/common/title.js";
+import { useShareLink } from "@/common/share.js";
+import { SharedResultBox } from "./sharedResult.js";
+import { titleShare } from "@/common/title.js";
 
-export const dynamic = "force-static";
+const dummyBrief = {
+  title: "placeholder",
+  composer: "placeholder",
+  chartCreator: "placeholder",
+  ytId: "",
+  updatedAt: 0,
+  published: true,
+  playCount: 999,
+  locale: "ja",
+  levels: [
+    {
+      name: "placeholder",
+      hash: "",
+      type: "Single",
+      difficulty: 10,
+      noteCount: 100,
+      bpmMin: 1,
+      bpmMax: 999,
+      length: 1,
+      unlisted: false,
+    },
+  ],
+};
 
 export default function ShareChart({ locale }: { locale: string }) {
   const t = useTranslations("share");
@@ -24,75 +52,32 @@ export default function ShareChart({ locale }: { locale: string }) {
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string>("");
+  const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
-    setCId(window.location.href.split("/").pop()!);
+    const cid = window.location.pathname.split("/").pop()!;
+    setCId(cid);
+    const searchParams = new URLSearchParams(window.location.search);
     let brief: ChartBrief;
     if (process.env.NODE_ENV === "development") {
-      brief = {
-        title: "placeholder",
-        composer: "placeholder",
-        chartCreator: "placeholder",
-        ytId: "",
-        updatedAt: 0,
-        published: true,
-        playCount: 999,
-        locale: "ja",
-        levels: [
-          {
-            name: "placeholder",
-            hash: "",
-            type: "Single",
-            difficulty: 10,
-            noteCount: 100,
-            bpmMin: 1,
-            bpmMax: 999,
-            length: 1,
-            unlisted: false,
-          },
-        ],
-      };
+      brief = dummyBrief;
     } else {
       brief = JSON.parse("PLACEHOLDER_BRIEF");
     }
     setBrief(brief);
+    document.title = titleShare(t, cid, brief);
     setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
-  }, []);
+    if (searchParams.get("result")) {
+      try {
+        setSharedResult(deserializeResultParams(searchParams.get("result")!));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [t]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
-  const [origin, setOrigin] = useState<string>("");
-  const [hasClipboard, setHasClipboard] = useState<boolean>(false);
-  const [shareData, setShareData] = useState<object | null>(null);
-  useEffect(() => {
-    setOrigin(window.location.origin);
-    setHasClipboard(!!navigator?.clipboard);
-  }, []);
-  useEffect(() => {
-    const shareData = {
-      title: titleWithSiteName(
-        brief?.composer
-          ? t("titleWithComposer", {
-              title: brief?.title,
-              composer: brief?.composer,
-              chartCreator: brief?.chartCreator,
-              cid: cid,
-            })
-          : t("title", {
-              title: brief?.title,
-              chartCreator: brief?.chartCreator,
-              cid: cid,
-            })
-      ),
-      url: `${origin}/share/${cid}`,
-    };
-    if (
-      !!navigator?.share &&
-      !!navigator.canShare &&
-      navigator.canShare(shareData)
-    ) {
-      setShareData(shareData);
-    }
-  }, [origin, cid, brief]);
+  const shareLink = useShareLink(cid, brief, locale);
 
   return (
     <main className="flex flex-col items-center w-full min-h-dvh h-max">
@@ -166,36 +151,29 @@ export default function ShareChart({ locale }: { locale: string }) {
                 </p>
               </div>
             </div>
+            {sharedResult && <SharedResultBox result={sharedResult} />}
             <p className="mt-2">
               <span className="hidden main-wide:inline-block mr-2">
                 {t("shareLink")}:
               </span>
               <Link
                 className={"inline-block py-2 " + linkStyle1}
-                href={`/share/${cid}`}
+                href={shareLink.path}
                 prefetch={false}
               >
                 <span className="main-wide:hidden">{t("shareLink")}</span>
                 <span className="hidden main-wide:inline-block">
-                  {origin}/share/{cid}
+                  {shareLink.url}
                 </span>
               </Link>
-              {hasClipboard && (
-                <Button
-                  className="ml-2"
-                  text={t("copy")}
-                  onClick={() =>
-                    navigator.clipboard.writeText(`${origin}/share/${cid}`)
-                  }
-                />
-              )}
-              {shareData && (
-                <Button
-                  className="ml-2"
-                  text={t("share")}
-                  onClick={() => navigator.share(shareData)}
-                />
-              )}
+              <span className="inline-block ml-2 space-x-1">
+                {shareLink.toClipboard && (
+                  <Button text={t("copy")} onClick={shareLink.toClipboard} />
+                )}
+                {shareLink.toAPI && (
+                  <Button text={t("share")} onClick={shareLink.toAPI} />
+                )}
+              </span>
             </p>
             <PlayOption cid={cid} brief={brief} />
           </Box>

@@ -4,14 +4,25 @@
 * sid=セッションID または cid=譜面ID&lvIndex=インデックス で譜面を指定
 * fps=1 でFPS表示
 * speed=1 で音符の速度変化を表示
+* result=1 でリザルト表示
+* auto=1 でオートプレイをデフォルトにする
 
 */
 
 "use client";
 
+const exampleResult = {
+  baseScore100: 777,
+  chainScore100: 2000,
+  bigScore100: 123,
+  score100: 2900,
+  judgeCount: [11, 22, 33, 44],
+  bigCount: 55,
+} as const;
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6, loadChart6 } from "@falling-nikochan/chart";
+import { ChartSeqData6, levelTypes, loadChart6 } from "@falling-nikochan/chart";
 import { ChartSeqData8, loadChart8 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -38,6 +49,8 @@ import { Level8Play } from "@falling-nikochan/chart";
 export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
   const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
+  const [goResult, setGoResult] = useState<boolean>(false);
+  const [autoDefault, setAutoDefault] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -54,6 +67,8 @@ export function InitPlay({ locale }: { locale: string }) {
     const lvIndexFromParam = Number(searchParams.get("lvIndex"));
     setShowFps(searchParams.get("fps") !== null);
     setDisplaySpeed(searchParams.get("speed") !== null);
+    setGoResult(searchParams.get("result") !== null);
+    setAutoDefault(searchParams.get("auto") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -149,6 +164,8 @@ export function InitPlay({ locale }: { locale: string }) {
       editing={editing}
       showFps={showFps}
       displaySpeed={displaySpeed}
+      goResult={goResult}
+      autoDefault={autoDefault}
       locale={locale}
     />
   );
@@ -162,6 +179,8 @@ interface Props {
   editing: boolean;
   showFps: boolean;
   displaySpeed: boolean;
+  goResult: boolean;
+  autoDefault: boolean;
   locale: string;
 }
 function Play(props: Props) {
@@ -176,7 +195,7 @@ function Play(props: Props) {
         (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
-  const [auto, setAuto] = useState<boolean>(false);
+  const [auto, setAuto] = useState<boolean>(props.autoDefault);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -271,7 +290,8 @@ function Play(props: Props) {
   // 譜面をstartした (playingとは異なり、stop後も終了後もtrueのまま)
   const [chartStarted, setChartStarted] = useState<boolean>(false);
   // result画面を表示する
-  const [showResult, setShowResult] = useState<boolean>(false);
+  const [showResult, setShowResult] = useState<boolean>(props.goResult);
+  const [resultDate, setResultDate] = useState<Date>();
 
   const start = () => {
     // 再生中に呼んでもとくになにも起こらない
@@ -329,11 +349,12 @@ function Play(props: Props) {
       }
       const t = setTimeout(() => {
         setShowResult(true);
+        setResultDate(new Date());
         stop();
       }, 1000);
       return () => clearTimeout(t);
     } else {
-      setShowResult(false);
+      setShowResult(props.goResult);
     }
   }, [
     chartStarted,
@@ -350,6 +371,7 @@ function Play(props: Props) {
     bigScore,
     judgeCount,
     stop,
+    props.goResult,
   ]);
 
   const onReady = useCallback(() => {
@@ -475,10 +497,40 @@ function Play(props: Props) {
           <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
           {showResult ? (
             <Result
-              baseScore={baseScore}
-              chainScore={chainScore}
-              bigScore={bigScore}
-              score={score}
+              auto={auto}
+              lang={props.locale}
+              date={resultDate || new Date()}
+              cid={cid || ""}
+              brief={chartBrief}
+              lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
+              lvType={levelTypes.indexOf(
+                chartBrief.levels.at(lvIndex || 0)?.type || ""
+              )}
+              lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
+              baseScore100={
+                props.goResult
+                  ? exampleResult.baseScore100
+                  : Math.floor(baseScore * 100)
+              }
+              chainScore100={
+                props.goResult
+                  ? exampleResult.chainScore100
+                  : Math.floor(chainScore * 100)
+              }
+              bigScore100={
+                props.goResult
+                  ? exampleResult.bigScore100
+                  : Math.floor(bigScore * 100)
+              }
+              score100={
+                props.goResult
+                  ? exampleResult.score100
+                  : Math.floor(score * 100)
+              }
+              judgeCount={
+                props.goResult ? exampleResult.judgeCount : judgeCount
+              }
+              bigCount={props.goResult ? exampleResult.bigCount : bigCount}
               reset={reset}
               exit={exit}
               isTouch={isTouch}
