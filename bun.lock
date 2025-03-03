@@ -25,7 +25,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "wasmoon": "^1.16.0",
@@ -33,7 +33,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.1.1",
         "@fontsource/merriweather": "^5.1.1",
@@ -42,7 +42,7 @@
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
         "@mdx-js/react": "^3.1.0",
-        "@next/mdx": "^15.2.0",
+        "@next/mdx": "^15.2.1",
         "@ygoe/msgpack": "^1.0.3",
         "ace-builds": "^1.39.0",
         "file-saver": "^2.0.5",
@@ -63,14 +63,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "next-intl": "^3.26.5",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "@hono/node-server": "^1.13.8",
         "@vercel/og": "^0.6.5",
@@ -244,7 +244,7 @@
 
     "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.2.0", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-jHFUG2OwmAuOASqq253RAEG/5BYcPHn27p1NoWZDCf4OdvdK0yRYWX92YKkL+Mk2s+GyJrmd/GATlL5b2IySpw=="],
 
-    "@next/mdx": ["@next/mdx@15.2.0", "", { "dependencies": { "source-map": "^0.7.0" }, "peerDependencies": { "@mdx-js/loader": ">=0.15.0", "@mdx-js/react": ">=0.15.0" }, "optionalPeers": ["@mdx-js/loader", "@mdx-js/react"] }, "sha512-q10eCj5ERepucvG/2vos/iNXh9XZCG7qTPMi9/QIYWW4SUnaZnz7ip7F4QpyHSRp4A3afk/BTVDTwuOOZ1VZMA=="],
+    "@next/mdx": ["@next/mdx@15.2.1", "", { "dependencies": { "source-map": "^0.7.0" }, "peerDependencies": { "@mdx-js/loader": ">=0.15.0", "@mdx-js/react": ">=0.15.0" }, "optionalPeers": ["@mdx-js/loader", "@mdx-js/react"] }, "sha512-C03Xzo05o0GxASwtFLKWBDZht0ez3C/fZATMfVIfEg/TcWqa/ND6UTgyor7LFdrNvvaGjCRCFnEwYzF/l6PuHA=="],
 
     "@next/swc-darwin-arm64": ["@next/swc-darwin-arm64@15.2.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-rlp22GZwNJjFCyL7h5wz9vtpBVuCt3ZYjFWpEPBGzG712/uL1bbSkS675rVAUCRZ4hjoTJ26Q7IKhr5DfJrHDA=="],
 
