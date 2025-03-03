@@ -198,22 +198,24 @@ export default function Result(props: Props) {
         </div>
       </div>
       {!props.auto && (shareLink.toClipboard || shareLink.toAPI) && (
-        <div className="mb-2 " style={{ ...appearingAnimation3(7) }}>
+        <div
+          className={
+            "mb-2 " +
+            (props.largeResult
+              ? "flex flex-row items-baseline justify-center space-x-2 "
+              : "flex flex-col items-center")
+          }
+          style={{ ...appearingAnimation3(7) }}
+        >
           <span>{t("shareResult")}</span>
-          {shareLink.toClipboard && (
-            <Button
-              className="ml-2"
-              text={t("copyLink")}
-              onClick={shareLink.toClipboard}
-            />
-          )}
-          {shareLink.toAPI && (
-            <Button
-              className="ml-2"
-              text={t("shareLink")}
-              onClick={shareLink.toAPI}
-            />
-          )}
+          <span className="inline-block space-x-1">
+            {shareLink.toClipboard && (
+              <Button text={t("copyLink")} onClick={shareLink.toClipboard} />
+            )}
+            {shareLink.toAPI && (
+              <Button text={t("shareLink")} onClick={shareLink.toAPI} />
+            )}
+          </span>
         </div>
       )}
       <div style={{ ...appearingAnimation3(7) }}>
