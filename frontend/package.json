@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@fontsource/kaisei-opti": "^5.1.1",
+    "@fontsource/kaisei-opti": "^5.2.5",
     "@fontsource/merriweather": "^5.1.1",
     "@fontsource/noto-sans": "^5.1.1",
     "@fontsource/noto-sans-jp": "^5.1.1",
