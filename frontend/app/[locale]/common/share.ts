@@ -9,7 +9,8 @@ export function useShareLink(
   cid: string | undefined,
   brief: ChartMin | ChartBrief | undefined | null,
   lang?: string,
-  resultParam?: string
+  resultParam?: string,
+  date?: Date
 ) {
   const [origin, setOrigin] = useState<string>("");
   const searchParams = new URLSearchParams();
@@ -33,7 +34,7 @@ export function useShareLink(
   useEffect(() => {
     const shareData = {
       title: resultParam
-        ? titleShareResult(t, cid, brief)
+        ? titleShareResult(t, cid, brief, date!)
         : titleShare(t, cid, brief),
       url: url,
     };
@@ -44,7 +45,7 @@ export function useShareLink(
     ) {
       setShareData(shareData);
     }
-  }, [origin, cid, brief, url, resultParam, t]);
+  }, [origin, cid, brief, url, resultParam, t, date]);
 
   return {
     url,

@@ -19,6 +19,7 @@ import { International, PlayOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share.js";
 import { SharedResultBox } from "./sharedResult.js";
+import { titleShare } from "@/common/title.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -54,7 +55,8 @@ export default function ShareChart({ locale }: { locale: string }) {
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
-    setCId(window.location.pathname.split("/").pop()!);
+    const cid = window.location.pathname.split("/").pop()!;
+    setCId(cid);
     const searchParams = new URLSearchParams(window.location.search);
     let brief: ChartBrief;
     if (process.env.NODE_ENV === "development") {
@@ -63,6 +65,7 @@ export default function ShareChart({ locale }: { locale: string }) {
       brief = JSON.parse("PLACEHOLDER_BRIEF");
     }
     setBrief(brief);
+    document.title = titleShare(t, cid, brief);
     setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
     if (searchParams.get("result")) {
       try {
@@ -71,7 +74,7 @@ export default function ShareChart({ locale }: { locale: string }) {
         console.error(e);
       }
     }
-  }, []);
+  }, [t]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const shareLink = useShareLink(cid, brief);

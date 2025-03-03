@@ -36,7 +36,8 @@ export default function Result(props: Props) {
     props.cid,
     props.brief,
     props.lang,
-    serializedParam
+    serializedParam,
+    props.date
   );
   useEffect(() => {
     setSerializedParam(serializeResultParams(props));

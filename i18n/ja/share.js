@@ -1,7 +1,12 @@
+import main from "./main";
 export default {
   share: {
-    title: "{title} - 譜面作成: {chartCreator} (ID: {cid})",
-    titleWithComposer: "{title} / {composer} - 譜面作成: {chartCreator} (ID: {cid})",
+    title: "{title} (ID: {cid})",
+    titleWithComposer: "{title} / {composer} (ID: {cid})",
+    description:
+      "{chartCreator} さん作成の {title} の譜面をプレイしよう。" +
+      main.main.descriptionVerbose,
+    chartCreatorEmpty: "(名無し)",
     chartCreator: "譜面作成",
     isSample: "サンプル譜面",
     isPublished: "一般公開",
@@ -12,6 +17,11 @@ export default {
     bestScore: "ベストスコア",
     start: "ゲーム開始！",
     unavailable: "公開されている譜面がまだありません。",
+    titleWithResult: "{date} のプレイ記録 | {title}",
+    descriptionWithResult:
+      "{chartCreator} さん作成の {title} の譜面 ({level}) のプレイ結果は、" +
+      "{score, number, ::.00} 点{status} でした。" +
+      main.main.descriptionVerbose,
     sharedResult: "共有されたプレイ記録",
   },
 };

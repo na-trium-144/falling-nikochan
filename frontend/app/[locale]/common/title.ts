@@ -15,20 +15,22 @@ export function titleShare(
       ? t("titleWithComposer", {
           title: brief?.title,
           composer: brief?.composer,
-          chartCreator: brief?.chartCreator,
           cid: cid,
         })
       : t("title", {
           title: brief?.title,
-          chartCreator: brief?.chartCreator,
           cid: cid,
         })
   );
 }
 export function titleShareResult(
   t: any,
-  cid?: string,
-  brief?: ChartMin | ChartBrief | null
+  cid: string | undefined,
+  brief: ChartMin | ChartBrief | null | undefined,
+  date: Date
 ): string {
-  return t("sharedResult") + " | " + titleShare(t, cid, brief);
+  return t("titleWithResult", {
+    date: date?.toLocaleDateString(),
+    title: titleShare(t, cid, brief),
+  });
 }
