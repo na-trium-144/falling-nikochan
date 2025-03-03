@@ -10,7 +10,6 @@ import {
   ChartBrief,
   deserializeResultParams,
   levelTypes,
-  rankStr,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
