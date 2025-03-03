@@ -5,6 +5,7 @@
 * fps=1 でFPS表示
 * speed=1 で音符の速度変化を表示
 * result=1 でリザルト表示
+* auto=1 でオートプレイをデフォルトにする
 
 */
 
@@ -49,6 +50,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [showFps, setShowFps] = useState<boolean>(false);
   const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [goResult, setGoResult] = useState<boolean>(false);
+  const [autoDefault, setAutoDefault] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -66,6 +68,7 @@ export function InitPlay({ locale }: { locale: string }) {
     setShowFps(searchParams.get("fps") !== null);
     setDisplaySpeed(searchParams.get("speed") !== null);
     setGoResult(searchParams.get("result") !== null);
+    setAutoDefault(searchParams.get("auto") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -162,6 +165,7 @@ export function InitPlay({ locale }: { locale: string }) {
       showFps={showFps}
       displaySpeed={displaySpeed}
       goResult={goResult}
+      autoDefault={autoDefault}
       locale={locale}
     />
   );
@@ -176,6 +180,7 @@ interface Props {
   showFps: boolean;
   displaySpeed: boolean;
   goResult: boolean;
+  autoDefault: boolean;
   locale: string;
 }
 function Play(props: Props) {
@@ -190,7 +195,7 @@ function Play(props: Props) {
         (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
-  const [auto, setAuto] = useState<boolean>(false);
+  const [auto, setAuto] = useState<boolean>(props.autoDefault);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -492,6 +497,7 @@ function Play(props: Props) {
           <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
           {showResult ? (
             <Result
+              auto={auto}
               lang={props.locale}
               date={resultDate || new Date()}
               cid={cid || ""}

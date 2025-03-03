@@ -22,6 +22,7 @@ interface Props extends ResultParams {
   brief: ChartBrief;
   isTouch: boolean;
   newRecord: number;
+  auto: boolean;
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
@@ -196,7 +197,7 @@ export default function Result(props: Props) {
           )}
         </div>
       </div>
-      {(shareLink.toClipboard || shareLink.toAPI) && (
+      {!props.auto && (shareLink.toClipboard || shareLink.toAPI) && (
         <div className="mb-2 " style={{ ...appearingAnimation3(7) }}>
           <span>{t("shareResult")}</span>
           {shareLink.toClipboard && (
