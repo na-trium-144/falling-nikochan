@@ -1,11 +1,11 @@
 export default {
   main: {
     description:
-      "シンプルでかわいい音ゲーです。" +
-      "誰でも譜面を作成し共有することができます。",
+      "誰でも譜面を作成し共有することができる、" +
+      "シンプルでかわいい音ゲーです。",
     descriptionVerbose:
-      "Falling Nikochan はシンプルでかわいい音ゲーです。" +
-      "誰でも譜面を作成し共有することができます。",
+      "Falling Nikochan は、誰でも譜面を作成し共有することができる、" +
+      "シンプルでかわいい音ゲーです。",
     about: {
       title: "Falling Nikochan とは？",
     },
