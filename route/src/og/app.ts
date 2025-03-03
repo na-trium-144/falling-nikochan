@@ -12,9 +12,8 @@ import { fetchStatic } from "../static.js";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
 
-const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
-  "/:type/:cid",
-  async (c) => {
+const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .get("/:type/:cid", async (c) => {
     const lang = c.req.query("lang") || "en"; // c.get("language");
     const cid = c.req.param("cid");
     const qResult = c.req.query("result");
@@ -140,7 +139,10 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         message: "Failed to generate image",
       });
     }
-  }
-);
+  })
+  .get("/:cid{[0-9]+}", (c) =>
+    // deprecated (used until ver8.11)
+    c.redirect(`/og/share/${c.req.param("cid")}`, 301)
+  );
 
 export default ogApp;
