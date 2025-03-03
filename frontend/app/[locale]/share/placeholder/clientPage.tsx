@@ -77,7 +77,7 @@ export default function ShareChart({ locale }: { locale: string }) {
   }, [t]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
-  const shareLink = useShareLink(cid, brief);
+  const shareLink = useShareLink(cid, brief, locale);
 
   return (
     <main className="flex flex-col items-center w-full min-h-dvh h-max">
@@ -158,7 +158,7 @@ export default function ShareChart({ locale }: { locale: string }) {
               </span>
               <Link
                 className={"inline-block py-2 " + linkStyle1}
-                href={`/share/${cid}`}
+                href={shareLink.path}
                 prefetch={false}
               >
                 <span className="main-wide:hidden">{t("shareLink")}</span>

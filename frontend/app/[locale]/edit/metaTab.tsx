@@ -184,10 +184,7 @@ export function MetaTab(props: Props2) {
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [saving, setSaving] = useState<boolean>(false);
   const [uploadMsg, setUploadMsg] = useState<string>("");
-  const shareLink = useShareLink(
-    props.cid,
-    props.chart
-  );
+  const shareLink = useShareLink(props.cid, props.chart, props.locale);
   useEffect(() => {
     setErrorMsg("");
     setSaveMsg("");
@@ -419,7 +416,7 @@ export function MetaTab(props: Props2) {
             <span className="hidden edit-wide:inline-block mr-2">
               {t("shareLink")}:
             </span>
-            <ExternalLink href={`/share/${props.cid}`}>
+            <ExternalLink href={shareLink.path}>
               <span className="edit-wide:hidden">{t("shareLink")}</span>
               <span className="hidden edit-wide:inline text-sm">
                 {shareLink.url}
