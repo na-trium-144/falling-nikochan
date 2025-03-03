@@ -1,3 +1,7 @@
+## ver. 8.13 - 2025/03/04 [#339](https://github.com/na-trium-144/falling-nikochan/pull/339)
+
+* /og/:cid から /og/share/:cid へのリダイレクトを追加
+
 ## ver. 8.12 - 2025/03/03 [#332](https://github.com/na-trium-144/falling-nikochan/pull/332)
 
 * playでresultの表示時にその結果を共有するリンクコピーボタン、共有ボタンを追加。
