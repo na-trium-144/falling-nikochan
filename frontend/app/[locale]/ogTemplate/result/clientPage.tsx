@@ -12,6 +12,7 @@ import { JudgeIcon } from "@/play/statusBox";
 import { levelBgColors, levelColors } from "@/common/levelColors";
 
 export default function OGTemplate() {
+  const th = useTranslations("share");
   const t = useTranslations("play.result");
   const ts = useTranslations("play.status");
   useTheme();
@@ -29,7 +30,7 @@ export default function OGTemplate() {
       style={{ width: 1200, height: 630 }}
     >
       <Title
-        className="absolute top-0 left-8 h-30 scale-120 origin-top-left "
+        className="absolute top-0 left-8 h-26 scale-120 origin-top-left "
         anim={false}
       />
       <div
@@ -48,22 +49,38 @@ export default function OGTemplate() {
         </div>
       </div>
       <div className="flex-1 min-w-0 ">
-        <div className="ml-124 mt-16 text-4xl ">
+        <div className="ml-124 mt-12 text-4xl ">
           <span className="inline-block w-16 ">ID:</span>
           <span className="inline-block ">{showDummyData && 444444}</span>
         </div>
         <div
           className={
-            "ml-20 mt-10 text-5xl font-title " +
+            "ml-20 mt-6 flex flex-row items-baseline " +
             "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
             (showDummyData ? "" : "invisible")
           }
         >
-          TitleたいとるTitleたいとるTitleたいとるTitleたいとるTitleたいとるTitleたいとる
+          <span className="text-5xl font-title ">Titleたいとる</span>
+          <span className="text-4xl font-title ml-4">/</span>
+          <span className="text-4xl font-title ml-4">作曲者Composer</span>
         </div>
         <div
           className={
-            "ml-20 mt-6 flex flex-row items-baseline " +
+            "pl-20 mt-4 font-title text-4xl " +
+            "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
+            (showDummyData ? "" : "invisible")
+          }
+        >
+          <span className="font-main-ui text-3xl mr-4 ">
+            {th("chartCreator")}:
+          </span>
+          <span>
+            chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作chartCreator譜面制作
+          </span>
+        </div>
+        <div
+          className={
+            "ml-20 mt-2 flex flex-row items-baseline " +
             (showDummyData ? "" : "invisible")
           }
         >
@@ -72,8 +89,20 @@ export default function OGTemplate() {
           <span className={"text-5xl " + levelColors[0]}>44</span>
         </div>
         <Box
-          className={"flex-1 ml-20 mt-8 h-max p-6 flex flex-col items-center "}
+          className={
+            "flex-1 ml-20 mt-6 h-max p-6 flex flex-col items-center " +
+            "relative "
+          }
         >
+          <div
+            className={
+              "absolute bottom-6 right-6 text-3xl text-slate-500 " +
+              (showDummyData ? "" : "invisible")
+            }
+          >
+            (2025/01/01)
+          </div>
+
           {/*<p className="text-3xl font-title font-bold">
             &lt; {t("result")} &gt;
           </p>*/}

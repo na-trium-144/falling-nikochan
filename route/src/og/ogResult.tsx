@@ -21,6 +21,8 @@ import {
   text2xl,
   text3xl,
   bold,
+  slate500,
+  amber500,
 } from "./style.js";
 
 export async function OGResult(
@@ -30,6 +32,7 @@ export async function OGResult(
   bgImageBin: string,
   params: ResultParams
 ) {
+  const th = await getTranslations(lang, "share");
   const t = await getTranslations(lang, "play.result");
   const ts = await getTranslations(lang, "play.status");
   return (
@@ -50,19 +53,6 @@ export async function OGResult(
         }}
         src={`data:image/png;base64,${btoa(bgImageBin)}`}
       />
-      <img
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: 120 * 4,
-          objectFit: "cover",
-        }}
-        src={
-          // defaultやhqやsdは4:3で、mqだけなぜか16:9
-          `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
-        }
-      />
       <div
         style={{
           // flexGrow: 1,  does not work
@@ -74,7 +64,7 @@ export async function OGResult(
         <div
           style={{
             paddingLeft: (124 + 16) * 4,
-            marginTop: 16 * 4,
+            marginTop: 12 * 4,
             ...text4xl,
             fontFamily: fontMainUi,
           }}
@@ -84,18 +74,55 @@ export async function OGResult(
         <div
           style={{
             paddingLeft: 20 * 4,
-            marginTop: 10 * 4,
+            marginTop: 6 * 4,
             width: 2147483647,
-            ...text5xl,
+            ...flexRow,
+          }}
+        >
+          <span
+            style={{
+              ...text5xl,
+              fontFamily: fontTitle,
+            }}
+          >
+            {brief.title}
+          </span>
+          <span
+            style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+          >
+            /
+          </span>
+          <span
+            style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+          >
+            {brief.composer}
+          </span>
+        </div>
+        <div
+          style={{
+            ...flexRow,
+            paddingLeft: 20 * 4,
+            marginTop: 4 * 4,
+            width: 2147483647,
+            ...text4xl,
             fontFamily: fontTitle,
           }}
         >
-          {brief.title}
+          <span
+            style={{
+              ...text3xl,
+              marginRight: 4 * 4,
+              fontFamily: fontMainUi,
+            }}
+          >
+            {th("chartCreator")}:
+          </span>
+          <span>{brief.chartCreator}</span>
         </div>
         <div
           style={{
             paddingLeft: 20 * 4,
-            marginTop: 6 * 4,
+            marginTop: 2 * 4,
             ...flexRow,
             width: 2147483647,
           }}
@@ -129,12 +156,24 @@ export async function OGResult(
         <div
           style={{
             marginLeft: 20 * 4,
-            marginTop: 8 * 4,
+            marginTop: 6 * 4,
             padding: 6 * 4,
             ...flexCol,
+            position: "relative",
             fontFamily: fontMainUi,
           }}
         >
+          <div
+            style={{
+              position: "absolute",
+              bottom: 6 * 4,
+              right: 6 * 4,
+              ...text3xl,
+              color: slate500,
+            }}
+          >
+            {`(${params.date.toLocaleDateString(lang)})`}
+          </div>
           <div
             style={{
               ...flexRow,
@@ -235,6 +274,31 @@ export async function OGResult(
           <span style={{ ...text4xl }}>{params.bigCount}</span>
         </div>
       </div>
+      {/* zIndexが効かなさそうなので代わりに順番を変えて解決 */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 124 * 4,
+          height: (124 * 4 * 9) / 16,
+          borderBottomLeftRadius: 12,
+          backgroundColor: amber500,
+        }}
+      />
+      <img
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 120 * 4,
+          objectFit: "cover",
+        }}
+        src={
+          // defaultやhqやsdは4:3で、mqだけなぜか16:9
+          `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
+        }
+      />
     </div>
   );
 }

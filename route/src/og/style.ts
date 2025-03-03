@@ -7,6 +7,8 @@ export const flexRow = {
   alignItems: "baseline",
 } as const;
 export const slate800 = "rgb(29 41 61)";
+export const slate500 = "rgb(98, 116, 142)";
+export const amber500 = "rgb(253, 154, 0)";
 export const bold = { fontWeight: 700 } as const;
 export const text2xl = { fontSize: 24, lineHeight: 2 / 1.5 } as const;
 export const text3xl = { fontSize: 30, lineHeight: 2.25 / 1.875 } as const;

@@ -253,10 +253,10 @@ function ResultRow(props: RowProps) {
       <span className="text-3xl text-right " style={props.scoreStyle}>
         {Math.floor(props.score100 / 100)}
       </span>
-      <span className="" style={props.scoreStyle}>
+      <span className="text-xl" style={props.scoreStyle}>
         .
       </span>
-      <span className="text-left w-5 " style={props.scoreStyle}>
+      <span className="text-xl text-left w-7 " style={props.scoreStyle}>
         {(props.score100 % 100).toString().padStart(2, "0")}
       </span>
     </p>
