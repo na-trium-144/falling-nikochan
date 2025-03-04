@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 interface Props {
+  className?: string;
   lvType: string;
   lvIndex?: number;
   isMobile: boolean; // 横並び or 縦並び
@@ -47,7 +48,8 @@ export function MusicArea(props: Props) {
         (levelBgColors.at(levelTypes.indexOf(props.lvType)) ||
           levelBgColors[1]) +
         (props.isMobile ? "mt-3 mx-3 " : "my-3 mr-3 ") +
-        "flex-col "
+        "flex-col " +
+        props.className
       }
       ref={ref}
     >

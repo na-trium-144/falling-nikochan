@@ -16,6 +16,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share";
 
+export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
+
 interface Props extends ResultParams {
   lang: string;
   cid: string;
@@ -59,10 +61,9 @@ export default function Result(props: Props) {
 
   const [showing, setShowing] = useState<number>(0);
   useEffect(() => {
-    const delay = [100, 500, 500, 500, 750, 750, 500];
     const offset: number[] = [];
-    for (let i = 0; i < delay.length; i++) {
-      offset.push((i > 0 ? offset[i - 1] : 0) + delay[i]);
+    for (let i = 0; i < resultAnimDelays.length; i++) {
+      offset.push((i > 0 ? offset[i - 1] : 0) + resultAnimDelays[i]);
     }
     const timers = offset.map((o, i) => setTimeout(() => setShowing(i + 1), o));
     return () => {
