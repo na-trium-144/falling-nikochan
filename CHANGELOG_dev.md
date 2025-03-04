@@ -1,3 +1,9 @@
+## ver. 8.15 - 2025/03/04 [#352]
+
+* /main/playから/shareページへの遷移をmodal表示に変更
+    * ブラウザのhistory遷移にも反応してmodalを開閉するようにした
+* 新着譜面リストなどのExclusiveModeの処理にもhistory処理を統合
+
 ## ver. 8.13 - 2025/03/04 [#339](https://github.com/na-trium-144/falling-nikochan/pull/339)
 
 * /og/:cid から /og/share/:cid へのリダイレクトを追加

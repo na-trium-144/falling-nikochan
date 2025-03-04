@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
@@ -14,12 +14,46 @@ import {
 } from "../play/fetch.js";
 import { rateLimitMin, validCId } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
+import { useDisplayMode } from "@/scale.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
+  const { isMobileMain } = useDisplayMode();
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
+
+  const [showExclusiveMode, setShowExclusiveMode] = useState<null | "recent">(
+    null
+  );
+  const [showAllMode, setShowAllMode] = useState<null | "recent">(null);
+  const goExclusiveMode = useCallback(
+    (mode: "recent") => {
+      window.history.replaceState(null, "", "#"); // これがないとなぜか #recent から元のページにブラウザバックできなくなる場合があるけどなぜ?
+      window.history.pushState(null, "", "#" + mode);
+      setShowExclusiveMode(mode);
+      if (isMobileMain) {
+        setShowAllMode(mode);
+        window.scrollTo(0, 0);
+      } else {
+        setTimeout(() => setShowAllMode(mode), 200);
+      }
+    },
+    [isMobileMain]
+  );
+  // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
+  useEffect(() => {
+    const handler = () => {
+      if (window.location.hash.length >= 2) {
+        goExclusiveMode(window.location.hash.slice(1) as "recent");
+      } else {
+        setShowAllMode(null);
+        setShowExclusiveMode(null);
+      }
+    };
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, [goExclusiveMode]);
 
   useEffect(() => {
     const recentCId = getRecent("edit").reverse();
@@ -67,11 +101,6 @@ export default function EditTab({ locale }: { locale: string }) {
     }
   };
 
-  const [showExclusiveMode, setShowExclusiveMode] = useState<null | "recent">(
-    null
-  );
-  const [showAllMode, setShowAllMode] = useState<null | "recent">(null);
-
   return (
     <IndexMain tab={2} locale={locale}>
       <AccordionLike hidden={showExclusiveMode !== null}>
@@ -111,10 +140,7 @@ export default function EditTab({ locale }: { locale: string }) {
       <AccordionLike
         hidden={showExclusiveMode !== null && showExclusiveMode !== "recent"}
         expanded={showAllMode === "recent"}
-        reset={() => {
-          setShowAllMode(null);
-          setShowExclusiveMode(null);
-        }}
+        reset={() => window.history.back()}
         header={
           <span className="text-xl font-bold font-title">
             {t("recentEdit")}
@@ -130,8 +156,11 @@ export default function EditTab({ locale }: { locale: string }) {
           showLoading
           additionalOpen={showAllMode === "recent"}
           setAdditionalOpen={(open) => {
-            setShowExclusiveMode(open ? "recent" : null);
-            setTimeout(() => setShowAllMode(open ? "recent" : null), 200);
+            if (open) {
+              goExclusiveMode("recent");
+            } else {
+              window.history.back();
+            }
           }}
         />
       </AccordionLike>
