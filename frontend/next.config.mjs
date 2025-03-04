@@ -30,6 +30,7 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  devIndicators: false,
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
