@@ -38,7 +38,7 @@
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "^5.1.1",
         "@fontsource/noto-sans": "^5.1.1",
-        "@fontsource/noto-sans-jp": "^5.1.1",
+        "@fontsource/noto-sans-jp": "^5.2.5",
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
         "@mdx-js/react": "^3.1.0",
@@ -170,7 +170,7 @@
 
     "@fontsource/noto-sans": ["@fontsource/noto-sans@5.1.1", "", {}, "sha512-WesuII3BzvzVr0JqYIgnEeJPwXvpFAo9tNCMH1AqoLSCdStKJugMaIcVJ/sT+Pw9ytIlUO3ccbqbe+BhhsXm9g=="],
 
-    "@fontsource/noto-sans-jp": ["@fontsource/noto-sans-jp@5.1.1", "", {}, "sha512-PXk7mDjiaW99xU85IIxRGekzxLz91h2usk0rfDXSVwds9Nuo4sdlDUEE8PQ1P3VLnV00FsCHfSH54uR217VXpg=="],
+    "@fontsource/noto-sans-jp": ["@fontsource/noto-sans-jp@5.2.5", "", {}, "sha512-ISoJUQlsuSo4y56P+eJD+g022BRAF1BC2uCyEFGRsob0g8VvQAoWNMlWh+P0VQw68QzZHHj41zRzeRFpzAdA7w=="],
 
     "@formatjs/ecma402-abstract": ["@formatjs/ecma402-abstract@2.3.3", "", { "dependencies": { "@formatjs/fast-memoize": "2.2.6", "@formatjs/intl-localematcher": "0.6.0", "decimal.js": "10", "tslib": "2" } }, "sha512-pJT1OkhplSmvvr6i3CWTPvC/FGC06MbN5TNBfRO6Ox62AEz90eMq+dVvtX9Bl3jxCEkS0tATzDarRZuOLw7oFg=="],
 
