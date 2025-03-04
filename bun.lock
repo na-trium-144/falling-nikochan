@@ -25,7 +25,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "wasmoon": "^1.16.0",
@@ -33,9 +33,9 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
-        "@fontsource/kaisei-opti": "^5.1.1",
+        "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "^5.1.1",
         "@fontsource/noto-sans": "^5.1.1",
         "@fontsource/noto-sans-jp": "^5.1.1",
@@ -63,14 +63,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "next-intl": "^3.26.5",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "8.11.0",
+      "version": "8.14.0",
       "dependencies": {
         "@hono/node-server": "^1.13.8",
         "@vercel/og": "^0.6.5",
@@ -164,7 +164,7 @@
 
     "@falling-nikochan/route": ["@falling-nikochan/route@workspace:route"],
 
-    "@fontsource/kaisei-opti": ["@fontsource/kaisei-opti@5.1.1", "", {}, "sha512-A89m/oJnOF8jQviuKTZtr2MLuloadYqN6Uh3gxIXva+Lbfqovpq6hEQn3UT7CuZio2aywbc9vDskYcimnTIu9Q=="],
+    "@fontsource/kaisei-opti": ["@fontsource/kaisei-opti@5.2.5", "", {}, "sha512-Ttd/KTtKEB1M+CAD52R5dQs/qlP4csMtJVwhydlza175rd+WBwT+EQiI6IrBPjFPVZjIruVG2bTMa8gluYkXNQ=="],
 
     "@fontsource/merriweather": ["@fontsource/merriweather@5.1.1", "", {}, "sha512-GaO8ZHDCQAuoPJh0yiLK+NzL03OnGs64uFGKFRSouinZ1CtoEtO+3DHr4LZokFW+Au5MvWr4Am2MOhjdyvIRyA=="],
 
