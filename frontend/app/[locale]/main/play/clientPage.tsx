@@ -15,6 +15,7 @@ import { AccordionLike, ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
 import {
+  ChartBrief,
   originalCId,
   sampleCId,
   validCId,
@@ -22,6 +23,9 @@ import {
 import { useTranslations } from "next-intl";
 import { SmallDomainShare } from "@/common/small";
 import { useDisplayMode } from "@/scale.js";
+import { fetchBrief } from "@/common/briefCache.js";
+import { Box, modalBg } from "@/common/box.js";
+import { ShareBox } from "@/share/placeholder/shareBox.js";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
@@ -35,7 +39,26 @@ export default function PlayTab({ locale }: { locale: string }) {
   const fetchOriginalAll = true;
   const [sampleBrief, setSampleBrief] = useState<ChartLineBrief[]>();
   const fetchSampleAll = true;
-  const router = useRouter();
+
+  const [modalCId, setModalCId] = useState<string | null>(null);
+  const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
+  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
+  const openModal = (cid: string, brief: ChartBrief | undefined) => {
+    if (brief) {
+      setModalCId(cid);
+      setModalBrief(brief);
+      setTimeout(() => {
+        setModalAppearing(true);
+      }, 0);
+    }
+  };
+  const closeModal = () => {
+    setModalAppearing(false);
+    setTimeout(() => {
+      setModalCId(null);
+      setModalBrief(null);
+    }, 200);
+  };
 
   useEffect(() => {
     const recentCId = getRecent("play").reverse();
@@ -112,21 +135,18 @@ export default function PlayTab({ locale }: { locale: string }) {
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
-    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
-      cache: "no-store",
-    });
+    const res = await fetchBrief(cid, true);
     if (res.ok) {
-      router.push(`/share/${cid}`);
+      // router.push(`/share/${cid}`);
+      openModal(cid, res.brief);
     } else {
-      setCidFetching(false);
-      try {
-        setCIdErrorMsg(
-          String(((await res.json()) as { message?: string }).message)
-        );
-      } catch (e) {
-        setCIdErrorMsg(String(e));
+      if (res.is404) {
+        setCIdErrorMsg("Chart Not Found");
+      } else {
+        setCIdErrorMsg("Server Error");
       }
     }
+    setCidFetching(false);
   };
 
   // exclusiveをセット(指定したもの以外を非表示にする) → 200ms後、showAllをセット(指定したものの内容を全て表示する)
@@ -139,7 +159,43 @@ export default function PlayTab({ locale }: { locale: string }) {
   );
 
   return (
-    <IndexMain tab={1} locale={locale}>
+    <IndexMain
+      tab={1}
+      locale={locale}
+      modal={
+        modalCId &&
+        modalBrief && (
+          <div
+            className={
+              modalBg +
+              "transition-opacity duration-200 " +
+              (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
+            }
+            onClick={closeModal}
+          >
+            <div className="absolute inset-6">
+              <Box
+                onClick={(e) => e.stopPropagation()}
+                className={
+                  "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
+                  "p-6 overflow-x-clip overflow-y-auto " +
+                  "shadow-lg " +
+                  "transition-transform duration-200 origin-center " +
+                  (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
+                }
+              >
+                <ShareBox
+                  cid={modalCId}
+                  brief={modalBrief}
+                  locale={locale}
+                  backButton={closeModal}
+                />
+              </Box>
+            </div>
+          </div>
+        )
+      }
+    >
       <AccordionLike
         hidden={showExclusiveMode !== null}
         header={
@@ -211,6 +267,9 @@ export default function PlayTab({ locale }: { locale: string }) {
           fetchAdditional={() => setFetchRecentAll(true)}
           creator
           href={(cid) => `/share/${cid}`}
+          onClick={(cid) =>
+            openModal(cid, recentBrief?.find((b) => b.cid === cid)?.brief)
+          }
           showLoading
           additionalOpen={showAllMode === "recent"}
           setAdditionalOpen={(open) => {
@@ -246,6 +305,9 @@ export default function PlayTab({ locale }: { locale: string }) {
           fetchAdditional={() => setFetchLatestAll(true)}
           creator
           href={(cid) => `/share/${cid}`}
+          onClick={(cid) =>
+            openModal(cid, latestBrief?.find((b) => b.cid === cid)?.brief)
+          }
           showLoading
           dateDiff
           additionalOpen={showAllMode === "latest"}
@@ -296,6 +358,14 @@ export default function PlayTab({ locale }: { locale: string }) {
           recentBrief={originalBrief?.concat(sampleBrief || [])}
           maxRow={(originalBrief?.length || 0) + (sampleBrief?.length || 0)}
           href={(cid) => `/share/${cid}`}
+          onClick={(cid) =>
+            openModal(
+              cid,
+              originalBrief
+                ?.concat(sampleBrief || [])
+                .find((b) => b.cid === cid)?.brief
+            )
+          }
           showLoading
           additionalOpen={false}
           setAdditionalOpen={() => undefined}
