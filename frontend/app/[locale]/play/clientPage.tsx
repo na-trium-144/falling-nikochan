@@ -36,7 +36,7 @@ import msgpack from "@ygoe/msgpack";
 import { CenterBox } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
-import Result from "./result.js";
+import Result, { resultAnimDelays } from "./result.js";
 import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
@@ -270,6 +270,9 @@ function Play(props: Props) {
 
   // start後true
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
+  const [exitable, setExitable] = useState<Date | null>(null);
+  const exitableNow = () =>
+    exitable && exitable.getTime() < new Date().getTime();
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
 
@@ -326,6 +329,10 @@ function Play(props: Props) {
     if (chartPlaying) {
       setChartStopped(true);
       setChartPlaying(false);
+      setExitable(
+        (ex) =>
+          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000))
+      );
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
@@ -342,6 +349,7 @@ function Play(props: Props) {
       setChartStopped(false);
       setChartStarted(false);
       setChartPlaying(false);
+      setExitable(null);
       setReady(true);
       resetNotesAll(chartSeq.notes);
       reloadBestScore();
@@ -398,6 +406,16 @@ function Play(props: Props) {
       const t = setTimeout(() => {
         setShowResult(true);
         setResultDate(new Date());
+        setExitable(
+          (ex) =>
+            new Date(
+              Math.max(
+                ex?.getTime() || 0,
+                new Date().getTime() +
+                  resultAnimDelays.reduce((a, b) => a + b, 0)
+              )
+            )
+        );
         stop();
       }, 1000);
       return () => clearTimeout(t);
@@ -433,6 +451,7 @@ function Play(props: Props) {
       setReady(false);
       setChartPlaying(true);
       setChartStarted(true);
+      setExitable(null);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(100);
     }
@@ -471,13 +490,12 @@ function Play(props: Props) {
           start();
         } else if (
           e.key === " " &&
-          (chartStopped || showResult) &&
-          !chartPlaying
+          ((chartStopped && !showResult) || (showResult && exitableNow()))
         ) {
           reset();
         } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
           stop();
-        } else if ((e.key === "Escape" || e.key === "Esc") && !chartPlaying) {
+        } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
           exit();
         } else {
           flash();
