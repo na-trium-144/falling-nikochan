@@ -8,6 +8,9 @@ import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
 import hashPasswdApp from "./hashPasswd.js";
 import { HTTPException } from "hono/http-exception";
+import { join, dirname } from "node:path";
+import dotenv from "dotenv";
+dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(

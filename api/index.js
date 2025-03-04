@@ -4,9 +4,6 @@
 
 import { handle } from "hono/vercel";
 import app from "@falling-nikochan/route";
-import { dirname } from "node:path";
-import dotenv from "dotenv";
-dotenv.config({ path: dirname(process.cwd()) });
 
 // export const config = {
 //   runtime: "nodejs",

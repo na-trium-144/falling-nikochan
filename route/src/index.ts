@@ -6,6 +6,9 @@ import { fetchStatic } from "./static.js";
 import { HTTPException } from "hono/http-exception";
 import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
+import { join, dirname } from "node:path";
+import dotenv from "dotenv";
+dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 async function errorResponse(
   origin: string,
