@@ -48,7 +48,7 @@ export function ChartList(props: Props) {
                   key={cid}
                   cid={cid}
                   brief={brief}
-                  href={props.href ? props.href(cid) : undefined}
+                  href={props.href(cid)}
                   onClick={
                     props.onClick ? () => props.onClick!(cid) : undefined
                   }

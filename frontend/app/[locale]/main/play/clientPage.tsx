@@ -6,7 +6,6 @@ import {
   fetchAndFilterBriefs,
 } from "./fetch.js";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
