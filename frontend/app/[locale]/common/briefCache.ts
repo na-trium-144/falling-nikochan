@@ -5,13 +5,14 @@ function briefKey(cid: string) {
 }
 
 export async function fetchBrief(
-  cid: string
+  cid: string,
+  noCache?: boolean
 ): Promise<{ brief?: ChartBrief; ok: boolean; is404: boolean }> {
   const fetchRes = fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
-    cache: "default",
+    cache: noCache ? "no-store" : "default",
   });
   const stale = localStorage.getItem(briefKey(cid));
-  if (stale) {
+  if (stale && !noCache) {
     fetchRes.then(async (res) => {
       if (res.ok) {
         localStorage.setItem(briefKey(cid), await res.text());
