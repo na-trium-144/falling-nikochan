@@ -2,7 +2,8 @@ import { ReactNode, MouseEvent } from "react";
 import { LoadingSlime } from "./loadingSlime.js";
 import { ThemeHandler } from "./theme.js";
 
-export const modalBg = "fixed inset-0 bg-slate-200/75 z-20 ";
+export const modalBg =
+  "fixed inset-0 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
 
 interface Props {
   children: ReactNode | ReactNode[];
