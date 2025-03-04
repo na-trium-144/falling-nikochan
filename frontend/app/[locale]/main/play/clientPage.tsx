@@ -45,20 +45,38 @@ export default function PlayTab({ locale }: { locale: string }) {
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
   const openModal = (cid: string, brief: ChartBrief | undefined) => {
     if (brief) {
+      if (window.location.pathname !== `/share/${cid}`) {
+        // pushStateではpopstateイベントは発生しない
+        window.history.pushState(null, "", `/share/${cid}`);
+      }
       setModalCId(cid);
       setModalBrief(brief);
-      setTimeout(() => {
-        setModalAppearing(true);
-      }, 0);
+      setTimeout(() => setModalAppearing(true));
     }
   };
   const closeModal = () => {
-    setModalAppearing(false);
-    setTimeout(() => {
-      setModalCId(null);
-      setModalBrief(null);
-    }, 200);
+    if (modalAppearing) {
+      window.history.back();
+    }
   };
+  useEffect(() => {
+    const handler = () => {
+      if (window.location.pathname.startsWith("/share/")) {
+        const cid = window.location.pathname.slice(7);
+        fetchBrief(cid).then((res) => {
+          openModal(cid, res.brief);
+        });
+      } else {
+        setModalAppearing(false);
+        setTimeout(() => {
+          setModalCId(null);
+          setModalBrief(null);
+        }, 200);
+      }
+    };
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, []);
 
   useEffect(() => {
     const recentCId = getRecent("play").reverse();
