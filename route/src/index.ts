@@ -4,7 +4,7 @@ import apiApp from "./api/app.js";
 import { Bindings } from "./env.js";
 import { fetchStatic } from "./static.js";
 import { HTTPException } from "hono/http-exception";
-import ogApp from "./og.js";
+import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
 
 async function errorResponse(
@@ -50,7 +50,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       console.error(err);
       err = new HTTPException(500, { message: "Server Error" });
     }
-    if (c.req.path.startsWith("/api")) {
+    if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
       return c.json(
         { message: await (err as HTTPException).getResponse().text() },
         (err as HTTPException).status

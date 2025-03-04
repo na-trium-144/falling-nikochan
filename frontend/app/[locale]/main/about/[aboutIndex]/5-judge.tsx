@@ -7,8 +7,8 @@ import {
   goodSec,
   okBaseScore,
   okSec,
+  rankStr,
 } from "@falling-nikochan/chart";
-import { rankStr } from "@/common/rank.js";
 import { getTranslations } from "@falling-nikochan/i18n";
 import { JudgeIcon } from "@/play/statusBox.js";
 

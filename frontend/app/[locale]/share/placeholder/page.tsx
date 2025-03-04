@@ -2,12 +2,11 @@ import ShareChart from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
-  return initMetadata(
-    params,
-    "/share/placeholder",
-    "PLACEHOLDER_TITLE",
-    "https://placeholder_og_image/"
-  );
+  return initMetadata(params, "/share/placeholder", "PLACEHOLDER_TITLE", {
+    image: "https://placeholder_og_image/",
+    noAlternate: true,
+    description: "PLACEHOLDER_DESCRIPTION",
+  });
 }
 // pageTitle(cid, brief) or `Not Found (ID: ${cid})`
 

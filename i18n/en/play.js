@@ -66,6 +66,9 @@ export default {
       },
       reset: "Restart",
       exit: "Exit",
+      shareResult: "Share your result!",
+      copyLink: "Copy Link",
+      shareLink: "Share",
     },
   },
 };

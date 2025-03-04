@@ -10,7 +10,8 @@
     "lint": "npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",
-    "t": "npm run chart:t && npm run route:t",
+    "i18n:t": "cd i18n && node verifyKeys.js",
+    "t": "npm run chart:t && npm run route:t && npm run i18n:t",
     "prepare": "npm run t",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "ndev": "cd frontend && next dev -H 0.0.0.0",
@@ -32,7 +33,7 @@
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.21.0",
     "@types/bun": "^1.2.4",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.9",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.19.0",
@@ -40,8 +41,8 @@
     "eslint-config-prettier": "^10.0.2",
     "globals": "^16.0.0",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.25.0"
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
   },
   "overrides": {
     "react": "$react",

@@ -24,8 +24,10 @@ export async function fetchAndFilterBriefs(
       } else if (!fetchAll && i >= chartListMaxRow) {
         return;
       } else {
-        const {brief, is404} = await fetchBrief(cid);
-        recentBriefNew[i] = is404 ? null : {cid, fetched: true, brief, original };
+        const { brief, is404 } = await fetchBrief(cid);
+        recentBriefNew[i] = is404
+          ? null
+          : { cid, fetched: true, brief, original };
         changed = true;
       }
     })
@@ -35,4 +37,3 @@ export async function fetchAndFilterBriefs(
     briefs: recentBriefNew.filter((brief) => brief !== null),
   };
 }
-

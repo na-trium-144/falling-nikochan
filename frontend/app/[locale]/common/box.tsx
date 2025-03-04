@@ -1,20 +1,27 @@
-import { ReactNode } from "react";
+import { ReactNode, MouseEvent } from "react";
 import { LoadingSlime } from "./loadingSlime.js";
 import { ThemeHandler } from "./theme.js";
+
+export const modalBg =
+  "fixed inset-0 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
 
 interface Props {
   children: ReactNode | ReactNode[];
   className?: string;
   style?: object;
+  onClick?: (e: MouseEvent) => void;
 }
 export function Box(props: Props) {
   return (
     <div
-      className={"rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")}
+      className={
+        "rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")
+      }
       style={{
         backdropFilter: "blur(2px)",
         ...props.style,
       }}
+      onClick={props.onClick}
     >
       {props.children}
     </div>
@@ -46,7 +53,10 @@ export function CenterBoxOnlyPage(props: {
   );
 }
 
-export function ErrorPage(props: { status?: number | string; message?: string }) {
+export function ErrorPage(props: {
+  status?: number | string;
+  message?: string;
+}) {
   return (
     <CenterBoxOnlyPage>
       <p>
