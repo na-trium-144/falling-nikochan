@@ -6,7 +6,7 @@
   "dependencies": {
     "@fontsource/kaisei-opti": "^5.2.5",
     "@fontsource/merriweather": "^5.2.5",
-    "@fontsource/noto-sans": "^5.1.1",
+    "@fontsource/noto-sans": "^5.2.5",
     "@fontsource/noto-sans-jp": "^5.2.5",
     "@icon-park/react": "^1.4.2",
     "@mdx-js/loader": "^3.1.0",
