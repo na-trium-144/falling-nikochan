@@ -5,7 +5,7 @@ import {
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "./fetch.js";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
@@ -40,6 +40,29 @@ export default function PlayTab({ locale }: { locale: string }) {
   const [sampleBrief, setSampleBrief] = useState<ChartLineBrief[]>();
   const fetchSampleAll = true;
 
+  // exclusiveをセット(指定したもの以外を非表示にする) → 200ms後、showAllをセット(指定したものの内容を全て表示する)
+  // mobileではごちゃごちゃやってもスクロールが入るせいできれいに見えないので瞬時に切り替える
+  const [showExclusiveMode, setShowExclusiveMode] = useState<
+    null | "recent" | "latest"
+  >(null);
+  const [showAllMode, setShowAllMode] = useState<null | "recent" | "latest">(
+    null
+  );
+  const goExclusiveMode = useCallback(
+    (mode: "recent" | "latest") => {
+      window.history.replaceState(null, "", "#"); // これがないとなぜか #recent から元のページにブラウザバックできなくなる場合があるけどなぜ?
+      window.history.pushState(null, "", "#" + mode);
+      setShowExclusiveMode(mode);
+      if (isMobileMain) {
+        setShowAllMode(mode);
+        window.scrollTo(0, 0);
+      } else {
+        setTimeout(() => setShowAllMode(mode), 200);
+      }
+    },
+    [isMobileMain]
+  );
+
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
@@ -54,11 +77,8 @@ export default function PlayTab({ locale }: { locale: string }) {
       setTimeout(() => setModalAppearing(true));
     }
   };
-  const closeModal = () => {
-    if (modalAppearing) {
-      window.history.back();
-    }
-  };
+
+  // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
   useEffect(() => {
     const handler = () => {
       if (window.location.pathname.startsWith("/share/")) {
@@ -66,7 +86,11 @@ export default function PlayTab({ locale }: { locale: string }) {
         fetchBrief(cid).then((res) => {
           openModal(cid, res.brief);
         });
+      } else if (window.location.hash.length >= 2) {
+        goExclusiveMode(window.location.hash.slice(1) as "recent" | "latest");
       } else {
+        setShowAllMode(null);
+        setShowExclusiveMode(null);
         setModalAppearing(false);
         setTimeout(() => {
           setModalCId(null);
@@ -76,7 +100,7 @@ export default function PlayTab({ locale }: { locale: string }) {
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, []);
+  }, [goExclusiveMode]);
 
   useEffect(() => {
     const recentCId = getRecent("play").reverse();
@@ -167,15 +191,6 @@ export default function PlayTab({ locale }: { locale: string }) {
     setCidFetching(false);
   };
 
-  // exclusiveをセット(指定したもの以外を非表示にする) → 200ms後、showAllをセット(指定したものの内容を全て表示する)
-  // mobileではごちゃごちゃやってもスクロールが入るせいできれいに見えないので瞬時に切り替える
-  const [showExclusiveMode, setShowExclusiveMode] = useState<
-    null | "recent" | "latest"
-  >(null);
-  const [showAllMode, setShowAllMode] = useState<null | "recent" | "latest">(
-    null
-  );
-
   return (
     <IndexMain
       tab={1}
@@ -189,7 +204,7 @@ export default function PlayTab({ locale }: { locale: string }) {
               "transition-opacity duration-200 " +
               (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
             }
-            onClick={closeModal}
+            onClick={() => window.history.back()}
           >
             <div className="absolute inset-6">
               <Box
@@ -206,7 +221,7 @@ export default function PlayTab({ locale }: { locale: string }) {
                   cid={modalCId}
                   brief={modalBrief}
                   locale={locale}
-                  backButton={closeModal}
+                  backButton={() => window.history.back()}
                 />
               </Box>
             </div>
@@ -269,10 +284,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       <AccordionLike
         hidden={showExclusiveMode !== null && showExclusiveMode !== "recent"}
         expanded={showAllMode === "recent"}
-        reset={() => {
-          setShowAllMode(null);
-          setShowExclusiveMode(null);
-        }}
+        reset={() => window.history.back()}
         header={
           <span className="text-xl font-bold font-title">
             {t("recentPlay")}
@@ -291,12 +303,10 @@ export default function PlayTab({ locale }: { locale: string }) {
           showLoading
           additionalOpen={showAllMode === "recent"}
           setAdditionalOpen={(open) => {
-            setShowExclusiveMode(open ? "recent" : null);
-            if (isMobileMain) {
-              setShowAllMode(open ? "recent" : null);
-              window.scrollTo(0, 0);
+            if (open) {
+              goExclusiveMode("recent");
             } else {
-              setTimeout(() => setShowAllMode(open ? "recent" : null), 200);
+              window.history.back();
             }
           }}
         />
@@ -304,10 +314,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       <AccordionLike
         hidden={showExclusiveMode !== null && showExclusiveMode !== "latest"}
         expanded={showAllMode === "latest"}
-        reset={() => {
-          setShowAllMode(null);
-          setShowExclusiveMode(null);
-        }}
+        reset={() => window.history.back()}
         header={
           <span className="text-xl font-bold font-title">{t("latest")}</span>
         }
@@ -330,12 +337,10 @@ export default function PlayTab({ locale }: { locale: string }) {
           dateDiff
           additionalOpen={showAllMode === "latest"}
           setAdditionalOpen={(open) => {
-            setShowExclusiveMode(open ? "latest" : null);
-            if (isMobileMain) {
-              setShowAllMode(open ? "latest" : null);
-              window.scrollTo(0, 0);
+            if (open) {
+              goExclusiveMode("latest");
             } else {
-              setTimeout(() => setShowAllMode(open ? "latest" : null), 200);
+              window.history.back();
             }
           }}
         />
