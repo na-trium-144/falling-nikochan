@@ -15,6 +15,7 @@ interface Props {
   children?: ReactNode | ReactNode[];
   tab: number | undefined;
   locale: string;
+  modal?: ReactNode;
 }
 export function IndexMain(props: Props) {
   const router = useRouter();
@@ -31,6 +32,7 @@ export function IndexMain(props: Props) {
 
   return (
     <main className="flex flex-col w-full overflow-x-hidden min-h-dvh h-max">
+      {props.modal}
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
           <Header locale={locale}>{tabTitles(props.tab)}</Header>
