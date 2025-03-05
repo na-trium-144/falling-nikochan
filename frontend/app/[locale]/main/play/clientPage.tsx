@@ -25,9 +25,11 @@ import { useDisplayMode } from "@/scale.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { Box, modalBg } from "@/common/box.js";
 import { ShareBox } from "@/share/placeholder/shareBox.js";
+import { titleShare, titleWithSiteName } from "@/common/title.js";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
+  const th = useTranslations("share");
   const te = useTranslations("error");
   const { isMobileMain } = useDisplayMode();
 
@@ -74,6 +76,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       }
       setModalCId(cid);
       setModalBrief(brief);
+      document.title = titleShare(th, cid, brief);
       setTimeout(() => setModalAppearing(true));
     }
   };
@@ -92,6 +95,7 @@ export default function PlayTab({ locale }: { locale: string }) {
         setShowAllMode(null);
         setShowExclusiveMode(null);
         setModalAppearing(false);
+        document.title = titleWithSiteName(t("title"));
         setTimeout(() => {
           setModalCId(null);
           setModalBrief(null);
