@@ -9,6 +9,7 @@ export async function getMessages(locale) {
     ...(await import(`./${locale}/share.js`)).default,
     ...(await import(`./${locale}/play.js`)).default,
     ...(await import(`./${locale}/edit.js`)).default,
+    ...(await import(`./${locale}/error.js`)).default,
   };
 }
 

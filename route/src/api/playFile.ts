@@ -25,7 +25,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       let { chart } = await getChartEntry(db, cid, null);
 
       if (!chart.levels.at(lvIndex)) {
-        throw new HTTPException(404, { message: "Level not found" });
+        throw new HTTPException(404, { message: "levelNotFound" });
       }
 
       let level: Level6Play | Level8Play;
@@ -52,9 +52,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           level = convertToPlay8(chart, lvIndex);
           break;
         default:
-          throw new HTTPException(500, {
-            message: "Unsupported chart version",
-          });
+          throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
       await db

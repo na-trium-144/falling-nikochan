@@ -28,6 +28,7 @@ import { ShareBox } from "@/share/placeholder/shareBox.js";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
+  const te = useTranslations("error");
   const { isMobileMain } = useDisplayMode();
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
@@ -182,9 +183,9 @@ export default function PlayTab({ locale }: { locale: string }) {
       openModal(cid, res.brief);
     } else {
       if (res.is404) {
-        setCIdErrorMsg("Chart Not Found");
+        setCIdErrorMsg(te("api.chartIdNotFound"));
       } else {
-        setCIdErrorMsg("Server Error");
+        setCIdErrorMsg(te("unknownApiError"));
       }
     }
     setCidFetching(false);

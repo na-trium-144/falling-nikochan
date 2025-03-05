@@ -46,8 +46,11 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { Level8Play } from "@falling-nikochan/chart";
 import { LoadingSlime } from "@/common/loadingSlime.js";
+import { useTranslations } from "next-intl";
 
 export function InitPlay({ locale }: { locale: string }) {
+  const te = useTranslations("error");
+
   const [showFps, setShowFps] = useState<boolean>(false);
   const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [goResult, setGoResult] = useState<boolean>(false);
@@ -86,7 +89,7 @@ export function InitPlay({ locale }: { locale: string }) {
           setChartBrief((await fetchBrief(cidFromParam)).brief))();
         setEditing(false);
       } else {
-        setErrorMsg("Failed to get session data");
+        setErrorMsg(te("noSession"));
         return;
       }
     }
@@ -127,31 +130,38 @@ export function InitPlay({ locale }: { locale: string }) {
             } else {
               setChartSeq(undefined);
               setErrorStatus(undefined);
-              setErrorMsg(`Invalid chart version: ${(seq as any)?.ver}`);
+              setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
             }
           } catch (e) {
             setChartSeq(undefined);
             setErrorStatus(undefined);
-            setErrorMsg(String(e));
+            console.error(e);
+            setErrorMsg(te("badResponse"));
           }
         } else {
           setChartSeq(undefined);
           setErrorStatus(res.status);
           try {
-            setErrorMsg(
-              String(((await res.json()) as { message?: string }).message)
-            );
+            const message = ((await res.json()) as { message?: string })
+              .message;
+            if (te.has("api." + message)) {
+              setErrorMsg(te("api." + message));
+            } else {
+              setErrorMsg(message || te("unknownApiError"));
+            }
           } catch {
-            setErrorMsg("");
+            setErrorMsg(te("unknownApiError"));
           }
         }
       })();
     }
-  }, []);
+  }, [te]);
 
   return (
     <Play
-      apiErrorMsg={errorStatus ? `${errorStatus}: ${errorMsg}` : errorMsg}
+      apiErrorMsg={
+        errorStatus && errorMsg ? `${errorStatus}: ${errorMsg}` : errorMsg
+      }
       cid={cid}
       lvIndex={lvIndex || 0}
       chartBrief={chartBrief}
@@ -190,6 +200,8 @@ function Play(props: Props) {
     showFps,
     displaySpeed,
   } = props;
+  const te = useTranslations("error");
+
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
     setTimeout(() => setInitAnim(true));
@@ -396,14 +408,14 @@ function Play(props: Props) {
       if (apiErrorMsg) {
         setErrorMsg(apiErrorMsg);
       } else if (ytError !== null) {
-        setErrorMsg(`YouTube Error (${ytError})`);
+        setErrorMsg(te("ytError", { code: ytError }));
       } else if (chartBrief && !chartBrief.ytId) {
-        setErrorMsg("YouTube video not specified");
+        setErrorMsg(te("noYtId"));
       } else if (chartSeq && chartSeq.notes.length === 0) {
-        setErrorMsg("Chart is empty");
+        setErrorMsg(te("seqEmpty"));
       }
     }
-  }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg]);
+  }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg, te]);
 
   useEffect(() => {
     if (chartStarted && end) {

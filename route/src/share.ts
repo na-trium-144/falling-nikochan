@@ -38,9 +38,7 @@ const shareHandler = factory.createHandlers(async (c) => {
       resultParams = deserializeResultParams(qResult);
     } catch (e) {
       console.error(e);
-      // throw new HTTPException(400, {
-      //   message: "Invalid result parameter",
-      // });
+      // throw new HTTPException(400, { message: "invalidResultParam" });
     }
   }
   const pBriefRes = briefApp.request(`/${cid}`);
@@ -152,9 +150,7 @@ const shareHandler = factory.createHandlers(async (c) => {
     } catch {
       //
     }
-    throw new HTTPException(briefRes.status as 401 | 404 | 500, {
-      message,
-    });
+    throw new HTTPException(briefRes.status as 401 | 404 | 500, {message});
   }
 });
 export default shareHandler;

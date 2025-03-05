@@ -180,6 +180,7 @@ interface Props2 {
 }
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
+  const te = useTranslations("error");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [saving, setSaving] = useState<boolean>(false);
@@ -241,20 +242,21 @@ export function MetaTab(props: Props2) {
             addRecent("edit", resBody.cid);
             onSave(resBody.cid, props.chart!.editPasswd);
           } else {
-            setErrorMsg("Invalid response");
+            setErrorMsg(te("badResponse"));
           }
         } catch {
-          setErrorMsg("Invalid response");
+          setErrorMsg(te("badResponse"));
         }
       } else {
         try {
-          const resBody = (await res.json()) as {
-            message?: string;
-            cid?: string;
-          };
-          setErrorMsg(`${res.status}: ${resBody.message}`);
+          const message = ((await res.json()) as { message?: string }).message;
+          if (te.has("api." + message)) {
+            setErrorMsg(te("api." + message));
+          } else {
+            setErrorMsg(message || te("unknownApiError"));
+          }
         } catch {
-          setErrorMsg(`${res.status} Error`);
+          setErrorMsg(te("unknownApiError"));
         }
       }
     } else {
@@ -277,13 +279,14 @@ export function MetaTab(props: Props2) {
         onSave(props.cid, props.chart!.editPasswd);
       } else {
         try {
-          const resBody = (await res.json()) as {
-            message?: string;
-            cid?: string;
-          };
-          setErrorMsg(`${res.status}: ${resBody.message}`);
+          const message = ((await res.json()) as { message?: string }).message;
+          if (te.has("api." + message)) {
+            setErrorMsg(te("api." + message));
+          } else {
+            setErrorMsg(message || te("unknownApiError"));
+          }
         } catch {
-          setErrorMsg(`${res.status} Error`);
+          setErrorMsg(te("unknownApiError"));
         }
       }
     }

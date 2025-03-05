@@ -27,7 +27,9 @@ export function MusicArea(props: Props) {
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
-    props.chartBrief && props.lvIndex !== undefined
+    props.chartBrief &&
+    props.lvIndex !== undefined &&
+    props.chartBrief.levels[props.lvIndex]
       ? Math.max(
           0.1,
           props.chartBrief.levels[props.lvIndex].length + props.offset

@@ -85,6 +85,7 @@ import { LoadingSlime } from "@/common/loadingSlime.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
+  const te = useTranslations("error");
   const themeContext = useTheme();
 
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
@@ -162,7 +163,7 @@ export default function EditAuth({ locale }: { locale: string }) {
           } catch {
             setChart(undefined);
             setErrorStatus(undefined);
-            setErrorMsg("invalid response");
+            setErrorMsg(te("badResponse"));
           }
         } else {
           if (res.status === 401) {
@@ -174,11 +175,15 @@ export default function EditAuth({ locale }: { locale: string }) {
             setChart(undefined);
             setErrorStatus(res.status);
             try {
-              setErrorMsg(
-                String(((await res.json()) as { message?: string }).message)
-              );
+              const message = ((await res.json()) as { message?: string })
+                .message;
+              if (te.has("api." + message)) {
+                setErrorMsg(te("api." + message));
+              } else {
+                setErrorMsg(message || te("unknownApiError"));
+              }
             } catch {
-              setErrorMsg("");
+              setErrorMsg(te("unknownApiError"));
             }
           }
         }
@@ -234,7 +239,7 @@ export default function EditAuth({ locale }: { locale: string }) {
               <p className="mb-2 ">
                 <span className="">{t("chartId")}:</span>
                 <span className="ml-2 ">{cid}</span>
-                </p>
+              </p>
               <p>{t("enterPasswd")}</p>
               {passwdFailed && <p>{t("passwdFailed")}</p>}
               <Input
