@@ -30,7 +30,6 @@ interface Props {
   currentLevel?: LevelEdit;
   notesAll: Note[];
   snapDivider: number;
-  ytId: string;
   timeBarPxPerSec: number;
 }
 export default function TimeBar(props: Props) {

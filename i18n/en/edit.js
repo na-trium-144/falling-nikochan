@@ -3,6 +3,7 @@ export default {
     title: "Chart Editor - {title} (ID: {cid})",
     titleShort: "Chart Editor",
     help: "Help",
+    chartId: "Chart ID",
     enterPasswd: "Enter the password to edit.",
     passwdFailed: "Password is incorrect.",
     submitPasswd: "Go",

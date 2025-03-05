@@ -2,7 +2,7 @@
 
 import { defaultNoteCommand, NoteCommand } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
   findBpmIndexFromStep,
@@ -17,7 +17,7 @@ import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
 import NoteTab from "./noteTab.js";
-import { Box, CenterBoxOnlyPage, ErrorPage, Loading } from "@/common/box.js";
+import { Box, modalBg } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent.js";
@@ -111,11 +111,12 @@ export default function EditAuth({ locale }: { locale: string }) {
       savePasswd: boolean
     ) => {
       if (cidInitial.current === "new") {
-        setChart(emptyChart(locale));
+        setCid(undefined);
         setPasswdFailed(false);
         setLoading(false);
-        setCid(undefined);
+        setChart(emptyChart(locale));
       } else {
+        setCid(cidInitial.current);
         setPasswdFailed(false);
         setLoading(true);
         const res = await fetch(
@@ -190,82 +191,91 @@ export default function EditAuth({ locale }: { locale: string }) {
     const params = new URLSearchParams(window.location.search);
     if (params.has("cid")) {
       cidInitial.current = params.get("cid")!;
-      setCid(cidInitial.current);
     }
     setSavePasswd(preferSavePasswd());
     document.title = titleWithSiteName(
       t("title", { title: "", cid: cidInitial.current })
     );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
-    void fetchChart(true, false, "", true);
+    // レンダリングの都合上 cidInitial.current を先に反映させたいため、setTimeoutで1段階遅延
+    setTimeout(() => void fetchChart(true, false, "", true));
   }, []);
 
-  if (chart === undefined) {
-    if (loading) {
-      return <Loading />;
-    }
-    if (errorStatus !== undefined || errorMsg !== undefined) {
-      return <ErrorPage status={errorStatus} message={errorMsg} />;
-    }
-    return (
-      <CenterBoxOnlyPage>
-        <Header reload locale={locale}>
-          {t("titleShort")}
-        </Header>
-        <p>{t("enterPasswd")}</p>
-        {passwdFailed && <p>{t("passwdFailed")}</p>}
-        <Input
-          actualValue={editPasswd}
-          updateValue={setEditPasswd}
-          left
-          passwd
-        />
-        <Button
-          text={t("submitPasswd")}
-          onClick={() => fetchChart(false, false, editPasswd, savePasswd)}
-        />
-        <p>
-          <CheckBox value={savePasswd} onChange={setSavePasswd}>
-            {t("savePasswd")}
-          </CheckBox>
-        </p>
-        {process.env.NODE_ENV === "development" && (
-          <p className="mt-2 ">
-            <button
-              className={linkStyle1 + "w-max m-auto "}
-              onClick={() => {
-                void (async () => {
-                  await fetchChart(false, true, editPasswd, savePasswd);
-                })();
-              }}
-            >
-              {t("bypassPasswd")}
-            </button>
-          </p>
-        )}
-      </CenterBoxOnlyPage>
-    );
-  } else {
-    return (
-      <Page
-        chart={chart}
-        setChart={setChart}
-        cid={cid}
-        setCid={setCid}
-        themeContext={themeContext}
-        guidePageInit={cidInitial.current === "new" ? 1 : null}
-        convertedFrom={convertedFrom}
-        setConvertedFrom={setConvertedFrom}
-        locale={locale}
-        editPasswdInitial={editPasswd}
-        savePasswdInitial={savePasswd}
-      />
-    );
-  }
+  return (
+    <Page
+      chart={chart}
+      setChart={setChart}
+      cid={cid}
+      setCid={setCid}
+      themeContext={themeContext}
+      guidePageInit={cidInitial.current === "new" ? 1 : null}
+      convertedFrom={convertedFrom}
+      setConvertedFrom={setConvertedFrom}
+      locale={locale}
+      editPasswdInitial={editPasswd}
+      savePasswdInitial={savePasswd}
+      modal={
+        chart === undefined ? (
+          loading ? (
+            <p>
+              <LoadingSlime />
+              Loading...
+            </p>
+          ) : errorStatus !== undefined || errorMsg !== undefined ? (
+            <p>
+              {errorStatus ? `${errorStatus}: ` : ""}
+              {errorMsg}
+            </p>
+          ) : (
+            <div className="text-center ">
+              <Header className="pt-0 pb-2 " reload locale={locale}>
+                {t("titleShort")}
+              </Header>
+              <p className="mb-2 ">
+                <span className="">{t("chartId")}:</span>
+                <span className="ml-2 ">{cid}</span>
+                </p>
+              <p>{t("enterPasswd")}</p>
+              {passwdFailed && <p>{t("passwdFailed")}</p>}
+              <Input
+                actualValue={editPasswd}
+                updateValue={setEditPasswd}
+                left
+                passwd
+              />
+              <Button
+                text={t("submitPasswd")}
+                onClick={() => fetchChart(false, false, editPasswd, savePasswd)}
+              />
+              <p>
+                <CheckBox value={savePasswd} onChange={setSavePasswd}>
+                  {t("savePasswd")}
+                </CheckBox>
+              </p>
+              {process.env.NODE_ENV === "development" && (
+                <p className="mt-2 ">
+                  <button
+                    className={linkStyle1 + "w-max m-auto "}
+                    onClick={() => {
+                      void (async () => {
+                        await fetchChart(false, true, editPasswd, savePasswd);
+                      })();
+                    }}
+                  >
+                    {t("bypassPasswd")}
+                  </button>
+                </p>
+              )}
+            </div>
+          )
+        ) : null
+      }
+    />
+  );
 }
 
 interface Props {
-  chart: Chart8Edit;
+  chart?: Chart8Edit;
   setChart: (chart: Chart8Edit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
@@ -276,6 +286,7 @@ interface Props {
   locale: string;
   editPasswdInitial?: string;
   savePasswdInitial: boolean;
+  modal?: ReactNode;
 }
 function Page(props: Props) {
   const {
@@ -299,7 +310,7 @@ function Page(props: Props) {
   const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
-  const chartNumEvent = numEvents(chart);
+  const chartNumEvent = chart ? numEvents(chart) : 0;
   const [savePasswd, setSavePasswd] = useState<boolean>(
     props.savePasswdInitial
   );
@@ -314,9 +325,11 @@ function Page(props: Props) {
     setHasChange(true);
     setChart(chart);
   };
-  document.title = titleWithSiteName(
-    t("title", { title: chart?.title, cid: cid })
-  );
+  useEffect(() => {
+    document.title = titleWithSiteName(
+      t("title", { title: chart?.title, cid: cid })
+    );
+  });
   useEffect(() => {
     void (async () => {
       if (chart) {
@@ -583,9 +596,8 @@ function Page(props: Props) {
   }, [chart, currentLevelIndex]);
 
   const [tab, setTab] = useState<number>(0);
-  const [guidePage, setGuidePage] = useState<number | null>(
-    props.guidePageInit
-  );
+  const [guidePage, setGuidePage] = useState<number | null>(null);
+  useEffect(() => setGuidePage(props.guidePageInit), [props.guidePageInit]);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
@@ -789,7 +801,7 @@ function Page(props: Props) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (ready && !isCodeTab) {
+        if (chart && ready && !isCodeTab) {
           if (e.key === " " && !playing) {
             start();
           } else if (
@@ -841,6 +853,28 @@ function Page(props: Props) {
         }
       }}
     >
+      {chart === undefined ? (
+        <div className={modalBg} onClick={(e) => e.stopPropagation()}>
+          <div className="absolute inset-6">
+            <Box
+              className={
+                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
+                "p-6 overflow-x-clip overflow-y-auto " +
+                "shadow-lg "
+              }
+            >
+              {props.modal}
+            </Box>
+          </div>
+        </div>
+      ) : guidePage !== null ? (
+        <GuideMain
+          index={guidePage}
+          setIndex={setGuidePage}
+          close={() => setGuidePage(null)}
+          locale={locale}
+        />
+      ) : null}
       <CaptionProvider>
         <div
           className={
@@ -864,7 +898,8 @@ function Page(props: Props) {
               className={
                 "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
                 (levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
-                  levelBgColors[1])
+                  levelBgColors[1]) +
+                (chart ? "" : "invisible ")
               }
             >
               <FlexYouTube
@@ -1033,7 +1068,6 @@ function Page(props: Props) {
                 currentLevel={currentLevel}
                 notesAll={notesAll}
                 snapDivider={snapDivider}
-                ytId={chart.ytId}
                 timeBarPxPerSec={timeBarPxPerSec}
               />
             </div>
@@ -1206,14 +1240,6 @@ function Page(props: Props) {
           </div>
         </div>
       </CaptionProvider>
-      {guidePage !== null && (
-        <GuideMain
-          index={guidePage}
-          setIndex={setGuidePage}
-          close={() => setGuidePage(null)}
-          locale={locale}
-        />
-      )}
     </main>
   );
 }

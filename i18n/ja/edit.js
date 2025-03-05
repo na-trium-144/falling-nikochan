@@ -3,6 +3,7 @@ export default {
     title: "譜面編集 - {title} (ID: {cid})",
     titleShort: "譜面編集",
     help: "ヘルプ",
+    chartId: "譜面ID",
     enterPasswd: "編集用パスワードを入力してください。",
     passwdFailed: "パスワードが違います。",
     submitPasswd: "進む",
