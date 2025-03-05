@@ -28,7 +28,7 @@ import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
 import useGameLogic from "./gameLogic.js";
-import { ReadyMessage, StopMessage } from "./messageBox.js";
+import { InitErrorMessage, ReadyMessage, StopMessage } from "./messageBox.js";
 import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
@@ -151,8 +151,7 @@ export function InitPlay({ locale }: { locale: string }) {
 
   return (
     <Play
-      errorStatus={errorStatus}
-      errorMsg={errorMsg}
+      apiErrorMsg={errorStatus ? `${errorStatus}: ${errorMsg}` : errorMsg}
       cid={cid}
       lvIndex={lvIndex || 0}
       chartBrief={chartBrief}
@@ -168,8 +167,7 @@ export function InitPlay({ locale }: { locale: string }) {
 }
 
 interface Props {
-  errorStatus?: number;
-  errorMsg?: string;
+  apiErrorMsg?: string;
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
@@ -183,8 +181,7 @@ interface Props {
 }
 function Play(props: Props) {
   const {
-    errorStatus,
-    errorMsg,
+    apiErrorMsg,
     cid,
     lvIndex,
     chartBrief,
@@ -364,11 +361,20 @@ function Play(props: Props) {
   // youtube側のreadyイベント & chartSeqが読み込まれる の両方を満たしたら
   // resetを1回呼び、loadingを閉じ、初期化完了となる
   const [ytReady, setYtReady] = useState<boolean>(false);
+  const [ytError, setYtError] = useState<number | null>(null);
   const [initDone, setInitDone] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>();
   const [showLoading, setShowLoading] = useState<boolean>(false);
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (ytReady && chartSeq && !initDone) {
+    if (errorMsg) {
+      if (showLoadingTimeout.current !== null) {
+        clearTimeout(showLoadingTimeout.current);
+      }
+      setShowLoading(false);
+      setInitDone(false);
+      setExitable(new Date());
+    } else if (ytReady && chartSeq && !initDone) {
       if (showLoadingTimeout.current !== null) {
         clearTimeout(showLoadingTimeout.current);
       }
@@ -384,7 +390,20 @@ function Play(props: Props) {
         );
       }
     }
-  }, [ytReady, chartSeq, reset, initDone]);
+  }, [ytReady, chartSeq, reset, initDone, errorMsg]);
+  useEffect(() => {
+    if (!errorMsg) {
+      if (apiErrorMsg) {
+        setErrorMsg(apiErrorMsg);
+      } else if (ytError !== null) {
+        setErrorMsg(`YouTube Error (${ytError})`);
+      } else if (chartBrief && !chartBrief.ytId) {
+        setErrorMsg("YouTube video not specified");
+      } else if (chartSeq && chartSeq.notes.length === 0) {
+        setErrorMsg("Chart is empty");
+      }
+    }
+  }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg]);
 
   useEffect(() => {
     if (chartStarted && end) {
@@ -469,6 +488,9 @@ function Play(props: Props) {
     }
     ref.current?.focus();
   }, [chartPlaying, ref]);
+  const onError = useCallback((ec: number) => {
+    setYtError(ec);
+  }, []);
 
   // キーを押したとき一定時間光らせる
   const [barFlash, setBarFlash] = useState<boolean>(false);
@@ -533,6 +555,7 @@ function Play(props: Props) {
             onReady={onReady}
             onStart={onStart}
             onStop={onStop}
+            onError={onError}
           />
           {!isMobile && (
             <>
@@ -577,11 +600,18 @@ function Play(props: Props) {
             <ScoreDisp score={score} best={bestScoreState} auto={auto} />
             <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
           </div>
-          {errorStatus || errorMsg ? (
-            <CenterBox>
+          {errorMsg ? (
+            <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
+          ) : !initDone ? (
+            <CenterBox
+              className={
+                "transition-opacity duration-200 ease-out " +
+                (showLoading ? "opacity-100" : "opacity-0")
+              }
+            >
               <p>
-                {errorStatus ? `${errorStatus}: ` : ""}
-                {errorMsg}
+                <LoadingSlime />
+                Loading...
               </p>
             </CenterBox>
           ) : showResult && chartBrief ? (
@@ -648,18 +678,6 @@ function Play(props: Props) {
             />
           ) : chartStopped ? (
             <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
-          ) : !initDone ? (
-            <CenterBox
-              className={
-                "transition-opacity duration-200 ease-out " +
-                (showLoading ? "opacity-100" : "opacity-0")
-              }
-            >
-              <p>
-                <LoadingSlime />
-                Loading...
-              </p>
-            </CenterBox>
           ) : null}
         </div>
       </div>

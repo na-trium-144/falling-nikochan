@@ -17,6 +17,7 @@ interface Props {
   onReady: () => void;
   onStart: () => void;
   onStop: () => void;
+  onError: (ec: number) => void;
 }
 export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
@@ -72,6 +73,7 @@ export function MusicArea(props: Props) {
             onReady={props.onReady}
             onStart={props.onStart}
             onStop={props.onStop}
+            onError={props.onError}
           />
         )}
         <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">
