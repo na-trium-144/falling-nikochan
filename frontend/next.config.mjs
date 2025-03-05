@@ -17,6 +17,19 @@ try {
   console.error("Failed to get commit hash: ", e);
 }
 
+const env = {
+  buildDate: date,
+  buildCommit: commit,
+  buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
+  // prefix for every asset URL
+  ASSET_PREFIX: process.env.ASSET_PREFIX || "",
+  // prefix for every API call URL
+  BACKEND_PREFIX: process.env.BACKEND_PREFIX || "",
+  // if set, disable all Next.js Link prefetch
+  NO_PREFETCH: process.env.NO_PREFETCH !== undefined ? "1" : "",
+};
+console.log("env: ", env);
+
 const nextConfig = {
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -33,14 +46,7 @@ const nextConfig = {
   assetPrefix: process.env.ASSET_PREFIX || undefined,
   output: "export",
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-  env: {
-    buildDate: date,
-    buildCommit: commit,
-    buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
-    ASSET_PREFIX: process.env.ASSET_PREFIX || "",
-    BACKEND_PREFIX:
-      process.env.NODE_ENV === "development" ? process.env.BACKEND_PREFIX : "",
-  },
+  env,
   webpack: (config, options) => {
     config.resolve = {
       ...config.resolve,

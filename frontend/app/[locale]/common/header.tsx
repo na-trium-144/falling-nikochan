@@ -30,7 +30,7 @@ export default function Header(props: Props) {
         <Link
           href={`/${props.locale}`}
           className={"text-xl " + linkStyle1}
-          prefetch={false}
+          prefetch={!process.env.NO_PREFETCH}
         >
           FallingNikochan
         </Link>

@@ -178,7 +178,11 @@ export function ChartListItem(props: CProps) {
           <ChartListItemChildren {...props} />
         </a>
       ) : (
-        <Link href={props.href} className={chartListStyle} prefetch={false}>
+        <Link
+          href={props.href}
+          className={chartListStyle}
+          prefetch={!process.env.NO_PREFETCH}
+        >
           <ChartListItemChildren {...props} />
         </Link>
       )}
