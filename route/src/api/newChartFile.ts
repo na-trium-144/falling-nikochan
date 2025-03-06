@@ -39,7 +39,8 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       ) {
         return c.json(
           {
-            message: `Too many requests, please retry ${rateLimitMin} minutes later`,
+            message: "tooManyRequest",
+            // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
           },
           429,
           { "retry-after": (rateLimitMin * 60).toString() }
@@ -48,7 +49,8 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
 
       if (chartBuf.byteLength > fileMaxSize) {
         throw new HTTPException(413, {
-          message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
+          message: "tooLargeFile",
+          // message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
         });
       }
 
@@ -57,7 +59,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         typeof newChartObj.ver === "number" &&
         newChartObj.ver < currentChartVer
       ) {
-        throw new HTTPException(409, { message: "chart version is old" });
+        throw new HTTPException(409, { message: "oldChartVersion" });
       }
 
       let newChart: ChartEdit;
@@ -65,18 +67,16 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         newChart = await validateChart(newChartObj);
       } catch (e) {
         console.error(e);
-        throw new HTTPException(415, { message: "invalid chart data" });
+        throw new HTTPException(415, { message: "invalidChart" });
       }
 
       if (numEvents(newChart) > chartMaxEvent) {
-        return c.json(
-          {
-            message: `Chart too large (number of events is ${numEvents(
-              newChart
-            )} / ${chartMaxEvent})`,
-          },
-          413
-        );
+        throw new HTTPException(413, {
+          message: "tooManyEvent",
+          // message: `Chart too large (number of events is ${numEvents(
+          //   newChart
+          // )} / ${chartMaxEvent})`,
+        });
       }
 
       // update Time

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 interface Props {
+  className?: string;
   lvType: string;
   lvIndex?: number;
   isMobile: boolean; // 横並び or 縦並び
@@ -16,6 +17,7 @@ interface Props {
   onReady: () => void;
   onStart: () => void;
   onStop: () => void;
+  onError: (ec: number) => void;
 }
 export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
@@ -25,7 +27,9 @@ export function MusicArea(props: Props) {
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
-    props.chartBrief && props.lvIndex !== undefined
+    props.chartBrief &&
+    props.lvIndex !== undefined &&
+    props.chartBrief.levels[props.lvIndex]
       ? Math.max(
           0.1,
           props.chartBrief.levels[props.lvIndex].length + props.offset
@@ -47,7 +51,8 @@ export function MusicArea(props: Props) {
         (levelBgColors.at(levelTypes.indexOf(props.lvType)) ||
           levelBgColors[1]) +
         (props.isMobile ? "mt-3 mx-3 " : "my-3 mr-3 ") +
-        "flex-col "
+        "flex-col " +
+        props.className
       }
       ref={ref}
     >
@@ -70,6 +75,7 @@ export function MusicArea(props: Props) {
             onReady={props.onReady}
             onStart={props.onStart}
             onStop={props.onStop}
+            onError={props.onError}
           />
         )}
         <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">

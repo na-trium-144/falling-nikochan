@@ -6,6 +6,10 @@ import { fetchStatic } from "./static.js";
 import { HTTPException } from "hono/http-exception";
 import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
+import { join, dirname } from "node:path";
+import dotenv from "dotenv";
+import { getTranslations } from "@falling-nikochan/i18n";
+dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 async function errorResponse(
   origin: string,
@@ -13,13 +17,19 @@ async function errorResponse(
   status: number,
   message: string
 ) {
+  const t = await getTranslations(lang, "error");
   return (
     await (
       await fetchStatic(new URL(`/${lang}/errorPlaceholder`, origin))
     ).text()
   )
     .replaceAll("PLACEHOLDER_STATUS", String(status))
-    .replaceAll("PLACEHOLDER_MESSAGE", message)
+    .replaceAll(
+      "PLACEHOLDER_MESSAGE",
+      t.has("api." + message)
+        ? t("api." + message)
+        : message || t("unknownApiError")
+    )
     .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
 }
@@ -48,28 +58,24 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     const lang = c.get("language");
     if (!(err instanceof HTTPException)) {
       console.error(err);
-      err = new HTTPException(500, { message: "Server Error" });
+      err = new HTTPException(500);
     }
+    const status = (err as HTTPException).status;
+    const message =
+      (await (err as HTTPException).getResponse().text()) ||
+      (status === 404 ? "notFound" : "");
     if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
-      return c.json(
-        { message: await (err as HTTPException).getResponse().text() },
-        (err as HTTPException).status
-      );
+      return c.json({ message }, status);
     } else {
       return c.body(
-        await errorResponse(
-          new URL(c.req.url).origin,
-          lang,
-          (err as HTTPException).status,
-          await (err as HTTPException).getResponse().text()
-        ),
-        (err as HTTPException).status,
+        await errorResponse(new URL(c.req.url).origin, lang, status, message),
+        status,
         { "Content-Type": "text/html" }
       );
     }
   })
   .notFound(() => {
-    throw new HTTPException(404, { message: "Not Found" });
+    throw new HTTPException(404);
   })
   .get("/edit/:cid", (c) => {
     // deprecated (used until ver6.15)

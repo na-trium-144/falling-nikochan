@@ -54,7 +54,7 @@ export default function Footer(props: Props) {
               key={i}
               className={"px-2 " + linkStyle1}
               href={`/${props.locale}${tabURL}`}
-              prefetch={false}
+              prefetch={!process.env.NO_PREFETCH}
             >
               {tabTitles(i)}
             </Link>
@@ -83,7 +83,7 @@ export default function Footer(props: Props) {
           <Link
             className={"inline-block relative group " + linkStyle1}
             href={`/${props.locale}/main/version`}
-            prefetch={false}
+            prefetch={!process.env.NO_PREFETCH}
           >
             <span>ver.</span>
             <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>

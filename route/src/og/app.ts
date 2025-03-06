@@ -23,9 +23,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         resultParams = deserializeResultParams(qResult);
       } catch (e) {
         console.error(e);
-        throw new HTTPException(400, {
-          message: "Invalid result parameter",
-        });
+        throw new HTTPException(400, { message: "invalidResultParam" });
       }
     }
     const pBriefRes = briefApp.request(`/${cid}`);
@@ -88,9 +86,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       } catch {
         //
       }
-      throw new HTTPException(briefRes.status as 401 | 404 | 500, {
-        message,
-      });
+      throw new HTTPException(briefRes.status as 401 | 404 | 500, { message });
     }
     const brief = (await briefRes.json()) as ChartBrief;
     const bgImageBuf = new Uint8Array(await (await pBgImage).arrayBuffer());
@@ -108,9 +104,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         break;
       case "result":
         if (!resultParams) {
-          throw new HTTPException(400, {
-            message: "Missing result parameter",
-          });
+          throw new HTTPException(400, { message: "missingResultParam" });
         }
         Image = OGResult(cid, lang, brief, bgImageBin, resultParams);
         cacheControl = "max-age=31536000";
@@ -135,9 +129,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       });
     } else {
       console.error(imRes);
-      throw new HTTPException(500, {
-        message: "Failed to generate image",
-      });
+      throw new HTTPException(500, { message: "imageGenerationFailed" });
     }
   })
   .get("/:cid{[0-9]+}", (c) =>

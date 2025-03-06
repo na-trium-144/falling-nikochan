@@ -36,6 +36,7 @@ export default function Button(props: Props) {
       }
       onClick={() => props.onClick && props.onClick()}
       onKeyDown={(e) => e.stopPropagation()}
+      onKeyUp={(e) => e.stopPropagation()}
       disabled={props.disabled || props.loading}
     >
       {props.loading && <LoadingSlime />}
