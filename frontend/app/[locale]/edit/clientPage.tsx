@@ -855,7 +855,12 @@ function Page(props: Props) {
         }
       }}
       onKeyUp={(e) => {
-        if (e.key === "Shift" || e.key === "Control") {
+        if (
+          chart &&
+          ready &&
+          !isCodeTab &&
+          (e.key === "Shift" || e.key === "Control")
+        ) {
           setDragMode("p");
         }
       }}

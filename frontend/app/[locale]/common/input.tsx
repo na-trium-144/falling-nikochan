@@ -42,6 +42,7 @@ export default function Input(props: Props) {
       }
       value={value}
       onKeyDown={(e) => e.stopPropagation()}
+      onKeyUp={(e) => e.stopPropagation()}
       onChange={(e) => {
         setValue(e.target.value);
         if (valueSetTimer !== null) {
