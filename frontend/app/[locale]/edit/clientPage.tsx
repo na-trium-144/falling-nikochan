@@ -608,9 +608,11 @@ function Page(props: Props) {
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
 
   const [dragMode, setDragMode] = useState<null | "p" | "v" | "a">(null);
-  if (dragMode === null && !isTouch) {
-    setDragMode("p");
-  }
+  useEffect(() => {
+    if (dragMode === null && !isTouch && chart) {
+      setDragMode("p");
+    }
+  }, [dragMode, isTouch, chart]);
 
   const changeOffset = (ofs: number) => {
     if (chart /*&& offsetValid(ofs)*/) {
@@ -940,7 +942,7 @@ function Page(props: Props) {
                 setDragMode={setDragMode}
               />
             </div>
-            {isTouch && (
+            {chart && isTouch && (
               <button
                 className={
                   "self-start flex flex-row items-center " + linkStyle1
