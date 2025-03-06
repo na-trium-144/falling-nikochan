@@ -18,6 +18,7 @@ import { useDisplayMode } from "@/scale.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
+  const te = useTranslations("error");
   const { isMobileMain } = useDisplayMode();
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
@@ -91,11 +92,14 @@ export default function EditTab({ locale }: { locale: string }) {
       setInputCId(cid);
     } else {
       try {
-        setCIdErrorMsg(
-          String(((await res.json()) as { message?: string }).message)
-        );
+        const message = ((await res.json()) as { message?: string }).message;
+        if (te.has("api." + message)) {
+          setCIdErrorMsg(te("api." + message));
+        } else {
+          setCIdErrorMsg(message || te("unknownApiError"));
+        }
       } catch {
-        setCIdErrorMsg("");
+        setCIdErrorMsg(te("unknownApiError"));
       }
       setInputCId("");
     }

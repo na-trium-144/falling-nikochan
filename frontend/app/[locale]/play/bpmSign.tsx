@@ -8,6 +8,7 @@ import { ChartSeqData6 } from "@falling-nikochan/chart";
 import { SmilingFace } from "@icon-park/react";
 
 interface Props {
+  className?: string;
   chartPlaying: boolean;
   chartSeq: ChartSeqData6 | ChartSeqData8 | null;
   getCurrentTimeSec: () => number | undefined;
@@ -122,7 +123,7 @@ export default function BPMSign(props: Props) {
 
   return (
     <div
-      className="-z-20 absolute origin-bottom-left"
+      className={"-z-20 absolute origin-bottom-left " + props.className}
       style={{
         bottom: "100%",
         left: "0.8rem",

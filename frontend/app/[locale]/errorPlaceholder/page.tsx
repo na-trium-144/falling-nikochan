@@ -1,5 +1,6 @@
+import { CenterBox } from "@/common/box";
+import { ThemeHandler } from "@/common/theme";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { ErrorPage } from "@/common/box.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   return initMetadata(params, null, "PLACEHOLDER_TITLE");
@@ -7,6 +8,9 @@ export async function generateMetadata({ params }: MetadataProps) {
 
 export default function NotFoundPage() {
   return (
-    <ErrorPage status="PLACEHOLDER_STATUS" message="PLACEHOLDER_MESSAGE" />
+    <main className="w-full h-dvh">
+      <CenterBox>PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE</CenterBox>
+      <ThemeHandler />
+    </main>
   );
 }

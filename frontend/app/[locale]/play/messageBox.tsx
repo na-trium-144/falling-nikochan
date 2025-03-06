@@ -6,7 +6,7 @@ import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
-import { ArrowLeft, RightOne } from "@icon-park/react";
+import { ArrowLeft, Caution, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
@@ -32,7 +32,7 @@ interface MessageProps {
   // setDisplaySpeed: (s: boolean) => void;
 }
 export function ReadyMessage(props: MessageProps) {
-  const t = useTranslations("play.readyMessage");
+  const t = useTranslations("play.message");
   const [optionOpen, setOptionOpen] = useState<boolean>(false);
 
   // props.small は clientPage.tsx のreadySmall (mainWindowの高さで決まる)
@@ -98,7 +98,7 @@ export function ReadyMessage(props: MessageProps) {
   );
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
-  const t = useTranslations("play.readyMessage");
+  const t = useTranslations("play.message");
   return (
     <div className="relative pr-8 min-h-32 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
@@ -151,7 +151,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   );
 }
 function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
-  const t = useTranslations("play.readyMessage");
+  const t = useTranslations("play.message");
   const diffMaxSec = -badFastSec;
   return (
     <div className="absolute inset-y-0 right-0 w-4 overflow-visible ">
@@ -222,7 +222,7 @@ interface MessageProps2 {
   exit: () => void;
 }
 export function StopMessage(props: MessageProps2) {
-  const t = useTranslations("play.stopMessage");
+  const t = useTranslations("play.message");
 
   return (
     <CenterBox>
@@ -235,6 +235,31 @@ export function StopMessage(props: MessageProps2) {
           keyName={props.isTouch ? undefined : "Space"}
           onClick={() => props.reset()}
         />
+        <Button
+          text={t("exit")}
+          keyName={props.isTouch ? undefined : "Esc"}
+          onClick={() => props.exit()}
+        />
+      </p>
+    </CenterBox>
+  );
+}
+
+interface MessageProps3 {
+  isTouch: boolean;
+  exit: () => void;
+  msg: string;
+}
+export function InitErrorMessage(props: MessageProps3) {
+  const t = useTranslations("play.message");
+
+  return (
+    <CenterBox>
+      <p className="mb-2">
+        <Caution className="inline-block text-lg align-middle mr-1" />
+        {props.msg}
+      </p>
+      <p>
         <Button
           text={t("exit")}
           keyName={props.isTouch ? undefined : "Esc"}

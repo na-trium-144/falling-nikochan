@@ -1,6 +1,6 @@
 export default {
   play: {
-    readyMessage: {
+    message: {
       ready: "Ready to start!",
       start: "Start",
       exit: "Exit",
@@ -17,11 +17,7 @@ export default {
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
-    },
-    stopMessage: {
       stopped: "Stopped",
-      reset: "Restart",
-      exit: "Exit",
     },
     score: {
       auto: "Auto Play",

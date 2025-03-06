@@ -5,7 +5,6 @@ import { PlayOption } from "./playOption.js";
 import { ChartBrief, ResultParams } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import Link from "next/link";
 import Button from "@/common/button.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
@@ -110,14 +109,14 @@ export function ShareBox(props: Props) {
         <span className="hidden main-wide:inline-block mr-2">
           {t("shareLink")}:
         </span>
-        <Link
+        <a
           className={"inline-block py-2 " + linkStyle1}
           href={shareLink.path}
-          prefetch={false}
+          onClick={(e) => e.preventDefault()}
         >
           <span className="main-wide:hidden">{t("shareLink")}</span>
           <span className="hidden main-wide:inline-block">{shareLink.url}</span>
-        </Link>
+        </a>
         <span className="inline-block ml-2 space-x-1">
           {shareLink.toClipboard && (
             <Button text={t("copy")} onClick={shareLink.toClipboard} />

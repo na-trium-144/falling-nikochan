@@ -29,7 +29,7 @@ export function Pager(props: Props) {
               href={props.hrefBefore}
               scroll={false}
               replace
-              prefetch={false}
+              prefetch={!process.env.NO_PREFETCH}
             >
               &lt;
             </Link>
@@ -53,7 +53,7 @@ export function Pager(props: Props) {
               href={props.hrefAfter}
               scroll={false}
               replace
-              prefetch={false}
+              prefetch={!process.env.NO_PREFETCH}
             >
               &gt;
             </Link>

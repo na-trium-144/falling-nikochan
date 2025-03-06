@@ -24,9 +24,7 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/chartFile", chartFileApp)
   .route("/newChartFile", newChartFileApp)
   .get("/seqFile/*", () => {
-    throw new HTTPException(410, {
-      message: "/api/seqFile is no longer supported",
-    });
+    throw new HTTPException(410, { message: "noLongerSupportedAPI" });
   })
   .route("/playFile", playFileApp)
   .route("/latest", latestApp)

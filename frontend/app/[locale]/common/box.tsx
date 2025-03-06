@@ -1,6 +1,4 @@
 import { ReactNode, MouseEvent } from "react";
-import { LoadingSlime } from "./loadingSlime.js";
-import { ThemeHandler } from "./theme.js";
 
 export const modalBg =
   "fixed inset-0 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
@@ -39,44 +37,5 @@ export function CenterBox(props: Props) {
     >
       {props.children}
     </Box>
-  );
-}
-
-export function CenterBoxOnlyPage(props: {
-  children: ReactNode | ReactNode[];
-}) {
-  return (
-    <main className="w-full h-dvh">
-      <CenterBox>{props.children}</CenterBox>
-      <ThemeHandler />
-    </main>
-  );
-}
-
-export function ErrorPage(props: {
-  status?: number | string;
-  message?: string;
-}) {
-  return (
-    <CenterBoxOnlyPage>
-      <p>
-        {props.status ? `${props.status}: ` : ""}
-        {String(props.message)}
-      </p>
-    </CenterBoxOnlyPage>
-  );
-}
-export function NotFound() {
-  return <ErrorPage status={404} message={"Not Found"} />;
-}
-
-export function Loading() {
-  return (
-    <CenterBoxOnlyPage>
-      <p>
-        <LoadingSlime />
-        Loading...
-      </p>
-    </CenterBoxOnlyPage>
   );
 }
