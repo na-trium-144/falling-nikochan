@@ -1,8 +1,5 @@
 import { serveStatic } from "hono/bun";
 import app from "./src/index.js";
-import { join, dirname } from "node:path";
-import dotenv from "dotenv";
-dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const port = 8787;
 

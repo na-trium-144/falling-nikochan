@@ -1,6 +1,6 @@
 export default {
   play: {
-    readyMessage: {
+    message: {
       ready: "準備完了！",
       start: "スタート",
       exit: "やめる",
@@ -17,11 +17,7 @@ export default {
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
-    },
-    stopMessage: {
       stopped: "停止しました",
-      reset: "もう一度",
-      exit: "やめる",
     },
     score: {
       auto: "オートプレイ",

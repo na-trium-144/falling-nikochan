@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const pagerButtonClass =
-  "text-center inline-block w-7 h-7 rounded-full " +
+  "text-center inline-block w-7 h-7 rounded-full cursor-pointer " +
   "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 " +
   "hover:dark:bg-stone-700 active:dark:bg-stone-600 ";
 interface Props {
@@ -29,7 +29,7 @@ export function Pager(props: Props) {
               href={props.hrefBefore}
               scroll={false}
               replace
-              prefetch={false}
+              prefetch={!process.env.NO_PREFETCH}
             >
               &lt;
             </Link>
@@ -53,7 +53,7 @@ export function Pager(props: Props) {
               href={props.hrefAfter}
               scroll={false}
               replace
-              prefetch={false}
+              prefetch={!process.env.NO_PREFETCH}
             >
               &gt;
             </Link>

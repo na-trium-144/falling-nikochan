@@ -1,20 +1,25 @@
-import { ReactNode } from "react";
-import { LoadingSlime } from "./loadingSlime.js";
-import { ThemeHandler } from "./theme.js";
+import { ReactNode, MouseEvent } from "react";
+
+export const modalBg =
+  "fixed inset-0 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
 
 interface Props {
   children: ReactNode | ReactNode[];
   className?: string;
   style?: object;
+  onClick?: (e: MouseEvent) => void;
 }
 export function Box(props: Props) {
   return (
     <div
-      className={"rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")}
+      className={
+        "rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")
+      }
       style={{
         backdropFilter: "blur(2px)",
         ...props.style,
       }}
+      onClick={props.onClick}
     >
       {props.children}
     </div>
@@ -32,41 +37,5 @@ export function CenterBox(props: Props) {
     >
       {props.children}
     </Box>
-  );
-}
-
-export function CenterBoxOnlyPage(props: {
-  children: ReactNode | ReactNode[];
-}) {
-  return (
-    <main className="w-full h-dvh">
-      <CenterBox>{props.children}</CenterBox>
-      <ThemeHandler />
-    </main>
-  );
-}
-
-export function ErrorPage(props: { status?: number | string; message?: string }) {
-  return (
-    <CenterBoxOnlyPage>
-      <p>
-        {props.status ? `${props.status}: ` : ""}
-        {String(props.message)}
-      </p>
-    </CenterBoxOnlyPage>
-  );
-}
-export function NotFound() {
-  return <ErrorPage status={404} message={"Not Found"} />;
-}
-
-export function Loading() {
-  return (
-    <CenterBoxOnlyPage>
-      <p>
-        <LoadingSlime />
-        Loading...
-      </p>
-    </CenterBoxOnlyPage>
   );
 }

@@ -9,7 +9,7 @@ const compat = new FlatCompat({
 });
 
 const eslintPluginNext = compat.config({
-  extends: ["next/core-web-vitals", "next/typescript"],
+  extends: ["next/core-web-vitals"],
   settings: {
     next: {
       rootDir: "frontend/",

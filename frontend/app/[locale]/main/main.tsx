@@ -15,6 +15,7 @@ interface Props {
   children?: ReactNode | ReactNode[];
   tab: number | undefined;
   locale: string;
+  modal?: ReactNode;
 }
 export function IndexMain(props: Props) {
   const router = useRouter();
@@ -31,6 +32,7 @@ export function IndexMain(props: Props) {
 
   return (
     <main className="flex flex-col w-full overflow-x-hidden min-h-dvh h-max">
+      {props.modal}
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
           <Header locale={locale}>{tabTitles(props.tab)}</Header>
@@ -48,7 +50,7 @@ export function IndexMain(props: Props) {
           marginLeft: "-20rem",
           marginRight: "-20rem",
         }}
-        prefetch={false}
+        prefetch={!process.env.NO_PREFETCH}
       >
         <Title className="absolute inset-0 " anim={isTitlePage} />
       </Link>
@@ -92,7 +94,7 @@ export function IndexMain(props: Props) {
                       ? "rounded-lg p-3 "
                       : "rounded-l-lg py-3 pl-2 pr-2 ")
                   }
-                  prefetch={false}
+                  prefetch={!process.env.NO_PREFETCH}
                   onClick={(e) => {
                     if (isTitlePage && !isMobileMain) {
                       setMenuMoveLeft(true);

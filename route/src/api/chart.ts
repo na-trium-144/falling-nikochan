@@ -60,7 +60,7 @@ export async function getChartEntry(
         entry: await chartToEntry(chart, cid, 0),
       };
     } else {
-      throw new HTTPException(404, { message: "Chart ID Not Found" });
+      throw new HTTPException(404, { message: "chartIdNotFound" });
     }
   }
   if (typeof entryCompressed.published !== "boolean") {
@@ -83,7 +83,7 @@ export async function getChartEntry(
   ) {
     return { entry, chart };
   } else {
-    throw new HTTPException(401, { message: "bad password" });
+    throw new HTTPException(401, { message: "badPassword" });
   }
 }
 
@@ -367,6 +367,6 @@ export function entryToChart(
         locale: entry.locale,
       };
     default:
-      throw new HTTPException(500, { message: "Unsupported chart version" });
+      throw new HTTPException(500, { message: "unsupportedChartVersion" });
   }
 }

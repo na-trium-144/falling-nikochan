@@ -16,6 +16,7 @@ interface Props {
   showLoading?: boolean;
   dateDiff?: boolean;
   href: (cid: string) => string;
+  onClick?: (cid: string) => void;
   newTab?: boolean;
   additionalOpen: boolean;
   setAdditionalOpen: (open: boolean) => void;
@@ -48,6 +49,9 @@ export function ChartList(props: Props) {
                   cid={cid}
                   brief={brief}
                   href={props.href(cid)}
+                  onClick={
+                    props.onClick ? () => props.onClick!(cid) : undefined
+                  }
                   creator={props.creator}
                   original={original}
                   newTab={props.newTab}
@@ -64,6 +68,9 @@ export function ChartList(props: Props) {
                   cid={cid}
                   brief={brief}
                   href={props.href(cid)}
+                  onClick={
+                    props.onClick ? () => props.onClick!(cid) : undefined
+                  }
                   creator={props.creator}
                   original={original}
                   newTab={props.newTab}
@@ -119,7 +126,8 @@ export function ChartList(props: Props) {
 }
 
 const chartListStyle =
-  "block hover:shadow active:shadow-inner rounded px-1 py-0.5 my-0.5 " +
+  "block w-full text-left cursor-pointer " +
+  "hover:shadow active:shadow-inner rounded px-1 py-0.5 my-0.5 " +
   "hover:mt-0 hover:mb-1 active:mt-0.5 active:mb-0.5 " +
   "hover:bg-sky-200/50 active:bg-sky-300/50 " +
   "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 ";
@@ -127,6 +135,7 @@ interface CProps {
   cid: string;
   brief?: ChartBrief;
   href: string;
+  onClick?: () => void;
   creator?: boolean;
   original?: boolean;
   newTab?: boolean;
@@ -152,12 +161,28 @@ export function ChartListItem(props: CProps) {
           : "opacity-0 ")
       }
     >
-      {props.newTab ? (
-        <a href={props.href} className={chartListStyle} target="_blank">
+      {props.onClick || props.newTab ? (
+        <a
+          href={props.href}
+          className={chartListStyle}
+          target={props.newTab ? "_blank" : undefined}
+          onClick={
+            props.onClick
+              ? (e) => {
+                  props.onClick!();
+                  e.preventDefault();
+                }
+              : undefined
+          }
+        >
           <ChartListItemChildren {...props} />
         </a>
       ) : (
-        <Link href={props.href} className={chartListStyle} prefetch={false}>
+        <Link
+          href={props.href}
+          className={chartListStyle}
+          prefetch={!process.env.NO_PREFETCH}
+        >
           <ChartListItemChildren {...props} />
         </Link>
       )}
