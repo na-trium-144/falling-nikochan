@@ -2,7 +2,9 @@ export default {
   play: {
     message: {
       ready: "準備完了！",
+      stopped: "停止しました",
       start: "スタート",
+      reset: "もう一度",
       exit: "やめる",
       startByTap:
         "または右上の動画を{isTouch, select, true {タップ} false {クリック} other {other}}で<br></br>" +
@@ -17,7 +19,6 @@ export default {
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
-      stopped: "停止しました",
     },
     score: {
       auto: "オートプレイ",
