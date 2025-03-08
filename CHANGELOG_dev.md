@@ -1,4 +1,12 @@
-## ver. 8.16 - 2025/03/06 [#356]
+## ver. 8.18 - 2025/03/08 [#364](https://github.com/na-trium-144/falling-nikochan/pull/364)
+
+* apiのテストを書いた `bun route:test`
+* messagepackを返すAPIでContent-Typeを設定するようにした
+* cidを受け取るAPIでcidが不正な場合400を返すようにした
+* API_ENV とは別に /api/newChartFile のratelimitの有無を切り替える API_NO_RATELIMIT 環境変数を追加
+* ciにテストの実行を追加、さらにjob間の依存関係を少し変更し効率化
+
+## ver. 8.16 - 2025/03/06 [#356](https://github.com/na-trium-144/falling-nikochan/pull/356)
 
 * play画面のloading表示の遷移、エラー表示処理を改善
 * resultがすべて表示されるまでresetもexitもできないようにした
@@ -10,7 +18,7 @@
     * 今はcloudflareのキャッシュを通しているので問題ない
     * 一応環境変数でオフのままにもできるようにもした
 
-## ver. 8.15 - 2025/03/04 [#352]
+## ver. 8.15 - 2025/03/04 [#352](https://github.com/na-trium-144/falling-nikochan/pull/352)
 
 * /main/playから/shareページへの遷移をmodal表示に変更
     * ブラウザのhistory遷移にも反応してmodalを開閉するようにした
