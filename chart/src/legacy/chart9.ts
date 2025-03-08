@@ -7,14 +7,7 @@ import {
   YoutubeIdSchema,
 } from "../chart.js";
 import { StepSchema } from "../step.js";
-import { Chart1 } from "./chart1.js";
-import { Chart2 } from "./chart2.js";
-import { Chart3 } from "./chart3.js";
-import { Chart4 } from "./chart4.js";
-import { Chart5 } from "./chart5.js";
-import { Chart6 } from "./chart6.js";
-import { Chart7 } from "./chart7.js";
-import { Chart8Edit, Chart8Min, convertTo8 } from "./chart8.js";
+import { ChartUntil8, ChartUntil8Min, convertTo8 } from "./chart8.js";
 
 export const NoteCommandSchema9 = v.object({
   step: StepSchema,
@@ -135,17 +128,10 @@ export function convertToMin9(chart: Chart9Edit): Chart9Min {
     })),
   };
 }
-export async function convertTo9(
-  chart:
-    | Chart1
-    | Chart2
-    | Chart3
-    | Chart4
-    | Chart5
-    | Chart6
-    | Chart7
-    | Chart8Edit
-): Promise<Chart9Edit> {
+
+export type ChartUntil9 = ChartUntil8 | Chart9Edit;
+export type ChartUntil9Min = ChartUntil8Min | Chart9Min;
+export async function convertTo9(chart: ChartUntil8): Promise<Chart9Edit> {
   if (chart.ver !== 8) chart = await convertTo8(chart);
   return {
     falling: "nikochan",
@@ -173,17 +159,7 @@ export async function convertTo9(
     published: chart.published,
   };
 }
-export async function convertTo9Min(
-  chart:
-    | Chart1
-    | Chart2
-    | Chart3
-    | Chart4
-    | Chart5
-    | Chart6
-    | Chart7
-    | Chart8Min
-): Promise<Chart9Min> {
+export async function convertTo9Min(chart: ChartUntil8Min): Promise<Chart9Min> {
   if (chart.ver !== 8) chart = await convertTo8(chart);
   return {
     falling: "nikochan",

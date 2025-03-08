@@ -31,19 +31,14 @@ route/ 内の定義
 
 import * as v from "valibot";
 import { difficulty } from "./difficulty.js";
-import { Chart1 } from "./legacy/chart1.js";
-import { Chart2 } from "./legacy/chart2.js";
-import { Chart3 } from "./legacy/chart3.js";
-import { Chart4 } from "./legacy/chart4.js";
-import { Chart5 } from "./legacy/chart5.js";
-import { Chart6 } from "./legacy/chart6.js";
-import { Chart7, hashLevel7 } from "./legacy/chart7.js";
-import { Chart8Edit, Chart8Min } from "./legacy/chart8.js";
+import { hashLevel7 } from "./legacy/chart7.js";
 import {
   Chart9Edit,
   Chart9Min,
   ChartEditSchema9,
   ChartMinSchema9,
+  ChartUntil9,
+  ChartUntil9Min,
   convertTo9,
   convertTo9Min,
   convertToMin9,
@@ -105,35 +100,14 @@ export type LevelPlay = Level9Play;
 export const convertToMin = convertToMin9;
 export const convertToPlay = convertToPlay9;
 
-export async function validateChart(
-  chart:
-    | ChartEdit
-    | Chart1
-    | Chart2
-    | Chart3
-    | Chart4
-    | Chart5
-    | Chart6
-    | Chart7
-    | Chart8Edit
-): Promise<ChartEdit> {
+export async function validateChart(chart: ChartUntil9): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 9) chart = await convertTo9(chart);
   v.parse(ChartEditSchema9, chart);
   return chart;
 }
 export async function validateChartMin(
-  chart:
-    | ChartEdit
-    | ChartMin
-    | Chart1
-    | Chart2
-    | Chart3
-    | Chart4
-    | Chart5
-    | Chart6
-    | Chart7
-    | Chart8Min
+  chart: ChartUntil9Min
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 9) chart = await convertTo9Min(chart);
