@@ -8,6 +8,7 @@
     "route:lint": "cd route && eslint src/",
     "frontend:lint": "cd frontend && tsc --noEmit && eslint app/",
     "lint": "npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
+    "route:test": "cd route && bun test",
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",
     "i18n:t": "cd i18n && node verifyKeys.js",

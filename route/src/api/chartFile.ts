@@ -53,7 +53,9 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         v7PasswdHash,
         v7HashKey,
       });
-      return c.body(new Blob([msgpack.serialize(chart)]).stream());
+      return c.body(new Blob([msgpack.serialize(chart)]).stream(), 200, {
+        "Content-Type": "application/vnd.msgpack",
+      });
     } finally {
       await client.close();
     }

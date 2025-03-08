@@ -55,23 +55,27 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   )
   .onError(async (err, c) => {
     console.error(err);
-    const lang = c.get("language");
-    if (!(err instanceof HTTPException)) {
-      console.error(err);
-      err = new HTTPException(500);
-    }
-    const status = (err as HTTPException).status;
-    const message =
-      (await (err as HTTPException).getResponse().text()) ||
-      (status === 404 ? "notFound" : "");
-    if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
-      return c.json({ message }, status);
-    } else {
-      return c.body(
-        await errorResponse(new URL(c.req.url).origin, lang, status, message),
-        status,
-        { "Content-Type": "text/html" }
-      );
+    try {
+      const lang = c.get("language");
+      if (!(err instanceof HTTPException)) {
+        err = new HTTPException(500);
+      }
+      const status = (err as HTTPException).status;
+      const message =
+        (await (err as HTTPException).getResponse().text()) ||
+        (status === 404 ? "notFound" : "");
+      if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
+        return c.json({ message }, status);
+      } else {
+        return c.body(
+          await errorResponse(new URL(c.req.url).origin, lang, status, message),
+          status,
+          { "Content-Type": "text/html" }
+        );
+      }
+    } catch (e) {
+      console.error("While handling the above error, another error thrown:", e);
+      return c.body(null, 500);
     }
   })
   .notFound(() => {

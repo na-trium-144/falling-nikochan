@@ -31,6 +31,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     MONGODB_URI="mongodb://localhost:27017"
     BACKEND_PREFIX="http://localhost:8787"
     API_ENV="development"
+    API_NO_RATELIMIT="1"
     ```
 * Install dependencies
     ```sh
@@ -77,6 +78,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * [ChartBrief](chart/src/chart.ts) as JSON with status code 200
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 404 (cid not found),
             * or 500 (other error)
 * `GET /api/latest` - Get the list of 25 latest updated charts.
@@ -89,6 +91,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * [Level6Play](chart/src/legacy/chart6.ts) or [Level8Play](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 404 (cid or level not found),
             * or 500 (other error)
 * `GET /api/hashPasswd/:cid` - Get the hash of the password for the chart.
@@ -110,6 +113,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts) or [Chart8Edit](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
             * or 500 (other error)
@@ -120,6 +124,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
             * 409 (chart data is Chart7 or older),
@@ -132,6 +137,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
             * or 500 (other error)

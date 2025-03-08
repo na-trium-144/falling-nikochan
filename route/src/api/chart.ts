@@ -15,6 +15,7 @@ import {
   isSample,
   getSample,
   Chart8Edit,
+  validCId,
 } from "@falling-nikochan/chart";
 import { gzip, gunzip } from "node:zlib";
 import { promisify } from "node:util";
@@ -49,6 +50,9 @@ export async function getChartEntry(
   entry: ChartEntry;
   chart: Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit;
 }> {
+  if (!validCId(cid)) {
+    throw new HTTPException(400, { message: "invalidChartId" });
+  }
   const entryCompressed = (await db
     .collection("chart")
     .findOne({ cid })) as ChartEntryCompressed | null;
