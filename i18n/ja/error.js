@@ -2,6 +2,7 @@ export default {
   error: {
     api: {
       // 400
+      invalidChartId: "譜面 ID が不正です",
       invalidResultParam: "result パラメータが不正です",
       missingResultParam: "result パラメータが指定されていません",
       // 401

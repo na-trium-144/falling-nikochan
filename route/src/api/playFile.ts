@@ -60,7 +60,9 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         .updateOne({ cid }, { $inc: { playCount: 1 } });
       // revalidateBrief(cid);
 
-      return c.body(new Blob([msgpack.serialize(level)]).stream());
+      return c.body(new Blob([msgpack.serialize(level)]).stream(), 200, {
+        "Content-Type": "application/vnd.msgpack",
+      });
     } finally {
       await client.close();
     }
