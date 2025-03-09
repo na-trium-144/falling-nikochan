@@ -13,10 +13,11 @@ export interface Result {
   step: Step;
 }
 export async function luaExec(
+  wasmPath: string,
   code: string,
   catchError: boolean
 ): Promise<Result> {
-  const factory = new LuaFactory();
+  const factory = new LuaFactory(wasmPath);
   const lua = await factory.createEngine();
   const result: Result = {
     stdout: [],
