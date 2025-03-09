@@ -151,8 +151,8 @@ export function MetaEdit(props: Props) {
           {!props.chart?.ytId
             ? t("publishFail.noId")
             : !hasLevelData
-            ? t("publishFail.empty")
-            : !props.chart?.editPasswd && t("publishFail.noPasswd")}
+              ? t("publishFail.empty")
+              : !props.chart?.editPasswd && t("publishFail.noPasswd")}
         </span>
       </p>
     </>
@@ -175,8 +175,7 @@ interface Props2 {
   locale: string;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
-  editPasswdPrev: string;
-  setEditPasswdPrev: (s: string) => void;
+  currentPasswd: { current: string };
 }
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
@@ -206,14 +205,14 @@ export function MetaTab(props: Props2) {
               process.env.NODE_ENV === "development"
                 ? "include"
                 : "same-origin",
-          }
+          },
         ).then(async (res) => {
           setPasswd(cid, await res.text());
         });
       } else {
         unsetPasswd(cid);
       }
-      props.setEditPasswdPrev(editPasswd);
+      props.currentPasswd.current = editPasswd;
     };
     if (props.cid === undefined) {
       const res = await fetch(
@@ -224,7 +223,7 @@ export function MetaTab(props: Props2) {
           cache: "no-store",
           credentials:
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        }
+        },
       );
       if (res.ok) {
         try {
@@ -237,7 +236,7 @@ export function MetaTab(props: Props2) {
             history.replaceState(
               null,
               "",
-              `/${props.locale}/edit?cid=${resBody.cid}`
+              `/${props.locale}/edit?cid=${resBody.cid}`,
             );
             addRecent("edit", resBody.cid);
             onSave(resBody.cid, props.chart!.editPasswd);
@@ -265,14 +264,14 @@ export function MetaTab(props: Props2) {
           `/api/chartFile/${props.cid}` +
           `?p=${getV6Passwd(props.cid)}` +
           `&ph=${getPasswd(props.cid)}` +
-          `&pw=${props.editPasswdPrev}`,
+          `&pw=${props.currentPasswd.current}`,
         {
           method: "POST",
           body: msgpack.serialize(props.chart),
           cache: "no-store",
           credentials:
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        }
+        },
       );
       if (res.ok) {
         props.setHasChange(false);
@@ -326,10 +325,10 @@ export function MetaTab(props: Props2) {
                 await luaExec(
                   process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
                   l.lua.join("\n"),
-                  false
+                  false,
                 )
               ).levelFreezed,
-            }))
+            })),
           ),
         };
       } catch (e1) {
@@ -351,10 +350,10 @@ export function MetaTab(props: Props2) {
                   await luaExec(
                     process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
                     l.lua.join("\n"),
-                    false
+                    false,
                   )
                 ).levelFreezed,
-              }))
+              })),
             ),
           };
         } catch (e2) {
