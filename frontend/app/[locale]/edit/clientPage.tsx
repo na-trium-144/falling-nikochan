@@ -316,9 +316,12 @@ function Page(props: Props) {
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
   const chartNumEvent = chart ? numEvents(chart) : 0;
-  const [savePasswd, setSavePasswd] = useState<boolean>(
-    props.savePasswdInitial
-  );
+  const [savePasswd, setSavePasswd] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (chart && savePasswd === null) {
+      setSavePasswd(props.savePasswdInitial);
+    }
+  }, [chart, savePasswd, props.savePasswdInitial]);
   // パスワードの変更前の値を保存
   // post後に chart.editPasswd で上書き
   const [editPasswdPrev, setEditPasswdPrev] = useState<string>(
@@ -1156,7 +1159,7 @@ function Page(props: Props) {
                   locale={locale}
                   editPasswdPrev={editPasswdPrev}
                   setEditPasswdPrev={setEditPasswdPrev}
-                  savePasswd={savePasswd}
+                  savePasswd={!!savePasswd}
                   setSavePasswd={setSavePasswd}
                 />
               ) : tab === 1 ? (
