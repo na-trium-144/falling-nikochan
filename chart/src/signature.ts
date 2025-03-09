@@ -1,3 +1,4 @@
+import { Signature5 } from "./legacy/chart5.js";
 import { Signature9 } from "./legacy/chart9.js";
 import {
   Step,
@@ -24,9 +25,9 @@ import {
 export type Signature = Signature9;
 export type SignatureWithLua = Signature9;
 
-export function getBarLength(s: Signature): Step[] {
+export function getBarLength(s: Signature | Signature5): Step[] {
   const barLength = toStepArray(s).map((b) =>
-    b.reduce((len, bs) => stepAdd(len, bs), stepZero())
+    b.reduce((len, bs) => stepAdd(len, bs), stepZero()),
   );
   barLength.forEach((len) => {
     if (stepCmp(len, stepZero()) <= 0) {
@@ -35,11 +36,11 @@ export function getBarLength(s: Signature): Step[] {
   });
   return barLength;
 }
-export function toStepArray(s: Signature): Step[][] {
+export function toStepArray(s: Signature | Signature5): Step[][] {
   return s.bars.map((b) =>
     b.map((bs) =>
-      stepSimplify({ fourth: 0, numerator: 1, denominator: bs / 4 })
-    )
+      stepSimplify({ fourth: 0, numerator: 1, denominator: bs / 4 }),
+    ),
   );
 }
 export function barFromLength(len: Step): (4 | 8 | 16)[] {
@@ -68,7 +69,7 @@ export function updateBarNum(signatures: Signature[]) {
   for (let si = 1; si < signatures.length; si++) {
     let prevBarBegin = stepSub(
       signatures[si - 1].step,
-      signatures[si - 1].offset
+      signatures[si - 1].offset,
     );
     const prevBarLength = getBarLength(signatures[si - 1]);
     let bi = 0;
@@ -76,7 +77,7 @@ export function updateBarNum(signatures: Signature[]) {
       barNum += 1;
       prevBarBegin = stepAdd(
         prevBarBegin,
-        prevBarLength[bi % prevBarLength.length]
+        prevBarLength[bi % prevBarLength.length],
       );
       bi += 1;
     }

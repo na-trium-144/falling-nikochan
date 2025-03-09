@@ -276,7 +276,7 @@ export default function PlayTab({ locale }: { locale: string }) {
                     .open(`/${locale}/play?cid=${cid}&lvIndex=0`, "_blank")
                     ?.focus()
                 }
-                isValid={validCId}
+                isValid={(t) => v.safeParse(CidSchema, t).success}
                 left
               />
             </h4>

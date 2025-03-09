@@ -163,7 +163,7 @@ interface Props2 {
   locale: string;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
-  currentPasswdHash: { current: string };
+  currentPasswdHash: { current: string | null };
   newPasswd: string;
   setNewPasswd: (pw: string) => void;
 }

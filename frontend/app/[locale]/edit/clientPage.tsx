@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Chart9Edit,
-  defaultNoteCommand,
-  hash,
-  NoteCommand,
-} from "@falling-nikochan/chart";
+import { defaultNoteCommand, hash, NoteCommand } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -42,7 +37,6 @@ import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
 import Header from "@/common/header.js";
 import {
   getPasswd,
-  getV6Passwd,
   preferSavePasswd,
   setPasswd,
   unsetPasswd,
@@ -311,7 +305,7 @@ interface Props {
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
-  currentPasswdHash: { current: string };
+  currentPasswdHash: { current: string | null };
   savePasswdInitial: boolean;
   modal?: ReactNode;
 }
