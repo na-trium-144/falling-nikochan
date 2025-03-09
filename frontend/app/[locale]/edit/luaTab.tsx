@@ -21,7 +21,11 @@ export function useLuaExecutor() {
 
   const exec = async (code: string) => {
     setRunning(true);
-    const result = await luaExec(code, true);
+    const result = await luaExec(
+      process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+      code,
+      true
+    );
     setRunning(false);
     setStdout(result.stdout);
     setErr(result.err);

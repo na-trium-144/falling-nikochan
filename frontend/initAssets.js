@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
 import { parse } from "node:path";
 import { toSfnt } from "woff2sfnt-sfnt2woff";
 for (const [name, file] of [
@@ -12,3 +12,8 @@ for (const [name, file] of [
   );
   writeFileSync(`public/assets/${parse(file).name}.ttf`, toSfnt(woff));
 }
+
+copyFileSync(
+  "../node_modules/wasmoon/dist/glue.wasm",
+  "public/assets/wasmoon_glue.wasm"
+);
