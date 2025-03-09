@@ -22,7 +22,7 @@ export interface RecordSummary {
 }
 const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:cid", async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
+    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -45,10 +45,10 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     }
   })
   .post("/:cid", async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
+    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const { lvHash, score } = v.parse(
       v.object({
-        lvHash: HashSchema,
+        lvHash: HashSchema(),
         score: v.pipe(v.number(), v.minValue(0), v.maxValue(120)),
       }),
       c.req.query(),

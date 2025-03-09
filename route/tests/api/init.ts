@@ -9,16 +9,18 @@ import {
   Chart5,
   Chart6,
   Chart7,
-  ChartEdit,
+  Chart8Edit,
+  Chart9Edit,
   currentChartVer,
+  hash,
   Level6Play,
-  Level8Play,
+  Level9Play,
   stepZero,
 } from "@falling-nikochan/chart";
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
-export function dummyChart(): ChartEdit {
+export function dummyChart(): Chart9Edit {
   return {
     falling: "nikochan",
     ver: currentChartVer,
@@ -28,7 +30,7 @@ export function dummyChart(): ChartEdit {
     composer: "b",
     chartCreator: "c",
     locale: "d",
-    editPasswd: "p",
+    changePasswd: null,
     published: false,
     levels: [
       {
@@ -73,11 +75,14 @@ export function dummyChart(): ChartEdit {
     ],
   };
 }
+export function dummyChart8(): Chart8Edit {
+  return { ...dummyChart(), ver: 8, editPasswd: "p" };
+}
 export function dummyChart7(): Chart7 {
-  return { ...dummyChart(), ver: 7 };
+  return { ...dummyChart8(), ver: 7 };
 }
 export function dummyChart6(): Chart6 {
-  const c: Chart6 = { ...dummyChart(), ver: 6 };
+  const c: Chart6 = { ...dummyChart7(), ver: 6 };
   // @ts-expect-error converting Chart8 to 6
   delete c.locale;
   return c;
@@ -98,9 +103,9 @@ export function dummyChart4(): Chart4 {
   };
 }
 
-export function dummyLevel8(): Level8Play {
+export function dummyLevel9(): Level9Play {
   return {
-    ver: 8,
+    ver: 9,
     offset: 1.23,
     notes: [
       {
@@ -110,23 +115,26 @@ export function dummyLevel8(): Level8Play {
         hitVX: 0,
         hitVY: 0,
         fall: true,
+        luaLine: null,
       },
     ],
     bpmChanges: [
-      { step: stepZero(), timeSec: 0, bpm: 180 },
+      { step: stepZero(), timeSec: 0, bpm: 180, luaLine: null },
       {
         step: { fourth: 1, numerator: 0, denominator: 1 },
         timeSec: 60 / 180,
         bpm: 120,
+        luaLine: null,
       },
     ],
-    speedChanges: [{ step: stepZero(), timeSec: 0, bpm: 240 }],
+    speedChanges: [{ step: stepZero(), timeSec: 0, bpm: 240, luaLine: null }],
     signature: [
       {
         step: stepZero(),
         offset: stepZero(),
         barNum: 0,
         bars: [[4]],
+        luaLine: null,
       },
     ],
   };
@@ -175,12 +183,13 @@ export function dummyLevel6(): Level6Play {
 
 /*
 cid100000に最新バージョンのchart(dummyChart()参照)を、
-100004〜100007にそれぞれver4〜7のchartを保存する
+100004〜100008にそれぞれver4〜7のchartを保存する
 */
 export async function initDb() {
   if (typeof process.env.MONGODB_URI !== "string") {
     throw new Error("MONGODB_URI is not set");
   }
+  const pSecretSalt = process.env.SECRET_SALT || "SecretSalt";
   const client = new MongoClient(process.env.MONGODB_URI);
   try {
     await client.connect();
@@ -190,7 +199,13 @@ export async function initDb() {
       { cid: dummyCid },
       {
         $set: await zipEntry(
-          await chartToEntry(dummyChart(), dummyCid, dummyDate.getTime()),
+          await chartToEntry(
+            { ...dummyChart(), changePasswd: await hash(dummyCid + "p") },
+            dummyCid,
+            dummyDate.getTime(),
+            pSecretSalt,
+            null,
+          ),
         ),
       },
       { upsert: true },
@@ -200,9 +215,14 @@ export async function initDb() {
       {
         $set: await zipEntry({
           ...(await chartToEntry(
-            dummyChart(),
+            {
+              ...dummyChart(),
+              changePasswd: await hash(String(Number(dummyCid) + 4) + "p"),
+            },
             String(Number(dummyCid) + 4),
             dummyDate.getTime(),
+            pSecretSalt,
+            null,
           )),
           ver: 4,
           levels: dummyChart4().levels,
@@ -215,9 +235,14 @@ export async function initDb() {
       {
         $set: await zipEntry({
           ...(await chartToEntry(
-            dummyChart(),
+            {
+              ...dummyChart(),
+              changePasswd: await hash(String(Number(dummyCid) + 5) + "p"),
+            },
             String(Number(dummyCid) + 5),
             dummyDate.getTime(),
+            pSecretSalt,
+            null,
           )),
           ver: 5,
           levels: dummyChart5().levels,
@@ -230,9 +255,14 @@ export async function initDb() {
       {
         $set: await zipEntry({
           ...(await chartToEntry(
-            dummyChart(),
+            {
+              ...dummyChart(),
+              changePasswd: await hash(String(Number(dummyCid) + 6) + "p"),
+            },
             String(Number(dummyCid) + 6),
             dummyDate.getTime(),
+            pSecretSalt,
+            null,
           )),
           ver: 6,
           levels: dummyChart6().levels,
@@ -245,12 +275,37 @@ export async function initDb() {
       {
         $set: await zipEntry({
           ...(await chartToEntry(
-            dummyChart(),
+            {
+              ...dummyChart(),
+              changePasswd: await hash(String(Number(dummyCid) + 7) + "p"),
+            },
             String(Number(dummyCid) + 7),
             dummyDate.getTime(),
+            pSecretSalt,
+            null,
           )),
           ver: 7,
           levels: dummyChart7().levels,
+        }),
+      },
+      { upsert: true },
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 8) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: await hash(String(Number(dummyCid) + 8) + "p"),
+            },
+            String(Number(dummyCid) + 8),
+            dummyDate.getTime(),
+            pSecretSalt,
+            null,
+          )),
+          ver: 8,
+          levels: dummyChart8().levels,
         }),
       },
       { upsert: true },

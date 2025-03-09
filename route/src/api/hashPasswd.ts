@@ -14,8 +14,8 @@ import * as v from "valibot";
 const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
-    const { p } = v.parse(v.object({ p: HashSchema }), c.req.query());
+    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
+    const { p } = v.parse(v.object({ p: HashSchema() }), c.req.query());
     let pUserSalt: string;
     if (env(c).API_ENV === "development") {
       // secure がつかない

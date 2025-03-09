@@ -54,20 +54,20 @@ import { luaAddSpeedChange } from "./lua/speed.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
 
-export const YoutubeIdSchema = v.pipe(
+export const YoutubeIdSchema = () => v.pipe(
   v.string(),
   v.regex(/^[a-zA-Z0-9_-]{11}$/)
 );
-export const HashSchema = v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
-export const LuaLineSchema = v.nullable(
+export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
+export const LuaLineSchema = () => v.nullable(
   v.pipe(v.number(), v.integer(), v.minValue(0))
 );
-export const CidSchema = v.pipe(v.string(), v.regex(/^[0-9]{6}$/));
+export const CidSchema = () => v.pipe(v.string(), v.regex(/^[0-9]{6}$/));
 export const levelTypes = ["Single", "Double", "Maniac"];
 export const levelTypesConst = ["Single", "Double", "Maniac"] as const;
 
-export const ChartBriefSchema = v.object({
-  ytId: YoutubeIdSchema,
+export const ChartBriefSchema = () => v.object({
+  ytId: YoutubeIdSchema(),
   title: v.string(),
   composer: v.string(),
   chartCreator: v.string(),
@@ -77,7 +77,7 @@ export const ChartBriefSchema = v.object({
   levels: v.array(
     v.object({
       name: v.string(),
-      hash: HashSchema,
+      hash: HashSchema(),
       type: v.picklist(levelTypesConst),
       difficulty: v.pipe(v.number(), v.integer(), v.minValue(1)),
       noteCount: v.pipe(v.number(), v.integer(), v.minValue(0)),
@@ -88,7 +88,7 @@ export const ChartBriefSchema = v.object({
     })
   ),
 });
-export type ChartBrief = v.InferOutput<typeof ChartBriefSchema>;
+export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
 
 export const currentChartVer = 9;
 export const lastIncompatibleVer = 6;
@@ -104,7 +104,7 @@ export const convertToPlay = convertToPlay9;
 export async function validateChart(chart: ChartUntil9): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 9) chart = await convertTo9(chart);
-  v.parse(ChartEditSchema9, chart);
+  v.parse(ChartEditSchema9(), chart);
   return chart;
 }
 export async function validateChartMin(
@@ -112,7 +112,7 @@ export async function validateChartMin(
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 9) chart = await convertTo9Min(chart);
-  v.parse(ChartMinSchema9, chart);
+  v.parse(ChartMinSchema9(), chart);
   return chart;
 }
 

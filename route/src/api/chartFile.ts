@@ -40,11 +40,11 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
   ["GET", "POST", "DELETE"],
   "/:cid",
   async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
+    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const { p, ph, pbypass } = v.parse(
       v.object({
-        p: v.optional(HashSchema),
-        ph: v.optional(HashSchema),
+        p: v.optional(HashSchema()),
+        ph: v.optional(HashSchema()),
         pbypass: v.optional(v.string()),
       }),
       c.req.query(),

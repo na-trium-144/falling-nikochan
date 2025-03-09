@@ -50,7 +50,7 @@ export async function getChartEntry(
   entry: ChartEntry;
   chart: Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit;
 }> {
-  if (!v.parse(CidSchema, cid)) {
+  if (!v.parse(CidSchema(), cid)) {
     throw new HTTPException(400, { message: "invalidChartId" });
   }
   const entryCompressed = (await db

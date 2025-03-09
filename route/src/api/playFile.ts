@@ -20,7 +20,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   async (c) => {
     const { cid, lvIndex } = v.parse(
       v.object({
-        cid: CidSchema,
+        cid: CidSchema(),
         lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
       }),
       c.req.param(),

@@ -245,7 +245,7 @@ export default function PlayTab({ locale }: { locale: string }) {
               className="ml-4 w-20"
               actualValue=""
               updateValue={gotoCId}
-              isValid={(t) => v.safeParse(CidSchema, t).success}
+              isValid={(t) => v.safeParse(CidSchema(), t).success}
               left
             />
             <span className={cidFetching ? "inline-block " : "hidden "}>
@@ -276,7 +276,7 @@ export default function PlayTab({ locale }: { locale: string }) {
                     .open(`/${locale}/play?cid=${cid}&lvIndex=0`, "_blank")
                     ?.focus()
                 }
-                isValid={(t) => v.safeParse(CidSchema, t).success}
+                isValid={(t) => v.safeParse(CidSchema(), t).success}
                 left
               />
             </h4>

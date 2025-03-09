@@ -9,7 +9,7 @@ import * as v from "valibot";
 const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
+    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();

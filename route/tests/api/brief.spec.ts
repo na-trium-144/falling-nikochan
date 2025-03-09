@@ -15,7 +15,6 @@ describe("GET /api/brief/:cid", () => {
       composer: dummyChart().composer,
       chartCreator: dummyChart().chartCreator,
       updatedAt: dummyDate.getTime(),
-      playCount: 0,
       published: false,
       locale: dummyChart().locale,
       levels: [

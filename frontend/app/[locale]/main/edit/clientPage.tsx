@@ -123,7 +123,7 @@ export default function EditTab({ locale }: { locale: string }) {
               actualValue={inputCId}
               updateValue={gotoCId}
               updateInvalidValue={() => setInputCId("")}
-              isValid={(t) => v.safeParse(CidSchema, t).success}
+              isValid={(t) => v.safeParse(CidSchema(), t).success}
               left
             />
             <ExternalLink

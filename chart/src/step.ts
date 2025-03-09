@@ -13,7 +13,7 @@
 
 import * as v from "valibot";
 
-export const StepSchema = v.pipe(
+export const StepSchema = () => v.pipe(
   v.object({
     fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
     numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
@@ -27,7 +27,7 @@ export const StepSchema = v.pipe(
     ["numerator"]
   )
 );
-export type Step = v.InferOutput<typeof StepSchema>;
+export type Step = v.InferOutput<ReturnType<typeof StepSchema>>;
 export function stepZero(): Step {
   return { fourth: 0, numerator: 0, denominator: 1 };
 }
