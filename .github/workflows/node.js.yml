@@ -17,8 +17,7 @@ jobs:
     - name: Abort if lockfile changed
       run: '[ -z "$(git status -s)" ]'
 
-  test: # uses node
-    needs: [check-lockfile]
+  lint: # uses node
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,10 +30,21 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run lint
-    # - run: npm run test
+
+  test: # uses bun
+    runs-on: ubuntu-latest
+    env:
+      MONGODB_URI: mongodb://localhost:27017
+      API_ENV: development
+      # API_NO_RATELIMIT: "1"
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: bun i --frozen-lock
+    - run: bun mongo-docker
+    - run: bun route:test
 
   vercel-build: # uses bun
-    needs: [check-lockfile]
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -54,7 +64,7 @@ jobs:
         include-hidden-files: true
 
   vercel-deploy:
-    needs: [vercel-build]
+    needs: [check-lockfile, lint, test, vercel-build]
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

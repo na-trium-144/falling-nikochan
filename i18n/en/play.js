@@ -2,7 +2,9 @@ export default {
   play: {
     message: {
       ready: "Ready to start!",
+      stopped: "Stopped",
       start: "Start",
+      reset: "Restart",
       exit: "Exit",
       startByTap:
         "Or start/stop by {isTouch, select, true {tapping} false {clicking} other {other}} the video<br></br>" +
@@ -17,7 +19,6 @@ export default {
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
-      stopped: "Stopped",
     },
     score: {
       auto: "Auto Play",
