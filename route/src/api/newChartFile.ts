@@ -25,9 +25,17 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     // cidとfidを生成し、bodyのデータを保存して、cidを返す
     console.log(c.req.header("x-forwarded-for"));
     const ip = String(
-      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
+      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
     ); // nullもundefinedも文字列にしちゃう
     const chartBuf = await c.req.arrayBuffer();
+    let pSecretSalt: string;
+    if (env(c).SECRET_SALT) {
+      pSecretSalt = env(c).SECRET_SALT!;
+    } else if (env(c).API_ENV === "development") {
+      pSecretSalt = "SecretSalt";
+    } else {
+      throw new Error("SECRET_SALT not set in production environment!");
+    }
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -43,7 +51,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
             // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
           },
           429,
-          { "retry-after": (rateLimitMin * 60).toString() }
+          { "retry-after": (rateLimitMin * 60).toString() },
         );
       }
 
@@ -82,10 +90,6 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       // update Time
       const updatedAt = new Date().getTime();
 
-      // if (chart.published) {
-      //   revalidateLatest();
-      // }
-
       let cid: string;
       while (true) {
         cid = Math.floor(Math.random() * 900000 + 100000).toString();
@@ -100,9 +104,10 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       await db
         .collection("chart")
         .insertOne(
-          await zipEntry(await chartToEntry(newChart, cid, updatedAt))
+          await zipEntry(
+            await chartToEntry(newChart, cid, updatedAt, pSecretSalt, null),
+          ),
         );
-      // revalidateBrief(cid);
 
       return c.json({ cid: cid });
     } finally {

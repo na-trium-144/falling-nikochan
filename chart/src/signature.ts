@@ -1,4 +1,4 @@
-import { Signature5, SignatureWithLua5 } from "./legacy/chart5.js";
+import { Signature9 } from "./legacy/chart9.js";
 import {
   Step,
   stepAdd,
@@ -6,7 +6,6 @@ import {
   stepSimplify,
   stepSub,
   stepZero,
-  validateStep,
 } from "./step.js";
 
 /**
@@ -22,22 +21,9 @@ import {
  * barNum: このSignatureが始まる時点の小節番号
  *
  */
-export type Signature = Signature5;
-export type SignatureWithLua = SignatureWithLua5;
+export type Signature = Signature9;
+export type SignatureWithLua = Signature9;
 
-export function validateSignature(s: SignatureWithLua) {
-  validateStep(s.step);
-  validateStep(s.offset);
-  if (!Array.isArray(s.bars)) throw "signature.bars is invalid";
-  s.bars.forEach((b) => {
-    if (!Array.isArray(b)) throw "signature.bars is invalid";
-    b.forEach((bs) => {
-      if (bs !== 4 && bs !== 8 && bs !== 16) throw "signature.bars is invalid";
-    });
-  });
-  if (typeof s.luaLine !== "number" && s.luaLine !== null)
-    throw "signature.luaLine is invalid";
-}
 export function getBarLength(s: Signature): Step[] {
   const barLength = toStepArray(s).map((b) =>
     b.reduce((len, bs) => stepAdd(len, bs), stepZero())

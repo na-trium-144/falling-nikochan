@@ -62,6 +62,7 @@ export const HashSchema = v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
 export const LuaLineSchema = v.nullable(
   v.pipe(v.number(), v.integer(), v.minValue(0))
 );
+export const CidSchema = v.pipe(v.string(), v.regex(/^[0-9]{6}$/));
 export const levelTypes = ["Single", "Double", "Maniac"];
 export const levelTypesConst = ["Single", "Double", "Maniac"] as const;
 
@@ -70,7 +71,7 @@ export const ChartBriefSchema = v.object({
   title: v.string(),
   composer: v.string(),
   chartCreator: v.string(),
-  updatedAt: v.date(),
+  updatedAt: v.number(), // <- Date.getTime()
   published: v.boolean(),
   locale: v.string(),
   levels: v.array(
@@ -149,7 +150,7 @@ export function emptyChart(locale: string): ChartEdit {
     title: "",
     composer: "",
     chartCreator: "",
-    editPasswdHash: "",
+    changePasswd: null,
     published: false,
     locale,
   };
@@ -183,17 +184,20 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
+      luaLine: null,
     })!;
     level = luaAddSpeedChange(level, {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
+      luaLine: null,
     })!;
     level = luaAddBeatChange(level, {
       step: stepZero(),
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
+      luaLine: null,
     })!;
   }
   return level;
@@ -214,7 +218,7 @@ export function copyLevel(level: LevelEdit): LevelEdit {
 
 export async function createBrief(
   chart: ChartEdit,
-  updatedAt: Date
+  updatedAt: number,
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
   try {

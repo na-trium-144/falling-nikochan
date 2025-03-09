@@ -83,7 +83,7 @@ export const ChartMinSchema9 = v.object({
 export const ChartEditSchema9 = v.object({
   ...ChartMinSchema9.entries,
   levels: v.array(LevelEditSchema9),
-  editPasswdHash: HashSchema,
+  changePasswd: v.nullable(HashSchema),
   published: v.boolean(),
 });
 
@@ -155,7 +155,7 @@ export async function convertTo9(chart: ChartUntil8): Promise<Chart9Edit> {
       speedChanges: level.speedChanges,
       signature: level.signature,
     })),
-    editPasswdHash: "",
+    changePasswd: null,
     published: chart.published,
   };
 }

@@ -3,13 +3,14 @@ import { BPMChange, updateBpmTimeSec } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 import { Chart3 } from "../legacy/chart3.js";
+import { BPMChange1 } from "../legacy/chart1.js";
 
 function bpmLuaCommand(bpm: number) {
   return `BPM(${bpm})`;
 }
 export function luaAddBpmChange<L extends LevelEdit | Chart3>(
   chart: L,
-  change: BPMChange
+  change: BPMChange | BPMChange1
 ): L | null {
   const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
