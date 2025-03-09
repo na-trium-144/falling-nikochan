@@ -1,3 +1,7 @@
+## ver. 8.20 - 2025/03/09 [#367](https://github.com/na-trium-144/falling-nikochan/pull/367)
+
+* wasmoonのwasmをassetsに入れてローカルでも使えるようにする
+
 ## ver. 8.18 - 2025/03/08 [#364](https://github.com/na-trium-144/falling-nikochan/pull/364)
 
 * apiのテストを書いた `bun route:test`

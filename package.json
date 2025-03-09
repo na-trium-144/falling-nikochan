@@ -15,8 +15,8 @@
     "t": "npm run chart:t && npm run route:t && npm run i18n:t",
     "prepare": "npm run t",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
-    "ndev": "cd frontend && next dev -H 0.0.0.0",
-    "nbuild": "cd frontend && node ./woff2sfnt.js && next build",
+    "ndev": "cd frontend && node ./initAssets.js && next dev -H 0.0.0.0",
+    "nbuild": "cd frontend && node ./initAssets.js && next build",
     "ldev": "cd route/ && tsx watch serve-local.ts",
     "bdev": "cd route/ && bun run --hot serve-bun.ts"
   },
