@@ -68,7 +68,6 @@ export default {
       publishFail: {
         noId: "(Cannot publish because YouTube video ID is not specified)",
         empty: "(Cannot publish because all chart data is empty or hidden)",
-        noPasswd: "(Cannot publish because edit password is not set)",
       },
       saveDone: "Saved!",
       loadFail: "Failed to load file",

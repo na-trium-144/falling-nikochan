@@ -15,7 +15,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
-    const p = v.parse(v.object({ cp: HashSchema }), c.req.query());
+    const { p } = v.parse(v.object({ p: HashSchema }), c.req.query());
     let pUserSalt: string;
     if (env(c).API_ENV === "development") {
       // secure がつかない
@@ -50,7 +50,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       const { entry } = await getChartEntry(db, cid, {
-        cidPasswdHash: p.cp,
+        cidPasswdHash: p,
         pSecretSalt,
       });
       return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {

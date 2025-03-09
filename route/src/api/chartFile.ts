@@ -32,6 +32,8 @@ import * as v from "valibot";
  * chartFileのクエリパラメータph(localStorageに保存する): hash(pServerHash + pUserSalt)
  *   pUserSaltは /api/hashPasswd でランダムにセットされる
  *
+ * chartFileのapiには p=CidPasswdHash または ph=hash(pServerHash + pUserSalt) を指定してアクセスする
+ *
  * また、development環境に限り /api/chartFile/cid?pbypass=1 でスキップできる
  */
 const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
@@ -39,9 +41,9 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
   "/:cid",
   async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
-    const p = v.parse(
+    const { p, ph, pbypass } = v.parse(
       v.object({
-        cp: v.optional(HashSchema),
+        p: v.optional(HashSchema),
         ph: v.optional(HashSchema),
         pbypass: v.optional(v.string()),
       }),
@@ -51,7 +53,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
       env(c).API_ENV === "development"
         ? getCookie(c, "pUserSalt")
         : getCookie(c, "pUserSalt", "host");
-    const bypass = !!p.pbypass && env(c).API_ENV === "development";
+    const bypass = !!pbypass && env(c).API_ENV === "development";
     const pSecretSalt = secretSalt(env(c));
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
@@ -59,8 +61,8 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
       const db = client.db("nikochan");
       let { entry, chart } = await getChartEntry(db, cid, {
         bypass,
-        cidPasswdHash: p.cp,
-        v9PasswdHash: p.ph,
+        cidPasswdHash: p,
+        v9PasswdHash: ph,
         v9UserSalt,
         pSecretSalt,
       });

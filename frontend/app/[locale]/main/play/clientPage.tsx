@@ -15,9 +15,9 @@ import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
 import {
   ChartBrief,
+  CidSchema,
   originalCId,
   sampleCId,
-  validCId,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SmallDomainShare } from "@/common/small";
@@ -26,6 +26,7 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Box, modalBg } from "@/common/box.js";
 import { ShareBox } from "@/share/placeholder/shareBox.js";
 import { titleShare, titleWithSiteName } from "@/common/title.js";
+import * as v from "valibot";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
@@ -48,7 +49,7 @@ export default function PlayTab({ locale }: { locale: string }) {
     null | "recent" | "latest"
   >(null);
   const [showAllMode, setShowAllMode] = useState<null | "recent" | "latest">(
-    null
+    null,
   );
   const goExclusiveMode = useCallback(
     (mode: "recent" | "latest") => {
@@ -62,7 +63,7 @@ export default function PlayTab({ locale }: { locale: string }) {
         setTimeout(() => setShowAllMode(mode), 200);
       }
     },
-    [isMobileMain]
+    [isMobileMain],
   );
 
   const [modalCId, setModalCId] = useState<string | null>(null);
@@ -110,7 +111,7 @@ export default function PlayTab({ locale }: { locale: string }) {
     const recentCId = getRecent("play").reverse();
     setRecentBrief(recentCId.map((cid) => ({ cid, fetched: false })));
     setOriginalBrief(
-      originalCId.map((cid) => ({ cid, fetched: false, original: true }))
+      originalCId.map((cid) => ({ cid, fetched: false, original: true })),
     );
     setSampleBrief(sampleCId.map((cid) => ({ cid, fetched: false })));
     void (async () => {
@@ -127,7 +128,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       if (recentBrief) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           recentBrief,
-          fetchRecentAll
+          fetchRecentAll,
         );
         if (changed) {
           setRecentBrief(briefs);
@@ -141,7 +142,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       if (latestBrief) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           latestBrief,
-          fetchLatestAll
+          fetchLatestAll,
         );
         if (changed) {
           setLatestBrief(briefs);
@@ -154,7 +155,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       if (originalBrief) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           originalBrief,
-          fetchOriginalAll
+          fetchOriginalAll,
         );
         if (changed) {
           setOriginalBrief(briefs);
@@ -167,7 +168,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       if (sampleBrief) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           sampleBrief,
-          fetchSampleAll
+          fetchSampleAll,
         );
         if (changed) {
           setSampleBrief(briefs);
@@ -244,7 +245,7 @@ export default function PlayTab({ locale }: { locale: string }) {
               className="ml-4 w-20"
               actualValue=""
               updateValue={gotoCId}
-              isValid={validCId}
+              isValid={(t) => v.safeParse(CidSchema, t).success}
               left
             />
             <span className={cidFetching ? "inline-block " : "hidden "}>
@@ -390,7 +391,7 @@ export default function PlayTab({ locale }: { locale: string }) {
               cid,
               originalBrief
                 ?.concat(sampleBrief || [])
-                .find((b) => b.cid === cid)?.brief
+                .find((b) => b.cid === cid)?.brief,
             )
           }
           showLoading
