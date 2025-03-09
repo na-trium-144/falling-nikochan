@@ -12,7 +12,7 @@ import { updateIpLastCreate } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
 import { chartToEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";
-import { Bindings } from "../env.js";
+import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
 
@@ -28,14 +28,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
     ); // nullもundefinedも文字列にしちゃう
     const chartBuf = await c.req.arrayBuffer();
-    let pSecretSalt: string;
-    if (env(c).SECRET_SALT) {
-      pSecretSalt = env(c).SECRET_SALT!;
-    } else if (env(c).API_ENV === "development") {
-      pSecretSalt = "SecretSalt";
-    } else {
-      throw new Error("SECRET_SALT not set in production environment!");
-    }
+    const pSecretSalt = secretSalt(env(c));
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();

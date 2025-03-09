@@ -5,6 +5,8 @@ import { getCookie, setCookie } from "hono/cookie";
 import { getChartEntry, getPUserHash } from "./chart.js";
 import { randomBytes } from "node:crypto";
 import { MongoClient } from "mongodb";
+import { CidSchema, HashSchema } from "@falling-nikochan/chart";
+import * as v from "valibot";
 
 /**
  * chartFile のコメントを参照
@@ -12,8 +14,8 @@ import { MongoClient } from "mongodb";
 const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const cid = c.req.param("cid");
-    const cidPasswdHash = c.req.query("cp") || "";
+    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
+    const p = v.parse(v.object({ cp: HashSchema }), c.req.query());
     let pUserSalt: string;
     if (env(c).API_ENV === "development") {
       // secure がつかない
@@ -48,7 +50,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       const { entry } = await getChartEntry(db, cid, {
-        cidPasswdHash,
+        cidPasswdHash: p.cp,
         pSecretSalt,
       });
       return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {

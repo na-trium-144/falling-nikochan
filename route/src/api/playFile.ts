@@ -10,14 +10,22 @@ import {
   Level9Play,
   convertToPlay9,
   convertTo9,
+  CidSchema,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
+import * as v from "valibot";
 
 const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
   async (c) => {
-    const cid = c.req.param("cid");
-    const lvIndex = Number(c.req.param("lvIndex"));
+    const { cid, lvIndex } = v.parse(
+      v.object({
+        cid: CidSchema,
+        lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
+      }),
+      c.req.param(),
+    );
+
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -56,10 +64,9 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
-      await db
-        .collection("chart")
-        .updateOne({ cid }, { $inc: { playCount: 1 } });
-      // revalidateBrief(cid);
+      // await db
+      //   .collection("chart")
+      //   .updateOne({ cid }, { $inc: { playCount: 1 } });
 
       return c.body(new Blob([msgpack.serialize(level)]).stream(), 200, {
         "Content-Type": "application/vnd.msgpack",

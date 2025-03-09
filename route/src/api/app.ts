@@ -7,6 +7,7 @@ import latestApp from "./latest.js";
 import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
 import hashPasswdApp from "./hashPasswd.js";
+import recordApp from "./record.js";
 import { HTTPException } from "hono/http-exception";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
@@ -28,6 +29,7 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .route("/playFile", playFileApp)
   .route("/latest", latestApp)
-  .route("/hashPasswd", hashPasswdApp);
+  .route("/hashPasswd", hashPasswdApp)
+  .route("/record", recordApp);
 
 export default apiApp;

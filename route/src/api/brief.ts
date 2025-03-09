@@ -3,11 +3,13 @@ import { entryToBrief, getChartEntry } from "./chart.js";
 import { MongoClient } from "mongodb";
 import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
+import { CidSchema } from "@falling-nikochan/chart";
+import * as v from "valibot";
 
 const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const cid = c.req.param("cid");
+    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -19,7 +21,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } finally {
       await client.close();
     }
-  }
+  },
 );
 
 export default briefApp;

@@ -8,13 +8,16 @@ import {
   validateChart,
   chartMaxEvent,
   fileMaxSize,
+  CidSchema,
+  HashSchema,
 } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
-import { Bindings } from "../env.js";
+import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
+import * as v from "valibot";
 
 /**
  * v9では生のパスワードをデータベースに保存せず、APIのインタフェース(Chart9Edit)としても生パスワードは用いない
@@ -30,33 +33,29 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
   ["GET", "POST", "DELETE"],
   "/:cid",
   async (c) => {
-    const cid = c.req.param("cid");
-    const cidPasswdHash = c.req.query("cp");
-    const v9PasswdHash = c.req.query("ph");
-    let v9UserSalt: string;
-    if (env(c).API_ENV === "development") {
-      v9UserSalt = getCookie(c, "pUserSalt") || "";
-    } else {
-      v9UserSalt = getCookie(c, "pUserSalt", "host") || "";
-    }
-    const bypass =
-      c.req.query("pbypass") === "1" && env(c).API_ENV === "development";
-    let pSecretSalt: string;
-    if (env(c).SECRET_SALT) {
-      pSecretSalt = env(c).SECRET_SALT!;
-    } else if (env(c).API_ENV === "development") {
-      pSecretSalt = "SecretSalt";
-    } else {
-      throw new Error("SECRET_SALT not set in production environment!");
-    }
+    const { cid } = v.parse(v.object({ cid: CidSchema }), c.req.param());
+    const p = v.parse(
+      v.object({
+        cp: v.optional(HashSchema),
+        ph: v.optional(HashSchema),
+        pbypass: v.optional(v.string()),
+      }),
+      c.req.query(),
+    );
+    const v9UserSalt =
+      env(c).API_ENV === "development"
+        ? getCookie(c, "pUserSalt")
+        : getCookie(c, "pUserSalt", "host");
+    const bypass = !!p.pbypass && env(c).API_ENV === "development";
+    const pSecretSalt = secretSalt(env(c));
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
       let { entry, chart } = await getChartEntry(db, cid, {
         bypass,
-        cidPasswdHash,
-        v9PasswdHash,
+        cidPasswdHash: p.cp,
+        v9PasswdHash: p.ph,
         v9UserSalt,
         pSecretSalt,
       });
@@ -127,7 +126,13 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
             { cid },
             {
               $set: await zipEntry(
-                await chartToEntry(newChart, cid, updatedAt, pSecretSalt, entry),
+                await chartToEntry(
+                  newChart,
+                  cid,
+                  updatedAt,
+                  pSecretSalt,
+                  entry,
+                ),
               ),
             },
           );

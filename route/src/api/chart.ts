@@ -115,7 +115,7 @@ function getPServerHash(
  */
 export interface ChartEntryCompressed {
   cid: string;
-  levelsCompressed: Binary | null;
+  levelsCompressed: Binary | null;  // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
   ver: 4 | 5 | 6 | 7 | 8 | 9;
@@ -127,7 +127,6 @@ export interface ChartEntryCompressed {
   pServerHash: string; // see comment in chartFile.ts
   pRandomSalt: string;
   updatedAt: number;
-  playCount: number;
   locale: string;
   levelBrief: {
     name: string;
@@ -172,7 +171,6 @@ export interface ChartLevelCore9 {
   signature: Signature9[];
   lua: string[];
 }
-
 export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
@@ -216,7 +214,6 @@ export async function zipEntry(
     pServerHash: entry.pServerHash,
     pRandomSalt: entry.pRandomSalt,
     updatedAt: entry.updatedAt,
-    playCount: entry.playCount,
     locale: entry.locale,
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
@@ -249,7 +246,6 @@ export async function chartToEntry(
   return {
     cid,
     deleted: prevEntry?.deleted || false,
-    playCount: prevEntry?.playCount || 0,
     levelsCompressed: null,
     levels: chart.levels.map((level) => ({
       notes: level.notes,
@@ -281,7 +277,6 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
     chartCreator: entry.chartCreator,
     levels: entry.levelBrief,
     updatedAt: entry.updatedAt,
-    // playCount: entry.playCount,
     published: entry.published,
     locale: entry.locale || "ja",
   };
