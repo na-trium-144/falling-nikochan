@@ -95,6 +95,9 @@ export default function EditAuth({ locale }: { locale: string }) {
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
   const [editPasswd, setEditPasswd] = useState<string>("");
+  // fetchに成功したらセット、
+  // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
+  const currentPasswd = useRef<string>("");
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -141,6 +144,7 @@ export default function EditAuth({ locale }: { locale: string }) {
               msgpack.deserialize(await res.arrayBuffer());
             setConvertedFrom(chartRes.ver);
             const chart: ChartEdit = await validateChart(chartRes);
+            currentPasswd.current = chart.editPasswd;
             if (savePasswd) {
               const res = await fetch(
                 process.env.BACKEND_PREFIX +
@@ -217,7 +221,7 @@ export default function EditAuth({ locale }: { locale: string }) {
       convertedFrom={convertedFrom}
       setConvertedFrom={setConvertedFrom}
       locale={locale}
-      editPasswdInitial={editPasswd}
+      currentPasswd={currentPasswd}
       savePasswdInitial={savePasswd}
       modal={
         chart === undefined ? (
@@ -289,7 +293,7 @@ interface Props {
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
-  editPasswdInitial?: string;
+  currentPasswd: {current: string;};
   savePasswdInitial: boolean;
   modal?: ReactNode;
 }
@@ -322,11 +326,6 @@ function Page(props: Props) {
       setSavePasswd(props.savePasswdInitial);
     }
   }, [chart, savePasswd, props.savePasswdInitial]);
-  // パスワードの変更前の値を保存
-  // post後に chart.editPasswd で上書き
-  const [editPasswdPrev, setEditPasswdPrev] = useState<string>(
-    props.editPasswdInitial || ""
-  );
 
   // 譜面の更新 (メタデータの変更など)
   const changeChart = (chart: Chart8Edit) => {
@@ -1157,8 +1156,7 @@ function Page(props: Props) {
                   setHasChange={setHasChange}
                   currentLevelIndex={currentLevelIndex}
                   locale={locale}
-                  editPasswdPrev={editPasswdPrev}
-                  setEditPasswdPrev={setEditPasswdPrev}
+                  currentPasswd={props.currentPasswd}
                   savePasswd={!!savePasswd}
                   setSavePasswd={setSavePasswd}
                 />
