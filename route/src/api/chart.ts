@@ -54,8 +54,8 @@ export async function getChartEntry(
     throw new HTTPException(400, { message: "invalidChartId" });
   }
   const entryCompressed = (await db
-    .collection("chart")
-    .findOne({ cid })) as ChartEntryCompressed | null;
+    .collection<ChartEntryCompressed>("chart")
+    .findOne({ cid }));
   if (entryCompressed === null || entryCompressed.deleted) {
     if (process.env.API_ENV === "development" && isSample(cid)) {
       const chart = getSample(cid);

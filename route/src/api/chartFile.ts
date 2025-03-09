@@ -12,7 +12,12 @@ import {
   HashSchema,
 } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
-import { chartToEntry, getChartEntry, zipEntry } from "./chart.js";
+import {
+  ChartEntryCompressed,
+  chartToEntry,
+  getChartEntry,
+  zipEntry,
+} from "./chart.js";
 import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie } from "hono/cookie";
@@ -65,11 +70,11 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
             "Content-Type": "application/vnd.msgpack",
           });
         case "DELETE":
-          await db.collection("chart").updateOne(
+          await db.collection<ChartEntryCompressed>("chart").updateOne(
             { cid },
             {
               $set: {
-                levelsCompressed: "",
+                levelsCompressed: null,
                 deleted: true,
               },
             },
@@ -122,7 +127,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
             updatedAt = new Date().getTime();
           }
 
-          await db.collection("chart").updateOne(
+          await db.collection<ChartEntryCompressed>("chart").updateOne(
             { cid },
             {
               $set: await zipEntry(

@@ -3,6 +3,7 @@ import { dummyCid, initDb } from "./init";
 import app from "@falling-nikochan/route";
 import { validCId } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
+import { ChartEntryCompressed } from "../../src/api/chart";
 
 describe("GET /api/latest", () => {
   test("should return latest entries", async () => {
@@ -22,7 +23,7 @@ describe("GET /api/latest", () => {
     try {
       await client.connect();
       const db = client.db("nikochan");
-      await db.collection("chart").updateOne(
+      await db.collection<ChartEntryCompressed>("chart").updateOne(
         { cid: dummyCid },
         {
           $set: {

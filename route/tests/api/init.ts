@@ -1,5 +1,9 @@
 import { MongoClient } from "mongodb";
-import { chartToEntry, zipEntry } from "@falling-nikochan/route/src/api/chart";
+import {
+  ChartEntryCompressed,
+  chartToEntry,
+  zipEntry,
+} from "@falling-nikochan/route/src/api/chart";
 import {
   Chart4,
   Chart5,
@@ -182,74 +186,74 @@ export async function initDb() {
     await client.connect();
     const db = client.db("nikochan");
     await db.collection("rateLimit").deleteMany({});
-    await db.collection("chart").updateOne(
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: dummyCid },
       {
         $set: await zipEntry(
-          await chartToEntry(dummyChart(), dummyCid, dummyDate.getTime())
+          await chartToEntry(dummyChart(), dummyCid, dummyDate.getTime()),
         ),
       },
-      { upsert: true }
+      { upsert: true },
     );
-    await db.collection("chart").updateOne(
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 4) },
       {
         $set: await zipEntry({
           ...(await chartToEntry(
             dummyChart(),
             String(Number(dummyCid) + 4),
-            dummyDate.getTime()
+            dummyDate.getTime(),
           )),
           ver: 4,
           levels: dummyChart4().levels,
         }),
       },
-      { upsert: true }
+      { upsert: true },
     );
-    await db.collection("chart").updateOne(
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 5) },
       {
         $set: await zipEntry({
           ...(await chartToEntry(
             dummyChart(),
             String(Number(dummyCid) + 5),
-            dummyDate.getTime()
+            dummyDate.getTime(),
           )),
           ver: 5,
           levels: dummyChart5().levels,
         }),
       },
-      { upsert: true }
+      { upsert: true },
     );
-    await db.collection("chart").updateOne(
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 6) },
       {
         $set: await zipEntry({
           ...(await chartToEntry(
             dummyChart(),
             String(Number(dummyCid) + 6),
-            dummyDate.getTime()
+            dummyDate.getTime(),
           )),
           ver: 6,
           levels: dummyChart6().levels,
         }),
       },
-      { upsert: true }
+      { upsert: true },
     );
-    await db.collection("chart").updateOne(
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 7) },
       {
         $set: await zipEntry({
           ...(await chartToEntry(
             dummyChart(),
             String(Number(dummyCid) + 7),
-            dummyDate.getTime()
+            dummyDate.getTime(),
           )),
           ver: 7,
           levels: dummyChart7().levels,
         }),
       },
-      { upsert: true }
+      { upsert: true },
     );
   } finally {
     await client.close();

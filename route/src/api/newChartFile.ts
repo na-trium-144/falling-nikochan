@@ -10,7 +10,7 @@ import {
 } from "@falling-nikochan/chart";
 import { updateIpLastCreate } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
-import { chartToEntry, zipEntry } from "./chart.js";
+import { ChartEntryCompressed, chartToEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";
 import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
@@ -86,7 +86,11 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       let cid: string;
       while (true) {
         cid = Math.floor(Math.random() * 900000 + 100000).toString();
-        if ((await db.collection("chart").findOne({ cid })) !== null) {
+        if (
+          (await db
+            .collection<ChartEntryCompressed>("chart")
+            .findOne({ cid })) !== null
+        ) {
           // cidかぶり
           continue;
         } else {
@@ -95,7 +99,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       }
 
       await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .insertOne(
           await zipEntry(
             await chartToEntry(newChart, cid, updatedAt, pSecretSalt, null),

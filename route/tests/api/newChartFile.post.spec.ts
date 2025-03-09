@@ -45,7 +45,7 @@ describe("POST /api/newChartFile", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: body.cid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.title).toBe(dummyChart().title);

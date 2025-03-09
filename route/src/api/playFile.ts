@@ -64,10 +64,6 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
-      // await db
-      //   .collection("chart")
-      //   .updateOne({ cid }, { $inc: { playCount: 1 } });
-
       return c.body(new Blob([msgpack.serialize(level)]).stream(), 200, {
         "Content-Type": "application/vnd.msgpack",
       });

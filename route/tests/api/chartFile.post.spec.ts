@@ -21,7 +21,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.title).toBe("updated");
@@ -40,7 +40,7 @@ describe("POST /api/chartFile/:cid", () => {
           Cookie: "hashKey=def",
         },
         body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
-      }
+      },
     );
     expect(res.status).toBe(204);
 
@@ -49,7 +49,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.title).toBe("updated");
@@ -105,7 +105,7 @@ describe("POST /api/chartFile/:cid", () => {
     await initDb();
     const chart = dummyChart();
     chart.levels[0].rest = new Array(chartMaxEvent + 1).fill(
-      chart.levels[0].rest[0]
+      chart.levels[0].rest[0],
     );
     const res = await app.request("/api/chartFile/100000?pw=p", {
       method: "POST",
@@ -151,7 +151,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.updatedAt).toBe(dummyDate.getTime());
@@ -173,7 +173,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.updatedAt).toBe(dummyDate.getTime());
@@ -199,7 +199,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.updatedAt).toBeGreaterThanOrEqual(dateBefore.getTime());
@@ -224,7 +224,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.connect();
       const db = client.db("nikochan");
       const e = (await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
       expect(e).not.toBeNull();
       expect(e!.updatedAt).toBeGreaterThanOrEqual(dateBefore.getTime());
