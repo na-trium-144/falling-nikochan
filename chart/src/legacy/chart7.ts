@@ -1,11 +1,8 @@
 import { hash } from "../chart.js";
 import { Step } from "../step.js";
-import { Chart1 } from "./chart1.js";
-import { Chart2 } from "./chart2.js";
-import { BPMChangeWithLua3, Chart3, RestStep3 } from "./chart3.js";
-import { Chart4 } from "./chart4.js";
-import { Chart5, SignatureWithLua5 } from "./chart5.js";
-import { Chart6, convertTo6 } from "./chart6.js";
+import { BPMChangeWithLua3, RestStep3 } from "./chart3.js";
+import { SignatureWithLua5 } from "./chart5.js";
+import { ChartUntil6, convertTo6 } from "./chart6.js";
 import { Level8Edit } from "./chart8.js";
 
 export interface Chart7 {
@@ -56,9 +53,8 @@ export async function hashLevel7(level: Level7 | Level8Edit) {
   );
 }
 
-export async function convertTo7(
-  chart: Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6
-): Promise<Chart7> {
+export type ChartUntil7 = ChartUntil6 | Chart7;
+export async function convertTo7(chart: ChartUntil6): Promise<Chart7> {
   if (chart.ver !== 6) chart = await convertTo6(chart);
   return {
     ...chart,

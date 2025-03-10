@@ -94,24 +94,28 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
             * 400 (invalid cid),
             * 404 (cid or level not found),
             * or 500 (other error)
-* `GET /api/hashPasswd/:cid` - Get the hash of the password for the chart.
+* `GET /api/hashPasswd/:cid` - Get the unique hash of the password for the chart.
     * `:cid` - Chart ID
     * Query Parameters
-        * `pw=` the raw editing password
-    * if `hashKey` value is not in the cookie, a random string is generated and stored.
+        * `cp=` sha256 hash of (cid + passwd)
+    * if `pUserSalt` value is not in the cookie, a random string is generated and stored.
     * Response
         * sha256 hash of (cid + passwd + hashKey) as raw text with status code 200
+        * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
+            * 401 (wrong passwd),
+            * 404 (cid not found),
+            * or 500 (other error)
 * `GET /api/chartFile/:cid` - Get the chart file. Password is required.
     * `:cid` - Chart ID
     * Query Parameters
         * Either one of the following is required.
-            * (deprecated) `p=` sha256 hash of the editing password
-            * `pw=` the raw editing password
-            * `ph=` sha256 hash of (cid + passwd + hashKey). Used for a saved password in frontend app, instead of saving the raw password.
-                * The cookie value `hashKey` must be set and match with that used for the hash.
+            * `cp=` sha256 hash of (cid + passwd)
+            * `ph=` hash of passwd obtained from `/api/hashPasswd/:cid?cp=...`
+                * The cookie value `pUserSalt` must be set and match with that used for the hash.
             * `pbypass=1` (only on development environment) bypass the password check
     * Response
-        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts) or [Chart8Edit](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
+        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts), [Chart8Edit](chart/src/legacy/chart8.ts) or [Chart9Edit](chart/src/legacy/chart9.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 400 (invalid cid),
             * 401 (wrong passwd),

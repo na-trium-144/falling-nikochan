@@ -7,17 +7,25 @@ import { env } from "hono/adapter";
 import {
   convertTo6,
   Level6Play,
-  convertTo8,
-  convertToPlay8,
-  Level8Play,
+  Level9Play,
+  convertToPlay9,
+  convertTo9,
+  CidSchema,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
+import * as v from "valibot";
 
 const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
   async (c) => {
-    const cid = c.req.param("cid");
-    const lvIndex = Number(c.req.param("lvIndex"));
+    const { cid, lvIndex } = v.parse(
+      v.object({
+        cid: CidSchema(),
+        lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
+      }),
+      c.req.param(),
+    );
+
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -28,7 +36,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         throw new HTTPException(404, { message: "levelNotFound" });
       }
 
-      let level: Level6Play | Level8Play;
+      let level: Level6Play | Level9Play;
       switch (chart.ver) {
         case 4:
         case 5:
@@ -46,19 +54,15 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           };
           break;
         case 7:
-          level = convertToPlay8(await convertTo8(chart), lvIndex);
-          break;
         case 8:
-          level = convertToPlay8(chart, lvIndex);
+          level = convertToPlay9(await convertTo9(chart), lvIndex);
+          break;
+        case 9:
+          level = convertToPlay9(chart, lvIndex);
           break;
         default:
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
-
-      await db
-        .collection("chart")
-        .updateOne({ cid }, { $inc: { playCount: 1 } });
-      // revalidateBrief(cid);
 
       return c.body(new Blob([msgpack.serialize(level)]).stream(), 200, {
         "Content-Type": "application/vnd.msgpack",
@@ -66,7 +70,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } finally {
       await client.close();
     }
-  }
+  },
 );
 
 export default playFileApp;

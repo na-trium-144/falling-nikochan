@@ -2,6 +2,7 @@ export default {
   error: {
     api: {
       // 400
+      noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
       missingResultParam: "Result parameter is missing",

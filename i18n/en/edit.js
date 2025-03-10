@@ -46,12 +46,11 @@ export default {
       musicTitle: "Song title",
       musicComposer: "Composer, etc.",
       chartCreator: "Chart creator (your name)",
-      passwd: "Editing password",
+      passwd: "Change password",
       passwdHelp:
         "You can set a password that is <br></br>" +
         "required to edit this chart next time.<br></br>" +
-        "If you do not set this, <br></br>" +
-        "anyone who knows the chart ID can edit this chart.<br></br>" +
+        "If left blank, it will not be changed from the current password.<br></br>" +
         "Be careful because there is no way to <br></br>" +
         "restore the password if you forget it.",
       displayPasswd: "Show",
@@ -68,7 +67,10 @@ export default {
       publishFail: {
         noId: "(Cannot publish because YouTube video ID is not specified)",
         empty: "(Cannot publish because all chart data is empty or hidden)",
-        noPasswd: "(Cannot publish because edit password is not set)",
+      },
+      saveFail: {
+        noId: "YouTube video ID is not specified",
+        noPasswd: "Password is not set",
       },
       saveDone: "Saved!",
       loadFail: "Failed to load file",

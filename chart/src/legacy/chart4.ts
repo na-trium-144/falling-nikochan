@@ -1,9 +1,7 @@
 import { hash } from "../chart.js";
-import { Chart1 } from "./chart1.js";
-import { Chart2 } from "./chart2.js";
 import {
   BPMChangeWithLua3,
-  Chart3,
+  ChartUntil3,
   convertTo3,
   NoteCommandWithLua3,
   RestStep3,
@@ -38,9 +36,8 @@ export async function hashLevel4(level: Level4) {
   );
 }
 
-export async function convertTo4(
-  chart: Chart1 | Chart2 | Chart3
-): Promise<Chart4> {
+export type ChartUntil4 = ChartUntil3 | Chart4;
+export async function convertTo4(chart: ChartUntil3): Promise<Chart4> {
   if (chart.ver !== 3) chart = convertTo3(chart);
   const newChart: Chart4 = {
     falling: "nikochan",

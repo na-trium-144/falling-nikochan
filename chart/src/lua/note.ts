@@ -1,10 +1,11 @@
 import { LevelEdit } from "../chart.js";
 import { NoteCommand, NoteCommandWithLua } from "../command.js";
 import { Chart3, NoteCommand3 } from "../legacy/chart3.js";
+import { NoteCommand7 } from "../legacy/chart7.js";
 import { Step, stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
-function noteLuaCommand(n: NoteCommand | NoteCommand3) {
+function noteLuaCommand(n: NoteCommand | NoteCommand3 | NoteCommand7) {
   if ("fall" in n) {
     return (
       `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
@@ -19,7 +20,7 @@ function noteLuaCommand(n: NoteCommand | NoteCommand3) {
 }
 export function luaAddNote<
   L extends LevelEdit | Chart3,
-  N extends NoteCommand | NoteCommand3
+  N extends NoteCommand | NoteCommand3 | NoteCommand7
 >(chart: L, n: N, step: Step): L | null {
   const insert = findInsertLine(chart, step);
   if (insert.luaLine === null) {
@@ -49,7 +50,7 @@ export function luaDeleteNote(
 export function luaUpdateNote(
   chart: LevelEdit,
   currentNoteIndex: number,
-  n: NoteCommand
+  n: NoteCommand | NoteCommand7
 ): LevelEdit | null {
   const oldN = chart.notes[currentNoteIndex];
   if (oldN.luaLine === null) {

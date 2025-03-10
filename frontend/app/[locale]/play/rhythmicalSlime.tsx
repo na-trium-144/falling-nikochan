@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BPMChange } from "@falling-nikochan/chart";
+import { BPMChange, BPMChange1, Signature5 } from "@falling-nikochan/chart";
 import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepSub, stepZero } from "@falling-nikochan/chart";
@@ -12,8 +12,8 @@ interface Props {
   style?: object;
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
-  bpmChanges?: BPMChange[];
-  signature: Signature[];
+  bpmChanges?: BPMChange[] | BPMChange1[];
+  signature: Signature[] | Signature5[];
 }
 interface SlimeState {
   // 対象の時刻の3/4ステップ前からしゃがむ

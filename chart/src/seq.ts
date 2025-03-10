@@ -9,12 +9,14 @@ import {
   stepZero,
 } from "./step.js";
 import { displayNote7, DisplayNote7, Note7 } from "./legacy/seq7.js";
-import { loadChart8 } from "./legacy/seq8.js";
+import { loadChart9 } from "./legacy/seq9.js";
+import { BPMChange1 } from "./legacy/chart1.js";
+import { Signature5 } from "./legacy/chart5.js";
 
 export type Note = Note7;
 export type DisplayNote = DisplayNote7;
 export const displayNote = displayNote7;
-export const loadChart = loadChart8;
+export const loadChart = loadChart9;
 
 /**
  * 判定線の位置
@@ -37,12 +39,15 @@ export interface Pos {
 }
 
 function defaultBpmChange(): BPMChange {
-  return { timeSec: 0, bpm: 120, step: stepZero() };
+  return { timeSec: 0, bpm: 120, step: stepZero(), luaLine: null };
 }
 /**
  * bpmとstep数→時刻(秒数)
  */
-export function getTimeSec(bpmChanges: BPMChange[], step: Step): number {
+export function getTimeSec(
+  bpmChanges: BPMChange[] | BPMChange1[],
+  step: Step,
+): number {
   const targetBpmChange =
     bpmChanges[findBpmIndexFromStep(bpmChanges, step)] || defaultBpmChange();
   return (
@@ -55,9 +60,9 @@ export function getTimeSec(bpmChanges: BPMChange[], step: Step): number {
  * bpmと時刻(秒数)→step
  */
 export function getStep(
-  bpmChanges: BPMChange[],
+  bpmChanges: BPMChange[] | BPMChange1[],
   timeSec: number,
-  denominator: number
+  denominator: number,
 ): Step {
   const targetBpmChange =
     bpmChanges[findBpmIndexFromSec(bpmChanges, timeSec)] || defaultBpmChange();
@@ -75,8 +80,8 @@ export function getStep(
  * 時刻(step)→小節数+小節内の拍数
  */
 export function getSignatureState(
-  signature: Signature[],
-  step: Step
+  signature: Signature[] | Signature5[],
+  step: Step,
 ): SignatureState {
   const targetSignature = signature[findBpmIndexFromStep(signature, step)];
   let barBegin = stepSub(targetSignature.step, targetSignature.offset);
@@ -91,7 +96,7 @@ export function getSignatureState(
       for (let si = 0; si < barSteps[bi % barLength.length].length; si++) {
         const barStepEnd = stepAdd(
           barStepBegin,
-          barSteps[bi % barLength.length][si]
+          barSteps[bi % barLength.length][si],
         );
         if (stepCmp(barStepEnd, step) > 0) {
           return {
@@ -128,8 +133,8 @@ export interface SignatureState {
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromSec(
-  bpmChanges: BPMChange[],
-  timeSec: number
+  bpmChanges: BPMChange[] | BPMChange1[],
+  timeSec: number,
 ): number {
   if (bpmChanges.length === 0) {
     return 0;
@@ -147,8 +152,8 @@ export function findBpmIndexFromSec(
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromStep(
-  bpmChanges: BPMChange[] | Signature[],
-  step: Step
+  bpmChanges: BPMChange[] | BPMChange1[] | Signature[] | Signature5[],
+  step: Step,
 ): number {
   if (bpmChanges.length === 0) {
     return 0;

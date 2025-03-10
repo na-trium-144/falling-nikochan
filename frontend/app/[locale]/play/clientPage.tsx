@@ -22,8 +22,8 @@ const exampleResult = {
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6, levelTypes, loadChart6 } from "@falling-nikochan/chart";
-import { ChartSeqData8, loadChart8 } from "@falling-nikochan/chart";
+import { ChartSeqData6, Level9Play, levelTypes, loadChart6 } from "@falling-nikochan/chart";
+import { ChartSeqData9, loadChart9 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -44,7 +44,6 @@ import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
-import { Level8Play } from "@falling-nikochan/chart";
 import { LoadingSlime } from "@/common/loadingSlime.js";
 import { useTranslations } from "next-intl";
 
@@ -59,7 +58,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData8>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData9>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -99,7 +98,7 @@ export function InitPlay({ locale }: { locale: string }) {
     //   " | Falling Nikochan";
 
     if (session?.level) {
-      setChartSeq(loadChart8(session.level));
+      setChartSeq(loadChart9(session.level));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
@@ -112,16 +111,16 @@ export function InitPlay({ locale }: { locale: string }) {
         );
         if (res.ok) {
           try {
-            const seq: Level6Play | Level8Play = msgpack.deserialize(
+            const seq: Level6Play | Level9Play = msgpack.deserialize(
               await res.arrayBuffer()
             );
-            if (seq.ver === 6 || seq.ver === 8) {
+            if (seq.ver === 6 || seq.ver === 9) {
               switch (seq.ver) {
                 case 6:
                   setChartSeq(loadChart6(seq));
                   break;
-                case 8:
-                  setChartSeq(loadChart8(seq));
+                case 9:
+                  setChartSeq(loadChart9(seq));
                   break;
               }
               setErrorStatus(undefined);
@@ -181,7 +180,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
-  chartSeq?: ChartSeqData6 | ChartSeqData8;
+  chartSeq?: ChartSeqData6 | ChartSeqData9;
   editing: boolean;
   showFps: boolean;
   displaySpeed: boolean;
