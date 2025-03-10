@@ -113,7 +113,7 @@ function getPServerHash(
  *
  * levels がjson+gzip圧縮+base64エンコードされてlevelsCompressedとして保存されている
  *
- * v8->v9: need to set locale, pServerHash, pRandomSalt
+ * v8->v9: need to set locale, pServerHash, pRandomSalt, ip
  */
 export interface ChartEntryCompressed {
   cid: string;
