@@ -24,4 +24,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
           accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}}
+          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main
