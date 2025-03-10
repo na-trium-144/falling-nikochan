@@ -49,6 +49,9 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
       }),
       c.req.query(),
     );
+    const ip = String(
+      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
+    ); // nullもundefinedも文字列にしちゃう
     const v9UserSalt =
       env(c).API_ENV === "development"
         ? getCookie(c, "pUserSalt")
@@ -137,6 +140,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
                   newChart,
                   cid,
                   updatedAt,
+                  ip,
                   pSecretSalt,
                   entry,
                 ),

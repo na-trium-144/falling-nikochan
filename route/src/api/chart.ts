@@ -61,7 +61,7 @@ export async function getChartEntry(
       const chart = getSample(cid);
       return {
         chart,
-        entry: await chartToEntry(chart, cid, 0, "", null),
+        entry: await chartToEntry(chart, cid, 0, null, "", null),
       };
     } else {
       throw new HTTPException(404, { message: "chartIdNotFound" });
@@ -129,6 +129,7 @@ export interface ChartEntryCompressed {
   pServerHash: string; // see comment in chartFile.ts
   pRandomSalt: string;
   updatedAt: number;
+  ip: string[];
   locale: string;
   levelBrief: {
     name: string;
@@ -216,6 +217,7 @@ export async function zipEntry(
     pServerHash: entry.pServerHash,
     pRandomSalt: entry.pRandomSalt,
     updatedAt: entry.updatedAt,
+    ip: entry.ip,
     locale: entry.locale,
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
@@ -226,6 +228,7 @@ export async function chartToEntry(
   chart: ChartEdit,
   cid: string,
   updatedAt: number,
+  addIp: string | null,
   pSecretSalt: string,
   prevEntry: ChartEntry | null,
 ): Promise<ChartEntry> {
@@ -245,6 +248,10 @@ export async function chartToEntry(
       pSecretSalt,
       pRandomSalt,
     );
+  }
+  const ip = prevEntry?.ip || [];
+  if (addIp !== null && !ip.includes(addIp)) {
+    ip.push(addIp);
   }
   return {
     cid,
@@ -269,6 +276,7 @@ export async function chartToEntry(
     chartCreator: chartBrief.chartCreator,
     updatedAt: chartBrief.updatedAt,
     levelBrief: chartBrief.levels,
+    ip,
     locale: chartBrief.locale,
   };
 }

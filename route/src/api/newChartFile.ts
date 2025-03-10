@@ -102,7 +102,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         .collection<ChartEntryCompressed>("chart")
         .insertOne(
           await zipEntry(
-            await chartToEntry(newChart, cid, updatedAt, pSecretSalt, null),
+            await chartToEntry(newChart, cid, updatedAt, ip, pSecretSalt, null),
           ),
         );
 
