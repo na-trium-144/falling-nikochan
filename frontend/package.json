@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "8.21.0",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
   "dependencies": {

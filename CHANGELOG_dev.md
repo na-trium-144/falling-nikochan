@@ -1,3 +1,17 @@
+## ver. 9.0 - 2025/ [#365](https://github.com/na-trium-144/falling-nikochan/pull/365)
+
+* valibotを導入し、Chart9のschema,validateChart()関数,apiのパラメータのパース処理をvalibotで書く
+  * todo: /og/result のパラメータ, recultParams が以前のまま
+* データベースに平文パスワードを保存するのをやめる
+  * route/src/api/chartFormat.ts のコメントを参照
+  * 今までの /api/chartFile のAPIとの互換性はない
+  * デプロイ時にデータベースの修正が必要
+* mongodbにアクセスする部分のTypeScript型指定を追加
+* ChartBrief.playCountを廃止し、データベースにプレイ回数だけでなくスコアなども記録するPlayRecordを追加、 /api/record 追加
+  * ブラウザーごと(cookieに保存する`playerId`で識別)に最高スコア、プレイ回数、FC回数、FB回数を記録
+  * todo: GETするAPIは作ったが、表示部分が未実装。それぞれのレベルのプレイ回数だけでなく、スコア分布・FC割合といった統計を表示できたらいいなと思っている(がそこまでデータが集まるかは不明)
+* ドメインをutcodeに移行
+
 ## ver. 8.20 - 2025/03/09 [#367](https://github.com/na-trium-144/falling-nikochan/pull/367)
 
 * wasmoonのwasmをassetsに入れてローカルでも使えるようにする
