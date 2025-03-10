@@ -13,20 +13,21 @@
 
 import * as v from "valibot";
 
-export const StepSchema = () => v.pipe(
-  v.object({
-    fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
-    numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
-    denominator: v.pipe(v.number(), v.integer(), v.minValue(1)),
-  }),
-  v.forward(
+export const StepSchema = () =>
+  v.pipe(
+    v.object({
+      fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
+      numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
+      denominator: v.pipe(v.number(), v.integer(), v.minValue(1)),
+    }),
+    /* v.forward(
     v.check(
       ({ numerator, denominator }) => numerator < denominator,
       "numerator < denominator"
     ),
     ["numerator"]
-  )
-);
+    ) */
+  );
 export type Step = v.InferOutput<ReturnType<typeof StepSchema>>;
 export function stepZero(): Step {
   return { fourth: 0, numerator: 0, denominator: 1 };
