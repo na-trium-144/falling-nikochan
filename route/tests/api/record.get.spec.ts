@@ -11,6 +11,6 @@ describe("GET /api/record/:cid", () => {
     const res = await app.request("/api/record/100000");
     expect(res.status).toBe(200);
     const summary: RecordGetSummary[] = await res.json();
-    expect(summary).toStrictEqual([{ lvHash: "dummy", count: 20 }]);
+    expect(summary).toStrictEqual([{ lvHash: "dummy", count: 2 }]);
   });
 });

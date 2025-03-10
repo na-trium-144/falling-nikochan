@@ -14,12 +14,10 @@ import { randomBytes } from "node:crypto";
 export interface PlayRecordEntry {
   cid: string;
   lvHash: string;
-  playerId: string;
   playedAt: number;
   score: number;
-  fc: number;
-  fb: number;
-  count: number;
+  fc: boolean;
+  fb: boolean;
 }
 const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:cid", async (c) => {
@@ -35,9 +33,9 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       for await (const record of records) {
         const s = summary.find((s) => s.lvHash === record.lvHash);
         if (s) {
-          s.count += record.count;
+          s.count++;
         } else {
-          summary.push({ lvHash: record.lvHash, count: record.count });
+          summary.push({ lvHash: record.lvHash, count: 1 });
         }
       }
       return c.json(summary);
@@ -52,56 +50,18 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       await c.req.json(),
     );
 
-    let playerId: string;
-    const newPlayerId = () =>
-      randomBytes(16)
-        .toString("base64")
-        .replaceAll("+", "-")
-        .replaceAll("/", "_")
-        .replaceAll("=", "");
-    if (env(c).API_ENV === "development") {
-      // secure がつかない
-      playerId = getCookie(c, "playerId") || newPlayerId();
-      setCookie(c, "playerId", playerId, {
-        // httpOnly: true,
-        maxAge: 400 * 24 * 3600,
-      });
-    } else {
-      playerId = getCookie(c, "playerId", "host") || newPlayerId();
-      setCookie(c, "playerId", playerId, {
-        // httpOnly: true,
-        maxAge: 400 * 24 * 3600,
-        path: "/",
-        secure: true,
-        sameSite: "Strict",
-        prefix: "host",
-      });
-    }
-
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
-      await db.collection<PlayRecordEntry>("playRecord").updateOne(
-        { $and: [{ cid }, { lvHash }, { playerId }] },
-        {
-          $set: {
-            cid,
-            lvHash,
-            playerId,
-            playedAt: Date.now(),
-          },
-          $max: {
-            score,
-          },
-          $inc: {
-            count: 1,
-            fc: fc ? 1 : 0,
-            fb: fb ? 1 : 0,
-          },
-        },
-        { upsert: true },
-      );
+      await db.collection<PlayRecordEntry>("playRecord").insertOne({
+        cid,
+        lvHash,
+        playedAt: Date.now(),
+        score,
+        fc,
+        fb,
+      });
       return c.body(null, 204);
     } finally {
       await client.close();

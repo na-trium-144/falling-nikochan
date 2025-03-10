@@ -202,22 +202,18 @@ export async function initDb() {
     await db.collection<PlayRecordEntry>("playRecord").insertOne({
       cid: dummyCid,
       lvHash: "dummy",
-      playerId: "dummyPlayerId1",
       playedAt: Date.now(),
       score: 100,
-      count: 10,
-      fc: 5,
-      fb: 3,
+      fc: true,
+      fb: false,
     });
     await db.collection<PlayRecordEntry>("playRecord").insertOne({
       cid: dummyCid,
       lvHash: "dummy",
-      playerId: "dummyPlayerId2",
       playedAt: Date.now(),
       score: 50,
-      count: 10,
-      fc: 5,
-      fb: 3,
+      fc: false,
+      fb: false,
     });
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: dummyCid },

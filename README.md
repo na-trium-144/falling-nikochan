@@ -91,12 +91,11 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
         * `{message?: string}` as JSON with status code
             * 400 (invalid cid),
             * or 500 (other error)
-* `POST /api/record/:cid` - Post a play record to the database. For each level of the chart, the number of plays, FC (full chain) and FB (full big notes), and the best score of each player (= each browser) are stored.
+* `POST /api/record/:cid` - Post a play record to the database. The record for every play is stored.
     * `:cid` - Chart ID
     * Request Body
         * [RecordPost](chart/src/record.ts) as JSON
             * The data should be the record of the current play of the player, regardless of the best score etc.
-    * if `playerId` value is not in the cookie, a random string is generated and stored.
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
