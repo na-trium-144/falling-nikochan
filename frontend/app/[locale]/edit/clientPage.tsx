@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultNoteCommand, hash, NoteCommand } from "@falling-nikochan/chart";
+import { defaultNoteCommand, NoteCommand } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";

@@ -5,7 +5,7 @@ import { getCookie, setCookie } from "hono/cookie";
 import { getChartEntry, getPUserHash } from "./chart.js";
 import { randomBytes } from "node:crypto";
 import { MongoClient } from "mongodb";
-import { CidSchema, HashSchema } from "@falling-nikochan/chart";
+import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 
 /**
