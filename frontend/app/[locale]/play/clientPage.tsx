@@ -22,7 +22,15 @@ const exampleResult = {
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6, Level9Play, levelTypes, loadChart6 } from "@falling-nikochan/chart";
+import {
+  bigScoreRate,
+  chainScoreRate,
+  ChartSeqData6,
+  Level9Play,
+  levelTypes,
+  loadChart6,
+  RecordPost,
+} from "@falling-nikochan/chart";
 import { ChartSeqData9, loadChart9 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
@@ -107,12 +115,12 @@ export function InitPlay({ locale }: { locale: string }) {
           process.env.BACKEND_PREFIX +
             `/api/playFile/${session?.cid || cidFromParam}` +
             `/${session?.lvIndex || lvIndexFromParam}`,
-          { cache: "no-store" }
+          { cache: "no-store" },
         );
         if (res.ok) {
           try {
             const seq: Level6Play | Level9Play = msgpack.deserialize(
-              await res.arrayBuffer()
+              await res.arrayBuffer(),
             );
             if (seq.ver === 6 || seq.ver === 9) {
               switch (seq.ver) {
@@ -221,7 +229,7 @@ function Play(props: Props) {
     "speedChanges" in chartSeq &&
     (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
       chartSeq.speedChanges.some(
-        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm,
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
@@ -238,7 +246,7 @@ function Play(props: Props) {
         localStorage.setItem(`offset-${cid}`, String(v));
       }
     },
-    [cid]
+    [cid],
   );
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -339,7 +347,7 @@ function Play(props: Props) {
       setChartPlaying(false);
       setExitable(
         (ex) =>
-          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000))
+          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000)),
       );
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
@@ -397,7 +405,7 @@ function Play(props: Props) {
       if (showLoadingTimeout.current === null) {
         showLoadingTimeout.current = setTimeout(
           () => setShowLoading(true),
-          1500
+          1500,
         );
       }
     }
@@ -418,41 +426,60 @@ function Play(props: Props) {
 
   useEffect(() => {
     if (chartStarted && end) {
-      if (
-        cid &&
-        !auto &&
-        score > bestScoreState &&
-        lvIndex !== undefined &&
-        chartBrief?.levels[lvIndex]
-      ) {
-        setBestScore(cid, lvIndex, {
-          levelHash: chartBrief.levels[lvIndex].hash,
-          baseScore,
-          chainScore,
-          bigScore,
-          judgeCount,
-        });
+      if (!showResult) {
+        if (
+          cid &&
+          !auto &&
+          score > bestScoreState &&
+          lvIndex !== undefined &&
+          chartBrief?.levels[lvIndex]
+        ) {
+          setBestScore(cid, lvIndex, {
+            levelHash: chartBrief.levels[lvIndex].hash,
+            baseScore,
+            chainScore,
+            bigScore,
+            judgeCount,
+          });
+        }
+        const t = setTimeout(() => {
+          setShowResult(true);
+          if (!auto) {
+            void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lvHash: chartBrief?.levels[lvIndex || 0]?.hash,
+                score,
+                fc: chainScore === chainScoreRate,
+                fb: bigScore === bigScoreRate,
+              } as RecordPost),
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            });
+          }
+          setResultDate(new Date());
+          setExitable(
+            (ex) =>
+              new Date(
+                Math.max(
+                  ex?.getTime() || 0,
+                  new Date().getTime() +
+                    resultAnimDelays.reduce((a, b) => a + b, 0),
+                ),
+              ),
+          );
+          stop();
+        }, 1000);
+        return () => clearTimeout(t);
       }
-      const t = setTimeout(() => {
-        setShowResult(true);
-        setResultDate(new Date());
-        setExitable(
-          (ex) =>
-            new Date(
-              Math.max(
-                ex?.getTime() || 0,
-                new Date().getTime() +
-                  resultAnimDelays.reduce((a, b) => a + b, 0)
-              )
-            )
-        );
-        stop();
-      }, 1000);
-      return () => clearTimeout(t);
     } else {
       setShowResult(props.goResult);
     }
   }, [
+    showResult,
     chartStarted,
     end,
     chartSeq,
@@ -634,7 +661,7 @@ function Play(props: Props) {
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || ""
+                chartBrief.levels.at(lvIndex || 0)?.type || "",
               )}
               lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
               baseScore100={

@@ -4,6 +4,7 @@ import {
   chartToEntry,
   zipEntry,
 } from "@falling-nikochan/route/src/api/chart";
+import { PlayRecordEntry } from "@falling-nikochan/route/src/api/record";
 import {
   Chart4,
   Chart5,
@@ -197,6 +198,27 @@ export async function initDb() {
     await client.connect();
     const db = client.db("nikochan");
     await db.collection("rateLimit").deleteMany({});
+    await db.collection<PlayRecordEntry>("playRecord").deleteMany({});
+    await db.collection<PlayRecordEntry>("playRecord").insertOne({
+      cid: dummyCid,
+      lvHash: "dummy",
+      playerId: "dummyPlayerId1",
+      playedAt: Date.now(),
+      score: 100,
+      count: 10,
+      fc: 5,
+      fb: 3,
+    });
+    await db.collection<PlayRecordEntry>("playRecord").insertOne({
+      cid: dummyCid,
+      lvHash: "dummy",
+      playerId: "dummyPlayerId2",
+      playedAt: Date.now(),
+      score: 50,
+      count: 10,
+      fc: 5,
+      fb: 3,
+    });
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: dummyCid },
       {

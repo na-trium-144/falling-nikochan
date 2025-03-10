@@ -1,6 +1,10 @@
 import { Hono } from "hono";
 import { Bindings } from "../env.js";
-import { CidSchema, HashSchema } from "@falling-nikochan/chart";
+import {
+  CidSchema,
+  RecordGetSummary,
+  RecordPostSchema,
+} from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { MongoClient } from "mongodb";
 import { env } from "hono/adapter";
@@ -13,12 +17,9 @@ export interface PlayRecordEntry {
   playerId: string;
   playedAt: number;
   score: number;
+  fc: number;
+  fb: number;
   count: number;
-}
-export interface RecordSummary {
-  lvHash: string;
-  count: number;
-  // todo: scoreの統計
 }
 const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:cid", async (c) => {
@@ -30,7 +31,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const records = db
         .collection<PlayRecordEntry>("playRecord")
         .find({ cid });
-      const summary: RecordSummary[] = [];
+      const summary: RecordGetSummary[] = [];
       for await (const record of records) {
         const s = summary.find((s) => s.lvHash === record.lvHash);
         if (s) {
@@ -46,12 +47,9 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .post("/:cid", async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { lvHash, score } = v.parse(
-      v.object({
-        lvHash: HashSchema(),
-        score: v.pipe(v.number(), v.minValue(0), v.maxValue(120)),
-      }),
-      c.req.query(),
+    const { lvHash, score, fc, fb } = v.parse(
+      RecordPostSchema(),
+      await c.req.json(),
     );
 
     let playerId: string;
@@ -92,9 +90,15 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
             lvHash,
             playerId,
             playedAt: Date.now(),
+          },
+          $max: {
             score,
           },
-          $inc: { count: 1 },
+          $inc: {
+            count: 1,
+            fc: fc ? 1 : 0,
+            fb: fb ? 1 : 0,
+          },
         },
         { upsert: true },
       );

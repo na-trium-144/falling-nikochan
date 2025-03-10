@@ -84,6 +84,24 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
 * `GET /api/latest` - Get the list of 25 latest updated charts.
     * Response
         * `{cid: string}[]` as JSON with status code 200
+* `GET /api/record/:cid` - Get the summary of the record from all players for the chart.
+    * `:cid` - Chart ID
+    * Response
+        * Array of [RecordGetSummary](chart/src/record.ts) as JSON with status code 200
+        * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
+            * or 500 (other error)
+* `POST /api/record/:cid` - Post a play record to the database. For each level of the chart, the number of plays, FC (full chain) and FB (full big notes), and the best score of each player (= each browser) are stored.
+    * `:cid` - Chart ID
+    * Request Body
+        * [RecordPost](chart/src/record.ts) as JSON
+            * The data should be the record of the current play of the player, regardless of the best score etc.
+    * if `playerId` value is not in the cookie, a random string is generated and stored.
+    * Response
+        * empty response with status code 204
+        * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
+            * or 500 (other error)
 * `GET /api/seqFile/:cid/:lvIndex` - Deprecated. Returns 410.
 * `GET /api/playFile/:cid/:lvIndex` - Get the level file. Used only when playing chart, not for editing.
     * `:cid` - Chart ID
