@@ -25,8 +25,8 @@ const env = {
   ASSET_PREFIX: process.env.ASSET_PREFIX || "",
   // prefix for every API call URL
   BACKEND_PREFIX: process.env.BACKEND_PREFIX || "",
-  // if set, disable all Next.js Link prefetch
-  NO_PREFETCH: process.env.NO_PREFETCH !== undefined ? "1" : "",
+  // if not empty, disable all Next.js Link prefetch
+  NO_PREFETCH: process.env.NO_PREFETCH || "",
 };
 console.log("env: ", env);
 
