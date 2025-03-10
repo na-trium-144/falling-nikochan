@@ -60,11 +60,59 @@ describe("POST /api/chartFile/:cid", () => {
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const e = (await db
+      const e = await db
         .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
+        .findOne({ cid: dummyCid });
       expect(e).not.toBeNull();
       expect(e!.title).toBe("updated");
+    } finally {
+      await client.close();
+    }
+  });
+  test("should save ip address", async () => {
+    await initDb();
+    let res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/vnd.msgpack",
+        "x-forwarded-for": "123",
+      },
+      body: msgpack.serialize(dummyChart()),
+    });
+    expect(res.status).toBe(204);
+
+    let client = new MongoClient(process.env.MONGODB_URI!);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.toBeNull();
+      expect(e!.ip).toStrictEqual(["123"]);
+    } finally {
+      await client.close();
+    }
+
+    res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/vnd.msgpack",
+        "x-forwarded-for": "456",
+      },
+      body: msgpack.serialize(dummyChart()),
+    });
+    expect(res.status).toBe(204);
+
+    client = new MongoClient(process.env.MONGODB_URI!);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.toBeNull();
+      expect(e!.ip).toStrictEqual(["123", "456"]);
     } finally {
       await client.close();
     }
@@ -196,9 +244,9 @@ describe("POST /api/chartFile/:cid", () => {
       try {
         await client.connect();
         const db = client.db("nikochan");
-        const e = (await db
+        const e = await db
           .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
+          .findOne({ cid: dummyCid });
         expect(e).not.toBeNull();
         expect(e!.updatedAt).toBe(dummyDate.getTime());
       } finally {
@@ -218,9 +266,9 @@ describe("POST /api/chartFile/:cid", () => {
       try {
         await client.connect();
         const db = client.db("nikochan");
-        const e = (await db
+        const e = await db
           .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
+          .findOne({ cid: dummyCid });
         expect(e).not.toBeNull();
         expect(e!.updatedAt).toBe(dummyDate.getTime());
       } finally {
@@ -244,9 +292,9 @@ describe("POST /api/chartFile/:cid", () => {
       try {
         await client.connect();
         const db = client.db("nikochan");
-        const e = (await db
+        const e = await db
           .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
+          .findOne({ cid: dummyCid });
         expect(e).not.toBeNull();
         expect(e!.updatedAt).toBeGreaterThanOrEqual(dateBefore.getTime());
         expect(e!.updatedAt).toBeLessThanOrEqual(dateAfter.getTime());
@@ -269,9 +317,9 @@ describe("POST /api/chartFile/:cid", () => {
       try {
         await client.connect();
         const db = client.db("nikochan");
-        const e = (await db
+        const e = await db
           .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid })) as ChartEntryCompressed | null;
+          .findOne({ cid: dummyCid });
         expect(e).not.toBeNull();
         expect(e!.updatedAt).toBeGreaterThanOrEqual(dateBefore.getTime());
         expect(e!.updatedAt).toBeLessThanOrEqual(dateAfter.getTime());

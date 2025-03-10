@@ -13,10 +13,11 @@ describe("POST /api/record/:cid", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         lvHash: await hash("dummy"),
+        auto: false,
         score: 100,
         fc: true,
         fb: false,
-      } as RecordPost),
+      } satisfies RecordPost),
     });
     expect(res.status).toBe(204);
 
@@ -32,6 +33,7 @@ describe("POST /api/record/:cid", () => {
       expect(record.length).toBe(1);
       expect(record[0]).toMatchObject({
         lvHash: await hash("dummy"),
+        auto: false,
         score: 100,
         fc: true,
         fb: false,
@@ -45,6 +47,7 @@ describe("POST /api/record/:cid", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         lvHash: await hash("dummy"),
+        auto: false,
         score: 50,
         fc: false,
         fb: true,

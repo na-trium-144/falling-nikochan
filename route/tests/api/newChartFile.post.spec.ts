@@ -53,13 +53,42 @@ describe("POST /api/newChartFile", () => {
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const e = (await db
+      const e = await db
         .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: body.cid })) as ChartEntryCompressed | null;
+        .findOne({ cid: body.cid });
       expect(e).not.toBeNull();
       expect(e!.title).toBe(dummyChart().title);
       expect(e!.updatedAt).toBeGreaterThanOrEqual(dateBefore.getTime());
       expect(e!.updatedAt).toBeLessThanOrEqual(dateAfter.getTime());
+    } finally {
+      await client.close();
+    }
+  });
+  test("should save ip address", async () => {
+    await initDb();
+    const res = await app.request("/api/newChartFile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/vnd.msgpack",
+        "x-forwarded-for": "123",
+      },
+      body: msgpack.serialize({
+        ...dummyChart(),
+        changePasswd: "p",
+      }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    const client = new MongoClient(process.env.MONGODB_URI!);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: body.cid });
+      expect(e).not.toBeNull();
+      expect(e!.ip).toStrictEqual(["123"]);
     } finally {
       await client.close();
     }
