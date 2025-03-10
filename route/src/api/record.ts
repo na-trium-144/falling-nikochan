@@ -8,13 +8,12 @@ import {
 import * as v from "valibot";
 import { MongoClient } from "mongodb";
 import { env } from "hono/adapter";
-import { getCookie, setCookie } from "hono/cookie";
-import { randomBytes } from "node:crypto";
 
 export interface PlayRecordEntry {
   cid: string;
   lvHash: string;
   playedAt: number;
+  auto: boolean;
   score: number;
   fc: boolean;
   fb: boolean;
@@ -28,7 +27,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const db = client.db("nikochan");
       const records = db
         .collection<PlayRecordEntry>("playRecord")
-        .find({ cid });
+        .find({ cid, auto: false });
       const summary: RecordGetSummary[] = [];
       for await (const record of records) {
         const s = summary.find((s) => s.lvHash === record.lvHash);
@@ -45,7 +44,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .post("/:cid", async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { lvHash, score, fc, fb } = v.parse(
+    const { lvHash, auto, score, fc, fb } = v.parse(
       RecordPostSchema(),
       await c.req.json(),
     );
@@ -57,6 +56,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       await db.collection<PlayRecordEntry>("playRecord").insertOne({
         cid,
         lvHash,
+        auto,
         playedAt: Date.now(),
         score,
         fc,

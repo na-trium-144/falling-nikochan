@@ -432,7 +432,7 @@ function Play(props: Props) {
           !auto &&
           score > bestScoreState &&
           lvIndex !== undefined &&
-          chartBrief?.levels[lvIndex]
+          chartBrief?.levels.at(lvIndex)
         ) {
           setBestScore(cid, lvIndex, {
             levelHash: chartBrief.levels[lvIndex].hash,
@@ -444,16 +444,17 @@ function Play(props: Props) {
         }
         const t = setTimeout(() => {
           setShowResult(true);
-          if (!auto) {
+          if (chartBrief?.levels.at(lvIndex)) {
             void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                lvHash: chartBrief?.levels[lvIndex || 0]?.hash,
+                lvHash: chartBrief.levels[lvIndex].hash,
+                auto,
                 score,
                 fc: chainScore === chainScoreRate,
                 fb: bigScore === bigScoreRate,
-              } as RecordPost),
+              } satisfies RecordPost),
               credentials:
                 process.env.NODE_ENV === "development"
                   ? "include"

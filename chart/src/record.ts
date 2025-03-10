@@ -11,6 +11,7 @@ export interface RecordGetSummary {
 export const RecordPostSchema = () =>
   v.object({
     lvHash: HashSchema(),
+    auto: v.boolean(),
     score: v.pipe(v.number(), v.minValue(0), v.maxValue(120)),
     fc: v.boolean(),
     fb: v.boolean(),
