@@ -8,7 +8,7 @@ import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Button from "@/common/button.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
-import { International, PlayOne } from "@icon-park/react";
+import { International } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share.js";
 import { SharedResultBox } from "./sharedResult.js";
@@ -93,13 +93,13 @@ export function ShareBox(props: Props) {
                   </>
                 )}
               </span>
-              <span className="ml-2">
+              {/*<span className="ml-2">
                 <PlayOne
                   className="inline-block w-5 translate-y-0.5"
                   theme="filled"
                 />
                 <span>{brief.playCount || 0}</span>
-              </span>
+              </span>*/}
             </span>
           </p>
         </div>

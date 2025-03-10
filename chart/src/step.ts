@@ -10,16 +10,25 @@
  * (1 / snapDivider) もstepと呼んでいるが別物。
  *
  */
-export interface Step {
-  fourth: number;
-  numerator: number;
-  denominator: number;
-}
-export function validateStep(s: Step) {
-  if (typeof s.fourth !== "number") throw "step.fourth is invalid";
-  if (typeof s.numerator !== "number") throw "step.numerator is invalid";
-  if (typeof s.denominator !== "number") throw "step.denominator is invalid";
-}
+
+import * as v from "valibot";
+
+export const StepSchema = () =>
+  v.pipe(
+    v.object({
+      fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
+      numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
+      denominator: v.pipe(v.number(), v.integer(), v.minValue(1)),
+    }),
+    /* v.forward(
+    v.check(
+      ({ numerator, denominator }) => numerator < denominator,
+      "numerator < denominator"
+    ),
+    ["numerator"]
+    ) */
+  );
+export type Step = v.InferOutput<ReturnType<typeof StepSchema>>;
 export function stepZero(): Step {
   return { fourth: 0, numerator: 0, denominator: 1 };
 }

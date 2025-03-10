@@ -1,14 +1,4 @@
 import { Pos } from "../seq.js";
-import { BPMChange1 } from "./chart1.js";
-import { Signature5 } from "./chart5.js";
-
-export interface ChartSeqData7 {
-  ver: 7;
-  notes: Note7[];
-  bpmChanges: BPMChange1[];
-  signature: Signature5[];
-  offset: number;
-}
 
 /**
  * ゲーム中で使用する音符の管理

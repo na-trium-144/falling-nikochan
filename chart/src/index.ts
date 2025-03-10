@@ -6,6 +6,7 @@ export * from "./difficulty.js"
 export * from "./dummySamples.js"
 export * from "./gameConstant.js"
 export * from "./rank.js"
+export * from "./record.js"
 export * from "./resultParams.js"
 export * from "./seq.js"
 export * from "./signature.js"
@@ -19,9 +20,10 @@ export * from "./legacy/chart5.js";
 export * from "./legacy/chart6.js";
 export * from "./legacy/chart7.js";
 export * from "./legacy/chart8.js";
+export * from "./legacy/chart9.js";
 export * from "./legacy/seq6.js";
 export * from "./legacy/seq7.js";
-export * from "./legacy/seq8.js";
+export * from "./legacy/seq9.js";
 
 export * from "./lua/bpm.js"
 export * from "./lua/edit.js"

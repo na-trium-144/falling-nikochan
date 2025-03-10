@@ -1,6 +1,6 @@
 const versionKey = "lastVisited";
-const latestChangelogMajor = 8;
-const latestChangelogMinor = 16;
+const latestChangelogMajor = 9;
+const latestChangelogMinor = 0;
 export function lastVisitedOld(): boolean {
   try {
     const lastVisited = localStorage.getItem(versionKey);

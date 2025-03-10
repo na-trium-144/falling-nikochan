@@ -3,14 +3,13 @@
 import { FourthNote } from "@/common/fourthNote.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
-import { ChartSeqData8 } from "@falling-nikochan/chart";
-import { ChartSeqData6 } from "@falling-nikochan/chart";
+import { ChartSeqData6, ChartSeqData9 } from "@falling-nikochan/chart";
 import { SmilingFace } from "@icon-park/react";
 
 interface Props {
   className?: string;
   chartPlaying: boolean;
-  chartSeq: ChartSeqData6 | ChartSeqData8 | null;
+  chartSeq: ChartSeqData6 | ChartSeqData9 | null;
   getCurrentTimeSec: () => number | undefined;
   hasExplicitSpeedChange: boolean;
 }

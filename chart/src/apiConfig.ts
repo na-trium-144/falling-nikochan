@@ -8,10 +8,6 @@ export const fileMaxSize = chartMaxEvent * (100 + 150);
 // BPMChange: 21 + 27 + 53 = 101
 // Signature: 27 + 30くらい + 53 * 2 = 133
 
-export function validCId(cid: string) {
-  return cid.length === 6 && Number(cid) >= 100000 && Number(cid) < 1000000;
-}
-
 export const originalCId = ["602399", "983403"];
 export const sampleCId = ["596134", "592994", "488006", "850858", "768743"];
 export function isSample(cid: string) {

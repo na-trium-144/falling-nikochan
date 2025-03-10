@@ -1,10 +1,10 @@
 import { LevelEdit } from "../chart.js";
 import { Signature, updateBarNum } from "../signature.js";
-import { Level5 } from "../legacy/chart5.js";
+import { Level5, Signature5 } from "../legacy/chart5.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 
-function beatLuaCommand(s: Signature) {
+function beatLuaCommand(s: Signature | Signature5) {
   let num = s.offset.fourth * s.offset.denominator + s.offset.numerator;
   let denom = s.offset.denominator * 4;
   for (let i = 2; i <= num && i <= denom; i++) {
@@ -25,7 +25,7 @@ function beatLuaCommand(s: Signature) {
 }
 export function luaAddBeatChange<L extends LevelEdit | Level5>(
   chart: L,
-  change: Signature
+  change: Signature | Signature5
 ): L | null {
   const insert = findInsertLine(chart, change.step);
   if (insert.luaLine === null) {
@@ -41,7 +41,7 @@ export function luaAddBeatChange<L extends LevelEdit | Level5>(
 export function luaUpdateBeatChange(
   chart: LevelEdit,
   index: number,
-  change: Signature
+  change: Signature | Signature5
 ) {
   if (chart.signature[index].luaLine === null) {
     return null;

@@ -15,7 +15,6 @@ describe("GET /api/brief/:cid", () => {
       composer: dummyChart().composer,
       chartCreator: dummyChart().chartCreator,
       updatedAt: dummyDate.getTime(),
-      playCount: 0,
       published: false,
       locale: dummyChart().locale,
       levels: [
@@ -44,7 +43,5 @@ describe("GET /api/brief/:cid", () => {
     await initDb();
     const res = await app.request("/api/brief/invalid");
     expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body).toStrictEqual({ message: "invalidChartId" });
   });
 });
