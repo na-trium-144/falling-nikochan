@@ -4,13 +4,13 @@
 * Anyone can create a chart without any account registration or login. Share the chart ID on SNS to let others play.
 * Uses YouTube embed as audio source.
 
-For more information, play, and chart creation, please visit the [Falling Nikochan top page](https://nikochan.natrium144.org).
+For more information, play, and chart creation, please visit the [Falling Nikochan top page](https://nikochan.utcode.net).
 
 > * シンプルでかわいい音ゲーです。PC、タブレット、スマートフォンなどのブラウザーで手軽に遊べます。
 > * さらに、アカウント登録やログイン不要で誰でも譜面を作成でき、SNSなどで譜面IDを共有することで他の人に遊んでもらうことができます。
 > * 音源としてYouTube埋め込みを利用しています。
 >
-> 遊び方などの説明、プレイ、譜面作成 は、 [Falling Nikochan トップページ](https://nikochan.natrium144.org) からどうぞ。
+> 遊び方などの説明、プレイ、譜面作成 は、 [Falling Nikochan トップページ](https://nikochan.utcode.net) からどうぞ。
 
 YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 

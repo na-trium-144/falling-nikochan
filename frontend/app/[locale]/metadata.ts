@@ -23,7 +23,7 @@ export async function initMetadata(
       ? options?.description
       : t("description");
   return {
-    metadataBase: new URL("https://nikochan.natrium144.org"),
+    metadataBase: new URL("https://nikochan.utcode.net"),
     title: titleWithSiteName(title),
     alternates: path
       ? {

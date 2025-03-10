@@ -8,11 +8,9 @@ export function SmallDomainOnly() {
     <Small>
       nikochan.
       <wbr />
-      natrium
+      utcode.
       <wbr />
-      144.
-      <wbr />
-      org
+      net
     </Small>
   );
 }
@@ -21,11 +19,9 @@ export function SmallDomainShare() {
     <Small>
       nikochan.
       <wbr />
-      natrium
+      utcode.
       <wbr />
-      144.
-      <wbr />
-      org
+      net
       <wbr />
       &#47;
       <wbr />
