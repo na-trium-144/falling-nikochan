@@ -45,16 +45,16 @@ const shareHandler = factory.createHandlers(async (c) => {
   const t = await getTranslations(qLang, "share");
   const tr = await getTranslations(qLang, "play.result");
   let placeholderUrl: URL;
-  if (c.req.path.startsWith("/share")) {
-    placeholderUrl = new URL(
-      `/${qLang}/share/placeholder`,
-      new URL(c.req.url).origin
-    );
-  } else {
-    placeholderUrl = new URL(
-      c.req.url.replace(/share\/[0-9]+/, "share/placeholder")
-    );
-  }
+  // if (c.req.path.startsWith("/share")) {
+  placeholderUrl = new URL(
+    `/${qLang}/share/placeholder`,
+    new URL(c.req.url).origin,
+  );
+  // } else {
+  //   placeholderUrl = new URL(
+  //     c.req.url.replace(/share\/[0-9]+/, "share/placeholder")
+  //   );
+  // }
   const pRes = fetchStatic(placeholderUrl);
   const briefRes = await pBriefRes;
   if (briefRes.ok) {
@@ -108,7 +108,7 @@ const shareHandler = factory.createHandlers(async (c) => {
           title: brief.title,
         });
     let replacedBody = (await res.text())
-      .replaceAll("/share/placeholder", `/share/${cid}`)
+      // .replaceAll("/share/placeholder", `/share/${cid}`)
       .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
       .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
       .replaceAll(
@@ -120,15 +120,15 @@ const shareHandler = factory.createHandlers(async (c) => {
               ...c.req.query(),
               v: packageJson.version,
             }).toString(),
-          new URL(c.req.url).origin
-        ).toString()
+          new URL(c.req.url).origin,
+        ).toString(),
       )
-      .replaceAll("PLACEHOLDER_DESCRIPTION", newDescription)
-      .replaceAll(
-        // これはjsファイルの中にしか現れないのでエスケープの必要はない
-        '"PLACEHOLDER_BRIEF"',
-        JSON.stringify(JSON.stringify(brief))
-      );
+      .replaceAll("PLACEHOLDER_DESCRIPTION", newDescription);
+    // .replaceAll(
+    //   // これはjsファイルの中にしか現れないのでエスケープの必要はない
+    //   '"PLACEHOLDER_BRIEF"',
+    //   JSON.stringify(JSON.stringify(brief))
+    // );
     if (c.req.path.startsWith("/share") && lang !== qLang) {
       const q = new URLSearchParams(c.req.query());
       q.delete("lang");
@@ -150,7 +150,7 @@ const shareHandler = factory.createHandlers(async (c) => {
     } catch {
       //
     }
-    throw new HTTPException(briefRes.status as 401 | 404 | 500, {message});
+    throw new HTTPException(briefRes.status as 401 | 404 | 500, { message });
   }
 });
 export default shareHandler;
