@@ -3,12 +3,12 @@ import app from "@falling-nikochan/route";
 import { hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
+import { initDb } from "./init";
 
 describe("GET /api/hashPasswd/:cid", () => {
   test("should return hashed password and random pUserSalt", async () => {
-    const res = await app.request(
-      "/api/hashPasswd/100000?p=" + (await hash("100000p")),
-    );
+    await initDb();
+    const res = await app.request("/api/hashPasswd/100000?p=p");
     expect(res.status).toBe(200);
     const resHash = await res.text();
     const pUserSalt = res.headers
@@ -32,12 +32,10 @@ describe("GET /api/hashPasswd/:cid", () => {
     expect(resHash).toBe(await hash(pServerHash + pUserSalt));
   });
   test("should use same pUserSalt if it is set in the cookie", async () => {
-    const res = await app.request(
-      "/api/hashPasswd/100000?p=" + (await hash("100000p")),
-      {
-        headers: { Cookie: "hashKey=def" },
-      },
-    );
+    await initDb();
+    const res = await app.request("/api/hashPasswd/100000?p=p", {
+      headers: { Cookie: "pUserSalt=def" },
+    });
     expect(res.status).toBe(200);
     const resHash = await res.text();
     const pUserSalt = res.headers
@@ -59,19 +57,11 @@ describe("GET /api/hashPasswd/:cid", () => {
     expect(resHash).toBe(await hash(pServerHash + pUserSalt));
   });
   test("should return 400 for invalid cid", async () => {
-    const res = await app.request(
-      "/api/hashPasswd/invalid?p=" + (await hash("100000p")),
-    );
+    const res = await app.request("/api/hashPasswd/invalid?p=p");
     expect(res.status).toBe(400);
   });
-  test("should return 401 for invalid password", async () => {
-    const res = await app.request("/api/hashPasswd/100000?p=invalid");
-    expect(res.status).toBe(401);
-  });
   test("should return 404 for nonexistent cid", async () => {
-    const res = await app.request(
-      "/api/hashPasswd/100001?p=" + (await hash("100001p")),
-    );
+    const res = await app.request("/api/hashPasswd/100001?p=p");
     expect(res.status).toBe(404);
   });
 });

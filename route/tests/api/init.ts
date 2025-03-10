@@ -12,7 +12,6 @@ import {
   Chart8Edit,
   Chart9Edit,
   currentChartVer,
-  hash,
   Level6Play,
   Level9Play,
   stepZero,
@@ -76,7 +75,10 @@ export function dummyChart(): Chart9Edit {
   };
 }
 export function dummyChart8(): Chart8Edit {
-  return { ...dummyChart(), ver: 8, editPasswd: "p" };
+  const c: Chart8Edit = { ...dummyChart(), ver: 8, editPasswd: "" };
+  // @ts-expect-error converting Chart9 to 8
+  delete c.changePasswd;
+  return c;
 }
 export function dummyChart7(): Chart7 {
   return { ...dummyChart8(), ver: 7 };
@@ -200,7 +202,7 @@ export async function initDb() {
       {
         $set: await zipEntry(
           await chartToEntry(
-            { ...dummyChart(), changePasswd: await hash(dummyCid + "p") },
+            { ...dummyChart(), changePasswd: "p" },
             dummyCid,
             dummyDate.getTime(),
             pSecretSalt,
@@ -217,7 +219,7 @@ export async function initDb() {
           ...(await chartToEntry(
             {
               ...dummyChart(),
-              changePasswd: await hash(String(Number(dummyCid) + 4) + "p"),
+              changePasswd: "p",
             },
             String(Number(dummyCid) + 4),
             dummyDate.getTime(),
@@ -237,7 +239,7 @@ export async function initDb() {
           ...(await chartToEntry(
             {
               ...dummyChart(),
-              changePasswd: await hash(String(Number(dummyCid) + 5) + "p"),
+              changePasswd: "p",
             },
             String(Number(dummyCid) + 5),
             dummyDate.getTime(),
@@ -257,7 +259,7 @@ export async function initDb() {
           ...(await chartToEntry(
             {
               ...dummyChart(),
-              changePasswd: await hash(String(Number(dummyCid) + 6) + "p"),
+              changePasswd: "p",
             },
             String(Number(dummyCid) + 6),
             dummyDate.getTime(),
@@ -277,7 +279,7 @@ export async function initDb() {
           ...(await chartToEntry(
             {
               ...dummyChart(),
-              changePasswd: await hash(String(Number(dummyCid) + 7) + "p"),
+              changePasswd: "p",
             },
             String(Number(dummyCid) + 7),
             dummyDate.getTime(),
@@ -297,7 +299,7 @@ export async function initDb() {
           ...(await chartToEntry(
             {
               ...dummyChart(),
-              changePasswd: await hash(String(Number(dummyCid) + 8) + "p"),
+              changePasswd: "p",
             },
             String(Number(dummyCid) + 8),
             dummyDate.getTime(),

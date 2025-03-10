@@ -163,7 +163,7 @@ interface Props2 {
   locale: string;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
-  currentPasswdHash: { current: string | null };
+  currentPasswd: { current: string | null };
   newPasswd: string;
   setNewPasswd: (pw: string) => void;
 }
@@ -203,7 +203,7 @@ export function MetaTab(props: Props2) {
         } else {
           unsetPasswd(cid);
         }
-        props.currentPasswdHash.current = changePasswd;
+        props.currentPasswd.current = changePasswd;
       }
     };
     props.chart!.changePasswd =
@@ -254,8 +254,8 @@ export function MetaTab(props: Props2) {
       }
     } else {
       const q = new URLSearchParams();
-      if (props.currentPasswdHash.current) {
-        q.set("p", props.currentPasswdHash.current);
+      if (props.currentPasswd.current) {
+        q.set("p", props.currentPasswd.current);
       } else {
         q.set("ph", getPasswd(props.cid) || "");
       }

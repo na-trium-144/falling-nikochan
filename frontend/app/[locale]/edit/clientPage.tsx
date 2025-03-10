@@ -96,7 +96,7 @@ export default function EditAuth({ locale }: { locale: string }) {
   const [editPasswd, setEditPasswd] = useState<string>("");
   // fetchに成功したらセット、
   // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
-  const currentPasswdHash = useRef<string | null>(null);
+  const currentPasswd = useRef<string | null>(null);
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -127,12 +127,10 @@ export default function EditAuth({ locale }: { locale: string }) {
           q.set("ph", getPasswd(cidInitial.current)!);
         }
         if (editPasswd) {
-          currentPasswdHash.current = await hash(
-            cidInitial.current + editPasswd,
-          );
-          q.set("p", currentPasswdHash.current);
+          currentPasswd.current = editPasswd;
+          q.set("p", currentPasswd.current);
         } else {
-          currentPasswdHash.current = null;
+          currentPasswd.current = null;
         }
         if (bypass) {
           q.set("pbypass", "1");
@@ -156,10 +154,10 @@ export default function EditAuth({ locale }: { locale: string }) {
             setConvertedFrom(chartRes.ver);
             const chart: ChartEdit = await validateChart(chartRes);
             if (savePasswd) {
-              if (currentPasswdHash.current) {
+              if (currentPasswd.current) {
                 const res = await fetch(
                   process.env.BACKEND_PREFIX +
-                    `/api/hashPasswd/${cidInitial.current}?p=${currentPasswdHash.current}`,
+                    `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
                   {
                     credentials:
                       process.env.NODE_ENV === "development"
@@ -233,7 +231,7 @@ export default function EditAuth({ locale }: { locale: string }) {
       convertedFrom={convertedFrom}
       setConvertedFrom={setConvertedFrom}
       locale={locale}
-      currentPasswdHash={currentPasswdHash}
+      currentPasswd={currentPasswd}
       savePasswdInitial={savePasswd}
       modal={
         chart === undefined ? (
@@ -305,7 +303,7 @@ interface Props {
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
-  currentPasswdHash: { current: string | null };
+  currentPasswd: { current: string | null };
   savePasswdInitial: boolean;
   modal?: ReactNode;
 }
@@ -1170,7 +1168,7 @@ function Page(props: Props) {
                   setHasChange={setHasChange}
                   currentLevelIndex={currentLevelIndex}
                   locale={locale}
-                  currentPasswdHash={props.currentPasswdHash}
+                  currentPasswd={props.currentPasswd}
                   newPasswd={newPasswd}
                   setNewPasswd={setNewPasswd}
                   savePasswd={!!savePasswd}

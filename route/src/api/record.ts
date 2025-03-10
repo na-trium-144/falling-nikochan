@@ -55,16 +55,21 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     );
 
     let playerId: string;
+    const newPlayerId = () =>
+      randomBytes(16)
+        .toString("base64")
+        .replaceAll("+", "-")
+        .replaceAll("/", "_")
+        .replaceAll("=", "");
     if (env(c).API_ENV === "development") {
       // secure がつかない
-      playerId = getCookie(c, "playerId") || randomBytes(16).toString("base64");
+      playerId = getCookie(c, "playerId") || newPlayerId();
       setCookie(c, "playerId", playerId, {
         // httpOnly: true,
         maxAge: 400 * 24 * 3600,
       });
     } else {
-      playerId =
-        getCookie(c, "playerId", "host") || randomBytes(16).toString("base64");
+      playerId = getCookie(c, "playerId", "host") || newPlayerId();
       setCookie(c, "playerId", playerId, {
         // httpOnly: true,
         maxAge: 400 * 24 * 3600,

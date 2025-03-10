@@ -1,7 +1,7 @@
 import { expect, test, describe } from "bun:test";
 import { dummyChart, dummyChart7, initDb } from "./init";
 import app from "@falling-nikochan/route";
-import { chartMaxEvent, fileMaxSize, hash } from "@falling-nikochan/chart";
+import { chartMaxEvent, fileMaxSize } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -16,7 +16,7 @@ describe("POST /api/newChartFile", () => {
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.serialize({
         ...dummyChart(),
-        changePassword: await hash("100000p"),
+        changePasswd: "p",
       }),
     });
     expect(res1.status).toBe(200);
@@ -26,7 +26,7 @@ describe("POST /api/newChartFile", () => {
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.serialize({
         ...dummyChart(),
-        changePassword: await hash("100000p"),
+        changePasswd: "p",
       }),
     });
     expect(res2.status).toBe(429);
@@ -41,7 +41,7 @@ describe("POST /api/newChartFile", () => {
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.serialize({
         ...dummyChart(),
-        changePassword: await hash("100000p"),
+        changePasswd: "p",
       }),
     });
     const dateAfter = new Date();

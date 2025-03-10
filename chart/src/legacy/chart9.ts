@@ -94,7 +94,7 @@ export const ChartEditSchema9 = () =>
   v.object({
     ...ChartMinSchema9().entries,
     levels: v.array(LevelEditSchema9()),
-    changePasswd: v.nullable(HashSchema()),
+    changePasswd: v.nullable(v.pipe(v.string(), v.minLength(1))),
     published: v.boolean(),
   });
 

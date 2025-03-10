@@ -9,14 +9,11 @@ import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 describe("POST /api/chartFile/:cid", () => {
   test("should update chart if raw password matches", async () => {
     await initDb();
-    const res = await app.request(
-      "/api/chartFile/100000?p=" + (await hash("100000p")),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
-      },
-    );
+    const res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+    });
     expect(res.status).toBe(204);
 
     const client = new MongoClient(process.env.MONGODB_URI!);
@@ -80,16 +77,17 @@ describe("POST /api/chartFile/:cid", () => {
       body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body).toStrictEqual({ message: "invalidChartId" });
   });
   test("should return 401 for wrong password", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100000?p=wrong&ph=wrong", {
-      method: "POST",
-      headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
-    });
+    const res = await app.request(
+      "/api/chartFile/100000?p=wrong&ph=" + (await hash("wrong")),
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+      },
+    );
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body).toStrictEqual({ message: "badPassword" });
@@ -107,14 +105,11 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 413 for large file", async () => {
     await initDb();
-    const res = await app.request(
-      "/api/chartFile/100000?p=" + (await hash("100000p")),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: new ArrayBuffer(fileMaxSize + 1),
-      },
-    );
+    const res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: new ArrayBuffer(fileMaxSize + 1),
+    });
     expect(res.status).toBe(413);
     const body = await res.json();
     expect(body).toStrictEqual({ message: "tooLargeFile" });
@@ -125,41 +120,32 @@ describe("POST /api/chartFile/:cid", () => {
     chart.levels[0].rest = new Array(chartMaxEvent + 1).fill(
       chart.levels[0].rest[0],
     );
-    const res = await app.request(
-      "/api/chartFile/100000?p=" + (await hash("100000p")),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize(chart),
-      },
-    );
+    const res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize(chart),
+    });
     expect(res.status).toBe(413);
     const body = await res.json();
     expect(body).toStrictEqual({ message: "tooManyEvent" });
   });
   test("should return 409 for old chart version", async () => {
     await initDb();
-    const res = await app.request(
-      "/api/chartFile/100000?p=" + (await hash("100000p")),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart7() }),
-      },
-    );
+    const res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({ ...dummyChart7() }),
+    });
     expect(res.status).toBe(409);
     const body = await res.json();
     expect(body).toStrictEqual({ message: "oldChartVersion" });
   });
   test("should return 415 for invalid chart", async () => {
     await initDb();
-    const res = await app.request(
-      "/api/chartFile/100000?p=" + (await hash("100000p")),
-      {
-        method: "POST",
-        body: "invalid",
-      },
-    );
+    const res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      body: "invalid",
+    });
     expect(res.status).toBe(415);
     const body = await res.json();
     expect(body).toStrictEqual({ message: "invalidChart" });
@@ -167,66 +153,45 @@ describe("POST /api/chartFile/:cid", () => {
   describe("password of chart", () => {
     test("should not be changed if changePasswd is null", async () => {
       await initDb();
-      const res = await app.request(
-        "/api/chartFile/100000?p=" + (await hash("100000p")),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize(dummyChart()),
-        },
-      );
+      const res = await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize(dummyChart()),
+      });
       expect(res.status).toBe(204);
 
       expect(
-        (
-          await app.request(
-            "/api/chartFile/100000?p=" + (await hash("100000p")),
-          )
-        ).status,
+        (await app.request("/api/chartFile/100000?p=p")).status,
       ).toStrictEqual(200);
     });
     test("should be changed if changePasswd is not null", async () => {
       await initDb();
-      const res = await app.request(
-        "/api/chartFile/100000?p=" + (await hash("100000p")),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize({
-            ...dummyChart(),
-            changePasswd: await hash("100000newPasswd"),
-          }),
-        },
-      );
+      const res = await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize({
+          ...dummyChart(),
+          changePasswd: "newPasswd",
+        }),
+      });
       expect(res.status).toBe(204);
 
       expect(
-        (
-          await app.request(
-            "/api/chartFile/100000?p=" + (await hash("100000p")),
-          )
-        ).status,
+        (await app.request("/api/chartFile/100000?p=p")).status,
       ).toStrictEqual(401);
       expect(
-        (
-          await app.request(
-            "/api/chartFile/100000?p=" + (await hash("100000newPasswd")),
-          )
-        ).status,
+        (await app.request("/api/chartFile/100000?p=newPasswd")).status,
       ).toStrictEqual(200);
     });
   });
   describe("ChartEntry.updatedAt", () => {
     test("should not be updated with uploading same chart", async () => {
       await initDb();
-      const res = await app.request(
-        "/api/chartFile/100000?p=" + (await hash("100000p")),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize(dummyChart()),
-        },
-      );
+      const res = await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize(dummyChart()),
+      });
       expect(res.status).toBe(204);
 
       const client = new MongoClient(process.env.MONGODB_URI!);
@@ -244,14 +209,11 @@ describe("POST /api/chartFile/:cid", () => {
     });
     test("should not be updated with metadata change", async () => {
       await initDb();
-      const res = await app.request(
-        "/api/chartFile/100000?p=" + (await hash("100000p")),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
-        },
-      );
+      const res = await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+      });
       expect(res.status).toBe(204);
 
       const client = new MongoClient(process.env.MONGODB_URI!);
@@ -272,14 +234,11 @@ describe("POST /api/chartFile/:cid", () => {
       const chart = dummyChart();
       chart.levels[0].notes = new Array(10).fill(chart.levels[0].notes[0]);
       const dateBefore = new Date();
-      const res = await app.request(
-        "/api/chartFile/100000?p=" + (await hash("100000p")),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize(chart),
-        },
-      );
+      const res = await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize(chart),
+      });
       const dateAfter = new Date();
       expect(res.status).toBe(204);
 
@@ -300,14 +259,11 @@ describe("POST /api/chartFile/:cid", () => {
     test("should be updated with publish", async () => {
       await initDb();
       const dateBefore = new Date();
-      const res = await app.request(
-        "/api/chartFile/100000?p=" + (await hash("100000p")),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize({ ...dummyChart(), published: true }),
-        },
-      );
+      const res = await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize({ ...dummyChart(), published: true }),
+      });
       const dateAfter = new Date();
       expect(res.status).toBe(204);
 

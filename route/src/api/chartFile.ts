@@ -25,14 +25,14 @@ import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 
 /**
- * v9では生のパスワードをデータベースに保存せず、APIのインタフェース(Chart9Edit)としても生パスワードは用いない
- * Chart9Editデータで送受信するchangePasswd (CidPasswdHash): hash(cid + passwd)
- * データベースに保存するpServerHash: hash(CidPasswdHash + process.env.SECRET_SALT + pRandomSalt)
+ * Chart9Editデータで送受信するchangePasswd, /api/chartFileのpパラメータは生のパスワード
+ * データベースに保存するpServerHash = hash(cid + passwd + process.env.SECRET_SALT + pRandomSalt)
  *   pRandomSaltはcidごとにランダムに1回生成し固定
- * chartFileのクエリパラメータph(localStorageに保存する): hash(pServerHash + pUserSalt)
+ * chartFileのクエリパラメータph,localStorageに保存するph = hash(pServerHash + pUserSalt)
  *   pUserSaltは /api/hashPasswd でランダムにセットされる
  *
- * chartFileのapiには p=CidPasswdHash または ph=hash(pServerHash + pUserSalt) を指定してアクセスする
+ * /api/chartFile には p=passwd または ph=hash(pServerHash + pUserSalt) を指定してアクセスする
+ * POST時のデータのchangePasswdをnullにすると以前のパスワードを次回も使用し、nullでない場合それを新しいパスワードとしてデータベースを更新
  *
  * また、development環境に限り /api/chartFile/cid?pbypass=1 でスキップできる
  */
@@ -43,7 +43,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const { p, ph, pbypass } = v.parse(
       v.object({
-        p: v.optional(HashSchema()),
+        p: v.optional(v.pipe(v.string(), v.minLength(1))),
         ph: v.optional(HashSchema()),
         pbypass: v.optional(v.string()),
       }),
@@ -61,7 +61,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
       const db = client.db("nikochan");
       let { entry, chart } = await getChartEntry(db, cid, {
         bypass,
-        cidPasswdHash: p,
+        rawPasswd: p,
         v9PasswdHash: ph,
         v9UserSalt,
         pSecretSalt,

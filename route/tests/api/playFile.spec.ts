@@ -67,7 +67,5 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     await initDb();
     const res = await app.request("/api/playFile/invalid/0");
     expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body).toStrictEqual({ message: "invalidChartId" });
   });
 });

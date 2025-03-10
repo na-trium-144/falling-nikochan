@@ -15,19 +15,26 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { p } = v.parse(v.object({ p: HashSchema() }), c.req.query());
+    const { p } = v.parse(
+      v.object({ p: v.pipe(v.string(), v.minLength(1)) }),
+      c.req.query(),
+    );
     let pUserSalt: string;
+    const newUserSalt = () =>
+      randomBytes(16)
+        .toString("base64")
+        .replaceAll("+", "-")
+        .replaceAll("/", "_")
+        .replaceAll("=", "");
     if (env(c).API_ENV === "development") {
       // secure がつかない
-      pUserSalt =
-        getCookie(c, "pUserSalt") || randomBytes(16).toString("base64");
+      pUserSalt = getCookie(c, "pUserSalt") || newUserSalt();
       setCookie(c, "pUserSalt", pUserSalt, {
         httpOnly: true,
         maxAge: 400 * 24 * 3600,
       });
     } else {
-      pUserSalt =
-        getCookie(c, "pUserSalt", "host") || randomBytes(16).toString("base64");
+      pUserSalt = getCookie(c, "pUserSalt", "host") || newUserSalt();
       setCookie(c, "pUserSalt", pUserSalt, {
         httpOnly: true,
         maxAge: 400 * 24 * 3600,
@@ -50,7 +57,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       const { entry } = await getChartEntry(db, cid, {
-        cidPasswdHash: p,
+        rawPasswd: p,
         pSecretSalt,
       });
       return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {

@@ -32,7 +32,7 @@ import { randomBytes } from "node:crypto";
 
 interface Passwd {
   bypass?: boolean;
-  cidPasswdHash?: string;
+  rawPasswd?: string;
   v9PasswdHash?: string;
   v9UserSalt?: string;
   pSecretSalt: string;
@@ -53,9 +53,9 @@ export async function getChartEntry(
   if (!v.parse(CidSchema(), cid)) {
     throw new HTTPException(400, { message: "invalidChartId" });
   }
-  const entryCompressed = (await db
+  const entryCompressed = await db
     .collection<ChartEntryCompressed>("chart")
-    .findOne({ cid }));
+    .findOne({ cid });
   if (entryCompressed === null || entryCompressed.deleted) {
     if (process.env.API_ENV === "development" && isSample(cid)) {
       const chart = getSample(cid);
@@ -77,9 +77,10 @@ export async function getChartEntry(
   if (
     p === null ||
     p.bypass ||
-    (p.cidPasswdHash !== undefined &&
+    (p.rawPasswd !== undefined &&
       (await getPServerHash(
-        p.cidPasswdHash,
+        cid,
+        p.rawPasswd,
         p.pSecretSalt,
         entry.pRandomSalt,
       )) === entry.pServerHash) ||
@@ -100,11 +101,12 @@ export function getPUserHash(
   return hash(pServerHash + pUserSalt);
 }
 function getPServerHash(
-  cidPasswdHash: string,
+  cid: string,
+  rawPasswd: string,
   pSecretSalt: string,
   pRandomSalt: string,
 ): Promise<string> {
-  return hash(cidPasswdHash + pSecretSalt + pRandomSalt);
+  return hash(cid + rawPasswd + pSecretSalt + pRandomSalt);
 }
 /**
  * データベースに保存する形式
@@ -115,7 +117,7 @@ function getPServerHash(
  */
 export interface ChartEntryCompressed {
   cid: string;
-  levelsCompressed: Binary | null;  // <- ChartLevelCore をjson化&gzip圧縮したもの
+  levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
   ver: 4 | 5 | 6 | 7 | 8 | 9;
@@ -238,6 +240,7 @@ export async function chartToEntry(
       throw new HTTPException(400, { message: "noPasswd" });
     }
     pServerHash = await getPServerHash(
+      cid,
       chart.changePasswd,
       pSecretSalt,
       pRandomSalt,
