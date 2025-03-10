@@ -404,8 +404,21 @@ export function MetaTab(props: Props2) {
           <span className="ml-1 mr-2 ">{props.cid || t("unsaved")}</span>
         </span>
         <HelpIcon>{t.rich("saveToServerHelp", { br: () => <br /> })}</HelpIcon>
-        <Button text={t("saveToServer")} onClick={save} loading={saving} />
-        <span className="inline-block ml-1 ">{errorMsg}</span>
+        <Button
+          text={t("saveToServer")}
+          onClick={save}
+          loading={saving}
+          disabled={!props.chart?.ytId || (!props.cid && !props.newPasswd)}
+        />
+        <span className="inline-block ml-1 ">
+          {errorMsg
+            ? errorMsg
+            : !props.chart?.ytId
+              ? t("saveFail.noId")
+              : !props.cid && !props.newPasswd
+                ? t("saveFail.noPasswd")
+                : null}
+        </span>
         {props.hasChange && (
           <span className="inline-block ml-1 text-amber-600 ">
             {t("hasUnsaved")}

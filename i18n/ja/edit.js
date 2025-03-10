@@ -46,12 +46,11 @@ export default {
       musicTitle: "楽曲タイトル",
       musicComposer: "作曲者など",
       chartCreator: "譜面作成者(あなたの名前)",
-      passwd: "編集用パスワード",
+      passwd: "パスワードを変更する",
       passwdHelp:
         "次回からこの譜面を編集する際に必要な<br></br>" +
         "パスワードを設定することができます。<br></br>" +
-        "これを設定しないと、譜面IDを知っている人が<br></br>" +
-        "誰でもこの譜面を編集できてしまいます。<br></br>" +
+        "空欄にすると現在設定されているパスワードから変更しません。<br></br>" +
         "パスワードを忘れた場合復元する方法はないので<br></br>" +
         "注意してください。",
       displayPasswd: "表示",
@@ -69,6 +68,10 @@ export default {
         noId: "(YouTube 動画IDが未指定のため一般公開できません)",
         empty:
           "(譜面データがすべて空または非表示になっているため一般公開できません)",
+      },
+      saveFail: {
+        noId: "YouTube 動画IDが未指定です",
+        noPasswd: "パスワードが未設定です",
       },
       saveDone: "保存しました！",
       loadFail: "ファイルの読み込みに失敗しました",

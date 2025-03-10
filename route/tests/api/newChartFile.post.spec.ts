@@ -119,7 +119,5 @@ describe("POST /api/newChartFile", () => {
       body: "invalid",
     });
     expect(res.status).toBe(415);
-    const body = await res.json();
-    expect(body).toStrictEqual({ message: "invalidChart" });
   });
 });

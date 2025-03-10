@@ -147,8 +147,6 @@ describe("POST /api/chartFile/:cid", () => {
       body: "invalid",
     });
     expect(res.status).toBe(415);
-    const body = await res.json();
-    expect(body).toStrictEqual({ message: "invalidChart" });
   });
   describe("password of chart", () => {
     test("should not be changed if changePasswd is null", async () => {

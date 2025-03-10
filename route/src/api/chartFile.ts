@@ -104,7 +104,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
             newChart = await validateChart(newChartObj);
           } catch (e) {
             console.error(e);
-            throw new HTTPException(415, { message: "invalidChart" });
+            throw new HTTPException(415, { message: (e as Error).toString() });
           }
 
           if (numEvents(newChart) > chartMaxEvent) {

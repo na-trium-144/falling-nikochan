@@ -54,40 +54,42 @@ import { luaAddSpeedChange } from "./lua/speed.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
 
-export const YoutubeIdSchema = () => v.pipe(
-  v.string(),
-  v.regex(/^[a-zA-Z0-9_-]{11}$/)
-);
+export const YoutubeIdSchema = () =>
+  v.pipe(
+    v.string(),
+    v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters"),
+  );
 export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
-export const LuaLineSchema = () => v.nullable(
-  v.pipe(v.number(), v.integer(), v.minValue(0))
-);
-export const CidSchema = () => v.pipe(v.string(), v.regex(/^[0-9]{6}$/));
+export const LuaLineSchema = () =>
+  v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0)));
+export const CidSchema = () =>
+  v.pipe(v.string(), v.regex(/^[0-9]{6}$/, "cid must be 6 digits"));
 export const levelTypes = ["Single", "Double", "Maniac"];
 export const levelTypesConst = ["Single", "Double", "Maniac"] as const;
 
-export const ChartBriefSchema = () => v.object({
-  ytId: YoutubeIdSchema(),
-  title: v.string(),
-  composer: v.string(),
-  chartCreator: v.string(),
-  updatedAt: v.number(), // <- Date.getTime()
-  published: v.boolean(),
-  locale: v.string(),
-  levels: v.array(
-    v.object({
-      name: v.string(),
-      hash: HashSchema(),
-      type: v.picklist(levelTypesConst),
-      difficulty: v.pipe(v.number(), v.integer(), v.minValue(1)),
-      noteCount: v.pipe(v.number(), v.integer(), v.minValue(0)),
-      bpmMin: v.pipe(v.number(), v.gtValue(0)),
-      bpmMax: v.pipe(v.number(), v.gtValue(0)),
-      length: v.pipe(v.number(), v.minValue(0)),
-      unlisted: v.boolean(),
-    })
-  ),
-});
+export const ChartBriefSchema = () =>
+  v.object({
+    ytId: YoutubeIdSchema(),
+    title: v.string(),
+    composer: v.string(),
+    chartCreator: v.string(),
+    updatedAt: v.number(), // <- Date.getTime()
+    published: v.boolean(),
+    locale: v.string(),
+    levels: v.array(
+      v.object({
+        name: v.string(),
+        hash: HashSchema(),
+        type: v.picklist(levelTypesConst),
+        difficulty: v.pipe(v.number(), v.integer(), v.minValue(1)),
+        noteCount: v.pipe(v.number(), v.integer(), v.minValue(0)),
+        bpmMin: v.pipe(v.number(), v.gtValue(0)),
+        bpmMax: v.pipe(v.number(), v.gtValue(0)),
+        length: v.pipe(v.number(), v.minValue(0)),
+        unlisted: v.boolean(),
+      }),
+    ),
+  });
 export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
 
 export const currentChartVer = 9;
@@ -108,7 +110,7 @@ export async function validateChart(chart: ChartUntil9): Promise<ChartEdit> {
   return chart;
 }
 export async function validateChartMin(
-  chart: ChartUntil9Min
+  chart: ChartUntil9Min,
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 9) chart = await convertTo9Min(chart);
@@ -135,7 +137,7 @@ export function numEvents(chart: ChartEdit): number {
         l.rest.length +
         l.bpmChanges.length +
         l.speedChanges.length +
-        l.signature.length
+        l.signature.length,
     )
     .reduce((a, b) => a + b);
 }
@@ -223,7 +225,7 @@ export async function createBrief(
   let levelHashes: string[] = [];
   try {
     levelHashes = await Promise.all(
-      chart.levels.map((level) => hashLevel(level))
+      chart.levels.map((level) => hashLevel(level)),
     );
   } catch {
     //
