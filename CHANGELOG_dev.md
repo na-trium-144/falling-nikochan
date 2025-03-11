@@ -1,3 +1,7 @@
+## ver. 9.3 - 2025/03/11 [#378](https://github.com/na-trium-144/falling-nikochan/pull/378)
+
+* @fontsource/merriweather のバージョンを5.2.5にダウングレード、固定
+
 ## ver. 9.1 - 2025/03/11 [#377](https://github.com/na-trium-144/falling-nikochan/pull/377)
 
 * URLにクエリパラメータでredirected=1がついているとき、リダイレクトに関するメッセージを表示する
