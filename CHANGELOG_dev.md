@@ -1,4 +1,40 @@
-## ver. 8.16 - 2025/03/06 [#356]
+## ver. 9.1 - 2025/03/11 [#377](https://github.com/na-trium-144/falling-nikochan/pull/377)
+
+* URLにクエリパラメータでredirected=1がついているとき、リダイレクトに関するメッセージを表示する
+
+## ver. 9.0 - 2025/03/11 [#369](https://github.com/na-trium-144/falling-nikochan/pull/369), [#370](https://github.com/na-trium-144/falling-nikochan/pull/370), [#365](https://github.com/na-trium-144/falling-nikochan/pull/365)
+
+* valibotを導入し、Chart9のschema,validateChart()関数,apiのパラメータのパース処理をvalibotで書く
+* データベースに平文パスワードを保存するのをやめる
+  * route/src/api/chartFormat.ts のコメントを参照
+  * 今までの /api/chartFile のAPIとの互換性はない
+  * デプロイ時にデータベースの修正が必要
+    * chartEntry.locale が必須 (nullを"jp"で埋める)
+    * chartEntry.editPasswd → ChartFile.pServerHash & pRandomSalt
+    * chartEntry.ip = []
+* mongodbにアクセスする部分のTypeScript型指定を追加
+* ChartBrief.playCountを廃止し、データベースにプレイ回数だけでなくスコアなども記録するPlayRecordを追加、 /api/record 追加
+  * プレイごとにスコア、プレイ回数、FC回数、FB回数を記録。なにも識別しないで全部保存
+  * todo: GETするAPIは作ったが、表示部分が未実装。それぞれのレベルのプレイ回数だけでなく、スコア分布・FC割合といった統計を表示できたらいいなと思っている(がそこまでデータが集まるかは不明)
+* chartFileのpost時にもipアドレスを保存するようにした
+* ドメインをutcodeに移行
+    * キャッシュがうまく設定できないので `assets/` と `_next/` を再び別ドメインに分離
+    * そうすると/share/のSSRページがjsを読めなくなる(assetsドメインのjsファイルを探しに行ってしまいバックエンドでの書き換えができない)ので、jsを書き換えてデータを埋め込むのではなくクライアントサイドでfetchすることにした
+* apiが返すcache-controlヘッダーに`s-maxage`を追加 (環境変数`API_CACHE_EDGE`が設定されている場合)
+
+## ver. 8.20 - 2025/03/09 [#367](https://github.com/na-trium-144/falling-nikochan/pull/367)
+
+* wasmoonのwasmをassetsに入れてローカルでも使えるようにする
+
+## ver. 8.18 - 2025/03/08 [#364](https://github.com/na-trium-144/falling-nikochan/pull/364)
+
+* apiのテストを書いた `bun route:test`
+* messagepackを返すAPIでContent-Typeを設定するようにした
+* cidを受け取るAPIでcidが不正な場合400を返すようにした
+* API_ENV とは別に /api/newChartFile のratelimitの有無を切り替える API_NO_RATELIMIT 環境変数を追加
+* ciにテストの実行を追加、さらにjob間の依存関係を少し変更し効率化
+
+## ver. 8.16 - 2025/03/06 [#356](https://github.com/na-trium-144/falling-nikochan/pull/356)
 
 * play画面のloading表示の遷移、エラー表示処理を改善
 * resultがすべて表示されるまでresetもexitもできないようにした
@@ -10,7 +46,7 @@
     * 今はcloudflareのキャッシュを通しているので問題ない
     * 一応環境変数でオフのままにもできるようにもした
 
-## ver. 8.15 - 2025/03/04 [#352]
+## ver. 8.15 - 2025/03/04 [#352](https://github.com/na-trium-144/falling-nikochan/pull/352)
 
 * /main/playから/shareページへの遷移をmodal表示に変更
     * ブラウザのhistory遷移にも反応してmodalを開閉するようにした

@@ -42,6 +42,7 @@ export interface RestStep3 {
   luaLine: number | null;
 }
 
+export type ChartUntil3 = Chart1 | Chart2 | Chart3;
 export function convertTo3(chart: Chart1 | Chart2): Chart3 {
   if(chart.ver !== 2) chart = convertTo2(chart);
   let newChart: Chart3 = {

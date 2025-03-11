@@ -8,14 +8,15 @@
     "route:lint": "cd route && eslint src/",
     "frontend:lint": "cd frontend && tsc --noEmit && eslint app/",
     "lint": "npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
+    "route:test": "cd route && bun test",
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",
     "i18n:t": "cd i18n && node verifyKeys.js",
     "t": "npm run chart:t && npm run route:t && npm run i18n:t",
     "prepare": "npm run t",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
-    "ndev": "cd frontend && next dev -H 0.0.0.0",
-    "nbuild": "cd frontend && node ./woff2sfnt.js && next build",
+    "ndev": "cd frontend && node ./initAssets.js && next dev -H 0.0.0.0",
+    "nbuild": "cd frontend && node ./initAssets.js && next build",
     "ldev": "cd route/ && tsx watch serve-local.ts",
     "bdev": "cd route/ && bun run --hot serve-bun.ts"
   },
@@ -31,9 +32,9 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.22.0",
     "@types/bun": "^1.2.4",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.19.0",
@@ -42,7 +43,7 @@
     "globals": "^16.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.0"
+    "typescript-eslint": "^8.26.1"
   },
   "overrides": {
     "react": "$react",

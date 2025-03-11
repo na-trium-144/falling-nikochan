@@ -1,11 +1,8 @@
-import { BPMChange1, Chart1 } from "./chart1.js";
-import { Chart2 } from "./chart2.js";
-import { BPMChangeWithLua3, Chart3, RestStep3 } from "./chart3.js";
-import { Chart4 } from "./chart4.js";
-import { Chart5, Signature5, SignatureWithLua5 } from "./chart5.js";
-import { Chart6 } from "./chart6.js";
+import { BPMChange1 } from "./chart1.js";
+import { BPMChangeWithLua3, RestStep3 } from "./chart3.js";
+import { Signature5, SignatureWithLua5 } from "./chart5.js";
 import {
-  Chart7,
+  ChartUntil7,
   convertTo7,
   NoteCommand7,
   NoteCommandWithLua7,
@@ -28,25 +25,7 @@ export interface Level8Min {
   lua: string[];
   unlisted: boolean;
 }
-/**
- * notes: 1音符1要素
- * rest: 休符
- *   notesそれぞれにstepの情報は入っているので、譜面を読むだけなら無くてもいい
- *   エディタがluaを編集するときどこにNoteコマンドを挿入するかの判断に使う。
- * bpmChanges: bpm変化の情報
- * offset: step=0に対応する時刻(秒)
- * (offsetの処理はgetCurrentTimeSec()の中に含まれる)
- *
- * 時刻は開始からのstep数(60/BPM*step=秒)で管理する。
- * プレイ時に秒単位の時刻に変換
- *
- * hashはbestScoreの管理のためだけに使う
- *
- * updatedAtは new Date().getTime()
- * サーバーに送信時に前のchartのhashと比較してサーバーがアップデートする
- * クライアント側は全く使わない
- *
- */
+
 export interface Chart8Edit extends Chart8Min {
   levels: Level8Edit[];
   editPasswd: string;
@@ -123,9 +102,10 @@ export function convertToMin8(chart: Chart8Edit): Chart8Min {
     })),
   };
 }
-export async function convertTo8(
-  chart: Chart1 | Chart2 | Chart3 | Chart4 | Chart5 | Chart6 | Chart7
-): Promise<Chart8Edit> {
+
+export type ChartUntil8 = ChartUntil7 | Chart8Edit;
+export type ChartUntil8Min = ChartUntil7 | Chart8Min;
+export async function convertTo8(chart: ChartUntil7): Promise<Chart8Edit> {
   if (chart.ver !== 7) chart = await convertTo7(chart);
   return {
     falling: "nikochan",

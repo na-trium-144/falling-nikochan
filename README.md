@@ -4,13 +4,13 @@
 * Anyone can create a chart without any account registration or login. Share the chart ID on SNS to let others play.
 * Uses YouTube embed as audio source.
 
-For more information, play, and chart creation, please visit the [Falling Nikochan top page](https://nikochan.natrium144.org).
+For more information, play, and chart creation, please visit the [Falling Nikochan top page](https://nikochan.utcode.net).
 
 > * シンプルでかわいい音ゲーです。PC、タブレット、スマートフォンなどのブラウザーで手軽に遊べます。
 > * さらに、アカウント登録やログイン不要で誰でも譜面を作成でき、SNSなどで譜面IDを共有することで他の人に遊んでもらうことができます。
 > * 音源としてYouTube埋め込みを利用しています。
 >
-> 遊び方などの説明、プレイ、譜面作成 は、 [Falling Nikochan トップページ](https://nikochan.natrium144.org) からどうぞ。
+> 遊び方などの説明、プレイ、譜面作成 は、 [Falling Nikochan トップページ](https://nikochan.utcode.net) からどうぞ。
 
 YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
 
@@ -31,7 +31,14 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     MONGODB_URI="mongodb://localhost:27017"
     BACKEND_PREFIX="http://localhost:8787"
     API_ENV="development"
+    API_NO_RATELIMIT="1"
     ```
+    * other environment variables:
+        * `SECRET_SALT`
+        * `API_CACHE_EDGE`
+        * `ASSET_PREFIX`
+        * `BACKEND_PREFIX`
+        * `NO_PREFETCH`
 * Install dependencies
     ```sh
     npm ci  # or  bun i
@@ -77,11 +84,29 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * [ChartBrief](chart/src/chart.ts) as JSON with status code 200
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 404 (cid not found),
             * or 500 (other error)
 * `GET /api/latest` - Get the list of 25 latest updated charts.
     * Response
         * `{cid: string}[]` as JSON with status code 200
+* `GET /api/record/:cid` - Get the summary of the record from all players for the chart.
+    * `:cid` - Chart ID
+    * Response
+        * Array of [RecordGetSummary](chart/src/record.ts) as JSON with status code 200
+        * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
+            * or 500 (other error)
+* `POST /api/record/:cid` - Post a play record to the database. The record for every play is stored.
+    * `:cid` - Chart ID
+    * Request Body
+        * [RecordPost](chart/src/record.ts) as JSON
+            * The data should be the record of the current play of the player, regardless of the best score etc.
+    * Response
+        * empty response with status code 204
+        * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
+            * or 500 (other error)
 * `GET /api/seqFile/:cid/:lvIndex` - Deprecated. Returns 410.
 * `GET /api/playFile/:cid/:lvIndex` - Get the level file. Used only when playing chart, not for editing.
     * `:cid` - Chart ID
@@ -89,27 +114,33 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * [Level6Play](chart/src/legacy/chart6.ts) or [Level8Play](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 404 (cid or level not found),
             * or 500 (other error)
-* `GET /api/hashPasswd/:cid` - Get the hash of the password for the chart.
+* `GET /api/hashPasswd/:cid` - Get the unique hash of the password for the chart.
     * `:cid` - Chart ID
     * Query Parameters
-        * `pw=` the raw editing password
-    * if `hashKey` value is not in the cookie, a random string is generated and stored.
+        * `cp=` sha256 hash of (cid + passwd)
+    * if `pUserSalt` value is not in the cookie, a random string is generated and stored.
     * Response
         * sha256 hash of (cid + passwd + hashKey) as raw text with status code 200
+        * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
+            * 401 (wrong passwd),
+            * 404 (cid not found),
+            * or 500 (other error)
 * `GET /api/chartFile/:cid` - Get the chart file. Password is required.
     * `:cid` - Chart ID
     * Query Parameters
         * Either one of the following is required.
-            * (deprecated) `p=` sha256 hash of the editing password
-            * `pw=` the raw editing password
-            * `ph=` sha256 hash of (cid + passwd + hashKey). Used for a saved password in frontend app, instead of saving the raw password.
-                * The cookie value `hashKey` must be set and match with that used for the hash.
+            * `cp=` sha256 hash of (cid + passwd)
+            * `ph=` hash of passwd obtained from `/api/hashPasswd/:cid?cp=...`
+                * The cookie value `pUserSalt` must be set and match with that used for the hash.
             * `pbypass=1` (only on development environment) bypass the password check
     * Response
-        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts) or [Chart8Edit](chart/src/legacy/chart8.ts) serialized with MessagePack with status code 200
+        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts), [Chart8Edit](chart/src/legacy/chart8.ts) or [Chart9Edit](chart/src/legacy/chart9.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
             * or 500 (other error)
@@ -120,6 +151,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
             * 409 (chart data is Chart7 or older),
@@ -132,6 +164,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
+            * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
             * or 500 (other error)

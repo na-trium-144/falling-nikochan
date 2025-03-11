@@ -7,15 +7,16 @@ import { HTTPException } from "hono/http-exception";
 import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
 import { join, dirname } from "node:path";
-import dotenv from "dotenv";
 import { getTranslations } from "@falling-nikochan/i18n";
+import { ValiError } from "valibot";
+import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 async function errorResponse(
   origin: string,
   lang: string,
   status: number,
-  message: string
+  message: string,
 ) {
   const t = await getTranslations(lang, "error");
   return (
@@ -28,7 +29,7 @@ async function errorResponse(
       "PLACEHOLDER_MESSAGE",
       t.has("api." + message)
         ? t("api." + message)
-        : message || t("unknownApiError")
+        : message || t("unknownApiError"),
     )
     .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
@@ -51,27 +52,33 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         httpOnly: false,
       },
       // debug: process.env.API_ENV === "development",
-    })
+    }),
   )
   .onError(async (err, c) => {
     console.error(err);
-    const lang = c.get("language");
-    if (!(err instanceof HTTPException)) {
-      console.error(err);
-      err = new HTTPException(500);
-    }
-    const status = (err as HTTPException).status;
-    const message =
-      (await (err as HTTPException).getResponse().text()) ||
-      (status === 404 ? "notFound" : "");
-    if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
-      return c.json({ message }, status);
-    } else {
-      return c.body(
-        await errorResponse(new URL(c.req.url).origin, lang, status, message),
-        status,
-        { "Content-Type": "text/html" }
-      );
+    try {
+      const lang = c.get("language");
+      if (err instanceof ValiError) {
+        err = new HTTPException(400, { message: err.message });
+      } else if (!(err instanceof HTTPException)) {
+        err = new HTTPException(500);
+      }
+      const status = (err as HTTPException).status;
+      const message =
+        (await (err as HTTPException).getResponse().text()) ||
+        (status === 404 ? "notFound" : "");
+      if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
+        return c.json({ message }, status);
+      } else {
+        return c.body(
+          await errorResponse(new URL(c.req.url).origin, lang, status, message),
+          status,
+          { "Content-Type": "text/html" },
+        );
+      }
+    } catch (e) {
+      console.error("While handling the above error, another error thrown:", e);
+      return c.body(null, 500);
     }
   })
   .notFound(() => {
@@ -87,7 +94,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     const params = new URLSearchParams(new URL(c.req.url).search);
     return c.redirect(
       `/${lang}${c.req.path}${params ? "?" + params : ""}`,
-      307
+      307,
     );
   })
   .get("/share/:cid{[0-9]+}", async (c, next) => {
@@ -96,18 +103,18 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
     await next();
   })
-  .get(
-    "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
-    async (c, next) => {
-      // @ts-expect-error TODO same as above
-      c.set("cid", c.req.param("cid"));
-      await next();
-    }
-  )
+  // .get(
+  //   "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
+  //   async (c, next) => {
+  //     // @ts-expect-error TODO same as above
+  //     c.set("cid", c.req.param("cid"));
+  //     await next();
+  //   }
+  // )
   .get("/share/:cid{[0-9]+}", ...shareHandler)
-  .get(
-    "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
-    ...shareHandler
-  );
+  // .get(
+  //   "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
+  //   ...shareHandler
+  // );
 
 export default app;

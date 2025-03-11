@@ -1,11 +1,11 @@
 import { getTimeSec } from "../seq.js";
 import { BPMChange1 } from "./chart1.js";
 import { Signature5 } from "./chart5.js";
-import { Level8Play } from "./chart8.js";
+import { Level9Play } from "./chart9.js";
 import { DisplayParam7, Note7 } from "./seq7.js";
 
-export interface ChartSeqData8 {
-  ver: 8;
+export interface ChartSeqData9 {
+  ver: 9;
   notes: Note7[];
   bpmChanges: BPMChange1[];
   speedChanges: BPMChange1[];
@@ -16,7 +16,7 @@ export interface ChartSeqData8 {
 /**
  * chartを読み込む
  */
-export function loadChart8(level: Level8Play): ChartSeqData8 {
+export function loadChart9(level: Level9Play): ChartSeqData9 {
   const notes: Note7[] = [];
   for (let id = 0; id < level.notes.length; id++) {
     const c = level.notes[id];
@@ -126,7 +126,7 @@ export function loadChart8(level: Level8Play): ChartSeqData8 {
     });
   }
   return {
-    ver: 8,
+    ver: 9,
     offset: level.offset,
     signature: level.signature,
     bpmChanges: level.bpmChanges,

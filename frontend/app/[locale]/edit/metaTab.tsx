@@ -12,12 +12,7 @@ import {
   lastIncompatibleVer,
   validateChartMin,
 } from "@falling-nikochan/chart";
-import {
-  getPasswd,
-  getV6Passwd,
-  setPasswd,
-  unsetPasswd,
-} from "@/common/passwdCache.js";
+import { getPasswd, setPasswd, unsetPasswd } from "@/common/passwdCache.js";
 import { addRecent } from "@/common/recent.js";
 import { initSession, SessionData } from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
@@ -36,6 +31,8 @@ interface Props {
   setChart: (chart: ChartEdit) => void;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
+  newPasswd: string;
+  setNewPasswd: (pw: string) => void;
 }
 export function MetaEdit(props: Props) {
   const t = useTranslations("edit.meta");
@@ -107,15 +104,8 @@ export function MetaEdit(props: Props) {
         <span className="inline-flex flex-row items-baseline">
           <Input
             className="font-title shrink w-40 "
-            actualValue={props.chart?.editPasswd || ""}
-            updateValue={(v: string) =>
-              props.chart &&
-              props.setChart({
-                ...props.chart,
-                editPasswd: v,
-                published: v ? props.chart.published : false,
-              })
-            }
+            actualValue={props.newPasswd}
+            updateValue={props.setNewPasswd}
             left
             passwd={hidePasswd}
           />
@@ -140,9 +130,7 @@ export function MetaEdit(props: Props) {
           onChange={(v: boolean) =>
             props.chart && props.setChart({ ...props.chart, published: v })
           }
-          disabled={
-            !props.chart?.editPasswd || !hasLevelData || !props.chart?.ytId
-          }
+          disabled={!hasLevelData || !props.chart?.ytId}
         >
           {t("publish")}
         </CheckBox>
@@ -151,8 +139,8 @@ export function MetaEdit(props: Props) {
           {!props.chart?.ytId
             ? t("publishFail.noId")
             : !hasLevelData
-            ? t("publishFail.empty")
-            : !props.chart?.editPasswd && t("publishFail.noPasswd")}
+              ? t("publishFail.empty")
+              : null}
         </span>
       </p>
     </>
@@ -175,8 +163,9 @@ interface Props2 {
   locale: string;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
-  editPasswdPrev: string;
-  setEditPasswdPrev: (s: string) => void;
+  currentPasswd: { current: string | null };
+  newPasswd: string;
+  setNewPasswd: (pw: string) => void;
 }
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
@@ -193,28 +182,32 @@ export function MetaTab(props: Props2) {
 
   const save = async () => {
     setSaving(true);
-    const onSave = async (cid: string, editPasswd: string) => {
+    const onSave = async (cid: string, changePasswd: string | null) => {
       setErrorMsg(t("saveDone"));
       props.setHasChange(false);
       props.setConvertedFrom(props.chart!.ver);
-      if (props.savePasswd) {
-        fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/hashPasswd/${cid}?pw=${editPasswd}`,
-          {
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          }
-        ).then(async (res) => {
-          setPasswd(cid, await res.text());
-        });
-      } else {
-        unsetPasswd(cid);
+      if (changePasswd) {
+        if (props.savePasswd) {
+          fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/hashPasswd/${cid}?p=${changePasswd}`,
+            {
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            },
+          ).then(async (res) => {
+            setPasswd(cid, await res.text());
+          });
+        } else {
+          unsetPasswd(cid);
+        }
+        props.currentPasswd.current = changePasswd;
       }
-      props.setEditPasswdPrev(editPasswd);
     };
+    props.chart!.changePasswd =
+      props.newPasswd.length > 0 ? props.newPasswd : null;
     if (props.cid === undefined) {
       const res = await fetch(
         process.env.BACKEND_PREFIX + `/api/newChartFile`,
@@ -224,7 +217,7 @@ export function MetaTab(props: Props2) {
           cache: "no-store",
           credentials:
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        }
+        },
       );
       if (res.ok) {
         try {
@@ -237,10 +230,10 @@ export function MetaTab(props: Props2) {
             history.replaceState(
               null,
               "",
-              `/${props.locale}/edit?cid=${resBody.cid}`
+              `/${props.locale}/edit?cid=${resBody.cid}`,
             );
             addRecent("edit", resBody.cid);
-            onSave(resBody.cid, props.chart!.editPasswd);
+            onSave(resBody.cid, props.chart!.changePasswd);
           } else {
             setErrorMsg(te("badResponse"));
           }
@@ -260,23 +253,27 @@ export function MetaTab(props: Props2) {
         }
       }
     } else {
+      const q = new URLSearchParams();
+      if (props.currentPasswd.current) {
+        q.set("p", props.currentPasswd.current);
+      } else if (getPasswd(props.cid)) {
+        q.set("ph", getPasswd(props.cid)!);
+      }
       const res = await fetch(
         process.env.BACKEND_PREFIX +
-          `/api/chartFile/${props.cid}` +
-          `?p=${getV6Passwd(props.cid)}` +
-          `&ph=${getPasswd(props.cid)}` +
-          `&pw=${props.editPasswdPrev}`,
+          `/api/chartFile/${props.cid}?` +
+          q.toString(),
         {
           method: "POST",
           body: msgpack.serialize(props.chart),
           cache: "no-store",
           credentials:
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        }
+        },
       );
       if (res.ok) {
         props.setHasChange(false);
-        onSave(props.cid, props.chart!.editPasswd);
+        onSave(props.cid, props.chart!.changePasswd);
       } else {
         try {
           const message = ((await res.json()) as { message?: string }).message;
@@ -290,6 +287,7 @@ export function MetaTab(props: Props2) {
         }
       }
     }
+    props.chart!.changePasswd = null;
     setSaving(false);
   };
   const downloadExtension = `fn${props.chart?.ver}.yml`;
@@ -317,13 +315,19 @@ export function MetaTab(props: Props2) {
         const newChartMin = await validateChartMin(content);
         newChart = {
           ...newChartMin,
-          editPasswd: props.chart?.editPasswd || "",
+          changePasswd: null,
           published: false,
           levels: await Promise.all(
             newChartMin.levels.map(async (l) => ({
               ...l,
-              ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
-            }))
+              ...(
+                await luaExec(
+                  process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                  l.lua.join("\n"),
+                  false,
+                )
+              ).levelFreezed,
+            })),
           ),
         };
       } catch (e1) {
@@ -336,13 +340,19 @@ export function MetaTab(props: Props2) {
           const newChartMin = await validateChartMin(content);
           newChart = {
             ...newChartMin,
-            editPasswd: props.chart?.editPasswd || "",
+            changePasswd: null,
             published: false,
             levels: await Promise.all(
               newChartMin.levels.map(async (l) => ({
                 ...l,
-                ...(await luaExec(l.lua.join("\n"), false)).levelFreezed,
-              }))
+                ...(
+                  await luaExec(
+                    process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                    l.lua.join("\n"),
+                    false,
+                  )
+                ).levelFreezed,
+              })),
             ),
           };
         } catch (e2) {
@@ -353,10 +363,7 @@ export function MetaTab(props: Props2) {
       }
       if (newChart) {
         if (confirm(t("confirmLoad"))) {
-          props.setChart({
-            ...newChart,
-            editPasswd: props.chart?.editPasswd || "",
-          });
+          props.setChart(newChart);
           props.setConvertedFrom(originalVer);
         }
       }
@@ -397,8 +404,21 @@ export function MetaTab(props: Props2) {
           <span className="ml-1 mr-2 ">{props.cid || t("unsaved")}</span>
         </span>
         <HelpIcon>{t.rich("saveToServerHelp", { br: () => <br /> })}</HelpIcon>
-        <Button text={t("saveToServer")} onClick={save} loading={saving} />
-        <span className="inline-block ml-1 ">{errorMsg}</span>
+        <Button
+          text={t("saveToServer")}
+          onClick={save}
+          loading={saving}
+          disabled={!props.chart?.ytId || (!props.cid && !props.newPasswd)}
+        />
+        <span className="inline-block ml-1 ">
+          {errorMsg
+            ? errorMsg
+            : !props.chart?.ytId
+              ? t("saveFail.noId")
+              : !props.cid && !props.newPasswd
+                ? t("saveFail.noPasswd")
+                : null}
+        </span>
         {props.hasChange && (
           <span className="inline-block ml-1 text-amber-600 ">
             {t("hasUnsaved")}
