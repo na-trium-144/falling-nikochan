@@ -84,7 +84,7 @@ import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { Chart8Edit } from "@falling-nikochan/chart";
-import { LoadingSlime } from "@/common/loadingSlime.js";
+import { SlimeSVG } from "@/common/slime.js";
 
 export default function EditAuth({ locale }: { locale: string }) {
   const t = useTranslations("edit");
@@ -242,7 +242,7 @@ export default function EditAuth({ locale }: { locale: string }) {
         chart === undefined ? (
           loading ? (
             <p>
-              <LoadingSlime />
+              <SlimeSVG />
               Loading...
             </p>
           ) : errorStatus !== undefined || errorMsg !== undefined ? (
@@ -1248,7 +1248,7 @@ function Page(props: Props) {
             <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
               {luaExecutor.running ? (
                 <div className="m-1">
-                  <LoadingSlime />
+                  <SlimeSVG />
                   {t("running")}
                 </div>
               ) : (

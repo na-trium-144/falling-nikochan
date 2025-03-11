@@ -52,8 +52,8 @@ import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
-import { LoadingSlime } from "@/common/loadingSlime.js";
 import { useTranslations } from "next-intl";
+import { SlimeSVG } from "@/common/slime.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -649,7 +649,7 @@ function Play(props: Props) {
               }
             >
               <p>
-                <LoadingSlime />
+                <SlimeSVG />
                 Loading...
               </p>
             </CenterBox>

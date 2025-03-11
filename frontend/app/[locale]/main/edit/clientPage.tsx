@@ -5,7 +5,6 @@ import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
 import { AccordionLike, ChartList } from "../chartList.js";
-import { LoadingSlime } from "@/common/loadingSlime.js";
 import { ExternalLink } from "@/common/extLink.js";
 import {
   ChartLineBrief,
@@ -16,6 +15,7 @@ import { CidSchema, rateLimitMin } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useDisplayMode } from "@/scale.js";
 import * as v from "valibot";
+import { SlimeSVG } from "@/common/slime.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -133,7 +133,7 @@ export default function EditTab({ locale }: { locale: string }) {
               {t("newTab")}
             </ExternalLink>
             <span className={cidFetching ? "inline-block " : "hidden "}>
-              <LoadingSlime />
+              <SlimeSVG />
               Loading...
             </span>
             <span className="ml-1 inline-block">{cidErrorMsg}</span>

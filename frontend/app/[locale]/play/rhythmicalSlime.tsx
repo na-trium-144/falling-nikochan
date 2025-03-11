@@ -5,7 +5,7 @@ import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepSub, stepZero } from "@falling-nikochan/chart";
 import { useDisplayMode } from "@/scale.js";
-import "./rhythmicalSlime.css";
+import { SlimeSVG } from "@/common/slime";
 
 interface Props {
   className?: string;
@@ -18,11 +18,11 @@ interface Props {
 interface SlimeState {
   // 対象の時刻の3/4ステップ前からしゃがむ
   // 対象の時刻の1/4ステップ前からジャンプしはじめ、
-  jumpBeginSec: number;
   // 対象の時刻の1/4ステップ後に最高点、
-  jumpEndSec: number;
   // 3/4ステップ後に着地
+  preparingSec: number;
   landingSec: number;
+  animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
   const { playing, getCurrentTimeSec, bpmChanges } = props;
@@ -63,29 +63,9 @@ export default function RhythmicalSlime(props: Props) {
               barChange();
             }
           }
-          const preparingSec = getTimeSec(
-            bpmChanges,
-            stepSub(ss.stepAligned, {
-              fourth: 0,
-              numerator: 3,
-              denominator: (slimeSize / 4) * 4,
-            })
-          );
-          if (preparingSec > now) {
-            timer = setTimeout(nextStep, (preparingSec - now) * 1000);
-            return;
-          }
           const jumpBeginSec = getTimeSec(
             bpmChanges,
             stepSub(ss.stepAligned, {
-              fourth: 0,
-              numerator: 1,
-              denominator: (slimeSize / 4) * 4,
-            })
-          );
-          const jumpEndSec = getTimeSec(
-            bpmChanges,
-            stepAdd(ss.stepAligned, {
               fourth: 0,
               numerator: 1,
               denominator: (slimeSize / 4) * 4,
@@ -99,15 +79,21 @@ export default function RhythmicalSlime(props: Props) {
               denominator: (slimeSize / 4) * 4,
             })
           );
+          const animDuration = (landingSec - jumpBeginSec) / 0.5;
+          const preparingSec = jumpBeginSec - animDuration * 0.2;
+          if (preparingSec > now) {
+            timer = setTimeout(nextStep, (preparingSec - now) * 1000);
+            return;
+          }
           setSlimeStates((states) => {
             const newStates = [...states];
             while (slimeIndex >= newStates.length) {
               newStates.push(undefined);
             }
             newStates[slimeIndex] = {
-              jumpBeginSec,
-              jumpEndSec,
+              preparingSec,
               landingSec,
+              animDuration,
             };
             return newStates;
           });
@@ -159,8 +145,7 @@ interface PropsS {
   playUIScale: number;
 }
 function Slime(props: PropsS) {
-  // 0: preparing, 1: jumping, 2: end
-  const [action, setAction] = useState<number>(0);
+  const [action, setAction] = useState<boolean>(false);
   const durationSec = useRef<number>(0);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -168,18 +153,17 @@ function Slime(props: PropsS) {
       timer = null;
       const now = props.getCurrentTimeSec();
       if (now === undefined || props.state === undefined) {
-        setAction(2);
-      } else if (now < props.state.jumpBeginSec) {
-        setAction(0);
-        durationSec.current = props.state.jumpBeginSec - now;
-        timer = setTimeout(update, (props.state.jumpBeginSec - now) * 1000);
-      } else if (now < props.state.jumpEndSec) {
-        setAction(1);
-        durationSec.current = props.state.jumpEndSec - now;
-        timer = setTimeout(update, (props.state.jumpEndSec - now) * 1000);
+        setAction(false);
+      } else if (
+        now >= props.state.preparingSec &&
+        now < props.state.landingSec
+      ) {
+        durationSec.current = props.state.animDuration;
+        timer = setTimeout(update, props.state.animDuration * 1000);
+        setAction(true);
       } else {
-        setAction(2);
-        durationSec.current = props.state.landingSec - now;
+        durationSec.current = props.state.animDuration;
+        setAction(false);
       }
     };
     update();
@@ -197,52 +181,17 @@ function Slime(props: PropsS) {
           (props.size === 4 ? 1 : props.size === 8 ? 0.75 : 0.5) *
           54 *
           props.playUIScale,
-        marginLeft: 6 * props.playUIScale,
+        marginLeft: 0 * props.playUIScale,
       }}
     >
-      <span
-        className="absolute inset-x-0 "
-        style={{
-          animationName: props.exists
-            ? "rhythmical-slime-appearing"
-            : "rhythmical-slime-disappearing",
-          animationIterationCount: 1,
-          animationDuration: "0.25s",
-          animationTimingFunction: "linear",
-          animationFillMode: "forwards",
-        }}
-      >
-        <img
-          src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
-          className={
-            "absolute bottom-0 inset-x-0 " +
-            "transition origin-bottom " +
-            (action === 1
-              ? "ease-out -translate-y-1/2 scale-y-110 "
-              : action === 0
-              ? "ease-out translate-y-0 scale-y-75 "
-              : "ease-in translate-y-0 scale-y-100 ")
-          }
-          style={{
-            transitionDuration: durationSec.current + "s",
-          }}
-        />
-        <img
-          src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
-          className={
-            "absolute bottom-0 inset-x-0 " +
-            "transition origin-bottom " +
-            (action === 1
-              ? "ease-out -translate-y-1/2 scale-y-110 opacity-0 "
-              : action === 0
-              ? "ease-out translate-y-0 scale-y-75 opacity-100 "
-              : "ease-in translate-y-0 scale-y-100 opacity-100 ")
-          }
-          style={{
-            transitionDuration: durationSec.current + "s",
-          }}
-        />
-      </span>
+      <SlimeSVG
+        className="absolute inset-x-0 bottom-0 "
+        appearingAnim
+        hidden={!props.exists}
+        duration={durationSec.current}
+        stopJumping={!action}
+        noLoop
+      />
     </span>
   );
 }

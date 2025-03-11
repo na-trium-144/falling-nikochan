@@ -9,7 +9,6 @@ import { useCallback, useEffect, useState } from "react";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
-import { LoadingSlime } from "@/common/loadingSlime.js";
 import { AccordionLike, ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import { Youtube } from "@icon-park/react";
@@ -27,6 +26,7 @@ import { Box, modalBg } from "@/common/box.js";
 import { ShareBox } from "@/share/placeholder/shareBox.js";
 import { titleShare, titleWithSiteName } from "@/common/title.js";
 import * as v from "valibot";
+import { SlimeSVG } from "@/common/slime.js";
 
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
@@ -249,7 +249,7 @@ export default function PlayTab({ locale }: { locale: string }) {
               left
             />
             <span className={cidFetching ? "inline-block " : "hidden "}>
-              <LoadingSlime />
+              <SlimeSVG />
               Loading...
             </span>
             <span className="ml-1 inline-block">{cidErrorMsg}</span>
