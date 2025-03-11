@@ -2,6 +2,8 @@ name: Vercel Production Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
+  NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
 on:
   push:
     branches:
@@ -19,12 +21,9 @@ jobs:
         run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: bunx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Purge Cloudflare Cache
-        run: >
-          curl https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/purge_cache
-          -H 'Content-Type: application/json'
-          -H "Authorization: Bearer $CLOUDFLARE_API_KEY"
-          -d '{"purge_everything":true}'
-        env:
-          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
+          accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
+          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main

@@ -103,18 +103,18 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
     await next();
   })
-  .get(
-    "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
-    async (c, next) => {
-      // @ts-expect-error TODO same as above
-      c.set("cid", c.req.param("cid"));
-      await next();
-    },
-  )
+  // .get(
+  //   "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
+  //   async (c, next) => {
+  //     // @ts-expect-error TODO same as above
+  //     c.set("cid", c.req.param("cid"));
+  //     await next();
+  //   }
+  // )
   .get("/share/:cid{[0-9]+}", ...shareHandler)
-  .get(
-    "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
-    ...shareHandler,
-  );
+  // .get(
+  //   "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
+  //   ...shareHandler
+  // );
 
 export default app;
