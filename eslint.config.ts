@@ -1,7 +1,8 @@
+import { defineConfig } from "eslint/config";
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
-import eslintConfigPrettier from "eslint-config-prettier";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
 import { FlatCompat } from "@eslint/eslintrc";
 
 const compat = new FlatCompat({
@@ -22,23 +23,16 @@ const eslintPluginNext = compat.config({
   },
 });
 
-const config = [
+export default defineConfig(
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
   eslintConfigPrettier,
-  ...eslintPluginNext,
+  { files: ["frontend/**/*"], extends: eslintPluginNext },
   {
     files: ["i18n/**/*"],
     rules: {
       "import/no-anonymous-default-export": "off",
-    },
-  },
-  {
-    files: ["route/**/*"],
-    rules: {
-      "@next/next/no-img-element": "off",
-      "jsx-a11y/alt-text": "off",
     },
   },
   {
@@ -47,6 +41,4 @@ const config = [
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
-];
-
-export default config;
+);
