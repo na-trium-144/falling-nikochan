@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
+import { fetchBrief } from "@/common/briefCache.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -49,14 +50,19 @@ export default function ShareChart({ locale }: { locale: string }) {
     const cid = window.location.pathname.split("/").pop()!;
     setCId(cid);
     const searchParams = new URLSearchParams(window.location.search);
-    let brief: ChartBrief;
-    if (process.env.NODE_ENV === "development") {
-      brief = dummyBrief;
-    } else {
-      brief = JSON.parse("PLACEHOLDER_BRIEF");
-    }
-    setBrief(brief);
-    document.title = titleShare(t, cid, brief);
+    void (async () => {
+      let brief: ChartBrief | undefined;
+      if (process.env.NODE_ENV === "development") {
+        brief = dummyBrief;
+      } else {
+        brief = (await fetchBrief(cid, true)).brief;
+      }
+      if (!brief) {
+        throw new Error("Failed to fetch brief");
+      }
+      setBrief(brief);
+      document.title = titleShare(t, cid, brief);
+    })();
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
