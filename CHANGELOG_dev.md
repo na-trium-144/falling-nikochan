@@ -1,4 +1,4 @@
-## ver. 9.0 - 2025/ [#369](https://github.com/na-trium-144/falling-nikochan/pull/369), [#370](https://github.com/na-trium-144/falling-nikochan/pull/370), [#365](https://github.com/na-trium-144/falling-nikochan/pull/365)
+## ver. 9.0 - 2025/03/11 [#369](https://github.com/na-trium-144/falling-nikochan/pull/369), [#370](https://github.com/na-trium-144/falling-nikochan/pull/370), [#365](https://github.com/na-trium-144/falling-nikochan/pull/365)
 
 * valibotを導入し、Chart9のschema,validateChart()関数,apiのパラメータのパース処理をvalibotで書く
 * データベースに平文パスワードを保存するのをやめる
