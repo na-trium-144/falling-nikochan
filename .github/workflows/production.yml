@@ -2,6 +2,8 @@ name: Vercel Production Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
+  NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
 on:
   push:
     branches:
