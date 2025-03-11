@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie, setCookie } from "hono/cookie";
 import { getChartEntry, getPUserHash } from "./chart.js";
@@ -61,7 +61,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         pSecretSalt,
       });
       return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
-        "cache-control": "no-store",
+        "cache-control": cacheControl(env(c), null),
       });
     } finally {
       await client.close();

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import {
   CidSchema,
   RecordGetSummary,
@@ -37,7 +37,9 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           summary.push({ lvHash: record.lvHash, count: 1 });
         }
       }
-      return c.json(summary);
+      return c.json(summary, 200, {
+        "Cache-Control": cacheControl(env(c), 600),
+      });
     } finally {
       await client.close();
     }

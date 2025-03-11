@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { entryToBrief, getChartEntry } from "./chart.js";
 import { MongoClient } from "mongodb";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
@@ -16,7 +16,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       const { entry } = await getChartEntry(db, cid, null);
       return c.json(entryToBrief(entry), 200, {
-        "cache-control": "max-age=600",
+        "cache-control": cacheControl(env(c), 600),
       });
     } finally {
       await client.close();

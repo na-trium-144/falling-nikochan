@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { MongoClient } from "mongodb";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
 
@@ -23,7 +23,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           .toArray(),
         200,
         {
-          "cache-control": "max-age=600",
+          "cache-control": cacheControl(env(c), 600),
         }
       );
     } finally {

@@ -1,5 +1,5 @@
 import { createFactory } from "hono/factory";
-import { Bindings } from "./env.js";
+import { Bindings, cacheControl } from "./env.js";
 import briefApp from "./api/brief.js";
 import { getTranslations } from "@falling-nikochan/i18n";
 import { fetchStatic } from "./static.js";
@@ -14,6 +14,7 @@ import {
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import packageJson from "../package.json" with { type: "json" };
+import { env } from "hono/adapter";
 
 interface ShareParams {
   language: string;
@@ -48,11 +49,11 @@ const shareHandler = factory.createHandlers(async (c) => {
   if (c.req.path.startsWith("/share")) {
     placeholderUrl = new URL(
       `/${qLang}/share/placeholder`,
-      new URL(c.req.url).origin
+      new URL(c.req.url).origin,
     );
   } else {
     placeholderUrl = new URL(
-      c.req.url.replace(/share\/[0-9]+/, "share/placeholder")
+      c.req.url.replace(/share\/[0-9]+/, "share/placeholder"),
     );
   }
   const pRes = fetchStatic(placeholderUrl);
@@ -120,14 +121,14 @@ const shareHandler = factory.createHandlers(async (c) => {
               ...c.req.query(),
               v: packageJson.version,
             }).toString(),
-          new URL(c.req.url).origin
-        ).toString()
+          new URL(c.req.url).origin,
+        ).toString(),
       )
       .replaceAll("PLACEHOLDER_DESCRIPTION", newDescription)
       .replaceAll(
         // これはjsファイルの中にしか現れないのでエスケープの必要はない
         '"PLACEHOLDER_BRIEF"',
-        JSON.stringify(JSON.stringify(brief))
+        JSON.stringify(JSON.stringify(brief)),
       );
     if (c.req.path.startsWith("/share") && lang !== qLang) {
       const q = new URLSearchParams(c.req.query());
@@ -141,7 +142,7 @@ const shareHandler = factory.createHandlers(async (c) => {
     }
     return c.text(replacedBody, 200, {
       "Content-Type": res.headers.get("Content-Type") || "text/plain",
-      "Cache-Control": "no-store",
+      "Cache-Control": cacheControl(env(c), null),
     });
   } else {
     let message = "";
@@ -150,7 +151,7 @@ const shareHandler = factory.createHandlers(async (c) => {
     } catch {
       //
     }
-    throw new HTTPException(briefRes.status as 401 | 404 | 500, {message});
+    throw new HTTPException(briefRes.status as 401 | 404 | 500, { message });
   }
 });
 export default shareHandler;

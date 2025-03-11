@@ -16,6 +16,7 @@
 * ドメインをutcodeに移行
     * キャッシュがうまく設定できないので `assets/` と `_next/` を再び別ドメインに分離
     * そうすると/share/のSSRページがjsを読めなくなる(assetsドメインのjsファイルを探しに行ってしまいバックエンドでの書き換えができない)ので、jsを書き換えてデータを埋め込むのではなくクライアントサイドでfetchすることにした
+* apiが返すcache-controlヘッダーに`s-maxage`を追加 (環境変数`API_CACHE_EDGE`が設定されている場合)
 
 ## ver. 8.20 - 2025/03/09 [#367](https://github.com/na-trium-144/falling-nikochan/pull/367)
 

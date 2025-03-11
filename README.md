@@ -33,6 +33,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     API_ENV="development"
     API_NO_RATELIMIT="1"
     ```
+    * other environment variables:
+        * `SECRET_SALT`
+        * `API_CACHE_EDGE`
+        * `ASSET_PREFIX`
+        * `BACKEND_PREFIX`
+        * `NO_PREFETCH`
 * Install dependencies
     ```sh
     npm ci  # or  bun i
