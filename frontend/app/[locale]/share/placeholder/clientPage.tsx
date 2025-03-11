@@ -13,6 +13,7 @@ import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
 import { fetchBrief } from "@/common/briefCache.js";
+import { RedirectedWarning } from "@/common/redirectedWarning.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -76,20 +77,25 @@ export default function ShareChart({ locale }: { locale: string }) {
       <Header className="main-wide:hidden" locale={locale}>
         ID: {cid}
       </Header>
-      <div className={"flex-1 p-6 w-full flex items-center justify-center"}>
-        {brief !== null && (
-          <Box
-            className="m-auto max-w-full p-6 shrink"
-            style={{ flexBasis: "60rem" }}
-          >
-            <ShareBox
-              cid={cid}
-              brief={brief}
-              sharedResult={sharedResult}
-              locale={locale}
-            />
-          </Box>
-        )}
+      <div
+        className={"flex-1 w-full flex flex-col items-center justify-center"}
+      >
+        <RedirectedWarning className="mx-6 mt-2 " />
+        <div className={"p-6 w-full flex items-center justify-center"}>
+          {brief !== null && (
+            <Box
+              className="m-auto max-w-full p-6 shrink"
+              style={{ flexBasis: "60rem" }}
+            >
+              <ShareBox
+                cid={cid}
+                brief={brief}
+                sharedResult={sharedResult}
+                locale={locale}
+              />
+            </Box>
+          )}
+        </div>
       </div>
       <Footer nav locale={locale} />
     </main>
