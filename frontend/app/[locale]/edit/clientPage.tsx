@@ -1,6 +1,10 @@
 "use client";
 
-import { defaultNoteCommand, NoteCommand } from "@falling-nikochan/chart";
+import {
+  Chart9Edit,
+  defaultNoteCommand,
+  NoteCommand,
+} from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -149,7 +153,7 @@ export default function EditAuth({ locale }: { locale: string }) {
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit =
+            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
               msgpack.deserialize(await res.arrayBuffer());
             setConvertedFrom(chartRes.ver);
             const chart: ChartEdit = await validateChart(chartRes);

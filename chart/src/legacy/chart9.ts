@@ -1,10 +1,5 @@
 import * as v from "valibot";
-import {
-  levelTypes,
-  levelTypesConst,
-  LuaLineSchema,
-  YoutubeIdSchema,
-} from "../chart.js";
+import { levelTypes, levelTypesConst, LuaLineSchema } from "../chart.js";
 import { StepSchema } from "../step.js";
 import { ChartUntil8, ChartUntil8Min, convertTo8 } from "./chart8.js";
 
@@ -82,7 +77,8 @@ export const ChartMinSchema9 = () =>
     falling: v.literal("nikochan"),
     ver: v.literal(9),
     offset: v.pipe(v.number(), v.minValue(0)),
-    ytId: YoutubeIdSchema(),
+    // ytId: YoutubeIdSchema(),
+    ytId: v.string(),
     title: v.string(),
     composer: v.string(),
     chartCreator: v.string(),
