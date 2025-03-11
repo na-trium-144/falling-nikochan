@@ -61,7 +61,14 @@ export async function getChartEntry(
       const chart = getSample(cid);
       return {
         chart,
-        entry: await chartToEntry(chart, cid, 0, null, "", null),
+        entry: await chartToEntry(
+          { ...chart, changePasswd: "a" },
+          cid,
+          0,
+          null,
+          "",
+          null,
+        ),
       };
     } else {
       throw new HTTPException(404, { message: "chartIdNotFound" });
