@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.22.0",
     "@types/bun": "^1.2.4",
     "@types/node": "^22.13.9",
     "@types/react": "^19.0.10",
