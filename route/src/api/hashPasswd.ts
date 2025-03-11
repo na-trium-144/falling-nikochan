@@ -7,6 +7,7 @@ import { randomBytes } from "node:crypto";
 import { MongoClient } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
+import { HTTPException } from "hono/http-exception";
 
 /**
  * chartFile のコメントを参照
@@ -60,9 +61,13 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         rawPasswd: p,
         pSecretSalt,
       });
-      return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
-        "cache-control": cacheControl(env(c), null),
-      });
+      if (entry.pServerHash) {
+        return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
+          "cache-control": cacheControl(env(c), null),
+        });
+      } else {
+        throw new HTTPException(400, { message: "noPasswd" });
+      }
     } finally {
       await client.close();
     }

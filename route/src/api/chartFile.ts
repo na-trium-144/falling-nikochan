@@ -34,6 +34,9 @@ import * as v from "valibot";
  * /api/chartFile には p=passwd または ph=hash(pServerHash + pUserSalt) を指定してアクセスする
  * POST時のデータのchangePasswdをnullにすると以前のパスワードを次回も使用し、nullでない場合それを新しいパスワードとしてデータベースを更新
  *
+ * v8以前で空文字列パスワードで保存していたデータについては、 pServerhash=pRandomSalt=null
+ * v9以降では空文字列パスワードでの上書き保存は許されない
+ *
  * また、development環境に限り /api/chartFile/cid?pbypass=1 でスキップできる
  */
 const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(

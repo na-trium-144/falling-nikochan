@@ -256,8 +256,8 @@ export function MetaTab(props: Props2) {
       const q = new URLSearchParams();
       if (props.currentPasswd.current) {
         q.set("p", props.currentPasswd.current);
-      } else {
-        q.set("ph", getPasswd(props.cid) || "");
+      } else if (getPasswd(props.cid)) {
+        q.set("ph", getPasswd(props.cid)!);
       }
       const res = await fetch(
         process.env.BACKEND_PREFIX +

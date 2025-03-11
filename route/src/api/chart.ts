@@ -84,16 +84,20 @@ export async function getChartEntry(
   if (
     p === null ||
     p.bypass ||
-    (p.rawPasswd !== undefined &&
-      (await getPServerHash(
-        cid,
-        p.rawPasswd,
-        p.pSecretSalt,
-        entry.pRandomSalt,
-      )) === entry.pServerHash) ||
-    (p.v9PasswdHash !== undefined &&
-      p.v9UserSalt !== undefined &&
-      (await getPUserHash(entry.pServerHash, p.v9UserSalt)) === p.v9PasswdHash)
+    (entry.pServerHash === null && entry.pRandomSalt === null) ||
+    (entry.pServerHash !== null &&
+      entry.pRandomSalt !== null &&
+      ((p.rawPasswd !== undefined &&
+        (await getPServerHash(
+          cid,
+          p.rawPasswd,
+          p.pSecretSalt,
+          entry.pRandomSalt,
+        )) === entry.pServerHash) ||
+        (p.v9PasswdHash !== undefined &&
+          p.v9UserSalt !== undefined &&
+          (await getPUserHash(entry.pServerHash, p.v9UserSalt)) ===
+            p.v9PasswdHash)))
   ) {
     return { entry, chart };
   } else {
@@ -107,7 +111,7 @@ export function getPUserHash(
 ): Promise<string> {
   return hash(pServerHash + pUserSalt);
 }
-function getPServerHash(
+export function getPServerHash(
   cid: string,
   rawPasswd: string,
   pSecretSalt: string,
@@ -133,8 +137,8 @@ export interface ChartEntryCompressed {
   title: string;
   composer: string;
   chartCreator: string;
-  pServerHash: string; // see comment in chartFile.ts
-  pRandomSalt: string;
+  pServerHash: string | null; // see comment in chartFile.ts
+  pRandomSalt: string | null;
   updatedAt: number;
   ip: string[];
   locale: string;
@@ -243,7 +247,11 @@ export async function chartToEntry(
   const pRandomSalt =
     prevEntry?.pRandomSalt || randomBytes(16).toString("base64");
   let pServerHash: string;
-  if (prevEntry && chart.changePasswd === null) {
+  if (
+    prevEntry &&
+    prevEntry.pServerHash !== null &&
+    chart.changePasswd === null
+  ) {
     pServerHash = prevEntry.pServerHash;
   } else {
     if (!chart.changePasswd) {
