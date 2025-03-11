@@ -1,7 +1,6 @@
 ## ver. 9.0 - 2025/ [#369](https://github.com/na-trium-144/falling-nikochan/pull/369), [#370](https://github.com/na-trium-144/falling-nikochan/pull/370), [#365](https://github.com/na-trium-144/falling-nikochan/pull/365)
 
 * valibotを導入し、Chart9のschema,validateChart()関数,apiのパラメータのパース処理をvalibotで書く
-  * todo: /og/result のパラメータ, recultParams が以前のまま
 * データベースに平文パスワードを保存するのをやめる
   * route/src/api/chartFormat.ts のコメントを参照
   * 今までの /api/chartFile のAPIとの互換性はない
