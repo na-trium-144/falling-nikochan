@@ -1,11 +1,11 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "private": true,
   "type": "module",
   "dependencies": {
     "@fontsource/kaisei-opti": "^5.2.5",
-    "@fontsource/merriweather": "^5.2.6",
+    "@fontsource/merriweather": "=5.2.5",
     "@fontsource/noto-sans": "^5.2.5",
     "@fontsource/noto-sans-jp": "^5.2.5",
     "@icon-park/react": "^1.4.2",
