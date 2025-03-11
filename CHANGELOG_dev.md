@@ -1,3 +1,7 @@
+## ver. 9.1 - 2025/03/11 [#377](https://github.com/na-trium-144/falling-nikochan/pull/377)
+
+* URLにクエリパラメータでredirected=1がついているとき、リダイレクトに関するメッセージを表示する
+
 ## ver. 9.0 - 2025/03/11 [#369](https://github.com/na-trium-144/falling-nikochan/pull/369), [#370](https://github.com/na-trium-144/falling-nikochan/pull/370), [#365](https://github.com/na-trium-144/falling-nikochan/pull/365)
 
 * valibotを導入し、Chart9のschema,validateChart()関数,apiのパラメータのパース処理をvalibotで書く
