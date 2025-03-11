@@ -174,7 +174,8 @@ export default function EditAuth({ locale }: { locale: string }) {
             setErrorStatus(undefined);
             setErrorMsg(undefined);
             addRecent("edit", cidInitial.current);
-          } catch {
+          } catch (e) {
+            console.error(e);
             setChart(undefined);
             setErrorStatus(undefined);
             setErrorMsg(te("badResponse"));
