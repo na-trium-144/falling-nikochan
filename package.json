@@ -7,7 +7,7 @@
     "i18n:lint": "cd i18n && eslint",
     "route:lint": "cd route && eslint src/",
     "frontend:lint": "cd frontend && tsc --noEmit && eslint app/",
-    "lint": "npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
+    "lint": "tsc && npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
     "route:test": "cd route && bun test",
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+  },
+  "include": ["./*.ts"],
+  "exclude": ["node_modules"]
+}
