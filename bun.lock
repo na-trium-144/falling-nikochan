@@ -25,7 +25,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "9.1.0",
+      "version": "9.3.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0-rc.3",
@@ -34,10 +34,10 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "9.1.0",
+      "version": "9.3.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
-        "@fontsource/merriweather": "^5.2.5",
+        "@fontsource/merriweather": "=5.2.5",
         "@fontsource/noto-sans": "^5.2.5",
         "@fontsource/noto-sans-jp": "^5.2.5",
         "@icon-park/react": "^1.4.2",
@@ -64,14 +64,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "9.1.0",
+      "version": "9.3.0",
       "dependencies": {
         "next-intl": "^3.26.5",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "9.1.0",
+      "version": "9.3.0",
       "dependencies": {
         "@hono/node-server": "^1.13.8",
         "@vercel/og": "^0.6.5",
