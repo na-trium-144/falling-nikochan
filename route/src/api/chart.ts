@@ -15,27 +15,27 @@ import {
   isSample,
   getSample,
   Chart8Edit,
-  validCId,
+  CidSchema,
+  Chart9Edit,
+  SpeedChange9,
+  NoteCommand9,
+  Rest9,
+  BPMChange9,
+  Signature9,
 } from "@falling-nikochan/chart";
+import * as v from "valibot";
 import { gzip, gunzip } from "node:zlib";
 import { promisify } from "node:util";
 import { Binary, Db } from "mongodb";
 import { HTTPException } from "hono/http-exception";
-
-export function hashPasswd(
-  cid: string,
-  pw: string,
-  hashKey: string
-): Promise<string> {
-  return hash(cid + pw + hashKey);
-}
+import { randomBytes } from "node:crypto";
 
 interface Passwd {
   bypass?: boolean;
-  v6PasswdHash?: string;
   rawPasswd?: string;
-  v7PasswdHash?: string;
-  v7HashKey?: string;
+  v9PasswdHash?: string;
+  v9UserSalt?: string;
+  pSecretSalt: string;
 }
 /**
  * パスワードについては chartFile のコメントを参照
@@ -45,23 +45,30 @@ interface Passwd {
 export async function getChartEntry(
   db: Db,
   cid: string,
-  p: Passwd | null
+  p: Passwd | null,
 ): Promise<{
   entry: ChartEntry;
-  chart: Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit;
+  chart: Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit;
 }> {
-  if (!validCId(cid)) {
+  if (!v.parse(CidSchema(), cid)) {
     throw new HTTPException(400, { message: "invalidChartId" });
   }
-  const entryCompressed = (await db
-    .collection("chart")
-    .findOne({ cid })) as ChartEntryCompressed | null;
+  const entryCompressed = await db
+    .collection<ChartEntryCompressed>("chart")
+    .findOne({ cid });
   if (entryCompressed === null || entryCompressed.deleted) {
     if (process.env.API_ENV === "development" && isSample(cid)) {
       const chart = getSample(cid);
       return {
         chart,
-        entry: await chartToEntry(chart, cid, 0),
+        entry: await chartToEntry(
+          { ...chart, changePasswd: "a" },
+          cid,
+          0,
+          null,
+          "",
+          null,
+        ),
       };
     } else {
       throw new HTTPException(404, { message: "chartIdNotFound" });
@@ -77,13 +84,20 @@ export async function getChartEntry(
   if (
     p === null ||
     p.bypass ||
-    (p.rawPasswd !== undefined && p.rawPasswd === chart.editPasswd) ||
-    (p.v6PasswdHash !== undefined &&
-      chart.ver <= 6 &&
-      p.v6PasswdHash === (await hash(chart.editPasswd))) ||
-    (p.v7PasswdHash !== undefined &&
-      p.v7HashKey !== undefined &&
-      p.v7PasswdHash === (await hashPasswd(cid, chart.editPasswd, p.v7HashKey)))
+    (entry.pServerHash === null && entry.pRandomSalt === null) ||
+    (entry.pServerHash !== null &&
+      entry.pRandomSalt !== null &&
+      ((p.rawPasswd !== undefined &&
+        (await getPServerHash(
+          cid,
+          p.rawPasswd,
+          p.pSecretSalt,
+          entry.pRandomSalt,
+        )) === entry.pServerHash) ||
+        (p.v9PasswdHash !== undefined &&
+          p.v9UserSalt !== undefined &&
+          (await getPUserHash(entry.pServerHash, p.v9UserSalt)) ===
+            p.v9PasswdHash)))
   ) {
     return { entry, chart };
   } else {
@@ -91,30 +105,47 @@ export async function getChartEntry(
   }
 }
 
+export function getPUserHash(
+  pServerHash: string,
+  pUserSalt: string,
+): Promise<string> {
+  return hash(pServerHash + pUserSalt);
+}
+export function getPServerHash(
+  cid: string,
+  rawPasswd: string,
+  pSecretSalt: string,
+  pRandomSalt: string,
+): Promise<string> {
+  return hash(cid + rawPasswd + pSecretSalt + pRandomSalt);
+}
 /**
  * データベースに保存する形式
  *
  * levels がjson+gzip圧縮+base64エンコードされてlevelsCompressedとして保存されている
+ *
+ * v8->v9: need to set locale, pServerHash, pRandomSalt, ip
  */
 export interface ChartEntryCompressed {
   cid: string;
-  levelsCompressed: Binary | null;
+  levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8;
+  ver: 4 | 5 | 6 | 7 | 8 | 9;
   offset: number;
   ytId: string;
   title: string;
   composer: string;
   chartCreator: string;
-  editPasswd: string;
+  pServerHash: string | null; // see comment in chartFile.ts
+  pRandomSalt: string | null;
   updatedAt: number;
-  playCount: number;
-  locale?: string; // new in v7
+  ip: string[];
+  locale: string;
   levelBrief: {
     name: string;
     hash: string;
-    type: string;
+    type: "Single" | "Double" | "Maniac";
     difficulty: number;
     noteCount: number;
     bpmMin: number;
@@ -146,16 +177,24 @@ export interface ChartLevelCore7 {
   signature: SignatureWithLua5[];
   lua: string[];
 }
-
+export interface ChartLevelCore9 {
+  notes: NoteCommand9[];
+  rest: Rest9[];
+  bpmChanges: BPMChange9[];
+  speedChanges: SpeedChange9[];
+  signature: Signature9[];
+  lua: string[];
+}
 export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
     | { ver: 5 | 6; levels: ChartLevelCore5[] }
     | { ver: 7 | 8; levels: ChartLevelCore7[] }
+    | { ver: 9; levels: ChartLevelCore9[] }
   );
 
 export async function unzipEntry(
-  entry: ChartEntryCompressed
+  entry: ChartEntryCompressed,
 ): Promise<ChartEntry> {
   if (!entry.levelsCompressed) {
     throw new Error("levelsCompressed is null");
@@ -171,10 +210,10 @@ export async function unzipEntry(
 }
 
 export async function zipEntry(
-  entry: ChartEntry
+  entry: ChartEntry,
 ): Promise<ChartEntryCompressed> {
   const levelsCompressed: Buffer = await promisify(gzip)(
-    JSON.stringify(entry.levels)
+    JSON.stringify(entry.levels),
   );
   return {
     cid: entry.cid,
@@ -186,9 +225,10 @@ export async function zipEntry(
     title: entry.title,
     composer: entry.composer,
     chartCreator: entry.chartCreator,
-    editPasswd: entry.editPasswd,
+    pServerHash: entry.pServerHash,
+    pRandomSalt: entry.pRandomSalt,
     updatedAt: entry.updatedAt,
-    playCount: entry.playCount,
+    ip: entry.ip,
     locale: entry.locale,
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
@@ -199,13 +239,38 @@ export async function chartToEntry(
   chart: ChartEdit,
   cid: string,
   updatedAt: number,
-  prevEntry?: ChartEntry
+  addIp: string | null,
+  pSecretSalt: string,
+  prevEntry: ChartEntry | null,
 ): Promise<ChartEntry> {
   const chartBrief = await createBrief(chart, updatedAt);
+  const pRandomSalt =
+    prevEntry?.pRandomSalt || randomBytes(16).toString("base64");
+  let pServerHash: string;
+  if (
+    prevEntry &&
+    prevEntry.pServerHash !== null &&
+    chart.changePasswd === null
+  ) {
+    pServerHash = prevEntry.pServerHash;
+  } else {
+    if (!chart.changePasswd) {
+      throw new HTTPException(400, { message: "noPasswd" });
+    }
+    pServerHash = await getPServerHash(
+      cid,
+      chart.changePasswd,
+      pSecretSalt,
+      pRandomSalt,
+    );
+  }
+  const ip = prevEntry?.ip || [];
+  if (addIp !== null && !ip.includes(addIp)) {
+    ip.push(addIp);
+  }
   return {
     cid,
     deleted: prevEntry?.deleted || false,
-    playCount: prevEntry?.playCount || 0,
     levelsCompressed: null,
     levels: chart.levels.map((level) => ({
       notes: level.notes,
@@ -218,13 +283,15 @@ export async function chartToEntry(
     ver: chart.ver,
     published: chart.published,
     offset: chart.offset,
-    editPasswd: chart.editPasswd,
+    pServerHash,
+    pRandomSalt,
     ytId: chartBrief.ytId,
     title: chartBrief.title,
     composer: chartBrief.composer,
     chartCreator: chartBrief.chartCreator,
     updatedAt: chartBrief.updatedAt,
     levelBrief: chartBrief.levels,
+    ip,
     locale: chartBrief.locale,
   };
 }
@@ -236,15 +303,14 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
     chartCreator: entry.chartCreator,
     levels: entry.levelBrief,
     updatedAt: entry.updatedAt,
-    playCount: entry.playCount,
     published: entry.published,
     locale: entry.locale || "ja",
   };
 }
 
 export function entryToChart(
-  entry: ChartEntry
-): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit {
+  entry: ChartEntry,
+): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit {
   switch (entry.ver) {
     case 4:
       return {
@@ -266,7 +332,7 @@ export function entryToChart(
         title: entry.title,
         composer: entry.composer,
         chartCreator: entry.chartCreator,
-        editPasswd: entry.editPasswd,
+        editPasswd: "",
         updatedAt: entry.updatedAt,
       };
     case 5:
@@ -290,7 +356,7 @@ export function entryToChart(
         title: entry.title,
         composer: entry.composer,
         chartCreator: entry.chartCreator,
-        editPasswd: entry.editPasswd,
+        editPasswd: "",
         updatedAt: entry.updatedAt,
       };
     case 6:
@@ -314,12 +380,9 @@ export function entryToChart(
         title: entry.title,
         composer: entry.composer,
         chartCreator: entry.chartCreator,
-        editPasswd: entry.editPasswd,
+        editPasswd: "",
       };
     case 7:
-      if (!entry.locale) {
-        throw new Error("locale is required in v7");
-      }
       return {
         falling: "nikochan",
         ver: entry.ver,
@@ -340,13 +403,10 @@ export function entryToChart(
         title: entry.title,
         composer: entry.composer,
         chartCreator: entry.chartCreator,
-        editPasswd: entry.editPasswd,
+        editPasswd: "",
         locale: entry.locale,
       };
     case 8:
-      if (!entry.locale) {
-        throw new Error("locale is required in v7");
-      }
       return {
         falling: "nikochan",
         ver: entry.ver,
@@ -367,7 +427,31 @@ export function entryToChart(
         title: entry.title,
         composer: entry.composer,
         chartCreator: entry.chartCreator,
-        editPasswd: entry.editPasswd,
+        editPasswd: "",
+        locale: entry.locale,
+      };
+    case 9:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        published: entry.published,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          type: entry.levelBrief.at(i)?.type || "Maniac",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          lua: level.lua,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        changePasswd: null,
         locale: entry.locale,
       };
     default:

@@ -3,6 +3,7 @@ import {
   copyLevel,
   levelTypes,
   ChartEdit,
+  levelTypesConst,
 } from "@falling-nikochan/chart";
 import { difficulty } from "@falling-nikochan/chart";
 import { Step, stepCmp } from "@falling-nikochan/chart";
@@ -199,7 +200,7 @@ export default function LevelTab(props: Props) {
           </p>
           <p className="mb-2">
             <span>{t("difficulty")}:</span>
-            {levelTypes.map((t, i) => (
+            {levelTypesConst.map((t, i) => (
               <CheckBox
                 key={t}
                 value={t === currentLevel.type}

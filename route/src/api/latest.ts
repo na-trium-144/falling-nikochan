@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { MongoClient } from "mongodb";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
+import { ChartEntryCompressed } from "./chart.js";
 
 export const numLatest = 25;
 
@@ -14,7 +15,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       return c.json(
         await db
-          .collection("chart")
+          .collection<ChartEntryCompressed>("chart")
           .find({ published: true })
           .sort({ updatedAt: -1 })
           .limit(numLatest)
@@ -22,7 +23,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           .toArray(),
         200,
         {
-          "cache-control": "max-age=600",
+          "cache-control": cacheControl(env(c), 600),
         }
       );
     } finally {

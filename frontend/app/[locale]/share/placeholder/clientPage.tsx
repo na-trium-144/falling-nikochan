@@ -21,13 +21,12 @@ const dummyBrief = {
   ytId: "",
   updatedAt: 0,
   published: true,
-  playCount: 999,
   locale: "ja",
   levels: [
     {
       name: "placeholder",
       hash: "",
-      type: "Single",
+      type: "Single" as const,
       difficulty: 10,
       noteCount: 100,
       bpmMin: 1,

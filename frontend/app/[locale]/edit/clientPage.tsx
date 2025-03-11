@@ -1,6 +1,10 @@
 "use client";
 
-import { defaultNoteCommand, NoteCommand } from "@falling-nikochan/chart";
+import {
+  Chart9Edit,
+  defaultNoteCommand,
+  NoteCommand,
+} from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -37,7 +41,6 @@ import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
 import Header from "@/common/header.js";
 import {
   getPasswd,
-  getV6Passwd,
   preferSavePasswd,
   setPasswd,
   unsetPasswd,
@@ -97,7 +100,7 @@ export default function EditAuth({ locale }: { locale: string }) {
   const [editPasswd, setEditPasswd] = useState<string>("");
   // fetchに成功したらセット、
   // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
-  const currentPasswd = useRef<string>("");
+  const currentPasswd = useRef<string | null>(null);
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -112,7 +115,7 @@ export default function EditAuth({ locale }: { locale: string }) {
       isFirst: boolean,
       bypass: boolean,
       editPasswd: string,
-      savePasswd: boolean
+      savePasswd: boolean,
     ) => {
       if (cidInitial.current === "new") {
         setCid(undefined);
@@ -123,40 +126,51 @@ export default function EditAuth({ locale }: { locale: string }) {
         setCid(cidInitial.current);
         setPasswdFailed(false);
         setLoading(true);
+        const q = new URLSearchParams();
+        if (getPasswd(cidInitial.current)) {
+          q.set("ph", getPasswd(cidInitial.current)!);
+        }
+        if (editPasswd) {
+          currentPasswd.current = editPasswd;
+          q.set("p", currentPasswd.current);
+        } else {
+          currentPasswd.current = null;
+        }
+        if (bypass) {
+          q.set("pbypass", "1");
+        }
         const res = await fetch(
           process.env.BACKEND_PREFIX +
-            `/api/chartFile/${cidInitial.current}` +
-            `?p=${getV6Passwd(cidInitial.current)}` +
-            `&ph=${getPasswd(cidInitial.current)}` +
-            `&pw=${editPasswd}` +
-            (bypass ? "&pbypass=1" : ""),
+            `/api/chartFile/${cidInitial.current}?` +
+            q.toString(),
           {
             cache: "no-store",
             credentials:
               process.env.NODE_ENV === "development"
                 ? "include"
                 : "same-origin",
-          }
+          },
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit =
+            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
               msgpack.deserialize(await res.arrayBuffer());
             setConvertedFrom(chartRes.ver);
             const chart: ChartEdit = await validateChart(chartRes);
-            currentPasswd.current = chart.editPasswd;
             if (savePasswd) {
-              const res = await fetch(
-                process.env.BACKEND_PREFIX +
-                  `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`,
-                {
-                  credentials:
-                    process.env.NODE_ENV === "development"
-                      ? "include"
-                      : "same-origin",
-                }
-              );
-              setPasswd(cidInitial.current, await res.text());
+              if (currentPasswd.current) {
+                const res = await fetch(
+                  process.env.BACKEND_PREFIX +
+                    `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
+                  {
+                    credentials:
+                      process.env.NODE_ENV === "development"
+                        ? "include"
+                        : "same-origin",
+                  },
+                );
+                setPasswd(cidInitial.current, await res.text());
+              }
             } else {
               unsetPasswd(cidInitial.current);
             }
@@ -164,7 +178,8 @@ export default function EditAuth({ locale }: { locale: string }) {
             setErrorStatus(undefined);
             setErrorMsg(undefined);
             addRecent("edit", cidInitial.current);
-          } catch {
+          } catch (e) {
+            console.error(e);
             setChart(undefined);
             setErrorStatus(undefined);
             setErrorMsg(te("badResponse"));
@@ -194,7 +209,7 @@ export default function EditAuth({ locale }: { locale: string }) {
         setLoading(false);
       }
     },
-    []
+    [],
   );
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -203,7 +218,7 @@ export default function EditAuth({ locale }: { locale: string }) {
     }
     setSavePasswd(preferSavePasswd());
     document.title = titleWithSiteName(
-      t("title", { title: "", cid: cidInitial.current })
+      t("title", { title: "", cid: cidInitial.current }),
     );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     // レンダリングの都合上 cidInitial.current を先に反映させたいため、setTimeoutで1段階遅延
@@ -284,8 +299,8 @@ export default function EditAuth({ locale }: { locale: string }) {
 }
 
 interface Props {
-  chart?: Chart8Edit;
-  setChart: (chart: Chart8Edit) => void;
+  chart?: ChartEdit;
+  setChart: (chart: ChartEdit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
   themeContext: ThemeContext;
@@ -293,7 +308,7 @@ interface Props {
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
-  currentPasswd: {current: string;};
+  currentPasswd: { current: string | null };
   savePasswdInitial: boolean;
   modal?: ReactNode;
 }
@@ -320,6 +335,8 @@ function Page(props: Props) {
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
   const chartNumEvent = chart ? numEvents(chart) : 0;
+  // 変更する場合は空文字列以外をセットすると、サーバーへ送信時にchart.changePasswdにセットされる
+  const [newPasswd, setNewPasswd] = useState<string>("");
   const [savePasswd, setSavePasswd] = useState<boolean | null>(null);
   useEffect(() => {
     if (chart && savePasswd === null) {
@@ -328,13 +345,13 @@ function Page(props: Props) {
   }, [chart, savePasswd, props.savePasswdInitial]);
 
   // 譜面の更新 (メタデータの変更など)
-  const changeChart = (chart: Chart8Edit) => {
+  const changeChart = (chart: ChartEdit) => {
     setHasChange(true);
     setChart(chart);
   };
   useEffect(() => {
     document.title = titleWithSiteName(
-      t("title", { title: chart?.title, cid: cid })
+      t("title", { title: chart?.title, cid: cid }),
     );
   });
   useEffect(() => {
@@ -346,7 +363,7 @@ function Page(props: Props) {
         const data = {
           cid: cid,
           lvIndex: currentLevelIndex,
-          brief: await createBrief(chart),
+          brief: await createBrief(chart, new Date().getTime()),
           level: convertToPlay(chart, currentLevelIndex),
           editing: true,
         };
@@ -361,7 +378,7 @@ function Page(props: Props) {
   // レベルの更新
   // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
   const changeLevel = async (
-    newLevel: LevelMin | string[] | null | undefined
+    newLevel: LevelMin | string[] | null | undefined,
   ) => {
     if (chart && newLevel && currentLevelIndex < chart.levels.length) {
       const newChart: ChartEdit = {
@@ -377,7 +394,7 @@ function Page(props: Props) {
         };
       }
       const levelFreezed = await luaExecutor.exec(
-        newChart.levels[currentLevelIndex].lua.join("\n")
+        newChart.levels[currentLevelIndex].lua.join("\n"),
       );
       if (levelFreezed) {
         newChart.levels[currentLevelIndex] = {
@@ -456,7 +473,7 @@ function Page(props: Props) {
       const step = getStep(
         currentLevel.bpmChanges,
         currentTimeSec,
-        snapDivider
+        snapDivider,
       );
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
@@ -468,11 +485,11 @@ function Page(props: Props) {
         let noteIndex: number;
         if (currentTimeSec < prevTimeSec.current) {
           noteIndex = currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, step) == 0
+            (n) => stepCmp(n.step, step) == 0,
           );
         } else {
           noteIndex = currentLevel.notes.findIndex(
-            (n) => stepCmp(n.step, step) == 0
+            (n) => stepCmp(n.step, step) == 0,
           );
         }
         if (currentNoteIndex !== noteIndex) {
@@ -573,7 +590,7 @@ function Page(props: Props) {
       }
       changeCurrentTimeSec(
         getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
-        focus
+        focus,
       );
     }
     if (focus) {
@@ -648,7 +665,7 @@ function Page(props: Props) {
         newLevel = luaUpdateSpeedChange(
           newLevel || currentLevel,
           currentSpeedIndex,
-          speed
+          speed,
         );
       }
       changeLevel(newLevel?.lua);
@@ -689,7 +706,7 @@ function Page(props: Props) {
         } else if (!speed && speedChangeHere) {
           newLevel = luaDeleteSpeedChange(
             newLevel || currentLevel,
-            currentSpeedIndex
+            currentSpeedIndex,
           );
         }
       }
@@ -700,7 +717,7 @@ function Page(props: Props) {
   const currentSignatureIndex =
     currentLevel && findBpmIndexFromStep(currentLevel.signature, currentStep);
   const currentSignature = currentLevel?.signature.at(
-    currentSignatureIndex || 0
+    currentSignatureIndex || 0,
   );
   const prevSignature =
     currentSignatureIndex && currentSignatureIndex > 0
@@ -713,7 +730,7 @@ function Page(props: Props) {
       const newLevel = luaUpdateBeatChange(
         currentLevel,
         currentSignatureIndex,
-        s
+        s,
       );
       changeLevel(newLevel?.lua);
     }
@@ -729,7 +746,7 @@ function Page(props: Props) {
       if (signatureChangeHere) {
         const newLevel = luaDeleteBeatChange(
           currentLevel,
-          currentSignatureIndex
+          currentSignatureIndex,
         );
         changeLevel(newLevel?.lua);
       } else {
@@ -751,8 +768,8 @@ function Page(props: Props) {
         // 追加したnoteは同じ時刻の音符の中でも最後
         setCurrentNoteIndex(
           currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, currentStep) == 0
-          )
+            (n) => stepCmp(n.step, currentStep) == 0,
+          ),
         );
         changeLevel(newLevel?.lua);
       }
@@ -777,8 +794,8 @@ function Page(props: Props) {
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
     ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(9)).map(() => null)
-    )
+      Array.from(new Array(9)).map(() => null),
+    ),
   );
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
@@ -956,7 +973,7 @@ function Page(props: Props) {
                 }
                 onClick={() => {
                   setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p",
                   );
                 }}
               >
@@ -1131,7 +1148,7 @@ function Page(props: Props) {
                   >
                     {t(`${key}.title`)}
                   </button>
-                )
+                ),
               )}
             </div>
             <Box
@@ -1157,6 +1174,8 @@ function Page(props: Props) {
                   currentLevelIndex={currentLevelIndex}
                   locale={locale}
                   currentPasswd={props.currentPasswd}
+                  newPasswd={newPasswd}
+                  setNewPasswd={setNewPasswd}
                   savePasswd={!!savePasswd}
                   setSavePasswd={setSavePasswd}
                 />

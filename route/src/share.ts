@@ -1,5 +1,5 @@
 import { createFactory } from "hono/factory";
-import { Bindings } from "./env.js";
+import { Bindings, cacheControl } from "./env.js";
 import briefApp from "./api/brief.js";
 import { getTranslations } from "@falling-nikochan/i18n";
 import { fetchStatic } from "./static.js";
@@ -14,6 +14,7 @@ import {
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import packageJson from "../package.json" with { type: "json" };
+import { env } from "hono/adapter";
 
 interface ShareParams {
   language: string;
@@ -141,7 +142,7 @@ const shareHandler = factory.createHandlers(async (c) => {
     }
     return c.text(replacedBody, 200, {
       "Content-Type": res.headers.get("Content-Type") || "text/plain",
-      "Cache-Control": "no-store",
+      "Cache-Control": cacheControl(env(c), null),
     });
   } else {
     let message = "";
