@@ -129,7 +129,7 @@ function Nikochan(props: NProps) {
     displayNote.chain && displayNote.baseScore !== undefined
       ? // 6,8,10,12
         6 +
-        Math.round(
+        Math.floor(
           3 * Math.min(1, displayNote.chain / bonusMax) * displayNote.baseScore
         ) *
           2
@@ -196,7 +196,7 @@ function Nikochan(props: NProps) {
             </span>
           )}*/}
       </div>
-      {/*false &&[1, 2].includes(displayNote.done) && (
+      {[1, 2].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
           left={note.targetX * boxSize + marginX}
@@ -204,7 +204,7 @@ function Nikochan(props: NProps) {
           big={displayNote.bigDone}
           chain={displayNote.chain || 0}
         />
-      )*/}
+      )}
       {particleNum > 0 && (
         <Particle
           particleNum={particleNum}
@@ -220,7 +220,7 @@ function Nikochan(props: NProps) {
   );
 }
 
-/*interface RProps {
+interface RProps {
   noteSize: number;
   left: number;
   bottom: number;
@@ -233,14 +233,14 @@ function Ripple(props: RProps) {
   const animateDone = useRef<boolean>(false);
   const { noteSize } = props;
   const rippleWidth = noteSize * 1.5 * (props.big ? 1.5 : 1);
-  const rippleHeight = rippleWidth * 0.6;
+  const rippleHeight = rippleWidth * 0.7;
   useEffect(() => {
     if (!animateDone.current) {
       [ref, ref2].forEach((r, i) => {
         r.current.animate(
           [
-            { transform: "scale(0)", opacity: 0.6 },
-            { transform: "scale(0.8)", opacity: 0.6, offset: 0.8 },
+            { transform: "scale(0)", opacity: 0.4 },
+            { transform: "scale(0.8)", opacity: 0.4, offset: 0.8 },
             { transform: `scale(1)`, opacity: 0 },
           ],
           {
@@ -269,7 +269,7 @@ function Ripple(props: RProps) {
           key={i}
           ref={r}
           className={
-            "absolute origin-center scale-0 " +
+            "absolute origin-center opacity-0 " +
             (props.chain >= bonusMax
               ? "bg-amber-200 border-amber-300 dark:bg-yellow-700 dark:border-yellow-600 "
               : "bg-yellow-200 border-yellow-300 dark:bg-amber-700 dark:border-amber-600 ")
@@ -286,7 +286,7 @@ function Ripple(props: RProps) {
       ))}
     </div>
   );
-}*/
+}
 
 interface PProps {
   particleNum: number;
@@ -301,40 +301,49 @@ function Particle(props: PProps) {
   const ref = useRef<HTMLImageElement>(null!);
   const refBig = useRef<HTMLImageElement | null>(null);
   const animateDone = useRef<boolean>(false);
+  const bigAnimateDone = useRef<boolean>(false);
   const { noteSize, particleNum } = props;
   const maxSize = noteSize * 1.8;
   const bigSize = noteSize * 3;
   useEffect(() => {
     if (!animateDone.current) {
       const angle = Math.random() * 360;
+      const angleVel = Math.random() * 180 - 90;
       ref.current.animate(
         [
           { transform: `scale(0.2) rotate(${angle}deg)`, opacity: 0.8 },
           {
-            transform: `scale(0.8) rotate(${angle}deg)`,
+            transform: `scale(0.8) rotate(${angle + angleVel * 0.8}deg)`,
             opacity: 0.8,
             offset: 0.8,
           },
-          { transform: `scale(1) rotate(${angle}deg)`, opacity: 0 },
-        ],
-        { duration: 500, fill: "forwards", easing: "ease-out" }
-      );
-      const angleBig = Math.random() * 360;
-      refBig.current?.animate(
-        [
-          { transform: `scale(0.2) rotate(${angleBig}deg)`, opacity: 0.8 },
-          {
-            transform: `scale(0.8) rotate(${angleBig}deg)`,
-            opacity: 0.8,
-            offset: 0.8,
-          },
-          { transform: `scale(1) rotate(${angleBig}deg)`, opacity: 0 },
+          { transform: `scale(1) rotate(${angle + angleVel}deg)`, opacity: 0 },
         ],
         { duration: 500, fill: "forwards", easing: "ease-out" }
       );
     }
     animateDone.current = true;
-  }, []);
+    if (props.big && refBig.current && !bigAnimateDone.current) {
+      const angleBig = Math.random() * 360;
+      const angleVel = Math.random() * 180 - 90;
+      refBig.current?.animate(
+        [
+          { transform: `scale(0.2) rotate(${angleBig}deg)`, opacity: 0.6 },
+          {
+            transform: `scale(0.8) rotate(${angleBig + angleVel * 0.8}deg)`,
+            opacity: 0.6,
+            offset: 0.8,
+          },
+          {
+            transform: `scale(1) rotate(${angleBig + angleVel}deg)`,
+            opacity: 0,
+          },
+        ],
+        { duration: 500, fill: "forwards", easing: "ease-out" }
+      );
+    }
+    bigAnimateDone.current = true;
+  }, [props.big]);
 
   return (
     <div
@@ -354,7 +363,7 @@ function Particle(props: PProps) {
           left: -maxSize / 2,
           bottom: -maxSize / 2,
           width: maxSize,
-          minWidth: maxSize,
+          minWidth: maxSize, // なぜかこれがないとwidthが0になってしまう...
           height: maxSize,
           minHeight: maxSize,
         }}
