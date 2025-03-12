@@ -85,7 +85,7 @@ export function SlimeSVG(props: Props) {
           ? props.className
           : "inline-block w-[1.5em] align-bottom translate-y-[-0.2em] mx-1 ") +
         (props.appearingAnim
-          ? "transition-all duration-250 " +
+          ? "transition-all duration-250 origin-bottom " +
             (appearing
               ? "ease-in opacity-100 scale-y-100 "
               : "ease-out opacity-0 scale-y-0 ")
