@@ -5,7 +5,6 @@ import { targetY, bigScale } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { bonusMax } from "@falling-nikochan/chart";
 import { ThemeContext } from "@/common/theme.js";
 import {
   displayNote6,
@@ -134,22 +133,22 @@ function Nikochan(props: NProps) {
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
 
-  const particleMaxNum = 15;
-  const particleNum =
-    displayNote.chain && displayNote.baseScore !== undefined
-      ? Math.min(
-          Math.round(
-            ((1 + (2 * displayNote.chain) / bonusMax) / 3) *
-              particleMaxNum *
-              displayNote.baseScore
-          ),
-          particleMaxNum
-        )
-      : 0;
-  const [particleStartAngle, setParticleStartAngle] = useState<number>();
-  useEffect(() => {
-    setParticleStartAngle(Math.random() * 360);
-  }, []);
+  // const particleMaxNum = 15;
+  // const particleNum =
+  //   displayNote.chain && displayNote.baseScore !== undefined
+  //     ? Math.min(
+  //         Math.round(
+  //           ((1 + (2 * displayNote.chain) / bonusMax) / 3) *
+  //             particleMaxNum *
+  //             displayNote.baseScore
+  //         ),
+  //         particleMaxNum
+  //       )
+  //     : 0;
+  // const [particleStartAngle, setParticleStartAngle] = useState<number>();
+  // useEffect(() => {
+  //   setParticleStartAngle(Math.random() * 360);
+  // }, []);
 
   return (
     <>
@@ -212,7 +211,7 @@ function Nikochan(props: NProps) {
             </span>
           )}*/}
       </div>
-      {[1, 2].includes(displayNote.done) && (
+      {/*false &&[1, 2].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
           left={note.targetX * boxSize + marginX}
@@ -223,7 +222,7 @@ function Nikochan(props: NProps) {
       )}
       {particleStartAngle !== undefined &&
         particleNum > 0 &&
-        Array.from(new Array(particleNum /*particleMaxNum*/)).map((_, i) => (
+        Array.from(new Array(particleNum /*particleMaxNum/)).map((_, i) => (
           <Particle
             key={i}
             angle={particleStartAngle + (360 * i) / particleNum}
@@ -235,12 +234,12 @@ function Nikochan(props: NProps) {
             chain={displayNote.chain || 0}
             themeContext={props.themeContext}
           />
-        ))}
+        ))*/}
     </>
   );
 }
 
-interface RProps {
+/*interface RProps {
   noteSize: number;
   left: number;
   bottom: number;
@@ -382,3 +381,4 @@ function Particle(props: PProps) {
     </div>
   );
 }
+*/
