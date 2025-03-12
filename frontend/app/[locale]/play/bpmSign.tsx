@@ -12,16 +12,23 @@ interface Props {
   chartSeq: ChartSeqData6 | ChartSeqData9 | null;
   getCurrentTimeSec: () => number | undefined;
   hasExplicitSpeedChange: boolean;
+  currentBpmIndex: number;
+  setCurrentBpmIndex: (index: number) => void;
 }
 export default function BPMSign(props: Props) {
   const { playUIScale } = useDisplayMode();
-  const { chartPlaying, chartSeq, getCurrentTimeSec, hasExplicitSpeedChange } =
-    props;
+  const {
+    chartPlaying,
+    chartSeq,
+    getCurrentTimeSec,
+    hasExplicitSpeedChange,
+    currentBpmIndex,
+    setCurrentBpmIndex,
+  } = props;
 
   const [flip, setFlip] = useState<boolean>(false);
 
   // chart.bpmChanges 内の現在のインデックス
-  const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
   const displayBpm = chartSeq?.bpmChanges.at(currentBpmIndex)?.bpm;
   const nextBpmIndex = useRef<number | null>(null);
 

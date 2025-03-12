@@ -211,6 +211,8 @@ export default function OGTemplate() {
             chartSeq={null}
             getCurrentTimeSec={() => undefined}
             hasExplicitSpeedChange={false}
+            currentBpmIndex={0}
+            setCurrentBpmIndex={() => undefined}
           />
         </div>
       </div>

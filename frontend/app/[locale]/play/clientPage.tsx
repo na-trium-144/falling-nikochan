@@ -54,6 +54,7 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
+import { BGCloud } from "./bgCloud.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -224,6 +225,7 @@ function Play(props: Props) {
     }
   }, [musicAreaOk]);
 
+  const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
   const hasExplicitSpeedChange =
     chartSeq !== undefined &&
     "speedChanges" in chartSeq &&
@@ -650,6 +652,17 @@ function Play(props: Props) {
             barFlash={barFlash}
             themeContext={themeContext}
           />
+          {[0.15, 0.25, 0.35].map((y) => (
+            <BGCloud
+              key={y}
+              bpm={
+                chartPlaying
+                  ? chartSeq?.bpmChanges.at(currentBpmIndex)?.bpm || 0
+                  : 0
+              }
+              top={y}
+            />
+          ))}
           <div
             className={
               "absoulte inset-0 " +
@@ -776,6 +789,8 @@ function Play(props: Props) {
           />
         )}
         <BPMSign
+          currentBpmIndex={currentBpmIndex}
+          setCurrentBpmIndex={setCurrentBpmIndex}
           className={
             "transition-opacity duration-200 ease-out " +
             (initAnim && chartSeq ? "opacity-100 " : "opacity-0 ")
