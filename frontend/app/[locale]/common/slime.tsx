@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 interface Props {
   className?: string;
@@ -20,6 +20,11 @@ export function SlimeSVG(props: Props) {
   // 1テンポ遅らせる
   useEffect(() => setAppearing(!props.hidden), [props.hidden]);
 
+  return <SlimeSVGInner {...props} id={id} appearing={appearing} />;
+}
+const SlimeSVGInner = memo(function SlimeSVGInner(
+  props: Props & { appearing: boolean; id: number }
+) {
   const duration = props.duration || 0.8;
   const smilAnimationParams = {
     dur: duration + "s",
@@ -86,7 +91,7 @@ export function SlimeSVG(props: Props) {
           : "inline-block w-[1.5em] align-bottom translate-y-[-0.2em] mx-1 ") +
         (props.appearingAnim
           ? "transition-all duration-250 origin-bottom " +
-            (appearing
+            (props.appearing
               ? "ease-in opacity-100 scale-y-100 "
               : "ease-out opacity-0 scale-y-0 ")
           : "")
@@ -95,7 +100,7 @@ export function SlimeSVG(props: Props) {
       {/*width="117.89705" height="105.69147"*/}
       <svg viewBox="0 0 31.193595 27.9642" version="1.1">
         <linearGradient
-          id={`slime-linearGradient-${id}`}
+          id={`slime-linearGradient-${props.id}`}
           x1="14.423388"
           y1="8.3200769"
           x2="14.423388"
@@ -141,7 +146,7 @@ export function SlimeSVG(props: Props) {
           />
           <path
             style={{
-              fill: `url(#slime-linearGradient-${id})`,
+              fill: `url(#slime-linearGradient-${props.id})`,
               fillOpacity: 1,
               stroke: "#000000",
               strokeWidth: 0.79375,
@@ -362,4 +367,4 @@ export function SlimeSVG(props: Props) {
       </svg>
     </span>
   );
-}
+});
