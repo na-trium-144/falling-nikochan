@@ -92,8 +92,6 @@ export function SlimeSVG(props: Props) {
           : "")
       }
     >
-      {props.jumpingMid &&
-        ((props.jumpingMid.getTime() % 10000) / 1000).toFixed(2)}
       {/*width="117.89705" height="105.69147"*/}
       <svg viewBox="0 0 31.193595 27.9642" version="1.1">
         <linearGradient
