@@ -25,7 +25,7 @@ export function SlimeSVG(props: Props) {
     dur: duration + "s",
     repeatCount: props.noLoop ? 1 : "indefinite",
     begin: props.noLoop ? "indefinite" : "0s",
-    fill: "freeze",
+    fill: "remove",
   } as const;
   const smilAnimationValues = (params: string[]) =>
     [2, 0, 1, 3, 4, 3, 2, 2].map((i) => params[i]).join(";");

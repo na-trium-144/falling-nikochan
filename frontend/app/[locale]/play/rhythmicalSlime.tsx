@@ -16,10 +16,10 @@ interface Props {
   signature: Signature[] | Signature5[];
 }
 interface SlimeState {
-  // 対象の時刻の3/4ステップ前からしゃがむ
-  // 対象の時刻の1/4ステップ前からジャンプしはじめ、
-  // 対象の時刻の1/4ステップ後に最高点、
-  // 3/4ステップ後に着地
+  // 対象の時刻の3/6ステップ前からしゃがむ
+  // 対象の時刻の1/6ステップ前からジャンプしはじめ、
+  // 対象の時刻の1/6ステップ後に最高点、
+  // 3/6ステップ後に着地
   preparingSec: number;
   jumpBeginSec: number;
   jumpMidSec: number;
@@ -75,7 +75,7 @@ export default function RhythmicalSlime(props: Props) {
             stepSub(ss.stepAligned, {
               fourth: 0,
               numerator: 1,
-              denominator: (slimeSize / 4) * 4,
+              denominator: (slimeSize / 4) * 6,
             })
           );
           const landingSec = getTimeSec(
@@ -83,7 +83,7 @@ export default function RhythmicalSlime(props: Props) {
             stepAdd(ss.stepAligned, {
               fourth: 0,
               numerator: 3,
-              denominator: (slimeSize / 4) * 4,
+              denominator: (slimeSize / 4) * 6,
             })
           );
           const jumpMidSec = (jumpBeginSec + landingSec) / 2;
