@@ -2,12 +2,16 @@ import { levelBgColors } from "./levelColors.js";
 
 interface Props {
   value: number;
+  className?: string;
   fixedColor?: string;
 }
 export default function ProgressBar(props: Props) {
   return (
     <div
-      className="relative h-1 rounded-full shadow bg-black/25 dark:bg-white/25 "
+      className={
+        "relative h-1 rounded-full shadow bg-black/25 dark:bg-white/25 " +
+        props.className
+      }
     >
       <div
         className={

@@ -47,10 +47,10 @@ export function MusicArea(props: Props) {
   return (
     <div
       className={
-        "z-10 grow-0 shrink-0 pt-3 px-3 pb-1 rounded-lg flex " +
+        "z-10 grow-0 shrink-0 pb-1 flex " +
         (levelBgColors.at(levelTypes.indexOf(props.lvType)) ||
           levelBgColors[1]) +
-        (props.isMobile ? "mt-3 mx-3 " : "my-3 mr-3 ") +
+        (props.isMobile ? "rounded-b-lg " : "rounded-bl-xl pl-3 ") +
         "flex-col " +
         props.className
       }
@@ -65,8 +65,8 @@ export function MusicArea(props: Props) {
           <FlexYouTube
             fixedSide="width"
             className={
-              "z-10 mb-1 " +
-              (props.isMobile ? "grow-0 shrink-0 w-1/2 " : "w-full")
+              "z-10 " +
+              (props.isMobile ? "grow-0 shrink-0 w-1/2 mb-1.5 " : "w-full mb-1")
             }
             scale={ytHalf ? 0.5 : 1}
             id={props.chartBrief?.ytId}
@@ -78,7 +78,12 @@ export function MusicArea(props: Props) {
             onError={props.onError}
           />
         )}
-        <div className="flex-1 min-w-0 mr-1 flex flex-col justify-between ">
+        <div
+          className={
+            "flex-1 min-w-0 mr-1 flex flex-col justify-between " +
+            (props.isMobile ? "ml-3 mt-2 " : "")
+          }
+        >
           <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
             <p className={largeTitle ? "leading-5 " : "leading-3.5 "}>
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
@@ -191,7 +196,11 @@ export function MusicArea(props: Props) {
           </p>
         </div>
       </div>
-      <ProgressBar value={currentSec / levelLength} fixedColor="bg-red-600" />
+      <ProgressBar
+        value={currentSec / levelLength}
+        fixedColor="bg-red-600"
+        className={props.isMobile ? "mx-2 " : "mr-1 "}
+      />
     </div>
   );
 }
