@@ -35,7 +35,7 @@ export default function FallingWindow(props: Props) {
   const fpsCountBegin = useRef<Date>(new Date());
 
   const { rem } = useDisplayMode();
-  const noteSize = Math.max(1.5 * rem, 0.05 * (boxSize || 0));
+  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   useEffect(() => {
     let anim: number;
