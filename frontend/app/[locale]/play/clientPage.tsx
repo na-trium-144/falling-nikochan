@@ -115,12 +115,12 @@ export function InitPlay({ locale }: { locale: string }) {
           process.env.BACKEND_PREFIX +
             `/api/playFile/${session?.cid || cidFromParam}` +
             `/${session?.lvIndex || lvIndexFromParam}`,
-          { cache: "no-store" },
+          { cache: "no-store" }
         );
         if (res.ok) {
           try {
             const seq: Level6Play | Level9Play = msgpack.deserialize(
-              await res.arrayBuffer(),
+              await res.arrayBuffer()
             );
             if (seq.ver === 6 || seq.ver === 9) {
               switch (seq.ver) {
@@ -229,7 +229,7 @@ function Play(props: Props) {
     "speedChanges" in chartSeq &&
     (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
       chartSeq.speedChanges.some(
-        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm,
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
@@ -246,7 +246,7 @@ function Play(props: Props) {
         localStorage.setItem(`offset-${cid}`, String(v));
       }
     },
-    [cid],
+    [cid]
   );
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -347,7 +347,7 @@ function Play(props: Props) {
       setChartPlaying(false);
       setExitable(
         (ex) =>
-          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000)),
+          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000))
       );
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
@@ -405,7 +405,7 @@ function Play(props: Props) {
       if (showLoadingTimeout.current === null) {
         showLoadingTimeout.current = setTimeout(
           () => setShowLoading(true),
-          1500,
+          1500
         );
       }
     }
@@ -468,9 +468,9 @@ function Play(props: Props) {
                 Math.max(
                   ex?.getTime() || 0,
                   new Date().getTime() +
-                    resultAnimDelays.reduce((a, b) => a + b, 0),
-                ),
-              ),
+                    resultAnimDelays.reduce((a, b) => a + b, 0)
+                )
+              )
           );
           stop();
         }, 1000);
@@ -568,6 +568,29 @@ function Play(props: Props) {
         hit();
       }}
     >
+      {musicAreaOk && (
+        <>
+          {/* play中に使用する画像を先に読み込んでキャッシュさせる */}
+          {[0, 1, 2, 3].map((i) => (
+            <img
+              src={process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`}
+              className="hidden"
+              decoding="async"
+              fetchPriority="low"
+              key={i}
+            />
+          ))}
+          {[4, 6, 8, 10, 12].map((i) => (
+            <img
+              src={process.env.ASSET_PREFIX + `/assets/particle${i}.svg`}
+              className="hidden"
+              decoding="async"
+              fetchPriority="low"
+              key={i}
+            />
+          ))}
+        </>
+      )}
       <div
         className={
           "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch " +
@@ -662,7 +685,7 @@ function Play(props: Props) {
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || "",
+                chartBrief.levels.at(lvIndex || 0)?.type || ""
               )}
               lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
               baseScore100={
