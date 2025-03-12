@@ -62,7 +62,11 @@ export function useTheme(): ThemeContext {
     updateTheme();
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     mql.addEventListener("change", updateTheme);
-    return () => mql.removeEventListener("change", updateTheme);
+    const i = setInterval(updateTheme, 1000);
+    return () => {
+      mql.removeEventListener("change", updateTheme);
+      clearInterval(i);
+    }
   }, []);
   return {
     theme,

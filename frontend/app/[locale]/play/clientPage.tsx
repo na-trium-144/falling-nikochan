@@ -659,8 +659,17 @@ function Play(props: Props) {
                 : "opacity-0 translate-y-[-300px]")
             }
           >
-            <ScoreDisp score={score} best={bestScoreState} auto={auto} />
-            <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
+            <ScoreDisp
+              score={score}
+              best={bestScoreState}
+              auto={auto}
+              theme={themeContext}
+            />
+            <ChainDisp
+              chain={chain}
+              fc={judgeCount[2] + judgeCount[3] === 0}
+              theme={themeContext}
+            />
           </div>
           {errorMsg ? (
             <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
