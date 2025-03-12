@@ -1,3 +1,14 @@
+## ver. 9.4 - 2025/03/12 [#379](https://github.com/na-trium-144/falling-nikochan/pull/379)
+
+* slimeの動きをsvgアニメーションで作り直した
+* だいぶ重くなるので、その代わりに以前のparticleとrippleを消しレンダリング負荷については解決
+* 改めて軽量なparticleを静的なsvgで実装
+* rippleが表示されていないバグを発見、修正 (いつから...?)
+* play中に使う画像ファイルをスタート前にfetchしておくようにした
+* スコア表示の雲を半透明に
+* ニコチャンを1.2倍大きく
+* musicAreaのレイアウトをちょっと変更
+
 ## ver. 9.3 - 2025/03/11 [#378](https://github.com/na-trium-144/falling-nikochan/pull/378)
 
 * @fontsource/merriweather のバージョンを5.2.5にダウングレード、固定
