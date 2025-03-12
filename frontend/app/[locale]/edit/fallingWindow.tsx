@@ -39,7 +39,7 @@ export default function FallingWindow(props: Props) {
     height && boxSize && (height - boxSize) / 2;
 
   const { rem } = useDisplayMode();
-  const noteSize = Math.max(1.5 * rem, 0.05 * (boxSize || 0));
+  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   const noteEditable =
     props.currentLevel?.notes[props.currentNoteIndex] &&

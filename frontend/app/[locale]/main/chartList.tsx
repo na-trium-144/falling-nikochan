@@ -1,12 +1,12 @@
 import { ChartBrief } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { LoadingSlime } from "@/common/loadingSlime.js";
 import { ArrowLeft, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
 import { ChartLineBrief } from "./play/fetch.js";
 import { pagerButtonClass } from "@/common/pager.js";
+import { SlimeSVG } from "@/common/slime.js";
 
 interface Props {
   recentBrief?: ChartLineBrief[];
@@ -88,7 +88,7 @@ export function ChartList(props: Props) {
               : "hidden ")
           }
         >
-          <LoadingSlime />
+          <SlimeSVG />
           Loading...
         </div>
         {Array.from(new Array(5)).map((_, i) => (

@@ -16,7 +16,7 @@
      transform="translate(-5.0270833)">
      <!-- fill: bg-stone-800/75 41,37,36  stroke: stone-300: 214,211,209 -->
     <path
-       style="fill:#292524;fill-opacity:1;stroke:#d6d3d1;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#292524;fill-opacity:0.75;stroke:#d6d3d1;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        d="M 10.59601,-1.9755361 C 4.9808701,0.20655147 3.8669034,4.2966456 7.3272646,9.3299738 3.5192914,13.058568 5.0917029,21.439185 12.830421,21.321725 c 2.751336,11.259639 21.409569,11.167559 26.033783,1.733553 9.234506,7.583333 23.428443,2.918534 20.716176,-9.414262 6.435966,-2.617501 6.028485,-14.6761782 -2.568757,-14.6761782"
        id="path3" />
   </g>

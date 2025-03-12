@@ -1,5 +1,5 @@
 import { Key } from "./key.js";
-import { LoadingSlime } from "./loadingSlime.js";
+import { SlimeSVG } from "./slime.js";
 
 export const buttonStyleDisabled =
   "appearance-none " +
@@ -39,7 +39,7 @@ export default function Button(props: Props) {
       onKeyUp={(e) => e.stopPropagation()}
       disabled={props.disabled || props.loading}
     >
-      {props.loading && <LoadingSlime />}
+      {props.loading && <SlimeSVG />}
       <span className={props.keyName ? "mr-1" : ""}>{props.text}</span>
       {Array.isArray(props.keyName)
         ? props.keyName.map((k, i) => (

@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeContext } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
 import { ReactNode, useEffect, useRef, useState } from "react";
@@ -8,6 +9,7 @@ interface CProps {
   className?: string;
   left?: boolean;
   children: ReactNode;
+  theme: ThemeContext;
 }
 function Cloud(props: CProps) {
   const { playUIScale } = useDisplayMode();
@@ -23,12 +25,11 @@ function Cloud(props: CProps) {
       }}
     >
       <img
-        src={process.env.ASSET_PREFIX + "/assets/cloud.svg"}
-        className="absolute inset-0 -z-10 dark:hidden "
-      />
-      <img
-        src={process.env.ASSET_PREFIX + "/assets/cloud-black.svg"}
-        className="absolute inset-0 -z-10 hidden dark:block"
+        src={
+          process.env.ASSET_PREFIX +
+          (props.theme.isDark ? "/assets/cloud-black.svg" : "/assets/cloud.svg")
+        }
+        className="absolute inset-0 -z-10 "
       />
       <div
         className={props.className}
@@ -49,12 +50,13 @@ interface Props {
   score: number;
   best: number;
   auto: boolean;
+  theme: ThemeContext;
 }
 export function ScoreDisp(props: Props) {
   const t = useTranslations("play.score");
   const { score, best } = props;
   return (
-    <Cloud className="flex flex-col">
+    <Cloud className="flex flex-col" theme={props.theme}>
       <div
         className="flex flex-row items-baseline"
         style={{ marginTop: 4, fontSize: 16 }}
@@ -90,12 +92,14 @@ interface ChainProps {
   style?: object;
   chain: number;
   fc: boolean;
+  theme: ThemeContext;
 }
 // slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
 // stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
   const t = useTranslations("play.score");
-  const factorClip = (c: number) => props.fc ? Math.min(1, Math.max(0, c)) : 0;
+  const factorClip = (c: number) =>
+    props.fc ? Math.min(1, Math.max(0, c)) : 0;
   const lchLight = [
     lerp(0.279, 0.705, factorClip((props.chain - 10) / 90)),
     lerp(0.041, 0.213, factorClip((props.chain - 25) / 75)),
@@ -112,40 +116,34 @@ export function ChainDisp(props: ChainProps) {
         "flex flex-col " +
         (props.chain >= 100 ? "text-orange-500 dark:text-yellow-400 " : "")
       }
+      theme={props.theme}
       left
     >
-      {[0, 1].map((i) => (
-        <div
-          key={i}
-          className={
-            (i === 0 ? "flex dark:hidden " : "hidden dark:flex ") +
-            "flex-row items-baseline justify-center "
-          }
-          style={{
-            marginTop: 20,
-            color:
-              i === 0
-                ? `oklch(${lchLight[0]} ${lchLight[1]} ${lchLight[2]})`
-                : `oklch(${lchDark[0]} ${lchDark[1]} ${lchDark[2]})`,
-          }}
+      <div
+        className="flex flex-row items-baseline justify-center "
+        style={{
+          marginTop: 20,
+          color: props.theme.isDark
+            ? `oklch(${lchDark[0]} ${lchDark[1]} ${lchDark[2]})`
+            : `oklch(${lchLight[0]} ${lchLight[1]} ${lchLight[2]})`,
+        }}
+      >
+        <span style={{ width: 112, marginRight: 8 }}>
+          <NumDisp
+            num={props.chain}
+            fontSize1={40}
+            fontSize2={null}
+            anim
+            alignAt2nd
+          />
+        </span>
+        <span
+          className="text-left w-14 overflow-visible "
+          style={{ fontSize: 16 }}
         >
-          <span style={{ width: 112, marginRight: 8 }}>
-            <NumDisp
-              num={props.chain}
-              fontSize1={40}
-              fontSize2={null}
-              anim
-              alignAt2nd
-            />
-          </span>
-          <span
-            className="text-left w-14 overflow-visible "
-            style={{ fontSize: 16 }}
-          >
-            {t("chain", { chain: props.chain })}
-          </span>
-        </div>
-      ))}
+          {t("chain", { chain: props.chain })}
+        </span>
+      </div>
     </Cloud>
   );
 }
