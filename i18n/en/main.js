@@ -6,7 +6,7 @@ export default {
     descriptionVerbose:
       "Falling Nikochan is a simple and cute rhythm game, " +
       "where anyone can create and share charts.",
-    redirected: "Falling Nikochan has moved to <url></url> in March 2025.",
+    redirected: "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
     about: {
       title: "What is Falling Nikochan?",
     },
