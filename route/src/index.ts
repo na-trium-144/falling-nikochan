@@ -7,7 +7,7 @@ import { HTTPException } from "hono/http-exception";
 import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
 import { join, dirname } from "node:path";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations, locales } from "@falling-nikochan/i18n";
 import { ValiError } from "valibot";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
@@ -41,7 +41,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   // これより上はlanguageDetectorのcookieが入らない
   .use(
     languageDetector({
-      supportedLanguages: ["en", "ja"],
+      supportedLanguages: locales,
       fallbackLanguage: "en",
       order: ["cookie", "header"],
       lookupCookie: "language",

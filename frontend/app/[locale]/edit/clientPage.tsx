@@ -86,7 +86,11 @@ import { titleWithSiteName } from "@/common/title.js";
 import { Chart8Edit } from "@falling-nikochan/chart";
 import { SlimeSVG } from "@/common/slime.js";
 
-export default function EditAuth({ locale }: { locale: string }) {
+export default function EditAuth(props: {
+  locale: string;
+  guideContents: ReactNode[];
+}) {
+  const { locale } = props;
   const t = useTranslations("edit");
   const te = useTranslations("error");
   const themeContext = useTheme();
@@ -115,7 +119,7 @@ export default function EditAuth({ locale }: { locale: string }) {
       isFirst: boolean,
       bypass: boolean,
       editPasswd: string,
-      savePasswd: boolean,
+      savePasswd: boolean
     ) => {
       if (cidInitial.current === "new") {
         setCid(undefined);
@@ -149,7 +153,7 @@ export default function EditAuth({ locale }: { locale: string }) {
               process.env.NODE_ENV === "development"
                 ? "include"
                 : "same-origin",
-          },
+          }
         );
         if (res.ok) {
           try {
@@ -167,7 +171,7 @@ export default function EditAuth({ locale }: { locale: string }) {
                       process.env.NODE_ENV === "development"
                         ? "include"
                         : "same-origin",
-                  },
+                  }
                 );
                 setPasswd(cidInitial.current, await res.text());
               }
@@ -209,7 +213,7 @@ export default function EditAuth({ locale }: { locale: string }) {
         setLoading(false);
       }
     },
-    [],
+    []
   );
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -218,7 +222,7 @@ export default function EditAuth({ locale }: { locale: string }) {
     }
     setSavePasswd(preferSavePasswd());
     document.title = titleWithSiteName(
-      t("title", { title: "", cid: cidInitial.current }),
+      t("title", { title: "", cid: cidInitial.current })
     );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     // レンダリングの都合上 cidInitial.current を先に反映させたいため、setTimeoutで1段階遅延
@@ -227,6 +231,7 @@ export default function EditAuth({ locale }: { locale: string }) {
 
   return (
     <Page
+      guideContents={props.guideContents}
       chart={chart}
       setChart={setChart}
       cid={cid}
@@ -299,6 +304,7 @@ export default function EditAuth({ locale }: { locale: string }) {
 }
 
 interface Props {
+  guideContents: ReactNode[];
   chart?: ChartEdit;
   setChart: (chart: ChartEdit) => void;
   cid: string | undefined;
@@ -351,7 +357,7 @@ function Page(props: Props) {
   };
   useEffect(() => {
     document.title = titleWithSiteName(
-      t("title", { title: chart?.title, cid: cid }),
+      t("title", { title: chart?.title, cid: cid })
     );
   });
   useEffect(() => {
@@ -378,7 +384,7 @@ function Page(props: Props) {
   // レベルの更新
   // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
   const changeLevel = async (
-    newLevel: LevelMin | string[] | null | undefined,
+    newLevel: LevelMin | string[] | null | undefined
   ) => {
     if (chart && newLevel && currentLevelIndex < chart.levels.length) {
       const newChart: ChartEdit = {
@@ -394,7 +400,7 @@ function Page(props: Props) {
         };
       }
       const levelFreezed = await luaExecutor.exec(
-        newChart.levels[currentLevelIndex].lua.join("\n"),
+        newChart.levels[currentLevelIndex].lua.join("\n")
       );
       if (levelFreezed) {
         newChart.levels[currentLevelIndex] = {
@@ -473,7 +479,7 @@ function Page(props: Props) {
       const step = getStep(
         currentLevel.bpmChanges,
         currentTimeSec,
-        snapDivider,
+        snapDivider
       );
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
@@ -485,11 +491,11 @@ function Page(props: Props) {
         let noteIndex: number;
         if (currentTimeSec < prevTimeSec.current) {
           noteIndex = currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, step) == 0,
+            (n) => stepCmp(n.step, step) == 0
           );
         } else {
           noteIndex = currentLevel.notes.findIndex(
-            (n) => stepCmp(n.step, step) == 0,
+            (n) => stepCmp(n.step, step) == 0
           );
         }
         if (currentNoteIndex !== noteIndex) {
@@ -590,7 +596,7 @@ function Page(props: Props) {
       }
       changeCurrentTimeSec(
         getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
-        focus,
+        focus
       );
     }
     if (focus) {
@@ -665,7 +671,7 @@ function Page(props: Props) {
         newLevel = luaUpdateSpeedChange(
           newLevel || currentLevel,
           currentSpeedIndex,
-          speed,
+          speed
         );
       }
       changeLevel(newLevel?.lua);
@@ -706,7 +712,7 @@ function Page(props: Props) {
         } else if (!speed && speedChangeHere) {
           newLevel = luaDeleteSpeedChange(
             newLevel || currentLevel,
-            currentSpeedIndex,
+            currentSpeedIndex
           );
         }
       }
@@ -717,7 +723,7 @@ function Page(props: Props) {
   const currentSignatureIndex =
     currentLevel && findBpmIndexFromStep(currentLevel.signature, currentStep);
   const currentSignature = currentLevel?.signature.at(
-    currentSignatureIndex || 0,
+    currentSignatureIndex || 0
   );
   const prevSignature =
     currentSignatureIndex && currentSignatureIndex > 0
@@ -730,7 +736,7 @@ function Page(props: Props) {
       const newLevel = luaUpdateBeatChange(
         currentLevel,
         currentSignatureIndex,
-        s,
+        s
       );
       changeLevel(newLevel?.lua);
     }
@@ -746,7 +752,7 @@ function Page(props: Props) {
       if (signatureChangeHere) {
         const newLevel = luaDeleteBeatChange(
           currentLevel,
-          currentSignatureIndex,
+          currentSignatureIndex
         );
         changeLevel(newLevel?.lua);
       } else {
@@ -768,8 +774,8 @@ function Page(props: Props) {
         // 追加したnoteは同じ時刻の音符の中でも最後
         setCurrentNoteIndex(
           currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, currentStep) == 0,
-          ),
+            (n) => stepCmp(n.step, currentStep) == 0
+          )
         );
         changeLevel(newLevel?.lua);
       }
@@ -794,8 +800,8 @@ function Page(props: Props) {
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
     ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(9)).map(() => null),
-    ),
+      Array.from(new Array(9)).map(() => null)
+    )
   );
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
@@ -900,6 +906,7 @@ function Page(props: Props) {
         </div>
       ) : guidePage !== null ? (
         <GuideMain
+          content={props.guideContents[guidePage]}
           index={guidePage}
           setIndex={setGuidePage}
           close={() => setGuidePage(null)}
@@ -973,7 +980,7 @@ function Page(props: Props) {
                 }
                 onClick={() => {
                   setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p",
+                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
                   );
                 }}
               >
@@ -1148,7 +1155,7 @@ function Page(props: Props) {
                   >
                     {t(`${key}.title`)}
                   </button>
-                ),
+                )
               )}
             </div>
             <Box

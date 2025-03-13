@@ -188,13 +188,6 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
 
 To add a new language, create a new directory with the language code and add all the translations in the corresponding files.
 
-When a new language added, it is automatically applied to the application except for the following files:
-- i18n/index.js
-- route/src/index.ts (`supportedLanguages:` in languageDetector)
-- frontend/app/[locale]/edit/guideMain.tsx
-- frontend/app/[locale]/main/policies/page.tsx
-- frontend/app/[locale]/main/version/page.tsx
-
 See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 
 ## Versioning
