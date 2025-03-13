@@ -1,8 +1,8 @@
 {/* このファイルに追記した際には frontend/app/[locale]/common/version.ts の latestChangeLogMinor を変える */}
 
 import { Key } from "@/common/key.js";
-import { Help, Translate, Sun } from "@icon-park/react";
 import { SlimeSVG } from "@/common/slime.js";
+import { TranslateIcon, SunIcon, HelpIcon } from "@/common/mdxIcons.js";
 
 ## ver. 9.4 - 2025/03/12
 
@@ -49,10 +49,10 @@ import { SlimeSVG } from "@/common/slime.js";
 
 - <img
     src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
-    className="inline-block h-4 "
+    className="inline-block w-6 "
   /> に加えて <img
     src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
-    className="inline-block h-4 "
+    className="inline-block w-6 "
   /> の画像を追加し、アニメーションするようにした
 
 ## ver. 7.11 - 2025/02/14
@@ -75,13 +75,13 @@ import { SlimeSVG } from "@/common/slime.js";
   - これにより例えば真上から降ってくる音符 (vx = 0) などが実現可能になります
   - プレイ画面では従来の譜面データを読み込む際には従来のプログラムを使用し、今までとまったく同じ挙動をします。
   - 譜面編集画面では従来の譜面データを読み込んで上書き保存すると ver. 7 の譜面形式に変換され、この仕様変更により一部の音符の挙動が今までと変わってしまう可能性があります。意図しない譜面になっていないかテストプレイ等で確認してください。
-- アプリ全体が英語に対応しました。ブラウザーの設定などを自動で判別しますが、画面下部の <Translate className="inline-block align-middle" /> Language ボタンで切り替えることもできます。
+- アプリ全体が英語に対応しました。ブラウザーの設定などを自動で判別しますが、画面下部の <TranslateIcon /> Language ボタンで切り替えることもできます。
   - プレイ画面や編集画面で一部英語表記だった箇所も、日本語表示モードではほぼすべて日本語で表示されるようになりました。
   - なんとなく「Chain」が「コンボ」に、
     またそれぞれの判定「Good」「OK」「Bad」「Miss」が「よい」「まあまあ」「だめ」「ミス」
     に変わっています。
 - プレイ画面での楽曲タイトルなどの表示を大きくしました。
-- 譜面編集のヘルプ画面の記述を減らし、読みやすくなりました。より詳細な説明は編集画面内の <span className="inline-block align-middle text-xl text-sky-300 dark:text-orange-900"><Help /></span> にカーソルを合わせる (またはタップする) ことで表示されます。
+- 譜面編集のヘルプ画面の記述を減らし、読みやすくなりました。より詳細な説明は編集画面内の <HelpIcon /> にカーソルを合わせる (またはタップする) ことで表示されます。
 - 譜面編集でパスワードを保存するかどうかをユーザーが選択できるようにしました
 - アプリが更新されたとき、この更新履歴ページへのリンク (画面下部のバージョン番号のところ) に未読マークが表示されるようにしました。
 
@@ -115,7 +115,7 @@ import { SlimeSVG } from "@/common/slime.js";
 
 ## ver. 5.22 - 2024/11/09
 
-- ダークテーマを実装しました。メニュー等のページで右下の <Sun className="inline-block align-middle" /> Theme ボタンから切り替えられます。
+- ダークテーマを実装しました。メニュー等のページで右下の <SunIcon /> Theme ボタンから切り替えられます。
 - プレイ画面と編集画面が常に新しいタブで開くようにしました
 
 ## ver. 5.19 - 2024/11/05
