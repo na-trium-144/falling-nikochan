@@ -1,3 +1,7 @@
+## ver. 9.6 - 2025/03/13 [#382](https://github.com/na-trium-144/falling-nikochan/pull/382)
+
+* /share 以外のページにもOGP画像を追加
+
 ## ver. 9.5 - 2025/03/13 [#381](https://github.com/na-trium-144/falling-nikochan/pull/381)
 
 * mdxを動的インポートし、localeの列挙を1箇所だけで済むようにした
