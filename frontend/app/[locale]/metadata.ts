@@ -14,7 +14,7 @@ export async function initMetadata(
     image?: string;
     noAlternate?: boolean;
     description?: string;
-  }
+  },
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
   const t = await getTranslations(locale, "main");
@@ -22,6 +22,8 @@ export async function initMetadata(
     options?.description !== undefined
       ? options?.description
       : t("description");
+  const imageUrl =
+    options?.image || process.env.ASSET_PREFIX + "/assets/ogTemplateTitle.png";
   return {
     metadataBase: new URL("https://nikochan.utcode.net"),
     title: titleWithSiteName(title),
@@ -30,10 +32,13 @@ export async function initMetadata(
           canonical: path,
           languages: options?.noAlternate
             ? {}
-            : locales.reduce((prev, locale) => {
-                prev[locale] = `/${locale}${path}`;
-                return prev;
-              }, {} as { [key: string]: string }),
+            : locales.reduce(
+                (prev, locale) => {
+                  prev[locale] = `/${locale}${path}`;
+                  return prev;
+                },
+                {} as { [key: string]: string },
+              ),
         }
       : undefined,
     description,
@@ -51,9 +56,13 @@ export async function initMetadata(
           title: titleWithoutSiteName(title),
           description,
           url: path,
-          images: options?.image
-            ? [{ url: options?.image, width: 1200, height: 630 }]
-            : undefined,
+          images: [
+            {
+              url: imageUrl,
+              width: 1200,
+              height: 630,
+            },
+          ],
           type: "website",
           locale: options?.noAlternate ? undefined : locale,
           siteName: "Falling Nikochan",
@@ -62,9 +71,9 @@ export async function initMetadata(
     twitter: path
       ? {
           title: titleWithSiteName(title),
-          card: "summary_large_image",
+          card: options?.image ? "summary_large_image" : "summary",
           description,
-          images: options?.image ? [options?.image] : undefined,
+          images: [imageUrl],
         }
       : undefined,
     robots: {
