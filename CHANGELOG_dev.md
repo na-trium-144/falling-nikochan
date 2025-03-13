@@ -1,3 +1,7 @@
+## ver. 9.5 - 2025/03/13 [#381](https://github.com/na-trium-144/falling-nikochan/pull/381)
+
+* mdxを動的インポートし、localeの列挙を1箇所だけで済むようにした
+
 ## ver. 9.4 - 2025/03/12 [#379](https://github.com/na-trium-144/falling-nikochan/pull/379)
 
 * slimeの動きをsvgアニメーションで作り直した
