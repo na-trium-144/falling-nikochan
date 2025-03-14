@@ -211,7 +211,7 @@ function Play(props: Props) {
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
-    setTimeout(() => setInitAnim(true));
+    requestAnimationFrame(() => setInitAnim(true));
   }, []);
 
   const lvType: string =
@@ -331,6 +331,7 @@ function Play(props: Props) {
   const [showResult, setShowResult] = useState<boolean>(props.goResult);
   const [resultDate, setResultDate] = useState<Date>();
 
+  const reset = useCallback(() => setShowReady(true), []);
   const start = () => {
     // Space(スタートボタン)が押されたとき
     // 再生中に呼んでもなにもしない
@@ -732,7 +733,7 @@ function Play(props: Props) {
                 props.goResult ? exampleResult.judgeCount : judgeCount
               }
               bigCount={props.goResult ? exampleResult.bigCount : bigCount}
-              reset={() => setShowReady(true)}
+              reset={reset}
               exit={exit}
               isTouch={isTouch}
               newRecord={
@@ -750,7 +751,7 @@ function Play(props: Props) {
             <StopMessage
               hidden={showReady || showResult}
               isTouch={isTouch}
-              reset={() => setShowReady(true)}
+              reset={reset}
               exit={exit}
             />
           )}

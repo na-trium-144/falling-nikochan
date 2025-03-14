@@ -8,7 +8,7 @@ import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
 import { ArrowLeft, Caution, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   badFastSec,
   badLateSec,
@@ -34,77 +34,117 @@ interface MessageProps {
 }
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.message");
+  const [slideIn, setSlideIn] = useState<boolean | null>(null);
   const [optionOpen, setOptionOpen] = useState<boolean>(false);
+  const [optionSlideIn, setOptionSlideIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (props.back && slideIn === null) {
+      requestAnimationFrame(() => setSlideIn(true));
+    }
+  }, [props.back, slideIn]);
+  useEffect(() => {
+    if (optionOpen && optionSlideIn === null) {
+      requestAnimationFrame(() => setOptionSlideIn(true));
+    }
+    if (!optionOpen && optionSlideIn !== null) {
+      setOptionSlideIn(null);
+    }
+  }, [optionOpen, optionSlideIn]);
 
   // props.small は clientPage.tsx のreadySmall (mainWindowの高さで決まる)
-  if (optionOpen && props.small) {
-    return (
-      <CenterBox>
-        <p className="text-lg font-title font-bold mb-1">
-          <button
-            className={pagerButtonClass + "mr-4 align-bottom "}
-            onClick={() => setOptionOpen(false)}
-          >
-            <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
-          </button>
-          {t("option")}
-        </p>
-        <OptionMenu {...props} />
-      </CenterBox>
-    );
-  }
   return (
-    <CenterBox>
-      <p className="text-lg font-title font-bold mb-2">
-        {props.back && (
-          <button
-            className={pagerButtonClass + "mr-4 align-bottom "}
-            onClick={props.back!}
-          >
-            <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
-          </button>
-        )}
-        {t("ready")}
-      </p>
-      <p>
-        <Button
-          text={t("start")}
-          keyName={props.isTouch ? undefined : "Space"}
-          onClick={() => props.start()}
-        />
-        <Button
-          text={t("exit")}
-          keyName={props.isTouch ? undefined : "Esc"}
-          onClick={() => props.exit()}
-        />
-      </p>
-      <p className="mt-2 text-sm">
-        {t.rich("startByTap", {
-          isTouch: props.isTouch ? "true" : "false",
-          br: () => <br />,
-        })}
-      </p>
-      {props.editing && (
-        <p className="mt-2">
-          {t.rich("editingNotification", {
+    <CenterBox className="overflow-clip ">
+      {props.small && (
+        <div
+          className={
+            (optionOpen ? "" : "hidden ") +
+            "relative transition-all duration-200 ease-out " +
+            (optionSlideIn !== true
+              ? "translate-x-full opacity-0 "
+              : "translate-x-0 opacity-100 ")
+          }
+        >
+          <p className="text-lg font-title font-bold mb-1">
+            <button
+              className={pagerButtonClass + "mr-4 align-bottom "}
+              onClick={() => {
+                setOptionSlideIn(false);
+                setTimeout(() => setOptionOpen(false), 200);
+              }}
+            >
+              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+            </button>
+            {t("option")}
+          </p>
+          <OptionMenu {...props} />
+        </div>
+      )}
+      <div
+        className={
+          (optionOpen && props.small ? "hidden " : "") +
+          "relative transition-all duration-200 ease-out " +
+          (!props.back
+            ? ""
+            : slideIn !== true
+              ? "translate-x-full opacity-0 "
+              : "translate-x-0 opacity-100 ")
+        }
+      >
+        <p className="text-lg font-title font-bold mb-2">
+          {props.back && (
+            <button
+              className={pagerButtonClass + "mr-4 align-bottom "}
+              onClick={() => {
+                setSlideIn(false);
+                setTimeout(props.back!, 200);
+              }}
+            >
+              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+            </button>
+          )}
+          {t("ready")}
+        </p>
+        <p>
+          <Button
+            text={t("start")}
+            keyName={props.isTouch ? undefined : "Space"}
+            onClick={() => props.start()}
+          />
+          <Button
+            text={t("exit")}
+            keyName={props.isTouch ? undefined : "Esc"}
+            onClick={() => props.exit()}
+          />
+        </p>
+        <p className="mt-2 text-sm">
+          {t.rich("startByTap", {
+            isTouch: props.isTouch ? "true" : "false",
             br: () => <br />,
           })}
         </p>
-      )}
-      {props.small ? (
-        <button
-          className={"block w-max relative mx-auto mt-2 " + linkStyle1}
-          onClick={() => setOptionOpen(!optionOpen)}
-        >
-          <RightOne className="absolute left-0 bottom-1 " theme="filled" />
-          <span className="ml-5">{t("option")}</span>
-        </button>
-      ) : (
-        <>
-          <div className="mt-2 mb-2 border-b border-slate-800 dark:border-stone-300" />
-          <OptionMenu {...props} header />
-        </>
-      )}
+        {props.editing && (
+          <p className="mt-2">
+            {t.rich("editingNotification", {
+              br: () => <br />,
+            })}
+          </p>
+        )}
+        {props.small ? (
+          <button
+            className={"block w-max relative mx-auto mt-2 " + linkStyle1}
+            onClick={() => setOptionOpen(!optionOpen)}
+          >
+            <RightOne className="absolute left-0 bottom-1 " theme="filled" />
+            <span className="ml-5">{t("option")}</span>
+          </button>
+        ) : (
+          <>
+            <div className="mt-2 mb-2 border-b border-slate-800 dark:border-stone-300" />
+            <OptionMenu {...props} header />
+          </>
+        )}
+      </div>
     </CenterBox>
   );
 }
