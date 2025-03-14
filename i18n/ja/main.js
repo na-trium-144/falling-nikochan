@@ -6,6 +6,7 @@ export default {
     descriptionVerbose:
       "Falling Nikochan は、誰でも譜面を作成し共有することができる、" +
       "シンプルでかわいい音ゲーです。",
+    redirected: "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
     about: {
       title: "Falling Nikochan とは？",
     },

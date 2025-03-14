@@ -1,32 +1,35 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BPMChange } from "@falling-nikochan/chart";
+import { BPMChange, BPMChange1, Signature5 } from "@falling-nikochan/chart";
 import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepSub, stepZero } from "@falling-nikochan/chart";
 import { useDisplayMode } from "@/scale.js";
-import "./rhythmicalSlime.css";
+import { SlimeSVG } from "@/common/slime";
 
 interface Props {
   className?: string;
   style?: object;
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
-  bpmChanges?: BPMChange[];
-  signature: Signature[];
+  bpmChanges?: BPMChange[] | BPMChange1[];
+  signature: Signature[] | Signature5[];
 }
 interface SlimeState {
-  // 対象の時刻の3/4ステップ前からしゃがむ
-  // 対象の時刻の1/4ステップ前からジャンプしはじめ、
+  // 対象の時刻の3/6ステップ前からしゃがむ
+  // 対象の時刻の1/6ステップ前からジャンプしはじめ、
+  // 対象の時刻の1/6ステップ後に最高点、
+  // 3/6ステップ後に着地
+  preparingSec: number;
   jumpBeginSec: number;
-  // 対象の時刻の1/4ステップ後に最高点、
-  jumpEndSec: number;
-  // 3/4ステップ後に着地
+  jumpMidSec: number;
   landingSec: number;
+  animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
   const { playing, getCurrentTimeSec, bpmChanges } = props;
   const step = useRef<Step>(stepZero());
+  const lastPreparingSec = useRef<number | null>(null);
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
   const [currentBar, setCurrentBar] = useState<(4 | 8 | 16)[]>([]);
   const [slimeStates, setSlimeStates] = useState<(SlimeState | undefined)[]>(
@@ -39,6 +42,10 @@ export default function RhythmicalSlime(props: Props) {
       const nextStep = () => {
         const now = getCurrentTimeSec();
         while (now !== undefined && playing && bpmChanges) {
+          if (lastPreparingSec.current != null && lastPreparingSec.current > now) {
+            timer = setTimeout(nextStep, (lastPreparingSec.current - now) * 1000);
+            return;
+          }
           const ss = getSignatureState(props.signature, step.current);
           step.current = ss.stepAligned;
           const slimeIndex = ss.count.fourth;
@@ -63,32 +70,12 @@ export default function RhythmicalSlime(props: Props) {
               barChange();
             }
           }
-          const preparingSec = getTimeSec(
-            bpmChanges,
-            stepSub(ss.stepAligned, {
-              fourth: 0,
-              numerator: 3,
-              denominator: (slimeSize / 4) * 4,
-            })
-          );
-          if (preparingSec > now) {
-            timer = setTimeout(nextStep, (preparingSec - now) * 1000);
-            return;
-          }
           const jumpBeginSec = getTimeSec(
             bpmChanges,
             stepSub(ss.stepAligned, {
               fourth: 0,
               numerator: 1,
-              denominator: (slimeSize / 4) * 4,
-            })
-          );
-          const jumpEndSec = getTimeSec(
-            bpmChanges,
-            stepAdd(ss.stepAligned, {
-              fourth: 0,
-              numerator: 1,
-              denominator: (slimeSize / 4) * 4,
+              denominator: (slimeSize / 4) * 6,
             })
           );
           const landingSec = getTimeSec(
@@ -96,18 +83,24 @@ export default function RhythmicalSlime(props: Props) {
             stepAdd(ss.stepAligned, {
               fourth: 0,
               numerator: 3,
-              denominator: (slimeSize / 4) * 4,
+              denominator: (slimeSize / 4) * 6,
             })
           );
+          const jumpMidSec = (jumpBeginSec + landingSec) / 2;
+          const animDuration = ((landingSec - jumpBeginSec) / 4) * 8;
+          const preparingSec = jumpBeginSec - (animDuration * 2) / 8;
+          lastPreparingSec.current = preparingSec;
           setSlimeStates((states) => {
             const newStates = [...states];
             while (slimeIndex >= newStates.length) {
               newStates.push(undefined);
             }
             newStates[slimeIndex] = {
+              preparingSec,
               jumpBeginSec,
-              jumpEndSec,
+              jumpMidSec,
               landingSec,
+              animDuration,
             };
             return newStates;
           });
@@ -122,6 +115,7 @@ export default function RhythmicalSlime(props: Props) {
       };
     } else {
       step.current = stepZero();
+      lastPreparingSec.current = null;
       setSlimeStates([]);
       setMaxSlimeNum((num) =>
         Math.max(num, props.signature[0]?.bars[0].length)
@@ -159,35 +153,20 @@ interface PropsS {
   playUIScale: number;
 }
 function Slime(props: PropsS) {
-  // 0: preparing, 1: jumping, 2: end
-  const [action, setAction] = useState<number>(0);
+  const prevJumpMid = useRef<number | null>(null);
+  const [jumpingMidDate, setJumpingMidDate] = useState<Date | null>(null);
   const durationSec = useRef<number>(0);
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const update = () => {
-      timer = null;
-      const now = props.getCurrentTimeSec();
-      if (now === undefined || props.state === undefined) {
-        setAction(2);
-      } else if (now < props.state.jumpBeginSec) {
-        setAction(0);
-        durationSec.current = props.state.jumpBeginSec - now;
-        timer = setTimeout(update, (props.state.jumpBeginSec - now) * 1000);
-      } else if (now < props.state.jumpEndSec) {
-        setAction(1);
-        durationSec.current = props.state.jumpEndSec - now;
-        timer = setTimeout(update, (props.state.jumpEndSec - now) * 1000);
-      } else {
-        setAction(2);
-        durationSec.current = props.state.landingSec - now;
-      }
-    };
-    update();
-    return () => {
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-    };
+    const now = props.getCurrentTimeSec();
+    if (now === undefined || props.state === undefined) {
+      setJumpingMidDate(null);
+    } else if (prevJumpMid.current !== props.state.jumpMidSec) {
+      prevJumpMid.current = props.state.jumpMidSec;
+      durationSec.current = props.state.animDuration;
+      setJumpingMidDate(
+        new Date(new Date().getTime() + (props.state.jumpMidSec - now) * 1000)
+      );
+    }
   }, [props]);
   return (
     <span
@@ -197,52 +176,17 @@ function Slime(props: PropsS) {
           (props.size === 4 ? 1 : props.size === 8 ? 0.75 : 0.5) *
           54 *
           props.playUIScale,
-        marginLeft: 6 * props.playUIScale,
+        marginLeft: 0 * props.playUIScale,
       }}
     >
-      <span
-        className="absolute inset-x-0 "
-        style={{
-          animationName: props.exists
-            ? "rhythmical-slime-appearing"
-            : "rhythmical-slime-disappearing",
-          animationIterationCount: 1,
-          animationDuration: "0.25s",
-          animationTimingFunction: "linear",
-          animationFillMode: "forwards",
-        }}
-      >
-        <img
-          src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
-          className={
-            "absolute bottom-0 inset-x-0 " +
-            "transition origin-bottom " +
-            (action === 1
-              ? "ease-out -translate-y-1/2 scale-y-110 "
-              : action === 0
-              ? "ease-out translate-y-0 scale-y-75 "
-              : "ease-in translate-y-0 scale-y-100 ")
-          }
-          style={{
-            transitionDuration: durationSec.current + "s",
-          }}
-        />
-        <img
-          src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
-          className={
-            "absolute bottom-0 inset-x-0 " +
-            "transition origin-bottom " +
-            (action === 1
-              ? "ease-out -translate-y-1/2 scale-y-110 opacity-0 "
-              : action === 0
-              ? "ease-out translate-y-0 scale-y-75 opacity-100 "
-              : "ease-in translate-y-0 scale-y-100 opacity-100 ")
-          }
-          style={{
-            transitionDuration: durationSec.current + "s",
-          }}
-        />
-      </span>
+      <SlimeSVG
+        className="absolute inset-x-0 bottom-0 "
+        appearingAnim
+        hidden={!props.exists}
+        jumpingMid={jumpingMidDate}
+        duration={durationSec.current}
+        noLoop
+      />
     </span>
   );
 }

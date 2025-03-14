@@ -10,9 +10,9 @@ import {
 } from "@falling-nikochan/chart";
 import { updateIpLastCreate } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
-import { chartToEntry, zipEntry } from "./chart.js";
+import { ChartEntryCompressed, chartToEntry, zipEntry } from "./chart.js";
 import { Hono } from "hono";
-import { Bindings } from "../env.js";
+import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
 
@@ -25,9 +25,10 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     // cidとfidを生成し、bodyのデータを保存して、cidを返す
     console.log(c.req.header("x-forwarded-for"));
     const ip = String(
-      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
+      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
     ); // nullもundefinedも文字列にしちゃう
     const chartBuf = await c.req.arrayBuffer();
+    const pSecretSalt = secretSalt(env(c));
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
@@ -43,7 +44,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
             // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
           },
           429,
-          { "retry-after": (rateLimitMin * 60).toString() }
+          { "retry-after": (rateLimitMin * 60).toString() },
         );
       }
 
@@ -67,7 +68,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         newChart = await validateChart(newChartObj);
       } catch (e) {
         console.error(e);
-        throw new HTTPException(415, { message: "invalidChart" });
+        throw new HTTPException(415, { message: (e as Error).toString() });
       }
 
       if (numEvents(newChart) > chartMaxEvent) {
@@ -82,14 +83,14 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       // update Time
       const updatedAt = new Date().getTime();
 
-      // if (chart.published) {
-      //   revalidateLatest();
-      // }
-
       let cid: string;
       while (true) {
         cid = Math.floor(Math.random() * 900000 + 100000).toString();
-        if ((await db.collection("chart").findOne({ cid })) !== null) {
+        if (
+          (await db
+            .collection<ChartEntryCompressed>("chart")
+            .findOne({ cid })) !== null
+        ) {
           // cidかぶり
           continue;
         } else {
@@ -98,11 +99,12 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       }
 
       await db
-        .collection("chart")
+        .collection<ChartEntryCompressed>("chart")
         .insertOne(
-          await zipEntry(await chartToEntry(newChart, cid, updatedAt))
+          await zipEntry(
+            await chartToEntry(newChart, cid, updatedAt, ip, pSecretSalt, null),
+          ),
         );
-      // revalidateBrief(cid);
 
       return c.json({ cid: cid });
     } finally {

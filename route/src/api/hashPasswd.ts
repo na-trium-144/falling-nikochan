@@ -1,8 +1,13 @@
 import { Hono } from "hono";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie, setCookie } from "hono/cookie";
-import { hashPasswd } from "./chart.js";
+import { getChartEntry, getPUserHash } from "./chart.js";
+import { randomBytes } from "node:crypto";
+import { MongoClient } from "mongodb";
+import { CidSchema } from "@falling-nikochan/chart";
+import * as v from "valibot";
+import { HTTPException } from "hono/http-exception";
 
 /**
  * chartFile のコメントを参照
@@ -10,21 +15,28 @@ import { hashPasswd } from "./chart.js";
 const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   async (c) => {
-    const cid = c.req.param("cid");
-    const pw = c.req.query("pw") || "";
-    let key: string;
+    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
+    const { p } = v.parse(
+      v.object({ p: v.pipe(v.string(), v.minLength(1)) }),
+      c.req.query(),
+    );
+    let pUserSalt: string;
+    const newUserSalt = () =>
+      randomBytes(16)
+        .toString("base64")
+        .replaceAll("+", "-")
+        .replaceAll("/", "_")
+        .replaceAll("=", "");
     if (env(c).API_ENV === "development") {
       // secure がつかない
-      key = getCookie(c, "hashKey") || Math.random().toString(36).substring(2);
-      setCookie(c, "hashKey", key, {
+      pUserSalt = getCookie(c, "pUserSalt") || newUserSalt();
+      setCookie(c, "pUserSalt", pUserSalt, {
         httpOnly: true,
         maxAge: 400 * 24 * 3600,
       });
     } else {
-      key =
-        getCookie(c, "hashKey", "host") ||
-        Math.random().toString(36).substring(2);
-      setCookie(c, "hashKey", key, {
+      pUserSalt = getCookie(c, "pUserSalt", "host") || newUserSalt();
+      setCookie(c, "pUserSalt", pUserSalt, {
         httpOnly: true,
         maxAge: 400 * 24 * 3600,
         path: "/",
@@ -33,10 +45,33 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         prefix: "host",
       });
     }
-    return c.text(await hashPasswd(cid, pw, key), 200, {
-      "cache-control": "no-store",
-    });
-  }
+    let pSecretSalt: string;
+    if (env(c).SECRET_SALT) {
+      pSecretSalt = env(c).SECRET_SALT!;
+    } else if (env(c).API_ENV === "development") {
+      pSecretSalt = "SecretSalt";
+    } else {
+      throw new Error("SECRET_SALT not set in production environment!");
+    }
+    const client = new MongoClient(env(c).MONGODB_URI);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const { entry } = await getChartEntry(db, cid, {
+        rawPasswd: p,
+        pSecretSalt,
+      });
+      if (entry.pServerHash) {
+        return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
+          "cache-control": cacheControl(env(c), null),
+        });
+      } else {
+        throw new HTTPException(400, { message: "noPasswd" });
+      }
+    } finally {
+      await client.close();
+    }
+  },
 );
 
 export default hashPasswdApp;

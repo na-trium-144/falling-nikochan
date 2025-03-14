@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Bindings } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import { ImageResponse } from "@vercel/og";
 import briefApp from "../api/brief.js";
 import { HTTPException } from "hono/http-exception";
@@ -11,6 +11,7 @@ import {
 import { fetchStatic } from "../static.js";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
+import { env } from "hono/adapter";
 
 const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:type/:cid", async (c) => {
@@ -57,7 +58,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     ).map((f) => ({
       ...f,
       pData: fetchStatic(
-        new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
+        new URL(`/assets/${f.file}`, new URL(c.req.url).origin),
       ),
     }));
     let pBgImage: Promise<Response>;
@@ -65,12 +66,12 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       case "share":
         // [locale]/ogTemplate/share をスクショしたpng画像を /assets に置く
         pBgImage = fetchStatic(
-          new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin)
+          new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin),
         );
         break;
       case "result":
         pBgImage = fetchStatic(
-          new URL(`/assets/ogTemplateResult.png`, new URL(c.req.url).origin)
+          new URL(`/assets/ogTemplateResult.png`, new URL(c.req.url).origin),
         );
         break;
       default:
@@ -96,18 +97,18 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     }
 
     let Image: Promise<React.ReactElement>;
-    let cacheControl: string;
+    let cacheAge: number;
     switch (c.req.param("type")) {
       case "share":
         Image = OGShare(cid, lang, brief, bgImageBin);
-        cacheControl = "max-age=7200";
+        cacheAge = 7200;
         break;
       case "result":
         if (!resultParams) {
           throw new HTTPException(400, { message: "missingResultParam" });
         }
         Image = OGResult(cid, lang, brief, bgImageBin, resultParams);
-        cacheControl = "max-age=31536000";
+        cacheAge = 31536000;
         break;
     }
     const imRes = new ImageResponse(await Image!, {
@@ -119,13 +120,13 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           weight: f.weight,
           style: f.style,
           data: await (await f.pData).arrayBuffer(),
-        }))
+        })),
       ),
     });
     if (imRes.ok && imRes.body) {
       return c.body(imRes.body, 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl!,
+        "Cache-Control": cacheControl(env(c), cacheAge!),
       });
     } else {
       console.error(imRes);
@@ -134,7 +135,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .get("/:cid{[0-9]+}", (c) =>
     // deprecated (used until ver8.11)
-    c.redirect(`/og/share/${c.req.param("cid")}`, 301)
+    c.redirect(`/og/share/${c.req.param("cid")}`, 301),
   );
 
 export default ogApp;

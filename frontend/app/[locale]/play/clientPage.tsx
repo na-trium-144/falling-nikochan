@@ -22,8 +22,16 @@ const exampleResult = {
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
-import { ChartSeqData6, levelTypes, loadChart6 } from "@falling-nikochan/chart";
-import { ChartSeqData8, loadChart8 } from "@falling-nikochan/chart";
+import {
+  bigScoreRate,
+  chainScoreRate,
+  ChartSeqData6,
+  Level9Play,
+  levelTypes,
+  loadChart6,
+  RecordPost,
+} from "@falling-nikochan/chart";
+import { ChartSeqData9, loadChart9 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -44,9 +52,8 @@ import { MusicArea } from "./musicArea.js";
 import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
-import { Level8Play } from "@falling-nikochan/chart";
-import { LoadingSlime } from "@/common/loadingSlime.js";
 import { useTranslations } from "next-intl";
+import { SlimeSVG } from "@/common/slime.js";
 import Title from "@/common/titleLogo.js";
 import { levelColors } from "@/common/levelColors.js";
 
@@ -61,7 +68,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData8>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData9>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -101,7 +108,7 @@ export function InitPlay({ locale }: { locale: string }) {
     //   " | Falling Nikochan";
 
     if (session?.level) {
-      setChartSeq(loadChart8(session.level));
+      setChartSeq(loadChart9(session.level));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
@@ -114,16 +121,16 @@ export function InitPlay({ locale }: { locale: string }) {
         );
         if (res.ok) {
           try {
-            const seq: Level6Play | Level8Play = msgpack.deserialize(
+            const seq: Level6Play | Level9Play = msgpack.deserialize(
               await res.arrayBuffer()
             );
-            if (seq.ver === 6 || seq.ver === 8) {
+            if (seq.ver === 6 || seq.ver === 9) {
               switch (seq.ver) {
                 case 6:
                   setChartSeq(loadChart6(seq));
                   break;
-                case 8:
-                  setChartSeq(loadChart8(seq));
+                case 9:
+                  setChartSeq(loadChart9(seq));
                   break;
               }
               setErrorStatus(undefined);
@@ -183,7 +190,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
-  chartSeq?: ChartSeqData6 | ChartSeqData8;
+  chartSeq?: ChartSeqData6 | ChartSeqData9;
   editing: boolean;
   showFps: boolean;
   displaySpeed: boolean;
@@ -421,41 +428,61 @@ function Play(props: Props) {
 
   useEffect(() => {
     if (chartStarted && end) {
-      if (
-        cid &&
-        !auto &&
-        score > bestScoreState &&
-        lvIndex !== undefined &&
-        chartBrief?.levels[lvIndex]
-      ) {
-        setBestScore(cid, lvIndex, {
-          levelHash: chartBrief.levels[lvIndex].hash,
-          baseScore,
-          chainScore,
-          bigScore,
-          judgeCount,
-        });
-      }
-      const t = setTimeout(() => {
-        setShowResult(true);
-        setResultDate(new Date());
-        setExitable(
-          (ex) =>
-            new Date(
-              Math.max(
-                ex?.getTime() || 0,
-                new Date().getTime() +
-                  resultAnimDelays.reduce((a, b) => a + b, 0)
+      if (!showResult) {
+        if (
+          cid &&
+          !auto &&
+          score > bestScoreState &&
+          lvIndex !== undefined &&
+          chartBrief?.levels.at(lvIndex)
+        ) {
+          setBestScore(cid, lvIndex, {
+            levelHash: chartBrief.levels[lvIndex].hash,
+            baseScore,
+            chainScore,
+            bigScore,
+            judgeCount,
+          });
+        }
+        const t = setTimeout(() => {
+          setShowResult(true);
+          if (chartBrief?.levels.at(lvIndex)) {
+            void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lvHash: chartBrief.levels[lvIndex].hash,
+                auto,
+                score,
+                fc: chainScore === chainScoreRate,
+                fb: bigScore === bigScoreRate,
+              } satisfies RecordPost),
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            });
+          }
+          setResultDate(new Date());
+          setExitable(
+            (ex) =>
+              new Date(
+                Math.max(
+                  ex?.getTime() || 0,
+                  new Date().getTime() +
+                    resultAnimDelays.reduce((a, b) => a + b, 0)
+                )
               )
-            )
-        );
-        stop();
-      }, 1000);
-      return () => clearTimeout(t);
+          );
+          stop();
+        }, 1000);
+        return () => clearTimeout(t);
+      }
     } else {
       setShowResult(props.goResult);
     }
   }, [
+    showResult,
     chartStarted,
     end,
     chartSeq,
@@ -543,6 +570,29 @@ function Play(props: Props) {
         hit();
       }}
     >
+      {musicAreaOk && (
+        <>
+          {/* play中に使用する画像を先に読み込んでキャッシュさせる */}
+          {[0, 1, 2, 3].map((i) => (
+            <img
+              src={process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`}
+              className="hidden"
+              decoding="async"
+              fetchPriority="low"
+              key={i}
+            />
+          ))}
+          {[4, 6, 8, 10, 12].map((i) => (
+            <img
+              src={process.env.ASSET_PREFIX + `/assets/particle${i}.svg`}
+              className="hidden"
+              decoding="async"
+              fetchPriority="low"
+              key={i}
+            />
+          ))}
+        </>
+      )}
       <div
         className={
           "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch " +
@@ -611,8 +661,17 @@ function Play(props: Props) {
                 : "opacity-0 translate-y-[-300px]")
             }
           >
-            <ScoreDisp score={score} best={bestScoreState} auto={auto} />
-            <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
+            <ScoreDisp
+              score={score}
+              best={bestScoreState}
+              auto={auto}
+              theme={themeContext}
+            />
+            <ChainDisp
+              chain={chain}
+              fc={judgeCount[2] + judgeCount[3] === 0}
+              theme={themeContext}
+            />
           </div>
           {errorMsg ? (
             <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
@@ -624,7 +683,7 @@ function Play(props: Props) {
               }
             >
               <p>
-                <LoadingSlime />
+                <SlimeSVG />
                 Loading...
               </p>
             </CenterBox>

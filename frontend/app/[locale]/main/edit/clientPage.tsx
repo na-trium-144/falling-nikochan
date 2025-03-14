@@ -5,16 +5,17 @@ import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
 import { AccordionLike, ChartList } from "../chartList.js";
-import { LoadingSlime } from "@/common/loadingSlime.js";
 import { ExternalLink } from "@/common/extLink.js";
 import {
   ChartLineBrief,
   chartListMaxRow,
   fetchAndFilterBriefs,
 } from "../play/fetch.js";
-import { rateLimitMin, validCId } from "@falling-nikochan/chart";
+import { CidSchema, rateLimitMin } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useDisplayMode } from "@/scale.js";
+import * as v from "valibot";
+import { SlimeSVG } from "@/common/slime.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -25,7 +26,7 @@ export default function EditTab({ locale }: { locale: string }) {
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
 
   const [showExclusiveMode, setShowExclusiveMode] = useState<null | "recent">(
-    null
+    null,
   );
   const [showAllMode, setShowAllMode] = useState<null | "recent">(null);
   const goExclusiveMode = useCallback(
@@ -40,7 +41,7 @@ export default function EditTab({ locale }: { locale: string }) {
         setTimeout(() => setShowAllMode(mode), 200);
       }
     },
-    [isMobileMain]
+    [isMobileMain],
   );
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function EditTab({ locale }: { locale: string }) {
       if (recentBrief) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           recentBrief,
-          fetchRecentAll
+          fetchRecentAll,
         );
         if (changed) {
           setRecentBrief(briefs);
@@ -122,7 +123,7 @@ export default function EditTab({ locale }: { locale: string }) {
               actualValue={inputCId}
               updateValue={gotoCId}
               updateInvalidValue={() => setInputCId("")}
-              isValid={validCId}
+              isValid={(t) => v.safeParse(CidSchema(), t).success}
               left
             />
             <ExternalLink
@@ -132,7 +133,7 @@ export default function EditTab({ locale }: { locale: string }) {
               {t("newTab")}
             </ExternalLink>
             <span className={cidFetching ? "inline-block " : "hidden "}>
-              <LoadingSlime />
+              <SlimeSVG />
               Loading...
             </span>
             <span className="ml-1 inline-block">{cidErrorMsg}</span>

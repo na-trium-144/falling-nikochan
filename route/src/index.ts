@@ -7,15 +7,16 @@ import { HTTPException } from "hono/http-exception";
 import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
 import { join, dirname } from "node:path";
+import { getTranslations, locales } from "@falling-nikochan/i18n";
+import { ValiError } from "valibot";
 import dotenv from "dotenv";
-import { getTranslations } from "@falling-nikochan/i18n";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 async function errorResponse(
   origin: string,
   lang: string,
   status: number,
-  message: string
+  message: string,
 ) {
   const t = await getTranslations(lang, "error");
   return (
@@ -28,7 +29,7 @@ async function errorResponse(
       "PLACEHOLDER_MESSAGE",
       t.has("api." + message)
         ? t("api." + message)
-        : message || t("unknownApiError")
+        : message || t("unknownApiError"),
     )
     .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
@@ -40,7 +41,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   // これより上はlanguageDetectorのcookieが入らない
   .use(
     languageDetector({
-      supportedLanguages: ["en", "ja"],
+      supportedLanguages: locales,
       fallbackLanguage: "en",
       order: ["cookie", "header"],
       lookupCookie: "language",
@@ -51,13 +52,15 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         httpOnly: false,
       },
       // debug: process.env.API_ENV === "development",
-    })
+    }),
   )
   .onError(async (err, c) => {
     console.error(err);
     try {
       const lang = c.get("language");
-      if (!(err instanceof HTTPException)) {
+      if (err instanceof ValiError) {
+        err = new HTTPException(400, { message: err.message });
+      } else if (!(err instanceof HTTPException)) {
         err = new HTTPException(500);
       }
       const status = (err as HTTPException).status;
@@ -70,7 +73,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         return c.body(
           await errorResponse(new URL(c.req.url).origin, lang, status, message),
           status,
-          { "Content-Type": "text/html" }
+          { "Content-Type": "text/html" },
         );
       }
     } catch (e) {
@@ -91,7 +94,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     const params = new URLSearchParams(new URL(c.req.url).search);
     return c.redirect(
       `/${lang}${c.req.path}${params ? "?" + params : ""}`,
-      307
+      307,
     );
   })
   .get("/share/:cid{[0-9]+}", async (c, next) => {
@@ -100,18 +103,18 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     // c.req.param("cid_txt").slice(0, -4) for /share/:cid_txt{[0-9]+.txt}
     await next();
   })
-  .get(
-    "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
-    async (c, next) => {
-      // @ts-expect-error TODO same as above
-      c.set("cid", c.req.param("cid"));
-      await next();
-    }
-  )
+  // .get(
+  //   "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
+  //   async (c, next) => {
+  //     // @ts-expect-error TODO same as above
+  //     c.set("cid", c.req.param("cid"));
+  //     await next();
+  //   }
+  // )
   .get("/share/:cid{[0-9]+}", ...shareHandler)
-  .get(
-    "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
-    ...shareHandler
-  );
+  // .get(
+  //   "/_next/static/chunks/app/:locale/share/:cid{[0-9]+}/:f",
+  //   ...shareHandler
+  // );
 
 export default app;

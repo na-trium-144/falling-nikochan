@@ -1,5 +1,20 @@
 import { Key } from "@/common/key.js";
-import { Help, Translate, Sun } from "@icon-park/react";
+import { SlimeSVG } from "@/common/slime.js";
+import { TranslateIcon } from "@/common/mdxIcons.js";
+
+## ver. 9.4 - 03/12/2025
+
+- The motion of <SlimeSVG /> has been made smoother.
+- Other changes have been made to the display and effects on the game screen.
+
+## ver. 9.0 - 03/11/2025
+
+- The domain (URL) of Falling Nikochan has been changed to nikochan.utcode.net.
+- The management of passwords in chart editing has been changed, and passwords saved in your browser previously cannot be used. You need to re-enter them.
+  - The passwords of the charts uploaded to the server themselves have not changed.
+- The play count of each chart has been removed.
+  - May be changed soon
+- The [terms of service](/main/policies) have been partially updated. It has been clarified that the IP address is saved when the chart created is saved on the server.
 
 ## ver. 8.16 - 03/06/2025
 
@@ -30,7 +45,7 @@ import { Help, Translate, Sun } from "@icon-park/react";
 
 ## ver. 7.15 - 02/21/2025
 
-- Added an image of <img src={process.env.ASSET_PREFIX + "/assets/slime2.svg"} className="inline-block h-4 " /> in addition to <img src={process.env.ASSET_PREFIX + "/assets/slime.svg"} className="inline-block h-4 " /> , and made it animate.
+- Added an image of <img src={process.env.ASSET_PREFIX + "/assets/slime2.svg"} className="inline-block w-6 " /> in addition to <img src={process.env.ASSET_PREFIX + "/assets/slime.svg"} className="inline-block w-6 " /> , and made it animate.
 
 ## ver. 7.11 - 02/14/2025
 
@@ -48,5 +63,5 @@ import { Help, Translate, Sun } from "@icon-park/react";
 
 ## ver. 7.0 - 02/11/2025
 
-- The entire app now supports English. It automatically detects your browser settings, but you can also switch to English using the <Translate className="inline-block align-middle" /> Language button at the bottom of the screen.
+- The entire app now supports English. It automatically detects your browser settings, but you can also switch to English using the <TranslateIcon /> Language button at the bottom of the screen.
 - When the app is updated, the link to this update history page (the version number at the bottom of the screen) will be marked as unread.

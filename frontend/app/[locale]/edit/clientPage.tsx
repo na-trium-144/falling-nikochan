@@ -1,6 +1,10 @@
 "use client";
 
-import { defaultNoteCommand, NoteCommand } from "@falling-nikochan/chart";
+import {
+  Chart9Edit,
+  defaultNoteCommand,
+  NoteCommand,
+} from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -37,7 +41,6 @@ import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
 import Header from "@/common/header.js";
 import {
   getPasswd,
-  getV6Passwd,
   preferSavePasswd,
   setPasswd,
   unsetPasswd,
@@ -81,9 +84,13 @@ import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { Chart8Edit } from "@falling-nikochan/chart";
-import { LoadingSlime } from "@/common/loadingSlime.js";
+import { SlimeSVG } from "@/common/slime.js";
 
-export default function EditAuth({ locale }: { locale: string }) {
+export default function EditAuth(props: {
+  locale: string;
+  guideContents: ReactNode[];
+}) {
+  const { locale } = props;
   const t = useTranslations("edit");
   const te = useTranslations("error");
   const themeContext = useTheme();
@@ -95,6 +102,9 @@ export default function EditAuth({ locale }: { locale: string }) {
   // chartのgetやpostに必要なパスワード
   // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
   const [editPasswd, setEditPasswd] = useState<string>("");
+  // fetchに成功したらセット、
+  // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
+  const currentPasswd = useRef<string | null>(null);
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -120,13 +130,23 @@ export default function EditAuth({ locale }: { locale: string }) {
         setCid(cidInitial.current);
         setPasswdFailed(false);
         setLoading(true);
+        const q = new URLSearchParams();
+        if (getPasswd(cidInitial.current)) {
+          q.set("ph", getPasswd(cidInitial.current)!);
+        }
+        if (editPasswd) {
+          currentPasswd.current = editPasswd;
+          q.set("p", currentPasswd.current);
+        } else {
+          currentPasswd.current = null;
+        }
+        if (bypass) {
+          q.set("pbypass", "1");
+        }
         const res = await fetch(
           process.env.BACKEND_PREFIX +
-            `/api/chartFile/${cidInitial.current}` +
-            `?p=${getV6Passwd(cidInitial.current)}` +
-            `&ph=${getPasswd(cidInitial.current)}` +
-            `&pw=${editPasswd}` +
-            (bypass ? "&pbypass=1" : ""),
+            `/api/chartFile/${cidInitial.current}?` +
+            q.toString(),
           {
             cache: "no-store",
             credentials:
@@ -137,22 +157,24 @@ export default function EditAuth({ locale }: { locale: string }) {
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit =
+            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
               msgpack.deserialize(await res.arrayBuffer());
             setConvertedFrom(chartRes.ver);
             const chart: ChartEdit = await validateChart(chartRes);
             if (savePasswd) {
-              const res = await fetch(
-                process.env.BACKEND_PREFIX +
-                  `/api/hashPasswd/${cidInitial.current}?pw=${chart.editPasswd}`,
-                {
-                  credentials:
-                    process.env.NODE_ENV === "development"
-                      ? "include"
-                      : "same-origin",
-                }
-              );
-              setPasswd(cidInitial.current, await res.text());
+              if (currentPasswd.current) {
+                const res = await fetch(
+                  process.env.BACKEND_PREFIX +
+                    `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
+                  {
+                    credentials:
+                      process.env.NODE_ENV === "development"
+                        ? "include"
+                        : "same-origin",
+                  }
+                );
+                setPasswd(cidInitial.current, await res.text());
+              }
             } else {
               unsetPasswd(cidInitial.current);
             }
@@ -160,7 +182,8 @@ export default function EditAuth({ locale }: { locale: string }) {
             setErrorStatus(undefined);
             setErrorMsg(undefined);
             addRecent("edit", cidInitial.current);
-          } catch {
+          } catch (e) {
+            console.error(e);
             setChart(undefined);
             setErrorStatus(undefined);
             setErrorMsg(te("badResponse"));
@@ -208,6 +231,7 @@ export default function EditAuth({ locale }: { locale: string }) {
 
   return (
     <Page
+      guideContents={props.guideContents}
       chart={chart}
       setChart={setChart}
       cid={cid}
@@ -217,13 +241,13 @@ export default function EditAuth({ locale }: { locale: string }) {
       convertedFrom={convertedFrom}
       setConvertedFrom={setConvertedFrom}
       locale={locale}
-      editPasswdInitial={editPasswd}
+      currentPasswd={currentPasswd}
       savePasswdInitial={savePasswd}
       modal={
         chart === undefined ? (
           loading ? (
             <p>
-              <LoadingSlime />
+              <SlimeSVG />
               Loading...
             </p>
           ) : errorStatus !== undefined || errorMsg !== undefined ? (
@@ -280,8 +304,9 @@ export default function EditAuth({ locale }: { locale: string }) {
 }
 
 interface Props {
-  chart?: Chart8Edit;
-  setChart: (chart: Chart8Edit) => void;
+  guideContents: ReactNode[];
+  chart?: ChartEdit;
+  setChart: (chart: ChartEdit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
   themeContext: ThemeContext;
@@ -289,7 +314,7 @@ interface Props {
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
-  editPasswdInitial?: string;
+  currentPasswd: { current: string | null };
   savePasswdInitial: boolean;
   modal?: ReactNode;
 }
@@ -316,20 +341,17 @@ function Page(props: Props) {
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
   const chartNumEvent = chart ? numEvents(chart) : 0;
+  // 変更する場合は空文字列以外をセットすると、サーバーへ送信時にchart.changePasswdにセットされる
+  const [newPasswd, setNewPasswd] = useState<string>("");
   const [savePasswd, setSavePasswd] = useState<boolean | null>(null);
   useEffect(() => {
     if (chart && savePasswd === null) {
       setSavePasswd(props.savePasswdInitial);
     }
   }, [chart, savePasswd, props.savePasswdInitial]);
-  // パスワードの変更前の値を保存
-  // post後に chart.editPasswd で上書き
-  const [editPasswdPrev, setEditPasswdPrev] = useState<string>(
-    props.editPasswdInitial || ""
-  );
 
   // 譜面の更新 (メタデータの変更など)
-  const changeChart = (chart: Chart8Edit) => {
+  const changeChart = (chart: ChartEdit) => {
     setHasChange(true);
     setChart(chart);
   };
@@ -347,7 +369,7 @@ function Page(props: Props) {
         const data = {
           cid: cid,
           lvIndex: currentLevelIndex,
-          brief: await createBrief(chart),
+          brief: await createBrief(chart, new Date().getTime()),
           level: convertToPlay(chart, currentLevelIndex),
           editing: true,
         };
@@ -884,6 +906,7 @@ function Page(props: Props) {
         </div>
       ) : guidePage !== null ? (
         <GuideMain
+          content={props.guideContents[guidePage]}
           index={guidePage}
           setIndex={setGuidePage}
           close={() => setGuidePage(null)}
@@ -1157,8 +1180,9 @@ function Page(props: Props) {
                   setHasChange={setHasChange}
                   currentLevelIndex={currentLevelIndex}
                   locale={locale}
-                  editPasswdPrev={editPasswdPrev}
-                  setEditPasswdPrev={setEditPasswdPrev}
+                  currentPasswd={props.currentPasswd}
+                  newPasswd={newPasswd}
+                  setNewPasswd={setNewPasswd}
                   savePasswd={!!savePasswd}
                   setSavePasswd={setSavePasswd}
                 />
@@ -1231,7 +1255,7 @@ function Page(props: Props) {
             <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
               {luaExecutor.running ? (
                 <div className="m-1">
-                  <LoadingSlime />
+                  <SlimeSVG />
                   {t("running")}
                 </div>
               ) : (

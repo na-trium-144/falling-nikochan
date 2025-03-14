@@ -1,22 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { targetY, bigScale } from "@falling-nikochan/chart";
+import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { bonusMax } from "@falling-nikochan/chart";
 import { ThemeContext } from "@/common/theme.js";
-import {
-  displayNote6,
-  DisplayNote6,
-  Note6,
-} from "@falling-nikochan/chart";
-import {
-  displayNote7,
-  DisplayNote7,
-  Note7,
-} from "@falling-nikochan/chart";
+import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
+import { displayNote7, DisplayNote7, Note7 } from "@falling-nikochan/chart";
 
 interface Props {
   className?: string;
@@ -44,7 +35,7 @@ export default function FallingWindow(props: Props) {
   const fpsCountBegin = useRef<Date>(new Date());
 
   const { rem } = useDisplayMode();
-  const noteSize = Math.max(1.5 * rem, 0.05 * (boxSize || 0));
+  const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   useEffect(() => {
     let anim: number;
@@ -134,23 +125,6 @@ function Nikochan(props: NProps) {
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
 
-  const particleMaxNum = 15;
-  const particleNum =
-    displayNote.chain && displayNote.baseScore !== undefined
-      ? Math.min(
-          Math.round(
-            ((1 + (2 * displayNote.chain) / bonusMax) / 3) *
-              particleMaxNum *
-              displayNote.baseScore
-          ),
-          particleMaxNum
-        )
-      : 0;
-  const [particleStartAngle, setParticleStartAngle] = useState<number>();
-  useEffect(() => {
-    setParticleStartAngle(Math.random() * 360);
-  }, []);
-
   return (
     <>
       <div
@@ -212,7 +186,7 @@ function Nikochan(props: NProps) {
             </span>
           )}*/}
       </div>
-      {[1, 2].includes(displayNote.done) && (
+      {[1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
           left={note.targetX * boxSize + marginX}
@@ -221,21 +195,20 @@ function Nikochan(props: NProps) {
           chain={displayNote.chain || 0}
         />
       )}
-      {particleStartAngle !== undefined &&
-        particleNum > 0 &&
-        Array.from(new Array(particleNum /*particleMaxNum*/)).map((_, i) => (
-          <Particle
-            key={i}
-            angle={particleStartAngle + (360 * i) / particleNum}
-            visible={i < particleNum}
-            left={note.targetX * boxSize + marginX}
-            bottom={targetY * boxSize + marginY}
-            noteSize={noteSize}
-            big={displayNote.bigDone}
-            chain={displayNote.chain || 0}
-            themeContext={props.themeContext}
-          />
-        ))}
+      {displayNote.chain && [1, 2].includes(displayNote.done) && (
+        <Particle
+          particleNum={
+            // 6,8,10,12
+            6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
+          }
+          left={note.targetX * boxSize + marginX}
+          bottom={targetY * boxSize + marginY}
+          noteSize={noteSize}
+          big={displayNote.bigDone}
+          chain={displayNote.chain || 0}
+          themeContext={props.themeContext}
+        />
+      )}
     </>
   );
 }
@@ -252,19 +225,19 @@ function Ripple(props: RProps) {
   const ref2 = useRef<HTMLDivElement>(null!);
   const animateDone = useRef<boolean>(false);
   const { noteSize } = props;
-  const rippleWidth = noteSize * 1.5 * (props.big ? 1.5 : 1);
-  const rippleHeight = rippleWidth * 0.6;
+  const rippleWidth = noteSize * 2 * (props.big ? 1.5 : 1);
+  const rippleHeight = rippleWidth * 0.7;
   useEffect(() => {
     if (!animateDone.current) {
       [ref, ref2].forEach((r, i) => {
         r.current.animate(
           [
-            { transform: "scale(0)", opacity: 0.6 },
-            { transform: "scale(0.8)", opacity: 0.6, offset: 0.8 },
+            { transform: "scale(0)", opacity: 0.5 },
+            { transform: "scale(0.8)", opacity: 0.5, offset: 0.8 },
             { transform: `scale(1)`, opacity: 0 },
           ],
           {
-            duration: 500 - 200 * i,
+            duration: 350 - 200 * i,
             delay: 200 * i,
             fill: "forwards",
             easing: "ease-out",
@@ -289,10 +262,10 @@ function Ripple(props: RProps) {
           key={i}
           ref={r}
           className={
-            "absolute origin-center scale-0 " +
+            "absolute origin-center opacity-0 " +
             (props.chain >= bonusMax
-              ? "bg-amber-200 border-amber-300 dark:bg-yellow-700 dark:border-yellow-600 "
-              : "bg-yellow-200 border-yellow-300 dark:bg-amber-700 dark:border-amber-600 ")
+              ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70 "
+              : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70 ")
           }
           style={{
             borderWidth: rippleWidth / 20,
@@ -309,51 +282,62 @@ function Ripple(props: RProps) {
 }
 
 interface PProps {
-  angle: number;
+  particleNum: number;
   left: number;
   bottom: number;
   noteSize: number;
-  visible: boolean;
   big: boolean;
   chain: number;
   themeContext: ThemeContext;
 }
 function Particle(props: PProps) {
-  const ref = useRef<HTMLDivElement>(null!);
+  const ref = useRef<HTMLImageElement>(null!);
+  const refBig = useRef<HTMLImageElement | null>(null);
   const animateDone = useRef<boolean>(false);
-  const angleRandom = useRef<number>(0);
-  const bigParam = useRef<number>(1);
-  const sizeParam = useRef<number>(1);
-  const hueParam = useRef<number>(0);
-  let hue =
-    55 - (15 * hueParam.current * Math.min(props.chain, bonusMax)) / bonusMax;
-  if (props.themeContext.isDark) {
-    hue = 85 - hue;
-  }
-  const { noteSize } = props;
-  const particleSize = (noteSize / 4) * sizeParam.current;
+  const bigAnimateDone = useRef<boolean>(false);
+  const { noteSize, particleNum } = props;
+  const maxSize = noteSize * 1.8;
+  const bigSize = noteSize * 3;
   useEffect(() => {
     if (!animateDone.current) {
-      const distance = noteSize * (0.5 + Math.random() * Math.random() * 1);
+      const angle = Math.random() * 360;
+      const angleVel = Math.random() * 120 - 60;
       ref.current.animate(
         [
-          { transform: "translateX(0px)", opacity: 0.8 },
+          { transform: `scale(0.3) rotate(${angle}deg)`, opacity: 0 },
           {
-            transform: `translateX(${distance * 0.8}px)`,
+            transform: `scale(0.8) rotate(${angle + angleVel * 0.8}deg)`,
             opacity: 0.8,
             offset: 0.8,
           },
-          { transform: `translateX(${distance}px)`, opacity: 0 },
+          { transform: `scale(1) rotate(${angle + angleVel}deg)`, opacity: 0 },
         ],
         { duration: 500, fill: "forwards", easing: "ease-out" }
       );
-      angleRandom.current = Math.random() * Math.random() * 120;
-      bigParam.current = Math.random() * 1 + 1;
-      sizeParam.current = Math.random() * Math.random() * 0.5 + 0.5;
-      hueParam.current = Math.random() * Math.random() * 1;
+      animateDone.current = true;
     }
-    animateDone.current = true;
-  }, [noteSize]);
+    if (props.big && refBig.current && !bigAnimateDone.current) {
+      const angleBig = Math.random() * 360;
+      const angleVel = Math.random() * 120 - 60;
+      refBig.current?.animate(
+        [
+          { transform: `scale(0.3) rotate(${angleBig}deg)`, opacity: 0 },
+          {
+            transform: `scale(0.8) rotate(${angleBig + angleVel * 0.8}deg)`,
+            opacity: 0.6,
+            offset: 0.8,
+          },
+          {
+            transform: `scale(1) rotate(${angleBig + angleVel}deg)`,
+            opacity: 0,
+          },
+        ],
+        { duration: 500, fill: "forwards", easing: "ease-out" }
+      );
+      bigAnimateDone.current = true;
+    }
+  }, [props.big]);
+
   return (
     <div
       className="absolute -z-10 "
@@ -362,23 +346,38 @@ function Particle(props: PProps) {
         height: 1,
         left: props.left,
         bottom: props.bottom,
-        transform:
-          `rotate(${props.angle + angleRandom.current}deg) ` +
-          `scale(${props.big ? bigParam.current : 1})`,
-        opacity: props.visible ? 1 : 0,
       }}
     >
-      <div
+      <img
+        src={process.env.ASSET_PREFIX + `/assets/particle${particleNum}.svg`}
         ref={ref}
-        className="absolute rounded-full "
+        className="absolute opacity-0"
         style={{
-          background: `hsl(${hue} 100% 50%)`,
-          width: particleSize,
-          height: particleSize,
-          left: -particleSize / 2,
-          bottom: -particleSize / 2,
+          left: -maxSize / 2,
+          bottom: -maxSize / 2,
+          width: maxSize,
+          minWidth: maxSize, // なぜかこれがないとwidthが0になってしまう...
+          height: maxSize,
+          minHeight: maxSize,
         }}
       />
+      {props.big && (
+        <img
+          src={
+            process.env.ASSET_PREFIX + `/assets/particle${particleNum - 2}.svg`
+          }
+          ref={refBig}
+          className="absolute opacity-0"
+          style={{
+            left: -bigSize / 2,
+            bottom: -bigSize / 2,
+            width: bigSize,
+            minWidth: bigSize,
+            height: bigSize,
+            minHeight: bigSize,
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import Link from "next/link";
 import Title from "@/common/titleLogo.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
+import { RedirectedWarning } from "@/common/redirectedWarning";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -41,12 +42,11 @@ export function IndexMain(props: Props) {
       <Link
         href={`/${locale}`}
         className={
-          (!isTitlePage ? "hidden main-wide:block " : " ") +
+          (!isTitlePage ? "hidden main-wide:block " : "basis-0 grow-1 ") +
           "shrink-0 basis-24 overflow-hidden relative " +
           linkStyle1
         }
         style={{
-          flexGrow: !isTitlePage ? 0 : 0.5,
           marginLeft: "-20rem",
           marginRight: "-20rem",
         }}
@@ -54,10 +54,15 @@ export function IndexMain(props: Props) {
       >
         <Title className="absolute inset-0 " anim={isTitlePage} />
       </Link>
+      <RedirectedWarning
+        className={
+          "self-center mx-6 " + (!isTitlePage ? "my-2 " : "basis-0 grow-1 ")
+        }
+      />
       <div
         className={
           "main-wide:max-h-dvh main-wide:overflow-hidden main-wide:mb-3 " +
-          "shrink-0 basis-56 grow " +
+          "shrink-0 basis-56 basis-0 grow-2 " +
           "flex flex-row items-stretch justify-center px-6 "
         }
       >
@@ -110,7 +115,7 @@ export function IndexMain(props: Props) {
                 >
                   {tabTitles(i)}
                 </Link>
-              )
+              ),
             )}
           </div>
         )}
@@ -131,8 +136,8 @@ export function IndexMain(props: Props) {
           isHiddenPage
             ? "block"
             : isTitlePage
-            ? false
-            : "block main-wide:hidden"
+              ? false
+              : "block main-wide:hidden"
         }
       />
     </main>

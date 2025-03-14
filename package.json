@@ -7,7 +7,7 @@
     "i18n:lint": "cd i18n && eslint",
     "route:lint": "cd route && eslint src/",
     "frontend:lint": "cd frontend && tsc --noEmit && eslint app/",
-    "lint": "npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
+    "lint": "tsc && npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run frontend:lint",
     "route:test": "cd route && bun test",
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",
@@ -32,18 +32,18 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
-    "@types/bun": "^1.2.4",
-    "@types/node": "^22.13.9",
+    "@eslint/js": "^9.22.0",
+    "@types/bun": "^1.2.5",
+    "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "eslint": "^9.19.0",
+    "eslint": "^9.22.0",
     "eslint-config-next": "^15.2.1",
-    "eslint-config-prettier": "^10.0.2",
+    "eslint-config-prettier": "^10.1.1",
     "globals": "^16.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.0"
+    "typescript-eslint": "^8.26.1"
   },
   "overrides": {
     "react": "$react",

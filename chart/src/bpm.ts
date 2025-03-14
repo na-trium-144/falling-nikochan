@@ -1,29 +1,21 @@
 import { BPMChange1 } from "./legacy/chart1.js";
-import { BPMChangeWithLua3 } from "./legacy/chart3.js";
-import { stepCmp, stepToFloat, validateStep } from "./step.js";
+import { BPMChange9 } from "./legacy/chart9.js";
+import { stepCmp, stepToFloat } from "./step.js";
 
 /**
  * timeSec +=
  *  (60 / bpmChanges[bi].bpm) *
  *  (bpmChanges[bi + 1].step - bpmChanges[bi].step);
  */
-export type BPMChange = BPMChange1;
-export type BPMChangeWithLua = BPMChangeWithLua3;
-
-export function validateBpmChange(b: BPMChangeWithLua) {
-  validateStep(b.step);
-  if (typeof b.timeSec !== "number") throw "BpmChange.timeSec is invalid";
-  if (typeof b.bpm !== "number") throw "BpmChange.bpm is invalid";
-  if (typeof b.luaLine !== "number" && b.luaLine !== null)
-    throw "note.luaLine is invalid";
-}
+export type BPMChange = BPMChange9;
+export type BPMChangeWithLua = BPMChange9;
 
 /**
  * stepが正しいとしてtimeSecを再計算
  */
 export function updateBpmTimeSec(
-  bpmChanges: BPMChange[],
-  scaleChanges: BPMChange[]
+  bpmChanges: BPMChange[] | BPMChange1[],
+  scaleChanges: BPMChange[] | BPMChange1[]
 ) {
   let timeSum = 0;
   let si = 0;
