@@ -108,7 +108,7 @@ const shareHandler = factory.createHandlers(async (c) => {
           title: brief.title,
         });
     let replacedBody = (await res.text())
-      // .replaceAll("/share/placeholder", `/share/${cid}`)
+      .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL, but not chunk script URL
       .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
       .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
       .replaceAll(
