@@ -43,7 +43,6 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         });
       }
       const brief = (await briefRes.json()) as ChartBrief;
-      const q = new URLSearchParams(c.req.query());
       const sBrief = msgpack.serialize([
         brief.ytId,
         brief.title,
@@ -54,17 +53,19 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       for (let i = 0; i < sBrief.length; i++) {
         sBriefBin += String.fromCharCode(sBrief[i]);
       }
-      q.set(
+      // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
+      const ogQuery = new URLSearchParams();
+      ogQuery.set("lang", c.req.query("lang") || "en");
+      if (c.req.query("result")) ogQuery.set("result", c.req.query("result")!);
+      ogQuery.set(
         "brief",
         btoa(sBriefBin)
           .replaceAll("+", "-")
           .replaceAll("/", "_")
           .replaceAll("=", ""),
       );
-      if (!q.has("v")) {
-        q.set("v", packageJson.version);
-      }
-      return c.redirect(`${c.req.path}?${q.toString()}`, 307);
+      ogQuery.set("v", packageJson.version);
+      return c.redirect(`${c.req.path}?${ogQuery.toString()}`, 307);
     }
 
     const sBriefBin = atob(

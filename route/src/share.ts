@@ -107,8 +107,13 @@ const shareHandler = factory.createHandlers(async (c) => {
           chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
           title: brief.title,
         });
+    // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
+    const ogQuery = new URLSearchParams();
+    ogQuery.set("lang", qLang);
+    if (resultParams) ogQuery.set("result", qResult!);
+    ogQuery.set("v", packageJson.version);
     let replacedBody = (await res.text())
-      .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL, but not chunk script URL
+      .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL, but not chunk script tag
       .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
       .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
       .replaceAll(
@@ -116,10 +121,7 @@ const shareHandler = factory.createHandlers(async (c) => {
         // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
         new URL(
           (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
-            new URLSearchParams({
-              ...c.req.query(),
-              v: packageJson.version,
-            }).toString(),
+            ogQuery.toString(),
           new URL(c.req.url).origin,
         ).toString(),
       )
