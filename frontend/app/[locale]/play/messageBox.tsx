@@ -55,7 +55,7 @@ export function ReadyMessage(props: MessageProps) {
   }
   return (
     <CenterBox>
-      <p className="text-lg font-title font-bold mb-1">
+      <p className="text-lg font-title font-bold mb-2">
         {props.back && (
           <button
             className={pagerButtonClass + "mr-4 align-bottom "}
@@ -238,7 +238,7 @@ export function StopMessage(props: MessageProps2) {
 
   return (
     <CenterBox className={props.hidden ? "hidden" : ""}>
-      <p className="text-lg font-title font-bold mb-1">
+      <p className="text-lg font-title font-bold mb-2">
         &lt; {t("stopped")} &gt;
       </p>
       <p>

@@ -15,10 +15,12 @@ import {
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share";
+import { useDisplayMode } from "@/scale";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
 interface Props extends ResultParams {
+  mainWindowHeight: number;
   hidden: boolean;
   lang: string;
   cid: string;
@@ -32,6 +34,25 @@ interface Props extends ResultParams {
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
+  const { rem } = useDisplayMode();
+  const ref = useRef<HTMLDivElement>(null);
+  const refTotal = useRef<HTMLDivElement>(null);
+  const refRank = useRef<HTMLDivElement>(null);
+  const refBest = useRef<HTMLDivElement>(null);
+  const scrollOptions = { behavior: "smooth", block: "end" } as const;
+  const animScroll = useRef([
+    null,
+    null,
+    null,
+    () => refTotal.current?.scrollIntoView(scrollOptions),
+    () => refRank.current?.scrollIntoView(scrollOptions),
+    () => refBest.current?.scrollIntoView(scrollOptions),
+    () =>
+      ref.current?.scrollTo({
+        top: ref.current!.scrollHeight,
+        ...scrollOptions,
+      }),
+  ]);
 
   const messageRandom = useRef<number>(Math.random());
 
@@ -66,7 +87,14 @@ export default function Result(props: Props) {
     for (let i = 0; i < resultAnimDelays.length; i++) {
       offset.push((i > 0 ? offset[i - 1] : 0) + resultAnimDelays[i]);
     }
-    const timers = offset.map((o, i) => setTimeout(() => setShowing(i + 1), o));
+    const timers = offset.map((o, i) =>
+      setTimeout(() => {
+        setShowing(i + 1);
+        if (animScroll.current.at(i)) {
+          animScroll.current.at(i)!();
+        }
+      }, o),
+    );
     return () => {
       timers.forEach((t) => clearTimeout(t));
     };
@@ -104,7 +132,15 @@ export default function Result(props: Props) {
       visibility: showing >= index ? "visible" : "hidden",
     }) as const;
   return (
-    <CenterBox className={props.hidden ? "hidden" : ""}>
+    <CenterBox
+      ref={ref}
+      className={
+        "overflow-y-auto overflow-x-clip " +
+        (props.hidden ? "hidden " : "") +
+        (showing >= resultAnimDelays.length ? "" : "touch-none ")
+      }
+      style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+    >
       <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
       <div
         className={
@@ -138,8 +174,10 @@ export default function Result(props: Props) {
             scoreStyle={jumpingAnimation(4)}
             score100={props.score100}
           />
+          <div ref={refTotal} />
         </div>
         <div
+          ref={refRank}
           className={
             "flex-none w-56 flex flex-col justify-center items-center " +
             (props.largeResult ? "space-y-2 " : "space-y-1 ")
@@ -183,7 +221,7 @@ export default function Result(props: Props) {
             </div>
           )}
           {props.newRecord > 0 && (
-            <div style={{ ...appearingAnimation2(6) }}>
+            <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
               <span className={props.largeResult ? "text-xl " : ""}>
                 {t("newRecord")}
               </span>

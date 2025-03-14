@@ -697,6 +697,7 @@ function Play(props: Props) {
           )}
           {showResult && chartBrief && (
             <Result
+              mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
               auto={auto}
               lang={props.locale}
