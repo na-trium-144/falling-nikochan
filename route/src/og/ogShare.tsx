@@ -1,6 +1,5 @@
 import React from "react";
 import { getTranslations } from "@falling-nikochan/i18n";
-import { ChartBrief } from "@falling-nikochan/chart";
 import {
   flexCol,
   flexRow,
@@ -11,12 +10,13 @@ import {
   text5xl,
   text7xl,
 } from "./style.js";
+import { ChartBriefMin } from "./app.js";
 
 export async function OGShare(
   cid: string,
   lang: string,
-  brief: ChartBrief,
-  bgImageBin: string
+  brief: ChartBriefMin,
+  bgImageBin: string,
 ) {
   const t = await getTranslations(lang, "share");
   return (

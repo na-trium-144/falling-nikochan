@@ -12,11 +12,78 @@ import { fetchStatic } from "../static.js";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
 import { env } from "hono/adapter";
+import msgpack from "@ygoe/msgpack";
+import packageJson from "../../package.json" with { type: "json" };
+
+export interface ChartBriefMin {
+  ytId: string;
+  title: string;
+  composer: string;
+  chartCreator: string;
+}
 
 const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:type/:cid", async (c) => {
-    const lang = c.req.query("lang") || "en"; // c.get("language");
     const cid = c.req.param("cid");
+
+    // /og/share/cid へのアクセスでは /og/share/cid?brief=表示する全情報&v=version へ301リダイレクトし、
+    // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
+    // (vパラメータは /share でも追加されるけど)
+    if (!c.req.query("brief")) {
+      const briefRes = await briefApp.request(`/${cid}`);
+      if (!briefRes.ok) {
+        let message = "";
+        try {
+          message =
+            ((await briefRes.json()) as { message?: string }).message || "";
+        } catch {
+          //
+        }
+        throw new HTTPException(briefRes.status as 401 | 404 | 500, {
+          message,
+        });
+      }
+      const brief = (await briefRes.json()) as ChartBrief;
+      const q = new URLSearchParams(c.req.query());
+      const sBrief = msgpack.serialize([
+        brief.ytId,
+        brief.title,
+        brief.composer,
+        brief.chartCreator,
+      ]);
+      let sBriefBin = "";
+      for (let i = 0; i < sBrief.length; i++) {
+        sBriefBin += String.fromCharCode(sBrief[i]);
+      }
+      q.set(
+        "brief",
+        btoa(sBriefBin)
+          .replaceAll("+", "-")
+          .replaceAll("/", "_")
+          .replaceAll("=", ""),
+      );
+      if (!q.has("v")) {
+        q.set("v", packageJson.version);
+      }
+      return c.redirect(`${c.req.path}?${q.toString()}`, 307);
+    }
+
+    const sBriefBin = atob(
+      c.req.query("brief")!.replaceAll("-", "+").replaceAll("_", "/"),
+    );
+    let sBriefArr = new Uint8Array(sBriefBin.length);
+    for (let i = 0; i < sBriefBin.length; i++) {
+      sBriefArr[i] = sBriefBin.charCodeAt(i);
+    }
+    const briefArr = msgpack.deserialize(sBriefArr);
+    const brief: ChartBriefMin = {
+      ytId: briefArr[0],
+      title: briefArr[1],
+      composer: briefArr[2],
+      chartCreator: briefArr[3],
+    };
+
+    const lang = c.req.query("lang") || "en"; // c.get("language");
     const qResult = c.req.query("result");
     let resultParams: ResultParams | null = null;
     if (qResult) {
@@ -27,7 +94,6 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         throw new HTTPException(400, { message: "invalidResultParam" });
       }
     }
-    const pBriefRes = briefApp.request(`/${cid}`);
     const pFonts = (
       [
         {
@@ -78,18 +144,6 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         throw new HTTPException(404);
     }
 
-    const briefRes = await pBriefRes;
-    if (!briefRes.ok) {
-      let message = "";
-      try {
-        message =
-          ((await briefRes.json()) as { message?: string }).message || "";
-      } catch {
-        //
-      }
-      throw new HTTPException(briefRes.status as 401 | 404 | 500, { message });
-    }
-    const brief = (await briefRes.json()) as ChartBrief;
     const bgImageBuf = new Uint8Array(await (await pBgImage).arrayBuffer());
     let bgImageBin = "";
     for (let i = 0; i < bgImageBuf.byteLength; i++) {
@@ -97,18 +151,15 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     }
 
     let Image: Promise<React.ReactElement>;
-    let cacheAge: number;
     switch (c.req.param("type")) {
       case "share":
         Image = OGShare(cid, lang, brief, bgImageBin);
-        cacheAge = 7200;
         break;
       case "result":
         if (!resultParams) {
           throw new HTTPException(400, { message: "missingResultParam" });
         }
         Image = OGResult(cid, lang, brief, bgImageBin, resultParams);
-        cacheAge = 31536000;
         break;
     }
     const imRes = new ImageResponse(await Image!, {
@@ -126,7 +177,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     if (imRes.ok && imRes.body) {
       return c.body(imRes.body, 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), cacheAge!),
+        "Cache-Control": cacheControl(env(c), 315360000),
       });
     } else {
       console.error(imRes);

@@ -4,7 +4,6 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
-  ChartBrief,
   levelTypes,
   rankStr,
   ResultParams,
@@ -24,11 +23,12 @@ import {
   slate500,
   amber500,
 } from "./style.js";
+import { ChartBriefMin } from "./app.js";
 
 export async function OGResult(
   cid: string,
   lang: string,
-  brief: ChartBrief,
+  brief: ChartBriefMin,
   bgImageBin: string,
   params: ResultParams
 ) {
