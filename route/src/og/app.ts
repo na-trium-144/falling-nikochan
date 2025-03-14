@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings, cacheControl, fetchStatic } from "../env.js";
 import { ImageResponse } from "@vercel/og";
 import briefApp from "../api/brief.js";
 import { HTTPException } from "hono/http-exception";
@@ -8,7 +8,6 @@ import {
   deserializeResultParams,
   ResultParams,
 } from "@falling-nikochan/chart";
-import { fetchStatic } from "../static.js";
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
 import { env } from "hono/adapter";
@@ -124,6 +123,7 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     ).map((f) => ({
       ...f,
       pData: fetchStatic(
+        env(c),
         new URL(`/assets/${f.file}`, new URL(c.req.url).origin),
       ),
     }));
@@ -132,11 +132,13 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       case "share":
         // [locale]/ogTemplate/share をスクショしたpng画像を /assets に置く
         pBgImage = fetchStatic(
+          env(c),
           new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin),
         );
         break;
       case "result":
         pBgImage = fetchStatic(
+          env(c),
           new URL(`/assets/ogTemplateResult.png`, new URL(c.req.url).origin),
         );
         break;

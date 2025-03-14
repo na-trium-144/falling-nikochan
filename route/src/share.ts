@@ -1,8 +1,7 @@
 import { createFactory } from "hono/factory";
-import { Bindings, cacheControl } from "./env.js";
+import { Bindings, cacheControl, fetchStatic } from "./env.js";
 import briefApp from "./api/brief.js";
 import { getTranslations } from "@falling-nikochan/i18n";
-import { fetchStatic } from "./static.js";
 import {
   baseScoreRate,
   bigScoreRate,
@@ -56,7 +55,7 @@ const shareHandler = factory.createHandlers(async (c) => {
   //     c.req.url.replace(/share\/[0-9]+/, "share/placeholder")
   //   );
   // }
-  const pRes = fetchStatic(placeholderUrl);
+  const pRes = fetchStatic(env(c), placeholderUrl);
   const briefRes = await pBriefRes;
   if (briefRes.ok) {
     const brief = (await briefRes.json()) as ChartBrief;
