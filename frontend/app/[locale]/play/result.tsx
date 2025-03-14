@@ -137,7 +137,7 @@ export default function Result(props: Props) {
       className={
         "overflow-y-auto overflow-x-clip " +
         (props.hidden ? "hidden " : "") +
-        (showing >= resultAnimDelays.length ? "" : "touch-none ")
+        (showing >= resultAnimDelays.length ? "touch-pan-y " : "touch-none ")
       }
       style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
     >

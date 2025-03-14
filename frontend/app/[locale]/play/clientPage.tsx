@@ -534,8 +534,7 @@ function Play(props: Props) {
   return (
     <main
       className={
-        "overflow-hidden w-full h-dvh relative select-none flex flex-col " +
-        (chartPlaying ? "touch-none " : "touch-pan-y ")
+        "overflow-hidden w-full h-dvh relative select-none flex flex-col touch-none "
       }
       tabIndex={0}
       ref={ref}
