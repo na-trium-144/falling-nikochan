@@ -18,6 +18,7 @@ import {
 
 interface MessageProps {
   isTouch: boolean;
+  back?: () => void;
   start: () => void;
   exit: () => void;
   auto: boolean;
@@ -54,7 +55,17 @@ export function ReadyMessage(props: MessageProps) {
   }
   return (
     <CenterBox>
-      <p className="text-lg font-title font-bold mb-1">{t("ready")}</p>
+      <p className="text-lg font-title font-bold mb-1">
+        {props.back && (
+          <button
+            className={pagerButtonClass + "mr-4 align-bottom "}
+            onClick={props.back!}
+          >
+            <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+          </button>
+        )}
+        {t("ready")}
+      </p>
       <p>
         <Button
           text={t("start")}
@@ -217,6 +228,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
 }
 
 interface MessageProps2 {
+  hidden: boolean;
   isTouch: boolean;
   reset: () => void;
   exit: () => void;
@@ -225,7 +237,7 @@ export function StopMessage(props: MessageProps2) {
   const t = useTranslations("play.message");
 
   return (
-    <CenterBox>
+    <CenterBox className={props.hidden ? "hidden" : ""}>
       <p className="text-lg font-title font-bold mb-1">
         &lt; {t("stopped")} &gt;
       </p>
