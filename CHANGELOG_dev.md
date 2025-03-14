@@ -1,3 +1,9 @@
+## ver. 9.8 - 2025/03/15 [#384](https://github.com/na-trium-144/falling-nikochan/pull/383)
+
+* ready画面からresult画面に戻れるようにした
+* 画面が小さい時result表示をスクロールできるようにした
+* ready画面とオプション画面にスライドインのアニメーションを追加
+
 ## ver. 9.7 - 2025/03/14 [#383](https://github.com/na-trium-144/falling-nikochan/pull/383)
 
 * /og/shareのパラメーターにbriefを入れることでキャッシュできるようにする
