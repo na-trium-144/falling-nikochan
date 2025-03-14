@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import { languageDetector } from "hono/language";
 import apiApp from "./api/app.js";
-import { Bindings } from "./env.js";
-import { fetchStatic } from "./static.js";
+import { Bindings, fetchStatic } from "./env.js";
 import { HTTPException } from "hono/http-exception";
 import ogApp from "./og/app.js";
 import shareHandler from "./share.js";
@@ -10,9 +9,11 @@ import { join, dirname } from "node:path";
 import { getTranslations, locales } from "@falling-nikochan/i18n";
 import { ValiError } from "valibot";
 import dotenv from "dotenv";
+import { env } from "hono/adapter";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 async function errorResponse(
+  e: Bindings,
   origin: string,
   lang: string,
   status: number,
@@ -21,7 +22,7 @@ async function errorResponse(
   const t = await getTranslations(lang, "error");
   return (
     await (
-      await fetchStatic(new URL(`/${lang}/errorPlaceholder`, origin))
+      await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin))
     ).text()
   )
     .replaceAll("PLACEHOLDER_STATUS", String(status))
@@ -71,7 +72,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
         return c.json({ message }, status);
       } else {
         return c.body(
-          await errorResponse(new URL(c.req.url).origin, lang, status, message),
+          await errorResponse(env(c), new URL(c.req.url).origin, lang, status, message),
           status,
           { "Content-Type": "text/html" },
         );

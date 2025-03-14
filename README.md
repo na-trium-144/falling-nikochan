@@ -34,11 +34,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     API_NO_RATELIMIT="1"
     ```
     * other environment variables:
-        * `SECRET_SALT`
-        * `API_CACHE_EDGE`
-        * `ASSET_PREFIX`
-        * `BACKEND_PREFIX`
-        * `NO_PREFETCH`
+        * `SECRET_SALT` (backend): string
+        * `VERCEL_PROTECTION_BYPASS_SECRET` (backend): string
+        * `API_CACHE_EDGE` (backend): `1` or unset
+        * `ASSET_PREFIX` (backend & frontend): `https://domain-of-your-assets/` or unset
+        * `BACKEND_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
+        * `NO_PREFETCH` (frontend): `1` or unset
 * Install dependencies
     ```sh
     npm ci  # or  bun i
