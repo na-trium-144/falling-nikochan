@@ -30,11 +30,29 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         .find({ cid, auto: false });
       const summary: RecordGetSummary[] = [];
       for await (const record of records) {
-        const s = summary.find((s) => s.lvHash === record.lvHash);
-        if (s) {
-          s.count++;
+        let s = summary.find((s) => s.lvHash === record.lvHash);
+        if (!s) {
+          s = {
+            lvHash: record.lvHash,
+            count: 0,
+            countAuto: 0,
+            histogram: Array(13).fill(0),
+            countFC: 0,
+            countFB: 0,
+          } satisfies RecordGetSummary;
+          summary.push(s);
+        }
+        if (record.auto) {
+          s.countAuto++;
         } else {
-          summary.push({ lvHash: record.lvHash, count: 1 });
+          s.count++;
+          s.histogram[Math.floor(record.score / 10)]++;
+          if (record.fc) {
+            s.countFC++;
+          }
+          if (record.fb) {
+            s.countFB++;
+          }
         }
       }
       return c.json(summary, 200, {

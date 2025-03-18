@@ -2,7 +2,11 @@
 
 import Header from "@/common/header.js";
 import { PlayOption } from "./playOption.js";
-import { ChartBrief, ResultParams } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  RecordGetSummary,
+  ResultParams,
+} from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Button from "@/common/button.js";
@@ -16,6 +20,7 @@ import { SharedResultBox } from "./sharedResult.js";
 interface Props {
   cid: string;
   brief: ChartBrief;
+  record: RecordGetSummary[];
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;
@@ -126,7 +131,7 @@ export function ShareBox(props: Props) {
           )}
         </span>
       </p>
-      <PlayOption cid={cid} brief={brief} />
+      <PlayOption cid={cid} brief={brief} record={props.record} />
     </div>
   );
 }

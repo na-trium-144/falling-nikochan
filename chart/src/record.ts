@@ -4,8 +4,12 @@ import { HashSchema } from "./chart.js";
 // GET /api/record -> RecordGetSummary[]
 export interface RecordGetSummary {
   lvHash: string;
+  countAuto: number;
+  // excluding auto play:
   count: number;
-  // todo: scoreの統計
+  countFC: number;
+  countFB: number;
+  histogram: number[]; // number[13]
 }
 
 export const RecordPostSchema = () =>

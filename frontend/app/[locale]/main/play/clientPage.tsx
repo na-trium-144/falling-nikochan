@@ -16,6 +16,7 @@ import {
   ChartBrief,
   CidSchema,
   originalCId,
+  RecordGetSummary,
   sampleCId,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
@@ -68,19 +69,22 @@ export default function PlayTab({ locale }: { locale: string }) {
 
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
+  const [modalRecord, setModalRecord] = useState<RecordGetSummary[]>([]);
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
-  const openModal = (cid: string, brief: ChartBrief | undefined) => {
+  const openModal = useCallback(async (cid: string, brief: ChartBrief | undefined) => {
     if (brief) {
+      const record = await (await fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)).json();
       if (window.location.pathname !== `/share/${cid}`) {
         // pushStateではpopstateイベントは発生しない
         window.history.pushState(null, "", `/share/${cid}`);
       }
       setModalCId(cid);
       setModalBrief(brief);
+      setModalRecord(record);
       document.title = titleShare(th, cid, brief);
       setTimeout(() => setModalAppearing(true));
     }
-  };
+  }, [th]);
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
   useEffect(() => {
@@ -105,7 +109,7 @@ export default function PlayTab({ locale }: { locale: string }) {
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, [goExclusiveMode]);
+  }, [goExclusiveMode, openModal, t]);
 
   useEffect(() => {
     const recentCId = getRecent("play").reverse();
@@ -225,6 +229,7 @@ export default function PlayTab({ locale }: { locale: string }) {
                 <ShareBox
                   cid={modalCId}
                   brief={modalBrief}
+                  record={modalRecord}
                   locale={locale}
                   backButton={() => window.history.back()}
                 />

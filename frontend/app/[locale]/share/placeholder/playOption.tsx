@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartBrief, levelTypes, rankStr } from "@falling-nikochan/chart";
+import { ChartBrief, levelTypes, rankStr, RecordGetSummary } from "@falling-nikochan/chart";
 import {
   clearBestScore,
   getBestScore,
@@ -11,13 +11,14 @@ import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
-import { RightOne, SmilingFace, Timer } from "@icon-park/react";
+import { PlayOne, RightOne, SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface Props {
   cid: string;
   brief: ChartBrief;
+  record: RecordGetSummary[];
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -26,6 +27,7 @@ export function PlayOption(props: Props) {
   const [selectedLevel, setSelectedLevel] = useState<number>(
     props.brief.levels.findIndex((l) => !l.unlisted)
   );
+  const selectedRecord = props.record.find((r) => r.lvHash === props.brief.levels[selectedLevel]?.hash);
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
   const totalScore = bestScoreState
@@ -134,6 +136,10 @@ export function PlayOption(props: Props) {
                 {props.brief.levels[selectedLevel]?.noteCount}
               </span>
             </div>
+          </div>
+          <div className="">
+            <PlayOne theme="filled" className="inline-block align-middle mr-2"/>
+            <span>{selectedRecord?.count || 0}</span>
           </div>
           <p
             className={
