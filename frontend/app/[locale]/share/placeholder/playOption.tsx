@@ -1,6 +1,11 @@
 "use client";
 
-import { ChartBrief, levelTypes, rankStr, RecordGetSummary } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  levelTypes,
+  rankStr,
+  RecordGetSummary,
+} from "@falling-nikochan/chart";
 import {
   clearBestScore,
   getBestScore,
@@ -25,9 +30,15 @@ export function PlayOption(props: Props) {
 
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number>(
-    props.brief.levels.findIndex((l) => !l.unlisted)
+    props.brief.levels.findIndex((l) => !l.unlisted),
   );
-  const selectedRecord = props.record.find((r) => r.lvHash === props.brief.levels[selectedLevel]?.hash);
+  const selectedRecord = props.record.find(
+    (r) => r.lvHash === props.brief.levels[selectedLevel]?.hash,
+  );
+  const histogramMax = Math.max(
+    10,
+    selectedRecord?.histogram.reduce((max, h) => Math.max(max, h), 0) || 0,
+  );
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
   const totalScore = bestScoreState
@@ -85,7 +96,7 @@ export function PlayOption(props: Props) {
                   </span>
                 </button>
               </li>
-            )
+            ),
         )}
       </ul>
       {selectedLevel >= 0 ? (
@@ -116,7 +127,7 @@ export function PlayOption(props: Props) {
               </span>
               <span className="text-lg">
                 {Math.floor(
-                  Math.round(props.brief.levels[selectedLevel]?.length) / 60
+                  Math.round(props.brief.levels[selectedLevel]?.length) / 60,
                 )}
               </span>
               <span className="text-lg">:</span>
@@ -138,8 +149,26 @@ export function PlayOption(props: Props) {
             </div>
           </div>
           <div className="">
-            <PlayOne theme="filled" className="inline-block align-middle mr-2"/>
+            <PlayOne
+              theme="filled"
+              className="inline-block align-middle mr-2"
+            />
             <span>{selectedRecord?.count || 0}</span>
+            <div className="inline-flex flex-row w-max text-xs/2 text-left align-middle mx-2 ">
+              {selectedRecord?.histogram.map((h, i) => (
+                <div key={i} className="w-4">
+                  <div className="h-6 relative border-b border-slate-500/50 ">
+                    <div
+                      className="bg-slate-500/50 absolute inset-x-0 bottom-0 "
+                      style={{
+                        height: (h / histogramMax) * 100 + "%",
+                      }}
+                    />
+                  </div>
+                  <div>{[0, 7, 10, 12].includes(i) && i * 10}</div>
+                </div>
+              ))}
+            </div>
           </div>
           <p
             className={
