@@ -15,10 +15,13 @@ import {
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share";
+import { useDisplayMode } from "@/scale";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
 interface Props extends ResultParams {
+  mainWindowHeight: number;
+  hidden: boolean;
   lang: string;
   cid: string;
   brief: ChartBrief;
@@ -31,6 +34,25 @@ interface Props extends ResultParams {
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
+  const { rem } = useDisplayMode();
+  const ref = useRef<HTMLDivElement>(null);
+  const refTotal = useRef<HTMLDivElement>(null);
+  const refRank = useRef<HTMLDivElement>(null);
+  const refBest = useRef<HTMLDivElement>(null);
+  const scrollOptions = { behavior: "smooth", block: "end" } as const;
+  const animScroll = useRef([
+    null,
+    null,
+    null,
+    () => refTotal.current?.scrollIntoView(scrollOptions),
+    () => refRank.current?.scrollIntoView(scrollOptions),
+    () => refBest.current?.scrollIntoView(scrollOptions),
+    () =>
+      ref.current?.scrollTo({
+        top: ref.current!.scrollHeight,
+        ...scrollOptions,
+      }),
+  ]);
 
   const messageRandom = useRef<number>(Math.random());
 
@@ -40,7 +62,7 @@ export default function Result(props: Props) {
     props.brief,
     props.lang,
     serializedParam,
-    props.date
+    props.date,
   );
   useEffect(() => {
     setSerializedParam(serializeResultParams(props));
@@ -65,7 +87,14 @@ export default function Result(props: Props) {
     for (let i = 0; i < resultAnimDelays.length; i++) {
       offset.push((i > 0 ? offset[i - 1] : 0) + resultAnimDelays[i]);
     }
-    const timers = offset.map((o, i) => setTimeout(() => setShowing(i + 1), o));
+    const timers = offset.map((o, i) =>
+      setTimeout(() => {
+        setShowing(i + 1);
+        if (animScroll.current.at(i)) {
+          animScroll.current.at(i)!();
+        }
+      }, o),
+    );
     return () => {
       timers.forEach((t) => clearTimeout(t));
     };
@@ -73,12 +102,12 @@ export default function Result(props: Props) {
 
   const jumpingAnimation = (index: number) =>
     ({
-      animationName: showing >= index ? "result-score-jumping" : undefined,
+      animationName: showing === index ? "result-score-jumping" : undefined,
       animationIterationCount: 1,
       animationDuration: "200ms",
       animationTimingFunction: "linear",
       animationFillMode: "forwards",
-    } as const);
+    }) as const;
   const appearingAnimation = (index: number) =>
     ({
       transitionProperty: "all",
@@ -86,14 +115,14 @@ export default function Result(props: Props) {
       transitionDuration: "100ms",
       opacity: showing >= index ? 1 : 0,
       transform: showing >= index ? "scale(1)" : "scale(4)",
-    } as const);
+    }) as const;
   const appearingAnimation2 = (index: number) =>
     ({
       transitionProperty: "opacity",
       transitionTimingFunction: "ease-out",
       transitionDuration: "300ms",
       opacity: showing >= index ? 1 : 0,
-    } as const);
+    }) as const;
   const appearingAnimation3 = (index: number) =>
     ({
       transitionProperty: "opacity",
@@ -101,9 +130,17 @@ export default function Result(props: Props) {
       transitionDuration: "150ms",
       opacity: showing >= index ? 1 : 0,
       visibility: showing >= index ? "visible" : "hidden",
-    } as const);
+    }) as const;
   return (
-    <CenterBox>
+    <CenterBox
+      ref={ref}
+      className={
+        "overflow-y-auto overflow-x-clip " +
+        (props.hidden ? "hidden " : "") +
+        (showing >= resultAnimDelays.length ? "touch-pan-y " : "touch-none ")
+      }
+      style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+    >
       <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
       <div
         className={
@@ -137,8 +174,10 @@ export default function Result(props: Props) {
             scoreStyle={jumpingAnimation(4)}
             score100={props.score100}
           />
+          <div ref={refTotal} />
         </div>
         <div
+          ref={refRank}
           className={
             "flex-none w-56 flex flex-col justify-center items-center " +
             (props.largeResult ? "space-y-2 " : "space-y-1 ")
@@ -175,14 +214,14 @@ export default function Result(props: Props) {
                   (props.score100 >= 9000
                     ? "A."
                     : props.score100 >= 7000
-                    ? "B."
-                    : "C.") +
-                  (Math.floor(messageRandom.current * 3) + 1)
+                      ? "B."
+                      : "C.") +
+                  (Math.floor(messageRandom.current * 3) + 1),
               )}
             </div>
           )}
           {props.newRecord > 0 && (
-            <div style={{ ...appearingAnimation2(6) }}>
+            <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
               <span className={props.largeResult ? "text-xl " : ""}>
                 {t("newRecord")}
               </span>

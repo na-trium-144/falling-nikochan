@@ -117,12 +117,12 @@ export function InitPlay({ locale }: { locale: string }) {
           process.env.BACKEND_PREFIX +
             `/api/playFile/${session?.cid || cidFromParam}` +
             `/${session?.lvIndex || lvIndexFromParam}`,
-          { cache: "no-store" }
+          { cache: "no-store" },
         );
         if (res.ok) {
           try {
             const seq: Level6Play | Level9Play = msgpack.deserialize(
-              await res.arrayBuffer()
+              await res.arrayBuffer(),
             );
             if (seq.ver === 6 || seq.ver === 9) {
               switch (seq.ver) {
@@ -213,7 +213,7 @@ function Play(props: Props) {
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
-    setTimeout(() => setInitAnim(true));
+    requestAnimationFrame(() => setInitAnim(true));
   }, []);
 
   const lvType: string =
@@ -231,7 +231,7 @@ function Play(props: Props) {
     "speedChanges" in chartSeq &&
     (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
       chartSeq.speedChanges.some(
-        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm,
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
@@ -248,7 +248,7 @@ function Play(props: Props) {
         localStorage.setItem(`offset-${cid}`, String(v));
       }
     },
-    [cid]
+    [cid],
   );
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -286,8 +286,8 @@ function Play(props: Props) {
   }, [cid, auto, lvIndex, chartBrief]);
   useEffect(reloadBestScore, [reloadBestScore]);
 
-  // start後true
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
+  // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<Date | null>(null);
   const exitableNow = () =>
     exitable && exitable.getTime() < new Date().getTime();
@@ -325,31 +325,32 @@ function Play(props: Props) {
     }
   }, [ref]);
 
-  // 準備完了画面を表示する
-  const [ready, setReady] = useState<boolean>(false);
+  // 準備完了画面を表示する (showStoppedとshowResultに優先する)
+  const [showReady, setShowReady] = useState<boolean>(false);
   // 譜面を中断した
-  const [chartStopped, setChartStopped] = useState<boolean>(false);
-  // 譜面をstartした (playingとは異なり、stop後も終了後もtrueのまま)
-  const [chartStarted, setChartStarted] = useState<boolean>(false);
+  const [showStopped, setShowStopped] = useState<boolean>(false);
   // result画面を表示する
   const [showResult, setShowResult] = useState<boolean>(props.goResult);
   const [resultDate, setResultDate] = useState<Date>();
 
+  const reset = useCallback(() => setShowReady(true), []);
   const start = () => {
-    // 再生中に呼んでもとくになにも起こらない
+    // Space(スタートボタン)が押されたとき
+    // 再生中に呼んでもなにもしない
     if (ytPlayer.current?.getPlayerState() === 0) {
       ytPlayer.current?.seekTo(0, true);
     }
     ytPlayer.current?.playVideo();
-    // 譜面の開始はonStart()で処理
+    // 譜面のリセットと開始はonStart()で処理
   };
   const stop = useCallback(() => {
+    // Escが押された時&Result表示時
     if (chartPlaying) {
-      setChartStopped(true);
+      setShowStopped(true);
       setChartPlaying(false);
       setExitable(
         (ex) =>
-          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000))
+          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000)),
       );
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
@@ -362,17 +363,6 @@ function Play(props: Props) {
       }
     }
   }, [chartPlaying]);
-  const reset = useCallback(() => {
-    if (chartSeq) {
-      setChartStopped(false);
-      setChartStarted(false);
-      setChartPlaying(false);
-      setExitable(null);
-      setReady(true);
-      resetNotesAll(chartSeq.notes);
-      reloadBestScore();
-    }
-  }, [chartSeq, resetNotesAll, reloadBestScore]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
     // history.back();
@@ -400,18 +390,19 @@ function Play(props: Props) {
         clearTimeout(showLoadingTimeout.current);
       }
       setShowLoading(false);
-      reset();
+      setShowReady(true);
+      resetNotesAll(chartSeq.notes);
       ref.current?.focus();
       setInitDone(true);
     } else {
       if (showLoadingTimeout.current === null) {
         showLoadingTimeout.current = setTimeout(
           () => setShowLoading(true),
-          1500
+          1500,
         );
       }
     }
-  }, [ytReady, chartSeq, reset, initDone, errorMsg]);
+  }, [ytReady, chartSeq, initDone, errorMsg, resetNotesAll]);
   useEffect(() => {
     if (!errorMsg) {
       if (apiErrorMsg) {
@@ -427,7 +418,7 @@ function Play(props: Props) {
   }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg, te]);
 
   useEffect(() => {
-    if (chartStarted && end) {
+    if (chartPlaying && end) {
       if (!showResult) {
         if (
           cid &&
@@ -470,20 +461,20 @@ function Play(props: Props) {
                 Math.max(
                   ex?.getTime() || 0,
                   new Date().getTime() +
-                    resultAnimDelays.reduce((a, b) => a + b, 0)
-                )
-              )
+                    resultAnimDelays.reduce((a, b) => a + b, 0),
+                ),
+              ),
           );
           stop();
         }, 1000);
         return () => clearTimeout(t);
       }
-    } else {
-      setShowResult(props.goResult);
+    } else if (props.goResult) {
+      setShowResult(true);
     }
   }, [
+    chartPlaying,
     showResult,
-    chartStarted,
     end,
     chartSeq,
     score,
@@ -503,24 +494,27 @@ function Play(props: Props) {
   const onReady = useCallback(() => {
     console.log("ready");
     setYtReady(true);
+    setExitable(new Date());
   }, []);
   const onStart = useCallback(() => {
     console.log("start");
     if (chartSeq) {
-      setChartStopped(false);
-      setReady(false);
+      setShowStopped(false);
+      setShowReady(false);
+      setShowResult(false);
       setChartPlaying(true);
-      setChartStarted(true);
+      // setChartStarted(true);
       setExitable(null);
+      resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(100);
     }
     ref.current?.focus();
-  }, [chartSeq, lateTimes]);
+  }, [chartSeq, lateTimes, resetNotesAll]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (chartPlaying) {
-      setChartStopped(true);
+      setShowStopped(true);
       setChartPlaying(false);
     }
     if (ytPlayer.current?.getPlayerState() === 2) {
@@ -543,19 +537,18 @@ function Play(props: Props) {
   return (
     <main
       className={
-        "overflow-hidden w-full h-dvh relative select-none flex flex-col " +
-        (chartPlaying ? "touch-none " : "touch-pan-y ")
+        "overflow-hidden w-full h-dvh relative select-none flex flex-col touch-none "
       }
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
-        if (e.key === " " && ready && !chartPlaying) {
+        if (e.key === " " && showReady && !chartPlaying) {
           start();
         } else if (
           e.key === " " &&
-          ((chartStopped && !showResult) || (showResult && exitableNow()))
+          ((showStopped && !showResult) || (showResult && exitableNow()))
         ) {
-          reset();
+          setShowReady(true);
         } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
           stop();
         } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
@@ -673,9 +666,10 @@ function Play(props: Props) {
               theme={themeContext}
             />
           </div>
-          {errorMsg ? (
+          {errorMsg && (
             <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
-          ) : !initDone ? (
+          )}
+          {!initDone && (
             <CenterBox
               className={
                 "transition-opacity duration-200 ease-out " +
@@ -687,8 +681,26 @@ function Play(props: Props) {
                 Loading...
               </p>
             </CenterBox>
-          ) : showResult && chartBrief ? (
+          )}
+          {false && showReady && (
+            <ReadyMessage
+              isTouch={isTouch}
+              back={showResult ? () => setShowReady(false) : undefined}
+              start={start}
+              exit={exit}
+              auto={auto}
+              setAuto={setAuto}
+              userOffset={userOffset}
+              setUserOffset={setUserOffset}
+              editing={editing}
+              lateTimes={lateTimes.current}
+              small={readySmall}
+            />
+          )}
+          {showResult && chartBrief && (
             <Result
+              mainWindowHeight={mainWindowSpace.height!}
+              hidden={false}
               auto={auto}
               lang={props.locale}
               date={resultDate || new Date()}
@@ -696,7 +708,7 @@ function Play(props: Props) {
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || ""
+                chartBrief.levels.at(lvIndex || 0)?.type || "",
               )}
               lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
               baseScore100={
@@ -736,22 +748,15 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
             />
-          ) : false ? (
-            <ReadyMessage
+          )}
+          {showStopped && (
+            <StopMessage
+              hidden={showReady || showResult}
               isTouch={isTouch}
-              start={start}
+              reset={reset}
               exit={exit}
-              auto={auto}
-              setAuto={setAuto}
-              userOffset={userOffset}
-              setUserOffset={setUserOffset}
-              editing={editing}
-              lateTimes={lateTimes.current}
-              small={readySmall}
             />
-          ) : chartStopped ? (
-            <StopMessage isTouch={isTouch} reset={reset} exit={exit} />
-          ) : null}
+          )}
         </div>
       </div>
       <div

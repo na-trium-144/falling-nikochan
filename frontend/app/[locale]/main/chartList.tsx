@@ -146,7 +146,7 @@ interface CProps {
 export function ChartListItem(props: CProps) {
   const [appearing, setAppearing] = useState<boolean>(false);
   useEffect(() => {
-    setTimeout(() => setAppearing(!props.hidden && !props.invisible), 0);
+    requestAnimationFrame(() => setAppearing(!props.hidden && !props.invisible));
   }, [props.hidden, props.invisible]);
   return (
     <li
@@ -300,7 +300,7 @@ export function AccordionLike(props: {
       setTimeout(() => setHidden(true), 200);
     } else {
       setHidden(false);
-      setTimeout(() => setTransparent(false), 0);
+      requestAnimationFrame(() => setTransparent(false));
     }
   }, [props.hidden]);
 

@@ -1,3 +1,16 @@
+## ver. 9.8 - 2025/03/15 [#384](https://github.com/na-trium-144/falling-nikochan/pull/383)
+
+* ready画面からresult画面に戻れるようにした
+* 画面が小さい時result表示をスクロールできるようにした
+* ready画面とオプション画面にスライドインのアニメーションを追加
+
+## ver. 9.7 - 2025/03/14 [#383](https://github.com/na-trium-144/falling-nikochan/pull/383)
+
+* /og/shareのパラメーターにbriefを入れることでキャッシュできるようにする
+* fetchStaticが環境変数のasset_prefixを使うようにする
+* 環境変数の VERCEL_AUTOMATION_BYPASS_SECRET_PREVIEW_ONLY を VERCEL_PROTECTION_BYPASS_SECRET に変更し、Honoのbindingに入れる
+* shareページのcanonicalURLがplaceholderのままになっていたのを修正
+
 ## ver. 9.6 - 2025/03/13 [#382](https://github.com/na-trium-144/falling-nikochan/pull/382)
 
 * /share 以外のページにもOGP画像を追加

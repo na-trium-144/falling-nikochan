@@ -1,9 +1,11 @@
 export interface Bindings {
   MONGODB_URI: string;
-  API_ENV: "development" | undefined;
-  API_NO_RATELIMIT: "1" | undefined;
-  SECRET_SALT: string | undefined;
-  API_CACHE_EDGE: "1" | undefined;
+  API_ENV?: "development";
+  API_NO_RATELIMIT?: "1";
+  SECRET_SALT?: string;
+  API_CACHE_EDGE?: "1";
+  ASSET_PREFIX?: string;
+  VERCEL_PROTECTION_BYPASS_SECRET?: string;
 }
 
 export function secretSalt(e: Bindings) {
@@ -26,4 +28,18 @@ export function cacheControl(e: Bindings, age: number | null) {
   } else {
     return "no-store";
   }
+}
+
+export function fetchStatic(e: Bindings, url: URL) {
+  return fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
+    headers: {
+      // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
+      // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
+      ...(e.VERCEL_PROTECTION_BYPASS_SECRET
+        ? {
+            "x-vercel-protection-bypass": e.VERCEL_PROTECTION_BYPASS_SECRET,
+          }
+        : {}),
+    },
+  });
 }
