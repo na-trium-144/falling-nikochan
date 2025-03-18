@@ -16,7 +16,7 @@ import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
-import { PlayOne, RightOne, SmilingFace, Timer } from "@icon-park/react";
+import { Flag, SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -29,26 +29,15 @@ export function PlayOption(props: Props) {
   const t = useTranslations("share");
 
   // levelが存在しない時 -1
-  const [selectedLevel, setSelectedLevel] = useState<number>(
-    props.brief.levels.findIndex((l) => !l.unlisted),
-  );
-  const selectedRecord = props.record.find(
-    (r) => r.lvHash === props.brief.levels[selectedLevel]?.hash,
-  );
-  const histogramMax = Math.max(
-    10,
-    selectedRecord?.histogram.reduce((max, h) => Math.max(max, h), 0) || 0,
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(
+    // props.brief.levels.findIndex((l) => !l.unlisted),
+    null,
   );
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
-  const totalScore = bestScoreState
-    ? bestScoreState.baseScore +
-      bestScoreState.chainScore +
-      bestScoreState.bigScore
-    : 0;
 
   useEffect(() => {
-    if (selectedLevel >= 0) {
+    if (selectedLevel !== null && selectedLevel >= 0) {
       const data = getBestScore(props.cid, selectedLevel);
       if (data && data.levelHash === props.brief.levels[selectedLevel].hash) {
         setBestScoreState(data);
@@ -61,124 +50,215 @@ export function PlayOption(props: Props) {
 
   return (
     <>
-      <p>{t("selectLevel")}:</p>
-      <ul className="ml-2 mt-1 mb-2">
-        {props.brief.levels.map(
-          (level, i) =>
-            level.unlisted || (
-              <li key={i}>
-                <button
-                  className={
-                    i === selectedLevel
-                      ? "text-blue-600 dark:text-blue-400 "
-                      : "hover:text-slate-500 hover:dark:text-stone-400 "
-                  }
-                  onClick={() => setSelectedLevel(i)}
-                >
-                  <span className="inline-block w-5 translate-y-0.5">
-                    {i === selectedLevel && <RightOne theme="filled" />}
-                  </span>
-                  {level.name && (
-                    <span className="inline-block mr-2 font-title">
-                      {level.name}
-                    </span>
-                  )}
+      <div className="mt-4 flex flex-row items-center justify-center ">
+        <p className="">{t("selectLevel")}:</p>
+        <ul className="ml-2 ">
+          {props.brief.levels.map(
+            (level, i) =>
+              level.unlisted || (
+                <li key={i} className="relative w-full pr-4 ">
+                  <LevelButton
+                    selected={selectedLevel === i}
+                    onClick={() => setSelectedLevel(i)}
+                    level={level}
+                  />
                   <span
                     className={
-                      "inline-block mr-2 " +
-                      (i === selectedLevel
-                        ? levelColors[levelTypes.indexOf(level.type)]
-                        : "")
+                      "absolute inline-block right-0 inset-y-0 my-auto w-0 h-0 " +
+                      "border-[0.7rem] border-transparent " +
+                      (selectedLevel === i &&
+                        "border-r-sky-100/75 dark:border-t-orange-950/75 ")
                     }
-                  >
-                    <span className="text-sm">{level.type}-</span>
-                    <span className="text-lg">{level.difficulty}</span>
-                  </span>
-                </button>
-              </li>
-            ),
+                  />
+                </li>
+              ),
+          )}
+        </ul>
+        {!props.brief.levels.some((l) => !l.unlisted) && (
+          <p className="ml-2 ">{t("unavailable")}</p>
         )}
-      </ul>
-      {selectedLevel >= 0 ? (
-        <>
-          <div className="flex flex-col main-wide:flex-row items-baseline">
-            <div>
-              <span className="text-lg mx-1.5 ">
-                <FourthNote />
-              </span>
-              <span className="mr-1">=</span>
-              <span className="text-lg">
-                {props.brief.levels[selectedLevel]?.bpmMin}
-              </span>
-              {props.brief.levels[selectedLevel]?.bpmMin !==
-                props.brief.levels[selectedLevel]?.bpmMax && (
-                <>
-                  <span className="ml-1 mr-1">〜</span>
-                  <span className="text-lg">
-                    {props.brief.levels[selectedLevel]?.bpmMax}
-                  </span>
-                </>
-              )}
-            </div>
-            <span className="mx-3 hidden main-wide:block">/</span>
-            <div>
-              <span className="inline-block w-5 translate-y-0.5">
-                <Timer />
-              </span>
-              <span className="text-lg">
-                {Math.floor(
-                  Math.round(props.brief.levels[selectedLevel]?.length) / 60,
-                )}
-              </span>
-              <span className="text-lg">:</span>
-              <span className="text-lg">
-                {(Math.round(props.brief.levels[selectedLevel]?.length) % 60)
-                  .toString()
-                  .padStart(2, "0")}
-              </span>
-            </div>
-            <span className="mx-3 hidden main-wide:block">/</span>
-            <div>
-              <span className="inline-block w-5 translate-y-0.5">
-                <SmilingFace />
-              </span>
-              <span className="mr-1">✕</span>
-              <span className="text-lg">
-                {props.brief.levels[selectedLevel]?.noteCount}
-              </span>
-            </div>
-          </div>
-          <div className="">
-            <PlayOne
-              theme="filled"
-              className="inline-block align-middle mr-2"
+        {selectedLevel !== null && selectedLevel >= 0 ? (
+          <div className="p-4 text-center rounded-lg bg-sky-100/75 dark:bg-orange-950/75 ">
+            <SelectedLevelInfo
+              brief={props.brief}
+              record={props.record}
+              selectedLevel={selectedLevel}
+              bestScoreState={bestScoreState}
             />
-            <span>{selectedRecord?.count || 0}</span>
-            <div className="inline-flex flex-row w-max text-xs/2 text-left align-middle mx-2 ">
-              {selectedRecord?.histogram.map((h, i) => (
-                <div key={i} className="w-4">
-                  <div className="h-6 relative border-b border-slate-500/50 ">
-                    <div
-                      className="bg-slate-500/50 absolute inset-x-0 bottom-0 "
-                      style={{
-                        height: (h / histogramMax) * 100 + "%",
-                      }}
-                    />
-                  </div>
-                  <div>{[0, 7, 10, 12].includes(i) && i * 10}</div>
-                </div>
-              ))}
-            </div>
           </div>
-          <p
+        ) : null}
+      </div>
+      {selectedLevel !== null && selectedLevel >= 0 && (
+        <p className="mt-3 text-center ">
+          <Button
+            text={t("start")}
+            onClick={() => {
+              // 押したときにも再度sessionを初期化
+              const sessionId = initSession({
+                cid: props.cid,
+                lvIndex: selectedLevel,
+                brief: props.brief,
+              });
+              // router.push(`/play?sid=${sessionId}`);  youtubeAPIが初期化されない
+              // location.href = `/play?sid=${sessionId}`;  テーマが引き継がれない
+              window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
+            }}
+          />
+        </p>
+      )}
+    </>
+  );
+}
+
+function LevelButton(props: {
+  selected: boolean;
+  onClick: () => void;
+  level: { name: string; type: string; difficulty: number };
+}) {
+  return (
+    <button
+      className={
+        "text-left w-full cursor-pointer " +
+        "rounded px-2 py-0.5 my-0.5 " +
+        (props.selected
+          ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50 "
+          : "hover:shadow hover:mt-0 hover:mb-1 hover:bg-sky-200/50 dark:hover:bg-orange-800/50 ")
+      }
+      onClick={props.onClick}
+    >
+      {props.level.name && (
+        <span className="inline-block mr-2 font-title">{props.level.name}</span>
+      )}
+      <span
+        className={
+          "inline-block " +
+          (props.selected
+            ? levelColors[levelTypes.indexOf(props.level.type)]
+            : "")
+        }
+      >
+        <span className="text-sm">{props.level.type}-</span>
+        <span className="text-lg">{props.level.difficulty}</span>
+      </span>
+    </button>
+  );
+}
+function SelectedLevelInfo(props: {
+  brief: ChartBrief;
+  record: RecordGetSummary[];
+  selectedLevel: number;
+  bestScoreState: ResultData | undefined;
+}) {
+  const t = useTranslations("share");
+  const [showBestDetail, setShowBestDetail] = useState(false);
+
+  const selectedRecord =
+    props.selectedLevel === null
+      ? null
+      : props.record.find(
+          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
+        );
+  const histogramMax = Math.max(
+    10,
+    selectedRecord?.histogram.reduce((max, h) => Math.max(max, h), 0) || 0,
+  );
+  const totalScore = props.bestScoreState
+    ? props.bestScoreState.baseScore +
+      props.bestScoreState.chainScore +
+      props.bestScoreState.bigScore
+    : 0;
+
+  return (
+    <>
+      <p>{t("chartInfo")}</p>
+      <div className="flex flex-col main-wide:flex-row items-baseline">
+        <div className="">
+          <span className="text-lg mx-1.5 ">
+            <FourthNote />
+          </span>
+          <span className="mr-1">=</span>
+          <span className="text-lg">
+            {props.brief.levels[props.selectedLevel]?.bpmMin}
+          </span>
+          {props.brief.levels[props.selectedLevel]?.bpmMin !==
+            props.brief.levels[props.selectedLevel]?.bpmMax && (
+            <>
+              <span className="ml-1 mr-1">〜</span>
+              <span className="text-lg">
+                {props.brief.levels[props.selectedLevel]?.bpmMax}
+              </span>
+            </>
+          )}
+        </div>
+        <span className="mx-3 hidden main-wide:block">/</span>
+        <div>
+          <span className="inline-block w-5 translate-y-0.5">
+            <Timer />
+          </span>
+          <span className="text-lg">
+            {Math.floor(
+              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60,
+            )}
+          </span>
+          <span className="text-lg">:</span>
+          <span className="text-lg">
+            {(Math.round(props.brief.levels[props.selectedLevel]?.length) % 60)
+              .toString()
+              .padStart(2, "0")}
+          </span>
+        </div>
+        <span className="mx-3 hidden main-wide:block">/</span>
+        <div>
+          <span className="inline-block w-5 translate-y-0.5">
+            <SmilingFace />
+          </span>
+          <span className="mr-1">✕</span>
+          <span className="text-lg">
+            {props.brief.levels[props.selectedLevel]?.noteCount}
+          </span>
+        </div>
+      </div>
+      <div className="mt-2 inline-flex flex-row w-max text-xs/2 text-left align-middle mx-2 ">
+        {selectedRecord?.histogram.map((h, i) => (
+          <div key={i} className="w-4">
+            <div className="h-6 relative border-b border-slate-500/50 ">
+              <div
+                className={
+                  "absolute inset-x-0 bottom-0 " +
+                  (props.bestScoreState &&
+                  totalScore >= i * 10 &&
+                  totalScore < (i + 1) * 10
+                    ? "bg-orange-500/50 "
+                    : "bg-slate-500/50 ")
+                }
+                style={{
+                  height: (h / histogramMax) * 100 + "%",
+                }}
+              />
+            </div>
+            <div>{[0, 7, 10, 12].includes(i) && i * 10}</div>
+          </div>
+        ))}
+      </div>
+      <button
+        className={
+          "w-full mt-4 px-2 rounded-lg " +
+          "flex flex-col items-center " +
+          (props.bestScoreState &&
+            "cursor-pointer active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50 " +
+              "hover:shadow hover:bg-sky-200/50 dark:hover:bg-orange-800/50 ")
+        }
+        onClick={() =>
+          setShowBestDetail(!!props.bestScoreState && !showBestDetail)
+        }
+      >
+        <p className="">{t("bestScore")}</p>
+        <div className="flex flex-row items-center ">
+          <span
             className={
-              "-mx-2 px-2 group rounded-lg " +
-              (bestScoreState
-                ? "hover:bg-amber-50 hover:dark:bg-amber-950 "
-                : "text-slate-400 dark:text-stone-600 ")
+              props.bestScoreState ? "" : "text-slate-400 dark:text-stone-600 "
             }
           >
-            <span>{t("bestScore")}:</span>
             <span className="inline-block text-2xl w-12 text-right">
               {Math.floor(totalScore)}
             </span>
@@ -186,82 +266,66 @@ export function PlayOption(props: Props) {
             <span className="inline-block w-6">
               {(Math.floor(totalScore * 100) % 100).toString().padStart(2, "0")}
             </span>
-            {bestScoreState && (
-              <>
-                <span className="text-xl main-wide:hidden">
-                  ({rankStr(totalScore)})
+          </span>
+          {props.bestScoreState && (
+            <span className="text-xl">({rankStr(totalScore)})</span>
+          )}
+          <Flag
+            theme="filled"
+            className="inline-block ml-2 mr-1 align-middle "
+          />
+          <span>-</span>
+          <span className="mx-1">/</span>
+          <span className="text-sm">{selectedRecord?.count || 0}</span>
+        </div>
+        {showBestDetail && props.bestScoreState && (
+          <>
+            <span className="inline-block ">
+              <span className="">
+                {Math.floor(props.bestScoreState.baseScore)}
+              </span>
+              <span className="text-sm">.</span>
+              <span className="text-sm">
+                {(Math.floor(props.bestScoreState.baseScore * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </span>
+              <span className="ml-0.5 mr-0.5">+</span>
+              <span className="">
+                {Math.floor(props.bestScoreState.chainScore)}
+              </span>
+              <span className="text-sm">.</span>
+              <span className="text-sm">
+                {(Math.floor(props.bestScoreState.chainScore * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </span>
+              <span className="ml-0.5 mr-0.5">+</span>
+              <span className="">
+                {Math.floor(props.bestScoreState.bigScore)}
+              </span>
+              <span className="text-sm">.</span>
+              <span className="text-sm">
+                {(Math.floor(props.bestScoreState.bigScore * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </span>
+            </span>
+            <span className="inline-block ml-2 mr-2">
+              {props.bestScoreState?.judgeCount.map((j, i) => (
+                <span key={i} className="inline-block">
+                  <span className="inline-block w-5 translate-y-0.5 ">
+                    <JudgeIcon index={i} />
+                  </span>
+                  <span className="text-lg mr-2">
+                    {props.bestScoreState?.judgeCount[i]}
+                  </span>
                 </span>
-                <span className="hidden group-hover:inline-block mr-2 ml-2 main-wide:ml-0">
-                  <span className="mr-1">=</span>
-                  <span className="">
-                    {Math.floor(bestScoreState.baseScore)}
-                  </span>
-                  <span className="text-sm">.</span>
-                  <span className="text-sm">
-                    {(Math.floor(bestScoreState.baseScore * 100) % 100)
-                      .toString()
-                      .padStart(2, "0")}
-                  </span>
-                  <span className="ml-0.5 mr-0.5">+</span>
-                  <span className="">
-                    {Math.floor(bestScoreState.chainScore)}
-                  </span>
-                  <span className="text-sm">.</span>
-                  <span className="text-sm">
-                    {(Math.floor(bestScoreState.chainScore * 100) % 100)
-                      .toString()
-                      .padStart(2, "0")}
-                  </span>
-                  <span className="ml-0.5 mr-0.5">+</span>
-                  <span className="">
-                    {Math.floor(bestScoreState.bigScore)}
-                  </span>
-                  <span className="text-sm">.</span>
-                  <span className="text-sm">
-                    {(Math.floor(bestScoreState.bigScore * 100) % 100)
-                      .toString()
-                      .padStart(2, "0")}
-                  </span>
-                </span>
-                <span className="text-xl hidden main-wide:inline">
-                  ({rankStr(totalScore)})
-                </span>
-                <span className="hidden group-hover:inline-block ml-2 mr-2">
-                  <span className="hidden main-wide:inline mr-1">-</span>
-                  {bestScoreState?.judgeCount.map((j, i) => (
-                    <span key={i} className="inline-block">
-                      <span className="inline-block w-5 translate-y-0.5 ">
-                        <JudgeIcon index={i} />
-                      </span>
-                      <span className="text-lg mr-2">
-                        {bestScoreState?.judgeCount[i]}
-                      </span>
-                    </span>
-                  ))}
-                </span>
-              </>
-            )}
-          </p>
-          <p className="mt-3">
-            <Button
-              text={t("start")}
-              onClick={() => {
-                // 押したときにも再度sessionを初期化
-                const sessionId = initSession({
-                  cid: props.cid,
-                  lvIndex: selectedLevel,
-                  brief: props.brief,
-                });
-                // router.push(`/play?sid=${sessionId}`);  youtubeAPIが初期化されない
-                // location.href = `/play?sid=${sessionId}`;  テーマが引き継がれない
-                window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
-              }}
-            />
-          </p>
-        </>
-      ) : (
-        <p className="ml-2 ">{t("unavailable")}</p>
-      )}
+              ))}
+            </span>
+          </>
+        )}
+      </button>
     </>
   );
 }
