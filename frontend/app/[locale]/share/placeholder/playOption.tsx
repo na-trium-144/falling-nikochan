@@ -337,13 +337,13 @@ function SelectedLevelInfo(props: {
                   .padStart(2, "0")}
               </span>
             </span>
-            <span className="inline-block ml-2 mr-2">
+            <span className="inline-block ml-2 mr-2 space-x-2 ">
               {bestScoreState?.judgeCount.map((j, i) => (
                 <span key={i} className="inline-block">
                   <span className="inline-block w-5 translate-y-0.5 ">
                     <JudgeIcon index={i} />
                   </span>
-                  <span className="text-lg mr-2">
+                  <span className="text-lg ">
                     {bestScoreState?.judgeCount[i]}
                   </span>
                 </span>
