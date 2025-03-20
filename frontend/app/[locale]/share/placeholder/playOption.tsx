@@ -16,7 +16,7 @@ import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
-import { PlayOne, SmilingFace, Timer } from "@icon-park/react";
+import { SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -192,7 +192,7 @@ function SelectedLevelInfo(props: {
         clearBestScore(props.cid, props.selectedLevel);
       }
     }
-  }, [props.cid, props.selectedLevel]);
+  }, [props.cid, props.selectedLevel, props.brief]);
 
   const totalScore = bestScoreState
     ? bestScoreState.baseScore +
@@ -203,7 +203,7 @@ function SelectedLevelInfo(props: {
   return (
     <>
       <p>{t("chartInfo")}</p>
-      <div className="flex flex-col main-wide:flex-row items-baseline">
+      <div className="inline-flex flex-col main-wide:flex-row items-baseline">
         <div className="">
           <span className="text-lg mx-1.5 ">
             <FourthNote />
@@ -251,17 +251,22 @@ function SelectedLevelInfo(props: {
         </div>
       </div>
       <p className="mt-2 ">
-        {t("otherPlayers")}:
-        <span className="ml-2 text-slate-500 dark:text-stone-400 ">
-          <PlayOne theme="filled" className="inline-block align-middle mr-1 " />
-          <span className="text-sm">{selectedRecord?.count || 0}</span>
-        </span>
+        {t("otherPlayers")}
+        <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
       </p>
-      {selectedRecord && selectedRecord.count >= 10 && (
-        <div className="inline-flex flex-row w-max text-xs/2 mb-2 text-left align-middle mx-2 ">
+      {selectedRecord && selectedRecord.count >= 5 && (
+        <div className="inline-flex flex-row w-max text-xs/3 text-left align-middle mx-2 ">
           {selectedRecord?.histogram.map((h, i) => (
-            <div key={i} className="w-4">
-              <div className="h-6 relative border-b border-slate-500 dark:border-stone-400 ">
+            <div
+              key={i}
+              className={
+                "w-5 " +
+                ([7, 10, 12].includes(i)
+                  ? "border-l border-slate-500/20 dark:border-stone-400/20 "
+                  : "")
+              }
+            >
+              <div className="h-8 relative border-b border-slate-500/20 dark:border-stone-400/20 ">
                 <div
                   className={
                     "absolute inset-x-0 bottom-0 " +
@@ -269,14 +274,15 @@ function SelectedLevelInfo(props: {
                     totalScore >= i * 10 &&
                     totalScore < (i + 1) * 10
                       ? "bg-orange-300 dark:bg-sky-800 "
-                      : "bg-slate-500 dark:bg-slate-400 ")
+                      : "bg-slate-500 dark:bg-stone-400 ")
                   }
                   style={{
                     height: (h / histogramMax) * 100 + "%",
+                    minHeight: h ? 1 : 0,
                   }}
                 />
               </div>
-              <div>{[0, 7, 10, 12].includes(i) && i * 10}</div>
+              <div className="ml-[0.1em]">{[0, 7, 10, 12].includes(i) && i * 10}</div>
             </div>
           ))}
         </div>
@@ -343,9 +349,7 @@ function SelectedLevelInfo(props: {
                   <span className="inline-block w-5 translate-y-0.5 ">
                     <JudgeIcon index={i} />
                   </span>
-                  <span className="text-lg ">
-                    {bestScoreState?.judgeCount[i]}
-                  </span>
+                  <span className="text-lg ">{j}</span>
                 </span>
               ))}
             </span>
