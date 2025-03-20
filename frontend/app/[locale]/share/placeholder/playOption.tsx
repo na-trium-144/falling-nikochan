@@ -16,7 +16,7 @@ import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
-import { Flag, PlayOne, SmilingFace, Timer } from "@icon-park/react";
+import { PlayOne, SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -33,30 +33,30 @@ export function PlayOption(props: Props) {
     // props.brief.levels.findIndex((l) => !l.unlisted),
     null,
   );
-
-  const [bestScoreState, setBestScoreState] = useState<ResultData>();
-
+  const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
-    if (selectedLevel !== null && selectedLevel >= 0) {
-      const data = getBestScore(props.cid, selectedLevel);
-      if (data && data.levelHash === props.brief.levels[selectedLevel].hash) {
-        setBestScoreState(data);
-      } else {
-        setBestScoreState(undefined);
-        clearBestScore(props.cid, selectedLevel);
-      }
+    if (selectedLevel === null && levelsNum === 1) {
+      setSelectedLevel(props.brief.levels.findIndex((l) => !l.unlisted));
     }
-  }, [props, selectedLevel]);
+  }, [props.brief.levels, selectedLevel, levelsNum]);
 
   return (
     <>
-      <div className="mt-4 flex flex-row items-center justify-center ">
-        <p className="">{t("selectLevel")}:</p>
-        <ul className="ml-2 ">
+      <div className="mt-4 flex flex-row items-center justify-center">
+        <p className="flex-none w-max ">{t("selectLevel")}:</p>
+        <ul className="min-w-0 grow-0 shrink ml-2 ">
           {props.brief.levels.map(
             (level, i) =>
               level.unlisted || (
-                <li key={i} className="relative w-full pr-4 ">
+                <li
+                  key={i}
+                  className={
+                    "relative w-full " +
+                    (selectedLevel !== null && selectedLevel >= 0
+                      ? "pr-4 "
+                      : "")
+                  }
+                >
                   <LevelButton
                     selected={selectedLevel === i}
                     onClick={() => setSelectedLevel(i)}
@@ -65,7 +65,7 @@ export function PlayOption(props: Props) {
                   <span
                     className={
                       "absolute inline-block right-0 inset-y-0 my-auto " +
-                      "w-4 h-4 translate-x-1/2 " +
+                      "w-4 h-4 translate-x-1/2 z-10 " +
                       "border-l border-b rounded-tr-full " +
                       "rotate-45 origin-center " +
                       "border-sky-300 dark:border-orange-900 " +
@@ -77,25 +77,32 @@ export function PlayOption(props: Props) {
               ),
           )}
         </ul>
-        {!props.brief.levels.some((l) => !l.unlisted) && (
-          <p className="ml-2 ">{t("unavailable")}</p>
-        )}
-        {selectedLevel !== null && selectedLevel >= 0 ? (
+        {levelsNum === 0 && <p className="ml-2 ">{t("unavailable")}</p>}
+        <div className="flex-none flex flex-col self-stretch">
+          <span style={{ flexGrow: selectedLevel || 0 }} />
           <div
             className={
-              "p-4 text-center rounded-lg border " +
+              "flex-none px-4 py-2 " +
+              "text-center rounded-lg border " +
               "border-sky-300 dark:border-orange-900 " +
-              "bg-sky-50 dark:bg-orange-950 "
+              "bg-sky-50 dark:bg-orange-950 " +
+              "transition-all duration-200 origin-left " +
+              (selectedLevel !== null && selectedLevel >= 0
+                ? "scale-100 "
+                : "scale-0 px-0! ")
             }
           >
-            <SelectedLevelInfo
-              brief={props.brief}
-              record={props.record}
-              selectedLevel={selectedLevel}
-              bestScoreState={bestScoreState}
-            />
+            {selectedLevel !== null && selectedLevel >= 0 ? (
+              <SelectedLevelInfo
+                cid={props.cid}
+                brief={props.brief}
+                record={props.record}
+                selectedLevel={selectedLevel}
+              />
+            ) : null}
           </div>
-        ) : null}
+          <span style={{ flexGrow: levelsNum - (selectedLevel || 0) - 1 }} />
+        </div>
       </div>
       {selectedLevel !== null && selectedLevel >= 0 && (
         <p className="mt-3 text-center ">
@@ -127,7 +134,7 @@ function LevelButton(props: {
   return (
     <button
       className={
-        "text-left w-full cursor-pointer " +
+        "text-left truncate w-full cursor-pointer " +
         "rounded px-2 py-0.5 my-0.5 " +
         (props.selected
           ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50 "
@@ -136,14 +143,13 @@ function LevelButton(props: {
       onClick={props.onClick}
     >
       {props.level.name && (
-        <span className="inline-block mr-2 font-title">{props.level.name}</span>
+        <span className="mr-2 font-title ">{props.level.name}</span>
       )}
       <span
         className={
-          "inline-block " +
-          (props.selected
+          props.selected
             ? levelColors[levelTypes.indexOf(props.level.type)]
-            : "")
+            : ""
         }
       >
         <span className="text-sm">{props.level.type}-</span>
@@ -153,10 +159,10 @@ function LevelButton(props: {
   );
 }
 function SelectedLevelInfo(props: {
+  cid: string;
   brief: ChartBrief;
   record: RecordGetSummary[];
   selectedLevel: number;
-  bestScoreState: ResultData | undefined;
 }) {
   const t = useTranslations("share");
   const [showBestDetail, setShowBestDetail] = useState(false);
@@ -171,10 +177,27 @@ function SelectedLevelInfo(props: {
     10,
     selectedRecord?.histogram.reduce((max, h) => Math.max(max, h), 0) || 0,
   );
-  const totalScore = props.bestScoreState
-    ? props.bestScoreState.baseScore +
-      props.bestScoreState.chainScore +
-      props.bestScoreState.bigScore
+
+  const [bestScoreState, setBestScoreState] = useState<ResultData>();
+  useEffect(() => {
+    if (props.selectedLevel >= 0) {
+      const data = getBestScore(props.cid, props.selectedLevel);
+      if (
+        data &&
+        data.levelHash === props.brief.levels[props.selectedLevel].hash
+      ) {
+        setBestScoreState(data);
+      } else {
+        setBestScoreState(undefined);
+        clearBestScore(props.cid, props.selectedLevel);
+      }
+    }
+  }, [props.cid, props.selectedLevel]);
+
+  const totalScore = bestScoreState
+    ? bestScoreState.baseScore +
+      bestScoreState.chainScore +
+      bestScoreState.bigScore
     : 0;
 
   return (
@@ -242,7 +265,7 @@ function SelectedLevelInfo(props: {
                 <div
                   className={
                     "absolute inset-x-0 bottom-0 " +
-                    (props.bestScoreState &&
+                    (bestScoreState &&
                     totalScore >= i * 10 &&
                     totalScore < (i + 1) * 10
                       ? "bg-orange-300 dark:bg-sky-800 "
@@ -262,19 +285,17 @@ function SelectedLevelInfo(props: {
         className={
           "w-full mt-2 px-2 rounded-lg " +
           "flex flex-col items-center " +
-          (props.bestScoreState &&
+          (bestScoreState &&
             "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60 " +
               "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800 ")
         }
-        onClick={() =>
-          setShowBestDetail(!!props.bestScoreState && !showBestDetail)
-        }
+        onClick={() => setShowBestDetail(!!bestScoreState && !showBestDetail)}
       >
         <p className="">{t("bestScore")}</p>
         <div className="flex flex-row items-center ">
           <span
             className={
-              props.bestScoreState ? "" : "text-slate-400 dark:text-stone-600 "
+              bestScoreState ? "" : "text-slate-400 dark:text-stone-600 "
             }
           >
             <span className="inline-block text-2xl w-12 text-right">
@@ -285,51 +306,45 @@ function SelectedLevelInfo(props: {
               {(Math.floor(totalScore * 100) % 100).toString().padStart(2, "0")}
             </span>
           </span>
-          {props.bestScoreState && (
+          {bestScoreState && (
             <span className="text-xl">({rankStr(totalScore)})</span>
           )}
         </div>
-        {showBestDetail && props.bestScoreState && (
+        {showBestDetail && bestScoreState && (
           <>
             <span className="inline-block ">
-              <span className="">
-                {Math.floor(props.bestScoreState.baseScore)}
-              </span>
+              <span className="">{Math.floor(bestScoreState.baseScore)}</span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(props.bestScoreState.baseScore * 100) % 100)
+                {(Math.floor(bestScoreState.baseScore * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
-              <span className="">
-                {Math.floor(props.bestScoreState.chainScore)}
-              </span>
+              <span className="">{Math.floor(bestScoreState.chainScore)}</span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(props.bestScoreState.chainScore * 100) % 100)
+                {(Math.floor(bestScoreState.chainScore * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
-              <span className="">
-                {Math.floor(props.bestScoreState.bigScore)}
-              </span>
+              <span className="">{Math.floor(bestScoreState.bigScore)}</span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(props.bestScoreState.bigScore * 100) % 100)
+                {(Math.floor(bestScoreState.bigScore * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
             </span>
             <span className="inline-block ml-2 mr-2">
-              {props.bestScoreState?.judgeCount.map((j, i) => (
+              {bestScoreState?.judgeCount.map((j, i) => (
                 <span key={i} className="inline-block">
                   <span className="inline-block w-5 translate-y-0.5 ">
                     <JudgeIcon index={i} />
                   </span>
                   <span className="text-lg mr-2">
-                    {props.bestScoreState?.judgeCount[i]}
+                    {bestScoreState?.judgeCount[i]}
                   </span>
                 </span>
               ))}
