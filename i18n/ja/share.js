@@ -15,6 +15,7 @@ export default {
     share: "共有",
     selectLevel: "レベルを選択",
     chartInfo: "譜面情報",
+    otherPlayers: "みんなのプレイ記録",
     bestScore: "あなたのベストスコア",
     start: "ゲーム開始！",
     unavailable: "公開されている譜面がまだありません。",

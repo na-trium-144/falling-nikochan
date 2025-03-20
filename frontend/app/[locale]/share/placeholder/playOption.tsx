@@ -16,7 +16,7 @@ import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
-import { Flag, SmilingFace, Timer } from "@icon-park/react";
+import { Flag, PlayOne, SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -64,10 +64,13 @@ export function PlayOption(props: Props) {
                   />
                   <span
                     className={
-                      "absolute inline-block right-0 inset-y-0 my-auto w-0 h-0 " +
-                      "border-[0.7rem] border-transparent " +
-                      (selectedLevel === i &&
-                        "border-r-sky-100/75 dark:border-t-orange-950/75 ")
+                      "absolute inline-block right-0 inset-y-0 my-auto " +
+                      "w-4 h-4 translate-x-1/2 " +
+                      "border-l border-b rounded-tr-full " +
+                      "rotate-45 origin-center " +
+                      "border-sky-300 dark:border-orange-900 " +
+                      "bg-sky-50 dark:bg-orange-950 " +
+                      (selectedLevel === i ? "" : "invisible ")
                     }
                   />
                 </li>
@@ -78,7 +81,13 @@ export function PlayOption(props: Props) {
           <p className="ml-2 ">{t("unavailable")}</p>
         )}
         {selectedLevel !== null && selectedLevel >= 0 ? (
-          <div className="p-4 text-center rounded-lg bg-sky-100/75 dark:bg-orange-950/75 ">
+          <div
+            className={
+              "p-4 text-center rounded-lg border " +
+              "border-sky-300 dark:border-orange-900 " +
+              "bg-sky-50 dark:bg-orange-950 "
+            }
+          >
             <SelectedLevelInfo
               brief={props.brief}
               record={props.record}
@@ -218,35 +227,44 @@ function SelectedLevelInfo(props: {
           </span>
         </div>
       </div>
-      <div className="mt-2 inline-flex flex-row w-max text-xs/2 text-left align-middle mx-2 ">
-        {selectedRecord?.histogram.map((h, i) => (
-          <div key={i} className="w-4">
-            <div className="h-6 relative border-b border-slate-500/50 ">
-              <div
-                className={
-                  "absolute inset-x-0 bottom-0 " +
-                  (props.bestScoreState &&
-                  totalScore >= i * 10 &&
-                  totalScore < (i + 1) * 10
-                    ? "bg-orange-500/50 "
-                    : "bg-slate-500/50 ")
-                }
-                style={{
-                  height: (h / histogramMax) * 100 + "%",
-                }}
-              />
+      <p className="mt-2 ">
+        {t("otherPlayers")}:
+        <span className="ml-2 text-slate-500 dark:text-stone-400 ">
+          <PlayOne theme="filled" className="inline-block align-middle mr-1 " />
+          <span className="text-sm">{selectedRecord?.count || 0}</span>
+        </span>
+      </p>
+      {selectedRecord && selectedRecord.count >= 10 && (
+        <div className="inline-flex flex-row w-max text-xs/2 mb-2 text-left align-middle mx-2 ">
+          {selectedRecord?.histogram.map((h, i) => (
+            <div key={i} className="w-4">
+              <div className="h-6 relative border-b border-slate-500 dark:border-stone-400 ">
+                <div
+                  className={
+                    "absolute inset-x-0 bottom-0 " +
+                    (props.bestScoreState &&
+                    totalScore >= i * 10 &&
+                    totalScore < (i + 1) * 10
+                      ? "bg-orange-300 dark:bg-sky-800 "
+                      : "bg-slate-500 dark:bg-slate-400 ")
+                  }
+                  style={{
+                    height: (h / histogramMax) * 100 + "%",
+                  }}
+                />
+              </div>
+              <div>{[0, 7, 10, 12].includes(i) && i * 10}</div>
             </div>
-            <div>{[0, 7, 10, 12].includes(i) && i * 10}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
       <button
         className={
-          "w-full mt-4 px-2 rounded-lg " +
+          "w-full mt-2 px-2 rounded-lg " +
           "flex flex-col items-center " +
           (props.bestScoreState &&
-            "cursor-pointer active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50 " +
-              "hover:shadow hover:bg-sky-200/50 dark:hover:bg-orange-800/50 ")
+            "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60 " +
+              "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800 ")
         }
         onClick={() =>
           setShowBestDetail(!!props.bestScoreState && !showBestDetail)
@@ -270,13 +288,6 @@ function SelectedLevelInfo(props: {
           {props.bestScoreState && (
             <span className="text-xl">({rankStr(totalScore)})</span>
           )}
-          <Flag
-            theme="filled"
-            className="inline-block ml-2 mr-1 align-middle "
-          />
-          <span>-</span>
-          <span className="mx-1">/</span>
-          <span className="text-sm">{selectedRecord?.count || 0}</span>
         </div>
         {showBestDetail && props.bestScoreState && (
           <>
