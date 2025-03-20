@@ -42,9 +42,11 @@ export function PlayOption(props: Props) {
 
   return (
     <>
-      <div className="mt-4 flex flex-row items-center justify-center">
-        <p className="flex-none w-max ">{t("selectLevel")}:</p>
-        <ul className="min-w-0 grow-0 shrink ml-2 ">
+      <div className="mt-4 flex flex-col main-wide:flex-row justify-center">
+        <p className="flex-none w-max self-begin main-wide:self-center ">
+          {t("selectLevel")}:
+        </p>
+        <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center ">
           {props.brief.levels.map(
             (level, i) =>
               level.unlisted || (
@@ -70,23 +72,29 @@ export function PlayOption(props: Props) {
                       "rotate-45 origin-center " +
                       "border-sky-300 dark:border-orange-900 " +
                       "bg-sky-50 dark:bg-orange-950 " +
-                      (selectedLevel === i ? "" : "invisible ")
+                      "invisible " +
+                      (selectedLevel === i ? "main-wide:visible " : "")
                     }
                   />
                 </li>
               ),
           )}
         </ul>
-        {levelsNum === 0 && <p className="ml-2 ">{t("unavailable")}</p>}
-        <div className="flex-none flex flex-col self-stretch">
+        {levelsNum === 0 && <p>{t("unavailable")}</p>}
+        <div
+          className={
+            "flex-none flex flex-col max-w-full mt-2 self-center " +
+            "main-wide:mt-0 main-wide:self-stretch"
+          }
+        >
           <span style={{ flexGrow: selectedLevel || 0 }} />
           <div
             className={
-              "flex-none px-4 py-2 " +
+              "flex-none max-w-full px-4 py-2 " +
               "text-center rounded-lg border " +
               "border-sky-300 dark:border-orange-900 " +
               "bg-sky-50 dark:bg-orange-950 " +
-              "transition-all duration-200 origin-left " +
+              "main-wide:transition-all main-wide:duration-200 origin-left " +
               (selectedLevel !== null && selectedLevel >= 0
                 ? "scale-100 "
                 : "scale-0 px-0! ")
@@ -255,12 +263,12 @@ function SelectedLevelInfo(props: {
         <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
       </p>
       {selectedRecord && selectedRecord.count >= 5 && (
-        <div className="inline-flex flex-row w-max text-xs/3 text-left align-middle mx-2 ">
+        <div className="inline-flex flex-row w-max max-w-full text-xs/3 text-left align-middle mx-2 ">
           {selectedRecord?.histogram.map((h, i) => (
             <div
               key={i}
               className={
-                "w-5 " +
+                "w-5 min-w-0 shrink " +
                 ([7, 10, 12].includes(i)
                   ? "border-l border-slate-500/20 dark:border-stone-400/20 "
                   : "")
@@ -282,7 +290,9 @@ function SelectedLevelInfo(props: {
                   }}
                 />
               </div>
-              <div className="ml-[0.1em]">{[0, 7, 10, 12].includes(i) && i * 10}</div>
+              <div className="ml-[0.1em]">
+                {[0, 7, 10, 12].includes(i) && i * 10}
+              </div>
             </div>
           ))}
         </div>
