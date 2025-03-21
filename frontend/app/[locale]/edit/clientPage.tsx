@@ -357,7 +357,7 @@ function Page(props: Props) {
   };
   useEffect(() => {
     document.title = titleWithSiteName(
-      t("title", { title: chart?.title, cid: cid })
+      t("title", { title: chart?.title || "", cid: cid || "" })
     );
   });
   useEffect(() => {
@@ -1000,7 +1000,9 @@ function Page(props: Props) {
                     </>
                   )}
                 </span>
-                <span className="">{t("touchMode", { mode: dragMode })}</span>
+                <span className="">
+                  {t("touchMode", { mode: dragMode || "null" })}
+                </span>
               </button>
             )}
           </div>
