@@ -18,8 +18,8 @@ export function useShareLink(
 
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
-  const path = `/share/${cid}?${searchParams.toString()}`;
-  const url = origin + path;
+  const sharePath = `/share/${cid}`;
+  const shareParams = searchParams.toString();
 
   if (resultParam) searchParams.set("result", resultParam);
   searchParams.set("v", packageJson.version);
@@ -33,8 +33,8 @@ export function useShareLink(
     // 共有される前にogを1回fetchしておくことにより、
     // cloudflareにキャッシュさせる
     void fetch(ogPath);
-    navigator.clipboard.writeText(url);
-  }, [url, ogPath]);
+    navigator.clipboard.writeText(origin + sharePath + "?" + shareParams);
+  }, [ogPath, origin, sharePath, shareParams]);
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
     void fetch(ogPath);
@@ -50,7 +50,7 @@ export function useShareLink(
       title: resultParam
         ? titleShareResult(t, cid, brief, date!)
         : titleShare(t, cid, brief),
-      url: url,
+      url: origin + sharePath + "?" + shareParams,
     };
     if (
       !!navigator?.share &&
@@ -59,11 +59,19 @@ export function useShareLink(
     ) {
       setShareData(shareData);
     }
-  }, [origin, cid, brief, url, resultParam, t, date]);
+  }, [origin, cid, brief, sharePath, shareParams, resultParam, t, date]);
 
   return {
-    url,
-    path,
+    url: (
+      <>
+        {origin}
+        {sharePath}
+        <span className="text-slate-500 dark:text-stone-400 ">
+          ?{shareParams}
+        </span>
+      </>
+    ),
+    path: sharePath + "?" + shareParams,
     toClipboard: hasClipboard ? toClipboard : null,
     toAPI: shareData ? toAPI : null,
   };
