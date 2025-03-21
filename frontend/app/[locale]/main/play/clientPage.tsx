@@ -75,18 +75,17 @@ export default function PlayTab({ locale }: { locale: string }) {
   const [modalRecord, setModalRecord] = useState<RecordGetSummary[]>([]);
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
   const openModal = useCallback(
-    async (cid: string, brief: ChartBrief | undefined) => {
+    (cid: string, brief: ChartBrief | undefined) => {
       if (brief) {
-        const record = await (
-          await fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-        ).json();
         if (window.location.pathname !== `/share/${cid}`) {
           // pushStateではpopstateイベントは発生しない
           window.history.pushState(null, "", `/share/${cid}`);
         }
         setModalCId(cid);
         setModalBrief(brief);
-        setModalRecord(record);
+        fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
+          .then((res) => res.json())
+          .then((record) => setModalRecord(record));
         document.title = titleShare(th, cid, brief);
         setTimeout(() => setModalAppearing(true));
       }
