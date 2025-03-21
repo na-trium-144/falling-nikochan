@@ -42,8 +42,15 @@ export function PlayOption(props: Props) {
   }, [props.brief.levels, selectedLevel, levelsNum]);
 
   return (
-    <>
-      <div className="mt-4 flex flex-col main-wide:flex-row justify-center">
+    <div
+      className={
+        "mx-auto mt-4 p-2 " +
+        "w-max max-w-full rounded-lg border " +
+        "border-sky-200 dark:border-orange-900 " +
+        "bg-sky-100/50 dark:bg-orange-950/50 "
+      }
+    >
+      <div className="flex flex-col main-wide:flex-row">
         <p className="flex-none w-max self-begin main-wide:self-center ">
           {t("selectLevel")}:
         </p>
@@ -71,8 +78,8 @@ export function PlayOption(props: Props) {
                       "w-4 h-4 translate-x-1/2 z-10 " +
                       "border-l border-b rounded-tr-full " +
                       "rotate-45 origin-center " +
-                      "border-sky-300 dark:border-orange-900 " +
-                      "bg-sky-50 dark:bg-orange-950 " +
+                      "border-slate-400 dark:border-stone-600 " +
+                      "bg-white dark:bg-stone-800 " +
                       "invisible " +
                       (selectedLevel === i ? "main-wide:visible " : "")
                     }
@@ -84,7 +91,7 @@ export function PlayOption(props: Props) {
         {levelsNum === 0 && <p>{t("unavailable")}</p>}
         <div
           className={
-            "flex-none flex flex-col max-w-full mt-2 self-center " +
+            "flex-none flex flex-col max-w-full self-center " +
             "main-wide:mt-0 main-wide:self-stretch"
           }
         >
@@ -93,12 +100,12 @@ export function PlayOption(props: Props) {
             className={
               "flex-none max-w-full px-4 py-2 " +
               "text-center rounded-lg border " +
-              "border-sky-300 dark:border-orange-900 " +
-              "bg-sky-50 dark:bg-orange-950 " +
+              "border-slate-400 dark:border-stone-600 " +
+              "bg-white dark:bg-stone-800 " +
               "main-wide:transition-all main-wide:duration-200 origin-left " +
               (selectedLevel !== null && selectedLevel >= 0
                 ? "scale-100 "
-                : "scale-0 px-0! ")
+                : "scale-0 px-0! py-0! ")
             }
           >
             {selectedLevel !== null && selectedLevel >= 0 ? (
@@ -131,7 +138,7 @@ export function PlayOption(props: Props) {
           />
         </p>
       )}
-    </>
+    </div>
   );
 }
 
@@ -147,7 +154,10 @@ function LevelButton(props: {
         "rounded px-2 py-0.5 my-0.5 " +
         (props.selected
           ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50 "
-          : "hover:shadow hover:mt-0 hover:mb-1 hover:bg-sky-200/50 dark:hover:bg-orange-800/50 ")
+          : "hover:shadow hover:mt-0 hover:mb-1 " +
+            "hover:bg-sky-200/50 dark:hover:bg-orange-800/50 " +
+            "active:mt-0.5 active:mb-0.5 " +
+            "active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50 ")
       }
       onClick={props.onClick}
     >
