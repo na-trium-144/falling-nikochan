@@ -64,6 +64,7 @@ export default {
       reset: "Restart",
       exit: "Exit",
       shareResult: "Share your result!",
+      otherPlayers: "Others' Play Records",
       copyLink: "Copy Link",
       shareLink: "Share",
     },

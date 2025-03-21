@@ -29,6 +29,7 @@ import {
   Level9Play,
   levelTypes,
   loadChart6,
+  RecordGetSummary,
   RecordPost,
 } from "@falling-nikochan/chart";
 import { ChartSeqData9, loadChart9 } from "@falling-nikochan/chart";
@@ -208,6 +209,8 @@ function Play(props: Props) {
     displaySpeed,
   } = props;
   const te = useTranslations("error");
+
+  const [record, setRecord] = useState<RecordGetSummary | undefined>(); // for showing in the result dialog
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
@@ -421,17 +424,29 @@ function Play(props: Props) {
         if (
           cid &&
           !auto &&
-          score > bestScoreState &&
           lvIndex !== undefined &&
           chartBrief?.levels.at(lvIndex)
         ) {
-          setBestScore(cid, lvIndex, {
-            levelHash: chartBrief.levels[lvIndex].hash,
-            baseScore,
-            chainScore,
-            bigScore,
-            judgeCount,
-          });
+          if (score > bestScoreState) {
+            setBestScore(cid, lvIndex, {
+              levelHash: chartBrief.levels[lvIndex].hash,
+              baseScore,
+              chainScore,
+              bigScore,
+              judgeCount,
+            });
+          }
+          void (async () => {
+            const res = await fetch(
+              process.env.BACKEND_PREFIX + `/api/record/${cid}`,
+            );
+            const records: RecordGetSummary[] = await res.json();
+            setRecord(
+              records.find(
+                (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash,
+              ),
+            );
+          })();
         }
         const t = setTimeout(() => {
           setShowResult(true);
@@ -745,6 +760,7 @@ function Play(props: Props) {
                   : 0
               }
               largeResult={largeResult}
+              record={record}
             />
           )}
           {showStopped && (
