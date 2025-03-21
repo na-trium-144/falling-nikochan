@@ -261,7 +261,7 @@ export default function Result(props: Props) {
           </span>
         </div>
       )}
-      {!props.auto && props.record?.histogram && (
+      {!props.auto && props.record?.histogram && props.record.count >= 5 && (
         <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
           <p>{t("otherPlayers")}</p>
           <RecordHistogram
