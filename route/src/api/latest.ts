@@ -19,7 +19,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             .find({ published: true })
             .sort({ updatedAt: -1 })
             .limit(numLatest)
-            .project({ _id: 0, cid: 1 })
+            .project<{ cid: string }>({ _id: 0, cid: 1 })
             .toArray()
         ).filter((e) => !isSample(e.cid)),
         200,
