@@ -38,7 +38,7 @@
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "=5.2.5",
-        "@fontsource/noto-sans": "^5.2.5",
+        "@fontsource/noto-sans": "^5.2.6",
         "@fontsource/noto-sans-jp": "^5.2.5",
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
@@ -171,7 +171,7 @@
 
     "@fontsource/merriweather": ["@fontsource/merriweather@5.2.5", "", {}, "sha512-5LHr2QYcpovXZc3iLsD2BLqpuwDUNxOSH6hDLDatferd++7xTEHPLHRPheyBECUU+KiXv/CBFs+amz9eh8U+Bw=="],
 
-    "@fontsource/noto-sans": ["@fontsource/noto-sans@5.2.5", "", {}, "sha512-g3hWgsQayHQGVXgQKjbHKpS7YQFQY8azwXFCi3ZkhgCK5fZXe3udeQYrZJJ4PMswGkNhoDPRR9OJZBlMjzZAEQ=="],
+    "@fontsource/noto-sans": ["@fontsource/noto-sans@5.2.6", "", {}, "sha512-46D39T1/QJ16LSbCTaNjjrGS6Y69FMLS9FeHKsrXSQg15Z2MFqmlnNMpURx2l6Sr3x9t9EVdr3CAkHnZyvea+w=="],
 
     "@fontsource/noto-sans-jp": ["@fontsource/noto-sans-jp@5.2.5", "", {}, "sha512-ISoJUQlsuSo4y56P+eJD+g022BRAF1BC2uCyEFGRsob0g8VvQAoWNMlWh+P0VQw68QzZHHj41zRzeRFpzAdA7w=="],
 
