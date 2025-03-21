@@ -4,6 +4,8 @@
 * shareページのレベル選択のUIを書き直し、shareページとresult画面にプレイ統計のヒストグラムの表示を追加
 * /api/popular と人気の譜面リストの表示を追加
 * /main/play でmodalを閉じるときの動作のバグを修正
+* published=trueのサンプル譜面はlatestに含まれないようにした
+    * 既存のサンプル譜面はすべてpublished=trueにデータベースを書き換える (popularに表示されるようにするため)
 
 ## ver. 9.8 - 2025/03/15 [#384](https://github.com/na-trium-144/falling-nikochan/pull/383)
 

@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
-import { numLatest } from "@falling-nikochan/chart";
+import { isSample, numLatest } from "@falling-nikochan/chart";
 
 const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
@@ -13,13 +13,15 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       return c.json(
-        await db
-          .collection<ChartEntryCompressed>("chart")
-          .find({ published: true })
-          .sort({ updatedAt: -1 })
-          .limit(numLatest)
-          .project({ _id: 0, cid: 1 })
-          .toArray(),
+        (
+          await db
+            .collection<ChartEntryCompressed>("chart")
+            .find({ published: true })
+            .sort({ updatedAt: -1 })
+            .limit(numLatest)
+            .project({ _id: 0, cid: 1 })
+            .toArray()
+        ).filter((e) => !isSample(e.cid)),
         200,
         {
           "cache-control": cacheControl(env(c), 600),
