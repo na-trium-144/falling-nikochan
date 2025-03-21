@@ -15,6 +15,7 @@ export function useShareLink(
 ) {
   const [origin, setOrigin] = useState<string>("");
   const searchParams = new URLSearchParams();
+  const t = useTranslations("share");
 
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
@@ -27,14 +28,21 @@ export function useShareLink(
     ? `/og/result/${cid}?${searchParams.toString()}`
     : `/og/share/${cid}?${searchParams.toString()}`;
 
+  // /route/src/share.ts 内で指定しているタイトルとおなじ
+  const newTitle = resultParam
+    ? titleShareResult(t, cid, brief, date)
+    : titleShare(t, cid, brief);
+
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   const toClipboard = useCallback(() => {
     // og画像の生成は時間がかかるので、
     // 共有される前にogを1回fetchしておくことにより、
     // cloudflareにキャッシュさせる
     void fetch(ogPath);
-    navigator.clipboard.writeText(origin + sharePath + "?" + shareParams);
-  }, [ogPath, origin, sharePath, shareParams]);
+    navigator.clipboard.writeText(
+      newTitle + "\n" + origin + sharePath + "?" + shareParams,
+    );
+  }, [ogPath, newTitle, origin, sharePath, shareParams]);
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
     void fetch(ogPath);
@@ -44,7 +52,6 @@ export function useShareLink(
     setOrigin(window.location.origin);
     setHasClipboard(!!navigator?.clipboard);
   }, []);
-  const t = useTranslations("share");
   useEffect(() => {
     const shareData = {
       title: resultParam
