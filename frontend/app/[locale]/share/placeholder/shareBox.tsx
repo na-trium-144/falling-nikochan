@@ -2,7 +2,11 @@
 
 import Header from "@/common/header.js";
 import { PlayOption } from "./playOption.js";
-import { ChartBrief, ResultParams } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  RecordGetSummary,
+  ResultParams,
+} from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import Button from "@/common/button.js";
@@ -15,7 +19,8 @@ import { SharedResultBox } from "./sharedResult.js";
 
 interface Props {
   cid: string;
-  brief: ChartBrief;
+  brief: ChartBrief | null;
+  record: RecordGetSummary[];
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;
@@ -27,7 +32,9 @@ export function ShareBox(props: Props) {
   const [updatedAt, setUpdatedAt] = useState<string>("");
 
   useEffect(() => {
-    setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
+    if (brief) {
+      setUpdatedAt(new Date(brief.updatedAt).toLocaleDateString());
+    }
   }, [brief]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
@@ -50,7 +57,7 @@ export function ShareBox(props: Props) {
           className={
             "my-2 w-full " + "main-wide:basis-1/3 " + "share-yt-wide:w-80 "
           }
-          id={brief.ytId}
+          id={brief?.ytId}
           control={true}
           ytPlayer={ytPlayer}
         />
@@ -68,7 +75,7 @@ export function ShareBox(props: Props) {
             <span className="inline-block">
               <span className="text-sm">{t("chartCreator")}:</span>
               <span className="ml-2 font-title text-lg">
-                {brief.chartCreator}
+                {brief?.chartCreator}
               </span>
             </span>
             <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
@@ -79,7 +86,7 @@ export function ShareBox(props: Props) {
                     <International className="inline-block w-5 translate-y-0.5" />
                     <span>{t("isSample")}</span>
                   </span>
-                ) : brief.published ? (
+                ) : brief?.published ? (
                   <span className="ml-2">
                     <International className="inline-block w-5 translate-y-0.5" />
                     <span>{t("isPublished")}</span>
@@ -126,7 +133,7 @@ export function ShareBox(props: Props) {
           )}
         </span>
       </p>
-      <PlayOption cid={cid} brief={brief} />
+      {brief && <PlayOption cid={cid} brief={brief} record={props.record} />}
     </div>
   );
 }
