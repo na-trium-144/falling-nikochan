@@ -16,6 +16,8 @@ import {
   ChartBrief,
   CidSchema,
   originalCId,
+  popularDays,
+  RecordGetSummary,
   sampleCId,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
@@ -36,6 +38,8 @@ export default function PlayTab({ locale }: { locale: string }) {
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
+  const [popularBrief, setPopularBrief] = useState<ChartLineBrief[]>();
+  const [fetchPopularAll, setFetchPopularAll] = useState<boolean>(false);
   const [latestBrief, setLatestBrief] = useState<ChartLineBrief[]>();
   const [fetchLatestAll, setFetchLatestAll] = useState<boolean>(false);
   const [originalBrief, setOriginalBrief] = useState<ChartLineBrief[]>();
@@ -46,13 +50,13 @@ export default function PlayTab({ locale }: { locale: string }) {
   // exclusiveをセット(指定したもの以外を非表示にする) → 200ms後、showAllをセット(指定したものの内容を全て表示する)
   // mobileではごちゃごちゃやってもスクロールが入るせいできれいに見えないので瞬時に切り替える
   const [showExclusiveMode, setShowExclusiveMode] = useState<
-    null | "recent" | "latest"
+    null | "recent" | "popular" | "latest"
   >(null);
-  const [showAllMode, setShowAllMode] = useState<null | "recent" | "latest">(
-    null,
-  );
+  const [showAllMode, setShowAllMode] = useState<
+    null | "recent" | "popular" | "latest"
+  >(null);
   const goExclusiveMode = useCallback(
-    (mode: "recent" | "latest") => {
+    (mode: "recent" | "popular" | "latest") => {
       window.history.replaceState(null, "", "#"); // これがないとなぜか #recent から元のページにブラウザバックできなくなる場合があるけどなぜ?
       window.history.pushState(null, "", "#" + mode);
       setShowExclusiveMode(mode);
@@ -68,19 +72,26 @@ export default function PlayTab({ locale }: { locale: string }) {
 
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
+  const [modalRecord, setModalRecord] = useState<RecordGetSummary[]>([]);
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
-  const openModal = (cid: string, brief: ChartBrief | undefined) => {
-    if (brief) {
-      if (window.location.pathname !== `/share/${cid}`) {
-        // pushStateではpopstateイベントは発生しない
-        window.history.pushState(null, "", `/share/${cid}`);
+  const openModal = useCallback(
+    (cid: string, brief: ChartBrief | undefined) => {
+      if (brief) {
+        if (window.location.pathname !== `/share/${cid}`) {
+          // pushStateではpopstateイベントは発生しない
+          window.history.pushState(null, "", `/share/${cid}`);
+        }
+        setModalCId(cid);
+        setModalBrief(brief);
+        fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
+          .then((res) => res.json())
+          .then((record) => setModalRecord(record));
+        document.title = titleShare(th, cid, brief);
+        setTimeout(() => setModalAppearing(true));
       }
-      setModalCId(cid);
-      setModalBrief(brief);
-      document.title = titleShare(th, cid, brief);
-      setTimeout(() => setModalAppearing(true));
-    }
-  };
+    },
+    [th],
+  );
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
   useEffect(() => {
@@ -90,22 +101,26 @@ export default function PlayTab({ locale }: { locale: string }) {
         fetchBrief(cid).then((res) => {
           openModal(cid, res.brief);
         });
-      } else if (window.location.hash.length >= 2) {
-        goExclusiveMode(window.location.hash.slice(1) as "recent" | "latest");
       } else {
-        setShowAllMode(null);
-        setShowExclusiveMode(null);
         setModalAppearing(false);
         document.title = titleWithSiteName(t("title"));
         setTimeout(() => {
           setModalCId(null);
           setModalBrief(null);
         }, 200);
+        if (window.location.hash.length >= 2) {
+          goExclusiveMode(
+            window.location.hash.slice(1) as "recent" | "popular" | "latest",
+          );
+        } else {
+          setShowAllMode(null);
+          setShowExclusiveMode(null);
+        }
       }
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, [goExclusiveMode]);
+  }, [goExclusiveMode, openModal, t]);
 
   useEffect(() => {
     const recentCId = getRecent("play").reverse();
@@ -121,6 +136,14 @@ export default function PlayTab({ locale }: { locale: string }) {
         })
       ).json()) as { cid: string }[];
       setLatestBrief(latestCId.map(({ cid }) => ({ cid, fetched: false })));
+    })();
+    void (async () => {
+      const popularCId = (await (
+        await fetch(process.env.BACKEND_PREFIX + `/api/popular`, {
+          cache: "default",
+        })
+      ).json()) as { cid: string }[];
+      setPopularBrief(popularCId.map(({ cid }) => ({ cid, fetched: false })));
     })();
   }, []);
   useEffect(() => {
@@ -150,6 +173,19 @@ export default function PlayTab({ locale }: { locale: string }) {
       }
     })();
   }, [latestBrief, fetchLatestAll]);
+  useEffect(() => {
+    void (async () => {
+      if (popularBrief) {
+        const { changed, briefs } = await fetchAndFilterBriefs(
+          popularBrief,
+          fetchPopularAll,
+        );
+        if (changed) {
+          setPopularBrief(briefs);
+        }
+      }
+    })();
+  }, [popularBrief, fetchPopularAll]);
   useEffect(() => {
     void (async () => {
       if (originalBrief) {
@@ -225,6 +261,7 @@ export default function PlayTab({ locale }: { locale: string }) {
                 <ShareBox
                   cid={modalCId}
                   brief={modalBrief}
+                  record={modalRecord}
                   locale={locale}
                   backButton={() => window.history.back()}
                 />
@@ -310,6 +347,37 @@ export default function PlayTab({ locale }: { locale: string }) {
           setAdditionalOpen={(open) => {
             if (open) {
               goExclusiveMode("recent");
+            } else {
+              window.history.back();
+            }
+          }}
+        />
+      </AccordionLike>
+      <AccordionLike
+        hidden={showExclusiveMode !== null && showExclusiveMode !== "popular"}
+        expanded={showAllMode === "popular"}
+        reset={() => window.history.back()}
+        header={
+          <span className="text-xl font-bold font-title">{t("popular")}</span>
+        }
+      >
+        <p className="pl-2 mb-1 text-justify ">
+          {t("popularDesc", { popularDays })}
+        </p>
+        <ChartList
+          recentBrief={popularBrief}
+          maxRow={chartListMaxRow}
+          fetchAdditional={() => setFetchPopularAll(true)}
+          creator
+          href={(cid) => `/share/${cid}`}
+          onClick={(cid) =>
+            openModal(cid, popularBrief?.find((b) => b.cid === cid)?.brief)
+          }
+          showLoading
+          additionalOpen={showAllMode === "popular"}
+          setAdditionalOpen={(open) => {
+            if (open) {
+              goExclusiveMode("popular");
             } else {
               window.history.back();
             }

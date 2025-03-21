@@ -11,6 +11,7 @@ import recordApp from "./record.js";
 import { HTTPException } from "hono/http-exception";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
+import popularApp from "./popular.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -29,6 +30,7 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .route("/playFile", playFileApp)
   .route("/latest", latestApp)
+  .route("/popular", popularApp)
   .route("/hashPasswd", hashPasswdApp)
   .route("/record", recordApp);
 

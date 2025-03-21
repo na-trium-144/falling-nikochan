@@ -5,6 +5,7 @@ import Footer from "@/common/footer.js";
 import {
   ChartBrief,
   deserializeResultParams,
+  RecordGetSummary,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
@@ -44,6 +45,7 @@ export default function ShareChart({ locale }: { locale: string }) {
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
+  const [record, setRecord] = useState<RecordGetSummary[]>([]);
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
@@ -63,6 +65,9 @@ export default function ShareChart({ locale }: { locale: string }) {
       setBrief(brief);
       document.title = titleShare(t, cid, brief);
     })();
+    fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`).then((res) =>
+      res.json().then((record) => setRecord(record)),
+    );
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
@@ -82,7 +87,7 @@ export default function ShareChart({ locale }: { locale: string }) {
       >
         <RedirectedWarning className="mx-6 mt-2 " />
         <div className={"p-6 w-full flex items-center justify-center"}>
-          {brief !== null && (
+          {
             <Box
               className="m-auto max-w-full p-6 shrink"
               style={{ flexBasis: "60rem" }}
@@ -90,11 +95,12 @@ export default function ShareChart({ locale }: { locale: string }) {
               <ShareBox
                 cid={cid}
                 brief={brief}
+                record={record}
                 sharedResult={sharedResult}
                 locale={locale}
               />
             </Box>
-          )}
+          }
         </div>
       </div>
       <Footer nav locale={locale} />
