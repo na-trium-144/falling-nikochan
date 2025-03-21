@@ -88,9 +88,12 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
             * 400 (invalid cid),
             * 404 (cid not found),
             * or 500 (other error)
-* `GET /api/latest` - Get the list of 25 latest updated charts.
+* `GET /api/latest` - Get the list of 24 latest updated charts.
     * Response
         * `{cid: string}[]` as JSON with status code 200
+* `GET /api/popular` - Get the list of 24 popular charts.
+    * Response
+        * `{cid: string, count: number}[]` as JSON with status code 200
 * `GET /api/record/:cid` - Get the summary of the record from all players for the chart.
     * `:cid` - Chart ID
     * Response
