@@ -19,6 +19,7 @@ import { JudgeIcon } from "@/play/statusBox.js";
 import { SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { RecordHistogram } from "@/common/recordHistogram";
 
 interface Props {
   cid: string;
@@ -181,10 +182,6 @@ function SelectedLevelInfo(props: {
       : props.record.find(
           (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
         );
-  const histogramMax = Math.max(
-    10,
-    selectedRecord?.histogram.reduce((max, h) => Math.max(max, h), 0) || 0,
-  );
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
   useEffect(() => {
@@ -263,40 +260,10 @@ function SelectedLevelInfo(props: {
         <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
       </p>
       {selectedRecord && selectedRecord.count >= 5 && (
-        <div className="inline-flex flex-row w-max max-w-full text-xs/3 text-left mx-2 ">
-          {selectedRecord?.histogram.map((h, i) => (
-            <div key={i} className="w-5 min-w-0 shrink relative">
-              {[7, 10, 12].includes(i) && (
-                <div
-                  className={
-                    "absolute inset-0 -z-10 " +
-                    "border-l border-slate-500/20 dark:border-stone-400/20 "
-                  }
-                />
-              )}
-              <div className="h-8 relative border-b border-slate-500/20 dark:border-stone-400/20 ">
-                {h > 0 && (
-                  <div
-                    className={
-                      "absolute inset-x-0 bottom-0 min-h-[1px] " +
-                      (bestScoreState &&
-                      totalScore >= i * 10 &&
-                      totalScore < (i + 1) * 10
-                        ? "bg-orange-300 dark:bg-sky-800 "
-                        : "bg-slate-500 dark:bg-stone-400 ")
-                    }
-                    style={{
-                      height: (h / histogramMax) * 100 + "%",
-                    }}
-                  />
-                )}
-              </div>
-              {[0, 7, 10, 12].includes(i) && (
-                <div className="ml-[0.1em]">{i * 10}</div>
-              )}
-            </div>
-          ))}
-        </div>
+        <RecordHistogram
+          histogram={selectedRecord.histogram}
+          bestScoreTotal={bestScoreState ? totalScore : null}
+        />
       )}
       <button
         className={
