@@ -113,9 +113,9 @@ export function ChartList(props: Props) {
           >
             <RightOne className="absolute left-0 bottom-1 " theme="filled" />
             <span className="ml-5">{t("showAll")}</span>
-            <span className="ml-1">
-              ({props.recentBrief.length /*- props.maxRow*/})
-            </span>
+            {/*<span className="ml-1">
+              ({props.recentBrief.length /*- props.maxRow* /})
+            </span>*/}
           </button>
         )}
       {props.recentBrief !== undefined && props.recentBrief.length === 0 && (
@@ -146,7 +146,9 @@ interface CProps {
 export function ChartListItem(props: CProps) {
   const [appearing, setAppearing] = useState<boolean>(false);
   useEffect(() => {
-    requestAnimationFrame(() => setAppearing(!props.hidden && !props.invisible));
+    requestAnimationFrame(() =>
+      setAppearing(!props.hidden && !props.invisible),
+    );
   }, [props.hidden, props.invisible]);
   return (
     <li
@@ -155,10 +157,10 @@ export function ChartListItem(props: CProps) {
         (props.hidden
           ? "hidden opacity-0 "
           : props.invisible
-          ? "hidden opacity-0 " /*invisible*/
-          : appearing
-          ? "opacity-100 "
-          : "opacity-0 ")
+            ? "hidden opacity-0 " /*invisible*/
+            : appearing
+              ? "opacity-100 "
+              : "opacity-0 ")
       }
     >
       {props.onClick || props.newTab ? (

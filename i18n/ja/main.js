@@ -20,6 +20,8 @@ export default {
       inputDirect: "譜面IDを指定し直接プレイ画面に飛ぶ",
       inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
       recentPlay: "最近プレイした譜面",
+      popular: "人気の譜面",
+      popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
       latest: "新着譜面",
       latestDesc: "最近作成・更新された譜面の一覧です。",
       latestDesc2:
@@ -51,7 +53,7 @@ export default {
         " (1度保存した譜面の上書きは何回でもできます。)",
     },
     chartList: {
-      showAll: "すべて表示",
+      showAll: "もっと表示",
       empty: "まだありません",
     },
     policies: {
