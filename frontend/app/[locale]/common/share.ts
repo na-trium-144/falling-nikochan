@@ -4,25 +4,29 @@ import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useState } from "react";
 import { titleShare, titleShareResult } from "./title";
 import { useTranslations } from "next-intl";
+import packageJson from "@/../../package.json" with { type: "json" };
 
 export function useShareLink(
   cid: string | undefined,
   brief: ChartMin | ChartBrief | undefined | null,
   lang?: string,
   resultParam?: string,
-  date?: Date
+  date?: Date,
 ) {
   const [origin, setOrigin] = useState<string>("");
   const searchParams = new URLSearchParams();
-  if (lang) searchParams.set("lang", lang);
-  if (resultParam) searchParams.set("result", resultParam);
-  const path = searchParams.toString()
-    ? `/share/${cid}?${searchParams.toString()}`
-    : `/share/${cid}`;
+
+  // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
+  searchParams.set("lang", lang || "en");
+  const path = `/share/${cid}?${searchParams.toString()}`;
   const url = origin + path;
+
+  if (resultParam) searchParams.set("result", resultParam);
+  searchParams.set("v", packageJson.version);
   const ogPath = resultParam
     ? `/og/result/${cid}?${searchParams.toString()}`
     : `/og/share/${cid}?${searchParams.toString()}`;
+
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   const toClipboard = useCallback(() => {
     // og画像の生成は時間がかかるので、

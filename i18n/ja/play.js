@@ -64,6 +64,7 @@ export default {
       reset: "もう一度",
       exit: "やめる",
       shareResult: "プレイ結果をシェアしよう！",
+      otherPlayers: "みんなのプレイ記録",
       copyLink: "リンクをコピー",
       shareLink: "共有",
     },

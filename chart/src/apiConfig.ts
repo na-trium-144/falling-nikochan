@@ -1,3 +1,5 @@
+export const numLatest = 24;
+export const popularDays = 3;
 export const rateLimitMin = 10;
 export const chartMaxEvent = 20000;
 export const fileMaxSize = chartMaxEvent * (100 + 150);
