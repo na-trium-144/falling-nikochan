@@ -91,8 +91,9 @@ export function PlayOption(props: Props) {
         {levelsNum === 0 && <p>{t("unavailable")}</p>}
         <div
           className={
-            "flex-none flex flex-col max-w-full self-center " +
-            "main-wide:mt-0 main-wide:self-stretch"
+            "flex-none flex flex-col max-w-full " +
+            "mt-2 main-wide:mt-0 " +
+            "self-center main-wide:self-stretch "
           }
         >
           <span style={{ flexGrow: selectedLevel || 0 }} />
