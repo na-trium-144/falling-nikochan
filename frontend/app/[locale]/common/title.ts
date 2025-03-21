@@ -27,7 +27,7 @@ export function titleShareResult(
   t: any,
   cid: string | undefined,
   brief: ChartMin | ChartBrief | null | undefined,
-  date: Date
+  date: Date | undefined
 ): string {
   return t("titleWithResult", {
     date: date?.toLocaleDateString(),

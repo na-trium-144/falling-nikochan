@@ -1,3 +1,8 @@
+## ver. 9.13 - 2025/03/21 [#400](https://github.com/na-trium-144/falling-nikochan/pull/400)
+
+* shareリンクのパラメータ部分を薄い色で表示
+* リンクをコピーした際タイトルを含めるようにした
+
 ## ver. 9.10 - 2025/03/21 [#395](https://github.com/na-trium-144/falling-nikochan/pull/395)
 
 * /api/recordでプレイ回数だけでなくプレイ記録の統計を出力するようにした

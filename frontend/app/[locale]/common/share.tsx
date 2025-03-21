@@ -15,11 +15,12 @@ export function useShareLink(
 ) {
   const [origin, setOrigin] = useState<string>("");
   const searchParams = new URLSearchParams();
+  const t = useTranslations("share");
 
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
-  const path = `/share/${cid}?${searchParams.toString()}`;
-  const url = origin + path;
+  const sharePath = `/share/${cid}`;
+  const shareParams = searchParams.toString();
 
   if (resultParam) searchParams.set("result", resultParam);
   searchParams.set("v", packageJson.version);
@@ -27,14 +28,21 @@ export function useShareLink(
     ? `/og/result/${cid}?${searchParams.toString()}`
     : `/og/share/${cid}?${searchParams.toString()}`;
 
+  // /route/src/share.ts 内で指定しているタイトルとおなじ
+  const newTitle = resultParam
+    ? titleShareResult(t, cid, brief, date)
+    : titleShare(t, cid, brief);
+
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   const toClipboard = useCallback(() => {
     // og画像の生成は時間がかかるので、
     // 共有される前にogを1回fetchしておくことにより、
     // cloudflareにキャッシュさせる
     void fetch(ogPath);
-    navigator.clipboard.writeText(url);
-  }, [url, ogPath]);
+    navigator.clipboard.writeText(
+      newTitle + "\n" + origin + sharePath + "?" + shareParams,
+    );
+  }, [ogPath, newTitle, origin, sharePath, shareParams]);
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
     void fetch(ogPath);
@@ -44,13 +52,12 @@ export function useShareLink(
     setOrigin(window.location.origin);
     setHasClipboard(!!navigator?.clipboard);
   }, []);
-  const t = useTranslations("share");
   useEffect(() => {
     const shareData = {
       title: resultParam
         ? titleShareResult(t, cid, brief, date!)
         : titleShare(t, cid, brief),
-      url: url,
+      url: origin + sharePath + "?" + shareParams,
     };
     if (
       !!navigator?.share &&
@@ -59,11 +66,19 @@ export function useShareLink(
     ) {
       setShareData(shareData);
     }
-  }, [origin, cid, brief, url, resultParam, t, date]);
+  }, [origin, cid, brief, sharePath, shareParams, resultParam, t, date]);
 
   return {
-    url,
-    path,
+    url: (
+      <>
+        {origin}
+        {sharePath}
+        <span className="text-slate-500 dark:text-stone-400 ">
+          ?{shareParams}
+        </span>
+      </>
+    ),
+    path: sharePath + "?" + shareParams,
     toClipboard: hasClipboard ? toClipboard : null,
     toAPI: shareData ? toAPI : null,
   };
