@@ -14,6 +14,10 @@ export default {
         "reflected here after reloading the page.",
       option: "Options",
       auto: "Auto Play",
+      enableSE: "Play SE for each note",
+      enableSELatency:
+        "In your current environment, there will be<br></br>" +
+        "an estimated delay of {latency} seconds",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
       offsetSecond: "sec",

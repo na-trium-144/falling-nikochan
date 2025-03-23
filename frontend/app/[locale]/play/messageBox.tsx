@@ -25,6 +25,9 @@ interface MessageProps {
   setAuto: (a: boolean) => void;
   userOffset: number;
   setUserOffset: (o: number) => void;
+  enableSE: boolean;
+  setEnableSE: (s: boolean) => void;
+  audioLatency: number;
   editing: boolean;
   lateTimes: number[];
   small: boolean;
@@ -54,7 +57,10 @@ export function ReadyMessage(props: MessageProps) {
 
   // props.small は clientPage.tsx のreadySmall (mainWindowの高さで決まる)
   return (
-    <CenterBox className="overflow-clip ">
+    <CenterBox
+      className="overflow-clip "
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       {props.small && (
         <div
           className={
@@ -150,6 +156,10 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
+  const offsetPlusLatency =
+    props.userOffset - (props.enableSE ? props.audioLatency : 0);
+  const offsetMinusLatency = (ofs: number) =>
+    ofs + (props.enableSE ? props.audioLatency : 0);
   return (
     <div className="relative pr-8 min-h-32 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
@@ -162,6 +172,23 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           >
             {t("auto")}
           </CheckBox>
+        </li>
+        <li className="">
+          <CheckBox
+            className=""
+            value={props.enableSE}
+            onChange={(v) => props.setEnableSE(v)}
+          >
+            {t("enableSE")}
+          </CheckBox>
+          {props.enableSE && (
+            <p className="text-sm">
+              {t.rich("enableSELatency", {
+                latency: props.audioLatency.toFixed(3),
+                br: () => <br />,
+              })}
+            </p>
+          )}
         </li>
         {/* <li className="">
           <CheckBox
@@ -179,10 +206,12 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             <Input
               className="w-16"
               actualValue={
-                (props.userOffset >= 0 ? "+" : "-") +
-                Math.abs(props.userOffset).toFixed(2)
+                (offsetPlusLatency >= 0 ? "+" : "-") +
+                Math.abs(offsetPlusLatency).toFixed(3)
               }
-              updateValue={(v) => props.setUserOffset(Number(v))}
+              updateValue={(v) =>
+                props.setUserOffset(offsetMinusLatency(Number(v)))
+              }
               isValid={(v) => !isNaN(Number(v))}
             />
             <span className="mr-1 ">{t("offsetSecond")}</span>
@@ -277,7 +306,10 @@ export function StopMessage(props: MessageProps2) {
   const t = useTranslations("play.message");
 
   return (
-    <CenterBox className={props.hidden ? "hidden" : ""}>
+    <CenterBox
+      className={props.hidden ? "hidden" : ""}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <p className="text-lg font-title font-bold mb-2">
         &lt; {t("stopped")} &gt;
       </p>
@@ -306,7 +338,7 @@ export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
 
   return (
-    <CenterBox>
+    <CenterBox onPointerDown={(e) => e.stopPropagation()}>
       <p className="mb-2">
         <Caution className="inline-block text-lg align-middle mr-1" />
         {props.msg}

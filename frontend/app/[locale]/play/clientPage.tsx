@@ -295,13 +295,71 @@ function Play(props: Props) {
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
 
+  const audioContext = useRef<AudioContext | null>(null);
+  const audioBuffer = useRef<AudioBuffer | null>(null);
+  const gainNode = useRef<GainNode | null>(null);
+  const [audioLatency, setAudioLatency] = useState<number>(0);
+  const [enableSE, setEnableSE_] = useState<boolean>(true);
+  const offsetPlusLatency = userOffset - (enableSE ? audioLatency : 0);
+  const setEnableSE = useCallback(
+    (v: boolean) => {
+      setEnableSE_(v);
+      localStorage.setItem("enableSE", v ? "1" : "0");
+      if (!v) {
+        audioContext.current?.suspend();
+      } else {
+        audioContext.current?.resume();
+      }
+    },
+    [audioContext],
+  );
+  useEffect(() => {
+    audioContext.current = new AudioContext();
+    const v = localStorage.getItem("enableSE");
+    if (v === "0") {
+      setEnableSE_(false);
+      audioContext.current?.suspend();
+    } else {
+      setEnableSE_(true);
+    }
+    setAudioLatency(
+      audioContext.current.baseLatency + audioContext.current.outputLatency,
+    );
+    void (async () => {
+      const res = await fetch(process.env.ASSET_PREFIX + "/assets/hit.wav");
+      const arrayBuffer = await res.arrayBuffer();
+      audioBuffer.current =
+        await audioContext.current!.decodeAudioData(arrayBuffer);
+    })();
+    gainNode.current = audioContext.current.createGain();
+    gainNode.current.gain.value = 0.5;
+    gainNode.current.connect(audioContext.current.destination);
+    return () => {
+      gainNode.current?.disconnect();
+      gainNode.current = null;
+      audioContext.current?.close();
+      audioContext.current = null;
+    };
+  }, []);
+  const playSE = useCallback(() => {
+    if (enableSE && audioContext.current && audioBuffer.current && gainNode.current) {
+      const source = audioContext.current.createBufferSource();
+      source.buffer = audioBuffer.current;
+      source.connect(gainNode.current);
+      source.start();
+      source.addEventListener("ended", () => source.disconnect());
+    }
+  }, [enableSE]);
+
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
-      return ytPlayer.current?.getCurrentTime() - chartSeq.offset - userOffset;
+      return (
+        ytPlayer.current?.getCurrentTime() - chartSeq.offset - offsetPlusLatency
+      );
     }
-  }, [chartSeq, chartPlaying, userOffset]);
+  }, [chartSeq, chartPlaying, offsetPlusLatency]);
   const {
     baseScore,
     chainScore,
@@ -316,7 +374,7 @@ function Play(props: Props) {
     bigTotal,
     end,
     lateTimes,
-  } = useGameLogic(getCurrentTimeSec, auto, userOffset);
+  } = useGameLogic(getCurrentTimeSec, auto, offsetPlusLatency, playSE);
 
   const [fps, setFps] = useState<number>(0);
 
@@ -616,7 +674,7 @@ function Play(props: Props) {
               "transition-transform duration-500 ease-in-out " +
               (musicAreaOk ? "translate-y-0 " : "translate-y-[-40vw] ")
             }
-            offset={(chartSeq?.offset || 0) + userOffset}
+            offset={(chartSeq?.offset || 0) + offsetPlusLatency}
             lvType={lvType}
             lvIndex={lvIndex}
             isMobile={isMobile}
@@ -688,6 +746,7 @@ function Play(props: Props) {
                 "transition-opacity duration-200 ease-out " +
                 (showLoading ? "opacity-100" : "opacity-0")
               }
+              onPointerDown={(e) => e.stopPropagation()}
             >
               <p>
                 <SlimeSVG />
@@ -705,6 +764,9 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
+              enableSE={enableSE}
+              setEnableSE={setEnableSE}
+              audioLatency={audioLatency}
               editing={editing}
               lateTimes={lateTimes.current}
               small={readySmall}

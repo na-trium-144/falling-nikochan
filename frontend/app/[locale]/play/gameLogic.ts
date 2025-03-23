@@ -19,6 +19,7 @@ export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean,
   userOffset: number,
+  playSE: () => void
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
   const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
@@ -111,7 +112,8 @@ export default function useGameLogic(
   );
 
   // キーを押したときの判定
-  const hit = () => {
+  const hit = useCallback(() => {
+    playSE();
     const now = getCurrentTimeSec();
     let candidate: Note6 | Note7 | null = null;
     let candidateJudge: number = 0;
@@ -206,7 +208,7 @@ export default function useGameLogic(
         lateTimes.current.push(candidateLateBig + userOffset);
       }
     }
-  };
+  }, [getCurrentTimeSec, judge, userOffset, playSE]);
   // 0.1s以上過ぎたものをmiss判定にする
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -224,6 +226,7 @@ export default function useGameLogic(
           continue;
         } else if (auto && late >= 0) {
           console.log("auto");
+          playSE();
           judge(n, now, 1);
           notesYetDone.current.shift();
           if (n.big) {
@@ -264,7 +267,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [auto, getCurrentTimeSec, judge]);
+  }, [auto, getCurrentTimeSec, judge, playSE]);
 
   return {
     baseScore,
