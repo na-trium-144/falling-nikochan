@@ -226,7 +226,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </div>
         </li>
       </ul>
-      <TimeAdjustBar userOffset={props.userOffset} times={props.lateTimes} />
+      <TimeAdjustBar userOffset={offsetPlusLatency} times={props.lateTimes} />
     </div>
   );
 }

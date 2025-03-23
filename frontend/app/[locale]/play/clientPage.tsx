@@ -297,7 +297,7 @@ function Play(props: Props) {
 
   const audioContext = useRef<AudioContext | null>(null);
   const audioBuffer = useRef<AudioBuffer | null>(null);
-  const gainNode = useRef<GainNode | null>(null);
+  // const gainNode = useRef<GainNode | null>(null);
   const [audioLatency, setAudioLatency] = useState<number>(0);
   const [enableSE, setEnableSE_] = useState<boolean>(true);
   const offsetPlusLatency = userOffset - (enableSE ? audioLatency : 0);
@@ -322,30 +322,39 @@ function Play(props: Props) {
     } else {
       setEnableSE_(true);
     }
-    setAudioLatency(
-      audioContext.current.baseLatency + audioContext.current.outputLatency,
-    );
     void (async () => {
       const res = await fetch(process.env.ASSET_PREFIX + "/assets/hit.wav");
       const arrayBuffer = await res.arrayBuffer();
       audioBuffer.current =
         await audioContext.current!.decodeAudioData(arrayBuffer);
     })();
-    gainNode.current = audioContext.current.createGain();
-    gainNode.current.gain.value = 0.5;
-    gainNode.current.connect(audioContext.current.destination);
+    // gainNode.current = audioContext.current.createGain();
+    // gainNode.current.gain.value = 1;
+    // gainNode.current.connect(audioContext.current.destination);
     return () => {
-      gainNode.current?.disconnect();
-      gainNode.current = null;
+      // gainNode.current?.disconnect();
+      // gainNode.current = null;
       audioContext.current?.close();
       audioContext.current = null;
     };
   }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (audioContext.current) {
+      // AudioContext初期化直後はLatencyとして0が返ってくるが、
+      // なぜか少し待ってから取得すると違う値になる
+      const currentAudioLatency =
+        audioContext.current.baseLatency + audioContext.current.outputLatency;
+      if (currentAudioLatency !== audioLatency) {
+        setAudioLatency(currentAudioLatency);
+      }
+    }
+  });
   const playSE = useCallback(() => {
-    if (enableSE && audioContext.current && audioBuffer.current && gainNode.current) {
+    if (enableSE && audioContext.current && audioBuffer.current) {
       const source = audioContext.current.createBufferSource();
       source.buffer = audioBuffer.current;
-      source.connect(gainNode.current);
+      source.connect(audioContext.current.destination);
       source.start();
       source.addEventListener("ended", () => source.disconnect());
     }
