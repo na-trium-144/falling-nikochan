@@ -55,6 +55,7 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
+import { useSE } from "./se.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -295,70 +296,8 @@ function Play(props: Props) {
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
 
-  const audioContext = useRef<AudioContext | null>(null);
-  const audioBuffer = useRef<AudioBuffer | null>(null);
-  // const gainNode = useRef<GainNode | null>(null);
-  const [audioLatency, setAudioLatency] = useState<number>(0);
-  const [enableSE, setEnableSE_] = useState<boolean>(true);
-  const offsetPlusLatency = userOffset - (enableSE ? audioLatency : 0);
-  const setEnableSE = useCallback(
-    (v: boolean) => {
-      setEnableSE_(v);
-      localStorage.setItem("enableSE", v ? "1" : "0");
-      if (!v) {
-        audioContext.current?.suspend();
-      } else {
-        audioContext.current?.resume();
-      }
-    },
-    [audioContext],
-  );
-  useEffect(() => {
-    audioContext.current = new AudioContext();
-    const v = localStorage.getItem("enableSE");
-    if (v === "0") {
-      setEnableSE_(false);
-      audioContext.current?.suspend();
-    } else {
-      setEnableSE_(true);
-    }
-    void (async () => {
-      const res = await fetch(process.env.ASSET_PREFIX + "/assets/hit.wav");
-      const arrayBuffer = await res.arrayBuffer();
-      audioBuffer.current =
-        await audioContext.current!.decodeAudioData(arrayBuffer);
-    })();
-    // gainNode.current = audioContext.current.createGain();
-    // gainNode.current.gain.value = 1;
-    // gainNode.current.connect(audioContext.current.destination);
-    return () => {
-      // gainNode.current?.disconnect();
-      // gainNode.current = null;
-      audioContext.current?.close();
-      audioContext.current = null;
-    };
-  }, []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (audioContext.current) {
-      // AudioContext初期化直後はLatencyとして0が返ってくるが、
-      // なぜか少し待ってから取得すると違う値になる
-      const currentAudioLatency =
-        audioContext.current.baseLatency + audioContext.current.outputLatency;
-      if (currentAudioLatency !== audioLatency) {
-        setAudioLatency(currentAudioLatency);
-      }
-    }
-  });
-  const playSE = useCallback(() => {
-    if (enableSE && audioContext.current && audioBuffer.current) {
-      const source = audioContext.current.createBufferSource();
-      source.buffer = audioBuffer.current;
-      source.connect(audioContext.current.destination);
-      source.start();
-      source.addEventListener("ended", () => source.disconnect());
-    }
-  }, [enableSE]);
+  const { playSE, enableSE, setEnableSE, audioLatency, offsetPlusLatency } =
+    useSE(userOffset);
 
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値

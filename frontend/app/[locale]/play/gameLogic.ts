@@ -14,12 +14,13 @@ import {
 } from "@falling-nikochan/chart";
 import { displayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote7, Note7 } from "@falling-nikochan/chart";
+import { SEType } from "./se";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean,
   userOffset: number,
-  playSE: () => void
+  playSE: (s: SEType) => void,
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
   const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
@@ -108,12 +109,11 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal]
+    [bonusTotal, notesTotal, bigTotal],
   );
 
   // キーを押したときの判定
   const hit = useCallback(() => {
-    playSE();
     const now = getCurrentTimeSec();
     let candidate: Note6 | Note7 | null = null;
     let candidateJudge: number = 0;
@@ -193,20 +193,24 @@ export default function useGameLogic(
       candidate !== null &&
       (candidateBig === null || candidateJudge <= candidateJudgeBig)
     ) {
+      playSE("hit");
       judge(candidate, now, candidateJudge);
       notesYetDone.current.shift();
       if (candidate.big) {
         notesBigYetDone.current.push(candidate);
       }
-      if(candidateLate !== null){
+      if (candidateLate !== null) {
         lateTimes.current.push(candidateLate + userOffset);
       }
     } else if (now && candidateBig !== null) {
+      playSE("hitBig");
       judge(candidateBig, now, candidateJudgeBig);
       notesBigYetDone.current.shift();
-      if(candidateLateBig !== null){
+      if (candidateLateBig !== null) {
         lateTimes.current.push(candidateLateBig + userOffset);
       }
+    } else {
+      playSE("hit");
     }
   }, [getCurrentTimeSec, judge, userOffset, playSE]);
   // 0.1s以上過ぎたものをmiss判定にする
@@ -226,7 +230,7 @@ export default function useGameLogic(
           continue;
         } else if (auto && late >= 0) {
           console.log("auto");
-          playSE();
+          playSE("hit");
           judge(n, now, 1);
           notesYetDone.current.shift();
           if (n.big) {
@@ -248,6 +252,7 @@ export default function useGameLogic(
           continue;
         } else if (auto && late >= 0) {
           console.log("auto");
+          playSE("hitBig");
           judge(n, now, 1);
           notesBigYetDone.current.shift();
           continue;
