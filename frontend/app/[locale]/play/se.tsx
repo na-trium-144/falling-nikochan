@@ -58,11 +58,16 @@ export function useSE(userOffset: number) {
   useEffect(() => {
     // AudioContext初期化直後はLatencyとして0が返ってくるが、
     // なぜか少し待ってから? or 実際にSEを再生してから? 取得すると違う値になる
-    if (audioContext.current) {
-      setAudioLatency(
-        audioContext.current.baseLatency + audioContext.current.outputLatency,
-      );
-    }
+    // なぜかlatencyがNaNになる環境もある
+    const t = setTimeout(() => {
+      if (audioContext.current) {
+        setAudioLatency(
+          (audioContext.current.baseLatency || 0) +
+            (audioContext.current.outputLatency || 0),
+        );
+      }
+    }, 100);
+    return () => clearTimeout(t);
   });
   const playSE = useCallback(
     (s: SEType) => {
