@@ -1,10 +1,11 @@
 "use client";
 
 import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/theme-monokai";
-import "ace-builds/src-noconflict/mode-lua";
-import "ace-builds/src-noconflict/snippets/lua";
+import "ace-builds/src-min-noconflict/ext-language_tools";
+import "ace-builds/src-min-noconflict/theme-github";
+import "ace-builds/src-min-noconflict/theme-monokai";
+import "ace-builds/src-min-noconflict/mode-lua";
+import "ace-builds/src-min-noconflict/snippets/lua";
 import { useEffect, useState } from "react";
 import { useDisplayMode } from "@/scale.js";
 import { luaExec } from "@falling-nikochan/chart";
