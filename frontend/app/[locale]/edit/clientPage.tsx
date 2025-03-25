@@ -45,7 +45,7 @@ import {
   setPasswd,
   unsetPasswd,
 } from "@/common/passwdCache.js";
-import LuaTab, { useLuaExecutor } from "./luaTab.js";
+import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import {
   luaAddBpmChange,
   luaDeleteBpmChange,
@@ -914,372 +914,380 @@ function Page(props: Props) {
         />
       ) : null}
       <CaptionProvider>
-        <div
-          className={
-            "w-full " +
-            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row "
-          }
-        >
+        <LuaTabProvider themeContext={themeContext}>
           <div
             className={
-              "edit-wide:basis-4/12 edit-wide:h-full " +
-              "grow-0 shrink-0 flex flex-col items-stretch p-3"
+              "w-full " +
+              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row "
             }
           >
-            <div className="flex flex-row items-center">
-              <Header reload locale={locale}>
-                {t("titleShort")}
-              </Header>
-              <Button text={t("help")} onClick={openGuide} />
-            </div>
             <div
               className={
-                "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
-                (levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
-                  levelBgColors[1]) +
-                (chart ? "" : "invisible ")
+                "edit-wide:basis-4/12 edit-wide:h-full " +
+                "grow-0 shrink-0 flex flex-col items-stretch p-3"
               }
             >
-              <FlexYouTube
-                fixedSide="width"
+              <div className="flex flex-row items-center">
+                <Header reload locale={locale}>
+                  {t("titleShort")}
+                </Header>
+                <Button text={t("help")} onClick={openGuide} />
+              </div>
+              <div
                 className={
-                  "w-full h-max " + "edit-wide:w-full edit-wide:h-auto "
+                  "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
+                  (levelBgColors[
+                    levelTypes.indexOf(currentLevel?.type || "")
+                  ] || levelBgColors[1]) +
+                  (chart ? "" : "invisible ")
                 }
-                control={true}
-                id={chart?.ytId}
-                ytPlayer={ytPlayer}
-                onReady={onReady}
-                onStart={onStart}
-                onStop={onStop}
-                onPlaybackRateChange={setPlaybackRate}
-              />
-            </div>
-            <div
-              className={
-                "relative " +
-                "w-full aspect-square " +
-                "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto "
-              }
-            >
-              <FallingWindow
-                inCodeTab={isCodeTab}
-                className="absolute inset-0"
-                notes={notesAll}
-                currentTimeSec={currentTimeSec || 0}
-                currentNoteIndex={currentNoteIndex}
-                currentLevel={currentLevel}
-                updateNote={updateNote}
-                dragMode={dragMode}
-                setDragMode={setDragMode}
-              />
-            </div>
-            {chart && isTouch && (
-              <button
-                className={
-                  "self-start flex flex-row items-center " + linkStyle1
-                }
-                onClick={() => {
-                  setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
-                  );
-                }}
               >
-                <span className="relative inline-block w-8 h-8 ">
-                  {dragMode === null ? (
-                    <>
-                      <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
-                      <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
-                    </>
-                  ) : (
-                    <>
-                      <Move
-                        className="absolute text-xl inset-0 w-max h-max m-auto "
-                        theme="two-tone"
-                        fill={["#333", "#fc5"]}
-                      />
-                    </>
-                  )}
-                </span>
-                <span className="">
-                  {t("touchMode", { mode: dragMode || "null" })}
-                </span>
-              </button>
-            )}
-          </div>
-          <div
-            className={
-              "p-3 flex flex-col items-stretch " +
-              "h-5/6 " +
-              "edit-wide:h-full edit-wide:flex-1 "
-            }
-          >
-            <div>
-              <span className="mr-1">{t("playerControl")}:</span>
-              <Select
-                options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
-                values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
-                value={playbackRate.toString()}
-                onChange={(s: string) => changePlaybackRate(Number(s))}
-              />
-              <Button
-                onClick={() => {
-                  if (ready) {
-                    if (!playing) {
-                      start();
-                    } else {
-                      stop();
-                    }
+                <FlexYouTube
+                  fixedSide="width"
+                  className={
+                    "w-full h-max " + "edit-wide:w-full edit-wide:h-auto "
                   }
-                }}
-                text={
-                  playing ? t("playerControls.pause") : t("playerControls.play")
+                  control={true}
+                  id={chart?.ytId}
+                  ytPlayer={ytPlayer}
+                  onReady={onReady}
+                  onStart={onStart}
+                  onStop={onStop}
+                  onPlaybackRateChange={setPlaybackRate}
+                />
+              </div>
+              <div
+                className={
+                  "relative " +
+                  "w-full aspect-square " +
+                  "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto "
                 }
-                keyName="Space"
-              />
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekStepRel(-snapDivider * 4);
-                    }
-                  }}
-                  text={t("playerControls.moveStep", {
-                    step: -snapDivider * 4,
-                  })}
-                  keyName="PageUp"
+              >
+                <FallingWindow
+                  inCodeTab={isCodeTab}
+                  className="absolute inset-0"
+                  notes={notesAll}
+                  currentTimeSec={currentTimeSec || 0}
+                  currentNoteIndex={currentNoteIndex}
+                  currentLevel={currentLevel}
+                  updateNote={updateNote}
+                  dragMode={dragMode}
+                  setDragMode={setDragMode}
                 />
-                <Button
+              </div>
+              {chart && isTouch && (
+                <button
+                  className={
+                    "self-start flex flex-row items-center " + linkStyle1
+                  }
                   onClick={() => {
-                    if (ready) {
-                      seekStepRel(snapDivider * 4);
-                    }
+                    setDragMode(
+                      dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                    );
                   }}
-                  text={t("playerControls.moveStep", { step: snapDivider * 4 })}
-                  keyName="PageDn"
-                />
-              </span>
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekLeft1();
-                    }
-                  }}
-                  text={t("playerControls.moveStep", { step: -1 })}
-                  keyName="←"
-                />
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekRight1();
-                    }
-                  }}
-                  text={t("playerControls.moveStep", { step: 1 })}
-                  keyName="→"
-                />
-              </span>
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekSec(-1 / 30);
-                    }
-                  }}
-                  text={t("playerControls.moveMinus1F")}
-                  keyName=","
-                />
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekSec(1 / 30);
-                    }
-                  }}
-                  text={t("playerControls.movePlus1F")}
-                  keyName="."
-                />
-              </span>
-            </div>
-            <div className="flex-none">
-              <TimeBar
-                currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
-                currentNoteIndex={currentNoteIndex}
-                currentStep={currentStep}
-                chart={chart}
-                currentLevel={currentLevel}
-                notesAll={notesAll}
-                snapDivider={snapDivider}
-                timeBarPxPerSec={timeBarPxPerSec}
-              />
-            </div>
-            <div className="flex flex-row items-baseline">
-              <span>{t("stepUnit")} =</span>
-              <span className="ml-2">1</span>
-              <span className="ml-1">/</span>
-              <Input
-                className="w-12"
-                actualValue={String(snapDivider * 4)}
-                updateValue={(v: string) => {
-                  setSnapDivider(Number(v) / 4);
-                }}
-                isValid={(v) =>
-                  !isNaN(Number(v)) &&
-                  String(Math.floor(Number(v) / 4) * 4) === v
-                }
-              />
-              <HelpIcon className="self-center">
-                {t.rich("stepUnitHelp", { br: () => <br /> })}
-              </HelpIcon>
-              <div className="flex-1" />
-              <span className="mr-1">{t("zoom")}</span>
-              <Button
-                text="-"
-                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
-              />
-              <Button
-                text="+"
-                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
-              />
-            </div>
-            <div className="flex flex-row ml-3 mt-3">
-              {tabNameKeys.map((key, i) =>
-                i === tab ? (
-                  <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
-                    {t(`${key}.title`)}
-                  </Box>
-                ) : (
-                  <button
-                    key={i}
-                    className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
-                    onClick={() => {
-                      setTab(i);
-                      ref.current.focus();
-                    }}
-                  >
-                    {t(`${key}.title`)}
-                  </button>
-                )
+                >
+                  <span className="relative inline-block w-8 h-8 ">
+                    {dragMode === null ? (
+                      <>
+                        <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                        <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                      </>
+                    ) : (
+                      <>
+                        <Move
+                          className="absolute text-xl inset-0 w-max h-max m-auto "
+                          theme="two-tone"
+                          fill={["#333", "#fc5"]}
+                        />
+                      </>
+                    )}
+                  </span>
+                  <span className="">
+                    {t("touchMode", { mode: dragMode || "null" })}
+                  </span>
+                </button>
               )}
             </div>
-            <Box
+            <div
               className={
-                "p-3 overflow-auto " +
-                "min-h-96 relative " +
-                "edit-wide:flex-1 edit-wide:min-h-0"
+                "p-3 flex flex-col items-stretch " +
+                "h-5/6 " +
+                "edit-wide:h-full edit-wide:flex-1 "
               }
             >
-              {tab === 0 ? (
-                <MetaTab
-                  sessionId={sessionId}
-                  sessionData={sessionData}
-                  chartNumEvent={chartNumEvent}
-                  chart={chart}
-                  setChart={changeChart}
-                  convertedFrom={convertedFrom}
-                  setConvertedFrom={setConvertedFrom}
-                  cid={cid}
-                  setCid={(newCid: string) => setCid(newCid)}
-                  hasChange={hasChange}
-                  setHasChange={setHasChange}
-                  currentLevelIndex={currentLevelIndex}
-                  locale={locale}
-                  currentPasswd={props.currentPasswd}
-                  newPasswd={newPasswd}
-                  setNewPasswd={setNewPasswd}
-                  savePasswd={!!savePasswd}
-                  setSavePasswd={setSavePasswd}
+              <div>
+                <span className="mr-1">{t("playerControl")}:</span>
+                <Select
+                  options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
+                  values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+                  value={playbackRate.toString()}
+                  onChange={(s: string) => changePlaybackRate(Number(s))}
                 />
-              ) : tab === 1 ? (
-                <TimingTab
-                  offset={chart?.offset}
-                  setOffset={changeOffset}
-                  currentLevel={currentLevel}
-                  prevBpm={
-                    currentBpmIndex !== undefined && currentBpmIndex >= 1
-                      ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
-                      : undefined
+                <Button
+                  onClick={() => {
+                    if (ready) {
+                      if (!playing) {
+                        start();
+                      } else {
+                        stop();
+                      }
+                    }
+                  }}
+                  text={
+                    playing
+                      ? t("playerControls.pause")
+                      : t("playerControls.play")
                   }
-                  currentBpmIndex={currentBpmIndex}
-                  currentBpm={
-                    currentBpmIndex !== undefined ? currentBpm : undefined
-                  }
-                  setCurrentBpm={changeBpm}
-                  bpmChangeHere={!!bpmChangeHere}
-                  toggleBpmChangeHere={toggleBpmChangeHere}
-                  prevSpeed={
-                    currentSpeedIndex !== undefined && currentSpeedIndex >= 1
-                      ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
-                      : undefined
-                  }
-                  currentSpeedIndex={currentSpeedIndex}
-                  currentSpeed={
-                    currentSpeedIndex !== undefined ? currentSpeed : undefined
-                  }
-                  speedChangeHere={!!speedChangeHere}
-                  prevSignature={prevSignature}
-                  currentSignature={currentSignature}
-                  setCurrentSignature={changeSignature}
-                  signatureChangeHere={!!signatureChangeHere}
-                  toggleSignatureChangeHere={toggleSignatureChangeHere}
-                  currentStep={currentStep}
+                  keyName="Space"
                 />
-              ) : tab === 2 ? (
-                <LevelTab
-                  chart={chart}
-                  currentLevelIndex={currentLevelIndex}
-                  setCurrentLevelIndex={setCurrentLevelIndex}
-                  changeChart={changeChart}
-                />
-              ) : tab === 3 ? (
-                <NoteTab
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekStepRel(-snapDivider * 4);
+                      }
+                    }}
+                    text={t("playerControls.moveStep", {
+                      step: -snapDivider * 4,
+                    })}
+                    keyName="PageUp"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekStepRel(snapDivider * 4);
+                      }
+                    }}
+                    text={t("playerControls.moveStep", {
+                      step: snapDivider * 4,
+                    })}
+                    keyName="PageDn"
+                  />
+                </span>
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekLeft1();
+                      }
+                    }}
+                    text={t("playerControls.moveStep", { step: -1 })}
+                    keyName="←"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekRight1();
+                      }
+                    }}
+                    text={t("playerControls.moveStep", { step: 1 })}
+                    keyName="→"
+                  />
+                </span>
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekSec(-1 / 30);
+                      }
+                    }}
+                    text={t("playerControls.moveMinus1F")}
+                    keyName=","
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekSec(1 / 30);
+                      }
+                    }}
+                    text={t("playerControls.movePlus1F")}
+                    keyName="."
+                  />
+                </span>
+              </div>
+              <div className="flex-none">
+                <TimeBar
+                  currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
                   currentNoteIndex={currentNoteIndex}
-                  hasCurrentNote={hasCurrentNote}
-                  notesIndexInStep={notesIndexInStep}
-                  notesCountInStep={notesCountInStep}
-                  canAddNote={canAddNote}
-                  addNote={addNote}
-                  deleteNote={deleteNote}
-                  updateNote={updateNote}
-                  copyNote={copyNote}
-                  pasteNote={pasteNote}
-                  hasCopyBuf={copyBuf.map((n) => n !== null)}
                   currentStep={currentStep}
+                  chart={chart}
                   currentLevel={currentLevel}
+                  notesAll={notesAll}
+                  snapDivider={snapDivider}
+                  timeBarPxPerSec={timeBarPxPerSec}
                 />
-              ) : null}
-              <LuaTab
-                visible={tab === 4}
-                currentLevel={currentLevel}
-                changeLevel={changeLevel}
-                seekStepAbs={(s: Step) => seekStepAbs(s, false)}
-                themeContext={themeContext}
-              />
-            </Box>
-            <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
-              {luaExecutor.running ? (
-                <div className="m-1">
-                  <SlimeSVG />
-                  {t("running")}
-                </div>
-              ) : (
-                (luaExecutor.stdout.length > 0 ||
-                  luaExecutor.err.length > 0) && (
+              </div>
+              <div className="flex flex-row items-baseline">
+                <span>{t("stepUnit")} =</span>
+                <span className="ml-2">1</span>
+                <span className="ml-1">/</span>
+                <Input
+                  className="w-12"
+                  actualValue={String(snapDivider * 4)}
+                  updateValue={(v: string) => {
+                    setSnapDivider(Number(v) / 4);
+                  }}
+                  isValid={(v) =>
+                    !isNaN(Number(v)) &&
+                    String(Math.floor(Number(v) / 4) * 4) === v
+                  }
+                />
+                <HelpIcon className="self-center">
+                  {t.rich("stepUnitHelp", { br: () => <br /> })}
+                </HelpIcon>
+                <div className="flex-1" />
+                <span className="mr-1">{t("zoom")}</span>
+                <Button
+                  text="-"
+                  onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
+                />
+                <Button
+                  text="+"
+                  onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
+                />
+              </div>
+              <div className="flex flex-row ml-3 mt-3">
+                {tabNameKeys.map((key, i) =>
+                  i === tab ? (
+                    <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
+                      {t(`${key}.title`)}
+                    </Box>
+                  ) : (
+                    <button
+                      key={i}
+                      className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
+                      onClick={() => {
+                        setTab(i);
+                        ref.current.focus();
+                      }}
+                    >
+                      {t(`${key}.title`)}
+                    </button>
+                  )
+                )}
+              </div>
+              <Box
+                className={
+                  "p-3 overflow-auto " +
+                  "min-h-96 relative " +
+                  "edit-wide:flex-1 edit-wide:min-h-0"
+                }
+              >
+                {tab === 0 ? (
+                  <MetaTab
+                    sessionId={sessionId}
+                    sessionData={sessionData}
+                    chartNumEvent={chartNumEvent}
+                    chart={chart}
+                    setChart={changeChart}
+                    convertedFrom={convertedFrom}
+                    setConvertedFrom={setConvertedFrom}
+                    cid={cid}
+                    setCid={(newCid: string) => setCid(newCid)}
+                    hasChange={hasChange}
+                    setHasChange={setHasChange}
+                    currentLevelIndex={currentLevelIndex}
+                    locale={locale}
+                    currentPasswd={props.currentPasswd}
+                    newPasswd={newPasswd}
+                    setNewPasswd={setNewPasswd}
+                    savePasswd={!!savePasswd}
+                    setSavePasswd={setSavePasswd}
+                  />
+                ) : tab === 1 ? (
+                  <TimingTab
+                    offset={chart?.offset}
+                    setOffset={changeOffset}
+                    currentLevel={currentLevel}
+                    prevBpm={
+                      currentBpmIndex !== undefined && currentBpmIndex >= 1
+                        ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
+                        : undefined
+                    }
+                    currentBpmIndex={currentBpmIndex}
+                    currentBpm={
+                      currentBpmIndex !== undefined ? currentBpm : undefined
+                    }
+                    setCurrentBpm={changeBpm}
+                    bpmChangeHere={!!bpmChangeHere}
+                    toggleBpmChangeHere={toggleBpmChangeHere}
+                    prevSpeed={
+                      currentSpeedIndex !== undefined && currentSpeedIndex >= 1
+                        ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
+                        : undefined
+                    }
+                    currentSpeedIndex={currentSpeedIndex}
+                    currentSpeed={
+                      currentSpeedIndex !== undefined ? currentSpeed : undefined
+                    }
+                    speedChangeHere={!!speedChangeHere}
+                    prevSignature={prevSignature}
+                    currentSignature={currentSignature}
+                    setCurrentSignature={changeSignature}
+                    signatureChangeHere={!!signatureChangeHere}
+                    toggleSignatureChangeHere={toggleSignatureChangeHere}
+                    currentStep={currentStep}
+                  />
+                ) : tab === 2 ? (
+                  <LevelTab
+                    chart={chart}
+                    currentLevelIndex={currentLevelIndex}
+                    setCurrentLevelIndex={setCurrentLevelIndex}
+                    changeChart={changeChart}
+                  />
+                ) : tab === 3 ? (
+                  <NoteTab
+                    currentNoteIndex={currentNoteIndex}
+                    hasCurrentNote={hasCurrentNote}
+                    notesIndexInStep={notesIndexInStep}
+                    notesCountInStep={notesCountInStep}
+                    canAddNote={canAddNote}
+                    addNote={addNote}
+                    deleteNote={deleteNote}
+                    updateNote={updateNote}
+                    copyNote={copyNote}
+                    pasteNote={pasteNote}
+                    hasCopyBuf={copyBuf.map((n) => n !== null)}
+                    currentStep={currentStep}
+                    currentLevel={currentLevel}
+                  />
+                ) : null}
+                <LuaTabPlaceholder
+                  visible={tab === 4}
+                  currentLevel={currentLevel}
+                  changeLevel={changeLevel}
+                  seekStepAbs={(s: Step) => seekStepAbs(s, false)}
+                  errLine={luaExecutor.errLine}
+                  err={luaExecutor.err}
+                />
+              </Box>
+              <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
+                {luaExecutor.running ? (
                   <div className="m-1">
-                    {luaExecutor.stdout.map((s, i) => (
-                      <p className="text-sm" key={i}>
-                        {s}
-                      </p>
-                    ))}
-                    {luaExecutor.err.map((e, i) => (
-                      <p className="text-sm text-red-600" key={i}>
-                        {e}
-                      </p>
-                    ))}
+                    <SlimeSVG />
+                    {t("running")}
                   </div>
-                )
-              )}
+                ) : (
+                  (luaExecutor.stdout.length > 0 ||
+                    luaExecutor.err.length > 0) && (
+                    <div className="m-1">
+                      {luaExecutor.stdout.map((s, i) => (
+                        <p className="text-sm" key={i}>
+                          {s}
+                        </p>
+                      ))}
+                      {luaExecutor.err.map((e, i) => (
+                        <p className="text-sm text-red-600" key={i}>
+                          {e}
+                        </p>
+                      ))}
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </LuaTabProvider>
       </CaptionProvider>
     </main>
   );
