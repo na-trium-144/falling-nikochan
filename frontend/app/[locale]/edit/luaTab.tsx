@@ -6,7 +6,7 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/mode-lua";
 import "ace-builds/src-min-noconflict/snippets/lua";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDisplayMode } from "@/scale.js";
 import { luaExec } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
@@ -41,6 +41,7 @@ export function useLuaExecutor() {
 }
 
 interface Props {
+  visible: boolean;
   currentLevel: LevelEdit | undefined;
   changeLevel: (lua: string[]) => void;
   seekStepAbs: (s: Step) => void;
@@ -49,9 +50,20 @@ interface Props {
 export default function LuaTab(props: Props) {
   const { currentLevel, changeLevel, seekStepAbs } = props;
   const { rem } = useDisplayMode();
-  const [code, setCode] = useState<string>(currentLevel?.lua.join("\n") || "");
+  const previousLevelCode = useRef<string>("");
+  const [code, setCode] = useState<string>("");
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
 
+  useEffect(() => {
+    const currentLevelCode = currentLevel?.lua.join("\n");
+    if (
+      currentLevelCode !== undefined &&
+      previousLevelCode.current !== currentLevelCode
+    ) {
+      previousLevelCode.current = currentLevelCode;
+      setCode(currentLevelCode);
+    }
+  }, [currentLevel]);
   useEffect(() => {
     if (codeChanged) {
       const t = setTimeout(() => {
@@ -63,40 +75,38 @@ export default function LuaTab(props: Props) {
   }, [code, codeChanged, changeLevel]);
 
   return (
-    <div className="flex flex-col absolute inset-3 space-y-3">
-      <div className="flex-1 w-full">
-        <AceEditor
-          mode="lua"
-          theme={props.themeContext.isDark ? "monokai" : "github"}
-          width="100%"
-          height="100%"
-          tabSize={2}
-          fontSize={1 * rem}
-          value={code}
-          annotations={
-            /*指定すると表示位置がなんかおかしい
+    <div className={"absolute inset-3 " + (props.visible ? "" : "hidden! ")}>
+      <AceEditor
+        mode="lua"
+        theme={props.themeContext.isDark ? "monokai" : "github"}
+        width="100%"
+        height="100%"
+        tabSize={2}
+        fontSize={1 * rem}
+        value={code}
+        annotations={
+          /*指定すると表示位置がなんかおかしい
             errLine !== null
               ? [{ row: errLine, column: 1, text: err[0], type: "error" }]
               : []*/
-            []
-          }
-          enableBasicAutocompletion={true}
-          enableLiveAutocompletion={true}
-          enableSnippets={true}
-          onChange={(value) => {
-            setCode(value);
-            setCodeChanged(true);
-          }}
-          onCursorChange={(sel) => {
-            if (currentLevel) {
-              const step = findStepFromLua(currentLevel, sel.cursor.row);
-              if (step !== null) {
-                seekStepAbs(step);
-              }
+          []
+        }
+        enableBasicAutocompletion={true}
+        enableLiveAutocompletion={true}
+        enableSnippets={true}
+        onChange={(value) => {
+          setCode(value);
+          setCodeChanged(true);
+        }}
+        onCursorChange={(sel) => {
+          if (currentLevel) {
+            const step = findStepFromLua(currentLevel, sel.cursor.row);
+            if (step !== null) {
+              seekStepAbs(step);
             }
-          }}
-        />
-      </div>
+          }
+        }}
+      />
     </div>
   );
 }

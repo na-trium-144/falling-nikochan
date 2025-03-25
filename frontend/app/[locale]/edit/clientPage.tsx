@@ -1245,14 +1245,14 @@ function Page(props: Props) {
                   currentStep={currentStep}
                   currentLevel={currentLevel}
                 />
-              ) : (
-                <LuaTab
-                  currentLevel={currentLevel}
-                  changeLevel={changeLevel}
-                  seekStepAbs={(s: Step) => seekStepAbs(s, false)}
-                  themeContext={themeContext}
-                />
-              )}
+              ) : null}
+              <LuaTab
+                visible={tab === 4}
+                currentLevel={currentLevel}
+                changeLevel={changeLevel}
+                seekStepAbs={(s: Step) => seekStepAbs(s, false)}
+                themeContext={themeContext}
+              />
             </Box>
             <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
               {luaExecutor.running ? (
