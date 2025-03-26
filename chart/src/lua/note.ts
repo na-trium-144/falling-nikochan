@@ -22,7 +22,7 @@ export function luaAddNote<
   L extends LevelEdit | Chart3,
   N extends NoteCommand | NoteCommand3 | NoteCommand7
 >(chart: L, n: N, step: Step): L | null {
-  const insert = findInsertLine(chart, step);
+  const insert = findInsertLine(chart, step, true);
   if (insert.luaLine === null) {
     return null;
   }

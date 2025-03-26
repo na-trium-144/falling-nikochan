@@ -12,7 +12,7 @@ export function luaAddBpmChange<L extends LevelEdit | Chart3>(
   chart: L,
   change: BPMChange | BPMChange1
 ): L | null {
-  const insert = findInsertLine(chart, change.step);
+  const insert = findInsertLine(chart, change.step, true);
   if (insert.luaLine === null) {
     return null;
   }
