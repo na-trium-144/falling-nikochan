@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type SEType = "hit" | "hitBig";
+export type SEType = "hit" | "hitBig" | "chain";
 
 export function useSE(userOffset: number) {
   const audioContext = useRef<AudioContext | null>(null);
   const audioHit = useRef<AudioBuffer | null>(null);
   const audioHitBig = useRef<AudioBuffer | null>(null);
+  const audioChain = useRef<AudioBuffer | null>(null);
   // const gainNode = useRef<GainNode | null>(null);
   const [audioLatency, setAudioLatency] = useState<number>(0);
   const [enableSE, setEnableSE_] = useState<boolean>(true);
@@ -35,6 +36,7 @@ export function useSE(userOffset: number) {
       [
         ["hit", audioHit],
         ["hitBig", audioHitBig],
+        ["chain", audioChain],
       ] as const
     ).forEach(([name, audioBuffer]) =>
       fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`)
@@ -54,7 +56,6 @@ export function useSE(userOffset: number) {
       audioContext.current = null;
     };
   }, []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // AudioContext初期化直後はLatencyとして0が返ってくるが、
     // なぜか少し待ってから? or 実際にSEを再生してから? 取得すると違う値になる
@@ -78,6 +79,9 @@ export function useSE(userOffset: number) {
           break;
         case "hitBig":
           audioBuffer = audioHitBig.current;
+          break;
+        case "chain":
+          audioBuffer = audioChain.current;
           break;
         default:
           return;

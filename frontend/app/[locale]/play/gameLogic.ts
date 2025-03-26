@@ -100,6 +100,9 @@ export default function useGameLogic(
         } else {
           thisChain = 0;
         }
+        if (Math.floor(chainRef.current / 50) < Math.floor(thisChain / 50)) {
+          playSE("chain");
+        }
         chainRef.current = thisChain;
         setChain(thisChain);
         setJudgeCount((judgeCount) => {
@@ -109,7 +112,7 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal],
+    [bonusTotal, notesTotal, bigTotal, playSE],
   );
 
   // キーを押したときの判定
