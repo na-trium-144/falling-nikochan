@@ -1261,7 +1261,7 @@ function Page(props: Props) {
                   err={luaExecutor.err}
                 />
               </Box>
-              <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
+              <div className="bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
                 {luaExecutor.running ? (
                   <div className="m-1">
                     <SlimeSVG />
@@ -1277,7 +1277,10 @@ function Page(props: Props) {
                         </p>
                       ))}
                       {luaExecutor.err.map((e, i) => (
-                        <p className="text-sm text-red-600" key={i}>
+                        <p
+                          className="text-sm text-red-600 dark:text-red-400 "
+                          key={i}
+                        >
                           {e}
                         </p>
                       ))}

@@ -155,7 +155,7 @@ export function LuaTabProvider(props: PProps) {
                     startCol: 0,
                     endCol: 1,
                     type: "fullLine",
-                    className: "absolute z-5 bg-red-200 ",
+                    className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
                   },
                 ]
               : []
