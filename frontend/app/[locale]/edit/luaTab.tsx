@@ -56,6 +56,7 @@ interface Props {
   visible: boolean;
   currentLevel: LevelEdit | undefined;
   currentStepStr: string | null;
+  barLines: { barNum: number; luaLine: number }[];
   changeLevel: (lua: string[]) => void;
   currentLine: number | null;
   seekStepAbs: (s: Step) => void;
@@ -87,6 +88,7 @@ export function LuaTabProvider(props: PProps) {
     height: 0,
     currentLine: null,
     currentStepStr: "",
+    barLines: [],
     currentLevel: undefined,
     changeLevel: () => {},
     seekStepAbs: () => {},
@@ -102,6 +104,7 @@ export function LuaTabProvider(props: PProps) {
     visible,
     currentLine,
     currentStepStr,
+    barLines,
     currentLevel,
     changeLevel,
     seekStepAbs,
@@ -150,11 +153,17 @@ export function LuaTabProvider(props: PProps) {
           fontSize={1 * rem}
           value={code}
           annotations={[
+            ...barLines.map((bl) => ({
+              row: bl.luaLine,
+              column: 1,
+              text: `${bl.barNum};`,
+              type: "info",
+            })),
             {
               row: currentLine === null ? -1 : currentLine,
               column: 1,
               text: t("currentLine", { step: currentStepStr || "null" }),
-              type: "info",
+              type: "warning",
             },
             {
               row: errLine === null ? -1 : errLine,
@@ -201,6 +210,7 @@ export function LuaTabPlaceholder(props: Props) {
     visible,
     currentLine,
     currentStepStr,
+    barLines,
     currentLevel,
     changeLevel,
     seekStepAbs,
@@ -220,6 +230,7 @@ export function LuaTabPlaceholder(props: Props) {
           visible,
           currentLine,
           currentStepStr,
+          barLines,
           currentLevel,
           changeLevel,
           seekStepAbs,
@@ -239,6 +250,7 @@ export function LuaTabPlaceholder(props: Props) {
     visible,
     currentLine,
     currentStepStr,
+    barLines,
     currentLevel,
     changeLevel,
     seekStepAbs,

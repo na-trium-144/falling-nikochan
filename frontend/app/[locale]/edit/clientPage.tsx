@@ -537,6 +537,31 @@ function Page(props: Props) {
     hasCurrentNote,
   ]);
 
+  // それぞれの小節線位置のコード内での行番号
+  const [barLines, setBarLines] = useState<
+    { barNum: number; luaLine: number }[]
+  >([]);
+  useEffect(() => {
+    const barLines: { barNum: number; luaLine: number }[] = [];
+    if (currentLevel) {
+      let step = stepZero();
+      const lastRest = currentLevel.rest.at(
+        currentLevel.rest.length - 1,
+      )?.begin;
+      while (lastRest !== undefined && stepCmp(step, lastRest) <= 0) {
+        const ss = getSignatureState(currentLevel.signature, step);
+        if (stepCmp(ss.offset, stepZero()) === 0) {
+          const line = findInsertLine(currentLevel, step, false).luaLine;
+          if (line !== null) {
+            barLines.push({ barNum: ss.barNum + 1, luaLine: line });
+          }
+        }
+        step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
+      }
+    }
+    setBarLines(barLines);
+  }, [currentLevel]);
+
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = (rate: number) => {
@@ -611,22 +636,26 @@ function Page(props: Props) {
       numerator: move,
       denominator: snapDivider,
     });
-    seekStepAbs(newStep);
+    seekStepAbs(newStep, true);
   };
-  const seekStepAbs = (newStep: Step, focus = true) => {
-    if (chart && currentLevel) {
-      if (stepCmp(newStep, stepZero()) < 0) {
-        newStep = stepZero();
+  const seekStepAbs = useCallback(
+    (newStep: Step, focus = false) => {
+      // デフォルト引数はluaTabからの呼び出しで使う
+      if (chart && currentLevel) {
+        if (stepCmp(newStep, stepZero()) < 0) {
+          newStep = stepZero();
+        }
+        changeCurrentTimeSec(
+          getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
+          focus,
+        );
       }
-      changeCurrentTimeSec(
-        getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
-        focus,
-      );
-    }
-    if (focus) {
-      ref.current.focus();
-    }
-  };
+      if (focus) {
+        ref.current.focus();
+      }
+    },
+    [chart, currentLevel],
+  );
   const seekSec = (moveSec: number, focus = true) => {
     if (chart) {
       changeCurrentTimeSec(currentTimeSec + chart.offset + moveSec, focus);
@@ -1280,9 +1309,10 @@ function Page(props: Props) {
                   visible={tab === 4}
                   currentLine={currentLine}
                   currentStepStr={currentStepStr}
+                  barLines={barLines}
                   currentLevel={currentLevel}
                   changeLevel={changeLevel}
-                  seekStepAbs={(s: Step) => seekStepAbs(s, false)}
+                  seekStepAbs={seekStepAbs}
                   errLine={luaExecutor.running ? null : luaExecutor.errLine}
                   err={luaExecutor.err}
                 />
