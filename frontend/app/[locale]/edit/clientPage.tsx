@@ -3,6 +3,7 @@
 import {
   Chart9Edit,
   defaultNoteCommand,
+  findInsertLine,
   NoteCommand,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
@@ -45,7 +46,7 @@ import {
   setPasswd,
   unsetPasswd,
 } from "@/common/passwdCache.js";
-import LuaTab, { useLuaExecutor } from "./luaTab.js";
+import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import {
   luaAddBpmChange,
   luaDeleteBpmChange,
@@ -119,7 +120,7 @@ export default function EditAuth(props: {
       isFirst: boolean,
       bypass: boolean,
       editPasswd: string,
-      savePasswd: boolean
+      savePasswd: boolean,
     ) => {
       if (cidInitial.current === "new") {
         setCid(undefined);
@@ -153,7 +154,7 @@ export default function EditAuth(props: {
               process.env.NODE_ENV === "development"
                 ? "include"
                 : "same-origin",
-          }
+          },
         );
         if (res.ok) {
           try {
@@ -171,7 +172,7 @@ export default function EditAuth(props: {
                       process.env.NODE_ENV === "development"
                         ? "include"
                         : "same-origin",
-                  }
+                  },
                 );
                 setPasswd(cidInitial.current, await res.text());
               }
@@ -213,7 +214,7 @@ export default function EditAuth(props: {
         setLoading(false);
       }
     },
-    []
+    [],
   );
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -222,7 +223,7 @@ export default function EditAuth(props: {
     }
     setSavePasswd(preferSavePasswd());
     document.title = titleWithSiteName(
-      t("title", { title: "", cid: cidInitial.current })
+      t("title", { title: "", cid: cidInitial.current }),
     );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     // レンダリングの都合上 cidInitial.current を先に反映させたいため、setTimeoutで1段階遅延
@@ -357,7 +358,7 @@ function Page(props: Props) {
   };
   useEffect(() => {
     document.title = titleWithSiteName(
-      t("title", { title: chart?.title || "", cid: cid || "" })
+      t("title", { title: chart?.title || "", cid: cid || "" }),
     );
   });
   useEffect(() => {
@@ -384,7 +385,7 @@ function Page(props: Props) {
   // レベルの更新
   // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
   const changeLevel = async (
-    newLevel: LevelMin | string[] | null | undefined
+    newLevel: LevelMin | string[] | null | undefined,
   ) => {
     if (chart && newLevel && currentLevelIndex < chart.levels.length) {
       const newChart: ChartEdit = {
@@ -400,7 +401,7 @@ function Page(props: Props) {
         };
       }
       const levelFreezed = await luaExecutor.exec(
-        newChart.levels[currentLevelIndex].lua.join("\n")
+        newChart.levels[currentLevelIndex].lua.join("\n"),
       );
       if (levelFreezed) {
         newChart.levels[currentLevelIndex] = {
@@ -433,9 +434,22 @@ function Page(props: Props) {
     useState<number>(0);
   // 現在時刻に対応するstep
   const [currentStep, setCurrentStep] = useState<Step>(stepZero());
+  const [currentLine, setCurrentLine] = useState<number | null>(null);
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
   const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
+
+  const ss =
+    currentLevel && getSignatureState(currentLevel.signature, currentStep);
+  const currentStepStr = ss
+    ? ss.barNum +
+      1 +
+      ";" +
+      (ss.count.fourth + 1) +
+      (ss.count.numerator > 0
+        ? "+" + ss.count.numerator + "/" + ss.count.denominator * 4
+        : "")
+    : null;
 
   // offsetを引いた後の時刻
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
@@ -479,28 +493,37 @@ function Page(props: Props) {
       const step = getStep(
         currentLevel.bpmChanges,
         currentTimeSec,
-        snapDivider
+        snapDivider,
       );
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
       }
+      let noteIndex: number | undefined = undefined;
       if (
         !hasCurrentNote ||
         stepCmp(currentLevel.notes[currentNoteIndex].step, step) != 0
       ) {
-        let noteIndex: number;
         if (currentTimeSec < prevTimeSec.current) {
           noteIndex = currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, step) == 0
+            (n) => stepCmp(n.step, step) == 0,
           );
         } else {
           noteIndex = currentLevel.notes.findIndex(
-            (n) => stepCmp(n.step, step) == 0
+            (n) => stepCmp(n.step, step) == 0,
           );
         }
         if (currentNoteIndex !== noteIndex) {
           setCurrentNoteIndex(noteIndex);
         }
+      }
+      let line: number | null;
+      if (noteIndex !== undefined && noteIndex >= 0) {
+        line = currentLevel.notes[noteIndex].luaLine;
+      } else {
+        line = findInsertLine(currentLevel, step, false).luaLine;
+      }
+      if (currentLine !== line) {
+        setCurrentLine(line);
       }
     }
     prevTimeSec.current = currentTimeSec;
@@ -510,8 +533,34 @@ function Page(props: Props) {
     currentTimeSec,
     currentStep,
     currentNoteIndex,
+    currentLine,
     hasCurrentNote,
   ]);
+
+  // それぞれの小節線位置のコード内での行番号
+  const [barLines, setBarLines] = useState<
+    { barNum: number; luaLine: number }[]
+  >([]);
+  useEffect(() => {
+    const barLines: { barNum: number; luaLine: number }[] = [];
+    if (currentLevel) {
+      let step = stepZero();
+      const lastRest = currentLevel.rest.at(
+        currentLevel.rest.length - 1,
+      )?.begin;
+      while (lastRest !== undefined && stepCmp(step, lastRest) <= 0) {
+        const ss = getSignatureState(currentLevel.signature, step);
+        if (stepCmp(ss.offset, stepZero()) === 0) {
+          const line = findInsertLine(currentLevel, step, false).luaLine;
+          if (line !== null) {
+            barLines.push({ barNum: ss.barNum + 1, luaLine: line });
+          }
+        }
+        step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
+      }
+    }
+    setBarLines(barLines);
+  }, [currentLevel]);
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -587,22 +636,26 @@ function Page(props: Props) {
       numerator: move,
       denominator: snapDivider,
     });
-    seekStepAbs(newStep);
+    seekStepAbs(newStep, true);
   };
-  const seekStepAbs = (newStep: Step, focus = true) => {
-    if (chart && currentLevel) {
-      if (stepCmp(newStep, stepZero()) < 0) {
-        newStep = stepZero();
+  const seekStepAbs = useCallback(
+    (newStep: Step, focus = false) => {
+      // デフォルト引数はluaTabからの呼び出しで使う
+      if (chart && currentLevel) {
+        if (stepCmp(newStep, stepZero()) < 0) {
+          newStep = stepZero();
+        }
+        changeCurrentTimeSec(
+          getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
+          focus,
+        );
       }
-      changeCurrentTimeSec(
-        getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
-        focus
-      );
-    }
-    if (focus) {
-      ref.current.focus();
-    }
-  };
+      if (focus) {
+        ref.current.focus();
+      }
+    },
+    [chart, currentLevel],
+  );
   const seekSec = (moveSec: number, focus = true) => {
     if (chart) {
       changeCurrentTimeSec(currentTimeSec + chart.offset + moveSec, focus);
@@ -671,7 +724,7 @@ function Page(props: Props) {
         newLevel = luaUpdateSpeedChange(
           newLevel || currentLevel,
           currentSpeedIndex,
-          speed
+          speed,
         );
       }
       changeLevel(newLevel?.lua);
@@ -712,7 +765,7 @@ function Page(props: Props) {
         } else if (!speed && speedChangeHere) {
           newLevel = luaDeleteSpeedChange(
             newLevel || currentLevel,
-            currentSpeedIndex
+            currentSpeedIndex,
           );
         }
       }
@@ -723,7 +776,7 @@ function Page(props: Props) {
   const currentSignatureIndex =
     currentLevel && findBpmIndexFromStep(currentLevel.signature, currentStep);
   const currentSignature = currentLevel?.signature.at(
-    currentSignatureIndex || 0
+    currentSignatureIndex || 0,
   );
   const prevSignature =
     currentSignatureIndex && currentSignatureIndex > 0
@@ -736,7 +789,7 @@ function Page(props: Props) {
       const newLevel = luaUpdateBeatChange(
         currentLevel,
         currentSignatureIndex,
-        s
+        s,
       );
       changeLevel(newLevel?.lua);
     }
@@ -752,7 +805,7 @@ function Page(props: Props) {
       if (signatureChangeHere) {
         const newLevel = luaDeleteBeatChange(
           currentLevel,
-          currentSignatureIndex
+          currentSignatureIndex,
         );
         changeLevel(newLevel?.lua);
       } else {
@@ -774,8 +827,8 @@ function Page(props: Props) {
         // 追加したnoteは同じ時刻の音符の中でも最後
         setCurrentNoteIndex(
           currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, currentStep) == 0
-          )
+            (n) => stepCmp(n.step, currentStep) == 0,
+          ),
         );
         changeLevel(newLevel?.lua);
       }
@@ -800,8 +853,8 @@ function Page(props: Props) {
   };
   const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
     ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(9)).map(() => null)
-    )
+      Array.from(new Array(9)).map(() => null),
+    ),
   );
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
@@ -914,372 +967,386 @@ function Page(props: Props) {
         />
       ) : null}
       <CaptionProvider>
-        <div
-          className={
-            "w-full " +
-            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row "
-          }
-        >
+        <LuaTabProvider themeContext={themeContext}>
           <div
             className={
-              "edit-wide:basis-4/12 edit-wide:h-full " +
-              "grow-0 shrink-0 flex flex-col items-stretch p-3"
+              "w-full " +
+              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row "
             }
           >
-            <div className="flex flex-row items-center">
-              <Header reload locale={locale}>
-                {t("titleShort")}
-              </Header>
-              <Button text={t("help")} onClick={openGuide} />
-            </div>
             <div
               className={
-                "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
-                (levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
-                  levelBgColors[1]) +
-                (chart ? "" : "invisible ")
+                "edit-wide:basis-4/12 edit-wide:h-full " +
+                "grow-0 shrink-0 flex flex-col items-stretch p-3"
               }
             >
-              <FlexYouTube
-                fixedSide="width"
+              <div className="flex flex-row items-center">
+                <Header reload locale={locale}>
+                  {t("titleShort")}
+                </Header>
+                <Button text={t("help")} onClick={openGuide} />
+              </div>
+              <div
                 className={
-                  "w-full h-max " + "edit-wide:w-full edit-wide:h-auto "
+                  "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
+                  (levelBgColors[
+                    levelTypes.indexOf(currentLevel?.type || "")
+                  ] || levelBgColors[1]) +
+                  (chart ? "" : "invisible ")
                 }
-                control={true}
-                id={chart?.ytId}
-                ytPlayer={ytPlayer}
-                onReady={onReady}
-                onStart={onStart}
-                onStop={onStop}
-                onPlaybackRateChange={setPlaybackRate}
-              />
-            </div>
-            <div
-              className={
-                "relative " +
-                "w-full aspect-square " +
-                "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto "
-              }
-            >
-              <FallingWindow
-                inCodeTab={isCodeTab}
-                className="absolute inset-0"
-                notes={notesAll}
-                currentTimeSec={currentTimeSec || 0}
-                currentNoteIndex={currentNoteIndex}
-                currentLevel={currentLevel}
-                updateNote={updateNote}
-                dragMode={dragMode}
-                setDragMode={setDragMode}
-              />
-            </div>
-            {chart && isTouch && (
-              <button
-                className={
-                  "self-start flex flex-row items-center " + linkStyle1
-                }
-                onClick={() => {
-                  setDragMode(
-                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
-                  );
-                }}
               >
-                <span className="relative inline-block w-8 h-8 ">
-                  {dragMode === null ? (
-                    <>
-                      <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
-                      <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
-                    </>
-                  ) : (
-                    <>
-                      <Move
-                        className="absolute text-xl inset-0 w-max h-max m-auto "
-                        theme="two-tone"
-                        fill={["#333", "#fc5"]}
-                      />
-                    </>
-                  )}
-                </span>
-                <span className="">
-                  {t("touchMode", { mode: dragMode || "null" })}
-                </span>
-              </button>
-            )}
-          </div>
-          <div
-            className={
-              "p-3 flex flex-col items-stretch " +
-              "h-5/6 " +
-              "edit-wide:h-full edit-wide:flex-1 "
-            }
-          >
-            <div>
-              <span className="mr-1">{t("playerControl")}:</span>
-              <Select
-                options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
-                values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
-                value={playbackRate.toString()}
-                onChange={(s: string) => changePlaybackRate(Number(s))}
-              />
-              <Button
-                onClick={() => {
-                  if (ready) {
-                    if (!playing) {
-                      start();
-                    } else {
-                      stop();
-                    }
+                <FlexYouTube
+                  fixedSide="width"
+                  className={
+                    "w-full h-max " + "edit-wide:w-full edit-wide:h-auto "
                   }
-                }}
-                text={
-                  playing ? t("playerControls.pause") : t("playerControls.play")
+                  control={true}
+                  id={chart?.ytId}
+                  ytPlayer={ytPlayer}
+                  onReady={onReady}
+                  onStart={onStart}
+                  onStop={onStop}
+                  onPlaybackRateChange={setPlaybackRate}
+                />
+              </div>
+              <div
+                className={
+                  "relative " +
+                  "w-full aspect-square " +
+                  "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto "
                 }
-                keyName="Space"
-              />
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekStepRel(-snapDivider * 4);
-                    }
-                  }}
-                  text={t("playerControls.moveStep", {
-                    step: -snapDivider * 4,
-                  })}
-                  keyName="PageUp"
+              >
+                <FallingWindow
+                  inCodeTab={isCodeTab}
+                  className="absolute inset-0"
+                  notes={notesAll}
+                  currentTimeSec={currentTimeSec || 0}
+                  currentNoteIndex={currentNoteIndex}
+                  currentLevel={currentLevel}
+                  updateNote={updateNote}
+                  dragMode={dragMode}
+                  setDragMode={setDragMode}
                 />
-                <Button
+              </div>
+              {chart && isTouch && (
+                <button
+                  className={
+                    "self-start flex flex-row items-center " + linkStyle1
+                  }
                   onClick={() => {
-                    if (ready) {
-                      seekStepRel(snapDivider * 4);
-                    }
+                    setDragMode(
+                      dragMode === "p" ? "v" : dragMode === "v" ? null : "p",
+                    );
                   }}
-                  text={t("playerControls.moveStep", { step: snapDivider * 4 })}
-                  keyName="PageDn"
-                />
-              </span>
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekLeft1();
-                    }
-                  }}
-                  text={t("playerControls.moveStep", { step: -1 })}
-                  keyName="←"
-                />
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekRight1();
-                    }
-                  }}
-                  text={t("playerControls.moveStep", { step: 1 })}
-                  keyName="→"
-                />
-              </span>
-              <span className="inline-block">
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekSec(-1 / 30);
-                    }
-                  }}
-                  text={t("playerControls.moveMinus1F")}
-                  keyName=","
-                />
-                <Button
-                  onClick={() => {
-                    if (ready) {
-                      seekSec(1 / 30);
-                    }
-                  }}
-                  text={t("playerControls.movePlus1F")}
-                  keyName="."
-                />
-              </span>
-            </div>
-            <div className="flex-none">
-              <TimeBar
-                currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
-                currentNoteIndex={currentNoteIndex}
-                currentStep={currentStep}
-                chart={chart}
-                currentLevel={currentLevel}
-                notesAll={notesAll}
-                snapDivider={snapDivider}
-                timeBarPxPerSec={timeBarPxPerSec}
-              />
-            </div>
-            <div className="flex flex-row items-baseline">
-              <span>{t("stepUnit")} =</span>
-              <span className="ml-2">1</span>
-              <span className="ml-1">/</span>
-              <Input
-                className="w-12"
-                actualValue={String(snapDivider * 4)}
-                updateValue={(v: string) => {
-                  setSnapDivider(Number(v) / 4);
-                }}
-                isValid={(v) =>
-                  !isNaN(Number(v)) &&
-                  String(Math.floor(Number(v) / 4) * 4) === v
-                }
-              />
-              <HelpIcon className="self-center">
-                {t.rich("stepUnitHelp", { br: () => <br /> })}
-              </HelpIcon>
-              <div className="flex-1" />
-              <span className="mr-1">{t("zoom")}</span>
-              <Button
-                text="-"
-                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
-              />
-              <Button
-                text="+"
-                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
-              />
-            </div>
-            <div className="flex flex-row ml-3 mt-3">
-              {tabNameKeys.map((key, i) =>
-                i === tab ? (
-                  <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
-                    {t(`${key}.title`)}
-                  </Box>
-                ) : (
-                  <button
-                    key={i}
-                    className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
-                    onClick={() => {
-                      setTab(i);
-                      ref.current.focus();
-                    }}
-                  >
-                    {t(`${key}.title`)}
-                  </button>
-                )
+                >
+                  <span className="relative inline-block w-8 h-8 ">
+                    {dragMode === null ? (
+                      <>
+                        <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                        <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                      </>
+                    ) : (
+                      <>
+                        <Move
+                          className="absolute text-xl inset-0 w-max h-max m-auto "
+                          theme="two-tone"
+                          fill={["#333", "#fc5"]}
+                        />
+                      </>
+                    )}
+                  </span>
+                  <span className="">
+                    {t("touchMode", { mode: dragMode || "null" })}
+                  </span>
+                </button>
               )}
             </div>
-            <Box
+            <div
               className={
-                "p-3 overflow-auto " +
-                "min-h-96 relative " +
-                "edit-wide:flex-1 edit-wide:min-h-0"
+                "p-3 flex flex-col items-stretch " +
+                "h-5/6 " +
+                "edit-wide:h-full edit-wide:flex-1 "
               }
             >
-              {tab === 0 ? (
-                <MetaTab
-                  sessionId={sessionId}
-                  sessionData={sessionData}
-                  chartNumEvent={chartNumEvent}
-                  chart={chart}
-                  setChart={changeChart}
-                  convertedFrom={convertedFrom}
-                  setConvertedFrom={setConvertedFrom}
-                  cid={cid}
-                  setCid={(newCid: string) => setCid(newCid)}
-                  hasChange={hasChange}
-                  setHasChange={setHasChange}
-                  currentLevelIndex={currentLevelIndex}
-                  locale={locale}
-                  currentPasswd={props.currentPasswd}
-                  newPasswd={newPasswd}
-                  setNewPasswd={setNewPasswd}
-                  savePasswd={!!savePasswd}
-                  setSavePasswd={setSavePasswd}
+              <div>
+                <span className="mr-1">{t("playerControl")}:</span>
+                <Select
+                  options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
+                  values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+                  value={playbackRate.toString()}
+                  onChange={(s: string) => changePlaybackRate(Number(s))}
                 />
-              ) : tab === 1 ? (
-                <TimingTab
-                  offset={chart?.offset}
-                  setOffset={changeOffset}
-                  currentLevel={currentLevel}
-                  prevBpm={
-                    currentBpmIndex !== undefined && currentBpmIndex >= 1
-                      ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
-                      : undefined
+                <Button
+                  onClick={() => {
+                    if (ready) {
+                      if (!playing) {
+                        start();
+                      } else {
+                        stop();
+                      }
+                    }
+                  }}
+                  text={
+                    playing
+                      ? t("playerControls.pause")
+                      : t("playerControls.play")
                   }
-                  currentBpmIndex={currentBpmIndex}
-                  currentBpm={
-                    currentBpmIndex !== undefined ? currentBpm : undefined
-                  }
-                  setCurrentBpm={changeBpm}
-                  bpmChangeHere={!!bpmChangeHere}
-                  toggleBpmChangeHere={toggleBpmChangeHere}
-                  prevSpeed={
-                    currentSpeedIndex !== undefined && currentSpeedIndex >= 1
-                      ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
-                      : undefined
-                  }
-                  currentSpeedIndex={currentSpeedIndex}
-                  currentSpeed={
-                    currentSpeedIndex !== undefined ? currentSpeed : undefined
-                  }
-                  speedChangeHere={!!speedChangeHere}
-                  prevSignature={prevSignature}
-                  currentSignature={currentSignature}
-                  setCurrentSignature={changeSignature}
-                  signatureChangeHere={!!signatureChangeHere}
-                  toggleSignatureChangeHere={toggleSignatureChangeHere}
-                  currentStep={currentStep}
+                  keyName="Space"
                 />
-              ) : tab === 2 ? (
-                <LevelTab
-                  chart={chart}
-                  currentLevelIndex={currentLevelIndex}
-                  setCurrentLevelIndex={setCurrentLevelIndex}
-                  changeChart={changeChart}
-                />
-              ) : tab === 3 ? (
-                <NoteTab
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekStepRel(-snapDivider * 4);
+                      }
+                    }}
+                    text={t("playerControls.moveStep", {
+                      step: -snapDivider * 4,
+                    })}
+                    keyName="PageUp"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekStepRel(snapDivider * 4);
+                      }
+                    }}
+                    text={t("playerControls.moveStep", {
+                      step: snapDivider * 4,
+                    })}
+                    keyName="PageDn"
+                  />
+                </span>
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekLeft1();
+                      }
+                    }}
+                    text={t("playerControls.moveStep", { step: -1 })}
+                    keyName="←"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekRight1();
+                      }
+                    }}
+                    text={t("playerControls.moveStep", { step: 1 })}
+                    keyName="→"
+                  />
+                </span>
+                <span className="inline-block">
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekSec(-1 / 30);
+                      }
+                    }}
+                    text={t("playerControls.moveMinus1F")}
+                    keyName=","
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ready) {
+                        seekSec(1 / 30);
+                      }
+                    }}
+                    text={t("playerControls.movePlus1F")}
+                    keyName="."
+                  />
+                </span>
+              </div>
+              <div className="flex-none">
+                <TimeBar
+                  currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
                   currentNoteIndex={currentNoteIndex}
-                  hasCurrentNote={hasCurrentNote}
-                  notesIndexInStep={notesIndexInStep}
-                  notesCountInStep={notesCountInStep}
-                  canAddNote={canAddNote}
-                  addNote={addNote}
-                  deleteNote={deleteNote}
-                  updateNote={updateNote}
-                  copyNote={copyNote}
-                  pasteNote={pasteNote}
-                  hasCopyBuf={copyBuf.map((n) => n !== null)}
                   currentStep={currentStep}
+                  chart={chart}
                   currentLevel={currentLevel}
+                  notesAll={notesAll}
+                  snapDivider={snapDivider}
+                  timeBarPxPerSec={timeBarPxPerSec}
                 />
-              ) : (
-                <LuaTab
+              </div>
+              <div className="flex flex-row items-baseline">
+                <span>{t("stepUnit")} =</span>
+                <span className="ml-2">1</span>
+                <span className="ml-1">/</span>
+                <Input
+                  className="w-12"
+                  actualValue={String(snapDivider * 4)}
+                  updateValue={(v: string) => {
+                    setSnapDivider(Number(v) / 4);
+                  }}
+                  isValid={(v) =>
+                    !isNaN(Number(v)) &&
+                    String(Math.floor(Number(v) / 4) * 4) === v
+                  }
+                />
+                <HelpIcon className="self-center">
+                  {t.rich("stepUnitHelp", { br: () => <br /> })}
+                </HelpIcon>
+                <div className="flex-1" />
+                <span className="mr-1">{t("zoom")}</span>
+                <Button
+                  text="-"
+                  onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
+                />
+                <Button
+                  text="+"
+                  onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
+                />
+              </div>
+              <div className="flex flex-row ml-3 mt-3">
+                {tabNameKeys.map((key, i) =>
+                  i === tab ? (
+                    <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
+                      {t(`${key}.title`)}
+                    </Box>
+                  ) : (
+                    <button
+                      key={i}
+                      className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
+                      onClick={() => {
+                        setTab(i);
+                        ref.current.focus();
+                      }}
+                    >
+                      {t(`${key}.title`)}
+                    </button>
+                  ),
+                )}
+              </div>
+              <Box
+                className={
+                  "p-3 overflow-auto " +
+                  "min-h-96 relative " +
+                  "edit-wide:flex-1 edit-wide:min-h-0"
+                }
+              >
+                {tab === 0 ? (
+                  <MetaTab
+                    sessionId={sessionId}
+                    sessionData={sessionData}
+                    chartNumEvent={chartNumEvent}
+                    chart={chart}
+                    setChart={changeChart}
+                    convertedFrom={convertedFrom}
+                    setConvertedFrom={setConvertedFrom}
+                    cid={cid}
+                    setCid={(newCid: string) => setCid(newCid)}
+                    hasChange={hasChange}
+                    setHasChange={setHasChange}
+                    currentLevelIndex={currentLevelIndex}
+                    locale={locale}
+                    currentPasswd={props.currentPasswd}
+                    newPasswd={newPasswd}
+                    setNewPasswd={setNewPasswd}
+                    savePasswd={!!savePasswd}
+                    setSavePasswd={setSavePasswd}
+                  />
+                ) : tab === 1 ? (
+                  <TimingTab
+                    offset={chart?.offset}
+                    setOffset={changeOffset}
+                    currentLevel={currentLevel}
+                    prevBpm={
+                      currentBpmIndex !== undefined && currentBpmIndex >= 1
+                        ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
+                        : undefined
+                    }
+                    currentBpmIndex={currentBpmIndex}
+                    currentBpm={
+                      currentBpmIndex !== undefined ? currentBpm : undefined
+                    }
+                    setCurrentBpm={changeBpm}
+                    bpmChangeHere={!!bpmChangeHere}
+                    toggleBpmChangeHere={toggleBpmChangeHere}
+                    prevSpeed={
+                      currentSpeedIndex !== undefined && currentSpeedIndex >= 1
+                        ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
+                        : undefined
+                    }
+                    currentSpeedIndex={currentSpeedIndex}
+                    currentSpeed={
+                      currentSpeedIndex !== undefined ? currentSpeed : undefined
+                    }
+                    speedChangeHere={!!speedChangeHere}
+                    prevSignature={prevSignature}
+                    currentSignature={currentSignature}
+                    setCurrentSignature={changeSignature}
+                    signatureChangeHere={!!signatureChangeHere}
+                    toggleSignatureChangeHere={toggleSignatureChangeHere}
+                    currentStep={currentStep}
+                  />
+                ) : tab === 2 ? (
+                  <LevelTab
+                    chart={chart}
+                    currentLevelIndex={currentLevelIndex}
+                    setCurrentLevelIndex={setCurrentLevelIndex}
+                    changeChart={changeChart}
+                  />
+                ) : tab === 3 ? (
+                  <NoteTab
+                    currentNoteIndex={currentNoteIndex}
+                    hasCurrentNote={hasCurrentNote}
+                    notesIndexInStep={notesIndexInStep}
+                    notesCountInStep={notesCountInStep}
+                    canAddNote={canAddNote}
+                    addNote={addNote}
+                    deleteNote={deleteNote}
+                    updateNote={updateNote}
+                    copyNote={copyNote}
+                    pasteNote={pasteNote}
+                    hasCopyBuf={copyBuf.map((n) => n !== null)}
+                    currentStep={currentStep}
+                    currentLevel={currentLevel}
+                  />
+                ) : null}
+                <LuaTabPlaceholder
+                  visible={tab === 4}
+                  currentLine={currentLine}
+                  currentStepStr={currentStepStr}
+                  barLines={barLines}
                   currentLevel={currentLevel}
                   changeLevel={changeLevel}
-                  seekStepAbs={(s: Step) => seekStepAbs(s, false)}
-                  themeContext={themeContext}
+                  seekStepAbs={seekStepAbs}
+                  errLine={luaExecutor.running ? null : luaExecutor.errLine}
+                  err={luaExecutor.err}
                 />
-              )}
-            </Box>
-            <div className="bg-slate-200 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
-              {luaExecutor.running ? (
-                <div className="m-1">
-                  <SlimeSVG />
-                  {t("running")}
-                </div>
-              ) : (
-                (luaExecutor.stdout.length > 0 ||
-                  luaExecutor.err.length > 0) && (
+              </Box>
+              <div className="bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
+                {luaExecutor.running ? (
                   <div className="m-1">
-                    {luaExecutor.stdout.map((s, i) => (
-                      <p className="text-sm" key={i}>
-                        {s}
-                      </p>
-                    ))}
-                    {luaExecutor.err.map((e, i) => (
-                      <p className="text-sm text-red-600" key={i}>
-                        {e}
-                      </p>
-                    ))}
+                    <SlimeSVG />
+                    {t("running")}
                   </div>
-                )
-              )}
+                ) : (
+                  (luaExecutor.stdout.length > 0 ||
+                    luaExecutor.err.length > 0) && (
+                    <div className="m-1">
+                      {luaExecutor.stdout.map((s, i) => (
+                        <p className="text-sm" key={i}>
+                          {s}
+                        </p>
+                      ))}
+                      {luaExecutor.err.map((e, i) => (
+                        <p
+                          className="text-sm text-red-600 dark:text-red-400 "
+                          key={i}
+                        >
+                          {e}
+                        </p>
+                      ))}
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </LuaTabProvider>
       </CaptionProvider>
     </main>
   );
