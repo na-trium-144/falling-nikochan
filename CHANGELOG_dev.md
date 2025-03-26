@@ -2,7 +2,7 @@
 
 * ReactAceEditorで補完候補が表示されるようにした
 * 譜面編集のタブ切り替えでコードエディタのカーソル位置がリセットされないようにした
-* AceEditorのpositionをabsoluteにし、エラー時にannotationとmarkerの表示を実装
+* AceEditorのpositionをabsoluteにし、annotationとmarkerでエラー時の表示と、小節線とカーソル位置の表示を実装
 
 ## ver. 9.13 - 2025/03/21 [#400](https://github.com/na-trium-144/falling-nikochan/pull/400)
 

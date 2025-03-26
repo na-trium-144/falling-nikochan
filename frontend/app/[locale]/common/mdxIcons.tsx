@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Help, Move, Sun, Translate } from "@icon-park/react";
+import { Caution, Help, Move, Sun, Translate } from "@icon-park/react";
 
 export function TranslateIcon() {
   return <Translate className="inline-block align-middle" />;
@@ -19,4 +19,7 @@ export function HelpIcon() {
 }
 export function MoveIcon() {
   return <Move className="inline-block align-middle " />;
+}
+export function CautionIcon() {
+  return <Caution className="inline-block align-middle " />;
 }
