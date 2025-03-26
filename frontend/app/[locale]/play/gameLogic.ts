@@ -19,6 +19,8 @@ import { SEType } from "./se";
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean,
+  // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
+  // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
   playSE: (s: SEType) => void,
 ) {
@@ -200,14 +202,16 @@ export default function useGameLogic(
         notesBigYetDone.current.push(candidate);
       }
       if (candidateLate !== null) {
-        lateTimes.current.push(candidateLate + userOffset);
+        lateTimes.current.push(candidateLate + userOffset /* + audioLatency */);
       }
     } else if (now && candidateBig !== null) {
       playSE("hitBig");
       judge(candidateBig, now, candidateJudgeBig);
       notesBigYetDone.current.shift();
       if (candidateLateBig !== null) {
-        lateTimes.current.push(candidateLateBig + userOffset);
+        lateTimes.current.push(
+          candidateLateBig + userOffset /* + audioLatency */,
+        );
       }
     } else {
       playSE("hit");

@@ -14,10 +14,9 @@ export default {
         "reflected here after reloading the page.",
       option: "Options",
       auto: "Auto Play",
-      enableSE: "Play SE for each note",
+      enableSE: "Enable Key/Tap Sounds",
       enableSELatency:
-        "In your current environment, there will be<br></br>" +
-        "an estimated delay of {latency} seconds",
+        "Judgment is adjusted by the sound delay estimated ({latency} seconds in this environment).",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
       offsetSecond: "sec",

@@ -156,14 +156,10 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
-  const offsetPlusLatency =
-    props.userOffset - (props.enableSE ? props.audioLatency : 0);
-  const offsetMinusLatency = (ofs: number) =>
-    ofs + (props.enableSE ? props.audioLatency : 0);
   return (
-    <div className="relative pr-8 min-h-32 max-w-full flex flex-col items-center ">
+    <div className="relative pr-8 min-h-52 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6">
+      <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6 space-y-1 ">
         <li className="">
           <CheckBox
             className=""
@@ -182,10 +178,11 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             {t("enableSE")}
           </CheckBox>
           {props.enableSE && (
-            <p className="text-sm">
+            <p className="ml-2 text-sm max-w-64 text-justify ">
+              <Caution className="inline-block align-middle mr-1" />
               {t.rich("enableSELatency", {
                 latency: props.audioLatency.toFixed(3),
-                br: () => <br />,
+                br:() => <br/>
               })}
             </p>
           )}
@@ -206,12 +203,10 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             <Input
               className="w-16"
               actualValue={
-                (offsetPlusLatency >= 0 ? "+" : "-") +
-                Math.abs(offsetPlusLatency).toFixed(3)
+                (props.userOffset >= 0 ? "+" : "-") +
+                Math.abs(props.userOffset).toFixed(3)
               }
-              updateValue={(v) =>
-                props.setUserOffset(offsetMinusLatency(Number(v)))
-              }
+              updateValue={(v) => props.setUserOffset(Number(v))}
               isValid={(v) => !isNaN(Number(v))}
             />
             <span className="mr-1 ">{t("offsetSecond")}</span>
@@ -226,7 +221,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </div>
         </li>
       </ul>
-      <TimeAdjustBar userOffset={offsetPlusLatency} times={props.lateTimes} />
+      <TimeAdjustBar userOffset={props.userOffset} times={props.lateTimes} />
     </div>
   );
 }

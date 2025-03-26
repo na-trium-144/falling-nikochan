@@ -322,7 +322,7 @@ function Play(props: Props) {
     bigTotal,
     end,
     lateTimes,
-  } = useGameLogic(getCurrentTimeSec, auto, offsetPlusLatency, playSE);
+  } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
   const [fps, setFps] = useState<number>(0);
 

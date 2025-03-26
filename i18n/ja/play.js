@@ -14,10 +14,9 @@ export default {
         "ページ再読み込みでこちらに反映されます。",
       option: "オプション",
       auto: "オートプレイ",
-      enableSE: "音符ごとに音を鳴らす",
+      enableSE: "キー/タップ音を鳴らす",
       enableSELatency:
-        "現在のあなたの環境では、<br></br>" +
-        "推定 {latency} 秒の遅延が発生します",
+        "サウンドの遅延分 (この環境では {latency} 秒) だけ判定が補正されます。",
       displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
       offsetSecond: "秒",
