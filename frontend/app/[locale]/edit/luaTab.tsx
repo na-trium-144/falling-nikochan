@@ -187,11 +187,13 @@ export function LuaTabProvider(props: PProps) {
           enableLiveAutocompletion={true}
           enableSnippets={true}
           onChange={(value) => {
-            setCode(value);
-            setCodeChanged(true);
+            if (visible) {
+              setCode(value);
+              setCodeChanged(true);
+            }
           }}
           onCursorChange={(sel) => {
-            if (currentLevel) {
+            if (currentLevel && visible) {
               const step = findStepFromLua(currentLevel, sel.cursor.row);
               if (step !== null) {
                 seekStepAbs(step);
