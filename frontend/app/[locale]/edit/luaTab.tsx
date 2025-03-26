@@ -33,7 +33,7 @@ export function useLuaExecutor() {
     const result = await luaExec(
       process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
       code,
-      true
+      true,
     );
     setRunning(false);
     setStdout(result.stdout);
@@ -48,6 +48,9 @@ export function useLuaExecutor() {
   return { stdout, err, errLine, running, exec };
 }
 
+// Aceはposition:fixedがviewportに対する絶対座標であることを想定しているが
+// ここで他のタブと同様にEditorを配置するとfixedが親divからの相対座標になってしまいうまく動作しない
+// ので、Editorを表示するdivを絶対座標で別に配置ししている
 interface Props {
   visible: boolean;
   currentLevel: LevelEdit | undefined;
@@ -148,7 +151,7 @@ export function LuaTabProvider(props: PProps) {
               ? [
                   {
                     startRow: errLine,
-                    endRow: errLine + 1,
+                    endRow: errLine,
                     startCol: 0,
                     endCol: 1,
                     type: "fullLine",
