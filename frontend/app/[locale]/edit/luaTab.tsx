@@ -21,6 +21,7 @@ import { findStepFromLua } from "@falling-nikochan/chart";
 import { ThemeContext } from "@/common/theme.js";
 import { LevelEdit } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
+import { useTranslations } from "next-intl";
 
 export function useLuaExecutor() {
   const [stdout, setStdout] = useState<string[]>([]);
@@ -54,7 +55,9 @@ export function useLuaExecutor() {
 interface Props {
   visible: boolean;
   currentLevel: LevelEdit | undefined;
+  currentStepStr: string | null;
   changeLevel: (lua: string[]) => void;
+  currentLine: number | null;
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
   err: string[];
@@ -82,6 +85,8 @@ export function LuaTabProvider(props: PProps) {
     left: 0,
     width: 0,
     height: 0,
+    currentLine: null,
+    currentStepStr: "",
     currentLevel: undefined,
     changeLevel: () => {},
     seekStepAbs: () => {},
@@ -95,6 +100,8 @@ export function LuaTabProvider(props: PProps) {
     width,
     height,
     visible,
+    currentLine,
+    currentStepStr,
     currentLevel,
     changeLevel,
     seekStepAbs,
@@ -102,6 +109,7 @@ export function LuaTabProvider(props: PProps) {
     err,
   } = data;
   const { rem } = useDisplayMode();
+  const t = useTranslations("edit.code");
   const previousLevelCode = useRef<string>("");
   const [code, setCode] = useState<string>("");
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
@@ -141,25 +149,31 @@ export function LuaTabProvider(props: PProps) {
           tabSize={2}
           fontSize={1 * rem}
           value={code}
-          annotations={
-            errLine !== null
-              ? [{ row: errLine, column: 1, text: err[0], type: "error" }]
-              : []
-          }
-          markers={
-            errLine !== null
-              ? [
-                  {
-                    startRow: errLine,
-                    endRow: errLine,
-                    startCol: 0,
-                    endCol: 1,
-                    type: "fullLine",
-                    className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
-                  },
-                ]
-              : []
-          }
+          annotations={[
+            {
+              row: currentLine === null ? -1 : currentLine,
+              column: 1,
+              text: t("currentLine", { step: currentStepStr || "null" }),
+              type: "info",
+            },
+            {
+              row: errLine === null ? -1 : errLine,
+              column: 1,
+              text: err[0],
+              type: "error",
+            },
+          ]}
+          markers={[
+            {
+              startRow: errLine === null ? -1 : errLine,
+              endRow: errLine === null ? -1 : errLine,
+              startCol: 0,
+              endCol: 1,
+              type: "fullLine",
+              // なぜか座標はAce側で指定してくれるのにposition:absoluteが無い
+              className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
+            },
+          ]}
           enableBasicAutocompletion={true}
           enableLiveAutocompletion={true}
           enableSnippets={true}
@@ -183,8 +197,16 @@ export function LuaTabProvider(props: PProps) {
 
 export function LuaTabPlaceholder(props: Props) {
   const { ref } = useResizeDetector();
-  const { visible, currentLevel, changeLevel, seekStepAbs, errLine, err } =
-    props;
+  const {
+    visible,
+    currentLine,
+    currentStepStr,
+    currentLevel,
+    changeLevel,
+    seekStepAbs,
+    errLine,
+    err,
+  } = props;
   const { setData } = useContext(LuaPositionContext);
   useEffect(() => {
     const onScroll = () => {
@@ -196,6 +218,8 @@ export function LuaTabPlaceholder(props: Props) {
           width: rect.width,
           height: rect.height,
           visible,
+          currentLine,
+          currentStepStr,
           currentLevel,
           changeLevel,
           seekStepAbs,
@@ -213,6 +237,8 @@ export function LuaTabPlaceholder(props: Props) {
     };
   }, [
     visible,
+    currentLine,
+    currentStepStr,
     currentLevel,
     changeLevel,
     seekStepAbs,
@@ -221,5 +247,5 @@ export function LuaTabPlaceholder(props: Props) {
     errLine,
     err,
   ]);
-  return <div ref={ref} className="absolute inset-3 " />;
+  return <div ref={ref} className="absolute inset-3 -z-10 " />;
 }

@@ -3,6 +3,7 @@
 import {
   Chart9Edit,
   defaultNoteCommand,
+  findInsertLine,
   NoteCommand,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
@@ -433,9 +434,22 @@ function Page(props: Props) {
     useState<number>(0);
   // 現在時刻に対応するstep
   const [currentStep, setCurrentStep] = useState<Step>(stepZero());
+  const [currentLine, setCurrentLine] = useState<number | null>(null);
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
   const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
+
+  const ss =
+    currentLevel && getSignatureState(currentLevel.signature, currentStep);
+  const currentStepStr = ss
+    ? ss.barNum +
+      1 +
+      ";" +
+      (ss.count.fourth + 1) +
+      (ss.count.numerator > 0
+        ? "+" + ss.count.numerator + "/" + ss.count.denominator * 4
+        : "")
+    : null;
 
   // offsetを引いた後の時刻
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
@@ -484,11 +498,11 @@ function Page(props: Props) {
       if (stepCmp(step, currentStep) !== 0) {
         setCurrentStep(step);
       }
+      let noteIndex: number | undefined = undefined;
       if (
         !hasCurrentNote ||
         stepCmp(currentLevel.notes[currentNoteIndex].step, step) != 0
       ) {
-        let noteIndex: number;
         if (currentTimeSec < prevTimeSec.current) {
           noteIndex = currentLevel.notes.findLastIndex(
             (n) => stepCmp(n.step, step) == 0,
@@ -502,6 +516,15 @@ function Page(props: Props) {
           setCurrentNoteIndex(noteIndex);
         }
       }
+      let line: number | null;
+      if (noteIndex !== undefined && noteIndex >= 0) {
+        line = currentLevel.notes[noteIndex].luaLine;
+      } else {
+        line = findInsertLine(currentLevel, step, false).luaLine;
+      }
+      if (currentLine !== line) {
+        setCurrentLine(line);
+      }
     }
     prevTimeSec.current = currentTimeSec;
   }, [
@@ -510,6 +533,7 @@ function Page(props: Props) {
     currentTimeSec,
     currentStep,
     currentNoteIndex,
+    currentLine,
     hasCurrentNote,
   ]);
 
@@ -1254,6 +1278,8 @@ function Page(props: Props) {
                 ) : null}
                 <LuaTabPlaceholder
                   visible={tab === 4}
+                  currentLine={currentLine}
+                  currentStepStr={currentStepStr}
                   currentLevel={currentLevel}
                   changeLevel={changeLevel}
                   seekStepAbs={(s: Step) => seekStepAbs(s, false)}
