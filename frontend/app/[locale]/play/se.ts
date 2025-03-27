@@ -2,11 +2,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type SEType = "hit" | "hitBig";
 
-export function useSE(userOffset: number) {
+export function useSE(cid: string | undefined, userOffset: number) {
   const audioContext = useRef<AudioContext | null>(null);
   const audioHit = useRef<AudioBuffer | null>(null);
   const audioHitBig = useRef<AudioBuffer | null>(null);
-  // const gainNode = useRef<GainNode | null>(null);
+  const gainNode = useRef<GainNode | null>(null);
+  const [seVolume, setSEVolume_] = useState<number>(100);
+  const setSEVolume = useCallback(
+    (v: number) => {
+      setSEVolume_(v);
+      localStorage.setItem("seVolume", v.toString());
+      if (cid) {
+        localStorage.setItem(`seVolume-${cid}`, v.toString());
+      }
+      if (gainNode.current) {
+        gainNode.current.gain.value = v / 100;
+      }
+    },
+    [cid],
+  );
   const [audioLatency, setAudioLatency] = useState<number>(0);
   const [enableSE, setEnableSE_] = useState<boolean>(true);
   const offsetPlusLatency = userOffset - (enableSE ? audioLatency : 0);
@@ -24,13 +38,21 @@ export function useSE(userOffset: number) {
   );
   useEffect(() => {
     audioContext.current = new AudioContext();
-    const v = localStorage.getItem("enableSE");
-    if (v === "0") {
+    if (localStorage.getItem("enableSE") === "0") {
       setEnableSE_(false);
       audioContext.current?.suspend();
     } else {
       setEnableSE_(true);
     }
+    gainNode.current = audioContext.current.createGain();
+    const vol = Number(
+      localStorage.getItem(`seVolume-${cid}`) ||
+        localStorage.getItem("seVolume") ||
+        100,
+    );
+    setSEVolume_(vol);
+    gainNode.current.gain.value = vol / 100;
+    gainNode.current.connect(audioContext.current.destination);
     (
       [
         ["hit", audioHit],
@@ -44,27 +66,23 @@ export function useSE(userOffset: number) {
           audioBuffer.current = audio;
         }),
     );
-    // gainNode.current = audioContext.current.createGain();
-    // gainNode.current.gain.value = 1;
-    // gainNode.current.connect(audioContext.current.destination);
     return () => {
-      // gainNode.current?.disconnect();
-      // gainNode.current = null;
+      gainNode.current?.disconnect();
+      gainNode.current = null;
       audioContext.current?.close();
       audioContext.current = null;
     };
-  }, []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cid]);
   useEffect(() => {
     // AudioContext初期化直後はLatencyとして0が返ってくるが、
     // なぜか少し待ってから? or 実際にSEを再生してから? 取得すると違う値になる
     // なぜかlatencyがNaNになる環境もある
     const t = setTimeout(() => {
-      if (audioContext.current) {
-        setAudioLatency(
-          (audioContext.current.baseLatency || 0) +
-            (audioContext.current.outputLatency || 0),
-        );
+      const latency =
+        (audioContext.current?.baseLatency || 0) +
+        (audioContext.current?.outputLatency || 0);
+      if (audioLatency !== latency) {
+        setAudioLatency(latency);
       }
     }, 100);
     return () => clearTimeout(t);
@@ -82,10 +100,10 @@ export function useSE(userOffset: number) {
         default:
           return;
       }
-      if (enableSE && audioContext.current && audioBuffer) {
+      if (enableSE && audioContext.current && gainNode.current && audioBuffer) {
         const source = audioContext.current.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(audioContext.current.destination);
+        source.connect(gainNode.current);
         source.start();
         source.addEventListener("ended", () => source.disconnect());
       }
@@ -93,5 +111,13 @@ export function useSE(userOffset: number) {
     [enableSE],
   );
 
-  return { playSE, enableSE, setEnableSE, audioLatency, offsetPlusLatency };
+  return {
+    playSE,
+    enableSE,
+    setEnableSE,
+    seVolume,
+    setSEVolume,
+    audioLatency,
+    offsetPlusLatency,
+  };
 }

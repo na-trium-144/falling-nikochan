@@ -295,9 +295,37 @@ function Play(props: Props) {
     exitable && exitable.getTime() < new Date().getTime();
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
+  const [ytVolume, setYtVolume_] = useState<number>(100);
+  const setYtVolume = useCallback(
+    (v: number) => {
+      setYtVolume_(v);
+      localStorage.setItem("ytVolume", v.toString());
+      if (cid) {
+        localStorage.setItem(`ytVolume-${cid}`, v.toString());
+      }
+      ytPlayer.current?.setVolume(v);
+    },
+    [cid],
+  );
+  useEffect(() => {
+    const vol = Number(
+      localStorage.getItem(`ytVolume-${cid}`) ||
+        localStorage.getItem("ytVolume") ||
+        100,
+    );
+    setYtVolume_(vol);
+    ytPlayer.current?.setVolume(vol);
+  }, [cid]);
 
-  const { playSE, enableSE, setEnableSE, audioLatency, offsetPlusLatency } =
-    useSE(userOffset);
+  const {
+    playSE,
+    enableSE,
+    setEnableSE,
+    seVolume,
+    setSEVolume,
+    audioLatency,
+    offsetPlusLatency,
+  } = useSE(cid, userOffset);
 
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
@@ -362,14 +390,14 @@ function Play(props: Props) {
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
-          ytPlayer.current?.setVolume(((10 - i) * 100) / 10);
+          ytPlayer.current?.setVolume(((10 - i) * ytVolume) / 10);
         }, i * 100);
         setTimeout(() => {
           ytPlayer.current?.pauseVideo();
         }, 1000);
       }
     }
-  }, [chartPlaying]);
+  }, [chartPlaying, ytVolume]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
     // history.back();
@@ -526,10 +554,10 @@ function Play(props: Props) {
       setExitable(null);
       resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
-      ytPlayer.current?.setVolume(100);
+      ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
-  }, [chartSeq, lateTimes, resetNotesAll]);
+  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (chartPlaying) {
@@ -619,9 +647,11 @@ function Play(props: Props) {
         >
           <MusicArea
             className={
-              "transition-transform duration-500 ease-in-out " +
+              "z-20 transition-transform duration-500 ease-in-out " +
               (musicAreaOk ? "translate-y-0 " : "translate-y-[-40vw] ")
             }
+            ready={musicAreaOk}
+            playing={chartPlaying}
             offset={(chartSeq?.offset || 0) + offsetPlusLatency}
             lvType={lvType}
             lvIndex={lvIndex}
@@ -632,6 +662,11 @@ function Play(props: Props) {
             onStart={onStart}
             onStop={onStop}
             onError={onError}
+            ytVolume={ytVolume}
+            setYtVolume={setYtVolume}
+            enableSE={enableSE}
+            seVolume={seVolume}
+            setSEVolume={setSEVolume}
           />
           {!isMobile && (
             <>
