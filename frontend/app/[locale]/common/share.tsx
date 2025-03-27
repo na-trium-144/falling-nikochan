@@ -19,10 +19,10 @@ export function useShareLink(
 
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
+  if (resultParam) searchParams.set("result", resultParam);
   const sharePath = `/share/${cid}`;
   const shareParams = searchParams.toString();
 
-  if (resultParam) searchParams.set("result", resultParam);
   searchParams.set("v", packageJson.version);
   const ogPath = resultParam
     ? `/og/result/${cid}?${searchParams.toString()}`
