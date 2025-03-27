@@ -225,6 +225,7 @@ export default {
     },
     code: {
       title: "コード",
+      currentLine: "現在の位置({step})に対応する行",
     },
     guide: {
       titles: {

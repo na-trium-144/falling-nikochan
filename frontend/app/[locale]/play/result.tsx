@@ -10,12 +10,14 @@ import {
   chainScoreRate,
   ChartBrief,
   rankStr,
+  RecordGetSummary,
   ResultParams,
   serializeResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share";
 import { useDisplayMode } from "@/scale";
+import { RecordHistogram } from "@/common/recordHistogram";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
@@ -31,6 +33,7 @@ interface Props extends ResultParams {
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
+  record: RecordGetSummary | undefined;
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
@@ -256,6 +259,15 @@ export default function Result(props: Props) {
               <Button text={t("shareLink")} onClick={shareLink.toAPI} />
             )}
           </span>
+        </div>
+      )}
+      {!props.auto && props.record?.histogram && props.record.count >= 5 && (
+        <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
+          <p>{t("otherPlayers")}</p>
+          <RecordHistogram
+            histogram={props.record.histogram}
+            bestScoreTotal={props.score100 / 100}
+          />
         </div>
       )}
       <div style={{ ...appearingAnimation3(7) }}>

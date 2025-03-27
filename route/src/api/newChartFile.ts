@@ -87,9 +87,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       while (true) {
         cid = Math.floor(Math.random() * 900000 + 100000).toString();
         if (
-          (await db
+          await db
             .collection<ChartEntryCompressed>("chart")
-            .findOne({ cid })) !== null
+            .countDocuments({ cid }, { limit: 1 })
         ) {
           // cidかぶり
           continue;

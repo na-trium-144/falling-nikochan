@@ -243,6 +243,7 @@ export default {
     },
     code: {
       title: "Code",
+      currentLine: "Line corresponding to the current position ({step})",
     },
     guide: {
       titles: {

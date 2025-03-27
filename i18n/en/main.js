@@ -19,6 +19,8 @@ export default {
       inputDirect: "Enter Chart ID and go to play screen directly",
       inputDirectDevonly: "dev environment only, instead of /share/cid path",
       recentPlay: "Recently Played Charts",
+      popular: "Popular Charts",
+      popularDesc: "Charts played many times in the last {popularDays} days.",
       latest: "Latest Charts",
       latestDesc: "List of charts recently created or updated.",
       latestDesc2:
@@ -49,7 +51,7 @@ export default {
         " (You can overwrite a chart as many times as you want.)",
     },
     chartList: {
-      showAll: "Show All",
+      showAll: "Show More",
       empty: "No charts yet",
     },
     policies: {

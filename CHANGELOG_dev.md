@@ -1,3 +1,23 @@
+## ver. 9.14 - 2025/03/26 [#416](https://github.com/na-trium-144/falling-nikochan/pull/416)
+
+* ReactAceEditorで補完候補が表示されるようにした
+* 譜面編集のタブ切り替えでコードエディタのカーソル位置がリセットされないようにした
+* AceEditorのpositionをabsoluteにし、annotationとmarkerでエラー時の表示と、小節線とカーソル位置の表示を実装
+
+## ver. 9.13 - 2025/03/21 [#400](https://github.com/na-trium-144/falling-nikochan/pull/400)
+
+* shareリンクのパラメータ部分を薄い色で表示
+* リンクをコピーした際タイトルを含めるようにした
+
+## ver. 9.10 - 2025/03/21 [#395](https://github.com/na-trium-144/falling-nikochan/pull/395)
+
+* /api/recordでプレイ回数だけでなくプレイ記録の統計を出力するようにした
+* shareページのレベル選択のUIを書き直し、shareページとresult画面にプレイ統計のヒストグラムの表示を追加
+* /api/popular と人気の譜面リストの表示を追加
+* /main/play でmodalを閉じるときの動作のバグを修正
+* published=trueのサンプル譜面はlatestに含まれないようにした
+    * 既存のサンプル譜面はすべてpublished=trueにデータベースを書き換える (popularに表示されるようにするため)
+
 ## ver. 9.8 - 2025/03/15 [#384](https://github.com/na-trium-144/falling-nikochan/pull/383)
 
 * ready画面からresult画面に戻れるようにした

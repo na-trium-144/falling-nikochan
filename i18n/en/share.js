@@ -14,6 +14,8 @@ export default {
     copy: "Copy",
     share: "Share",
     selectLevel: "Select Level",
+    chartInfo: "Chart Information",
+    otherPlayers: "Others' Play Records",
     bestScore: "Best Score",
     start: "Start Game!",
     unavailable: "No levels have been published yet.",

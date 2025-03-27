@@ -142,17 +142,18 @@ export interface ChartEntryCompressed {
   updatedAt: number;
   ip: string[];
   locale: string;
-  levelBrief: {
-    name: string;
-    hash: string;
-    type: "Single" | "Double" | "Maniac";
-    difficulty: number;
-    noteCount: number;
-    bpmMin: number;
-    bpmMax: number;
-    length: number;
-    unlisted: boolean;
-  }[];
+  levelBrief: ChartLevelBrief[];
+}
+export interface ChartLevelBrief {
+  name: string;
+  hash: string;
+  type: "Single" | "Double" | "Maniac";
+  difficulty: number;
+  noteCount: number;
+  bpmMin: number;
+  bpmMax: number;
+  length: number;
+  unlisted: boolean;
 }
 export interface ChartLevelCore3 {
   notes: NoteCommandWithLua3[];
