@@ -283,6 +283,7 @@ export function MusicArea(props: Props) {
           setPointerInVolumeCtrl(false);
           e.stopPropagation();
         }}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         {!props.isMobile && (
           <span
