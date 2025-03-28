@@ -17,6 +17,8 @@ export default {
       enableSE: "Enable Key/Tap Sounds",
       enableSELatency:
         "Judgment is adjusted by the sound delay estimated ({latency} seconds in this environment).",
+      unknownSELatency:
+        "There may be a delay in sound output. Please adjust the judgment timing manually.",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
       offsetSecond: "sec",

@@ -27,7 +27,7 @@ interface MessageProps {
   setUserOffset: (o: number) => void;
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
-  audioLatency: number;
+  audioLatency: number | null | undefined;
   editing: boolean;
   lateTimes: number[];
   small: boolean;
@@ -180,10 +180,13 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           {props.enableSE && (
             <p className="ml-2 text-sm max-w-64 text-justify ">
               <Caution className="inline-block align-middle mr-1" />
-              {t.rich("enableSELatency", {
-                latency: props.audioLatency.toFixed(3),
-                br:() => <br/>
-              })}
+              {props.audioLatency === undefined
+                ? null
+                : props.audioLatency === null
+                  ? t("unknownSELatency")
+                  : t("enableSELatency", {
+                      latency: props.audioLatency.toFixed(3),
+                    })}
             </p>
           )}
         </li>

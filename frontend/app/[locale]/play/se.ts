@@ -22,9 +22,12 @@ export function useSE(cid: string | undefined, userOffset: number) {
     },
     [cid],
   );
-  const [audioLatency, setAudioLatency] = useState<number>(0);
+  // undefined=未取得 null=取得不能
+  const [audioLatency, setAudioLatency] = useState<number | null | undefined>(
+    undefined,
+  );
   const [enableSE, setEnableSE_] = useState<boolean>(true);
-  const offsetPlusLatency = userOffset - (enableSE ? audioLatency : 0);
+  const offsetPlusLatency = userOffset - (enableSE ? audioLatency || 0 : 0);
   const setEnableSE = useCallback(
     (v: boolean) => {
       setEnableSE_(v);
@@ -39,11 +42,16 @@ export function useSE(cid: string | undefined, userOffset: number) {
   );
   useEffect(() => {
     audioContext.current = new AudioContext();
-    if (localStorage.getItem("enableSE") === "0") {
+    const enableSEInitial =
+      localStorage.getItem("enableSE") === "1" ||
+      (localStorage.getItem("enableSE") == null &&
+        audioContext.current?.baseLatency !== undefined &&
+        audioContext.current?.outputLatency !== undefined);
+    if (enableSEInitial) {
+      setEnableSE_(true);
+    } else {
       setEnableSE_(false);
       audioContext.current?.suspend();
-    } else {
-      setEnableSE_(true);
     }
     gainNode.current = audioContext.current.createGain();
     const vol = Number(
@@ -80,8 +88,11 @@ export function useSE(cid: string | undefined, userOffset: number) {
     // なぜかlatencyがNaNになる環境もある
     const t = setTimeout(() => {
       const latency =
-        (audioContext.current?.baseLatency || 0) +
-        (audioContext.current?.outputLatency || 0);
+        audioContext.current?.baseLatency !== undefined &&
+        audioContext.current?.outputLatency !== undefined
+          ? audioContext.current.baseLatency +
+            audioContext.current.outputLatency
+          : null;
       if (audioLatency !== latency) {
         setAudioLatency(latency);
       }
