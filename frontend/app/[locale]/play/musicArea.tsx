@@ -293,7 +293,7 @@ export function MusicArea(props: Props) {
           <Youtube className="text-xl " />
           <span className="text-sm w-7 text-right ">{props.ytVolume}</span>
           <Slider
-            className="flex-1 mx-2 h-5! py-0! "
+            className="flex-1 mx-2 h-5! py-0! bg-transparent! "
             classNames={{
               rail: "inset-y-0! my-auto h-1.5! ",
               track: "inset-y-0! my-auto h-1.5! ",
@@ -313,9 +313,16 @@ export function MusicArea(props: Props) {
               (props.enableSE ? "" : "text-slate-400 dark:text-stone-600 ")
             }
           />
-          <span className="text-sm w-7 text-right ">{props.seVolume}</span>
+          <span
+            className={
+              "text-sm w-7 text-right " +
+              (props.enableSE ? "" : "text-slate-400 dark:text-stone-600 ")
+            }
+          >
+            {props.seVolume}
+          </span>
           <Slider
-            className="flex-1 mx-2 h-5! py-0! "
+            className="flex-1 mx-2 h-5! py-0! bg-transparent! "
             classNames={{
               rail: "inset-y-0! my-auto h-1.5! ",
               track: "inset-y-0! my-auto h-1.5! ",
