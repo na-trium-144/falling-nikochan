@@ -31,6 +31,7 @@ export default {
       "3連符は 1 / 12 や 1 / 24、5連符は 1 / 20 などとします。",
     zoom: "拡大",
     running: "スクリプトを実行中...",
+    cancel: "キャンセル",
     timeBar: {
       bpm: "BPM",
       speed: "速度",

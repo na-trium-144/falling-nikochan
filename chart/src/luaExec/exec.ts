@@ -78,7 +78,7 @@ export async function luaExec(
         .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
         .replace(/^( *)Accel\(( *-?[\d.]+ *)\)( *)$/, `$1AccelStatic(${ln},$2)$3`)
     );
-    console.log(codeStatic);
+    // console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
   } catch (e) {
     if (!catchError) {

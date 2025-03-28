@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/route",
-  "version": "9.17.0",
+  "version": "9.18.0",
   "private": true,
   "type": "module",
   "main": "dist/src/index.js",
