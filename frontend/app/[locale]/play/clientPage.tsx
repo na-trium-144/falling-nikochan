@@ -56,6 +56,8 @@ import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "./se.js";
+import { Pause } from "@icon-park/react";
+import { linkStyle1 } from "@/common/linkStyle.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -719,6 +721,21 @@ function Play(props: Props) {
               fc={judgeCount[2] + judgeCount[3] === 0}
               theme={themeContext}
             />
+            <button
+              className={
+                "absolute rounded-full p-2 cursor-pointer " +
+                "top-0 inset-x-0 mx-auto w-max text-xl " +
+                "bg-white/50 dark:bg-stone-800/50 " +
+                (isMobile ? "mt-9 " : "") +
+                "hover:bg-slate-200/50 active:bg-slate-300/50 " +
+                "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
+                linkStyle1
+              }
+              onClick={stop}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <Pause />
+            </button>
           </div>
           {errorMsg && (
             <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />

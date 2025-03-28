@@ -18,9 +18,11 @@ function Cloud(props: CProps) {
     <div
       className={
         "absolute top-0 " +
-        (props.left ? "left-3 origin-top-left" : "right-3 origin-top-right")
+        (props.left ? "origin-top-left" : "origin-top-right")
       }
       style={{
+        left: props.left ? 0.75 * playUIScale + "rem" : undefined,
+        right: props.left ? undefined : 0.75 * playUIScale + "rem",
         transform: `scale(${playUIScale * 0.8})`,
       }}
     >

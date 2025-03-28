@@ -29,7 +29,7 @@ export function useDisplayMode(): DisplayMode {
 
   const isMobileMain = width < 48 * rem; // global.css と合わせる
   const isMobileGame = width < height;
-  const scalingWidthThreshold = 400 * (isMobileGame ? 1 : 1.5);
+  const scalingWidthThreshold = 400 * (isMobileGame ? 1.1 : 1.6);
   const playUIScale = Math.min(width / scalingWidthThreshold, 1);
   const mobileStatusScale = Math.min(width / (31 * rem), 1);
   const largeResultThreshold = 32 * rem * (isMobileGame ? 1 : 1.5);

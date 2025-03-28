@@ -6,7 +6,7 @@ import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
-import { ArrowLeft, Caution, RightOne } from "@icon-park/react";
+import { ArrowLeft, Caution, Pause, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
@@ -123,17 +123,16 @@ export function ReadyMessage(props: MessageProps) {
             onClick={() => props.exit()}
           />
         </p>
-        <p className="mt-2 text-sm">
-          {t.rich("startByTap", {
-            isTouch: props.isTouch ? "true" : "false",
-            br: () => <br />,
+        <p className="mt-2 max-w-96 text-center">
+          {t.rich("howToPause", {
+            pause: () => (
+              <Pause className="inline-block align-middle text-lg " />
+            ),
           })}
         </p>
         {props.editing && (
-          <p className="mt-2">
-            {t.rich("editingNotification", {
-              br: () => <br />,
-            })}
+          <p className="mt-2 max-w-96 text-center">
+            {t("editingNotification")}
           </p>
         )}
         {props.small ? (

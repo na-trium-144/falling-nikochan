@@ -6,11 +6,10 @@ export default {
       start: "スタート",
       reset: "もう一度",
       exit: "やめる",
-      startByTap:
-        "または右上の動画を{isTouch, select, true {タップ} false {クリック} other {other}}で<br></br>" +
-        "スタート・停止できます",
+      howToPause:
+        "画面上部の <pause></pause> ボタンを押すことで停止できます。",
       editingNotification:
-        "編集画面で変更した譜面は、<br></br>" +
+        "編集画面で変更した譜面は、" +
         "ページ再読み込みでこちらに反映されます。",
       option: "オプション",
       auto: "オートプレイ",

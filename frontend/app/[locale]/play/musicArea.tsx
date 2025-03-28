@@ -239,11 +239,17 @@ export function MusicArea(props: Props) {
         className={
           "absolute rounded-full p-2 cursor-pointer " +
           (props.isMobile
-            ? "-bottom-9 inset-x-0 mx-auto w-max text-xl "
+            ? "-bottom-9 inset-x-0 mx-auto w-max text-xl " +
+              "bg-white/50 dark:bg-stone-800/50 "
             : "bottom-0 right-1 ") +
           "hover:bg-slate-200/50 active:bg-slate-300/50 " +
           "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
-          linkStyle1
+          linkStyle1 +
+          (props.isMobile
+            ? initialVolumeCtrlOpenDone.current
+              ? "transition-all ease-out duration-300 opacity-100 "
+              : "opacity-0 "
+            : "")
         }
         onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
         onPointerDown={(e) => e.stopPropagation()}
