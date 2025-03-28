@@ -23,6 +23,8 @@ import { ThemeContext } from "@/common/theme.js";
 import { LevelEdit } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import { useTranslations } from "next-intl";
+// https://github.com/vercel/next.js/discussions/29415
+import "remote-web-worker";
 
 export function useLuaExecutor() {
   const [stdout, setStdout] = useState<string[]>([]);
@@ -57,12 +59,7 @@ export function useLuaExecutor() {
       const p = new Promise<LevelFreeze | null>((resolve) => {
         workerResolver.current = resolve;
       });
-      // https://github.com/vercel/next.js/discussions/29415
-      // @ts-expect-error webpack5 global variable
-      __webpack_public_path__ = "/_next/";
       worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
-      // @ts-expect-error webpack5 global variable
-      __webpack_public_path__ = process.env.ASSET_PREFIX + "/_next/";
       worker.current.postMessage({ code, catchError: true });
       worker.current.addEventListener(
         "message",
