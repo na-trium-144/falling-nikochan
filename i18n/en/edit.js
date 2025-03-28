@@ -31,6 +31,7 @@ export default {
       "Use 1 / 12 or 1 / 24 for triplets, 1 / 20 for quintuplets, etc.",
     zoom: "Zoom",
     running: "Running the script...",
+    cancel: "Cancel",
     timeBar: {
       bpm: "BPM",
       speed: "Speed",

@@ -1,3 +1,11 @@
+## ver. 9.18 - 2025/03/28 [#420](https://github.com/na-trium-144/falling-nikochan/pull/420)
+
+* 譜面編集のluaExecをworkerで実行するようにし、workerをterminateするキャンセルボタンを実装
+
+## ver. 9.17 - 2025/03/28 [#419](https://github.com/na-trium-144/falling-nikochan/pull/419)
+
+* 音符間隔が狭い場合でもコンボ数とスコア表示のアニメーションがなめらかに動くようにした
+
 ## ver. 9.14 - 2025/03/26 [#416](https://github.com/na-trium-144/falling-nikochan/pull/416)
 
 * ReactAceEditorで補完候補が表示されるようにした
