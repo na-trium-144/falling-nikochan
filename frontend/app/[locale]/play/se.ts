@@ -7,6 +7,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
   const audioHit = useRef<AudioBuffer | null>(null);
   const audioHitBig = useRef<AudioBuffer | null>(null);
   const gainNode = useRef<GainNode | null>(null);
+  const lastPlayed = useRef<{ [key in SEType]?: Date }>({});
   const [seVolume, setSEVolume_] = useState<number>(100);
   const setSEVolume = useCallback(
     (v: number) => {
@@ -100,7 +101,17 @@ export function useSE(cid: string | undefined, userOffset: number) {
         default:
           return;
       }
-      if (enableSE && audioContext.current && gainNode.current && audioBuffer) {
+      if (
+        enableSE &&
+        audioContext.current &&
+        gainNode.current &&
+        audioBuffer &&
+        // 同時押しオートで音量が大きくなりすぎるのを防ぐ
+        // しかし2個や3個同時押しと1個が全く同じ音になるので、違和感あるかも
+        (!lastPlayed.current[s] ||
+          Date.now() - lastPlayed.current[s].getTime() > 10)
+      ) {
+        lastPlayed.current[s] = new Date();
         const source = audioContext.current.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(gainNode.current);

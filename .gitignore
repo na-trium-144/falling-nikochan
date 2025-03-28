@@ -3,4 +3,4 @@
 */public/assets/wasmoon_glue.wasm
 */dist/
 /node_modules/
-/.vercel/
+/.vercel*
