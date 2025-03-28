@@ -86,7 +86,6 @@ export function MusicArea(props: Props) {
         "relative flex-col " +
         props.className
       }
-      onPointerDown={(e) => e.stopPropagation()}
       onPointerEnter={() => setPointerInVolumeCtrl(true)}
       onPointerLeave={() => setPointerInVolumeCtrl(false)}
       ref={ref}
@@ -247,6 +246,7 @@ export function MusicArea(props: Props) {
           linkStyle1
         }
         onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <VolumeNotice theme="filled" />
       </button>
