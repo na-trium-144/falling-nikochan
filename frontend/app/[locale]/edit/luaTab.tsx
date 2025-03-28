@@ -9,13 +9,14 @@ import "ace-builds/src-min-noconflict/snippets/lua";
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { useDisplayMode } from "@/scale.js";
-import { luaExec } from "@falling-nikochan/chart";
+import { LevelFreeze, Result } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
 import { ThemeContext } from "@/common/theme.js";
@@ -28,25 +29,60 @@ export function useLuaExecutor() {
   const [err, setErr] = useState<string[]>([]);
   const [errLine, setErrLine] = useState<number | null>(null);
   const [running, setRunning] = useState<boolean>(false);
+  const worker = useRef<Worker | null>(null);
+  const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
+    null
+  );
 
-  const exec = async (code: string) => {
-    setRunning(true);
-    const result = await luaExec(
-      process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
-      code,
-      true,
-    );
-    setRunning(false);
-    setStdout(result.stdout);
-    setErr(result.err);
-    setErrLine(result.errorLine);
-    if (result.err.length === 0) {
-      return result.levelFreezed;
-    } else {
-      return null;
+  const abortExec = useCallback(() => {
+    if (worker.current !== null) {
+      worker.current.terminate();
+      worker.current = null;
     }
-  };
-  return { stdout, err, errLine, running, exec };
+    if (workerResolver.current !== null) {
+      setRunning(false);
+      setStdout([]);
+      setErr(["terminated"]);
+      setErrLine(-1);
+      workerResolver.current(null);
+      workerResolver.current = null;
+    }
+  }, []);
+  const exec = useCallback(
+    (code: string) => {
+      if (worker.current !== null) {
+        abortExec();
+      }
+      setRunning(true);
+      const p = new Promise<LevelFreeze | null>((resolve) => {
+        workerResolver.current = resolve;
+      });
+      worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
+      worker.current.postMessage({ code, catchError: true });
+      worker.current.addEventListener(
+        "message",
+        ({ data }: { data: Result }) => {
+          if (workerResolver.current) {
+            setRunning(false);
+            setStdout(data.stdout);
+            setErr(data.err);
+            setErrLine(data.errorLine);
+            if (data.err.length === 0) {
+              workerResolver.current(data.levelFreezed);
+            } else {
+              workerResolver.current(null);
+            }
+            workerResolver.current = null;
+          } else {
+            console.error("luaExecWorker finished but resolver is null");
+          }
+        }
+      );
+      return p;
+    },
+    [abortExec]
+  );
+  return { stdout, err, errLine, running, exec, abortExec };
 }
 
 // Aceはposition:fixedがviewportに対する絶対座標であることを想定しているが
