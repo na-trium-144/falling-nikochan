@@ -3,7 +3,7 @@
 import { ThemeContext } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 interface CProps {
   className?: string;
@@ -159,41 +159,56 @@ const digits = 6;
 function NumDisp(props: NumProps) {
   const { num, anim } = props;
   const prevNum = useRef<number>(0);
-  const [numChanged, setNumChanged] = useState<boolean[]>(
-    Array.from(new Array(digits)).map(() => false)
+  const numRefS100 = useRef<HTMLSpanElement | null>(null);
+  const numRefS10 = useRef<HTMLSpanElement | null>(null);
+  const numRef1 = useRef<HTMLSpanElement | null>(null);
+  const numRef10 = useRef<HTMLSpanElement | null>(null);
+  const numRef100 = useRef<HTMLSpanElement | null>(null);
+  const numRef1000 = useRef<HTMLSpanElement | null>(null);
+  const numRefs = useRef([
+    numRef1000,
+    numRef100,
+    numRef10,
+    numRef1,
+    numRefS10,
+    numRefS100,
+  ]);
+  const numAnimations = useRef<(Animation | undefined)[]>(
+    new Array(digits).fill(undefined),
   );
   useEffect(() => {
     if (anim && num > prevNum.current) {
-      const numChangedNew = numChanged.slice();
+      const numChanged = new Array(digits).fill(false);
       let a = 1000;
       for (let i = 0; i < digits; i++) {
         if (
-          (i >= 1 && numChangedNew[i - 1]) ||
+          (i >= 1 && numChanged[i - 1]) ||
           Math.floor(num / a) % 10 !== Math.floor(prevNum.current / a) % 10
         ) {
-          numChangedNew[i] = true;
+          numChanged[i] = true;
+          numAnimations.current[i]?.cancel();
+          numAnimations.current[i] = numRefs.current[i].current?.animate(
+            [
+              { transform: "translateY(0)" },
+              { transform: "translateY(-25%)", offset: 0.3 },
+              { transform: "translateY(0)" },
+            ],
+            { duration: 200, fill: "forwards", easing: "linear" },
+          );
         }
         a /= 10;
       }
-      setNumChanged(numChangedNew);
-      setTimeout(() => {
-        setNumChanged(Array.from(new Array(digits)).map(() => false));
-      }, 100);
     }
     prevNum.current = num;
-  }, [num, numChanged, anim]);
+  }, [num, anim]);
   return (
     <>
       <div className="text-right">
         {[1000, 100, 10, 1].map((a, i) => (
           <span
             key={i}
-            className={
-              "inline-block overflow-visible text-left transition duration-100 " +
-              (numChanged[i]
-                ? "ease-out -translate-y-1/4"
-                : "ease-in translate-y-0")
-            }
+            ref={numRefs.current[i]}
+            className="inline-block overflow-visible text-left "
             style={{
               width:
                 a === 1 && props.alignAt2nd
@@ -222,12 +237,8 @@ function NumDisp(props: NumProps) {
             {[10, 100].map((a, i) => (
               <span
                 key={a}
-                className={
-                  "inline-block transition duration-100 " +
-                  (numChanged[i + digits - 2]
-                    ? "ease-out -translate-y-1/4"
-                    : "ease-in translate-y-0")
-                }
+                ref={numRefs.current[i + digits - 2]}
+                className="inline-block "
                 style={{
                   // width: (32 / 48) * props.fontSize2!,
                   fontSize: props.fontSize2!,
