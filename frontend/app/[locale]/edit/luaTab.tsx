@@ -23,6 +23,8 @@ import { ThemeContext } from "@/common/theme.js";
 import { LevelEdit } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import { useTranslations } from "next-intl";
+// https://github.com/vercel/next.js/discussions/29415
+import "remote-web-worker";
 
 export function useLuaExecutor() {
   const [stdout, setStdout] = useState<string[]>([]);
