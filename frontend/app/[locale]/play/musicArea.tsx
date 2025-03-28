@@ -252,10 +252,10 @@ export function MusicArea(props: Props) {
       </button>
       <div
         className={
-          "absolute p-2 z-10 " +
+          "absolute z-10 " +
           (props.isMobile
-            ? "bottom-1 inset-x-0 mx-2 "
-            : "top-full inset-x-0 mt-2 mr-1 ") +
+            ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4 "
+            : "top-full inset-x-0 mt-2 mr-1 p-3 ") +
           "rounded-lg border border-slate-400 dark:border-stone-600 " +
           "bg-white/75 dark:bg-stone-800/75 " +
           "transition-all duration-200 " +
@@ -290,10 +290,15 @@ export function MusicArea(props: Props) {
           />
         )}
         <div className="flex flex-row items-center ">
-          <Youtube className="text-lg " />
+          <Youtube className="text-xl " />
           <span className="text-sm w-7 text-right ">{props.ytVolume}</span>
           <Slider
-            className="flex-1 mx-2 "
+            className="flex-1 mx-2 h-5! py-0! "
+            classNames={{
+              rail: "inset-y-0! my-auto h-1.5! ",
+              track: "inset-y-0! my-auto h-1.5! ",
+              handle: "h-5! w-5! m-0! ",
+            }}
             min={0}
             max={100}
             step={1}
@@ -301,16 +306,21 @@ export function MusicArea(props: Props) {
             onChange={(v) => props.setYtVolume(v as number)}
           />
         </div>
-        <div className="flex flex-row items-center mt-2 ">
+        <div className="flex flex-row items-center mt-3 ">
           <SmilingFace
             className={
-              "text-lg " +
+              "text-xl " +
               (props.enableSE ? "" : "text-slate-400 dark:text-stone-600 ")
             }
           />
           <span className="text-sm w-7 text-right ">{props.seVolume}</span>
           <Slider
-            className="flex-1 mx-2 "
+            className="flex-1 mx-2 h-5! py-0! "
+            classNames={{
+              rail: "inset-y-0! my-auto h-1.5! ",
+              track: "inset-y-0! my-auto h-1.5! ",
+              handle: "h-5! w-5! m-0! ",
+            }}
             min={0}
             max={100}
             step={1}

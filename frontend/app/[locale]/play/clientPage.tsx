@@ -275,7 +275,7 @@ function Play(props: Props) {
     !statusHide;
   const mainWindowSpace = useResizeDetector();
   const readySmall =
-    !!mainWindowSpace.height && mainWindowSpace.height < 27 * rem;
+    !!mainWindowSpace.height && mainWindowSpace.height < 30 * rem;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
