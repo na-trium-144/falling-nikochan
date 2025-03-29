@@ -17,6 +17,7 @@ interface Props {
   lvType: string;
   lvIndex?: number;
   isMobile: boolean; // 横並び or 縦並び
+  isTouch: boolean;
   ytPlayer: { current?: YouTubePlayer };
   chartBrief?: ChartBrief;
   offset: number;
@@ -237,11 +238,11 @@ export function MusicArea(props: Props) {
       />
       <button
         className={
-          "absolute rounded-full p-2 cursor-pointer " +
+          "absolute rounded-full cursor-pointer " +
           (props.isMobile
             ? "-bottom-9 inset-x-0 mx-auto w-max text-xl " +
-              "bg-white/50 dark:bg-stone-800/50 "
-            : "bottom-0 right-1 ") +
+              (props.isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2 " : "p-2 ")
+            : "bottom-0 right-1 p-2 ") +
           "hover:bg-slate-200/50 active:bg-slate-300/50 " +
           "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
           linkStyle1 +

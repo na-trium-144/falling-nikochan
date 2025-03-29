@@ -58,6 +58,7 @@ import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "./se.js";
 import { Pause } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle.js";
+import { Key } from "@/common/key.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -658,6 +659,7 @@ function Play(props: Props) {
             lvType={lvType}
             lvIndex={lvIndex}
             isMobile={isMobile}
+            isTouch={isTouch}
             ytPlayer={ytPlayer}
             chartBrief={chartBrief}
             onReady={onReady}
@@ -723,10 +725,12 @@ function Play(props: Props) {
             />
             <button
               className={
-                "absolute rounded-full p-2 cursor-pointer " +
+                "absolute rounded-full cursor-pointer " +
                 "top-0 inset-x-0 mx-auto w-max text-xl " +
-                "bg-white/50 dark:bg-stone-800/50 " +
-                (isMobile ? "mt-9 " : "") +
+                (isTouch
+                  ? "bg-white/50 dark:bg-stone-800/50 p-2 "
+                  : "py-1 px-2 ") +
+                (isMobile ? "mt-10 " : "") +
                 "hover:bg-slate-200/50 active:bg-slate-300/50 " +
                 "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
                 linkStyle1
@@ -734,7 +738,10 @@ function Play(props: Props) {
               onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
             >
-              <Pause />
+              <Pause className="inline-block align-middle" />
+              {!isTouch && (
+                <Key className="text-xs p-0.5 mx-1 align-middle ">Esc</Key>
+              )}
             </button>
           </div>
           {errorMsg && (
