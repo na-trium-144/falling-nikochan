@@ -11,7 +11,7 @@ export default {
     installDesc: "You can add Falling Nikochan as an app to your home screen.",
     install: "Add to Home Screen",
     installIOS:
-      "You can add Falling Nikochan as an app to your home screen " +
+      "You can open Falling Nikochan as an app " +
       "by selecting 'Add to Home Screen' from Safari's share menu.",
     dismiss: "Close",
     about: {

@@ -13,7 +13,7 @@ export default {
     install: "ホーム画面に追加",
     installIOS:
       "Safari の共有メニューから「ホーム画面に追加」を選択することで、" +
-      "Falling Nikochan をアプリとしてホーム画面に追加することができます。",
+      "Falling Nikochan をアプリとして開くことができます。",
     dismiss: "閉じる",
     about: {
       title: "Falling Nikochan とは？",
