@@ -1,6 +1,8 @@
 import { getTranslations } from "@falling-nikochan/i18n";
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations("en", "main");
   return {
