@@ -1,4 +1,4 @@
-## ver. 10.0 - 2025/03/30 [#403](https://github.com/na-trium-144/falling-nikochan/pull/403), [#424](https://github.com/na-trium-144/falling-nikochan/pull/424)
+## ver. 10.0 - 2025/03/30 [#403](https://github.com/na-trium-144/falling-nikochan/pull/403), [#424](https://github.com/na-trium-144/falling-nikochan/pull/424), [#426](https://github.com/na-trium-144/falling-nikochan/pull/426)
 
 * 音符を叩いたときのSEを追加
     * baseLatency+outputLatencyの分だけ判定オフセットをずらす

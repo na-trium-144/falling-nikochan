@@ -424,14 +424,15 @@ export function MetaTab(props: Props2) {
             {t("hasUnsaved")}
           </span>
         )}
-        {props.convertedFrom < currentChartVer && (
-          <span className="inline-block ml-1 text-amber-600 text-sm ">
-            <Caution className="inline-block mr-1 translate-y-0.5 " />
-            {props.convertedFrom <= lastIncompatibleVer
-              ? t("convertingIncompatible", { ver: props.convertedFrom })
-              : t("converting", { ver: props.convertedFrom })}
-          </span>
-        )}
+        {
+          /*props.convertedFrom < currentChartVer*/
+          props.convertedFrom <= lastIncompatibleVer && (
+            <span className="inline-block ml-1 text-amber-600 text-sm ">
+              <Caution className="inline-block mr-1 translate-y-0.5 " />
+              {t("convertingIncompatible", { ver: props.convertedFrom })}
+            </span>
+          )
+        }
       </div>
       {props.cid && (
         <>
