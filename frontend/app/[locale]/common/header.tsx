@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { pagerButtonClass } from "./pager.js";
 import { ArrowLeft } from "@icon-park/react";
+import { isStandalone } from "./pwaInstall.js";
 
 interface Props {
   className?: string;
@@ -22,7 +23,7 @@ export default function Header(props: Props) {
           <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
         </button>
       )}
-      {props.reload ? (
+      {props.reload && !isStandalone() ? (
         <a href={`/${props.locale}`} className={"text-xl " + linkStyle1}>
           FallingNikochan
         </a>

@@ -150,6 +150,7 @@ export function MetaEdit(props: Props) {
 }
 
 interface Props2 {
+  saveEditSession: () => void;
   sessionId?: number;
   sessionData?: SessionData;
   chartNumEvent: number;
@@ -392,7 +393,7 @@ export function MetaTab(props: Props2) {
             if (props.sessionData) {
               initSession(props.sessionData, props.sessionId);
               if (isStandalone()) {
-                // todo: 編集中の譜面をセッションに保存
+                props.saveEditSession();
                 router.push(`/${props.locale}/play?sid=${props.sessionId}`);
               } else {
                 window
