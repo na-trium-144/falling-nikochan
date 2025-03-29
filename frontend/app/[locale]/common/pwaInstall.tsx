@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "./button";
 
@@ -21,15 +21,16 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-interface Props {
-  className?: string;
-}
-export function PWAInstall(props: Props) {
-  const t = useTranslations("main");
+export function usePWAInstall() {
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+
+  const dismiss = useCallback(() => {
+    localStorage.setItem("PWADismissed", "1");
+    setDismissed(true);
+  }, []);
   useEffect(() => {
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1",
@@ -54,7 +55,30 @@ export function PWAInstall(props: Props) {
       setDetectedOS("ios");
     }
   }, []);
+  const install = useCallback(() => {
+    deferredPrompt?.prompt().then(({ outcome }) => {
+      if (outcome === "accepted") {
+        localStorage.setItem("PWADismissed", "1");
+        setDismissed(true);
+      }
+      setDeferredPrompt(null);
+    });
+  }, [deferredPrompt]);
 
+  return {
+    dismissed,
+    dismiss,
+    detectedOS,
+    deferredPrompt,
+    install,
+  };
+}
+interface Props {
+  className?: string;
+}
+export function PWAInstall(props: Props) {
+  const t = useTranslations("main");
+  const pwa = usePWAInstall();
   return (
     <div
       className={
@@ -65,34 +89,17 @@ export function PWAInstall(props: Props) {
       <div
         className={
           "text-center px-3 py-2 h-max rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
-          (dismissed || detectedOS === null ? "hidden " : "")
+          (pwa.dismissed || pwa.detectedOS === null ? "hidden " : "")
         }
       >
-        {deferredPrompt && detectedOS === "android" && (
+        {pwa.deferredPrompt && pwa.detectedOS === "android" && (
           <>
             <p>{t("installDesc")}</p>
-            <Button
-              text={t("install")}
-              onClick={() => {
-                deferredPrompt.prompt().then(({ outcome }) => {
-                  if (outcome === "accepted") {
-                    localStorage.setItem("PWADismissed", "1");
-                    setDismissed(true);
-                  }
-                  setDeferredPrompt(null);
-                });
-              }}
-            />
+            <Button text={t("install")} onClick={pwa.install} />
           </>
         )}
-        {detectedOS === "ios" && <p>{t("installIOS")}</p>}
-        <Button
-          text={t("dismiss")}
-          onClick={() => {
-            localStorage.setItem("PWADismissed", "1");
-            setDismissed(true);
-          }}
-        />
+        {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
+        <Button text={t("dismiss")} onClick={pwa.dismiss} />
       </div>
     </div>
   );
