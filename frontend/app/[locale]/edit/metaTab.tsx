@@ -8,7 +8,6 @@ import {
   ChartEdit,
   ChartMin,
   convertToMin,
-  currentChartVer,
   lastIncompatibleVer,
   validateChartMin,
 } from "@falling-nikochan/chart";
