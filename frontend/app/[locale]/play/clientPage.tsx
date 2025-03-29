@@ -55,6 +55,7 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
+import { isStandalone } from "@/common/pwaInstall.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -366,8 +367,11 @@ function Play(props: Props) {
   }, [chartPlaying]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
-    // history.back();
-    window.close();
+    if (isStandalone()) {
+      history.back();
+    } else {
+      window.close();
+    }
   };
 
   // youtube側のreadyイベント & chartSeqが読み込まれる の両方を満たしたら

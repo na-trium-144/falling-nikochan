@@ -16,10 +16,13 @@ import { useTranslations } from "next-intl";
 import { useDisplayMode } from "@/scale.js";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
+import { isStandalone } from "@/common/pwaInstall.js";
+import { useRouter } from "next/navigation";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
   const te = useTranslations("error");
+  const router = useRouter();
   const { isMobileMain } = useDisplayMode();
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
@@ -87,8 +90,11 @@ export default function EditTab({ locale }: { locale: string }) {
     });
     setCidFetching(false);
     if (res.ok) {
-      // router.push(`/${locale}/edit?cid=${cid}`);
-      window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
+      if (isStandalone()) {
+        router.push(`/${locale}/edit?cid=${cid}`);
+      } else {
+        window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
+      }
       setCIdErrorMsg("");
       setInputCId(cid);
     } else {
