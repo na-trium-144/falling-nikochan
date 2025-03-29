@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { ChartLineBrief } from "./play/fetch.js";
 import { pagerButtonClass } from "@/common/pager.js";
 import { SlimeSVG } from "@/common/slime.js";
-import { isStandalone } from "@/common/pwaInstall.js";
+import { useStandaloneDetector } from "@/common/pwaInstall.js";
 
 interface Props {
   recentBrief?: ChartLineBrief[];
@@ -145,6 +145,7 @@ interface CProps {
   hidden?: boolean;
 }
 export function ChartListItem(props: CProps) {
+  const isStandalone = useStandaloneDetector();
   const [appearing, setAppearing] = useState<boolean>(false);
   useEffect(() => {
     requestAnimationFrame(() =>
@@ -164,7 +165,7 @@ export function ChartListItem(props: CProps) {
               : "opacity-0 ")
       }
     >
-      {props.onClick || (props.newTab && !isStandalone()) ? (
+      {props.onClick || (props.newTab && !isStandalone) ? (
         <a
           href={props.href}
           className={chartListStyle}

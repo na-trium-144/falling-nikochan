@@ -2,7 +2,7 @@
 
 import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle.js";
 import { EfferentThree } from "@icon-park/react";
-import { isStandalone } from "./pwaInstall";
+import { useStandaloneDetector } from "./pwaInstall";
 import Link from "next/link";
 
 interface Props {
@@ -25,6 +25,7 @@ function LinkChildren(props: Props) {
   );
 }
 export function ExternalLink(props: Props) {
+  const isStandalone = useStandaloneDetector();
   if (props.onClick) {
     return (
       <button
@@ -36,7 +37,7 @@ export function ExternalLink(props: Props) {
         <LinkChildren {...props} />
       </button>
     );
-  } else if (props.href?.startsWith("/") && isStandalone()) {
+  } else if (props.href?.startsWith("/") && isStandalone) {
     return (
       <Link
         className={

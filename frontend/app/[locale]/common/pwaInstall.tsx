@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "./button";
 
+export function useStandaloneDetector() {
+  const [state, setState] = useState<boolean>(false);
+  useEffect(() => setState(isStandalone()), []);
+  return state;
+}
 export function isStandalone() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
