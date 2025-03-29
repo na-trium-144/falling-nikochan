@@ -75,6 +75,9 @@ export function dummyChart(): Chart9Edit {
     ],
   };
 }
+export function dummyChart9(): Chart9Edit {
+  return { ...dummyChart(), ver: 9 };
+}
 export function dummyChart8(): Chart8Edit {
   const c: Chart8Edit = { ...dummyChart(), ver: 8, editPasswd: "" };
   // @ts-expect-error converting Chart9 to 8
@@ -108,7 +111,7 @@ export function dummyChart4(): Chart4 {
 
 export function dummyLevel9(): Level9Play {
   return {
-    ver: 9,
+    ver: 10,
     offset: 1.23,
     notes: [
       {
@@ -186,7 +189,7 @@ export function dummyLevel6(): Level6Play {
 
 /*
 cid100000に最新バージョンのchart(dummyChart()参照)を、
-100004〜100008にそれぞれver4〜7のchartを保存する
+100004〜100009にそれぞれver4〜9のchartを保存する
 */
 export async function initDb() {
   if (typeof process.env.MONGODB_URI !== "string") {
@@ -343,6 +346,27 @@ export async function initDb() {
           )),
           ver: 8,
           levels: dummyChart8().levels,
+        }),
+      },
+      { upsert: true },
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 9) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 9),
+            dummyDate.getTime(),
+            null,
+            pSecretSalt,
+            null,
+          )),
+          ver: 9,
+          levels: dummyChart9().levels,
         }),
       },
       { upsert: true },

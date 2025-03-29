@@ -94,9 +94,9 @@ export default {
         "You can overwrite as many times as you like <br></br>" +
         "if it is already been saved and assigned an ID.",
       hasUnsaved: "(There are unsaved changes)",
-      converting:
-        "This chart has been converted from the old format (ver.{ver}), " +
-        "and saving will overwrite the previous chart data with the converted data.",
+      // converting:
+      //   "This chart has been converted from the old format (ver.{ver}), " +
+      //   "and saving will overwrite the previous chart data with the converted data.",
       convertingIncompatible:
         "This chart has been converted from the old format (ver.{ver}), " +
         "and some notes may behave differently. " +

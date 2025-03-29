@@ -5,7 +5,7 @@ import { Level9Play } from "./chart9.js";
 import { DisplayParam7, Note7 } from "./seq7.js";
 
 export interface ChartSeqData9 {
-  ver: 9;
+  ver: 10;
   notes: Note7[];
   bpmChanges: BPMChange1[];
   speedChanges: BPMChange1[];
@@ -126,7 +126,7 @@ export function loadChart9(level: Level9Play): ChartSeqData9 {
     });
   }
   return {
-    ver: 9,
+    ver: 10,
     offset: level.offset,
     signature: level.signature,
     bpmChanges: level.bpmChanges,

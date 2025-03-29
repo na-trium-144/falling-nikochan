@@ -58,6 +58,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           level = convertToPlay9(await convertTo9(chart), lvIndex);
           break;
         case 9:
+        case 10:
           level = convertToPlay9(chart, lvIndex);
           break;
         default:
