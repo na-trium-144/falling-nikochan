@@ -9,26 +9,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: "Falling Nikochan",
     short_name: "Nikochan",
     description: t("description"),
-    icons: [
-      {
-        src: "/assets/app-icon-256.png",
-        sizes: "256x256",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/assets/app-icon-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/assets/app-icon-1024.png",
-        sizes: "1024x1024",
-        type: "image/png",
-        purpose: "maskable",
-      },
-    ],
+    icons: [192, 256, 512, 1024].map((size) => ({
+      src: process.env.ASSET_PREFIX + `/assets/app-icon-${size}.png`,
+      sizes: `${size}x${size}`,
+      type: "image/png",
+      purpose: "maskable",
+    })),
     start_url: "/",
     display: "standalone",
     orientation: "any",
