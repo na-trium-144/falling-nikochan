@@ -130,6 +130,8 @@ export function FlexYouTube(props: Props) {
         // If script is already there, load the video directly
         loadVideo();
       }
+
+      return () => ytPlayer.current?.destroy();
     }
   }, [id, control, ytPlayer]);
   return (
