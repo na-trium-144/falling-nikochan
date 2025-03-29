@@ -6,7 +6,15 @@ export default {
     descriptionVerbose:
       "Falling Nikochan は、誰でも譜面を作成し共有することができる、" +
       "シンプルでかわいい音ゲーです。",
-    redirected: "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
+    redirected:
+      "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
+    installDesc:
+      "Falling Nikochan をアプリとしてホーム画面に追加することができます。",
+    install: "ホーム画面に追加",
+    installIOS:
+      "Safari の共有メニューから「ホーム画面に追加」を選択することで、" +
+      "Falling Nikochan をアプリとしてホーム画面に追加することができます。",
+    dismiss: "閉じる",
     about: {
       title: "Falling Nikochan とは？",
     },

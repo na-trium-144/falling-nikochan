@@ -6,7 +6,14 @@ export default {
     descriptionVerbose:
       "Falling Nikochan is a simple and cute rhythm game, " +
       "where anyone can create and share charts.",
-    redirected: "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
+    redirected:
+      "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
+    installDesc: "You can add Falling Nikochan as an app to your home screen.",
+    install: "Add to Home Screen",
+    installIOS:
+      "You can add Falling Nikochan as an app to your home screen " +
+      "by selecting 'Add to Home Screen' from Safari's share menu.",
+    dismiss: "Close",
     about: {
       title: "What is Falling Nikochan?",
     },
