@@ -123,12 +123,12 @@ export function InitPlay({ locale }: { locale: string }) {
             const seq: Level6Play | Level9Play = msgpack.deserialize(
               await res.arrayBuffer(),
             );
-            if (seq.ver === 6 || seq.ver === 9) {
+            if (seq.ver === 6 || seq.ver === 10) {
               switch (seq.ver) {
                 case 6:
                   setChartSeq(loadChart6(seq));
                   break;
-                case 9:
+                case 10:
                   setChartSeq(loadChart9(seq));
                   break;
               }
