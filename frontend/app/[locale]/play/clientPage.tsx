@@ -725,11 +725,11 @@ function Play(props: Props) {
             />
             <button
               className={
-                "absolute rounded-full cursor-pointer " +
+                "absolute rounded-full cursor-pointer leading-1 " +
                 "top-0 inset-x-0 mx-auto w-max text-xl " +
                 (isTouch
                   ? "bg-white/50 dark:bg-stone-800/50 p-2 "
-                  : "py-1 px-2 ") +
+                  : "py-2 px-1 ") +
                 (isMobile ? "mt-10 " : "") +
                 "hover:bg-slate-200/50 active:bg-slate-300/50 " +
                 "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
@@ -738,7 +738,7 @@ function Play(props: Props) {
               onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
             >
-              <Pause className="inline-block align-middle" />
+              <Pause className="inline-block align-middle " />
               {!isTouch && (
                 <Key className="text-xs p-0.5 mx-1 align-middle ">Esc</Key>
               )}

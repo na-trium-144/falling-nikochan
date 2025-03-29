@@ -236,7 +236,7 @@ export function MusicArea(props: Props) {
       />
       <button
         className={
-          "absolute rounded-full cursor-pointer " +
+          "absolute rounded-full cursor-pointer leading-1 " +
           (props.isMobile
             ? "-bottom-9 inset-x-0 mx-auto w-max text-xl " +
               (props.isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2 " : "p-2 ")
@@ -253,7 +253,7 @@ export function MusicArea(props: Props) {
         onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <VolumeNotice theme="filled" />
+        <VolumeNotice theme="filled" className="inline-block align-middle"/>
       </button>
       <div
         className={
