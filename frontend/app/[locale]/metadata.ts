@@ -45,10 +45,14 @@ export async function initMetadata(
     generator: "Next.js",
     applicationName: "Falling Nikochan",
     referrer: "origin-when-cross-origin",
+    appleWebApp: true,
     icons: {
       // これを1つでも書くと /app にファイルを置く metadata API が無効になるっぽい?
       icon: process.env.ASSET_PREFIX + "/assets/icon.png",
-      apple: process.env.ASSET_PREFIX + "/assets/apple-icon.png",
+      apple: [192, 256, 512, 1024].map((size) => ({
+        url: process.env.ASSET_PREFIX + `/assets/app-icon-${size}.png`,
+        size: `${size}x${size}`,
+      })),
       shortcut: "/favicon.ico",
     },
     openGraph: path

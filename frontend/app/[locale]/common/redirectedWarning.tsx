@@ -19,7 +19,7 @@ export function RedirectedWarning(props: { className?: string }) {
   return (
     <div
       className={
-        "text-center flex items-center justify-center " +
+        "text-center flex items-center justify-center text-sm " +
         (props.className || "")
       }
     >

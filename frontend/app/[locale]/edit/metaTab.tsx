@@ -25,6 +25,8 @@ import { HelpIcon } from "@/common/caption";
 import { luaExec } from "@falling-nikochan/chart";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/share";
+import { isStandalone } from "@/common/pwaInstall";
+import { useRouter } from "next/navigation";
 
 interface Props {
   chart?: ChartEdit;
@@ -148,6 +150,7 @@ export function MetaEdit(props: Props) {
 }
 
 interface Props2 {
+  saveEditSession: () => void;
   sessionId?: number;
   sessionData?: SessionData;
   chartNumEvent: number;
@@ -170,6 +173,7 @@ interface Props2 {
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
   const te = useTranslations("error");
+  const router = useRouter();
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [saveMsg, setSaveMsg] = useState<string>("");
   const [saving, setSaving] = useState<boolean>(false);
@@ -388,9 +392,17 @@ export function MetaTab(props: Props2) {
           onClick={() => {
             if (props.sessionData) {
               initSession(props.sessionData, props.sessionId);
-              window
-                .open(`/${props.locale}/play?sid=${props.sessionId}`, "_blank")
-                ?.focus();
+              if (isStandalone()) {
+                props.saveEditSession();
+                router.push(`/${props.locale}/play?sid=${props.sessionId}`);
+              } else {
+                window
+                  .open(
+                    `/${props.locale}/play?sid=${props.sessionId}`,
+                    "_blank",
+                  )
+                  ?.focus();
+              }
             }
           }}
         >

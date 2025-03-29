@@ -11,6 +11,7 @@ import Title from "@/common/titleLogo.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
+import { PWAInstall } from "@/common/pwaInstall";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -59,6 +60,7 @@ export function IndexMain(props: Props) {
           "self-center mx-6 " + (!isTitlePage ? "my-2 " : "basis-0 grow-1 ")
         }
       />
+      {isTitlePage && <PWAInstall className="self-center mx-6 my-2 " />}
       <div
         className={
           "main-wide:max-h-dvh main-wide:overflow-hidden main-wide:mb-3 " +
