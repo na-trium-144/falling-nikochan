@@ -9,6 +9,7 @@ interface Props {
   className?: string;
   style?: object;
   onClick?: (e: MouseEvent) => void;
+  onPointerDown?: (e: MouseEvent) => void;
 }
 export function Box(props: Props) {
   return (
@@ -22,6 +23,7 @@ export function Box(props: Props) {
         ...props.style,
       }}
       onClick={props.onClick}
+      onPointerDown={props.onPointerDown}
     >
       {props.children}
     </div>
@@ -37,6 +39,8 @@ export function CenterBox(props: Props) {
         (props.className || "")
       }
       style={props.style}
+      onClick={props.onClick}
+      onPointerDown={props.onPointerDown}
     >
       {props.children}
     </Box>

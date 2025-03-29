@@ -143,6 +143,7 @@ export default function Result(props: Props) {
         (showing >= resultAnimDelays.length ? "touch-pan-y " : "touch-none ")
       }
       style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
       <div
