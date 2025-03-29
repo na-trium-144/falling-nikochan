@@ -7,8 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { SmilingFace, VolumeNotice, Youtube } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
 
 interface Props {
   ready: boolean;
@@ -300,18 +298,13 @@ export function MusicArea(props: Props) {
         <div className="flex flex-row items-center ">
           <Youtube className="text-xl " />
           <span className="text-sm w-7 text-right ">{props.ytVolume}</span>
-          <Slider
-            className="flex-1 mx-2 h-5! py-0! bg-transparent! "
-            classNames={{
-              rail: "inset-y-0! my-auto h-1.5! ",
-              track: "inset-y-0! my-auto h-1.5! ",
-              handle: "h-5! w-5! m-0! ",
-            }}
-            min={0}
-            max={100}
-            step={1}
+          <input
+            className="flex-1 mx-1 "
+            type="range"
+            min="0"
+            max="100"
             value={props.ytVolume}
-            onChange={(v) => props.setYtVolume(v as number)}
+            onChange={(e) => props.setYtVolume(parseInt(e.target.value))}
           />
         </div>
         <div className="flex flex-row items-center mt-3 ">
@@ -329,19 +322,14 @@ export function MusicArea(props: Props) {
           >
             {props.seVolume}
           </span>
-          <Slider
-            className="flex-1 mx-2 h-5! py-0! bg-transparent! "
-            classNames={{
-              rail: "inset-y-0! my-auto h-1.5! ",
-              track: "inset-y-0! my-auto h-1.5! ",
-              handle: "h-5! w-5! m-0! ",
-            }}
+          <input
+            type="range"
+            className="flex-1 mx-1 "
             min={0}
             max={100}
-            step={1}
             disabled={!props.enableSE}
             value={props.seVolume}
-            onChange={(v) => props.setSEVolume(v as number)}
+            onChange={(e) => props.setSEVolume(parseInt(e.target.value))}
           />
         </div>
       </div>
