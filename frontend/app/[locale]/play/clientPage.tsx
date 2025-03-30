@@ -55,6 +55,10 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
+import { useSE } from "./se.js";
+import { Pause } from "@icon-park/react";
+import { linkStyle1 } from "@/common/linkStyle.js";
+import { Key } from "@/common/key.js";
 import { isStandalone } from "@/common/pwaInstall.js";
 
 export function InitPlay({ locale }: { locale: string }) {
@@ -282,7 +286,7 @@ function Play(props: Props) {
     !statusHide;
   const mainWindowSpace = useResizeDetector();
   const readySmall =
-    !!mainWindowSpace.height && mainWindowSpace.height < 27 * rem;
+    !!mainWindowSpace.height && mainWindowSpace.height < 30 * rem;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -302,14 +306,47 @@ function Play(props: Props) {
     exitable && exitable.getTime() < new Date().getTime();
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
+  const [ytVolume, setYtVolume_] = useState<number>(100);
+  const setYtVolume = useCallback(
+    (v: number) => {
+      setYtVolume_(v);
+      localStorage.setItem("ytVolume", v.toString());
+      if (cid) {
+        localStorage.setItem(`ytVolume-${cid}`, v.toString());
+      }
+      ytPlayer.current?.setVolume(v);
+    },
+    [cid],
+  );
+  useEffect(() => {
+    const vol = Number(
+      localStorage.getItem(`ytVolume-${cid}`) ||
+        localStorage.getItem("ytVolume") ||
+        100,
+    );
+    setYtVolume_(vol);
+    ytPlayer.current?.setVolume(vol);
+  }, [cid]);
+
+  const {
+    playSE,
+    enableSE,
+    setEnableSE,
+    seVolume,
+    setSEVolume,
+    audioLatency,
+    offsetPlusLatency,
+  } = useSE(cid, userOffset);
 
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
-      return ytPlayer.current?.getCurrentTime() - chartSeq.offset - userOffset;
+      return (
+        ytPlayer.current?.getCurrentTime() - chartSeq.offset - offsetPlusLatency
+      );
     }
-  }, [chartSeq, chartPlaying, userOffset]);
+  }, [chartSeq, chartPlaying, offsetPlusLatency]);
   const {
     baseScore,
     chainScore,
@@ -324,7 +361,7 @@ function Play(props: Props) {
     bigTotal,
     end,
     lateTimes,
-  } = useGameLogic(getCurrentTimeSec, auto, userOffset);
+  } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
   const [fps, setFps] = useState<number>(0);
 
@@ -364,14 +401,14 @@ function Play(props: Props) {
       // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
-          ytPlayer.current?.setVolume(((10 - i) * 100) / 10);
+          ytPlayer.current?.setVolume(((10 - i) * ytVolume) / 10);
         }, i * 100);
         setTimeout(() => {
           ytPlayer.current?.pauseVideo();
         }, 1000);
       }
     }
-  }, [chartPlaying]);
+  }, [chartPlaying, ytVolume]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
     if (isStandalone()) {
@@ -541,10 +578,10 @@ function Play(props: Props) {
       setExitable(null);
       resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
-      ytPlayer.current?.setVolume(100);
+      ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
-  }, [chartSeq, lateTimes, resetNotesAll]);
+  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (chartPlaying) {
@@ -634,19 +671,27 @@ function Play(props: Props) {
         >
           <MusicArea
             className={
-              "transition-transform duration-500 ease-in-out " +
+              "z-20 transition-transform duration-500 ease-in-out " +
               (musicAreaOk ? "translate-y-0 " : "translate-y-[-40vw] ")
             }
-            offset={(chartSeq?.offset || 0) + userOffset}
+            ready={musicAreaOk}
+            playing={chartPlaying}
+            offset={(chartSeq?.offset || 0) + offsetPlusLatency}
             lvType={lvType}
             lvIndex={lvIndex}
             isMobile={isMobile}
+            isTouch={isTouch}
             ytPlayer={ytPlayer}
             chartBrief={chartBrief}
             onReady={onReady}
             onStart={onStart}
             onStop={onStop}
             onError={onError}
+            ytVolume={ytVolume}
+            setYtVolume={setYtVolume}
+            enableSE={enableSE}
+            seVolume={seVolume}
+            setSEVolume={setSEVolume}
           />
           {!isMobile && (
             <>
@@ -699,6 +744,26 @@ function Play(props: Props) {
               fc={judgeCount[2] + judgeCount[3] === 0}
               theme={themeContext}
             />
+            <button
+              className={
+                "absolute rounded-full cursor-pointer leading-1 " +
+                "top-0 inset-x-0 mx-auto w-max text-xl " +
+                (isTouch
+                  ? "bg-white/50 dark:bg-stone-800/50 p-2 "
+                  : "py-2 px-1 ") +
+                (isMobile ? "mt-10 " : "") +
+                "hover:bg-slate-200/50 active:bg-slate-300/50 " +
+                "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
+                linkStyle1
+              }
+              onClick={stop}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <Pause className="inline-block align-middle " />
+              {!isTouch && (
+                <Key className="text-xs p-0.5 mx-1 align-middle ">Esc</Key>
+              )}
+            </button>
           </div>
           {!initDone && (
             <CenterBox
@@ -706,6 +771,7 @@ function Play(props: Props) {
                 "transition-opacity duration-200 ease-out " +
                 (showLoading ? "opacity-100" : "opacity-0")
               }
+              onPointerDown={(e) => e.stopPropagation()}
             >
               <p>
                 <SlimeSVG />
@@ -726,6 +792,9 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
+              enableSE={enableSE}
+              setEnableSE={setEnableSE}
+              audioLatency={audioLatency}
               editing={editing}
               lateTimes={lateTimes.current}
               small={readySmall}

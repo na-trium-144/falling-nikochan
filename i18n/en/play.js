@@ -6,14 +6,19 @@ export default {
       start: "Start",
       reset: "Restart",
       exit: "Exit",
-      startByTap:
-        "Or start/stop by {isTouch, select, true {tapping} false {clicking} other {other}} the video<br></br>" +
-        "on the top right",
+      howToPause:
+        "You can pause by pressing " +
+        "the <pause></pause> button at the top of the screen.",
       editingNotification:
-        "Changes made in the editing screen will be <br></br>" +
+        "Changes made in the editing screen will be " +
         "reflected here after reloading the page.",
       option: "Options",
       auto: "Auto Play",
+      enableSE: "Enable Key/Tap Sounds",
+      enableSELatency:
+        "Judgment is adjusted by the sound delay estimated ({latency} seconds in this environment).",
+      unknownSELatency:
+        "There may be a delay in sound output. Please adjust the judgment timing manually.",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
       offsetSecond: "sec",

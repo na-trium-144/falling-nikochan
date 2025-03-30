@@ -4,4 +4,4 @@
 */public/assets/buildVer.json
 */dist/
 /node_modules/
-/.vercel/
+/.vercel*
