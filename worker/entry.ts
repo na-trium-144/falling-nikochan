@@ -36,17 +36,11 @@ const app = new Hono({ strict: false })
   .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", (c) => fetch(c.req.raw))
   .get("/*", async (c) => {
-    if (
-      !c.req.url.startsWith(self.origin) &&
-      !c.req.url.startsWith(process.env.ASSET_PREFIX || "null")
-    ) {
-      return fetch(c.req.raw);
-    }
     const res = await fetchStatic(null, new URL(c.req.url));
     if (res.ok) {
       return res;
     } else {
-      return c.notFound();
+      return fetch(c.req.raw);
     }
   })
   .use(languageDetector())
@@ -82,9 +76,12 @@ async function initAssetsCache() {
                 process.env.ASSET_PREFIX,
                 "",
               );
-              cache.put(pathname, new Response(body, {
-                headers: res.headers,
-              }));
+              cache.put(
+                pathname,
+                new Response(body, {
+                  headers: res.headers,
+                }),
+              );
             } else {
               cache.put(pathname, res);
             }
@@ -108,5 +105,10 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(Promise.all([self.clients.claim(), initAssetsCache()]));
 });
 
-// @ts-expect-error Type 'void' is not assignable to type 'undefined'.
-self.addEventListener("fetch", handle(app));
+self.addEventListener("fetch", (e) => {
+  if (new URL(e.request.url).origin !== self.origin) {
+    return;
+  }
+  // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
+  return handle(app)(e);
+});
