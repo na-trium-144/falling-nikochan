@@ -13,7 +13,7 @@ import {
   notFound,
   fetchStatic,
 } from "@falling-nikochan/route";
-import { briefApp } from "@falling-nikochan/route/src/api/brief";
+import { briefApp } from "@falling-nikochan/route/src/api/brief.js";
 import { Hono } from "hono";
 
 // export const config = {
