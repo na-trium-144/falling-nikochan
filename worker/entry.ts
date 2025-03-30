@@ -30,9 +30,15 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
 
 async function initAssetsCache(config: { clearOld: boolean }) {
   const cache = await mainCache();
-  const filesRes = await fetch(
-    (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
-  );
+  let filesRes: Response;
+  try {
+    filesRes = await fetch(
+      (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
+    );
+  } catch (e) {
+    console.error(e);
+    return;
+  }
   if (filesRes.ok) {
     const files = (await filesRes.json()).map((file: string) => {
       let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
@@ -92,11 +98,15 @@ async function initAssetsCache(config: { clearOld: boolean }) {
       );
     }
     await Promise.all(pFetch);
-    const remoteVer = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
-    );
-    if (remoteVer.ok) {
-      await configCache().then((cache) => cache.put("/buildVer", remoteVer));
+    try {
+      const remoteVer = await fetch(
+        (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      );
+      if (remoteVer.ok) {
+        await configCache().then((cache) => cache.put("/buildVer", remoteVer));
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 }
@@ -146,9 +156,14 @@ const app = new Hono({ strict: false })
   .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", (c) => fetch(c.req.raw))
   .get("/worker/checkUpdate", async (c) => {
-    const remoteVer: BuildVer = await fetch(
+    let remoteVer: BuildVer;
+    const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
-    ).then((res) => res.json());
+    );
+    if (!remoteRes.ok) {
+      return c.body(null, 500);
+    }
+    remoteVer = await remoteRes.json();
     const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
       cache.match("/buildVer").then((res) => res?.json()),
     );

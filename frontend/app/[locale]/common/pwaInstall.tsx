@@ -75,21 +75,37 @@ export function usePWAInstall(): PWAStates {
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
         console.log("registered service worker");
         updateFetching = setTimeout(() => {
-          fetch("/worker/checkUpdate").then(async (res) => {
-            const { version, commit } = await res.json();
-            if (version) {
-              setWorkerUpdate("updating");
-              fetch("/worker/initAssets?clearOld=1").then(() => {
-                setWorkerUpdate("done");
-                setTimeout(() => window.location.reload(), 1000);
-              });
-            } else if (commit) {
-              setWorkerUpdate("updating");
-              fetch("/worker/initAssets").then(() => {
-                setWorkerUpdate("done");
-              });
-            }
-          });
+          fetch("/worker/checkUpdate")
+            .then(async (res) => {
+              if (res.ok) {
+                const { version, commit } = await res.json();
+                if (version) {
+                  setWorkerUpdate("updating");
+                  fetch("/worker/initAssets?clearOld=1")
+                    .then((res) => {
+                      if (res.ok) {
+                        setWorkerUpdate("done");
+                        setTimeout(() => window.location.reload(), 1000);
+                      } else {
+                        setWorkerUpdate(null);
+                      }
+                    })
+                    .catch(() => setWorkerUpdate(null));
+                } else if (commit) {
+                  setWorkerUpdate("updating");
+                  fetch("/worker/initAssets")
+                    .then((res) => {
+                      if (res.ok) {
+                        setWorkerUpdate("done");
+                      } else {
+                        setWorkerUpdate(null);
+                      }
+                    })
+                    .catch(() => setWorkerUpdate(null));
+                }
+              }
+            })
+            .catch(() => undefined);
         }, 1000);
 
         reg.addEventListener("updatefound", () => {
