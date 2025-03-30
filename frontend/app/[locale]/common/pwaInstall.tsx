@@ -138,7 +138,7 @@ export function usePWAInstall(): PWAStates {
   const install = useCallback(() => {
     deferredPrompt?.prompt().then(({ outcome }) => {
       if (outcome === "accepted") {
-        localStorage.setItem("PWADismissed", "1");
+        // localStorage.setItem("PWADismissed", "1");
         setDismissed(true);
       }
       setDeferredPrompt(null);
