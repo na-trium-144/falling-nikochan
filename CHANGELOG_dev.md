@@ -11,6 +11,11 @@
 * PWAとしてインストール可能にした
     * PWAの場合playやeditを同一のタブで開く
     * 編集中の譜面データが消失しないようにsessionStorageに退避
+* PWAの場合のみserviceWorkerを起動
+    * /のリダイレクト処理と、/api以外のルートのキャッシュをする
+    * ASSET_PREFIXへのアクセスを元のドメインに書き換える
+    * バージョン(/assets/buildVer.json)が更新されたときassetsを再度fetchする
+    * languageDetectorもserviceWorker独自のものを実装
 
 ## ver. 9.18 - 2025/03/28 [#420](https://github.com/na-trium-144/falling-nikochan/pull/420)
 
