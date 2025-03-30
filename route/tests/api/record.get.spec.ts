@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { initDb } from "./init";
-import app from "@falling-nikochan/route";
+import { app, initDb } from "./init";
 import { RecordGetSummary } from "@falling-nikochan/chart";
 
 describe("GET /api/record/:cid", () => {

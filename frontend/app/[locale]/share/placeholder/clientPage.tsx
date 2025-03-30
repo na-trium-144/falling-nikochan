@@ -65,9 +65,13 @@ export default function ShareChart({ locale }: { locale: string }) {
       setBrief(brief);
       document.title = titleShare(t, cid, brief);
     })();
-    fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`).then((res) =>
-      res.json().then((record) => setRecord(record)),
-    );
+    fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
+      .then((res) => {
+        if (res.ok) {
+          res.json().then((record) => setRecord(record));
+        }
+      })
+      .catch(() => undefined);
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));

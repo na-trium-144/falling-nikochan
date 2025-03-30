@@ -1,5 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import {
+  app,
   dummyChart,
   dummyChart6,
   dummyChart7,
@@ -7,7 +8,6 @@ import {
   dummyChart9,
   initDb,
 } from "./init";
-import app from "@falling-nikochan/route";
 import {
   Chart4,
   Chart5,

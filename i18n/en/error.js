@@ -28,6 +28,7 @@ export default {
       unsupportedChartVersion: "Unsupported chart data version",
     },
     unknownApiError: "An error occurred on the server",
+    fetchError: "Failed to connect to the server",
     noSession: "Failed to load session data",
     chartVersion: "The version of the chart data (ver. {ver}) is abnormal",
     badResponse: "Failed to interpret the response from the server",
