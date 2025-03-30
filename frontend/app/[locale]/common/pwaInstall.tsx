@@ -27,12 +27,16 @@ interface PWAStates {
   detectedOS: "android" | "ios" | null;
   deferredPrompt: BeforeInstallPromptEvent | null;
   install: () => void;
+  workerUpdate: null | "updating" | "done";
 }
 export function usePWAInstall(): PWAStates {
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const [workerUpdate, setWorkerUpdate] = useState<null | "updating" | "done">(
+    null,
+  );
 
   const dismiss = useCallback(() => {
     localStorage.setItem("PWADismissed", "1");
@@ -61,24 +65,56 @@ export function usePWAInstall(): PWAStates {
     ) {
       setDetectedOS("ios");
     }
+
+    let updateFetching: ReturnType<typeof setTimeout> | null = null;
     if (
       (isStandalone() || process.env.USE_SW) &&
       "serviceWorker" in navigator
     ) {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .then((reg) => {
-          reg.addEventListener("updatefound", () => {
-            const newWorker = reg.installing;
-            newWorker?.addEventListener("statechange", () => {
-              if (newWorker?.state === "installed") {
-                window.location.reload();
-              }
-            });
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
+        console.log("registered service worker");
+        updateFetching = setTimeout(() => {
+          fetch("/worker/checkUpdate").then(async (res) => {
+            const { version, commit } = await res.json();
+            if (version) {
+              setWorkerUpdate("updating");
+              fetch("/worker/initAssets?clearOld=1").then(() => {
+                setWorkerUpdate("done");
+                setTimeout(() => window.location.reload(), 1000);
+              });
+            } else if (commit) {
+              setWorkerUpdate("updating");
+              fetch("/worker/initAssets").then(() => {
+                setWorkerUpdate("done");
+              });
+            }
+          });
+        }, 1000);
+
+        reg.addEventListener("updatefound", () => {
+          setWorkerUpdate("updating");
+          if (updateFetching !== null) clearTimeout(updateFetching);
+          const newWorker = reg.installing;
+          newWorker?.addEventListener("statechange", () => {
+            if (newWorker?.state === "installed") {
+              setWorkerUpdate("done");
+              // 適当に遅延させる
+              setTimeout(() => window.location.reload(), 1000);
+            }
           });
         });
+      });
     }
+    return () => {
+      if (updateFetching !== null) clearTimeout(updateFetching);
+    };
   }, []);
+  useEffect(() => {
+    if (workerUpdate === "done") {
+      const t = setTimeout(() => setWorkerUpdate(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [workerUpdate]);
   const install = useCallback(() => {
     deferredPrompt?.prompt().then(({ outcome }) => {
       if (outcome === "accepted") {
@@ -95,6 +131,7 @@ export function usePWAInstall(): PWAStates {
     detectedOS,
     deferredPrompt,
     install,
+    workerUpdate,
   };
 }
 interface Props {

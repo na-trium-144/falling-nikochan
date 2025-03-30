@@ -14,6 +14,8 @@ export default {
       "You can open Falling Nikochan as an app " +
       "by selecting 'Add to Home Screen' from Safari's share menu.",
     dismiss: "Close",
+    updating: "Downloading update...",
+    updateDone: "Update completed!",
     about: {
       title: "What is Falling Nikochan?",
     },

@@ -12,6 +12,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
 import { PWAInstallMain, usePWAInstall } from "@/common/pwaInstall";
+import { SlimeSVG } from "@/common/slime";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -36,6 +37,24 @@ export function IndexMain(props: Props) {
   return (
     <main className="flex flex-col w-full overflow-x-hidden min-h-dvh h-max">
       {props.modal}
+      <Box
+        className={
+          "fixed inset-x-0 bottom-2 p-2 w-max max-w-full mx-auto z-50 shadow-lg " +
+          "transition-all duration-200 origin-bottom " +
+          (pwa.workerUpdate !== null
+            ? "ease-in scale-100 opacity-100 "
+            : "ease-out scale-0 opacity-0 ")
+        }
+      >
+        {pwa.workerUpdate === "updating" ? (
+          <>
+            <SlimeSVG />
+            {t("updating")}
+          </>
+        ) : (
+          t("updateDone")
+        )}
+      </Box>
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
           <Header locale={locale}>{tabTitles(props.tab)}</Header>
@@ -61,7 +80,9 @@ export function IndexMain(props: Props) {
           "self-center mx-6 " + (!isTitlePage ? "my-2 " : "basis-0 grow-1 ")
         }
       />
-      {isTitlePage && <PWAInstallMain pwa={pwa} className="self-center mx-6 my-2 " />}
+      {isTitlePage && (
+        <PWAInstallMain pwa={pwa} className="self-center mx-6 my-2 " />
+      )}
       <div
         className={
           "main-wide:max-h-dvh main-wide:overflow-hidden main-wide:mb-3 " +

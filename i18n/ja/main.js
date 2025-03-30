@@ -15,6 +15,8 @@ export default {
       "Safari の共有メニューから「ホーム画面に追加」を選択することで、" +
       "Falling Nikochan をアプリとして開くことができます。",
     dismiss: "閉じる",
+    updating: "更新をダウンロード中...",
+    updateDone: "更新が完了しました！",
     about: {
       title: "Falling Nikochan とは？",
     },
