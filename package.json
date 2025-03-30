@@ -12,11 +12,13 @@
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",
     "i18n:t": "cd i18n && node verifyKeys.js",
-    "t": "npm run chart:t && npm run route:t && npm run i18n:t",
+    "worker:t": "cd worker && tsc",
+    "t": "npm run chart:t && npm run route:t && npm run i18n:t && npm run worker:t",
     "prepare": "npm run t",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
+    "swbuild": "cd worker && webpack",
     "ndev": "cd frontend && node ./initAssets.js && next dev -H 0.0.0.0",
-    "nbuild": "cd frontend && node ./initAssets.js && next build",
+    "nbuild": "npm run swbuild && cd frontend && node ./initAssets.js && next build",
     "ldev": "cd route/ && tsx watch serve-local.ts",
     "bdev": "cd route/ && bun run --hot serve-bun.ts"
   },
@@ -24,7 +26,8 @@
     "chart",
     "i18n",
     "frontend",
-    "route"
+    "route",
+    "worker"
   ],
   "dependencies": {
     "react": "^19.0.0",

@@ -9,16 +9,26 @@ import {
   languageDetector,
   onError,
   notFound,
+  fetchStatic,
 } from "./src/index.js";
 import { Hono } from "hono";
+import { logger } from "hono/logger";
+import briefApp from "./src/api/brief.js";
 
 const port = 8787;
 console.log(`Server is running on http://localhost:${port}`);
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .use(logger())
   .route("/api", apiApp)
   .route("/og", ogApp)
-  .route("/share", shareApp)
+  .route(
+    "/share",
+    shareApp({
+      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchStatic,
+    }),
+  )
   .route("/", redirectApp)
   .use(
     "/*",
@@ -37,7 +47,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     }),
   )
   .use(languageDetector())
-  .onError(onError)
+  .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
 serve({

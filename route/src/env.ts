@@ -2,7 +2,6 @@ import { locales } from "@falling-nikochan/i18n";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
-dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export interface Bindings {
   MONGODB_URI: string;
@@ -51,6 +50,7 @@ export function fetchStatic(e: Bindings, url: URL) {
 }
 
 export function languageDetector(){
+  dotenv.config({ path: join(dirname(process.cwd()), ".env") });
   return honoLanguageDetector({
       supportedLanguages: locales,
       fallbackLanguage: "en",

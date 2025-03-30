@@ -27,15 +27,23 @@ import {
   notFound,
   onError,
   languageDetector,
+  fetchStatic,
 } from "@falling-nikochan/route";
+import briefApp from "@falling-nikochan/route/src/api/brief";
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)
   .route("/og", ogApp)
-  .route("/share", shareApp)
+  .route(
+    "/share",
+    shareApp({
+      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchStatic,
+    }),
+  )
   .route("/", redirectApp)
   .use(languageDetector())
-  .onError(onError)
+  .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
 export const dummyCid = "100000";

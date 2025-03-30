@@ -11,7 +11,9 @@ import {
   languageDetector,
   onError,
   notFound,
+  fetchStatic,
 } from "@falling-nikochan/route";
+import { briefApp } from "@falling-nikochan/route/src/api/brief";
 import { Hono } from "hono";
 
 // export const config = {
@@ -21,10 +23,16 @@ import { Hono } from "hono";
 const app = new Hono({ strict: false })
   .route("/api", apiApp)
   .route("/og", ogApp)
-  .route("/share", shareApp)
+  .route(
+    "/share",
+    shareApp({
+      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchStatic,
+    }),
+  )
   .route("/", redirectApp)
   .use(languageDetector())
-  .onError(onError)
+  .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
 export const GET = handle(app);

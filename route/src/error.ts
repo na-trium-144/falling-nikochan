@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { Bindings, fetchStatic } from "./env.js";
+import { Bindings } from "./env.js";
 import { ValiError } from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
@@ -8,41 +8,47 @@ import { getTranslations } from "@falling-nikochan/i18n";
 export function notFound(): Response {
   throw new HTTPException(404);
 }
-export async function onError(err: any, c: Context) {
-  console.error(err);
-  try {
-    const lang = c.get("language");
-    if (err instanceof ValiError) {
-      err = new HTTPException(400, { message: err.message });
-    } else if (!(err instanceof HTTPException)) {
-      err = new HTTPException(500);
-    }
-    const status = (err as HTTPException).status;
-    const message =
-      (await (err as HTTPException).getResponse().text()) ||
-      (status === 404 ? "notFound" : "");
-    if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
-      return c.json({ message }, status);
-    } else {
-      return c.body(
-        await errorResponse(
-          env(c),
-          new URL(c.req.url).origin,
-          lang,
+export const onError =
+  (config: {
+    fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+  }) =>
+  async (err: any, c: Context) => {
+    console.error(err);
+    try {
+      const lang = c.get("language");
+      if (err instanceof ValiError) {
+        err = new HTTPException(400, { message: err.message });
+      } else if (!(err instanceof HTTPException)) {
+        err = new HTTPException(500);
+      }
+      const status = (err as HTTPException).status;
+      const message =
+        (await (err as HTTPException).getResponse().text()) ||
+        (status === 404 ? "notFound" : "");
+      if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
+        return c.json({ message }, status);
+      } else {
+        return c.body(
+          await errorResponse(
+            config.fetchStatic,
+            env(c),
+            new URL(c.req.url).origin,
+            lang,
+            status,
+            message,
+          ),
           status,
-          message,
-        ),
-        status,
-        { "Content-Type": "text/html" },
-      );
+          { "Content-Type": "text/html" },
+        );
+      }
+    } catch (e) {
+      console.error("While handling the above error, another error thrown:", e);
+      return c.body(null, 500);
     }
-  } catch (e) {
-    console.error("While handling the above error, another error thrown:", e);
-    return c.body(null, 500);
-  }
-}
+  };
 
 async function errorResponse(
+  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>,
   e: Bindings,
   origin: string,
   lang: string,

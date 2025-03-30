@@ -9,8 +9,7 @@
     "skipLibCheck": true,
     "allowJs": true,
     "jsx": "react",
-    "resolveJsonModule": true,
-    "lib": ["es2017", "webworker"]
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }
