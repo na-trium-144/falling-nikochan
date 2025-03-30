@@ -65,7 +65,10 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           .replaceAll("=", ""),
       );
       ogQuery.set("v", packageJson.version);
-      return c.redirect(`${c.req.path}?${ogQuery.toString()}`, 307);
+      return c.redirect(
+        `${new URL(c.req.url).origin}/${c.req.path}?${ogQuery.toString()}`,
+        307,
+      );
     }
 
     const sBriefBin = atob(
@@ -189,7 +192,10 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   })
   .get("/:cid{[0-9]+}", (c) =>
     // deprecated (used until ver8.11)
-    c.redirect(`/og/share/${c.req.param("cid")}`, 301),
+    c.redirect(
+      `${new URL(c.req.url).origin}/og/share/${c.req.param("cid")}`,
+      301,
+    ),
   );
 
 export default ogApp;

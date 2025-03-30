@@ -28,6 +28,7 @@ export default {
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
     },
     unknownApiError: "サーバーで何らかのエラーが発生しました",
+    fetchError: "サーバーへの接続に失敗しました",
     noSession: "セッションデータを読み込めません",
     chartVersion: "譜面データのバージョン (ver. {ver}) が異常です",
     badResponse: "サーバーからの応答を解釈できません",

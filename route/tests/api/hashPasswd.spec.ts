@@ -1,9 +1,8 @@
 import { expect, test, describe } from "bun:test";
-import app from "@falling-nikochan/route";
 import { hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
-import { initDb } from "./init";
+import { app, initDb } from "./init";
 
 describe("GET /api/hashPasswd/:cid", () => {
   test("should return hashed password and random pUserSalt", async () => {

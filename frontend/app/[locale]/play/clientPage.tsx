@@ -55,6 +55,7 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
+import { isStandalone } from "@/common/pwaInstall.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -112,54 +113,61 @@ export function InitPlay({ locale }: { locale: string }) {
       setErrorMsg(undefined);
     } else {
       void (async () => {
-        const res = await fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/playFile/${session?.cid || cidFromParam}` +
-            `/${session?.lvIndex || lvIndexFromParam}`,
-          { cache: "no-store" },
-        );
-        if (res.ok) {
-          try {
-            const seq: Level6Play | Level9Play = msgpack.deserialize(
-              await res.arrayBuffer(),
-            );
-            if (seq.ver === 6 || seq.ver === 9) {
-              switch (seq.ver) {
-                case 6:
-                  setChartSeq(loadChart6(seq));
-                  break;
-                case 9:
-                  setChartSeq(loadChart9(seq));
-                  break;
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/playFile/${session?.cid || cidFromParam}` +
+              `/${session?.lvIndex || lvIndexFromParam}`,
+            { cache: "no-store" },
+          );
+          if (res.ok) {
+            try {
+              const seq: Level6Play | Level9Play = msgpack.deserialize(
+                await res.arrayBuffer(),
+              );
+              if (seq.ver === 6 || seq.ver === 9) {
+                switch (seq.ver) {
+                  case 6:
+                    setChartSeq(loadChart6(seq));
+                    break;
+                  case 9:
+                    setChartSeq(loadChart9(seq));
+                    break;
+                }
+                setErrorStatus(undefined);
+                setErrorMsg(undefined);
+                addRecent("play", session?.cid || cidFromParam || "");
+              } else {
+                setChartSeq(undefined);
+                setErrorStatus(undefined);
+                setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
               }
-              setErrorStatus(undefined);
-              setErrorMsg(undefined);
-              addRecent("play", session?.cid || cidFromParam || "");
-            } else {
+            } catch (e) {
               setChartSeq(undefined);
               setErrorStatus(undefined);
-              setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
+              console.error(e);
+              setErrorMsg(te("badResponse"));
             }
-          } catch (e) {
+          } else {
             setChartSeq(undefined);
-            setErrorStatus(undefined);
-            console.error(e);
-            setErrorMsg(te("badResponse"));
-          }
-        } else {
-          setChartSeq(undefined);
-          setErrorStatus(res.status);
-          try {
-            const message = ((await res.json()) as { message?: string })
-              .message;
-            if (te.has("api." + message)) {
-              setErrorMsg(te("api." + message));
-            } else {
-              setErrorMsg(message || te("unknownApiError"));
+            setErrorStatus(res.status);
+            try {
+              const message = ((await res.json()) as { message?: string })
+                .message;
+              if (te.has("api." + message)) {
+                setErrorMsg(te("api." + message));
+              } else {
+                setErrorMsg(message || te("unknownApiError"));
+              }
+            } catch {
+              setErrorMsg(te("unknownApiError"));
             }
-          } catch {
-            setErrorMsg(te("unknownApiError"));
           }
+        } catch (e) {
+          setChartSeq(undefined);
+          setErrorStatus(undefined);
+          console.error(e);
+          setErrorMsg(te("fetchError"));
         }
       })();
     }
@@ -366,8 +374,11 @@ function Play(props: Props) {
   }, [chartPlaying]);
   const exit = () => {
     // router.replace(`/share/${cid}`);
-    // history.back();
-    window.close();
+    if (isStandalone()) {
+      history.back();
+    } else {
+      window.close();
+    }
   };
 
   // youtube側のreadyイベント & chartSeqが読み込まれる の両方を満たしたら
@@ -437,35 +448,45 @@ function Play(props: Props) {
             });
           }
           void (async () => {
-            const res = await fetch(
-              process.env.BACKEND_PREFIX + `/api/record/${cid}`,
-            );
-            const records: RecordGetSummary[] = await res.json();
-            setRecord(
-              records.find(
-                (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash,
-              ),
-            );
+            try {
+              const res = await fetch(
+                process.env.BACKEND_PREFIX + `/api/record/${cid}`,
+              );
+              if (res.ok) {
+                const records: RecordGetSummary[] = await res.json();
+                setRecord(
+                  records.find(
+                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash,
+                  ),
+                );
+              }
+            } catch (e) {
+              console.error(e);
+            }
           })();
         }
         const t = setTimeout(() => {
           setShowResult(true);
           if (chartBrief?.levels.at(lvIndex)) {
-            void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                lvHash: chartBrief.levels[lvIndex].hash,
-                auto,
-                score,
-                fc: chainScore === chainScoreRate,
-                fb: bigScore === bigScoreRate,
-              } satisfies RecordPost),
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            });
+            try {
+              void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  lvHash: chartBrief.levels[lvIndex].hash,
+                  auto,
+                  score,
+                  fc: chainScore === chainScoreRate,
+                  fb: bigScore === bigScoreRate,
+                } satisfies RecordPost),
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              });
+            } catch {
+              //ignore
+            }
           }
           setResultDate(new Date());
           setExitable(
@@ -679,9 +700,6 @@ function Play(props: Props) {
               theme={themeContext}
             />
           </div>
-          {errorMsg && (
-            <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
-          )}
           {!initDone && (
             <CenterBox
               className={
@@ -694,6 +712,9 @@ function Play(props: Props) {
                 Loading...
               </p>
             </CenterBox>
+          )}
+          {errorMsg && (
+            <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
           )}
           {showReady && (
             <ReadyMessage

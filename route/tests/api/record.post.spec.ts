@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { initDb } from "./init";
-import app from "@falling-nikochan/route";
+import { app, initDb } from "./init";
 import { RecordPost, hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { PlayRecordEntry } from "@falling-nikochan/route/src/api/record";

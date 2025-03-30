@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { dummyChart, dummyDate, initDb } from "./init";
-import app from "@falling-nikochan/route";
+import { app, dummyChart, dummyDate, initDb } from "./init";
 import { ChartBrief, hashLevel } from "@falling-nikochan/chart";
 
 describe("GET /api/brief/:cid", () => {

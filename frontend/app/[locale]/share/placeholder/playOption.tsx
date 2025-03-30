@@ -20,6 +20,8 @@ import { SmilingFace, Timer } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
+import { isStandalone } from "@/common/pwaInstall";
+import { useRouter } from "next/navigation";
 
 interface Props {
   cid: string;
@@ -28,6 +30,7 @@ interface Props {
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
+  const router = useRouter();
 
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number | null>(
@@ -132,9 +135,11 @@ export function PlayOption(props: Props) {
                 lvIndex: selectedLevel,
                 brief: props.brief,
               });
-              // router.push(`/play?sid=${sessionId}`);  youtubeAPIが初期化されない
-              // location.href = `/play?sid=${sessionId}`;  テーマが引き継がれない
-              window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
+              if (isStandalone()) {
+                router.push(`/play?sid=${sessionId}`);
+              } else {
+                window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
+              }
             }}
           />
         </p>

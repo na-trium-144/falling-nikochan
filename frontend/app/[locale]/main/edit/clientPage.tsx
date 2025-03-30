@@ -16,10 +16,13 @@ import { useTranslations } from "next-intl";
 import { useDisplayMode } from "@/scale.js";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
+import { isStandalone } from "@/common/pwaInstall.js";
+import { useRouter } from "next/navigation";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
   const te = useTranslations("error");
+  const router = useRouter();
   const { isMobileMain } = useDisplayMode();
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
@@ -82,26 +85,39 @@ export default function EditTab({ locale }: { locale: string }) {
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg("");
     setCidFetching(true);
-    const res = await fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
-      cache: "no-store",
-    });
-    setCidFetching(false);
-    if (res.ok) {
-      // router.push(`/${locale}/edit?cid=${cid}`);
-      window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
-      setCIdErrorMsg("");
-      setInputCId(cid);
-    } else {
-      try {
-        const message = ((await res.json()) as { message?: string }).message;
-        if (te.has("api." + message)) {
-          setCIdErrorMsg(te("api." + message));
+    try {
+      const res = await fetch(
+        process.env.BACKEND_PREFIX + `/api/brief/${cid}`,
+        {
+          cache: "no-store",
+        },
+      );
+      setCidFetching(false);
+      if (res.ok) {
+        if (isStandalone()) {
+          router.push(`/${locale}/edit?cid=${cid}`);
         } else {
-          setCIdErrorMsg(message || te("unknownApiError"));
+          window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
         }
-      } catch {
-        setCIdErrorMsg(te("unknownApiError"));
+        setCIdErrorMsg("");
+        setInputCId(cid);
+      } else {
+        try {
+          const message = ((await res.json()) as { message?: string }).message;
+          if (te.has("api." + message)) {
+            setCIdErrorMsg(te("api." + message));
+          } else {
+            setCIdErrorMsg(message || te("unknownApiError"));
+          }
+        } catch {
+          setCIdErrorMsg(te("unknownApiError"));
+        }
+        setInputCId("");
       }
+    } catch (e) {
+      console.error(e);
+      setCidFetching(false);
+      setCIdErrorMsg(te("fetchError"));
       setInputCId("");
     }
   };
