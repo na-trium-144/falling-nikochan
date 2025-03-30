@@ -1,3 +1,9 @@
+import { locales } from "@falling-nikochan/i18n";
+import { languageDetector as honoLanguageDetector } from "hono/language";
+import dotenv from "dotenv";
+import { dirname, join } from "node:path";
+dotenv.config({ path: join(dirname(process.cwd()), ".env") });
+
 export interface Bindings {
   MONGODB_URI: string;
   API_ENV?: "development";
@@ -42,4 +48,20 @@ export function fetchStatic(e: Bindings, url: URL) {
         : {}),
     },
   });
+}
+
+export function languageDetector(){
+  return honoLanguageDetector({
+      supportedLanguages: locales,
+      fallbackLanguage: "en",
+      order: ["cookie", "header"],
+      lookupCookie: "language",
+      cookieOptions: {
+        sameSite: "Lax",
+        secure: process.env.API_ENV !== "development",
+        maxAge: 60 * 60 * 24 * 365,
+        httpOnly: false,
+      },
+      // debug: process.env.API_ENV === "development",
+    });
 }

@@ -17,6 +17,26 @@ import {
   Level9Play,
   stepZero,
 } from "@falling-nikochan/chart";
+import { Hono } from "hono";
+import {
+  apiApp,
+  ogApp,
+  shareApp,
+  redirectApp,
+  Bindings,
+  notFound,
+  onError,
+  languageDetector,
+} from "@falling-nikochan/route";
+
+export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .route("/api", apiApp)
+  .route("/og", ogApp)
+  .route("/share", shareApp)
+  .route("/", redirectApp)
+  .use(languageDetector())
+  .onError(onError)
+  .notFound(notFound);
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);

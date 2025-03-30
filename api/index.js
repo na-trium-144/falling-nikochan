@@ -3,11 +3,29 @@
 // Set NODEJS_HELPERS=0 in Vercel production environment variables. https://github.com/honojs/hono/issues/1256
 
 import { handle } from "hono/vercel";
-import app from "@falling-nikochan/route";
+import {
+  apiApp,
+  ogApp,
+  shareApp,
+  redirectApp,
+  languageDetector,
+  onError,
+  notFound,
+} from "@falling-nikochan/route";
+import { Hono } from "hono";
 
 // export const config = {
 //   runtime: "nodejs",
 // };
+
+const app = new Hono({ strict: false })
+  .route("/api", apiApp)
+  .route("/og", ogApp)
+  .route("/share", shareApp)
+  .route("/", redirectApp)
+  .use(languageDetector())
+  .onError(onError)
+  .notFound(notFound);
 
 export const GET = handle(app);
 export const POST = handle(app);

@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { dummyChart, dummyChart7, initDb } from "./init";
-import app from "@falling-nikochan/route";
+import { app, dummyChart, dummyChart7, initDb } from "./init";
 import { chartMaxEvent, fileMaxSize } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
