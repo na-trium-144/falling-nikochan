@@ -17,8 +17,8 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
   if (pathname.endsWith("/")) {
     pathname = pathname.slice(0, -1);
   }
-  if (!pathname.split("/").pop()?.includes(".")) {
-    pathname += ".html";
+  if (pathname.endsWith(".html")) {
+    pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
   return (await cache.match(pathname)) || new Response(null, { status: 404 });
@@ -61,11 +61,39 @@ async function initAssetsCache() {
   if (filesRes.ok) {
     await Promise.all([
       (await filesRes.json()).map(async (file: string) => {
-        const pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
-        cache.put(
-          pathname,
-          await fetch((process.env.ASSET_PREFIX || self.origin) + pathname),
-        );
+        let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
+        if (pathname.endsWith(".html")) {
+          pathname = pathname.slice(0, -5);
+        }
+        try {
+          const res = await fetch(
+            (process.env.ASSET_PREFIX || self.origin) + pathname,
+          );
+          if (res.ok) {
+            if (
+              process.env.ASSET_PREFIX &&
+              (file.endsWith(".html") ||
+                file.endsWith(".js") ||
+                file.endsWith(".css") ||
+                file.endsWith(".txt"))
+            ) {
+              // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
+              const body = (await res.text()).replaceAll(
+                process.env.ASSET_PREFIX,
+                "",
+              );
+              cache.put(pathname, new Response(body, {
+                headers: res.headers,
+              }));
+            } else {
+              cache.put(pathname, res);
+            }
+          } else {
+            console.error(`failed to fetch ${pathname}: ${res.status}`);
+          }
+        } catch (e) {
+          console.error(`failed to fetch ${pathname}: ${e}`);
+        }
       }),
     ]);
   }
