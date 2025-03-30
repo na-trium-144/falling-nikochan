@@ -1,12 +1,36 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import app from "./src/index.js";
+import {
+  apiApp,
+  ogApp,
+  redirectApp,
+  shareApp,
+  Bindings,
+  languageDetector,
+  onError,
+  notFound,
+  fetchStatic,
+} from "./src/index.js";
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import briefApp from "./src/api/brief.js";
 
 const port = 8787;
 console.log(`Server is running on http://localhost:${port}`);
 
-serve({
-  fetch: app.use(
+const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+  .use(logger())
+  .route("/api", apiApp)
+  .route("/og", ogApp)
+  .route(
+    "/share",
+    shareApp({
+      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchStatic,
+    }),
+  )
+  .route("/", redirectApp())
+  .use(
     "/*",
     serveStatic({
       root: "../frontend/out",
@@ -20,7 +44,13 @@ serve({
           return path + ".html";
         }
       },
-    })
-  ).fetch,
+    }),
+  )
+  .use(languageDetector())
+  .onError(onError({ fetchStatic }))
+  .notFound(notFound);
+
+serve({
+  fetch: app.fetch,
   port,
 });
