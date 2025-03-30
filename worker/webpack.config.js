@@ -1,6 +1,7 @@
 import { join, dirname } from "node:path";
 import webpack from "webpack";
 import dotenv from "dotenv";
+// import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const config = {
@@ -16,7 +17,23 @@ const config = {
     ],
   },
   plugins: [
+    // new BundleAnalyzerPlugin(),
     new webpack.IgnorePlugin({ resourceRegExp: /\.mdx$/ }),
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/api\//,
+      contextRegExp: /route/,
+    }),
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/og\//,
+      contextRegExp: /route/,
+    }),
+    ...["main", "edit", "about", "play", "share"].map(
+      (n) =>
+        new webpack.IgnorePlugin({
+          resourceRegExp: new RegExp(`${n}\\.js$`),
+          contextRegExp: /i18n/,
+        }),
+    ),
     new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
       resource.request = resource.request.replace(/^node:/, "");
     }),
@@ -28,9 +45,10 @@ const config = {
       dotenv: false,
       mongodb: false,
       "node:path": false,
-      "react": false,
+      react: false,
       "@ygoe/msgpack": false,
-      "wasmoon": false,
+      wasmoon: false,
+      "@falling-nikochan/chart": false,
     },
     fallback: {
       path: false,
