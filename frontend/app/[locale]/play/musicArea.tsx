@@ -253,7 +253,7 @@ export function MusicArea(props: Props) {
         onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <VolumeNotice theme="filled" className="inline-block align-middle"/>
+        <VolumeNotice theme="filled" className="inline-block align-middle" />
       </button>
       <div
         className={
@@ -328,7 +328,7 @@ export function MusicArea(props: Props) {
             min={0}
             max={100}
             disabled={!props.enableSE}
-            value={props.seVolume}
+            value={props.enableSE ? props.seVolume : 0}
             onChange={(e) => props.setSEVolume(parseInt(e.target.value))}
           />
         </div>
