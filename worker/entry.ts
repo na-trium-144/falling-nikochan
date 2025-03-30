@@ -1,12 +1,12 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 import { handle } from "hono/service-worker";
 import {
-  languageDetector,
   notFound,
   onError,
   redirectApp,
   shareApp,
 } from "@falling-nikochan/route";
+import { locales } from "@falling-nikochan/i18n";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -107,15 +107,42 @@ interface BuildVer {
   version: string;
 }
 
+const languageDetector = async (c: Context, next: () => Promise<void>) => {
+  // headerもcookieも使えないので、その代わりにnavigator.languagesを使って検出するミドルウェア
+  const systemLangs = navigator.languages.map(
+    (l) => new Intl.Locale(l).language,
+  );
+  const preferredLang = c.req.path.split("/")[1];
+  const cache = await configCache();
+  const preferredLang2 = await cache.match("/lang").then((res) => res?.text());
+  let lang: string;
+  if (preferredLang && locales.includes(preferredLang)) {
+    lang = preferredLang;
+  } else if (preferredLang2 && locales.includes(preferredLang2)) {
+    lang = preferredLang2;
+  } else {
+    lang = systemLangs.find((l) => locales.includes(l)) || "en";
+  }
+  c.set("language", lang);
+  cache.put("/lang", new Response(lang));
+  await next();
+};
+
 const app = new Hono({ strict: false })
   .route(
     "/share",
     shareApp({
       fetchBrief: (cid) => fetch(`/api/brief/${cid}`),
       fetchStatic,
+      languageDetector,
     }),
   )
-  .route("/", redirectApp)
+  .route(
+    "/",
+    redirectApp({
+      languageDetector,
+    }),
+  )
   .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", (c) => fetch(c.req.raw))
   .get("/worker/checkUpdate", async (c) => {
@@ -148,7 +175,7 @@ const app = new Hono({ strict: false })
       return fetch(c.req.raw);
     }
   })
-  .use(languageDetector())
+  .use(languageDetector)
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 

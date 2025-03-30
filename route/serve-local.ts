@@ -29,7 +29,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchStatic,
     }),
   )
-  .route("/", redirectApp)
+  .route("/", redirectApp())
   .use(
     "/*",
     serveStatic({

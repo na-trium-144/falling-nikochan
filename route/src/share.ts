@@ -12,7 +12,7 @@ import {
 import { HTTPException } from "hono/http-exception";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -23,9 +23,10 @@ bodyを無理やり書き換える。
 const shareApp = (config: {
   fetchBrief: (cid: string) => Response | Promise<Response>;
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+  languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
-    .use(languageDetector())
+    .use(config.languageDetector || languageDetector())
     .get("/:cid{[0-9]+}", async (c) => {
       const lang = c.get("language");
       const qLang = c.req.query("lang") || lang;

@@ -30,7 +30,7 @@ const app = new Hono({ strict: false })
       fetchStatic,
     }),
   )
-  .route("/", redirectApp)
+  .route("/", redirectApp())
   .use(languageDetector())
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
