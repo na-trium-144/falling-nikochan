@@ -405,9 +405,10 @@ export default function PlayTab({ locale }: { locale: string }) {
           fetchAdditional={() => setFetchPopularAll(true)}
           creator
           href={(cid) => `/share/${cid}`}
-          onClick={(cid) =>
-            openModal(cid, popularBrief?.find((b) => b.cid === cid)?.brief)
-          }
+          onClick={(cid) => {
+            if (Array.isArray(popularBrief))
+              openModal(cid, popularBrief.find((b) => b.cid === cid)?.brief);
+          }}
           showLoading
           additionalOpen={showAllMode === "popular"}
           setAdditionalOpen={(open) => {
@@ -438,9 +439,10 @@ export default function PlayTab({ locale }: { locale: string }) {
           fetchAdditional={() => setFetchLatestAll(true)}
           creator
           href={(cid) => `/share/${cid}`}
-          onClick={(cid) =>
-            openModal(cid, latestBrief?.find((b) => b.cid === cid)?.brief)
-          }
+          onClick={(cid) => {
+            if (Array.isArray(latestBrief))
+              openModal(cid, latestBrief.find((b) => b.cid === cid)?.brief);
+          }}
           showLoading
           dateDiff
           additionalOpen={showAllMode === "latest"}
