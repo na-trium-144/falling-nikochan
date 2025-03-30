@@ -21,7 +21,14 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-export function usePWAInstall() {
+interface PWAStates {
+  dismissed: boolean;
+  dismiss: () => void;
+  detectedOS: "android" | "ios" | null;
+  deferredPrompt: BeforeInstallPromptEvent | null;
+  install: () => void;
+}
+export function usePWAInstall(): PWAStates {
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
   const [deferredPrompt, setDeferredPrompt] =
@@ -54,6 +61,23 @@ export function usePWAInstall() {
     ) {
       setDetectedOS("ios");
     }
+    if (
+      (isStandalone() || process.env.USE_SW) &&
+      "serviceWorker" in navigator
+    ) {
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .then((reg) => {
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
+            newWorker?.addEventListener("statechange", () => {
+              if (newWorker?.state === "installed") {
+                window.location.reload();
+              }
+            });
+          });
+        });
+    }
   }, []);
   const install = useCallback(() => {
     deferredPrompt?.prompt().then(({ outcome }) => {
@@ -75,10 +99,11 @@ export function usePWAInstall() {
 }
 interface Props {
   className?: string;
+  pwa: PWAStates;
 }
-export function PWAInstall(props: Props) {
+export function PWAInstallMain(props: Props) {
   const t = useTranslations("main");
-  const pwa = usePWAInstall();
+  const { pwa } = props;
   return (
     <div
       className={

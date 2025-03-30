@@ -21,6 +21,7 @@ const env = {
   buildDate: date,
   buildCommit: commit,
   buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
+  USE_SW: process.env.USE_SW || "",
   // prefix for every asset URL
   ASSET_PREFIX: process.env.ASSET_PREFIX || "",
   // prefix for every API call URL

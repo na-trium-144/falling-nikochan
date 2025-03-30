@@ -49,19 +49,21 @@ export function fetchStatic(e: Bindings, url: URL) {
   });
 }
 
-export function languageDetector(){
-  dotenv.config({ path: join(dirname(process.cwd()), ".env") });
+export function languageDetector() {
+  if(dotenv && join && dirname){
+    dotenv.config({ path: join(dirname(process.cwd()), ".env") });
+  }
   return honoLanguageDetector({
-      supportedLanguages: locales,
-      fallbackLanguage: "en",
-      order: ["cookie", "header"],
-      lookupCookie: "language",
-      cookieOptions: {
-        sameSite: "Lax",
-        secure: process.env.API_ENV !== "development",
-        maxAge: 60 * 60 * 24 * 365,
-        httpOnly: false,
-      },
-      // debug: process.env.API_ENV === "development",
-    });
+    supportedLanguages: locales,
+    fallbackLanguage: "en",
+    order: ["cookie", "header"],
+    lookupCookie: "language",
+    cookieOptions: {
+      sameSite: "Lax",
+      secure: process.env.API_ENV !== "development",
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: false,
+    },
+    // debug: process.env.API_ENV === "development",
+  });
 }

@@ -13,7 +13,7 @@ export const onError =
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
   }) =>
   async (err: any, c: Context) => {
-    console.error(err);
+    console.error(`Error: ${err} in ${c.req.path}`);
     try {
       const lang = c.get("language");
       if (err instanceof ValiError) {

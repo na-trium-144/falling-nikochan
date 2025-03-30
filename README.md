@@ -40,6 +40,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * `ASSET_PREFIX` (backend & frontend): `https://domain-of-your-assets/` or unset
         * `BACKEND_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
         * `NO_PREFETCH` (frontend): `1` or unset
+        * `USE_SW` (frontend): `1` or unset
 * Install dependencies
     ```sh
     npm ci  # or  bun i
@@ -68,7 +69,8 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
     * Or, SSR with exported html files
         * All pages should work by accessing the backend (`http://localhost:8787`) after building frontend, but there is no hot-reload.
         ```sh
-        npm run nbuild  # or  bun nbuild
+        npm run nbuild && npm run swbuild
+        # or  bun nbuild && bun swbuild
         ```
     * As of Bun v1.2.2, `bun -b nbuild` seems to be unstable for this project.
 

@@ -18,24 +18,13 @@ const config = {
   },
   plugins: [
     // new BundleAnalyzerPlugin(),
-    new webpack.IgnorePlugin({ resourceRegExp: /\.mdx$/ }),
-    new webpack.IgnorePlugin({
-      resourceRegExp: /^\.\/api\//,
-      contextRegExp: /route/,
-    }),
-    new webpack.IgnorePlugin({
-      resourceRegExp: /^\.\/og\//,
-      contextRegExp: /route/,
-    }),
-    ...["main", "edit", "about", "play", "share"].map(
-      (n) =>
-        new webpack.IgnorePlugin({
-          resourceRegExp: new RegExp(`${n}\\.js$`),
-          contextRegExp: /i18n/,
-        }),
-    ),
     new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
       resource.request = resource.request.replace(/^node:/, "");
+    }),
+    new webpack.DefinePlugin({
+      "process.env.API_ENV": JSON.stringify(process.env.API_ENV),
+      "process.env.ASSET_PREFIX": JSON.stringify(process.env.ASSET_PREFIX),
+      process: "{cwd:()=>''}",
     }),
   ],
   resolve: {
@@ -49,6 +38,9 @@ const config = {
       "@ygoe/msgpack": false,
       wasmoon: false,
       "@falling-nikochan/chart": false,
+      "@falling-nikochan/i18n": "@falling-nikochan/i18n/staticImport.js",
+      "./api/app.js": false,
+      "./og/app.js": false,
     },
     fallback: {
       path: false,
@@ -58,7 +50,7 @@ const config = {
     },
   },
   output: {
-    path: join(dirname(process.cwd()), "frontend/public/assets"),
+    path: join(dirname(process.cwd()), "frontend/out"),
     filename: "sw.js",
   },
 };
