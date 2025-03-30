@@ -5,6 +5,7 @@ import {
   dummyChart6,
   dummyChart7,
   dummyChart8,
+  dummyChart9,
   initDb,
 } from "./init";
 import {
@@ -36,7 +37,7 @@ describe("GET /api/chartFile/:cid", () => {
       pServerHash = (await (await client.connect())
         .db("nikochan")
         .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash;
+        .findOne({ cid: "100000" }))!.pServerHash!;
     } finally {
       client.close();
     }
@@ -50,6 +51,13 @@ describe("GET /api/chartFile/:cid", () => {
     expect(res.status).toBe(200);
     const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).toStrictEqual(dummyChart());
+  });
+  test("should return Chart9 if chart version is 9", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100009?p=p");
+    expect(res.status).toBe(200);
+    const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+    expect(chart).toStrictEqual(dummyChart9());
   });
   test("should return Chart8 if chart version is 8", async () => {
     await initDb();

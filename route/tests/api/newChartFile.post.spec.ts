@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { app, dummyChart, dummyChart7, initDb } from "./init";
+import { app, dummyChart, dummyChart9, initDb } from "./init";
 import { chartMaxEvent, fileMaxSize } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
@@ -134,7 +134,7 @@ describe("POST /api/newChartFile", () => {
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart7() }),
+      body: msgpack.serialize({ ...dummyChart9() }),
     });
     expect(res.status).toBe(409);
     const body = await res.json();

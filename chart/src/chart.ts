@@ -53,6 +53,7 @@ import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
+import { ChartUntil8, ChartUntil8Min } from "./legacy/chart8.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -92,7 +93,7 @@ export const ChartBriefSchema = () =>
   });
 export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
 
-export const currentChartVer = 9;
+export const currentChartVer = 10;
 export const lastIncompatibleVer = 6;
 export type ChartMin = Chart9Min;
 export type LevelMin = Level9Min;
@@ -105,17 +106,19 @@ export const convertToPlay = convertToPlay9;
 
 export async function validateChart(chart: ChartUntil9): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 9) chart = await convertTo9(chart);
+  if (chart.ver !== 9 && chart.ver !== 10)
+    chart = await convertTo9(chart as ChartUntil8);
   v.parse(ChartEditSchema9(), chart);
-  return chart;
+  return { ...chart, ver: 10 };
 }
 export async function validateChartMin(
   chart: ChartUntil9Min,
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 9) chart = await convertTo9Min(chart);
+  if (chart.ver !== 9 && chart.ver !== 10)
+    chart = await convertTo9Min(chart as ChartUntil8Min);
   v.parse(ChartMinSchema9(), chart);
-  return chart;
+  return { ...chart, ver: 10 };
 }
 
 export async function hash(text: string) {
