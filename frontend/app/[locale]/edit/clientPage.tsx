@@ -134,7 +134,16 @@ export default function EditAuth(props: {
         hasChange,
       }),
     );
-  }, [cid, editPasswd, currentPasswd, savePasswd, chart, convertedFrom, currentLevelIndex, hasChange]);
+  }, [
+    cid,
+    editPasswd,
+    currentPasswd,
+    savePasswd,
+    chart,
+    convertedFrom,
+    currentLevelIndex,
+    hasChange,
+  ]);
   const fetchChart = useCallback(
     async (
       isFirst: boolean,
@@ -187,72 +196,88 @@ export default function EditAuth(props: {
         if (bypass) {
           q.set("pbypass", "1");
         }
-        const res = await fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/chartFile/${cidInitial.current}?` +
-            q.toString(),
-          {
-            cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          },
-        );
-        if (res.ok) {
-          try {
-            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
-              msgpack.deserialize(await res.arrayBuffer());
-            setConvertedFrom(chartRes.ver);
-            const chart: ChartEdit = await validateChart(chartRes);
-            if (savePasswd) {
-              if (currentPasswd.current) {
-                const res = await fetch(
-                  process.env.BACKEND_PREFIX +
-                    `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
-                  {
-                    credentials:
-                      process.env.NODE_ENV === "development"
-                        ? "include"
-                        : "same-origin",
-                  },
-                );
-                setPasswd(cidInitial.current, await res.text());
-              }
-            } else {
-              unsetPasswd(cidInitial.current);
-            }
-            setChart(chart);
-            setErrorStatus(undefined);
-            setErrorMsg(undefined);
-            addRecent("edit", cidInitial.current);
-          } catch (e) {
-            console.error(e);
-            setChart(undefined);
-            setErrorStatus(undefined);
-            setErrorMsg(te("badResponse"));
-          }
-        } else {
-          if (res.status === 401) {
-            if (!isFirst) {
-              setPasswdFailed(true);
-            }
-            setChart(undefined);
-          } else {
-            setChart(undefined);
-            setErrorStatus(res.status);
+        let res: Response | null = null;
+        try {
+          res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/chartFile/${cidInitial.current}?` +
+              q.toString(),
+            {
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            },
+          );
+          if (res?.ok) {
             try {
-              const message = ((await res.json()) as { message?: string })
-                .message;
-              if (te.has("api." + message)) {
-                setErrorMsg(te("api." + message));
+              const chartRes:
+                | Chart5
+                | Chart6
+                | Chart7
+                | Chart8Edit
+                | Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+              setConvertedFrom(chartRes.ver);
+              const chart: ChartEdit = await validateChart(chartRes);
+              if (savePasswd) {
+                if (currentPasswd.current) {
+                  try {
+                    const res = await fetch(
+                      process.env.BACKEND_PREFIX +
+                        `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
+                      {
+                        credentials:
+                          process.env.NODE_ENV === "development"
+                            ? "include"
+                            : "same-origin",
+                      },
+                    );
+                    setPasswd(cidInitial.current, await res.text());
+                  } catch {
+                    //ignore
+                  }
+                }
               } else {
-                setErrorMsg(message || te("unknownApiError"));
+                unsetPasswd(cidInitial.current);
               }
-            } catch {
-              setErrorMsg(te("unknownApiError"));
+              setChart(chart);
+              setErrorStatus(undefined);
+              setErrorMsg(undefined);
+              addRecent("edit", cidInitial.current);
+            } catch (e) {
+              console.error(e);
+              setChart(undefined);
+              setErrorStatus(undefined);
+              setErrorMsg(te("badResponse"));
+            }
+          } else {
+            if (res?.status === 401) {
+              if (!isFirst) {
+                setPasswdFailed(true);
+              }
+              setChart(undefined);
+            } else {
+              setChart(undefined);
+              setErrorStatus(res?.status);
+              try {
+                const message = ((await res?.json()) as { message?: string })
+                  .message;
+                if (te.has("api." + message)) {
+                  setErrorMsg(te("api." + message));
+                } else {
+                  setErrorMsg(message || te("unknownApiError"));
+                }
+              } catch {
+                setErrorMsg(te("unknownApiError"));
+              }
             }
           }
+        } catch (e) {
+          console.error(e);
+          setChart(undefined);
+          setErrorStatus(undefined);
+          setErrorMsg(te("fetchError"));
         }
         setLoading(false);
       }

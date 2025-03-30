@@ -69,6 +69,7 @@ export function usePWAInstall(): PWAStates {
     let updateFetching: ReturnType<typeof setTimeout> | null = null;
     if (
       (isStandalone() || process.env.USE_SW) &&
+      process.env.NODE_ENV !== "development" &&
       "serviceWorker" in navigator
     ) {
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {

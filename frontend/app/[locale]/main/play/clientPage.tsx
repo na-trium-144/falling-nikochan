@@ -38,9 +38,13 @@ export default function PlayTab({ locale }: { locale: string }) {
 
   const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
   const [fetchRecentAll, setFetchRecentAll] = useState<boolean>(false);
-  const [popularBrief, setPopularBrief] = useState<ChartLineBrief[]>();
+  const [popularBrief, setPopularBrief] = useState<
+    ChartLineBrief[] | "error" | undefined
+  >(undefined);
   const [fetchPopularAll, setFetchPopularAll] = useState<boolean>(false);
-  const [latestBrief, setLatestBrief] = useState<ChartLineBrief[]>();
+  const [latestBrief, setLatestBrief] = useState<
+    ChartLineBrief[] | "error" | undefined
+  >(undefined);
   const [fetchLatestAll, setFetchLatestAll] = useState<boolean>(false);
   const [originalBrief, setOriginalBrief] = useState<ChartLineBrief[]>();
   const fetchOriginalAll = true;
@@ -84,8 +88,15 @@ export default function PlayTab({ locale }: { locale: string }) {
         setModalCId(cid);
         setModalBrief(brief);
         fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-          .then((res) => res.json())
-          .then((record) => setModalRecord(record));
+          .then((res) => {
+            if (res.ok) {
+              return res.json();
+            } else {
+              throw new Error("failed to fetch record");
+            }
+          })
+          .then((record) => setModalRecord(record))
+          .catch(() => setModalRecord([]));
         document.title = titleShare(th, cid, brief);
         setTimeout(() => setModalAppearing(true));
       }
@@ -130,20 +141,44 @@ export default function PlayTab({ locale }: { locale: string }) {
     );
     setSampleBrief(sampleCId.map((cid) => ({ cid, fetched: false })));
     void (async () => {
-      const latestCId = (await (
-        await fetch(process.env.BACKEND_PREFIX + `/api/latest`, {
-          cache: "default",
-        })
-      ).json()) as { cid: string }[];
-      setLatestBrief(latestCId.map(({ cid }) => ({ cid, fetched: false })));
+      try {
+        const latestRes = await fetch(
+          process.env.BACKEND_PREFIX + `/api/latest`,
+          {
+            cache: "default",
+          },
+        );
+        if (latestRes.ok) {
+          const latestCId = (await latestRes.json()) as { cid: string }[];
+          setLatestBrief(latestCId.map(({ cid }) => ({ cid, fetched: false })));
+        } else {
+          setLatestBrief("error");
+        }
+      } catch (e) {
+        console.error(e);
+        setLatestBrief("error");
+      }
     })();
     void (async () => {
-      const popularCId = (await (
-        await fetch(process.env.BACKEND_PREFIX + `/api/popular`, {
-          cache: "default",
-        })
-      ).json()) as { cid: string }[];
-      setPopularBrief(popularCId.map(({ cid }) => ({ cid, fetched: false })));
+      try {
+        const popularRes = await fetch(
+          process.env.BACKEND_PREFIX + `/api/popular`,
+          {
+            cache: "default",
+          },
+        );
+        if (popularRes.ok) {
+          const popularCId = (await popularRes.json()) as { cid: string }[];
+          setPopularBrief(
+            popularCId.map(({ cid }) => ({ cid, fetched: false })),
+          );
+        } else {
+          setPopularBrief("error");
+        }
+      } catch (e) {
+        console.error(e);
+        setPopularBrief("error");
+      }
     })();
   }, []);
   useEffect(() => {
@@ -162,7 +197,7 @@ export default function PlayTab({ locale }: { locale: string }) {
   }, [recentBrief, fetchRecentAll]);
   useEffect(() => {
     void (async () => {
-      if (latestBrief) {
+      if (Array.isArray(latestBrief)) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           latestBrief,
           fetchLatestAll,
@@ -175,7 +210,7 @@ export default function PlayTab({ locale }: { locale: string }) {
   }, [latestBrief, fetchLatestAll]);
   useEffect(() => {
     void (async () => {
-      if (popularBrief) {
+      if (Array.isArray(popularBrief)) {
         const { changed, briefs } = await fetchAndFilterBriefs(
           popularBrief,
           fetchPopularAll,

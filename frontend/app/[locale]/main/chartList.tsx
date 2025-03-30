@@ -10,7 +10,7 @@ import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 
 interface Props {
-  recentBrief?: ChartLineBrief[];
+  recentBrief?: ChartLineBrief[] | "error";
   maxRow: number;
   fetchAdditional?: () => void;
   creator?: boolean;
@@ -24,13 +24,16 @@ interface Props {
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
+  const te = useTranslations("error");
 
   const fetching =
     props.recentBrief === undefined ||
-    props.recentBrief.slice(0, props.maxRow).some(({ fetched }) => !fetched);
+    (Array.isArray(props.recentBrief) &&
+      props.recentBrief.slice(0, props.maxRow).some(({ fetched }) => !fetched));
   const fetchingAdditional =
     props.recentBrief === undefined ||
-    props.recentBrief.some(({ fetched }) => !fetched);
+    (Array.isArray(props.recentBrief) &&
+      props.recentBrief.some(({ fetched }) => !fetched));
   return (
     <>
       <ul
@@ -39,7 +42,7 @@ export function ChartList(props: Props) {
           gridTemplateColumns: `repeat(auto-fit, minmax(min(18rem, 100%), 1fr))`,
         }}
       >
-        {props.recentBrief !== undefined && props.recentBrief.length > 0 && (
+        {Array.isArray(props.recentBrief) && props.recentBrief.length > 0 && (
           <>
             {props.recentBrief
               .slice(0, props.maxRow)
@@ -92,6 +95,9 @@ export function ChartList(props: Props) {
           <SlimeSVG />
           Loading...
         </div>
+        {props.recentBrief === "error" && (
+          <div className="w-max pl-6 ">{te("fetchError")}</div>
+        )}
         {Array.from(new Array(5)).map((_, i) => (
           <span key={i} />
         ))}

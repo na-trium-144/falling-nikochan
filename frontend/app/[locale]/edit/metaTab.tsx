@@ -192,18 +192,22 @@ export function MetaTab(props: Props2) {
       props.setConvertedFrom(props.chart!.ver);
       if (changePasswd) {
         if (props.savePasswd) {
-          fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/hashPasswd/${cid}?p=${changePasswd}`,
-            {
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            },
-          ).then(async (res) => {
-            setPasswd(cid, await res.text());
-          });
+          try {
+            fetch(
+              process.env.BACKEND_PREFIX +
+                `/api/hashPasswd/${cid}?p=${changePasswd}`,
+              {
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              },
+            ).then(async (res) => {
+              setPasswd(cid, await res.text());
+            });
+          } catch {
+            //ignore
+          }
         } else {
           unsetPasswd(cid);
         }
@@ -213,48 +217,56 @@ export function MetaTab(props: Props2) {
     props.chart!.changePasswd =
       props.newPasswd.length > 0 ? props.newPasswd : null;
     if (props.cid === undefined) {
-      const res = await fetch(
-        process.env.BACKEND_PREFIX + `/api/newChartFile`,
-        {
-          method: "POST",
-          body: msgpack.serialize(props.chart),
-          cache: "no-store",
-          credentials:
-            process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        },
-      );
-      if (res.ok) {
-        try {
-          const resBody = (await res.json()) as {
-            message?: string;
-            cid?: string;
-          };
-          if (typeof resBody.cid === "string") {
-            props.setCid(resBody.cid);
-            history.replaceState(
-              null,
-              "",
-              `/${props.locale}/edit?cid=${resBody.cid}`,
-            );
-            addRecent("edit", resBody.cid);
-            onSave(resBody.cid, props.chart!.changePasswd);
-          } else {
+      try {
+        const res = await fetch(
+          process.env.BACKEND_PREFIX + `/api/newChartFile`,
+          {
+            method: "POST",
+            body: msgpack.serialize(props.chart),
+            cache: "no-store",
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
+          },
+        );
+        if (res.ok) {
+          try {
+            const resBody = (await res.json()) as {
+              message?: string;
+              cid?: string;
+            };
+            if (typeof resBody.cid === "string") {
+              props.setCid(resBody.cid);
+              history.replaceState(
+                null,
+                "",
+                `/${props.locale}/edit?cid=${resBody.cid}`,
+              );
+              addRecent("edit", resBody.cid);
+              onSave(resBody.cid, props.chart!.changePasswd);
+            } else {
+              setErrorMsg(te("badResponse"));
+            }
+          } catch {
             setErrorMsg(te("badResponse"));
           }
-        } catch {
-          setErrorMsg(te("badResponse"));
-        }
-      } else {
-        try {
-          const message = ((await res.json()) as { message?: string }).message;
-          if (te.has("api." + message)) {
-            setErrorMsg(te("api." + message));
-          } else {
-            setErrorMsg(message || te("unknownApiError"));
+        } else {
+          try {
+            const message = ((await res.json()) as { message?: string })
+              .message;
+            if (te.has("api." + message)) {
+              setErrorMsg(te("api." + message));
+            } else {
+              setErrorMsg(message || te("unknownApiError"));
+            }
+          } catch {
+            setErrorMsg(te("unknownApiError"));
           }
-        } catch {
-          setErrorMsg(te("unknownApiError"));
         }
+      } catch (e) {
+        console.error(e);
+        setErrorMsg(te("fetchError"));
       }
     } else {
       const q = new URLSearchParams();
@@ -263,32 +275,40 @@ export function MetaTab(props: Props2) {
       } else if (getPasswd(props.cid)) {
         q.set("ph", getPasswd(props.cid)!);
       }
-      const res = await fetch(
-        process.env.BACKEND_PREFIX +
-          `/api/chartFile/${props.cid}?` +
-          q.toString(),
-        {
-          method: "POST",
-          body: msgpack.serialize(props.chart),
-          cache: "no-store",
-          credentials:
-            process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        },
-      );
-      if (res.ok) {
-        props.setHasChange(false);
-        onSave(props.cid, props.chart!.changePasswd);
-      } else {
-        try {
-          const message = ((await res.json()) as { message?: string }).message;
-          if (te.has("api." + message)) {
-            setErrorMsg(te("api." + message));
-          } else {
-            setErrorMsg(message || te("unknownApiError"));
+      try {
+        const res = await fetch(
+          process.env.BACKEND_PREFIX +
+            `/api/chartFile/${props.cid}?` +
+            q.toString(),
+          {
+            method: "POST",
+            body: msgpack.serialize(props.chart),
+            cache: "no-store",
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
+          },
+        );
+        if (res.ok) {
+          props.setHasChange(false);
+          onSave(props.cid, props.chart!.changePasswd);
+        } else {
+          try {
+            const message = ((await res.json()) as { message?: string })
+              .message;
+            if (te.has("api." + message)) {
+              setErrorMsg(te("api." + message));
+            } else {
+              setErrorMsg(message || te("unknownApiError"));
+            }
+          } catch {
+            setErrorMsg(te("unknownApiError"));
           }
-        } catch {
-          setErrorMsg(te("unknownApiError"));
         }
+      } catch (e) {
+        console.error(e);
+        setErrorMsg(te("fetchError"));
       }
     }
     props.chart!.changePasswd = null;
