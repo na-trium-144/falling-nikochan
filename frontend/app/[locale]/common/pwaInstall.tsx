@@ -46,6 +46,8 @@ export function usePWAInstall(): PWAStates {
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1",
     );
+  }, []);
+  useEffect(() => {
     const userAgent = (
       navigator.userAgent ||
       navigator.vendor ||
@@ -65,7 +67,8 @@ export function usePWAInstall(): PWAStates {
     ) {
       setDetectedOS("ios");
     }
-
+  }, []);
+  useEffect(() => {
     let updateFetching: ReturnType<typeof setTimeout> | null = null;
     if (
       (isStandalone() || process.env.USE_SW) &&
