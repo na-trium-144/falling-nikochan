@@ -73,6 +73,14 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         # or  bun nbuild && bun swbuild
         ```
     * As of Bun v1.2.2, `bun -b nbuild` seems to be unstable for this project.
+* Service Worker
+    * Add `USE_SW=1` to `.env` file
+    * Build frontend and service worker
+    ```sh
+    npm run nbuild && npm run swbuild
+    # or  bun nbuild && bun swbuild
+    ```
+    * Access the backend (`http://localhost:8787`) to see the service worker in action
 
 ## API
 
