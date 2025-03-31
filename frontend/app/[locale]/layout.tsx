@@ -25,7 +25,7 @@ export default async function RootLayout({
   const locale = (await params).locale;
   return (
     <html lang={locale}>
-      <body className="min-w-full min-h-dvh overflow-auto ">
+      <body className="w-full h-dvh overflow-hidden touch-none ">
         <IntlProvider locale={locale} messages={await getMessages(locale)}>
           {children}
         </IntlProvider>

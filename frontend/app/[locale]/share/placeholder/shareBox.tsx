@@ -44,7 +44,7 @@ export function ShareBox(props: Props) {
     <div className="flex flex-col ">
       {props.backButton && (
         <Header
-          className="block main-wide:hidden mb-2 pl-0"
+          className="block main-wide:hidden "
           backButton={props.backButton}
           locale={locale}
         >
@@ -63,7 +63,7 @@ export function ShareBox(props: Props) {
         />
         <div className="main-wide:flex-1 main-wide:self-start">
           <Header
-            className="hidden main-wide:block mb-2 pl-0"
+            className="hidden main-wide:block pb-2 pl-0"
             backButton={props.backButton}
             locale={locale}
           >

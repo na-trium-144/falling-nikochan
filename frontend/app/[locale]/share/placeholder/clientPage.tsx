@@ -82,30 +82,29 @@ export default function ShareChart({ locale }: { locale: string }) {
   }, [t]);
 
   return (
-    <main className="flex flex-col items-center w-full min-h-dvh h-max">
+    <main className="flex flex-col items-center w-full h-dvh main-wide:pt-6 ">
       <Header className="main-wide:hidden" locale={locale}>
         ID: {cid}
       </Header>
+      <RedirectedWarning />
       <div
-        className={"flex-1 w-full flex flex-col items-center justify-center"}
+        className={
+          "basis-0 flex-1 min-h-0 w-full px-3 main-wide:px-6 " +
+          "w-full "
+        }
       >
-        <RedirectedWarning className="mx-6 mt-2 " />
-        <div className={"p-6 w-full flex items-center justify-center"}>
-          {
-            <Box
-              className="m-auto max-w-full p-6 shrink"
-              style={{ flexBasis: "60rem" }}
-            >
-              <ShareBox
-                cid={cid}
-                brief={brief}
-                record={record}
-                sharedResult={sharedResult}
-                locale={locale}
-              />
-            </Box>
-          }
-        </div>
+        <Box
+          className="overflow-y-auto h-full m-auto max-w-full p-6 shrink"
+          style={{ flexBasis: "60rem" }}
+        >
+          <ShareBox
+            cid={cid}
+            brief={brief}
+            record={record}
+            sharedResult={sharedResult}
+            locale={locale}
+          />
+        </Box>
       </div>
       <Footer nav locale={locale} />
     </main>

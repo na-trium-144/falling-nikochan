@@ -21,7 +21,7 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-interface PWAStates {
+export interface PWAStates {
   dismissed: boolean;
   dismiss: () => void;
   detectedOS: "android" | "ios" | null;
@@ -44,7 +44,7 @@ export function usePWAInstall(): PWAStates {
   }, []);
   useEffect(() => {
     setDismissed(
-      isStandalone() || localStorage.getItem("PWADismissed") === "1"
+      isStandalone() || localStorage.getItem("PWADismissed") === "1",
     );
   }, []);
   useEffect(() => {
@@ -155,7 +155,6 @@ export function usePWAInstall(): PWAStates {
   };
 }
 interface Props {
-  className?: string;
   pwa: PWAStates;
 }
 export function PWAInstallMain(props: Props) {
@@ -164,25 +163,19 @@ export function PWAInstallMain(props: Props) {
   return (
     <div
       className={
-        "text-center flex items-center justify-center text-sm " +
-        (props.className || "")
+        "text-center text-sm mx-6 my-2 px-3 py-2 h-max " +
+        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
+        (pwa.dismissed || pwa.detectedOS === null ? "hidden " : "")
       }
     >
-      <div
-        className={
-          "text-center px-3 py-2 h-max rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
-          (pwa.dismissed || pwa.detectedOS === null ? "hidden " : "")
-        }
-      >
-        {pwa.deferredPrompt && pwa.detectedOS === "android" && (
-          <>
-            <p>{t("installDesc")}</p>
-            <Button text={t("install")} onClick={pwa.install} />
-          </>
-        )}
-        {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
-        <Button text={t("dismiss")} onClick={pwa.dismiss} />
-      </div>
+      {pwa.deferredPrompt && pwa.detectedOS === "android" && (
+        <>
+          <p>{t("installDesc")}</p>
+          <Button text={t("install")} onClick={pwa.install} />
+        </>
+      )}
+      {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
+      <Button text={t("dismiss")} onClick={pwa.dismiss} />
     </div>
   );
 }

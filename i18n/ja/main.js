@@ -20,9 +20,11 @@ export default {
     updateFailed: "更新に失敗しました...",
     about: {
       title: "Falling Nikochan とは？",
+      titleShort: "概要",
     },
     play: {
       title: "プレイする",
+      titleShort: "プレイ",
       inputId: "譜面IDを入力",
       inputIdDesc:
         "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
@@ -48,6 +50,7 @@ export default {
     },
     edit: {
       title: "譜面作成",
+      titleShort: "譜面作成",
       welcome:
         "Falling Nikochan の譜面エディタにようこそ。" +
         "アカウント登録不要で誰でも譜面を作成することができます。",
@@ -69,6 +72,7 @@ export default {
     },
     policies: {
       title: "利用規約っぽいもの",
+      titleShort: "利用規約",
     },
     version: {
       title: "バージョン情報",
