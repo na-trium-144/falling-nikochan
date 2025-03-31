@@ -24,6 +24,7 @@ export default {
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
+      off: "Off",
     },
     score: {
       auto: "Auto Play",
