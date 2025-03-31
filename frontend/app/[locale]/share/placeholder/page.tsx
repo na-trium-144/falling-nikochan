@@ -6,6 +6,7 @@ export async function generateMetadata({ params }: MetadataProps) {
     image: "https://placeholder_og_image/",
     noAlternate: true,
     description: "PLACEHOLDER_DESCRIPTION",
+    custom: { nikochanSharingBrief: "PLACEHOLDER_BRIEF" },
   });
 }
 // pageTitle(cid, brief) or `Not Found (ID: ${cid})`
