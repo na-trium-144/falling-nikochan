@@ -16,6 +16,7 @@ export default {
     dismiss: "Close",
     updating: "Downloading update...",
     updateDone: "Update completed!",
+    updateFailed: "Update failed...",
     about: {
       title: "What is Falling Nikochan?",
     },

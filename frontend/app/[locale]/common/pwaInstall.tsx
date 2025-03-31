@@ -27,16 +27,16 @@ interface PWAStates {
   detectedOS: "android" | "ios" | null;
   deferredPrompt: BeforeInstallPromptEvent | null;
   install: () => void;
-  workerUpdate: null | "updating" | "done";
+  workerUpdate: null | "updating" | "done" | "failed";
 }
 export function usePWAInstall(): PWAStates {
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [workerUpdate, setWorkerUpdate] = useState<null | "updating" | "done">(
-    null,
-  );
+  const [workerUpdate, setWorkerUpdate] = useState<
+    null | "updating" | "done" | "failed"
+  >(null);
 
   const dismiss = useCallback(() => {
     localStorage.setItem("PWADismissed", "1");
@@ -44,7 +44,7 @@ export function usePWAInstall(): PWAStates {
   }, []);
   useEffect(() => {
     setDismissed(
-      isStandalone() || localStorage.getItem("PWADismissed") === "1",
+      isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
   }, []);
   useEffect(() => {
@@ -90,10 +90,10 @@ export function usePWAInstall(): PWAStates {
                         setWorkerUpdate("done");
                         setTimeout(() => window.location.reload(), 1000);
                       } else {
-                        setWorkerUpdate(null);
+                        setWorkerUpdate("failed");
                       }
                     })
-                    .catch(() => setWorkerUpdate(null));
+                    .catch(() => setWorkerUpdate("failed"));
                 } else if (commit) {
                   setWorkerUpdate("updating");
                   fetch("/worker/initAssets")
@@ -101,10 +101,10 @@ export function usePWAInstall(): PWAStates {
                       if (res.ok) {
                         setWorkerUpdate("done");
                       } else {
-                        setWorkerUpdate(null);
+                        setWorkerUpdate("failed");
                       }
                     })
-                    .catch(() => setWorkerUpdate(null));
+                    .catch(() => setWorkerUpdate("failed"));
                 }
               }
             })
@@ -130,7 +130,7 @@ export function usePWAInstall(): PWAStates {
     };
   }, []);
   useEffect(() => {
-    if (workerUpdate === "done") {
+    if (workerUpdate === "done" || workerUpdate === "failed") {
       const t = setTimeout(() => setWorkerUpdate(null), 3000);
       return () => clearTimeout(t);
     }
