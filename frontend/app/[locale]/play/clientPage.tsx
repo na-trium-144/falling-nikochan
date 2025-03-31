@@ -603,8 +603,8 @@ function Play(props: Props) {
   // キーを押したとき一定時間光らせる
   const [barFlash, setBarFlash] = useState<boolean>(false);
   const flash = () => {
-    setBarFlash(true);
-    setTimeout(() => setBarFlash(false), 100);
+    //setBarFlash(true);
+    //setTimeout(() => setBarFlash(false), 100);
   };
 
   return (
@@ -784,7 +784,7 @@ function Play(props: Props) {
           {errorMsg && (
             <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
           )}
-          {false && showReady && (
+          {showReady && (
             <ReadyMessage
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
@@ -950,26 +950,22 @@ function Play(props: Props) {
         />
       )}
       <Title className="absolute left-0 top-0 h-32 scale-175 origin-top-left " anim={false} />
-      <div className="absolute left-12 top-74 z-10 ">
+      <div className="absolute left-32 bottom-16 z-10 ">
         <span className="text-7xl font-bold font-title">
-          title
+          you are an idiot!
         </span>
         <span className="text-6xl ml-6 font-bold font-title">
         </span>
-      </div>
-      <div className="absolute left-12 top-98">
-        <span className="text-5xl font-title">
-          composer etc
-        </span>
-        <span className="text-5xl ml-4 font-title">
+        <span className="text-5xl ml-4 font-title ">
+          {/*ビートまりお*/}
         </span>
       </div>
-      <div className={"absolute left-48 top-122 " + levelColors[0]}>
-        <span className="text-4xl mr-6">
-          Level:
-        </span>
+      <div className={"absolute right-12 bottom-16 z-10 font-bold " + levelColors[2]}>
         <span className="text-5xl ">
-          Single-8
+          Maniac-
+        </span>
+        <span className="text-6xl ">
+          12
         </span>
       </div>
     </main>
