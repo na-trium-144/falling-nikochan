@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { dummyCid, initDb } from "./init";
-import app from "@falling-nikochan/route";
+import { app, dummyCid, initDb } from "./init";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 

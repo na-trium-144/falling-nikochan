@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { ReactNode } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { pagerButtonClass } from "./pager.js";
 import { ArrowLeft } from "@icon-park/react";
+import { useStandaloneDetector } from "./pwaInstall.js";
 
 interface Props {
   className?: string;
@@ -12,6 +15,8 @@ interface Props {
   backButton?: () => void;
 }
 export default function Header(props: Props) {
+  const isStandalone = useStandaloneDetector();
+
   return (
     <div className={"p-3 pb-0 w-full " + props.className}>
       {props.backButton && (
@@ -22,7 +27,7 @@ export default function Header(props: Props) {
           <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
         </button>
       )}
-      {props.reload ? (
+      {props.reload && !isStandalone ? (
         <a href={`/${props.locale}`} className={"text-xl " + linkStyle1}>
           FallingNikochan
         </a>

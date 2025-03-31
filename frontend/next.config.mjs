@@ -5,6 +5,7 @@ import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
+import { writeFileSync } from "node:fs";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const date = new Date().toUTCString();
@@ -21,6 +22,7 @@ const env = {
   buildDate: date,
   buildCommit: commit,
   buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
+  USE_SW: process.env.USE_SW || "",
   // prefix for every asset URL
   ASSET_PREFIX: process.env.ASSET_PREFIX || "",
   // prefix for every API call URL
@@ -29,6 +31,11 @@ const env = {
   NO_PREFETCH: process.env.NO_PREFETCH || "",
 };
 console.log("env: ", env);
+writeFileSync(
+  join(process.cwd(), "public/assets/buildVer.json"),
+  JSON.stringify({ date, commit, version: env.buildVersion }),
+  "utf-8",
+);
 
 const nextConfig = {
   eslint: {

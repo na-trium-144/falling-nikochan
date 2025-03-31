@@ -1,15 +1,18 @@
 import { readdir } from "node:fs/promises";
 import { locales } from "./index.js";
+import { getMessages as staticGetMessages } from "./staticImport.js";
 import { basename } from "node:path";
 const actualLocales = (await readdir(".", { withFileTypes: true }))
   .filter((file) => file.isDirectory())
   .map((dir) => dir.name);
 if (actualLocales.length !== locales.length) {
   throw new Error(
-    `locales in i18n/index.js ${locales} do not match actual locales ${actualLocales}`
+    `locales in i18n/index.js ${locales} do not match actual locales ${actualLocales}`,
   );
 }
-
+for (const locale of locales) {
+  staticGetMessages(locale);
+}
 function listKeys(dict, prefix = "") {
   let keys = [];
   for (const key in dict) {
@@ -28,8 +31,8 @@ async function getKeys(locale) {
   return (
     await Promise.all(
       files.map(async (file) =>
-        listKeys((await import(`./${locale}/${file}`)).default)
-      )
+        listKeys((await import(`./${locale}/${file}`)).default),
+      ),
     )
   ).flat();
 }

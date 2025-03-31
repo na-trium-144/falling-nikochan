@@ -2,6 +2,27 @@ import { Key } from "@/common/key.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { TranslateIcon } from "@/common/mdxIcons.js";
 
+## ver. 10.0 - 03/30/2025
+
+- Falling Nikochan can now be installed as a PWA app.
+  - On Android, you can install it by tapping the "Add to Home Screen" button displayed on the Falling Nikochan top page
+  (or the [What is Falling Nikochan?](/main/about/1) overview page).
+  - On iOS, you can install it by selecting "Add to Home Screen" from the share button in Safari.
+  - When launched as an app from the home screen, the browser toolbar will be hidden, allowing you to play comfortably in full screen.
+  - Also, when launched as an app, the entire app is downloaded before launching, so the page loads faster in slow internet environments.
+    - However, you cannot play offline.
+- Implemented a tap sound when hitting notes.
+  - You can choose on/off in the options screen before playing.
+  - On Windows, Linux, MacOS (except Safari) and Android, the judgement timing is automatically adjusted by the delay in audio output.
+  - On MacOS (Safari) and iOS, the audio output delay cannot be detected, so you may need to manually adjust the judgment offset.
+  Therefore, the tap sound is off by default.
+- You can now adjust the YouTube playback volume and tap sound volume during play.
+- Added a stop button at the top of the screen during play.
+
+## ver. 9.17 - 03/28/2025
+
+- The animation of the chain count and score display moves smoothly even when the note interval is narrow.
+
 ## ver. 9.13 - 03/21/2025
 
 - When copying a shared link, the title is now included in addition to the URL.

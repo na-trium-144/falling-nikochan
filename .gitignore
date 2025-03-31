@@ -1,6 +1,7 @@
 .env
 */public/assets/*.ttf
 */public/assets/wasmoon_glue.wasm
+*/public/assets/buildVer.json
 */dist/
 /node_modules/
-/.vercel/
+/.vercel*

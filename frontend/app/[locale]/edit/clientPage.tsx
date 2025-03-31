@@ -109,12 +109,41 @@ export default function EditAuth(props: {
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [guidePage, setGuidePage] = useState<number | null>(null);
 
   const [chart, setChart] = useState<ChartEdit>();
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
   const [convertedFrom, setConvertedFrom] = useState<number>(currentChartVer);
 
+  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
+  const [hasChange, setHasChange] = useState<boolean>(false);
+
+  // PWAでテストプレイを押した場合に編集中の譜面データをsessionStorageに退避
+  const saveEditSession = useCallback(() => {
+    sessionStorage.setItem(
+      "editSession",
+      JSON.stringify({
+        cid,
+        editPasswd,
+        currentPasswd,
+        savePasswd,
+        chart,
+        convertedFrom,
+        currentLevelIndex,
+        hasChange,
+      }),
+    );
+  }, [
+    cid,
+    editPasswd,
+    currentPasswd,
+    savePasswd,
+    chart,
+    convertedFrom,
+    currentLevelIndex,
+    hasChange,
+  ]);
   const fetchChart = useCallback(
     async (
       isFirst: boolean,
@@ -122,7 +151,30 @@ export default function EditAuth(props: {
       editPasswd: string,
       savePasswd: boolean,
     ) => {
+      if (sessionStorage.getItem("editSession")) {
+        const data = JSON.parse(sessionStorage.getItem("editSession")!);
+        sessionStorage.removeItem("editSession");
+        if (
+          data.cid === cidInitial.current ||
+          (data.cid === undefined && cidInitial.current === "new")
+        ) {
+          setCid(data.cid);
+          setEditPasswd(data.editPasswd);
+          currentPasswd.current = data.currentPasswd.current;
+          setSavePasswd(data.savePasswd);
+          setChart(data.chart);
+          setConvertedFrom(data.convertedFrom);
+          setCurrentLevelIndex(data.currentLevelIndex);
+          setHasChange(data.hasChange);
+          setPasswdFailed(false);
+          setLoading(false);
+          setErrorStatus(undefined);
+          setErrorMsg(undefined);
+          return;
+        }
+      }
       if (cidInitial.current === "new") {
+        setGuidePage(1);
         setCid(undefined);
         setPasswdFailed(false);
         setLoading(false);
@@ -144,77 +196,93 @@ export default function EditAuth(props: {
         if (bypass) {
           q.set("pbypass", "1");
         }
-        const res = await fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/chartFile/${cidInitial.current}?` +
-            q.toString(),
-          {
-            cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          },
-        );
-        if (res.ok) {
-          try {
-            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
-              msgpack.deserialize(await res.arrayBuffer());
-            setConvertedFrom(chartRes.ver);
-            const chart: ChartEdit = await validateChart(chartRes);
-            if (savePasswd) {
-              if (currentPasswd.current) {
-                const res = await fetch(
-                  process.env.BACKEND_PREFIX +
-                    `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
-                  {
-                    credentials:
-                      process.env.NODE_ENV === "development"
-                        ? "include"
-                        : "same-origin",
-                  },
-                );
-                setPasswd(cidInitial.current, await res.text());
-              }
-            } else {
-              unsetPasswd(cidInitial.current);
-            }
-            setChart(chart);
-            setErrorStatus(undefined);
-            setErrorMsg(undefined);
-            addRecent("edit", cidInitial.current);
-          } catch (e) {
-            console.error(e);
-            setChart(undefined);
-            setErrorStatus(undefined);
-            setErrorMsg(te("badResponse"));
-          }
-        } else {
-          if (res.status === 401) {
-            if (!isFirst) {
-              setPasswdFailed(true);
-            }
-            setChart(undefined);
-          } else {
-            setChart(undefined);
-            setErrorStatus(res.status);
+        let res: Response | null = null;
+        try {
+          res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/chartFile/${cidInitial.current}?` +
+              q.toString(),
+            {
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            },
+          );
+          if (res?.ok) {
             try {
-              const message = ((await res.json()) as { message?: string })
-                .message;
-              if (te.has("api." + message)) {
-                setErrorMsg(te("api." + message));
+              const chartRes:
+                | Chart5
+                | Chart6
+                | Chart7
+                | Chart8Edit
+                | Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+              setConvertedFrom(chartRes.ver);
+              const chart: ChartEdit = await validateChart(chartRes);
+              if (savePasswd) {
+                if (currentPasswd.current) {
+                  try {
+                    const res = await fetch(
+                      process.env.BACKEND_PREFIX +
+                        `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
+                      {
+                        credentials:
+                          process.env.NODE_ENV === "development"
+                            ? "include"
+                            : "same-origin",
+                      },
+                    );
+                    setPasswd(cidInitial.current, await res.text());
+                  } catch {
+                    //ignore
+                  }
+                }
               } else {
-                setErrorMsg(message || te("unknownApiError"));
+                unsetPasswd(cidInitial.current);
               }
-            } catch {
-              setErrorMsg(te("unknownApiError"));
+              setChart(chart);
+              setErrorStatus(undefined);
+              setErrorMsg(undefined);
+              addRecent("edit", cidInitial.current);
+            } catch (e) {
+              console.error(e);
+              setChart(undefined);
+              setErrorStatus(undefined);
+              setErrorMsg(te("badResponse"));
+            }
+          } else {
+            if (res?.status === 401) {
+              if (!isFirst) {
+                setPasswdFailed(true);
+              }
+              setChart(undefined);
+            } else {
+              setChart(undefined);
+              setErrorStatus(res?.status);
+              try {
+                const message = ((await res?.json()) as { message?: string })
+                  .message;
+                if (te.has("api." + message)) {
+                  setErrorMsg(te("api." + message));
+                } else {
+                  setErrorMsg(message || te("unknownApiError"));
+                }
+              } catch {
+                setErrorMsg(te("unknownApiError"));
+              }
             }
           }
+        } catch (e) {
+          console.error(e);
+          setChart(undefined);
+          setErrorStatus(undefined);
+          setErrorMsg(te("fetchError"));
         }
         setLoading(false);
       }
     },
-    [],
+    [locale, te],
   );
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -227,23 +295,30 @@ export default function EditAuth(props: {
     );
     // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
     // レンダリングの都合上 cidInitial.current を先に反映させたいため、setTimeoutで1段階遅延
-    setTimeout(() => void fetchChart(true, false, "", true));
-  }, []);
+    const ft = setTimeout(() => void fetchChart(true, false, "", true));
+    return () => clearTimeout(ft);
+  }, [fetchChart, t]);
 
   return (
     <Page
+      saveEditSession={saveEditSession}
       guideContents={props.guideContents}
       chart={chart}
       setChart={setChart}
       cid={cid}
       setCid={setCid}
       themeContext={themeContext}
-      guidePageInit={cidInitial.current === "new" ? 1 : null}
+      guidePage={guidePage}
+      setGuidePage={setGuidePage}
       convertedFrom={convertedFrom}
       setConvertedFrom={setConvertedFrom}
       locale={locale}
       currentPasswd={currentPasswd}
       savePasswdInitial={savePasswd}
+      currentLevelIndex={currentLevelIndex}
+      setCurrentLevelIndex={setCurrentLevelIndex}
+      hasChange={hasChange}
+      setHasChange={setHasChange}
       modal={
         chart === undefined ? (
           loading ? (
@@ -305,18 +380,24 @@ export default function EditAuth(props: {
 }
 
 interface Props {
+  saveEditSession: () => void;
   guideContents: ReactNode[];
   chart?: ChartEdit;
   setChart: (chart: ChartEdit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
   themeContext: ThemeContext;
-  guidePageInit: number | null;
+  guidePage: number | null;
+  setGuidePage: (v: number | null) => void;
   convertedFrom: number;
   setConvertedFrom: (v: number) => void;
   locale: string;
   currentPasswd: { current: string | null };
   savePasswdInitial: boolean;
+  currentLevelIndex: number;
+  setCurrentLevelIndex: (v: number) => void;
+  hasChange: boolean;
+  setHasChange: (v: boolean) => void;
   modal?: ReactNode;
 }
 function Page(props: Props) {
@@ -329,16 +410,20 @@ function Page(props: Props) {
     convertedFrom,
     setConvertedFrom,
     locale,
+    currentLevelIndex,
+    setCurrentLevelIndex,
+    hasChange,
+    setHasChange,
+    guidePage,
+    setGuidePage,
   } = props;
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
-  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel = chart?.levels.at(currentLevelIndex);
 
   const luaExecutor = useLuaExecutor();
 
-  const [hasChange, setHasChange] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<number>();
   const [sessionData, setSessionData] = useState<SessionData>();
   const chartNumEvent = chart ? numEvents(chart) : 0;
@@ -679,8 +764,6 @@ function Page(props: Props) {
   }, [chart, currentLevelIndex]);
 
   const [tab, setTab] = useState<number>(0);
-  const [guidePage, setGuidePage] = useState<number | null>(null);
-  useEffect(() => setGuidePage(props.guidePageInit), [props.guidePageInit]);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
   const isCodeTab = tab === 4;
   const openGuide = () => setGuidePage([2, 4, 5, 6, 7][tab]);
@@ -1228,6 +1311,7 @@ function Page(props: Props) {
               >
                 {tab === 0 ? (
                   <MetaTab
+                    saveEditSession={props.saveEditSession}
                     sessionId={sessionId}
                     sessionData={sessionData}
                     chartNumEvent={chartNumEvent}
@@ -1317,11 +1401,23 @@ function Page(props: Props) {
                   err={luaExecutor.err}
                 />
               </Box>
-              <div className="bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm h-24 max-h-24 edit-wide:h-auto overflow-auto">
+              <div
+                className={
+                  "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm " +
+                  "h-24 max-h-24 edit-wide:h-auto overflow-auto "
+                }
+              >
                 {luaExecutor.running ? (
                   <div className="m-1">
-                    <SlimeSVG />
-                    {t("running")}
+                    <span className="inline-block ">
+                      <SlimeSVG />
+                      {t("running")}
+                    </span>
+                    <Button
+                      className="ml-2"
+                      onClick={luaExecutor.abortExec}
+                      text={t("cancel")}
+                    />
                   </div>
                 ) : (
                   (luaExecutor.stdout.length > 0 ||

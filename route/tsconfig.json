@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "allowJs": true,
     "jsx": "react",
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }
