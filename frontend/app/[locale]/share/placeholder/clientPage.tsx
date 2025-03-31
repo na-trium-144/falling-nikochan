@@ -41,7 +41,7 @@ const dummyBrief = {
 export default function ShareChart({ locale }: { locale: string }) {
   const t = useTranslations("share");
 
-  const [cid, setCId] = useState<string>("");
+  const [cid, setCId] = useState<string>();
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [record, setRecord] = useState<RecordGetSummary[]>([]);
