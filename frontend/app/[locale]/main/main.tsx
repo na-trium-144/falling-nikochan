@@ -51,9 +51,11 @@ export function IndexMain(props: Props) {
             <SlimeSVG />
             {t("updating")}
           </>
-        ) : (
+        ) : pwa.workerUpdate === "done" ? (
           t("updateDone")
-        )}
+        ) : pwa.workerUpdate === "failed" ? (
+          t("updateFailed")
+        ) : null}
       </Box>
       {props.tab !== undefined && (
         <div className="main-wide:hidden">
@@ -139,7 +141,7 @@ export function IndexMain(props: Props) {
                 >
                   {tabTitles(i)}
                 </Link>
-              ),
+              )
             )}
           </div>
         )}
@@ -160,8 +162,8 @@ export function IndexMain(props: Props) {
           isHiddenPage
             ? "block"
             : isTitlePage
-              ? false
-              : "block main-wide:hidden"
+            ? false
+            : "block main-wide:hidden"
         }
       />
     </main>

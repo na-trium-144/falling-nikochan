@@ -11,9 +11,23 @@ import { locales } from "@falling-nikochan/i18n";
 declare const self: ServiceWorkerGlobalScope;
 
 // assetsを保存する
-const mainCache = () => caches.open("main");
+// cacheの中身の仕様を変更したときにはcacheの名前を変える
+const mainCache = () => caches.open("main1");
+const tmpCache = () => caches.open("tmp1");
 // 設定など
 const configCache = () => caches.open("config");
+
+async function clearOldCaches() {
+  await caches
+    .keys()
+    .then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k !== "main1" && k !== "tmp1" && k !== "config")
+          .map((k) => caches.delete(k)),
+      ),
+    );
+}
 
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
@@ -28,27 +42,55 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
   return (await cache.match(pathname)) || new Response(null, { status: 404 });
 }
 
-async function initAssetsCache(config: { clearOld: boolean }) {
+// serviceWorkerからクライアントに返すため、cache-controlを削除したresponseを作成
+function returnBody(body: string | ReadableStream | null, headers: Headers) {
+  return new Response(body, {
+    headers: {
+      ...(headers.has("Content-Type") && {
+        "Content-Type": headers.get("Content-Type")!,
+      }),
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+async function initAssetsCache(config: {
+  clearOld: boolean;
+}): Promise<boolean> {
+  // true = success
   const cache = await mainCache();
+  const tmp = await tmpCache();
   let filesRes: Response;
+  let remoteVerRes: Response;
   try {
     filesRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
     );
+    remoteVerRes = await fetch(
+      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+    );
   } catch (e) {
     console.error(e);
-    return;
+    return false;
   }
-  if (filesRes.ok) {
-    const files = (await filesRes.json()).map((file: string) => {
-      let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
-      if (pathname.endsWith(".html")) {
-        pathname = pathname.slice(0, -5);
-      }
-      return pathname;
-    });
-    const pFetch = files.map(async (pathname: string) => {
-      if (pathname.startsWith("/_next") && (await cache.match(pathname))) {
+  if (!filesRes.ok || !remoteVerRes.ok) {
+    return false;
+  }
+  const files = (await filesRes.json()).map((file: string) => {
+    let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
+    if (pathname.endsWith(".html")) {
+      pathname = pathname.slice(0, -5);
+    }
+    return pathname;
+  });
+  // tmpCacheにデータを入れる
+  let failed = false;
+  await Promise.all(
+    files.map(async (pathname: string) => {
+      if (
+        pathname.startsWith("/_next") &&
+        ((await cache.match(pathname)) || (await tmp.match(pathname)))
+      ) {
         // パス名にハッシュが入っているので更新する必要がない
         return;
       }
@@ -70,45 +112,48 @@ async function initAssetsCache(config: { clearOld: boolean }) {
               process.env.ASSET_PREFIX,
               "",
             );
-            cache.put(
-              pathname,
-              new Response(body, {
-                headers: res.headers,
-              }),
-            );
+            tmp.put(pathname, returnBody(body, res.headers));
           } else {
-            cache.put(pathname, res);
+            tmp.put(pathname, returnBody(res.body, res.headers));
           }
         } else {
           console.error(`failed to fetch ${pathname}: ${res.status}`);
+          failed = true;
         }
       } catch (e) {
         console.error(`failed to fetch ${pathname}: ${e}`);
+        failed = true;
       }
-    });
-    if (config.clearOld) {
-      const keys = await cache.keys();
-      await Promise.all(
-        keys.map(async (req) => {
-          if (!files.includes(new URL(req.url).pathname)) {
-            console.warn(`delete ${req.url}`);
-            await cache.delete(req);
-          }
-        }),
-      );
-    }
-    await Promise.all(pFetch);
-    try {
-      const remoteVer = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
-      );
-      if (remoteVer.ok) {
-        await configCache().then((cache) => cache.put("/buildVer", remoteVer));
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    }),
+  );
+  // 1つでも失敗したら中断
+  if (failed) {
+    return false;
   }
+  if (config.clearOld) {
+    const keys = await cache.keys();
+    await Promise.all(
+      keys.map(async (req) => {
+        if (!files.includes(new URL(req.url).pathname)) {
+          console.warn(`delete ${req.url}`);
+          await cache.delete(req);
+        }
+      }),
+    );
+  }
+  // tmpからmainに移す
+  await Promise.all(
+    files.map(async (pathname: string) => {
+      const res = await tmp.match(pathname);
+      if (res) {
+        await cache.put(pathname, res);
+        await tmp.delete(pathname);
+      }
+    }),
+  );
+  // finished
+  await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
+  return true;
 }
 
 interface BuildVer {
@@ -179,15 +224,27 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/worker/initAssets", async (c) => {
-    await initAssetsCache({ clearOld: !!c.req.query("clearOld") });
-    return c.body(null);
+    if (await initAssetsCache({ clearOld: !!c.req.query("clearOld") })) {
+      return c.body(null);
+    } else {
+      return c.body(null, 503);
+    }
   })
   .get("/*", async (c) => {
     const res = await fetchStatic(null, new URL(c.req.url));
     if (res.ok) {
       return res;
     } else {
-      return fetch(c.req.raw);
+      // failsafe 通常は全部cacheに入っているはずだが
+      console.warn(`${c.req.url} is not in cache`);
+      const res = await fetch(c.req.raw);
+      if (res.ok) {
+        const returnRes = returnBody(res.body, res.headers);
+        await (await mainCache()).put(c.req.raw, returnRes.clone());
+        return returnRes;
+      } else {
+        return res;
+      }
     }
   })
   .use(languageDetector)
@@ -201,7 +258,7 @@ self.addEventListener("install", (e) => {
 });
 self.addEventListener("activate", (e) => {
   console.log("service worker activate");
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(Promise.all([self.clients.claim(), clearOldCaches()]));
 });
 
 self.addEventListener("fetch", (e) => {
