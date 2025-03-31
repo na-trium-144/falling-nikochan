@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { SmilingFace, VolumeNotice, Youtube } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle";
+import { useTranslations } from "next-intl";
 
 interface Props {
   ready: boolean;
@@ -34,6 +35,8 @@ export function MusicArea(props: Props) {
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
   const largeTitle = props.isMobile ? height && height > 8 * rem : true;
+
+  const t = useTranslations("play.message");
 
   const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
   const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
@@ -297,7 +300,7 @@ export function MusicArea(props: Props) {
         )}
         <div className="flex flex-row items-center ">
           <Youtube className="text-xl " />
-          <span className="text-sm w-7 text-right ">{props.ytVolume}</span>
+          <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
           <input
             className="flex-1 mx-1 "
             type="range"
@@ -316,11 +319,11 @@ export function MusicArea(props: Props) {
           />
           <span
             className={
-              "text-sm w-7 text-right " +
+              "text-sm w-8 text-center " +
               (props.enableSE ? "" : "text-slate-400 dark:text-stone-600 ")
             }
           >
-            {props.seVolume}
+            {props.enableSE ? props.seVolume : t("off")}
           </span>
           <input
             type="range"
