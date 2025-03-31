@@ -17,6 +17,7 @@ export default {
     dismiss: "閉じる",
     updating: "更新をダウンロード中...",
     updateDone: "更新が完了しました！",
+    updateFailed: "更新に失敗しました...",
     about: {
       title: "Falling Nikochan とは？",
     },
