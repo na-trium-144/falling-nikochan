@@ -290,20 +290,25 @@ function AboutModal(props: AProps) {
             }
             title={t("title")}
           />
-          <div className="flex-1 flex flex-row ">
+          <div
+            className="flex-1 flex flex-row "
+            style={{ width: props.contents.length * 100 + "%" }}
+          >
             {props.contents.map((c, i) => (
               // 選択中のページ以外を非表示にするが、
               // 非表示のページも含めてコンテンツの高さが最も高いものに合わせたサイズで表示させたいので、
-              // 非表示のページをwidth:0としてすべて横並びで表示
+              // 全部横に並べて非表示のページをtranslateXで画面外に送る
               <div
                 key={i}
-                className={
-                  i === props.aboutPageIndex
-                    ? "w-auto h-max "
-                    : "overflow-x-clip w-0 h-max"
-                }
+                className="basis-0 flex-1 relative h-max text-center"
+                style={{
+                  transform:
+                    i === props.aboutPageIndex
+                      ? `translateX(-${i * 100}%)`
+                      : `translateX(100vw)`,
+                }}
               >
-                <div className="w-148 h-max ">{c}</div>
+                {c}
               </div>
             ))}
           </div>
