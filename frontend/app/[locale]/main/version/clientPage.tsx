@@ -5,12 +5,20 @@ import { useTranslations } from "next-intl";
 import { updateLastVisited } from "@/common/version.js";
 import { ReactNode, useEffect } from "react";
 
-export default function ChangelogPage(props: {locale: string, changeLog: ReactNode}) {
+export default function ChangelogPage(props: {
+  locale: string;
+  changeLog: ReactNode;
+}) {
   const t = useTranslations("main.version");
   useEffect(() => updateLastVisited(), []);
 
   return (
-    <IndexMain tab={4} locale={props.locale}>
+    <IndexMain
+      title={t("title")}
+      tabKey={null}
+      mobileTabKey="links"
+      locale={props.locale}
+    >
       <div className="mb-2">
         <span className="inline-block">Falling Nikochan</span>
         <span className="inline-block">

@@ -15,11 +15,13 @@ import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
 import { useShareModal } from "./shareModal.jsx";
 import { getRecent, updateRecent } from "@/common/recent.js";
+import { tabKeys } from "@/common/footer.jsx";
 
 interface PProps {
   locale: string;
   title: string;
-  hiddenPage?: boolean;
+  tabKey: tabKeys;
+  mobileTabKey: tabKeys;
   type: ChartListType;
 }
 export default function ChartListPage(props: PProps) {
@@ -28,8 +30,8 @@ export default function ChartListPage(props: PProps) {
   return (
     <IndexMain
       title={props.title}
-      tabKey="play"
-      hiddenPage={props.hiddenPage}
+      tabKey={props.tabKey}
+      mobileTabKey={props.mobileTabKey}
       locale={props.locale}
       modal={modal}
     >
@@ -149,9 +151,10 @@ export function ChartList(props: Props) {
   return (
     <>
       <ul
-        className="grid w-full justify-items-start items-center "
+        className="grid w-full mx-auto justify-items-start items-center "
         style={{
           gridTemplateColumns: `repeat(auto-fit, minmax(min(18rem, 100%), 1fr))`,
+          maxWidth: 7 * 18 - 0.1 + "rem",
         }}
       >
         {Array.isArray(briefs) && briefs.length > 0 && (
@@ -242,10 +245,14 @@ export function ChartListItem(props: CProps) {
       setAppearing(!props.hidden && !props.invisible),
     );
   }, [props.hidden, props.invisible]);
+
+  // ~36rem: 1列 -> 18~36rem -> max-width:27rem
+  // ~54rem: 2列 -> 18~27rem
+  // ~72rem: 3列 -> 18~24rem
   return (
     <li
       className={
-        "w-full h-max transition-opacity ease-out duration-200 " +
+        "w-full max-w-108 mx-auto h-max transition-opacity ease-out duration-200 " +
         (props.hidden
           ? "hidden opacity-0 "
           : props.invisible

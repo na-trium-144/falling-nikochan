@@ -27,7 +27,6 @@ export default {
     inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
     about: {
       title: "Falling Nikochan とは？",
-      titleShort: "概要",
     },
     play: {
       title: "プレイする",

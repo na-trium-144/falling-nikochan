@@ -61,7 +61,12 @@ export default function EditTab({ locale }: { locale: string }) {
   };
 
   return (
-    <IndexMain title={t("title")} tabKey="edit" locale={locale}>
+    <IndexMain
+      title={t("title")}
+      tabKey="edit"
+      mobileTabKey="edit"
+      locale={locale}
+    >
       <p className="mb-3 text-justify">{t("welcome")}</p>
       <div className="mb-3">
         <h3 className="mb-2">

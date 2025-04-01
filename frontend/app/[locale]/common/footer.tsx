@@ -12,6 +12,7 @@ import { PWAStates } from "./pwaInstall.js";
 import { Box } from "./box.js";
 import { SlimeSVG } from "./slime.js";
 
+export type tabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
 export const mobileTabTitleKeys = ["top", "play", "edit", "links"] as const;
 export const tabURLs = {

@@ -11,10 +11,11 @@ export default async function Page({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
   return (
     <ChartListPage
-      hiddenPage
       locale={(await params).locale}
       title={t("recent")}
       type="recent"
+      tabKey={null}
+      mobileTabKey="top"
     />
   );
 }

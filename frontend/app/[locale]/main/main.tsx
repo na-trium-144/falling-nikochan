@@ -6,6 +6,7 @@ import {
   MobileFooter,
   PCFooter,
   pcTabTitleKeys,
+  tabKeys,
   tabURLs,
 } from "@/common/footer.js";
 import { ReactNode } from "react";
@@ -19,8 +20,8 @@ import { usePWAInstall } from "@/common/pwaInstall";
 interface Props {
   children?: ReactNode | ReactNode[];
   title: string;
-  tabKey: string;
-  hiddenPage?: boolean;
+  tabKey: tabKeys;
+  mobileTabKey: tabKeys;
   locale: string;
   modal?: ReactNode;
 }
@@ -56,7 +57,7 @@ export function IndexMain(props: Props) {
           "flex flex-row items-stretch justify-center px-3 main-wide:px-6 "
         }
       >
-        {!props.hiddenPage && (
+        {props.tabKey !== null && (
           <nav
             className={
               "hidden main-wide:flex " +
@@ -92,8 +93,8 @@ export function IndexMain(props: Props) {
           {props.children}
         </Box>
       </div>
-      <PCFooter locale={locale} nav={props.hiddenPage} pwa={pwa} />
-      <MobileFooter locale={locale} nav={props.hiddenPage} pwa={pwa} />
+      <PCFooter locale={locale} nav={props.tabKey !== null} pwa={pwa} />
+      <MobileFooter locale={locale} nav={props.tabKey !== null} pwa={pwa} />
     </main>
   );
 }

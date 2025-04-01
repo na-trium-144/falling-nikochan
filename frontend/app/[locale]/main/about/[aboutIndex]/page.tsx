@@ -7,13 +7,13 @@ import { AboutContent4 } from "./4-level.js";
 import { AboutContent5 } from "./5-judge.js";
 import { getTranslations } from "@falling-nikochan/i18n";
 import { initMetadata } from "@/metadata.js";
+import { maxAboutPageIndex } from "./pager.js";
 
-const maxIndex = 5;
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
 export function generateStaticParams() {
-  return Array.from(new Array(maxIndex)).map((_, i) => ({
+  return Array.from(new Array(maxAboutPageIndex)).map((_, i) => ({
     aboutIndex: (i + 1).toString(),
   }));
 }
@@ -31,12 +31,18 @@ export default async function AboutTab({ params }: Props) {
   const aboutIndex = Number((await params).aboutIndex);
   const locale = (await params).locale;
   const t = await getTranslations(params, `about.${aboutIndex}`);
+  const tm = await getTranslations(params, "main.about");
 
   return (
-    <IndexMain tab={0} locale={locale}>
+    <IndexMain
+      title={tm("title")}
+      tabKey={null}
+      mobileTabKey="top"
+      locale={locale}
+    >
       <Pager
         index={aboutIndex}
-        maxIndex={maxIndex}
+        maxIndex={maxAboutPageIndex}
         hrefBefore={`/${locale}/main/about/${aboutIndex - 1}`}
         hrefAfter={`/${locale}/main/about/${aboutIndex + 1}`}
         title={t("title")}
@@ -53,7 +59,7 @@ export default async function AboutTab({ params }: Props) {
         ) : aboutIndex === 5 ? (
           <AboutContent5 locale={locale} />
         ) : (
-          <p> Not Found</p>
+          <p>Not Found</p>
         )}
       </div>
     </IndexMain>

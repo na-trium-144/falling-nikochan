@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { linkStyle1 } from "./common/linkStyle.js";
+import { linkStyle1, linkStyle3 } from "./common/linkStyle.js";
 import Title from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, usePWAInstall } from "./common/pwaInstall.js";
@@ -14,7 +14,7 @@ import {
 import { useDisplayMode } from "./scale.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Input from "./common/input.jsx";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
@@ -23,18 +23,36 @@ import { fetchBrief } from "./common/briefCache.js";
 import { useShareModal } from "./main/shareModal.jsx";
 import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
+import { Box, modalBg } from "./common/box.jsx";
+import { Pager, pagerButtonClass } from "./common/pager.jsx";
+import { ArrowLeft } from "@icon-park/react";
+import { maxAboutPageIndex } from "./main/about/[aboutIndex]/pager.js";
 
-export default function TopPage({ locale }: { locale: string }) {
+interface Props {
+  locale: string;
+  aboutContents: ReactNode[];
+}
+export default function TopPage(props: Props) {
   const { screenWidth, rem } = useDisplayMode();
   const router = useRouter();
   const pwa = usePWAInstall();
   const t = useTranslations("main");
   const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
+  const { locale } = props;
   const { modal, openModal } = useShareModal(locale);
+  const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
 
   return (
     <main className="flex flex-col w-full h-full overflow-x-clip overflow-y-auto items-center ">
-      {modal}
+      {modal ? (
+        modal
+      ) : aboutPageIndex !== null ? (
+        <AboutModal
+          contents={props.aboutContents}
+          aboutPageIndex={aboutPageIndex}
+          setAboutPageIndex={setAboutPageIndex}
+        />
+      ) : null}
       <Link
         href={`/${locale}`}
         className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
@@ -46,21 +64,36 @@ export default function TopPage({ locale }: { locale: string }) {
       >
         <Title className="absolute inset-0 " anim />
       </Link>
-      <div className="basis-0 grow-1">
+      <div className="flex-none mb-3 text-center px-6">
+        {t("description")}
+        <Link
+          href={`/${locale}/main/about/1`}
+          className={"main-wide:hidden " + linkStyle3}
+        >
+          {t("about.title")}
+        </Link>
+        <button
+          className={"hidden main-wide:inline " + linkStyle3}
+          onClick={() => setAboutPageIndex(1)}
+        >
+          {t("about.title")}
+        </button>
+      </div>
+      <div className="basis-0 grow-2">
         <RedirectedWarning />
         <PWAInstallMain pwa={pwa} />
       </div>
 
-      <div className="flex-none mb-3 text-center px-6 ">
+      <div className="basis-auto grow-1 my-auto h-max mb-3 text-center px-6 ">
         <InputCId openModal={openModal} />
       </div>
       {process.env.NODE_ENV === "development" && (
-        <div className="flex-none mb-3 text-center px-6 ">
+        <div className="basis-auto grow-1 my-auto h-max mb-3 text-center px-6 ">
           <InputDirect locale={locale} />
         </div>
       )}
 
-      <div className="flex-none mb-3 text-center w-full px-6 ">
+      <div className="basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6 ">
         <h3 className="mb-2 text-xl font-bold font-title">
           {t("play.recent")}
         </h3>
@@ -76,7 +109,7 @@ export default function TopPage({ locale }: { locale: string }) {
 
       <nav
         className={
-          "shrink-0 basis-auto grow-6 " +
+          "shrink-0 basis-auto grow-3 " +
           "hidden main-wide:flex " +
           "flex-col justify-center w-60 " +
           "transition ease-out duration-200 "
@@ -197,5 +230,85 @@ function InputDirect(props: { locale: string }) {
       </h4>
       <p className="text-sm ">({t("inputDirectDevonly")})</p>
     </>
+  );
+}
+
+interface AProps {
+  contents: ReactNode[];
+  aboutPageIndex: number;
+  setAboutPageIndex: (i: number | null) => void;
+}
+function AboutModal(props: AProps) {
+  const tm = useTranslations("main.about");
+  const t = useTranslations(`about.${props.aboutPageIndex}`);
+  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
+  useEffect(() => {
+    setTimeout(() => setModalAppearing(true));
+  }, [props.aboutPageIndex]);
+  const close = () => {
+    setModalAppearing(false);
+    setTimeout(() => props.setAboutPageIndex(null), 200);
+  };
+
+  return (
+    <div
+      className={
+        modalBg +
+        "transition-opacity duration-200 " +
+        (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
+      }
+      onClick={close}
+    >
+      <div className="absolute inset-12">
+        <Box
+          className={
+            "absolute inset-0 m-auto w-160 h-max max-w-full max-h-full " +
+            "p-6 overflow-x-clip overflow-y-auto " +
+            "shadow-lg " +
+            "transition-transform duration-200 origin-center " +
+            (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
+          }
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
+            <button
+              className={pagerButtonClass + "absolute left-0 inset-y-0 "}
+              onClick={close}
+            >
+              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+            </button>
+            {tm("title")}
+          </h3>
+          <Pager
+            index={props.aboutPageIndex}
+            maxIndex={maxAboutPageIndex}
+            onClickBefore={() =>
+              props.setAboutPageIndex(props.aboutPageIndex - 1)
+            }
+            onClickAfter={() =>
+              props.setAboutPageIndex(props.aboutPageIndex + 1)
+            }
+            title={t("title")}
+          />
+          <div className="flex-1 flex flex-row ">
+            {props.contents.map((c, i) => (
+              // 選択中のページ以外を非表示にするが、
+              // 非表示のページも含めてコンテンツの高さが最も高いものに合わせたサイズで表示させたいので、
+              // 非表示のページをwidth:0としてすべて横並びで表示
+              <div
+                key={i}
+                className={
+                  i === props.aboutPageIndex
+                    ? "w-auto h-max "
+                    : "overflow-x-clip w-0 h-max"
+                }
+              >
+                <div className="w-148 h-max ">{c}</div>
+              </div>
+            ))}
+          </div>
+        </Box>
+      </div>
+    </div>
   );
 }

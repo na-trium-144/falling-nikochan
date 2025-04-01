@@ -69,7 +69,7 @@ export function useShareModal(locale: string) {
       }
       onClick={() => window.history.back()}
     >
-      <div className="absolute inset-6">
+      <div className="absolute inset-12">
         <Box
           onClick={(e) => e.stopPropagation()}
           className={

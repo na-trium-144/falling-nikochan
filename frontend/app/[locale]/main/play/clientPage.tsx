@@ -14,7 +14,13 @@ export default function PlayTab({ locale }: { locale: string }) {
   const { modal, openModal } = useShareModal(locale);
 
   return (
-    <IndexMain title={t("title")} tabKey="play" locale={locale} modal={modal}>
+    <IndexMain
+      title={t("title")}
+      tabKey="play"
+      mobileTabKey="play"
+      locale={locale}
+      modal={modal}
+    >
       <div className="flex-none mb-3 ">
         <h3 className="mb-2 text-xl font-bold font-title">{t("popular")}</h3>
         <p className="pl-2 mb-1 text-justify ">

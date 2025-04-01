@@ -14,6 +14,8 @@ export default async function Page({ params }: MetadataProps) {
       locale={(await params).locale}
       title={t("popular")}
       type="popular"
+      tabKey="play"
+      mobileTabKey="play"
     />
   );
 }

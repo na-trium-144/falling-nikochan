@@ -14,6 +14,8 @@ interface Props {
   onClickAfter?: () => void;
 }
 export function Pager(props: Props) {
+  console.log(props.index, props.maxIndex)
+  console.log(props.index < props.maxIndex)
   return (
     <div
       className={
