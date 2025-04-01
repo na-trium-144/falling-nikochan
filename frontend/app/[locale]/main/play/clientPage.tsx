@@ -11,7 +11,7 @@ import { useShareModal } from "../shareModal.jsx";
 export default function PlayTab({ locale }: { locale: string }) {
   const t = useTranslations("main.play");
 
-  const { modal, openModal } = useShareModal(locale);
+  const { modal, openModal, openShareInternal } = useShareModal(locale, "play");
 
   return (
     <IndexMain
@@ -32,6 +32,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           creator
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
+          onClickMobile={openShareInternal}
           showLoading
           moreHref={`/${locale}/main/popular`}
         />
@@ -48,6 +49,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           creator
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
+          onClickMobile={openShareInternal}
           showLoading
           dateDiff
           moreHref={`/${locale}/main/latest`}
@@ -86,6 +88,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           fetchAll
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
+          onClickMobile={openShareInternal}
           showLoading
           moreHref=""
         />

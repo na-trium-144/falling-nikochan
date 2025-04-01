@@ -92,7 +92,7 @@ export function IndexMain(props: Props) {
             )}
           </nav>
         )}
-        <Box className={"flex flex-col p-6 overflow-auto min-h-0 flex-1 "}>
+        <Box className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}>
           {props.children}
         </Box>
       </div>

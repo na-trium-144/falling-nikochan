@@ -36,7 +36,7 @@ export function PCFooter(props: Props) {
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
 
   return (
-    <footer className="py-3 z-50 hidden main-wide:block relative ">
+    <footer className="py-3 z-10 hidden main-wide:block relative text-center ">
       <PWAUpdateNotification pwa={props.pwa} />
       {props.nav && (
         <div
@@ -84,7 +84,7 @@ export function PCFooter(props: Props) {
 export function MobileFooter(props: Props) {
   const tm = useTranslations("main");
   return (
-    <footer className="pt-3 pb-1 z-50 w-full main-wide:hidden flex flex-row items-center justify-stretch relative">
+    <footer className="pt-3 pb-1 z-10 w-full main-wide:hidden flex flex-row items-center justify-stretch relative">
       <PWAUpdateNotification pwa={props.pwa} />
       {mobileTabTitleKeys.map((key, i) => (
         <Link

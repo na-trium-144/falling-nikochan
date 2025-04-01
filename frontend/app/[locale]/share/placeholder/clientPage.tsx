@@ -1,7 +1,5 @@
 "use client";
 
-import Header from "@/common/header.js";
-import Footer from "@/common/footer.js";
 import {
   ChartBrief,
   deserializeResultParams,
@@ -15,6 +13,12 @@ import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
+import Link from "next/link.js";
+import Title from "@/common/titleLogo.jsx";
+import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
+import { MobileFooter, PCFooter } from "@/common/footer.jsx";
+import { usePWAInstall } from "@/common/pwaInstall.jsx";
+import { AboutModal } from "@/clientPage.jsx";
 
 const dummyBrief = {
   title: "placeholder",
@@ -39,9 +43,15 @@ const dummyBrief = {
   ],
 };
 
-export default function ShareChart({ locale }: { locale: string }) {
+interface Props {
+  locale: string;
+  aboutContents: ReactNode[];
+}
+export default function ShareChart(props: Props) {
   const t = useTranslations("share");
-
+  const tm = useTranslations("main");
+  const pwa = usePWAInstall();
+  const { locale } = props;
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
@@ -81,32 +91,64 @@ export default function ShareChart({ locale }: { locale: string }) {
     }
   }, [t]);
 
+  const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
+
   return (
-    <main className="flex flex-col items-center w-full h-dvh main-wide:pt-6 ">
-      <Header className="main-wide:hidden" locale={locale}>
-        ID: {cid}
-      </Header>
+    <main className="flex flex-col w-full h-full overflow-x-clip overflow-y-auto items-center ">
+      {aboutPageIndex !== null && (
+        <AboutModal
+          contents={props.aboutContents}
+          aboutPageIndex={aboutPageIndex}
+          setAboutPageIndex={setAboutPageIndex}
+        />
+      )}
+      <Link
+        href={`/${locale}`}
+        className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
+        style={{
+          marginLeft: "-20rem",
+          marginRight: "-20rem",
+        }}
+        prefetch={!process.env.NO_PREFETCH}
+      >
+        <Title className="absolute inset-0 " anim />
+      </Link>
+      <div className="basis-0 flex-1" />
+      <div className="flex-none mb-3 text-center px-6">
+        {tm("description")}
+        <Link
+          href={`/${locale}/main/about/1`}
+          className={"main-wide:hidden " + linkStyle3}
+        >
+          {tm("about.title")}
+        </Link>
+        <button
+          className={"hidden main-wide:inline " + linkStyle3}
+          onClick={() => setAboutPageIndex(1)}
+        >
+          {tm("about.title")}
+        </button>
+      </div>
       <RedirectedWarning />
       <div
         className={
-          "basis-0 flex-1 min-h-0 w-full px-3 main-wide:px-6 " +
-          "w-full "
+          "basis-auto grow-6 shrink min-h-0 px-3 main-wide:px-6 " +
+          "flex flex-col items-center justify-center"
         }
       >
-        <Box
-          className="overflow-y-auto h-full m-auto max-w-full p-6 shrink"
-          style={{ flexBasis: "60rem" }}
-        >
+        <Box className="overflow-y-auto w-max h-max max-w-full max-h-full p-6">
           <ShareBox
             cid={cid}
             brief={brief}
             record={record}
             sharedResult={sharedResult}
             locale={locale}
+            forceShowCId
           />
         </Box>
       </div>
-      <Footer nav locale={locale} />
+      <PCFooter locale={locale} nav pwa={pwa} />
+      <MobileFooter locale={locale} nav pwa={pwa} />
     </main>
   );
 }

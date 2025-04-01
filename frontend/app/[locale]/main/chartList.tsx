@@ -21,11 +21,14 @@ interface PProps {
   locale: string;
   title: string;
   tabKey: tabKeys;
-  mobileTabKey: tabKeys;
+  mobileTabKey: "top" | "play";
   type: ChartListType;
 }
 export default function ChartListPage(props: PProps) {
-  const { modal, openModal } = useShareModal(props.locale);
+  const { modal, openModal, openShareInternal } = useShareModal(
+    props.locale,
+    props.mobileTabKey,
+  );
 
   return (
     <IndexMain
@@ -49,6 +52,7 @@ export default function ChartListPage(props: PProps) {
         creator
         href={(cid) => `/share/${cid}`}
         onClick={openModal}
+        onClickMobile={openShareInternal}
         showLoading
         moreHref=""
       />
@@ -71,6 +75,7 @@ interface Props {
   dateDiff?: boolean;
   href: (cid: string) => string;
   onClick?: (cid: string, brief?: ChartBrief) => void;
+  onClickMobile?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
   moreHref: string;
 }
@@ -169,6 +174,11 @@ export function ChartList(props: Props) {
                 onClick={
                   props.onClick ? () => props.onClick!(cid, brief) : undefined
                 }
+                onClickMobile={
+                  props.onClickMobile
+                    ? () => props.onClickMobile!(cid, brief)
+                    : undefined
+                }
                 creator={props.creator}
                 original={original}
                 newTab={props.newTab}
@@ -230,6 +240,7 @@ interface CProps {
   brief?: ChartBrief;
   href: string;
   onClick?: () => void;
+  onClickMobile?: () => void;
   creator?: boolean;
   original?: boolean;
   newTab?: boolean;
@@ -263,21 +274,38 @@ export function ChartListItem(props: CProps) {
       }
     >
       {props.onClick || (props.newTab && !isStandalone) ? (
-        <a
-          href={props.href}
-          className={chartListStyle}
-          target={props.newTab ? "_blank" : undefined}
-          onClick={
-            props.onClick
-              ? (e) => {
-                  props.onClick!();
-                  e.preventDefault();
-                }
-              : undefined
-          }
-        >
-          <ChartListItemChildren {...props} />
-        </a>
+        <>
+          <a
+            href={props.href}
+            className={
+              chartListStyle +
+              (props.onClickMobile ? "hidden main-wide:block " : "")
+            }
+            target={props.newTab ? "_blank" : undefined}
+            onClick={
+              props.onClick
+                ? (e) => {
+                    props.onClick!();
+                    e.preventDefault();
+                  }
+                : undefined
+            }
+          >
+            <ChartListItemChildren {...props} />
+          </a>
+          {props.onClickMobile && (
+            <a
+              href={props.href}
+              className={chartListStyle + "main-wide:hidden "}
+              onClick={(e) => {
+                props.onClickMobile!();
+                e.preventDefault();
+              }}
+            >
+              <ChartListItemChildren {...props} />
+            </a>
+          )}
+        </>
       ) : (
         <Link
           href={props.href}

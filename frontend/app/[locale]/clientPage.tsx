@@ -39,7 +39,7 @@ export default function TopPage(props: Props) {
   const t = useTranslations("main");
   const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
   const { locale } = props;
-  const { modal, openModal } = useShareModal(locale);
+  const { modal, openModal, openShareInternal } = useShareModal(locale, "top");
   const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
 
   return (
@@ -64,7 +64,8 @@ export default function TopPage(props: Props) {
       >
         <Title className="absolute inset-0 " anim />
       </Link>
-      <div className="flex-none mb-3 text-center px-6">
+      <div className="basis-0 flex-1" />
+      <div className="flex-none mb-3 text-center px-6 ">
         {t("description")}
         <Link
           href={`/${locale}/main/about/1`}
@@ -102,6 +103,7 @@ export default function TopPage(props: Props) {
           creator
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
+          onClickMobile={openShareInternal}
           showLoading
           moreHref={`/${locale}/main/recent`}
         />
@@ -238,7 +240,7 @@ interface AProps {
   aboutPageIndex: number;
   setAboutPageIndex: (i: number | null) => void;
 }
-function AboutModal(props: AProps) {
+export function AboutModal(props: AProps) {
   const tm = useTranslations("main.about");
   const t = useTranslations(`about.${props.aboutPageIndex}`);
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
