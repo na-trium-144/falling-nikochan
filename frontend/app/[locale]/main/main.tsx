@@ -20,8 +20,9 @@ import { usePWAInstall } from "@/common/pwaInstall";
 interface Props {
   children?: ReactNode | ReactNode[];
   title: string;
-  tabKey: tabKeys;
-  mobileTabKey: tabKeys;
+  tabKey: tabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
+  mobileTabKey: tabKeys; // モバイル表示でfooter内のアクティブなタブ
+  noBackButton?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   locale: string;
   modal?: ReactNode;
 }
@@ -33,7 +34,9 @@ export function IndexMain(props: Props) {
   return (
     <main className="flex flex-col w-full h-full items-center ">
       {props.modal}
-      <MobileHeader>{props.title}</MobileHeader>
+      <MobileHeader noBackButton={props.noBackButton}>
+        {props.title}
+      </MobileHeader>
       <Link
         href={`/${locale}`}
         className={

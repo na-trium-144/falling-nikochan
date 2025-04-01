@@ -18,6 +18,7 @@ export default function PlayTab({ locale }: { locale: string }) {
       title={t("title")}
       tabKey="play"
       mobileTabKey="play"
+      noBackButton
       locale={locale}
       modal={modal}
     >
