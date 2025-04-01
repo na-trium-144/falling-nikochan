@@ -37,13 +37,22 @@ export default function TopPage(props: Props) {
   const router = useRouter();
   const pwa = usePWAInstall();
   const t = useTranslations("main");
-  const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
+  const [menuMove, setMenuMove] = useState<boolean>(false);
+  const [menuMove2, setMenuMove2] = useState<boolean>(false);
+  const menuMoveAnimClass =
+    "min-h-0 shrink-2 transition-opacity duration-200 ease-linear " +
+    (menuMove2 ? "opacity-0 " : "opacity-100 ");
+  useEffect(() => {
+    if (menuMove) {
+      setTimeout(() => setMenuMove2(true));
+    }
+  }, [menuMove]);
   const { locale } = props;
   const { modal, openModal, openShareInternal } = useShareModal(locale, "top");
   const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
 
   return (
-    <main className="flex flex-col w-full h-full overflow-x-clip overflow-y-auto items-center ">
+    <main className="w-full h-full overflow-x-clip overflow-y-auto ">
       {modal ? (
         modal
       ) : aboutPageIndex !== null ? (
@@ -53,100 +62,138 @@ export default function TopPage(props: Props) {
           setAboutPageIndex={setAboutPageIndex}
         />
       ) : null}
-      <Link
-        href={`/${locale}`}
-        className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
-        style={{
-          marginLeft: "-20rem",
-          marginRight: "-20rem",
-        }}
-        prefetch={!process.env.NO_PREFETCH}
-      >
-        <Title className="absolute inset-0 " anim />
-      </Link>
-      <div className="basis-0 flex-1" />
-      <div className="flex-none mb-3 text-center px-6 ">
-        {t("description")}
-        <Link
-          href={`/${locale}/main/about/1`}
-          className={"main-wide:hidden " + linkStyle3}
-        >
-          {t("about.title")}
-        </Link>
-        <button
-          className={"hidden main-wide:inline " + linkStyle3}
-          onClick={() => setAboutPageIndex(1)}
-        >
-          {t("about.title")}
-        </button>
-      </div>
-      <div className="basis-0 grow-2">
-        <RedirectedWarning />
-        <PWAInstallMain pwa={pwa} />
-      </div>
-
-      <div className="basis-auto grow-1 my-auto h-max mb-3 text-center px-6 ">
-        <InputCId openModal={openModal} />
-      </div>
-      {process.env.NODE_ENV === "development" && (
-        <div className="basis-auto grow-1 my-auto h-max mb-3 text-center px-6 ">
-          <InputDirect locale={locale} />
-        </div>
-      )}
-
-      <div className="basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6 ">
-        <h3 className="mb-2 text-xl font-bold font-title">
-          {t("play.recent")}
-        </h3>
-        <ChartList
-          type="recent"
-          creator
-          href={(cid) => `/share/${cid}`}
-          onClick={openModal}
-          onClickMobile={openShareInternal}
-          showLoading
-          moreHref={`/${locale}/main/recent`}
-        />
-      </div>
-
-      <nav
+      <div
         className={
-          "shrink-0 basis-auto grow-3 " +
-          "hidden main-wide:flex " +
-          "flex-col justify-center w-60 " +
-          "transition ease-out duration-200 "
+          "flex flex-col w-full min-h-full h-max items-center " +
+          (menuMove
+            ? "transition-[max-height] duration-200 ease-out " +
+              (menuMove2 ? "max-h-full " : "max-h-max")
+            : "")
         }
-        style={{
-          transform: menuMoveLeft
-            ? `translateX(-${
-                (screenWidth - (60 / 4) * rem - (12 / 4) * rem) / 2
-              }px)`
-            : undefined,
-        }}
       >
-        {pcTabTitleKeys.map((key, i) => (
+        <Link
+          href={`/${locale}`}
+          className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
+          style={{
+            marginLeft: "-20rem",
+            marginRight: "-20rem",
+          }}
+          prefetch={!process.env.NO_PREFETCH}
+        >
+          <Title className="absolute inset-0 " anim />
+        </Link>
+        <div className="basis-0 flex-1 " />
+        <div className={"grow-0 mb-3 text-center px-6 " + menuMoveAnimClass}>
+          {t("description")}
           <Link
-            key={i}
-            href={`/${locale}${tabURLs[key]}`}
-            className={
-              " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
-              "rounded-lg p-3 "
-            }
-            prefetch={!process.env.NO_PREFETCH}
-            onClick={(e) => {
-              setMenuMoveLeft(true);
-              setTimeout(() => {
-                router.push(`/${locale}${tabURLs[key]}`);
-              }, 150);
-              e.preventDefault();
-            }}
+            href={`/${locale}/main/about/1`}
+            className={"main-wide:hidden " + linkStyle3}
           >
-            {t(key + ".title")}
+            {t("about.title")}
           </Link>
-        ))}
-      </nav>
-      <PCFooter locale={locale} pwa={pwa} />
-      <div className="flex-none basis-14 main-wide:hidden " />
+          <button
+            className={"hidden main-wide:inline " + linkStyle3}
+            onClick={() => setAboutPageIndex(1)}
+          >
+            {t("about.title")}
+          </button>
+        </div>
+        <div className={"basis-0 grow-2 " + menuMoveAnimClass}>
+          <RedirectedWarning />
+          <PWAInstallMain pwa={pwa} />
+        </div>
+
+        <div
+          className={
+            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6 " +
+            menuMoveAnimClass
+          }
+        >
+          <InputCId openModal={openModal} />
+        </div>
+        {process.env.NODE_ENV === "development" && (
+          <div
+            className={
+              "basis-auto grow-1 my-auto h-max mb-3 text-center px-6 " +
+              menuMoveAnimClass
+            }
+          >
+            <InputDirect locale={locale} />
+          </div>
+        )}
+
+        <div
+          className={
+            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6 " +
+            menuMoveAnimClass
+          }
+        >
+          <h3 className="mb-2 text-xl font-bold font-title">
+            {t("play.recent")}
+          </h3>
+          <ChartList
+            type="recent"
+            creator
+            href={(cid) => `/share/${cid}`}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+            showLoading
+            moreHref={`/${locale}/main/recent`}
+          />
+        </div>
+
+        <div
+          className={
+            "shrink-1 h-dvh transition-all duration-200 ease-in " +
+            (menuMove2 ? "max-h-[50vh] " : "max-h-0 ")
+          }
+        />
+        <nav
+          className={
+            "shrink-0 basis-auto grow-3 " +
+            "hidden main-wide:flex " +
+            "flex-col justify-center w-60 " +
+            "transition ease-out duration-200 "
+          }
+          style={{
+            transform: menuMove
+              ? `translateX(-${
+                  (screenWidth - (60 / 4) * rem - (12 / 4) * rem) / 2
+                }px)`
+              : undefined,
+          }}
+        >
+          {pcTabTitleKeys.map((key, i) => (
+            <Link
+              key={i}
+              href={`/${locale}${tabURLs[key]}`}
+              className={
+                " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
+                "rounded-lg p-3 "
+              }
+              prefetch={!process.env.NO_PREFETCH}
+              onClick={(e) => {
+                setMenuMove(true);
+                setTimeout(() => {
+                  router.push(`/${locale}${tabURLs[key]}`);
+                }, 150);
+                e.preventDefault();
+              }}
+            >
+              {t(key + ".title")}
+            </Link>
+          ))}
+        </nav>
+        <div
+          className={
+            "shrink-1 h-dvh transition-all duration-200 ease-in " +
+            (menuMove2 ? "max-h-[50vh] " : "max-h-0 ")
+          }
+        />
+
+        <PCFooter locale={locale} pwa={pwa} />
+        <div className="flex-none basis-14 main-wide:hidden " />
+      </div>
       <div
         className={
           "fixed bottom-0 inset-x-0 backdrop-blur-2xs " +
