@@ -1,35 +1,79 @@
+"use client";
 import { ChartBrief } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { ArrowLeft, ArrowRight, RightOne } from "@icon-park/react";
+import { ArrowRight } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ReactNode, useEffect, useState } from "react";
-import { ChartLineBrief } from "./play/fetch.js";
-import { pagerButtonClass } from "@/common/pager.js";
+import { useEffect, useState } from "react";
+import {
+  chartListMaxRow,
+  ChartListType,
+  useChartListFetcher,
+} from "./fetch.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
+import { IndexMain } from "./main.js";
+import { useShareModal } from "./shareModal.jsx";
+
+interface PProps {
+  locale: string;
+  title: string;
+  hiddenPage?: boolean;
+  type: ChartListType;
+}
+export default function ChartListPage(props: PProps) {
+  const { modal, openModal } = useShareModal(props.locale);
+
+  return (
+    <IndexMain
+      title={props.title}
+      tabKey="play"
+      hiddenPage={props.hiddenPage}
+      locale={props.locale}
+      modal={modal}
+    >
+      <h3
+        className={
+          "flex-none mb-2 text-xl font-bold font-title " +
+          "hidden main-wide:block "
+        }
+      >
+        {props.title}
+      </h3>
+      <ChartList
+        type={props.type}
+        fetchAll
+        creator
+        href={(cid) => `/share/${cid}`}
+        onClick={openModal}
+        showLoading
+        moreHref=""
+      />
+    </IndexMain>
+  );
+}
 
 interface Props {
-  recentBrief?: ChartLineBrief[] | "error";
-  maxRow: number | null;
+  type: ChartListType;
+  fetchAll?: boolean;
   creator?: boolean;
   showLoading?: boolean;
   dateDiff?: boolean;
   href: (cid: string) => string;
-  onClick?: (cid: string) => void;
+  onClick?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
   moreHref: string;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
   const te = useTranslations("error");
-
+  const briefs = useChartListFetcher(props.type, !!props.fetchAll);
+  const maxRow =
+    Array.isArray(briefs) && props.fetchAll ? briefs.length : chartListMaxRow;
   const fetching =
-    props.recentBrief === undefined ||
-    (Array.isArray(props.recentBrief) &&
-      props.recentBrief
-        .slice(0, props.maxRow || props.recentBrief.length)
-        .some(({ fetched }) => !fetched));
+    briefs === undefined ||
+    (Array.isArray(briefs) &&
+      briefs.slice(0, maxRow).some(({ fetched }) => !fetched));
   return (
     <>
       <ul
@@ -38,26 +82,24 @@ export function ChartList(props: Props) {
           gridTemplateColumns: `repeat(auto-fit, minmax(min(18rem, 100%), 1fr))`,
         }}
       >
-        {Array.isArray(props.recentBrief) && props.recentBrief.length > 0 && (
+        {Array.isArray(briefs) && briefs.length > 0 && (
           <>
-            {props.recentBrief
-              .slice(0, props.maxRow || props.recentBrief.length)
-              .map(({ cid, brief, original }) => (
-                <ChartListItem
-                  invisible={fetching}
-                  key={cid}
-                  cid={cid}
-                  brief={brief}
-                  href={props.href(cid)}
-                  onClick={
-                    props.onClick ? () => props.onClick!(cid) : undefined
-                  }
-                  creator={props.creator}
-                  original={original}
-                  newTab={props.newTab}
-                  dateDiff={props.dateDiff}
-                />
-              ))}
+            {briefs.slice(0, maxRow).map(({ cid, brief, original }) => (
+              <ChartListItem
+                invisible={fetching}
+                key={cid}
+                cid={cid}
+                brief={brief}
+                href={props.href(cid)}
+                onClick={
+                  props.onClick ? () => props.onClick!(cid, brief) : undefined
+                }
+                creator={props.creator}
+                original={original}
+                newTab={props.newTab}
+                dateDiff={props.dateDiff}
+              />
+            ))}
           </>
         )}
         <div
@@ -68,36 +110,34 @@ export function ChartList(props: Props) {
           <SlimeSVG />
           Loading...
         </div>
-        {props.recentBrief === "error" && (
+        {briefs === "error" && (
           <div className="w-max pl-6 ">{te("fetchError")}</div>
         )}
         {Array.from(new Array(5)).map((_, i) => (
           <span key={i} />
         ))}
       </ul>
-      {props.recentBrief !== undefined &&
-        props.maxRow &&
-        props.recentBrief.length > props.maxRow && (
-          <Link
-            className={
-              "block w-max mx-auto mt-1 " +
-              (fetching ? "invisible " : "") +
-              linkStyle1
-            }
-            href={props.moreHref}
-            prefetch={!process.env.NO_PREFETCH}
-          >
-            {t("showAll")}
-            {/*<span className="ml-1">
-              ({props.recentBrief.length /*- props.maxRow* /})
+      {Array.isArray(briefs) && briefs.length > maxRow && (
+        <Link
+          className={
+            "block w-max mx-auto mt-1 " +
+            (fetching ? "invisible " : "") +
+            linkStyle1
+          }
+          href={props.moreHref}
+          prefetch={!process.env.NO_PREFETCH}
+        >
+          {t("showAll")}
+          {/*<span className="ml-1">
+              ({briefs.length /*- props.maxRow* /})
             </span>*/}
-            <ArrowRight
-              className="inline-block align-middle ml-2 "
-              theme="filled"
-            />
-          </Link>
-        )}
-      {props.recentBrief !== undefined && props.recentBrief.length === 0 && (
+          <ArrowRight
+            className="inline-block align-middle ml-2 "
+            theme="filled"
+          />
+        </Link>
+      )}
+      {Array.isArray(briefs) && briefs.length === 0 && (
         <div className="pl-2">{t("empty")}</div>
       )}
     </>
@@ -265,53 +305,4 @@ function DateDiff(props: DProps) {
   } else {
     return null;
   }
-}
-
-export function AccordionLike(props: {
-  hidden: boolean;
-  expanded?: boolean;
-  children: ReactNode;
-  header?: ReactNode;
-  reset?: () => void;
-}) {
-  const [hidden, setHidden] = useState<boolean>(false);
-  const [transparent, setTransparent] = useState<boolean>(false);
-  useEffect(() => {
-    if (props.hidden) {
-      setTransparent(true);
-      setTimeout(() => setHidden(true), 200);
-    } else {
-      setHidden(false);
-      requestAnimationFrame(() => setTransparent(false));
-    }
-  }, [props.hidden]);
-
-  return (
-    <div
-      className={
-        "main-wide:transition-all main-wide:duration-200 " +
-        (hidden ? "hidden " : "") +
-        (transparent
-          ? "ease-out opacity-0 max-h-0 pointer-events-none "
-          : "mb-3 ease-in opacity-100 max-h-full ")
-      }
-    >
-      {props.header && (
-        <h3 className="mb-2">
-          <button
-            className={
-              pagerButtonClass +
-              "mr-4 align-bottom " +
-              (props.expanded ? "" : "hidden! ")
-            }
-            onClick={props.reset || (() => undefined)}
-          >
-            <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
-          </button>
-          {props.header}
-        </h3>
-      )}
-      {props.children}
-    </div>
-  );
 }

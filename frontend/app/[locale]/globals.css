@@ -6,6 +6,7 @@
   --breakpoint-share-yt-wide: 60rem; /* shareでYouTubeを表示する場所が変わる */
   --color-orange-975: #20100a;
   --color-amber-975: #20180a;
+  --blur-2xs: 2px;
 }
 @custom-variant dark (&:where(.dark, .dark *));
 

@@ -25,7 +25,6 @@ export default {
       "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
     inputDirect: "譜面IDを指定し直接プレイ画面に飛ぶ",
     inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
-    recentPlay: "最近プレイした譜面",
     about: {
       title: "Falling Nikochan とは？",
       titleShort: "概要",
@@ -33,6 +32,7 @@ export default {
     play: {
       title: "プレイする",
       titleShort: "プレイ",
+      recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
       latest: "新着譜面",

@@ -5,25 +5,24 @@ import { linkStyle1 } from "./common/linkStyle.js";
 import Title from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, usePWAInstall } from "./common/pwaInstall.js";
-import Footer, { pcTabTitleKeys, tabURLs } from "./common/footer.js";
+import {
+  MobileFooter,
+  PCFooter,
+  pcTabTitleKeys,
+  tabURLs,
+} from "./common/footer.js";
 import { useDisplayMode } from "./scale.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Input from "./common/input.jsx";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
 import { SmallDomainShare } from "./common/small.jsx";
 import { fetchBrief } from "./common/briefCache.js";
-import { useShareModal } from "./main/play/shareModal.jsx";
-import {
-  ChartLineBrief,
-  chartListMaxRow,
-  fetchAndFilterBriefs,
-} from "./main/play/fetch.js";
+import { useShareModal } from "./main/shareModal.jsx";
 import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
-import { getRecent, updateRecent } from "./common/recent.js";
 
 export default function TopPage({ locale }: { locale: string }) {
   const { screenWidth, rem } = useDisplayMode();
@@ -34,7 +33,7 @@ export default function TopPage({ locale }: { locale: string }) {
   const { modal, openModal } = useShareModal(locale);
 
   return (
-    <main className="flex flex-col w-full h-full overflow-auto items-center ">
+    <main className="flex flex-col w-full h-full overflow-x-clip overflow-y-auto items-center ">
       {modal}
       <Link
         href={`/${locale}`}
@@ -62,7 +61,17 @@ export default function TopPage({ locale }: { locale: string }) {
       )}
 
       <div className="flex-none mb-3 text-center w-full px-6 ">
-        <RecentList openModal={openModal} locale={locale} />
+        <h3 className="mb-2 text-xl font-bold font-title">
+          {t("play.recent")}
+        </h3>
+        <ChartList
+          type="recent"
+          creator
+          href={(cid) => `/share/${cid}`}
+          onClick={openModal}
+          showLoading
+          moreHref={`/${locale}/main/recent`}
+        />
       </div>
 
       <nav
@@ -101,7 +110,17 @@ export default function TopPage({ locale }: { locale: string }) {
           </Link>
         ))}
       </nav>
-      <Footer locale={locale} pwa={pwa} />
+      <PCFooter locale={locale} pwa={pwa} />
+      <div className="flex-none basis-14 main-wide:hidden " />
+      <div
+        className={
+          "fixed bottom-0 inset-x-0 backdrop-blur-2xs " +
+          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0 " +
+          "dark:from-orange-950 dark:to-orange-950/0 "
+        }
+      >
+        <MobileFooter locale={locale} pwa={pwa} />
+      </div>
     </main>
   );
 }
@@ -177,49 +196,6 @@ function InputDirect(props: { locale: string }) {
         />
       </h4>
       <p className="text-sm ">({t("inputDirectDevonly")})</p>
-    </>
-  );
-}
-
-function RecentList(props: {
-  openModal: (cid: string, brief?: ChartBrief) => void;
-  locale: string;
-}) {
-  const t = useTranslations("main");
-  const [recentBrief, setRecentBrief] = useState<ChartLineBrief[]>();
-  useEffect(() => {
-    const recentCId = getRecent("play").reverse();
-    setRecentBrief(recentCId.map((cid) => ({ cid, fetched: false })));
-  }, []);
-  useEffect(() => {
-    void (async () => {
-      if (recentBrief) {
-        const { changed, briefs } = await fetchAndFilterBriefs(
-          recentBrief,
-          false,
-        );
-        if (changed) {
-          setRecentBrief(briefs);
-          updateRecent("play", briefs.map(({ cid }) => cid).reverse());
-        }
-      }
-    })();
-  }, [recentBrief]);
-
-  return (
-    <>
-      <h3 className="mb-2 text-xl font-bold font-title">{t("recentPlay")}</h3>
-      <ChartList
-        recentBrief={recentBrief}
-        maxRow={chartListMaxRow}
-        creator
-        href={(cid) => `/share/${cid}`}
-        onClick={(cid) =>
-          props.openModal(cid, recentBrief?.find((b) => b.cid === cid)?.brief)
-        }
-        showLoading
-        moreHref={`/${props.locale}/main/recent`}
-      />
     </>
   );
 }

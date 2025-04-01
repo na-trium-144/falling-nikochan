@@ -4,13 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
-import { AccordionLike, ChartList } from "../chartList.js";
+import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import {
   ChartLineBrief,
   chartListMaxRow,
   fetchAndFilterBriefs,
-} from "../play/fetch.js";
+} from "../fetch.js";
 import { CidSchema, rateLimitMin } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useDisplayMode } from "@/scale.js";

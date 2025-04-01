@@ -14,11 +14,11 @@ interface MProps {
 export function MobileHeader(props: MProps) {
   return (
     <header
-      className={"m-3 w-full relative text-center text-lg main-wide:hidden "}
+      className={"p-3 w-full relative text-center text-lg main-wide:hidden "}
     >
       {!props.noBackButton && (
         <button
-          className={pagerButtonClass + "absolute left-0 inset-y-0 "}
+          className={pagerButtonClass + "absolute left-3 inset-y-3 "}
           onClick={() => history.back()}
         >
           <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />

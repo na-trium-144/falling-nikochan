@@ -27,7 +27,7 @@ interface Props {
   locale: string;
   pwa: PWAStates;
 }
-export default function Footer(props: Props) {
+export function PCFooter(props: Props) {
   const themeContext = useTheme();
   const tm = useTranslations("main");
   // const t = useTranslations("footer");
@@ -35,76 +35,78 @@ export default function Footer(props: Props) {
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
 
   return (
-    <>
-      <footer className="py-3 z-50 hidden main-wide:block relative ">
-        <PWAUpdateNotification pwa={props.pwa} />
-        {props.nav && (
-          <div
-            className={
-              "text-center mb-2 divide-solid divide-slate-800 dark:divide-stone-300 " +
-              "flex items-stretch w-max mx-auto " +
-              "divide-x flex-row "
-            }
-          >
-            {pcTabTitleKeys.map((key, i) => (
-              <Link
-                key={i}
-                className={"px-2 " + linkStyle1}
-                href={`/${props.locale}${tabURLs[key]}`}
-                prefetch={!process.env.NO_PREFETCH}
-              >
-                {tm(key + ".title")}
-              </Link>
-            ))}
-          </div>
-        )}
-        <div className={"flex-row items-baseline space-x-3"}>
-          <Link
-            className={"inline-block relative group " + linkStyle1}
-            href={`/${props.locale}/main/version`}
-            prefetch={!process.env.NO_PREFETCH}
-          >
-            <span>ver.</span>
-            <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
-            <Comment className="inline-block translate-y-0.5 " />
-            <span
-              className={
-                "absolute w-3 h-3 rounded-full bg-red-500 " +
-                (isLastVisitedOld ? "inline-block " : "hidden ")
-              }
-              style={{ top: "-0.1rem", right: "-0.25rem" }}
-            />
-          </Link>
-          <LangSwitcher locale={props.locale} />
-          <ThemeSwitcher {...themeContext} />
+    <footer className="py-3 z-50 hidden main-wide:block relative ">
+      <PWAUpdateNotification pwa={props.pwa} />
+      {props.nav && (
+        <div
+          className={
+            "text-center mb-2 divide-solid divide-slate-800 dark:divide-stone-300 " +
+            "flex items-stretch w-max mx-auto " +
+            "divide-x flex-row "
+          }
+        >
+          {pcTabTitleKeys.map((key, i) => (
+            <Link
+              key={i}
+              className={"px-2 " + linkStyle1}
+              href={`/${props.locale}${tabURLs[key]}`}
+              prefetch={!process.env.NO_PREFETCH}
+            >
+              {tm(key + ".title")}
+            </Link>
+          ))}
         </div>
-      </footer>
-      <footer className="pt-3 pb-1 z-50 main-wide:hidden flex flex-row items-center justify-stretch relative">
-        <PWAUpdateNotification pwa={props.pwa} />
-        {mobileTabTitleKeys.map((key, i) => (
-          <Link
-            key={i}
+      )}
+      <div className={"flex-row items-baseline space-x-3"}>
+        <Link
+          className={"inline-block relative group " + linkStyle1}
+          href={`/${props.locale}/main/version`}
+          prefetch={!process.env.NO_PREFETCH}
+        >
+          <span>ver.</span>
+          <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
+          <Comment className="inline-block translate-y-0.5 " />
+          <span
             className={
-              "w-full text-lg space-y-1 flex flex-col items-center " +
-              linkStyle1
+              "absolute w-3 h-3 rounded-full bg-red-500 " +
+              (isLastVisitedOld ? "inline-block " : "hidden ")
             }
-            href={`/${props.locale}${tabURLs[key]}`}
-            prefetch={!process.env.NO_PREFETCH}
-          >
-            {i === 0 ? (
-              <Home />
-            ) : i === 1 ? (
-              <Search />
-            ) : i === 2 ? (
-              <Edit />
-            ) : (
-              <More />
-            )}
-            <span className="text-xs ">{tm(key + ".titleShort")}</span>
-          </Link>
-        ))}
-      </footer>
-    </>
+            style={{ top: "-0.1rem", right: "-0.25rem" }}
+          />
+        </Link>
+        <LangSwitcher locale={props.locale} />
+        <ThemeSwitcher {...themeContext} />
+      </div>
+    </footer>
+  );
+}
+export function MobileFooter(props: Props) {
+  const tm = useTranslations("main");
+  return (
+    <footer className="pt-3 pb-1 z-50 w-full main-wide:hidden flex flex-row items-center justify-stretch relative">
+      <PWAUpdateNotification pwa={props.pwa} />
+      {mobileTabTitleKeys.map((key, i) => (
+        <Link
+          key={i}
+          className={
+            "w-full text-lg space-y-1 flex flex-col items-center " + linkStyle1
+          }
+          href={`/${props.locale}${tabURLs[key]}`}
+          prefetch={!process.env.NO_PREFETCH}
+        >
+          {i === 0 ? (
+            <Home />
+          ) : i === 1 ? (
+            <Search />
+          ) : i === 2 ? (
+            <Edit />
+          ) : (
+            <More />
+          )}
+          <span className="text-xs ">{tm(key + ".titleShort")}</span>
+        </Link>
+      ))}
+    </footer>
   );
 }
 

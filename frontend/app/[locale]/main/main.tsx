@@ -2,7 +2,9 @@
 
 import { MobileHeader } from "@/common/header.js";
 import { Box } from "@/common/box.js";
-import Footer, {
+import {
+  MobileFooter,
+  PCFooter,
   pcTabTitleKeys,
   tabURLs,
 } from "@/common/footer.js";
@@ -18,7 +20,7 @@ interface Props {
   children?: ReactNode | ReactNode[];
   title: string;
   tabKey: string;
-  isHiddenPage?: boolean;
+  hiddenPage?: boolean;
   locale: string;
   modal?: ReactNode;
 }
@@ -49,12 +51,12 @@ export function IndexMain(props: Props) {
       <RedirectedWarning />
       <div
         className={
-          "overflow-hidden " +
+          "w-full overflow-hidden " +
           "shrink-0 basis-0 grow-2 " +
           "flex flex-row items-stretch justify-center px-3 main-wide:px-6 "
         }
       >
-        {!props.isHiddenPage && (
+        {!props.hiddenPage && (
           <nav
             className={
               "hidden main-wide:flex " +
@@ -86,15 +88,12 @@ export function IndexMain(props: Props) {
             )}
           </nav>
         )}
-        <Box
-          className={
-            "flex flex-col p-6 overflow-auto " + "w-full min-h-0 flex-1 "
-          }
-        >
+        <Box className={"flex flex-col p-6 overflow-auto min-h-0 flex-1 "}>
           {props.children}
         </Box>
       </div>
-      <Footer locale={locale} nav={props.isHiddenPage} pwa={pwa}/>
+      <PCFooter locale={locale} nav={props.hiddenPage} pwa={pwa} />
+      <MobileFooter locale={locale} nav={props.hiddenPage} pwa={pwa} />
     </main>
   );
 }
