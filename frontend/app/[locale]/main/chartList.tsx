@@ -1,6 +1,6 @@
 import { ChartBrief } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { ArrowLeft, RightOne } from "@icon-park/react";
+import { ArrowLeft, ArrowRight, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
@@ -11,16 +11,14 @@ import { useStandaloneDetector } from "@/common/pwaInstall.js";
 
 interface Props {
   recentBrief?: ChartLineBrief[] | "error";
-  maxRow: number;
-  fetchAdditional?: () => void;
+  maxRow: number | null;
   creator?: boolean;
   showLoading?: boolean;
   dateDiff?: boolean;
   href: (cid: string) => string;
   onClick?: (cid: string) => void;
   newTab?: boolean;
-  additionalOpen: boolean;
-  setAdditionalOpen: (open: boolean) => void;
+  moreHref: string;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
@@ -29,11 +27,9 @@ export function ChartList(props: Props) {
   const fetching =
     props.recentBrief === undefined ||
     (Array.isArray(props.recentBrief) &&
-      props.recentBrief.slice(0, props.maxRow).some(({ fetched }) => !fetched));
-  const fetchingAdditional =
-    props.recentBrief === undefined ||
-    (Array.isArray(props.recentBrief) &&
-      props.recentBrief.some(({ fetched }) => !fetched));
+      props.recentBrief
+        .slice(0, props.maxRow || props.recentBrief.length)
+        .some(({ fetched }) => !fetched));
   return (
     <>
       <ul
@@ -45,29 +41,10 @@ export function ChartList(props: Props) {
         {Array.isArray(props.recentBrief) && props.recentBrief.length > 0 && (
           <>
             {props.recentBrief
-              .slice(0, props.maxRow)
+              .slice(0, props.maxRow || props.recentBrief.length)
               .map(({ cid, brief, original }) => (
                 <ChartListItem
                   invisible={fetching}
-                  key={cid}
-                  cid={cid}
-                  brief={brief}
-                  href={props.href(cid)}
-                  onClick={
-                    props.onClick ? () => props.onClick!(cid) : undefined
-                  }
-                  creator={props.creator}
-                  original={original}
-                  newTab={props.newTab}
-                  dateDiff={props.dateDiff}
-                />
-              ))}
-            {props.recentBrief
-              .slice(props.maxRow)
-              .map(({ cid, brief, original }) => (
-                <ChartListItem
-                  invisible={fetchingAdditional}
-                  hidden={!props.additionalOpen}
                   key={cid}
                   cid={cid}
                   brief={brief}
@@ -85,11 +62,7 @@ export function ChartList(props: Props) {
         )}
         <div
           className={
-            "w-max pl-6 " +
-            ((fetching || (props.additionalOpen && fetchingAdditional)) &&
-            props.showLoading
-              ? ""
-              : "hidden ")
+            "w-max pl-6 " + (fetching && props.showLoading ? "" : "hidden ")
           }
         >
           <SlimeSVG />
@@ -103,27 +76,26 @@ export function ChartList(props: Props) {
         ))}
       </ul>
       {props.recentBrief !== undefined &&
-        props.recentBrief.length > props.maxRow &&
-        !props.additionalOpen && (
-          <button
+        props.maxRow &&
+        props.recentBrief.length > props.maxRow && (
+          <Link
             className={
-              "block relative ml-1 mt-1 " +
+              "block w-max mx-auto mt-1 " +
               (fetching ? "invisible " : "") +
               linkStyle1
             }
-            onClick={() => {
-              props.setAdditionalOpen(!props.additionalOpen);
-              if (fetchingAdditional && props.fetchAdditional) {
-                props.fetchAdditional();
-              }
-            }}
+            href={props.moreHref}
+            prefetch={!process.env.NO_PREFETCH}
           >
-            <RightOne className="absolute left-0 bottom-1 " theme="filled" />
-            <span className="ml-5">{t("showAll")}</span>
+            {t("showAll")}
             {/*<span className="ml-1">
               ({props.recentBrief.length /*- props.maxRow* /})
             </span>*/}
-          </button>
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
+          </Link>
         )}
       {props.recentBrief !== undefined && props.recentBrief.length === 0 && (
         <div className="pl-2">{t("empty")}</div>
