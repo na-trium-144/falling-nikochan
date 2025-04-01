@@ -1,19 +1,20 @@
 "use client";
-import { ChartBrief } from "@falling-nikochan/chart";
+import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { ArrowRight } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+  ChartLineBrief,
   chartListMaxRow,
-  ChartListType,
-  useChartListFetcher,
+  fetchAndFilterBriefs,
 } from "./fetch.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
 import { useShareModal } from "./shareModal.jsx";
+import { getRecent, updateRecent } from "@/common/recent.js";
 
 interface PProps {
   locale: string;
@@ -53,6 +54,13 @@ export default function ChartListPage(props: PProps) {
   );
 }
 
+export type ChartListType =
+  | "recent"
+  | "recentEdit"
+  | "popular"
+  | "latest"
+  | "sample";
+
 interface Props {
   type: ChartListType;
   fetchAll?: boolean;
@@ -67,7 +75,71 @@ interface Props {
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
   const te = useTranslations("error");
-  const briefs = useChartListFetcher(props.type, !!props.fetchAll);
+
+  const [briefs, setBriefs] = useState<ChartLineBrief[] | "error">();
+  useEffect(() => {
+    switch (props.type) {
+      case "recent":
+        setBriefs(
+          getRecent("play")
+            .reverse()
+            .map((cid) => ({ cid, fetched: false })),
+        );
+        break;
+      case "recentEdit":
+        setBriefs(
+          getRecent("edit")
+            .reverse()
+            .map((cid) => ({ cid, fetched: false })),
+        );
+        break;
+      case "sample":
+        setBriefs(
+          originalCId
+            .map(
+              (cid) =>
+                ({ cid, fetched: false, original: true }) as ChartLineBrief,
+            )
+            .concat(sampleCId.map((cid) => ({ cid, fetched: false }))),
+        );
+        break;
+      case "latest":
+      case "popular":
+        void (async () => {
+          try {
+            const latestRes = await fetch(
+              process.env.BACKEND_PREFIX + `/api/${props.type}`,
+              { cache: "default" },
+            );
+            if (latestRes.ok) {
+              const latestCId = (await latestRes.json()) as { cid: string }[];
+              setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
+            } else {
+              setBriefs("error");
+            }
+          } catch (e) {
+            console.error(e);
+            setBriefs("error");
+          }
+        })();
+    }
+  }, [props.type]);
+  useEffect(() => {
+    void (async () => {
+      if (Array.isArray(briefs)) {
+        const res = await fetchAndFilterBriefs(briefs, !!props.fetchAll);
+        if (res.changed) {
+          setBriefs(res.briefs);
+          if (props.type === "recent") {
+            updateRecent("play", briefs.map(({ cid }) => cid).reverse());
+          }
+          if (props.type === "recentEdit") {
+            updateRecent("edit", briefs.map(({ cid }) => cid).reverse());
+          }
+        }
+      }
+    })();
+  }, [briefs, props.type, props.fetchAll]);
   const maxRow =
     Array.isArray(briefs) && props.fetchAll ? briefs.length : chartListMaxRow;
   const fetching =
