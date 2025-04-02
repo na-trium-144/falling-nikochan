@@ -73,7 +73,6 @@ import {
 import { useDisplayMode } from "@/scale.js";
 import { Forbid, Move } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { useTheme } from "@/common/theme.js";
 import { GuideMain } from "./guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
 import { Signature } from "@falling-nikochan/chart";
@@ -413,7 +412,6 @@ function Page(props: Props) {
     guidePage,
     setGuidePage,
   } = props;
-  const themeState = useTheme();
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 

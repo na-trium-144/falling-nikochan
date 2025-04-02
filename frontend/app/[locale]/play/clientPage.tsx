@@ -50,7 +50,6 @@ import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
-import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
@@ -275,7 +274,6 @@ function Play(props: Props) {
     largeResult,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  const themeState = useTheme();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;

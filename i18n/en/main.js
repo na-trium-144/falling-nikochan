@@ -17,18 +17,21 @@ export default {
     updating: "Downloading update...",
     updateDone: "Update completed!",
     updateFailed: "Update failed...",
+    inputId: "Enter Chart ID",
+    inputIdDesc: "Enter the ID of the chart you want to play.",
+    inputIdDesc2: "You can also play by accessing the chart URL (<url></url>).",
+    inputDirect: "Enter Chart ID and go to play screen directly",
+    inputDirectDevonly: "dev environment only, instead of /share/cid path",
     about: {
       title: "What is Falling Nikochan?",
     },
+    top: {
+      titleShort: "Home",
+    },
     play: {
-      title: "Play",
-      inputId: "Enter Chart ID",
-      inputIdDesc: "Enter the ID of the chart you want to play.",
-      inputIdDesc2:
-        "You can also play by accessing the chart URL (<url></url>).",
-      inputDirect: "Enter Chart ID and go to play screen directly",
-      inputDirectDevonly: "dev environment only, instead of /share/cid path",
-      recentPlay: "Recently Played Charts",
+      title: "Play with Public Charts",
+      titleShort: "Play",
+      recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
       latest: "Latest Charts",
@@ -44,7 +47,8 @@ export default {
         "In dev environment, dummy files with only title and composer are displayed.",
     },
     edit: {
-      title: "Chart Editor",
+      title: "Create a Chart",
+      titleShort: "Create",
       welcome:
         "Welcome to Falling Nikochan chart editor. " +
         "You can create charts without an account.",
@@ -70,6 +74,21 @@ export default {
     version: {
       title: "Version Info",
       changelog: "Main Change Logs",
+    },
+    links: {
+      title: "Contact and Other Links",
+      titleShort: "other",
+      about: "About Falling Nikochan",
+      version: "Version Info",
+      changelog: "Changelogs here",
+      policies: "(Kind of) Terms of Use",
+      settings: "Settings",
+      theme: "Theme",
+      light: "Light",
+      dark: "Dark",
+      default: "System Default",
+      officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
+      officialChannelShort: "Official Channel",
     },
   },
   footer: {

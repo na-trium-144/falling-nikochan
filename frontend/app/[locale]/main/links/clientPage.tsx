@@ -28,22 +28,30 @@ export default function LinksPage({ locale }: { locale: string }) {
     >
       <div className="mb-3 main-wide:hidden">
         <h3 className="mb-2 text-xl font-bold font-title">{t("settings")}</h3>
-        <div className="ml-2 space-y-1">
+        <div className="ml-2 space-y-2">
           <p>
             <Translate className="inline-block align-middle" />
             <span className="ml-1">Language:</span>
             <LangSwitcher locale={locale}>
               <span
                 className={
-                  "mx-1 px-1 " +
+                  "inline-block align-top mx-1 px-1 " +
                   linkStyle1 +
                   "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none "
                 }
               >
-                <span className="inline-block text-center w-20">
-                  {langNames[locale]}
+                <span className="flex flex-row items-center ">
+                  <span className="flex-1 text-center ">
+                    {langNames[locale]}
+                  </span>
+                  <DownOne className="w-max h-max" theme="filled" />
                 </span>
-                <DownOne className="inline-block align-middle" theme="filled" />
+                {Object.values(langNames).map((l) => (
+                  // 最大幅を取得するため
+                  <p key={l} className="h-0 overflow-hidden pr-6 ">
+                    {l}
+                  </p>
+                ))}{" "}
               </span>
             </LangSwitcher>
           </p>
@@ -57,19 +65,24 @@ export default function LinksPage({ locale }: { locale: string }) {
             <ThemeSwitcher>
               <span
                 className={
-                  "mx-1 px-1 " +
+                  "inline-block align-top mx-1 px-1 " +
                   linkStyle1 +
                   "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none "
                 }
               >
-                <span className="inline-block text-center w-15">
-                  {themeState.theme === "dark"
-                    ? t("dark")
-                    : themeState.theme === "light"
-                      ? t("light")
-                      : t("default")}
+                <span className="flex flex-row items-center ">
+                  <span className="flex-1 text-center">
+                    {themeState.theme === "dark"
+                      ? t("dark")
+                      : themeState.theme === "light"
+                        ? t("light")
+                        : t("default")}
+                  </span>
+                  <DownOne className="w-max h-max " theme="filled" />
                 </span>
-                <DownOne className="inline-block align-middle" theme="filled" />
+                <p className="h-0 overflow-hidden pr-6 ">{t("dark")}</p>
+                <p className="h-0 overflow-hidden pr-6 ">{t("light")}</p>
+                <p className="h-0 overflow-hidden pr-6 ">{t("default")}</p>
               </span>
             </ThemeSwitcher>
           </p>

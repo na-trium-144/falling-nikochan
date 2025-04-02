@@ -1,6 +1,5 @@
 "use client";
 
-import Header from "@/common/header.js";
 import { PlayOption } from "./playOption.js";
 import {
   ChartBrief,

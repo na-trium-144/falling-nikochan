@@ -14,7 +14,6 @@ import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
 import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation.js";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
 import { PWAStates } from "./pwaInstall.js";
