@@ -25,6 +25,7 @@ jobs:
           name: vercel-output
           path: .vercel/output
           include-hidden-files: true
+      - run: rm -rf .git
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
