@@ -128,7 +128,7 @@ export default function ShareChart(props: Props) {
       <RedirectedWarning />
       <div
         className={
-          "basis-auto grow-6 shrink min-h-0 px-3 main-wide:px-6 " +
+          "basis-auto grow-6 shrink min-h-0 w-full px-3 main-wide:px-6 " +
           "flex flex-col items-center justify-center"
         }
       >

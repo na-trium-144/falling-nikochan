@@ -24,7 +24,7 @@ export function SharedResultBox(props: Props) {
     setResultDate(new Date(props.result.date).toLocaleDateString());
   }, [props.result.date]);
   return (
-    <Box className="mx-auto py-4 px-6 mt-4">
+    <Box className="w-max mx-auto py-4 px-6 mt-4">
       <p className="text-lg font-title font-bold text-center ">
         &lt; {th("sharedResult")} &gt;
       </p>
