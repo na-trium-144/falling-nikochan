@@ -29,7 +29,7 @@
     "worker"
   ],
   "dependencies": {
-    "react": "^19.0.0",
+    "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
@@ -37,7 +37,7 @@
     "@eslint/js": "^9.23.0",
     "@types/bun": "^1.2.5",
     "@types/node": "^22.13.10",
-    "@types/react": "^19.0.11",
+    "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.22.0",
     "eslint-config-next": "^15.2.4",
