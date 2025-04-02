@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/worker",
-  "version": "10.5.0",
+  "version": "10.6.0",
   "private": true,
   "type": "module",
   "devDependencies": {
