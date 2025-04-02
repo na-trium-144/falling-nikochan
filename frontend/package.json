@@ -13,7 +13,7 @@
     "@mdx-js/react": "^3.1.0",
     "@next/mdx": "^15.2.4",
     "@ygoe/msgpack": "^1.0.3",
-    "ace-builds": "^1.39.0",
+    "ace-builds": "^1.39.1",
     "file-saver": "^2.0.5",
     "next": "^15.2.4",
     "react-ace": "^14.0.1",
