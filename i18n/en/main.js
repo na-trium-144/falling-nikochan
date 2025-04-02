@@ -87,6 +87,12 @@ export default {
       light: "Light",
       dark: "Dark",
       default: "System Default",
+      installDesc:
+        "you can add Falling Nikochan to your home screen and " +
+        "launch it as an app for a better full-screen experience.",
+      install: "Add to Home Screen",
+      installIOS:
+        '(On iOS, select "Add to Home Screen" from the Safari\'s share menu.)',
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",
     },

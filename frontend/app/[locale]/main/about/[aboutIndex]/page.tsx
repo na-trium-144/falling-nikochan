@@ -49,7 +49,7 @@ export default async function AboutTab({ params }: Props) {
       />
       <div className="flex-1 text-center">
         {aboutIndex === 1 ? (
-          <AboutContent1 />
+          <AboutContent1 locale={locale} />
         ) : aboutIndex === 2 ? (
           <AboutContent2 />
         ) : aboutIndex === 3 ? (

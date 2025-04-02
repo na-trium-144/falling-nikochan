@@ -91,6 +91,12 @@ export default {
       light: "ライト",
       dark: "ダーク",
       default: "自動",
+      installDesc:
+        "Falling Nikochan をホーム画面に追加してアプリとして起動することにより、" +
+        "フルスクリーンでより快適に遊ぶことができます。",
+      install: "ホーム画面に追加",
+      installIOS:
+        "(iOS では Safari の共有メニューから「ホーム画面に追加」を選択してください。)",
       officialChannel: "Falling Nikochan 公式チャンネル (@nikochan144)",
       officialChannelShort: "公式チャンネル",
     },

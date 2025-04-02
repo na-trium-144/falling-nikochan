@@ -10,13 +10,6 @@ export default {
         "In addition to playing, anyone can create charts without registering an account or logging in.",
       content4:
         "The created charts are saved on the server and can be easily shared on SNS and played by others.",
-      installDesc:
-        "On Android and iOS tablets and smartphones, " +
-        "you can add Falling Nikochan to your home screen and " +
-        "launch it as an app for a better full-screen experience.",
-      install: "Add to Home Screen",
-      installIOS:
-        '(On iOS, select "Add to Home Screen" from the Safari\'s share menu.)',
     },
     2: {
       title: "How to Play",

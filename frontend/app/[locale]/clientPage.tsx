@@ -98,7 +98,7 @@ export default function TopPage(props: Props) {
             {t("about.title")}
           </button>
         </div>
-        <div className={"basis-0 grow-2 " + menuMoveAnimClass}>
+        <div className={"basis-auto grow-2 " + menuMoveAnimClass}>
           <RedirectedWarning />
           <PWAInstallMain pwa={pwa} />
         </div>
