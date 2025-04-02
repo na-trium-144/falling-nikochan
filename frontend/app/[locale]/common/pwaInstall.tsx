@@ -98,7 +98,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         navigator.serviceWorker
           .register("/sw.js", { scope: "/" })
           .then((reg) => {
-            console.log("registered service worker");
             updateFetching = setTimeout(() => {
               fetch("/worker/checkUpdate")
                 .then(async (res) => {
