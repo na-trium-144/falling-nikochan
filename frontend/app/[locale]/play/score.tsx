@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeContext } from "@/common/theme";
+import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
 import { ReactNode, useEffect, useRef } from "react";
@@ -9,9 +9,9 @@ interface CProps {
   className?: string;
   left?: boolean;
   children: ReactNode;
-  theme: ThemeContext;
 }
 function Cloud(props: CProps) {
+  const themeState = useTheme();
   const { playUIScale } = useDisplayMode();
 
   return (
@@ -29,7 +29,7 @@ function Cloud(props: CProps) {
       <img
         src={
           process.env.ASSET_PREFIX +
-          (props.theme.isDark ? "/assets/cloud-black.svg" : "/assets/cloud.svg")
+          (themeState.isDark ? "/assets/cloud-black.svg" : "/assets/cloud.svg")
         }
         className="absolute inset-0 -z-10 "
       />
@@ -52,13 +52,12 @@ interface Props {
   score: number;
   best: number;
   auto: boolean;
-  theme: ThemeContext;
 }
 export function ScoreDisp(props: Props) {
   const t = useTranslations("play.score");
   const { score, best } = props;
   return (
-    <Cloud className="flex flex-col" theme={props.theme}>
+    <Cloud className="flex flex-col">
       <div
         className="flex flex-row items-baseline"
         style={{ marginTop: 4, fontSize: 16 }}
@@ -94,11 +93,11 @@ interface ChainProps {
   style?: object;
   chain: number;
   fc: boolean;
-  theme: ThemeContext;
 }
 // slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
 // stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
+  const themeState = useTheme();
   const t = useTranslations("play.score");
   const factorClip = (c: number) =>
     props.fc ? Math.min(1, Math.max(0, c)) : 0;
@@ -118,14 +117,13 @@ export function ChainDisp(props: ChainProps) {
         "flex flex-col " +
         (props.chain >= 100 ? "text-orange-500 dark:text-yellow-400 " : "")
       }
-      theme={props.theme}
       left
     >
       <div
         className="flex flex-row items-baseline justify-center "
         style={{
           marginTop: 20,
-          color: props.theme.isDark
+          color: themeState.isDark
             ? `oklch(${lchDark[0]} ${lchDark[1]} ${lchDark[2]})`
             : `oklch(${lchLight[0]} ${lchLight[1]} ${lchLight[2]})`,
         }}

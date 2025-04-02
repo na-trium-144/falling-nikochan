@@ -6,6 +6,7 @@ import "@/globals.css";
 import { getMessages, locales } from "@falling-nikochan/i18n";
 import IntlProvider from "./intlProvider.js";
 import { initMetadata, MetadataProps } from "./metadata.js";
+import { ThemeProvider } from "./common/theme.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -27,7 +28,7 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className="w-full h-dvh overflow-hidden touch-none ">
         <IntlProvider locale={locale} messages={await getMessages(locale)}>
-          {children}
+          <ThemeProvider>{children}</ThemeProvider>
         </IntlProvider>
       </body>
     </html>

@@ -152,13 +152,13 @@ export default function TopPage(props: Props) {
           className={
             "shrink-0 basis-auto grow-3 " +
             "hidden main-wide:flex " +
-            "flex-col justify-center w-60 " +
+            "flex-col justify-center w-64 " +
             "transition ease-out duration-200 "
           }
           style={{
             transform: menuMove
               ? `translateX(-${
-                  (screenWidth - (60 / 4) * rem - (12 / 4) * rem) / 2
+                  (screenWidth - (64 / 4) * rem - (12 / 4) * rem) / 2
                 }px)`
               : undefined,
           }}

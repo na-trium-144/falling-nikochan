@@ -275,7 +275,7 @@ function Play(props: Props) {
     largeResult,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  const themeContext = useTheme();
+  const themeState = useTheme();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -722,7 +722,6 @@ function Play(props: Props) {
             playing={chartPlaying}
             setFPS={setFps}
             barFlash={barFlash}
-            themeContext={themeContext}
           />
           <div
             className={
@@ -737,12 +736,10 @@ function Play(props: Props) {
               score={score}
               best={bestScoreState}
               auto={auto}
-              theme={themeContext}
             />
             <ChainDisp
               chain={chain}
               fc={judgeCount[2] + judgeCount[3] === 0}
-              theme={themeContext}
             />
             <button
               className={

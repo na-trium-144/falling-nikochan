@@ -1,6 +1,15 @@
 "use client";
 
-import { Comment, Edit, Home, More, Search, Translate } from "@icon-park/react";
+import {
+  Comment,
+  Edit,
+  Home,
+  Moon,
+  More,
+  Search,
+  Sun,
+  Translate,
+} from "@icon-park/react";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
 import { ThemeSwitcher, useTheme } from "./theme.js";
@@ -11,6 +20,7 @@ import { lastVisitedOld } from "./version.js";
 import { PWAStates } from "./pwaInstall.js";
 import { Box } from "./box.js";
 import { SlimeSVG } from "./slime.js";
+import { LangSwitcher } from "./langSwitcher.jsx";
 
 export type tabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
@@ -29,9 +39,9 @@ interface Props {
   pwa: PWAStates;
 }
 export function PCFooter(props: Props) {
-  const themeContext = useTheme();
+  const themeState = useTheme();
   const tm = useTranslations("main");
-  // const t = useTranslations("footer");
+  const t = useTranslations("footer");
   const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
 
@@ -75,8 +85,18 @@ export function PCFooter(props: Props) {
             style={{ top: "-0.1rem", right: "-0.25rem" }}
           />
         </Link>
-        <LangSwitcher locale={props.locale} />
-        <ThemeSwitcher {...themeContext} />
+        <LangSwitcher locale={props.locale}>
+          <Translate className="absolute bottom-1 left-0 " />
+          <span className="ml-5 ">Language</span>
+        </LangSwitcher>
+        <ThemeSwitcher>
+          {themeState.isDark ? (
+            <Moon className="absolute bottom-1 left-0 " />
+          ) : (
+            <Sun className="absolute bottom-1 left-0 " />
+          )}
+          <span className="ml-5 ">{t("theme")}</span>
+        </ThemeSwitcher>
       </div>
     </footer>
   );
@@ -108,48 +128,6 @@ export function MobileFooter(props: Props) {
         </Link>
       ))}
     </footer>
-  );
-}
-
-const langNames: { [key: string]: string } = {
-  ja: "日本語",
-  en: "English",
-};
-interface LangProps {
-  locale: string;
-}
-export function LangSwitcher(props: LangProps) {
-  const router = useRouter();
-  return (
-    <span className={"inline-block relative " + linkStyle1}>
-      <select
-        className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
-        value={props.locale}
-        onChange={(e) => {
-          document.cookie = `language=${e.target.value};path=/;max-age=31536000`;
-          if (window.location.pathname.startsWith(`/${props.locale}`)) {
-            router.replace(
-              window.location.pathname.replace(
-                `/${props.locale}`,
-                `/${e.target.value}`,
-              ),
-              { scroll: false },
-            );
-          } else {
-            // /share/cid など
-            router.refresh();
-          }
-        }}
-      >
-        {Object.keys(langNames).map((lang) => (
-          <option key={lang} value={lang}>
-            {langNames[lang]}
-          </option>
-        ))}
-      </select>
-      <Translate className="absolute bottom-1 left-0 " />
-      <span className="ml-5 ">Language</span>
-    </span>
   );
 }
 

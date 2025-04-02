@@ -28,9 +28,12 @@ export default {
     about: {
       title: "Falling Nikochan とは？",
     },
+    top: {
+      titleShort: "ホーム",
+    },
     play: {
-      title: "プレイする",
-      titleShort: "プレイ",
+      title: "公開されている譜面で遊ぶ",
+      titleShort: "公開譜面",
       recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
@@ -48,7 +51,7 @@ export default {
         "dev環境ではタイトルや作曲者だけ入力したダミーのファイルが表示されます",
     },
     edit: {
-      title: "譜面作成",
+      title: "譜面を作る",
       titleShort: "譜面作成",
       welcome:
         "Falling Nikochan の譜面エディタにようこそ。" +
@@ -71,11 +74,25 @@ export default {
     },
     policies: {
       title: "利用規約っぽいもの",
-      titleShort: "利用規約",
     },
     version: {
       title: "バージョン情報",
       changelog: "主な更新履歴",
+    },
+    links: {
+      title: "お問い合わせ先・その他リンク",
+      titleShort: "その他",
+      about: "Falling Nikochan について",
+      version: "バージョン",
+      changelog: "更新履歴はこちら",
+      policies: "利用規約っぽいもの",
+      settings: "設定",
+      theme: "テーマ色",
+      light: "ライト",
+      dark: "ダーク",
+      default: "自動",
+      officialChannel: "Falling Nikochan 公式チャンネル (@nikochan144)",
+      officialChannelShort: "公式チャンネル",
     },
   },
   footer: {

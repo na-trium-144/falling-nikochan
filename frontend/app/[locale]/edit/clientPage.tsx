@@ -73,7 +73,7 @@ import {
 import { useDisplayMode } from "@/scale.js";
 import { Forbid, Move } from "@icon-park/react";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { ThemeContext, useTheme } from "@/common/theme.js";
+import { useTheme } from "@/common/theme.js";
 import { GuideMain } from "./guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
 import { Signature } from "@falling-nikochan/chart";
@@ -94,7 +94,6 @@ export default function EditAuth(props: {
   const { locale } = props;
   const t = useTranslations("edit");
   const te = useTranslations("error");
-  const themeContext = useTheme();
 
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>("");
@@ -307,7 +306,6 @@ export default function EditAuth(props: {
       setChart={setChart}
       cid={cid}
       setCid={setCid}
-      themeContext={themeContext}
       guidePage={guidePage}
       setGuidePage={setGuidePage}
       convertedFrom={convertedFrom}
@@ -386,7 +384,6 @@ interface Props {
   setChart: (chart: ChartEdit) => void;
   cid: string | undefined;
   setCid: (cid: string | undefined) => void;
-  themeContext: ThemeContext;
   guidePage: number | null;
   setGuidePage: (v: number | null) => void;
   convertedFrom: number;
@@ -406,7 +403,6 @@ function Page(props: Props) {
     setChart,
     cid,
     setCid,
-    themeContext,
     convertedFrom,
     setConvertedFrom,
     locale,
@@ -417,6 +413,7 @@ function Page(props: Props) {
     guidePage,
     setGuidePage,
   } = props;
+  const themeState = useTheme();
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
@@ -1050,7 +1047,7 @@ function Page(props: Props) {
         />
       ) : null}
       <CaptionProvider>
-        <LuaTabProvider themeContext={themeContext}>
+        <LuaTabProvider>
           <div
             className={
               "w-full " +

@@ -64,7 +64,7 @@ export function IndexMain(props: Props) {
           <nav
             className={
               "hidden main-wide:flex " +
-              "flex-col h-max w-60 shrink-0 my-auto " +
+              "flex-col h-max w-64 shrink-0 my-auto " +
               "transition ease-out duration-200 "
             }
           >
@@ -96,8 +96,8 @@ export function IndexMain(props: Props) {
           {props.children}
         </Box>
       </div>
-      <PCFooter locale={locale} nav={props.tabKey !== null} pwa={pwa} />
-      <MobileFooter locale={locale} nav={props.tabKey !== null} pwa={pwa} />
+      <PCFooter locale={locale} nav={props.tabKey === null} pwa={pwa} />
+      <MobileFooter locale={locale} nav={props.tabKey === null} pwa={pwa} />
     </main>
   );
 }
