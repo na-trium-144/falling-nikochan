@@ -6,7 +6,7 @@ import {
   MobileFooter,
   PCFooter,
   pcTabTitleKeys,
-  tabKeys,
+  TabKeys,
   tabURLs,
 } from "@/common/footer.js";
 import { ReactNode } from "react";
@@ -20,8 +20,8 @@ import { usePWAInstall } from "@/common/pwaInstall";
 interface Props {
   children?: ReactNode | ReactNode[];
   title: string;
-  tabKey: tabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
-  mobileTabKey: tabKeys; // モバイル表示でfooter内のアクティブなタブ
+  tabKey: TabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
+  mobileTabKey: TabKeys; // モバイル表示でfooter内のアクティブなタブ
   noBackButton?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   locale: string;
   modal?: ReactNode;
@@ -96,8 +96,8 @@ export function IndexMain(props: Props) {
           {props.children}
         </Box>
       </div>
-      <PCFooter locale={locale} nav={props.tabKey === null} pwa={pwa} />
-      <MobileFooter locale={locale} nav={props.tabKey === null} pwa={pwa} />
+      <PCFooter locale={locale} nav={props.tabKey === null} />
+      <MobileFooter locale={locale} tabKey={props.mobileTabKey} pwa={pwa} />
     </main>
   );
 }

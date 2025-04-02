@@ -191,7 +191,7 @@ export default function TopPage(props: Props) {
           }
         />
 
-        <PCFooter locale={locale} pwa={pwa} />
+        <PCFooter locale={locale} />
         <div className="flex-none basis-14 main-wide:hidden " />
       </div>
       <div
@@ -201,7 +201,7 @@ export default function TopPage(props: Props) {
           "dark:from-orange-950 dark:to-orange-950/0 "
         }
       >
-        <MobileFooter locale={locale} pwa={pwa} />
+        <MobileFooter locale={locale} pwa={pwa} tabKey="top" />
       </div>
     </main>
   );

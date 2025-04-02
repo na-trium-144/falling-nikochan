@@ -21,7 +21,7 @@ import { Box } from "./box.js";
 import { SlimeSVG } from "./slime.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
 
-export type tabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
+export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
 export const mobileTabTitleKeys = ["top", "play", "edit", "links"] as const;
 export const tabURLs = {
@@ -35,7 +35,6 @@ export const tabURLs = {
 interface Props {
   nav?: boolean; // trueで表示
   locale: string;
-  pwa: PWAStates;
 }
 export function PCFooter(props: Props) {
   const themeState = useTheme();
@@ -45,8 +44,7 @@ export function PCFooter(props: Props) {
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
 
   return (
-    <footer className="py-3 z-10 hidden main-wide:block relative text-center ">
-      <PWAUpdateNotification pwa={props.pwa} />
+    <footer className="py-3 hidden main-wide:block relative text-center ">
       {props.nav && (
         <div
           className={
@@ -100,28 +98,56 @@ export function PCFooter(props: Props) {
     </footer>
   );
 }
-export function MobileFooter(props: Props) {
+interface MobileProps {
+  locale: string;
+  pwa: PWAStates;
+  tabKey: TabKeys;
+}
+export function MobileFooter(props: MobileProps) {
   const tm = useTranslations("main");
+  const themeState = useTheme();
+  const iconFill = themeState.isDark
+    ? ["#d6d3d1" /*stone-300*/, "#a6a09b" /*stone-400*/]
+    : ["#1d293d" /*slate-800*/, "#62748e" /*slate-500*/];
   return (
-    <footer className="pt-3 pb-1 z-10 w-full main-wide:hidden flex flex-row items-center justify-stretch relative">
+    <footer
+      className={
+        "pt-3 pb-1 z-10 w-full " +
+        "main-wide:h-0 main-wide:p-0! " +
+        "flex flex-row items-center justify-stretch relative"
+      }
+    >
       <PWAUpdateNotification pwa={props.pwa} />
       {mobileTabTitleKeys.map((key, i) => (
         <Link
           key={i}
           className={
-            "w-full text-lg space-y-1 flex flex-col items-center " + linkStyle1
+            "w-full text-lg space-y-1 flex flex-col items-center main-wide:hidden " +
+            (props.tabKey === key ? "" : "text-slate-500 dark:text-stone-400 ")
           }
           href={`/${props.locale}${tabURLs[key]}`}
           prefetch={!process.env.NO_PREFETCH}
         >
           {i === 0 ? (
-            <Home />
+            <Home
+              theme={props.tabKey === key ? "two-tone" : "outline"}
+              fill={props.tabKey === key ? iconFill : iconFill[1]}
+            />
           ) : i === 1 ? (
-            <Search />
+            <Search
+              theme={props.tabKey === key ? "two-tone" : "outline"}
+              fill={props.tabKey === key ? iconFill : iconFill[1]}
+            />
           ) : i === 2 ? (
-            <Edit />
+            <Edit
+              theme={props.tabKey === key ? "two-tone" : "outline"}
+              fill={props.tabKey === key ? iconFill : iconFill[1]}
+            />
           ) : (
-            <More />
+            <More
+              theme={props.tabKey === key ? "two-tone" : "outline"}
+              fill={props.tabKey === key ? iconFill : iconFill[1]}
+            />
           )}
           <span className="text-xs ">{tm(key + ".titleShort")}</span>
         </Link>

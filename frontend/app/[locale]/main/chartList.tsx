@@ -15,12 +15,12 @@ import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
 import { useShareModal } from "./shareModal.jsx";
 import { getRecent, updateRecent } from "@/common/recent.js";
-import { tabKeys } from "@/common/footer.jsx";
+import { TabKeys } from "@/common/footer.jsx";
 
 interface PProps {
   locale: string;
   title: string;
-  tabKey: tabKeys;
+  tabKey: TabKeys;
   mobileTabKey: "top" | "play";
   type: ChartListType;
 }

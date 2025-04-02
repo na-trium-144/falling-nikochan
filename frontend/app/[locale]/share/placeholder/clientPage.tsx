@@ -147,8 +147,8 @@ export default function ShareChart(props: Props) {
           />
         </Box>
       </div>
-      <PCFooter locale={locale} nav pwa={pwa} />
-      <MobileFooter locale={locale} nav pwa={pwa} />
+      <PCFooter locale={locale} nav />
+      <MobileFooter locale={locale} pwa={pwa} tabKey={null} />
     </main>
   );
 }
