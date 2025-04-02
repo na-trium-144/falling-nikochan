@@ -1,6 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { dummyLevel6, dummyLevel9, initDb } from "./init";
-import app from "@falling-nikochan/route";
+import { app, dummyLevel6, dummyLevel9, initDb } from "./init";
 import { Level6Play, Level9Play, LevelPlay } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 

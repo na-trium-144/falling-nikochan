@@ -9,19 +9,19 @@ interface Props {
   className?: string;
   style?: object;
   onClick?: (e: MouseEvent) => void;
+  onPointerDown?: (e: MouseEvent) => void;
 }
 export function Box(props: Props) {
   return (
     <div
       ref={props.ref}
       className={
-        "rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")
+        "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs " +
+        (props.className || "")
       }
-      style={{
-        backdropFilter: "blur(2px)",
-        ...props.style,
-      }}
+      style={props.style}
       onClick={props.onClick}
+      onPointerDown={props.onPointerDown}
     >
       {props.children}
     </div>
@@ -37,6 +37,8 @@ export function CenterBox(props: Props) {
         (props.className || "")
       }
       style={props.style}
+      onClick={props.onClick}
+      onPointerDown={props.onPointerDown}
     >
       {props.children}
     </Box>

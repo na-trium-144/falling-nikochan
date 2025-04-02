@@ -1,11 +1,15 @@
 "use client";
 
-import Header from "@/common/header.js";
+import { MobileHeader } from "@/common/header.js";
 import { Box } from "@/common/box.js";
-import Footer, { tabTitleKeys, tabURLs } from "@/common/footer.js";
-import { useDisplayMode } from "@/scale.js";
-import { ReactNode, useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  MobileFooter,
+  PCFooter,
+  pcTabTitleKeys,
+  TabKeys,
+  tabURLs,
+} from "@/common/footer.js";
+import { ReactNode } from "react";
 import Link from "next/link";
 import Title from "@/common/titleLogo.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
@@ -14,36 +18,28 @@ import { RedirectedWarning } from "@/common/redirectedWarning";
 
 interface Props {
   children?: ReactNode | ReactNode[];
-  tab: number | undefined;
+  title: string;
+  tabKey: TabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
+  mobileTabKey: TabKeys; // モバイル表示でfooter内のアクティブなタブ
+  noBackButton?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   locale: string;
   modal?: ReactNode;
 }
 export function IndexMain(props: Props) {
-  const router = useRouter();
   const locale = props.locale;
   const t = useTranslations("main");
-  const tabTitles = (i: number) => t(tabTitleKeys[i] + ".title");
-  const { screenWidth, rem, isMobileMain } = useDisplayMode();
-
-  const isTitlePage = props.tab === undefined;
-  const isHiddenPage = props.tab !== undefined && props.tab >= tabURLs.length;
-
-  const [menuMoveLeft, setMenuMoveLeft] = useState<boolean>(false);
-  // const [menuMoveRight, setMenuMoveRight] = useState<boolean>(false);
 
   return (
-    <main className="flex flex-col w-full overflow-x-hidden min-h-dvh h-max">
+    <main className="flex flex-col w-full h-full items-center ">
       {props.modal}
-      {props.tab !== undefined && (
-        <div className="main-wide:hidden">
-          <Header locale={locale}>{tabTitles(props.tab)}</Header>
-        </div>
-      )}
+      <MobileHeader noBackButton={props.noBackButton}>
+        {props.title}
+      </MobileHeader>
       <Link
         href={`/${locale}`}
         className={
-          (!isTitlePage ? "hidden main-wide:block " : "basis-0 grow-1 ") +
-          "shrink-0 basis-24 overflow-hidden relative " +
+          "hidden main-wide:block w-full " +
+          "shrink-0 basis-24 relative " +
           linkStyle1
         }
         style={{
@@ -52,94 +48,54 @@ export function IndexMain(props: Props) {
         }}
         prefetch={!process.env.NO_PREFETCH}
       >
-        <Title className="absolute inset-0 " anim={isTitlePage} />
+        <Title className="absolute inset-0 " />
       </Link>
-      <RedirectedWarning
-        className={
-          "self-center mx-6 " + (!isTitlePage ? "my-2 " : "basis-0 grow-1 ")
-        }
-      />
+      <RedirectedWarning />
       <div
         className={
-          "main-wide:max-h-dvh main-wide:overflow-hidden main-wide:mb-3 " +
-          "shrink-0 basis-56 basis-0 grow-2 " +
-          "flex flex-row items-stretch justify-center px-6 "
+          "w-full overflow-hidden " +
+          "shrink-0 basis-0 grow-2 " +
+          "flex flex-row items-stretch justify-center px-3 main-wide:px-6 "
         }
       >
-        {!isHiddenPage && (
-          <div
+        {props.tabKey !== null && (
+          <nav
             className={
-              (props.tab === undefined ? "flex " : "hidden main-wide:flex ") +
-              "flex-col h-max w-60 shrink-0 my-auto " +
+              "hidden main-wide:flex " +
+              "flex-col h-max w-64 shrink-0 my-auto " +
               "transition ease-out duration-200 "
             }
-            style={{
-              transform: menuMoveLeft
-                ? `translateX(-${
-                    (screenWidth - (56 / 4) * rem - (12 / 4) * rem) / 2
-                  }px)`
-                : undefined,
-            }}
           >
-            {tabURLs.map((tabURL, i) =>
-              i === props.tab ? (
+            {pcTabTitleKeys.map((key, i) =>
+              key === props.tabKey ? (
                 <Box
                   key={i}
                   className="text-center rounded-r-none py-3 pl-2 pr-2"
                 >
-                  {tabTitles(i)}
+                  {t(key + ".title")}
                 </Box>
               ) : (
                 <Link
                   key={i}
-                  href={`/${locale}${tabURL}`}
+                  href={`/${locale}${tabURLs[key]}`}
                   className={
                     " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
-                    (isTitlePage
-                      ? "rounded-lg p-3 "
-                      : "rounded-l-lg py-3 pl-2 pr-2 ")
+                    "rounded-l-lg py-3 pl-2 pr-2 "
                   }
                   prefetch={!process.env.NO_PREFETCH}
-                  onClick={(e) => {
-                    if (isTitlePage && !isMobileMain) {
-                      setMenuMoveLeft(true);
-                      setTimeout(() => {
-                        router.replace(`/${locale}${tabURL}`, {
-                          scroll: false,
-                        });
-                      }, 150);
-                      e.preventDefault();
-                    }
-                  }}
-                  scroll={false}
                 >
-                  {tabTitles(i)}
+                  {t(key + ".title")}
                 </Link>
               ),
             )}
-          </div>
+          </nav>
         )}
-        {!isTitlePage && (
-          <Box
-            className={
-              "flex flex-col p-6 overflow-auto " +
-              "w-full min-h-0 my-6 main-wide:flex-1 main-wide:my-0 "
-            }
-          >
-            {props.children}
-          </Box>
-        )}
+        <Box className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}>
+          {props.children}
+        </Box>
       </div>
-      <Footer
-        locale={locale}
-        nav={
-          isHiddenPage
-            ? "block"
-            : isTitlePage
-              ? false
-              : "block main-wide:hidden"
-        }
-      />
+      <PCFooter locale={locale} nav={props.tabKey === null} />
+      <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
   );
 }

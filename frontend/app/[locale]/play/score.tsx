@@ -1,33 +1,35 @@
 "use client";
 
-import { ThemeContext } from "@/common/theme";
+import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 interface CProps {
   className?: string;
   left?: boolean;
   children: ReactNode;
-  theme: ThemeContext;
 }
 function Cloud(props: CProps) {
+  const themeState = useTheme();
   const { playUIScale } = useDisplayMode();
 
   return (
     <div
       className={
         "absolute top-0 " +
-        (props.left ? "left-3 origin-top-left" : "right-3 origin-top-right")
+        (props.left ? "origin-top-left" : "origin-top-right")
       }
       style={{
+        left: props.left ? 0.75 * playUIScale + "rem" : undefined,
+        right: props.left ? undefined : 0.75 * playUIScale + "rem",
         transform: `scale(${playUIScale * 0.8})`,
       }}
     >
       <img
         src={
           process.env.ASSET_PREFIX +
-          (props.theme.isDark ? "/assets/cloud-black.svg" : "/assets/cloud.svg")
+          (themeState.isDark ? "/assets/cloud-black.svg" : "/assets/cloud.svg")
         }
         className="absolute inset-0 -z-10 "
       />
@@ -50,13 +52,12 @@ interface Props {
   score: number;
   best: number;
   auto: boolean;
-  theme: ThemeContext;
 }
 export function ScoreDisp(props: Props) {
   const t = useTranslations("play.score");
   const { score, best } = props;
   return (
-    <Cloud className="flex flex-col" theme={props.theme}>
+    <Cloud className="flex flex-col">
       <div
         className="flex flex-row items-baseline"
         style={{ marginTop: 4, fontSize: 16 }}
@@ -92,11 +93,11 @@ interface ChainProps {
   style?: object;
   chain: number;
   fc: boolean;
-  theme: ThemeContext;
 }
 // slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
 // stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
+  const themeState = useTheme();
   const t = useTranslations("play.score");
   const factorClip = (c: number) =>
     props.fc ? Math.min(1, Math.max(0, c)) : 0;
@@ -116,14 +117,13 @@ export function ChainDisp(props: ChainProps) {
         "flex flex-col " +
         (props.chain >= 100 ? "text-orange-500 dark:text-yellow-400 " : "")
       }
-      theme={props.theme}
       left
     >
       <div
         className="flex flex-row items-baseline justify-center "
         style={{
           marginTop: 20,
-          color: props.theme.isDark
+          color: themeState.isDark
             ? `oklch(${lchDark[0]} ${lchDark[1]} ${lchDark[2]})`
             : `oklch(${lchLight[0]} ${lchLight[1]} ${lchLight[2]})`,
         }}
@@ -159,41 +159,56 @@ const digits = 6;
 function NumDisp(props: NumProps) {
   const { num, anim } = props;
   const prevNum = useRef<number>(0);
-  const [numChanged, setNumChanged] = useState<boolean[]>(
-    Array.from(new Array(digits)).map(() => false)
+  const numRefS100 = useRef<HTMLSpanElement | null>(null);
+  const numRefS10 = useRef<HTMLSpanElement | null>(null);
+  const numRef1 = useRef<HTMLSpanElement | null>(null);
+  const numRef10 = useRef<HTMLSpanElement | null>(null);
+  const numRef100 = useRef<HTMLSpanElement | null>(null);
+  const numRef1000 = useRef<HTMLSpanElement | null>(null);
+  const numRefs = useRef([
+    numRef1000,
+    numRef100,
+    numRef10,
+    numRef1,
+    numRefS10,
+    numRefS100,
+  ]);
+  const numAnimations = useRef<(Animation | undefined)[]>(
+    new Array(digits).fill(undefined),
   );
   useEffect(() => {
     if (anim && num > prevNum.current) {
-      const numChangedNew = numChanged.slice();
+      const numChanged = new Array(digits).fill(false);
       let a = 1000;
       for (let i = 0; i < digits; i++) {
         if (
-          (i >= 1 && numChangedNew[i - 1]) ||
+          (i >= 1 && numChanged[i - 1]) ||
           Math.floor(num / a) % 10 !== Math.floor(prevNum.current / a) % 10
         ) {
-          numChangedNew[i] = true;
+          numChanged[i] = true;
+          numAnimations.current[i]?.cancel();
+          numAnimations.current[i] = numRefs.current[i].current?.animate(
+            [
+              { transform: "translateY(0)" },
+              { transform: "translateY(-25%)", offset: 0.3 },
+              { transform: "translateY(0)" },
+            ],
+            { duration: 200, fill: "forwards", easing: "linear" },
+          );
         }
         a /= 10;
       }
-      setNumChanged(numChangedNew);
-      setTimeout(() => {
-        setNumChanged(Array.from(new Array(digits)).map(() => false));
-      }, 100);
     }
     prevNum.current = num;
-  }, [num, numChanged, anim]);
+  }, [num, anim]);
   return (
     <>
       <div className="text-right">
         {[1000, 100, 10, 1].map((a, i) => (
           <span
             key={i}
-            className={
-              "inline-block overflow-visible text-left transition duration-100 " +
-              (numChanged[i]
-                ? "ease-out -translate-y-1/4"
-                : "ease-in translate-y-0")
-            }
+            ref={numRefs.current[i]}
+            className="inline-block overflow-visible text-left "
             style={{
               width:
                 a === 1 && props.alignAt2nd
@@ -222,12 +237,8 @@ function NumDisp(props: NumProps) {
             {[10, 100].map((a, i) => (
               <span
                 key={a}
-                className={
-                  "inline-block transition duration-100 " +
-                  (numChanged[i + digits - 2]
-                    ? "ease-out -translate-y-1/4"
-                    : "ease-in translate-y-0")
-                }
+                ref={numRefs.current[i + digits - 2]}
+                className="inline-block "
                 style={{
                   // width: (32 / 48) * props.fontSize2!,
                   fontSize: props.fontSize2!,

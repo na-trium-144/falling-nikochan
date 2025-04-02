@@ -40,7 +40,6 @@ export function FlexYouTube(props: Props) {
   const onPlaybackRateChangeRef = useRef<(rate: number) => void>(undefined);
   useEffect(() => {
     resizeYouTube.current = () => {
-      console.log("resize");
       if (ytPlayer.current) {
         if (width && height) {
           const iframe = ytPlayer.current.getIframe();
@@ -130,6 +129,8 @@ export function FlexYouTube(props: Props) {
         // If script is already there, load the video directly
         loadVideo();
       }
+
+      return () => ytPlayer.current?.destroy();
     }
   }, [id, control, ytPlayer]);
   return (

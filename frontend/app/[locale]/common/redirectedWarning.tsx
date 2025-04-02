@@ -4,7 +4,7 @@ import { Caution } from "@icon-park/react";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-export function RedirectedWarning(props: { className?: string }) {
+export function RedirectedWarning() {
   const t = useTranslations("main");
   const [showRedirectWarning, setShowRedirectWarning] =
     useState<boolean>(false);
@@ -19,29 +19,23 @@ export function RedirectedWarning(props: { className?: string }) {
   return (
     <div
       className={
-        "text-center flex items-center justify-center " +
-        (props.className || "")
+        "text-center text-sm mx-6 my-2 px-3 py-2 h-max " +
+        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
+        (showRedirectWarning ? "" : "hidden ")
       }
     >
-      <div
-        className={
-          "text-center px-3 py-2 h-max rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
-          (showRedirectWarning ? "" : "hidden ")
-        }
-      >
-        <Caution className="inline-block align-middle mr-1 " />
-        {t.rich("redirected", {
-          url: () => (
-            <span>
-              nikochan.
-              <wbr />
-              utcode.
-              <wbr />
-              net
-            </span>
-          ),
-        })}
-      </div>
+      <Caution className="inline-block align-middle mr-1 " />
+      {t.rich("redirected", {
+        url: () => (
+          <span>
+            nikochan.
+            <wbr />
+            utcode.
+            <wbr />
+            net
+          </span>
+        ),
+      })}
     </div>
   );
 }

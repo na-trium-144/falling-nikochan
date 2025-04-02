@@ -43,7 +43,7 @@ export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
 export function insertLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   line: number,
-  content: string
+  content: string,
 ) {
   chart.lua = chart.lua
     .slice(0, line)
@@ -82,7 +82,7 @@ export function insertLua<L extends LevelEdit | Level5 | Chart3>(
 export function replaceLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   line: number,
-  content: string
+  content: string,
 ) {
   chart.lua = chart.lua
     .slice(0, line)
@@ -144,11 +144,12 @@ function stepLuaCommand(s: Step) {
 }
 // 時刻stepにコマンドを挿入する準備
 // 挿入する行、またはnullを返す。
-// 既存のStepコマンドを分割する必要がある場合は分割し、
+// modify=trueの場合、既存のStepコマンドを分割する必要がある場合は分割し、
 // Stepコマンドを追加する必要がある場合は追加する。
 export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
-  step: Step
+  step: Step,
+  modify: boolean,
 ): { chart: L; luaLine: number | null } {
   for (let ri = 0; ri < chart.rest.length; ri++) {
     const rest = chart.rest[ri];
@@ -159,6 +160,9 @@ export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
       if (stepCmp(restEnd, step) > 0) {
         if (rest.luaLine === null) {
           return { chart, luaLine: null };
+        }
+        if (!modify) {
+          return { chart, luaLine: rest.luaLine };
         }
         const stepBefore = stepSub(step, rest.begin);
         const stepAfter = stepSub(restEnd, step);
@@ -189,6 +193,9 @@ export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
   if (stepCmp(stepBefore, stepZero()) === 0) {
     return { chart, luaLine: newLine };
   } else {
+    if (!modify) {
+      return { chart, luaLine: newLine + 1 };
+    }
     insertLua(chart, newLine, stepLuaCommand(stepBefore));
     chart.rest.push({
       begin: restBegin,

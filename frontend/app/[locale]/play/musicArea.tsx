@@ -3,14 +3,20 @@ import { levelBgColors } from "@/common/levelColors";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { SmilingFace, VolumeNotice, Youtube } from "@icon-park/react";
+import { linkStyle1 } from "@/common/linkStyle";
+import { useTranslations } from "next-intl";
 
 interface Props {
+  ready: boolean;
+  playing: boolean;
   className?: string;
   lvType: string;
   lvIndex?: number;
   isMobile: boolean; // 横並び or 縦並び
+  isTouch: boolean;
   ytPlayer: { current?: YouTubePlayer };
   chartBrief?: ChartBrief;
   offset: number;
@@ -18,12 +24,40 @@ interface Props {
   onStart: () => void;
   onStop: () => void;
   onError: (ec: number) => void;
+  ytVolume: number;
+  setYtVolume: (vol: number) => void;
+  enableSE: boolean;
+  seVolume: number;
+  setSEVolume: (vol: number) => void;
 }
 export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
   const largeTitle = props.isMobile ? height && height > 8 * rem : true;
+
+  const t = useTranslations("play.message");
+
+  const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
+  const initialVolumeCtrlOpenDone = useRef(false);
+  useEffect(() => {
+    if (props.ready && !initialVolumeCtrlOpenDone.current) {
+      const t = setTimeout(() => {
+        setVolumeCtrlOpen(true);
+        initialVolumeCtrlOpenDone.current = true;
+      }, 500);
+      return () => clearTimeout(t);
+    }
+  }, [props.ready]);
+  useEffect(() => {
+    if (props.playing && volumeCtrlOpen && !pointerInVolumeCtrl) {
+      const t = setTimeout(() => {
+        setVolumeCtrlOpen(false);
+      }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, [props.playing, volumeCtrlOpen, pointerInVolumeCtrl]);
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
@@ -32,7 +66,7 @@ export function MusicArea(props: Props) {
     props.chartBrief.levels[props.lvIndex]
       ? Math.max(
           0.1,
-          props.chartBrief.levels[props.lvIndex].length + props.offset
+          props.chartBrief.levels[props.lvIndex].length + props.offset,
         )
       : 0.1;
   useEffect(() => {
@@ -51,9 +85,11 @@ export function MusicArea(props: Props) {
         (levelBgColors.at(levelTypes.indexOf(props.lvType)) ||
           levelBgColors[1]) +
         (props.isMobile ? "rounded-b-lg " : "rounded-bl-xl pl-3 ") +
-        "flex-col " +
+        "relative flex-col " +
         props.className
       }
+      onPointerEnter={() => setPointerInVolumeCtrl(true)}
+      onPointerLeave={() => setPointerInVolumeCtrl(false)}
       ref={ref}
     >
       <div
@@ -201,6 +237,105 @@ export function MusicArea(props: Props) {
         fixedColor="bg-red-600"
         className={props.isMobile ? "mx-2 " : "mr-1 "}
       />
+      <button
+        className={
+          "absolute rounded-full cursor-pointer leading-1 " +
+          (props.isMobile
+            ? "-bottom-9 inset-x-0 mx-auto w-max text-xl " +
+              (props.isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2 " : "p-2 ")
+            : "bottom-0 right-1 p-2 ") +
+          "hover:bg-slate-200/50 active:bg-slate-300/50 " +
+          "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
+          linkStyle1 +
+          (props.isMobile
+            ? initialVolumeCtrlOpenDone.current
+              ? "transition-all ease-out duration-300 opacity-100 "
+              : "opacity-0 "
+            : "")
+        }
+        onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <VolumeNotice theme="filled" className="inline-block align-middle" />
+      </button>
+      <div
+        className={
+          "absolute z-10 " +
+          (props.isMobile
+            ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4 "
+            : "top-full inset-x-0 mt-2 mr-1 p-3 ") +
+          "rounded-lg border border-slate-400 dark:border-stone-600 " +
+          "bg-white/75 dark:bg-stone-800/75 " +
+          "transition-all duration-200 " +
+          (volumeCtrlOpen
+            ? "ease-out scale-100 opacity-100 "
+            : "ease-in scale-0 opacity-0 ")
+        }
+        style={{
+          transformOrigin: props.isMobile
+            ? "center calc(100% + 0.5rem)"
+            : "calc(100% - 0.75rem) -0.5rem",
+          backdropFilter: "blur(2px)",
+        }}
+        onPointerEnter={(e) => {
+          setPointerInVolumeCtrl(true);
+          e.stopPropagation();
+        }}
+        onPointerLeave={(e) => {
+          setPointerInVolumeCtrl(false);
+          e.stopPropagation();
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        {!props.isMobile && (
+          <span
+            className={
+              "absolute inline-block right-2 top-0 w-4 h-4 -translate-y-1/2 " +
+              "border-l border-b rounded-tr-full " +
+              "rotate-135 origin-center " +
+              "border-slate-400 dark:border-stone-600 " +
+              "bg-white dark:bg-stone-800 "
+            }
+          />
+        )}
+        <div className="flex flex-row items-center ">
+          <Youtube className="text-xl " />
+          <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
+          <input
+            className="flex-1 mx-1 "
+            type="range"
+            min="0"
+            max="100"
+            value={props.ytVolume}
+            onChange={(e) => props.setYtVolume(parseInt(e.target.value))}
+          />
+        </div>
+        <div className="flex flex-row items-center mt-3 ">
+          <SmilingFace
+            className={
+              "text-xl " +
+              (props.enableSE ? "" : "text-slate-400 dark:text-stone-600 ")
+            }
+          />
+          <span
+            className={
+              "text-sm w-8 text-center " +
+              (props.enableSE ? "" : "text-slate-400 dark:text-stone-600 ")
+            }
+          >
+            {props.enableSE ? props.seVolume : t("off")}
+          </span>
+          <input
+            type="range"
+            className="flex-1 mx-1 "
+            min={0}
+            max={100}
+            disabled={!props.enableSE}
+            value={props.enableSE ? props.seVolume : 0}
+            onChange={(e) => props.setSEVolume(parseInt(e.target.value))}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle.js";
 import { EfferentThree } from "@icon-park/react";
+import { useStandaloneDetector } from "./pwaInstall";
+import Link from "next/link";
 
 interface Props {
   className?: string;
@@ -23,6 +25,7 @@ function LinkChildren(props: Props) {
   );
 }
 export function ExternalLink(props: Props) {
+  const isStandalone = useStandaloneDetector();
   if (props.onClick) {
     return (
       <button
@@ -34,6 +37,17 @@ export function ExternalLink(props: Props) {
         <LinkChildren {...props} />
       </button>
     );
+  } else if (props.href?.startsWith("/") && isStandalone) {
+    return (
+      <Link
+        className={
+          "relative inline-block w-max " + linkStyle1 + props.className
+        }
+        href={props.href}
+      >
+        <LinkChildren {...props} />
+      </Link>
+    );
   } else {
     return (
       <a
@@ -42,8 +56,8 @@ export function ExternalLink(props: Props) {
           (props.href?.startsWith("/")
             ? linkStyle1
             : props.noColor
-            ? linkStyle2
-            : linkStyle3) +
+              ? linkStyle2
+              : linkStyle3) +
           props.className
         }
         href={props.href}

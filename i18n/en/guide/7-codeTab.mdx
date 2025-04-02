@@ -1,4 +1,5 @@
 import { BeatSlime } from "@/edit/timingTab.js";
+import { CautionIcon } from "@/common/mdxIcons";
 
 - In the Code tab, you can edit the music data as text (Lua language program).
   - Edits made in the Timing tab or Note tab are automatically reflected in the Code tab, and conversely, edits made in the Code tab are automatically reflected in the other tabs.
@@ -8,7 +9,8 @@ import { BeatSlime } from "@/edit/timingTab.js";
 - When you edit the Code tab, the edited code is automatically executed.
   - If an error occurs (such as incorrect syntax), a message will be displayed in red at the bottom.
   - Please note that if you move to a tab other than the Code tab while an error is displayed, the changes in the Code tab will not be saved and will revert to the last time the command was executed without errors.
-- When you place the cursor over various commands such as `Note()` in the Code tab, the time bar will also move to the time corresponding to that note (but this is not 100% accurate).
+- When you place the cursor over various commands such as `Note()` in the Code tab, the time bar will also move to the time corresponding to that note.
+- The <CautionIcon /> next to the line number indicates the line corresponding to the cursor position of the time bar, and <span className="text-sm align-middle">i</span> indicates the line corresponding to each bar line.
 - Falling Nikochan's unique commands are as follows.
   - `Note(x, vx, vy, big, fall)`: Places a note.
     - Specify x, vx, vy as numbers, and big, fall as `true` or `false`.
@@ -24,5 +26,4 @@ import { BeatSlime } from "@/edit/timingTab.js";
     - You can specify a beat count offset ( a / b ) after the beat.
     a is an integer 0 or greater, and b is an integer 1 or greater.
 - Lines beginning with `--` (two minus signs) are comments (anything written will be ignored).
-- Be careful as there is no way to stop if you write an infinite loop, etc.
 - I will not explain more about the grammar of Lua languages here, so please look them up yourself.

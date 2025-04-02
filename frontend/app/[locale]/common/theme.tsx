@@ -1,9 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { linkStyle1 } from "./linkStyle.js";
-import { Moon, Sun } from "@icon-park/react";
 import { useTranslations } from "next-intl";
+
+export interface ThemeState {
+  theme: "dark" | "light" | null;
+  isDark: boolean;
+  setTheme: (theme: "dark" | "light" | null) => void;
+}
+const ThemeContext = createContext<ThemeState>({
+  theme: null,
+  isDark: false,
+  setTheme: () => {},
+});
+export const useTheme = () => useContext(ThemeContext);
 
 function getCurrentTheme(): "dark" | "light" | null {
   const theme = localStorage?.getItem("theme");
@@ -30,7 +47,7 @@ const applyTheme = () => {
       "text-slate-800",
       "dark:from-orange-950",
       "dark:to-orange-975",
-      "dark:text-stone-300"
+      "dark:text-stone-300",
     );
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */
@@ -41,14 +58,8 @@ const applyTheme = () => {
     }
   }
 };
-export interface ThemeContext {
-  theme: "dark" | "light" | null;
-  isDark: boolean;
-  setTheme: (theme: "dark" | "light" | null) => void;
-}
-// setTheme 時に他のインスタンスに変更を通知する手段がないので、
-// ページ内の1箇所のみで使用すること
-export function useTheme(): ThemeContext {
+
+export function ThemeProvider(props: { children: ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light" | null>(null);
   const [isDark, setIsDark] = useState<boolean>(false);
   applyTheme(); // できるだけ早く、useEffectとかよりも先に実行する
@@ -66,32 +77,31 @@ export function useTheme(): ThemeContext {
     return () => {
       mql.removeEventListener("change", updateTheme);
       clearInterval(i);
-    }
+    };
   }, []);
-  return {
-    theme,
-    isDark,
-    setTheme: (theme: "dark" | "light" | null) => {
-      if (theme !== null) {
-        localStorage?.setItem("theme", theme);
-      } else {
-        localStorage?.removeItem("theme");
-      }
-      updateTheme();
-    },
-  };
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        isDark,
+        setTheme: (theme: "dark" | "light" | null) => {
+          if (theme !== null) {
+            localStorage?.setItem("theme", theme);
+          } else {
+            localStorage?.removeItem("theme");
+          }
+          updateTheme();
+        },
+      }}
+    >
+      {props.children}
+    </ThemeContext.Provider>
+  );
 }
 
-// switcherは不要だけどサーバーサイドでテーマを処理したい時に使う
-export function ThemeHandler() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const themeContext = useTheme();
-  return null;
-}
-
-export function ThemeSwitcher(props: ThemeContext) {
+export function ThemeSwitcher(props: { children: ReactNode }) {
+  const { theme, setTheme } = useTheme();
   const t = useTranslations("footer");
-  const { isDark, theme, setTheme } = props;
 
   return (
     <span className={"inline-block relative " + linkStyle1}>
@@ -110,12 +120,7 @@ export function ThemeSwitcher(props: ThemeContext) {
         <option value="light">{t("light")}</option>
         <option value="null">{t("default")}</option>
       </select>
-      {isDark ? (
-        <Moon className="absolute bottom-1 left-0 " />
-      ) : (
-        <Sun className="absolute bottom-1 left-0 " />
-      )}
-      <span className="ml-5 ">{t("theme")}</span>
+      {props.children}
     </span>
   );
 }

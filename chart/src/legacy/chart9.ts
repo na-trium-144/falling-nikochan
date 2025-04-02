@@ -64,7 +64,7 @@ export const LevelEditSchema9 = () =>
   });
 export const LevelPlaySchema9 = () =>
   v.object({
-    ver: v.literal(9),
+    ver: v.union([v.literal(9), v.literal(10)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     notes: v.array(NoteCommandSchema9()),
     bpmChanges: v.array(BPMChangeSchema9()),
@@ -75,7 +75,7 @@ export const LevelPlaySchema9 = () =>
 export const ChartMinSchema9 = () =>
   v.object({
     falling: v.literal("nikochan"),
-    ver: v.literal(9),
+    ver: v.union([v.literal(9), v.literal(10)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     // ytId: YoutubeIdSchema(),
     ytId: v.string(),
@@ -110,7 +110,7 @@ export type Chart9Edit = v.InferOutput<ReturnType<typeof ChartEditSchema9>>;
 export function convertToPlay9(chart: Chart9Edit, lvIndex: number): Level9Play {
   const level = chart.levels.at(lvIndex);
   return {
-    ver: 9,
+    ver: 10,
     offset: chart.offset,
     notes: level?.notes || [],
     bpmChanges: level?.bpmChanges || [],
@@ -121,7 +121,7 @@ export function convertToPlay9(chart: Chart9Edit, lvIndex: number): Level9Play {
 export function convertToMin9(chart: Chart9Edit): Chart9Min {
   return {
     falling: "nikochan",
-    ver: 9,
+    ver: 10,
     offset: chart.offset,
     ytId: chart.ytId,
     title: chart.title,
@@ -143,7 +143,7 @@ export async function convertTo9(chart: ChartUntil8): Promise<Chart9Edit> {
   if (chart.ver !== 8) chart = await convertTo8(chart);
   return {
     falling: "nikochan",
-    ver: 9,
+    ver: 10,
     offset: chart.offset,
     ytId: chart.ytId,
     title: chart.title,
@@ -171,7 +171,7 @@ export async function convertTo9Min(chart: ChartUntil8Min): Promise<Chart9Min> {
   if (chart.ver !== 8) chart = await convertTo8(chart);
   return {
     falling: "nikochan",
-    ver: 9,
+    ver: 10,
     offset: chart.offset,
     ytId: chart.ytId,
     title: chart.title,

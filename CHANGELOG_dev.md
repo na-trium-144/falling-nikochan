@@ -1,3 +1,47 @@
+## ver. 10.5 - 2025/04/02 [#430](https://github.com/na-trium-144/falling-nikochan/pull/430)
+
+* モバイル表示時のUIをリニューアル
+    * フッター追加
+    * ページ階層の見直し
+    * 譜面ID入力と最近プレイした譜面リストをトップページに移動
+
+## ver. 10.4 - 2025/03/31 [#431](https://github.com/na-trium-144/falling-nikochan/pull/431)
+
+* #369 (ver9.0) でshareページのbodyをSSRせずクライアント側でfetchする仕様に変更していたが、遅いのでmetaタグを利用してbriefデータを渡すようにした
+
+## ver. 10.0 - 2025/03/30 [#403](https://github.com/na-trium-144/falling-nikochan/pull/403), [#424](https://github.com/na-trium-144/falling-nikochan/pull/424), [#426](https://github.com/na-trium-144/falling-nikochan/pull/426)
+
+* 音符を叩いたときのSEを追加
+    * baseLatency+outputLatencyの分だけ判定オフセットをずらす
+    * safariではoutputLatencyが未実装だったので、あきらめる (デフォルトでSEオフ)
+    * 3個以上とか同時に音符を叩いたときに鳴るSEの量を制限: 10msあたり通常1個+big1個までしか鳴らさない
+* YouTubeとSEの音量調整ボタン追加
+* ついでにそれ以外のUIも改善
+    * pauseボタンを上部に追加
+* 同一タブ内でYouTubeの初期化がうまくいかない問題が解決
+* PWAとしてインストール可能にした
+    * PWAの場合playやeditを同一のタブで開く
+    * 編集中の譜面データが消失しないようにsessionStorageに退避
+* PWAの場合のみserviceWorkerを起動
+    * /のリダイレクト処理と、/api以外のルートのキャッシュをする
+    * ASSET_PREFIXへのアクセスを元のドメインに書き換える
+    * バージョン(/assets/buildVer.json)が更新されたときassetsを再度fetchする
+    * languageDetectorもserviceWorker独自のものを実装
+
+## ver. 9.18 - 2025/03/28 [#420](https://github.com/na-trium-144/falling-nikochan/pull/420)
+
+* 譜面編集のluaExecをworkerで実行するようにし、workerをterminateするキャンセルボタンを実装
+
+## ver. 9.17 - 2025/03/28 [#419](https://github.com/na-trium-144/falling-nikochan/pull/419)
+
+* 音符間隔が狭い場合でもコンボ数とスコア表示のアニメーションがなめらかに動くようにした
+
+## ver. 9.14 - 2025/03/26 [#416](https://github.com/na-trium-144/falling-nikochan/pull/416)
+
+* ReactAceEditorで補完候補が表示されるようにした
+* 譜面編集のタブ切り替えでコードエディタのカーソル位置がリセットされないようにした
+* AceEditorのpositionをabsoluteにし、annotationとmarkerでエラー時の表示と、小節線とカーソル位置の表示を実装
+
 ## ver. 9.13 - 2025/03/21 [#400](https://github.com/na-trium-144/falling-nikochan/pull/400)
 
 * shareリンクのパラメータ部分を薄い色で表示

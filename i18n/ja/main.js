@@ -6,20 +6,35 @@ export default {
     descriptionVerbose:
       "Falling Nikochan は、誰でも譜面を作成し共有することができる、" +
       "シンプルでかわいい音ゲーです。",
-    redirected: "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
+    redirected:
+      "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
+    installDesc:
+      "Falling Nikochan をアプリとしてホーム画面に追加することができます。",
+    install: "ホーム画面に追加",
+    installIOS:
+      "Safari の共有メニューから「ホーム画面に追加」を選択することで、" +
+      "Falling Nikochan をアプリとして開くことができます。",
+    dismiss: "閉じる",
+    updating: "更新をダウンロード中...",
+    updateDone: "更新が完了しました！",
+    updateFailed: "更新に失敗しました...",
+    inputId: "譜面IDを入力",
+    inputIdDesc:
+      "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
+    inputIdDesc2:
+      "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
+    inputDirect: "譜面IDを指定し直接プレイ画面に飛ぶ",
+    inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
     about: {
       title: "Falling Nikochan とは？",
     },
+    top: {
+      titleShort: "ホーム",
+    },
     play: {
-      title: "プレイする",
-      inputId: "譜面IDを入力",
-      inputIdDesc:
-        "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
-      inputIdDesc2:
-        "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
-      inputDirect: "譜面IDを指定し直接プレイ画面に飛ぶ",
-      inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
-      recentPlay: "最近プレイした譜面",
+      title: "公開されている譜面で遊ぶ",
+      titleShort: "公開譜面",
+      recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
       latest: "新着譜面",
@@ -36,7 +51,8 @@ export default {
         "dev環境ではタイトルや作曲者だけ入力したダミーのファイルが表示されます",
     },
     edit: {
-      title: "譜面作成",
+      title: "譜面を作る",
+      titleShort: "譜面作成",
       welcome:
         "Falling Nikochan の譜面エディタにようこそ。" +
         "アカウント登録不要で誰でも譜面を作成することができます。",
@@ -62,6 +78,28 @@ export default {
     version: {
       title: "バージョン情報",
       changelog: "主な更新履歴",
+    },
+    links: {
+      title: "お問い合わせ先・その他リンク",
+      titleShort: "その他",
+      about: "Falling Nikochan について",
+      version: "バージョン",
+      changelog: "更新履歴はこちら",
+      policies: "利用規約っぽいもの",
+      settings: "設定",
+      theme: "テーマ色",
+      light: "ライト",
+      dark: "ダーク",
+      default: "自動",
+      installDesc:
+        "Falling Nikochan をホーム画面に追加してアプリとして起動することにより、" +
+        "フルスクリーンでより快適に遊ぶことができます。",
+      install: "ホーム画面に追加",
+      installIOS:
+        "(iOS では Safari の共有メニューから「ホーム画面に追加」を選択してください。)",
+      contactForm: "お問い合わせフォーム",
+      officialChannel: "Falling Nikochan 公式チャンネル (@nikochan144)",
+      officialChannelShort: "公式チャンネル",
     },
   },
   footer: {

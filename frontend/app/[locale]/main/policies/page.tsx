@@ -10,8 +10,9 @@ export async function generateMetadata({ params }: MetadataProps) {
 export default async function PolicyTab({ params }: MetadataProps) {
   const locale = (await params).locale;
   const Policies = await importPoliciesMDX(locale);
+  const t = await getTranslations(params, "main.policies");
   return (
-    <IndexMain tab={3} locale={locale}>
+    <IndexMain title={t("title")} tabKey="policies" mobileTabKey="links" locale={locale}>
       <div className="text-justify">
         <Policies />
       </div>

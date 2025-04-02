@@ -27,7 +27,7 @@ export function luaAddBeatChange<L extends LevelEdit | Level5>(
   chart: L,
   change: Signature | Signature5
 ): L | null {
-  const insert = findInsertLine(chart, change.step);
+  const insert = findInsertLine(chart, change.step, true);
   if (insert.luaLine === null) {
     return null;
   }

@@ -6,19 +6,24 @@ export default {
       start: "スタート",
       reset: "もう一度",
       exit: "やめる",
-      startByTap:
-        "または右上の動画を{isTouch, select, true {タップ} false {クリック} other {other}}で<br></br>" +
-        "スタート・停止できます",
+      howToPause:
+        "画面上部の <pause></pause> ボタンを押すことで停止できます。",
       editingNotification:
-        "編集画面で変更した譜面は、<br></br>" +
+        "編集画面で変更した譜面は、" +
         "ページ再読み込みでこちらに反映されます。",
       option: "オプション",
       auto: "オートプレイ",
+      enableSE: "キー/タップ音を鳴らす",
+      enableSELatency:
+        "サウンドの遅延分 (この環境では {latency} 秒) だけ判定が補正されます。",
+      unknownSELatency:
+        "サウンドの出力に遅延が生じる可能性があります。手動で判定タイミングを調整してください。",
       displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
+      off: "オフ",
     },
     score: {
       auto: "オートプレイ",

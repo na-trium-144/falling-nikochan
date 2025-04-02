@@ -6,7 +6,7 @@ import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
-import { ArrowLeft, Caution, RightOne } from "@icon-park/react";
+import { ArrowLeft, Caution, Pause, RightOne } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
@@ -25,6 +25,9 @@ interface MessageProps {
   setAuto: (a: boolean) => void;
   userOffset: number;
   setUserOffset: (o: number) => void;
+  enableSE: boolean;
+  setEnableSE: (s: boolean) => void;
+  audioLatency: number | null | undefined;
   editing: boolean;
   lateTimes: number[];
   small: boolean;
@@ -54,7 +57,10 @@ export function ReadyMessage(props: MessageProps) {
 
   // props.small は clientPage.tsx のreadySmall (mainWindowの高さで決まる)
   return (
-    <CenterBox className="overflow-clip ">
+    <CenterBox
+      className="overflow-clip "
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       {props.small && (
         <div
           className={
@@ -117,17 +123,16 @@ export function ReadyMessage(props: MessageProps) {
             onClick={() => props.exit()}
           />
         </p>
-        <p className="mt-2 text-sm">
-          {t.rich("startByTap", {
-            isTouch: props.isTouch ? "true" : "false",
-            br: () => <br />,
+        <p className="mt-2 max-w-96 text-center">
+          {t.rich("howToPause", {
+            pause: () => (
+              <Pause className="inline-block align-middle text-lg " />
+            ),
           })}
         </p>
         {props.editing && (
-          <p className="mt-2">
-            {t.rich("editingNotification", {
-              br: () => <br />,
-            })}
+          <p className="mt-2 max-w-96 text-center">
+            {t("editingNotification")}
           </p>
         )}
         {props.small ? (
@@ -151,9 +156,9 @@ export function ReadyMessage(props: MessageProps) {
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
   return (
-    <div className="relative pr-8 min-h-32 max-w-full flex flex-col items-center ">
+    <div className="relative pr-8 min-h-52 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6">
+      <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6 space-y-1 ">
         <li className="">
           <CheckBox
             className=""
@@ -162,6 +167,27 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           >
             {t("auto")}
           </CheckBox>
+        </li>
+        <li className="">
+          <CheckBox
+            className=""
+            value={props.enableSE}
+            onChange={(v) => props.setEnableSE(v)}
+          >
+            {t("enableSE")}
+          </CheckBox>
+          {props.enableSE && (
+            <p className="ml-2 text-sm max-w-64 text-justify ">
+              <Caution className="inline-block align-middle mr-1" />
+              {props.audioLatency === undefined
+                ? null
+                : props.audioLatency === null
+                  ? t("unknownSELatency")
+                  : t("enableSELatency", {
+                      latency: props.audioLatency.toFixed(3),
+                    })}
+            </p>
+          )}
         </li>
         {/* <li className="">
           <CheckBox
@@ -180,7 +206,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               className="w-16"
               actualValue={
                 (props.userOffset >= 0 ? "+" : "-") +
-                Math.abs(props.userOffset).toFixed(2)
+                Math.abs(props.userOffset).toFixed(3)
               }
               updateValue={(v) => props.setUserOffset(Number(v))}
               isValid={(v) => !isNaN(Number(v))}
@@ -277,7 +303,10 @@ export function StopMessage(props: MessageProps2) {
   const t = useTranslations("play.message");
 
   return (
-    <CenterBox className={props.hidden ? "hidden" : ""}>
+    <CenterBox
+      className={props.hidden ? "hidden" : ""}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <p className="text-lg font-title font-bold mb-2">
         &lt; {t("stopped")} &gt;
       </p>
@@ -306,7 +335,7 @@ export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
 
   return (
-    <CenterBox>
+    <CenterBox onPointerDown={(e) => e.stopPropagation()}>
       <p className="mb-2">
         <Caution className="inline-block text-lg align-middle mr-1" />
         {props.msg}

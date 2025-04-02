@@ -1,6 +1,5 @@
 "use client";
 
-import { useTheme } from "@/common/theme";
 import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";
@@ -15,7 +14,6 @@ export default function OGTemplate() {
   const th = useTranslations("share");
   const t = useTranslations("play.result");
   const ts = useTranslations("play.status");
-  useTheme();
   const [showDummyData, setShowDummyData] = useState<boolean>(true);
   useEffect(() => {
     setShowDummyData(
