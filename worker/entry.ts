@@ -65,9 +65,11 @@ async function initAssetsCache(config: {
   try {
     filesRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
+      { cache: "no-store" },
     );
     remoteVerRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      { cache: "no-store" },
     );
   } catch (e) {
     console.error(e);
@@ -204,6 +206,7 @@ const app = new Hono({ strict: false })
     let remoteVer: BuildVer;
     const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      { cache: "no-store" },
     );
     if (!remoteRes.ok) {
       return c.body(null, 500);
