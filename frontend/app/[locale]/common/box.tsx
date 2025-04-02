@@ -16,12 +16,10 @@ export function Box(props: Props) {
     <div
       ref={props.ref}
       className={
-        "rounded-lg bg-white/75 dark:bg-stone-800/75 " + (props.className || "")
+        "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs " +
+        (props.className || "")
       }
-      style={{
-        backdropFilter: "blur(2px)",
-        ...props.style,
-      }}
+      style={props.style}
       onClick={props.onClick}
       onPointerDown={props.onPointerDown}
     >

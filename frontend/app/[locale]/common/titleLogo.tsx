@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import TargetLine from "./targetLine.js";
 
 interface Props {
-  anim: boolean;
+  anim?: boolean;
   className?: string;
 }
 export default function Title(props: Props) {
