@@ -13,7 +13,7 @@ export function MobileHeader(props: MProps) {
   return (
     <header
       className={
-        "p-3 w-full relative text-center text-lg main-wide:hidden " +
+        "p-3 w-full relative text-center text-xl font-bold font-title main-wide:hidden " +
         props.className
       }
     >

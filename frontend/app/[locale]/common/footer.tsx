@@ -122,7 +122,7 @@ export function MobileFooter(props: MobileProps) {
         <Link
           key={i}
           className={
-            "w-full text-lg space-y-1 flex flex-col items-center main-wide:hidden " +
+            "w-full text-xl space-y-1 flex flex-col items-center main-wide:hidden " +
             (props.tabKey === key ? "" : "text-slate-500 dark:text-stone-400 ")
           }
           href={`/${props.locale}${tabURLs[key]}`}
@@ -149,7 +149,7 @@ export function MobileFooter(props: MobileProps) {
               fill={props.tabKey === key ? iconFill : iconFill[1]}
             />
           )}
-          <span className="text-xs ">{tm(key + ".titleShort")}</span>
+          <span className="text-sm ">{tm(key + ".titleShort")}</span>
         </Link>
       ))}
     </footer>
