@@ -27,7 +27,7 @@
     "@types/mdx": "^2.0.13",
     "dotenv": "^16.4.7",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.14",
+    "tailwindcss": "^4.1.0",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
 }
