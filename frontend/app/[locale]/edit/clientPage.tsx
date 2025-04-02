@@ -39,7 +39,7 @@ import {
   validateChart,
 } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
-import Header from "@/common/header.js";
+import { MobileHeader } from "@/common/header.js";
 import {
   getPasswd,
   preferSavePasswd,
@@ -330,9 +330,6 @@ export default function EditAuth(props: {
             </p>
           ) : (
             <div className="text-center ">
-              <Header className="pt-0 pb-2 " reload locale={locale}>
-                {t("titleShort")}
-              </Header>
               <p className="mb-2 ">
                 <span className="">{t("chartId")}:</span>
                 <span className="ml-2 ">{cid}</span>
@@ -958,7 +955,8 @@ function Page(props: Props) {
   return (
     <main
       className={
-        "overflow-x-hidden edit-wide:h-dvh edit-wide:overflow-y-hidden " +
+        "w-full h-dvh overflow-x-clip overflow-y-auto " +
+        "edit-wide:overflow-y-clip " +
         (dragMode !== null ? "touch-none " : "")
       }
       tabIndex={0}
@@ -1021,6 +1019,20 @@ function Page(props: Props) {
         }
       }}
     >
+      <div
+        className={
+          "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs " +
+          "flex edit-wide:hidden flex-row items-center " +
+          "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200 " +
+          "dark:from-orange-975/0 to-orange-975 "
+        }
+      >
+        <MobileHeader className="flex-1 ">
+          {t("titleShort")} ID: {cid}
+        </MobileHeader>
+        <Button text={t("help")} onClick={openGuide} />
+      </div>
+      <div className="w-0 h-13 edit-wide:hidden" />
       {chart === undefined ? (
         <div className={modalBg} onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-6">
@@ -1044,6 +1056,7 @@ function Page(props: Props) {
           locale={locale}
         />
       ) : null}
+
       <CaptionProvider>
         <LuaTabProvider>
           <div
@@ -1054,19 +1067,19 @@ function Page(props: Props) {
           >
             <div
               className={
-                "edit-wide:basis-4/12 edit-wide:h-full " +
-                "grow-0 shrink-0 flex flex-col items-stretch p-3"
+                "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3 " +
+                "grow-0 shrink-0 flex flex-col items-stretch "
               }
             >
-              <div className="flex flex-row items-center">
-                <Header reload locale={locale}>
-                  {t("titleShort")}
-                </Header>
+              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 ">
+                <span className="flex-1 ">
+                  {t("titleShort")} ID: {cid}
+                </span>
                 <Button text={t("help")} onClick={openGuide} />
               </div>
               <div
                 className={
-                  "grow-0 shrink-0 mt-3 p-3 rounded-lg flex flex-col items-center " +
+                  "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center " +
                   (levelBgColors[
                     levelTypes.indexOf(currentLevel?.type || "")
                   ] || levelBgColors[1]) +
