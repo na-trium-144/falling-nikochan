@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 import Button from "./button";
 
 export function useStandaloneDetector() {
-  const [state, setState] = useState<boolean>(false);
+  const [state, setState] = useState<boolean | null>(null);
   useEffect(() => setState(isStandalone()), []);
   return state;
 }

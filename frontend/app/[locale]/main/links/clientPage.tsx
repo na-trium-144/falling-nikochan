@@ -14,12 +14,13 @@ import { linkStyle1, linkStyle3 } from "@/common/linkStyle";
 import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
-import { usePWAInstall } from "@/common/pwaInstall";
+import { usePWAInstall, useStandaloneDetector } from "@/common/pwaInstall";
 import Button from "@/common/button";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
   const themeState = useTheme();
+  const isStandalone = useStandaloneDetector();
   const pwa = usePWAInstall();
   return (
     <IndexMain
@@ -89,15 +90,17 @@ export default function LinksPage({ locale }: { locale: string }) {
               </span>
             </ThemeSwitcher>
           </p>
-          <div>
-            <p>{t("installDesc")}</p>
-            {pwa.detectedOS === "android" && (
-              <p className="text-center ">
-                <Button text={t("install")} onClick={pwa.install} />
-              </p>
-            )}
-            {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
-          </div>
+          {isStandalone === false && (
+            <div>
+              <p>{t("installDesc")}</p>
+              {pwa.detectedOS === "android" && (
+                <p className="text-center ">
+                  <Button text={t("install")} onClick={pwa.install} />
+                </p>
+              )}
+              {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
+            </div>
+          )}
         </div>
       </div>
       <div className="mb-3 main-wide:hidden ">
