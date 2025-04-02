@@ -16,7 +16,6 @@ import Link from "next/link.js";
 import Title from "@/common/titleLogo.jsx";
 import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { MobileFooter, PCFooter } from "@/common/footer.jsx";
-import { usePWAInstall } from "@/common/pwaInstall.jsx";
 import { AboutModal } from "@/clientPage.jsx";
 
 const dummyBrief = {
@@ -49,7 +48,6 @@ interface Props {
 export default function ShareChart(props: Props) {
   const t = useTranslations("share");
   const tm = useTranslations("main");
-  const pwa = usePWAInstall();
   const { locale } = props;
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
@@ -146,7 +144,7 @@ export default function ShareChart(props: Props) {
         </Box>
       </div>
       <PCFooter locale={locale} nav />
-      <MobileFooter locale={locale} pwa={pwa} tabKey={null} />
+      <MobileFooter locale={locale} tabKey={null} />
     </main>
   );
 }

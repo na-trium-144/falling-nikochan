@@ -4,7 +4,7 @@ import Link from "next/link";
 import { linkStyle1, linkStyle3 } from "./common/linkStyle.js";
 import Title from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
-import { PWAInstallMain, usePWAInstall } from "./common/pwaInstall.js";
+import { PWAInstallMain } from "./common/pwaInstall.js";
 import {
   MobileFooter,
   PCFooter,
@@ -35,7 +35,6 @@ interface Props {
 export default function TopPage(props: Props) {
   const { screenWidth, rem } = useDisplayMode();
   const router = useRouter();
-  const pwa = usePWAInstall();
   const t = useTranslations("main");
   const [menuMove, setMenuMove] = useState<boolean>(false);
   const [menuMove2, setMenuMove2] = useState<boolean>(false);
@@ -100,7 +99,7 @@ export default function TopPage(props: Props) {
         </div>
         <div className={"basis-auto grow-2 " + menuMoveAnimClass}>
           <RedirectedWarning />
-          <PWAInstallMain pwa={pwa} />
+          <PWAInstallMain />
         </div>
 
         <div
@@ -201,7 +200,7 @@ export default function TopPage(props: Props) {
           "dark:from-orange-950 dark:to-orange-950/0 "
         }
       >
-        <MobileFooter locale={locale} pwa={pwa} tabKey="top" />
+        <MobileFooter locale={locale} tabKey="top" />
       </div>
     </main>
   );

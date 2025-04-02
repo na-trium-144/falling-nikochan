@@ -15,7 +15,6 @@ import Title from "@/common/titleLogo.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
-import { usePWAInstall } from "@/common/pwaInstall";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -29,7 +28,6 @@ interface Props {
 export function IndexMain(props: Props) {
   const locale = props.locale;
   const t = useTranslations("main");
-  const pwa = usePWAInstall();
 
   return (
     <main className="flex flex-col w-full h-full items-center ">
@@ -97,7 +95,7 @@ export function IndexMain(props: Props) {
         </Box>
       </div>
       <PCFooter locale={locale} nav={props.tabKey === null} />
-      <MobileFooter locale={locale} tabKey={props.mobileTabKey} pwa={pwa} />
+      <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
   );
 }
