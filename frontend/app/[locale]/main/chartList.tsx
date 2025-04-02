@@ -1,131 +1,228 @@
-import { ChartBrief } from "@falling-nikochan/chart";
+"use client";
+import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { ArrowLeft, RightOne } from "@icon-park/react";
+import { ArrowRight } from "@icon-park/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ReactNode, useEffect, useState } from "react";
-import { ChartLineBrief } from "./play/fetch.js";
-import { pagerButtonClass } from "@/common/pager.js";
+import { useEffect, useState } from "react";
+import {
+  ChartLineBrief,
+  chartListMaxRow,
+  fetchAndFilterBriefs,
+} from "./fetch.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
+import { IndexMain } from "./main.js";
+import { useShareModal } from "./shareModal.jsx";
+import { getRecent, updateRecent } from "@/common/recent.js";
+import { TabKeys } from "@/common/footer.jsx";
+
+interface PProps {
+  locale: string;
+  title: string;
+  tabKey: TabKeys;
+  mobileTabKey: "top" | "play";
+  type: ChartListType;
+}
+export default function ChartListPage(props: PProps) {
+  const { modal, openModal, openShareInternal } = useShareModal(
+    props.locale,
+    props.mobileTabKey,
+  );
+
+  return (
+    <IndexMain
+      title={props.title}
+      tabKey={props.tabKey}
+      mobileTabKey={props.mobileTabKey}
+      locale={props.locale}
+      modal={modal}
+    >
+      <h3
+        className={
+          "flex-none mb-2 text-xl font-bold font-title " +
+          "hidden main-wide:block "
+        }
+      >
+        {props.title}
+      </h3>
+      <ChartList
+        type={props.type}
+        fetchAll
+        creator
+        href={(cid) => `/share/${cid}`}
+        onClick={openModal}
+        onClickMobile={openShareInternal}
+        showLoading
+        moreHref=""
+      />
+    </IndexMain>
+  );
+}
+
+export type ChartListType =
+  | "recent"
+  | "recentEdit"
+  | "popular"
+  | "latest"
+  | "sample";
 
 interface Props {
-  recentBrief?: ChartLineBrief[] | "error";
-  maxRow: number;
-  fetchAdditional?: () => void;
+  type: ChartListType;
+  fetchAll?: boolean;
   creator?: boolean;
   showLoading?: boolean;
   dateDiff?: boolean;
   href: (cid: string) => string;
-  onClick?: (cid: string) => void;
+  onClick?: (cid: string, brief?: ChartBrief) => void;
+  onClickMobile?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
-  additionalOpen: boolean;
-  setAdditionalOpen: (open: boolean) => void;
+  moreHref: string;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
   const te = useTranslations("error");
 
+  const [briefs, setBriefs] = useState<ChartLineBrief[] | "error">();
+  useEffect(() => {
+    switch (props.type) {
+      case "recent":
+        setBriefs(
+          getRecent("play")
+            .reverse()
+            .map((cid) => ({ cid, fetched: false })),
+        );
+        break;
+      case "recentEdit":
+        setBriefs(
+          getRecent("edit")
+            .reverse()
+            .map((cid) => ({ cid, fetched: false })),
+        );
+        break;
+      case "sample":
+        setBriefs(
+          originalCId
+            .map(
+              (cid) =>
+                ({ cid, fetched: false, original: true }) as ChartLineBrief,
+            )
+            .concat(sampleCId.map((cid) => ({ cid, fetched: false }))),
+        );
+        break;
+      case "latest":
+      case "popular":
+        void (async () => {
+          try {
+            const latestRes = await fetch(
+              process.env.BACKEND_PREFIX + `/api/${props.type}`,
+              { cache: "default" },
+            );
+            if (latestRes.ok) {
+              const latestCId = (await latestRes.json()) as { cid: string }[];
+              setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
+            } else {
+              setBriefs("error");
+            }
+          } catch (e) {
+            console.error(e);
+            setBriefs("error");
+          }
+        })();
+    }
+  }, [props.type]);
+  useEffect(() => {
+    void (async () => {
+      if (Array.isArray(briefs)) {
+        const res = await fetchAndFilterBriefs(briefs, !!props.fetchAll);
+        if (res.changed) {
+          setBriefs(res.briefs);
+          if (props.type === "recent") {
+            updateRecent("play", briefs.map(({ cid }) => cid).reverse());
+          }
+          if (props.type === "recentEdit") {
+            updateRecent("edit", briefs.map(({ cid }) => cid).reverse());
+          }
+        }
+      }
+    })();
+  }, [briefs, props.type, props.fetchAll]);
+  const maxRow =
+    Array.isArray(briefs) && props.fetchAll ? briefs.length : chartListMaxRow;
   const fetching =
-    props.recentBrief === undefined ||
-    (Array.isArray(props.recentBrief) &&
-      props.recentBrief.slice(0, props.maxRow).some(({ fetched }) => !fetched));
-  const fetchingAdditional =
-    props.recentBrief === undefined ||
-    (Array.isArray(props.recentBrief) &&
-      props.recentBrief.some(({ fetched }) => !fetched));
+    briefs === undefined ||
+    (Array.isArray(briefs) &&
+      briefs.slice(0, maxRow).some(({ fetched }) => !fetched));
   return (
     <>
       <ul
-        className="grid w-full justify-items-start items-center "
+        className="grid w-full mx-auto justify-items-start items-center "
         style={{
           gridTemplateColumns: `repeat(auto-fit, minmax(min(18rem, 100%), 1fr))`,
+          maxWidth: 7 * 18 - 0.1 + "rem",
         }}
       >
-        {Array.isArray(props.recentBrief) && props.recentBrief.length > 0 && (
+        {Array.isArray(briefs) && briefs.length > 0 && (
           <>
-            {props.recentBrief
-              .slice(0, props.maxRow)
-              .map(({ cid, brief, original }) => (
-                <ChartListItem
-                  invisible={fetching}
-                  key={cid}
-                  cid={cid}
-                  brief={brief}
-                  href={props.href(cid)}
-                  onClick={
-                    props.onClick ? () => props.onClick!(cid) : undefined
-                  }
-                  creator={props.creator}
-                  original={original}
-                  newTab={props.newTab}
-                  dateDiff={props.dateDiff}
-                />
-              ))}
-            {props.recentBrief
-              .slice(props.maxRow)
-              .map(({ cid, brief, original }) => (
-                <ChartListItem
-                  invisible={fetchingAdditional}
-                  hidden={!props.additionalOpen}
-                  key={cid}
-                  cid={cid}
-                  brief={brief}
-                  href={props.href(cid)}
-                  onClick={
-                    props.onClick ? () => props.onClick!(cid) : undefined
-                  }
-                  creator={props.creator}
-                  original={original}
-                  newTab={props.newTab}
-                  dateDiff={props.dateDiff}
-                />
-              ))}
+            {briefs.slice(0, maxRow).map(({ cid, brief, original }) => (
+              <ChartListItem
+                invisible={fetching}
+                key={cid}
+                cid={cid}
+                brief={brief}
+                href={props.href(cid)}
+                onClick={
+                  props.onClick ? () => props.onClick!(cid, brief) : undefined
+                }
+                onClickMobile={
+                  props.onClickMobile
+                    ? () => props.onClickMobile!(cid, brief)
+                    : undefined
+                }
+                creator={props.creator}
+                original={original}
+                newTab={props.newTab}
+                dateDiff={props.dateDiff}
+              />
+            ))}
           </>
         )}
         <div
           className={
-            "w-max pl-6 " +
-            ((fetching || (props.additionalOpen && fetchingAdditional)) &&
-            props.showLoading
-              ? ""
-              : "hidden ")
+            "w-max pl-6 " + (fetching && props.showLoading ? "" : "hidden ")
           }
         >
           <SlimeSVG />
           Loading...
         </div>
-        {props.recentBrief === "error" && (
+        {briefs === "error" && (
           <div className="w-max pl-6 ">{te("fetchError")}</div>
         )}
         {Array.from(new Array(5)).map((_, i) => (
           <span key={i} />
         ))}
       </ul>
-      {props.recentBrief !== undefined &&
-        props.recentBrief.length > props.maxRow &&
-        !props.additionalOpen && (
-          <button
-            className={
-              "block relative ml-1 mt-1 " +
-              (fetching ? "invisible " : "") +
-              linkStyle1
-            }
-            onClick={() => {
-              props.setAdditionalOpen(!props.additionalOpen);
-              if (fetchingAdditional && props.fetchAdditional) {
-                props.fetchAdditional();
-              }
-            }}
-          >
-            <RightOne className="absolute left-0 bottom-1 " theme="filled" />
-            <span className="ml-5">{t("showAll")}</span>
-            {/*<span className="ml-1">
-              ({props.recentBrief.length /*- props.maxRow* /})
+      {Array.isArray(briefs) && briefs.length > maxRow && (
+        <Link
+          className={
+            "block w-max mx-auto mt-1 " +
+            (fetching ? "invisible " : "") +
+            linkStyle1
+          }
+          href={props.moreHref}
+          prefetch={!process.env.NO_PREFETCH}
+        >
+          {t("showAll")}
+          {/*<span className="ml-1">
+              ({briefs.length /*- props.maxRow* /})
             </span>*/}
-          </button>
-        )}
-      {props.recentBrief !== undefined && props.recentBrief.length === 0 && (
+          <ArrowRight
+            className="inline-block align-middle ml-2 "
+            theme="filled"
+          />
+        </Link>
+      )}
+      {Array.isArray(briefs) && briefs.length === 0 && (
         <div className="pl-2">{t("empty")}</div>
       )}
     </>
@@ -143,6 +240,7 @@ interface CProps {
   brief?: ChartBrief;
   href: string;
   onClick?: () => void;
+  onClickMobile?: () => void;
   creator?: boolean;
   original?: boolean;
   newTab?: boolean;
@@ -158,10 +256,14 @@ export function ChartListItem(props: CProps) {
       setAppearing(!props.hidden && !props.invisible),
     );
   }, [props.hidden, props.invisible]);
+
+  // ~36rem: 1列 -> 18~36rem -> max-width:27rem
+  // ~54rem: 2列 -> 18~27rem
+  // ~72rem: 3列 -> 18~24rem
   return (
     <li
       className={
-        "w-full h-max transition-opacity ease-out duration-200 " +
+        "w-full max-w-108 mx-auto h-max transition-opacity ease-out duration-200 " +
         (props.hidden
           ? "hidden opacity-0 "
           : props.invisible
@@ -172,21 +274,38 @@ export function ChartListItem(props: CProps) {
       }
     >
       {props.onClick || (props.newTab && !isStandalone) ? (
-        <a
-          href={props.href}
-          className={chartListStyle}
-          target={props.newTab ? "_blank" : undefined}
-          onClick={
-            props.onClick
-              ? (e) => {
-                  props.onClick!();
-                  e.preventDefault();
-                }
-              : undefined
-          }
-        >
-          <ChartListItemChildren {...props} />
-        </a>
+        <>
+          <a
+            href={props.href}
+            className={
+              chartListStyle +
+              (props.onClickMobile ? "hidden main-wide:block " : "")
+            }
+            target={props.newTab ? "_blank" : undefined}
+            onClick={
+              props.onClick
+                ? (e) => {
+                    props.onClick!();
+                    e.preventDefault();
+                  }
+                : undefined
+            }
+          >
+            <ChartListItemChildren {...props} />
+          </a>
+          {props.onClickMobile && (
+            <a
+              href={props.href}
+              className={chartListStyle + "main-wide:hidden "}
+              onClick={(e) => {
+                props.onClickMobile!();
+                e.preventDefault();
+              }}
+            >
+              <ChartListItemChildren {...props} />
+            </a>
+          )}
+        </>
       ) : (
         <Link
           href={props.href}
@@ -293,53 +412,4 @@ function DateDiff(props: DProps) {
   } else {
     return null;
   }
-}
-
-export function AccordionLike(props: {
-  hidden: boolean;
-  expanded?: boolean;
-  children: ReactNode;
-  header?: ReactNode;
-  reset?: () => void;
-}) {
-  const [hidden, setHidden] = useState<boolean>(false);
-  const [transparent, setTransparent] = useState<boolean>(false);
-  useEffect(() => {
-    if (props.hidden) {
-      setTransparent(true);
-      setTimeout(() => setHidden(true), 200);
-    } else {
-      setHidden(false);
-      requestAnimationFrame(() => setTransparent(false));
-    }
-  }, [props.hidden]);
-
-  return (
-    <div
-      className={
-        "main-wide:transition-all main-wide:duration-200 " +
-        (hidden ? "hidden " : "") +
-        (transparent
-          ? "ease-out opacity-0 max-h-0 pointer-events-none "
-          : "mb-3 ease-in opacity-100 max-h-full ")
-      }
-    >
-      {props.header && (
-        <h3 className="mb-2">
-          <button
-            className={
-              pagerButtonClass +
-              "mr-4 align-bottom " +
-              (props.expanded ? "" : "hidden! ")
-            }
-            onClick={props.reset || (() => undefined)}
-          >
-            <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
-          </button>
-          {props.header}
-        </h3>
-      )}
-      {props.children}
-    </div>
-  );
 }

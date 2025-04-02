@@ -19,7 +19,7 @@ import { useDisplayMode } from "@/scale.js";
 import { LevelFreeze, Result } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
-import { ThemeContext } from "@/common/theme.js";
+import { useTheme } from "@/common/theme.js";
 import { LevelEdit } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import { useTranslations } from "next-intl";
@@ -115,9 +115,9 @@ const LuaPositionContext = createContext<LuaPositionContext>(null!);
 
 interface PProps {
   children: ReactNode;
-  themeContext: ThemeContext;
 }
 export function LuaTabProvider(props: PProps) {
+  const themeState = useTheme();
   const [data, setData] = useState<LuaPositionData>({
     visible: false,
     top: 0,
@@ -184,7 +184,7 @@ export function LuaTabProvider(props: PProps) {
       >
         <AceEditor
           mode="lua"
-          theme={props.themeContext.isDark ? "monokai" : "github"}
+          theme={themeState.isDark ? "monokai" : "github"}
           width="100%"
           height="100%"
           tabSize={2}

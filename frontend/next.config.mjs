@@ -59,6 +59,7 @@ const nextConfig = {
       ...config.resolve,
       extensionAlias: {
         ".js": [".js", ".ts", ".tsx"],
+        ".jsx": [".js", ".ts", ".tsx"],
       },
       fallback: {
         path: false,

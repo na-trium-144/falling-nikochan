@@ -5,7 +5,6 @@ import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { ThemeContext } from "@/common/theme.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote7, DisplayNote7, Note7 } from "@falling-nikochan/chart";
 
@@ -17,7 +16,6 @@ interface Props {
   playing: boolean;
   setFPS?: (fps: number) => void;
   barFlash: boolean;
-  themeContext: ThemeContext;
 }
 
 export default function FallingWindow(props: Props) {
@@ -98,7 +96,6 @@ export default function FallingWindow(props: Props) {
                 marginX={marginX}
                 marginY={marginY}
                 boxSize={boxSize}
-                themeContext={props.themeContext}
               />
             )
         )}
@@ -114,7 +111,6 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
-  themeContext: ThemeContext;
 }
 function Nikochan(props: NProps) {
   /* にこちゃん
@@ -206,7 +202,6 @@ function Nikochan(props: NProps) {
           noteSize={noteSize}
           big={displayNote.bigDone}
           chain={displayNote.chain || 0}
-          themeContext={props.themeContext}
         />
       )}
     </>
@@ -288,7 +283,6 @@ interface PProps {
   noteSize: number;
   big: boolean;
   chain: number;
-  themeContext: ThemeContext;
 }
 function Particle(props: PProps) {
   const ref = useRef<HTMLImageElement>(null!);

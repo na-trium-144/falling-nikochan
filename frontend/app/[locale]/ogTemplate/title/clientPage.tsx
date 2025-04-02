@@ -1,14 +1,11 @@
 "use client";
 
-import { useTheme } from "@/common/theme";
 import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";
 import { stepZero } from "@falling-nikochan/chart";
 
 export default function OGTemplate() {
-  useTheme();
-
   // 1rem = 16px の環境でのみ正常に表示される
   return (
     <div

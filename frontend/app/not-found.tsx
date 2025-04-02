@@ -1,5 +1,5 @@
 import { CenterBox } from "@/common/box";
-import { ThemeHandler } from "@/common/theme";
+import { ThemeProvider } from "@/common/theme";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { getTranslations } from "@falling-nikochan/i18n";
 
@@ -12,10 +12,9 @@ export default async function NotFoundPage() {
   return (
     <html>
       <body>
-        <main className="w-full h-dvh">
+        <ThemeProvider>
           <CenterBox>404: {t("api.notFound")}</CenterBox>
-          <ThemeHandler />
-        </main>
+        </ThemeProvider>
       </body>
     </html>
   );
