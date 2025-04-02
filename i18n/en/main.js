@@ -93,6 +93,7 @@ export default {
       install: "Add to Home Screen",
       installIOS:
         '(On iOS, select "Add to Home Screen" from the Safari\'s share menu.)',
+      contactForm: "Contact Form",
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",
     },

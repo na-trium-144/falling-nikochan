@@ -132,6 +132,11 @@ export default function LinksPage({ locale }: { locale: string }) {
         <h3 className="mb-2 text-xl font-bold font-title">{t("title")}</h3>
         <ul className="list-disc ml-6 space-y-1 ">
           <li>
+            <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
+              {t("contactForm")}
+            </ExternalLink>
+          </li>
+          <li>
             <Youtube
               className="inline-block align-middle mr-1"
               theme="filled"

@@ -97,6 +97,7 @@ export default {
       install: "ホーム画面に追加",
       installIOS:
         "(iOS では Safari の共有メニューから「ホーム画面に追加」を選択してください。)",
+      contactForm: "お問い合わせフォーム",
       officialChannel: "Falling Nikochan 公式チャンネル (@nikochan144)",
       officialChannelShort: "公式チャンネル",
     },
