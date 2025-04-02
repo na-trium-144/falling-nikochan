@@ -11,7 +11,6 @@ import { useTranslations } from "next-intl";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
-import { fetchBrief } from "@/common/briefCache.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import Link from "next/link.js";
 import Title from "@/common/titleLogo.jsx";
@@ -62,19 +61,18 @@ export default function ShareChart(props: Props) {
     const cid = window.location.pathname.split("/").pop()!;
     setCId(cid);
     const searchParams = new URLSearchParams(window.location.search);
-    void (async () => {
-      let brief: ChartBrief | undefined;
-      if (process.env.NODE_ENV === "development") {
-        brief = dummyBrief;
-      } else {
-        brief = (await fetchBrief(cid, true)).brief;
-      }
-      if (!brief) {
-        throw new Error("Failed to fetch brief");
-      }
-      setBrief(brief);
-      document.title = titleShare(t, cid, brief);
-    })();
+    let brief: ChartBrief;
+    if (process.env.NODE_ENV === "development") {
+      brief = dummyBrief;
+    } else {
+      brief = JSON.parse(
+        document
+          .querySelector('meta[name="nikochanSharingBrief"]')!
+          .getAttribute("content")!,
+      );
+    }
+    setBrief(brief);
+    document.title = titleShare(t, cid, brief);
     fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
       .then((res) => {
         if (res.ok) {

@@ -18,7 +18,7 @@ import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
 
 interface Props {
-  cid: string;
+  cid: string | undefined;
   brief: ChartBrief | null;
   record: RecordGetSummary[];
   sharedResult?: ResultParams | null;
@@ -70,21 +70,25 @@ export function ShareBox(props: Props) {
                 <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
               </button>
             )}
-            <span>ID: {cid}</span>
+            <span>{cid && `ID: ${cid}`}</span>
           </div>
           <p className="font-title text-2xl">{brief?.title}</p>
           <p className="font-title text-lg">{brief?.composer}</p>
           <p className="mt-1">
             <span className="inline-block">
-              <span className="text-sm">{t("chartCreator")}:</span>
+              <span className="text-sm">
+                {brief && `${t("chartCreator")}:`}
+              </span>
               <span className="ml-2 font-title text-lg">
                 {brief?.chartCreator}
               </span>
             </span>
             <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
-              <span className="inline-block">({updatedAt})</span>
+              <span className="inline-block">
+                {updatedAt && `(${updatedAt})`}
+              </span>
               <span>
-                {isSample(cid) ? (
+                {cid && isSample(cid) ? (
                   <span className="ml-2">
                     <International className="inline-block w-5 translate-y-0.5" />
                     <span>{t("isSample")}</span>
@@ -115,28 +119,34 @@ export function ShareBox(props: Props) {
         </div>
       </div>
       {sharedResult && <SharedResultBox result={sharedResult} />}
-      <p className="mt-2">
-        <span className="hidden main-wide:inline-block mr-2">
-          {t("shareLink")}:
-        </span>
-        <a
-          className={"inline-block py-2 " + linkStyle1}
-          href={shareLink.path}
-          onClick={(e) => e.preventDefault()}
-        >
-          <span className="main-wide:hidden">{t("shareLink")}</span>
-          <span className="hidden main-wide:inline-block">{shareLink.url}</span>
-        </a>
-        <span className="inline-block ml-2 space-x-1">
-          {shareLink.toClipboard && (
-            <Button text={t("copy")} onClick={shareLink.toClipboard} />
-          )}
-          {shareLink.toAPI && (
-            <Button text={t("share")} onClick={shareLink.toAPI} />
-          )}
-        </span>
-      </p>
-      {brief && <PlayOption cid={cid} brief={brief} record={props.record} />}
+      {brief && (
+        <p className="mt-2">
+          <span className="hidden main-wide:inline-block mr-2">
+            {t("shareLink")}:
+          </span>
+          <a
+            className={"inline-block py-2 " + linkStyle1}
+            href={shareLink.path}
+            onClick={(e) => e.preventDefault()}
+          >
+            <span className="main-wide:hidden">{t("shareLink")}</span>
+            <span className="hidden main-wide:inline-block">
+              {shareLink.url}
+            </span>
+          </a>
+          <span className="inline-block ml-2 space-x-1">
+            {shareLink.toClipboard && (
+              <Button text={t("copy")} onClick={shareLink.toClipboard} />
+            )}
+            {shareLink.toAPI && (
+              <Button text={t("share")} onClick={shareLink.toAPI} />
+            )}
+          </span>
+        </p>
+      )}
+      {cid && brief && (
+        <PlayOption cid={cid} brief={brief} record={props.record} />
+      )}
     </>
   );
 }

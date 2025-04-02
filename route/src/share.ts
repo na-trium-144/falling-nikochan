@@ -79,10 +79,15 @@ const shareApp = (config: {
         }
         let titleEscapedJsStr = ""; // "{...\"TITLE\"}" inside script tag
         let titleEscapedHtml = ""; // <title>TITLE</title>, "TITLE" inside meta tag
+        const briefStr = JSON.stringify(brief);
+        let briefEscapedHtml = "";
         for (let i = 0; i < newTitle.length; i++) {
           titleEscapedJsStr +=
             "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
           titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
+        }
+        for (let i = 0; i < briefStr.length; i++) {
+          briefEscapedHtml += "&#" + briefStr.charCodeAt(i) + ";";
         }
         const newDescription = resultParams
           ? t("descriptionWithResult", {
@@ -128,12 +133,8 @@ const shareApp = (config: {
               new URL(c.req.url).origin,
             ).toString(),
           )
-          .replaceAll("PLACEHOLDER_DESCRIPTION", newDescription);
-        // .replaceAll(
-        //   // これはjsファイルの中にしか現れないのでエスケープの必要はない
-        //   '"PLACEHOLDER_BRIEF"',
-        //   JSON.stringify(JSON.stringify(brief))
-        // );
+          .replaceAll("PLACEHOLDER_DESCRIPTION", newDescription)
+          .replaceAll("PLACEHOLDER_BRIEF", briefEscapedHtml);
         if (c.req.path.startsWith("/share") && lang !== qLang) {
           const q = new URLSearchParams(c.req.query());
           q.delete("lang");
