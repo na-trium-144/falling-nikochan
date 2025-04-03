@@ -162,7 +162,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   const frameDropOptions =
     (props.frameDrop &&
       props.maxFPS &&
-      Array.from(new Array(Math.ceil(props.maxFPS / 10 - 0.3))).map(
+      Array.from(new Array(Math.ceil(props.maxFPS / 15 - 0.3))).map(
         (_, i) => i + 1,
       )) ||
     [];
