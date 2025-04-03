@@ -16,17 +16,13 @@ import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
 import {
   PWAInstallDesc,
-  usePWAInstall,
   useStandaloneDetector,
 } from "@/common/pwaInstall";
-import Button from "@/common/button";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
-  const tp = useTranslations("main.pwa");
   const themeState = useTheme();
   const isStandalone = useStandaloneDetector();
-  const pwa = usePWAInstall();
   return (
     <IndexMain
       title={t("titleShort")}
