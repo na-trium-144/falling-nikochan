@@ -642,6 +642,9 @@ function Play(props: Props) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
+        if (e.repeat) {
+          return;
+        }
         if (e.key === " " && showReady && !chartPlaying) {
           start();
         } else if (
