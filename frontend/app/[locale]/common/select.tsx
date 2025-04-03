@@ -26,7 +26,7 @@ export default function Select(props: Props) {
         })}
       </select>
       <Down
-        className="absolute inset-y-0 my-auto h-max right-2 cursor-pointer "
+        className="absolute inset-y-0 my-auto h-max right-2 cursor-pointer pointer-events-none "
         theme="filled"
       />
     </span>
