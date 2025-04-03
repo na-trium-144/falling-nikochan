@@ -1,3 +1,8 @@
+## ver. 10.10 - 2025/04/03 [#446](https://github.com/na-trium-144/falling-nikochan/pull/446)
+
+* ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策で、スタートボタンを押した時にSEを鳴らすようにした
+* キーを長押ししたときの繰り返し入力を無視するようにした
+
 ## ver. 10.9 - 2025/04/03 [#445](https://github.com/na-trium-144/falling-nikochan/pull/445)
 
 * プレイ中のフレームレートを制限するオプションを追加

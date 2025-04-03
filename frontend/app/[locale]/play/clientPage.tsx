@@ -415,6 +415,7 @@ function Play(props: Props) {
       ytPlayer.current?.seekTo(0, true);
     }
     ytPlayer.current?.playVideo();
+    playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
     // 譜面のリセットと開始はonStart()で処理
   };
   const stop = useCallback(() => {
@@ -641,6 +642,9 @@ function Play(props: Props) {
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
+        if (e.repeat) {
+          return;
+        }
         if (e.key === " " && showReady && !chartPlaying) {
           start();
         } else if (
