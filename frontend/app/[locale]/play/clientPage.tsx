@@ -944,24 +944,25 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
-      <Title className="absolute left-0 top-0 h-32 scale-175 origin-top-left " anim={false} />
-      <div className="absolute left-32 bottom-16 z-10 ">
-        <span className="text-7xl font-bold font-title">
-          you are an idiot!
-        </span>
-        <span className="text-6xl ml-6 font-bold font-title">
-        </span>
-        <span className="text-5xl ml-4 font-title ">
-          {/*ビートまりお*/}
-        </span>
-      </div>
-      <div className={"absolute right-12 bottom-16 z-10 font-bold " + levelColors[2]}>
-        <span className="text-5xl ">
-          Maniac-
-        </span>
-        <span className="text-6xl ">
-          12
-        </span>
+      <Title
+        className="absolute left-0 top-0 h-32 scale-175 origin-top-left "
+        anim={false}
+      />
+      <div
+        className="absolute inset-x-0 bottom-18 z-10 "
+        style={{ textShadow: "0.15rem 0.2rem 0.2rem rgb(0, 0, 0, 0.7)" }}
+      >
+        <div className="absolute left-32 bottom-0 ">
+          <span className="text-7xl font-bold font-title">初音ミクの激唱</span>
+          <span className="text-6xl ml-6 font-bold font-title"></span>
+          <span className="text-5xl ml-4 font-title ">{/*ビートまりお*/}</span>
+        </div>
+        <div
+          className={"absolute right-12 bottom-0 font-bold " + levelColors[0]}
+        >
+          <span className="text-5xl ">Single-</span>
+          <span className="text-6xl ">11</span>
+        </div>
       </div>
     </main>
   );
