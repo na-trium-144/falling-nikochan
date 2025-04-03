@@ -949,19 +949,18 @@ function Play(props: Props) {
         anim={false}
       />
       <div
-        className="absolute inset-x-0 bottom-18 z-10 "
+        className="absolute inset-0 z-10 "
         style={{ textShadow: "0.15rem 0.2rem 0.2rem rgb(0, 0, 0, 0.7)" }}
       >
-        <div className="absolute left-32 bottom-0 ">
+        <div className="absolute left-32 bottom-16 ">
           <span className="text-7xl font-bold font-title">初音ミクの激唱</span>
           <span className="text-6xl ml-6 font-bold font-title"></span>
-          <span className="text-5xl ml-4 font-title ">{/*ビートまりお*/}</span>
         </div>
         <div
-          className={"absolute right-12 bottom-0 font-bold " + levelColors[0]}
+          className={"absolute right-8 top-72 font-bold " + levelColors[0]}
         >
-          <span className="text-5xl ">Single-</span>
-          <span className="text-6xl ">11</span>
+          <span className="text-6xl ">Single-</span>
+          <span className="text-7xl ">11</span>
         </div>
       </div>
     </main>
