@@ -156,7 +156,7 @@ export function MobileFooter(props: MobileProps) {
 }
 
 export function PWAUpdateNotification() {
-  const t = useTranslations("main");
+  const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();
   useEffect(() => pwa.setEnableWorkerUpdate(true), [pwa.setEnableWorkerUpdate]);
   return (

@@ -8,16 +8,22 @@ export default {
       "シンプルでかわいい音ゲーです。",
     redirected:
       "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
-    installDesc:
-      "Falling Nikochan をアプリとしてホーム画面に追加することができます。",
-    install: "ホーム画面に追加",
-    installIOS:
-      "Safari の共有メニューから「ホーム画面に追加」を選択することで、" +
-      "Falling Nikochan をアプリとして開くことができます。",
-    dismiss: "閉じる",
-    updating: "更新をダウンロード中...",
-    updateDone: "更新が完了しました！",
-    updateFailed: "更新に失敗しました...",
+    pwa: {
+      installWithPrompt:
+        "Falling Nikochan をホーム画面に追加してアプリとして起動することにより、" +
+        "フルスクリーンでより快適に遊ぶことができます。",
+      install: "ホーム画面に追加",
+      installWithoutPrompt:
+        "ブラウザのメニューから「ホーム画面に追加」を選択してアプリとして起動することにより、" +
+        "フルスクリーンでより快適に遊ぶことができます。",
+      installIOS:
+        "Safari の共有メニューから「ホーム画面に追加」を選択してアプリとして起動することにより、" +
+        "フルスクリーンでより快適に遊ぶことができます。",
+      dismiss: "閉じる",
+      updating: "更新をダウンロード中...",
+      updateDone: "更新が完了しました！",
+      updateFailed: "更新に失敗しました...",
+    },
     inputId: "譜面IDを入力",
     inputIdDesc:
       "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
@@ -91,12 +97,6 @@ export default {
       light: "ライト",
       dark: "ダーク",
       default: "自動",
-      installDesc:
-        "Falling Nikochan をホーム画面に追加してアプリとして起動することにより、" +
-        "フルスクリーンでより快適に遊ぶことができます。",
-      install: "ホーム画面に追加",
-      installIOS:
-        "(iOS では Safari の共有メニューから「ホーム画面に追加」を選択してください。)",
       contactForm: "お問い合わせフォーム",
       officialChannel: "Falling Nikochan 公式チャンネル (@nikochan144)",
       officialChannelShort: "公式チャンネル",

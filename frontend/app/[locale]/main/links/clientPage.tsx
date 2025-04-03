@@ -14,11 +14,16 @@ import { linkStyle1, linkStyle3 } from "@/common/linkStyle";
 import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
-import { usePWAInstall, useStandaloneDetector } from "@/common/pwaInstall";
+import {
+  PWAInstallDesc,
+  usePWAInstall,
+  useStandaloneDetector,
+} from "@/common/pwaInstall";
 import Button from "@/common/button";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
+  const tp = useTranslations("main.pwa");
   const themeState = useTheme();
   const isStandalone = useStandaloneDetector();
   const pwa = usePWAInstall();
@@ -92,17 +97,16 @@ export default function LinksPage({ locale }: { locale: string }) {
           </p>
           {isStandalone === false && (
             <div>
-              <p>{t("installDesc")}</p>
-              {pwa.detectedOS === "android" && (
-                <p className="text-center ">
-                  <Button text={t("install")} onClick={pwa.install} />
-                </p>
-              )}
-              {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
+              <PWAInstallDesc />
             </div>
           )}
         </div>
       </div>
+      {isStandalone === false && (
+        <div className="mb-3 hidden main-wide:block">
+          <PWAInstallDesc />
+        </div>
+      )}
       <div className="mb-3 main-wide:hidden ">
         <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
         <div className="ml-2 space-y-1">
