@@ -50,7 +50,6 @@ import { getBestScore, setBestScore } from "@/common/bestScore.js";
 import BPMSign from "./bpmSign.js";
 import { getSession } from "./session.js";
 import { MusicArea } from "./musicArea.js";
-import { useTheme } from "@/common/theme.js";
 import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
@@ -277,7 +276,6 @@ function Play(props: Props) {
     largeResult,
   } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  const themeContext = useTheme();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -724,7 +722,6 @@ function Play(props: Props) {
             playing={chartPlaying}
             setFPS={setFps}
             barFlash={barFlash}
-            themeContext={themeContext}
           />
           <div
             className={
@@ -739,12 +736,10 @@ function Play(props: Props) {
               score={score}
               best={bestScoreState}
               auto={auto}
-              theme={themeContext}
             />
             <ChainDisp
               chain={chain}
               fc={judgeCount[2] + judgeCount[3] === 0}
-              theme={themeContext}
             />
             <button
               className={

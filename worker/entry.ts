@@ -11,10 +11,23 @@ import { locales } from "@falling-nikochan/i18n";
 declare const self: ServiceWorkerGlobalScope;
 
 // assetsを保存する
-const mainCache = () => caches.open("main");
-const tmpCache = () => caches.open("tmp");
+// cacheの中身の仕様を変更したときにはcacheの名前を変える
+const mainCache = () => caches.open("main1");
+const tmpCache = () => caches.open("tmp1");
 // 設定など
 const configCache = () => caches.open("config");
+
+async function clearOldCaches() {
+  await caches
+    .keys()
+    .then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k !== "main1" && k !== "tmp1" && k !== "config")
+          .map((k) => caches.delete(k)),
+      ),
+    );
+}
 
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
@@ -29,6 +42,18 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
   return (await cache.match(pathname)) || new Response(null, { status: 404 });
 }
 
+// serviceWorkerからクライアントに返すため、cache-controlを削除したresponseを作成
+function returnBody(body: string | ReadableStream | null, headers: Headers) {
+  return new Response(body, {
+    headers: {
+      ...(headers.has("Content-Type") && {
+        "Content-Type": headers.get("Content-Type")!,
+      }),
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 async function initAssetsCache(config: {
   clearOld: boolean;
 }): Promise<boolean> {
@@ -39,10 +64,12 @@ async function initAssetsCache(config: {
   let remoteVerRes: Response;
   try {
     filesRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json"
+      (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
+      { cache: "no-store" },
     );
     remoteVerRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json"
+      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      { cache: "no-store" },
     );
   } catch (e) {
     console.error(e);
@@ -72,7 +99,7 @@ async function initAssetsCache(config: {
       try {
         const res = await fetch(
           (process.env.ASSET_PREFIX || self.origin) + pathname,
-          { cache: "no-cache" }
+          { cache: "no-cache" },
         );
         if (res.ok) {
           if (
@@ -85,16 +112,11 @@ async function initAssetsCache(config: {
             // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
             const body = (await res.text()).replaceAll(
               process.env.ASSET_PREFIX,
-              ""
+              "",
             );
-            tmp.put(
-              pathname,
-              new Response(body, {
-                headers: res.headers,
-              })
-            );
+            tmp.put(pathname, returnBody(body, res.headers));
           } else {
-            tmp.put(pathname, res);
+            tmp.put(pathname, returnBody(res.body, res.headers));
           }
         } else {
           console.error(`failed to fetch ${pathname}: ${res.status}`);
@@ -104,7 +126,7 @@ async function initAssetsCache(config: {
         console.error(`failed to fetch ${pathname}: ${e}`);
         failed = true;
       }
-    })
+    }),
   );
   // 1つでも失敗したら中断
   if (failed) {
@@ -118,7 +140,7 @@ async function initAssetsCache(config: {
           console.warn(`delete ${req.url}`);
           await cache.delete(req);
         }
-      })
+      }),
     );
   }
   // tmpからmainに移す
@@ -129,7 +151,7 @@ async function initAssetsCache(config: {
         await cache.put(pathname, res);
         await tmp.delete(pathname);
       }
-    })
+    }),
   );
   // finished
   await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
@@ -145,7 +167,7 @@ interface BuildVer {
 const languageDetector = async (c: Context, next: () => Promise<void>) => {
   // headerもcookieも使えないので、その代わりにnavigator.languagesを使って検出するミドルウェア
   const systemLangs = navigator.languages.map(
-    (l) => new Intl.Locale(l).language
+    (l) => new Intl.Locale(l).language,
   );
   const preferredLang = c.req.path.split("/")[1];
   const cache = await configCache();
@@ -170,27 +192,28 @@ const app = new Hono({ strict: false })
       fetchBrief: (cid) => fetch(`/api/brief/${cid}`),
       fetchStatic,
       languageDetector,
-    })
+    }),
   )
   .route(
     "/",
     redirectApp({
       languageDetector,
-    })
+    }),
   )
   .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", (c) => fetch(c.req.raw))
   .get("/worker/checkUpdate", async (c) => {
     let remoteVer: BuildVer;
     const remoteRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json"
+      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      { cache: "no-store" },
     );
     if (!remoteRes.ok) {
       return c.body(null, 500);
     }
     remoteVer = await remoteRes.json();
     const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
-      cache.match("/buildVer").then((res) => res?.json())
+      cache.match("/buildVer").then((res) => res?.json()),
     );
     if (remoteVer.version !== cacheVer?.version) {
       return c.json({ version: true, commit: true });
@@ -218,10 +241,13 @@ const app = new Hono({ strict: false })
       // failsafe 通常は全部cacheに入っているはずだが
       console.warn(`${c.req.url} is not in cache`);
       const res = await fetch(c.req.raw);
-      if (res) {
-        await (await mainCache()).put(c.req.raw, res.clone());
+      if (res.ok) {
+        const returnRes = returnBody(res.body, res.headers);
+        await (await mainCache()).put(c.req.raw, returnRes.clone());
+        return returnRes;
+      } else {
+        return res;
       }
-      return res;
     }
   })
   .use(languageDetector)
@@ -235,7 +261,7 @@ self.addEventListener("install", (e) => {
 });
 self.addEventListener("activate", (e) => {
   console.log("service worker activate");
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(Promise.all([self.clients.claim(), clearOldCaches()]));
 });
 
 self.addEventListener("fetch", (e) => {

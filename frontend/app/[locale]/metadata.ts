@@ -14,6 +14,7 @@ export async function initMetadata(
     image?: string;
     noAlternate?: boolean;
     description?: string;
+    custom?: { [key: string]: string };
   },
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
@@ -85,5 +86,6 @@ export async function initMetadata(
       follow: path ? true : false,
       nocache: true,
     },
+    other: options?.custom,
   };
 }

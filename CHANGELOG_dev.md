@@ -1,3 +1,14 @@
+## ver. 10.5 - 2025/04/02 [#430](https://github.com/na-trium-144/falling-nikochan/pull/430)
+
+* モバイル表示時のUIをリニューアル
+    * フッター追加
+    * ページ階層の見直し
+    * 譜面ID入力と最近プレイした譜面リストをトップページに移動
+
+## ver. 10.4 - 2025/03/31 [#431](https://github.com/na-trium-144/falling-nikochan/pull/431)
+
+* #369 (ver9.0) でshareページのbodyをSSRせずクライアント側でfetchする仕様に変更していたが、遅いのでmetaタグを利用してbriefデータを渡すようにした
+
 ## ver. 10.0 - 2025/03/30 [#403](https://github.com/na-trium-144/falling-nikochan/pull/403), [#424](https://github.com/na-trium-144/falling-nikochan/pull/424), [#426](https://github.com/na-trium-144/falling-nikochan/pull/426)
 
 * 音符を叩いたときのSEを追加

@@ -1,12 +1,7 @@
-"use client";
+import { getTranslations } from "@falling-nikochan/i18n";
 
-import Button from "@/common/button";
-import { usePWAInstall } from "@/common/pwaInstall";
-import { useTranslations } from "next-intl";
-
-export function AboutContent1() {
-  const t = useTranslations("about.1");
-  const pwa = usePWAInstall();
+export async function AboutContent1({locale}: {locale:string}) {
+  const t = await getTranslations(locale, "about.1");
   return (
     <>
       <div className="mb-4">
@@ -16,13 +11,6 @@ export function AboutContent1() {
       <div className="mb-4">
         <p>{t("content3")}</p>
         <p>{t("content4")}</p>
-      </div>
-      <div className="mb-4">
-        <p>{t("installDesc")}</p>
-        {pwa.detectedOS === "android" && (
-          <Button text={t("install")} onClick={pwa.install} />
-        )}
-        {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
       </div>
     </>
   );
