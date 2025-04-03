@@ -73,6 +73,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       (window as any).opera
     ).toLowerCase();
     if (userAgent.includes("android")) {
+      // beforeinstallpromptイベントが発火するのを待つ
+      setTimeout(() => setDetectedOS("android"), 100);
       const handler = ((e: BeforeInstallPromptEvent) => {
         e.preventDefault();
         setDeferredPrompt(e);
@@ -184,7 +186,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   );
 }
 export function PWAInstallMain() {
-  const t = useTranslations("main");
+  const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();
   return (
     <div
@@ -194,14 +196,33 @@ export function PWAInstallMain() {
         (pwa.dismissed || pwa.detectedOS === null ? "hidden " : "")
       }
     >
-      {pwa.deferredPrompt && pwa.detectedOS === "android" && (
-        <>
-          <p>{t("installDesc")}</p>
-          <Button text={t("install")} onClick={pwa.install} />
-        </>
-      )}
-      {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
+      <PWAInstallDesc />
       <Button text={t("dismiss")} onClick={pwa.dismiss} />
     </div>
   );
+}
+
+// dismissed かどうかはチェックしないが、
+// standaloneとPCでは非表示にする
+export function PWAInstallDesc() {
+  const t = useTranslations("main.pwa");
+  const pwa = usePWAInstall();
+  const isStandalone = useStandaloneDetector();
+  if (isStandalone === false) {
+    if (pwa.detectedOS === "android") {
+      if (pwa.deferredPrompt) {
+        return (
+          <>
+            <p>{t("installWithPrompt")}</p>
+            <Button text={t("install")} onClick={pwa.install} />
+          </>
+        );
+      } else {
+        return <p>{t("installWithoutPrompt")}</p>;
+      }
+    } else if (pwa.detectedOS === "ios") {
+      return <p>{t("installIOS")}</p>;
+    }
+  }
+  return null;
 }
