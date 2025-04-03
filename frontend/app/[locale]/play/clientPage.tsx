@@ -364,17 +364,34 @@ function Play(props: Props) {
   const [fps, setFps_] = useState<number>(0);
   // nフレームに1回画面を更新する
   // フレームレートが60を超える端末の場合に、60を超えないように自動的に設定して制限する
-  const [frameDrop, setFrameDrop] = useState<number | null>(null);
-  const prevFPS = useRef<number>(0);
+  const [frameDrop, setFrameDrop_] = useState<number | null>(null);
   const [maxFPS, setMaxFPS] = useState<number>(0);
-  const setFps = useCallback((fps: number) => {
-    setFps_(fps);
-    if(frameDrop === null && fps > 0 && fps <= prevFPS.current){ // fps計測が安定するまで待つ
-      setFrameDrop(Math.max(1, Math.ceil(fps / 60 - 0.3))); // 2捨3入
-      setMaxFPS(prevFPS.current);
-    }
-    prevFPS.current = fps;
-  }, [frameDrop]);
+  const fpsStable = useRef<number>(0);
+  const setFps = useCallback(
+    (fps: number) => {
+      setFps_(fps);
+      if (frameDrop === null && fps > 0) {
+        // fps計測が安定するまで待つ
+        if (fps <= maxFPS) {
+          fpsStable.current++;
+          if (fpsStable.current > maxFPS) {
+            setFrameDrop_(
+              Number(localStorage.getItem("frameDrop") || 0) ||
+                Math.max(1, Math.ceil(fps / 60 - 0.3)), // 2捨3入
+            );
+          }
+        } else {
+          fpsStable.current = 0;
+          setMaxFPS(fps);
+        }
+      }
+    },
+    [frameDrop, maxFPS],
+  );
+  const setFrameDrop = useCallback((v: number) => {
+    setFrameDrop_(v);
+    localStorage.setItem("frameDrop", v.toString());
+  }, []);
 
   useEffect(() => {
     if (ref.current) {
@@ -744,15 +761,8 @@ function Play(props: Props) {
                 : "opacity-0 translate-y-[-300px]")
             }
           >
-            <ScoreDisp
-              score={score}
-              best={bestScoreState}
-              auto={auto}
-            />
-            <ChainDisp
-              chain={chain}
-              fc={judgeCount[2] + judgeCount[3] === 0}
-            />
+            <ScoreDisp score={score} best={bestScoreState} auto={auto} />
+            <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
             <button
               className={
                 "absolute rounded-full cursor-pointer leading-1 " +

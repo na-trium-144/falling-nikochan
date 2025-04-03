@@ -160,7 +160,8 @@ export function ReadyMessage(props: MessageProps) {
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
   const frameDropOptions =
-    (props.maxFPS &&
+    (props.frameDrop &&
+      props.maxFPS &&
       Array.from(new Array(Math.ceil(props.maxFPS / 10 - 0.3))).map(
         (_, i) => i + 1,
       )) ||

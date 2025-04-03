@@ -30,7 +30,6 @@ export default function FallingWindow(props: Props) {
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
-  const fpsCount = useRef<number>(0);
   const fpsCountBegin = useRef<Date>(new Date());
 
   const { rem } = useDisplayMode();
@@ -38,6 +37,7 @@ export default function FallingWindow(props: Props) {
 
   const update = useRef<() => void | null>(null);
   const dropCount = useRef<number>(0);
+  const fpsCounter = useRef<Date[]>([]);
   useEffect(() => {
     update.current = () => {
       dropCount.current = (dropCount.current + 1) % frameDrop;
@@ -61,13 +61,16 @@ export default function FallingWindow(props: Props) {
           setDisplayNotes([]);
         }
 
-        fpsCount.current++;
-        if (new Date().getTime() - fpsCountBegin.current.getTime() >= 1000) {
-          if (setFPS) {
-            setFPS(fpsCount.current);
-          }
-          fpsCountBegin.current = new Date();
-          fpsCount.current = 0;
+        const nowDate = new Date();
+        fpsCounter.current.push(nowDate);
+        while (
+          fpsCounter.current.at(0) &&
+          nowDate.getTime() - fpsCounter.current.at(0)!.getTime() > 1000
+        ) {
+          fpsCounter.current.shift();
+        }
+        if (setFPS) {
+          setFPS(fpsCounter.current.length);
         }
       }
     };
