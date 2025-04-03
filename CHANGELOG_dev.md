@@ -1,3 +1,8 @@
+## ver. 10.9 - 2025/04/03 [#445](https://github.com/na-trium-144/falling-nikochan/pull/445)
+
+* プレイ中のフレームレートを制限するオプションを追加
+    * デフォルトでは60fps以下になるようにした
+
 ## ver. 10.5 - 2025/04/02 [#430](https://github.com/na-trium-144/falling-nikochan/pull/430)
 
 * モバイル表示時のUIをリニューアル
