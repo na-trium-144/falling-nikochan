@@ -415,6 +415,7 @@ function Play(props: Props) {
       ytPlayer.current?.seekTo(0, true);
     }
     ytPlayer.current?.playVideo();
+    playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
     // 譜面のリセットと開始はonStart()で処理
   };
   const stop = useCallback(() => {
