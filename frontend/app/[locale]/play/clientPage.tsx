@@ -284,7 +284,7 @@ function Play(props: Props) {
     !statusHide;
   const mainWindowSpace = useResizeDetector();
   const readySmall =
-    !!mainWindowSpace.height && mainWindowSpace.height < 30 * rem;
+    !!mainWindowSpace.height && mainWindowSpace.height < 36 * rem;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -361,7 +361,20 @@ function Play(props: Props) {
     lateTimes,
   } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
-  const [fps, setFps] = useState<number>(0);
+  const [fps, setFps_] = useState<number>(0);
+  // nフレームに1回画面を更新する
+  // フレームレートが60を超える端末の場合に、60を超えないように自動的に設定して制限する
+  const [frameDrop, setFrameDrop] = useState<number | null>(null);
+  const prevFPS = useRef<number>(0);
+  const [maxFPS, setMaxFPS] = useState<number>(0);
+  const setFps = useCallback((fps: number) => {
+    setFps_(fps);
+    if(frameDrop === null && fps > 0 && fps <= prevFPS.current){ // fps計測が安定するまで待つ
+      setFrameDrop(Math.max(1, Math.ceil(fps / 60 - 0.3))); // 2捨3入
+      setMaxFPS(prevFPS.current);
+    }
+    prevFPS.current = fps;
+  }, [frameDrop]);
 
   useEffect(() => {
     if (ref.current) {
@@ -714,6 +727,7 @@ function Play(props: Props) {
         </div>
         <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
           <FallingWindow
+            frameDrop={frameDrop || 1}
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -790,6 +804,9 @@ function Play(props: Props) {
               enableSE={enableSE}
               setEnableSE={setEnableSE}
               audioLatency={audioLatency}
+              maxFPS={maxFPS}
+              frameDrop={frameDrop}
+              setFrameDrop={setFrameDrop}
               editing={editing}
               lateTimes={lateTimes.current}
               small={readySmall}

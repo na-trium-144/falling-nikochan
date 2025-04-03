@@ -15,6 +15,7 @@ import {
   goodSec,
   okSec,
 } from "@falling-nikochan/chart";
+import Select from "@/common/select";
 
 interface MessageProps {
   isTouch: boolean;
@@ -28,6 +29,9 @@ interface MessageProps {
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
   audioLatency: number | null | undefined;
+  maxFPS: null | number;
+  frameDrop: null | number;
+  setFrameDrop: (f: number) => void;
   editing: boolean;
   lateTimes: number[];
   small: boolean;
@@ -155,8 +159,14 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
+  const frameDropOptions =
+    (props.maxFPS &&
+      Array.from(new Array(Math.ceil(props.maxFPS / 10 - 0.3))).map(
+        (_, i) => i + 1,
+      )) ||
+    [];
   return (
-    <div className="relative pr-8 min-h-52 max-w-full flex flex-col items-center ">
+    <div className="relative pr-8 min-h-58 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
       <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6 space-y-1 ">
         <li className="">
@@ -200,8 +210,8 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </CheckBox>
         </li>*/}
         <li className="">
-          <div className="">{t("offset")}</div>
-          <div className="">
+          {t("offset")}
+          <div>
             <Input
               className="w-16"
               actualValue={
@@ -221,6 +231,20 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               onClick={() => props.setUserOffset(props.userOffset + 0.01)}
             />
           </div>
+        </li>
+        <li>
+          <span className="mr-2">{t("limitFPS")}</span>
+          <Select
+            options={
+              frameDropOptions.map((f) =>
+                String(Math.round(props.maxFPS! / f)),
+              ) || []
+            }
+            values={frameDropOptions.map(String)}
+            value={String(props.frameDrop)}
+            onChange={(v) => props.setFrameDrop(Number(v))}
+            disabled={!frameDropOptions.length}
+          />
         </li>
       </ul>
       <TimeAdjustBar userOffset={props.userOffset} times={props.lateTimes} />
