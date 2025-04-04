@@ -40,7 +40,6 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * `ASSET_PREFIX` (backend & frontend): `https://domain-of-your-assets/` or unset
         * `BACKEND_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
         * `NO_PREFETCH` (frontend): `1` or unset
-        * `USE_SW` (frontend): `1` or unset
 * Install dependencies
     ```sh
     npm ci  # or  bun i
@@ -74,8 +73,6 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         ```
     * As of Bun v1.2.2, `bun -b nbuild` seems to be unstable for this project.
 * Service Worker
-    * By default, it is used only when frontend is launched as PWA app.
-    * Add `USE_SW=1` to `.env` file to enable it in the browser.
     * Build frontend and service worker
     ```sh
     npm run nbuild && npm run swbuild
