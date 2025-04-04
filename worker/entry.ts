@@ -29,6 +29,41 @@ async function clearOldCaches() {
     );
 }
 
+async function fetchAndReplace(
+  pathname: string,
+  signal?: AbortSignal,
+): Promise<Response | null> {
+  try {
+    const res = await fetch(
+      (process.env.ASSET_PREFIX || self.origin) + pathname,
+      { cache: "no-cache", signal },
+    );
+    if (res.ok) {
+      if (
+        process.env.ASSET_PREFIX &&
+        (res.headers.get("Content-Type")?.includes("html") ||
+          pathname.endsWith(".js") ||
+          pathname.endsWith(".css") ||
+          pathname.endsWith(".txt"))
+      ) {
+        // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
+        const body = (await res.text()).replaceAll(
+          process.env.ASSET_PREFIX,
+          "",
+        );
+        return returnBody(body, res.headers);
+      } else {
+        return returnBody(res.body, res.headers);
+      }
+    } else {
+      console.error(`failed to fetch ${pathname}: ${res.status}`);
+      return null;
+    }
+  } catch (e) {
+    console.error(`failed to fetch ${pathname}: ${e}`);
+    return null;
+  }
+}
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
   let pathname = url.pathname;
@@ -76,6 +111,7 @@ async function initAssetsCache(config: {
     return false;
   }
   if (!filesRes.ok || !remoteVerRes.ok) {
+    console.error("initAssetsCache: failed to fetch json");
     return false;
   }
   const files = (await filesRes.json()).map((file: string) => {
@@ -96,40 +132,17 @@ async function initAssetsCache(config: {
         // パス名にハッシュが入っているので更新する必要がない
         return;
       }
-      try {
-        const res = await fetch(
-          (process.env.ASSET_PREFIX || self.origin) + pathname,
-          { cache: "no-cache" },
-        );
-        if (res.ok) {
-          if (
-            process.env.ASSET_PREFIX &&
-            (res.headers.get("Content-Type")?.includes("html") ||
-              pathname.endsWith(".js") ||
-              pathname.endsWith(".css") ||
-              pathname.endsWith(".txt"))
-          ) {
-            // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
-            const body = (await res.text()).replaceAll(
-              process.env.ASSET_PREFIX,
-              "",
-            );
-            tmp.put(pathname, returnBody(body, res.headers));
-          } else {
-            tmp.put(pathname, returnBody(res.body, res.headers));
-          }
-        } else {
-          console.error(`failed to fetch ${pathname}: ${res.status}`);
-          failed = true;
-        }
-      } catch (e) {
-        console.error(`failed to fetch ${pathname}: ${e}`);
+      const res = await fetchAndReplace(pathname);
+      if (res) {
+        tmp.put(pathname, res);
+      } else {
         failed = true;
       }
     }),
   );
   // 1つでも失敗したら中断
   if (failed) {
+    console.error("initAssetsCache: failed to fetch some files");
     return false;
   }
   if (config.clearOld) {
@@ -155,6 +168,7 @@ async function initAssetsCache(config: {
   );
   // finished
   await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
+  console.log("initAssetsCache: finished");
   return true;
 }
 
@@ -188,6 +202,8 @@ const languageDetector = async (c: Context, next: () => Promise<void>) => {
 const app = new Hono({ strict: false })
   .route(
     "/share",
+    // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
+    // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
       fetchBrief: (cid) => fetch(`/api/brief/${cid}`),
       fetchStatic,
@@ -234,11 +250,23 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/*", async (c) => {
+    if (!c.req.path.includes(".") || c.req.path.endsWith(".txt")) {
+      // キャッシュされた古いバージョンのページが読み込まれる問題を避けるために
+      // htmlとtxtについてはキャッシュよりも最新バージョンのfetchを優先する
+      // 1秒のタイムアウトを設け、fetchできなければキャッシュから返す
+      const abortController = new AbortController();
+      const timeout = setTimeout(() => abortController.abort(), 1000);
+      const res = await fetchAndReplace(c.req.path, abortController.signal);
+      clearTimeout(timeout);
+      if (res) {
+        return res;
+      }
+    }
     const res = await fetchStatic(null, new URL(c.req.url));
     if (res.ok) {
       return res;
     } else {
-      // failsafe 通常は全部cacheに入っているはずだが
+      // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
       console.warn(`${c.req.url} is not in cache`);
       const res = await fetch(c.req.raw);
       if (res.ok) {
