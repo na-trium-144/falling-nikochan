@@ -29,6 +29,41 @@ async function clearOldCaches() {
     );
 }
 
+async function fetchAndReplace(
+  pathname: string,
+  signal?: AbortSignal,
+): Promise<Response | null> {
+  try {
+    const res = await fetch(
+      (process.env.ASSET_PREFIX || self.origin) + pathname,
+      { cache: "no-cache", signal },
+    );
+    if (res.ok) {
+      if (
+        process.env.ASSET_PREFIX &&
+        (res.headers.get("Content-Type")?.includes("html") ||
+          pathname.endsWith(".js") ||
+          pathname.endsWith(".css") ||
+          pathname.endsWith(".txt"))
+      ) {
+        // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
+        const body = (await res.text()).replaceAll(
+          process.env.ASSET_PREFIX,
+          "",
+        );
+        return returnBody(body, res.headers);
+      } else {
+        return returnBody(res.body, res.headers);
+      }
+    } else {
+      console.error(`failed to fetch ${pathname}: ${res.status}`);
+      return null;
+    }
+  } catch (e) {
+    console.error(`failed to fetch ${pathname}: ${e}`);
+    return null;
+  }
+}
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
   let pathname = url.pathname;
@@ -39,6 +74,16 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
+  if (!pathname.includes(".") || pathname.endsWith(".txt")) {
+    // ページについてはキャッシュよりも最新バージョンのfetchを優先する
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), 1000);
+    const res = await fetchAndReplace(pathname, abortController.signal);
+    clearTimeout(timeout);
+    if (res) {
+      return res;
+    }
+  }
   return (await cache.match(pathname)) || new Response(null, { status: 404 });
 }
 
@@ -96,34 +141,10 @@ async function initAssetsCache(config: {
         // パス名にハッシュが入っているので更新する必要がない
         return;
       }
-      try {
-        const res = await fetch(
-          (process.env.ASSET_PREFIX || self.origin) + pathname,
-          { cache: "no-cache" },
-        );
-        if (res.ok) {
-          if (
-            process.env.ASSET_PREFIX &&
-            (res.headers.get("Content-Type")?.includes("html") ||
-              pathname.endsWith(".js") ||
-              pathname.endsWith(".css") ||
-              pathname.endsWith(".txt"))
-          ) {
-            // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
-            const body = (await res.text()).replaceAll(
-              process.env.ASSET_PREFIX,
-              "",
-            );
-            tmp.put(pathname, returnBody(body, res.headers));
-          } else {
-            tmp.put(pathname, returnBody(res.body, res.headers));
-          }
-        } else {
-          console.error(`failed to fetch ${pathname}: ${res.status}`);
-          failed = true;
-        }
-      } catch (e) {
-        console.error(`failed to fetch ${pathname}: ${e}`);
+      const res = await fetchAndReplace(pathname);
+      if (res) {
+        tmp.put(pathname, res);
+      } else {
         failed = true;
       }
     }),
