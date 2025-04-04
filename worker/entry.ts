@@ -74,16 +74,6 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
-  if (!pathname.includes(".") || pathname.endsWith(".txt")) {
-    // ページについてはキャッシュよりも最新バージョンのfetchを優先する
-    const abortController = new AbortController();
-    const timeout = setTimeout(() => abortController.abort(), 1000);
-    const res = await fetchAndReplace(pathname, abortController.signal);
-    clearTimeout(timeout);
-    if (res) {
-      return res;
-    }
-  }
   return (await cache.match(pathname)) || new Response(null, { status: 404 });
 }
 
@@ -255,6 +245,16 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/*", async (c) => {
+    if (!c.req.path.includes(".") || c.req.path.endsWith(".txt")) {
+      // ページについてはキャッシュよりも最新バージョンのfetchを優先する
+      const abortController = new AbortController();
+      const timeout = setTimeout(() => abortController.abort(), 1000);
+      const res = await fetchAndReplace(c.req.path, abortController.signal);
+      clearTimeout(timeout);
+      if (res) {
+        return res;
+      }
+    }
     const res = await fetchStatic(null, new URL(c.req.url));
     if (res.ok) {
       return res;
