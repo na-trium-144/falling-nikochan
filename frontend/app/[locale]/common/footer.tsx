@@ -16,7 +16,7 @@ import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
-import { usePWAInstall } from "./pwaInstall.js";
+import { usePWAInstall, useStandaloneDetector } from "./pwaInstall.js";
 import { Box } from "./box.js";
 import { SlimeSVG } from "./slime.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
@@ -156,15 +156,15 @@ export function MobileFooter(props: MobileProps) {
 }
 
 export function PWAUpdateNotification() {
-  const t = useTranslations("main");
+  const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();
-  useEffect(() => pwa.setEnableWorkerUpdate(true), [pwa.setEnableWorkerUpdate]);
+  const isStandalone = useStandaloneDetector();
   return (
     <Box
       className={
         "absolute bottom-full inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg " +
         "transition-all duration-200 origin-bottom " +
-        (pwa.workerUpdate !== null
+        (pwa.workerUpdate !== null && isStandalone
           ? "ease-in scale-100 opacity-100 "
           : "ease-out scale-0 opacity-0 ")
       }

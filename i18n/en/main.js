@@ -8,15 +8,22 @@ export default {
       "where anyone can create and share charts.",
     redirected:
       "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
-    installDesc: "You can add Falling Nikochan as an app to your home screen.",
-    install: "Add to Home Screen",
-    installIOS:
-      "You can open Falling Nikochan as an app " +
-      "by selecting 'Add to Home Screen' from Safari's share menu.",
-    dismiss: "Close",
-    updating: "Downloading update...",
-    updateDone: "Update completed!",
-    updateFailed: "Update failed...",
+    pwa: {
+      installWithPrompt:
+        "For a more comfortable full-screen experience, " +
+        "add Falling Nikochan to your home screen and launch it as an app.",
+      install: "Add to Home Screen",
+      installWithoutPrompt:
+        "For a more comfortable full-screen experience, " +
+        'select "Add to home screen" from your browser\'s menu and launch it as an app.',
+      installIOS:
+        "For a more comfortable full-screen experience, " +
+        'select "Add to home screen" from Safari\'s share menu and launch it as an app.',
+      dismiss: "Not now",
+      updating: "Downloading update...",
+      updateDone: "Update completed!",
+      updateFailed: "Update failed...",
+    },
     inputId: "Enter Chart ID",
     inputIdDesc: "Enter the ID of the chart you want to play.",
     inputIdDesc2: "You can also play by accessing the chart URL (<url></url>).",
@@ -87,12 +94,6 @@ export default {
       light: "Light",
       dark: "Dark",
       default: "System Default",
-      installDesc:
-        "you can add Falling Nikochan to your home screen and " +
-        "launch it as an app for a better full-screen experience.",
-      install: "Add to Home Screen",
-      installIOS:
-        '(On iOS, select "Add to Home Screen" from the Safari\'s share menu.)',
       contactForm: "Contact Form",
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",

@@ -23,6 +23,7 @@ export default {
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
+      limitFPS: "フレームレートを下げる",
       off: "オフ",
     },
     score: {

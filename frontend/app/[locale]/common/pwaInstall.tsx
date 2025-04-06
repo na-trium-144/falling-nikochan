@@ -35,7 +35,6 @@ export interface PWAStates {
   deferredPrompt: BeforeInstallPromptEvent | null;
   install: () => void;
   workerUpdate: null | "updating" | "done" | "failed";
-  setEnableWorkerUpdate: (enable: boolean) => void;
 }
 const PWAContext = createContext<PWAStates>({
   dismissed: false,
@@ -44,7 +43,6 @@ const PWAContext = createContext<PWAStates>({
   deferredPrompt: null,
   install: () => undefined,
   workerUpdate: null,
-  setEnableWorkerUpdate: () => undefined,
 });
 export const usePWAInstall = () => useContext(PWAContext);
 export function PWAInstallProvider(props: { children: ReactNode }) {
@@ -55,7 +53,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   const [workerUpdate, setWorkerUpdate] = useState<
     null | "updating" | "done" | "failed"
   >(null);
-  const [enableWorkerUpdate, setEnableWorkerUpdate] = useState<boolean>(false);
 
   const dismiss = useCallback(() => {
     localStorage.setItem("PWADismissed", "1");
@@ -73,6 +70,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       (window as any).opera
     ).toLowerCase();
     if (userAgent.includes("android")) {
+      // beforeinstallpromptイベントが発火するのを待つ
+      setTimeout(() => setDetectedOS("android"), 100);
       const handler = ((e: BeforeInstallPromptEvent) => {
         e.preventDefault();
         setDeferredPrompt(e);
@@ -88,69 +87,53 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     }
   }, []);
   useEffect(() => {
-    if (enableWorkerUpdate) {
-      let updateFetching: ReturnType<typeof setTimeout> | null = null;
-      if (
-        (isStandalone() || process.env.USE_SW) &&
-        process.env.NODE_ENV !== "development" &&
-        "serviceWorker" in navigator
-      ) {
-        navigator.serviceWorker
-          .register("/sw.js", { scope: "/" })
-          .then((reg) => {
-            updateFetching = setTimeout(() => {
-              fetch("/worker/checkUpdate")
-                .then(async (res) => {
-                  if (res.ok) {
-                    const { version, commit } = await res.json();
-                    if (version) {
-                      setWorkerUpdate("updating");
-                      fetch("/worker/initAssets?clearOld=1")
-                        .then((res) => {
-                          if (res.ok) {
-                            setWorkerUpdate("done");
-                            setTimeout(() => window.location.reload(), 1000);
-                          } else {
-                            setWorkerUpdate("failed");
-                          }
-                        })
-                        .catch(() => setWorkerUpdate("failed"));
-                    } else if (commit) {
-                      setWorkerUpdate("updating");
-                      fetch("/worker/initAssets")
-                        .then((res) => {
-                          if (res.ok) {
-                            setWorkerUpdate("done");
-                          } else {
-                            setWorkerUpdate("failed");
-                          }
-                        })
-                        .catch(() => setWorkerUpdate("failed"));
-                    }
-                  }
-                })
-                .catch(() => undefined);
-            }, 1000);
-
-            reg.addEventListener("updatefound", () => {
-              setWorkerUpdate("updating");
-              if (updateFetching !== null) clearTimeout(updateFetching);
-              const newWorker = reg.installing;
-              newWorker?.addEventListener("statechange", () => {
-                if (newWorker?.state === "installed") {
-                  setWorkerUpdate("done");
-                  // 適当に遅延させる
-                  setTimeout(() => window.location.reload(), 1000);
+    let updateFetching: ReturnType<typeof setTimeout> | null = null;
+    if (
+      process.env.NODE_ENV !== "development" &&
+      "serviceWorker" in navigator
+    ) {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
+        updateFetching = setTimeout(() => {
+          fetch("/worker/checkUpdate")
+            .then(async (res) => {
+              if (res.ok) {
+                const { /*version,*/ commit } = await res.json();
+                // if (version) {
+                //   setWorkerUpdate("updating");
+                //   fetch("/worker/initAssets?clearOld=1")
+                if (commit) {
+                  setWorkerUpdate("updating");
+                  fetch("/worker/initAssets?clearOld=1")
+                    .then((res) => {
+                      if (res.ok) {
+                        setWorkerUpdate("done");
+                      } else {
+                        setWorkerUpdate("failed");
+                      }
+                    })
+                    .catch(() => setWorkerUpdate("failed"));
                 }
-              });
-            });
+              }
+            })
+            .catch(() => undefined);
+        }, 1000);
+
+        reg.addEventListener("updatefound", () => {
+          setWorkerUpdate("updating");
+          if (updateFetching !== null) clearTimeout(updateFetching);
+          const newWorker = reg.installing;
+          newWorker?.addEventListener("statechange", () => {
+            if (newWorker?.state === "installed") {
+              setWorkerUpdate("done");
+            }
           });
-      }
-      return () => {
-        if (updateFetching !== null) clearTimeout(updateFetching);
-      };
+        });
+      });
     }
-  }, [enableWorkerUpdate]);
+    return () => {
+      if (updateFetching !== null) clearTimeout(updateFetching);
+    };
+  }, []);
   useEffect(() => {
     if (workerUpdate === "done" || workerUpdate === "failed") {
       const t = setTimeout(() => setWorkerUpdate(null), 3000);
@@ -176,7 +159,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         deferredPrompt,
         install,
         workerUpdate,
-        setEnableWorkerUpdate,
       }}
     >
       {props.children}
@@ -184,7 +166,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   );
 }
 export function PWAInstallMain() {
-  const t = useTranslations("main");
+  const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();
   return (
     <div
@@ -194,14 +176,33 @@ export function PWAInstallMain() {
         (pwa.dismissed || pwa.detectedOS === null ? "hidden " : "")
       }
     >
-      {pwa.deferredPrompt && pwa.detectedOS === "android" && (
-        <>
-          <p>{t("installDesc")}</p>
-          <Button text={t("install")} onClick={pwa.install} />
-        </>
-      )}
-      {pwa.detectedOS === "ios" && <p>{t("installIOS")}</p>}
+      <PWAInstallDesc />
       <Button text={t("dismiss")} onClick={pwa.dismiss} />
     </div>
   );
+}
+
+// dismissed かどうかはチェックしないが、
+// standaloneとPCでは非表示にする
+export function PWAInstallDesc() {
+  const t = useTranslations("main.pwa");
+  const pwa = usePWAInstall();
+  const isStandalone = useStandaloneDetector();
+  if (isStandalone === false) {
+    if (pwa.detectedOS === "android") {
+      if (pwa.deferredPrompt) {
+        return (
+          <>
+            <p>{t("installWithPrompt")}</p>
+            <Button text={t("install")} onClick={pwa.install} />
+          </>
+        );
+      } else {
+        return <p>{t("installWithoutPrompt")}</p>;
+      }
+    } else if (pwa.detectedOS === "ios") {
+      return <p>{t("installIOS")}</p>;
+    }
+  }
+  return null;
 }

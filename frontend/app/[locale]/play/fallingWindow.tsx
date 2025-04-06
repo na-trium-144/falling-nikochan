@@ -15,11 +15,12 @@ interface Props {
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
+  frameDrop: number;
   barFlash: boolean;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS } = props;
+  const { notes, playing, getCurrentTimeSec, setFPS, frameDrop } = props;
   const [displayNotes, setDisplayNotes] = useState<
     DisplayNote6[] | DisplayNote7[]
   >([]);
@@ -29,47 +30,68 @@ export default function FallingWindow(props: Props) {
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
-  const fpsCount = useRef<number>(0);
-  const fpsCountBegin = useRef<Date>(new Date());
 
   const { rem } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
+  const update = useRef<() => void | null>(null);
+  const dropCount = useRef<number>(0);
+  const fpsCounter = useRef<Date[]>([]);
   useEffect(() => {
-    let anim: number;
-    const update = () => {
-      const now = getCurrentTimeSec();
-      if (
-        playing &&
-        marginX !== undefined &&
-        marginY !== undefined &&
-        boxSize &&
-        now !== undefined
-      ) {
-        setDisplayNotes(
-          notes
-            .map((n) =>
-              n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)
-            )
-            .filter((n) => n !== null)
-        );
-      } else {
-        setDisplayNotes([]);
-      }
-
-      fpsCount.current++;
-      if (new Date().getTime() - fpsCountBegin.current.getTime() >= 1000) {
-        if (setFPS) {
-          setFPS(fpsCount.current);
+    update.current = () => {
+      dropCount.current = (dropCount.current + 1) % frameDrop;
+      if (dropCount.current === 0) {
+        const now = getCurrentTimeSec();
+        if (
+          playing &&
+          marginX !== undefined &&
+          marginY !== undefined &&
+          boxSize &&
+          now !== undefined
+        ) {
+          setDisplayNotes(
+            notes
+              .map((n) =>
+                n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now),
+              )
+              .filter((n) => n !== null),
+          );
+        } else {
+          setDisplayNotes([]);
         }
-        fpsCountBegin.current = new Date();
-        fpsCount.current = 0;
+
+        const nowDate = new Date();
+        fpsCounter.current.push(nowDate);
+        while (
+          fpsCounter.current.at(0) &&
+          nowDate.getTime() - fpsCounter.current.at(0)!.getTime() > 1000
+        ) {
+          fpsCounter.current.shift();
+        }
+        if (setFPS) {
+          setFPS(fpsCounter.current.length);
+        }
       }
-      anim = requestAnimationFrame(update);
     };
-    anim = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(anim);
-  }, [notes, playing, getCurrentTimeSec, marginX, marginY, boxSize, setFPS]);
+  }, [
+    frameDrop,
+    notes,
+    playing,
+    getCurrentTimeSec,
+    marginX,
+    marginY,
+    boxSize,
+    setFPS,
+  ]);
+  useEffect(() => {
+    let animFrame: number;
+    const updateLoop = () => {
+      update.current?.();
+      animFrame = requestAnimationFrame(updateLoop);
+    };
+    animFrame = requestAnimationFrame(updateLoop);
+    return () => cancelAnimationFrame(animFrame);
+  }, []);
 
   return (
     <div className={props.className} style={props.style} ref={ref}>
@@ -97,7 +119,7 @@ export default function FallingWindow(props: Props) {
                 marginY={marginY}
                 boxSize={boxSize}
               />
-            )
+            ),
         )}
       </div>
     </div>
@@ -129,12 +151,12 @@ function Nikochan(props: NProps) {
           (displayNote.done === 0
             ? ""
             : displayNote.done === 1
-            ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
-            : displayNote.done === 2
-            ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
-            : displayNote.done === 3
-            ? "transition ease-linear duration-300 opacity-0"
-            : "")
+              ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+              : displayNote.done === 2
+                ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
+                : displayNote.done === 3
+                  ? "transition ease-linear duration-300 opacity-0"
+                  : "")
         }
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
@@ -236,7 +258,7 @@ function Ripple(props: RProps) {
             delay: 200 * i,
             fill: "forwards",
             easing: "ease-out",
-          }
+          },
         );
       });
     }
@@ -306,7 +328,7 @@ function Particle(props: PProps) {
           },
           { transform: `scale(1) rotate(${angle + angleVel}deg)`, opacity: 0 },
         ],
-        { duration: 500, fill: "forwards", easing: "ease-out" }
+        { duration: 500, fill: "forwards", easing: "ease-out" },
       );
       animateDone.current = true;
     }
@@ -326,7 +348,7 @@ function Particle(props: PProps) {
             opacity: 0,
           },
         ],
-        { duration: 500, fill: "forwards", easing: "ease-out" }
+        { duration: 500, fill: "forwards", easing: "ease-out" },
       );
       bigAnimateDone.current = true;
     }
