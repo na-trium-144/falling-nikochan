@@ -164,9 +164,8 @@ export function ChartList(props: Props) {
         }}
       >
         {Array.from(new Array(maxRow)).map((_, i) =>
-          Array.isArray(briefs) && briefs.at(i) ? (
+          Array.isArray(briefs) && briefs.at(i) && !fetching ? (
             <ChartListItem
-              invisible={fetching}
               key={i}
               cid={briefs.at(i)!.cid}
               brief={briefs.at(i)!.brief}
@@ -256,34 +255,15 @@ interface CProps {
   original?: boolean;
   newTab?: boolean;
   dateDiff?: boolean;
-  invisible?: boolean;
-  hidden?: boolean;
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
-  const [appearing, setAppearing] = useState<boolean>(false);
-  useEffect(() => {
-    requestAnimationFrame(() =>
-      setAppearing(!props.hidden && !props.invisible),
-    );
-  }, [props.hidden, props.invisible]);
 
   // ~36rem: 1列 -> 18~36rem -> max-width:27rem
   // ~54rem: 2列 -> 18~27rem
   // ~72rem: 3列 -> 18~24rem
   return (
-    <li
-      className={
-        "w-full max-w-108 mx-auto h-max transition-opacity ease-out duration-200 " +
-        (props.hidden
-          ? "hidden opacity-0 "
-          : props.invisible
-            ? "hidden opacity-0 " /*invisible*/
-            : appearing
-              ? "opacity-100 "
-              : "opacity-0 ")
-      }
-    >
+    <li className={"w-full max-w-108 mx-auto h-max "}>
       {props.onClick || (props.newTab && !isStandalone) ? (
         <>
           <a
@@ -333,11 +313,13 @@ function ChartListItemChildren(props: CProps) {
   return (
     <div className="flex flex-row items-center space-x-2 ">
       <div className="flex-none ">
-        {props.brief?.ytId && (
+        {props.brief?.ytId ? (
           <img
             className="h-9 w-16 object-cover object-center "
             src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
           />
+        ) : (
+          <div className="h-9 w-16 " />
         )}
       </div>
       <div className="flex-1 min-w-0 flex flex-col items-begin justify-center space-y-0.5">
