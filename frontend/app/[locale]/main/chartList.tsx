@@ -23,6 +23,7 @@ interface PProps {
   tabKey: TabKeys;
   mobileTabKey: "top" | "play";
   type: ChartListType;
+  dateDiff?: boolean;
 }
 export default function ChartListPage(props: PProps) {
   const { modal, openModal, openShareInternal } = useShareModal(
@@ -54,6 +55,7 @@ export default function ChartListPage(props: PProps) {
         onClick={openModal}
         onClickMobile={openShareInternal}
         showLoading
+        dateDiff={props.dateDiff}
         moreHref=""
       />
     </IndexMain>
