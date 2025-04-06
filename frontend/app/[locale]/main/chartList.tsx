@@ -154,58 +154,69 @@ export function ChartList(props: Props) {
     (Array.isArray(briefs) &&
       briefs.slice(0, maxRow).some(({ fetched }) => !fetched));
   return (
-    <>
+    <div className="relative w-full h-max ">
       <ul
-        className="grid w-full mx-auto justify-items-start items-center "
+        className="grid w-full mx-auto justify-items-start items-center gap-1 "
         style={{
-          gridTemplateColumns: `repeat(auto-fit, minmax(min(18rem, 100%), 1fr))`,
-          maxWidth: 7 * 18 - 0.1 + "rem",
+          gridTemplateColumns: `repeat(auto-fill, minmax(min(18rem, 100%), 1fr))`,
+          // max 3 columns
+          maxWidth: 4 * 18 - 0.1 + "rem",
         }}
       >
-        {Array.isArray(briefs) && briefs.length > 0 && (
-          <>
-            {briefs.slice(0, maxRow).map(({ cid, brief, original }) => (
-              <ChartListItem
-                invisible={fetching}
-                key={cid}
-                cid={cid}
-                brief={brief}
-                href={props.href(cid)}
-                onClick={
-                  props.onClick ? () => props.onClick!(cid, brief) : undefined
-                }
-                onClickMobile={
-                  props.onClickMobile
-                    ? () => props.onClickMobile!(cid, brief)
-                    : undefined
-                }
-                creator={props.creator}
-                original={original}
-                newTab={props.newTab}
-                dateDiff={props.dateDiff}
-              />
-            ))}
-          </>
+        {Array.from(new Array(maxRow)).map((_, i) =>
+          Array.isArray(briefs) && briefs.at(i) ? (
+            <ChartListItem
+              invisible={fetching}
+              key={i}
+              cid={briefs.at(i)!.cid}
+              brief={briefs.at(i)!.brief}
+              href={props.href(briefs.at(i)!.cid)}
+              onClick={
+                props.onClick
+                  ? () => props.onClick!(briefs.at(i)!.cid, briefs.at(i)!.brief)
+                  : undefined
+              }
+              onClickMobile={
+                props.onClickMobile
+                  ? () =>
+                      props.onClickMobile!(
+                        briefs.at(i)!.cid,
+                        briefs.at(i)!.brief,
+                      )
+                  : undefined
+              }
+              creator={props.creator}
+              original={briefs.at(i)!.original}
+              newTab={props.newTab}
+              dateDiff={props.dateDiff}
+            />
+          ) : (
+            <li
+              key={i}
+              className={
+                "w-full max-w-108 mx-auto h-10 rounded " +
+                "bg-sky-200/25 dark:bg-orange-800/10 "
+              }
+            />
+          ),
         )}
-        <div
-          className={
-            "w-max pl-6 " + (fetching && props.showLoading ? "" : "hidden ")
-          }
-        >
-          <SlimeSVG />
-          Loading...
-        </div>
-        {briefs === "error" && (
-          <div className="w-max pl-6 ">{te("fetchError")}</div>
-        )}
-        {Array.from(new Array(5)).map((_, i) => (
-          <span key={i} />
-        ))}
       </ul>
-      {Array.isArray(briefs) && briefs.length > maxRow && (
+      <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+        {fetching && props.showLoading ? (
+          <>
+            <SlimeSVG />
+            Loading...
+          </>
+        ) : briefs === "error" ? (
+          te("fetchError")
+        ) : Array.isArray(briefs) && briefs.length === 0 ? (
+          t("empty")
+        ) : null}
+      </div>
+      {Array.isArray(briefs) && briefs.length > maxRow ? (
         <Link
           className={
-            "block w-max mx-auto mt-1 " +
+            "block w-max mx-auto mt-2 " +
             (fetching ? "invisible " : "") +
             linkStyle1
           }
@@ -221,20 +232,20 @@ export function ChartList(props: Props) {
             theme="filled"
           />
         </Link>
+      ) : (
+        <div className="w-0 h-4 mt-2 " />
       )}
-      {Array.isArray(briefs) && briefs.length === 0 && (
-        <div className="pl-2">{t("empty")}</div>
-      )}
-    </>
+    </div>
   );
 }
 
 const chartListStyle =
   "block w-full text-left cursor-pointer " +
-  "hover:shadow active:shadow-inner rounded px-1 py-0.5 my-0.5 " +
-  "hover:mt-0 hover:mb-1 active:mt-0.5 active:mb-0.5 " +
+  "hover:shadow active:shadow-inner rounded px-1 py-0.5 " +
+  "hover:-translate-y-0.5 active:translate-y-0 " +
   "hover:bg-sky-200/50 active:bg-sky-300/50 " +
-  "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 ";
+  "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 " +
+  "bg-sky-200/25 dark:bg-orange-800/10 ";
 interface CProps {
   cid: string;
   brief?: ChartBrief;
