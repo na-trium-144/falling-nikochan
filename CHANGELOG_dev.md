@@ -1,3 +1,9 @@
+## ver. 10.13 - 2025/04/06 [#453](https://github.com/na-trium-144/falling-nikochan/pull/453)
+
+* ChartListの表示を3列までにする
+* ChartListでそれぞれの項目の背景色を追加 (Loading中のスケルトン表示と兼用)
+* ChartListの表示時のアニメーションを削除
+
 ## ver. 10.12 - 2025/04/05 [#451](https://github.com/na-trium-144/falling-nikochan/pull/451)
 
 * pwaでなくてもサービスワーカーを使うようにする
