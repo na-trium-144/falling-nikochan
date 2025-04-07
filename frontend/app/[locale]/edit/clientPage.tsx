@@ -1024,7 +1024,7 @@ function Page(props: Props) {
           "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs " +
           "flex edit-wide:hidden flex-row items-center " +
           "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200 " +
-          "dark:from-orange-975/0 to-orange-975 "
+          "dark:from-orange-975/0 dark:to-orange-975 "
         }
       >
         <MobileHeader className="flex-1 ">
