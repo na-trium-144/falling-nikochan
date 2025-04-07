@@ -4,7 +4,7 @@ import { FourthNote } from "@/common/fourthNote.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
 import { ChartSeqData6, ChartSeqData9 } from "@falling-nikochan/chart";
-import { SmilingFace } from "@icon-park/react";
+import SmilingFace from "@icon-park/react/lib/icons/SmilingFace.js";
 
 interface Props {
   className?: string;

@@ -1,3 +1,8 @@
+## ver. 10.16 - 2025/04/07 [#456](https://github.com/na-trium-144/falling-nikochan/pull/456)
+
+* @icon-park のimportをファイルごとに分けて行うようにした
+    * dev環境の高速化
+
 ## ver. 10.13 - 2025/04/06 [#453](https://github.com/na-trium-144/falling-nikochan/pull/453)
 
 * ChartListの表示を3列までにする

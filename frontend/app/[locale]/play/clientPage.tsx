@@ -55,7 +55,7 @@ import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "./se.js";
-import { Pause } from "@icon-park/react";
+import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
 import { isStandalone } from "@/common/pwaInstall.js";

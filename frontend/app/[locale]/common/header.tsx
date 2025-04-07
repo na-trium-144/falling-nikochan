@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { pagerButtonClass } from "./pager.js";
-import { ArrowLeft } from "@icon-park/react";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 
 interface MProps {
   className?: string;

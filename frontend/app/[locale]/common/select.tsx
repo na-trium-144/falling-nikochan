@@ -1,4 +1,4 @@
-import { Down } from "@icon-park/react";
+import Down from "@icon-park/react/lib/icons/Down";
 import { buttonStyle, buttonStyleDisabled } from "./button.js";
 
 interface Props {

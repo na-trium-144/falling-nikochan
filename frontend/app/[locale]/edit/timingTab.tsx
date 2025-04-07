@@ -21,7 +21,8 @@ import {
   toStepArray,
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
-import { Close, CornerDownLeft } from "@icon-park/react";
+import Close from "@icon-park/react/lib/icons/Close";
+import CornerDownLeft from "@icon-park/react/lib/icons/CornerDownLeft";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";

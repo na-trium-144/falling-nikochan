@@ -5,7 +5,9 @@ import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { SmilingFace, VolumeNotice, Youtube } from "@icon-park/react";
+import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
+import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
+import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { linkStyle1 } from "@/common/linkStyle";
 import { useTranslations } from "next-intl";
 
