@@ -33,27 +33,30 @@ import * as v from "valibot";
 import { difficulty } from "./difficulty.js";
 import { hashLevel7 } from "./legacy/chart7.js";
 import {
-  Chart9Edit,
-  Chart9Min,
-  ChartEditSchema9,
-  ChartMinSchema9,
   ChartUntil9,
   ChartUntil9Min,
-  convertTo9,
-  convertTo9Min,
-  convertToMin9,
-  convertToPlay9,
-  Level9Edit,
-  Level9Freeze,
   Level9Min,
-  Level9Play,
 } from "./legacy/chart9.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
-import { ChartUntil8, ChartUntil8Min } from "./legacy/chart8.js";
+import {
+  Chart11Edit,
+  Chart11Min,
+  ChartEditSchema11,
+  ChartMinSchema11,
+  ChartUntil11,
+  ChartUntil11Min,
+  convertTo11,
+  convertTo11Min,
+  convertToMin11,
+  convertToPlay11,
+  Level11Edit,
+  Level11Freeze,
+  Level11Play,
+} from "./legacy/chart11.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -93,32 +96,30 @@ export const ChartBriefSchema = () =>
   });
 export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
 
-export const currentChartVer = 10;
+export const currentChartVer = 11;
 export const lastIncompatibleVer = 6;
-export type ChartMin = Chart9Min;
+export type ChartMin = Chart11Min;
 export type LevelMin = Level9Min;
-export type ChartEdit = Chart9Edit;
-export type LevelFreeze = Level9Freeze;
-export type LevelEdit = Level9Edit;
-export type LevelPlay = Level9Play;
-export const convertToMin = convertToMin9;
-export const convertToPlay = convertToPlay9;
+export type ChartEdit = Chart11Edit;
+export type LevelFreeze = Level11Freeze;
+export type LevelEdit = Level11Edit;
+export type LevelPlay = Level11Play;
+export const convertToMin = convertToMin11;
+export const convertToPlay = convertToPlay11;
 
-export async function validateChart(chart: ChartUntil9): Promise<ChartEdit> {
+export async function validateChart(chart: ChartUntil11): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 9 && chart.ver !== 10)
-    chart = await convertTo9(chart as ChartUntil8);
-  v.parse(ChartEditSchema9(), chart);
-  return { ...chart, ver: 10 };
+  if (chart.ver !== 11) chart = await convertTo11(chart as ChartUntil9);
+  v.parse(ChartEditSchema11(), chart);
+  return { ...chart, ver: 11 };
 }
 export async function validateChartMin(
-  chart: ChartUntil9Min,
+  chart: ChartUntil11Min,
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 9 && chart.ver !== 10)
-    chart = await convertTo9Min(chart as ChartUntil8Min);
-  v.parse(ChartMinSchema9(), chart);
-  return { ...chart, ver: 10 };
+  if (chart.ver !== 11) chart = await convertTo11Min(chart as ChartUntil9Min);
+  v.parse(ChartMinSchema11(), chart);
+  return { ...chart, ver: 11 };
 }
 
 export async function hash(text: string) {
@@ -173,6 +174,14 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
     bpmChanges: [],
     speedChanges: [],
     signature: [],
+    ytBegin: {
+      timeSec: 0,
+      luaLine: null,
+    },
+    ytEnd: {
+      timeSec: "note",
+      luaLine: null,
+    },
   };
   if (prevLevel) {
     for (const change of prevLevel.bpmChanges) {
@@ -184,6 +193,8 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
     for (const s of prevLevel.signature) {
       level = luaAddBeatChange(level, s)!;
     }
+    level = luaReplaceYTBegin(level, prevLevel.ytBegin)!;
+    level = luaReplaceYTEnd(level, prevLevel.ytEnd)!;
   } else {
     level = luaAddBpmChange(level, {
       bpm: 120,
@@ -204,6 +215,14 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bars: [[4, 4, 4, 4]],
       luaLine: null,
     })!;
+    level = luaReplaceYTBegin(level, {
+      timeSec: 0,
+      luaLine: null,
+    })!;
+    level = luaReplaceYTEnd(level, {
+      timeSec: "note",
+      luaLine: null,
+    })!;
   }
   return level;
 }
@@ -218,6 +237,8 @@ export function copyLevel(level: LevelEdit): LevelEdit {
     bpmChanges: level.bpmChanges.map((n) => ({ ...n })),
     speedChanges: level.speedChanges.map((n) => ({ ...n })),
     signature: level.signature.map((n) => ({ ...n })),
+    ytBegin: { ...level.ytBegin },
+    ytEnd: { ...level.ytEnd },
   };
 }
 
