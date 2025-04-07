@@ -25,8 +25,8 @@ import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
 import { Box, modalBg } from "./common/box.jsx";
 import { Pager, pagerButtonClass } from "./common/pager.jsx";
-import { ArrowLeft } from "@icon-park/react";
 import { maxAboutPageIndex } from "./main/about/[aboutIndex]/pager.js";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 
 interface Props {
   locale: string;

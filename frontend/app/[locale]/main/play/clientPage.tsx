@@ -3,7 +3,7 @@
 import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
-import { Youtube } from "@icon-park/react";
+import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareModal } from "../shareModal.jsx";

@@ -12,7 +12,7 @@ import { HelpIcon } from "@/common/caption";
 import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input.js";
 import { levelColors } from "@/common/levelColors";
-import { RightOne } from "@icon-park/react";
+import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 

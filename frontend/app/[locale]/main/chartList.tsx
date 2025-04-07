@@ -1,7 +1,7 @@
 "use client";
 import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
-import { ArrowRight } from "@icon-park/react";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";

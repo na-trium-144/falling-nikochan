@@ -18,7 +18,7 @@ import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
 import YAML from "yaml";
 import CheckBox from "@/common/checkBox.js";
-import { Caution } from "@icon-park/react";
+import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { luaExec } from "@falling-nikochan/chart";

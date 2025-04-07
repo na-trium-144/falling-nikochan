@@ -2,14 +2,12 @@
 import { useTranslations } from "next-intl";
 import { IndexMain } from "../main";
 import { ExternalLink } from "@/common/extLink";
-import {
-  DownOne,
-  Github,
-  Moon,
-  Sun,
-  Translate,
-  Youtube,
-} from "@icon-park/react";
+import DownOne from "@icon-park/react/lib/icons/DownOne"
+import Github from "@icon-park/react/lib/icons/Github";
+import Moon from "@icon-park/react/lib/icons/Moon";
+import Sun from "@icon-park/react/lib/icons/Sun";
+import Translate from "@icon-park/react/lib/icons/Translate";
+import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { linkStyle1, linkStyle3 } from "@/common/linkStyle";
 import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";

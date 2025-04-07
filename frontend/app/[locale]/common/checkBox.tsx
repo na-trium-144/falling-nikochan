@@ -1,4 +1,5 @@
-import { CheckCorrect, Square } from "@icon-park/react";
+import CheckCorrect from "@icon-park/react/lib/icons/CheckCorrect";
+import Square from "@icon-park/react/lib/icons/Square";
 
 interface Props {
   children: React.ReactNode;

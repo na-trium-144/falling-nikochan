@@ -4,7 +4,7 @@ import { Box } from "@/common/box.js";
 import { SmallDomainShare } from "@/common/small";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { Youtube } from "@icon-park/react";
+import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import { useTranslations } from "next-intl";
 
 export function AboutContent3() {
