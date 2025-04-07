@@ -1,6 +1,7 @@
 import { LevelEdit } from "../chart.js";
 import { Chart3 } from "../legacy/chart3.js";
 import { Level5 } from "../legacy/chart5.js";
+import { Level9Edit } from "../legacy/chart9.js";
 import {
   Step,
   stepAdd,
@@ -40,7 +41,7 @@ export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
 }
 
 // コマンドを挿入
-export function insertLua<L extends LevelEdit | Level5 | Chart3>(
+export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
   chart: L,
   line: number,
   content: string,
@@ -76,6 +77,20 @@ export function insertLua<L extends LevelEdit | Level5 | Chart3>(
         n.luaLine++;
       }
     });
+  }
+  if (
+    "ytBegin" in chart &&
+    chart.ytBegin.luaLine !== null &&
+    chart.ytBegin.luaLine >= line
+  ) {
+    chart.ytBegin.luaLine++;
+  }
+  if (
+    "ytEnd" in chart &&
+    chart.ytEnd.luaLine !== null &&
+    chart.ytEnd.luaLine >= line
+  ) {
+    chart.ytEnd.luaLine++;
   }
 }
 // コマンドを置き換え
@@ -129,6 +144,16 @@ export function deleteLua(chart: LevelEdit, line: number) {
       n.luaLine--;
     }
   });
+  if (chart.ytBegin.luaLine === line) {
+    chart.ytBegin.luaLine = null;
+  } else if (chart.ytBegin.luaLine !== null && chart.ytBegin.luaLine >= line) {
+    chart.ytBegin.luaLine--;
+  }
+  if (chart.ytEnd.luaLine === line) {
+    chart.ytEnd.luaLine = null;
+  } else if (chart.ytEnd.luaLine !== null && chart.ytEnd.luaLine >= line) {
+    chart.ytEnd.luaLine--;
+  }
 }
 
 function stepLuaCommand(s: Step) {

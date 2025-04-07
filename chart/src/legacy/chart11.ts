@@ -1,6 +1,5 @@
 import * as v from "valibot";
-import { levelTypes, levelTypesConst, LuaLineSchema } from "../chart.js";
-import { StepSchema } from "../step.js";
+import { levelTypes, LuaLineSchema } from "../chart.js";
 import {
   BPMChangeSchema9,
   ChartUntil9,
@@ -14,6 +13,7 @@ import {
   SpeedChangeSchema9,
 } from "./chart9.js";
 import { ChartUntil8, ChartUntil8Min } from "./chart8.js";
+import { luaInsertYTBeginEnd } from "../lua/yt.js";
 
 export const YTBeginSchema11 = () =>
   v.object({
@@ -124,19 +124,7 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
   return {
     ...chart,
     ver: 11,
-    levels: chart.levels.map((level) => ({
-      name: level.name,
-      type: levelTypes.includes(level.type)
-        ? (level.type as "Single" | "Double" | "Maniac")
-        : "Maniac",
-      lua: level.lua,
-      unlisted: level.unlisted,
-      notes: level.notes,
-      rest: level.rest,
-      bpmChanges: level.bpmChanges,
-      speedChanges: level.speedChanges,
-      signature: level.signature,
-    })),
+    levels: chart.levels.map((level) => luaInsertYTBeginEnd(level)),
   };
 }
 export async function convertTo11Min(

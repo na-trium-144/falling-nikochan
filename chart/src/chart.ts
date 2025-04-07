@@ -32,14 +32,11 @@ route/ 内の定義
 import * as v from "valibot";
 import { difficulty } from "./difficulty.js";
 import { hashLevel7 } from "./legacy/chart7.js";
-import {
-  ChartUntil9,
-  ChartUntil9Min,
-  Level9Min,
-} from "./legacy/chart9.js";
+import { ChartUntil9, ChartUntil9Min, Level9Min } from "./legacy/chart9.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
+import { luaReplaceYTBegin, luaReplaceYTEnd } from "./lua/yt.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
 import {
