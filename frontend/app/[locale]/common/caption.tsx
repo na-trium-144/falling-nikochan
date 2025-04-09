@@ -1,4 +1,4 @@
-import { Help } from "@icon-park/react";
+import Help from "@icon-park/react/lib/icons/Help";
 import { createContext, ReactNode, useContext, useRef, useState } from "react";
 
 interface CaptionData {

@@ -3,7 +3,7 @@ import Button from "@/common/button.js";
 import Input from "@/common/input.js";
 import { Step } from "@falling-nikochan/chart";
 import { Key } from "@/common/key.js";
-import { Mouse } from "@icon-park/react";
+import Mouse from "@icon-park/react/lib/icons/Mouse";
 import CheckBox from "@/common/checkBox.js";
 import { getSignatureState } from "@falling-nikochan/chart";
 import Select from "@/common/select";

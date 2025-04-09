@@ -1,9 +1,9 @@
 "use client";
 
 import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle.js";
-import { EfferentThree } from "@icon-park/react";
 import { useStandaloneDetector } from "./pwaInstall";
 import Link from "next/link";
+import EfferentThree from "@icon-park/react/lib/icons/EfferentThree";
 
 interface Props {
   className?: string;

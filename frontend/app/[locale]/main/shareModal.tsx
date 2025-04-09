@@ -17,27 +17,31 @@ export function useShareModal(locale: string, from: "play" | "top") {
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
   const router = useRouter();
   const openModal = useCallback(
-    (cid: string, brief: ChartBrief | undefined) => {
-      if (brief) {
-        if (window.location.pathname !== `/share/${cid}`) {
-          // pushStateではpopstateイベントは発生しない
-          window.history.pushState(null, "", `/share/${cid}`);
-        }
-        setModalCId(cid);
-        setModalBrief(brief);
-        fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-          .then((res) => {
-            if (res.ok) {
-              return res.json();
-            } else {
-              throw new Error("failed to fetch record");
-            }
-          })
-          .then((record) => setModalRecord(record))
-          .catch(() => setModalRecord([]));
-        document.title = titleShare(th, cid, brief);
-        setTimeout(() => setModalAppearing(true));
+    (cid: string) => {
+      if (window.location.pathname !== `/share/${cid}`) {
+        // pushStateではpopstateイベントは発生しない
+        window.history.pushState(null, "", `/share/${cid}`);
       }
+      setModalBrief(null);
+      setModalCId(cid);
+      document.title = titleShare(th, cid);
+      fetchBrief(cid).then((res) => {
+        if (res.ok) {
+          setModalBrief(res.brief!);
+          document.title = titleShare(th, cid, res.brief!);
+        }
+      });
+      fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            throw new Error("failed to fetch record");
+          }
+        })
+        .then((record) => setModalRecord(record))
+        .catch(() => setModalRecord([]));
+      setTimeout(() => setModalAppearing(true));
     },
     [th],
   );
@@ -48,7 +52,6 @@ export function useShareModal(locale: string, from: "play" | "top") {
           "shareInternal",
           JSON.stringify({
             cid,
-            brief,
             fromPlay: from === "play",
           } satisfies ShareInternalSession),
         );
@@ -63,9 +66,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
     const handler = () => {
       if (window.location.pathname.startsWith("/share/")) {
         const cid = window.location.pathname.slice(7);
-        fetchBrief(cid).then((res) => {
-          openModal(cid, res.brief);
-        });
+        openModal(cid);
       } else {
         setModalAppearing(false);
         document.title = titleWithSiteName(t("title"));

@@ -2,7 +2,11 @@
 
 "use client";
 
-import { Caution, Help, Move, Sun, Translate } from "@icon-park/react";
+import Caution from "@icon-park/react/lib/icons/Caution";
+import Help from "@icon-park/react/lib/icons/Help";
+import Move from "@icon-park/react/lib/icons/Move";
+import Sun from "@icon-park/react/lib/icons/Sun";
+import Translate from "@icon-park/react/lib/icons/Translate";
 
 export function TranslateIcon() {
   return <Translate className="inline-block align-middle" />;

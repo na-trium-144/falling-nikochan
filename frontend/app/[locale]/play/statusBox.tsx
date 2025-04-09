@@ -2,12 +2,10 @@
 
 import { Box } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
-import {
-  DisappointedFace,
-  DistraughtFace,
-  GrinningFaceWithTightlyClosedEyesOpenMouth,
-  SmilingFace,
-} from "@icon-park/react";
+import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
+import DistraughtFace from "@icon-park/react/lib/icons/DistraughtFace";
+import GrinningFaceWithTightlyClosedEyesOpenMouth from "@icon-park/react/lib/icons/GrinningFaceWithTightlyClosedEyesOpenMouth";
+import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 

@@ -6,7 +6,10 @@ import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
-import { ArrowLeft, Caution, Pause, RightOne } from "@icon-park/react";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
+import Caution from "@icon-park/react/lib/icons/Caution";
+import Pause from "@icon-park/react/lib/icons/Pause";
+import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {

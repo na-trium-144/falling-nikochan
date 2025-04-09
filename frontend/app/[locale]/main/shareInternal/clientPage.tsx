@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "@/share/placeholder/shareBox.jsx";
+import { fetchBrief } from "@/common/briefCache.js";
 
 export interface ShareInternalSession {
   cid: string;
-  brief: ChartBrief;
   fromPlay: boolean;
 }
 
@@ -27,8 +27,14 @@ export default function ShareInternal({ locale }: { locale: string }) {
     );
     if (data) {
       setCId(data.cid);
-      setBrief(data.brief);
       setFromPlay(data.fromPlay);
+      document.title = titleShare(t, data.cid);
+      fetchBrief(data.cid).then((res) => {
+        if (res.ok) {
+          setBrief(res.brief!);
+          document.title = titleShare(t, data.cid, res.brief!);
+        }
+      });
       fetch(process.env.BACKEND_PREFIX + `/api/record/${data.cid}`)
         .then((res) => {
           if (res.ok) {
@@ -39,7 +45,6 @@ export default function ShareInternal({ locale }: { locale: string }) {
         })
         .then((record) => setRecord(record))
         .catch(() => setRecord([]));
-      document.title = titleShare(t, data.cid, data.brief);
     } else {
       setSessionError(true);
     }
