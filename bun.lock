@@ -13,7 +13,7 @@
         "@types/bun": "^1.2.5",
         "@types/node": "^22.13.10",
         "@types/react": "^19.0.12",
-        "@types/react-dom": "^19.0.4",
+        "@types/react-dom": "^19.1.1",
         "eslint": "^9.22.0",
         "eslint-config-next": "^15.2.4",
         "eslint-config-prettier": "^10.1.1",
@@ -25,7 +25,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "10.7.0",
+      "version": "10.16.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -34,7 +34,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "10.7.0",
+      "version": "10.16.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -65,14 +65,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "10.7.0",
+      "version": "10.16.0",
       "dependencies": {
         "next-intl": "^4.0.2",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "10.7.0",
+      "version": "10.16.0",
       "dependencies": {
         "@hono/node-server": "^1.14.0",
         "@vercel/og": "^0.6.8",
@@ -84,7 +84,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "10.7.0",
+      "version": "10.16.0",
       "devDependencies": {
         "ts-loader": "^9.5.2",
         "webpack": "^5.98.0",
@@ -375,7 +375,7 @@
 
     "@types/react": ["@types/react@19.0.12", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-V6Ar115dBDrjbtXSrS+/Oruobc+qVbbUxDFC1RSbRqLt5SYvxxyIDrSC85RWml54g+jfNeEMZhEj7wW07ONQhA=="],
 
-    "@types/react-dom": ["@types/react-dom@19.0.4", "", { "peerDependencies": { "@types/react": "^19.0.0" } }, "sha512-4fSQ8vWFkg+TGhePfUzVmat3eC14TXYSsiiDSLI0dVLsrm9gZFABjPy/Qu6TKgl1tq1Bu1yDsuQgY3A3DOjCcg=="],
+    "@types/react-dom": ["@types/react-dom@19.1.1", "", { "peerDependencies": { "@types/react": "^19.0.0" } }, "sha512-jFf/woGTVTjUJsl2O7hcopJ1r0upqoq/vIOoCj0yLh3RIXxWcljlpuZ+vEBRXsymD1jhfeJrlyTy/S1UW+4y1w=="],
 
     "@types/unist": ["@types/unist@3.0.3", "", {}, "sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q=="],
 
