@@ -65,7 +65,7 @@ export function luaBeat(state: Result, ...args: any[]) {
     Array.isArray(args[1]) &&
     args[1].every(
       (x: any) =>
-        Array.isArray(x) && x.every((b) => b === 4 || b === 8 || b === 16)
+        Array.isArray(x) && x.every((b) => b === 4 || b === 8 || b === 16),
     ) &&
     typeof args[2] === "number" &&
     args[2] >= 0 &&
@@ -119,5 +119,54 @@ export function luaAccel(state: Result, ...args: any[]) {
     });
   } else {
     throw "invalid argument for Accel()";
+  }
+}
+
+export function luaVideoBeginAt(state: Result, ...args: any[]) {
+  if (
+    args.length === 2 &&
+    (typeof args[0] === "number" || args[0] === null) &&
+    typeof args[1] === "number"
+  ) {
+    state.levelFreezed.ytBegin = {
+      timeSec: args[1],
+      luaLine: args[0],
+    };
+  } else {
+    throw "invalid argument for VideoBeginAt()";
+  }
+}
+export function luaVideoEndAt(state: Result, ...args: any[]) {
+  if (
+    args.length === 2 &&
+    (typeof args[0] === "number" || args[0] === null) &&
+    typeof args[1] === "number"
+  ) {
+    state.levelFreezed.ytEnd = {
+      timeSec: args[1],
+      luaLine: args[0],
+    };
+  } else {
+    throw "invalid argument for VideoEndAt()";
+  }
+}
+export function luaVideoEndAuto(state: Result, ...args: any[]) {
+  if (args.length === 1 && (typeof args[0] === "number" || args[0] === null)) {
+    state.levelFreezed.ytEnd = {
+      timeSec: "note",
+      luaLine: args[0],
+    };
+  } else {
+    throw "invalid argument for VideoEndAuto()";
+  }
+}
+export function luaVideoEndFull(state: Result, ...args: any[]) {
+  if (args.length === 1 && (typeof args[0] === "number" || args[0] === null)) {
+    state.levelFreezed.ytEnd = {
+      timeSec: "yt",
+      luaLine: args[0],
+    };
+  } else {
+    throw "invalid argument for VideoEndFull()";
   }
 }
