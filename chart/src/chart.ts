@@ -36,7 +36,11 @@ import { ChartUntil9, ChartUntil9Min, Level9Min } from "./legacy/chart9.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
-import { luaReplaceYTBegin, luaReplaceYTEnd } from "./lua/yt.js";
+import {
+  luaInsertYTBeginEnd,
+  luaReplaceYTBegin,
+  luaReplaceYTEnd,
+} from "./lua/yt.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
 import {
@@ -190,8 +194,7 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
     for (const s of prevLevel.signature) {
       level = luaAddBeatChange(level, s)!;
     }
-    level = luaReplaceYTBegin(level, prevLevel.ytBegin)!;
-    level = luaReplaceYTEnd(level, prevLevel.ytEnd)!;
+    level = luaInsertYTBeginEnd(level, prevLevel.ytBegin, prevLevel.ytEnd);
   } else {
     level = luaAddBpmChange(level, {
       bpm: 120,
@@ -212,14 +215,7 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bars: [[4, 4, 4, 4]],
       luaLine: null,
     })!;
-    level = luaReplaceYTBegin(level, {
-      timeSec: 0,
-      luaLine: null,
-    })!;
-    level = luaReplaceYTEnd(level, {
-      timeSec: "note",
-      luaLine: null,
-    })!;
+    level = luaInsertYTBeginEnd(level);
   }
   return level;
 }

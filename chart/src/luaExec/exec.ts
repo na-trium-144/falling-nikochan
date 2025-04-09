@@ -112,11 +112,11 @@ export async function luaExec(
         )
         .replace(
           /^( *)VideoEndAuto\(( *)\)( *)$/,
-          `$1VideoEndAutoStatic(${ln},$2)$3`,
+          `$1VideoEndAutoStatic(${ln})$3`,
         )
         .replace(
           /^( *)VideoEndFull\(( *)\)( *)$/,
-          `$1VideoEndFullStatic(${ln},$2)$3`,
+          `$1VideoEndFullStatic(${ln})$3`,
         ),
     );
     // console.log(codeStatic);

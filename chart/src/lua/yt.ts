@@ -16,18 +16,22 @@ function ytEndLuaCommand(sec: number | "note" | "yt") {
       return `VideoEndAt(${sec})`;
   }
 }
-export function luaInsertYTBeginEnd(chart: Level9Edit): Level11Edit {
-  insertLua(chart, 0, ytBeginLuaCommand(0));
-  insertLua(chart, 1, ytEndLuaCommand("note"));
+export function luaInsertYTBeginEnd(
+  chart: Level11Edit | Level9Edit,
+  ytBegin?: YTBegin11,
+  ytEnd?: YTEnd11,
+): Level11Edit {
+  insertLua(chart, 0, ytBeginLuaCommand(ytBegin ? ytBegin.timeSec : 0));
+  insertLua(chart, 1, ytEndLuaCommand(ytEnd ? ytEnd.timeSec : "note"));
   return {
     ...chart,
-    ytBegin: { timeSec: 0, luaLine: 0 },
-    ytEnd: { timeSec: "note", luaLine: 1 },
+    ytBegin: ytBegin || { timeSec: 0, luaLine: 0 },
+    ytEnd: ytEnd || { timeSec: "note", luaLine: 1 },
   };
 }
 export function luaReplaceYTBegin(chart: LevelEdit, change: YTBegin11) {
   if (chart.ytBegin.luaLine === null) {
-    return;
+    return chart;
   }
   replaceLua(chart, chart.ytBegin.luaLine, ytBeginLuaCommand(change.timeSec));
   chart.ytBegin.timeSec = change.timeSec;
@@ -35,7 +39,7 @@ export function luaReplaceYTBegin(chart: LevelEdit, change: YTBegin11) {
 }
 export function luaReplaceYTEnd(chart: LevelEdit, change: YTEnd11) {
   if (chart.ytEnd.luaLine === null) {
-    return;
+    return chart;
   }
   replaceLua(chart, chart.ytEnd.luaLine, ytEndLuaCommand(change.timeSec));
   chart.ytEnd.timeSec = change.timeSec;

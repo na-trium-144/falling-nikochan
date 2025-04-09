@@ -4,6 +4,8 @@ import {
   Chart9Edit,
   defaultNoteCommand,
   findInsertLine,
+  luaReplaceYTBegin,
+  luaReplaceYTEnd,
   NoteCommand,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
@@ -895,6 +897,24 @@ function Page(props: Props) {
       }
     }
   };
+  const setYTBegin = (begin: number) => {
+    if (chart && currentLevel) {
+      const newLevel = luaReplaceYTBegin(currentLevel, {
+        timeSec: begin,
+        luaLine: null,
+      });
+      changeLevel(newLevel?.lua);
+    }
+  };
+  const setYTEnd = (end: number | "note" | "yt") => {
+    if (chart && currentLevel) {
+      const newLevel = luaReplaceYTEnd(currentLevel, {
+        timeSec: end,
+        luaLine: null,
+      });
+      changeLevel(newLevel?.lua);
+    }
+  };
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
     if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
@@ -1373,6 +1393,8 @@ function Page(props: Props) {
                     signatureChangeHere={!!signatureChangeHere}
                     toggleSignatureChangeHere={toggleSignatureChangeHere}
                     currentStep={currentStep}
+                    setYTBegin={setYTBegin}
+                    setYTEnd={setYTEnd}
                   />
                 ) : tab === 2 ? (
                   <LevelTab
