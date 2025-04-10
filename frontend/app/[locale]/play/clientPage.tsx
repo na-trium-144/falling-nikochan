@@ -605,12 +605,13 @@ function Play(props: Props) {
       setChartPlaying(true);
       // setChartStarted(true);
       setExitable(null);
+      reloadBestScore();
       resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
-  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref]);
+  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref, reloadBestScore]);
   const onStop = useCallback(() => {
     console.log("stop");
     if (chartPlaying) {
