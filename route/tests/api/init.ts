@@ -14,6 +14,7 @@ import {
   Chart8Edit,
   Chart9Edit,
   currentChartVer,
+  defaultCopyBuffer,
   Level11Play,
   Level6Play,
   Level9Play,
@@ -62,6 +63,7 @@ export function dummyChart(): Chart11Edit {
     locale: "d",
     changePasswd: null,
     published: false,
+    copyBuffer: defaultCopyBuffer(),
     levels: [
       {
         name: "e",
@@ -109,7 +111,7 @@ export function dummyChart(): Chart11Edit {
   };
 }
 export function dummyChart10(): Chart9Edit {
-  return {
+  const c: Chart9Edit = {
     ...dummyChart(),
     ver: 10,
     levels: dummyChart().levels.map((l) => ({
@@ -124,6 +126,9 @@ export function dummyChart10(): Chart9Edit {
       signature: l.signature,
     })),
   };
+  // @ts-expect-error converting Chart11 to 10
+  delete c.copyBuffer;
+  return c;
 }
 export function dummyChart9(): Chart9Edit {
   return { ...dummyChart10(), ver: 9 };

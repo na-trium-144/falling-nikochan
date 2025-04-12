@@ -2,7 +2,6 @@
 
 import {
   Chart9Edit,
-  defaultNoteCommand,
   findInsertLine,
   NoteCommand,
 } from "@falling-nikochan/chart";
