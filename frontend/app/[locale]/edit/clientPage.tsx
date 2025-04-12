@@ -948,7 +948,9 @@ function Page(props: Props) {
     }
   };
 
-  const addNote = (n: NoteCommand | null = copyBuf[0]) => {
+  const addNote = (
+    n: NoteCommand | null | undefined = chart?.copyBuffer[0],
+  ) => {
     if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaAddNote(levelCopied, n, currentStep);
@@ -980,26 +982,21 @@ function Page(props: Props) {
     }
     // ref.current.focus();
   };
-  const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
-    ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(9)).map(() => null),
-    ),
-  );
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
-      const newCopyBuf = copyBuf.slice();
+      const newCopyBuf = chart.copyBuffer.slice();
       newCopyBuf[copyIndex] = currentLevel.notes[currentNoteIndex];
-      setCopyBuf(newCopyBuf);
+      changeChart({ ...chart, copyBuffer: newCopyBuf });
     }
     ref.current.focus();
   };
   const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
-    if (copyBuf[copyIndex]) {
+    if (chart?.copyBuffer[copyIndex]) {
       if (chart) {
         if (hasCurrentNote && !forceAdd) {
-          updateNote(copyBuf[copyIndex]);
+          updateNote(chart.copyBuffer[copyIndex]);
         } else {
-          addNote(copyBuf[copyIndex]);
+          addNote(chart.copyBuffer[copyIndex]);
         }
       }
     }
@@ -1042,7 +1039,7 @@ function Page(props: Props) {
             pasteNote(0);
           } else if (
             Number(e.key) >= 1 &&
-            Number(e.key) <= copyBuf.length - 1
+            Number(e.key) <= chart.copyBuffer.length - 1
           ) {
             pasteNote(Number(e.key));
           } else if (e.key === "n") {
@@ -1453,7 +1450,9 @@ function Page(props: Props) {
                     updateNote={updateNote}
                     copyNote={copyNote}
                     pasteNote={pasteNote}
-                    hasCopyBuf={copyBuf.map((n) => n !== null)}
+                    hasCopyBuf={
+                      chart ? chart.copyBuffer.map((n) => n !== null) : []
+                    }
                     currentStep={currentStep}
                     currentLevel={currentLevel}
                   />

@@ -52,6 +52,7 @@ import {
   Level11Freeze,
   Level11Play,
 } from "./legacy/chart11.js";
+import { defaultCopyBuffer } from "./command.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -154,6 +155,7 @@ export function emptyChart(locale: string): ChartEdit {
     changePasswd: null,
     published: false,
     locale,
+    copyBuffer: defaultCopyBuffer(),
   };
   return chart;
 }

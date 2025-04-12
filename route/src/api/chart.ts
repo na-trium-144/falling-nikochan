@@ -150,6 +150,7 @@ export interface ChartEntryCompressed {
   updatedAt: number;
   ip: string[];
   locale: string;
+  copyBuffer?: (NoteCommand9 | null)[];
   levelBrief: ChartLevelBrief[];
 }
 export interface ChartLevelBrief {
@@ -251,6 +252,7 @@ export async function zipEntry(
     updatedAt: entry.updatedAt,
     ip: entry.ip,
     locale: entry.locale,
+    copyBuffer: entry.copyBuffer, // ver11〜
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
   };
@@ -317,6 +319,7 @@ export async function chartToEntry(
     levelBrief: chartBrief.levels,
     ip,
     locale: chartBrief.locale,
+    copyBuffer: chart.copyBuffer,
   };
 }
 export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
@@ -505,6 +508,7 @@ export function entryToChart(
         chartCreator: entry.chartCreator,
         changePasswd: null,
         locale: entry.locale,
+        copyBuffer: entry.copyBuffer!,
       };
     default:
       throw new HTTPException(500, { message: "unsupportedChartVersion" });

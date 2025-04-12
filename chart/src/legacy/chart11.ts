@@ -1,3 +1,5 @@
+// ver9->ver11: ytBegin, ytEnd, ytEndSec, copyBuffer 追加
+
 import * as v from "valibot";
 import {
   BPMChangeSchema9,
@@ -13,6 +15,7 @@ import {
 import { ChartUntil8, ChartUntil8Min } from "./chart8.js";
 import { levelTypesConst } from "../chart.js";
 import { getTimeSec } from "../seq.js";
+import { defaultCopyBuffer } from "../command.js";
 
 export const YTBeginSchema11 = () => v.number();
 export const YTEndSchema11 = () =>
@@ -65,6 +68,7 @@ export const ChartMinSchema11 = () =>
     chartCreator: v.string(),
     locale: v.string(),
     levels: v.array(LevelMinSchema11()),
+    copyBuffer: v.pipe(v.array(v.nullable(NoteCommandSchema9())), v.length(10)),
   });
 export const ChartEditSchema11 = () =>
   v.object({
@@ -122,6 +126,7 @@ export function convertToMin11(chart: Chart11Edit): Chart11Min {
       ytEnd: level.ytEnd,
       ytEndSec: level.ytEndSec,
     })),
+    copyBuffer: chart.copyBuffer,
   };
 }
 
@@ -145,6 +150,7 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
             )
           : 0,
     })),
+    copyBuffer: defaultCopyBuffer(),
   };
 }
 export async function convertTo11Min(
@@ -161,5 +167,6 @@ export async function convertTo11Min(
       ytEnd: "note",
       ytEndSec: 0, // level.notes がないので譜面の長さの情報を取り出せない。諦める
     })),
+    copyBuffer: defaultCopyBuffer(),
   };
 }
