@@ -6,10 +6,6 @@ import {
   luaBPM,
   luaNote,
   luaStep,
-  luaVideoBeginAt,
-  luaVideoEndAt,
-  luaVideoEndAuto,
-  luaVideoEndFull,
 } from "./api.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
@@ -39,14 +35,6 @@ export async function luaExec(
       bpmChanges: [],
       speedChanges: [],
       signature: [],
-      ytBegin: {
-        timeSec: 0,
-        luaLine: null,
-      },
-      ytEnd: {
-        timeSec: "note",
-        luaLine: null,
-      },
     },
     step: stepZero(),
   };
@@ -71,10 +59,6 @@ export async function luaExec(
         ["Beat", luaBeat],
         ["BPM", luaBPM],
         ["Accel", luaAccel],
-        ["VideoBeginAt", luaVideoBeginAt],
-        ["VideoEndAt", luaVideoEndAt],
-        ["VideoEndAuto", luaVideoEndAuto],
-        ["VideoEndFull", luaVideoEndFull],
       ] as const
     ).forEach(([name, func]) => {
       lua.global.set(name, (...args: any[]) => func(result, null, ...args));
@@ -101,22 +85,6 @@ export async function luaExec(
         .replace(
           /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
           `$1AccelStatic(${ln},$2)$3`,
-        )
-        .replace(
-          /^( *)VideoBeginAt\(( *[\d.]+ *)\)( *)$/,
-          `$1VideoBeginAtStatic(${ln},$2)$3`,
-        )
-        .replace(
-          /^( *)VideoEndAt\(( *[\d.]+ *)\)( *)$/,
-          `$1VideoEndAtStatic(${ln},$2)$3`,
-        )
-        .replace(
-          /^( *)VideoEndAuto\(( *)\)( *)$/,
-          `$1VideoEndAutoStatic(${ln})$3`,
-        )
-        .replace(
-          /^( *)VideoEndFull\(( *)\)( *)$/,
-          `$1VideoEndFullStatic(${ln})$3`,
         ),
     );
     // console.log(codeStatic);

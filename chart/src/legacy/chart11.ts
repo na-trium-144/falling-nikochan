@@ -1,34 +1,34 @@
 import * as v from "valibot";
-import { levelTypes, LuaLineSchema } from "../chart.js";
 import {
   BPMChangeSchema9,
   ChartUntil9,
   ChartUntil9Min,
   convertTo9,
   convertTo9Min,
-  LevelMinSchema9,
   NoteCommandSchema9,
   RestSchema9,
   SignatureSchema9,
   SpeedChangeSchema9,
 } from "./chart9.js";
 import { ChartUntil8, ChartUntil8Min } from "./chart8.js";
-import { luaInsertYTBeginEnd } from "../lua/yt.js";
+import { levelTypesConst } from "../chart.js";
+import { getTimeSec } from "../seq.js";
 
-export const YTBeginSchema11 = () =>
-  v.object({
-    timeSec: v.number(),
-    luaLine: LuaLineSchema(),
-  });
+export const YTBeginSchema11 = () => v.number();
 export const YTEndSchema11 = () =>
+  v.union([v.literal("note"), v.literal("yt"), v.number()]);
+export const LevelMinSchema11 = () =>
   v.object({
-    timeSec: v.union([v.literal("note"), v.literal("yt"), v.number()]),
-    luaLine: LuaLineSchema(),
+    name: v.string(),
+    type: v.picklist(levelTypesConst),
+    unlisted: v.boolean(),
+    lua: v.array(v.string()),
+    ytBegin: YTBeginSchema11(),
+    ytEnd: YTEndSchema11(),
+    ytEndSec: v.number(),
   });
 export const LevelFreezeSchema11 = () =>
   v.object({
-    ytBegin: YTBeginSchema11(),
-    ytEnd: YTEndSchema11(),
     notes: v.array(NoteCommandSchema9()),
     rest: v.array(RestSchema9()),
     bpmChanges: v.array(BPMChangeSchema9()),
@@ -37,7 +37,7 @@ export const LevelFreezeSchema11 = () =>
   });
 export const LevelEditSchema11 = () =>
   v.object({
-    ...LevelMinSchema9().entries,
+    ...LevelMinSchema11().entries,
     ...LevelFreezeSchema11().entries,
   });
 export const LevelPlaySchema11 = () =>
@@ -48,6 +48,9 @@ export const LevelPlaySchema11 = () =>
     bpmChanges: v.array(BPMChangeSchema9()),
     speedChanges: v.array(SpeedChangeSchema9()),
     signature: v.array(SignatureSchema9()),
+    ytBegin: YTBeginSchema11(),
+    ytEnd: YTEndSchema11(),
+    ytEndSec: v.number(),
   });
 
 export const ChartMinSchema11 = () =>
@@ -61,7 +64,7 @@ export const ChartMinSchema11 = () =>
     composer: v.string(),
     chartCreator: v.string(),
     locale: v.string(),
-    levels: v.array(LevelMinSchema9()),
+    levels: v.array(LevelMinSchema11()),
   });
 export const ChartEditSchema11 = () =>
   v.object({
@@ -95,6 +98,9 @@ export function convertToPlay11(
     bpmChanges: level?.bpmChanges || [],
     speedChanges: level?.speedChanges || [],
     signature: level?.signature || [],
+    ytBegin: level?.ytBegin || 0,
+    ytEnd: level?.ytEnd || "note",
+    ytEndSec: level?.ytEndSec || 0,
   };
 }
 export function convertToMin11(chart: Chart11Edit): Chart11Min {
@@ -112,6 +118,9 @@ export function convertToMin11(chart: Chart11Edit): Chart11Min {
       type: level.type,
       unlisted: level.unlisted,
       lua: level.lua,
+      ytBegin: level.ytBegin,
+      ytEnd: level.ytEnd,
+      ytEndSec: level.ytEndSec,
     })),
   };
 }
@@ -124,7 +133,18 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
   return {
     ...chart,
     ver: 11,
-    levels: chart.levels.map((level) => luaInsertYTBeginEnd(level)),
+    levels: chart.levels.map((level) => ({
+      ...level,
+      ytBegin: 0,
+      ytEnd: "note",
+      ytEndSec:
+        level.notes.length >= 1
+          ? getTimeSec(
+              level.bpmChanges,
+              level.notes[level.notes.length - 1].step,
+            )
+          : 0,
+    })),
   };
 }
 export async function convertTo11Min(
@@ -132,5 +152,14 @@ export async function convertTo11Min(
 ): Promise<Chart11Min> {
   if (chart.ver !== 9 && chart.ver !== 10)
     chart = await convertTo9Min(chart as ChartUntil8Min);
-  return { ...chart, ver: 11 };
+  return {
+    ...chart,
+    ver: 11,
+    levels: chart.levels.map((level) => ({
+      ...level,
+      ytBegin: 0,
+      ytEnd: "note",
+      ytEndSec: 0, // level.notes がないので譜面の長さの情報を取り出せない。諦める
+    })),
+  };
 }

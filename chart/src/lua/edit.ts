@@ -78,20 +78,6 @@ export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
       }
     });
   }
-  if (
-    "ytBegin" in chart &&
-    chart.ytBegin.luaLine !== null &&
-    chart.ytBegin.luaLine >= line
-  ) {
-    chart.ytBegin.luaLine++;
-  }
-  if (
-    "ytEnd" in chart &&
-    chart.ytEnd.luaLine !== null &&
-    chart.ytEnd.luaLine >= line
-  ) {
-    chart.ytEnd.luaLine++;
-  }
 }
 // コマンドを置き換え
 export function replaceLua<L extends LevelEdit | Level5 | Chart3>(
@@ -144,16 +130,6 @@ export function deleteLua(chart: LevelEdit, line: number) {
       n.luaLine--;
     }
   });
-  if (chart.ytBegin.luaLine === line) {
-    chart.ytBegin.luaLine = null;
-  } else if (chart.ytBegin.luaLine !== null && chart.ytBegin.luaLine >= line) {
-    chart.ytBegin.luaLine--;
-  }
-  if (chart.ytEnd.luaLine === line) {
-    chart.ytEnd.luaLine = null;
-  } else if (chart.ytEnd.luaLine !== null && chart.ytEnd.luaLine >= line) {
-    chart.ytEnd.luaLine--;
-  }
 }
 
 function stepLuaCommand(s: Step) {

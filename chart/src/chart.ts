@@ -36,11 +36,6 @@ import { ChartUntil9, ChartUntil9Min, Level9Min } from "./legacy/chart9.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
-import {
-  luaInsertYTBeginEnd,
-  luaReplaceYTBegin,
-  luaReplaceYTEnd,
-} from "./lua/yt.js";
 import { getTimeSec } from "./seq.js";
 import { stepZero } from "./step.js";
 import {
@@ -175,14 +170,9 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
     bpmChanges: [],
     speedChanges: [],
     signature: [],
-    ytBegin: {
-      timeSec: 0,
-      luaLine: null,
-    },
-    ytEnd: {
-      timeSec: "note",
-      luaLine: null,
-    },
+    ytBegin: 0,
+    ytEnd: "note",
+    ytEndSec: 0,
   };
   if (prevLevel) {
     for (const change of prevLevel.bpmChanges) {
@@ -194,7 +184,6 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
     for (const s of prevLevel.signature) {
       level = luaAddBeatChange(level, s)!;
     }
-    level = luaInsertYTBeginEnd(level, prevLevel.ytBegin, prevLevel.ytEnd);
   } else {
     level = luaAddBpmChange(level, {
       bpm: 120,
@@ -215,7 +204,6 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bars: [[4, 4, 4, 4]],
       luaLine: null,
     })!;
-    level = luaInsertYTBeginEnd(level);
   }
   return level;
 }
@@ -230,8 +218,9 @@ export function copyLevel(level: LevelEdit): LevelEdit {
     bpmChanges: level.bpmChanges.map((n) => ({ ...n })),
     speedChanges: level.speedChanges.map((n) => ({ ...n })),
     signature: level.signature.map((n) => ({ ...n })),
-    ytBegin: { ...level.ytBegin },
-    ytEnd: { ...level.ytEnd },
+    ytBegin: level.ytBegin,
+    ytEnd: level.ytEnd,
+    ytEndSec: level.ytEndSec,
   };
 }
 
@@ -256,10 +245,7 @@ export async function createBrief(
     difficulty: difficulty(level, level.type),
     bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
     bpmMax: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.max(a, b)),
-    length:
-      level.notes.length >= 1
-        ? getTimeSec(level.bpmChanges, level.notes[level.notes.length - 1].step)
-        : 0,
+    length: level.ytEndSec - level.ytBegin,
   }));
   return {
     ytId: chart.ytId,

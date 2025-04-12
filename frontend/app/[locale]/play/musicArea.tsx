@@ -19,6 +19,7 @@ interface Props {
   lvIndex?: number;
   isMobile: boolean; // 横並び or 縦並び
   isTouch: boolean;
+  ytBeginSec: number;
   ytPlayer: { current?: YouTubePlayer };
   chartBrief?: ChartBrief;
   offset: number;
@@ -66,19 +67,24 @@ export function MusicArea(props: Props) {
     props.chartBrief &&
     props.lvIndex !== undefined &&
     props.chartBrief.levels[props.lvIndex]
-      ? Math.max(
-          0.1,
-          props.chartBrief.levels[props.lvIndex].length + props.offset,
-        )
+      ? Math.max(0.1, props.chartBrief.levels[props.lvIndex].length)
       : 0.1;
   useEffect(() => {
     const id = setInterval(() => {
       if (props.ytPlayer.current?.getCurrentTime) {
-        setCurrentSec(props.ytPlayer.current.getCurrentTime() || 0);
+        setCurrentSec(
+          Math.min(
+            levelLength,
+            Math.max(
+              0,
+              (props.ytPlayer.current.getCurrentTime() || 0) - props.ytBeginSec,
+            ),
+          ),
+        );
       }
     }, 50);
     return () => clearInterval(id);
-  }, [props]);
+  }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
   return (
     <div

@@ -4,8 +4,6 @@ import {
   Chart9Edit,
   defaultNoteCommand,
   findInsertLine,
-  luaReplaceYTBegin,
-  luaReplaceYTEnd,
   NoteCommand,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
@@ -897,24 +895,59 @@ function Page(props: Props) {
       }
     }
   };
+
   const setYTBegin = (begin: number) => {
     if (chart && currentLevel) {
-      const newLevel = luaReplaceYTBegin(currentLevel, {
-        timeSec: begin,
-        luaLine: null,
-      });
-      changeLevel(newLevel?.lua);
+      currentLevel.ytBegin = begin;
+      changeChart({ ...chart });
     }
   };
+  const [currentLevelLength, setCurrentLevelLength] = useState<number>(0);
+  useEffect(() => {
+    if (currentLevel) {
+      let length = 0;
+      if (currentLevel.notes.length > 0) {
+        length =
+          getTimeSec(currentLevel.bpmChanges, currentLevel.notes.at(-1)!.step) +
+          (chart?.offset || 0);
+      }
+      if(currentLevelLength !== length){
+        setCurrentLevelLength(length);
+        if (chart && currentLevel.ytEnd === "note") {
+          currentLevel.ytEndSec = length;
+          changeChart({ ...chart });
+        }
+      }
+    }
+  }, [currentLevel, chart, changeChart, currentLevelLength]);
+  const [ytDuration, setYTDuration] = useState<number>(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (ytPlayer.current?.getDuration) {
+      const duration = ytPlayer.current.getDuration();
+      if (duration !== ytDuration) {
+        setYTDuration(duration);
+        if(chart && currentLevel?.ytEnd === "yt") {
+          currentLevel.ytEndSec = duration;
+          changeChart({ ...chart });
+        }
+      }
+    }
+  });
   const setYTEnd = (end: number | "note" | "yt") => {
     if (chart && currentLevel) {
-      const newLevel = luaReplaceYTEnd(currentLevel, {
-        timeSec: end,
-        luaLine: null,
-      });
-      changeLevel(newLevel?.lua);
+      currentLevel.ytEnd = end;
+      if (end === "note") {
+        currentLevel.ytEndSec = currentLevelLength;
+      } else if (end === "yt") {
+        currentLevel.ytEndSec = ytDuration;
+      } else {
+        currentLevel.ytEndSec = end;
+      }
+      changeChart({ ...chart });
     }
   };
+
   const addNote = (n: NoteCommand | null = copyBuf[0]) => {
     if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
@@ -1395,6 +1428,8 @@ function Page(props: Props) {
                     currentStep={currentStep}
                     setYTBegin={setYTBegin}
                     setYTEnd={setYTEnd}
+                    currentLevelLength={currentLevelLength}
+                    ytDuration={ytDuration}
                   />
                 ) : tab === 2 ? (
                   <LevelTab

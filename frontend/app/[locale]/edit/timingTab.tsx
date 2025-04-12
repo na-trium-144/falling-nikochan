@@ -48,6 +48,8 @@ interface Props {
   toggleSignatureChangeHere: () => void;
   setYTBegin: (ytBegin: number) => void;
   setYTEnd: (ytEnd: number | "note" | "yt") => void;
+  currentLevelLength: number;
+  ytDuration: number;
   currentStep: Step;
 }
 export default function TimingTab(props: Props) {
@@ -58,6 +60,11 @@ export default function TimingTab(props: Props) {
   const bpmValid = (bpm: string) =>
     bpm !== "" && !isNaN(Number(bpm)) && Number(bpm) > 0;
   const speedValid = (bpm: string) => bpm !== "" && !isNaN(Number(bpm));
+  const ytEndValid = (offset: string) =>
+    offset !== "" &&
+    !isNaN(Number(offset)) &&
+    Number(offset) >= props.currentLevelLength &&
+    Number(offset) <= props.ytDuration;
 
   const bpmChangeable =
     props.currentBpmIndex !== undefined &&
@@ -69,10 +76,6 @@ export default function TimingTab(props: Props) {
     props.currentLevel?.speedChanges[props.currentSpeedIndex].luaLine !== null;
   const signatureChangeable =
     props.currentSignature && props.currentSignature.luaLine !== null;
-  const ytBeginChangeable =
-    props.currentLevel?.ytBegin && props.currentLevel.ytBegin.luaLine !== null;
-  const ytEndChangeable =
-    props.currentLevel?.ytEnd && props.currentLevel.ytEnd.luaLine !== null;
 
   const ss =
     props.currentLevel &&
@@ -86,6 +89,7 @@ export default function TimingTab(props: Props) {
     <>
       <div className="mb-3">
         <span>{t("offset")}</span>
+        <HelpIcon>{t.rich("offsetHelp", { br: () => <br /> })}</HelpIcon>
         <Input
           className="w-16"
           actualValue={
@@ -95,58 +99,59 @@ export default function TimingTab(props: Props) {
           isValid={offsetValid}
         />
         <span>{t("offsetSecond")}</span>
-        <HelpIcon>{t.rich("offsetHelp", { br: () => <br /> })}</HelpIcon>
       </div>
       <div>
         <span>{t("ytBegin")}</span>
+        <HelpIcon>{t.rich("ytBeginHelp", { br: () => <br /> })}</HelpIcon>
         <Input
           className="w-16"
-          actualValue={props.currentLevel?.ytBegin.timeSec.toString() || ""}
+          actualValue={props.currentLevel?.ytBegin.toString() || ""}
           updateValue={(v: string) => props.setYTBegin(Number(v))}
           isValid={offsetValid}
-          disabled={!ytBeginChangeable}
         />
         <span>{t("offsetSecond")}</span>
-        <HelpIcon>{t.rich("ytBeginHelp", { br: () => <br /> })}</HelpIcon>
       </div>
       <div className="mb-3">
         <span>{t("ytEnd")}</span>
+        <HelpIcon>{t.rich("ytEndHelp", { br: () => <br /> })}</HelpIcon>
         <CheckBox
-          value={props.currentLevel?.ytEnd.timeSec === "note"}
+          value={props.currentLevel?.ytEnd === "note"}
           className={"ml-2 "}
           onChange={() => props.setYTEnd("note")}
-          disabled={!ytEndChangeable}
         >
           {t("ytEndAuto")}
+          <span className="text-sm ml-1">
+            ({Math.round(props.currentLevelLength * 10) / 10}{" "}
+            {t("offsetSecond")})
+          </span>
         </CheckBox>
         <CheckBox
-          value={props.currentLevel?.ytEnd.timeSec === "yt"}
+          value={props.currentLevel?.ytEnd === "yt"}
           className={"ml-2 "}
           onChange={() => props.setYTEnd("yt")}
-          disabled={!ytEndChangeable}
         >
           {t("ytEndFull")}
+          <span className="text-sm ml-1">
+            ({Math.round(props.ytDuration * 10) / 10} {t("offsetSecond")})
+          </span>
         </CheckBox>
         <CheckBox
-          value={typeof props.currentLevel?.ytEnd.timeSec === "number"}
+          value={typeof props.currentLevel?.ytEnd === "number"}
           className={"ml-2 "}
-          onChange={() => props.setYTEnd(0)}
-          disabled={!ytEndChangeable}
+          onChange={() => props.setYTEnd(props.currentLevel?.ytEndSec || 0)}
         >
           {t("ytEndAt")}
           <Input
             className="w-16"
-            actualValue={props.currentLevel?.ytEnd.timeSec.toString() || ""}
+            actualValue={(
+              Math.round((props.currentLevel?.ytEndSec || 0) * 10) / 10
+            ).toString()}
             updateValue={(v: string) => props.setYTEnd(Number(v))}
-            isValid={offsetValid}
-            disabled={
-              !ytEndChangeable ||
-              typeof props.currentLevel?.ytEnd.timeSec !== "number"
-            }
+            isValid={ytEndValid}
+            disabled={typeof props.currentLevel?.ytEnd !== "number"}
           />
           <span>{t("offsetSecond")}</span>
         </CheckBox>
-        <HelpIcon>{t.rich("ytEndHelp", { br: () => <br /> })}</HelpIcon>
       </div>
       <div>
         <span>{t("step")}</span>
