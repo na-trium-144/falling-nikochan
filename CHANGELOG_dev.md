@@ -1,3 +1,9 @@
+## ver. 11.0 - 2025/04/13 [#457](https://github.com/na-trium-144/falling-nikochan/pull/457)
+
+* 動画の再生開始位置と再生終了位置の指定を追加
+* copyBufferを譜面データに含める
+* 編集ページにバージョン表記追加
+
 ## ver. 10.16 - 2025/04/07 [#456](https://github.com/na-trium-144/falling-nikochan/pull/456)
 
 * @icon-park のimportをファイルごとに分けて行うようにした
