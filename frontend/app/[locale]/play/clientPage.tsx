@@ -504,17 +504,21 @@ function Play(props: Props) {
 
   const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
-    if (chartPlaying && chartSeq && "ytEndSec" in chartSeq) {
-      const checkEnd = () => {
-        const ended =
-          ytPlayer.current?.getPlayerState() === 0 ||
-          (ytPlayer.current?.getCurrentTime() || 0) >= chartSeq.ytEndSec;
-        if (ended !== endSecPassed) {
-          setEndSecPassed(ended);
-        }
-      };
-      const t = setInterval(checkEnd, 100);
-      return () => clearInterval(t);
+    if (chartPlaying && chartSeq) {
+      if ("ytEndSec" in chartSeq) {
+        const checkEnd = () => {
+          const ended =
+            ytPlayer.current?.getPlayerState() === 0 ||
+            (ytPlayer.current?.getCurrentTime() || 0) >= chartSeq.ytEndSec;
+          if (ended !== endSecPassed) {
+            setEndSecPassed(ended);
+          }
+        };
+        const t = setInterval(checkEnd, 100);
+        return () => clearInterval(t);
+      } else {
+        setEndSecPassed(true);
+      }
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
   useEffect(() => {
