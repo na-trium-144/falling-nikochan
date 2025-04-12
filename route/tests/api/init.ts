@@ -6,6 +6,7 @@ import {
 } from "@falling-nikochan/route/src/api/chart";
 import { PlayRecordEntry } from "@falling-nikochan/route/src/api/record";
 import {
+  Chart11Edit,
   Chart4,
   Chart5,
   Chart6,
@@ -13,6 +14,7 @@ import {
   Chart8Edit,
   Chart9Edit,
   currentChartVer,
+  Level11Play,
   Level6Play,
   Level9Play,
   stepZero,
@@ -48,7 +50,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
-export function dummyChart(): Chart9Edit {
+export function dummyChart(): Chart11Edit {
   return {
     falling: "nikochan",
     ver: currentChartVer,
@@ -99,15 +101,35 @@ export function dummyChart(): Chart9Edit {
             luaLine: null,
           },
         ],
+        ytBegin: 0,
+        ytEnd: "note",
+        ytEndSec: 0,
       },
     ],
   };
 }
+export function dummyChart10(): Chart9Edit {
+  return {
+    ...dummyChart(),
+    ver: 10,
+    levels: dummyChart().levels.map((l) => ({
+      name: l.name,
+      type: l.type,
+      unlisted: l.unlisted,
+      lua: l.lua,
+      notes: l.notes,
+      rest: l.rest,
+      bpmChanges: l.bpmChanges,
+      speedChanges: l.speedChanges,
+      signature: l.signature,
+    })),
+  };
+}
 export function dummyChart9(): Chart9Edit {
-  return { ...dummyChart(), ver: 9 };
+  return { ...dummyChart10(), ver: 9 };
 }
 export function dummyChart8(): Chart8Edit {
-  const c: Chart8Edit = { ...dummyChart(), ver: 8, editPasswd: "" };
+  const c: Chart8Edit = { ...dummyChart10(), ver: 8, editPasswd: "" };
   // @ts-expect-error converting Chart9 to 8
   delete c.changePasswd;
   return c;
@@ -137,9 +159,9 @@ export function dummyChart4(): Chart4 {
   };
 }
 
-export function dummyLevel9(): Level9Play {
+export function dummyLevel11(): Level11Play {
   return {
-    ver: 10,
+    ver: 11,
     offset: 1.23,
     notes: [
       {
@@ -171,6 +193,9 @@ export function dummyLevel9(): Level9Play {
         luaLine: null,
       },
     ],
+    ytBegin: 0,
+    ytEnd: "note",
+    ytEndSec: 0,
   };
 }
 
@@ -395,6 +420,27 @@ export async function initDb() {
           )),
           ver: 9,
           levels: dummyChart9().levels,
+        }),
+      },
+      { upsert: true },
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 10) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 10),
+            dummyDate.getTime(),
+            null,
+            pSecretSalt,
+            null,
+          )),
+          ver: 10,
+          levels: dummyChart10().levels,
         }),
       },
       { upsert: true },
