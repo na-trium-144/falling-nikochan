@@ -2,6 +2,7 @@ import { expect, test, describe } from "bun:test";
 import {
   app,
   dummyChart,
+  dummyChart10,
   dummyChart6,
   dummyChart7,
   dummyChart8,
@@ -9,6 +10,7 @@ import {
   initDb,
 } from "./init";
 import {
+    Chart11Edit,
   Chart4,
   Chart5,
   Chart6,
@@ -26,7 +28,7 @@ describe("GET /api/chartFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/chartFile/100000?p=p");
     expect(res.status).toBe(200);
-    const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).toStrictEqual(dummyChart());
   });
   test("should return ChartEdit if password hash with pUserSalt matches", async () => {
@@ -49,8 +51,15 @@ describe("GET /api/chartFile/:cid", () => {
       },
     );
     expect(res.status).toBe(200);
-    const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).toStrictEqual(dummyChart());
+  });
+  test("should return Chart10 if chart version is 10", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100010?p=p");
+    expect(res.status).toBe(200);
+    const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+    expect(chart).toStrictEqual(dummyChart10());
   });
   test("should return Chart9 if chart version is 9", async () => {
     await initDb();

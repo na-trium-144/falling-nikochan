@@ -1,6 +1,7 @@
 import { LevelEdit } from "../chart.js";
 import { Chart3 } from "../legacy/chart3.js";
 import { Level5 } from "../legacy/chart5.js";
+import { Level9Edit } from "../legacy/chart9.js";
 import {
   Step,
   stepAdd,
@@ -40,7 +41,7 @@ export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
 }
 
 // コマンドを挿入
-export function insertLua<L extends LevelEdit | Level5 | Chart3>(
+export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
   chart: L,
   line: number,
   content: string,

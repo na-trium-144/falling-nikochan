@@ -1,4 +1,4 @@
-import { luaExec } from "@falling-nikochan/chart";
+import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 
 const worker = self as unknown as Worker;
 
