@@ -128,6 +128,7 @@ export function InitPlay({ locale }: { locale: string }) {
               const seq: Level6Play | Level11Play = msgpack.deserialize(
                 await res.arrayBuffer(),
               );
+              console.log("seq.ver", seq.ver);
               if (seq.ver === 6 || seq.ver === 11) {
                 switch (seq.ver) {
                   case 6:
@@ -517,12 +518,13 @@ function Play(props: Props) {
         const t = setInterval(checkEnd, 100);
         return () => clearInterval(t);
       } else {
-        setEndSecPassed(true);
+        if (!endSecPassed) {
+          setEndSecPassed(true);
+        }
       }
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
   useEffect(() => {
-    console.log(chartEnd, endSecPassed);
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
         if (
@@ -620,12 +622,12 @@ function Play(props: Props) {
   ]);
 
   const onReady = useCallback(() => {
-    console.log("ready");
+    console.log("ready ->", ytPlayer.current?.getPlayerState());
     setYtReady(true);
     setExitable(new Date());
   }, []);
   const onStart = useCallback(() => {
-    console.log("start");
+    console.log("start ->", ytPlayer.current?.getPlayerState());
     if (chartSeq) {
       setShowStopped(false);
       setShowReady(false);
@@ -641,7 +643,7 @@ function Play(props: Props) {
     ref.current?.focus();
   }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref, reloadBestScore]);
   const onStop = useCallback(() => {
-    console.log("stop");
+    console.log("stop ->", ytPlayer.current?.getPlayerState());
     switch (ytPlayer.current?.getPlayerState()) {
       case 0:
         if (chartPlaying) {
