@@ -17,9 +17,11 @@ import { levelTypesConst } from "../chart.js";
 import { getTimeSec } from "../seq.js";
 import { defaultCopyBuffer } from "../command.js";
 
+// begin, end ともに chart.offset を加えた値 (=YouTubeのcurrentTime基準の時刻)
 export const YTBeginSchema11 = () => v.number();
 export const YTEndSchema11 = () =>
   v.union([v.literal("note"), v.literal("yt"), v.number()]);
+
 export const LevelMinSchema11 = () =>
   v.object({
     name: v.string(),
@@ -147,7 +149,7 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
           ? getTimeSec(
               level.bpmChanges,
               level.notes[level.notes.length - 1].step,
-            )
+            ) + chart.offset
           : 0,
     })),
     copyBuffer: defaultCopyBuffer(),
