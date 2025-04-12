@@ -25,7 +25,7 @@ describe("GET /api/brief/:cid", () => {
           noteCount: 1,
           bpmMin: 120,
           bpmMax: 180,
-          length: 0,
+          length: 1.23,
           unlisted: false,
         },
       ],
