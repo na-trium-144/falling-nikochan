@@ -17,7 +17,6 @@ import {
   defaultCopyBuffer,
   Level11Play,
   Level6Play,
-  Level9Play,
   stepZero,
 } from "@falling-nikochan/chart";
 import { Hono } from "hono";
@@ -105,7 +104,7 @@ export function dummyChart(): Chart11Edit {
         ],
         ytBegin: 0,
         ytEnd: "note",
-        ytEndSec: 0,
+        ytEndSec: 1.23, // offset がたされている
       },
     ],
   };
@@ -200,7 +199,7 @@ export function dummyLevel11(): Level11Play {
     ],
     ytBegin: 0,
     ytEnd: "note",
-    ytEndSec: 0,
+    ytEndSec: 1.23,
   };
 }
 
