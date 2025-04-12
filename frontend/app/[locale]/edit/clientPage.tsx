@@ -911,7 +911,7 @@ function Page(props: Props) {
           getTimeSec(currentLevel.bpmChanges, currentLevel.notes.at(-1)!.step) +
           (chart?.offset || 0);
       }
-      if(currentLevelLength !== length){
+      if (currentLevelLength !== length) {
         setCurrentLevelLength(length);
         if (chart && currentLevel.ytEnd === "note") {
           currentLevel.ytEndSec = length;
@@ -927,7 +927,7 @@ function Page(props: Props) {
       const duration = ytPlayer.current.getDuration();
       if (duration !== ytDuration) {
         setYTDuration(duration);
-        if(chart && currentLevel?.ytEnd === "yt") {
+        if (chart && currentLevel?.ytEnd === "yt") {
           currentLevel.ytEndSec = duration;
           changeChart({ ...chart });
         }
@@ -1125,9 +1125,12 @@ function Page(props: Props) {
                 "grow-0 shrink-0 flex flex-col items-stretch "
               }
             >
-              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 ">
-                <span className="flex-1 ">
-                  {t("titleShort")} ID: {cid}
+              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
+                <span>{t("titleShort")}</span>
+                <span className="flex-1">ID: {cid}</span>
+                <span className="text-slate-500 dark:text-stone-400 ">
+                  <span className="">ver.</span>
+                  <span className="ml-1">{process.env.buildVersion}</span>
                 </span>
                 <Button text={t("help")} onClick={openGuide} />
               </div>
