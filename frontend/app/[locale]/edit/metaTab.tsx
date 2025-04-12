@@ -21,7 +21,7 @@ import CheckBox from "@/common/checkBox.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { luaExec } from "@falling-nikochan/chart";
+import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/share";
 import { isStandalone } from "@/common/pwaInstall";

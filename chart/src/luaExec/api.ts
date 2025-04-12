@@ -1,7 +1,7 @@
 import { Step, stepAdd, stepSimplify } from "../step.js";
-import { Result } from "./exec.js";
+import { LuaExecResult } from "./exec.js";
 
-export function luaNote(state: Result, ...args: any[]) {
+export function luaNote(state: LuaExecResult, ...args: any[]) {
   if (args.length === 5) {
     args.push(false);
   }
@@ -27,7 +27,7 @@ export function luaNote(state: Result, ...args: any[]) {
     throw "invalid argument for Note()";
   }
 }
-export function luaStep(state: Result, ...args: any[]) {
+export function luaStep(state: LuaExecResult, ...args: any[]) {
   if (
     args.length === 3 &&
     (typeof args[0] === "number" || args[0] === null) &&
@@ -54,7 +54,7 @@ export function luaStep(state: Result, ...args: any[]) {
   }
 }
 
-export function luaBeat(state: Result, ...args: any[]) {
+export function luaBeat(state: LuaExecResult, ...args: any[]) {
   if (args.length === 2) {
     args.push(0);
     args.push(1);
@@ -87,7 +87,7 @@ export function luaBeat(state: Result, ...args: any[]) {
     throw "invalid argument for Beat()";
   }
 }
-export function luaBPM(state: Result, ...args: any[]) {
+export function luaBPM(state: LuaExecResult, ...args: any[]) {
   if (
     args.length === 2 &&
     (typeof args[0] === "number" || args[0] === null) &&
@@ -105,7 +105,7 @@ export function luaBPM(state: Result, ...args: any[]) {
   }
 }
 
-export function luaAccel(state: Result, ...args: any[]) {
+export function luaAccel(state: LuaExecResult, ...args: any[]) {
   if (
     args.length === 2 &&
     (typeof args[0] === "number" || args[0] === null) &&

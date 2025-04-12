@@ -31,6 +31,3 @@ export * from "./lua/edit.js"
 export * from "./lua/note.js"
 export * from "./lua/signature.js"
 export * from "./lua/speed.js"
-
-export * from "./luaExec/api.js";
-export * from "./luaExec/exec.js";

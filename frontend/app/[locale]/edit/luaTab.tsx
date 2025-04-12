@@ -16,7 +16,8 @@ import {
   useState,
 } from "react";
 import { useDisplayMode } from "@/scale.js";
-import { LevelFreeze, Result } from "@falling-nikochan/chart";
+import { LuaExecResult } from "@falling-nikochan/chart/dist/luaExec";
+import { LevelFreeze } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme.js";
@@ -63,7 +64,7 @@ export function useLuaExecutor() {
       worker.current.postMessage({ code, catchError: true });
       worker.current.addEventListener(
         "message",
-        ({ data }: { data: Result }) => {
+        ({ data }: { data: LuaExecResult }) => {
           if (workerResolver.current) {
             setRunning(false);
             setStdout(data.stdout);

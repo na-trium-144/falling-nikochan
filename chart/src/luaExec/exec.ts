@@ -11,7 +11,7 @@ import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";
 
-export interface Result {
+export interface LuaExecResult {
   stdout: string[];
   err: string[];
   errorLine: number | null;
@@ -22,10 +22,10 @@ export async function luaExec(
   wasmPath: string,
   code: string,
   catchError: boolean,
-): Promise<Result> {
+): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
   const lua = await factory.createEngine();
-  const result: Result = {
+  const result: LuaExecResult = {
     stdout: [],
     err: [],
     errorLine: null,

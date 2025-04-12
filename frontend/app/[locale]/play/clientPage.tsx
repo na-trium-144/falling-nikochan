@@ -26,7 +26,6 @@ import {
   bigScoreRate,
   chainScoreRate,
   ChartSeqData6,
-  getTimeSec,
   Level11Play,
   levelTypes,
   loadChart6,
