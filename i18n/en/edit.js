@@ -124,6 +124,17 @@ export default {
         "There is no function to display the waveform of <br></br>" +
         "the audio data of the video, so please adjust it by <br></br>" +
         "using slow playback or frame advance, etc.",
+      ytBegin: "Video start",
+      ytEnd: "Video end",
+      ytEndAuto: "Last note",
+      ytEndFull: "End of video",
+      ytEndAt: "Manual setting",
+      ytBeginHelp:
+        "You can cut the intro of the video <br></br>" +
+        "by specifying the start position of the video.",
+      ytEndHelp:
+        "You can specify whether to stop the video when the chart ends,<br></br>" +
+        "or to play the video to the end before ending it.",
       step: "Step",
       stepHelp:
         'Time in beats is expressed as "bars; beats + fractions".<br></br>' +
