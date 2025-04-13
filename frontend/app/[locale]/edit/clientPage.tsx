@@ -429,10 +429,13 @@ function Page(props: Props) {
   }, [chart, savePasswd, props.savePasswdInitial]);
 
   // 譜面の更新 (メタデータの変更など)
-  const changeChart = (chart: ChartEdit) => {
-    setHasChange(true);
-    setChart(chart);
-  };
+  const changeChart = useCallback(
+    (chart: ChartEdit) => {
+      setHasChange(true);
+      setChart(chart);
+    },
+    [setChart, setHasChange],
+  );
   useEffect(() => {
     document.title = titleWithSiteName(
       t("title", { title: chart?.title || "", cid: cid || "" }),
@@ -912,8 +915,16 @@ function Page(props: Props) {
       }
       if (currentLevelLength !== length) {
         setCurrentLevelLength(length);
-        if (chart && currentLevel.ytEnd === "note") {
-          currentLevel.ytEndSec = length;
+      }
+      if (chart) {
+        let hasChange = false;
+        for (const level of chart.levels) {
+          if (level.ytEnd === "note" && level.ytEndSec !== length) {
+            level.ytEndSec = length;
+            hasChange = true;
+          }
+        }
+        if (hasChange) {
           changeChart({ ...chart });
         }
       }
@@ -926,8 +937,16 @@ function Page(props: Props) {
       const duration = ytPlayer.current.getDuration();
       if (duration !== ytDuration) {
         setYTDuration(duration);
-        if (chart && currentLevel?.ytEnd === "yt") {
-          currentLevel.ytEndSec = duration;
+      }
+      if (chart) {
+        let hasChange = false;
+        for (const level of chart.levels) {
+          if (level.ytEnd === "yt" && level.ytEndSec !== duration) {
+            level.ytEndSec = duration;
+            hasChange = true;
+          }
+        }
+        if (hasChange) {
           changeChart({ ...chart });
         }
       }
@@ -985,7 +1004,8 @@ function Page(props: Props) {
     if (chart && currentLevel && hasCurrentNote) {
       const newCopyBuf = chart.copyBuffer.slice();
       newCopyBuf[copyIndex] = currentLevel.notes[currentNoteIndex];
-      changeChart({ ...chart, copyBuffer: newCopyBuf });
+      // copyBufferの更新は未保存の変更とみなさない (changeChart にしない)
+      setChart({ ...chart, copyBuffer: newCopyBuf });
     }
     ref.current.focus();
   };
