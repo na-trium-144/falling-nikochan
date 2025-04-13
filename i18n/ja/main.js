@@ -62,6 +62,8 @@ export default {
       welcome:
         "Falling Nikochan の譜面エディタにようこそ。" +
         "アカウント登録不要で誰でも譜面を作成することができます。",
+      welcome2: "初めての方はこちらも参考にどうぞ。",
+      howToVideo: "Falling Nikochan 譜面の作り方",
       inputId: "譜面IDを入力",
       inputIdDesc:
         "編集したい譜面の ID を知っている場合はこちらに入力してください。" +

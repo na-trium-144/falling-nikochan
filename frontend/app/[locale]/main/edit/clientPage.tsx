@@ -11,6 +11,7 @@ import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
 import { isStandalone } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
+import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -68,7 +69,17 @@ export default function EditTab({ locale }: { locale: string }) {
       noBackButton
       locale={locale}
     >
-      <p className="mb-3 text-justify">{t("welcome")}</p>
+      <p className="text-justify">{t("welcome")}</p>
+      <p className="mb-3 text-justify">
+        {t("welcome2")}
+        <ExternalLink
+          className="mx-1"
+          href="https://www.youtube.com/watch?v=hi9TY_78ETY"
+          icon={<Youtube className="absolute left-0 bottom-1" theme="filled" />}
+        >
+          <span className="text-sm">{t("howToVideo")}</span>
+        </ExternalLink>
+      </p>
       <div className="mb-3">
         <h3 className="mb-2">
           <span className="text-xl font-bold font-title ">{t("inputId")}:</span>
