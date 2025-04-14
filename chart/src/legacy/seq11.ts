@@ -1,22 +1,24 @@
 import { getTimeSec } from "../seq.js";
 import { BPMChange1 } from "./chart1.js";
+import { Level11Play } from "./chart11.js";
 import { Signature5 } from "./chart5.js";
-import { Level9Play } from "./chart9.js";
 import { DisplayParam7, Note7 } from "./seq7.js";
 
-export interface ChartSeqData9 {
-  ver: 10;
+export interface ChartSeqData11 {
+  ver: 11;
   notes: Note7[];
   bpmChanges: BPMChange1[];
   speedChanges: BPMChange1[];
   signature: Signature5[];
   offset: number;
+  ytBegin: number;
+  ytEndSec: number;
 }
 
 /**
  * chartを読み込む
  */
-export function loadChart9(level: Level9Play): ChartSeqData9 {
+export function loadChart11(level: Level11Play): ChartSeqData11 {
   const notes: Note7[] = [];
   for (let id = 0; id < level.notes.length; id++) {
     const c = level.notes[id];
@@ -126,11 +128,13 @@ export function loadChart9(level: Level9Play): ChartSeqData9 {
     });
   }
   return {
-    ver: 10,
+    ver: 11,
     offset: level.offset,
     signature: level.signature,
     bpmChanges: level.bpmChanges,
     speedChanges: level.speedChanges,
     notes,
+    ytBegin: level.ytBegin,
+    ytEndSec: level.ytEndSec,
   };
 }

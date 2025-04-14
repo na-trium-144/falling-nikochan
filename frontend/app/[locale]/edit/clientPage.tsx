@@ -2,7 +2,6 @@
 
 import {
   Chart9Edit,
-  defaultNoteCommand,
   findInsertLine,
   NoteCommand,
 } from "@falling-nikochan/chart";
@@ -430,10 +429,13 @@ function Page(props: Props) {
   }, [chart, savePasswd, props.savePasswdInitial]);
 
   // 譜面の更新 (メタデータの変更など)
-  const changeChart = (chart: ChartEdit) => {
-    setHasChange(true);
-    setChart(chart);
-  };
+  const changeChart = useCallback(
+    (chart: ChartEdit) => {
+      setHasChange(true);
+      setChart(chart);
+    },
+    [setChart, setHasChange],
+  );
   useEffect(() => {
     document.title = titleWithSiteName(
       t("title", { title: chart?.title || "", cid: cid || "" }),
@@ -895,7 +897,70 @@ function Page(props: Props) {
       }
     }
   };
-  const addNote = (n: NoteCommand | null = copyBuf[0]) => {
+
+  const setYTBegin = (begin: number) => {
+    if (chart && currentLevel) {
+      currentLevel.ytBegin = begin;
+      changeChart({ ...chart });
+    }
+  };
+  const [currentLevelLength, setCurrentLevelLength] = useState<number>(0);
+  useEffect(() => {
+    if (currentLevel) {
+      let length = 0;
+      if (currentLevel.notes.length > 0) {
+        length =
+          getTimeSec(currentLevel.bpmChanges, currentLevel.notes.at(-1)!.step) +
+          (chart?.offset || 0);
+      }
+      if (currentLevelLength !== length) {
+        setCurrentLevelLength(length);
+      }
+      if (currentLevel.ytEnd === "note" && currentLevel.ytEndSec !== length) {
+        currentLevel.ytEndSec = length;
+        changeChart({ ...chart! });
+      }
+    }
+  }, [currentLevel, chart, changeChart, currentLevelLength]);
+  const [ytDuration, setYTDuration] = useState<number>(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (ytPlayer.current?.getDuration) {
+      const duration = ytPlayer.current.getDuration();
+      if (duration !== ytDuration) {
+        setYTDuration(duration);
+      }
+      if (chart) {
+        let hasChange = false;
+        for (const level of chart.levels) {
+          if (level.ytEnd === "yt" && level.ytEndSec !== duration) {
+            level.ytEndSec = duration;
+            hasChange = true;
+          }
+        }
+        if (hasChange) {
+          changeChart({ ...chart });
+        }
+      }
+    }
+  });
+  const setYTEnd = (end: number | "note" | "yt") => {
+    if (chart && currentLevel) {
+      currentLevel.ytEnd = end;
+      if (end === "note") {
+        currentLevel.ytEndSec = currentLevelLength;
+      } else if (end === "yt") {
+        currentLevel.ytEndSec = ytDuration;
+      } else {
+        currentLevel.ytEndSec = end;
+      }
+      changeChart({ ...chart });
+    }
+  };
+
+  const addNote = (
+    n: NoteCommand | null | undefined = chart?.copyBuffer[0],
+  ) => {
     if (chart && currentLevel && n && canAddNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaAddNote(levelCopied, n, currentStep);
@@ -927,26 +992,22 @@ function Page(props: Props) {
     }
     // ref.current.focus();
   };
-  const [copyBuf, setCopyBuf] = useState<(NoteCommand | null)[]>(
-    ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-      Array.from(new Array(9)).map(() => null),
-    ),
-  );
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
-      const newCopyBuf = copyBuf.slice();
+      const newCopyBuf = chart.copyBuffer.slice();
       newCopyBuf[copyIndex] = currentLevel.notes[currentNoteIndex];
-      setCopyBuf(newCopyBuf);
+      // copyBufferの更新は未保存の変更とみなさない (changeChart にしない)
+      setChart({ ...chart, copyBuffer: newCopyBuf });
     }
     ref.current.focus();
   };
   const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
-    if (copyBuf[copyIndex]) {
+    if (chart?.copyBuffer[copyIndex]) {
       if (chart) {
         if (hasCurrentNote && !forceAdd) {
-          updateNote(copyBuf[copyIndex]);
+          updateNote(chart.copyBuffer[copyIndex]);
         } else {
-          addNote(copyBuf[copyIndex]);
+          addNote(chart.copyBuffer[copyIndex]);
         }
       }
     }
@@ -989,7 +1050,7 @@ function Page(props: Props) {
             pasteNote(0);
           } else if (
             Number(e.key) >= 1 &&
-            Number(e.key) <= copyBuf.length - 1
+            Number(e.key) <= chart.copyBuffer.length - 1
           ) {
             pasteNote(Number(e.key));
           } else if (e.key === "n") {
@@ -1069,12 +1130,17 @@ function Page(props: Props) {
             <div
               className={
                 "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3 " +
-                "grow-0 shrink-0 flex flex-col items-stretch "
+                "min-w-0 grow-0 shrink-0 flex flex-col items-stretch "
               }
             >
-              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 ">
-                <span className="flex-1 ">
-                  {t("titleShort")} ID: {cid}
+              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
+                <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
+                  <span className="text-nowrap ">{t("titleShort")}</span>
+                  <span className="grow-1 text-nowrap ">ID: {cid}</span>
+                  <span className="min-w-0 overflow-clip shrink-1 text-nowrap text-slate-500 dark:text-stone-400 ">
+                    <span className="">ver.</span>
+                    <span className="ml-1">{process.env.buildVersion}</span>
+                  </span>
                 </span>
                 <Button text={t("help")} onClick={openGuide} />
               </div>
@@ -1373,6 +1439,10 @@ function Page(props: Props) {
                     signatureChangeHere={!!signatureChangeHere}
                     toggleSignatureChangeHere={toggleSignatureChangeHere}
                     currentStep={currentStep}
+                    setYTBegin={setYTBegin}
+                    setYTEnd={setYTEnd}
+                    currentLevelLength={currentLevelLength}
+                    ytDuration={ytDuration}
                   />
                 ) : tab === 2 ? (
                   <LevelTab
@@ -1393,7 +1463,9 @@ function Page(props: Props) {
                     updateNote={updateNote}
                     copyNote={copyNote}
                     pasteNote={pasteNote}
-                    hasCopyBuf={copyBuf.map((n) => n !== null)}
+                    hasCopyBuf={
+                      chart ? chart.copyBuffer.map((n) => n !== null) : []
+                    }
                     currentStep={currentStep}
                     currentLevel={currentLevel}
                   />

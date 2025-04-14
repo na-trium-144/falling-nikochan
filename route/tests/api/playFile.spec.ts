@@ -1,6 +1,6 @@
 import { expect, test, describe } from "bun:test";
-import { app, dummyLevel6, dummyLevel9, initDb } from "./init";
-import { Level6Play, Level9Play, LevelPlay } from "@falling-nikochan/chart";
+import { app, dummyLevel11, dummyLevel6, initDb } from "./init";
+import { Level11Play, Level6Play } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 
 describe("GET /api/playFile/:cid/:lvIndex", () => {
@@ -8,22 +8,36 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     await initDb();
     const res = await app.request("/api/playFile/100000/0");
     expect(res.status).toBe(200);
-    const level: LevelPlay = msgpack.deserialize(await res.arrayBuffer());
-    expect(level).toStrictEqual(dummyLevel9());
+    const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).toStrictEqual(dummyLevel11());
   });
-  test("should return Level9Play if chart version is 8", async () => {
+  test("should return Level11Play if chart version is 10", async () => {
+    await initDb();
+    const res = await app.request("/api/playFile/100010/0");
+    expect(res.status).toBe(200);
+    const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).toMatchObject(dummyLevel11());
+  });
+  test("should return Level11Play if chart version is 9", async () => {
+    await initDb();
+    const res = await app.request("/api/playFile/100009/0");
+    expect(res.status).toBe(200);
+    const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).toMatchObject(dummyLevel11());
+  });
+  test("should return Level11Play if chart version is 8", async () => {
     await initDb();
     const res = await app.request("/api/playFile/100008/0");
     expect(res.status).toBe(200);
-    const level: Level9Play = msgpack.deserialize(await res.arrayBuffer());
-    expect(level).toMatchObject(dummyLevel9());
+    const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).toMatchObject(dummyLevel11());
   });
-  test("should return Level9Play if chart version is 7", async () => {
+  test("should return Level11Play if chart version is 7", async () => {
     await initDb();
     const res = await app.request("/api/playFile/100007/0");
     expect(res.status).toBe(200);
-    const level: Level9Play = msgpack.deserialize(await res.arrayBuffer());
-    expect(level).toMatchObject(dummyLevel9());
+    const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).toMatchObject(dummyLevel11());
   });
   test("should return Level6Play if chart version is 6", async () => {
     await initDb();

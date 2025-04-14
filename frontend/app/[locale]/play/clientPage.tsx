@@ -26,13 +26,13 @@ import {
   bigScoreRate,
   chainScoreRate,
   ChartSeqData6,
-  Level9Play,
+  Level11Play,
   levelTypes,
   loadChart6,
   RecordGetSummary,
   RecordPost,
 } from "@falling-nikochan/chart";
-import { ChartSeqData9, loadChart9 } from "@falling-nikochan/chart";
+import { ChartSeqData11, loadChart11 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -73,7 +73,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData9>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData11>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -113,7 +113,7 @@ export function InitPlay({ locale }: { locale: string }) {
     //   " | Falling Nikochan";
 
     if (session?.level) {
-      setChartSeq(loadChart9(session.level));
+      setChartSeq(loadChart11(session.level));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
@@ -127,16 +127,17 @@ export function InitPlay({ locale }: { locale: string }) {
           );
           if (res.ok) {
             try {
-              const seq: Level6Play | Level9Play = msgpack.deserialize(
+              const seq: Level6Play | Level11Play = msgpack.deserialize(
                 await res.arrayBuffer(),
               );
-              if (seq.ver === 6 || seq.ver === 10) {
+              console.log("seq.ver", seq.ver);
+              if (seq.ver === 6 || seq.ver === 11) {
                 switch (seq.ver) {
                   case 6:
                     setChartSeq(loadChart6(seq));
                     break;
-                  case 10:
-                    setChartSeq(loadChart9(seq));
+                  case 11:
+                    setChartSeq(loadChart11(seq));
                     break;
                 }
                 setErrorStatus(undefined);
@@ -202,7 +203,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
-  chartSeq?: ChartSeqData6 | ChartSeqData9;
+  chartSeq?: ChartSeqData6 | ChartSeqData11;
   editing: boolean;
   showFps: boolean;
   displaySpeed: boolean;
@@ -359,8 +360,8 @@ function Play(props: Props) {
     judgeCount,
     bigCount,
     bigTotal,
-    end,
     lateTimes,
+    chartEnd,
   } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
   const [fps, setFps_] = useState<number>(0);
@@ -412,11 +413,19 @@ function Play(props: Props) {
   const reset = useCallback(() => setShowReady(true), []);
   const start = () => {
     // Space(スタートボタン)が押されたとき
-    // 再生中に呼んでもなにもしない
-    if (ytPlayer.current?.getPlayerState() === 0) {
-      ytPlayer.current?.seekTo(0, true);
+    switch (ytPlayer.current?.getPlayerState()) {
+      case 2:
+        ytPlayer.current?.playVideo();
+        break;
+      default:
+        if (chartSeq && "ytBegin" in chartSeq) {
+          ytPlayer.current?.seekTo(chartSeq.ytBegin, true);
+        } else {
+          ytPlayer.current?.seekTo(0, true);
+        }
+        break;
     }
-    ytPlayer.current?.playVideo();
+    // 再生中に呼んでもなにもしない
     playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
     // 譜面のリセットと開始はonStart()で処理
   };
@@ -429,7 +438,6 @@ function Play(props: Props) {
         (ex) =>
           new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000)),
       );
-      // 開始時の音量は問答無用で100っぽい?
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
           ytPlayer.current?.setVolume(((10 - i) * ytVolume) / 10);
@@ -497,8 +505,29 @@ function Play(props: Props) {
     }
   }, [apiErrorMsg, ytError, chartBrief, chartSeq, errorMsg, te]);
 
+  const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
-    if (chartPlaying && end) {
+    if (chartPlaying && chartSeq) {
+      if ("ytEndSec" in chartSeq) {
+        const checkEnd = () => {
+          const ended =
+            ytPlayer.current?.getPlayerState() === 0 ||
+            (ytPlayer.current?.getCurrentTime() || 0) >= chartSeq.ytEndSec;
+          if (ended !== endSecPassed) {
+            setEndSecPassed(ended);
+          }
+        };
+        const t = setInterval(checkEnd, 100);
+        return () => clearInterval(t);
+      } else {
+        if (!endSecPassed) {
+          setEndSecPassed(true);
+        }
+      }
+    }
+  }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
+  useEffect(() => {
+    if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
         if (
           cid &&
@@ -577,7 +606,8 @@ function Play(props: Props) {
   }, [
     chartPlaying,
     showResult,
-    end,
+    chartEnd,
+    endSecPassed,
     chartSeq,
     score,
     bestScoreState,
@@ -594,12 +624,12 @@ function Play(props: Props) {
   ]);
 
   const onReady = useCallback(() => {
-    console.log("ready");
+    console.log("ready ->", ytPlayer.current?.getPlayerState());
     setYtReady(true);
     setExitable(new Date());
   }, []);
   const onStart = useCallback(() => {
-    console.log("start");
+    console.log("start ->", ytPlayer.current?.getPlayerState());
     if (chartSeq) {
       setShowStopped(false);
       setShowReady(false);
@@ -607,24 +637,35 @@ function Play(props: Props) {
       setChartPlaying(true);
       // setChartStarted(true);
       setExitable(null);
+      reloadBestScore();
       resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
-  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref]);
+  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref, reloadBestScore]);
   const onStop = useCallback(() => {
-    console.log("stop");
-    if (chartPlaying) {
-      setShowStopped(true);
-      setChartPlaying(false);
-    }
-    if (ytPlayer.current?.getPlayerState() === 2) {
-      // 終了ではなくpauseの場合のみ
-      ytPlayer.current?.seekTo(0, true);
+    console.log("stop ->", ytPlayer.current?.getPlayerState());
+    switch (ytPlayer.current?.getPlayerState()) {
+      case 0:
+        if (chartPlaying) {
+          setEndSecPassed(true);
+        }
+        break;
+      case 2:
+        if (chartPlaying) {
+          setShowStopped(true);
+          setChartPlaying(false);
+        }
+        if (chartSeq && "ytBegin" in chartSeq) {
+          ytPlayer.current?.seekTo(chartSeq.ytBegin, true);
+        } else {
+          ytPlayer.current?.seekTo(0, true);
+        }
+        break;
     }
     ref.current?.focus();
-  }, [chartPlaying, ref]);
+  }, [chartPlaying, ref, chartSeq]);
   const onError = useCallback((ec: number) => {
     setYtError(ec);
   }, []);
@@ -710,6 +751,9 @@ function Play(props: Props) {
             }
             ready={musicAreaOk}
             playing={chartPlaying}
+            ytBeginSec={
+              chartSeq && "ytBegin" in chartSeq ? chartSeq.ytBegin : 0
+            }
             offset={(chartSeq?.offset || 0) + offsetPlusLatency}
             lvType={lvType}
             lvIndex={lvIndex}
@@ -733,12 +777,12 @@ function Play(props: Props) {
                 className={
                   "z-10 flex-none m-3 self-end " +
                   "transition-opacity duration-100 " +
-                  (!statusHide && musicAreaOk
+                  (!statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100 "
                     : "ease-out opacity-0 ")
                 }
                 judgeCount={judgeCount}
-                bigCount={bigCount}
+                bigCount={bigCount || 0}
                 bigTotal={bigTotal}
                 notesTotal={notesAll.length}
                 isMobile={false}
@@ -941,7 +985,7 @@ function Play(props: Props) {
                 margin: 1 * rem * mobileStatusScale,
               }}
               judgeCount={judgeCount}
-              bigCount={bigCount}
+              bigCount={bigCount || 0}
               bigTotal={bigTotal}
               notesTotal={notesAll.length}
               isMobile={true}
@@ -968,7 +1012,7 @@ function Play(props: Props) {
           className="z-20 absolute my-auto h-max inset-y-0"
           style={{ right: "0.75rem" }}
           judgeCount={judgeCount}
-          bigCount={bigCount}
+          bigCount={bigCount || 0}
           bigTotal={bigTotal}
           notesTotal={notesAll.length}
           isMobile={false}

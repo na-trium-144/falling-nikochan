@@ -44,7 +44,7 @@ describe("POST /api/chartFile/:cid", () => {
         pServerHash = (await (await client.connect())
           .db("nikochan")
           .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: "100000" }))!.pServerHash;
+          .findOne({ cid: "100000" }))!.pServerHash!;
       } finally {
         client.close();
       }

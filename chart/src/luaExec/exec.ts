@@ -1,11 +1,17 @@
 import { LuaFactory } from "wasmoon";
 import { Step, stepZero } from "../step.js";
-import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
+import {
+  luaAccel,
+  luaBeat,
+  luaBPM,
+  luaNote,
+  luaStep,
+} from "./api.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";
 
-export interface Result {
+export interface LuaExecResult {
   stdout: string[];
   err: string[];
   errorLine: number | null;
@@ -15,11 +21,11 @@ export interface Result {
 export async function luaExec(
   wasmPath: string,
   code: string,
-  catchError: boolean
-): Promise<Result> {
+  catchError: boolean,
+): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
   const lua = await factory.createEngine();
-  const result: Result = {
+  const result: LuaExecResult = {
     stdout: [],
     err: [],
     errorLine: null,
@@ -46,37 +52,40 @@ export async function luaExec(
       この場合Noteタブなどから編集できない
     */
 
-    lua.global.set("Note", (...args: any[]) => luaNote(result, null, ...args));
-    lua.global.set("NoteStatic", (...args: any[]) => luaNote(result, ...args));
-    lua.global.set("Step", (...args: any[]) => luaStep(result, null, ...args));
-    lua.global.set("StepStatic", (...args: any[]) => luaStep(result, ...args));
-    lua.global.set("Beat", (...args: any[]) => luaBeat(result, null, ...args));
-    lua.global.set("BeatStatic", (...args: any[]) => luaBeat(result, ...args));
-    lua.global.set("BPM", (...args: any[]) => luaBPM(result, null, ...args));
-    lua.global.set("BPMStatic", (...args: any[]) => luaBPM(result, ...args));
-    lua.global.set("Accel", (...args: any[]) =>
-      luaAccel(result, null, ...args)
-    );
-    lua.global.set("AccelStatic", (...args: any[]) =>
-      luaAccel(result, ...args)
-    );
+    (
+      [
+        ["Note", luaNote],
+        ["Step", luaStep],
+        ["Beat", luaBeat],
+        ["BPM", luaBPM],
+        ["Accel", luaAccel],
+      ] as const
+    ).forEach(([name, func]) => {
+      lua.global.set(name, (...args: any[]) => func(result, null, ...args));
+      lua.global.set(`${name}Static`, (...args: any[]) =>
+        func(result, ...args),
+      );
+    });
 
     const codeStatic = code.split("\n").map((lineStr, ln) =>
       lineStr
         .replace(
           /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
-          `$1NoteStatic(${ln},$2)$3`
+          `$1NoteStatic(${ln},$2)$3`,
         )
         .replace(
           /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
-          `$1StepStatic(${ln},$2)$3`
+          `$1StepStatic(${ln},$2)$3`,
         )
         .replace(
           /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
-          `$1BeatStatic(${ln},$2)$3`
+          `$1BeatStatic(${ln},$2)$3`,
         )
         .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
-        .replace(/^( *)Accel\(( *-?[\d.]+ *)\)( *)$/, `$1AccelStatic(${ln},$2)$3`)
+        .replace(
+          /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
+          `$1AccelStatic(${ln},$2)$3`,
+        ),
     );
     // console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
@@ -134,7 +143,7 @@ export async function luaExec(
   }
   updateBpmTimeSec(
     result.levelFreezed.bpmChanges,
-    result.levelFreezed.speedChanges
+    result.levelFreezed.speedChanges,
   );
   updateBarNum(result.levelFreezed.signature);
   return result;

@@ -65,7 +65,7 @@ export default function Result(props: Props) {
     props.brief,
     props.lang,
     serializedParam,
-    props.date,
+    props.date
   );
   useEffect(() => {
     setSerializedParam(serializeResultParams(props));
@@ -96,7 +96,7 @@ export default function Result(props: Props) {
         if (animScroll.current.at(i)) {
           animScroll.current.at(i)!();
         }
-      }, o),
+      }, o)
     );
     return () => {
       timers.forEach((t) => clearTimeout(t));
@@ -110,7 +110,7 @@ export default function Result(props: Props) {
       animationDuration: "200ms",
       animationTimingFunction: "linear",
       animationFillMode: "forwards",
-    }) as const;
+    } as const);
   const appearingAnimation = (index: number) =>
     ({
       transitionProperty: "all",
@@ -118,14 +118,14 @@ export default function Result(props: Props) {
       transitionDuration: "100ms",
       opacity: showing >= index ? 1 : 0,
       transform: showing >= index ? "scale(1)" : "scale(4)",
-    }) as const;
+    } as const);
   const appearingAnimation2 = (index: number) =>
     ({
       transitionProperty: "opacity",
       transitionTimingFunction: "ease-out",
       transitionDuration: "300ms",
       opacity: showing >= index ? 1 : 0,
-    }) as const;
+    } as const);
   const appearingAnimation3 = (index: number) =>
     ({
       transitionProperty: "opacity",
@@ -133,7 +133,7 @@ export default function Result(props: Props) {
       transitionDuration: "150ms",
       opacity: showing >= index ? 1 : 0,
       visibility: showing >= index ? "visible" : "hidden",
-    }) as const;
+    } as const);
   return (
     <CenterBox
       ref={ref}
@@ -168,8 +168,13 @@ export default function Result(props: Props) {
           <ResultRow
             visible={showing >= 3}
             name={t("bigNoteBonus")}
-            scoreStyle={jumpingAnimation(3)}
+            scoreStyle={
+              props.bigCount === null
+                ? appearingAnimation3(3)
+                : jumpingAnimation(3)
+            }
             score100={props.bigScore100}
+            disabled={props.bigCount === null}
           />
           <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
           <ResultRow
@@ -218,9 +223,9 @@ export default function Result(props: Props) {
                   (props.score100 >= 9000
                     ? "A."
                     : props.score100 >= 7000
-                      ? "B."
-                      : "C.") +
-                  (Math.floor(messageRandom.current * 3) + 1),
+                    ? "B."
+                    : "C.") +
+                  (Math.floor(messageRandom.current * 3) + 1)
               )}
             </div>
           )}
@@ -289,6 +294,7 @@ export default function Result(props: Props) {
 
 interface RowProps {
   visible: boolean;
+  disabled?: boolean;
   name: string;
   className?: string;
   scoreStyle?: object;
@@ -300,6 +306,7 @@ function ResultRow(props: RowProps) {
       className={
         "flex flex-row items-baseline " +
         (props.visible ? "" : "opacity-0 ") +
+        (props.disabled ? "text-slate-400 dark:text-stone-600 " : "") +
         (props.className || "")
       }
     >

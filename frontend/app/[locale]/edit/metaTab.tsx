@@ -21,7 +21,7 @@ import CheckBox from "@/common/checkBox.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { luaExec } from "@falling-nikochan/chart";
+import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/share";
 import { isStandalone } from "@/common/pwaInstall";
@@ -38,10 +38,6 @@ interface Props {
 export function MetaEdit(props: Props) {
   const t = useTranslations("edit.meta");
   const [hidePasswd, setHidePasswd] = useState<boolean>(true);
-  const hasLevelData =
-    props.chart?.levels &&
-    props.chart.levels.length > 0 &&
-    props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
 
   return (
     <>
@@ -124,26 +120,6 @@ export function MetaEdit(props: Props) {
         </CheckBox>
         <HelpIcon>{t.rich("savePasswdHelp", { br: () => <br /> })}</HelpIcon>
       </p>
-      <p>
-        <CheckBox
-          className="ml-0 "
-          value={props.chart?.published || false}
-          onChange={(v: boolean) =>
-            props.chart && props.setChart({ ...props.chart, published: v })
-          }
-          disabled={!hasLevelData || !props.chart?.ytId}
-        >
-          {t("publish")}
-        </CheckBox>
-        <HelpIcon>{t.rich("publishHelp", { br: () => <br /> })}</HelpIcon>
-        <span className="inline-block ml-2 text-sm">
-          {!props.chart?.ytId
-            ? t("publishFail.noId")
-            : !hasLevelData
-              ? t("publishFail.empty")
-              : null}
-        </span>
-      </p>
     </>
   );
 }
@@ -182,6 +158,10 @@ export function MetaTab(props: Props2) {
     setErrorMsg("");
     setSaveMsg("");
   }, [props.chart]);
+  const hasLevelData =
+    props.chart?.levels &&
+    props.chart.levels.length > 0 &&
+    props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
 
   const save = async () => {
     setSaving(true);
@@ -488,6 +468,27 @@ export function MetaTab(props: Props2) {
           </div>
         </>
       )}
+      <p className="mb-2 ml-2 ">
+        <CheckBox
+          className="ml-0 "
+          value={props.chart?.published || false}
+          onChange={(v: boolean) =>
+            props.chart && props.setChart({ ...props.chart, published: v })
+          }
+          disabled={!hasLevelData || !props.chart?.ytId}
+        >
+          {t("publish")}
+        </CheckBox>
+        <HelpIcon>{t.rich("publishHelp", { br: () => <br /> })}</HelpIcon>
+        <span className="inline-block ml-2 text-sm">
+          {!props.chart?.ytId
+            ? t("publishFail.noId")
+            : !hasLevelData
+              ? t("publishFail.empty")
+              : null}
+        </span>
+      </p>
+
       <div className="mb-4">
         <span className="">{t("localSaveLoad")}</span>
         <HelpIcon>

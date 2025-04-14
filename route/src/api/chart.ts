@@ -22,6 +22,7 @@ import {
   Rest9,
   BPMChange9,
   Signature9,
+  Chart11Edit,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { gzip, gunzip } from "node:zlib";
@@ -48,7 +49,14 @@ export async function getChartEntry(
   p: Passwd | null,
 ): Promise<{
   entry: ChartEntry;
-  chart: Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit;
+  chart:
+    | Chart4
+    | Chart5
+    | Chart6
+    | Chart7
+    | Chart8Edit
+    | Chart9Edit
+    | Chart11Edit;
 }> {
   if (!v.parse(CidSchema(), cid)) {
     throw new HTTPException(400, { message: "invalidChartId" });
@@ -131,7 +139,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   offset: number;
   ytId: string;
   title: string;
@@ -142,6 +150,7 @@ export interface ChartEntryCompressed {
   updatedAt: number;
   ip: string[];
   locale: string;
+  copyBuffer?: (NoteCommand9 | null)[];
   levelBrief: ChartLevelBrief[];
 }
 export interface ChartLevelBrief {
@@ -186,12 +195,24 @@ export interface ChartLevelCore9 {
   signature: Signature9[];
   lua: string[];
 }
+export interface ChartLevelCore11 {
+  notes: NoteCommand9[];
+  rest: Rest9[];
+  bpmChanges: BPMChange9[];
+  speedChanges: SpeedChange9[];
+  signature: Signature9[];
+  lua: string[];
+  ytBegin: number;
+  ytEndSec: number;
+  ytEnd: "note" | "yt" | number;
+}
 export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
     | { ver: 5 | 6; levels: ChartLevelCore5[] }
     | { ver: 7 | 8; levels: ChartLevelCore7[] }
     | { ver: 9 | 10; levels: ChartLevelCore9[] }
+    | { ver: 11; levels: ChartLevelCore11[] }
   );
 
 export async function unzipEntry(
@@ -231,6 +252,7 @@ export async function zipEntry(
     updatedAt: entry.updatedAt,
     ip: entry.ip,
     locale: entry.locale,
+    copyBuffer: entry.copyBuffer, // ver11〜
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
   };
@@ -280,6 +302,9 @@ export async function chartToEntry(
       speedChanges: level.speedChanges,
       signature: level.signature,
       lua: level.lua,
+      ytBegin: level.ytBegin,
+      ytEndSec: level.ytEndSec,
+      ytEnd: level.ytEnd,
     })),
     ver: chart.ver,
     published: chart.published,
@@ -294,6 +319,7 @@ export async function chartToEntry(
     levelBrief: chartBrief.levels,
     ip,
     locale: chartBrief.locale,
+    copyBuffer: chart.copyBuffer,
   };
 }
 export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
@@ -311,7 +337,7 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
 
 export function entryToChart(
   entry: ChartEntry,
-): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit {
+): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit | Chart11Edit {
   switch (entry.ver) {
     case 4:
       return {
@@ -455,6 +481,34 @@ export function entryToChart(
         chartCreator: entry.chartCreator,
         changePasswd: null,
         locale: entry.locale,
+      };
+    case 11:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        published: entry.published,
+        levels: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          type: entry.levelBrief.at(i)?.type || "Maniac",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          lua: level.lua,
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+          ytBegin: level.ytBegin,
+          ytEndSec: level.ytEndSec,
+          ytEnd: level.ytEnd,
+        })),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        changePasswd: null,
+        locale: entry.locale,
+        copyBuffer: entry.copyBuffer!,
       };
     default:
       throw new HTTPException(500, { message: "unsupportedChartVersion" });

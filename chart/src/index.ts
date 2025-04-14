@@ -21,15 +21,13 @@ export * from "./legacy/chart6.js";
 export * from "./legacy/chart7.js";
 export * from "./legacy/chart8.js";
 export * from "./legacy/chart9.js";
+export * from "./legacy/chart11.js";
 export * from "./legacy/seq6.js";
 export * from "./legacy/seq7.js";
-export * from "./legacy/seq9.js";
+export * from "./legacy/seq11.js";
 
 export * from "./lua/bpm.js"
 export * from "./lua/edit.js"
 export * from "./lua/note.js"
 export * from "./lua/signature.js"
 export * from "./lua/speed.js"
-
-export * from "./luaExec/api.js";
-export * from "./luaExec/exec.js";

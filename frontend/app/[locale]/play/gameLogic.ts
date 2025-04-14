@@ -46,7 +46,7 @@ export default function useGameLogic(
   const bigScore = (bigCount / (bigTotal || 1)) * bigScoreRate;
   const score = baseScore + chainScore + bigScore;
 
-  const end = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
+  const chartEnd = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
 
   const [chain, setChain] = useState<number>(0);
   const chainRef = useRef<number>(0);
@@ -288,9 +288,9 @@ export default function useGameLogic(
     resetNotesAll,
     hit,
     judgeCount,
-    bigCount,
+    bigCount: bigTotal === 0 ? null : bigCount,
     bigTotal,
-    end,
+    chartEnd,
     lateTimes,
   };
 }
