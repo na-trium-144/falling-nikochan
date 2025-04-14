@@ -288,7 +288,7 @@ export default function useGameLogic(
     resetNotesAll,
     hit,
     judgeCount,
-    bigCount,
+    bigCount: bigTotal === 0 ? null : bigCount,
     bigTotal,
     chartEnd,
     lateTimes,

@@ -60,7 +60,15 @@ export function SharedResultBox(props: Props) {
                 ["bigNoteBonus", props.result.bigScore100],
               ] as const
             ).map(([name, score100], i) => (
-              <p key={i} className="flex flex-row w-full items-baseline ">
+              <p
+                key={i}
+                className={
+                  "flex flex-row w-full items-baseline " +
+                  (name === "bigNoteBonus" && props.result.bigCount === null
+                    ? "text-slate-400 dark:text-stone-600 "
+                    : "")
+                }
+              >
                 <span className="flex-1 text-sm ">{t(name)}:</span>
                 <span className="text-2xl">{Math.floor(score100 / 100)}</span>
                 <span className="">.</span>
@@ -106,7 +114,7 @@ export function SharedResultBox(props: Props) {
         <div
           className={
             "w-32 flex flex-col justify-center " +
-            "text-slate-500 dark:text-stone-400 "
+            "text-slate-400 dark:text-stone-600 "
           }
         >
           {["good", "ok", "bad", "miss"].map((name, ji) => (
@@ -120,7 +128,7 @@ export function SharedResultBox(props: Props) {
           ))}
           <div className="flex flex-row items-baseline ">
             <span className="flex-1 text-xs ">{ts("big")}</span>
-            <span className="text-base ">{props.result.bigCount}</span>
+            <span className="text-base ">{props.result.bigCount || 0}</span>
           </div>
         </div>
       </div>

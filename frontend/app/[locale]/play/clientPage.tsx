@@ -775,12 +775,12 @@ function Play(props: Props) {
                 className={
                   "z-10 flex-none m-3 self-end " +
                   "transition-opacity duration-100 " +
-                  (!statusHide && musicAreaOk
+                  (!statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100 "
                     : "ease-out opacity-0 ")
                 }
                 judgeCount={judgeCount}
-                bigCount={bigCount}
+                bigCount={bigCount || 0}
                 bigTotal={bigTotal}
                 notesTotal={notesAll.length}
                 isMobile={false}
@@ -983,7 +983,7 @@ function Play(props: Props) {
                 margin: 1 * rem * mobileStatusScale,
               }}
               judgeCount={judgeCount}
-              bigCount={bigCount}
+              bigCount={bigCount || 0}
               bigTotal={bigTotal}
               notesTotal={notesAll.length}
               isMobile={true}
@@ -1010,7 +1010,7 @@ function Play(props: Props) {
           className="z-20 absolute my-auto h-max inset-y-0"
           style={{ right: "0.75rem" }}
           judgeCount={judgeCount}
-          bigCount={bigCount}
+          bigCount={bigCount || 0}
           bigTotal={bigTotal}
           notesTotal={notesAll.length}
           isMobile={false}
