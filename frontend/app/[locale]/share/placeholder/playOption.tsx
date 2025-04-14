@@ -7,7 +7,6 @@ import {
   RecordGetSummary,
 } from "@falling-nikochan/chart";
 import {
-  clearBestScore,
   getBestScore,
   ResultData,
 } from "@/common/bestScore.js";
@@ -36,7 +35,7 @@ export function PlayOption(props: Props) {
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number | null>(
     // props.brief.levels.findIndex((l) => !l.unlisted),
-    null,
+    null
   );
   const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
@@ -89,7 +88,7 @@ export function PlayOption(props: Props) {
                     }
                   />
                 </li>
-              ),
+              )
           )}
         </ul>
         {levelsNum === 0 && <p>{t("unavailable")}</p>}
@@ -197,21 +196,20 @@ function SelectedLevelInfo(props: {
     props.selectedLevel === null
       ? null
       : props.record.find(
-          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
+          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
         );
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
   useEffect(() => {
     if (props.selectedLevel >= 0) {
-      const data = getBestScore(props.cid, props.selectedLevel);
-      if (
-        data &&
-        data.levelHash === props.brief.levels[props.selectedLevel].hash
-      ) {
+      const data = getBestScore(
+        props.cid,
+        props.brief.levels[props.selectedLevel].hash
+      );
+      if (data) {
         setBestScoreState(data);
       } else {
         setBestScoreState(undefined);
-        clearBestScore(props.cid, props.selectedLevel);
       }
     }
   }, [props.cid, props.selectedLevel, props.brief]);
@@ -251,7 +249,7 @@ function SelectedLevelInfo(props: {
           </span>
           <span className="text-lg">
             {Math.floor(
-              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60,
+              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60
             )}
           </span>
           <span className="text-lg">:</span>
