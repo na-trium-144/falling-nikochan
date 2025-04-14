@@ -1,3 +1,7 @@
+## ver. 11.5 - 2025/04/14 [#477](https://github.com/na-trium-144/falling-nikochan/pull/477)
+
+* Big音符が1つも無いときBig音符数表示とresultのBigボーナス表示はグレーで表示するようにした
+
 ## ver. 11.0 - 2025/04/13 [#457](https://github.com/na-trium-144/falling-nikochan/pull/457)
 
 * 動画の再生開始位置と再生終了位置の指定を追加

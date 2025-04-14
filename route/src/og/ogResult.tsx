@@ -22,6 +22,7 @@ import {
   bold,
   slate500,
   amber500,
+  slate400,
 } from "./style.js";
 import { ChartBriefMin } from "./app.js";
 
@@ -191,7 +192,15 @@ export async function OGResult(
               ).map(([name, score], i) => (
                 <div
                   key={i}
-                  style={{ ...flexRow, width: "100%", marginBottom: 2 * 4 }}
+                  style={{
+                    ...flexRow,
+                    width: "100%",
+                    marginBottom: 2 * 4,
+                    color:
+                      name === "bigNoteBonus" && params.bigCount === null
+                        ? slate400
+                        : undefined,
+                  }}
                 >
                   <span style={{ flexGrow: 1, ...text2xl }}>{t(name)}:</span>
                   <span style={{ ...text5xl }}>{Math.floor(score / 100)}</span>
@@ -269,9 +278,14 @@ export async function OGResult(
             <span style={{ ...text4xl }}>{params.judgeCount[ji]}</span>
           </div>
         ))}
-        <div style={{ ...flexRow }}>
+        <div
+          style={{
+            ...flexRow,
+            color: params.bigCount === null ? slate400 : undefined,
+          }}
+        >
           <span style={{ ...text2xl, flexGrow: 1 }}>{ts("big")}</span>
-          <span style={{ ...text4xl }}>{params.bigCount}</span>
+          <span style={{ ...text4xl }}>{params.bigCount || 0}</span>
         </div>
       </div>
       {/* zIndexが効かなさそうなので代わりに順番を変えて解決 */}

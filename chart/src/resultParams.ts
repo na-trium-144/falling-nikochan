@@ -13,7 +13,7 @@ export interface ResultParams {
   bigScore100: number;
   score100: number;
   judgeCount: readonly [number, number, number, number];
-  bigCount: number;
+  bigCount: number | null; // null: 存在しない
 }
 // ここではレベルの指定はlvIndexやlvHashではなく、名前と内容を直接保存しているので
 // レベルの順番が変わったり更新されたりしても記録は有効
@@ -29,7 +29,7 @@ export const ResultSerializedSchema = () =>
     v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [7] bigScore100
     v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(12000)), // [8] score100
     v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)), // [9] judgeCount
-    v.pipe(v.number(), v.integer(), v.minValue(0)), // [10] bigCount
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [10] bigCount
   ]);
 export type ResultSerialized = v.InferOutput<
   ReturnType<typeof ResultSerializedSchema>

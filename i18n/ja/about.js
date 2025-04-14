@@ -67,7 +67,7 @@ export default {
         "すべて<good>よい</good>判定なら合計 {baseScoreRate} 点になり、" +
         "<ok>まあまあ</ok>判定は よい 判定の {okBaseScore} 倍の点数が入ります。",
       content4:
-        "<b>コンボボーナス</b> ({chainScoreRate} 点満点) はChainに応じて入るボーナス得点です。" +
+        "<b>コンボボーナス</b> ({chainScoreRate} 点満点) はコンボに応じて入るボーナス得点です。" +
         "コンボをつなげればつなげるほど増えます。",
       content5:
         "<b>Big ボーナス</b> ({bigScoreRate} 点満点) は大きいニコチャンを2本指で叩いた場合に入るボーナス得点です。",
