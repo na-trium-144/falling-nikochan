@@ -114,7 +114,7 @@ export function SharedResultBox(props: Props) {
         <div
           className={
             "w-32 flex flex-col justify-center " +
-            "text-slate-400 dark:text-stone-600 "
+            "text-slate-500 dark:text-stone-400 "
           }
         >
           {["good", "ok", "bad", "miss"].map((name, ji) => (
@@ -126,7 +126,14 @@ export function SharedResultBox(props: Props) {
               <span className="text-base ">{props.result.judgeCount[ji]}</span>
             </div>
           ))}
-          <div className="flex flex-row items-baseline ">
+          <div
+            className={
+              "flex flex-row items-baseline " +
+              (props.result.bigCount === null
+                ? "text-slate-400 dark:text-stone-600 "
+                : "")
+            }
+          >
             <span className="flex-1 text-xs ">{ts("big")}</span>
             <span className="text-base ">{props.result.bigCount || 0}</span>
           </div>
