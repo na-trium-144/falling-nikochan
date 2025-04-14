@@ -916,17 +916,9 @@ function Page(props: Props) {
       if (currentLevelLength !== length) {
         setCurrentLevelLength(length);
       }
-      if (chart) {
-        let hasChange = false;
-        for (const level of chart.levels) {
-          if (level.ytEnd === "note" && level.ytEndSec !== length) {
-            level.ytEndSec = length;
-            hasChange = true;
-          }
-        }
-        if (hasChange) {
-          changeChart({ ...chart });
-        }
+      if (currentLevel.ytEnd === "note" && currentLevel.ytEndSec !== length) {
+        currentLevel.ytEndSec = length;
+        changeChart({ ...chart! });
       }
     }
   }, [currentLevel, chart, changeChart, currentLevelLength]);
