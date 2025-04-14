@@ -52,7 +52,7 @@ export default function StatusBox(props: Props) {
             <StatusValue>{props.judgeCount[ji]}</StatusValue>
           </StatusItem>
         ))}
-        <StatusItem wide>
+        <StatusItem wide disabled={props.bigTotal === 0}>
           <StatusName>{t("big")}</StatusName>
           <StatusValue>{props.bigCount}</StatusValue>
           {!props.isMobile && (
@@ -63,7 +63,14 @@ export default function StatusBox(props: Props) {
           )}
         </StatusItem>
         {props.isMobile && screenWidth >= 39 * rem && (
-          <span className="flex-none w-12 pl-1 self-end translate-y-1 flex flex-row items-baseline mr-2">
+          <span
+            className={
+              "flex-none w-12 pl-1 self-end translate-y-1 flex flex-row items-baseline mr-2 " +
+              (props.bigTotal === 0
+                ? "text-slate-400 dark:text-stone-600 "
+                : "")
+            }
+          >
             <span className="flex-1">/</span>
             <span>{props.bigTotal}</span>
           </span>
@@ -91,15 +98,20 @@ export default function StatusBox(props: Props) {
   );
 }
 
-function StatusItem(props: { wide?: boolean; children: ReactNode[] }) {
+function StatusItem(props: {
+  wide?: boolean;
+  children: ReactNode[];
+  disabled?: boolean;
+}) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   return (
     <div
       className={
-        isMobile
-          ? "flex-1 basis-1 flex flex-col mr-2"
-          : "flex flex-row items-baseline " + (props.wide ? "" : "mr-12")
+        (isMobile
+          ? "flex-1 basis-1 flex flex-col mr-2 "
+          : "flex flex-row items-baseline " + (props.wide ? "" : "mr-12 ")) +
+        (props.disabled ? "text-slate-400 dark:text-stone-600 " : "")
       }
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
