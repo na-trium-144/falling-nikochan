@@ -16,6 +16,7 @@ export default async function Page({ params }: MetadataProps) {
       type="popular"
       tabKey="play"
       mobileTabKey="play"
+      badge
     />
   );
 }

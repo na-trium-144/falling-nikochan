@@ -1,19 +1,43 @@
-function bestKey(cid: string, lvIndex: number) {
-  return "best-" + cid + "-" + lvIndex;
+function bestKey(cid: string, lvHash: string) {
+  return `best-${cid}-${lvHash.slice(0, 8)}`;
 }
 export interface ResultData {
-  levelHash: string;
   baseScore: number;
   chainScore: number;
   bigScore: number;
   judgeCount: [number, number, number, number];
 }
-export function getBestScore(cid: string, lvIndex: number): ResultData | null {
-  return JSON.parse(localStorage.getItem(bestKey(cid, lvIndex)) || "null");
+interface ResultDataOld extends ResultData {
+  levelHash: string;
 }
-export function setBestScore(cid: string, lvIndex: number, data: ResultData) {
-  localStorage.setItem(bestKey(cid, lvIndex), JSON.stringify(data));
+export function getBestScore(cid: string, lvHash: string): ResultData | null {
+  let bestScore: ResultData | null = JSON.parse(
+    localStorage.getItem(bestKey(cid, lvHash)) || "null"
+  );
+  if (!bestScore) {
+    for (let i = 0; i < 10; i++) {
+      const oldKey = `best-${cid}-${i}`;
+      const oldScore: ResultDataOld | null = JSON.parse(
+        localStorage.getItem(oldKey) || "null"
+      );
+      if (oldScore && oldScore.levelHash === lvHash) {
+        bestScore = {
+          baseScore: oldScore.baseScore,
+          chainScore: oldScore.chainScore,
+          bigScore: oldScore.bigScore,
+          judgeCount: oldScore.judgeCount,
+        };
+        localStorage.setItem(bestKey(cid, lvHash), JSON.stringify(bestScore));
+        localStorage.removeItem(oldKey);
+        break;
+      }
+    }
+  }
+  return bestScore;
 }
-export function clearBestScore(cid: string, lvIndex: number) {
-  localStorage.removeItem(bestKey(cid, lvIndex));
+export function setBestScore(cid: string, lvHash: string, data: ResultData) {
+  localStorage.setItem(bestKey(cid, lvHash), JSON.stringify(data));
+}
+export function clearBestScore(cid: string, lvHash: string) {
+  localStorage.removeItem(bestKey(cid, lvHash));
 }

@@ -16,6 +16,8 @@ import { IndexMain } from "./main.js";
 import { useShareModal } from "./shareModal.jsx";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { TabKeys } from "@/common/footer.jsx";
+import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
+import { getBestScore } from "@/common/bestScore.js";
 
 interface PProps {
   locale: string;
@@ -24,6 +26,7 @@ interface PProps {
   mobileTabKey: "top" | "play";
   type: ChartListType;
   dateDiff?: boolean;
+  badge?: boolean;
 }
 export default function ChartListPage(props: PProps) {
   const { modal, openModal, openShareInternal } = useShareModal(
@@ -57,6 +60,7 @@ export default function ChartListPage(props: PProps) {
         showLoading
         dateDiff={props.dateDiff}
         moreHref=""
+        badge={props.badge}
       />
     </IndexMain>
   );
@@ -80,6 +84,7 @@ interface Props {
   onClickMobile?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
   moreHref: string;
+  badge?: boolean;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
@@ -190,6 +195,7 @@ export function ChartList(props: Props) {
               original={briefs.at(i)!.original}
               newTab={props.newTab}
               dateDiff={props.dateDiff}
+              badge={props.badge}
             />
           ) : (
             <li
@@ -257,6 +263,7 @@ interface CProps {
   original?: boolean;
   newTab?: boolean;
   dateDiff?: boolean;
+  badge?: boolean;
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
@@ -312,8 +319,22 @@ export function ChartListItem(props: CProps) {
   );
 }
 function ChartListItemChildren(props: CProps) {
+  const [status, setStatus] = useState<BadgeStatus[]>([]);
+  useEffect(() => {
+    if (props.badge) {
+      setStatus(
+        props.brief?.levels
+          .filter((l) => !l.unlisted)
+          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || [],
+      );
+    } else {
+      setStatus([]);
+    }
+  }, [props.cid, props.brief, props.badge]);
+
   return (
-    <div className="flex flex-row items-center space-x-2 ">
+    <div className="relative flex flex-row items-center gap-2 ">
+      <LevelBadge className="absolute top-0 -right-1" status={status} />
       <div className="flex-none ">
         {props.brief?.ytId ? (
           <img
