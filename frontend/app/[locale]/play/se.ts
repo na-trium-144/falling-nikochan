@@ -93,7 +93,14 @@ export function useSE(cid: string | undefined, userOffset: number) {
           ? audioContext.current.baseLatency +
             audioContext.current.outputLatency
           : null;
-      if (audioLatency !== latency) {
+      if (
+        audioLatency === undefined ||
+        (audioLatency === null && latency !== null) ||
+        (audioLatency !== null && latency === null) ||
+        (typeof audioLatency === "number" &&
+          typeof latency === "number" &&
+          audioLatency < latency)
+      ) {
         setAudioLatency(latency);
       }
     }, 100);
