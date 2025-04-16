@@ -6,10 +6,7 @@ import {
   rankStr,
   RecordGetSummary,
 } from "@falling-nikochan/chart";
-import {
-  getBestScore,
-  ResultData,
-} from "@/common/bestScore.js";
+import { getBestScore, ResultData } from "@/common/bestScore.js";
 import Button from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
@@ -22,6 +19,7 @@ import { useEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
+import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 
 interface Props {
   cid: string;
@@ -32,10 +30,19 @@ export function PlayOption(props: Props) {
   const t = useTranslations("share");
   const router = useRouter();
 
+  const [status, setStatus] = useState<BadgeStatus[]>([]);
+  useEffect(() => {
+    setStatus(
+      props.brief?.levels
+        // .filter((l) => !l.unlisted)
+        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || [],
+    );
+  }, [props.cid, props.brief]);
+
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number | null>(
     // props.brief.levels.findIndex((l) => !l.unlisted),
-    null
+    null,
   );
   const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
@@ -64,16 +71,17 @@ export function PlayOption(props: Props) {
                 <li
                   key={i}
                   className={
-                    "relative w-full " +
+                    "relative leading-0 w-full " +
                     (selectedLevel !== null && selectedLevel >= 0
                       ? "pr-4 "
-                      : "")
+                      : "pr-2 ")
                   }
                 >
                   <LevelButton
                     selected={selectedLevel === i}
                     onClick={() => setSelectedLevel(i)}
                     level={level}
+                    status={status.at(i)}
                   />
                   <span
                     className={
@@ -88,7 +96,7 @@ export function PlayOption(props: Props) {
                     }
                   />
                 </li>
-              )
+              ),
           )}
         </ul>
         {levelsNum === 0 && <p>{t("unavailable")}</p>}
@@ -152,12 +160,13 @@ function LevelButton(props: {
   selected: boolean;
   onClick: () => void;
   level: { name: string; type: string; difficulty: number };
+  status: BadgeStatus;
 }) {
   return (
     <button
       className={
-        "text-left truncate w-full cursor-pointer " +
-        "rounded px-2 py-0.5 my-0.5 " +
+        "cursor-pointer w-full " +
+        "relative rounded px-2 py-0.5 my-0.5 " +
         (props.selected
           ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50 "
           : "hover:shadow hover:mt-0 hover:mb-1 " +
@@ -167,18 +176,24 @@ function LevelButton(props: {
       }
       onClick={props.onClick}
     >
-      {props.level.name && (
-        <span className="mr-2 font-title ">{props.level.name}</span>
-      )}
-      <span
-        className={
-          props.selected
-            ? levelColors[levelTypes.indexOf(props.level.type)]
-            : ""
-        }
-      >
-        <span className="text-sm">{props.level.type}-</span>
-        <span className="text-lg">{props.level.difficulty}</span>
+      <LevelBadge
+        className="absolute top-0.5 -right-3 "
+        status={[props.status]}
+      />
+      <span className="inline-block text-center truncate w-full ">
+        {props.level.name && (
+          <span className="mr-2 font-title ">{props.level.name}</span>
+        )}
+        <span
+          className={
+            props.selected
+              ? levelColors[levelTypes.indexOf(props.level.type)]
+              : ""
+          }
+        >
+          <span className="text-sm">{props.level.type}-</span>
+          <span className="text-lg">{props.level.difficulty}</span>
+        </span>
       </span>
     </button>
   );
@@ -196,7 +211,7 @@ function SelectedLevelInfo(props: {
     props.selectedLevel === null
       ? null
       : props.record.find(
-          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
+          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
         );
 
   const [bestScoreState, setBestScoreState] = useState<ResultData>();
@@ -204,7 +219,7 @@ function SelectedLevelInfo(props: {
     if (props.selectedLevel >= 0) {
       const data = getBestScore(
         props.cid,
-        props.brief.levels[props.selectedLevel].hash
+        props.brief.levels[props.selectedLevel].hash,
       );
       if (data) {
         setBestScoreState(data);
@@ -249,7 +264,7 @@ function SelectedLevelInfo(props: {
           </span>
           <span className="text-lg">
             {Math.floor(
-              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60
+              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60,
             )}
           </span>
           <span className="text-lg">:</span>

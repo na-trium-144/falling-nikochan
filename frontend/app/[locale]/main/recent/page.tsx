@@ -16,6 +16,7 @@ export default async function Page({ params }: MetadataProps) {
       type="recent"
       tabKey={null}
       mobileTabKey="top"
+      badge
     />
   );
 }

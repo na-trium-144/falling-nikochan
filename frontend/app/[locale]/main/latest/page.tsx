@@ -17,6 +17,7 @@ export default async function Page({ params }: MetadataProps) {
       tabKey="play"
       mobileTabKey="play"
       dateDiff
+      badge
     />
   );
 }
