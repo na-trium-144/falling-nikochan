@@ -35,6 +35,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           onClickMobile={openShareInternal}
           showLoading
           moreHref={`/${locale}/main/popular`}
+          badge
         />
       </div>
       <div className="flex-none mb-3 ">
@@ -53,6 +54,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           showLoading
           dateDiff
           moreHref={`/${locale}/main/latest`}
+          badge
         />
       </div>
       <div className="flex-none mb-3 ">
@@ -91,6 +93,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           onClickMobile={openShareInternal}
           showLoading
           moreHref=""
+          badge
         />
       </div>
     </IndexMain>

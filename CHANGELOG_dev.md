@@ -1,3 +1,12 @@
+## ver. 11.7 - 2025/04/16 [#496](https://github.com/na-trium-144/falling-nikochan/pull/496)
+
+* プレイ中にoutputLatencyの値が揺れるのを対策するため、latencyの最大値を使用する
+
+## ver. 11.6 - 2025/04/16 [#476](https://github.com/na-trium-144/falling-nikochan/pull/476)
+
+* ベストスコアの保存をlvIndexではなくlvHashで管理するようにした
+* chartListとレベル選択からクリア・フルコンボ状況がわかるバッジを追加
+
 ## ver. 11.5 - 2025/04/14 [#477](https://github.com/na-trium-144/falling-nikochan/pull/477)
 
 * Big音符が1つも無いときBig音符数表示とresultのBigボーナス表示はグレーで表示するようにした
