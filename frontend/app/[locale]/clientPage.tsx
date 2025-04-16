@@ -138,6 +138,7 @@ export default function TopPage(props: Props) {
             onClickMobile={openShareInternal}
             showLoading
             moreHref={`/${locale}/main/recent`}
+            badge
           />
         </div>
 
