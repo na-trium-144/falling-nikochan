@@ -10,7 +10,7 @@ import { ShareInternalSession } from "./shareInternal/clientPage";
 
 export function useShareModal(locale: string, from: "play" | "top") {
   const th = useTranslations("share");
-  const t = useTranslations("main.play");
+  const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
   const [modalRecord, setModalRecord] = useState<RecordGetSummary[]>([]);
@@ -43,7 +43,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
         .catch(() => setModalRecord([]));
       setTimeout(() => setModalAppearing(true));
     },
-    [th],
+    [th]
   );
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
@@ -53,12 +53,12 @@ export function useShareModal(locale: string, from: "play" | "top") {
           JSON.stringify({
             cid,
             fromPlay: from === "play",
-          } satisfies ShareInternalSession),
+          } satisfies ShareInternalSession)
         );
         router.push(`/${locale}/main/shareInternal`);
       }
     },
-    [locale, from, router],
+    [locale, from, router]
   );
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
@@ -69,7 +69,14 @@ export function useShareModal(locale: string, from: "play" | "top") {
         openModal(cid);
       } else {
         setModalAppearing(false);
-        document.title = titleWithSiteName(t("title"));
+        switch (from) {
+          case "play":
+            document.title = titleWithSiteName(tp("title"));
+            break;
+          case "top":
+            document.title = titleWithSiteName("");
+            break;
+        }
         setTimeout(() => {
           setModalCId(null);
           setModalBrief(null);
@@ -78,7 +85,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, [openModal, t]);
+  }, [openModal, from, tp]);
 
   const modal: ReactNode = modalCId && modalBrief && (
     <div
