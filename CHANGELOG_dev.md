@@ -1,3 +1,7 @@
+## ver. 11.9 - 2025/04/17 [#499](https://github.com/na-trium-144/falling-nikochan/pull/499)
+
+* 非表示のレベルの編集では日付を更新しないようにする
+
 ## ver. 11.7 - 2025/04/16 [#496](https://github.com/na-trium-144/falling-nikochan/pull/496)
 
 * プレイ中にoutputLatencyの値が揺れるのを対策するため、latencyの最大値を使用する
