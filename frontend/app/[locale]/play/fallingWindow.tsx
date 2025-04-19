@@ -15,12 +15,14 @@ interface Props {
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
-  frameDrop: number;
+  maxFPS: number;
+  frameDrop: number | null;
   barFlash: boolean;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS, frameDrop } = props;
+  const { notes, playing, getCurrentTimeSec, setFPS, maxFPS, frameDrop } =
+    props;
   const [displayNotes, setDisplayNotes] = useState<
     DisplayNote6[] | DisplayNote7[]
   >([]);
@@ -34,14 +36,24 @@ export default function FallingWindow(props: Props) {
   const { rem } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
-  const update = useRef<() => void | null>(null);
-  const dropCount = useRef<number>(0);
+  const update = useRef<(ts: DOMHighResTimeStamp) => void | null>(null);
+  const prevUpdate = useRef<DOMHighResTimeStamp | null>(null);
   const fpsCounter = useRef<Date[]>([]);
   useEffect(() => {
-    update.current = () => {
-      dropCount.current = (dropCount.current + 1) % frameDrop;
-      if (dropCount.current === 0) {
+    update.current = (ts: DOMHighResTimeStamp) => {
+      if (
+        prevUpdate.current === null ||
+        frameDrop === null ||
+        ts - prevUpdate.current > 1000 / (maxFPS / (frameDrop - 0.5))
+      ) {
         const now = getCurrentTimeSec();
+        if (playing) {
+          console.log(
+            "update",
+            (((new Date().getTime() / 1000) * 60) % 100).toFixed(2),
+            ((now || 0) * 60).toFixed(2),
+          );
+        }
         if (
           playing &&
           marginX !== undefined &&
@@ -71,9 +83,15 @@ export default function FallingWindow(props: Props) {
         if (setFPS) {
           setFPS(fpsCounter.current.length);
         }
+        // if (prevUpdate.current === null) {
+        prevUpdate.current = ts;
+        // } else {
+        //   dropCount.current += (ts - prevUpdate.current) / (1000 / targetFPS);
+        // }
       }
     };
   }, [
+    maxFPS,
     frameDrop,
     notes,
     playing,
@@ -85,8 +103,8 @@ export default function FallingWindow(props: Props) {
   ]);
   useEffect(() => {
     let animFrame: number;
-    const updateLoop = () => {
-      update.current?.();
+    const updateLoop = (ts: DOMHighResTimeStamp) => {
+      update.current?.(ts);
       animFrame = requestAnimationFrame(updateLoop);
     };
     animFrame = requestAnimationFrame(updateLoop);
