@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
@@ -15,15 +15,14 @@ interface Props {
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
-  frameDrop: number;
+  maxFPS: number;
+  frameDrop: number | null;
   barFlash: boolean;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS, frameDrop } = props;
-  const [displayNotes, setDisplayNotes] = useState<
-    DisplayNote6[] | DisplayNote7[]
-  >([]);
+  const { notes, playing, getCurrentTimeSec, setFPS, maxFPS, frameDrop } =
+    props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -34,64 +33,67 @@ export default function FallingWindow(props: Props) {
   const { rem } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
-  const update = useRef<() => void | null>(null);
-  const dropCount = useRef<number>(0);
+  const [rerenderIndex, setRerenderIndex] = useState<number>(0);
   const fpsCounter = useRef<Date[]>([]);
-  useEffect(() => {
-    update.current = () => {
-      dropCount.current = (dropCount.current + 1) % frameDrop;
-      if (dropCount.current === 0) {
-        const now = getCurrentTimeSec();
-        if (
-          playing &&
-          marginX !== undefined &&
-          marginY !== undefined &&
-          boxSize &&
-          now !== undefined
-        ) {
-          setDisplayNotes(
-            notes
-              .map((n) =>
-                n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now),
-              )
-              .filter((n) => n !== null),
-          );
-        } else {
-          setDisplayNotes([]);
-        }
-
-        const nowDate = new Date();
-        fpsCounter.current.push(nowDate);
-        while (
-          fpsCounter.current.at(0) &&
-          nowDate.getTime() - fpsCounter.current.at(0)!.getTime() > 1000
-        ) {
-          fpsCounter.current.shift();
-        }
-        if (setFPS) {
-          setFPS(fpsCounter.current.length);
-        }
-      }
-    };
-  }, [
-    frameDrop,
-    notes,
-    playing,
-    getCurrentTimeSec,
-    marginX,
-    marginY,
-    boxSize,
-    setFPS,
-  ]);
   useEffect(() => {
     let animFrame: number;
     const updateLoop = () => {
-      update.current?.();
+      setRerenderIndex((r) => r + 1);
       animFrame = requestAnimationFrame(updateLoop);
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
   }, []);
+
+  const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
+  const prevRerenderIndex = useRef<number>(-1);
+  const prevRerender = useRef<Date | null>(null);
+  if (
+    prevRerender.current === null ||
+    (prevRerenderIndex.current !== rerenderIndex && frameDrop === null) ||
+    (frameDrop !== null &&
+      new Date().getTime() - prevRerender.current.getTime() >
+        1000 / (maxFPS / (frameDrop - 0.5)))
+  ) {
+    const nowDate = new Date();
+    fpsCounter.current.push(nowDate);
+    while (
+      fpsCounter.current.at(0) &&
+      nowDate.getTime() - fpsCounter.current.at(0)!.getTime() > 1000
+    ) {
+      fpsCounter.current.shift();
+    }
+    if (setFPS) {
+      setFPS(fpsCounter.current.length);
+    }
+    if (
+      prevRerender.current === null ||
+      frameDrop === null ||
+      new Date().getTime() - prevRerender.current.getTime() >
+        (1000 / (maxFPS / frameDrop)) * 2
+    ) {
+      prevRerender.current = nowDate;
+    } else {
+      prevRerender.current = new Date(
+        prevRerender.current.getTime() + 1000 / (maxFPS / frameDrop),
+      );
+    }
+    prevRerenderIndex.current = rerenderIndex;
+    const now = getCurrentTimeSec();
+    if (
+      playing &&
+      marginX !== undefined &&
+      marginY !== undefined &&
+      boxSize &&
+      now !== undefined
+    ) {
+      displayNotes.current = notes
+        .map((n) => (n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)))
+        .filter((n) => n !== null);
+    } else {
+      displayNotes.current = [];
+    }
+  }
 
   return (
     <div className={props.className} style={props.style} ref={ref}>
@@ -105,26 +107,42 @@ export default function FallingWindow(props: Props) {
             bottom={targetY * boxSize + marginY}
           />
         )}
-        {displayNotes.map(
-          (d) =>
-            boxSize &&
-            marginX !== undefined &&
-            marginY !== undefined && (
-              <Nikochan
-                key={d.id}
-                displayNote={d}
-                note={notes[d.id]}
-                noteSize={noteSize}
-                marginX={marginX}
-                marginY={marginY}
-                boxSize={boxSize}
-              />
-            ),
+        {boxSize && marginX !== undefined && marginY !== undefined && (
+          <NikochansMemo
+            displayNotes={displayNotes.current}
+            notes={notes}
+            noteSize={noteSize}
+            boxSize={boxSize}
+            marginX={marginX}
+            marginY={marginY}
+          />
         )}
       </div>
     </div>
   );
 }
+
+interface MProps {
+  displayNotes: DisplayNote6[] | DisplayNote7[];
+  notes: Note6[] | Note7[];
+  noteSize: number;
+  boxSize: number;
+  marginX: number;
+  marginY: number;
+}
+const NikochansMemo = memo(function Nikochans(props: MProps) {
+  return props.displayNotes.map((d) => (
+    <Nikochan
+      key={d.id}
+      displayNote={d}
+      note={props.notes[d.id]}
+      noteSize={props.noteSize}
+      marginX={props.marginX}
+      marginY={props.marginY}
+      boxSize={props.boxSize}
+    />
+  ));
+});
 
 interface NProps {
   displayNote: DisplayNote6 | DisplayNote7;
