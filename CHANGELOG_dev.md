@@ -1,3 +1,9 @@
+## ver. 11.15 - 2025/04/19 [#507](https://github.com/na-trium-144/falling-nikochan/pull/507)
+
+* /api/latest や popular へのリクエストがエラーになったときstatusとmessageを表示する
+* serviceWorkerがAPIへのfetchに失敗した場合502を返す
+* /share が/api/briefへのアクセス中に発生したエラーステータスをそのまま返す
+
 ## ver. 11.13 - 2025/04/19 [#505](https://github.com/na-trium-144/falling-nikochan/pull/505)
 
 * プレイ中の時間の計算にDateではなくperformance.now()を使う
