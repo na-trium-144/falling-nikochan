@@ -50,11 +50,12 @@ export default function FallingWindow(props: Props) {
   const prevRerender = useRef<DOMHighResTimeStamp | null>(null);
   if (
     prevRerender.current === null ||
-    (prevRerenderIndex.current !== rerenderIndex && frameDrop === null) ||
-    (frameDrop !== null &&
-      performance.now() - prevRerender.current >
-        1000 / (maxFPS / (frameDrop - 0.5)))
+    (prevRerenderIndex.current !== rerenderIndex &&
+      (frameDrop === null ||
+        performance.now() - prevRerender.current >
+          1000 / (maxFPS / (frameDrop - 0.5))))
   ) {
+    performance.mark("nikochan-rerender");
     const nowDate = performance.now();
     fpsCounter.current.push(nowDate);
     while (
