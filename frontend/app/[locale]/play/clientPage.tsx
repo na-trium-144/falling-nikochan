@@ -171,7 +171,7 @@ export function InitPlay({ locale }: { locale: string }) {
           setChartSeq(undefined);
           setErrorStatus(undefined);
           console.error(e);
-          setErrorMsg(te("fetchError"));
+          setErrorMsg(te("api.fetchError"));
         }
       })();
     }

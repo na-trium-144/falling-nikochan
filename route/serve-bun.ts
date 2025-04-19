@@ -11,8 +11,8 @@ import {
   fetchStatic,
 } from "./src/index.js";
 import { Hono } from "hono";
-import { logger } from 'hono/logger'
-import briefApp from "./src/api/brief.js";
+import { logger } from "hono/logger";
+import { briefAppWithHandler } from "./src/api/brief.js";
 
 const port = 8787;
 
@@ -23,7 +23,8 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route(
     "/share",
     shareApp({
-      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchBrief: (cid) =>
+        briefAppWithHandler({ fetchStatic }).request(`/api/${cid}`),
       fetchStatic,
     }),
   )

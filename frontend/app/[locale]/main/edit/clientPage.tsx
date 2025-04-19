@@ -56,7 +56,7 @@ export default function EditTab({ locale }: { locale: string }) {
     } catch (e) {
       console.error(e);
       setCidFetching(false);
-      setCIdErrorMsg(te("fetchError"));
+      setCIdErrorMsg(te("api.fetchError"));
       setInputCId("");
     }
   };
