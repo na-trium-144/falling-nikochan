@@ -135,7 +135,7 @@ export default function RhythmicalSlime(props: Props) {
         <Slime
           key={i}
           exists={i < currentBar.length}
-          size={currentBar[i] || 4}
+          size={i < currentBar.length ? currentBar[i] || 4 : null}
           state={slimeStates[i]}
           getCurrentTimeSec={getCurrentTimeSec}
           playUIScale={playUIScale}
@@ -147,12 +147,20 @@ export default function RhythmicalSlime(props: Props) {
 
 interface PropsS {
   getCurrentTimeSec: () => number | undefined;
-  size: 4 | 8 | 16;
+  size: 4 | 8 | 16 | null;
   exists: boolean;
   state?: SlimeState;
   playUIScale: number;
 }
 function Slime(props: PropsS) {
+  const prevSize = useRef<4 | 8 | 16 | null>(null);
+  let size: 4 | 8 | 16;
+  if (props.size === null) {
+    size = prevSize.current || 4;
+  } else {
+    size = props.size;
+    prevSize.current = size;
+  }
   const prevJumpMid = useRef<number | null>(null);
   const [jumpingMidDate, setJumpingMidDate] = useState<Date | null>(null);
   const durationSec = useRef<number>(0);
@@ -164,7 +172,7 @@ function Slime(props: PropsS) {
       prevJumpMid.current = props.state.jumpMidSec;
       durationSec.current = props.state.animDuration;
       setJumpingMidDate(
-        new Date(new Date().getTime() + (props.state.jumpMidSec - now) * 1000)
+        new Date(new Date().getTime() + (props.state.jumpMidSec - now) * 1000),
       );
     }
   }, [props]);
@@ -173,9 +181,7 @@ function Slime(props: PropsS) {
       className="relative "
       style={{
         width:
-          (props.size === 4 ? 1 : props.size === 8 ? 0.75 : 0.5) *
-          54 *
-          props.playUIScale,
+          (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) * 54 * props.playUIScale,
         marginLeft: 0 * props.playUIScale,
       }}
     >
