@@ -1,3 +1,7 @@
+## ver. 11.13 - 2025/04/19 [#505](https://github.com/na-trium-144/falling-nikochan/pull/505)
+
+* プレイ中の時間の計算にDateではなくperformance.now()を使う
+
 ## ver. 11.10 - 2025/04/19 [#503](https://github.com/na-trium-144/falling-nikochan/pull/503)
 
 * play画面のフレームレートができるだけ一定になるように修正

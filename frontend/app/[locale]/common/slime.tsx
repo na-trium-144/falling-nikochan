@@ -8,7 +8,7 @@ interface Props {
   appearingAnim?: boolean;
   hidden?: boolean;
   // noLoopの場合、 jumpingMidの時刻で最高点になるようジャンプを開始
-  jumpingMid?: Date | null;
+  jumpingMid?: DOMHighResTimeStamp | null;
   duration?: number;
   noLoop?: boolean;
 }
@@ -47,19 +47,17 @@ const SlimeSVGInner = memo(function SlimeSVGInner(
   const p6tAnimRef = useRef<SVGAnimateTransformElement>(null!);
   const p9AnimRef = useRef<SVGAnimateElement>(null!);
   const p9tAnimRef = useRef<SVGAnimateTransformElement>(null!);
-  const prevJumpingMid = useRef<Date | null>(null);
+  const prevJumpingMid = useRef<DOMHighResTimeStamp | null>(null);
   useEffect(() => {
     if (
       props.noLoop &&
       props.jumpingMid &&
       (prevJumpingMid.current === null ||
-        prevJumpingMid.current.getTime() < props.jumpingMid.getTime())
+        prevJumpingMid.current < props.jumpingMid)
     ) {
       prevJumpingMid.current = props.jumpingMid;
       let jumpStart =
-        props.jumpingMid.getTime() / 1000 -
-        (duration * 4) / 8 -
-        new Date().getTime() / 1000;
+        props.jumpingMid / 1000 - (duration * 4) / 8 - performance.now() / 1000;
       if (jumpStart < 0) {
         // return;
         jumpStart = 0;

@@ -33,7 +33,7 @@ export default function RhythmicalSlime(props: Props) {
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
   const [currentBar, setCurrentBar] = useState<(4 | 8 | 16)[]>([]);
   const [slimeStates, setSlimeStates] = useState<(SlimeState | undefined)[]>(
-    []
+    [],
   );
 
   useEffect(() => {
@@ -42,8 +42,14 @@ export default function RhythmicalSlime(props: Props) {
       const nextStep = () => {
         const now = getCurrentTimeSec();
         while (now !== undefined && playing && bpmChanges) {
-          if (lastPreparingSec.current != null && lastPreparingSec.current > now) {
-            timer = setTimeout(nextStep, (lastPreparingSec.current - now) * 1000);
+          if (
+            lastPreparingSec.current != null &&
+            lastPreparingSec.current > now
+          ) {
+            timer = setTimeout(
+              nextStep,
+              (lastPreparingSec.current - now) * 1000,
+            );
             return;
           }
           const ss = getSignatureState(props.signature, step.current);
@@ -162,7 +168,8 @@ function Slime(props: PropsS) {
     prevSize.current = size;
   }
   const prevJumpMid = useRef<number | null>(null);
-  const [jumpingMidDate, setJumpingMidDate] = useState<Date | null>(null);
+  const [jumpingMidDate, setJumpingMidDate] =
+    useState<DOMHighResTimeStamp | null>(null);
   const durationSec = useRef<number>(0);
   useEffect(() => {
     const now = props.getCurrentTimeSec();
@@ -172,7 +179,7 @@ function Slime(props: PropsS) {
       prevJumpMid.current = props.state.jumpMidSec;
       durationSec.current = props.state.animDuration;
       setJumpingMidDate(
-        new Date(new Date().getTime() + (props.state.jumpMidSec - now) * 1000),
+        performance.now() + (props.state.jumpMidSec - now) * 1000,
       );
     }
   }, [props]);
