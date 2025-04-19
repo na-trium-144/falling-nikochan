@@ -34,7 +34,7 @@ export default function FallingWindow(props: Props) {
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
-  const fpsCounter = useRef<Date[]>([]);
+  const fpsCounter = useRef<DOMHighResTimeStamp[]>([]);
   useEffect(() => {
     let animFrame: number;
     const updateLoop = () => {
@@ -47,19 +47,19 @@ export default function FallingWindow(props: Props) {
 
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
   const prevRerenderIndex = useRef<number>(-1);
-  const prevRerender = useRef<Date | null>(null);
+  const prevRerender = useRef<DOMHighResTimeStamp | null>(null);
   if (
     prevRerender.current === null ||
     (prevRerenderIndex.current !== rerenderIndex && frameDrop === null) ||
     (frameDrop !== null &&
-      new Date().getTime() - prevRerender.current.getTime() >
+      performance.now() - prevRerender.current >
         1000 / (maxFPS / (frameDrop - 0.5)))
   ) {
-    const nowDate = new Date();
+    const nowDate = performance.now();
     fpsCounter.current.push(nowDate);
     while (
       fpsCounter.current.at(0) &&
-      nowDate.getTime() - fpsCounter.current.at(0)!.getTime() > 1000
+      nowDate - fpsCounter.current.at(0)! > 1000
     ) {
       fpsCounter.current.shift();
     }
@@ -69,14 +69,11 @@ export default function FallingWindow(props: Props) {
     if (
       prevRerender.current === null ||
       frameDrop === null ||
-      new Date().getTime() - prevRerender.current.getTime() >
-        (1000 / (maxFPS / frameDrop)) * 2
+      nowDate - prevRerender.current > (1000 / (maxFPS / frameDrop)) * 2
     ) {
       prevRerender.current = nowDate;
     } else {
-      prevRerender.current = new Date(
-        prevRerender.current.getTime() + 1000 / (maxFPS / frameDrop),
-      );
+      prevRerender.current += 1000 / (maxFPS / frameDrop);
     }
     prevRerenderIndex.current = rerenderIndex;
     const now = getCurrentTimeSec();

@@ -300,9 +300,8 @@ function Play(props: Props) {
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
   // 終了ボタンが押せるようになる時刻をセット
-  const [exitable, setExitable] = useState<Date | null>(null);
-  const exitableNow = () =>
-    exitable && exitable.getTime() < new Date().getTime();
+  const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
+  const exitableNow = () => exitable && exitable < performance.now();
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [ytVolume, setYtVolume_] = useState<number>(100);
@@ -432,10 +431,7 @@ function Play(props: Props) {
     if (chartPlaying) {
       setShowStopped(true);
       setChartPlaying(false);
-      setExitable(
-        (ex) =>
-          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000))
-      );
+      setExitable((ex) => Math.max(ex || 0, performance.now() + 1000));
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
           ytPlayer.current?.setVolume(((10 - i) * ytVolume) / 10);
@@ -470,7 +466,7 @@ function Play(props: Props) {
       }
       setShowLoading(false);
       setInitDone(false);
-      setExitable(new Date());
+      setExitable(performance.now());
     } else if (ytReady && chartSeq && !initDone) {
       if (showLoadingTimeout.current !== null) {
         clearTimeout(showLoadingTimeout.current);
@@ -583,15 +579,11 @@ function Play(props: Props) {
             }
           }
           setResultDate(new Date());
-          setExitable(
-            (ex) =>
-              new Date(
-                Math.max(
-                  ex?.getTime() || 0,
-                  new Date().getTime() +
-                    resultAnimDelays.reduce((a, b) => a + b, 0)
-                )
-              )
+          setExitable((ex) =>
+            Math.max(
+              ex || 0,
+              performance.now() + resultAnimDelays.reduce((a, b) => a + b, 0),
+            ),
           );
           stop();
         }, 1000);
@@ -623,7 +615,7 @@ function Play(props: Props) {
   const onReady = useCallback(() => {
     console.log("ready ->", ytPlayer.current?.getPlayerState());
     setYtReady(true);
-    setExitable(new Date());
+    setExitable(performance.now());
   }, []);
   const onStart = useCallback(() => {
     console.log("start ->", ytPlayer.current?.getPlayerState());
