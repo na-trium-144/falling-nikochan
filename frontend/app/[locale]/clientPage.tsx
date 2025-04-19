@@ -108,7 +108,10 @@ export default function TopPage(props: Props) {
             menuMoveAnimClass
           }
         >
-          <InputCId openModal={openModal} />
+          <InputCId
+            openModal={openModal}
+            openShareInternal={openShareInternal}
+          />
         </div>
         {process.env.NODE_ENV === "development" && (
           <div
@@ -209,18 +212,23 @@ export default function TopPage(props: Props) {
 
 function InputCId(props: {
   openModal: (cid: string, brief?: ChartBrief) => void;
+  openShareInternal: (cid: string, brief?: ChartBrief) => void;
 }) {
   const t = useTranslations("main");
   const te = useTranslations("error");
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
-  const gotoCId = async (cid: string) => {
+  const gotoCId = async (cid: string, isMobile: boolean) => {
     setCIdErrorMsg("");
     setCidFetching(true);
     const res = await fetchBrief(cid, true);
     if (res.ok) {
       // router.push(`/share/${cid}`);
-      props.openModal(cid, res.brief);
+      if (isMobile) {
+        props.openShareInternal(cid, res.brief);
+      } else {
+        props.openModal(cid, res.brief);
+      }
     } else {
       if (res.is404) {
         setCIdErrorMsg(te("api.chartIdNotFound"));
@@ -235,9 +243,16 @@ function InputCId(props: {
       <h3 className="mb-2 ">
         <span className="text-xl font-bold font-title">{t("inputId")}:</span>
         <Input
-          className="ml-4 w-20"
+          className="ml-4 w-20 hidden main-wide:inline-block "
           actualValue=""
-          updateValue={gotoCId}
+          updateValue={(cid: string) => gotoCId(cid, false)}
+          isValid={(t) => v.safeParse(CidSchema(), t).success}
+          left
+        />
+        <Input
+          className="ml-4 w-20 main-wide:hidden"
+          actualValue=""
+          updateValue={(cid: string) => gotoCId(cid, true)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
