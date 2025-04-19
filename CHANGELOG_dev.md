@@ -1,10 +1,16 @@
+## ver. 11.10 - 2025/04/19 [#503](https://github.com/na-trium-144/falling-nikochan/pull/503)
+
+* play画面のフレームレートができるだけ一定になるように修正
+* displayNoteの計算をrequestAnimationFrameではなくrender時に行う
+* Revert #496
+
 ## ver. 11.9 - 2025/04/17 [#499](https://github.com/na-trium-144/falling-nikochan/pull/499)
 
 * 非表示のレベルの編集では日付を更新しないようにする
 
 ## ver. 11.7 - 2025/04/16 [#496](https://github.com/na-trium-144/falling-nikochan/pull/496)
 
-* プレイ中にoutputLatencyの値が揺れるのを対策するため、latencyの最大値を使用する
+* <del>プレイ中にoutputLatencyの値が揺れるのを対策するため、latencyの最大値を使用する</del>
 
 ## ver. 11.6 - 2025/04/16 [#476](https://github.com/na-trium-144/falling-nikochan/pull/476)
 

@@ -791,7 +791,8 @@ function Play(props: Props) {
         </div>
         <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
           <FallingWindow
-            frameDrop={frameDrop || 1}
+            maxFPS={maxFPS}
+            frameDrop={frameDrop}
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
