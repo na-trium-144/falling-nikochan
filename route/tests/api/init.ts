@@ -31,7 +31,7 @@ import {
   languageDetector,
   fetchStatic,
 } from "@falling-nikochan/route";
-import briefApp from "@falling-nikochan/route/src/api/brief";
+import { briefAppWithHandler } from "@falling-nikochan/route/src/api/brief";
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)
@@ -39,7 +39,8 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route(
     "/share",
     shareApp({
-      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchBrief: (cid) =>
+        briefAppWithHandler({ fetchStatic }).request(`/api/${cid}`),
       fetchStatic,
     }),
   )

@@ -90,7 +90,9 @@ export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
   const te = useTranslations("error");
 
-  const [briefs, setBriefs] = useState<ChartLineBrief[] | "error">();
+  const [briefs, setBriefs] = useState<
+    ChartLineBrief[] | { status: number | null; message: string }
+  >();
   useEffect(() => {
     switch (props.type) {
       case "recent":
@@ -129,11 +131,18 @@ export function ChartList(props: Props) {
               const latestCId = (await latestRes.json()) as { cid: string }[];
               setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
             } else {
-              setBriefs("error");
+              try {
+                setBriefs({
+                  status: latestRes.status,
+                  message: (await latestRes.json()).message,
+                });
+              } catch {
+                setBriefs({ status: latestRes.status, message: "" });
+              }
             }
           } catch (e) {
             console.error(e);
-            setBriefs("error");
+            setBriefs({ status: null, message: "fetchError" });
           }
         })();
     }
@@ -214,8 +223,11 @@ export function ChartList(props: Props) {
             <SlimeSVG />
             Loading...
           </>
-        ) : briefs === "error" ? (
-          te("fetchError")
+        ) : briefs && "message" in briefs ? (
+          (briefs.status ? `${briefs.status}: ` : "") +
+          (te.has(`api.${briefs.message}`)
+            ? te(`api.${briefs.message}`)
+            : te("unknownApiError"))
         ) : Array.isArray(briefs) && briefs.length === 0 ? (
           t("empty")
         ) : null}

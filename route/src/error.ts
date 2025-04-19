@@ -15,8 +15,10 @@ export const onError =
   async (err: any, c: Context) => {
     console.error(`Error: ${err} in ${c.req.path}`);
     try {
-      const lang = c.get("language");
-      if (err instanceof ValiError) {
+      const lang = c.get("language") || "en";
+      if (err instanceof TypeError) {
+        err = new HTTPException(502, { message: "fetchError" });
+      } else if (err instanceof ValiError) {
         err = new HTTPException(400, { message: err.message });
       } else if (!(err instanceof HTTPException)) {
         err = new HTTPException(500);
