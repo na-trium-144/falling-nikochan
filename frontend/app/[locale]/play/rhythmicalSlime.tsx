@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BPMChange, BPMChange1, Signature5 } from "@falling-nikochan/chart";
+import {
+  BPMChange,
+  BPMChange1,
+  Signature5,
+  SignatureState,
+} from "@falling-nikochan/chart";
 import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepSub, stepZero } from "@falling-nikochan/chart";
@@ -29,6 +34,7 @@ interface SlimeState {
 export default function RhythmicalSlime(props: Props) {
   const { playing, getCurrentTimeSec, bpmChanges } = props;
   const step = useRef<Step>(stepZero());
+  const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
   const [currentBar, setCurrentBar] = useState<(4 | 8 | 16)[]>([]);
@@ -62,8 +68,9 @@ export default function RhythmicalSlime(props: Props) {
             denominator: slimeSize / 4,
           };
           if (
-            currentBar.length !== ss.bar.length ||
-            !currentBar.every((v, i) => v === ss.bar[i])
+            prevSS.current === null ||
+            prevSS.current.bar.length !== ss.bar.length ||
+            !prevSS.current.bar.every((v, i) => v === ss.bar[i])
           ) {
             const barChangeSec = getTimeSec(bpmChanges, ss.stepAligned);
             const barChange = () => {
@@ -76,13 +83,14 @@ export default function RhythmicalSlime(props: Props) {
               barChange();
             }
           }
+          prevSS.current = ss;
           const jumpBeginSec = getTimeSec(
             bpmChanges,
             stepSub(ss.stepAligned, {
               fourth: 0,
               numerator: 1,
               denominator: (slimeSize / 4) * 6,
-            })
+            }),
           );
           const landingSec = getTimeSec(
             bpmChanges,
@@ -90,7 +98,7 @@ export default function RhythmicalSlime(props: Props) {
               fourth: 0,
               numerator: 3,
               denominator: (slimeSize / 4) * 6,
-            })
+            }),
           );
           const jumpMidSec = (jumpBeginSec + landingSec) / 2;
           const animDuration = ((landingSec - jumpBeginSec) / 4) * 8;
@@ -121,14 +129,15 @@ export default function RhythmicalSlime(props: Props) {
       };
     } else {
       step.current = stepZero();
+      prevSS.current = null;
       lastPreparingSec.current = null;
       setSlimeStates([]);
       setMaxSlimeNum((num) =>
-        Math.max(num, props.signature[0]?.bars[0].length)
+        Math.max(num, props.signature[0]?.bars[0].length),
       );
       setCurrentBar(props.signature[0]?.bars[0] || []);
     }
-  }, [bpmChanges, playing, getCurrentTimeSec, currentBar, props.signature]);
+  }, [bpmChanges, playing, getCurrentTimeSec, props.signature]);
 
   const { playUIScale } = useDisplayMode();
 
@@ -175,6 +184,7 @@ function Slime(props: PropsS) {
     const now = props.getCurrentTimeSec();
     if (now === undefined || props.state === undefined) {
       setJumpingMidDate(null);
+      prevJumpMid.current = null;
     } else if (prevJumpMid.current !== props.state.jumpMidSec) {
       prevJumpMid.current = props.state.jumpMidSec;
       durationSec.current = props.state.animDuration;
