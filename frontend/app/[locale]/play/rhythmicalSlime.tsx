@@ -33,7 +33,7 @@ export default function RhythmicalSlime(props: Props) {
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
   const [currentBar, setCurrentBar] = useState<(4 | 8 | 16)[]>([]);
   const [slimeStates, setSlimeStates] = useState<(SlimeState | undefined)[]>(
-    []
+    [],
   );
 
   useEffect(() => {
@@ -42,8 +42,14 @@ export default function RhythmicalSlime(props: Props) {
       const nextStep = () => {
         const now = getCurrentTimeSec();
         while (now !== undefined && playing && bpmChanges) {
-          if (lastPreparingSec.current != null && lastPreparingSec.current > now) {
-            timer = setTimeout(nextStep, (lastPreparingSec.current - now) * 1000);
+          if (
+            lastPreparingSec.current != null &&
+            lastPreparingSec.current > now
+          ) {
+            timer = setTimeout(
+              nextStep,
+              (lastPreparingSec.current - now) * 1000,
+            );
             return;
           }
           const ss = getSignatureState(props.signature, step.current);
@@ -135,7 +141,7 @@ export default function RhythmicalSlime(props: Props) {
         <Slime
           key={i}
           exists={i < currentBar.length}
-          size={currentBar[i] || 4}
+          size={i < currentBar.length ? currentBar[i] || 4 : null}
           state={slimeStates[i]}
           getCurrentTimeSec={getCurrentTimeSec}
           playUIScale={playUIScale}
@@ -147,14 +153,23 @@ export default function RhythmicalSlime(props: Props) {
 
 interface PropsS {
   getCurrentTimeSec: () => number | undefined;
-  size: 4 | 8 | 16;
+  size: 4 | 8 | 16 | null;
   exists: boolean;
   state?: SlimeState;
   playUIScale: number;
 }
 function Slime(props: PropsS) {
+  const prevSize = useRef<4 | 8 | 16 | null>(null);
+  let size: 4 | 8 | 16;
+  if (props.size === null) {
+    size = prevSize.current || 4;
+  } else {
+    size = props.size;
+    prevSize.current = size;
+  }
   const prevJumpMid = useRef<number | null>(null);
-  const [jumpingMidDate, setJumpingMidDate] = useState<Date | null>(null);
+  const [jumpingMidDate, setJumpingMidDate] =
+    useState<DOMHighResTimeStamp | null>(null);
   const durationSec = useRef<number>(0);
   useEffect(() => {
     const now = props.getCurrentTimeSec();
@@ -164,7 +179,7 @@ function Slime(props: PropsS) {
       prevJumpMid.current = props.state.jumpMidSec;
       durationSec.current = props.state.animDuration;
       setJumpingMidDate(
-        new Date(new Date().getTime() + (props.state.jumpMidSec - now) * 1000)
+        performance.now() + (props.state.jumpMidSec - now) * 1000,
       );
     }
   }, [props]);
@@ -173,9 +188,7 @@ function Slime(props: PropsS) {
       className="relative "
       style={{
         width:
-          (props.size === 4 ? 1 : props.size === 8 ? 0.75 : 0.5) *
-          54 *
-          props.playUIScale,
+          (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) * 54 * props.playUIScale,
         marginLeft: 0 * props.playUIScale,
       }}
     >

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { Bindings, cacheControl, fetchStatic } from "../env.js";
 import { ImageResponse } from "@vercel/og";
-import briefApp from "../api/brief.js";
+import { briefAppWithHandler } from "../api/brief.js";
 import { HTTPException } from "hono/http-exception";
 import {
   ChartBrief,
@@ -29,7 +29,9 @@ const ogApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
     // (vパラメータは /share でも追加されるけど)
     if (!c.req.query("brief")) {
-      const briefRes = await briefApp.request(`/${cid}`);
+      const briefRes = await briefAppWithHandler({ fetchStatic }).request(
+        `/api/${cid}`,
+      );
       if (!briefRes.ok) {
         let message = "";
         try {

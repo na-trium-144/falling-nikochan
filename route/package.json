@@ -1,16 +1,16 @@
 {
   "name": "@falling-nikochan/route",
-  "version": "11.5.0",
+  "version": "11.15.0",
   "private": true,
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "dependencies": {
-    "@hono/node-server": "^1.14.0",
+    "@hono/node-server": "^1.14.1",
     "@vercel/og": "^0.6.8",
     "@ygoe/msgpack": "^1.0.3",
     "dotenv": "^16.4.7",
-    "hono": "^4.7.5",
+    "hono": "^4.7.6",
     "mongodb": "^6.15.0"
   }
 }

@@ -123,12 +123,12 @@ export function InitPlay({ locale }: { locale: string }) {
             process.env.BACKEND_PREFIX +
               `/api/playFile/${session?.cid || cidFromParam}` +
               `/${session?.lvIndex || lvIndexFromParam}`,
-            { cache: "no-store" },
+            { cache: "no-store" }
           );
           if (res.ok) {
             try {
               const seq: Level6Play | Level11Play = msgpack.deserialize(
-                await res.arrayBuffer(),
+                await res.arrayBuffer()
               );
               console.log("seq.ver", seq.ver);
               if (seq.ver === 6 || seq.ver === 11) {
@@ -173,7 +173,7 @@ export function InitPlay({ locale }: { locale: string }) {
           setChartSeq(undefined);
           setErrorStatus(undefined);
           console.error(e);
-          setErrorMsg(te("fetchError"));
+          setErrorMsg(te("api.fetchError"));
         }
       })();
     }
@@ -246,7 +246,7 @@ function Play(props: Props) {
     "speedChanges" in chartSeq &&
     (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
       chartSeq.speedChanges.some(
-        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm,
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
@@ -263,7 +263,7 @@ function Play(props: Props) {
         localStorage.setItem(`offset-${cid}`, String(v));
       }
     },
-    [cid],
+    [cid]
   );
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -292,8 +292,8 @@ function Play(props: Props) {
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
     if (!auto && cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
-      const data = getBestScore(cid, lvIndex);
-      if (data && data.levelHash === chartBrief.levels[lvIndex].hash) {
+      const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
+      if (data) {
         setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
       }
     }
@@ -302,9 +302,8 @@ function Play(props: Props) {
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
   // 終了ボタンが押せるようになる時刻をセット
-  const [exitable, setExitable] = useState<Date | null>(null);
-  const exitableNow = () =>
-    exitable && exitable.getTime() < new Date().getTime();
+  const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
+  const exitableNow = () => exitable && exitable < performance.now();
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [ytVolume, setYtVolume_] = useState<number>(100);
@@ -317,13 +316,13 @@ function Play(props: Props) {
       }
       ytPlayer.current?.setVolume(v);
     },
-    [cid],
+    [cid]
   );
   useEffect(() => {
     const vol = Number(
       localStorage.getItem(`ytVolume-${cid}`) ||
         localStorage.getItem("ytVolume") ||
-        100,
+        100
     );
     setYtVolume_(vol);
     ytPlayer.current?.setVolume(vol);
@@ -380,7 +379,7 @@ function Play(props: Props) {
           if (fpsStable.current > maxFPS) {
             setFrameDrop_(
               Number(localStorage.getItem("frameDrop") || 0) ||
-                Math.max(1, Math.ceil(fps / 60 - 0.3)), // 2捨3入
+                Math.max(1, Math.ceil(fps / 60 - 0.3)) // 2捨3入
             );
           }
         } else {
@@ -389,7 +388,7 @@ function Play(props: Props) {
         }
       }
     },
-    [frameDrop, maxFPS],
+    [frameDrop, maxFPS]
   );
   const setFrameDrop = useCallback((v: number) => {
     setFrameDrop_(v);
@@ -434,10 +433,7 @@ function Play(props: Props) {
     if (chartPlaying) {
       setShowStopped(true);
       setChartPlaying(false);
-      setExitable(
-        (ex) =>
-          new Date(Math.max(ex?.getTime() || 0, new Date().getTime() + 1000)),
-      );
+      setExitable((ex) => Math.max(ex || 0, performance.now() + 1000));
       for (let i = 1; i < 10; i++) {
         setTimeout(() => {
           ytPlayer.current?.setVolume(((10 - i) * ytVolume) / 10);
@@ -472,7 +468,7 @@ function Play(props: Props) {
       }
       setShowLoading(false);
       setInitDone(false);
-      setExitable(new Date());
+      setExitable(performance.now());
     } else if (ytReady && chartSeq && !initDone) {
       if (showLoadingTimeout.current !== null) {
         clearTimeout(showLoadingTimeout.current);
@@ -486,7 +482,7 @@ function Play(props: Props) {
       if (showLoadingTimeout.current === null) {
         showLoadingTimeout.current = setTimeout(
           () => setShowLoading(true),
-          1500,
+          1500
         );
       }
     }
@@ -536,8 +532,7 @@ function Play(props: Props) {
           chartBrief?.levels.at(lvIndex)
         ) {
           if (score > bestScoreState) {
-            setBestScore(cid, lvIndex, {
-              levelHash: chartBrief.levels[lvIndex].hash,
+            setBestScore(cid, chartBrief.levels[lvIndex].hash, {
               baseScore,
               chainScore,
               bigScore,
@@ -547,14 +542,14 @@ function Play(props: Props) {
           void (async () => {
             try {
               const res = await fetch(
-                process.env.BACKEND_PREFIX + `/api/record/${cid}`,
+                process.env.BACKEND_PREFIX + `/api/record/${cid}`
               );
               if (res.ok) {
                 const records: RecordGetSummary[] = await res.json();
                 setRecord(
                   records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash,
-                  ),
+                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
+                  )
                 );
               }
             } catch (e) {
@@ -586,15 +581,11 @@ function Play(props: Props) {
             }
           }
           setResultDate(new Date());
-          setExitable(
-            (ex) =>
-              new Date(
-                Math.max(
-                  ex?.getTime() || 0,
-                  new Date().getTime() +
-                    resultAnimDelays.reduce((a, b) => a + b, 0),
-                ),
-              ),
+          setExitable((ex) =>
+            Math.max(
+              ex || 0,
+              performance.now() + resultAnimDelays.reduce((a, b) => a + b, 0),
+            ),
           );
           stop();
         }, 1000);
@@ -626,7 +617,7 @@ function Play(props: Props) {
   const onReady = useCallback(() => {
     console.log("ready ->", ytPlayer.current?.getPlayerState());
     setYtReady(true);
-    setExitable(new Date());
+    setExitable(performance.now());
   }, []);
   const onStart = useCallback(() => {
     console.log("start ->", ytPlayer.current?.getPlayerState());
@@ -794,7 +785,8 @@ function Play(props: Props) {
         </div>
         <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
           <FallingWindow
-            frameDrop={frameDrop || 1}
+            maxFPS={maxFPS}
+            frameDrop={frameDrop}
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -883,7 +875,7 @@ function Play(props: Props) {
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || "",
+                chartBrief.levels.at(lvIndex || 0)?.type || ""
               )}
               lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
               baseScore100={

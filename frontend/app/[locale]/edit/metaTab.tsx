@@ -245,7 +245,7 @@ export function MetaTab(props: Props2) {
         }
       } catch (e) {
         console.error(e);
-        setErrorMsg(te("fetchError"));
+        setErrorMsg(te("api.fetchError"));
       }
     } else {
       const q = new URLSearchParams();
@@ -287,7 +287,7 @@ export function MetaTab(props: Props2) {
         }
       } catch (e) {
         console.error(e);
-        setErrorMsg(te("fetchError"));
+        setErrorMsg(te("api.fetchError"));
       }
     }
     props.chart!.changePasswd = null;

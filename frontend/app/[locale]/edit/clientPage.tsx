@@ -275,7 +275,7 @@ export default function EditAuth(props: {
           console.error(e);
           setChart(undefined);
           setErrorStatus(undefined);
-          setErrorMsg(te("fetchError"));
+          setErrorMsg(te("api.fetchError"));
         }
         setLoading(false);
       }

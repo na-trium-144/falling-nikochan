@@ -123,13 +123,18 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
           }
 
           // update Time
-          const prevHashes = entry.levelBrief.map((l) => l.hash);
+          const prevHashes = entry.levelBrief
+            .filter((l) => !l.unlisted)
+            .map((l) => l.hash);
           const newHashes = await Promise.all(
-            newChart.levels.map((level) => hashLevel(level)),
+            newChart.levels
+              .filter((l) => !l.unlisted)
+              .map((level) => hashLevel(level))
           );
           let updatedAt = entry.updatedAt;
           if (
-            !newHashes.every((h, i) => h === prevHashes[i]) ||
+            prevHashes.length !== newHashes.length ||
+            !newHashes.every((h, i) => h === prevHashes.at(i)) ||
             (!entry.published && newChart.published)
           ) {
             updatedAt = new Date().getTime();

@@ -1,3 +1,32 @@
+## ver. 11.15 - 2025/04/19 [#507](https://github.com/na-trium-144/falling-nikochan/pull/507)
+
+* /api/latest や popular へのリクエストがエラーになったときstatusとmessageを表示する
+* serviceWorkerがAPIへのfetchに失敗した場合502を返す
+* /share が/api/briefへのアクセス中に発生したエラーステータスをそのまま返す
+
+## ver. 11.13 - 2025/04/19 [#505](https://github.com/na-trium-144/falling-nikochan/pull/505)
+
+* プレイ中の時間の計算にDateではなくperformance.now()を使う
+
+## ver. 11.10 - 2025/04/19 [#503](https://github.com/na-trium-144/falling-nikochan/pull/503)
+
+* play画面のフレームレートができるだけ一定になるように修正
+* displayNoteの計算をrequestAnimationFrameではなくrender時に行う
+* Revert #496
+
+## ver. 11.9 - 2025/04/17 [#499](https://github.com/na-trium-144/falling-nikochan/pull/499)
+
+* 非表示のレベルの編集では日付を更新しないようにする
+
+## ver. 11.7 - 2025/04/16 [#496](https://github.com/na-trium-144/falling-nikochan/pull/496)
+
+* <del>プレイ中にoutputLatencyの値が揺れるのを対策するため、latencyの最大値を使用する</del>
+
+## ver. 11.6 - 2025/04/16 [#476](https://github.com/na-trium-144/falling-nikochan/pull/476)
+
+* ベストスコアの保存をlvIndexではなくlvHashで管理するようにした
+* chartListとレベル選択からクリア・フルコンボ状況がわかるバッジを追加
+
 ## ver. 11.5 - 2025/04/14 [#477](https://github.com/na-trium-144/falling-nikochan/pull/477)
 
 * Big音符が1つも無いときBig音符数表示とresultのBigボーナス表示はグレーで表示するようにした
