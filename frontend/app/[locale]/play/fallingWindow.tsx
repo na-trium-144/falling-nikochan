@@ -39,11 +39,18 @@ export default function FallingWindow(props: Props) {
     let animFrame: number;
     const updateLoop = () => {
       setRerenderIndex((r) => r + 1);
+      while (
+        fpsCounter.current.at(0) &&
+        fpsCounter.current.at(-1)! - fpsCounter.current.at(0)! > 1000
+      ) {
+        fpsCounter.current.shift();
+      }
+      setFPS?.(fpsCounter.current.length);
       animFrame = requestAnimationFrame(updateLoop);
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
-  }, []);
+  }, [setFPS]);
 
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
   const prevRerenderIndex = useRef<number>(-1);
@@ -58,15 +65,6 @@ export default function FallingWindow(props: Props) {
     performance.mark("nikochan-rerender");
     const nowDate = performance.now();
     fpsCounter.current.push(nowDate);
-    while (
-      fpsCounter.current.at(0) &&
-      nowDate - fpsCounter.current.at(0)! > 1000
-    ) {
-      fpsCounter.current.shift();
-    }
-    if (setFPS) {
-      setFPS(fpsCounter.current.length);
-    }
     if (
       prevRerender.current === null ||
       frameDrop === null ||
