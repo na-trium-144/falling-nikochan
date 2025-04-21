@@ -12,10 +12,13 @@ declare const self: ServiceWorkerGlobalScope;
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
-const mainCache = () => caches.open("main2");
-const tmpCache = () => caches.open("tmp2");
+const mainCacheName = "main2";
+const tmpCacheName = "tmp2";
+const mainCache = () => caches.open(mainCacheName);
+const tmpCache = () => caches.open(tmpCacheName);
 // 設定など
-const configCache = () => caches.open("config");
+const configCacheName = "config";
+const configCache = () => caches.open(configCacheName);
 
 async function clearOldCaches() {
   await caches
@@ -23,7 +26,7 @@ async function clearOldCaches() {
     .then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== "main1" && k !== "tmp1" && k !== "config")
+          .filter((k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k))
           .map((k) => caches.delete(k)),
       ),
     );
@@ -254,7 +257,7 @@ const app = new Hono({ strict: false })
       );
       if (res.ok) {
         const returnRes = returnBody(res.body, res.headers);
-        await (await mainCache()).put(c.req.raw, returnRes.clone());
+        await (await mainCache()).put(c.req.path, returnRes.clone());
         return returnRes;
       } else {
         return res;
