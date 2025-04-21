@@ -293,9 +293,12 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  if (new URL(e.request.url).origin !== self.origin) {
-    return;
+  if (
+    new URL(e.request.url).origin === self.origin ||
+    (process.env.ASSET_PREFIX &&
+      new URL(e.request.url).origin === process.env.ASSET_PREFIX)
+  ) {
+    // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
+    return handle(app)(e);
   }
-  // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
-  return handle(app)(e);
 });
