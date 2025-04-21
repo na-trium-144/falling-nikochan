@@ -12,10 +12,13 @@ declare const self: ServiceWorkerGlobalScope;
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
-const mainCache = () => caches.open("main1");
-const tmpCache = () => caches.open("tmp1");
+const mainCacheName = "main2";
+const tmpCacheName = "tmp2";
+const mainCache = () => caches.open(mainCacheName);
+const tmpCache = () => caches.open(tmpCacheName);
 // 設定など
-const configCache = () => caches.open("config");
+const configCacheName = "config";
+const configCache = () => caches.open(configCacheName);
 
 async function clearOldCaches() {
   await caches
@@ -23,47 +26,12 @@ async function clearOldCaches() {
     .then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== "main1" && k !== "tmp1" && k !== "config")
+          .filter((k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k))
           .map((k) => caches.delete(k)),
       ),
     );
 }
 
-async function fetchAndReplace(
-  pathname: string,
-  signal?: AbortSignal,
-): Promise<Response | null> {
-  try {
-    const res = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + pathname,
-      { cache: "no-cache", signal },
-    );
-    if (res.ok) {
-      if (
-        process.env.ASSET_PREFIX &&
-        (res.headers.get("Content-Type")?.includes("html") ||
-          pathname.endsWith(".js") ||
-          pathname.endsWith(".css") ||
-          pathname.endsWith(".txt"))
-      ) {
-        // ページ内で ASSET_PREFIX にアクセスしている箇所をすべてもとのドメインに置き換えてserviceWorkerを経由されるようにする
-        const body = (await res.text()).replaceAll(
-          process.env.ASSET_PREFIX,
-          "",
-        );
-        return returnBody(body, res.headers);
-      } else {
-        return returnBody(res.body, res.headers);
-      }
-    } else {
-      console.error(`failed to fetch ${pathname}: ${res.status}`);
-      return null;
-    }
-  } catch (e) {
-    console.error(`failed to fetch ${pathname}: ${e}`);
-    return null;
-  }
-}
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
   const cache = await mainCache();
   let pathname = url.pathname;
@@ -132,10 +100,19 @@ async function initAssetsCache(config: {
         // パス名にハッシュが入っているので更新する必要がない
         return;
       }
-      const res = await fetchAndReplace(pathname);
-      if (res) {
-        tmp.put(pathname, res);
-      } else {
+      try {
+        const res = await fetch(
+          (process.env.ASSET_PREFIX || self.origin) + pathname,
+          { cache: "no-cache" },
+        );
+        if (res.ok) {
+          tmp.put(pathname, returnBody(res.body, res.headers));
+        } else {
+          console.error(`failed to fetch ${pathname}: ${res.status}`);
+          failed = true;
+        }
+      } catch (e) {
+        console.error(`failed to fetch ${pathname}: ${e}`);
         failed = true;
       }
     }),
@@ -205,7 +182,7 @@ const app = new Hono({ strict: false })
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: (cid) => fetch(`/api/brief/${cid}`),
+      fetchBrief: (cid) => fetch(self.origin + `/api/brief/${cid}`),
       fetchStatic,
       languageDetector,
     }),
@@ -256,10 +233,17 @@ const app = new Hono({ strict: false })
       // 1秒のタイムアウトを設け、fetchできなければキャッシュから返す
       const abortController = new AbortController();
       const timeout = setTimeout(() => abortController.abort(), 1000);
-      const res = await fetchAndReplace(c.req.path, abortController.signal);
-      clearTimeout(timeout);
-      if (res) {
-        return res;
+      try {
+        const remoteRes = await fetch(
+          (process.env.ASSET_PREFIX || self.origin) + c.req.path,
+          { cache: "no-cache", signal: abortController.signal },
+        );
+        clearTimeout(timeout);
+        if (remoteRes.ok) {
+          return returnBody(remoteRes.body, remoteRes.headers);
+        }
+      } catch {
+        // pass
       }
     }
     const res = await fetchStatic(null, new URL(c.req.url));
@@ -268,10 +252,12 @@ const app = new Hono({ strict: false })
     } else {
       // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
       console.warn(`${c.req.url} is not in cache`);
-      const res = await fetch(c.req.raw);
+      const res = await fetch(
+        (process.env.ASSET_PREFIX || self.origin) + c.req.path,
+      );
       if (res.ok) {
         const returnRes = returnBody(res.body, res.headers);
-        await (await mainCache()).put(c.req.raw, returnRes.clone());
+        await (await mainCache()).put(c.req.path, returnRes.clone());
         return returnRes;
       } else {
         return res;
@@ -293,9 +279,12 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  if (new URL(e.request.url).origin !== self.origin) {
-    return;
+  if (
+    new URL(e.request.url).origin === self.origin ||
+    (process.env.ASSET_PREFIX &&
+      new URL(e.request.url).origin === process.env.ASSET_PREFIX)
+  ) {
+    // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
+    return handle(app)(e);
   }
-  // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
-  return handle(app)(e);
 });
