@@ -1,3 +1,7 @@
+## ver. 11.18 - 2025/04/22 [#508](https://github.com/na-trium-144/falling-nikochan/pull/508)
+
+* iOSでサービスワーカーが正常に機能していないのかasset_prefixへアクセスしようとする場合があったため、asset_prefixへのアクセスもサービスワーカーで処理するように変更
+
 ## ver. 11.15 - 2025/04/19 [#507](https://github.com/na-trium-144/falling-nikochan/pull/507)
 
 * /api/latest や popular へのリクエストがエラーになったときstatusとmessageを表示する
