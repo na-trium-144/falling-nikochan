@@ -1,5 +1,5 @@
 "use client";
-import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
+import { ChartBrief } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -66,16 +66,11 @@ export default function ChartListPage(props: PProps) {
   );
 }
 
-export type ChartListType =
-  | "recent"
-  | "recentEdit"
-  | "popular"
-  | "latest"
-  | "original"
-  | "sample";
+export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 interface Props {
-  type: ChartListType;
+  type?: ChartListType;
+  briefs?: ChartLineBrief[];
   fetchAll?: boolean;
   creator?: boolean;
   showLoading?: boolean;
@@ -92,8 +87,8 @@ export function ChartList(props: Props) {
   const te = useTranslations("error");
 
   const [briefs, setBriefs] = useState<
-    ChartLineBrief[] | { status: number | null; message: string }
-  >();
+    ChartLineBrief[] | { status: number | null; message: string } | undefined
+  >(props.briefs || undefined);
   useEffect(() => {
     switch (props.type) {
       case "recent":
@@ -109,14 +104,6 @@ export function ChartList(props: Props) {
             .reverse()
             .map((cid) => ({ cid, fetched: false })),
         );
-        break;
-      case "original":
-        setBriefs(
-          originalCId.map((cid) => ({ cid, fetched: false, original: true })),
-        );
-        break;
-      case "sample":
-        setBriefs(sampleCId.map((cid) => ({ cid, fetched: false })));
         break;
       case "latest":
       case "popular":

@@ -7,9 +7,16 @@ import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareModal } from "../shareModal.jsx";
+import { ChartLineBrief } from "../fetch.js";
 
-export default function PlayTab({ locale }: { locale: string }) {
+interface Props {
+  locale: string;
+  sampleBriefs: ChartLineBrief[];
+  originalBriefs: ChartLineBrief[];
+}
+export default function PlayTab(props: Props) {
   const t = useTranslations("main.play");
+  const { locale } = props;
 
   const { modal, openModal, openShareInternal } = useShareModal(locale, "play");
 
@@ -86,7 +93,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           </p>
         )}
         <ChartList
-          type="original"
+          briefs={props.originalBriefs}
           fetchAll
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
@@ -96,7 +103,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           badge
         />
         <ChartList
-          type="sample"
+          briefs={props.sampleBriefs}
           fetchAll
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
