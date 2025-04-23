@@ -171,7 +171,7 @@ export function ChartList(props: Props) {
   return (
     <div className="relative w-full h-max ">
       <ul
-        className="grid w-full mx-auto justify-items-start items-center gap-1 "
+        className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
         style={{
           gridTemplateColumns: `repeat(auto-fill, minmax(min(18rem, 100%), 1fr))`,
           // max 3 columns
