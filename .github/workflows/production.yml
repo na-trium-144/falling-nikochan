@@ -2,8 +2,6 @@ name: Vercel Production Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
-  NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
 on:
   push:
     branches:
@@ -18,6 +16,10 @@ jobs:
       - name: Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
+        env:
+          MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
+          ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
+          NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
         run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
