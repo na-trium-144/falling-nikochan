@@ -79,6 +79,8 @@ const SlimeSVGInner = memo(function SlimeSVGInner(
       ]) {
         ref.current.beginElementAt(jumpStart);
       }
+    } else if (!props.jumpingMid) {
+      prevJumpingMid.current = null;
     }
   }, [props.jumpingMid, duration, props.noLoop]);
   return (
