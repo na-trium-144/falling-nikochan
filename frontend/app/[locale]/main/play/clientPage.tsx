@@ -86,6 +86,16 @@ export default function PlayTab({ locale }: { locale: string }) {
           </p>
         )}
         <ChartList
+          type="original"
+          fetchAll
+          href={(cid) => `/share/${cid}`}
+          onClick={openModal}
+          onClickMobile={openShareInternal}
+          showLoading
+          moreHref=""
+          badge
+        />
+        <ChartList
           type="sample"
           fetchAll
           href={(cid) => `/share/${cid}`}

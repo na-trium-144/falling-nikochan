@@ -71,6 +71,7 @@ export type ChartListType =
   | "recentEdit"
   | "popular"
   | "latest"
+  | "original"
   | "sample";
 
 interface Props {
@@ -109,15 +110,13 @@ export function ChartList(props: Props) {
             .map((cid) => ({ cid, fetched: false })),
         );
         break;
-      case "sample":
+      case "original":
         setBriefs(
-          originalCId
-            .map(
-              (cid) =>
-                ({ cid, fetched: false, original: true }) as ChartLineBrief,
-            )
-            .concat(sampleCId.map((cid) => ({ cid, fetched: false }))),
+          originalCId.map((cid) => ({ cid, fetched: false, original: true })),
         );
+        break;
+      case "sample":
+        setBriefs(sampleCId.map((cid) => ({ cid, fetched: false })));
         break;
       case "latest":
       case "popular":
