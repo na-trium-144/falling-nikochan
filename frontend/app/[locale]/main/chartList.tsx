@@ -59,7 +59,7 @@ export default function ChartListPage(props: PProps) {
         onClickMobile={openShareInternal}
         showLoading
         dateDiff={props.dateDiff}
-        moreHref=""
+        moreHref={null}
         badge={props.badge}
       />
     </IndexMain>
@@ -84,7 +84,7 @@ interface Props {
   onClick?: (cid: string, brief?: ChartBrief) => void;
   onClickMobile?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
-  moreHref: string;
+  moreHref: string | null;
   badge?: boolean;
 }
 export function ChartList(props: Props) {
@@ -231,28 +231,29 @@ export function ChartList(props: Props) {
           t("empty")
         ) : null}
       </div>
-      {Array.isArray(briefs) && briefs.length > maxRow ? (
-        <Link
-          className={
-            "block w-max mx-auto mt-2 " +
-            (fetching ? "invisible " : "") +
-            linkStyle1
-          }
-          href={props.moreHref}
-          prefetch={!process.env.NO_PREFETCH}
-        >
-          {t("showAll")}
-          {/*<span className="ml-1">
+      {props.moreHref &&
+        (Array.isArray(briefs) && briefs.length > maxRow ? (
+          <Link
+            className={
+              "block w-max mx-auto mt-2 " +
+              (fetching ? "invisible " : "") +
+              linkStyle1
+            }
+            href={props.moreHref}
+            prefetch={!process.env.NO_PREFETCH}
+          >
+            {t("showAll")}
+            {/*<span className="ml-1">
               ({briefs.length /*- props.maxRow* /})
             </span>*/}
-          <ArrowRight
-            className="inline-block align-middle ml-2 "
-            theme="filled"
-          />
-        </Link>
-      ) : (
-        <div className="w-0 h-4 mt-2 " />
-      )}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
+          </Link>
+        ) : (
+          <div className="w-0 h-6 mt-2 " />
+        ))}
     </div>
   );
 }

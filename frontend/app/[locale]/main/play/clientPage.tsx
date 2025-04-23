@@ -92,7 +92,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           onClick={openModal}
           onClickMobile={openShareInternal}
           showLoading
-          moreHref=""
+          moreHref={null}
           badge
         />
         <ChartList
@@ -102,7 +102,7 @@ export default function PlayTab({ locale }: { locale: string }) {
           onClick={openModal}
           onClickMobile={openShareInternal}
           showLoading
-          moreHref=""
+          moreHref={null}
           badge
         />
       </div>

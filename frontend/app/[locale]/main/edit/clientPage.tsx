@@ -122,7 +122,7 @@ export default function EditTab({ locale }: { locale: string }) {
           href={(cid) => `/${locale}/edit?cid=${cid}`}
           newTab
           showLoading
-          moreHref=""
+          moreHref={null}
         />
       </div>
     </IndexMain>
