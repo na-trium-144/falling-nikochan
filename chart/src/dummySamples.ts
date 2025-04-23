@@ -39,6 +39,21 @@ export function getSample(cid: string): ChartEdit {
         title: "FREEDOM DiVE↓",
         composer: "xi",
       },
+      170465: {
+        ytId: "Soy4jGPHr3g",
+        title: "テトリス",
+        composer: "柊マグネタイト",
+      },
+      142383: {
+        ytId: "vS_a8Edde8k",
+        title: "ナイト・オブ・ナイツ",
+        composer: "ビートまりお",
+      },
+      683932: {
+        ytId: "e8HRTlkGD4Q",
+        title: "conflict",
+        composer: "siromaru + cranky",
+      },
     }[cid],
     chartCreator: "(dev dummy file)",
   };
