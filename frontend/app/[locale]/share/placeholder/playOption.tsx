@@ -319,16 +319,16 @@ function SelectedLevelInfo(props: {
               bestScoreState ? "" : "text-slate-400 dark:text-stone-600 "
             }
           >
-            <span className="inline-block text-2xl w-12 text-right">
+            <span className="inline-block text-2xl">
               {Math.floor(totalScore)}
             </span>
             <span className="">.</span>
-            <span className="inline-block w-6">
+            <span className="inline-block">
               {(Math.floor(totalScore * 100) % 100).toString().padStart(2, "0")}
             </span>
           </span>
           {bestScoreState && (
-            <span className="text-xl">({rankStr(totalScore)})</span>
+            <span className="text-xl ml-1 ">({rankStr(totalScore)})</span>
           )}
         </div>
         {showBestDetail && bestScoreState && (
