@@ -21,7 +21,7 @@ import { pagerButtonClass } from "@/common/pager.jsx";
 interface Props {
   cid: string | undefined;
   brief: ChartBrief | null;
-  record: RecordGetSummary[];
+  record: RecordGetSummary[] | null;
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;

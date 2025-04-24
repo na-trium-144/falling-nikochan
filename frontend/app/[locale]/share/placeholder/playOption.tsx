@@ -20,11 +20,12 @@ import { RecordHistogram } from "@/common/recordHistogram";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
+import { SlimeSVG } from "@/common/slime";
 
 interface Props {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[];
+  record: RecordGetSummary[] | null;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -201,7 +202,7 @@ function LevelButton(props: {
 function SelectedLevelInfo(props: {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[];
+  record: RecordGetSummary[] | null;
   selectedLevel: number;
 }) {
   const t = useTranslations("share");
@@ -210,7 +211,7 @@ function SelectedLevelInfo(props: {
   const selectedRecord =
     props.selectedLevel === null
       ? null
-      : props.record.find(
+      : props.record?.find(
           (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
         );
 
@@ -287,8 +288,14 @@ function SelectedLevelInfo(props: {
       </div>
       <p className="mt-2 ">
         {t("otherPlayers")}
-        <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
+        {props.record !== null && (
+          <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
+        )}
       </p>
+      <span className={props.record === null ? "block " : "hidden "}>
+        <SlimeSVG />
+        Loading...
+      </span>
       {selectedRecord && selectedRecord.count >= 5 && (
         <RecordHistogram
           histogram={selectedRecord.histogram}

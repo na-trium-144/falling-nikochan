@@ -13,7 +13,9 @@ export function useShareModal(locale: string, from: "play" | "top") {
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
-  const [modalRecord, setModalRecord] = useState<RecordGetSummary[]>([]);
+  const [modalRecord, setModalRecord] = useState<RecordGetSummary[] | null>(
+    null,
+  );
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
   const router = useRouter();
   const openModal = useCallback(
@@ -31,6 +33,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
           document.title = titleShare(th, cid, res.brief!);
         }
       });
+      setModalRecord(null);
       fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
         .then((res) => {
           if (res.ok) {

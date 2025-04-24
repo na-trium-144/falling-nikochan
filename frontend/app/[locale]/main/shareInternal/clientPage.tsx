@@ -19,7 +19,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
   const [cid, setCId] = useState<string | null>(null);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [fromPlay, setFromPlay] = useState<boolean | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[]>();
+  const [record, setRecord] = useState<RecordGetSummary[] | null>(null);
   const [sessionError, setSessionError] = useState<boolean>(false);
   useEffect(() => {
     const data: ShareInternalSession | null = JSON.parse(
@@ -35,6 +35,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
           document.title = titleShare(t, data.cid, res.brief!);
         }
       });
+      setRecord(null);
       fetch(process.env.BACKEND_PREFIX + `/api/record/${data.cid}`)
         .then((res) => {
           if (res.ok) {
@@ -65,7 +66,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
         <ShareBox
           cid={cid || ""}
           brief={brief}
-          record={record || []}
+          record={record}
           locale={locale}
         />
       )}
