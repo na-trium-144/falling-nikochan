@@ -2,7 +2,8 @@ name: Node.js CI
 on:
   pull_request:
     branches: [ "main" ]
-    
+permissions:
+  contents: read
 jobs:
   check-lockfile:
     runs-on: ubuntu-latest
@@ -12,8 +13,8 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 20.x
-    - run: bun i
-    - run: npm i
+    - run: bun i --ignore-scripts --lockfile-only
+    - run: npm i --ignore-scripts --package-lock-only
     - name: Abort if lockfile changed
       run: '[ -z "$(git status -s)" ]'
 
