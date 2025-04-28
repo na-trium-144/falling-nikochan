@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 import Button from "./button";
+import { hasTouch } from "@/scale";
 
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
@@ -67,6 +68,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     const userAgent = (
       navigator.userAgent ||
       navigator.vendor ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).opera
     ).toLowerCase();
     if (userAgent.includes("android")) {
@@ -80,7 +82,9 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       window.addEventListener("beforeinstallprompt", handler);
       return () => window.removeEventListener("beforeinstallprompt", handler);
     } else if (
-      userAgent.match(/iphone|ipad|ipod/) &&
+      (userAgent.match(/iphone|ipad|ipod/) ||
+        (userAgent.includes("macintosh") && hasTouch())) &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       !(window as any).MSStream
     ) {
       setDetectedOS("ios");
