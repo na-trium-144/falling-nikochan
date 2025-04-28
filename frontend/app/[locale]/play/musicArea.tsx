@@ -271,6 +271,7 @@ export function MusicArea(props: Props) {
         }
         onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
       >
         <VolumeNotice theme="filled" className="inline-block align-middle" />
       </button>
@@ -302,6 +303,7 @@ export function MusicArea(props: Props) {
           e.stopPropagation();
         }}
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
       >
         {!props.isMobile && (
           <span

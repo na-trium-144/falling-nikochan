@@ -67,6 +67,7 @@ export function ReadyMessage(props: MessageProps) {
     <CenterBox
       className="overflow-clip "
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
     >
       {props.small && (
         <div
@@ -334,6 +335,7 @@ export function StopMessage(props: MessageProps2) {
     <CenterBox
       className={props.hidden ? "hidden" : ""}
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
     >
       <p className="text-lg font-title font-bold mb-2">
         &lt; {t("stopped")} &gt;
@@ -363,7 +365,10 @@ export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
 
   return (
-    <CenterBox onPointerDown={(e) => e.stopPropagation()}>
+    <CenterBox
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+    >
       <p className="mb-2">
         <Caution className="inline-block text-lg align-middle mr-1" />
         {props.msg}

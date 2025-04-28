@@ -35,6 +35,8 @@ export default function Button(props: Props) {
         props.className
       }
       onClick={() => props.onClick && props.onClick()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
       onKeyUp={(e) => e.stopPropagation()}
       disabled={props.disabled || props.loading}
