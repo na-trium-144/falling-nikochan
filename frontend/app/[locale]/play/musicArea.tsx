@@ -10,6 +10,7 @@ import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { linkStyle1 } from "@/common/linkStyle";
 import { useTranslations } from "next-intl";
+import { detectOS } from "@/common/pwaInstall";
 
 interface Props {
   ready: boolean;
@@ -42,6 +43,13 @@ export function MusicArea(props: Props) {
   const t = useTranslations("play.message");
 
   const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
+  useEffect(() => {
+    if (detectOS() === "ios") {
+      // https://stackoverflow.com/questions/31147753/youtube-iframe-embed-cant-control-audio-on-ipad
+      setYtVolumeCtrlAvailable(false);
+    }
+  }, []);
   const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
   const initialVolumeCtrlOpenDone = useRef(false);
   useEffect(() => {
@@ -314,7 +322,8 @@ export function MusicArea(props: Props) {
             type="range"
             min="0"
             max="100"
-            value={props.ytVolume}
+            disabled={!ytVolumeCtrlAvailable}
+            value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
             onChange={(e) => props.setYtVolume(parseInt(e.target.value))}
           />
         </div>

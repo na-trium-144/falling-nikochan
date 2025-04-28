@@ -1,3 +1,9 @@
+## ver. 11.21 - 2025/04/28 [#522](https://github.com/na-trium-144/falling-nikochan/pull/522)
+
+ cssのgradientが使えない環境で代わりの背景色を設定
+* ipadのuserAgent認識を修正
+* iosではYouTubeの音量を変更できないので、YouTube音量変更のinputを無効化
+
 ## ver. 11.19 - 2025/04/24 [#518](https://github.com/na-trium-144/falling-nikochan/pull/518)
 
 * /main/play のサンプル譜面リストをSSRに変更

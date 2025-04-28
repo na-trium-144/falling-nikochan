@@ -939,8 +939,8 @@ function Play(props: Props) {
         <div
           className={
             "-z-30 absolute inset-x-0 bottom-0 " +
-            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 " +
-            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700 "
+            "bg-lime-500 bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 " +
+            "dark:bg-lime-800 dark:from-lime-900 dark:via-lime-800 dark:to-lime-700 "
           }
           style={{ top: "-1rem" }}
         />

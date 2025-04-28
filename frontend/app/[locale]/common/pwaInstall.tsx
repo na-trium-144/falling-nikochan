@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 import Button from "./button";
+import { hasTouch } from "@/scale";
 
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
@@ -45,6 +46,25 @@ const PWAContext = createContext<PWAStates>({
   workerUpdate: null,
 });
 export const usePWAInstall = () => useContext(PWAContext);
+export function detectOS(): "android" | "ios" | null {
+  const userAgent = (
+    navigator.userAgent ||
+    navigator.vendor ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).opera
+  ).toLowerCase();
+  if (userAgent.includes("android")) {
+    return "android";
+  } else if (
+    (userAgent.match(/iphone|ipad|ipod/) ||
+      (userAgent.includes("macintosh") && hasTouch())) &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    !(window as any).MSStream
+  ) {
+    return "ios";
+  }
+  return null;
+}
 export function PWAInstallProvider(props: { children: ReactNode }) {
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
@@ -64,26 +84,24 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     );
   }, []);
   useEffect(() => {
-    const userAgent = (
-      navigator.userAgent ||
-      navigator.vendor ||
-      (window as any).opera
-    ).toLowerCase();
-    if (userAgent.includes("android")) {
-      // beforeinstallpromptイベントが発火するのを待つ
-      setTimeout(() => setDetectedOS("android"), 100);
-      const handler = ((e: BeforeInstallPromptEvent) => {
-        e.preventDefault();
-        setDeferredPrompt(e);
-        setDetectedOS("android");
-      }) as EventListener;
-      window.addEventListener("beforeinstallprompt", handler);
-      return () => window.removeEventListener("beforeinstallprompt", handler);
-    } else if (
-      userAgent.match(/iphone|ipad|ipod/) &&
-      !(window as any).MSStream
-    ) {
-      setDetectedOS("ios");
+    switch (detectOS()) {
+      case "android": {
+        // beforeinstallpromptイベントが発火するのを待つ
+        setTimeout(() => setDetectedOS("android"), 100);
+        const handler = ((e: BeforeInstallPromptEvent) => {
+          e.preventDefault();
+          setDeferredPrompt(e);
+          setDetectedOS("android");
+        }) as EventListener;
+        window.addEventListener("beforeinstallprompt", handler);
+        return () => window.removeEventListener("beforeinstallprompt", handler);
+      }
+      case "ios":
+        setDetectedOS("ios");
+        break;
+      case null:
+        setDetectedOS(null);
+        break;
     }
   }, []);
   useEffect(() => {
