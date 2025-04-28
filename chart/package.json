@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/chart",
-  "version": "11.21.0",
+  "version": "11.22.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",

@@ -693,10 +693,12 @@ function Play(props: Props) {
           hit();
         }
       }}
-      onPointerDown={() => {
+      onPointerDown={(e) => {
         flash();
         hit();
+        e.preventDefault();
       }}
+      onPointerUp={(e) => e.preventDefault()}
     >
       {musicAreaOk && (
         <>
@@ -817,6 +819,7 @@ function Play(props: Props) {
               }
               onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e)=> e.stopPropagation()}
             >
               <Pause className="inline-block align-middle " />
               {!isTouch && (
@@ -831,6 +834,7 @@ function Play(props: Props) {
                 (showLoading ? "opacity-100" : "opacity-0")
               }
               onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
             >
               <p>
                 <SlimeSVG />
