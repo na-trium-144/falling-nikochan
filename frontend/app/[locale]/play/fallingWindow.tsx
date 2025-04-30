@@ -1,12 +1,13 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote7, DisplayNote7, Note7 } from "@falling-nikochan/chart";
+import { Application, Assets, Sprite, Texture } from "pixi.js";
 
 interface Props {
   className?: string;
@@ -33,12 +34,153 @@ export default function FallingWindow(props: Props) {
   const { rem } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
-  const [rerenderIndex, setRerenderIndex] = useState<number>(0);
+  const [app, setApp] = useState<Application | null>(null);
+  const [cleanupNotDone, setCleanupNotDone] = useState<boolean>(false);
+  useEffect(() => {
+    if (cleanupNotDone) return;
+    const app = new Application();
+    const pInit = app
+      .init({ backgroundAlpha: 0, width: boxSize, height: boxSize })
+      .then(() => {
+        ref.current?.appendChild(app.canvas);
+        setApp(app);
+      });
+    return () => {
+      setCleanupNotDone(true);
+      pInit.then(() => {
+        app.destroy(true, { children: true });
+        setApp(null);
+        setCleanupNotDone(false);
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref, cleanupNotDone]);
+  useEffect(() => {
+    if (boxSize && app) {
+      app.renderer.resize(boxSize, boxSize);
+    }
+  }, [app, boxSize, ref]);
+
+  const nikochanAssets = useRef<Texture[]>([]);
+  const particleAssets = useRef<Texture[]>([]);
+  useEffect(() => {
+    Promise.all(
+      [0, 1, 2, 3].map((name) =>
+        Assets.load(process.env.ASSET_PREFIX + `/assets/nikochan${name}.svg`),
+      ),
+    ).then((a) => {
+      nikochanAssets.current = a;
+    });
+    Promise.all(
+      [4, 6, 8, 10, 12].map((name) =>
+        Assets.load(process.env.ASSET_PREFIX + `/assets/particle${name}.svg`),
+      ),
+    ).then((a) => {
+      particleAssets.current = a;
+    });
+  }, []);
+
+  interface NikochanState {
+    display?: DisplayNote6 | DisplayNote7;
+    sprite?: Sprite;
+    transitionBegin?: DOMHighResTimeStamp;
+  }
+  const nikochan = useRef<NikochanState[]>([]);
+  useEffect(() => {
+    const update = () => {
+      const now = getCurrentTimeSec();
+      if (
+        app &&
+        playing &&
+        marginX !== undefined &&
+        marginY !== undefined &&
+        boxSize &&
+        now !== undefined
+      ) {
+        // todo: mapではなくforループにして途中でbreak
+        notes
+          .map((n) =>
+            n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now),
+          )
+          .forEach((dn, i) => {
+            if (i >= nikochan.current.length) {
+              nikochan.current.push({});
+            }
+            const n = nikochan.current[i]!;
+            n.display = dn || undefined;
+            if (dn) {
+              let s: Sprite;
+              if (n.sprite) {
+                s = n.sprite;
+              } else {
+                s = new Sprite(nikochanAssets.current[0]);
+                n.sprite = s;
+                app.stage.addChild(s);
+              }
+              if (dn.done > 0 && !n.transitionBegin) {
+                n.transitionBegin = performance.now();
+              }
+              let scale: number = 1;
+              let opacity: number = 1;
+              let translateY: number = 0;
+              const tAnim = Math.min(
+                1,
+                (performance.now() - (n.transitionBegin || 0)) / 300,
+              );
+              switch (dn.done) {
+                case 0:
+                  break;
+                case 1:
+                  scale = 1 + 0.4 * tAnim;
+                  opacity = 1 - tAnim;
+                  translateY = 1 * tAnim;
+                  break;
+                case 2:
+                  opacity = 1 - tAnim;
+                  translateY = 0.5 * tAnim;
+                  break;
+                case 3:
+                  opacity = 1 - tAnim;
+                  break;
+              }
+              s.texture = nikochanAssets.current[[0, 1, 2, 3, 0][dn.done]];
+              s.anchor.set(0.5);
+              s.width = noteSize * bigScale(notes[i].big) * scale;
+              s.height = noteSize * bigScale(notes[i].big) * scale;
+              s.x = dn.pos.x * boxSize + marginX;
+              s.y =
+                boxSize -
+                (dn.pos.y * boxSize +
+                  targetY * boxSize +
+                  marginY +
+                  translateY * noteSize);
+              s.alpha = opacity;
+            }
+          });
+      }
+    };
+    if (app) {
+      app?.ticker?.add(update);
+      return () => void app?.ticker?.remove(update);
+    }
+  }, [
+    app,
+    boxSize,
+    notes,
+    noteSize,
+    marginX,
+    marginY,
+    rem,
+    playing,
+    getCurrentTimeSec,
+  ]);
+
   const fpsCounter = useRef<DOMHighResTimeStamp[]>([]);
   useEffect(() => {
-    let animFrame: number;
-    const updateLoop = () => {
-      setRerenderIndex((r) => r + 1);
+    const update = () => {
+      performance.mark("nikochan-tick");
+      const nowDate = performance.now();
+      fpsCounter.current.push(nowDate);
       while (
         fpsCounter.current.at(0) &&
         fpsCounter.current.at(-1)! - fpsCounter.current.at(0)! > 1000
@@ -46,179 +188,27 @@ export default function FallingWindow(props: Props) {
         fpsCounter.current.shift();
       }
       setFPS?.(fpsCounter.current.length);
-      animFrame = requestAnimationFrame(updateLoop);
     };
-    animFrame = requestAnimationFrame(updateLoop);
-    return () => cancelAnimationFrame(animFrame);
-  }, [setFPS]);
-
-  const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
-  const prevRerenderIndex = useRef<number>(-1);
-  const prevRerender = useRef<DOMHighResTimeStamp | null>(null);
-  if (
-    prevRerender.current === null ||
-    (prevRerenderIndex.current !== rerenderIndex &&
-      (frameDrop === null ||
-        performance.now() - prevRerender.current >
-          1000 / (maxFPS / (frameDrop - 0.5))))
-  ) {
-    performance.mark("nikochan-rerender");
-    const nowDate = performance.now();
-    fpsCounter.current.push(nowDate);
-    if (
-      prevRerender.current === null ||
-      frameDrop === null ||
-      nowDate - prevRerender.current > (1000 / (maxFPS / frameDrop)) * 2
-    ) {
-      prevRerender.current = nowDate;
-    } else {
-      prevRerender.current += 1000 / (maxFPS / frameDrop);
-    }
-    prevRerenderIndex.current = rerenderIndex;
-    const now = getCurrentTimeSec();
-    if (
-      playing &&
-      marginX !== undefined &&
-      marginY !== undefined &&
-      boxSize &&
-      now !== undefined
-    ) {
-      displayNotes.current = notes
-        .map((n) => (n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)))
-        .filter((n) => n !== null);
-    } else {
-      displayNotes.current = [];
-    }
-  }
+    app?.ticker?.add(update);
+    return () => void app?.ticker?.remove(update);
+  }, [app, setFPS]);
 
   return (
     <div className={props.className} style={props.style} ref={ref}>
-      <div className="relative w-full h-full overflow-visible">
-        {/* 判定線 */}
-        {boxSize && marginY !== undefined && (
-          <TargetLine
-            barFlash={props.barFlash}
-            left={0}
-            right="-100%"
-            bottom={targetY * boxSize + marginY}
-          />
-        )}
-        {boxSize && marginX !== undefined && marginY !== undefined && (
-          <NikochansMemo
-            displayNotes={displayNotes.current}
-            notes={notes}
-            noteSize={noteSize}
-            boxSize={boxSize}
-            marginX={marginX}
-            marginY={marginY}
-          />
-        )}
-      </div>
+      {/* 判定線 */}
+      {boxSize && marginY !== undefined && (
+        <TargetLine
+          barFlash={props.barFlash}
+          left={0}
+          right="-100%"
+          bottom={targetY * boxSize + marginY}
+        />
+      )}
     </div>
   );
 }
 
-interface MProps {
-  displayNotes: DisplayNote6[] | DisplayNote7[];
-  notes: Note6[] | Note7[];
-  noteSize: number;
-  boxSize: number;
-  marginX: number;
-  marginY: number;
-}
-const NikochansMemo = memo(function Nikochans(props: MProps) {
-  return props.displayNotes.map((d) => (
-    <Nikochan
-      key={d.id}
-      displayNote={d}
-      note={props.notes[d.id]}
-      noteSize={props.noteSize}
-      marginX={props.marginX}
-      marginY={props.marginY}
-      boxSize={props.boxSize}
-    />
-  ));
-});
-
-interface NProps {
-  displayNote: DisplayNote6 | DisplayNote7;
-  noteSize: number;
-  note: Note6 | Note7;
-  marginX: number;
-  marginY: number;
-  boxSize: number;
-}
-function Nikochan(props: NProps) {
-  /* にこちゃん
-  d.done に応じて画像と動きを変える
-  0: 通常
-  1〜3: good, ok, bad
-  4: miss は画像が0と同じ
-  */
-  const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
-
-  return (
-    <>
-      <div
-        className={
-          "absolute " +
-          (displayNote.done === 0
-            ? ""
-            : displayNote.done === 1
-              ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
-              : displayNote.done === 2
-                ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
-                : displayNote.done === 3
-                  ? "transition ease-linear duration-300 opacity-0"
-                  : "")
-        }
-        style={{
-          /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-          width: noteSize * bigScale(note.big),
-          height: noteSize * bigScale(note.big),
-          left:
-            displayNote.pos.x * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginX,
-          bottom:
-            displayNote.pos.y * boxSize +
-            targetY * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginY,
-        }}
-      >
-        <img
-          src={
-            process.env.ASSET_PREFIX +
-            `/assets/nikochan${
-              displayNote.done <= 3 ? displayNote.done : 0
-            }.svg`
-          }
-          className="w-full h-full "
-        />
-        {/* chainBonusをにこちゃんの右上に表示する */}
-        {/*{displayNote.baseScore !== undefined &&
-          displayNote.chainBonus !== undefined &&
-          displayNote.chain && (
-            <span
-              className={
-                "absolute w-12 text-xs " +
-                (displayNote.chain >= 100 || displayNote.bigDone
-                  ? "text-orange-500 "
-                  : "")
-              }
-              style={{ bottom: "100%", left: "100%" }}
-            >
-              ×{" "}
-              {(
-                displayNote.baseScore +
-                displayNote.chainBonus +
-                (displayNote.bigBonus || 0)
-              ).toFixed(2)}
-            </span>
-          )}*/}
-      </div>
-      {[1].includes(displayNote.done) && (
+/*      {[1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
           left={note.targetX * boxSize + marginX}
@@ -239,10 +229,7 @@ function Nikochan(props: NProps) {
           big={displayNote.bigDone}
           chain={displayNote.chain || 0}
         />
-      )}
-    </>
-  );
-}
+      )}*/
 
 interface RProps {
   noteSize: number;
