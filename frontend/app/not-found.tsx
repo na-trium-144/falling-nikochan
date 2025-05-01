@@ -11,7 +11,7 @@ export default async function NotFoundPage() {
   const t = await getTranslations("en", "error");
   return (
     <html>
-      <body>
+      <body className="w-full h-dvh overflow-hidden touch-none ">
         <ThemeProvider>
           <CenterBox>404: {t("api.notFound")}</CenterBox>
         </ThemeProvider>
