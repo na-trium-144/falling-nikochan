@@ -133,7 +133,7 @@ export function MusicArea(props: Props) {
         <div
           className={
             "flex-1 min-w-0 mr-1 flex flex-col justify-between " +
-            (props.isMobile ? "ml-3 mt-2 " : "")
+            (props.isMobile ? (largeTitle ? "ml-3 mt-4 " : "ml-3 mt-2 ") : "")
           }
         >
           <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
