@@ -65,7 +65,7 @@ export default function StatusBox(props: Props) {
         {props.isMobile && screenWidth >= 39 * rem && (
           <span
             className={
-              "flex-none w-12 pl-1 self-end translate-y-1 flex flex-row items-baseline mr-2 " +
+              "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2 " +
               (props.bigTotal === 0
                 ? "text-slate-400 dark:text-stone-600 "
                 : "")
@@ -88,7 +88,7 @@ export default function StatusBox(props: Props) {
           )}
         </StatusItem>
         {props.isMobile && screenWidth >= 35 * rem && (
-          <span className="flex-none w-12 pl-1 self-end translate-y-1 flex flex-row items-baseline">
+          <span className="flex-none w-12 self-end translate-y-1 flex flex-row items-baseline">
             <span className="flex-1">/</span>
             <span>{props.notesTotal}</span>
           </span>
@@ -153,21 +153,42 @@ function StatusName(props: { children: ReactNode }) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   return (
-    <span className={isMobile ? "h-max w-max" : "flex-1"}>
+    <span className={isMobile ? "h-max w-full text-center " : "flex-1"}>
       {props.children}
     </span>
   );
 }
-function StatusValue(props: { children: ReactNode }) {
-  return (
-    <span
-      className="text-right mt-1"
-      style={{
-        fontSize: "2em",
-        lineHeight: 1,
-      }}
-    >
-      {props.children}
-    </span>
-  );
+function StatusValue(props: { children: number }) {
+  const { screenWidth, screenHeight } = useDisplayMode();
+  const isMobile = screenWidth < screenHeight;
+  if (isMobile) {
+    return (
+      <span
+        className="mt-1 w-full text-center "
+        style={{
+          fontSize: "2em",
+          lineHeight: 1,
+        }}
+      >
+        {props.children}
+      </span>
+    );
+  } else {
+    return (
+      <span
+        className="inline-flex mt-1 w-4 justify-center items-baseline "
+        style={{
+          fontSize: "2em",
+          lineHeight: 1,
+        }}
+      >
+        <span className="relative w-max ">
+          {props.children % 10}
+          <span className="absolute inset-y-0 right-full ">
+            {props.children >= 10 && Math.floor(props.children / 10)}
+          </span>
+        </span>
+      </span>
+    );
+  }
 }
