@@ -23,14 +23,12 @@ interface Props {
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
-  maxFPS: number;
-  frameDrop: number | null;
+  limitMaxFPS: number;
   barFlash: boolean;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS } =
-    props;
+  const { notes, playing, getCurrentTimeSec, setFPS, limitMaxFPS } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -84,6 +82,11 @@ export default function FallingWindow(props: Props) {
       app.canvas.style.marginTop = `${canvasTop}px`;
     }
   }, [app, ref, canvasWidth, canvasHeight, canvasLeft, canvasTop]);
+  useEffect(() => {
+    if (app) {
+      app.ticker.maxFPS = limitMaxFPS;
+    }
+  }, [app, limitMaxFPS]);
 
   const nikochanAssets = useRef<Texture[]>([]);
   const particleAssets = useRef<(Texture | undefined)[]>([]);
