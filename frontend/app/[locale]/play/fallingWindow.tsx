@@ -351,8 +351,7 @@ function nikochanSprite(
   }
   s.texture = cx.nikochanAssets[[0, 1, 2, 3, 0][dn.done]];
   s.anchor.set(0.5);
-  s.width = cx.noteSize * bigScale(n.big) * scale;
-  s.height = cx.noteSize * bigScale(n.big) * scale;
+  s.setSize(cx.noteSize * bigScale(n.big) * scale);
   s.x = dn.pos.x * cx.boxSize + cx.originX;
   s.y =
     -dn.pos.y * cx.boxSize -
@@ -376,8 +375,10 @@ function rippleSprite(
     );
     const opacity = tAnim < 0.8 ? 0.3 : 0.3 - ((tAnim - 0.8) / 0.2) * 0.3;
     const scale = 1 * tAnim;
-    rs[i].width = cx.noteSize * 2 * (n.big ? 1.5 : 1) * scale;
-    rs[i].height = rs[i].width * 0.7;
+    rs[i].setSize(
+      cx.noteSize * 2 * (n.big ? 1.5 : 1) * scale,
+      cx.noteSize * 2 * (n.big ? 1.5 : 1) * scale * 0.7,
+    );
     rs[i].anchor.set(0.5);
     rs[i].x = n.targetX * cx.boxSize + cx.originX;
     rs[i].y = -targetY * cx.boxSize + cx.originY;
@@ -401,8 +402,10 @@ function particleSprite(
       (tAnim < 0.8 ? tAnim / 0.8 : 1 - (tAnim - 0.8) / 0.2) * [0.8, 0.6][i];
     const angle = ns.pAngle![i] + ns.pAngleVel![i] * tAnim;
     const pSize = cx.noteSize * [1.8, 3][i];
-    ps[i].width = pSize * scale;
-    ps[i].height = pSize * scale;
+    ps[i].setSize(
+      (pSize * scale * ps[i].texture.width) / ps[i].texture.height,
+      pSize * scale,
+    );
     ps[i].anchor.set(0.5);
     ps[i].x = n.targetX * cx.boxSize + cx.originX;
     ps[i].y = -targetY * cx.boxSize + cx.originY;
