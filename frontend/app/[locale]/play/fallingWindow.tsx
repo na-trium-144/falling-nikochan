@@ -7,7 +7,14 @@ import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote7, DisplayNote7, Note7 } from "@falling-nikochan/chart";
-import { Application, Assets, Sprite, Texture } from "pixi.js";
+import {
+  Application,
+  Assets,
+  IRenderLayer,
+  RenderLayer,
+  Sprite,
+  Texture,
+} from "pixi.js";
 
 interface Props {
   className?: string;
@@ -35,6 +42,9 @@ export default function FallingWindow(props: Props) {
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   const [app, setApp] = useState<Application | null>(null);
+  const rippleLayer = useRef<IRenderLayer>(null);
+  const particleLayer = useRef<IRenderLayer>(null);
+  const nikochanLayer = useRef<IRenderLayer>(null);
   const [cleanupNotDone, setCleanupNotDone] = useState<boolean>(false);
   useEffect(() => {
     if (cleanupNotDone) return;
@@ -43,6 +53,12 @@ export default function FallingWindow(props: Props) {
       .init({ backgroundAlpha: 0, width: boxSize, height: boxSize })
       .then(() => {
         ref.current?.appendChild(app.canvas);
+        rippleLayer.current = new RenderLayer();
+        app.stage.addChild(rippleLayer.current);
+        particleLayer.current = new RenderLayer();
+        app.stage.addChild(particleLayer.current);
+        nikochanLayer.current = new RenderLayer();
+        app.stage.addChild(nikochanLayer.current);
         setApp(app);
       });
     return () => {
@@ -62,35 +78,55 @@ export default function FallingWindow(props: Props) {
   }, [app, boxSize, ref]);
 
   const nikochanAssets = useRef<Texture[]>([]);
-  const particleAssets = useRef<Texture[]>([]);
+  const particleAssets = useRef<(Texture | undefined)[]>([]);
+  const rippleAsset = useRef<Texture | undefined>(undefined);
   useEffect(() => {
     Promise.all(
       [0, 1, 2, 3].map((name) =>
-        Assets.load(process.env.ASSET_PREFIX + `/assets/nikochan${name}.svg`),
+        Assets.load<Texture>(
+          process.env.ASSET_PREFIX + `/assets/nikochan${name}.svg`,
+        ),
       ),
     ).then((a) => {
       nikochanAssets.current = a;
     });
     Promise.all(
-      [4, 6, 8, 10, 12].map((name) =>
-        Assets.load(process.env.ASSET_PREFIX + `/assets/particle${name}.svg`),
+      Array.from(new Array(13)).map((_, i) =>
+        [4, 6, 8, 10, 12].includes(i)
+          ? Assets.load<Texture>(
+              process.env.ASSET_PREFIX + `/assets/particle${i}.svg`,
+            )
+          : undefined,
       ),
     ).then((a) => {
       particleAssets.current = a;
     });
+    Assets.load<Texture>(process.env.ASSET_PREFIX + `/assets/ripple.svg`).then(
+      (a) => {
+        rippleAsset.current = a;
+      },
+    );
   }, []);
 
-  interface NikochanState {
-    display?: DisplayNote6 | DisplayNote7;
-    sprite?: Sprite;
-    transitionBegin?: DOMHighResTimeStamp;
-  }
   const nikochan = useRef<NikochanState[]>([]);
   useEffect(() => {
     const update = () => {
       const now = getCurrentTimeSec();
+      const cx: NContext = {
+        app: app!,
+        boxSize: boxSize || 0,
+        marginX: marginX || 0,
+        marginY: marginY || 0,
+        noteSize,
+        targetY,
+        nikochanAssets: nikochanAssets.current,
+        particleAssets: particleAssets.current,
+        rippleAsset: rippleAsset.current,
+        nikochanLayer: nikochanLayer.current!,
+        rippleLayer: rippleLayer.current!,
+        particleLayer: particleLayer.current!,
+      };
       if (
-        app &&
         playing &&
         marginX !== undefined &&
         marginY !== undefined &&
@@ -106,57 +142,15 @@ export default function FallingWindow(props: Props) {
             if (i >= nikochan.current.length) {
               nikochan.current.push({});
             }
-            const n = nikochan.current[i]!;
-            n.display = dn || undefined;
-            if (dn) {
-              let s: Sprite;
-              if (n.sprite) {
-                s = n.sprite;
-              } else {
-                s = new Sprite(nikochanAssets.current[0]);
-                n.sprite = s;
-                app.stage.addChild(s);
-              }
-              if (dn.done > 0 && !n.transitionBegin) {
-                n.transitionBegin = performance.now();
-              }
-              let scale: number = 1;
-              let opacity: number = 1;
-              let translateY: number = 0;
-              const tAnim = Math.min(
-                1,
-                (performance.now() - (n.transitionBegin || 0)) / 300,
-              );
-              switch (dn.done) {
-                case 0:
-                  break;
-                case 1:
-                  scale = 1 + 0.4 * tAnim;
-                  opacity = 1 - tAnim;
-                  translateY = 1 * tAnim;
-                  break;
-                case 2:
-                  opacity = 1 - tAnim;
-                  translateY = 0.5 * tAnim;
-                  break;
-                case 3:
-                  opacity = 1 - tAnim;
-                  break;
-              }
-              s.texture = nikochanAssets.current[[0, 1, 2, 3, 0][dn.done]];
-              s.anchor.set(0.5);
-              s.width = noteSize * bigScale(notes[i].big) * scale;
-              s.height = noteSize * bigScale(notes[i].big) * scale;
-              s.x = dn.pos.x * boxSize + marginX;
-              s.y =
-                boxSize -
-                (dn.pos.y * boxSize +
-                  targetY * boxSize +
-                  marginY +
-                  translateY * noteSize);
-              s.alpha = opacity;
-            }
+            const ns = nikochan.current[i]!;
+            const n = notes[i];
+            updateNikochan(ns, n, dn, cx);
           });
+      } else {
+        nikochan.current.forEach((ns) => {
+          clearNikochan(ns, cx);
+        });
+        nikochan.current = [];
       }
     };
     if (app) {
@@ -208,193 +202,205 @@ export default function FallingWindow(props: Props) {
   );
 }
 
-/*      {[1].includes(displayNote.done) && (
-        <Ripple
-          noteSize={noteSize}
-          left={note.targetX * boxSize + marginX}
-          bottom={targetY * boxSize + marginY}
-          big={displayNote.bigDone}
-          chain={displayNote.chain || 0}
-        />
-      )}
-      {displayNote.chain && [1, 2].includes(displayNote.done) && (
-        <Particle
-          particleNum={
-            // 6,8,10,12
-            6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
-          }
-          left={note.targetX * boxSize + marginX}
-          bottom={targetY * boxSize + marginY}
-          noteSize={noteSize}
-          big={displayNote.bigDone}
-          chain={displayNote.chain || 0}
-        />
-      )}*/
-
-interface RProps {
+interface NikochanState {
+  sprite?: Sprite;
+  rippleSprite?: Sprite[];
+  particleSprite?: Sprite[];
+  transitionBegin?: DOMHighResTimeStamp;
+  pAngle?: number[];
+  pAngleVel?: number[];
+}
+interface NContext {
+  app: Application;
+  boxSize: number;
+  marginX: number;
+  marginY: number;
   noteSize: number;
-  left: number;
-  bottom: number;
-  big: boolean;
-  chain: number;
+  targetY: number;
+  nikochanAssets: Texture[];
+  particleAssets: (Texture | undefined)[];
+  rippleAsset: Texture | undefined;
+  nikochanLayer: IRenderLayer;
+  rippleLayer: IRenderLayer;
+  particleLayer: IRenderLayer;
 }
-function Ripple(props: RProps) {
-  const ref = useRef<HTMLDivElement>(null!);
-  const ref2 = useRef<HTMLDivElement>(null!);
-  const animateDone = useRef<boolean>(false);
-  const { noteSize } = props;
-  const rippleWidth = noteSize * 2 * (props.big ? 1.5 : 1);
-  const rippleHeight = rippleWidth * 0.7;
-  useEffect(() => {
-    if (!animateDone.current) {
-      [ref, ref2].forEach((r, i) => {
-        r.current.animate(
-          [
-            { transform: "scale(0)", opacity: 0.5 },
-            { transform: "scale(0.8)", opacity: 0.5, offset: 0.8 },
-            { transform: `scale(1)`, opacity: 0 },
-          ],
-          {
-            duration: 350 - 200 * i,
-            delay: 200 * i,
-            fill: "forwards",
-            easing: "ease-out",
-          },
-        );
-      });
+function clearNikochan(ns: NikochanState, cx: NContext) {
+  if (ns.sprite) {
+    cx.nikochanLayer.detach(ns.sprite);
+    cx.app.stage.removeChild(ns.sprite);
+    ns.sprite.destroy();
+    ns.sprite = undefined;
+  }
+  if (ns.rippleSprite) {
+    ns.rippleSprite.forEach((s) => {
+      cx.rippleLayer.detach(s);
+      cx.app.stage.removeChild(s);
+      s.destroy();
+    });
+    ns.rippleSprite = undefined;
+  }
+  if (ns.particleSprite) {
+    ns.particleSprite.forEach((s) => {
+      cx.particleLayer.detach(s);
+      cx.app.stage.removeChild(s);
+      s.destroy();
+    });
+    ns.particleSprite = undefined;
+  }
+}
+function updateNikochan(
+  ns: NikochanState,
+  n: Note6 | Note7,
+  dn: DisplayNote6 | DisplayNote7 | null,
+  cx: NContext,
+) {
+  if (!dn) {
+    clearNikochan(ns, cx);
+  } else {
+    let s: Sprite;
+    if (ns.sprite) {
+      s = ns.sprite;
+    } else {
+      s = new Sprite();
+      ns.sprite = s;
+      cx.app.stage.addChild(s);
+      cx.nikochanLayer.attach(s);
     }
-    animateDone.current = true;
-  }, [noteSize]);
-  return (
-    <div
-      className="absolute -z-20 "
-      style={{
-        width: 1,
-        height: 1,
-        left: props.left,
-        bottom: props.bottom,
-      }}
-    >
-      {[ref, ref2].map((r, i) => (
-        <div
-          key={i}
-          ref={r}
-          className={
-            "absolute origin-center opacity-0 " +
-            (props.chain >= bonusMax
-              ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70 "
-              : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70 ")
-          }
-          style={{
-            borderWidth: rippleWidth / 20,
-            borderRadius: "50%",
-            width: rippleWidth,
-            height: rippleHeight,
-            left: -rippleWidth / 2,
-            bottom: -rippleHeight / 2,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+    if (dn.done > 0 && !ns.transitionBegin) {
+      ns.transitionBegin = performance.now();
+    }
+    nikochanSprite(ns, n, dn, s, cx);
 
-interface PProps {
-  particleNum: number;
-  left: number;
-  bottom: number;
-  noteSize: number;
-  big: boolean;
-  chain: number;
+    if ([1].includes(dn.done)) {
+      let rs: Sprite[];
+      if (ns.rippleSprite) {
+        rs = ns.rippleSprite;
+      } else {
+        rs = [new Sprite(cx.rippleAsset), new Sprite(cx.rippleAsset)];
+        ns.rippleSprite = rs;
+        cx.app.stage.addChild(...rs);
+        cx.rippleLayer.attach(...rs);
+      }
+      rippleSprite(ns, n, dn, rs, cx);
+    }
+    if (dn.chain && [1, 2].includes(dn.done)) {
+      let ps: Sprite[];
+      if (ns.particleSprite) {
+        ps = ns.particleSprite;
+      } else {
+        // 6,8,10,12
+        const particleNum =
+          6 + Math.floor(3 * Math.min(1, dn.chain / bonusMax)) * 2;
+        ps = [
+          new Sprite(cx.particleAssets[particleNum]),
+          new Sprite(cx.particleAssets[particleNum - 2]),
+        ];
+        ns.particleSprite = ps;
+        cx.app.stage.addChild(...ps);
+        cx.particleLayer.attach(...ps);
+      }
+      if (!ns.pAngle) {
+        ns.pAngle = [Math.random() * 360, Math.random() * 360];
+        ns.pAngleVel = [Math.random() * 120 - 60, Math.random() * 120 - 60];
+      }
+      particleSprite(ns, n, dn, ps, cx);
+    }
+  }
 }
-function Particle(props: PProps) {
-  const ref = useRef<HTMLImageElement>(null!);
-  const refBig = useRef<HTMLImageElement | null>(null);
-  const animateDone = useRef<boolean>(false);
-  const bigAnimateDone = useRef<boolean>(false);
-  const { noteSize, particleNum } = props;
-  const maxSize = noteSize * 1.8;
-  const bigSize = noteSize * 3;
-  useEffect(() => {
-    if (!animateDone.current) {
-      const angle = Math.random() * 360;
-      const angleVel = Math.random() * 120 - 60;
-      ref.current.animate(
-        [
-          { transform: `scale(0.3) rotate(${angle}deg)`, opacity: 0 },
-          {
-            transform: `scale(0.8) rotate(${angle + angleVel * 0.8}deg)`,
-            opacity: 0.8,
-            offset: 0.8,
-          },
-          { transform: `scale(1) rotate(${angle + angleVel}deg)`, opacity: 0 },
-        ],
-        { duration: 500, fill: "forwards", easing: "ease-out" },
-      );
-      animateDone.current = true;
-    }
-    if (props.big && refBig.current && !bigAnimateDone.current) {
-      const angleBig = Math.random() * 360;
-      const angleVel = Math.random() * 120 - 60;
-      refBig.current?.animate(
-        [
-          { transform: `scale(0.3) rotate(${angleBig}deg)`, opacity: 0 },
-          {
-            transform: `scale(0.8) rotate(${angleBig + angleVel * 0.8}deg)`,
-            opacity: 0.6,
-            offset: 0.8,
-          },
-          {
-            transform: `scale(1) rotate(${angleBig + angleVel}deg)`,
-            opacity: 0,
-          },
-        ],
-        { duration: 500, fill: "forwards", easing: "ease-out" },
-      );
-      bigAnimateDone.current = true;
-    }
-  }, [props.big]);
-
-  return (
-    <div
-      className="absolute -z-10 "
-      style={{
-        width: 1,
-        height: 1,
-        left: props.left,
-        bottom: props.bottom,
-      }}
-    >
-      <img
-        src={process.env.ASSET_PREFIX + `/assets/particle${particleNum}.svg`}
-        ref={ref}
-        className="absolute opacity-0"
-        style={{
-          left: -maxSize / 2,
-          bottom: -maxSize / 2,
-          width: maxSize,
-          minWidth: maxSize, // なぜかこれがないとwidthが0になってしまう...
-          height: maxSize,
-          minHeight: maxSize,
-        }}
-      />
-      {props.big && (
-        <img
-          src={
-            process.env.ASSET_PREFIX + `/assets/particle${particleNum - 2}.svg`
-          }
-          ref={refBig}
-          className="absolute opacity-0"
-          style={{
-            left: -bigSize / 2,
-            bottom: -bigSize / 2,
-            width: bigSize,
-            minWidth: bigSize,
-            height: bigSize,
-            minHeight: bigSize,
-          }}
-        />
-      )}
-    </div>
+function nikochanSprite(
+  ns: NikochanState,
+  n: Note6 | Note7,
+  dn: DisplayNote6 | DisplayNote7,
+  s: Sprite,
+  cx: NContext,
+) {
+  let scale: number = 1;
+  let opacity: number = 1;
+  let translateY: number = 0;
+  const tAnim = Math.min(
+    1,
+    (performance.now() - (ns.transitionBegin || 0)) / 300,
   );
+  switch (dn.done) {
+    case 0:
+      break;
+    case 1:
+      scale = 1 + 0.4 * tAnim;
+      opacity = 1 - tAnim;
+      translateY = 1 * tAnim;
+      break;
+    case 2:
+      opacity = 1 - tAnim;
+      translateY = 0.5 * tAnim;
+      break;
+    case 3:
+      opacity = 1 - tAnim;
+      break;
+  }
+  s.texture = cx.nikochanAssets[[0, 1, 2, 3, 0][dn.done]];
+  s.anchor.set(0.5);
+  s.width = cx.noteSize * bigScale(n.big) * scale;
+  s.height = cx.noteSize * bigScale(n.big) * scale;
+  s.x = dn.pos.x * cx.boxSize + cx.marginX;
+  s.y =
+    cx.boxSize -
+    (dn.pos.y * cx.boxSize +
+      targetY * cx.boxSize +
+      cx.marginY +
+      translateY * cx.noteSize);
+  s.alpha = opacity;
+}
+function rippleSprite(
+  ns: NikochanState,
+  n: Note6 | Note7,
+  dn: DisplayNote6 | DisplayNote7,
+  rs: Sprite[],
+  cx: NContext,
+) {
+  for (let i = 0; i < 2; i++) {
+    const tAnim = Math.min(
+      1,
+      Math.max(0, performance.now() - (ns.transitionBegin || 0) - 200 * i) /
+        (350 - 200 * i),
+    );
+    const opacity = tAnim < 0.8 ? 0.3 : 0.3 - ((tAnim - 0.8) / 0.2) * 0.3;
+    const scale = 1 * tAnim;
+    rs[i].width = cx.noteSize * 2 * (n.big ? 1.5 : 1) * scale;
+    rs[i].height = rs[i].width * 0.7;
+    rs[i].anchor.set(0.5);
+    rs[i].x = n.targetX * cx.boxSize + cx.marginX;
+    rs[i].y = cx.boxSize - (targetY * cx.boxSize + cx.marginY);
+    rs[i].alpha = opacity;
+  }
+}
+function particleSprite(
+  ns: NikochanState,
+  n: Note6 | Note7,
+  dn: DisplayNote6 | DisplayNote7,
+  ps: Sprite[],
+  cx: NContext,
+) {
+  for (let i = 0; i < 2; i++) {
+    const tAnim = Math.min(
+      1,
+      (performance.now() - (ns.transitionBegin || 0)) / 500,
+    );
+    const scale = tAnim < 0.8 ? 0.3 + (tAnim / 0.8) * 0.5 : tAnim;
+    const opacity =
+      (tAnim < 0.8 ? tAnim / 0.8 : 1 - (tAnim - 0.8) / 0.2) * [0.8, 0.6][i];
+    const angle = ns.pAngle![i] + ns.pAngleVel![i] * tAnim;
+    const pSize = cx.noteSize * [1.8, 3][i];
+    ps[i].width = pSize * scale;
+    ps[i].height = pSize * scale;
+    ps[i].anchor.set(0.5);
+    ps[i].x = n.targetX * cx.boxSize + cx.marginX;
+    ps[i].y = cx.boxSize - (targetY * cx.boxSize + cx.marginY);
+    ps[i].alpha = opacity;
+    ps[i].angle = angle;
+    if (!dn.bigBonus && i === 1) {
+      ps[i].alpha = 0;
+      ps[i].width = 0;
+      ps[i].height = 0;
+    }
+  }
 }
