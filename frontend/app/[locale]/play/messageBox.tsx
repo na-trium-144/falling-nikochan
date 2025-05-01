@@ -32,8 +32,9 @@ interface MessageProps {
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
   audioLatency: number | null | undefined;
-  limitMaxFPS: number;
-  setLimitMaxFPS: (f: number) => void;
+  maxFPS: null | number;
+  frameDrop: null | number;
+  setFrameDrop: (f: number) => void;
   editing: boolean;
   lateTimes: number[];
   small: boolean;
@@ -162,6 +163,13 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
+  const frameDropOptions =
+    (props.frameDrop &&
+      props.maxFPS &&
+      Array.from(new Array(Math.ceil(props.maxFPS / 15 - 0.3))).map(
+        (_, i) => i + 1,
+      )) ||
+    [];
   return (
     <div className="relative pr-8 min-h-58 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
@@ -232,10 +240,15 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
         <li>
           <span className="mr-2">{t("limitFPS")}</span>
           <Select
-            options={[t("noLimit"), "60", "40", "30", "20"]}
-            values={["0", "60", "40", "30", "20"]}
-            value={String(props.limitMaxFPS)}
-            onChange={(v) => props.setLimitMaxFPS(Number(v))}
+            options={
+              frameDropOptions.map((f) =>
+                String(Math.round(props.maxFPS! / f)),
+              ) || []
+            }
+            values={frameDropOptions.map(String)}
+            value={String(props.frameDrop)}
+            onChange={(v) => props.setFrameDrop(Number(v))}
+            disabled={!frameDropOptions.length}
           />
         </li>
       </ul>

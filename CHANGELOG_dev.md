@@ -1,7 +1,3 @@
-## ver. 11.23 - 2025/05/02 [#527](https://github.com/na-trium-144/falling-nikochan/pull/527)
-
-* playでの音符とエフェクトの描画をDOMで行うのをやめ、 pixi.js を使ってWebGLで描画するようにした
-
 ## ver. 11.21 - 2025/04/28 [#522](https://github.com/na-trium-144/falling-nikochan/pull/522)
 
  cssのgradientが使えない環境で代わりの背景色を設定

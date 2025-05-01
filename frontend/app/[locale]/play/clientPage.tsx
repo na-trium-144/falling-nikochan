@@ -361,16 +361,36 @@ function Play(props: Props) {
     chartEnd,
   } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
-  const [fps, setFps] = useState<number>(0);
-  // フレームレートが60を超える端末の場合に、60を超えないように制限する
-  // 0=制限なし
-  const [limitMaxFPS, setLimitMaxFPS_] = useState<number>(60);
-  useEffect(() => {
-    setLimitMaxFPS_(Number(localStorage.getItem("limitMaxFPS") || 60));
-  }, []);
-  const setLimitMaxFPS = useCallback((v: number) => {
-    setLimitMaxFPS_(v);
-    localStorage.setItem("limitMaxFPS", v.toString());
+  const [fps, setFps_] = useState<number>(0);
+  // nフレームに1回画面を更新する
+  // フレームレートが60を超える端末の場合に、60を超えないように自動的に設定して制限する
+  const [frameDrop, setFrameDrop_] = useState<number | null>(null);
+  const [maxFPS, setMaxFPS] = useState<number>(0);
+  const fpsStable = useRef<number>(0);
+  const setFps = useCallback(
+    (fps: number) => {
+      setFps_(fps);
+      if (frameDrop === null && fps > 0) {
+        // fps計測が安定するまで待つ
+        if (fps <= maxFPS) {
+          fpsStable.current++;
+          if (fpsStable.current > maxFPS) {
+            setFrameDrop_(
+              Number(localStorage.getItem("frameDrop") || 0) ||
+                Math.max(1, Math.ceil(fps / 60 - 0.3)) // 2捨3入
+            );
+          }
+        } else {
+          fpsStable.current = 0;
+          setMaxFPS(fps);
+        }
+      }
+    },
+    [frameDrop, maxFPS]
+  );
+  const setFrameDrop = useCallback((v: number) => {
+    setFrameDrop_(v);
+    localStorage.setItem("frameDrop", v.toString());
   }, []);
 
   useEffect(() => {
@@ -765,7 +785,8 @@ function Play(props: Props) {
         </div>
         <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
           <FallingWindow
-            limitMaxFPS={limitMaxFPS}
+            maxFPS={maxFPS}
+            frameDrop={frameDrop}
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -837,8 +858,9 @@ function Play(props: Props) {
               enableSE={enableSE}
               setEnableSE={setEnableSE}
               audioLatency={audioLatency}
-              limitMaxFPS={limitMaxFPS}
-              setLimitMaxFPS={setLimitMaxFPS}
+              maxFPS={maxFPS}
+              frameDrop={frameDrop}
+              setFrameDrop={setFrameDrop}
               editing={editing}
               lateTimes={lateTimes.current}
               small={readySmall}
