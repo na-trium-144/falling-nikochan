@@ -29,7 +29,7 @@ interface Props {
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS, maxFPS, frameDrop } =
+  const { notes, playing, getCurrentTimeSec, setFPS } =
     props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
