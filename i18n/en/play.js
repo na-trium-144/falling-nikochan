@@ -24,7 +24,8 @@ export default {
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
-      limitFPS: "Reduce Frame Rate",
+      limitFPS: "Frame Rate",
+      noLimit: "No Limit",
       off: "Off",
     },
     score: {

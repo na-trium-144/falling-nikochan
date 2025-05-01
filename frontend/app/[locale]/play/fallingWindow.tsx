@@ -15,14 +15,12 @@ interface Props {
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
-  maxFPS: number;
-  frameDrop: number | null;
+  limitMaxFPS: number;
   barFlash: boolean;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS, maxFPS, frameDrop } =
-    props;
+  const { notes, playing, getCurrentTimeSec, setFPS, limitMaxFPS } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -39,40 +37,47 @@ export default function FallingWindow(props: Props) {
     let animFrame: number;
     const updateLoop = () => {
       setRerenderIndex((r) => r + 1);
-      while (
-        fpsCounter.current.at(0) &&
-        fpsCounter.current.at(-1)! - fpsCounter.current.at(0)! > 1000
-      ) {
-        fpsCounter.current.shift();
-      }
-      setFPS?.(fpsCounter.current.length);
       animFrame = requestAnimationFrame(updateLoop);
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
+  }, []);
+  useEffect(() => {
+    if (setFPS) {
+      const i = setInterval(() => {
+        while (
+          fpsCounter.current.at(0) &&
+          fpsCounter.current.at(-1)! - fpsCounter.current.at(0)! > 1000
+        ) {
+          fpsCounter.current.shift();
+        }
+        setFPS!(fpsCounter.current.length);
+      }, 100);
+      return () => clearInterval(i);
+    }
   }, [setFPS]);
 
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
   const prevRerenderIndex = useRef<number>(-1);
   const prevRerender = useRef<DOMHighResTimeStamp | null>(null);
   if (
-    prevRerender.current === null ||
-    (prevRerenderIndex.current !== rerenderIndex &&
-      (frameDrop === null ||
-        performance.now() - prevRerender.current >
-          1000 / (maxFPS / (frameDrop - 0.5))))
+    prevRerenderIndex.current !== rerenderIndex &&
+    (prevRerender.current === null ||
+      limitMaxFPS === 0 ||
+      performance.now() - prevRerender.current > 1000 / (limitMaxFPS * 1.1))
   ) {
     performance.mark("nikochan-rerender");
     const nowDate = performance.now();
     fpsCounter.current.push(nowDate);
     if (
       prevRerender.current === null ||
-      frameDrop === null ||
-      nowDate - prevRerender.current > (1000 / (maxFPS / frameDrop)) * 2
+      limitMaxFPS === 0 ||
+      // reset clock if rendering is too late
+      performance.now() - prevRerender.current > (1000 / limitMaxFPS) * 3
     ) {
       prevRerender.current = nowDate;
     } else {
-      prevRerender.current += 1000 / (maxFPS / frameDrop);
+      prevRerender.current += 1000 / limitMaxFPS;
     }
     prevRerenderIndex.current = rerenderIndex;
     const now = getCurrentTimeSec();
