@@ -37,6 +37,15 @@ export default function FallingWindow(props: Props) {
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
+  // canvasサイズはここ以外にも legacy/seq.ts のloadChart()でも制限される
+  const canvasWidth: number | undefined = boxSize && boxSize * 2.5;
+  const canvasHeight: number | undefined = boxSize && boxSize * 2;
+  const canvasLeft: number | undefined =
+    marginX !== undefined && boxSize ? marginX - boxSize * 0.5 : undefined;
+  const canvasTop: number | undefined =
+    marginY !== undefined && boxSize ? marginY - boxSize * 0.5 : undefined;
+  const originX: number | undefined = boxSize && boxSize * 0.5;
+  const originY: number | undefined = boxSize && boxSize * 1.5;
 
   const { rem } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
@@ -49,18 +58,16 @@ export default function FallingWindow(props: Props) {
   useEffect(() => {
     if (cleanupNotDone) return;
     const app = new Application();
-    const pInit = app
-      .init({ backgroundAlpha: 0, width: boxSize, height: boxSize })
-      .then(() => {
-        ref.current?.appendChild(app.canvas);
-        rippleLayer.current = new RenderLayer();
-        app.stage.addChild(rippleLayer.current);
-        particleLayer.current = new RenderLayer();
-        app.stage.addChild(particleLayer.current);
-        nikochanLayer.current = new RenderLayer();
-        app.stage.addChild(nikochanLayer.current);
-        setApp(app);
-      });
+    const pInit = app.init({ backgroundAlpha: 0 }).then(() => {
+      ref.current?.appendChild(app.canvas);
+      rippleLayer.current = new RenderLayer();
+      app.stage.addChild(rippleLayer.current);
+      particleLayer.current = new RenderLayer();
+      app.stage.addChild(particleLayer.current);
+      nikochanLayer.current = new RenderLayer();
+      app.stage.addChild(nikochanLayer.current);
+      setApp(app);
+    });
     return () => {
       setCleanupNotDone(true);
       pInit.then(() => {
@@ -69,13 +76,14 @@ export default function FallingWindow(props: Props) {
         setCleanupNotDone(false);
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref, cleanupNotDone]);
   useEffect(() => {
-    if (boxSize && app) {
-      app.renderer.resize(boxSize, boxSize);
+    if (app && canvasWidth && canvasHeight) {
+      app.renderer.resize(canvasWidth, canvasHeight);
+      app.canvas.style.marginLeft = `${canvasLeft}px`;
+      app.canvas.style.marginTop = `${canvasTop}px`;
     }
-  }, [app, boxSize, ref]);
+  }, [app, ref, canvasWidth, canvasHeight, canvasLeft, canvasTop]);
 
   const nikochanAssets = useRef<Texture[]>([]);
   const particleAssets = useRef<(Texture | undefined)[]>([]);
@@ -115,8 +123,8 @@ export default function FallingWindow(props: Props) {
       const cx: NContext = {
         app: app!,
         boxSize: boxSize || 0,
-        marginX: marginX || 0,
-        marginY: marginY || 0,
+        originX: originX || 0,
+        originY: originY || 0,
         noteSize,
         targetY,
         nikochanAssets: nikochanAssets.current,
@@ -128,8 +136,8 @@ export default function FallingWindow(props: Props) {
       };
       if (
         playing &&
-        marginX !== undefined &&
-        marginY !== undefined &&
+        originX !== undefined &&
+        originY !== undefined &&
         boxSize &&
         now !== undefined
       ) {
@@ -162,8 +170,8 @@ export default function FallingWindow(props: Props) {
     boxSize,
     notes,
     noteSize,
-    marginX,
-    marginY,
+    originX,
+    originY,
     rem,
     playing,
     getCurrentTimeSec,
@@ -192,6 +200,7 @@ export default function FallingWindow(props: Props) {
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
         <TargetLine
+          className="-z-10"
           barFlash={props.barFlash}
           left={0}
           right="-100%"
@@ -213,8 +222,8 @@ interface NikochanState {
 interface NContext {
   app: Application;
   boxSize: number;
-  marginX: number;
-  marginY: number;
+  originX: number;
+  originY: number;
   noteSize: number;
   targetY: number;
   nikochanAssets: Texture[];
@@ -341,13 +350,12 @@ function nikochanSprite(
   s.anchor.set(0.5);
   s.width = cx.noteSize * bigScale(n.big) * scale;
   s.height = cx.noteSize * bigScale(n.big) * scale;
-  s.x = dn.pos.x * cx.boxSize + cx.marginX;
+  s.x = dn.pos.x * cx.boxSize + cx.originX;
   s.y =
-    cx.boxSize -
-    (dn.pos.y * cx.boxSize +
-      targetY * cx.boxSize +
-      cx.marginY +
-      translateY * cx.noteSize);
+    -dn.pos.y * cx.boxSize -
+    targetY * cx.boxSize +
+    cx.originY -
+    translateY * cx.noteSize;
   s.alpha = opacity;
 }
 function rippleSprite(
@@ -368,8 +376,8 @@ function rippleSprite(
     rs[i].width = cx.noteSize * 2 * (n.big ? 1.5 : 1) * scale;
     rs[i].height = rs[i].width * 0.7;
     rs[i].anchor.set(0.5);
-    rs[i].x = n.targetX * cx.boxSize + cx.marginX;
-    rs[i].y = cx.boxSize - (targetY * cx.boxSize + cx.marginY);
+    rs[i].x = n.targetX * cx.boxSize + cx.originX;
+    rs[i].y = -targetY * cx.boxSize + cx.originY;
     rs[i].alpha = opacity;
   }
 }
@@ -393,8 +401,8 @@ function particleSprite(
     ps[i].width = pSize * scale;
     ps[i].height = pSize * scale;
     ps[i].anchor.set(0.5);
-    ps[i].x = n.targetX * cx.boxSize + cx.marginX;
-    ps[i].y = cx.boxSize - (targetY * cx.boxSize + cx.marginY);
+    ps[i].x = n.targetX * cx.boxSize + cx.originX;
+    ps[i].y = -targetY * cx.boxSize + cx.originY;
     ps[i].alpha = opacity;
     ps[i].angle = angle;
     if (!dn.bigBonus && i === 1) {
