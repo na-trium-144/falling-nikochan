@@ -1,6 +1,10 @@
+## ver. 11.25 - 2025/05/02 [#529](https://github.com/na-trium-144/falling-nikochan/pull/529)
+
+* pixi.js で描画するとsvgの画質が悪くなっていたため、ver11.23〜24をrevert
+
 ## ver. 11.23 - 2025/05/02 [#527](https://github.com/na-trium-144/falling-nikochan/pull/527)
 
-* playでの音符とエフェクトの描画をDOMで行うのをやめ、 pixi.js を使ってWebGLで描画するようにした
+* <del>playでの音符とエフェクトの描画をDOMで行うのをやめ、 pixi.js を使ってWebGLで描画するようにした</del>
 
 ## ver. 11.21 - 2025/04/28 [#522](https://github.com/na-trium-144/falling-nikochan/pull/522)
 
