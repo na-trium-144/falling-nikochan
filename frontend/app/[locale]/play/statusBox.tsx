@@ -109,7 +109,7 @@ function StatusItem(props: {
     <div
       className={
         (isMobile
-          ? "flex-1 basis-1 flex flex-col mr-2 "
+          ? "flex-1 basis-1 flex flex-col "
           : "flex flex-row items-baseline " + (props.wide ? "" : "mr-12 ")) +
         (props.disabled ? "text-slate-400 dark:text-stone-600 " : "")
       }
@@ -153,7 +153,7 @@ function StatusName(props: { children: ReactNode }) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   return (
-    <span className={isMobile ? "h-max w-full text-center " : "flex-1"}>
+    <span className={isMobile ? "h-max w-full text-center text-nowrap " : "flex-1"}>
       {props.children}
     </span>
   );
