@@ -39,7 +39,7 @@ export function MusicArea(props: Props) {
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
   const largeTitle = props.isMobile ? height && height > 7.5 * rem : true;
-  const veryLargeTitle = props.isMobile ? height && height > 11.5 * rem : true;
+  const veryLargeTitle = props.isMobile ? height && height > 11.5 * rem : false;
 
   const t = useTranslations("play.message");
 
