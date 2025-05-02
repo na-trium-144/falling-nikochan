@@ -202,24 +202,33 @@ export function PWAInstallMain() {
 
 // dismissed かどうかはチェックしないが、
 // standaloneとPCでは非表示にする
-export function PWAInstallDesc() {
+export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
   const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();
   const isStandalone = useStandaloneDetector();
   if (isStandalone === false) {
     if (pwa.detectedOS === "android") {
       if (pwa.deferredPrompt) {
-        return (
-          <>
-            <p>{t("installWithPrompt")}</p>
-            <Button text={t("install")} onClick={pwa.install} />
-          </>
-        );
+        if (props.block) {
+          return (
+            <div className={props.className}>
+              <p>{t("installWithPrompt")}</p>
+              <Button text={t("install")} onClick={pwa.install} />
+            </div>
+          );
+        } else {
+          return (
+            <>
+              <p>{t("installWithPrompt")}</p>
+              <Button text={t("install")} onClick={pwa.install} />
+            </>
+          );
+        }
       } else {
-        return <p>{t("installWithoutPrompt")}</p>;
+        return <p className={props.className}>{t("installWithoutPrompt")}</p>;
       }
     } else if (pwa.detectedOS === "ios") {
-      return <p>{t("installIOS")}</p>;
+      return <p className={props.className}>{t("installIOS")}</p>;
     }
   }
   return null;
