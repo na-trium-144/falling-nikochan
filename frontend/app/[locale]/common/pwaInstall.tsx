@@ -19,6 +19,7 @@ export function useStandaloneDetector() {
 }
 export function isStandalone() {
   return (
+    new URLSearchParams(location.search).get("utm_source") === "homescreen" ||
     sessionStorage.getItem("fromHomeScreen") ||
     window.matchMedia("(display-mode: standalone)").matches ||
     (navigator as any).standalone ||
@@ -80,14 +81,12 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     setDismissed(true);
   }, []);
   useEffect(() => {
+    if (isStandalone()) {
+      sessionStorage.setItem("fromHomeScreen", "1");
+    }
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1",
     );
-    if (
-      new URLSearchParams(location.search).get("utm_source") === "homescreen"
-    ) {
-      sessionStorage.setItem("fromHomeScreen", "1");
-    }
   }, []);
   useEffect(() => {
     switch (detectOS()) {
