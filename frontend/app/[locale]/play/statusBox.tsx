@@ -2,7 +2,7 @@
 
 import { Box } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
-import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
+import WorriedFace from "@icon-park/react/lib/icons/WorriedFace";
 import DistraughtFace from "@icon-park/react/lib/icons/DistraughtFace";
 import GrinningFaceWithTightlyClosedEyesOpenMouth from "@icon-park/react/lib/icons/GrinningFaceWithTightlyClosedEyesOpenMouth";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
@@ -142,7 +142,7 @@ export function JudgeIcon(props: { index: number }) {
       ) : props.index === 1 ? (
         <SmilingFace />
       ) : props.index === 2 ? (
-        <DisappointedFace />
+        <WorriedFace />
       ) : (
         <DistraughtFace />
       )}
