@@ -26,7 +26,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         } as const,
       ])
       .flat(),
-    start_url: "/",
+    start_url: "/?utm_source=homescreen",
+    id: "/",
     display: "standalone",
     orientation: "any",
     scope: "/",

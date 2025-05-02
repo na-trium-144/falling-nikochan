@@ -19,6 +19,7 @@ export function useStandaloneDetector() {
 }
 export function isStandalone() {
   return (
+    sessionStorage.getItem("fromHomeScreen") ||
     window.matchMedia("(display-mode: standalone)").matches ||
     (navigator as any).standalone ||
     document.referrer.includes("android-app://")
@@ -82,6 +83,11 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1",
     );
+    if (
+      new URLSearchParams(location.search).get("utm_source") === "homescreen"
+    ) {
+      sessionStorage.setItem("fromHomeScreen", "1");
+    }
   }, []);
   useEffect(() => {
     switch (detectOS()) {
