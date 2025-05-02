@@ -42,12 +42,12 @@ function currentThemeIsDark() {
 const applyTheme = () => {
   if (typeof document !== "undefined") {
     document.body.classList.add(
-      "bg-sky-200",
       "bg-gradient-to-t",
+      "bg-sky-50",
       "from-sky-50",
       "to-sky-200",
       "text-slate-800",
-      "dark:bg-orange-975",
+      "dark:bg-orange-950",
       "dark:from-orange-950",
       "dark:to-orange-975",
       "dark:text-stone-300",
