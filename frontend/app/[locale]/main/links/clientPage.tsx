@@ -2,7 +2,7 @@
 import { useTranslations } from "next-intl";
 import { IndexMain } from "../main";
 import { ExternalLink } from "@/common/extLink";
-import DownOne from "@icon-park/react/lib/icons/DownOne"
+import DownOne from "@icon-park/react/lib/icons/DownOne";
 import Github from "@icon-park/react/lib/icons/Github";
 import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
@@ -12,15 +12,11 @@ import { linkStyle1, linkStyle3 } from "@/common/linkStyle";
 import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
-import {
-  PWAInstallDesc,
-  useStandaloneDetector,
-} from "@/common/pwaInstall";
+import { PWAInstallDesc } from "@/common/pwaInstall";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
   const themeState = useTheme();
-  const isStandalone = useStandaloneDetector();
   return (
     <IndexMain
       title={t("titleShort")}
@@ -89,18 +85,10 @@ export default function LinksPage({ locale }: { locale: string }) {
               </span>
             </ThemeSwitcher>
           </p>
-          {isStandalone === false && (
-            <div>
-              <PWAInstallDesc />
-            </div>
-          )}
+          <PWAInstallDesc block />
         </div>
       </div>
-      {isStandalone === false && (
-        <div className="mb-3 hidden main-wide:block">
-          <PWAInstallDesc />
-        </div>
-      )}
+      <PWAInstallDesc block className="mb-3 hidden main-wide:block" />
       <div className="mb-3 main-wide:hidden ">
         <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
         <div className="ml-2 space-y-1">
