@@ -1,3 +1,8 @@
+## ver. 11.27 - 2025/05/02 [#530](https://github.com/na-trium-144/falling-nikochan/pull/530)
+
+* 音符数表示をpcでは1の桁中央揃え、モバイルでは中央揃えに変更
+* iPadサイズの画面で使用するもう1段階大きいタイトル表示を実装
+
 ## ver. 11.25 - 2025/05/02 [#529](https://github.com/na-trium-144/falling-nikochan/pull/529)
 
 * pixi.js で描画するとsvgの画質が悪くなっていたため、ver11.23〜24をrevert
@@ -8,7 +13,7 @@
 
 ## ver. 11.21 - 2025/04/28 [#522](https://github.com/na-trium-144/falling-nikochan/pull/522)
 
- cssのgradientが使えない環境で代わりの背景色を設定
+* cssのgradientが使えない環境で代わりの背景色を設定
 * ipadのuserAgent認識を修正
 * iosではYouTubeの音量を変更できないので、YouTube音量変更のinputを無効化
 
