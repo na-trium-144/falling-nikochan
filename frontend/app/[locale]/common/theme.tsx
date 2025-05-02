@@ -9,6 +9,7 @@ import {
 } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { useTranslations } from "next-intl";
+import { themeColorDark, themeColorLight } from "@/metadata.js";
 
 export interface ThemeState {
   theme: "dark" | "light" | null;
@@ -57,6 +58,23 @@ const applyTheme = () => {
     } else {
       /* ライトテーマの時 */
       document.body.classList.remove("dark");
+    }
+    const metaThemeColor = document.querySelectorAll("meta[name=theme-color]");
+    switch (getCurrentTheme()) {
+      case "dark":
+        metaThemeColor.forEach((e) => {
+          e.setAttribute("content", themeColorDark);
+        });
+        break;
+      case "light":
+        metaThemeColor.forEach((e) => {
+          e.setAttribute("content", themeColorLight);
+        });
+        break;
+      default:
+        metaThemeColor[0].setAttribute("content", themeColorLight);
+        metaThemeColor[1].setAttribute("content", themeColorDark);
+        break;
     }
   }
 };

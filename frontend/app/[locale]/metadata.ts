@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations, locales } from "@falling-nikochan/i18n";
 import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
+export const themeColorLight = "#f0f9ff"; // sky-50
+export const backgroundColorLight = "#b8e6fe"; // sky-200
+export const themeColorDark = "#441306"; // orange-950
+export const backgroundColorDark = "#20100a"; // orange-975
+
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
 }

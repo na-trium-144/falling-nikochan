@@ -1,3 +1,4 @@
+import { backgroundColorLight, themeColorLight } from "@/metadata";
 import { getTranslations } from "@falling-nikochan/i18n";
 import type { MetadataRoute } from "next";
 
@@ -29,5 +30,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     display: "standalone",
     orientation: "any",
     scope: "/",
+    theme_color: themeColorLight,
+    background_color: backgroundColorLight,
   };
 }
