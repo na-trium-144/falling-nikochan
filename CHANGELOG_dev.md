@@ -1,3 +1,9 @@
+## ver. 11.30 - 2025/05/03 [#534](https://github.com/na-trium-144/falling-nikochan/pull/534)
+
+* アイコン変更, 音符画像を一部変更
+* theme_colorとbackground_colorの指定を追加
+* MacのPWAをフルスクリーンにするとstandaloneではなくフルスクリーン扱いになりプレイ画面が別タブで開いてしまうのを修正
+
 ## ver. 11.27 - 2025/05/02 [#530](https://github.com/na-trium-144/falling-nikochan/pull/530)
 
 * 音符数表示をpcでは1の桁中央揃え、モバイルでは中央揃えに変更
