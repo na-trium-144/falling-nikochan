@@ -5,12 +5,7 @@ import { FC, ReactNode } from "react";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "edit");
-  return initMetadata(
-    params,
-    "/edit",
-    t("title", { title: "", cid: "" }),
-    t("description"),
-  );
+  return initMetadata(params, "/edit", t("titleShort"), t("description"));
 }
 
 export default async function Page({ params }: MetadataProps) {
