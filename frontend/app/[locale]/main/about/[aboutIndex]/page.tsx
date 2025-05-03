@@ -24,7 +24,7 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const aboutIndex = (await params).aboutIndex;
   const t = await getTranslations(params, `about.${aboutIndex}`);
-  return initMetadata(params, `/main/about/${aboutIndex}`, t("title"));
+  return initMetadata(params, `/main/about/${aboutIndex}`, t("title"), t("description"));
 }
 
 export default async function AboutTab({ params }: Props) {

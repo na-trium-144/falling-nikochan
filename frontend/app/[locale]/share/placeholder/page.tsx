@@ -7,12 +7,17 @@ import { AboutContent4 } from "@/main/about/[aboutIndex]/4-level.jsx";
 import { AboutContent5 } from "@/main/about/[aboutIndex]/5-judge.jsx";
 
 export async function generateMetadata({ params }: MetadataProps) {
-  return initMetadata(params, "/share/placeholder", "PLACEHOLDER_TITLE", {
-    image: "https://placeholder_og_image/",
-    noAlternate: true,
-    description: "PLACEHOLDER_DESCRIPTION",
-    custom: { nikochanSharingBrief: "PLACEHOLDER_BRIEF" },
-  });
+  return initMetadata(
+    params,
+    "/share/placeholder",
+    "PLACEHOLDER_TITLE",
+    "PLACEHOLDER_DESCRIPTION",
+    {
+      image: "https://placeholder_og_image/",
+      noAlternate: true,
+      custom: { nikochanSharingBrief: "PLACEHOLDER_BRIEF" },
+    },
+  );
 }
 // pageTitle(cid, brief) or `Not Found (ID: ${cid})`
 
