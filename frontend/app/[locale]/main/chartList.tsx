@@ -1,5 +1,5 @@
 "use client";
-import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
+import { ChartBrief } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -59,22 +59,18 @@ export default function ChartListPage(props: PProps) {
         onClickMobile={openShareInternal}
         showLoading
         dateDiff={props.dateDiff}
-        moreHref=""
+        moreHref={null}
         badge={props.badge}
       />
     </IndexMain>
   );
 }
 
-export type ChartListType =
-  | "recent"
-  | "recentEdit"
-  | "popular"
-  | "latest"
-  | "sample";
+export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 interface Props {
-  type: ChartListType;
+  type?: ChartListType;
+  briefs?: ChartLineBrief[];
   fetchAll?: boolean;
   creator?: boolean;
   showLoading?: boolean;
@@ -83,7 +79,7 @@ interface Props {
   onClick?: (cid: string, brief?: ChartBrief) => void;
   onClickMobile?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
-  moreHref: string;
+  moreHref: string | null;
   badge?: boolean;
 }
 export function ChartList(props: Props) {
@@ -91,8 +87,8 @@ export function ChartList(props: Props) {
   const te = useTranslations("error");
 
   const [briefs, setBriefs] = useState<
-    ChartLineBrief[] | { status: number | null; message: string }
-  >();
+    ChartLineBrief[] | { status: number | null; message: string } | undefined
+  >(props.briefs || undefined);
   useEffect(() => {
     switch (props.type) {
       case "recent":
@@ -107,16 +103,6 @@ export function ChartList(props: Props) {
           getRecent("edit")
             .reverse()
             .map((cid) => ({ cid, fetched: false })),
-        );
-        break;
-      case "sample":
-        setBriefs(
-          originalCId
-            .map(
-              (cid) =>
-                ({ cid, fetched: false, original: true }) as ChartLineBrief,
-            )
-            .concat(sampleCId.map((cid) => ({ cid, fetched: false }))),
         );
         break;
       case "latest":
@@ -172,7 +158,7 @@ export function ChartList(props: Props) {
   return (
     <div className="relative w-full h-max ">
       <ul
-        className="grid w-full mx-auto justify-items-start items-center gap-1 "
+        className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
         style={{
           gridTemplateColumns: `repeat(auto-fill, minmax(min(18rem, 100%), 1fr))`,
           // max 3 columns
@@ -232,28 +218,29 @@ export function ChartList(props: Props) {
           t("empty")
         ) : null}
       </div>
-      {Array.isArray(briefs) && briefs.length > maxRow ? (
-        <Link
-          className={
-            "block w-max mx-auto mt-2 " +
-            (fetching ? "invisible " : "") +
-            linkStyle1
-          }
-          href={props.moreHref}
-          prefetch={!process.env.NO_PREFETCH}
-        >
-          {t("showAll")}
-          {/*<span className="ml-1">
+      {props.moreHref &&
+        (Array.isArray(briefs) && briefs.length > maxRow ? (
+          <Link
+            className={
+              "block w-max mx-auto mt-2 " +
+              (fetching ? "invisible " : "") +
+              linkStyle1
+            }
+            href={props.moreHref}
+            prefetch={!process.env.NO_PREFETCH}
+          >
+            {t("showAll")}
+            {/*<span className="ml-1">
               ({briefs.length /*- props.maxRow* /})
             </span>*/}
-          <ArrowRight
-            className="inline-block align-middle ml-2 "
-            theme="filled"
-          />
-        </Link>
-      ) : (
-        <div className="w-0 h-4 mt-2 " />
-      )}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
+          </Link>
+        ) : (
+          <div className="w-0 h-6 mt-2 " />
+        ))}
     </div>
   );
 }

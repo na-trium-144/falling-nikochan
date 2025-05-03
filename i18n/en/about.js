@@ -10,6 +10,10 @@ export default {
         "In addition to playing, anyone can create charts without registering an account or logging in.",
       content4:
         "The created charts are saved on the server and can be easily shared on SNS and played by others.",
+      description:
+        "A simple and cute rhythm game that you can play from your browser without downloading. " +
+        "In addition to playing, anyone can create charts without registering an account or logging in. " +
+        "The created charts are saved on the server and can be easily shared on SNS and played by others. ",
     },
     2: {
       title: "How to Play",
@@ -25,6 +29,10 @@ export default {
         "The more Nikochans you hit in a row without missing, " +
         "the more Chain bonus points you get, and the more score you get.",
       chain: "{chain, plural, =1 {chain} other {chains}}",
+      description:
+        "The rule is simple: hit the notes when Nikochan (smiley faces) overlaps the line. " +
+        "Regardless of Nikochan's position or falling direction, " +
+        "you can hit the notes by pressing any key on PC , or by tapping anywhere on the screen on tablets and smartphones.",
     },
     3: {
       title: "Create Charts",
@@ -40,6 +48,11 @@ export default {
         "a chart ID (6-digit number) is issued.",
       content5:
         "By sharing the chart ID or chart URL (<url></url>) on SNS, you can have others play it.",
+      description:
+        "You can create charts using your favorite songs." +
+        "Falling Nikochan does not require you to download sound sources. " +
+        "It plays sound sources by embedding YouTube, so you can use any music uploaded to YouTube. " +
+        "By sharing the chart ID or chart URL on SNS, you can have others play it.",
     },
     4: {
       title: "Difficulty",
@@ -53,6 +66,12 @@ export default {
       content3:
         "The number after the difficulty level (1-20) indicates the difficulty of the chart (the number of Nikochans falling). " +
         "(Please use it as a rough guide.)",
+      description:
+        "There may be multiple charts (levels) for one song. " +
+        "Each chart is labeled with a difficulty level such as Single-4, Double-8, or Maniac. " +
+        "Single indicates a chart intended to be played with one hand, " +
+        "and Double indicates a chart intended to be played with two or more fingers or both hands. " +
+        "(You don't have to play exactly as labeled.)",
     },
     5: {
       title: "Game Specs",
@@ -72,6 +91,11 @@ export default {
         "<b>Big Notes Bonus</b> (out of {bigScoreRate} points) is a bonus score that you get when you hit big Nikochans with two fingers.",
       content6:
         "Based on the total score, you will be evaluated with the ranks <rank>70</rank>, <rank>80</rank>, <rank>90</rank>, <rank>100</rank>, <rank>110</rank>, and <rank>120</rank>.",
+      description:
+        "There are Good, OK, and Bad judgments depending on the timing of hitting Nikochan. " +
+        "The score consists of Base Score, Chain Bonus, and Big Notes Bonus, " +
+        "totaling 120 points (if you don't hit big Nikochans with two fingers, 100 points). " +
+        "Based on the total score, you will be evaluated with the ranks B, B+, A, A+, S, and S+.",
     },
   },
 };

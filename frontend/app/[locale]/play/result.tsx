@@ -144,6 +144,7 @@ export default function Result(props: Props) {
       }
       style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
     >
       <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
       <div

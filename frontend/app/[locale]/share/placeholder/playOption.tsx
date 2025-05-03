@@ -20,11 +20,12 @@ import { RecordHistogram } from "@/common/recordHistogram";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
+import { SlimeSVG } from "@/common/slime";
 
 interface Props {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[];
+  record: RecordGetSummary[] | null;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -201,7 +202,7 @@ function LevelButton(props: {
 function SelectedLevelInfo(props: {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[];
+  record: RecordGetSummary[] | null;
   selectedLevel: number;
 }) {
   const t = useTranslations("share");
@@ -210,29 +211,26 @@ function SelectedLevelInfo(props: {
   const selectedRecord =
     props.selectedLevel === null
       ? null
-      : props.record.find(
+      : props.record?.find(
           (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
         );
 
-  const [bestScoreState, setBestScoreState] = useState<ResultData>();
+  const [bestScoreState, setBestScoreState] = useState<(ResultData | null)[]>(
+    [],
+  );
   useEffect(() => {
-    if (props.selectedLevel >= 0) {
-      const data = getBestScore(
-        props.cid,
-        props.brief.levels[props.selectedLevel].hash,
-      );
-      if (data) {
-        setBestScoreState(data);
-      } else {
-        setBestScoreState(undefined);
-      }
+    const bestScoreState: (ResultData | null)[] = [];
+    for (let i = 0; i < props.brief.levels.length; i++) {
+      bestScoreState.push(getBestScore(props.cid, props.brief.levels[i].hash));
     }
-  }, [props.cid, props.selectedLevel, props.brief]);
+    setBestScoreState(bestScoreState);
+  }, [props.cid, props.brief]);
 
-  const totalScore = bestScoreState
-    ? bestScoreState.baseScore +
-      bestScoreState.chainScore +
-      bestScoreState.bigScore
+  const selectedBestScore = bestScoreState.at(props.selectedLevel);
+  const totalScore = selectedBestScore
+    ? selectedBestScore.baseScore +
+      selectedBestScore.chainScore +
+      selectedBestScore.bigScore
     : 0;
 
   return (
@@ -287,72 +285,84 @@ function SelectedLevelInfo(props: {
       </div>
       <p className="mt-2 ">
         {t("otherPlayers")}
-        <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
+        {props.record !== null && (
+          <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
+        )}
       </p>
+      <span className={props.record === null ? "block " : "hidden "}>
+        <SlimeSVG />
+        Loading...
+      </span>
       {selectedRecord && selectedRecord.count >= 5 && (
         <RecordHistogram
           histogram={selectedRecord.histogram}
-          bestScoreTotal={bestScoreState ? totalScore : null}
+          bestScoreTotal={selectedBestScore ? totalScore : null}
         />
       )}
       <button
         className={
           "w-full mt-2 px-2 rounded-lg " +
           "flex flex-col items-center " +
-          (bestScoreState &&
+          (selectedBestScore &&
             "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60 " +
               "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800 ")
         }
-        onClick={() => setShowBestDetail(!!bestScoreState && !showBestDetail)}
+        onClick={() =>
+          setShowBestDetail(!!selectedBestScore && !showBestDetail)
+        }
       >
         <p className="">{t("bestScore")}</p>
         <div className="flex flex-row items-center ">
           <span
             className={
-              bestScoreState ? "" : "text-slate-400 dark:text-stone-600 "
+              selectedBestScore ? "" : "text-slate-400 dark:text-stone-600 "
             }
           >
-            <span className="inline-block text-2xl w-12 text-right">
+            <span className="inline-block text-2xl">
               {Math.floor(totalScore)}
             </span>
             <span className="">.</span>
-            <span className="inline-block w-6">
+            <span className="inline-block">
               {(Math.floor(totalScore * 100) % 100).toString().padStart(2, "0")}
             </span>
           </span>
-          {bestScoreState && (
-            <span className="text-xl">({rankStr(totalScore)})</span>
+          {selectedBestScore && (
+            <span className="text-xl ml-1 ">({rankStr(totalScore)})</span>
           )}
         </div>
-        {showBestDetail && bestScoreState && (
+        {showBestDetail && selectedBestScore && (
           <>
             <span className="inline-block ">
-              <span className="">{Math.floor(bestScoreState.baseScore)}</span>
+              <span className="">
+                {Math.floor(selectedBestScore.baseScore)}
+              </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(bestScoreState.baseScore * 100) % 100)
+                {(Math.floor(selectedBestScore.baseScore * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
-              <span className="">{Math.floor(bestScoreState.chainScore)}</span>
+              <span className="">
+                {Math.floor(selectedBestScore.chainScore)}
+              </span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(bestScoreState.chainScore * 100) % 100)
+                {(Math.floor(selectedBestScore.chainScore * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
               <span className="ml-0.5 mr-0.5">+</span>
-              <span className="">{Math.floor(bestScoreState.bigScore)}</span>
+              <span className="">{Math.floor(selectedBestScore.bigScore)}</span>
               <span className="text-sm">.</span>
               <span className="text-sm">
-                {(Math.floor(bestScoreState.bigScore * 100) % 100)
+                {(Math.floor(selectedBestScore.bigScore * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </span>
             </span>
             <span className="inline-block ml-2 mr-2 space-x-2 ">
-              {bestScoreState?.judgeCount.map((j, i) => (
+              {selectedBestScore?.judgeCount.map((j, i) => (
                 <span key={i} className="inline-block">
                   <span className="inline-block w-5 translate-y-0.5 ">
                     <JudgeIcon index={i} />

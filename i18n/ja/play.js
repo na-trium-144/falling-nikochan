@@ -1,13 +1,14 @@
 export default {
   play: {
+    description:
+      "Falling Nikochan のゲーム本体のURLです。(このURLだけ共有しても動作しません)",
     message: {
       ready: "準備完了！",
       stopped: "停止しました",
       start: "スタート",
       reset: "もう一度",
       exit: "やめる",
-      howToPause:
-        "画面上部の <pause></pause> ボタンを押すことで停止できます。",
+      howToPause: "画面上部の <pause></pause> ボタンを押すことで停止できます。",
       editingNotification:
         "編集画面で変更した譜面は、" +
         "ページ再読み込みでこちらに反映されます。",
@@ -23,7 +24,8 @@ export default {
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
-      limitFPS: "フレームレートを下げる",
+      limitFPS: "フレームレート",
+      noLimit: "制限なし",
       off: "オフ",
     },
     score: {

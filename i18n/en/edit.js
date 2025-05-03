@@ -2,6 +2,7 @@ export default {
   edit: {
     title: "Chart Editor - {title} (ID: {cid})",
     titleShort: "Chart Editor",
+    description: "Falling Nikochan Chart Editor",
     help: "Help",
     chartId: "Chart ID",
     enterPasswd: "Enter the password to edit.",
