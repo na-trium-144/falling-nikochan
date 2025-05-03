@@ -183,14 +183,15 @@ export default function LinksPage({ locale }: { locale: string }) {
 
 function EMailImg() {
   const theme = useTheme();
+  // メールアドレスを48pxのSVG画像にしたものを1/4にスケールして表示
+  // なぜか *0.75 しないとサイズが合わない inkscapeの1pxとブラウザの1pxは違う?
   return (
     <span
-      className="inline-block align-middle scale-25 origin-top-left "
-      style={{ width: 227.89, height: 17.42 }}
+      className="inline-block align-middle origin-top-left "
+      style={{ height: 69.68 / 48 * 0.75 + "rem" }}
     >
       <svg
-        width="241.18156mm"
-        height="18.440395mm"
+        height="100%"
         viewBox="0 0 241.18156 18.440395"
       >
         <defs id="defs1" />

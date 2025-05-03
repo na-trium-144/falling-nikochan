@@ -1,3 +1,7 @@
+## ver. 11.31 - 2025/05/03 [#540](https://github.com/na-trium-144/falling-nikochan/pull/540)
+
+* スパム対策でSVG化したメールアドレス表示を追加
+
 ## ver. 11.30 - 2025/05/03 [#534](https://github.com/na-trium-144/falling-nikochan/pull/534)
 
 * アイコン変更, 音符画像を一部変更
