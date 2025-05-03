@@ -36,7 +36,7 @@
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.25.1",
     "@types/bun": "^1.2.5",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "eslint": "^9.22.0",
