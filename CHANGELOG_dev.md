@@ -1,3 +1,8 @@
+## ver. 11.32 - 2025/05/04 [#541](https://github.com/na-trium-144/falling-nikochan/pull/540)
+
+* すべてのページにdescriptionを追加
+* パラメータなしの/editで/main/editにリダイレクトする
+
 ## ver. 11.31 - 2025/05/03 [#540](https://github.com/na-trium-144/falling-nikochan/pull/540)
 
 * スパム対策でSVG化したメールアドレス表示を追加
