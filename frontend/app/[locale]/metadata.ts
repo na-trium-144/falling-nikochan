@@ -54,12 +54,12 @@ export async function initMetadata(
     appleWebApp: true,
     icons: {
       // これを1つでも書くと /app にファイルを置く metadata API が無効になるっぽい?
-      icon: process.env.ASSET_PREFIX + "/assets/icon.png",
+      icon: process.env.ASSET_PREFIX + "/assets/icon.png?v=2",
       apple: [192, 256, 512, 1024].map((size) => ({
-        url: process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png`,
+        url: process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
         size: `${size}x${size}`,
       })),
-      shortcut: "/favicon.ico",
+      shortcut: "/favicon.ico?v=2",
     },
     openGraph: path
       ? {
