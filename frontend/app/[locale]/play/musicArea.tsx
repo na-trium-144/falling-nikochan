@@ -10,6 +10,7 @@ import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { linkStyle1 } from "@/common/linkStyle";
 import { useTranslations } from "next-intl";
+import { detectOS } from "@/common/pwaInstall";
 
 interface Props {
   ready: boolean;
@@ -37,11 +38,19 @@ export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
-  const largeTitle = props.isMobile ? height && height > 8 * rem : true;
+  const largeTitle = props.isMobile ? height && height > 7.5 * rem : true;
+  const veryLargeTitle = props.isMobile ? height && height > 11.5 * rem : false;
 
   const t = useTranslations("play.message");
 
   const [volumeCtrlOpen, setVolumeCtrlOpen] = useState(false);
+  const [ytVolumeCtrlAvailable, setYtVolumeCtrlAvailable] = useState(true);
+  useEffect(() => {
+    if (detectOS() === "ios") {
+      // https://stackoverflow.com/questions/31147753/youtube-iframe-embed-cant-control-audio-on-ipad
+      setYtVolumeCtrlAvailable(false);
+    }
+  }, []);
   const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
   const initialVolumeCtrlOpenDone = useRef(false);
   useEffect(() => {
@@ -125,16 +134,24 @@ export function MusicArea(props: Props) {
         <div
           className={
             "flex-1 min-w-0 mr-1 flex flex-col justify-between " +
-            (props.isMobile ? "ml-3 mt-2 " : "")
+            (props.isMobile ? (largeTitle ? "ml-3 mt-4 " : "ml-3 mt-2 ") : "")
           }
         >
           <div className={props.isMobile ? "h-0 overflow-visible " : ""}>
-            <p className={largeTitle ? "leading-5 " : "leading-3.5 "}>
+            <p
+              className={
+                veryLargeTitle ? "" : largeTitle ? "leading-5 " : "leading-3.5 "
+              }
+            >
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
               <span
                 className={
                   "inline-block font-title align-bottom " +
-                  (largeTitle ? "text-2xl/6 " : "text-lg/5 ") +
+                  (veryLargeTitle
+                    ? "block! text-3xl "
+                    : largeTitle
+                      ? "text-2xl/6 "
+                      : "text-lg/5 ") +
                   "overflow-x-clip overflow-y-visible " +
                   "max-w-full text-ellipsis text-nowrap "
                 }
@@ -145,7 +162,11 @@ export function MusicArea(props: Props) {
                 <span
                   className={
                     "inline-block font-title align-bottom " +
-                    (largeTitle ? "text-lg/5 " : "text-sm/3.5 ") +
+                    (veryLargeTitle
+                      ? "block! text-2xl "
+                      : largeTitle
+                        ? "text-lg/5 "
+                        : "text-sm/3.5 ") +
                     "overflow-x-clip overflow-y-visible " +
                     "max-w-full text-ellipsis text-nowrap "
                   }
@@ -155,21 +176,38 @@ export function MusicArea(props: Props) {
                 </span>
               )}
             </p>
-            <p className={largeTitle ? "leading-4.5 " : "leading-4 "}>
+            <p
+              className={
+                veryLargeTitle
+                  ? "leading-6 "
+                  : largeTitle
+                    ? "leading-4.5 "
+                    : "leading-4 "
+              }
+            >
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
                     className={
-                      "inline-block leading-0 align-bottom " +
+                      "inline-block align-bottom " +
                       "overflow-x-clip overflow-y-visible " +
-                      "max-w-full text-ellipsis text-nowrap "
+                      "max-w-full text-ellipsis text-nowrap " +
+                      (veryLargeTitle
+                        ? "leading-6 "
+                        : largeTitle
+                          ? "leading-4.5 "
+                          : "leading-4 ")
                     }
                   >
                     {props.chartBrief?.levels[props.lvIndex].name && (
                       <span
                         className={
                           "font-title mr-1 align-bottom " +
-                          (largeTitle ? "text-lg/4 " : "text-sm/3.5 ")
+                          (veryLargeTitle
+                            ? "text-2xl "
+                            : largeTitle
+                              ? "text-lg/4 "
+                              : "text-sm/3.5 ")
                         }
                       >
                         {props.chartBrief?.levels[props.lvIndex].name}
@@ -178,7 +216,11 @@ export function MusicArea(props: Props) {
                     <span
                       className={
                         "align-bottom " +
-                        (largeTitle ? "text-base/3 " : "text-xs/2.5 ")
+                        (veryLargeTitle
+                          ? "text-xl "
+                          : largeTitle
+                            ? "text-base/3 "
+                            : "text-xs/2.5 ")
                       }
                     >
                       {props.lvType}-
@@ -186,7 +228,11 @@ export function MusicArea(props: Props) {
                     <span
                       className={
                         "align-bottom " +
-                        (largeTitle ? "text-xl/4 " : "text-lg/3.5 ")
+                        (veryLargeTitle
+                          ? "text-3xl "
+                          : largeTitle
+                            ? "text-xl/4 "
+                            : "text-lg/3.5 ")
                       }
                     >
                       {props.chartBrief?.levels[props.lvIndex]?.difficulty}
@@ -197,13 +243,22 @@ export function MusicArea(props: Props) {
                 className={
                   "inline-block align-bottom " +
                   "overflow-x-clip overflow-y-visible " +
-                  "max-w-full text-ellipsis text-nowrap "
+                  "max-w-full text-ellipsis text-nowrap " +
+                  (veryLargeTitle
+                    ? "leading-6 "
+                    : largeTitle
+                      ? "leading-4.5 "
+                      : "leading-4 ")
                 }
               >
                 <span
                   className={
                     "ml-2 align-bottom " +
-                    (largeTitle ? "text-sm/3.5 " : "text-xs/2.5")
+                    (veryLargeTitle
+                      ? "text-lg "
+                      : largeTitle
+                        ? "text-sm/3.5 "
+                        : "text-xs/2.5")
                   }
                 >
                   by
@@ -211,7 +266,11 @@ export function MusicArea(props: Props) {
                 <span
                   className={
                     "ml-1.5 font-title align-bottom " +
-                    (largeTitle ? "text-lg/4 " : "text-sm/3.5 ")
+                    (veryLargeTitle
+                      ? "text-2xl "
+                      : largeTitle
+                        ? "text-lg/4 "
+                        : "text-sm/3.5 ")
                   }
                 >
                   {props.chartBrief?.chartCreator}
@@ -263,6 +322,7 @@ export function MusicArea(props: Props) {
         }
         onClick={() => setVolumeCtrlOpen(!volumeCtrlOpen)}
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
       >
         <VolumeNotice theme="filled" className="inline-block align-middle" />
       </button>
@@ -294,6 +354,7 @@ export function MusicArea(props: Props) {
           e.stopPropagation();
         }}
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
       >
         {!props.isMobile && (
           <span
@@ -314,7 +375,8 @@ export function MusicArea(props: Props) {
             type="range"
             min="0"
             max="100"
-            value={props.ytVolume}
+            disabled={!ytVolumeCtrlAvailable}
+            value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
             onChange={(e) => props.setYtVolume(parseInt(e.target.value))}
           />
         </div>

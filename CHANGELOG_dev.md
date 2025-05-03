@@ -1,3 +1,41 @@
+## ver. 11.32 - 2025/05/04 [#541](https://github.com/na-trium-144/falling-nikochan/pull/540)
+
+* すべてのページにdescriptionを追加
+* パラメータなしの/editで/main/editにリダイレクトする
+
+## ver. 11.31 - 2025/05/03 [#540](https://github.com/na-trium-144/falling-nikochan/pull/540)
+
+* スパム対策でSVG化したメールアドレス表示を追加
+
+## ver. 11.30 - 2025/05/03 [#534](https://github.com/na-trium-144/falling-nikochan/pull/534)
+
+* アイコン変更, 音符画像を一部変更
+* theme_colorとbackground_colorの指定を追加
+* MacのPWAをフルスクリーンにするとstandaloneではなくフルスクリーン扱いになりプレイ画面が別タブで開いてしまうのを修正
+
+## ver. 11.27 - 2025/05/02 [#530](https://github.com/na-trium-144/falling-nikochan/pull/530)
+
+* 音符数表示をpcでは1の桁中央揃え、モバイルでは中央揃えに変更
+* iPadサイズの画面で使用するもう1段階大きいタイトル表示を実装
+
+## ver. 11.25 - 2025/05/02 [#529](https://github.com/na-trium-144/falling-nikochan/pull/529)
+
+* pixi.js で描画するとsvgの画質が悪くなっていたため、ver11.23〜24をrevert
+
+## ver. 11.23 - 2025/05/02 [#527](https://github.com/na-trium-144/falling-nikochan/pull/527)
+
+* <del>playでの音符とエフェクトの描画をDOMで行うのをやめ、 pixi.js を使ってWebGLで描画するようにした</del>
+
+## ver. 11.21 - 2025/04/28 [#522](https://github.com/na-trium-144/falling-nikochan/pull/522)
+
+* cssのgradientが使えない環境で代わりの背景色を設定
+* ipadのuserAgent認識を修正
+* iosではYouTubeの音量を変更できないので、YouTube音量変更のinputを無効化
+
+## ver. 11.19 - 2025/04/24 [#518](https://github.com/na-trium-144/falling-nikochan/pull/518)
+
+* /main/play のサンプル譜面リストをSSRに変更
+
 ## ver. 11.18 - 2025/04/22 [#508](https://github.com/na-trium-144/falling-nikochan/pull/508)
 
 * iOSでサービスワーカーが正常に機能していないのかasset_prefixへアクセスしようとする場合があったため、asset_prefixへのアクセスもサービスワーカーで処理するように変更

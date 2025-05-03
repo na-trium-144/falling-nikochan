@@ -52,7 +52,7 @@ export default function ShareChart(props: Props) {
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[]>([]);
+  const [record, setRecord] = useState<RecordGetSummary[] | null>(null);
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
@@ -71,13 +71,16 @@ export default function ShareChart(props: Props) {
     }
     setBrief(brief);
     document.title = titleShare(t, cid, brief);
+    setRecord(null);
     fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
       .then((res) => {
         if (res.ok) {
           res.json().then((record) => setRecord(record));
+        } else {
+          throw new Error("failed to fetch record");
         }
       })
-      .catch(() => undefined);
+      .catch(() => setRecord([]));
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));

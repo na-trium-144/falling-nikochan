@@ -38,18 +38,7 @@ export function useDisplayMode(): DisplayMode {
   // タッチ操作かどうか (操作説明が変わる)
   const [isTouch, setIsTouch] = useState(false);
   useEffect(() => {
-    // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.
-    // TBD: report to bugzilla.
-    const navigator = (window.top || window).navigator;
-    const maxTouchPoints = Number.isFinite(navigator.maxTouchPoints)
-      ? navigator.maxTouchPoints
-      : (navigator as any).msMaxTouchPoints;
-    if (Number.isFinite(maxTouchPoints)) {
-      // Windows 10 system reports that it supports touch, even though it acutally doesn't (ignore msMaxTouchPoints === 256).
-      setIsTouch(maxTouchPoints > 0 && maxTouchPoints !== 256);
-    } else {
-      setIsTouch("ontouchstart" in window);
-    }
+    setIsTouch(hasTouch());
   }, []);
 
   return {
@@ -62,4 +51,20 @@ export function useDisplayMode(): DisplayMode {
     mobileStatusScale,
     largeResult,
   };
+}
+
+export function hasTouch() {
+  // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.
+  // TBD: report to bugzilla.
+  const navigator = (window.top || window).navigator;
+  const maxTouchPoints = Number.isFinite(navigator.maxTouchPoints)
+    ? navigator.maxTouchPoints
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    : (navigator as any).msMaxTouchPoints;
+  if (Number.isFinite(maxTouchPoints)) {
+    // Windows 10 system reports that it supports touch, even though it acutally doesn't (ignore msMaxTouchPoints === 256).
+    return maxTouchPoints > 0 && maxTouchPoints !== 256;
+  } else {
+    return "ontouchstart" in window;
+  }
 }

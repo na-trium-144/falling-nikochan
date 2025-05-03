@@ -13,9 +13,7 @@ export async function AboutContent1({locale}: {locale:string}) {
         <p>{t("content3")}</p>
         <p>{t("content4")}</p>
       </div>
-      <div>
-        <PWAInstallDesc />
-      </div>
+      <PWAInstallDesc block />
     </>
   );
 }

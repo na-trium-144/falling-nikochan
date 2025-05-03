@@ -4,7 +4,7 @@ import { initMetadata, MetadataProps } from "@/metadata.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.version");
-  return initMetadata(params, "/main/version", t("title"));
+  return initMetadata(params, "/main/version", t("title"), t("description"));
 }
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;

@@ -1,5 +1,7 @@
 export default {
   play: {
+    description:
+      "This is the URL for the Falling Nikochan's game itself. (Sharing this URL alone will not work)",
     message: {
       ready: "Ready to start!",
       stopped: "Stopped",
@@ -24,7 +26,8 @@ export default {
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
-      limitFPS: "Reduce Frame Rate",
+      limitFPS: "Frame Rate",
+      noLimit: "No Limit",
       off: "Off",
     },
     score: {

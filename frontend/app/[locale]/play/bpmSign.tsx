@@ -136,8 +136,8 @@ export default function BPMSign(props: Props) {
       <div
         className={
           "rounded-sm mb-6 py-1 px-1.5 overflow-hidden " +
-          "bg-gradient-to-t from-amber-600 to-amber-500 " +
-          "dark:from-amber-900 dark:to-amber-800 " +
+          "bg-amber-500 bg-gradient-to-t from-amber-600 to-amber-500 " +
+          "dark:bg-amber-800 dark:from-amber-900 dark:to-amber-800 " +
           "border-b-2 border-r-2 border-amber-800 dark:border-amber-950 " +
           "transition-transform duration-100 " +
           (flip ? "scale-x-0 " : "scale-x-100 ")

@@ -85,6 +85,7 @@ import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { Chart8Edit } from "@falling-nikochan/chart";
 import { SlimeSVG } from "@/common/slime.js";
+import { useRouter } from "next/navigation.js";
 
 export default function EditAuth(props: {
   locale: string;
@@ -93,6 +94,7 @@ export default function EditAuth(props: {
   const { locale } = props;
   const t = useTranslations("edit");
   const te = useTranslations("error");
+  const router = useRouter();
 
   // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
   const cidInitial = useRef<string>("");
@@ -177,7 +179,7 @@ export default function EditAuth(props: {
         setPasswdFailed(false);
         setLoading(false);
         setChart(emptyChart(locale));
-      } else {
+      } else if (cidInitial.current) {
         setCid(cidInitial.current);
         setPasswdFailed(false);
         setLoading(true);
@@ -278,9 +280,11 @@ export default function EditAuth(props: {
           setErrorMsg(te("api.fetchError"));
         }
         setLoading(false);
+      } else {
+        router.push(`/${locale}/main/edit`);
       }
     },
-    [locale, te],
+    [locale, te, router],
   );
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

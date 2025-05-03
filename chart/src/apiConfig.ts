@@ -11,7 +11,16 @@ export const fileMaxSize = chartMaxEvent * (100 + 150);
 // Signature: 27 + 30くらい + 53 * 2 = 133
 
 export const originalCId = ["602399", "983403"];
-export const sampleCId = ["596134", "592994", "488006", "850858", "768743"];
+export const sampleCId = [
+  "850858",
+  "596134",
+  "170465",
+  "592994",
+  "488006",
+  "142383",
+  "683932",
+  "768743",
+];
 export function isSample(cid: string) {
   return sampleCId.includes(cid) || originalCId.includes(cid);
 }
