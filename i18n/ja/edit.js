@@ -2,6 +2,7 @@ export default {
   edit: {
     title: "譜面編集 - {title} (ID: {cid})",
     titleShort: "譜面編集",
+    description: "Falling Nikochan 譜面編集",
     help: "ヘルプ",
     chartId: "譜面ID",
     enterPasswd: "編集用パスワードを入力してください。",

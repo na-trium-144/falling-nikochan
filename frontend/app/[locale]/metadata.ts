@@ -15,19 +15,18 @@ export async function initMetadata(
   params: Promise<{ locale?: string }>,
   path: string | null,
   title: string,
+  description: string | null,
   options?: {
     image?: string;
     noAlternate?: boolean;
-    description?: string;
     custom?: { [key: string]: string };
   },
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
   const t = await getTranslations(locale, "main");
-  const description =
-    options?.description !== undefined
-      ? options?.description
-      : t("description");
+  if(description === null){
+    description = t("description");
+  }
   const imageUrl =
     options?.image || process.env.ASSET_PREFIX + "/assets/ogTemplateTitle.png";
   return {

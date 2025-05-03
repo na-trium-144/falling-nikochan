@@ -38,6 +38,8 @@ export default {
     play: {
       title: "Play with Public Charts",
       titleShort: "Play",
+      description:
+        "You can find songs from popular charts / latest charts / sample charts.",
       recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
@@ -56,6 +58,11 @@ export default {
     edit: {
       title: "Create a Chart",
       titleShort: "Create",
+      description:
+        "Welcome to Falling Nikochan chart editor. " +
+        "You can create charts without an account. " +
+        "You can save a chart to the server once every {rateLimitMin} minutes." +
+        " (You can overwrite a chart as many times as you want.)",
       welcome:
         "Welcome to Falling Nikochan chart editor. " +
         "You can create charts without an account.",
@@ -83,10 +90,13 @@ export default {
     version: {
       title: "Version Info",
       changelog: "Main Change Logs",
+      description:
+        "Version information and main change logs of Falling Nikochan.",
     },
     links: {
       title: "Contact and Other Links",
       titleShort: "other",
+      description: "Contact and other links of Falling Nikochan.",
       about: "About Falling Nikochan",
       version: "Version Info",
       changelog: "Changelogs here",

@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: MetadataProps) {
-  return initMetadata(params, "/", "");
+  return initMetadata(params, "/", "", null);
 }
 
 export const viewport: Viewport = {
