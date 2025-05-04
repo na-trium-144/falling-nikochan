@@ -4,7 +4,7 @@ import { getTranslations, importPoliciesMDX } from "@falling-nikochan/i18n";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.policies");
-  return initMetadata(params, "/main/policies", t("title"));
+  return initMetadata(params, "/main/policies", t("title"), "");
 }
 
 export default async function PolicyTab({ params }: MetadataProps) {

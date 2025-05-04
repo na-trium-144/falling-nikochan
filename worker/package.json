@@ -1,11 +1,11 @@
 {
   "name": "@falling-nikochan/worker",
-  "version": "11.18.0",
+  "version": "11.32.0",
   "private": true,
   "type": "module",
   "devDependencies": {
     "ts-loader": "^9.5.2",
-    "webpack": "^5.98.0",
+    "webpack": "^5.99.7",
     "webpack-cli": "^6.0.1"
   }
 }

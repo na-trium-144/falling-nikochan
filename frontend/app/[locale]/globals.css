@@ -29,6 +29,8 @@ body {
 
   /*//ポップアップメニュー表示制御*/
   -webkit-touch-callout: none;
+  
+  -webkit-text-size-adjust: none;
 }
 .appearance-none {
   appearance: none;

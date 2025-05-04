@@ -40,6 +40,8 @@ export default {
     play: {
       title: "公開されている譜面で遊ぶ",
       titleShort: "公開譜面",
+      description:
+        "人気の譜面 / 新着譜面 / サンプル譜面 から曲を探すことができます。",
       recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
@@ -59,6 +61,11 @@ export default {
     edit: {
       title: "譜面を作る",
       titleShort: "譜面作成",
+      description:
+        "Falling Nikochan の譜面エディタにようこそ。" +
+        "アカウント登録不要で誰でも譜面を作成することができます。" +
+        "新しくサーバーに譜面を保存するのは{rateLimitMin}分ごとに1回までに制限しています。" +
+        " (1度保存した譜面の上書きは何回でもできます。)",
       welcome:
         "Falling Nikochan の譜面エディタにようこそ。" +
         "アカウント登録不要で誰でも譜面を作成することができます。",
@@ -86,10 +93,12 @@ export default {
     version: {
       title: "バージョン情報",
       changelog: "主な更新履歴",
+      description: "Falling Nikochan のバージョン情報 / 主な更新履歴です。",
     },
     links: {
       title: "お問い合わせ先・その他リンク",
       titleShort: "その他",
+      description: "Falling Nikochan のお問い合わせ先・その他リンクです。",
       about: "Falling Nikochan について",
       version: "バージョン",
       changelog: "更新履歴はこちら",

@@ -1,8 +1,10 @@
+import { getTranslations } from "@falling-nikochan/i18n";
 import { InitPlay } from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 
 export async function generateMetadata({ params }: MetadataProps) {
-  return initMetadata(params, null, "");
+  const t = await getTranslations(params, "play");
+  return initMetadata(params, null, "", t("description"));
 }
 // pageTitle(cid, brief) or `Not Found (ID: ${cid})`
 

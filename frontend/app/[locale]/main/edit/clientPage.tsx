@@ -70,7 +70,7 @@ export default function EditTab({ locale }: { locale: string }) {
       locale={locale}
     >
       <p className="text-justify">{t("welcome")}</p>
-      <p className="mb-3 text-justify">
+      <p className="mb-3 text-left">
         {t("welcome2")}
         <ExternalLink
           className="mx-1"
@@ -122,7 +122,7 @@ export default function EditTab({ locale }: { locale: string }) {
           href={(cid) => `/${locale}/edit?cid=${cid}`}
           newTab
           showLoading
-          moreHref=""
+          moreHref={null}
         />
       </div>
     </IndexMain>
