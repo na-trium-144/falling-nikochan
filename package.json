@@ -6,7 +6,7 @@
     "chart:lint": "cd chart && eslint src/",
     "i18n:lint": "cd i18n && eslint && node verifyKeys.js",
     "route:lint": "cd route && eslint src/",
-    "worker:lint": "cd worker && tsc && eslint ./",
+    "worker:lint": "cd worker && tsc && eslint ./entry.ts",
     "frontend:lint": "cd frontend && tsc --noEmit && eslint app/",
     "lint": "tsc && npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run worker:lint && npm run frontend:lint",
     "route:test": "cd route && bun test",
@@ -29,13 +29,14 @@
     "worker"
   ],
   "dependencies": {
+    "core-js": "^3.42.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.26.0",
-    "@types/bun": "^1.2.5",
+    "@types/bun": "^1.2.12",
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.3",
