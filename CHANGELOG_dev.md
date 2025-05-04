@@ -1,4 +1,8 @@
-## ver. 11.32 - 2025/05/04 [#541](https://github.com/na-trium-144/falling-nikochan/pull/540)
+## ver. 11.33 - 2025/05/04 [#552](https://github.com/na-trium-144/falling-nikochan/pull/552)
+
+* tsconfigのtargetとlibをes2021(frontendは2017)に統一し、polyfillを追加
+
+## ver. 11.32 - 2025/05/04 [#541](https://github.com/na-trium-144/falling-nikochan/pull/541)
 
 * すべてのページにdescriptionを追加
 * パラメータなしの/editで/main/editにリダイレクトする

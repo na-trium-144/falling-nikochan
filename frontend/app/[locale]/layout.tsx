@@ -14,6 +14,7 @@ import {
 import { ThemeProvider } from "./common/theme.jsx";
 import { PWAInstallProvider } from "./common/pwaInstall.jsx";
 import type { Viewport } from "next";
+import { PolyfillProvider } from "../polyfills.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -41,11 +42,13 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className="w-full h-dvh overflow-hidden touch-none ">
-        <IntlProvider locale={locale} messages={await getMessages(locale)}>
-          <ThemeProvider>
-            <PWAInstallProvider>{children}</PWAInstallProvider>
-          </ThemeProvider>
-        </IntlProvider>
+        <PolyfillProvider>
+          <IntlProvider locale={locale} messages={await getMessages(locale)}>
+            <ThemeProvider>
+              <PWAInstallProvider>{children}</PWAInstallProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        </PolyfillProvider>
       </body>
     </html>
   );
