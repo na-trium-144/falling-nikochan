@@ -13,8 +13,8 @@ declare const self: ServiceWorkerGlobalScope;
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
-const mainCacheName = "main2";
-const tmpCacheName = "tmp2";
+const mainCacheName = "main3";
+const tmpCacheName = "tmp3";
 const mainCache = () => caches.open(mainCacheName);
 const tmpCache = () => caches.open(tmpCacheName);
 // 設定など
@@ -27,7 +27,9 @@ async function clearOldCaches() {
     .then((keys) =>
       Promise.all(
         keys
-          .filter((k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k))
+          .filter(
+            (k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k),
+          )
           .map((k) => caches.delete(k)),
       ),
     );
@@ -47,13 +49,17 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
 }
 
 // serviceWorkerからクライアントに返すため、cache-controlを削除したresponseを作成
-function returnBody(body: string | ReadableStream | null, headers: Headers) {
+function returnBody(
+  body: string | ReadableStream | null,
+  headers: Headers,
+  enableCache: boolean,
+) {
   return new Response(body, {
     headers: {
       ...(headers.has("Content-Type") && {
         "Content-Type": headers.get("Content-Type")!,
       }),
-      "Cache-Control": "no-store",
+      "Cache-Control": enableCache ? "max-age=14400" : "no-store",
     },
   });
 }
@@ -107,7 +113,14 @@ async function initAssetsCache(config: {
           { cache: "no-cache" },
         );
         if (res.ok) {
-          tmp.put(pathname, returnBody(res.body, res.headers));
+          tmp.put(
+            pathname,
+            returnBody(
+              res.body,
+              res.headers,
+              pathname.startsWith("/_next") || pathname.startsWith("/assets"),
+            ),
+          );
         } else {
           console.error(`failed to fetch ${pathname}: ${res.status}`);
           failed = true;
@@ -241,7 +254,11 @@ const app = new Hono({ strict: false })
         );
         clearTimeout(timeout);
         if (remoteRes.ok) {
-          return returnBody(remoteRes.body, remoteRes.headers);
+          return returnBody(
+            remoteRes.body,
+            remoteRes.headers,
+            c.req.path.startsWith("/_next") || c.req.path.startsWith("/assets"),
+          );
         }
       } catch {
         // pass
@@ -257,7 +274,11 @@ const app = new Hono({ strict: false })
         (process.env.ASSET_PREFIX || self.origin) + c.req.path,
       );
       if (res.ok) {
-        const returnRes = returnBody(res.body, res.headers);
+        const returnRes = returnBody(
+          res.body,
+          res.headers,
+          c.req.path.startsWith("/_next") || c.req.path.startsWith("/assets"),
+        );
         await (await mainCache()).put(c.req.path, returnRes.clone());
         return returnRes;
       } else {
