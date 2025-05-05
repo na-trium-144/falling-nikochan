@@ -1,3 +1,8 @@
+## ver. 11.34 - 2025/05/05 [#553](https://github.com/na-trium-144/falling-nikochan/pull/553)
+
+* sitemapの生成
+* botのリクエストに対しては307リダイレクトの代わりに直接内容を返す
+
 ## ver. 11.33 - 2025/05/04 [#552](https://github.com/na-trium-144/falling-nikochan/pull/552)
 
 * tsconfigのtargetとlibをes2021(frontendは2017)に統一し、polyfillを追加

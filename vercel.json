@@ -28,6 +28,10 @@
       "destination": "/api"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "/api"
+    },
+    {
       "source": "/",
       "destination": "/api"
     },
