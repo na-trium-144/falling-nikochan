@@ -102,8 +102,8 @@ export default function FallingWindow(props: Props) {
     Promise.all(
       [0, 1, 2, 3].map((i) =>
         fetch(process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`)
-          .then((res) => res.blob())
-          .then((blob) => URL.createObjectURL(blob)),
+          .then((res) => res.text())
+          .then((text) => `data:image/svg+xml;base64,${btoa(text)}`),
       ),
     ).then((urls) => {
       nikochanAssets.current = urls;
@@ -112,17 +112,13 @@ export default function FallingWindow(props: Props) {
       Array.from(new Array(13)).map((_, i) =>
         [4, 6, 8, 10, 12].includes(i)
           ? fetch(process.env.ASSET_PREFIX + `/assets/particle${i}.svg`)
-              .then((res) => res.blob())
-              .then((blob) => URL.createObjectURL(blob))
+              .then((res) => res.text())
+              .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
           : "",
       ),
     ).then((urls) => {
       particleAssets.current = urls;
     });
-    return () => {
-      nikochanAssets.current.forEach((url) => URL.revokeObjectURL(url));
-      particleAssets.current.forEach((url) => URL.revokeObjectURL(url));
-    }
   }, []);
 
   return (
