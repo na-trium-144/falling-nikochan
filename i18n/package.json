@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/i18n",
-  "version": "11.34.0",
+  "version": "11.35.0",
   "private": true,
   "type": "module",
   "main": "index.js",
