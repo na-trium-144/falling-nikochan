@@ -6,6 +6,7 @@ import { handle } from "hono/vercel";
 import {
   apiApp,
   ogApp,
+  sitemapApp,
   shareApp,
   redirectApp,
   languageDetector,
@@ -23,6 +24,7 @@ import { Hono } from "hono";
 const app = new Hono({ strict: false })
   .route("/api", apiApp)
   .route("/og", ogApp)
+  .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
     shareApp({
