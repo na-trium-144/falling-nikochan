@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, RefObject, useEffect, useRef, useState } from "react";
 import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
@@ -96,6 +96,35 @@ export default function FallingWindow(props: Props) {
     }
   }
 
+  const nikochanAssets = useRef<string[]>([]);
+  const particleAssets = useRef<string[]>([]);
+  useEffect(() => {
+    Promise.all(
+      [0, 1, 2, 3].map((i) =>
+        fetch(process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`)
+          .then((res) => res.blob())
+          .then((blob) => URL.createObjectURL(blob)),
+      ),
+    ).then((urls) => {
+      nikochanAssets.current = urls;
+    });
+    Promise.all(
+      Array.from(new Array(13)).map((_, i) =>
+        [4, 6, 8, 10, 12].includes(i)
+          ? fetch(process.env.ASSET_PREFIX + `/assets/particle${i}.svg`)
+              .then((res) => res.blob())
+              .then((blob) => URL.createObjectURL(blob))
+          : "",
+      ),
+    ).then((urls) => {
+      particleAssets.current = urls;
+    });
+    return () => {
+      nikochanAssets.current.forEach((url) => URL.revokeObjectURL(url));
+      particleAssets.current.forEach((url) => URL.revokeObjectURL(url));
+    }
+  }, []);
+
   return (
     <div className={props.className} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
@@ -116,6 +145,8 @@ export default function FallingWindow(props: Props) {
             boxSize={boxSize}
             marginX={marginX}
             marginY={marginY}
+            nikochanAssets={nikochanAssets}
+            particleAssets={particleAssets}
           />
         )}
       </div>
@@ -130,6 +161,8 @@ interface MProps {
   boxSize: number;
   marginX: number;
   marginY: number;
+  nikochanAssets: RefObject<string[]>;
+  particleAssets: RefObject<string[]>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
   return props.displayNotes.map((d) => (
@@ -141,6 +174,8 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       marginX={props.marginX}
       marginY={props.marginY}
       boxSize={props.boxSize}
+      nikochanAssets={props.nikochanAssets}
+      particleAssets={props.particleAssets}
     />
   ));
 });
@@ -152,6 +187,8 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
+  nikochanAssets: RefObject<string[]>;
+  particleAssets: RefObject<string[]>;
 }
 function Nikochan(props: NProps) {
   /* にこちゃん
@@ -193,11 +230,11 @@ function Nikochan(props: NProps) {
         }}
       >
         <img
+          decoding="async"
           src={
-            process.env.ASSET_PREFIX +
-            `/assets/nikochan${
+            props.nikochanAssets.current[
               displayNote.done <= 3 ? displayNote.done : 0
-            }.svg`
+            ]
           }
           className="w-full h-full "
         />
@@ -243,6 +280,7 @@ function Nikochan(props: NProps) {
           noteSize={noteSize}
           big={displayNote.bigDone}
           chain={displayNote.chain || 0}
+          particleAssets={props.particleAssets}
         />
       )}
     </>
@@ -324,6 +362,7 @@ interface PProps {
   noteSize: number;
   big: boolean;
   chain: number;
+  particleAssets: RefObject<string[]>;
 }
 function Particle(props: PProps) {
   const ref = useRef<HTMLImageElement>(null!);
@@ -384,7 +423,8 @@ function Particle(props: PProps) {
       }}
     >
       <img
-        src={process.env.ASSET_PREFIX + `/assets/particle${particleNum}.svg`}
+        decoding="async"
+        src={props.particleAssets.current[particleNum]}
         ref={ref}
         className="absolute opacity-0"
         style={{
@@ -398,9 +438,8 @@ function Particle(props: PProps) {
       />
       {props.big && (
         <img
-          src={
-            process.env.ASSET_PREFIX + `/assets/particle${particleNum - 2}.svg`
-          }
+          decoding="async"
+          src={props.particleAssets.current[particleNum - 2]}
           ref={refBig}
           className="absolute opacity-0"
           style={{
