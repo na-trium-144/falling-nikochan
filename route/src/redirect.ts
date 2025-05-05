@@ -16,13 +16,19 @@ const redirectApp = (config: {
       const cid = c.req.param("cid");
       return c.redirect(`${new URL(c.req.url).origin}/edit?cid=${cid}`, 301);
     })
-    .on("get", ["/", "/edit", "/main/*", "/play"], (c) => {
+    .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
       const params = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.get("language");
       const redirected = `${new URL(c.req.url).origin}/${lang}${c.req.path}${params ? "?" + params : ""}`;
       if (isbot(c.req.header("User-Agent"))) {
         // crawlerに対してはリダイレクトのレスポンスを返す代わりにリダイレクト先のページを直接返す
-        return config.fetchStatic(env(c), new URL(redirected));
+        const res = await config.fetchStatic(env(c), new URL(redirected));
+        if (res.ok) {
+          return c.body(res.body as ReadableStream, 200, {
+            "Content-Type": res.headers.get("Content-Type") || "text/html",
+            "Cache-Control": "no-store",
+          });
+        }
       }
       return c.redirect(redirected, 307);
     });
