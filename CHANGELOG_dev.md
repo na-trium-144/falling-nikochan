@@ -1,3 +1,7 @@
+## ver. 11.35 - 2025/05/06 [#555](https://github.com/na-trium-144/falling-nikochan/pull/555)
+
+* play中の画像アセットを音符1個ごとにfetchしないようbase64のdataURLに変更
+
 ## ver. 11.34 - 2025/05/05 [#553](https://github.com/na-trium-144/falling-nikochan/pull/553)
 
 * sitemapの生成
