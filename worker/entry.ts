@@ -27,7 +27,9 @@ async function clearOldCaches() {
     .then((keys) =>
       Promise.all(
         keys
-          .filter((k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k))
+          .filter(
+            (k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k),
+          )
           .map((k) => caches.delete(k)),
       ),
     );
@@ -192,6 +194,7 @@ const app = new Hono({ strict: false })
     "/",
     redirectApp({
       languageDetector,
+      fetchStatic,
     }),
   )
   .all("/api/*", (c) => fetch(c.req.raw))
