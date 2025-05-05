@@ -41,6 +41,7 @@ const config = {
       "@falling-nikochan/i18n": "@falling-nikochan/i18n/staticImport.js",
       "./api/app.js": false,
       "./og/app.js": false,
+      "./sitemap.js": false,
     },
     fallback: {
       path: false,
