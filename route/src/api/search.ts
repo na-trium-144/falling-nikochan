@@ -20,6 +20,11 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       .split(" ")
       .map((s) => s.trim())
       .filter((s) => s);
+    if (normalizedQueries.length === 0) {
+      return c.json([], 200, {
+        "cache-control": cacheControl(env(c), 600),
+      });
+    }
     console.log(normalizedQueries);
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
