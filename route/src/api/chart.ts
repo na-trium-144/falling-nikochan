@@ -30,6 +30,7 @@ import { promisify } from "node:util";
 import { Binary, Db } from "mongodb";
 import { HTTPException } from "hono/http-exception";
 import { randomBytes } from "node:crypto";
+import { normalizeEntry, YTDataEntry } from "./ytData.js";
 
 interface Passwd {
   bypass?: boolean;
@@ -74,6 +75,7 @@ export async function getChartEntry(
           cid,
           0,
           null,
+          undefined,
           "",
           null,
         ),
@@ -145,6 +147,7 @@ export interface ChartEntryCompressed {
   title: string;
   composer: string;
   chartCreator: string;
+  normalizedText: string;
   pServerHash: string | null; // see comment in chartFile.ts
   pRandomSalt: string | null;
   updatedAt: number;
@@ -246,6 +249,7 @@ export async function zipEntry(
     ytId: entry.ytId,
     title: entry.title,
     composer: entry.composer,
+    normalizedText: entry.normalizedText,
     chartCreator: entry.chartCreator,
     pServerHash: entry.pServerHash,
     pRandomSalt: entry.pRandomSalt,
@@ -263,6 +267,7 @@ export async function chartToEntry(
   cid: string,
   updatedAt: number,
   addIp: string | null,
+  ytData: YTDataEntry | undefined,
   pSecretSalt: string,
   prevEntry: ChartEntry | null,
 ): Promise<ChartEntry> {
@@ -315,6 +320,7 @@ export async function chartToEntry(
     title: chartBrief.title,
     composer: chartBrief.composer,
     chartCreator: chartBrief.chartCreator,
+    normalizedText: normalizeEntry({ ...chartBrief, ytData }),
     updatedAt: chartBrief.updatedAt,
     levelBrief: chartBrief.levels,
     ip,

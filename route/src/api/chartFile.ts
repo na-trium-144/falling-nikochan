@@ -23,6 +23,7 @@ import { env } from "hono/adapter";
 import { getCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
+import { getYTDataEntry } from "./ytData.js";
 
 /**
  * Chart9Editデータで送受信するchangePasswd, /api/chartFileのpパラメータは生のパスワード
@@ -149,6 +150,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
                   cid,
                   updatedAt,
                   ip,
+                  await getYTDataEntry(env(c), db, newChart.ytId),
                   pSecretSalt,
                   entry,
                 ),

@@ -15,6 +15,7 @@ import { Hono } from "hono";
 import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
+import { getYTDataEntry } from "./ytData.js";
 
 const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/", async (c) => {
@@ -102,7 +103,15 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         .collection<ChartEntryCompressed>("chart")
         .insertOne(
           await zipEntry(
-            await chartToEntry(newChart, cid, updatedAt, ip, pSecretSalt, null),
+            await chartToEntry(
+              newChart,
+              cid,
+              updatedAt,
+              ip,
+              await getYTDataEntry(env(c), db, newChart.ytId),
+              pSecretSalt,
+              null,
+            ),
           ),
         );
 
