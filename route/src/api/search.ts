@@ -5,6 +5,7 @@ import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
 import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
+import { numLatest } from "@falling-nikochan/chart";
 
 const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
@@ -30,25 +31,44 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       return c.json(
-        await db
-          .collection<ChartEntryCompressed>("chart")
-          .find({
-            $or: [
-              { cid: q, published: true },
-              {
-                $and: [
-                  ...normalizedQueries.map((s) => ({
-                    normalizedText: { $regex: s },
-                  })),
-                  { published: true },
-                ],
-              },
-            ],
-          })
-          .sort({ updatedAt: -1 })
-          // .limit(numLatest)
-          .project<{ cid: string }>({ _id: 0, cid: 1 })
-          .toArray(),
+        (
+          await db
+            .collection<ChartEntryCompressed>("chart")
+            .find({
+              $or: [
+                { cid: q, published: true },
+                {
+                  $and: [
+                    ...normalizedQueries.map((s) => ({
+                      normalizedText: { $regex: s },
+                    })),
+                    { published: true },
+                  ],
+                },
+              ],
+            })
+            // .sort({ updatedAt: -1 })
+            // .limit(numLatest)
+            .project<{ cid: string; normalizedText: string }>({
+              _id: 0,
+              cid: 1,
+              normalizedText: 1,
+            })
+            .toArray()
+        )
+          .sort(
+            (a, b) =>
+              // sort by the number of queries occurence in the normalizedText
+              -normalizedQueries.reduce(
+                (prev, q) =>
+                  prev +
+                  a.normalizedText.split(q).length -
+                  b.normalizedText.split(q).length,
+                0,
+              ),
+          )
+          .slice(0, numLatest)
+          .map((r) => ({ cid: r.cid })),
         200,
         {
           "cache-control": cacheControl(env(c), 600),
