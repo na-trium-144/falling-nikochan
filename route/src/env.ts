@@ -11,6 +11,7 @@ export interface Bindings {
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
   VERCEL_PROTECTION_BYPASS_SECRET?: string;
+  GOOGLE_API_KEY?: string;
 }
 
 export function secretSalt(e: Bindings) {

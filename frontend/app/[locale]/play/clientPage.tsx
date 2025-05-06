@@ -129,12 +129,13 @@ export function InitPlay({ locale }: { locale: string }) {
                 await res.arrayBuffer()
               );
               console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 11) {
+              if (seq.ver === 6 || seq.ver === 11 || seq.ver === 12) {
                 switch (seq.ver) {
                   case 6:
                     setChartSeq(loadChart6(seq));
                     break;
                   case 11:
+                  case 12:
                     setChartSeq(loadChart11(seq));
                     break;
                 }

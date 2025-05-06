@@ -60,6 +60,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           level = convertToPlay11(await convertTo11(chart), lvIndex);
           break;
         case 11:
+        case 12:
           level = convertToPlay11(chart, lvIndex);
           break;
         default:

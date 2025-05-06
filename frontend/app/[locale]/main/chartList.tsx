@@ -4,7 +4,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChartLineBrief,
   chartListMaxRow,
@@ -73,8 +73,9 @@ interface Props {
   briefs?: ChartLineBrief[];
   fetchAll?: boolean;
   creator?: boolean;
-  showLoading?: boolean;
+  showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
+  search?: boolean;
   href: (cid: string) => string;
   onClick?: (cid: string, brief?: ChartBrief) => void;
   onClickMobile?: (cid: string, brief?: ChartBrief) => void;
@@ -89,6 +90,13 @@ export function ChartList(props: Props) {
   const [briefs, setBriefs] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >(props.briefs || undefined);
+  const prevPropBriefs = useRef<ChartLineBrief[] | undefined>(props.briefs);
+  useEffect(() => {
+    if (props.briefs !== prevPropBriefs.current) {
+      setBriefs(props.briefs);
+      prevPropBriefs.current = props.briefs;
+    }
+  }, [props.briefs]);
   useEffect(() => {
     switch (props.type) {
       case "recent":
@@ -149,12 +157,16 @@ export function ChartList(props: Props) {
       }
     })();
   }, [briefs, props.type, props.fetchAll]);
-  const maxRow =
-    Array.isArray(briefs) && props.fetchAll ? briefs.length : chartListMaxRow;
+  const maxRow = props.fetchAll
+    ? Array.isArray(briefs)
+      ? briefs.length
+      : 0
+    : chartListMaxRow;
   const fetching =
     briefs === undefined ||
     (Array.isArray(briefs) &&
       briefs.slice(0, maxRow).some(({ fetched }) => !fetched));
+
   return (
     <div className="relative w-full h-max ">
       <ul
@@ -215,7 +227,11 @@ export function ChartList(props: Props) {
             ? te(`api.${briefs.message}`)
             : te("unknownApiError"))
         ) : Array.isArray(briefs) && briefs.length === 0 ? (
-          t("empty")
+          props.search ? (
+            t("notFound")
+          ) : (
+            t("empty")
+          )
         ) : null}
       </div>
       {props.moreHref &&

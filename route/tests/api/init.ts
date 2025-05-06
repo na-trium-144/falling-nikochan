@@ -57,7 +57,7 @@ export function dummyChart(): Chart11Edit {
     ver: currentChartVer,
     offset: 1.23,
     ytId: "123456789ab",
-    title: "a",
+    title: "test テスト",
     composer: "b",
     chartCreator: "c",
     locale: "d",
@@ -109,6 +109,9 @@ export function dummyChart(): Chart11Edit {
       },
     ],
   };
+}
+export function dummyChart11(): Chart11Edit {
+  return { ...dummyChart(), ver: 11 };
 }
 export function dummyChart10(): Chart9Edit {
   const c: Chart9Edit = {
@@ -166,7 +169,7 @@ export function dummyChart4(): Chart4 {
 
 export function dummyLevel11(): Level11Play {
   return {
-    ver: 11,
+    ver: 12,
     offset: 1.23,
     notes: [
       {
@@ -292,10 +295,11 @@ export async function initDb() {
       {
         $set: await zipEntry(
           await chartToEntry(
-            { ...dummyChart(), changePasswd: "p" },
+            { ...dummyChart(), changePasswd: "p", published: true, },
             dummyCid,
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           ),
@@ -315,6 +319,7 @@ export async function initDb() {
             String(Number(dummyCid) + 4),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
@@ -336,6 +341,7 @@ export async function initDb() {
             String(Number(dummyCid) + 5),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
@@ -357,6 +363,7 @@ export async function initDb() {
             String(Number(dummyCid) + 6),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
@@ -378,6 +385,7 @@ export async function initDb() {
             String(Number(dummyCid) + 7),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
@@ -399,6 +407,7 @@ export async function initDb() {
             String(Number(dummyCid) + 8),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
@@ -420,6 +429,7 @@ export async function initDb() {
             String(Number(dummyCid) + 9),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
@@ -441,11 +451,34 @@ export async function initDb() {
             String(Number(dummyCid) + 10),
             dummyDate.getTime(),
             null,
+            undefined,
             pSecretSalt,
             null,
           )),
           ver: 10,
           levels: dummyChart10().levels,
+        }),
+      },
+      { upsert: true },
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 11) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart11(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 11),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null,
+          )),
+          ver: 11,
+          levels: dummyChart11().levels,
         }),
       },
       { upsert: true },

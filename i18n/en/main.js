@@ -40,6 +40,8 @@ export default {
       titleShort: "Play",
       description:
         "You can find songs from popular charts / latest charts / sample charts.",
+      search: "Search",
+      searchDesc: "Search by song title, composer, chart creator, etc.",
       recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
@@ -83,6 +85,7 @@ export default {
     chartList: {
       showAll: "Show More",
       empty: "No charts yet",
+      notFound: "No charts found",
     },
     policies: {
       title: "(Kind of) Terms of Use",

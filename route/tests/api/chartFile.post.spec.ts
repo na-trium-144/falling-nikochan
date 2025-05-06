@@ -311,6 +311,11 @@ describe("POST /api/chartFile/:cid", () => {
     test("should be updated with publish", async () => {
       await initDb();
       const dateBefore = new Date();
+      await app.request("/api/chartFile/100000?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize({ ...dummyChart(), published: false }),
+      });
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },

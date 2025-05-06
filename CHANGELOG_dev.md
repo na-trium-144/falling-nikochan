@@ -1,3 +1,7 @@
+## ver. 12.0 - 2025/05/06 [#560](https://github.com/na-trium-144/falling-nikochan/pull/560)
+
+* YouTubeDataAPIで取得した動画情報を使った検索機能の実装
+
 ## ver. 11.35 - 2025/05/06 [#555](https://github.com/na-trium-144/falling-nikochan/pull/555)
 
 * play中の画像アセットを音符1個ごとにfetchしないようbase64のdataURLに変更
