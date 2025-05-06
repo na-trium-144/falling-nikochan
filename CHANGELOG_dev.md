@@ -1,3 +1,8 @@
+## ver. 12.2 - 2025/05/07 [#562](https://github.com/na-trium-144/falling-nikochan/pull/562)
+
+* faviconをapp/からpublic/に移動
+    * これのせいでhead内に favicon.ico が2つ書かれていたのを修正
+
 ## ver. 12.0 - 2025/05/06 [#560](https://github.com/na-trium-144/falling-nikochan/pull/560)
 
 * YouTubeDataAPIで取得した動画情報を使った検索機能の実装
