@@ -11,6 +11,13 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
     expect(level).toStrictEqual(dummyLevel11());
   });
+  test("should return Level11Play if chart version is 11", async () => {
+    await initDb();
+    const res = await app.request("/api/playFile/100011/0");
+    expect(res.status).toBe(200);
+    const level: Level11Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).toMatchObject(dummyLevel11());
+  });
   test("should return Level11Play if chart version is 10", async () => {
     await initDb();
     const res = await app.request("/api/playFile/100010/0");

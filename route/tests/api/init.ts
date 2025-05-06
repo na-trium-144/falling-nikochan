@@ -110,6 +110,9 @@ export function dummyChart(): Chart11Edit {
     ],
   };
 }
+export function dummyChart11(): Chart11Edit {
+  return { ...dummyChart(), ver: 11 };
+}
 export function dummyChart10(): Chart9Edit {
   const c: Chart9Edit = {
     ...dummyChart(),
@@ -166,7 +169,7 @@ export function dummyChart4(): Chart4 {
 
 export function dummyLevel11(): Level11Play {
   return {
-    ver: 11,
+    ver: 12,
     offset: 1.23,
     notes: [
       {
@@ -454,6 +457,28 @@ export async function initDb() {
           )),
           ver: 10,
           levels: dummyChart10().levels,
+        }),
+      },
+      { upsert: true },
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 11) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart11(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 11),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null,
+          )),
+          ver: 11,
+          levels: dummyChart11().levels,
         }),
       },
       { upsert: true },

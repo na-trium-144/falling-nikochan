@@ -3,6 +3,7 @@ import {
   app,
   dummyChart,
   dummyChart10,
+  dummyChart11,
   dummyChart6,
   dummyChart7,
   dummyChart8,
@@ -10,7 +11,7 @@ import {
   initDb,
 } from "./init";
 import {
-    Chart11Edit,
+  Chart11Edit,
   Chart4,
   Chart5,
   Chart6,
@@ -53,6 +54,13 @@ describe("GET /api/chartFile/:cid", () => {
     expect(res.status).toBe(200);
     const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).toStrictEqual(dummyChart());
+  });
+  test("should return Chart11 if chart version is 11", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100011?p=p");
+    expect(res.status).toBe(200);
+    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
+    expect(chart).toStrictEqual(dummyChart11());
   });
   test("should return Chart10 if chart version is 10", async () => {
     await initDb();
