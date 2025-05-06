@@ -133,15 +133,13 @@ export function getPServerHash(
  * データベースに保存する形式
  *
  * levels がjson+gzip圧縮+base64エンコードされてlevelsCompressedとして保存されている
- *
- * v8->v9: need to set locale, pServerHash, pRandomSalt, ip
  */
 export interface ChartEntryCompressed {
   cid: string;
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   offset: number;
   ytId: string;
   title: string;
@@ -215,7 +213,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 5 | 6; levels: ChartLevelCore5[] }
     | { ver: 7 | 8; levels: ChartLevelCore7[] }
     | { ver: 9 | 10; levels: ChartLevelCore9[] }
-    | { ver: 11; levels: ChartLevelCore11[] }
+    | { ver: 11 | 12; levels: ChartLevelCore11[] }
   );
 
 export async function unzipEntry(
@@ -249,7 +247,7 @@ export async function zipEntry(
     ytId: entry.ytId,
     title: entry.title,
     composer: entry.composer,
-    normalizedText: entry.normalizedText,
+    normalizedText: entry.normalizedText, // ver12〜
     chartCreator: entry.chartCreator,
     pServerHash: entry.pServerHash,
     pRandomSalt: entry.pRandomSalt,
@@ -489,6 +487,7 @@ export function entryToChart(
         locale: entry.locale,
       };
     case 11:
+    case 12:
       return {
         falling: "nikochan",
         ver: entry.ver,
