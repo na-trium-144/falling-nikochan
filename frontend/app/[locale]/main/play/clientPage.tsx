@@ -25,48 +25,61 @@ export default function PlayTab(props: Props) {
   const [searchText, setSearchText_] = useState<string>("");
   const [searching, setSearching] = useState<boolean>(false);
   const abortSearching = useRef<AbortController | null>(null);
+  const searchingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchResult, setSearchResult] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >();
   const setSearchText = useCallback((v: string) => {
     setSearchText_(v);
-    setSearchResult(undefined);
     if (abortSearching.current) {
       abortSearching.current.abort();
       abortSearching.current = null;
     }
-    if (v) {
+    if (searchingTimeout.current) {
+      clearTimeout(searchingTimeout.current);
+      searchingTimeout.current = null;
+    }
+    if (!v) {
+      setSearching(false);
+      setSearchResult(undefined);
+    } else {
       setSearching(true);
+      setSearchResult(undefined);
       abortSearching.current = new AbortController();
-      fetch(process.env.BACKEND_PREFIX + `/api/search?q=${v}`, {
-        signal: abortSearching.current.signal,
-      })
-        .then(async (res) => {
-          if (res.ok) {
-            setSearchResult(
-              (await res.json()).map((r: { cid: string }) => ({
-                cid: r.cid,
-                fetched: false,
-              })),
-            );
-            setSearching(false);
-          } else {
-            try {
-              setSearchResult({
-                status: res.status,
-                message: (await res.json()).message,
-              });
-            } catch {
-              setSearchResult({ status: res.status, message: "" });
-            }
-            setSearching(false);
-          }
-        })
-        .catch((e) => {
-          console.error(e);
-          setSearchResult({ status: null, message: "fetchError" });
-          setSearching(false);
-        });
+      searchingTimeout.current = setTimeout(() => {
+        searchingTimeout.current = null;
+        if (abortSearching.current) {
+          fetch(process.env.BACKEND_PREFIX + `/api/search?q=${v}`, {
+            signal: abortSearching.current.signal,
+          })
+            .then(async (res) => {
+              if (res.ok) {
+                setSearchResult(
+                  (await res.json()).map((r: { cid: string }) => ({
+                    cid: r.cid,
+                    fetched: false,
+                  })),
+                );
+                setSearching(false);
+              } else {
+                try {
+                  setSearchResult({
+                    status: res.status,
+                    message: (await res.json()).message,
+                  });
+                } catch {
+                  setSearchResult({ status: res.status, message: "" });
+                }
+                setSearching(false);
+              }
+            })
+            .catch((e) => {
+              console.error(e);
+              setSearchResult({ status: null, message: "fetchError" });
+              setSearching(false);
+            });
+        }
+      }, 1000);
     }
   }, []);
 
