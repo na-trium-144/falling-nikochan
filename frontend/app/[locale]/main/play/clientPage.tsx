@@ -40,9 +40,17 @@ export default function PlayTab(props: Props) {
       searchingTimeout.current = null;
     }
     if (!v) {
+      if (window.location.search.length > 2) {
+        window.history.back();
+      }
       setSearching(false);
       setSearchResult(undefined);
     } else {
+      if (window.location.search.length < 2) {
+        window.history.pushState(null, "", `?search=${v}`);
+      } else {
+        window.history.replaceState(null, "", `?search=${v}`);
+      }
       setSearching(true);
       setSearchResult(undefined);
       abortSearching.current = new AbortController();
@@ -82,6 +90,22 @@ export default function PlayTab(props: Props) {
       }, 1000);
     }
   }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      if (window.location.pathname.includes("/main/play")) {
+        const q = new URLSearchParams(window.location.search).get("search");
+        if (q) {
+          setSearchText(q);
+        } else {
+          setSearchText("");
+        }
+      }
+    };
+    handler();
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, [setSearchText]);
 
   return (
     <IndexMain
