@@ -42,6 +42,8 @@ export default {
       titleShort: "公開譜面",
       description:
         "人気の譜面 / 新着譜面 / サンプル譜面 から曲を探すことができます。",
+      search: "検索",
+      searchDesc: "曲名や作曲者、譜面製作者などから検索します。",
       recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
@@ -86,6 +88,7 @@ export default {
     chartList: {
       showAll: "もっと表示",
       empty: "まだありません",
+      notFound: "見つかりませんでした",
     },
     policies: {
       title: "利用規約っぽいもの",
