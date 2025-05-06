@@ -26,7 +26,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "11.35.0",
+      "version": "11.36.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -35,11 +35,11 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "11.35.0",
+      "version": "11.36.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "=5.2.5",
-        "@fontsource/noto-sans": "^5.2.6",
+        "@fontsource/noto-sans": "^5.2.7",
         "@fontsource/noto-sans-jp": "^5.2.5",
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
@@ -66,14 +66,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "11.35.0",
+      "version": "11.36.0",
       "dependencies": {
         "next-intl": "^4.0.2",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "11.35.0",
+      "version": "11.36.0",
       "dependencies": {
         "@hono/node-server": "^1.14.1",
         "@vercel/og": "^0.6.8",
@@ -87,7 +87,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "11.35.0",
+      "version": "11.36.0",
       "devDependencies": {
         "ts-loader": "^9.5.2",
         "webpack": "^5.99.7",
