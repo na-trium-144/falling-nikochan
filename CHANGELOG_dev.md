@@ -1,7 +1,8 @@
-## ver. 12.2 - 2025/05/07 [#562](https://github.com/na-trium-144/falling-nikochan/pull/562)
+## ver. 12.2 - 2025/05/07 [#562](https://github.com/na-trium-144/falling-nikochan/pull/562), [#563](https://github.com/na-trium-144/falling-nikochan/pull/563)
 
 * faviconをapp/からpublic/に移動
     * これのせいでhead内に favicon.ico が2つ書かれていたのを修正
+* iconサイズとtypeの指定を修正・追加
 
 ## ver. 12.0 - 2025/05/06 [#560](https://github.com/na-trium-144/falling-nikochan/pull/560)
 
