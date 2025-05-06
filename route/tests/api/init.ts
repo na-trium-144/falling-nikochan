@@ -295,7 +295,7 @@ export async function initDb() {
       {
         $set: await zipEntry(
           await chartToEntry(
-            { ...dummyChart(), changePasswd: "p" },
+            { ...dummyChart(), changePasswd: "p", published: true, },
             dummyCid,
             dummyDate.getTime(),
             null,

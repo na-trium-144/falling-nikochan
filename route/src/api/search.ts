@@ -3,7 +3,6 @@ import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
-import { numLatest } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
 
@@ -35,16 +34,19 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           .collection<ChartEntryCompressed>("chart")
           .find({
             $or: [
-              { cid: q },
+              { cid: q, published: true },
               {
-                $and: normalizedQueries.map((s) => ({
-                  normalizedText: { $regex: s },
-                })),
+                $and: [
+                  ...normalizedQueries.map((s) => ({
+                    normalizedText: { $regex: s },
+                  })),
+                  { published: true },
+                ],
               },
             ],
           })
           .sort({ updatedAt: -1 })
-          .limit(numLatest)
+          // .limit(numLatest)
           .project<{ cid: string }>({ _id: 0, cid: 1 })
           .toArray(),
         200,

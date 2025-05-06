@@ -30,7 +30,7 @@ describe("GET /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000?p=p");
     expect(res.status).toBe(200);
     const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
-    expect(chart).toStrictEqual(dummyChart());
+    expect(chart).toStrictEqual({ ...dummyChart(), published: true });
   });
   test("should return ChartEdit if password hash with pUserSalt matches", async () => {
     await initDb();
@@ -53,7 +53,7 @@ describe("GET /api/chartFile/:cid", () => {
     );
     expect(res.status).toBe(200);
     const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
-    expect(chart).toStrictEqual(dummyChart());
+    expect(chart).toStrictEqual({ ...dummyChart(), published: true });
   });
   test("should return Chart11 if chart version is 11", async () => {
     await initDb();
