@@ -70,7 +70,10 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 interface Props {
   type?: ChartListType;
-  briefs?: ChartLineBrief[];
+  briefs?:
+    | ChartLineBrief[]
+    | { status: number | null; message: string }
+    | undefined;
   fetchAll?: boolean;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
