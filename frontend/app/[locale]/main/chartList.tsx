@@ -93,7 +93,9 @@ export function ChartList(props: Props) {
   const [briefs, setBriefs] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | undefined>(props.briefs);
+  const prevPropBriefs = useRef<
+    ChartLineBrief[] | { status: number | null; message: string } | undefined
+  >(props.briefs);
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
       setBriefs(props.briefs);
