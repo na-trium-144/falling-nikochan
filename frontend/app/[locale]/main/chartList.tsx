@@ -70,7 +70,10 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 interface Props {
   type?: ChartListType;
-  briefs?: ChartLineBrief[];
+  briefs?:
+    | ChartLineBrief[]
+    | { status: number | null; message: string }
+    | undefined;
   fetchAll?: boolean;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
@@ -90,7 +93,9 @@ export function ChartList(props: Props) {
   const [briefs, setBriefs] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | undefined>(props.briefs);
+  const prevPropBriefs = useRef<
+    ChartLineBrief[] | { status: number | null; message: string } | undefined
+  >(props.briefs);
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
       setBriefs(props.briefs);
