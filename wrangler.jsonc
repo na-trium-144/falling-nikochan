@@ -1,0 +1,10 @@
+{
+  // "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-app",
+  "main": "route/serve.js",
+  "compatibility_date": "2025-05-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "frontend/out",
+  },
+}
