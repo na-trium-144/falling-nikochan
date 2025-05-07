@@ -92,7 +92,7 @@ export const ChartBriefSchema = () =>
   });
 export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
 
-export const currentChartVer = 11;
+export const currentChartVer = 12;
 export const lastIncompatibleVer = 6;
 export type ChartMin = Chart11Min;
 export type LevelMin = Level9Min;
@@ -105,17 +105,17 @@ export const convertToPlay = convertToPlay11;
 
 export async function validateChart(chart: ChartUntil11): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 11) chart = await convertTo11(chart as ChartUntil9);
+  if (chart.ver !== 11 && chart.ver !== 12) chart = await convertTo11(chart as ChartUntil9);
   v.parse(ChartEditSchema11(), chart);
-  return { ...chart, ver: 11 };
+  return { ...chart, ver: 12 };
 }
 export async function validateChartMin(
   chart: ChartUntil11Min,
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 11) chart = await convertTo11Min(chart as ChartUntil9Min);
+  if (chart.ver !== 11 && chart.ver !== 12) chart = await convertTo11Min(chart as ChartUntil9Min);
   v.parse(ChartMinSchema11(), chart);
-  return { ...chart, ver: 11 };
+  return { ...chart, ver: 12 };
 }
 
 export async function hash(text: string) {

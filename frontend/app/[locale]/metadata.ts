@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { getTranslations, locales } from "@falling-nikochan/i18n";
 import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
@@ -6,6 +6,15 @@ export const backgroundColorLight = "#f0f9ff"; // sky-50
 export const themeColorLight = "#b8e6fe"; // sky-200
 export const backgroundColorDark = "#441306"; // orange-950
 export const themeColorDark = "#20100a"; // orange-975
+
+export function initViewport(): Viewport {
+  return {
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: themeColorLight },
+      { media: "(prefers-color-scheme: dark)", color: themeColorDark },
+    ],
+  };
+}
 
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
@@ -24,7 +33,7 @@ export async function initMetadata(
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
   const t = await getTranslations(locale, "main");
-  if(description === null){
+  if (description === null) {
     description = t("description");
   }
   const imageUrl =
@@ -53,12 +62,20 @@ export async function initMetadata(
     appleWebApp: true,
     icons: {
       // これを1つでも書くと /app にファイルを置く metadata API が無効になるっぽい?
-      icon: process.env.ASSET_PREFIX + "/assets/icon.png?v=2",
+      icon: {
+        url: process.env.ASSET_PREFIX + "/assets/icon.png?v=2",
+        sizes: "256x256",
+        type: "image/png",
+      },
       apple: [192, 256, 512, 1024].map((size) => ({
         url: process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
-        size: `${size}x${size}`,
+        sizes: `${size}x${size}`,
+        type: "image/png",
       })),
-      shortcut: "/favicon.ico?v=2",
+      shortcut: {
+        url: "/favicon.ico?v=2",
+        type: "image/x-icon",
+      },
     },
     openGraph: path
       ? {

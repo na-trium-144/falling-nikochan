@@ -7,6 +7,7 @@ import {
   shareApp,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n";
+import "core-js/features/string/replace-all";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -26,7 +27,9 @@ async function clearOldCaches() {
     .then((keys) =>
       Promise.all(
         keys
-          .filter((k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k))
+          .filter(
+            (k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k),
+          )
           .map((k) => caches.delete(k)),
       ),
     );
@@ -191,6 +194,7 @@ const app = new Hono({ strict: false })
     "/",
     redirectApp({
       languageDetector,
+      fetchStatic,
     }),
   )
   .all("/api/*", (c) => fetch(c.req.raw))

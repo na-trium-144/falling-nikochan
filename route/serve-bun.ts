@@ -3,6 +3,7 @@ import {
   apiApp,
   ogApp,
   redirectApp,
+  sitemapApp,
   shareApp,
   Bindings,
   languageDetector,
@@ -20,6 +21,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(logger())
   .route("/api", apiApp)
   .route("/og", ogApp)
+  .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
     shareApp({
@@ -28,7 +30,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchStatic,
     }),
   )
-  .route("/", redirectApp())
+  .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",
     serveStatic({

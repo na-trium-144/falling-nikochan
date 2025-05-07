@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "11.32.0",
+  "version": "12.2.0",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -11,11 +11,11 @@
     "@icon-park/react": "^1.4.2",
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
-    "@next/mdx": "^15.2.4",
+    "@next/mdx": "^15.3.1",
     "@ygoe/msgpack": "^1.0.3",
-    "ace-builds": "^1.39.1",
+    "ace-builds": "^1.41.0",
     "file-saver": "^2.0.5",
-    "next": "^15.2.4",
+    "next": "^15.3.1",
     "react-ace": "^14.0.1",
     "react-resize-detector": "^12.0.2",
     "remote-web-worker": "^0.0.9",

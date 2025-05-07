@@ -1,4 +1,27 @@
-## ver. 11.32 - 2025/05/04 [#541](https://github.com/na-trium-144/falling-nikochan/pull/540)
+## ver. 12.2 - 2025/05/07 [#562](https://github.com/na-trium-144/falling-nikochan/pull/562), [#563](https://github.com/na-trium-144/falling-nikochan/pull/563)
+
+* faviconをapp/からpublic/に移動
+    * これのせいでhead内に favicon.ico が2つ書かれていたのを修正
+* iconサイズとtypeの指定を修正・追加
+
+## ver. 12.0 - 2025/05/06 [#560](https://github.com/na-trium-144/falling-nikochan/pull/560)
+
+* YouTubeDataAPIで取得した動画情報を使った検索機能の実装
+
+## ver. 11.35 - 2025/05/06 [#555](https://github.com/na-trium-144/falling-nikochan/pull/555)
+
+* play中の画像アセットを音符1個ごとにfetchしないようbase64のdataURLに変更
+
+## ver. 11.34 - 2025/05/05 [#553](https://github.com/na-trium-144/falling-nikochan/pull/553)
+
+* sitemapの生成
+* botのリクエストに対しては307リダイレクトの代わりに直接内容を返す
+
+## ver. 11.33 - 2025/05/04 [#552](https://github.com/na-trium-144/falling-nikochan/pull/552)
+
+* tsconfigのtargetとlibをes2021(frontendは2017)に統一し、polyfillを追加
+
+## ver. 11.32 - 2025/05/04 [#541](https://github.com/na-trium-144/falling-nikochan/pull/541)
 
 * すべてのページにdescriptionを追加
 * パラメータなしの/editで/main/editにリダイレクトする

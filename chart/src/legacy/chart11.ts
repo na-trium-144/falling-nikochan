@@ -47,7 +47,7 @@ export const LevelEditSchema11 = () =>
   });
 export const LevelPlaySchema11 = () =>
   v.object({
-    ver: v.union([v.literal(11)]),
+    ver: v.union([v.literal(11), v.literal(12)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     notes: v.array(NoteCommandSchema9()),
     bpmChanges: v.array(BPMChangeSchema9()),
@@ -61,7 +61,7 @@ export const LevelPlaySchema11 = () =>
 export const ChartMinSchema11 = () =>
   v.object({
     falling: v.literal("nikochan"),
-    ver: v.union([v.literal(11)]),
+    ver: v.union([v.literal(11), v.literal(12)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     // ytId: YoutubeIdSchema(),
     ytId: v.string(),
@@ -98,7 +98,7 @@ export function convertToPlay11(
 ): Level11Play {
   const level = chart.levels.at(lvIndex);
   return {
-    ver: 11,
+    ver: 12,
     offset: chart.offset,
     notes: level?.notes || [],
     bpmChanges: level?.bpmChanges || [],
@@ -112,7 +112,7 @@ export function convertToPlay11(
 export function convertToMin11(chart: Chart11Edit): Chart11Min {
   return {
     falling: "nikochan",
-    ver: 11,
+    ver: 12,
     offset: chart.offset,
     ytId: chart.ytId,
     title: chart.title,
@@ -139,7 +139,7 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
     chart = await convertTo9(chart as ChartUntil8);
   return {
     ...chart,
-    ver: 11,
+    ver: 12,
     levels: chart.levels.map((level) => ({
       ...level,
       ytBegin: 0,
@@ -162,7 +162,7 @@ export async function convertTo11Min(
     chart = await convertTo9Min(chart as ChartUntil8Min);
   return {
     ...chart,
-    ver: 11,
+    ver: 12,
     levels: chart.levels.map((level) => ({
       ...level,
       ytBegin: 0,

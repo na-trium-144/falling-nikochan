@@ -8,6 +8,8 @@ import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareModal } from "../shareModal.jsx";
 import { ChartLineBrief } from "../fetch.js";
+import Input from "@/common/input.jsx";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 interface Props {
   locale: string;
@@ -20,6 +22,91 @@ export default function PlayTab(props: Props) {
 
   const { modal, openModal, openShareInternal } = useShareModal(locale, "play");
 
+  const [searchText, setSearchText_] = useState<string>("");
+  const [searching, setSearching] = useState<boolean>(false);
+  const abortSearching = useRef<AbortController | null>(null);
+  const searchingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [searchResult, setSearchResult] = useState<
+    ChartLineBrief[] | { status: number | null; message: string } | undefined
+  >();
+  const setSearchText = useCallback((v: string) => {
+    setSearchText_(v);
+    if (abortSearching.current) {
+      abortSearching.current.abort();
+      abortSearching.current = null;
+    }
+    if (searchingTimeout.current) {
+      clearTimeout(searchingTimeout.current);
+      searchingTimeout.current = null;
+    }
+    if (!v) {
+      if (window.location.search.length > 2) {
+        window.history.back();
+      }
+      setSearching(false);
+      setSearchResult(undefined);
+    } else {
+      if (window.location.search.length < 2) {
+        window.history.pushState(null, "", `?search=${v}`);
+      } else {
+        window.history.replaceState(null, "", `?search=${v}`);
+      }
+      setSearching(true);
+      setSearchResult(undefined);
+      abortSearching.current = new AbortController();
+      searchingTimeout.current = setTimeout(() => {
+        searchingTimeout.current = null;
+        if (abortSearching.current) {
+          fetch(process.env.BACKEND_PREFIX + `/api/search?q=${v}`, {
+            signal: abortSearching.current.signal,
+          })
+            .then(async (res) => {
+              if (res.ok) {
+                setSearchResult(
+                  (await res.json()).map((r: { cid: string }) => ({
+                    cid: r.cid,
+                    fetched: false,
+                  })),
+                );
+                setSearching(false);
+              } else {
+                try {
+                  setSearchResult({
+                    status: res.status,
+                    message: (await res.json()).message,
+                  });
+                } catch {
+                  setSearchResult({ status: res.status, message: "" });
+                }
+                setSearching(false);
+              }
+            })
+            .catch((e) => {
+              console.error(e);
+              setSearchResult({ status: null, message: "fetchError" });
+              setSearching(false);
+            });
+        }
+      }, 1000);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      if (window.location.pathname.includes("/main/play")) {
+        const q = new URLSearchParams(window.location.search).get("search");
+        if (q) {
+          setSearchText(q);
+        } else {
+          setSearchText("");
+        }
+      }
+    };
+    handler();
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, [setSearchText]);
+
   return (
     <IndexMain
       title={t("title")}
@@ -30,6 +117,37 @@ export default function PlayTab(props: Props) {
       modal={modal}
     >
       <div className="flex-none mb-3 ">
+        <h3 className="mb-2 flex items-baseline ">
+          <span className="mr-2 text-xl font-bold font-title ">
+            {t("search")}:
+          </span>
+          <Input
+            actualValue={searchText}
+            updateValue={setSearchText}
+            left
+            className="flex-1 font-title "
+          />
+        </h3>
+        <p className="pl-2 mb-1 text-justify ">{t("searchDesc")}</p>
+        {(Array.isArray(searchResult) || searching) && (
+          <ChartList
+            briefs={Array.isArray(searchResult) ? searchResult : undefined}
+            search
+            creator
+            href={(cid) => `/share/${cid}`}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+            showLoading
+            fetchAll
+            moreHref={null}
+            badge
+          />
+        )}
+      </div>
+      <AccordionLike
+        className="flex-none mb-3 "
+        hidden={searching || !!searchResult}
+      >
         <h3 className="mb-2 text-xl font-bold font-title">{t("popular")}</h3>
         <p className="pl-2 mb-1 text-justify ">
           {t("popularDesc", { popularDays })}
@@ -44,8 +162,11 @@ export default function PlayTab(props: Props) {
           moreHref={`/${locale}/main/popular`}
           badge
         />
-      </div>
-      <div className="flex-none mb-3 ">
+      </AccordionLike>
+      <AccordionLike
+        className="flex-none mb-3 "
+        hidden={searching || !!searchResult}
+      >
         <h3 className="mb-2 text-xl font-bold font-title">{t("latest")}</h3>
         <p className="pl-2 text-justify ">
           {t("latestDesc")}
@@ -63,8 +184,11 @@ export default function PlayTab(props: Props) {
           moreHref={`/${locale}/main/latest`}
           badge
         />
-      </div>
-      <div className="flex-none mb-3 ">
+      </AccordionLike>
+      <AccordionLike
+        className="flex-none mb-3 "
+        hidden={searching || !!searchResult}
+      >
         <h3 className="mb-2 text-xl font-bold font-title">{t("sample")}</h3>
         <p className="pl-2 mb-1 text-justify ">
           {t.rich("sampleDesc", {
@@ -112,7 +236,43 @@ export default function PlayTab(props: Props) {
           moreHref={null}
           badge
         />
-      </div>
+      </AccordionLike>
     </IndexMain>
+  );
+}
+
+export function AccordionLike(props: {
+  className?: string;
+  hidden: boolean;
+  // expanded?: boolean;
+  children: ReactNode;
+  // reset?: () => void;
+}) {
+  const [hidden, setHidden] = useState<boolean>(false);
+  const [transparent, setTransparent] = useState<boolean>(false);
+  useEffect(() => {
+    if (props.hidden) {
+      setTransparent(true);
+      setTimeout(() => setHidden(true), 200);
+    } else {
+      setHidden(false);
+      requestAnimationFrame(() => setTransparent(false));
+    }
+  }, [props.hidden]);
+
+  return (
+    <div
+      className={
+        // main-wide:
+        "transition-all duration-500 " +
+        (hidden ? "hidden " : "") +
+        (transparent
+          ? "m-0! ease-out opacity-0 max-h-0 pointer-events-none "
+          : "ease-in opacity-100 max-h-200 ") +
+        props.className
+      }
+    >
+      {props.children}
+    </div>
   );
 }

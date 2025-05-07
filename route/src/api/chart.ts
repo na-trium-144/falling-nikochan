@@ -30,6 +30,7 @@ import { promisify } from "node:util";
 import { Binary, Db } from "mongodb";
 import { HTTPException } from "hono/http-exception";
 import { randomBytes } from "node:crypto";
+import { normalizeEntry, YTDataEntry } from "./ytData.js";
 
 interface Passwd {
   bypass?: boolean;
@@ -74,6 +75,7 @@ export async function getChartEntry(
           cid,
           0,
           null,
+          undefined,
           "",
           null,
         ),
@@ -131,20 +133,19 @@ export function getPServerHash(
  * データベースに保存する形式
  *
  * levels がjson+gzip圧縮+base64エンコードされてlevelsCompressedとして保存されている
- *
- * v8->v9: need to set locale, pServerHash, pRandomSalt, ip
  */
 export interface ChartEntryCompressed {
   cid: string;
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   offset: number;
   ytId: string;
   title: string;
   composer: string;
   chartCreator: string;
+  normalizedText: string;
   pServerHash: string | null; // see comment in chartFile.ts
   pRandomSalt: string | null;
   updatedAt: number;
@@ -212,7 +213,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 5 | 6; levels: ChartLevelCore5[] }
     | { ver: 7 | 8; levels: ChartLevelCore7[] }
     | { ver: 9 | 10; levels: ChartLevelCore9[] }
-    | { ver: 11; levels: ChartLevelCore11[] }
+    | { ver: 11 | 12; levels: ChartLevelCore11[] }
   );
 
 export async function unzipEntry(
@@ -246,6 +247,7 @@ export async function zipEntry(
     ytId: entry.ytId,
     title: entry.title,
     composer: entry.composer,
+    normalizedText: entry.normalizedText, // ver12〜
     chartCreator: entry.chartCreator,
     pServerHash: entry.pServerHash,
     pRandomSalt: entry.pRandomSalt,
@@ -263,6 +265,7 @@ export async function chartToEntry(
   cid: string,
   updatedAt: number,
   addIp: string | null,
+  ytData: YTDataEntry | undefined,
   pSecretSalt: string,
   prevEntry: ChartEntry | null,
 ): Promise<ChartEntry> {
@@ -315,6 +318,7 @@ export async function chartToEntry(
     title: chartBrief.title,
     composer: chartBrief.composer,
     chartCreator: chartBrief.chartCreator,
+    normalizedText: normalizeEntry({ ...chartBrief, ytData }),
     updatedAt: chartBrief.updatedAt,
     levelBrief: chartBrief.levels,
     ip,
@@ -483,6 +487,7 @@ export function entryToChart(
         locale: entry.locale,
       };
     case 11:
+    case 12:
       return {
         falling: "nikochan",
         ver: entry.ver,

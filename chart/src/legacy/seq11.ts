@@ -5,7 +5,7 @@ import { Signature5 } from "./chart5.js";
 import { DisplayParam7, Note7 } from "./seq7.js";
 
 export interface ChartSeqData11 {
-  ver: 11;
+  ver: 12;
   notes: Note7[];
   bpmChanges: BPMChange1[];
   speedChanges: BPMChange1[];
@@ -128,7 +128,7 @@ export function loadChart11(level: Level11Play): ChartSeqData11 {
     });
   }
   return {
-    ver: 11,
+    ver: 12,
     offset: level.offset,
     signature: level.signature,
     bpmChanges: level.bpmChanges,
