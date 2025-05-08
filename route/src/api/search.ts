@@ -5,7 +5,6 @@ import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
 import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
-import { numLatest } from "@falling-nikochan/chart";
 
 const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
@@ -67,7 +66,6 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                 0,
               ),
           )
-          .slice(0, numLatest)
           .map((r) => ({ cid: r.cid })),
         200,
         {

@@ -75,6 +75,7 @@ interface Props {
     | { status: number | null; message: string }
     | undefined;
   fetchAll?: boolean;
+  maxRow?: number;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
@@ -83,7 +84,8 @@ interface Props {
   onClick?: (cid: string, brief?: ChartBrief) => void;
   onClickMobile?: (cid: string, brief?: ChartBrief) => void;
   newTab?: boolean;
-  moreHref: string | null;
+  moreHref?: string | null;
+  onMoreClick?: () => void;
   badge?: boolean;
 }
 export function ChartList(props: Props) {
@@ -149,7 +151,14 @@ export function ChartList(props: Props) {
   useEffect(() => {
     void (async () => {
       if (Array.isArray(briefs)) {
-        const res = await fetchAndFilterBriefs(briefs, !!props.fetchAll);
+        const res = await fetchAndFilterBriefs(
+          briefs,
+          props.fetchAll
+            ? null
+            : props.maxRow !== undefined
+              ? props.maxRow
+              : chartListMaxRow,
+        );
         if (res.changed) {
           setBriefs(res.briefs);
           if (props.type === "recent") {
@@ -161,12 +170,15 @@ export function ChartList(props: Props) {
         }
       }
     })();
-  }, [briefs, props.type, props.fetchAll]);
+  }, [briefs, props.type, props.fetchAll, props.maxRow]);
   const maxRow = props.fetchAll
     ? Array.isArray(briefs)
       ? briefs.length
       : 0
-    : chartListMaxRow;
+    : props.maxRow !== undefined
+      ? props.maxRow
+      : chartListMaxRow;
+  console.log(props.maxRow);
   const fetching =
     briefs === undefined ||
     (Array.isArray(briefs) &&
@@ -239,8 +251,23 @@ export function ChartList(props: Props) {
           )
         ) : null}
       </div>
-      {props.moreHref &&
-        (Array.isArray(briefs) && briefs.length > maxRow ? (
+      {Array.isArray(briefs) && briefs.length > maxRow ? (
+        props.onMoreClick ? (
+          <button
+            className={
+              "block w-max mx-auto mt-2 " +
+              (fetching ? "invisible " : "") +
+              linkStyle1
+            }
+            onClick={props.onMoreClick}
+          >
+            {t("showAll")}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
+          </button>
+        ) : props.moreHref ? (
           <Link
             className={
               "block w-max mx-auto mt-2 " +
@@ -251,17 +278,15 @@ export function ChartList(props: Props) {
             prefetch={!process.env.NO_PREFETCH}
           >
             {t("showAll")}
-            {/*<span className="ml-1">
-              ({briefs.length /*- props.maxRow* /})
-            </span>*/}
             <ArrowRight
               className="inline-block align-middle ml-2 "
               theme="filled"
             />
           </Link>
-        ) : (
-          <div className="w-0 h-6 mt-2 " />
-        ))}
+        ) : null
+      ) : props.moreHref || props.onMoreClick ? (
+        <div className="w-0 h-6 mt-2 " />
+      ) : null}
     </div>
   );
 }

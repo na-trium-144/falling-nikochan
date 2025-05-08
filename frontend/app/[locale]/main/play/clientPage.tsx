@@ -4,7 +4,7 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import { popularDays } from "@falling-nikochan/chart";
+import { numLatest, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareModal } from "../shareModal.jsx";
 import { ChartLineBrief } from "../fetch.js";
@@ -34,9 +34,11 @@ export default function PlayTab(props: Props) {
   const [searchResult, setSearchResult] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >();
+  const [searchMaxRow, setSearchMaxRow] = useState<number>(numLatest);
   const setSearchText = useCallback(
     (v: string, noDelay?: boolean) => {
       setSearchText_(v);
+      setSearchMaxRow(numLatest);
       if (abortSearching.current) {
         abortSearching.current.abort();
         abortSearching.current = null;
@@ -151,8 +153,11 @@ export default function PlayTab(props: Props) {
             onClick={openModal}
             onClickMobile={openShareInternal}
             showLoading
-            fetchAll
-            moreHref={null}
+            maxRow={Math.min(
+              searchMaxRow,
+              Array.isArray(searchResult) ? searchResult.length : 0,
+            )}
+            onMoreClick={() => setSearchMaxRow((prev) => prev + numLatest)}
             badge
           />
         )}

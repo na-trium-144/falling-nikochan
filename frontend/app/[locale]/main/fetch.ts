@@ -13,7 +13,7 @@ export interface ChartLineBrief {
 
 export async function fetchAndFilterBriefs(
   recentBrief: ChartLineBrief[],
-  fetchAll: boolean,
+  maxRow: number | null = chartListMaxRow,
 ): Promise<{ changed: boolean; briefs: ChartLineBrief[] }> {
   let changed = false;
   const recentBriefNew: (ChartLineBrief | null)[] = recentBrief.slice();
@@ -21,7 +21,7 @@ export async function fetchAndFilterBriefs(
     recentBrief.map(async ({ cid, fetched, original }, i) => {
       if (fetched) {
         return;
-      } else if (!fetchAll && i >= chartListMaxRow) {
+      } else if (maxRow !== null && i >= maxRow) {
         return;
       } else {
         const { brief, is404 } = await fetchBrief(cid);
