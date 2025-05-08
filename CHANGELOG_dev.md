@@ -1,3 +1,7 @@
+## ver. 12.5 - 2025/05/09 [#572](https://github.com/na-trium-144/falling-nikochan/pull/562), [#563](https://github.com/na-trium-144/falling-nikochan/pull/572)
+
+* 検索結果をバックエンドは全て返すようにし、フロントエンドは24件以上の場合もっと表示ボタンを表示
+
 ## ver. 12.2 - 2025/05/07 [#562](https://github.com/na-trium-144/falling-nikochan/pull/562), [#563](https://github.com/na-trium-144/falling-nikochan/pull/563)
 
 * faviconをapp/からpublic/に移動
