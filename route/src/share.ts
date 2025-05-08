@@ -77,18 +77,6 @@ const shareApp = (config: {
             date: resultParams.date.toLocaleDateString(qLang),
           });
         }
-        let titleEscapedJsStr = ""; // "{...\"TITLE\"}" inside script tag
-        let titleEscapedHtml = ""; // <title>TITLE</title>, "TITLE" inside meta tag
-        const briefStr = JSON.stringify(brief);
-        let briefEscapedHtml = "";
-        for (let i = 0; i < newTitle.length; i++) {
-          titleEscapedJsStr +=
-            "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
-          titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
-        }
-        for (let i = 0; i < briefStr.length; i++) {
-          briefEscapedHtml += "&#" + briefStr.charCodeAt(i) + ";";
-        }
         const newDescription = resultParams
           ? t("descriptionWithResult", {
               chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
@@ -115,6 +103,22 @@ const shareApp = (config: {
               chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
               title: brief.title,
             });
+        let titleEscapedJsStr = ""; // "{...\"TITLE\"}" inside script tag
+        let titleEscapedHtml = ""; // <title>TITLE</title>, "TITLE" inside meta tag
+        const briefStr = JSON.stringify(brief);
+        let briefEscapedHtml = "";
+        let descriptionEscapedHtml = "";
+        for (let i = 0; i < newTitle.length; i++) {
+          titleEscapedJsStr +=
+            "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
+          titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
+        }
+        for (let i = 0; i < briefStr.length; i++) {
+          briefEscapedHtml += "&#" + briefStr.charCodeAt(i) + ";";
+        }
+        for (let i = 0; i < newDescription.length; i++) {
+          descriptionEscapedHtml += "&#" + newDescription.charCodeAt(i) + ";";
+        }
         // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
         const ogQuery = new URLSearchParams();
         ogQuery.set("lang", qLang);
@@ -133,7 +137,7 @@ const shareApp = (config: {
               new URL(c.req.url).origin,
             ).toString(),
           )
-          .replaceAll("PLACEHOLDER_DESCRIPTION", newDescription)
+          .replaceAll("PLACEHOLDER_DESCRIPTION", descriptionEscapedHtml)
           .replaceAll("PLACEHOLDER_BRIEF", briefEscapedHtml);
         if (c.req.path.startsWith("/share") && lang !== qLang) {
           const q = new URLSearchParams(c.req.query());
