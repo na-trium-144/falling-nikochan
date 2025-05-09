@@ -1,12 +1,28 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
+import { writeFileSync, readFileSync } from "node:fs";
 import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
+import parentPackageJson from "../package.json" with { type: "json" };
+// import babelRc from "./.babelrc" with { type: "json" };
+const babelRc = JSON.parse(readFileSync("./.babelrc", "utf-8"));
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
-import { writeFileSync } from "node:fs";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
+
+const coreJsVersion = parentPackageJson.devDependencies["core-js"]
+  .slice(1)
+  .split(".")
+  .slice(0, 2)
+  .join(".");
+const babelCoreJsVersion = babelRc.presets[0][1]["preset-env"].corejs;
+if (coreJsVersion !== babelCoreJsVersion) {
+  // https://github.com/babel/babel/issues/15412
+  throw new Error(
+    `core-js version in .babelrc (${babelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`,
+  );
+}
 
 const date = new Date().toUTCString();
 let commit = "";
