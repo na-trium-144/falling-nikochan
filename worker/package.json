@@ -2,5 +2,12 @@
   "name": "@falling-nikochan/worker",
   "version": "12.5.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "browserslist": [
+    "chrome 64",
+    "edge 79",
+    "firefox 67",
+    "opera 51",
+    "safari 12"
+  ]
 }

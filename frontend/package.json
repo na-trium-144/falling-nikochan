@@ -3,6 +3,13 @@
   "version": "12.5.0",
   "private": true,
   "type": "module",
+  "browserslist": [
+    "chrome 64",
+    "edge 79",
+    "firefox 67",
+    "opera 51",
+    "safari 12"
+  ],
   "dependencies": {
     "@fontsource/kaisei-opti": "^5.2.5",
     "@fontsource/merriweather": "=5.2.5",

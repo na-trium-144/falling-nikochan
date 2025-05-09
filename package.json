@@ -2,13 +2,6 @@
   "name": "falling-nikochan",
   "private": true,
   "type": "module",
-  "browserslist": [
-    "chrome 64",
-    "edge 79",
-    "firefox 67",
-    "opera 51",
-    "safari 12"
-  ],
   "scripts": {
     "chart:lint": "cd chart && eslint src/",
     "i18n:lint": "cd i18n && eslint && node verifyKeys.js",

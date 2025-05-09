@@ -56,7 +56,9 @@ const nextConfig = {
   webpack: (config, options) => {
     return {
       ...config,
-      // target: "browserslist",  // somehow this breaks build: `unhandledRejection ReferenceError: self is not defined`
+      // target: "browserslist",
+      // ↑ somehow this breaks build: `unhandledRejection ReferenceError: self is not defined`
+      //    but it seems like it's actually reading the browserslist config in ./package.json anyway
       resolve: {
         ...config.resolve,
         extensionAlias: {
@@ -72,6 +74,14 @@ const nextConfig = {
           module: false,
           ...config.resolve?.fallback,
         },
+      },
+      module: {
+        ...config.module,
+        rules: (config.module?.rules || []).map((r) => ({
+          ...r,
+          // https://github.com/vercel/next.js/issues/74743
+          exclude: (r.exclude || []).concat([/core-js/]),
+        })),
       },
     };
   },

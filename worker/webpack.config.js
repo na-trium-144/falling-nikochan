@@ -12,11 +12,12 @@ const config = {
     rules: [
       {
         test: /\.js$/,
+        exclude: /core-js/,
         use: {
-          loader: 'babel-loader'
-        }
+          loader: "babel-loader",
+        },
       },
-    ]
+    ],
   },
   plugins: [
     // new BundleAnalyzerPlugin(),
@@ -40,7 +41,8 @@ const config = {
       "@ygoe/msgpack": false,
       wasmoon: false,
       "@falling-nikochan/chart": false,
-      "@falling-nikochan/i18n/dynamic.js": "@falling-nikochan/i18n/staticMin.js",
+      "@falling-nikochan/i18n/dynamic.js":
+        "@falling-nikochan/i18n/staticMin.js",
       "./api/app.js": false,
       "./og/app.js": false,
       "./sitemap.js": false,
