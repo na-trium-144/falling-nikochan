@@ -54,23 +54,26 @@ const nextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   env,
   webpack: (config, options) => {
-    config.resolve = {
-      ...config.resolve,
-      extensionAlias: {
-        ".js": [".js", ".ts", ".tsx"],
-        ".jsx": [".js", ".ts", ".tsx"],
-      },
-      fallback: {
-        path: false,
-        fs: false,
-        child_process: false,
-        crypto: false,
-        url: false,
-        module: false,
-        ...config.resolve?.fallback,
+    return {
+      ...config,
+      // target: "browserslist",  // somehow this breaks build: `unhandledRejection ReferenceError: self is not defined`
+      resolve: {
+        ...config.resolve,
+        extensionAlias: {
+          ".js": [".js", ".ts", ".tsx"],
+          ".jsx": [".js", ".ts", ".tsx"],
+        },
+        fallback: {
+          path: false,
+          fs: false,
+          child_process: false,
+          crypto: false,
+          url: false,
+          module: false,
+          ...config.resolve?.fallback,
+        },
       },
     };
-    return config;
   },
 };
 

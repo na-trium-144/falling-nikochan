@@ -5,16 +5,18 @@ import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const config = {
-  entry: "./entry.ts",
+  entry: "./dist/entry.js",
+  target: "browserslist",
   mode: process.env.API_ENV === "development" ? "development" : "production",
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        test: /\.js$/,
+        use: {
+          loader: 'babel-loader'
+        }
       },
-    ],
+    ]
   },
   plugins: [
     // new BundleAnalyzerPlugin(),
