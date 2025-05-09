@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
-import { locales } from "./index.js";
-import { getMessages as staticGetMessages } from "./staticImport.js";
+import { locales } from "./dynamic.js";
+import { getMessages as staticGetMessages } from "./staticMin.js";
 import { basename } from "node:path";
 const actualLocales = (await readdir(".", { withFileTypes: true }))
   .filter((file) => file.isDirectory())

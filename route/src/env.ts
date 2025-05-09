@@ -1,4 +1,4 @@
-import { locales } from "@falling-nikochan/i18n";
+import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";

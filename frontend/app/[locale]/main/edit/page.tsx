@@ -1,5 +1,5 @@
 import EditTab from "./clientPage.js";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { rateLimitMin } from "@falling-nikochan/chart";
 

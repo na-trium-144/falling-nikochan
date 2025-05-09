@@ -1,5 +1,5 @@
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import ChartListPage from "../chartList";
 import { popularDays } from "@falling-nikochan/chart";
 

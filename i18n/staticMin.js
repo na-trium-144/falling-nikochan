@@ -1,3 +1,5 @@
+// for service worker where only error message is needed and dynamic import does not work
+
 import { createTranslator } from "next-intl";
 import enError from "./en/error.js";
 import jaError from "./ja/error.js";

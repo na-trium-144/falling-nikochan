@@ -1,7 +1,7 @@
 import { CenterBox } from "@/common/box";
 import { ThemeProvider } from "@/common/theme";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { PolyfillProvider } from "./polyfills";
 
 export async function generateMetadata({ params }: MetadataProps) {

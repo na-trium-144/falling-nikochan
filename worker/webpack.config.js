@@ -38,7 +38,7 @@ const config = {
       "@ygoe/msgpack": false,
       wasmoon: false,
       "@falling-nikochan/chart": false,
-      "@falling-nikochan/i18n": "@falling-nikochan/i18n/staticImport.js",
+      "@falling-nikochan/i18n/dynamic.js": "@falling-nikochan/i18n/staticMin.js",
       "./api/app.js": false,
       "./og/app.js": false,
       "./sitemap.js": false,

@@ -1,5 +1,5 @@
 import { backgroundColorLight, themeColorLight } from "@/metadata";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
