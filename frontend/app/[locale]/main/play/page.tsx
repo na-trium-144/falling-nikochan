@@ -1,7 +1,7 @@
 import PlayTab from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import briefApp from "@falling-nikochan/route/dist/src/api/brief.js";
 import { ChartLineBrief } from "../fetch.js";
 

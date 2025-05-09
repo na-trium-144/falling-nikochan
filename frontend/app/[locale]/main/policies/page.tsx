@@ -1,6 +1,7 @@
 import { IndexMain } from "../main.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { getTranslations, importPoliciesMDX } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
+import { importPoliciesMDX } from "@falling-nikochan/i18n/mdx";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.policies");

@@ -6,7 +6,7 @@ import {
   redirectApp,
   shareApp,
 } from "@falling-nikochan/route";
-import { locales } from "@falling-nikochan/i18n";
+import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import "core-js/features/string/replace-all";
 
 declare const self: ServiceWorkerGlobalScope;

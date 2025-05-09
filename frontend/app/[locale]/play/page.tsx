@@ -1,4 +1,4 @@
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import { InitPlay } from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 

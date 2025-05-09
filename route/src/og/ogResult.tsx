@@ -1,5 +1,5 @@
 import React from "react";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
   baseScoreRate,
   bigScoreRate,
