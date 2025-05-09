@@ -1,3 +1,12 @@
+## ver. 12.6 - 2025/05/10 [#573](https://github.com/na-trium-144/falling-nikochan/pull/562), [#563](https://github.com/na-trium-144/falling-nikochan/pull/573)
+
+* i18n/ のindex.jsをdynamicとstaticとmdxに分けた
+* core-jsを手動でimportせず、browserslistをもとにbabelに自動polyfillさせるよう設定
+    * ver11.33で手動追加したpolyfillは削除
+    * browserslistの設定はnext.jsの最低要件に合わせた
+* audioContextがない環境でエラーを出さないようにした(動作確認できないけど)
+* serviceworkerのcacheからttfを除外
+
 ## ver. 12.5 - 2025/05/09 [#572](https://github.com/na-trium-144/falling-nikochan/pull/562), [#563](https://github.com/na-trium-144/falling-nikochan/pull/572)
 
 * 検索結果をバックエンドは全て返すようにし、フロントエンドは24件以上の場合もっと表示ボタンを表示

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { getTranslations, locales } from "@falling-nikochan/i18n";
+import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic";
 import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
 export const backgroundColorLight = "#f0f9ff"; // sky-50

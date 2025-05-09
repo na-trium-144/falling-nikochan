@@ -30,9 +30,10 @@ export function useSE(cid: string | undefined, userOffset: number) {
   const offsetPlusLatency = userOffset - (enableSE ? audioLatency || 0 : 0);
   const setEnableSE = useCallback(
     (v: boolean) => {
-      setEnableSE_(v);
-      localStorage.setItem("enableSE", v ? "1" : "0");
-      if (!v) {
+      const enableSE = v && "AudioContext" in window;
+      setEnableSE_(enableSE);
+      localStorage.setItem("enableSE", enableSE ? "1" : "0");
+      if (!enableSE) {
         audioContext.current?.suspend();
       } else {
         audioContext.current?.resume();
@@ -41,46 +42,50 @@ export function useSE(cid: string | undefined, userOffset: number) {
     [audioContext],
   );
   useEffect(() => {
-    audioContext.current = new AudioContext();
-    const enableSEInitial =
-      localStorage.getItem("enableSE") === "1" ||
-      (localStorage.getItem("enableSE") == null &&
-        audioContext.current?.baseLatency !== undefined &&
-        audioContext.current?.outputLatency !== undefined);
-    if (enableSEInitial) {
-      setEnableSE_(true);
+    if ("AudioContext" in window) {
+      audioContext.current = new AudioContext();
+      const enableSEInitial =
+        localStorage.getItem("enableSE") === "1" ||
+        (localStorage.getItem("enableSE") == null &&
+          audioContext.current?.baseLatency !== undefined &&
+          audioContext.current?.outputLatency !== undefined);
+      if (enableSEInitial) {
+        setEnableSE_(true);
+      } else {
+        setEnableSE_(false);
+        audioContext.current?.suspend();
+      }
+      gainNode.current = audioContext.current.createGain();
+      const vol = Number(
+        localStorage.getItem(`seVolume-${cid}`) ||
+          localStorage.getItem("seVolume") ||
+          100,
+      );
+      setSEVolume_(vol);
+      gainNode.current.gain.value = vol / 100;
+      gainNode.current.connect(audioContext.current.destination);
+      (
+        [
+          ["hit", audioHit],
+          ["hitBig", audioHitBig],
+        ] as const
+      ).forEach(([name, audioBuffer]) =>
+        fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`)
+          .then((res) => res.arrayBuffer())
+          .then((aryBuf) => audioContext.current!.decodeAudioData(aryBuf))
+          .then((audio) => {
+            audioBuffer.current = audio;
+          }),
+      );
+      return () => {
+        gainNode.current?.disconnect();
+        gainNode.current = null;
+        audioContext.current?.close();
+        audioContext.current = null;
+      };
     } else {
       setEnableSE_(false);
-      audioContext.current?.suspend();
     }
-    gainNode.current = audioContext.current.createGain();
-    const vol = Number(
-      localStorage.getItem(`seVolume-${cid}`) ||
-        localStorage.getItem("seVolume") ||
-        100,
-    );
-    setSEVolume_(vol);
-    gainNode.current.gain.value = vol / 100;
-    gainNode.current.connect(audioContext.current.destination);
-    (
-      [
-        ["hit", audioHit],
-        ["hitBig", audioHitBig],
-      ] as const
-    ).forEach(([name, audioBuffer]) =>
-      fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`)
-        .then((res) => res.arrayBuffer())
-        .then((aryBuf) => audioContext.current!.decodeAudioData(aryBuf))
-        .then((audio) => {
-          audioBuffer.current = audio;
-        }),
-    );
-    return () => {
-      gainNode.current?.disconnect();
-      gainNode.current = null;
-      audioContext.current?.close();
-      audioContext.current = null;
-    };
   }, [cid]);
   useEffect(() => {
     // AudioContext初期化直後はLatencyとして0が返ってくるが、

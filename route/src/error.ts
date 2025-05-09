@@ -3,7 +3,7 @@ import { Bindings } from "./env.js";
 import { ValiError } from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 
 export function notFound(): Response {
   throw new HTTPException(404);
