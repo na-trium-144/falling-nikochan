@@ -4,12 +4,13 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import { popularDays } from "@falling-nikochan/chart";
+import { numLatest, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useShareModal } from "../shareModal.jsx";
 import { ChartLineBrief } from "../fetch.js";
 import Input from "@/common/input.jsx";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { titleWithSiteName } from "@/common/title.js";
 
 interface Props {
   locale: string;
@@ -20,7 +21,11 @@ export default function PlayTab(props: Props) {
   const t = useTranslations("main.play");
   const { locale } = props;
 
-  const { modal, openModal, openShareInternal } = useShareModal(locale, "play");
+  const { modal, openModal, openShareInternal } = useShareModal(
+    locale,
+    "play",
+    { noResetTitle: true },
+  );
 
   const [searchText, setSearchText_] = useState<string>("");
   const [searching, setSearching] = useState<boolean>(false);
@@ -29,74 +34,84 @@ export default function PlayTab(props: Props) {
   const [searchResult, setSearchResult] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >();
-  const setSearchText = useCallback((v: string) => {
-    setSearchText_(v);
-    if (abortSearching.current) {
-      abortSearching.current.abort();
-      abortSearching.current = null;
-    }
-    if (searchingTimeout.current) {
-      clearTimeout(searchingTimeout.current);
-      searchingTimeout.current = null;
-    }
-    if (!v) {
-      if (window.location.search.length > 2) {
-        window.history.back();
+  const [searchMaxRow, setSearchMaxRow] = useState<number>(numLatest);
+  const setSearchText = useCallback(
+    (v: string, noDelay?: boolean) => {
+      setSearchText_(v);
+      setSearchMaxRow(numLatest);
+      if (abortSearching.current) {
+        abortSearching.current.abort();
+        abortSearching.current = null;
       }
-      setSearching(false);
-      setSearchResult(undefined);
-    } else {
-      if (window.location.search.length < 2) {
-        window.history.pushState(null, "", `?search=${v}`);
-      } else {
-        window.history.replaceState(null, "", `?search=${v}`);
-      }
-      setSearching(true);
-      setSearchResult(undefined);
-      abortSearching.current = new AbortController();
-      searchingTimeout.current = setTimeout(() => {
+      if (searchingTimeout.current) {
+        clearTimeout(searchingTimeout.current);
         searchingTimeout.current = null;
-        if (abortSearching.current) {
-          fetch(process.env.BACKEND_PREFIX + `/api/search?q=${v}`, {
-            signal: abortSearching.current.signal,
-          })
-            .then(async (res) => {
-              if (res.ok) {
-                setSearchResult(
-                  (await res.json()).map((r: { cid: string }) => ({
-                    cid: r.cid,
-                    fetched: false,
-                  })),
-                );
-                setSearching(false);
-              } else {
-                try {
-                  setSearchResult({
-                    status: res.status,
-                    message: (await res.json()).message,
-                  });
-                } catch {
-                  setSearchResult({ status: res.status, message: "" });
-                }
-                setSearching(false);
-              }
-            })
-            .catch((e) => {
-              console.error(e);
-              setSearchResult({ status: null, message: "fetchError" });
-              setSearching(false);
-            });
+      }
+      if (!v) {
+        if (window.location.search.length > 2) {
+          window.history.back();
         }
-      }, 1000);
-    }
-  }, []);
+        setSearching(false);
+        setSearchResult(undefined);
+        document.title = titleWithSiteName(t("title"));
+      } else {
+        if (window.location.search.length < 2) {
+          window.history.pushState(null, "", `?search=${v}`);
+        } else {
+          window.history.replaceState(null, "", `?search=${v}`);
+        }
+        setSearching(true);
+        setSearchResult(undefined);
+        document.title = titleWithSiteName(t("searchTitle", { search: v }));
+        abortSearching.current = new AbortController();
+        searchingTimeout.current = setTimeout(
+          () => {
+            searchingTimeout.current = null;
+            if (abortSearching.current) {
+              fetch(process.env.BACKEND_PREFIX + `/api/search?q=${v}`, {
+                signal: abortSearching.current.signal,
+              })
+                .then(async (res) => {
+                  if (res.ok) {
+                    setSearchResult(
+                      (await res.json()).map((r: { cid: string }) => ({
+                        cid: r.cid,
+                        fetched: false,
+                      })),
+                    );
+                    setSearching(false);
+                  } else {
+                    try {
+                      setSearchResult({
+                        status: res.status,
+                        message: (await res.json()).message,
+                      });
+                    } catch {
+                      setSearchResult({ status: res.status, message: "" });
+                    }
+                    setSearching(false);
+                  }
+                })
+                .catch((e) => {
+                  console.error(e);
+                  setSearchResult({ status: null, message: "fetchError" });
+                  setSearching(false);
+                });
+            }
+          },
+          noDelay ? 0 : 1000,
+        );
+      }
+    },
+    [t],
+  );
 
   useEffect(() => {
     const handler = () => {
       if (window.location.pathname.includes("/main/play")) {
         const q = new URLSearchParams(window.location.search).get("search");
         if (q) {
-          setSearchText(q);
+          setSearchText(q, true);
         } else {
           setSearchText("");
         }
@@ -129,17 +144,20 @@ export default function PlayTab(props: Props) {
           />
         </h3>
         <p className="pl-2 mb-1 text-justify ">{t("searchDesc")}</p>
-        {(Array.isArray(searchResult) || searching) && (
+        {(searchResult || searching) && (
           <ChartList
-            briefs={Array.isArray(searchResult) ? searchResult : undefined}
+            briefs={searchResult}
             search
             creator
             href={(cid) => `/share/${cid}`}
             onClick={openModal}
             onClickMobile={openShareInternal}
             showLoading
-            fetchAll
-            moreHref={null}
+            maxRow={Math.min(
+              searchMaxRow,
+              Array.isArray(searchResult) ? searchResult.length : 0,
+            )}
+            onMoreClick={() => setSearchMaxRow((prev) => prev + numLatest)}
             badge
           />
         )}

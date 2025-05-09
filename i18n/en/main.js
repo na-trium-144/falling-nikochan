@@ -42,6 +42,7 @@ export default {
         "You can find songs from popular charts / latest charts / sample charts.",
       search: "Search",
       searchDesc: "Search by song title, composer, chart creator, etc.",
+      searchTitle: "Search results for {search}",
       recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
