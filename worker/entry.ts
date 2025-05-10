@@ -7,7 +7,6 @@ import {
   shareApp,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
-import "core-js/features/string/replace-all";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -85,13 +84,15 @@ async function initAssetsCache(config: {
     console.error("initAssetsCache: failed to fetch json");
     return false;
   }
-  const files = (await filesRes.json()).map((file: string) => {
-    let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
-    if (pathname.endsWith(".html")) {
-      pathname = pathname.slice(0, -5);
-    }
-    return pathname;
-  });
+  const files = ((await filesRes.json()) as string[])
+    .map((file) => {
+      let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
+      if (pathname.endsWith(".html")) {
+        pathname = pathname.slice(0, -5);
+      }
+      return pathname;
+    })
+    .filter((n) => !n.endsWith(".ttf"));
   // tmpCacheにデータを入れる
   let failed = false;
   await Promise.all(

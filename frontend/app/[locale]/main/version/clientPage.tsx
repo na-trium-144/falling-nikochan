@@ -19,7 +19,8 @@ export default function ChangelogPage(props: {
       mobileTabKey="links"
       locale={props.locale}
     >
-      <div className="mb-2">
+      <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
+      <p className="mb-2">
         <span className="inline-block">Falling Nikochan</span>
         <span className="inline-block">
           <span className="ml-2">ver.</span>
@@ -31,7 +32,10 @@ export default function ChangelogPage(props: {
         <span className="ml-2 text-sm inline-block">
           Build at {process.env.buildDate}.
         </span>
-      </div>
+      </p>
+      <p className="mb-3 text-justify">
+        {t("supportedBrowsers", { browserslist: process.env.browserslist! })}
+      </p>
       <h3 className="text-xl font-bold font-title">{t("changelog")}</h3>
       {props.changeLog}
     </IndexMain>

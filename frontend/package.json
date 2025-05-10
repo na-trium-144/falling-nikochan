@@ -1,8 +1,14 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "12.5.0",
+  "version": "12.7.0",
   "private": true,
   "type": "module",
+  "browserslist": [
+    "chrome 111",
+    "edge 111",
+    "safari 16.4",
+    "firefox 128"
+  ],
   "dependencies": {
     "@fontsource/kaisei-opti": "^5.2.5",
     "@fontsource/merriweather": "=5.2.5",
