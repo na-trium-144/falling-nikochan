@@ -96,12 +96,19 @@ export default {
       changelog: "Main Change Logs",
       description:
         "Version information and main change logs of Falling Nikochan.",
+      about: "About Falling Nikochan",
+      supportedBrowsers:
+        "Supported browsers are {browserslist}. " +
+        "Some parts may not function or display properly in earlier versions.",
     },
     links: {
       title: "Contact and Other Links",
       titleShort: "other",
       description: "Contact and other links of Falling Nikochan.",
       about: "About Falling Nikochan",
+      supportedBrowsers:
+        "Supported browsers are {browserslist}. " +
+        "Some parts may not function or display properly in earlier versions.",
       version: "Version Info",
       changelog: "Changelogs here",
       policies: "(Kind of) Terms of Use",

@@ -5,6 +5,7 @@
   "type": "module",
   "browserslist": [
     "chrome 111",
+    "edge 111",
     "safari 16.4",
     "firefox 128"
   ],

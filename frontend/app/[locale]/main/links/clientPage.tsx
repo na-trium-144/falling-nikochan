@@ -101,7 +101,7 @@ export default function LinksPage({ locale }: { locale: string }) {
         </div>
       </div>
       <PWAInstallDesc block className="mb-3 hidden main-wide:block" />
-      <div className="mb-3 main-wide:hidden ">
+      <div className="mb-3 ">
         <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
         <div className="ml-2 space-y-1">
           <p>
@@ -118,7 +118,10 @@ export default function LinksPage({ locale }: { locale: string }) {
               {t("changelog")}
             </Link>
           </p>
-          <p>
+      <p className="text-justify">
+        {t("supportedBrowsers", { browserslist: process.env.browserslist! })}
+      </p>
+          <p className="main-wide:hidden ">
             <Link
               className={linkStyle3}
               href={`/${locale}/main/policies`}
@@ -188,12 +191,9 @@ function EMailImg() {
   return (
     <span
       className="inline-block align-middle origin-top-left "
-      style={{ height: 69.68 / 48 * 0.75 + "rem" }}
+      style={{ height: (69.68 / 48) * 0.75 + "rem" }}
     >
-      <svg
-        height="100%"
-        viewBox="0 0 241.18156 18.440395"
-      >
+      <svg height="100%" viewBox="0 0 241.18156 18.440395">
         <defs id="defs1" />
         <g id="layer1" transform="translate(-49.20535,-109.45489)">
           <path
