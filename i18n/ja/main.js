@@ -98,12 +98,19 @@ export default {
       title: "バージョン情報",
       changelog: "主な更新履歴",
       description: "Falling Nikochan のバージョン情報 / 主な更新履歴です。",
+      about: "Falling Nikochan について",
+      supportedBrowsers:
+        "対応ブラウザは {browserslist} です。" +
+        "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
     },
     links: {
       title: "お問い合わせ先・その他リンク",
       titleShort: "その他",
       description: "Falling Nikochan のお問い合わせ先・その他リンクです。",
       about: "Falling Nikochan について",
+      supportedBrowsers:
+        "対応ブラウザは {browserslist} です。" +
+        "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
       version: "バージョン",
       changelog: "更新履歴はこちら",
       policies: "利用規約っぽいもの",
