@@ -1,3 +1,8 @@
+## ver. 12.7 - 2025/05/10 [#574](https://github.com/na-trium-144/falling-nikochan/pull/574)
+
+* browserslistをtailwindの対応バージョンに合わせる
+* 対応ブラウザリストの表示を追加
+
 ## ver. 12.6 - 2025/05/10 [#573](https://github.com/na-trium-144/falling-nikochan/pull/573)
 
 * i18n/ のindex.jsをdynamicとstaticとmdxに分けた
