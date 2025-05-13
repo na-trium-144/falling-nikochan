@@ -148,6 +148,17 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 404 for nonexistent cid", async () => {
     await initDb();
+    const res = await app.request("/api/chartFile/100002?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+    });
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body).toStrictEqual({ message: "chartIdNotFound" });
+  });
+  test("should return 404 for deleted cid", async () => {
+    await initDb();
     const res = await app.request("/api/chartFile/100001?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
