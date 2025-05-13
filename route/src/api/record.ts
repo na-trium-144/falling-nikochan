@@ -27,7 +27,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const db = client.db("nikochan");
       const records = db
         .collection<PlayRecordEntry>("playRecord")
-        .find({ cid });
+        .find({ cid, deleted: false })
       const summary: RecordGetSummary[] = [];
       for await (const record of records) {
         let s = summary.find((s) => s.lvHash === record.lvHash);

@@ -35,13 +35,14 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             .collection<ChartEntryCompressed>("chart")
             .find({
               $or: [
-                { cid: q, published: true },
+                { cid: q, published: true, deleted: false },
                 {
                   $and: [
                     ...normalizedQueries.map((s) => ({
                       normalizedText: { $regex: s },
                     })),
                     { published: true },
+                    { deleted: false },
                   ],
                 },
               ],
