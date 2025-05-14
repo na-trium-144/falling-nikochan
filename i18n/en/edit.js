@@ -211,6 +211,8 @@ export default {
       levelAdd: "Add",
       levelDuplicate: "Duplicate",
       levelDelete: "Delete",
+      deleteConfirm:
+        "Are you sure you want to delete this level?\nThis action cannot be undone.",
       unlisted: "(Unlisted)",
       levelName: "Level name",
       difficulty: "Difficulty",

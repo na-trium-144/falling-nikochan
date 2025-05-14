@@ -197,6 +197,7 @@ export default {
       levelAdd: "追加",
       levelDuplicate: "コピーを作成",
       levelDelete: "削除",
+      deleteConfirm: "このレベルを削除しますか?\nこの操作は取り消せません。",
       unlisted: "(非表示)",
       levelName: "レベル名",
       difficulty: "難易度",
