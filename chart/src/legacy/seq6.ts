@@ -173,7 +173,7 @@ export function displayNote6(
   note: Note6,
   timeSec: number
 ): DisplayNote6 | null {
-  if (timeSec - note.hitTimeSec > 0.5) {
+  if (timeSec - note.hitTimeSec > 1.0) {
     return null;
   } else if (note.done >= 1 && note.done <= 3) {
     return {
