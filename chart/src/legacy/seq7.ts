@@ -19,7 +19,6 @@ export interface Note7 {
   bigDone: boolean;
   hitTimeSec: number;
   appearTimeSec: number;
-  appeared: boolean;
   targetX: number;
   vx: number;
   vy: number;
@@ -48,7 +47,6 @@ export interface DisplayParam7 {
 export interface DisplayNote7 {
   id: number;
   pos: Pos;
-  appeared: boolean;
   done: number;
   bigDone: boolean;
   baseScore?: number;
@@ -67,7 +65,6 @@ export function displayNote7(
     return {
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
-      appeared: note.appeared,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -94,7 +91,6 @@ export function displayNote7(
         x: note.targetX + note.vx * u,
         y: note.vy * u - (note.ay * u * u) / 2,
       },
-      appeared: note.appeared,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,

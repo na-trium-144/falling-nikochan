@@ -30,7 +30,6 @@ export interface Note6 {
   bigDone: boolean;
   hitTimeSec: number;
   appearTimeSec: number;
-  appeared: boolean;
   targetX: number;
   hitPos?: Pos;
   done: number;
@@ -56,7 +55,6 @@ interface DisplayParam6 {
 export interface DisplayNote6 {
   id: number;
   pos: Pos;
-  appeared: boolean;
   done: number;
   bigDone: boolean;
   baseScore?: number;
@@ -97,7 +95,7 @@ export function loadChart6(
     const display: DisplayParam6[] = [];
     let tBegin = hitTimeSec;
     // noteCommandの座標系 (-5<=x<=5) から
-    // displayの座標系に変換するのもここでやる
+    //  displayの座標系に変換するのもここでやる
     let x = (c.hitX + 5) / 10;
     const targetX = x;
     let y = 0;
@@ -105,7 +103,6 @@ export function loadChart6(
     let vy = c.hitVY;
     const ay = 1;
     let appearTimeSec = hitTimeSec;
-    let appeared = false;
     for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
       const ts = level.speedChanges[ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
@@ -162,7 +159,6 @@ export function loadChart6(
       big: c.big,
       hitTimeSec,
       appearTimeSec,
-      appeared,
       done: 0,
       bigDone: false,
       display,
@@ -187,7 +183,6 @@ export function displayNote6(
     return {
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
-      appeared: note.appeared,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -213,7 +208,6 @@ export function displayNote6(
         x: a[0] + a[1] * t,
         y: b[0] + b[1] * t + b[2] * t * t,
       },
-      appeared: note.appeared,
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
