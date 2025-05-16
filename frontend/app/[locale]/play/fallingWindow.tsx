@@ -195,13 +195,36 @@ function Nikochan(props: NProps) {
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
 
+  const [enableFadeIn, setEnableFadeIn] = useState<boolean>(true);
+  const [appeared, setAppeared] = useState<boolean>(false);
+  useEffect(() => {
+    const x = displayNote.pos.x * boxSize + marginX;
+    const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
+    const size = noteSize * bigScale(note.big);
+    const isOffScreen =
+      x + size / 2 < 0 ||
+      x - size / 2 > window.innerWidth ||
+      y - size / 2 > boxSize ||
+      y + size / 2 < 0;
+    if (isOffScreen) {
+      setEnableFadeIn(false);
+    } else {
+      // set appeared after rendering next frame to ensure fade transition
+      requestAnimationFrame(() => setAppeared(true));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <>
       <div
         className={
           "absolute " +
           (displayNote.done === 0
-            ? ""
+            ? enableFadeIn
+              ? appeared
+                ? "transition ease-linear duration-100 opacity-100"
+                : "opacity-0"
+              : "opacity-100"
             : displayNote.done === 1
               ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
               : displayNote.done === 2
