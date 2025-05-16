@@ -88,8 +88,25 @@ export default function FallingWindow(props: Props) {
       boxSize &&
       now !== undefined
     ) {
+      // set appeared after rendering next frame to ensure fade transition
+      displayNotes.current = displayNotes.current.map((n) => {
+        if (!n.appeared) n.appeared = true;
+        return n;
+      });
+      // filter notes to appear at current time
       displayNotes.current = notes
-        .map((n) => (n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)))
+        .map((n) => {
+          const prev = displayNotes.current.find((d) => d.id === n.id);
+
+          const updated =
+            n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now);
+          if (!updated) return null;
+
+          return {
+            ...updated,
+            appeared: prev?.appeared || false,
+          };
+        })
         .filter((n) => n !== null);
     } else {
       displayNotes.current = [];
@@ -201,7 +218,9 @@ function Nikochan(props: NProps) {
         className={
           "absolute " +
           (displayNote.done === 0
-            ? ""
+            ? displayNote.appeared
+              ? "transition ease-linear duration-200 opacity-100"
+              : "opacity-0"
             : displayNote.done === 1
               ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
               : displayNote.done === 2

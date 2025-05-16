@@ -71,6 +71,7 @@ export function loadChart11(level: Level11Play): ChartSeqData11 {
     }
 
     let appearTimeSec: number | null = null;
+    let appeared: boolean = false;
     for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
       const ts = level.speedChanges[ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
@@ -118,6 +119,7 @@ export function loadChart11(level: Level11Play): ChartSeqData11 {
       big: c.big,
       hitTimeSec,
       appearTimeSec,
+      appeared,
       done: 0,
       bigDone: false,
       display,
