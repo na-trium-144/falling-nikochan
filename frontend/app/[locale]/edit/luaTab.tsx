@@ -6,7 +6,7 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/mode-lua";
 import "ace-builds/src-min-noconflict/snippets/lua";
-import 'ace-builds/src-min-noconflict/ext-searchbox';
+import "ace-builds/src-min-noconflict/ext-searchbox";
 import {
   createContext,
   ReactNode,
@@ -35,7 +35,7 @@ export function useLuaExecutor() {
   const [running, setRunning] = useState<boolean>(false);
   const worker = useRef<Worker | null>(null);
   const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
-    null
+    null,
   );
 
   const abortExec = useCallback(() => {
@@ -80,11 +80,11 @@ export function useLuaExecutor() {
           } else {
             console.error("luaExecWorker finished but resolver is null");
           }
-        }
+        },
       );
       return p;
     },
-    [abortExec]
+    [abortExec],
   );
   return { stdout, err, errLine, running, exec, abortExec };
 }
@@ -246,7 +246,9 @@ export function LuaTabProvider(props: PProps) {
   );
 }
 
-export function LuaTabPlaceholder(props: Props) {
+export function LuaTabPlaceholder(
+  props: Props & { parentContainer: HTMLDivElement | null },
+) {
   const { ref } = useResizeDetector();
   const {
     visible,
@@ -258,6 +260,7 @@ export function LuaTabPlaceholder(props: Props) {
     seekStepAbs,
     errLine,
     err,
+    parentContainer,
   } = props;
   const { setData } = useContext(LuaPositionContext);
   useEffect(() => {
@@ -283,10 +286,10 @@ export function LuaTabPlaceholder(props: Props) {
     };
     onScroll();
     window.addEventListener("resize", onScroll);
-    // window.addEventListener("scroll", onScroll);
+    parentContainer?.addEventListener("scroll", onScroll);
     return () => {
       window.removeEventListener("resize", onScroll);
-      // window.removeEventListener("scroll", onScroll);
+      parentContainer?.removeEventListener("scroll", onScroll);
     };
   }, [
     visible,
@@ -300,6 +303,7 @@ export function LuaTabPlaceholder(props: Props) {
     setData,
     errLine,
     err,
+    parentContainer,
   ]);
   return <div ref={ref} className="absolute inset-3 -z-10 " />;
 }
