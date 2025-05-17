@@ -64,8 +64,8 @@ export async function getChartEntry(
   }
   const entryCompressed = await db
     .collection<ChartEntryCompressed>("chart")
-    .findOne({ cid });
-  if (entryCompressed === null || entryCompressed.deleted) {
+    .findOne({ cid, deleted: false });
+  if (entryCompressed === null) {
     if (process.env.API_ENV === "development" && isSample(cid)) {
       const chart = getSample(cid);
       return {

@@ -83,7 +83,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
             { cid },
             {
               $set: {
-                levelsCompressed: null,
+                // levelsCompressed: null,
                 deleted: true,
               },
             },

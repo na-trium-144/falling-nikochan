@@ -17,15 +17,24 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         playedAt: { $gt: Date.now() - 1000 * 60 * 60 * 24 * popularDays },
       });
       const cidCounts: { cid: string; count: number }[] = [];
+      const chartEntries = new Map<string, ChartLevelBrief[] | undefined>();
       for await (const record of records) {
-        const b = await db
-          .collection<ChartEntryCompressed>("chart")
-          .find({ cid: record.cid, published: true })
-          .project<{
-            levelBrief: ChartLevelBrief[];
-          }>({ _id: 0, levelBrief: true })
-          .next();
-        if (b && b.levelBrief.find((l) => l.hash === record.lvHash)) {
+        let lb: ChartLevelBrief[] | undefined;
+        if (chartEntries.has(record.cid)) {
+          lb = chartEntries.get(record.cid);
+        } else {
+          lb = (
+            await db
+              .collection<ChartEntryCompressed>("chart")
+              .find({ cid: record.cid, published: true, deleted: false })
+              .project<{
+                levelBrief: ChartLevelBrief[];
+              }>({ _id: 0, levelBrief: true })
+              .next()
+          )?.levelBrief;
+          chartEntries.set(record.cid, lb);
+        }
+        if (lb && lb.find((l) => l.hash === record.lvHash)) {
           const cidCount = cidCounts.find((c) => c.cid === record.cid);
           if (cidCount) {
             cidCount.count++;

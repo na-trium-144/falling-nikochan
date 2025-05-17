@@ -293,6 +293,45 @@ export function MetaTab(props: Props2) {
     props.chart!.changePasswd = null;
     setSaving(false);
   };
+  const deleteChart = async () => {
+    while (true) {
+      const m = window.prompt(t("confirmDelete", { cid: props.cid! }));
+      if (m === null) {
+        return;
+      }
+      if (m === props.cid) {
+        break;
+      }
+    }
+    const q = new URLSearchParams();
+    if (props.currentPasswd.current) {
+      q.set("p", props.currentPasswd.current);
+    } else if (getPasswd(props.cid!)) {
+      q.set("ph", getPasswd(props.cid!)!);
+    }
+    try {
+      const res = await fetch(
+        process.env.BACKEND_PREFIX +
+          `/api/chartFile/${props.cid}?` +
+          q.toString(),
+        {
+          method: "DELETE",
+          cache: "no-store",
+          credentials:
+            process.env.NODE_ENV === "development" ? "include" : "same-origin",
+        },
+      );
+      if (res.ok) {
+        if (isStandalone()) {
+          history.back();
+        } else {
+          window.close();
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   const downloadExtension = `fn${props.chart?.ver}.yml`;
   const download = () => {
     const yml = YAML.stringify(convertToMin(props.chart!), {
@@ -487,6 +526,13 @@ export function MetaTab(props: Props2) {
               ? t("publishFail.empty")
               : null}
         </span>
+      </p>
+      <p>
+        <Button
+          text={t("deleteFromServer")}
+          onClick={deleteChart}
+          disabled={!props.cid}
+        />
       </p>
 
       <div className="mb-4">
