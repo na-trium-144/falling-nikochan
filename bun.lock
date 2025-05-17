@@ -30,7 +30,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.7.0",
+      "version": "12.9.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -39,7 +39,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.7.0",
+      "version": "12.9.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -64,20 +64,20 @@
         "@types/mdx": "^2.0.13",
         "dotenv": "^16.4.7",
         "postcss": "^8.5.3",
-        "tailwindcss": "^4.1.5",
+        "tailwindcss": "^4.1.7",
         "woff2sfnt-sfnt2woff": "^1.0.0",
       },
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.7.0",
+      "version": "12.9.0",
       "dependencies": {
         "next-intl": "^4.0.2",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.7.0",
+      "version": "12.9.0",
       "dependencies": {
         "@hono/node-server": "^1.14.1",
         "@vercel/og": "^0.6.8",
@@ -95,7 +95,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.7.0",
+      "version": "12.9.0",
     },
   },
   "overrides": {
@@ -1619,7 +1619,7 @@
 
     "supports-preserve-symlinks-flag": ["supports-preserve-symlinks-flag@1.0.0", "", {}, "sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w=="],
 
-    "tailwindcss": ["tailwindcss@4.1.5", "", {}, "sha512-nYtSPfWGDiWgCkwQG/m+aX83XCwf62sBgg3bIlNiiOcggnS1x3uVRDAuyelBFL+vJdOPPCGElxv9DjHJjRHiVA=="],
+    "tailwindcss": ["tailwindcss@4.1.7", "", {}, "sha512-kr1o/ErIdNhTz8uzAYL7TpaUuzKIE6QPQ4qmSdxnoX/lo+5wmUHQA6h3L5yIqEImSRnAAURDirLu/BgiXGPAhg=="],
 
     "tapable": ["tapable@2.2.1", "", {}, "sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ=="],
 
