@@ -572,8 +572,13 @@ function Page(props: Props) {
 
   // currentTimeが変わったときcurrentStepを更新
   const prevTimeSec = useRef<number>(-1);
+  const prevSnapDivider = useRef<number>(-1);
   useEffect(() => {
-    if (currentLevel && currentTimeSec !== prevTimeSec.current) {
+    if (
+      currentLevel &&
+      (currentTimeSec !== prevTimeSec.current ||
+        snapDivider !== prevSnapDivider.current)
+    ) {
       const step = getStep(
         currentLevel.bpmChanges,
         currentTimeSec,
@@ -611,6 +616,7 @@ function Page(props: Props) {
       }
     }
     prevTimeSec.current = currentTimeSec;
+    prevSnapDivider.current = snapDivider;
   }, [
     currentLevel,
     snapDivider,

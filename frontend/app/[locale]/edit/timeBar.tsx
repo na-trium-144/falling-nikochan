@@ -77,15 +77,6 @@ export default function TimeBar(props: Props) {
       const timeBarBeginSec =
         currentTimeSecWithoutOffset - marginPxLeft / timeBarPxPerSec;
       setTimeBarBeginSec(timeBarBeginSec);
-      if (chart && currentLevel) {
-        setTimeBarBeginStep(
-          getStep(
-            currentLevel.bpmChanges,
-            timeBarBeginSec - chart.offset,
-            snapDivider
-          )
-        );
-      }
     } else if (
       currentTimeSecWithoutOffset - timeBarBeginSec >
       (timeBarWidth - marginPxRight) / timeBarPxPerSec
@@ -94,15 +85,15 @@ export default function TimeBar(props: Props) {
         currentTimeSecWithoutOffset -
         (timeBarWidth - marginPxRight) / timeBarPxPerSec;
       setTimeBarBeginSec(timeBarBeginSec);
-      if (chart && currentLevel) {
-        setTimeBarBeginStep(
-          getStep(
-            currentLevel.bpmChanges,
-            timeBarBeginSec - chart.offset,
-            snapDivider
-          )
-        );
-      }
+    }
+    if (chart && currentLevel) {
+      setTimeBarBeginStep(
+        getStep(
+          currentLevel.bpmChanges,
+          timeBarBeginSec - chart.offset,
+          snapDivider
+        )
+      );
     }
   }, [
     currentTimeSecWithoutOffset,
