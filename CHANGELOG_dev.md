@@ -1,3 +1,7 @@
+## ver. 12.12 - 2025/05/18 [#607](https://github.com/na-trium-144/falling-nikochan/pull/607)
+
+* briefCacheをlocalStorageからcacheStorageに移す
+
 ## ver. 12.11 - 2025/05/18 [#606](https://github.com/na-trium-144/falling-nikochan/pull/606)
 
 * ReactAceのsearchBoxを有効化

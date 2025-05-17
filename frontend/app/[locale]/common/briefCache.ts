@@ -1,8 +1,9 @@
 import { ChartBrief } from "@falling-nikochan/chart";
 
-function briefKey(cid: string) {
+function briefKeyOld(cid: string) {
   return "brief-" + cid;
 }
+const briefCacheName = "brief1";
 
 export async function fetchBrief(
   cid: string,
@@ -11,14 +12,30 @@ export async function fetchBrief(
   const fetchRes = fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
     cache: noCache ? "no-store" : "default",
   });
-  const stale = localStorage.getItem(briefKey(cid));
+  const cache = await window.caches.open(briefCacheName);
+  window.caches
+    .keys()
+    .then((keys) =>
+      keys
+        .filter((k) => k.startsWith("brief") && k !== briefCacheName)
+        .forEach((k) => window.caches.delete(k)),
+    );
+  const staleLS = localStorage.getItem(briefKeyOld(cid));
+  if (staleLS) {
+    cache.put(`/api/brief/${cid}`, new Response(staleLS));
+    localStorage.removeItem(briefKeyOld(cid));
+  }
+  const stale =
+    staleLS ||
+    (await cache.match(`/api/brief/${cid}`).then((res) => res?.text()));
   if (stale && !noCache) {
     fetchRes
       .then(async (res) => {
         if (res.ok) {
-          localStorage.setItem(briefKey(cid), await res.text());
+          cache.put(`/api/brief/${cid}`, res);
         } else if (res.status == 404) {
-          localStorage.removeItem(briefKey(cid));
+          cache.delete(`/api/brief/${cid}`);
+          localStorage.removeItem(briefKeyOld(cid));
         }
       })
       .catch(() => undefined);
@@ -31,8 +48,8 @@ export async function fetchBrief(
     try {
       const res = await fetchRes;
       if (res.ok) {
+        cache.put(`/api/brief/${cid}`, res.clone());
         const brief = (await res.json()) as ChartBrief;
-        localStorage.setItem(briefKey(cid), JSON.stringify(brief));
         return {
           brief,
           ok: true,
@@ -40,7 +57,8 @@ export async function fetchBrief(
         };
       } else {
         if (res.status == 404) {
-          localStorage.removeItem(briefKey(cid));
+          cache.delete(`/api/brief/${cid}`);
+          localStorage.removeItem(briefKeyOld(cid));
         }
         return { ok: false, is404: res.status == 404 };
       }

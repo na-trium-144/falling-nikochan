@@ -27,7 +27,9 @@ async function clearOldCaches() {
       Promise.all(
         keys
           .filter(
-            (k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k),
+            (k) =>
+              ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
+              !k.startsWith("brief"), // used in @/common/briefCache
           )
           .map((k) => caches.delete(k)),
       ),
