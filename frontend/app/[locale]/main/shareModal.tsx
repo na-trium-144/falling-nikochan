@@ -8,7 +8,13 @@ import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { ShareInternalSession } from "./shareInternal/clientPage";
 
-export function useShareModal(locale: string, from: "play" | "top") {
+export function useShareModal(
+  locale: string,
+  from: "play" | "top",
+  config?: {
+    noResetTitle?: boolean;
+  },
+) {
   const th = useTranslations("share");
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
@@ -26,7 +32,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
       }
       setModalBrief(null);
       setModalCId(cid);
-      document.title = titleShare(th, cid);
+      // document.title = titleShare(th, cid);
       fetchBrief(cid).then((res) => {
         if (res.ok) {
           setModalBrief(res.brief!);
@@ -46,7 +52,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
         .catch(() => setModalRecord([]));
       setTimeout(() => setModalAppearing(true));
     },
-    [th]
+    [th],
   );
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
@@ -56,12 +62,12 @@ export function useShareModal(locale: string, from: "play" | "top") {
           JSON.stringify({
             cid,
             fromPlay: from === "play",
-          } satisfies ShareInternalSession)
+          } satisfies ShareInternalSession),
         );
         router.push(`/${locale}/main/shareInternal`);
       }
     },
-    [locale, from, router]
+    [locale, from, router],
   );
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
@@ -72,13 +78,15 @@ export function useShareModal(locale: string, from: "play" | "top") {
         openModal(cid);
       } else {
         setModalAppearing(false);
-        switch (from) {
-          case "play":
-            document.title = titleWithSiteName(tp("title"));
-            break;
-          case "top":
-            document.title = titleWithSiteName("");
-            break;
+        if (!config?.noResetTitle) {
+          switch (from) {
+            case "play":
+              document.title = titleWithSiteName(tp("title"));
+              break;
+            case "top":
+              document.title = titleWithSiteName("");
+              break;
+          }
         }
         setTimeout(() => {
           setModalCId(null);
@@ -88,7 +96,7 @@ export function useShareModal(locale: string, from: "play" | "top") {
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, [openModal, from, tp]);
+  }, [openModal, from, tp, config?.noResetTitle]);
 
   const modal: ReactNode = modalCId && modalBrief && (
     <div

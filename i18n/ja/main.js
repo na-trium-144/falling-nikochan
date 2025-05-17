@@ -44,6 +44,7 @@ export default {
         "人気の譜面 / 新着譜面 / サンプル譜面 から曲を探すことができます。",
       search: "検索",
       searchDesc: "曲名や作曲者、譜面製作者などから検索します。",
+      searchTitle: "{search} の検索結果",
       recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
@@ -97,12 +98,19 @@ export default {
       title: "バージョン情報",
       changelog: "主な更新履歴",
       description: "Falling Nikochan のバージョン情報 / 主な更新履歴です。",
+      about: "Falling Nikochan について",
+      supportedBrowsers:
+        "対応ブラウザは {browserslist} です。" +
+        "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
     },
     links: {
       title: "お問い合わせ先・その他リンク",
       titleShort: "その他",
       description: "Falling Nikochan のお問い合わせ先・その他リンクです。",
       about: "Falling Nikochan について",
+      supportedBrowsers:
+        "対応ブラウザは {browserslist} です。" +
+        "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
       version: "バージョン",
       changelog: "更新履歴はこちら",
       policies: "利用規約っぽいもの",

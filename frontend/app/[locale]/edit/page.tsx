@@ -1,6 +1,7 @@
 import EditAuth from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { getTranslations, importGuideMDX } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
+import { importGuideMDX } from "@falling-nikochan/i18n/mdx";
 import { FC, ReactNode } from "react";
 
 export async function generateMetadata({ params }: MetadataProps) {

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { getTranslations, locales } from "@falling-nikochan/i18n";
+import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic";
 import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
 export const backgroundColorLight = "#f0f9ff"; // sky-50
@@ -16,10 +16,11 @@ export function initViewport(): Viewport {
   };
 }
 
+export const originURL = new URL("https://nikochan.utcode.net");
+
 export interface MetadataProps {
   params: Promise<{ locale: string }>;
 }
-
 export async function initMetadata(
   params: Promise<{ locale?: string }>,
   path: string | null,
@@ -39,7 +40,7 @@ export async function initMetadata(
   const imageUrl =
     options?.image || process.env.ASSET_PREFIX + "/assets/ogTemplateTitle.png";
   return {
-    metadataBase: new URL("https://nikochan.utcode.net"),
+    metadataBase: originURL,
     title: titleWithSiteName(title),
     alternates: path
       ? {

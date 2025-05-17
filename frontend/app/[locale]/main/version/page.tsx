@@ -1,4 +1,5 @@
-import { getTranslations, importChangeLogMDX } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
+import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx";
 import ChangelogPage from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 

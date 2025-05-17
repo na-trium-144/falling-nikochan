@@ -5,14 +5,17 @@ import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const config = {
-  entry: "./entry.ts",
+  entry: "./dist/entry.js",
+  target: "browserslist",
   mode: process.env.API_ENV === "development" ? "development" : "production",
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        test: /\.js$/,
+        exclude: /core-js/,
+        use: {
+          loader: "babel-loader",
+        },
       },
     ],
   },
@@ -38,7 +41,8 @@ const config = {
       "@ygoe/msgpack": false,
       wasmoon: false,
       "@falling-nikochan/chart": false,
-      "@falling-nikochan/i18n": "@falling-nikochan/i18n/staticImport.js",
+      "@falling-nikochan/i18n/dynamic.js":
+        "@falling-nikochan/i18n/staticMin.js",
       "./api/app.js": false,
       "./og/app.js": false,
       "./sitemap.js": false,

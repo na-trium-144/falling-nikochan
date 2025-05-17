@@ -1,6 +1,6 @@
 import { levelTypes } from "@falling-nikochan/chart";
 import { levelColors } from "@/common/levelColors";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 
 interface Props {
   locale: string;

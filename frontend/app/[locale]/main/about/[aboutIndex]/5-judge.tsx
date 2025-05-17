@@ -9,7 +9,7 @@ import {
   okSec,
   rankStr,
 } from "@falling-nikochan/chart";
-import { getTranslations } from "@falling-nikochan/i18n";
+import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { JudgeIcon } from "@/play/statusBox.js";
 
 interface Props {
