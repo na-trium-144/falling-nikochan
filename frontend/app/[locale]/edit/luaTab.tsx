@@ -6,6 +6,7 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/mode-lua";
 import "ace-builds/src-min-noconflict/snippets/lua";
+import 'ace-builds/src-min-noconflict/ext-searchbox';
 import {
   createContext,
   ReactNode,
