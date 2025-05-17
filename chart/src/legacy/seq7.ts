@@ -1,12 +1,21 @@
 import { Pos } from "../seq.js";
 
 /**
- * ゲーム中で使用する音符の管理
- * id: 通し番号
- * hitTimeSec: 判定時刻
- * appearTimeSec: 画面に表示し始める時刻
- * display: 現在時刻→画面上の位置
- * done: 判定結果 0:まだ 1:Good 2:OK 3:bad 4:miss
+ * Note properties used in-game | ゲーム中で使用する音符の管理
+ * --------------------------------------------------------
+ * id: unique number | 通し番号
+ * big: whether the note is big | 大音符
+ * bigDone: whether the note has been judged | 判定済みかどうか
+ * hitTimeSec: hit judgement time | 判定時刻
+ * appearTimeSec: when note starts appearing | 画面に表示し始める時刻
+ * targetX: 0.0 - 1.0  (1 / 10 of NoteCommand.x)
+ * vx: 1 / 4 of NoteCommand.vx
+ * vy: 1 / 4 of NoteCommand.vy
+ * ay: ??
+ * display: used for calculation of position | 画面上の位置の計算に使う
+ * hitPos: position of the note when hit | 判定時の位置
+ * done: judgement result | 判定結果
+ *   0:NotYet 1:Good 2:OK 3:bad 4:miss
  */
 export interface Note7 {
   ver: 7;
@@ -55,7 +64,7 @@ export function displayNote7(
   note: Note7,
   timeSec: number
 ): DisplayNote7 | null {
-  if (timeSec - note.hitTimeSec > 0.5) {
+  if (timeSec - note.hitTimeSec > 1.0) {
     return null;
   } else if (note.done >= 1 && note.done <= 3) {
     return {
