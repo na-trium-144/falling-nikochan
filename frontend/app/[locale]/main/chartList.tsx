@@ -178,7 +178,6 @@ export function ChartList(props: Props) {
     : props.maxRow !== undefined
       ? props.maxRow
       : chartListMaxRow;
-  console.log(props.maxRow);
   const fetching =
     briefs === undefined ||
     (Array.isArray(briefs) &&

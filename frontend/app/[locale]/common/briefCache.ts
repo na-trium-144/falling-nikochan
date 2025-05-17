@@ -28,7 +28,6 @@ export async function fetchBrief(
   const stale =
     staleLS ||
     (await cache.match(`/api/brief/${cid}`).then((res) => res?.text()));
-  console.log(`fetching ${cid}: staleLS=${!!staleLS}, stale=${!!stale}`);
   if (stale && !noCache) {
     fetchRes
       .then(async (res) => {
