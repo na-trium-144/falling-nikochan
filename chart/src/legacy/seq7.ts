@@ -3,14 +3,19 @@ import { Pos } from "../seq.js";
 /**
  * Note properties used in-game | ゲーム中で使用する音符の管理
  * --------------------------------------------------------
- * id:            unique number                      | 通し番号
- * hitTimeSec:    hit judgement time                 | 判定時刻
- * appearTimeSec: when note starts appearing         | 画面に表示し始める時刻
- * appeared:      whether the note has appeared      | 表示済み
- * display:       function: current time -> position | 現在時刻→画面上の位置
- * done:          judgement result                   | 判定結果
- *                    vvvv
- *        0:NotYet 1:Good 2:OK 3:bad 4:miss
+ * id: unique number | 通し番号
+ * big: whether the note is big | 大音符
+ * bigDone: whether the note has been judged | 判定済みかどうか
+ * hitTimeSec: hit judgement time | 判定時刻
+ * appearTimeSec: when note starts appearing | 画面に表示し始める時刻
+ * targetX: 0.0 - 1.0  (1 / 10 of NoteCommand.x)
+ * vx: 1 / 4 of NoteCommand.vx
+ * vy: 1 / 4 of NoteCommand.vy
+ * ay: ??
+ * display: used for calculation of position | 画面上の位置の計算に使う
+ * hitPos: position of the note when hit | 判定時の位置
+ * done: judgement result | 判定結果
+ *   0:NotYet 1:Good 2:OK 3:bad 4:miss
  */
 export interface Note7 {
   ver: 7;

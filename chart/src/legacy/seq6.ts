@@ -12,16 +12,7 @@ export interface ChartSeqData6 {
 }
 
 /**
- * Note properties used in-game | ゲーム中で使用する音符の管理
- * --------------------------------------------------------
- * id:            unique number                      | 通し番号
- * hitTimeSec:    hit judgement time                 | 判定時刻
- * appearTimeSec: when note starts appearing         | 画面に表示し始める時刻
- * appeared:      whether the note has appeared      | 表示済み
- * display:       function: current time -> position | 現在時刻→画面上の位置
- * done:          judgement result                   | 判定結果
- *                    vvvv
- *        0:NotYet 1:Good 2:OK 3:bad 4:miss
+ * see seq7.ts
  */
 export interface Note6 {
   ver: 6;
