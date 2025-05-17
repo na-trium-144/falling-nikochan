@@ -36,7 +36,7 @@
     "@babel/preset-env": "^7.27.2",
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.26.0",
-    "@types/bun": "^1.2.12",
+    "@types/bun": "^1.2.13",
     "@types/node": "^22.15.9",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.3",
