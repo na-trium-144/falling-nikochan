@@ -13,6 +13,8 @@ import { CautionIcon } from "@/common/mdxIcons";
 - コードタブで`Note()`などの各種コマンドにカーソルを合わせると、タイムバーもその音符に対応する時刻に移動します。
 - 行番号の横の <CautionIcon /> はタイムバーのカーソル位置に対応する行、
 <span className="text-sm align-middle">i</span> はそれぞれの小節線に対応する行を表しています。
+- Ctrl+F (⌘+F) で検索・置き換えができます。
+置き換えは Ctrl+R ではないので注意してください。(ページをリロードしてしまいます)
 - Falling Nikochan 特有のコマンドは以下の通りです。
   - `Note(x, vx, vy, big, fall)`: 音符を置きます。
     - x, vx, vy は数値、big, fall は`true`または`false`を指定してください。
