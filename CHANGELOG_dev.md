@@ -1,3 +1,13 @@
+## ver. 12.9 - 2025/05/17 [#593](https://github.com/na-trium-144/falling-nikochan/pull/593)
+
+* 音符に100msフェードインと200msのフェードアウトを追加
+
+## ver. 12.8 - 2025/05/17 [#593](https://github.com/na-trium-144/falling-nikochan/pull/593)
+
+* /api/popular のdb呼び出しを効率化
+* 譜面削除ボタン追加
+* レベルの削除時にも確認を追加
+
 ## ver. 12.7 - 2025/05/10 [#574](https://github.com/na-trium-144/falling-nikochan/pull/574)
 
 * browserslistをtailwindの対応バージョンに合わせる

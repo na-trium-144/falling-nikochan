@@ -12,12 +12,7 @@ export interface ChartSeqData6 {
 }
 
 /**
- * ゲーム中で使用する音符の管理
- * id: 通し番号
- * hitTimeSec: 判定時刻
- * appearTimeSec: 画面に表示し始める時刻
- * display: 現在時刻→画面上の位置
- * done: 判定結果 0:まだ 1:Good 2:OK 3:bad 4:miss
+ * see seq7.ts
  */
 export interface Note6 {
   ver: 6;
@@ -173,7 +168,7 @@ export function displayNote6(
   note: Note6,
   timeSec: number
 ): DisplayNote6 | null {
-  if (timeSec - note.hitTimeSec > 0.5) {
+  if (timeSec - note.hitTimeSec > 1.0) {
     return null;
   } else if (note.done >= 1 && note.done <= 3) {
     return {

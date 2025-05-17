@@ -71,6 +71,13 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
   });
   test("should return 404 for nonexistent cid", async () => {
     await initDb();
+    const res = await app.request("/api/playFile/100002/0");
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body).toStrictEqual({ message: "chartIdNotFound" });
+  });
+  test("should return 404 for deleted cid", async () => {
+    await initDb();
     const res = await app.request("/api/playFile/100001/0");
     expect(res.status).toBe(404);
     const body = await res.json();

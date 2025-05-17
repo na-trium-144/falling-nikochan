@@ -60,6 +60,10 @@ describe("GET /api/hashPasswd/:cid", () => {
     expect(res.status).toBe(400);
   });
   test("should return 404 for nonexistent cid", async () => {
+    const res = await app.request("/api/hashPasswd/100002?p=p");
+    expect(res.status).toBe(404);
+  });
+  test("should return 404 for deleted cid", async () => {
     const res = await app.request("/api/hashPasswd/100001?p=p");
     expect(res.status).toBe(404);
   });
