@@ -1,19 +1,22 @@
 // @vercel/og をimportしないようにするため個別import
-import apiApp from "@falling-nikochan/route/dist/src/api/app";
-import sitemapApp from "@falling-nikochan/route/dist/src/sitemap";
-import shareApp from "@falling-nikochan/route/dist/src/share";
-import { briefAppWithHandler } from "@falling-nikochan/route/dist/src/api/brief";
-import redirectApp from "@falling-nikochan/route/dist/src/redirect";
-import { notFound, onError } from "@falling-nikochan/route/dist/src/error";
 import {
-  fetchStatic,
+  apiApp,
+  ogApp,
+  redirectApp,
+  sitemapApp,
+  shareApp,
   languageDetector,
-} from "@falling-nikochan/route/dist/src/env";
+  onError,
+  notFound,
+  fetchStatic,
+  briefAppWithHandler,
+} from "@falling-nikochan/route";
 import { Hono } from "hono";
+import { ImageResponse } from "@cloudflare/pages-plugin-vercel-og/api";
 
 const app = new Hono({ strict: false })
   .route("/api", apiApp)
-  // .route("/og", ogApp)
+  .route("/og", ogApp({ ImageResponse }))
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
