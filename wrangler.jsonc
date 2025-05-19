@@ -6,5 +6,6 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "frontend/out",
+    "binding": "ASSETS",
   },
 }
