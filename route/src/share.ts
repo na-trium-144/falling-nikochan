@@ -21,7 +21,7 @@ bodyを無理やり書き換える。
 */
 
 const shareApp = (config: {
-  fetchBrief: (cid: string) => Response | Promise<Response>;
+  fetchBrief: (e: Bindings, cid: string) => Response | Promise<Response>;
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
@@ -42,7 +42,7 @@ const shareApp = (config: {
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
-      const pBriefRes = config.fetchBrief(cid);
+      const pBriefRes = config.fetchBrief(env(c), cid);
       const t = await getTranslations(qLang, "share");
       const tr = await getTranslations(qLang, "play.result");
       let placeholderUrl: URL;

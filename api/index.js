@@ -13,9 +13,10 @@ import {
   onError,
   notFound,
   fetchStatic,
+  fetchBrief,
 } from "@falling-nikochan/route";
-import briefApp from "@falling-nikochan/route/dist/src/api/brief.js";
 import { Hono } from "hono";
+import { ImageResponse } from "@vercel/og";
 
 // export const config = {
 //   runtime: "nodejs",
@@ -23,12 +24,19 @@ import { Hono } from "hono";
 
 const app = new Hono({ strict: false })
   .route("/api", apiApp)
-  .route("/og", ogApp)
+  .route(
+    "/og",
+    ogApp({
+      ImageResponse,
+      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchStatic,
+    }),
+  )
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
     shareApp({
-      fetchBrief: (cid) => briefApp.request(`/${cid}`),
+      fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
     }),
   )

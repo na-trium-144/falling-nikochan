@@ -11,10 +11,11 @@ import {
   onError,
   notFound,
   fetchStatic,
+  fetchBrief,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { briefAppWithHandler } from "./src/api/brief.js";
+import { ImageResponse } from "@vercel/og";
 
 const port = 8787;
 console.log(`Server is running on http://localhost:${port}`);
@@ -22,13 +23,19 @@ console.log(`Server is running on http://localhost:${port}`);
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(logger())
   .route("/api", apiApp)
-  .route("/og", ogApp)
+  .route(
+    "/og",
+    ogApp({
+      ImageResponse,
+      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchStatic,
+    }),
+  )
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
     shareApp({
-      fetchBrief: (cid) =>
-        briefAppWithHandler({ fetchStatic }).request(`/api/${cid}`),
+      fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
     }),
   )
