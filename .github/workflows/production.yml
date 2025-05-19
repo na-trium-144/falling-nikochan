@@ -30,6 +30,7 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - run: rm -rf .git
+      - run: bun i -g wrangler@latest
       - name: Publish to Cloudflare Worker
         uses: cloudflare/wrangler-action@v3
         with:
