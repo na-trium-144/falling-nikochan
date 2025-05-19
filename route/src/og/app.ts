@@ -71,7 +71,7 @@ const ogApp = (config: {
         );
         ogQuery.set("v", packageJson.version);
         return c.redirect(
-          `${new URL(c.req.url).origin}/${c.req.path}?${ogQuery.toString()}`,
+          `${new URL(c.req.url).origin}${c.req.path}?${ogQuery.toString()}`,
           307,
         );
       }
