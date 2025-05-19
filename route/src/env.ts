@@ -14,6 +14,7 @@ export interface Bindings {
   SECRET_SALT?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
+  BACKEND_OG_PREFIX?: string;
   VERCEL_PROTECTION_BYPASS_SECRET?: string;
   GOOGLE_API_KEY?: string;
 }

@@ -1,6 +1,5 @@
 import {
   apiApp,
-  ogApp,
   redirectApp,
   sitemapApp,
   shareApp,
@@ -10,20 +9,19 @@ import {
   fetchBrief,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
-import { ImageResponse } from "@cloudflare/pages-plugin-vercel-og/api";
+import { env } from "hono/adapter";
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
 
 const app = new Hono({ strict: false })
   .route("/api", apiApp)
-  .route(
-    "/og",
-    ogApp({
-      ImageResponse,
-      fetchBrief: fetchBrief({ fetchStatic }),
-      fetchStatic,
-    }),
-  )
+  .get("/og/*", (c) => {
+    const url = new URL(c.req.raw.url);
+    return c.redirect(
+      env(c).BACKEND_OG_PREFIX + url.pathname + url.search,
+      307,
+    );
+  })
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",

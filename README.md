@@ -39,6 +39,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * `API_CACHE_EDGE` (backend): `1` or unset
         * `ASSET_PREFIX` (backend & frontend): `https://domain-of-your-assets/` or unset
         * `BACKEND_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
+        * `BACKEND_OG_PREFIX` (backend): alternate backend for og image generation, `https://domain-of-your-backend/` or unset
         * `NO_PREFETCH` (frontend): `1` or unset
         * `GOOGLE_API_KEY` (backend): API key for YouTube Data API v3 (optional)
 * Install dependencies
