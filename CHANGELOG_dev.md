@@ -1,3 +1,12 @@
+## ver. 12.12 - 2025/05/18 [#607](https://github.com/na-trium-144/falling-nikochan/pull/607)
+
+* briefCacheをlocalStorageからcacheStorageに移す
+
+## ver. 12.11 - 2025/05/18 [#606](https://github.com/na-trium-144/falling-nikochan/pull/606)
+
+* ReactAceのsearchBoxを有効化
+* モバイル表示で画面をスクロールするたびにReactAceの位置が更新されるようにする
+
 ## ver. 12.9 - 2025/05/17 [#593](https://github.com/na-trium-144/falling-nikochan/pull/593)
 
 * 音符に100msフェードインと200msのフェードアウトを追加
