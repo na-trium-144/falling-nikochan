@@ -1,3 +1,7 @@
+## ver. 12.13 - 2025/05/20 [#604](https://github.com/na-trium-144/falling-nikochan/pull/604)
+
+* productionのデプロイ先をVercelからCloudflareWorkerに変更
+
 ## ver. 12.12 - 2025/05/18 [#607](https://github.com/na-trium-144/falling-nikochan/pull/607)
 
 * briefCacheをlocalStorageからcacheStorageに移す

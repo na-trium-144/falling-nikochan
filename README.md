@@ -59,7 +59,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         ```sh
         npm run ldev  # or  bun bdev
         ```
-    * For the deployment, currently using Vercel
+    * For the deployment, currently using Cloudflare Worker and Vercel
 * Frontend
     * development environment of Next.js (`http://localhost:3000/ja` or `/en`)
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
