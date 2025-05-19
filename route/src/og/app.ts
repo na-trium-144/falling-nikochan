@@ -1,7 +1,6 @@
 import { Hono } from "hono";
-import { Bindings, cacheControl, fetchStatic } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
-import { briefAppWithHandler } from "../api/brief.js";
 import { HTTPException } from "hono/http-exception";
 import {
   ChartBrief,
@@ -21,7 +20,11 @@ export interface ChartBriefMin {
   chartCreator: string;
 }
 
-const ogApp = (config: { ImageResponse: any }) =>
+const ogApp = (config: {
+  ImageResponse: any;
+  fetchBrief: (e: Bindings, cid: string) => Response | Promise<Response>;
+  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+}) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
@@ -30,9 +33,7 @@ const ogApp = (config: { ImageResponse: any }) =>
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
       if (!c.req.query("brief")) {
-        const briefRes = await briefAppWithHandler({ fetchStatic }).request(
-          `/api/${cid}`,
-        );
+        const briefRes = await config.fetchBrief(env(c), cid);
         if (!briefRes.ok) {
           let message = "";
           try {
@@ -130,22 +131,22 @@ const ogApp = (config: { ImageResponse: any }) =>
         ] as const
       ).map((f) => ({
         ...f,
-        pData: fetchStatic(
+        pData: config.fetchStatic(
           env(c),
           new URL(`/assets/${f.file}`, new URL(c.req.url).origin),
         ),
       }));
-      let pBgImage: Promise<Response>;
+      let pBgImage: Response | Promise<Response>;
       switch (c.req.param("type")) {
         case "share":
           // [locale]/ogTemplate/share をスクショしたpng画像を /assets に置く
-          pBgImage = fetchStatic(
+          pBgImage = config.fetchStatic(
             env(c),
             new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin),
           );
           break;
         case "result":
-          pBgImage = fetchStatic(
+          pBgImage = config.fetchStatic(
             env(c),
             new URL(`/assets/ogTemplateResult.png`, new URL(c.req.url).origin),
           );

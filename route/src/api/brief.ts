@@ -5,7 +5,6 @@ import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
-import { onError } from "../error.js";
 
 const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
@@ -24,12 +23,5 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     }
   },
 );
-
-export const briefAppWithHandler = (config: {
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
-}) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false })
-    .route("/api", briefApp)
-    .onError(onError({ fetchStatic: config.fetchStatic }));
 
 export default briefApp;

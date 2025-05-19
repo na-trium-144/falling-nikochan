@@ -1,4 +1,3 @@
-// @vercel/og をimportしないようにするため個別import
 import {
   apiApp,
   ogApp,
@@ -8,21 +7,28 @@ import {
   languageDetector,
   onError,
   notFound,
-  fetchStatic,
-  briefAppWithHandler,
+  fetchBrief,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@cloudflare/pages-plugin-vercel-og/api";
 
+const fetchStatic = (e, url) => e.ASSETS.fetch(url);
+
 const app = new Hono({ strict: false })
   .route("/api", apiApp)
-  .route("/og", ogApp({ ImageResponse }))
+  .route(
+    "/og",
+    ogApp({
+      ImageResponse,
+      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchStatic,
+    }),
+  )
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
     shareApp({
-      fetchBrief: (cid) =>
-        briefAppWithHandler({ fetchStatic }).request(`/api/${cid}`),
+      fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
     }),
   )
