@@ -27,7 +27,9 @@ async function clearOldCaches() {
       Promise.all(
         keys
           .filter(
-            (k) => ![mainCacheName, tmpCacheName, configCacheName].includes(k),
+            (k) =>
+              ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
+              !k.startsWith("brief"), // used in @/common/briefCache
           )
           .map((k) => caches.delete(k)),
       ),
@@ -186,7 +188,7 @@ const app = new Hono({ strict: false })
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: (cid) => fetch(self.origin + `/api/brief/${cid}`),
+      fetchBrief: (_e, cid: string) => fetch(self.origin + `/api/brief/${cid}`),
       fetchStatic,
       languageDetector,
     }),

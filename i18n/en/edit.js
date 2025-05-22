@@ -95,6 +95,12 @@ export default {
         "You can overwrite as many times as you like <br></br>" +
         "if it is already been saved and assigned an ID.",
       hasUnsaved: "(There are unsaved changes)",
+      deleteFromServer: "Delete this chart from server",
+      confirmDelete:
+        // \n for confirm() dialog
+        "Are you sure you want to delete this chart? \n" +
+        "This action cannot be undone.\n\n" +
+        "Type {cid} to confirm deletion.",
       // converting:
       //   "This chart has been converted from the old format (ver.{ver}), " +
       //   "and saving will overwrite the previous chart data with the converted data.",
@@ -205,6 +211,8 @@ export default {
       levelAdd: "Add",
       levelDuplicate: "Duplicate",
       levelDelete: "Delete",
+      deleteConfirm:
+        "Are you sure you want to delete this level?\nThis action cannot be undone.",
       unlisted: "(Unlisted)",
       levelName: "Level name",
       difficulty: "Difficulty",

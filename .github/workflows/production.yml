@@ -30,11 +30,11 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - run: rm -rf .git
-      - name: Publish to Cloudflare Pages
+      - run: bun i -g wrangler@latest
+      - name: Publish to Cloudflare Worker
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
+          apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
           accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main
       - name: Deploy Project Artifacts to Vercel
         run: bunx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

@@ -2,14 +2,19 @@ import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
+import briefApp from "./api/brief.js";
+import { Hono } from "hono";
+import { onError } from "./error.js";
 
 export interface Bindings {
+  ASSETS?: { fetch: typeof fetch };
   MONGODB_URI: string;
   API_ENV?: "development";
   API_NO_RATELIMIT?: "1";
   SECRET_SALT?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
+  BACKEND_OG_PREFIX?: string;
   VERCEL_PROTECTION_BYPASS_SECRET?: string;
   GOOGLE_API_KEY?: string;
 }
@@ -36,6 +41,16 @@ export function cacheControl(e: Bindings, age: number | null) {
   }
 }
 
+export const fetchBrief =
+  (config: {
+    fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+  }) =>
+  (e: Bindings, cid: string) => {
+    return new Hono<{ Bindings: Bindings }>({ strict: false })
+      .route("/api/brief", briefApp)
+      .onError(onError({ fetchStatic: config.fetchStatic }))
+      .request(`/api/brief/${cid}`, undefined, e);
+  };
 export function fetchStatic(e: Bindings, url: URL) {
   return fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
     headers: {
@@ -51,7 +66,7 @@ export function fetchStatic(e: Bindings, url: URL) {
 }
 
 export function languageDetector() {
-  if(dotenv && join && dirname){
+  if (dotenv && join && dirname) {
     dotenv.config({ path: join(dirname(process.cwd()), ".env") });
   }
   return honoLanguageDetector({

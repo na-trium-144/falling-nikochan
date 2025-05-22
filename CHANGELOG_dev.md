@@ -1,3 +1,26 @@
+## ver. 12.13 - 2025/05/20 [#604](https://github.com/na-trium-144/falling-nikochan/pull/604)
+
+* productionのデプロイ先をVercelからCloudflareWorkerに変更
+
+## ver. 12.12 - 2025/05/18 [#607](https://github.com/na-trium-144/falling-nikochan/pull/607)
+
+* briefCacheをlocalStorageからcacheStorageに移す
+
+## ver. 12.11 - 2025/05/18 [#606](https://github.com/na-trium-144/falling-nikochan/pull/606)
+
+* ReactAceのsearchBoxを有効化
+* モバイル表示で画面をスクロールするたびにReactAceの位置が更新されるようにする
+
+## ver. 12.9 - 2025/05/17 [#593](https://github.com/na-trium-144/falling-nikochan/pull/593)
+
+* 音符に100msフェードインと200msのフェードアウトを追加
+
+## ver. 12.8 - 2025/05/17 [#593](https://github.com/na-trium-144/falling-nikochan/pull/593)
+
+* /api/popular のdb呼び出しを効率化
+* 譜面削除ボタン追加
+* レベルの削除時にも確認を追加
+
 ## ver. 12.7 - 2025/05/10 [#574](https://github.com/na-trium-144/falling-nikochan/pull/574)
 
 * browserslistをtailwindの対応バージョンに合わせる

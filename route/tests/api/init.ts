@@ -22,7 +22,6 @@ import {
 import { Hono } from "hono";
 import {
   apiApp,
-  ogApp,
   shareApp,
   redirectApp,
   Bindings,
@@ -30,17 +29,15 @@ import {
   onError,
   languageDetector,
   fetchStatic,
+  fetchBrief,
 } from "@falling-nikochan/route";
-import { briefAppWithHandler } from "@falling-nikochan/route/src/api/brief";
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", apiApp)
-  .route("/og", ogApp)
   .route(
     "/share",
     shareApp({
-      fetchBrief: (cid) =>
-        briefAppWithHandler({ fetchStatic }).request(`/api/${cid}`),
+      fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
     }),
   )
@@ -295,7 +292,7 @@ export async function initDb() {
       {
         $set: await zipEntry(
           await chartToEntry(
-            { ...dummyChart(), changePasswd: "p", published: true, },
+            { ...dummyChart(), changePasswd: "p", published: true },
             dummyCid,
             dummyDate.getTime(),
             null,
@@ -304,6 +301,28 @@ export async function initDb() {
             null,
           ),
         ),
+      },
+      { upsert: true },
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: dummyCid + 1 },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+              published: true,
+            },
+            dummyCid,
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null,
+          )),
+          deleted: true,
+        }),
       },
       { upsert: true },
     );

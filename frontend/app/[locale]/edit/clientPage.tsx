@@ -510,7 +510,7 @@ function Page(props: Props) {
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [hasChange, sessionId, t]);
 
-  const ref = useRef<HTMLDivElement>(null!);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
@@ -572,8 +572,13 @@ function Page(props: Props) {
 
   // currentTimeが変わったときcurrentStepを更新
   const prevTimeSec = useRef<number>(-1);
+  const prevSnapDivider = useRef<number>(-1);
   useEffect(() => {
-    if (currentLevel && currentTimeSec !== prevTimeSec.current) {
+    if (
+      currentLevel &&
+      (currentTimeSec !== prevTimeSec.current ||
+        snapDivider !== prevSnapDivider.current)
+    ) {
       const step = getStep(
         currentLevel.bpmChanges,
         currentTimeSec,
@@ -611,6 +616,7 @@ function Page(props: Props) {
       }
     }
     prevTimeSec.current = currentTimeSec;
+    prevSnapDivider.current = snapDivider;
   }, [
     currentLevel,
     snapDivider,
@@ -670,18 +676,18 @@ function Page(props: Props) {
   }, []);
   const start = () => {
     ytPlayer.current?.playVideo();
-    ref.current.focus();
+    ref.current?.focus();
   };
   const stop = () => {
     ytPlayer.current?.pauseVideo();
-    ref.current.focus();
+    ref.current?.focus();
   };
   const changeCurrentTimeSec = (timeSec: number, focus = true) => {
     if (ytPlayer.current?.seekTo) {
       ytPlayer.current?.seekTo(timeSec, true);
     }
     if (focus) {
-      ref.current.focus();
+      ref.current?.focus();
     }
   };
   const seekRight1 = () => {
@@ -697,7 +703,7 @@ function Page(props: Props) {
         seekStepRel(1);
       }
     }
-    ref.current.focus();
+    ref.current?.focus();
   };
   const seekLeft1 = () => {
     if (chart) {
@@ -712,7 +718,7 @@ function Page(props: Props) {
         seekStepRel(-1);
       }
     }
-    ref.current.focus();
+    ref.current?.focus();
   };
   const seekStepRel = (move: number) => {
     let newStep = stepAdd(currentStep, {
@@ -735,7 +741,7 @@ function Page(props: Props) {
         );
       }
       if (focus) {
-        ref.current.focus();
+        ref.current?.focus();
       }
     },
     [chart, currentLevel],
@@ -978,7 +984,7 @@ function Page(props: Props) {
         changeLevel(newLevel?.lua);
       }
     }
-    ref.current.focus();
+    ref.current?.focus();
   };
   const deleteNote = () => {
     if (chart && currentLevel && hasCurrentNote) {
@@ -986,7 +992,7 @@ function Page(props: Props) {
       const newLevel = luaDeleteNote(levelCopied, currentNoteIndex);
       changeLevel(newLevel?.lua);
     }
-    ref.current.focus();
+    ref.current?.focus();
   };
   const updateNote = (n: NoteCommand) => {
     if (chart && currentLevel && hasCurrentNote) {
@@ -1003,7 +1009,7 @@ function Page(props: Props) {
       // copyBufferの更新は未保存の変更とみなさない (changeChart にしない)
       setChart({ ...chart, copyBuffer: newCopyBuf });
     }
-    ref.current.focus();
+    ref.current?.focus();
   };
   const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
     if (chart?.copyBuffer[copyIndex]) {
@@ -1015,7 +1021,7 @@ function Page(props: Props) {
         }
       }
     }
-    ref.current.focus();
+    ref.current?.focus();
   };
 
   return (
@@ -1373,7 +1379,7 @@ function Page(props: Props) {
                       className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
                       onClick={() => {
                         setTab(i);
-                        ref.current.focus();
+                        ref.current?.focus();
                       }}
                     >
                       {t(`${key}.title`)}
@@ -1475,6 +1481,7 @@ function Page(props: Props) {
                   />
                 ) : null}
                 <LuaTabPlaceholder
+                  parentContainer={ref.current}
                   visible={tab === 4}
                   currentLine={currentLine}
                   currentStepStr={currentStepStr}

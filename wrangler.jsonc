@@ -1,0 +1,11 @@
+{
+  // "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "falling-nikochan",
+  "main": "route/serve-cf.js",
+  "compatibility_date": "2025-05-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "frontend/out",
+    "binding": "ASSETS",
+  },
+}

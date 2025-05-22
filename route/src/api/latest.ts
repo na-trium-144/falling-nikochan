@@ -16,7 +16,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         (
           await db
             .collection<ChartEntryCompressed>("chart")
-            .find({ published: true })
+            .find({ published: true, deleted: false })
             .sort({ updatedAt: -1 })
             .limit(numLatest)
             .project<{ cid: string }>({ _id: 0, cid: 1 })
