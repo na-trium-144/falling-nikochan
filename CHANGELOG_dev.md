@@ -1,3 +1,7 @@
+## ver. 12.15 - 2025/05/23 [#620](https://github.com/na-trium-144/falling-nikochan/pull/620)
+
+* PC表示でも /main/latest などのページに戻るボタンを追加
+
 ## ver. 12.13 - 2025/05/20 [#604](https://github.com/na-trium-144/falling-nikochan/pull/604)
 
 * productionのデプロイ先をVercelからCloudflareWorkerに変更
