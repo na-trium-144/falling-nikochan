@@ -27,6 +27,7 @@ import { Box, modalBg } from "./common/box.jsx";
 import { Pager, pagerButtonClass } from "./common/pager.jsx";
 import { maxAboutPageIndex } from "./main/about/[aboutIndex]/pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
+import { FestivalLink, useFestival } from "./common/festival.jsx";
 
 interface Props {
   locale: string;
@@ -49,6 +50,7 @@ export default function TopPage(props: Props) {
   const { locale } = props;
   const { modal, openModal, openShareInternal } = useShareModal(locale, "top");
   const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
+  const fes = useFestival();
 
   return (
     <main className="w-full h-full overflow-x-clip overflow-y-auto ">
@@ -97,11 +99,11 @@ export default function TopPage(props: Props) {
             {t("about.title")}
           </button>
         </div>
+        <FestivalLink {...fes} className="grow-0 mb-3 px-6 " />
         <div className={"basis-auto grow-2 " + menuMoveAnimClass}>
           <RedirectedWarning />
           <PWAInstallMain />
         </div>
-
         <div
           className={
             "basis-auto grow-1 my-auto h-max mb-3 text-center px-6 " +
