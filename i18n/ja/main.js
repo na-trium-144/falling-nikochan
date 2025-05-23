@@ -8,6 +8,7 @@ export default {
       "シンプルでかわいい音ゲーです。",
     redirected:
       "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
+    back: "戻る",
     pwa: {
       installWithPrompt:
         "Falling Nikochan をホーム画面に追加してアプリとして起動することにより、" +

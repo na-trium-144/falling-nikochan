@@ -30,7 +30,8 @@ export default function LinksPage({ locale }: { locale: string }) {
       title={t("titleShort")}
       tabKey="links"
       mobileTabKey="links"
-      noBackButton
+      noBackButtonMobile
+      noBackButtonPC
       locale={locale}
     >
       <div className="mb-3 main-wide:hidden">

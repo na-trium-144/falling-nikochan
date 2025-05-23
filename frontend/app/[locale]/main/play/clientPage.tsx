@@ -127,7 +127,8 @@ export default function PlayTab(props: Props) {
       title={t("title")}
       tabKey="play"
       mobileTabKey="play"
-      noBackButton
+      noBackButtonMobile
+      noBackButtonPC
       locale={locale}
       modal={modal}
     >
