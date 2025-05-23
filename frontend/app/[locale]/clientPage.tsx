@@ -99,7 +99,7 @@ export default function TopPage(props: Props) {
             {t("about.title")}
           </button>
         </div>
-        <FestivalLink {...fes} className="grow-0 mb-3 px-6 " />
+        <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
         <div className={"basis-auto grow-2 " + menuMoveAnimClass}>
           <RedirectedWarning />
           <PWAInstallMain />
