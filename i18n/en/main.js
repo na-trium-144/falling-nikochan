@@ -121,6 +121,9 @@ export default {
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",
     },
+    festival:
+      "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
+      "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",
   },
   footer: {
     theme: "Theme",
