@@ -70,12 +70,18 @@ export function IndexMain(props: Props) {
           >
             {pcTabTitleKeys.map((key, i) =>
               key === props.tabKey ? (
-                <Box
+                <Link
                   key={i}
-                  className="text-center rounded-r-none py-3 pl-2 pr-2"
+                  href={`/${locale}${tabURLs[key]}`}
+                  className={
+                    "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs " +
+                    "text-center rounded-r-none py-3 pl-2 pr-2 " +
+                    "hover:bg-white hover:dark:bg-stone-800 active:shadow-inner "
+                  }
+                  prefetch={!process.env.NO_PREFETCH}
                 >
                   {t(key + ".title")}
-                </Box>
+                </Link>
               ) : (
                 <Link
                   key={i}
