@@ -15,14 +15,15 @@ export function useFestival() {
       const kind = fesParam.slice(0, 2) as "kf" | "mf";
       setNum(num);
       setKind(kind);
-      params.delete("fes");
       sessionStorage.setItem("fesNum", String(num));
       sessionStorage.setItem("fesKind", kind);
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}?${params}`,
-      );
+      // replaceStateをするとnextjsのナビゲーションがバグる
+      // params.delete("fes");
+      // window.history.replaceState(
+      //   null,
+      //   "",
+      //   `${window.location.pathname}?${params}`,
+      // );
     } else {
       const num = Number(sessionStorage.getItem("fesNum"));
       const kind = sessionStorage.getItem("fesKind") as "kf" | "mf";
