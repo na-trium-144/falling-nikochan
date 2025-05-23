@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import Button from "./button";
 import { hasTouch } from "@/scale";
+import { WarningBox } from "./box";
 
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
@@ -192,16 +193,10 @@ export function PWAInstallMain() {
   const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();
   return (
-    <div
-      className={
-        "text-center text-sm mx-6 my-2 px-3 py-2 h-max " +
-        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
-        (pwa.dismissed || pwa.detectedOS === null ? "hidden " : "")
-      }
-    >
+    <WarningBox hidden={pwa.dismissed || pwa.detectedOS === null}>
       <PWAInstallDesc />
       <Button text={t("dismiss")} onClick={pwa.dismiss} />
-    </div>
+    </WarningBox>
   );
 }
 
