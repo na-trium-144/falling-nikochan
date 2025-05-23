@@ -15,13 +15,15 @@ import Title from "@/common/titleLogo.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 
 interface Props {
   children?: ReactNode | ReactNode[];
   title: string;
   tabKey: TabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
   mobileTabKey: TabKeys; // モバイル表示でfooter内のアクティブなタブ
-  noBackButton?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
+  noBackButtonMobile?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
+  noBackButtonPC?: boolean;
   locale: string;
   modal?: ReactNode;
 }
@@ -32,7 +34,7 @@ export function IndexMain(props: Props) {
   return (
     <main className="flex flex-col w-full h-full items-center ">
       {props.modal}
-      <MobileHeader noBackButton={props.noBackButton}>
+      <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
       <Link
@@ -91,6 +93,15 @@ export function IndexMain(props: Props) {
           </nav>
         )}
         <Box className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}>
+          {!props.noBackButtonPC && (
+            <button
+              className={"hidden main-wide:block w-max mb-3 " + linkStyle1}
+              onClick={() => history.back()}
+            >
+              <ArrowLeft className="inline-block align-middle mr-2 " />
+              {t("back")}
+            </button>
+          )}
           {props.children}
         </Box>
       </div>

@@ -8,6 +8,7 @@ export default {
       "where anyone can create and share charts.",
     redirected:
       "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
+    back: "Back",
     pwa: {
       installWithPrompt:
         "For a more comfortable full-screen experience, " +
