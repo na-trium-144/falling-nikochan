@@ -1,13 +1,15 @@
 "use client";
 
 import { Box } from "@/common/box.js";
+import { linkStyle3 } from "@/common/linkStyle";
 import { SmallDomainShare } from "@/common/small";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
-export function AboutContent3() {
+export function AboutContent3({ locale }: { locale: string }) {
   const t = useTranslations("about.3");
   const { screenWidth, rem, isMobileMain } = useDisplayMode();
 
@@ -38,6 +40,15 @@ export function AboutContent3() {
           <p>
             {t.rich("content3", {
               small: (c) => <span className="text-sm">{c}</span>,
+              linkPolicies: (c) => (
+                <Link
+                  href={`/${locale}/main/policies`}
+                  className={linkStyle3}
+                  prefetch={!process.env.NO_PREFETCH}
+                >
+                  {c}
+                </Link>
+              ),
             })}
           </p>
         </div>
