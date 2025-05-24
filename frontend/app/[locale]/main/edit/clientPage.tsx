@@ -66,7 +66,8 @@ export default function EditTab({ locale }: { locale: string }) {
       title={t("title")}
       tabKey="edit"
       mobileTabKey="edit"
-      noBackButton
+      noBackButtonMobile
+      noBackButtonPC
       locale={locale}
     >
       <p className="text-justify">{t("welcome")}</p>

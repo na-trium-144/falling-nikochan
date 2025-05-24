@@ -8,6 +8,7 @@ export default {
       "where anyone can create and share charts.",
     redirected:
       "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
+    back: "Back",
     pwa: {
       installWithPrompt:
         "For a more comfortable full-screen experience, " +
@@ -121,6 +122,9 @@ export default {
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",
     },
+    festival:
+      "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
+      "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",
   },
   footer: {
     theme: "Theme",

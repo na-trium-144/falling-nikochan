@@ -8,6 +8,7 @@ export default {
       "シンプルでかわいい音ゲーです。",
     redirected:
       "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
+    back: "戻る",
     pwa: {
       installWithPrompt:
         "Falling Nikochan をホーム画面に追加してアプリとして起動することにより、" +
@@ -123,6 +124,8 @@ export default {
       officialChannel: "Falling Nikochan 公式チャンネル (@nikochan144)",
       officialChannelShort: "公式チャンネル",
     },
+    festival:
+      "ut.code(); 第{num}回{kind, select, mf {五月祭} kf {駒場祭} other {other}}ウェブサイトに戻る",
   },
   footer: {
     theme: "テーマ色",
