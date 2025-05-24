@@ -53,7 +53,7 @@ export default async function AboutTab({ params }: Props) {
         ) : aboutIndex === 2 ? (
           <AboutContent2 />
         ) : aboutIndex === 3 ? (
-          <AboutContent3 />
+          <AboutContent3 locale={locale} />
         ) : aboutIndex === 4 ? (
           <AboutContent4 locale={locale} />
         ) : aboutIndex === 5 ? (
