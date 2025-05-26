@@ -5,10 +5,16 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
+  inputTypes,
   levelTypes,
   rankStr,
   ResultParams,
 } from "@falling-nikochan/chart";
+import KeyboardOne from "@icon-park/react/lib/icons/KeyboardOne";
+import MouseOne from "@icon-park/react/lib/icons/MouseOne";
+import Write from "@icon-park/react/lib/icons/Write";
+import ClickTap from "@icon-park/react/lib/icons/ClickTap";
+import GameThree from "@icon-park/react/lib/icons/GameThree";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -37,7 +43,20 @@ export function SharedResultBox(props: Props) {
           <span className="text-lg">{props.result.lvDifficulty}</span>
         </span>
         <span className="text-slate-500 dark:text-stone-400 ">
-          ({resultDate})
+          <span>(</span>
+          <span>{resultDate}</span>
+          {props.result.inputType === inputTypes.keyboard ? (
+            <KeyboardOne className="inline-block ml-2 align-middle " />
+          ) : props.result.inputType === inputTypes.mouse ? (
+            <MouseOne className="inline-block ml-2 align-middle " />
+          ) : props.result.inputType === inputTypes.pen ? (
+            <Write className="inline-block ml-2 align-middle " />
+          ) : props.result.inputType === inputTypes.touch ? (
+            <ClickTap className="inline-block ml-2 align-middle " />
+          ) : props.result.inputType === inputTypes.gamepad ? (
+            <GameThree className="inline-block ml-2 align-middle " />
+          ) : null}
+          <span>)</span>
         </span>
       </p>
       <div
