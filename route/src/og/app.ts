@@ -183,6 +183,9 @@ const ogApp = (config: {
           case inputTypes.pen:
             imagePath = "/assets/icon-slate500-write.svg";
             break;
+          case inputTypes.gamepad:
+            imagePath = "/assets/icon-slate500-game-three.svg";
+            break;
           case null:
             imagePath = null;
             break;
