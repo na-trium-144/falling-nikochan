@@ -16,7 +16,7 @@ export async function OGShare(
   cid: string,
   lang: string,
   brief: ChartBriefMin,
-  bgImageBin: string,
+  bgImageBin: Promise<string>,
 ) {
   const t = await getTranslations(lang, "share");
   return (
@@ -34,7 +34,7 @@ export async function OGShare(
           width: "100%",
           position: "absolute",
         }}
-        src={`data:image/png;base64,${btoa(bgImageBin)}`}
+        src={`data:image/png;base64,${btoa(await bgImageBin)}`}
       />
       <img
         style={{

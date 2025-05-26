@@ -4,7 +4,6 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
-  inputTypes,
   levelTypes,
   rankStr,
   ResultParams,
@@ -31,9 +30,9 @@ export async function OGResult(
   cid: string,
   lang: string,
   brief: ChartBriefMin,
-  bgImageBin: string,
+  bgImageBin: Promise<string>,
   params: ResultParams,
-  inputTypeImageBin: string | null,
+  inputTypeImageBin: Promise<string> | null,
 ) {
   const th = await getTranslations(lang, "share");
   const t = await getTranslations(lang, "play.result");
@@ -54,7 +53,7 @@ export async function OGResult(
           width: "100%",
           position: "absolute",
         }}
-        src={`data:image/png;base64,${btoa(bgImageBin)}`}
+        src={`data:image/png;base64,${btoa(await bgImageBin)}`}
       />
       <div
         style={{
@@ -184,7 +183,7 @@ export async function OGResult(
                   marginLeft: 12,
                   height: 30,
                 }}
-                src={`data:image/svg+xml;base64,${btoa(inputTypeImageBin)}`}
+                src={`data:image/svg+xml;base64,${btoa(await inputTypeImageBin)}`}
               />
             )}
             <span>)</span>

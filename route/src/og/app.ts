@@ -137,32 +137,37 @@ const ogApp = (config: {
           new URL(`/assets/${f.file}`, new URL(c.req.url).origin),
         ),
       }));
-      let pBgImage: Response | Promise<Response>;
+      let imagePath: string;
       switch (c.req.param("type")) {
         case "share":
           // [locale]/ogTemplate/share をスクショしたpng画像を /assets に置く
-          pBgImage = config.fetchStatic(
-            env(c),
-            new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin),
-          );
+          imagePath = "/assets/ogTemplateShare.png";
           break;
         case "result":
-          pBgImage = config.fetchStatic(
-            env(c),
-            new URL(`/assets/ogTemplateResult.png`, new URL(c.req.url).origin),
-          );
+          imagePath = "/assets/ogTemplateResult.png";
           break;
         default:
           throw new HTTPException(404);
       }
+      const pBgImageBin = new Promise<Response>((res) =>
+        res(
+          config.fetchStatic(
+            env(c),
+            new URL(imagePath, new URL(c.req.url).origin),
+          ),
+        ),
+      )
+        .then((bgImage) => bgImage.arrayBuffer())
+        .then((buf) => {
+          const bgImageBuf = new Uint8Array(buf);
+          let bgImageBin = "";
+          for (let i = 0; i < bgImageBuf.byteLength; i++) {
+            bgImageBin += String.fromCharCode(bgImageBuf[i]);
+          }
+          return bgImageBin;
+        });
 
-      const bgImageBuf = new Uint8Array(await (await pBgImage).arrayBuffer());
-      let bgImageBin = "";
-      for (let i = 0; i < bgImageBuf.byteLength; i++) {
-        bgImageBin += String.fromCharCode(bgImageBuf[i]);
-      }
-
-      let inputTypeImageBin = "";
+      let pInputTypeImageBin: Promise<string> | null = null;
       if (resultParams) {
         let imagePath: string | null;
         switch (resultParams.inputType) {
@@ -175,29 +180,39 @@ const ogApp = (config: {
           case inputTypes.touch:
             imagePath = "/assets/icon-slate500-click-tap.svg";
             break;
+          case null:
+            imagePath = null;
+            break;
           default:
             console.error(`unknown touch type ${resultParams.inputType}`);
             imagePath = null;
             break;
         }
         if (imagePath) {
-          const pInputTypeImage = config.fetchStatic(
-            env(c),
-            new URL(imagePath, new URL(c.req.url).origin),
-          );
-          const inputTypeImageBuf = new Uint8Array(
-            await (await pInputTypeImage).arrayBuffer(),
-          );
-          for (let i = 0; i < inputTypeImageBuf.byteLength; i++) {
-            inputTypeImageBin += String.fromCharCode(inputTypeImageBuf[i]);
-          }
+          pInputTypeImageBin = new Promise<Response>((res) =>
+            res(
+              config.fetchStatic(
+                env(c),
+                new URL(imagePath, new URL(c.req.url).origin),
+              ),
+            ),
+          )
+            .then((image) => image.arrayBuffer())
+            .then((buf) => {
+              const inputTypeImageBuf = new Uint8Array(buf);
+              let inputTypeImageBin = "";
+              for (let i = 0; i < inputTypeImageBuf.byteLength; i++) {
+                inputTypeImageBin += String.fromCharCode(inputTypeImageBuf[i]);
+              }
+              return inputTypeImageBin;
+            });
         }
       }
 
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
         case "share":
-          Image = OGShare(cid, lang, brief, bgImageBin);
+          Image = OGShare(cid, lang, brief, pBgImageBin);
           break;
         case "result":
           if (!resultParams) {
@@ -207,9 +222,9 @@ const ogApp = (config: {
             cid,
             lang,
             brief,
-            bgImageBin,
+            pBgImageBin,
             resultParams,
-            inputTypeImageBin,
+            pInputTypeImageBin,
           );
           break;
       }
