@@ -91,16 +91,18 @@ export async function OGResult(
           >
             {brief.title}
           </span>
-          <span
-            style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
-          >
-            /
-          </span>
-          <span
-            style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
-          >
-            {brief.composer}
-          </span>
+          {brief.composer && (<>
+            <span
+              style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+            >
+              /
+            </span>
+            <span
+              style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+            >
+              {brief.composer}
+            </span>
+          </>)}
         </div>
         <div
           style={{
