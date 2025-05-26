@@ -23,6 +23,8 @@ import {
   slate500,
   amber500,
   slate400,
+  emerald500,
+  rose400,
 } from "./style.js";
 import { ChartBriefMin } from "./app.js";
 
@@ -307,10 +309,10 @@ export async function OGResult(
           position: "absolute",
           top: 0,
           right: 0,
-          width: 124 * 4,
-          height: (124 * 4 * 9) / 16,
+          width: (120 + 4) * 4,
+          height: ((120 * 9) / 16 + 4) * 4,
           borderBottomLeftRadius: 12,
-          backgroundColor: amber500,
+          backgroundColor: [emerald500, amber500, rose400][params.lvType],
         }}
       />
       <img

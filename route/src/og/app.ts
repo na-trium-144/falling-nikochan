@@ -6,6 +6,7 @@ import {
   ChartBrief,
   deserializeResultParams,
   inputTypes,
+  levelTypes,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { OGShare } from "./ogShare.js";
@@ -19,6 +20,7 @@ export interface ChartBriefMin {
   title: string;
   composer: string;
   chartCreator: string;
+  lvType?: number; // 0, 1, 2
 }
 
 const ogApp = (config: {
@@ -48,11 +50,15 @@ const ogApp = (config: {
           });
         }
         const brief = (await briefRes.json()) as ChartBrief;
+        const lvType = levelTypes.indexOf(
+          brief.levels.filter((l) => !l.unlisted).at(0)?.type || "",
+        );
         const sBrief = msgpack.serialize([
           brief.ytId,
           brief.title,
           brief.composer,
           brief.chartCreator,
+          lvType >= 0 ? lvType : undefined,
         ]);
         let sBriefBin = "";
         for (let i = 0; i < sBrief.length; i++) {
@@ -90,6 +96,7 @@ const ogApp = (config: {
         title: briefArr[1],
         composer: briefArr[2],
         chartCreator: briefArr[3],
+        lvType: briefArr[4],
       };
 
       const lang = c.req.query("lang") || "en"; // c.get("language");

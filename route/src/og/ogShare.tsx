@@ -1,10 +1,13 @@
 import React from "react";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
+  amber500,
+  emerald500,
   flexCol,
   flexRow,
   fontMainUi,
   fontTitle,
+  rose400,
   slate800,
   text4xl,
   text5xl,
@@ -35,6 +38,20 @@ export async function OGShare(
           position: "absolute",
         }}
         src={`data:image/png;base64,${btoa(await bgImageBin)}`}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: (120 + 4) * 4,
+          height: ((120 * 9) / 16 + 4) * 4,
+          borderBottomLeftRadius: 12,
+          backgroundColor:
+            brief.lvType !== undefined
+              ? [emerald500, amber500, rose400][brief.lvType]
+              : amber500,
+        }}
       />
       <img
         style={{
