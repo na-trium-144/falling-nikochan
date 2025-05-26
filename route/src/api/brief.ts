@@ -21,7 +21,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default briefApp;

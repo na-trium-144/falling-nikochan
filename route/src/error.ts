@@ -37,10 +37,10 @@ export const onError =
             new URL(c.req.url).origin,
             lang,
             status,
-            message,
+            message
           ),
           status,
-          { "Content-Type": "text/html" },
+          { "Content-Type": "text/html" }
         );
       }
     } catch (e) {
@@ -55,7 +55,7 @@ async function errorResponse(
   origin: string,
   lang: string,
   status: number,
-  message: string,
+  message: string
 ) {
   const t = await getTranslations(lang, "error");
   return (
@@ -68,7 +68,7 @@ async function errorResponse(
       "PLACEHOLDER_MESSAGE",
       t.has("api." + message)
         ? t("api." + message)
-        : message || t("unknownApiError"),
+        : message || t("unknownApiError")
     )
     .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう

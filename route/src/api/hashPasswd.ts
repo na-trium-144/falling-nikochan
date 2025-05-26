@@ -18,7 +18,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const { p } = v.parse(
       v.object({ p: v.pipe(v.string(), v.minLength(1)) }),
-      c.req.query(),
+      c.req.query()
     );
     let pUserSalt: string;
     const newUserSalt = () =>
@@ -71,7 +71,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default hashPasswdApp;

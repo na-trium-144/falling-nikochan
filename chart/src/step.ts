@@ -19,7 +19,7 @@ export const StepSchema = () =>
       fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
       numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
       denominator: v.pipe(v.number(), v.integer(), v.minValue(1)),
-    }),
+    })
     /* v.forward(
     v.check(
       ({ numerator, denominator }) => numerator < denominator,

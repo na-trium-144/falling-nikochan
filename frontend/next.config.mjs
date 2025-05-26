@@ -20,7 +20,7 @@ const babelCoreJsVersion = babelRc.presets[0][1]["preset-env"].corejs;
 if (coreJsVersion !== babelCoreJsVersion) {
   // https://github.com/babel/babel/issues/15412
   throw new Error(
-    `core-js version in .babelrc (${babelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`,
+    `core-js version in .babelrc (${babelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`
   );
 }
 
@@ -50,7 +50,7 @@ console.log("env: ", env);
 writeFileSync(
   join(process.cwd(), "public/assets/buildVer.json"),
   JSON.stringify({ date, commit, version: env.buildVersion }),
-  "utf-8",
+  "utf-8"
 );
 
 const nextConfig = {

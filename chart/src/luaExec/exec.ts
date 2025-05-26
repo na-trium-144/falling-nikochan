@@ -1,12 +1,6 @@
 import { LuaFactory } from "wasmoon";
 import { Step, stepZero } from "../step.js";
-import {
-  luaAccel,
-  luaBeat,
-  luaBPM,
-  luaNote,
-  luaStep,
-} from "./api.js";
+import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";
@@ -21,7 +15,7 @@ export interface LuaExecResult {
 export async function luaExec(
   wasmPath: string,
   code: string,
-  catchError: boolean,
+  catchError: boolean
 ): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
   const lua = await factory.createEngine();
@@ -63,7 +57,7 @@ export async function luaExec(
     ).forEach(([name, func]) => {
       lua.global.set(name, (...args: any[]) => func(result, null, ...args));
       lua.global.set(`${name}Static`, (...args: any[]) =>
-        func(result, ...args),
+        func(result, ...args)
       );
     });
 
@@ -71,21 +65,21 @@ export async function luaExec(
       lineStr
         .replace(
           /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
-          `$1NoteStatic(${ln},$2)$3`,
+          `$1NoteStatic(${ln},$2)$3`
         )
         .replace(
           /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
-          `$1StepStatic(${ln},$2)$3`,
+          `$1StepStatic(${ln},$2)$3`
         )
         .replace(
           /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
-          `$1BeatStatic(${ln},$2)$3`,
+          `$1BeatStatic(${ln},$2)$3`
         )
         .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
         .replace(
           /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelStatic(${ln},$2)$3`,
-        ),
+          `$1AccelStatic(${ln},$2)$3`
+        )
     );
     // console.log(codeStatic);
     await lua.doString(codeStatic.join("\n"));
@@ -143,7 +137,7 @@ export async function luaExec(
   }
   updateBpmTimeSec(
     result.levelFreezed.bpmChanges,
-    result.levelFreezed.speedChanges,
+    result.levelFreezed.speedChanges
   );
   updateBarNum(result.levelFreezed.signature);
   return result;

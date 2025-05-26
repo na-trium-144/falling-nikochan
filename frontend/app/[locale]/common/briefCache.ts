@@ -7,7 +7,7 @@ const briefCacheName = "brief1";
 
 export async function fetchBrief(
   cid: string,
-  noCache?: boolean,
+  noCache?: boolean
 ): Promise<{ brief?: ChartBrief; ok: boolean; is404: boolean }> {
   const fetchRes = fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
     cache: noCache ? "no-store" : "default",
@@ -18,7 +18,7 @@ export async function fetchBrief(
     .then((keys) =>
       keys
         .filter((k) => k.startsWith("brief") && k !== briefCacheName)
-        .forEach((k) => window.caches.delete(k)),
+        .forEach((k) => window.caches.delete(k))
     );
   const staleLS = localStorage.getItem(briefKeyOld(cid));
   if (staleLS) {

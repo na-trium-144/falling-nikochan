@@ -22,7 +22,7 @@ export default function useGameLogic(
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
-  playSE: (s: SEType) => void,
+  playSE: (s: SEType) => void
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
   const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
@@ -111,7 +111,7 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal],
+    [bonusTotal, notesTotal, bigTotal]
   );
 
   // キーを押したときの判定
@@ -210,7 +210,7 @@ export default function useGameLogic(
       notesBigYetDone.current.shift();
       if (candidateLateBig !== null) {
         lateTimes.current.push(
-          candidateLateBig + userOffset /* + audioLatency */,
+          candidateLateBig + userOffset /* + audioLatency */
         );
       }
     } else {

@@ -23,7 +23,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         cid: CidSchema(),
         lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
       }),
-      c.req.param(),
+      c.req.param()
     );
 
     const client = new MongoClient(env(c).MONGODB_URI);
@@ -73,7 +73,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default playFileApp;

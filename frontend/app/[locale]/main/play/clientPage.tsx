@@ -24,7 +24,7 @@ export default function PlayTab(props: Props) {
   const { modal, openModal, openShareInternal } = useShareModal(
     locale,
     "play",
-    { noResetTitle: true },
+    { noResetTitle: true }
   );
 
   const [searchText, setSearchText_] = useState<string>("");
@@ -77,7 +77,7 @@ export default function PlayTab(props: Props) {
                       (await res.json()).map((r: { cid: string }) => ({
                         cid: r.cid,
                         fetched: false,
-                      })),
+                      }))
                     );
                     setSearching(false);
                   } else {
@@ -99,11 +99,11 @@ export default function PlayTab(props: Props) {
                 });
             }
           },
-          noDelay ? 0 : 1000,
+          noDelay ? 0 : 1000
         );
       }
     },
-    [t],
+    [t]
   );
 
   useEffect(() => {
@@ -156,7 +156,7 @@ export default function PlayTab(props: Props) {
             showLoading
             maxRow={Math.min(
               searchMaxRow,
-              Array.isArray(searchResult) ? searchResult.length : 0,
+              Array.isArray(searchResult) ? searchResult.length : 0
             )}
             onMoreClick={() => setSearchMaxRow((prev) => prev + numLatest)}
             badge

@@ -30,7 +30,7 @@ const app = new Hono({ strict: false })
       ImageResponse,
       fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
-    }),
+    })
   )
   .route("/sitemap.xml", sitemapApp)
   .route(
@@ -38,7 +38,7 @@ const app = new Hono({ strict: false })
     shareApp({
       fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
-    }),
+    })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())

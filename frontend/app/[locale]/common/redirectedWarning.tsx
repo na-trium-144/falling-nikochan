@@ -12,9 +12,9 @@ export function RedirectedWarning() {
   useEffect(
     () =>
       setShowRedirectWarning(
-        new URLSearchParams(window.location.search).has("redirected"),
+        new URLSearchParams(window.location.search).has("redirected")
       ),
-    [],
+    []
   );
 
   return (

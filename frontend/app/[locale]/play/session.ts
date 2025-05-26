@@ -13,15 +13,15 @@ export interface SessionData {
 // (initSession時に過去のsessionをぜんぶ消すことにしている)
 export function initSession(
   data: SessionData | null,
-  sessionId?: number,
+  sessionId?: number
 ): number {
-  for(let si = 0; si < localStorage.length; si++){
-    if(localStorage.key(si)?.startsWith("session")){
+  for (let si = 0; si < localStorage.length; si++) {
+    if (localStorage.key(si)?.startsWith("session")) {
       localStorage.removeItem(localStorage.key(si) || "");
     }
   }
 
-  if(sessionId === undefined) {
+  if (sessionId === undefined) {
     sessionId = (Number(localStorage.getItem("lastSessionId")) || 0) + 1;
     localStorage.setItem("lastSessionId", String(sessionId));
   }

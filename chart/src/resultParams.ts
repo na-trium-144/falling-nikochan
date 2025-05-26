@@ -59,7 +59,7 @@ export function serializeResultParams(params: ResultParams): string {
 }
 export function deserializeResultParams(serialized: string): ResultParams {
   const serializedBin = atob(
-    serialized.replaceAll("-", "+").replaceAll("_", "/"),
+    serialized.replaceAll("-", "+").replaceAll("_", "/")
   );
   const serializedArr = new Uint8Array(serializedBin.length);
   for (let i = 0; i < serializedBin.length; i++) {

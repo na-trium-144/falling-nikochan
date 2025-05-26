@@ -212,7 +212,7 @@ export default function TimingTab(props: Props) {
               if (props.currentBpm == props.currentSpeed) {
                 props.toggleBpmChangeHere(
                   !props.bpmChangeHere,
-                  !props.bpmChangeHere,
+                  !props.bpmChangeHere
                 );
               } else {
                 props.toggleBpmChangeHere(!props.bpmChangeHere, null);
@@ -309,15 +309,15 @@ export default function TimingTab(props: Props) {
                 stepImproper(
                   prevBarLength.reduce(
                     (len, bl) => stepAdd(len, bl),
-                    stepZero(),
-                  ),
+                    stepZero()
+                  )
                 )
               : currentBarLength &&
                 stepImproper(
                   currentBarLength.reduce(
                     (len, bl) => stepAdd(len, bl),
-                    stepZero(),
-                  ),
+                    stepZero()
+                  )
                 )}
           </span>
           <span className="mx-1">/</span>
@@ -329,7 +329,7 @@ export default function TimingTab(props: Props) {
               : currentBarLength &&
                 currentBarLength.reduce(
                   (len, bl) => stepAdd(len, bl),
-                  stepZero(),
+                  stepZero()
                 ).denominator * 4}
           </span>
         </span>
@@ -352,15 +352,15 @@ export default function TimingTab(props: Props) {
               {stepImproper(
                 currentBarLength.reduce(
                   (len, bl) => stepAdd(len, bl),
-                  stepZero(),
-                ),
+                  stepZero()
+                )
               )}
             </span>
             <span className="mx-1">/</span>
             <span className="">
               {currentBarLength.reduce(
                 (len, bl) => stepAdd(len, bl),
-                stepZero(),
+                stepZero()
               ).denominator * 4}
             </span>
             <span className="inline-block ml-2 text-sm">
@@ -395,7 +395,7 @@ export default function TimingTab(props: Props) {
                   let newBar: (4 | 8 | 16)[];
                   if (stepCmp(newSig, currentSig) >= 0) {
                     newBar = bar.concat(
-                      barFromLength(stepSub(newSig, currentSig)),
+                      barFromLength(stepSub(newSig, currentSig))
                     );
                   } else {
                     newBar = barFromLength(newSig);
@@ -403,7 +403,7 @@ export default function TimingTab(props: Props) {
                   props.setCurrentSignature({
                     ...props.currentSignature!,
                     bars: props.currentSignature!.bars.map((b, j) =>
-                      i === j ? newBar : b,
+                      i === j ? newBar : b
                     ),
                   });
                 }}
@@ -415,7 +415,7 @@ export default function TimingTab(props: Props) {
                   width:
                     currentBarLength!.reduce(
                       (max, len) => Math.max(max, stepToFloat(len)),
-                      0,
+                      0
                     ) *
                       2 *
                       2 +
@@ -448,13 +448,13 @@ export default function TimingTab(props: Props) {
                               [i].slice(countIndex)
                               .reduce(
                                 (len, bs) => stepAdd(len, bs),
-                                stepZero(),
+                                stepZero()
                               ),
                             stepSimplify({
                               fourth: 0,
                               numerator: 1,
                               denominator: bs / 4,
-                            }),
+                            })
                           );
                           if (stepCmp(remainingSig, stepZero()) >= 0) {
                             const newBar = bar
@@ -464,7 +464,7 @@ export default function TimingTab(props: Props) {
                             props.setCurrentSignature({
                               ...props.currentSignature!,
                               bars: props.currentSignature!.bars.map((b, k) =>
-                                i === k ? newBar : b,
+                                i === k ? newBar : b
                               ),
                             });
                             return;
@@ -498,7 +498,7 @@ export default function TimingTab(props: Props) {
                   props.setCurrentSignature({
                     ...props.currentSignature!,
                     bars: props.currentSignature!.bars.filter(
-                      (_, k) => k !== i,
+                      (_, k) => k !== i
                     ),
                   });
                 }}
@@ -602,7 +602,7 @@ function InputSig(props: PropsS) {
               fourth: 0,
               numerator: Number(v),
               denominator: denom,
-            }),
+            })
           );
           setNum(Number(v));
         }}
@@ -619,7 +619,7 @@ function InputSig(props: PropsS) {
               fourth: 0,
               numerator: num,
               denominator: Number(v) / 4,
-            }),
+            })
           );
           setDenom(Number(v) / 4);
         }}

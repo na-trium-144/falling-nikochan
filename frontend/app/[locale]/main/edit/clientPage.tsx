@@ -29,7 +29,7 @@ export default function EditTab({ locale }: { locale: string }) {
         process.env.BACKEND_PREFIX + `/api/brief/${cid}`,
         {
           cache: "no-store",
-        },
+        }
       );
       setCidFetching(false);
       if (res.ok) {

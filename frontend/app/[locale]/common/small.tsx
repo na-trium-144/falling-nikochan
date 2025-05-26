@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-export function Small(props: {children: ReactNode}) {
+export function Small(props: { children: ReactNode }) {
   return <span className="text-sm" {...props} />;
 }
 export function SmallDomainOnly() {

@@ -94,7 +94,7 @@ export function IndexMain(props: Props) {
                 >
                   {t(key + ".title")}
                 </Link>
-              ),
+              )
             )}
           </nav>
         )}
