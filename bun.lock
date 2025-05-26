@@ -13,7 +13,7 @@
         "@eslint/js": "^9.27.0",
         "@types/bun": "^1.2.13",
         "@types/node": "^22.15.19",
-        "@types/react": "^19.1.4",
+        "@types/react": "^19.1.5",
         "@types/react-dom": "^19.1.5",
         "babel-loader": "^10.0.0",
         "core-js": "^3.42.0",
@@ -30,7 +30,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.13.0",
+      "version": "12.15.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -39,7 +39,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.13.0",
+      "version": "12.15.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -70,14 +70,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.13.0",
+      "version": "12.15.0",
       "dependencies": {
         "next-intl": "^4.0.2",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.13.0",
+      "version": "12.15.0",
       "dependencies": {
         "@hono/node-server": "^1.14.2",
         "@vercel/og": "^0.6.8",
@@ -95,7 +95,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.13.0",
+      "version": "12.15.0",
     },
   },
   "overrides": {
@@ -565,7 +565,7 @@
 
     "@types/node": ["@types/node@22.15.19", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-3vMNr4TzNQyjHcRZadojpRaD9Ofr6LsonZAoQ+HMUa/9ORTPoxVIw0e0mpqWpdjj8xybyCM+oKOUH2vwFu/oEw=="],
 
-    "@types/react": ["@types/react@19.1.4", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-EB1yiiYdvySuIITtD5lhW4yPyJ31RkJkkDw794LaQYrxCSaQV/47y5o1FMC4zF9ZyjUjzJMZwbovEnT5yHTW6g=="],
+    "@types/react": ["@types/react@19.1.5", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-piErsCVVbpMMT2r7wbawdZsq4xMvIAhQuac2gedQHysu1TZYEigE6pnFfgZT+/jQnrRuF5r+SHzuehFjfRjr4g=="],
 
     "@types/react-dom": ["@types/react-dom@19.1.5", "", { "peerDependencies": { "@types/react": "^19.0.0" } }, "sha512-CMCjrWucUBZvohgZxkjd6S9h0nZxXjzus6yDfUb+xLxYM7VvjKNH1tQrE9GWLql1XoOP4/Ds3bwFqShHUYraGg=="],
 
