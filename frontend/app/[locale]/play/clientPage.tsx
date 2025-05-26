@@ -31,6 +31,7 @@ import {
   loadChart6,
   RecordGetSummary,
   RecordPost,
+  inputTypes,
 } from "@falling-nikochan/chart";
 import { ChartSeqData11, loadChart11 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
@@ -121,12 +122,12 @@ export function InitPlay({ locale }: { locale: string }) {
             process.env.BACKEND_PREFIX +
               `/api/playFile/${session?.cid || cidFromParam}` +
               `/${session?.lvIndex || lvIndexFromParam}`,
-            { cache: "no-store" }
+            { cache: "no-store" },
           );
           if (res.ok) {
             try {
               const seq: Level6Play | Level11Play = msgpack.deserialize(
-                await res.arrayBuffer()
+                await res.arrayBuffer(),
               );
               console.log("seq.ver", seq.ver);
               if (seq.ver === 6 || seq.ver === 11 || seq.ver === 12) {
@@ -245,7 +246,7 @@ function Play(props: Props) {
     "speedChanges" in chartSeq &&
     (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
       chartSeq.speedChanges.some(
-        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm,
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
@@ -262,7 +263,7 @@ function Play(props: Props) {
         localStorage.setItem(`offset-${cid}`, String(v));
       }
     },
-    [cid]
+    [cid],
   );
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -315,13 +316,13 @@ function Play(props: Props) {
       }
       ytPlayer.current?.setVolume(v);
     },
-    [cid]
+    [cid],
   );
   useEffect(() => {
     const vol = Number(
       localStorage.getItem(`ytVolume-${cid}`) ||
         localStorage.getItem("ytVolume") ||
-        100
+        100,
     );
     setYtVolume_(vol);
     ytPlayer.current?.setVolume(vol);
@@ -360,6 +361,7 @@ function Play(props: Props) {
     bigTotal,
     lateTimes,
     chartEnd,
+    hitType,
   } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
   const [fps, setFps] = useState<number>(0);
@@ -461,7 +463,7 @@ function Play(props: Props) {
       if (showLoadingTimeout.current === null) {
         showLoadingTimeout.current = setTimeout(
           () => setShowLoading(true),
-          1500
+          1500,
         );
       }
     }
@@ -521,14 +523,14 @@ function Play(props: Props) {
           void (async () => {
             try {
               const res = await fetch(
-                process.env.BACKEND_PREFIX + `/api/record/${cid}`
+                process.env.BACKEND_PREFIX + `/api/record/${cid}`,
               );
               if (res.ok) {
                 const records: RecordGetSummary[] = await res.json();
                 setRecord(
                   records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
-                  )
+                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash,
+                  ),
                 );
               }
             } catch (e) {
@@ -671,12 +673,26 @@ function Play(props: Props) {
           exit();
         } else {
           flash();
-          hit();
+          hit(inputTypes.keyboard);
         }
       }}
       onPointerDown={(e) => {
         flash();
-        hit();
+        switch (e.pointerType) {
+          case "mouse":
+            hit(inputTypes.mouse);
+            break;
+          case "pen":
+            hit(inputTypes.pen);
+            break;
+          case "touch":
+            hit(inputTypes.touch);
+            break;
+          default:
+            console.warn(`unknown pointer type: ${e.pointerType}`);
+            hit(0);
+            break;
+        }
         e.preventDefault();
       }}
       onPointerUp={(e) => e.preventDefault()}
@@ -799,7 +815,7 @@ function Play(props: Props) {
               }
               onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e)=> e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
             >
               <Pause className="inline-block align-middle " />
               {!isTouch && (
@@ -856,7 +872,7 @@ function Play(props: Props) {
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || ""
+                chartBrief.levels.at(lvIndex || 0)?.type || "",
               )}
               lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
               baseScore100={
@@ -896,6 +912,7 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
               record={record}
+              inputType={hitType}
             />
           )}
           {showStopped && (
