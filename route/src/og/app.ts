@@ -5,6 +5,7 @@ import { HTTPException } from "hono/http-exception";
 import {
   ChartBrief,
   deserializeResultParams,
+  inputTypes,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { OGShare } from "./ogShare.js";
@@ -161,6 +162,38 @@ const ogApp = (config: {
         bgImageBin += String.fromCharCode(bgImageBuf[i]);
       }
 
+      let inputTypeImageBin = "";
+      if (resultParams) {
+        let imagePath: string | null;
+        switch (resultParams.inputType) {
+          case inputTypes.keyboard:
+            imagePath = "/assets/icon-slate500-keyboard-one.svg";
+            break;
+          case inputTypes.mouse:
+            imagePath = "/assets/icon-slate500-mouse-one.svg";
+            break;
+          case inputTypes.touch:
+            imagePath = "/assets/icon-slate500-click-tap.svg";
+            break;
+          default:
+            console.error(`unknown touch type ${resultParams.inputType}`);
+            imagePath = null;
+            break;
+        }
+        if (imagePath) {
+          const pInputTypeImage = config.fetchStatic(
+            env(c),
+            new URL(imagePath, new URL(c.req.url).origin),
+          );
+          const inputTypeImageBuf = new Uint8Array(
+            await (await pInputTypeImage).arrayBuffer(),
+          );
+          for (let i = 0; i < inputTypeImageBuf.byteLength; i++) {
+            inputTypeImageBin += String.fromCharCode(inputTypeImageBuf[i]);
+          }
+        }
+      }
+
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
         case "share":
@@ -170,7 +203,14 @@ const ogApp = (config: {
           if (!resultParams) {
             throw new HTTPException(400, { message: "missingResultParam" });
           }
-          Image = OGResult(cid, lang, brief, bgImageBin, resultParams);
+          Image = OGResult(
+            cid,
+            lang,
+            brief,
+            bgImageBin,
+            resultParams,
+            inputTypeImageBin,
+          );
           break;
       }
       const imRes = new config.ImageResponse(await Image!, {

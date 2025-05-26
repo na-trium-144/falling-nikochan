@@ -4,6 +4,7 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
+  inputTypes,
   levelTypes,
   rankStr,
   ResultParams,
@@ -31,7 +32,8 @@ export async function OGResult(
   lang: string,
   brief: ChartBriefMin,
   bgImageBin: string,
-  params: ResultParams
+  params: ResultParams,
+  inputTypeImageBin: string | null,
 ) {
   const th = await getTranslations(lang, "share");
   const t = await getTranslations(lang, "play.result");
@@ -171,9 +173,21 @@ export async function OGResult(
               right: 6 * 4,
               ...text3xl,
               color: slate500,
+              ...flexRow,
             }}
           >
-            {`(${params.date.toLocaleDateString(lang)})`}
+            <span>(</span>
+            <span>{params.date.toLocaleDateString(lang)}</span>
+            {inputTypeImageBin && (
+              <img
+                style={{
+                  marginLeft: 12,
+                  height: 30,
+                }}
+                src={`data:image/svg+xml;base64,${btoa(inputTypeImageBin)}`}
+              />
+            )}
+            <span>)</span>
           </div>
           <div
             style={{
