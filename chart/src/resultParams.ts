@@ -20,6 +20,7 @@ export const inputTypes = {
   keyboard: 1,
   touch: 2,
   mouse: 3,
+  pen: 4,
 } as const;
 // ここではレベルの指定はlvIndexやlvHashではなく、名前と難易度表記を直接保存しているので
 // レベルの順番が変わったり更新されたりしても記録は有効

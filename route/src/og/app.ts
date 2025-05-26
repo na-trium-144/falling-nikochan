@@ -180,6 +180,9 @@ const ogApp = (config: {
           case inputTypes.touch:
             imagePath = "/assets/icon-slate500-click-tap.svg";
             break;
+          case inputTypes.pen:
+            imagePath = "/assets/icon-slate500-write.svg";
+            break;
           case null:
             imagePath = null;
             break;
