@@ -1,3 +1,7 @@
+## ver. 12.17 - 2025/05/28 [#636](https://github.com/na-trium-144/falling-nikochan/pull/636)
+
+* cid 10xxxx を使用禁止にする
+
 ## ver. 12.16 - 2025/05/28 [#629](https://github.com/na-trium-144/falling-nikochan/pull/629)
 
 * GitHub Actionによるprettierのcheckを導入
