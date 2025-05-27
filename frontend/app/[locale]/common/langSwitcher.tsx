@@ -25,9 +25,9 @@ export function LangSwitcher(props: LangProps) {
             router.replace(
               window.location.pathname.replace(
                 `/${props.locale}`,
-                `/${e.target.value}`,
+                `/${e.target.value}`
               ),
-              { scroll: false },
+              { scroll: false }
             );
           } else {
             // /share/cid など

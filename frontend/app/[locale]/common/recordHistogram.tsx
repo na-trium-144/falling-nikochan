@@ -5,7 +5,7 @@ interface Props {
 export function RecordHistogram(props: Props) {
   const histogramMax = Math.max(
     10,
-    props.histogram.reduce((max, h) => Math.max(max, h), 0) || 0,
+    props.histogram.reduce((max, h) => Math.max(max, h), 0) || 0
   );
 
   return (

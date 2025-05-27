@@ -7,7 +7,7 @@ const actualLocales = (await readdir(".", { withFileTypes: true }))
   .map((dir) => dir.name);
 if (actualLocales.length !== locales.length) {
   throw new Error(
-    `locales in i18n/index.js ${locales} do not match actual locales ${actualLocales}`,
+    `locales in i18n/index.js ${locales} do not match actual locales ${actualLocales}`
   );
 }
 for (const locale of locales) {
@@ -31,8 +31,8 @@ async function getKeys(locale) {
   return (
     await Promise.all(
       files.map(async (file) =>
-        listKeys((await import(`./${locale}/${file}`)).default),
-      ),
+        listKeys((await import(`./${locale}/${file}`)).default)
+      )
     )
   ).flat();
 }

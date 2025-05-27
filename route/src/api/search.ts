@@ -13,7 +13,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       v.object({
         q: v.string(),
       }),
-      c.req.query(),
+      c.req.query()
     );
     const normalizedQueries = normalizeStr(q)
       .split(" ")
@@ -64,19 +64,19 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
                   prev +
                   a.normalizedText.split(q).length -
                   b.normalizedText.split(q).length,
-                0,
-              ),
+                0
+              )
           )
           .map((r) => ({ cid: r.cid })),
         200,
         {
           "cache-control": cacheControl(env(c), 600),
-        },
+        }
       );
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default searchApp;

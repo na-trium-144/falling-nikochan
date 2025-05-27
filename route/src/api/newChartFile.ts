@@ -25,7 +25,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .post("/", async (c) => {
     console.log(c.req.header("x-forwarded-for"));
     const ip = String(
-      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
+      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
     ); // nullもundefinedも文字列にしちゃう
     const chartBuf = await c.req.arrayBuffer();
     const pSecretSalt = secretSalt(env(c));
@@ -44,7 +44,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
             // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
           },
           429,
-          { "retry-after": (rateLimitMin * 60).toString() },
+          { "retry-after": (rateLimitMin * 60).toString() }
         );
       }
 
@@ -111,9 +111,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
               ip,
               await getYTDataEntry(env(c), db, newChart.ytId),
               pSecretSalt,
-              null,
-            ),
-          ),
+              null
+            )
+          )
         );
 
       return c.json({ cid: cid });

@@ -51,10 +51,10 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
         ph: v.optional(HashSchema()),
         pbypass: v.optional(v.string()),
       }),
-      c.req.query(),
+      c.req.query()
     );
     const ip = String(
-      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
+      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
     ); // nullもundefinedも文字列にしちゃう
     const v9UserSalt =
       env(c).API_ENV === "development"
@@ -86,7 +86,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
                 // levelsCompressed: null,
                 deleted: true,
               },
-            },
+            }
           );
           return c.body(null, 204);
         case "POST": {
@@ -152,10 +152,10 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
                   ip,
                   await getYTDataEntry(env(c), db, newChart.ytId),
                   pSecretSalt,
-                  entry,
-                ),
+                  entry
+                )
               ),
-            },
+            }
           );
           return c.body(null, 204);
         }
@@ -165,7 +165,7 @@ const chartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).on(
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default chartFileApp;

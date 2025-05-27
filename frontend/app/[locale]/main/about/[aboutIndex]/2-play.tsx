@@ -77,8 +77,8 @@ export function AboutContent2() {
               (nikochanPhase === 0
                 ? "-translate-y-28 translate-x-14"
                 : nikochanPhase === 1
-                ? "transition ease-linear duration-700"
-                : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125")
+                  ? "transition ease-linear duration-700"
+                  : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125")
             }
             style={{
               /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
@@ -118,7 +118,7 @@ export function AboutContent2() {
         >
           <div className="absolute top-0 left-0">
             <span className="inline-block text-lg w-6 text-right">{chain}</span>
-            <span className="text-xs ml-1">{t("chain", {chain})}</span>
+            <span className="text-xs ml-1">{t("chain", { chain })}</span>
           </div>
           <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
           <div
@@ -127,8 +127,8 @@ export function AboutContent2() {
               (nikochanPhase === 0
                 ? "-translate-y-28 translate-x-14"
                 : nikochanPhase === 1
-                ? "transition ease-linear duration-700"
-                : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125")
+                  ? "transition ease-linear duration-700"
+                  : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125")
             }
             style={{
               /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */

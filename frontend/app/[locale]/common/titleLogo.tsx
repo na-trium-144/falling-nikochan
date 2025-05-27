@@ -38,8 +38,8 @@ export default function Title(props: Props) {
           (nikochanPhase === 0
             ? "-translate-y-28 translate-x-14 opacity-0 "
             : nikochanPhase === 1
-            ? "transition-transform ease-linear duration-300"
-            : "")
+              ? "transition-transform ease-linear duration-300"
+              : "")
         }
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */

@@ -48,7 +48,7 @@ export default function LevelTab(props: Props) {
       props.changeChart({
         ...props.chart,
         levels: props.chart.levels.filter(
-          (_, i) => i !== props.currentLevelIndex,
+          (_, i) => i !== props.currentLevelIndex
         ),
       });
       props.setCurrentLevelIndex(0);
@@ -82,7 +82,7 @@ export default function LevelTab(props: Props) {
   useEffect(() => {
     if (props.chart) {
       setLevelsDifficulty(
-        props.chart.levels.map((level) => difficulty(level, level.type)),
+        props.chart.levels.map((level) => difficulty(level, level.type))
       );
     }
   }, [props.chart]);

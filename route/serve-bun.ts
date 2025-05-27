@@ -27,7 +27,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       ImageResponse,
       fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
-    }),
+    })
   )
   .route("/sitemap.xml", sitemapApp)
   .route(
@@ -35,7 +35,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     shareApp({
       fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
-    }),
+    })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(
@@ -52,7 +52,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           return path + ".html";
         }
       },
-    }),
+    })
   )
   .use(languageDetector())
   .onError(onError({ fetchStatic }))

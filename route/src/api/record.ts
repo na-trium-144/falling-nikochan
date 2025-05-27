@@ -27,7 +27,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
       const db = client.db("nikochan");
       const records = db
         .collection<PlayRecordEntry>("playRecord")
-        .find({ cid })
+        .find({ cid });
       const summary: RecordGetSummary[] = [];
       for await (const record of records) {
         let s = summary.find((s) => s.lvHash === record.lvHash);
@@ -66,7 +66,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const { lvHash, auto, score, fc, fb } = v.parse(
       RecordPostSchema(),
-      await c.req.json(),
+      await c.req.json()
     );
 
     const client = new MongoClient(env(c).MONGODB_URI);

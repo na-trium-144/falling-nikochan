@@ -46,6 +46,14 @@ jobs:
     - run: bun mongo-docker
     - run: bun route:test
 
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: bun i --frozen-lock
+    - run: bunx prettier --check .
+
   vercel-build: # uses bun
     runs-on: ubuntu-latest
     env:

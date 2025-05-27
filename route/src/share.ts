@@ -49,7 +49,7 @@ const shareApp = (config: {
       // if (c.req.path.startsWith("/share")) {
       placeholderUrl = new URL(
         `/${qLang}/share/placeholder`,
-        new URL(c.req.url).origin,
+        new URL(c.req.url).origin
       );
       // } else {
       //   placeholderUrl = new URL(
@@ -134,8 +134,8 @@ const shareApp = (config: {
             new URL(
               (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
                 ogQuery.toString(),
-              new URL(c.req.url).origin,
-            ).toString(),
+              new URL(c.req.url).origin
+            ).toString()
           )
           .replaceAll("PLACEHOLDER_DESCRIPTION", descriptionEscapedHtml)
           .replaceAll("PLACEHOLDER_BRIEF", briefEscapedHtml);

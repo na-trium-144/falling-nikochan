@@ -48,12 +48,12 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         200,
         {
           "cache-control": cacheControl(env(c), 600),
-        },
+        }
       );
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default popularApp;

@@ -16,7 +16,7 @@ export interface Chart2 {
 }
 
 export function convertTo2(chart: Chart1): Chart2 {
-  if(chart.ver !== 1) throw new Error("invalid chart version");
+  if (chart.ver !== 1) throw new Error("invalid chart version");
   return {
     falling: "nikochan",
     ver: 2,

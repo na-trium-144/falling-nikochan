@@ -65,7 +65,7 @@ export function luaBeat(state: LuaExecResult, ...args: any[]) {
     Array.isArray(args[1]) &&
     args[1].every(
       (x: any) =>
-        Array.isArray(x) && x.every((b) => b === 4 || b === 8 || b === 16),
+        Array.isArray(x) && x.every((b) => b === 4 || b === 8 || b === 16)
     ) &&
     typeof args[2] === "number" &&
     args[2] >= 0 &&

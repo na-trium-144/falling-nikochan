@@ -23,7 +23,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
   const [sessionError, setSessionError] = useState<boolean>(false);
   useEffect(() => {
     const data: ShareInternalSession | null = JSON.parse(
-      sessionStorage.getItem("shareInternal") || "null",
+      sessionStorage.getItem("shareInternal") || "null"
     );
     if (data) {
       setCId(data.cid);
