@@ -23,7 +23,6 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     return c.body(null, 400);
   })
   .post("/", async (c) => {
-    // cidとfidを生成し、bodyのデータを保存して、cidを返す
     console.log(c.req.header("x-forwarded-for"));
     const ip = String(
       c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
@@ -86,7 +85,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
 
       let cid: string;
       while (true) {
-        cid = Math.floor(Math.random() * 900000 + 100000).toString();
+        // 生成するcidは110000〜999999まで
+        // 10xxxxはテストデータに使用するので、誤ってテストを本番環境で実行する可能性に備えて予約
+        cid = Math.floor(Math.random() * 890000 + 110000).toString();
         if (
           await db
             .collection<ChartEntryCompressed>("chart")
