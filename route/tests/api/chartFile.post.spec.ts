@@ -58,7 +58,7 @@ describe("POST /api/chartFile/:cid", () => {
           Cookie: "pUserSalt=def",
         },
         body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
-      },
+      }
     );
     expect(res.status).toBe(204);
 
@@ -140,7 +140,7 @@ describe("POST /api/chartFile/:cid", () => {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
-      },
+      }
     );
     expect(res.status).toBe(401);
     const body = await res.json();
@@ -183,7 +183,7 @@ describe("POST /api/chartFile/:cid", () => {
     await initDb();
     const chart = dummyChart();
     chart.levels[0].rest = new Array(chartMaxEvent + 1).fill(
-      chart.levels[0].rest[0],
+      chart.levels[0].rest[0]
     );
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
@@ -224,7 +224,7 @@ describe("POST /api/chartFile/:cid", () => {
       expect(res.status).toBe(204);
 
       expect(
-        (await app.request("/api/chartFile/100000?p=p")).status,
+        (await app.request("/api/chartFile/100000?p=p")).status
       ).toStrictEqual(200);
     });
     test("should be changed if changePasswd is not null", async () => {
@@ -240,10 +240,10 @@ describe("POST /api/chartFile/:cid", () => {
       expect(res.status).toBe(204);
 
       expect(
-        (await app.request("/api/chartFile/100000?p=p")).status,
+        (await app.request("/api/chartFile/100000?p=p")).status
       ).toStrictEqual(401);
       expect(
-        (await app.request("/api/chartFile/100000?p=newPasswd")).status,
+        (await app.request("/api/chartFile/100000?p=newPasswd")).status
       ).toStrictEqual(200);
     });
   });

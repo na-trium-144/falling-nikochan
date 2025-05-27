@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: MetadataProps) {
     params,
     "/main/edit",
     t("title"),
-    t("description", { rateLimitMin }),
+    t("description", { rateLimitMin })
   );
 }
 

@@ -16,7 +16,7 @@ export async function OGShare(
   cid: string,
   lang: string,
   brief: ChartBriefMin,
-  bgImageBin: string,
+  bgImageBin: string
 ) {
   const t = await getTranslations(lang, "share");
   return (

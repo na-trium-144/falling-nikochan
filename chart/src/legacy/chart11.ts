@@ -77,7 +77,7 @@ export const ChartEditSchema11 = () =>
     ...ChartMinSchema11().entries,
     levels: v.array(LevelEditSchema11()),
     changePasswd: v.nullable(
-      v.pipe(v.string(), v.nonEmpty("Passwd must not be empty")),
+      v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))
     ),
     published: v.boolean(),
   });
@@ -94,7 +94,7 @@ export type Chart11Edit = v.InferOutput<ReturnType<typeof ChartEditSchema11>>;
 
 export function convertToPlay11(
   chart: Chart11Edit,
-  lvIndex: number,
+  lvIndex: number
 ): Level11Play {
   const level = chart.levels.at(lvIndex);
   return {
@@ -148,7 +148,7 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
         level.notes.length >= 1
           ? getTimeSec(
               level.bpmChanges,
-              level.notes[level.notes.length - 1].step,
+              level.notes[level.notes.length - 1].step
             ) + chart.offset
           : 0,
     })),
@@ -156,7 +156,7 @@ export async function convertTo11(chart: ChartUntil9): Promise<Chart11Edit> {
   };
 }
 export async function convertTo11Min(
-  chart: ChartUntil9Min,
+  chart: ChartUntil9Min
 ): Promise<Chart11Min> {
   if (chart.ver !== 9 && chart.ver !== 10)
     chart = await convertTo9Min(chart as ChartUntil8Min);

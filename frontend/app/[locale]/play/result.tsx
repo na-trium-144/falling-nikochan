@@ -110,7 +110,7 @@ export default function Result(props: Props) {
       animationDuration: "200ms",
       animationTimingFunction: "linear",
       animationFillMode: "forwards",
-    } as const);
+    }) as const;
   const appearingAnimation = (index: number) =>
     ({
       transitionProperty: "all",
@@ -118,14 +118,14 @@ export default function Result(props: Props) {
       transitionDuration: "100ms",
       opacity: showing >= index ? 1 : 0,
       transform: showing >= index ? "scale(1)" : "scale(4)",
-    } as const);
+    }) as const;
   const appearingAnimation2 = (index: number) =>
     ({
       transitionProperty: "opacity",
       transitionTimingFunction: "ease-out",
       transitionDuration: "300ms",
       opacity: showing >= index ? 1 : 0,
-    } as const);
+    }) as const;
   const appearingAnimation3 = (index: number) =>
     ({
       transitionProperty: "opacity",
@@ -133,7 +133,7 @@ export default function Result(props: Props) {
       transitionDuration: "150ms",
       opacity: showing >= index ? 1 : 0,
       visibility: showing >= index ? "visible" : "hidden",
-    } as const);
+    }) as const;
   return (
     <CenterBox
       ref={ref}
@@ -224,8 +224,8 @@ export default function Result(props: Props) {
                   (props.score100 >= 9000
                     ? "A."
                     : props.score100 >= 7000
-                    ? "B."
-                    : "C.") +
+                      ? "B."
+                      : "C.") +
                   (Math.floor(messageRandom.current * 3) + 1)
               )}
             </div>

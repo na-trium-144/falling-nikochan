@@ -39,7 +39,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     shareApp({
       fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
-    }),
+    })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
@@ -298,11 +298,11 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
-          ),
+            null
+          )
         ),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: dummyCid + 1 },
@@ -319,12 +319,12 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           deleted: true,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 4) },
@@ -340,13 +340,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 4,
           levels: dummyChart4().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 5) },
@@ -362,13 +362,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 5,
           levels: dummyChart5().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 6) },
@@ -384,13 +384,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 6,
           levels: dummyChart6().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 7) },
@@ -406,13 +406,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 7,
           levels: dummyChart7().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 8) },
@@ -428,13 +428,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 8,
           levels: dummyChart8().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 9) },
@@ -450,13 +450,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 9,
           levels: dummyChart9().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 10) },
@@ -472,13 +472,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 10,
           levels: dummyChart10().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: String(Number(dummyCid) + 11) },
@@ -494,13 +494,13 @@ export async function initDb() {
             null,
             undefined,
             pSecretSalt,
-            null,
+            null
           )),
           ver: 11,
           levels: dummyChart11().levels,
         }),
       },
-      { upsert: true },
+      { upsert: true }
     );
   } finally {
     await client.close();

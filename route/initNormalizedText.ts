@@ -30,7 +30,7 @@ try {
             ytData: await getYTDataEntry(process.env as any, db, chart.ytId),
           }),
         },
-      },
+      }
     );
   }
 } finally {

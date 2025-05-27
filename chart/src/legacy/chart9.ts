@@ -90,7 +90,7 @@ export const ChartEditSchema9 = () =>
     ...ChartMinSchema9().entries,
     levels: v.array(LevelEditSchema9()),
     changePasswd: v.nullable(
-      v.pipe(v.string(), v.nonEmpty("Passwd must not be empty")),
+      v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))
     ),
     published: v.boolean(),
   });

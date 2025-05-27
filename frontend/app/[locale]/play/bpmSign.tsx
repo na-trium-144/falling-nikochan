@@ -68,10 +68,13 @@ export default function BPMSign(props: Props) {
         currentBpmIndex + 1 < chartSeq.bpmChanges.length
       ) {
         // chartのvalidateでtimesecは再計算されたことが保証されている
-        timer = setTimeout(() => {
-          timer = null;
-          setNextBpmIndex(currentBpmIndex + 1);
-        }, (chartSeq.bpmChanges[currentBpmIndex + 1].timeSec - now) * 1000 - 100);
+        timer = setTimeout(
+          () => {
+            timer = null;
+            setNextBpmIndex(currentBpmIndex + 1);
+          },
+          (chartSeq.bpmChanges[currentBpmIndex + 1].timeSec - now) * 1000 - 100
+        );
       }
       return () => {
         if (timer !== null) {
@@ -102,10 +105,13 @@ export default function BPMSign(props: Props) {
       prevPlaying2.current = true;
       const nextSpeedChangeTime =
         chartSeq.speedChanges[currentSpeedIndex + 1].timeSec;
-      timer = setTimeout(() => {
-        timer = null;
-        setCurrentSpeedIndex(currentSpeedIndex + 1);
-      }, (nextSpeedChangeTime - now) * 1000);
+      timer = setTimeout(
+        () => {
+          timer = null;
+          setCurrentSpeedIndex(currentSpeedIndex + 1);
+        },
+        (nextSpeedChangeTime - now) * 1000
+      );
     }
     return () => {
       if (timer !== null) {

@@ -53,7 +53,7 @@ describe("DELETE /api/chartFile/:cid", () => {
       {
         headers: { Cookie: "pUserSalt=def" },
         method: "delete",
-      },
+      }
     );
     expect(res.status).toBe(204);
     expect((await app.request("/api/brief/100000")).status).toBe(404);
@@ -70,7 +70,7 @@ describe("DELETE /api/chartFile/:cid", () => {
     expect((await app.request("/api/brief/100000")).status).toBe(200);
     const res = await app.request(
       "/api/chartFile/100000?p=wrong&ph=" + (await hash("wrong")),
-      { method: "delete" },
+      { method: "delete" }
     );
     expect(res.status).toBe(401);
     const body = await res.json();

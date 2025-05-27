@@ -35,7 +35,7 @@ export function useLuaExecutor() {
   const [running, setRunning] = useState<boolean>(false);
   const worker = useRef<Worker | null>(null);
   const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
-    null,
+    null
   );
 
   const abortExec = useCallback(() => {
@@ -80,11 +80,11 @@ export function useLuaExecutor() {
           } else {
             console.error("luaExecWorker finished but resolver is null");
           }
-        },
+        }
       );
       return p;
     },
-    [abortExec],
+    [abortExec]
   );
   return { stdout, err, errLine, running, exec, abortExec };
 }
@@ -247,7 +247,7 @@ export function LuaTabProvider(props: PProps) {
 }
 
 export function LuaTabPlaceholder(
-  props: Props & { parentContainer: HTMLDivElement | null },
+  props: Props & { parentContainer: HTMLDivElement | null }
 ) {
   const { ref } = useResizeDetector();
   const {

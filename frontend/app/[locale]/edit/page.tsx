@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: MetadataProps) {
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
   const guideContents = ([null] as ReactNode[]).concat(
-    (await importGuideMDX(locale)).map((Content: FC, i) => <Content key={i} />),
+    (await importGuideMDX(locale)).map((Content: FC, i) => <Content key={i} />)
   );
   return <EditAuth locale={locale} guideContents={guideContents} />;
 }

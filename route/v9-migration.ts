@@ -60,7 +60,7 @@ try {
       chart.cid,
       chart.editPasswd,
       process.env.SECRET_SALT!,
-      pRandomSalt,
+      pRandomSalt
     );
     console.log(`Updating ${chart.cid}`);
     await db.collection<ChartEntryCompressed>("chart").updateOne(
@@ -75,7 +75,7 @@ try {
         $unset: {
           editPasswd: "",
         },
-      },
+      }
     );
   }
 } finally {

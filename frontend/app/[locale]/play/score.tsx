@@ -174,7 +174,7 @@ function NumDisp(props: NumProps) {
     numRefS100,
   ]);
   const numAnimations = useRef<(Animation | undefined)[]>(
-    new Array(digits).fill(undefined),
+    new Array(digits).fill(undefined)
   );
   useEffect(() => {
     if (anim && num > prevNum.current) {
@@ -193,7 +193,7 @@ function NumDisp(props: NumProps) {
               { transform: "translateY(-25%)", offset: 0.3 },
               { transform: "translateY(0)" },
             ],
-            { duration: 200, fill: "forwards", easing: "linear" },
+            { duration: 200, fill: "forwards", easing: "linear" }
           );
         }
         a /= 10;

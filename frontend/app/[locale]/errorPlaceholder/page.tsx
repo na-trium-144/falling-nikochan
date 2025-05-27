@@ -6,7 +6,7 @@ export async function generateMetadata({ params }: MetadataProps) {
     params,
     null,
     "PLACEHOLDER_TITLE",
-    "PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE",
+    "PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE"
   );
 }
 

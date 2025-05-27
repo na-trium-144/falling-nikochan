@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: MetadataProps) {
     params,
     "/main/popular",
     t("popular"),
-    t("popularDesc", { popularDays }),
+    t("popularDesc", { popularDays })
   );
 }
 

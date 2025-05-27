@@ -17,7 +17,7 @@ export type NoteCommand = NoteCommand9;
 export type NoteCommandWithLua = NoteCommand9;
 
 export function defaultNoteCommand(
-  currentStep: Step = stepZero(),
+  currentStep: Step = stepZero()
 ): NoteCommand {
   return {
     step: currentStep,
@@ -34,6 +34,6 @@ export type RestStep = Rest9;
 
 export function defaultCopyBuffer() {
   return ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
-    Array.from(new Array(9)).map(() => null),
+    Array.from(new Array(9)).map(() => null)
   );
 }
