@@ -122,12 +122,12 @@ export function InitPlay({ locale }: { locale: string }) {
             process.env.BACKEND_PREFIX +
               `/api/playFile/${session?.cid || cidFromParam}` +
               `/${session?.lvIndex || lvIndexFromParam}`,
-            { cache: "no-store" },
+            { cache: "no-store" }
           );
           if (res.ok) {
             try {
               const seq: Level6Play | Level11Play = msgpack.deserialize(
-                await res.arrayBuffer(),
+                await res.arrayBuffer()
               );
               console.log("seq.ver", seq.ver);
               if (seq.ver === 6 || seq.ver === 11 || seq.ver === 12) {
@@ -246,7 +246,7 @@ function Play(props: Props) {
     "speedChanges" in chartSeq &&
     (chartSeq.speedChanges.length !== chartSeq.bpmChanges.length ||
       chartSeq.speedChanges.some(
-        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm,
+        (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
@@ -263,7 +263,7 @@ function Play(props: Props) {
         localStorage.setItem(`offset-${cid}`, String(v));
       }
     },
-    [cid],
+    [cid]
   );
 
   const ref = useRef<HTMLDivElement>(null!);
@@ -316,13 +316,13 @@ function Play(props: Props) {
       }
       ytPlayer.current?.setVolume(v);
     },
-    [cid],
+    [cid]
   );
   useEffect(() => {
     const vol = Number(
       localStorage.getItem(`ytVolume-${cid}`) ||
         localStorage.getItem("ytVolume") ||
-        100,
+        100
     );
     setYtVolume_(vol);
     ytPlayer.current?.setVolume(vol);
@@ -463,7 +463,7 @@ function Play(props: Props) {
       if (showLoadingTimeout.current === null) {
         showLoadingTimeout.current = setTimeout(
           () => setShowLoading(true),
-          1500,
+          1500
         );
       }
     }
@@ -506,6 +506,7 @@ function Play(props: Props) {
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
+        const newResultDate = new Date();
         if (
           cid &&
           !auto &&
@@ -514,23 +515,26 @@ function Play(props: Props) {
         ) {
           if (score > bestScoreState) {
             setBestScore(cid, chartBrief.levels[lvIndex].hash, {
+              date: newResultDate.getTime(),
               baseScore,
               chainScore,
               bigScore,
               judgeCount,
+              bigCount: bigCount,
+              inputType: hitType,
             });
           }
           void (async () => {
             try {
               const res = await fetch(
-                process.env.BACKEND_PREFIX + `/api/record/${cid}`,
+                process.env.BACKEND_PREFIX + `/api/record/${cid}`
               );
               if (res.ok) {
                 const records: RecordGetSummary[] = await res.json();
                 setRecord(
                   records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash,
-                  ),
+                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
+                  )
                 );
               }
             } catch (e) {
@@ -561,7 +565,7 @@ function Play(props: Props) {
               //ignore
             }
           }
-          setResultDate(new Date());
+          setResultDate(newResultDate);
           setExitable((ex) =>
             Math.max(
               ex || 0,
@@ -593,6 +597,8 @@ function Play(props: Props) {
     judgeCount,
     stop,
     props.goResult,
+    bigCount,
+    hitType,
   ]);
 
   const onReady = useCallback(() => {
@@ -872,7 +878,7 @@ function Play(props: Props) {
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || "",
+                chartBrief.levels.at(lvIndex || 0)?.type || ""
               )}
               lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
               baseScore100={

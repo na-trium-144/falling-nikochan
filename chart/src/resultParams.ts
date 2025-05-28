@@ -3,7 +3,7 @@ import * as v from "valibot";
 
 const dateBase = new Date(2025, 2, 1);
 export interface ResultParams {
-  date: Date;
+  date: Date | null;
   lvName: string;
   lvType: number;
   lvDifficulty: number;
@@ -42,7 +42,7 @@ export const ResultSerializedSchema = () =>
     ]),
     v.tuple([
       v.literal(2),
-      v.number(), // [1] date - dateBase
+      v.nullable(v.number()), // [1] date - dateBase
       v.string(), // [2] lvName
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2)), // [3] lvType 0,1,2
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(20)), // [4] lvDifficulty 0-20
@@ -61,7 +61,7 @@ export type ResultSerialized = v.InferOutput<
 export function serializeResultParams(params: ResultParams): string {
   const serialized = msgpack.serialize([
     2,
-    params.date.getTime() - dateBase.getTime(),
+    params.date !== null ? params.date.getTime() - dateBase.getTime() : null,
     params.lvName,
     params.lvType,
     params.lvDifficulty,
@@ -92,13 +92,16 @@ export function deserializeResultParams(serialized: string): ResultParams {
   }
   const deserialized = v.parse(
     ResultSerializedSchema(),
-    msgpack.deserialize(serializedArr),
+    msgpack.deserialize(serializedArr)
   );
   switch (deserialized[0]) {
     case 1:
     case 2:
       return {
-        date: new Date(dateBase.getTime() + deserialized[1]),
+        date:
+          deserialized[1] !== null
+            ? new Date(dateBase.getTime() + deserialized[1])
+            : null,
         lvName: deserialized[2],
         lvType: deserialized[3],
         lvDifficulty: deserialized[4],
