@@ -518,27 +518,29 @@ function Play(props: Props) {
               judgeCount,
             });
           }
-          void (async () => {
-            try {
-              const res = await fetch(
-                process.env.BACKEND_PREFIX + `/api/record/${cid}`
-              );
-              if (res.ok) {
-                const records: RecordGetSummary[] = await res.json();
-                setRecord(
-                  records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
-                  )
+          if (!editing) {
+            void (async () => {
+              try {
+                const res = await fetch(
+                  process.env.BACKEND_PREFIX + `/api/record/${cid}`
                 );
+                if (res.ok) {
+                  const records: RecordGetSummary[] = await res.json();
+                  setRecord(
+                    records.find(
+                      (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
+                    )
+                  );
+                }
+              } catch (e) {
+                console.error(e);
               }
-            } catch (e) {
-              console.error(e);
-            }
-          })();
+            })();
+          }
         }
         const t = setTimeout(() => {
           setShowResult(true);
-          if (chartBrief?.levels.at(lvIndex)) {
+          if (!editing && chartBrief?.levels.at(lvIndex)) {
             try {
               void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
                 method: "POST",
@@ -591,6 +593,7 @@ function Play(props: Props) {
     judgeCount,
     stop,
     props.goResult,
+    editing,
   ]);
 
   const onReady = useCallback(() => {
