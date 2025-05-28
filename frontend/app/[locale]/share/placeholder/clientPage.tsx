@@ -66,7 +66,7 @@ export default function ShareChart(props: Props) {
       brief = JSON.parse(
         document
           .querySelector('meta[name="nikochanSharingBrief"]')!
-          .getAttribute("content")!,
+          .getAttribute("content")!
       );
     }
     setBrief(brief);

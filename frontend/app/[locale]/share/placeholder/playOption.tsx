@@ -36,14 +36,14 @@ export function PlayOption(props: Props) {
     setStatus(
       props.brief?.levels
         // .filter((l) => !l.unlisted)
-        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || [],
+        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
     );
   }, [props.cid, props.brief]);
 
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number | null>(
     // props.brief.levels.findIndex((l) => !l.unlisted),
-    null,
+    null
   );
   const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
@@ -97,7 +97,7 @@ export function PlayOption(props: Props) {
                     }
                   />
                 </li>
-              ),
+              )
           )}
         </ul>
         {levelsNum === 0 && <p>{t("unavailable")}</p>}
@@ -212,11 +212,11 @@ function SelectedLevelInfo(props: {
     props.selectedLevel === null
       ? null
       : props.record?.find(
-          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
+          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
         );
 
   const [bestScoreState, setBestScoreState] = useState<(ResultData | null)[]>(
-    [],
+    []
   );
   useEffect(() => {
     const bestScoreState: (ResultData | null)[] = [];
@@ -262,7 +262,7 @@ function SelectedLevelInfo(props: {
           </span>
           <span className="text-lg">
             {Math.floor(
-              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60,
+              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60
             )}
           </span>
           <span className="text-lg">:</span>

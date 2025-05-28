@@ -565,8 +565,8 @@ function Play(props: Props) {
           setExitable((ex) =>
             Math.max(
               ex || 0,
-              performance.now() + resultAnimDelays.reduce((a, b) => a + b, 0),
-            ),
+              performance.now() + resultAnimDelays.reduce((a, b) => a + b, 0)
+            )
           );
           stop();
         }, 1000);

@@ -180,7 +180,7 @@ export function MetaTab(props: Props2) {
                   process.env.NODE_ENV === "development"
                     ? "include"
                     : "same-origin",
-              },
+              }
             ).then(async (res) => {
               setPasswd(cid, await res.text());
             });
@@ -207,7 +207,7 @@ export function MetaTab(props: Props2) {
               process.env.NODE_ENV === "development"
                 ? "include"
                 : "same-origin",
-          },
+          }
         );
         if (res.ok) {
           try {
@@ -220,7 +220,7 @@ export function MetaTab(props: Props2) {
               history.replaceState(
                 null,
                 "",
-                `/${props.locale}/edit?cid=${resBody.cid}`,
+                `/${props.locale}/edit?cid=${resBody.cid}`
               );
               addRecent("edit", resBody.cid);
               onSave(resBody.cid, props.chart!.changePasswd);
@@ -267,7 +267,7 @@ export function MetaTab(props: Props2) {
               process.env.NODE_ENV === "development"
                 ? "include"
                 : "same-origin",
-          },
+          }
         );
         if (res.ok) {
           props.setHasChange(false);
@@ -319,7 +319,7 @@ export function MetaTab(props: Props2) {
           cache: "no-store",
           credentials:
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
-        },
+        }
       );
       if (res.ok) {
         if (isStandalone()) {
@@ -366,10 +366,10 @@ export function MetaTab(props: Props2) {
                 await luaExec(
                   process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
                   l.lua.join("\n"),
-                  false,
+                  false
                 )
               ).levelFreezed,
-            })),
+            }))
           ),
         };
       } catch (e1) {
@@ -391,10 +391,10 @@ export function MetaTab(props: Props2) {
                   await luaExec(
                     process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
                     l.lua.join("\n"),
-                    false,
+                    false
                   )
                 ).levelFreezed,
-              })),
+              }))
             ),
           };
         } catch (e2) {
@@ -437,7 +437,7 @@ export function MetaTab(props: Props2) {
                 window
                   .open(
                     `/${props.locale}/play?sid=${props.sessionId}`,
-                    "_blank",
+                    "_blank"
                   )
                   ?.focus();
               }

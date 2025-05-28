@@ -41,7 +41,7 @@ export default {
         "Falling Nikochan does not require you to download sound sources. " +
         "It plays sound sources by embedding <youtube>YouTube</youtube>, so you can use any music uploaded to YouTube.",
       content3:
-        "In most cases, there are no copyright issues because we do not redistribute sound sources. "+
+        "In most cases, there are no copyright issues because we do not redistribute sound sources. " +
         "<small>(For details, please refer to the <linkPolicies>Terms of Use</linkPolicies>)</small>",
       content4:
         "When you create a chart and upload it to Falling Nikochan's server, " +

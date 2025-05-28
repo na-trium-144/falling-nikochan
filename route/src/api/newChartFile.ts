@@ -23,10 +23,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     return c.body(null, 400);
   })
   .post("/", async (c) => {
-    // cidとfidを生成し、bodyのデータを保存して、cidを返す
     console.log(c.req.header("x-forwarded-for"));
     const ip = String(
-      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim(),
+      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
     ); // nullもundefinedも文字列にしちゃう
     const chartBuf = await c.req.arrayBuffer();
     const pSecretSalt = secretSalt(env(c));
@@ -45,7 +44,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
             // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
           },
           429,
-          { "retry-after": (rateLimitMin * 60).toString() },
+          { "retry-after": (rateLimitMin * 60).toString() }
         );
       }
 
@@ -86,7 +85,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
 
       let cid: string;
       while (true) {
-        cid = Math.floor(Math.random() * 900000 + 100000).toString();
+        // 生成するcidは110000〜999999まで
+        // 10xxxxはテストデータに使用するので、誤ってテストを本番環境で実行する可能性に備えて予約
+        cid = Math.floor(Math.random() * 890000 + 110000).toString();
         if (
           await db
             .collection<ChartEntryCompressed>("chart")
@@ -110,9 +111,9 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
               ip,
               await getYTDataEntry(env(c), db, newChart.ytId),
               pSecretSalt,
-              null,
-            ),
-          ),
+              null
+            )
+          )
         );
 
       return c.json({ cid: cid });

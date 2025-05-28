@@ -74,17 +74,17 @@ const ogApp = (config: {
           btoa(sBriefBin)
             .replaceAll("+", "-")
             .replaceAll("/", "_")
-            .replaceAll("=", ""),
+            .replaceAll("=", "")
         );
         ogQuery.set("v", packageJson.version);
         return c.redirect(
           `${new URL(c.req.url).origin}${c.req.path}?${ogQuery.toString()}`,
-          307,
+          307
         );
       }
 
       const sBriefBin = atob(
-        c.req.query("brief")!.replaceAll("-", "+").replaceAll("_", "/"),
+        c.req.query("brief")!.replaceAll("-", "+").replaceAll("_", "/")
       );
       let sBriefArr = new Uint8Array(sBriefBin.length);
       for (let i = 0; i < sBriefBin.length; i++) {
@@ -141,7 +141,7 @@ const ogApp = (config: {
         ...f,
         pData: config.fetchStatic(
           env(c),
-          new URL(`/assets/${f.file}`, new URL(c.req.url).origin),
+          new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
         ),
       }));
       let imagePath: string;
@@ -250,7 +250,7 @@ const ogApp = (config: {
             weight: f.weight,
             style: f.style,
             data: await (await f.pData).arrayBuffer(),
-          })),
+          }))
         ),
       }) as Response;
       if (imRes.ok && imRes.body) {
@@ -267,8 +267,8 @@ const ogApp = (config: {
       // deprecated (used until ver8.11)
       c.redirect(
         `${new URL(c.req.url).origin}/og/share/${c.req.param("cid")}`,
-        301,
-      ),
+        301
+      )
     );
 
 export default ogApp;

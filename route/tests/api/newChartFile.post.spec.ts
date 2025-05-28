@@ -7,7 +7,7 @@ import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 describe("POST /api/newChartFile", () => {
   test.skipIf(
-    process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT,
+    process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT
   )("should return 429 for too many requests", async () => {
     await initDb();
     const res1 = await app.request("/api/newChartFile", {
@@ -118,7 +118,7 @@ describe("POST /api/newChartFile", () => {
     await initDb();
     const chart = dummyChart();
     chart.levels[0].rest = new Array(chartMaxEvent + 1).fill(
-      chart.levels[0].rest[0],
+      chart.levels[0].rest[0]
     );
     const res = await app.request("/api/newChartFile", {
       method: "POST",

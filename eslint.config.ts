@@ -41,5 +41,5 @@ export default defineConfig(
       "prefer-const": "off",
       "@typescript-eslint/no-explicit-any": "warn",
     },
-  },
+  }
 );

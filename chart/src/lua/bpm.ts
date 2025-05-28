@@ -22,7 +22,11 @@ export function luaAddBpmChange<L extends LevelEdit | Chart3>(
   chart.bpmChanges = chart.bpmChanges.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }
-export function luaUpdateBpmChange(chart: LevelEdit, index: number, bpm: number) {
+export function luaUpdateBpmChange(
+  chart: LevelEdit,
+  index: number,
+  bpm: number
+) {
   if (chart.bpmChanges[index].luaLine === null) {
     return null;
   }

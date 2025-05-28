@@ -64,7 +64,7 @@ const sitemapApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       "Content-Encoding": "gzip",
       "Cache-Control": cacheControl(env(c), 86400),
     });
-  },
+  }
 );
 
 export default sitemapApp;

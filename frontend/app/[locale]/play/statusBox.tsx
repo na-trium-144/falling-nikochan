@@ -153,7 +153,9 @@ function StatusName(props: { children: ReactNode }) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
   return (
-    <span className={isMobile ? "h-max w-full text-center text-nowrap " : "flex-1"}>
+    <span
+      className={isMobile ? "h-max w-full text-center text-nowrap " : "flex-1"}
+    >
       {props.children}
     </span>
   );

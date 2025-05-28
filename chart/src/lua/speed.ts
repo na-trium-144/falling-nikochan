@@ -25,7 +25,11 @@ export function luaAddSpeedChange<L extends LevelEdit | Chart3>(
   );
   return chart;
 }
-export function luaUpdateSpeedChange(chart: LevelEdit, index: number, bpm: number) {
+export function luaUpdateSpeedChange(
+  chart: LevelEdit,
+  index: number,
+  bpm: number
+) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }

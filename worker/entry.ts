@@ -21,19 +21,17 @@ const configCacheName = "config";
 const configCache = () => caches.open(configCacheName);
 
 async function clearOldCaches() {
-  await caches
-    .keys()
-    .then((keys) =>
-      Promise.all(
-        keys
-          .filter(
-            (k) =>
-              ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
-              !k.startsWith("brief"), // used in @/common/briefCache
-          )
-          .map((k) => caches.delete(k)),
-      ),
-    );
+  await caches.keys().then((keys) =>
+    Promise.all(
+      keys
+        .filter(
+          (k) =>
+            ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
+            !k.startsWith("brief") // used in @/common/briefCache
+        )
+        .map((k) => caches.delete(k))
+    )
+  );
 }
 
 async function fetchStatic(_e: any, url: URL): Promise<Response> {
@@ -72,11 +70,11 @@ async function initAssetsCache(config: {
   try {
     filesRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
-      { cache: "no-store" },
+      { cache: "no-store" }
     );
     remoteVerRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
-      { cache: "no-store" },
+      { cache: "no-store" }
     );
   } catch (e) {
     console.error(e);
@@ -109,7 +107,7 @@ async function initAssetsCache(config: {
       try {
         const res = await fetch(
           (process.env.ASSET_PREFIX || self.origin) + pathname,
-          { cache: "no-cache" },
+          { cache: "no-cache" }
         );
         if (res.ok) {
           tmp.put(pathname, returnBody(res.body, res.headers));
@@ -121,7 +119,7 @@ async function initAssetsCache(config: {
         console.error(`failed to fetch ${pathname}: ${e}`);
         failed = true;
       }
-    }),
+    })
   );
   // 1つでも失敗したら中断
   if (failed) {
@@ -136,7 +134,7 @@ async function initAssetsCache(config: {
           console.warn(`delete ${req.url}`);
           await cache.delete(req);
         }
-      }),
+      })
     );
   }
   // tmpからmainに移す
@@ -147,7 +145,7 @@ async function initAssetsCache(config: {
         await cache.put(pathname, res);
         await tmp.delete(pathname);
       }
-    }),
+    })
   );
   // finished
   await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
@@ -164,7 +162,7 @@ interface BuildVer {
 const languageDetector = async (c: Context, next: () => Promise<void>) => {
   // headerもcookieも使えないので、その代わりにnavigator.languagesを使って検出するミドルウェア
   const systemLangs = navigator.languages.map(
-    (l) => new Intl.Locale(l).language,
+    (l) => new Intl.Locale(l).language
   );
   const preferredLang = c.req.path.split("/")[1];
   const cache = await configCache();
@@ -191,14 +189,14 @@ const app = new Hono({ strict: false })
       fetchBrief: (_e, cid: string) => fetch(self.origin + `/api/brief/${cid}`),
       fetchStatic,
       languageDetector,
-    }),
+    })
   )
   .route(
     "/",
     redirectApp({
       languageDetector,
       fetchStatic,
-    }),
+    })
   )
   .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", (c) => fetch(c.req.raw))
@@ -206,14 +204,14 @@ const app = new Hono({ strict: false })
     let remoteVer: BuildVer;
     const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
-      { cache: "no-store" },
+      { cache: "no-store" }
     );
     if (!remoteRes.ok) {
       return c.body(null, 500);
     }
     remoteVer = await remoteRes.json();
     const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
-      cache.match("/buildVer").then((res) => res?.json()),
+      cache.match("/buildVer").then((res) => res?.json())
     );
     if (remoteVer.version !== cacheVer?.version) {
       return c.json({ version: true, commit: true });
@@ -243,7 +241,7 @@ const app = new Hono({ strict: false })
       try {
         const remoteRes = await fetch(
           (process.env.ASSET_PREFIX || self.origin) + c.req.path,
-          { cache: "no-cache", signal: abortController.signal },
+          { cache: "no-cache", signal: abortController.signal }
         );
         clearTimeout(timeout);
         if (remoteRes.ok) {
@@ -260,7 +258,7 @@ const app = new Hono({ strict: false })
       // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
       console.warn(`${c.req.url} is not in cache`);
       const res = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + c.req.path,
+        (process.env.ASSET_PREFIX || self.origin) + c.req.path
       );
       if (res.ok) {
         const returnRes = returnBody(res.body, res.headers);

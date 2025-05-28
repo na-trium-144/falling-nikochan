@@ -49,7 +49,7 @@ describe("GET /api/chartFile/:cid", () => {
       "/api/chartFile/100000?ph=" + (await hash(pServerHash + "def")),
       {
         headers: { Cookie: "pUserSalt=def" },
-      },
+      }
     );
     expect(res.status).toBe(200);
     const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
@@ -121,7 +121,7 @@ describe("GET /api/chartFile/:cid", () => {
   test("should return 401 for wrong password", async () => {
     await initDb();
     const res = await app.request(
-      "/api/chartFile/100000?p=wrong&ph=" + (await hash("wrong")),
+      "/api/chartFile/100000?p=wrong&ph=" + (await hash("wrong"))
     );
     expect(res.status).toBe(401);
     const body = await res.json();

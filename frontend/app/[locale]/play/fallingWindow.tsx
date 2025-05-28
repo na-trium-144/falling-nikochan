@@ -103,8 +103,8 @@ export default function FallingWindow(props: Props) {
       [0, 1, 2, 3].map((i) =>
         fetch(process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`)
           .then((res) => res.text())
-          .then((text) => `data:image/svg+xml;base64,${btoa(text)}`),
-      ),
+          .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
+      )
     ).then((urls) => {
       nikochanAssets.current = urls;
     });
@@ -114,8 +114,8 @@ export default function FallingWindow(props: Props) {
           ? fetch(process.env.ASSET_PREFIX + `/assets/particle${i}.svg`)
               .then((res) => res.text())
               .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
-          : "",
-      ),
+          : ""
+      )
     ).then((urls) => {
       particleAssets.current = urls;
     });
@@ -336,7 +336,7 @@ function Ripple(props: RProps) {
             delay: 200 * i,
             fill: "forwards",
             easing: "ease-out",
-          },
+          }
         );
       });
     }
@@ -407,7 +407,7 @@ function Particle(props: PProps) {
           },
           { transform: `scale(1) rotate(${angle + angleVel}deg)`, opacity: 0 },
         ],
-        { duration: 500, fill: "forwards", easing: "ease-out" },
+        { duration: 500, fill: "forwards", easing: "ease-out" }
       );
       animateDone.current = true;
     }
@@ -427,7 +427,7 @@ function Particle(props: PProps) {
             opacity: 0,
           },
         ],
-        { duration: 500, fill: "forwards", easing: "ease-out" },
+        { duration: 500, fill: "forwards", easing: "ease-out" }
       );
       bigAnimateDone.current = true;
     }

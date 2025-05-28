@@ -86,7 +86,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       sessionStorage.setItem("fromHomeScreen", "1");
     }
     setDismissed(
-      isStandalone() || localStorage.getItem("PWADismissed") === "1",
+      isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
   }, []);
   useEffect(() => {

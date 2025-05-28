@@ -46,7 +46,7 @@ function defaultBpmChange(): BPMChange {
  */
 export function getTimeSec(
   bpmChanges: BPMChange[] | BPMChange1[],
-  step: Step,
+  step: Step
 ): number {
   const targetBpmChange =
     bpmChanges[findBpmIndexFromStep(bpmChanges, step)] || defaultBpmChange();
@@ -62,7 +62,7 @@ export function getTimeSec(
 export function getStep(
   bpmChanges: BPMChange[] | BPMChange1[],
   timeSec: number,
-  denominator: number,
+  denominator: number
 ): Step {
   const targetBpmChange =
     bpmChanges[findBpmIndexFromSec(bpmChanges, timeSec)] || defaultBpmChange();
@@ -81,7 +81,7 @@ export function getStep(
  */
 export function getSignatureState(
   signature: Signature[] | Signature5[],
-  step: Step,
+  step: Step
 ): SignatureState {
   const targetSignature = signature[findBpmIndexFromStep(signature, step)];
   let barBegin = stepSub(targetSignature.step, targetSignature.offset);
@@ -96,7 +96,7 @@ export function getSignatureState(
       for (let si = 0; si < barSteps[bi % barLength.length].length; si++) {
         const barStepEnd = stepAdd(
           barStepBegin,
-          barSteps[bi % barLength.length][si],
+          barSteps[bi % barLength.length][si]
         );
         if (stepCmp(barStepEnd, step) > 0) {
           return {
@@ -134,7 +134,7 @@ export interface SignatureState {
  */
 export function findBpmIndexFromSec(
   bpmChanges: BPMChange[] | BPMChange1[],
-  timeSec: number,
+  timeSec: number
 ): number {
   if (bpmChanges.length === 0) {
     return 0;
@@ -153,7 +153,7 @@ export function findBpmIndexFromSec(
  */
 export function findBpmIndexFromStep(
   bpmChanges: BPMChange[] | BPMChange1[] | Signature[] | Signature5[],
-  step: Step,
+  step: Step
 ): number {
   if (bpmChanges.length === 0) {
     return 0;

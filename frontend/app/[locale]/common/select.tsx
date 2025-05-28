@@ -12,7 +12,9 @@ export default function Select(props: Props) {
   return (
     <span className="inline-block relative">
       <select
-        className={(props.disabled ? buttonStyleDisabled : buttonStyle) + "pr-6"}
+        className={
+          (props.disabled ? buttonStyleDisabled : buttonStyle) + "pr-6"
+        }
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
         disabled={props.disabled}

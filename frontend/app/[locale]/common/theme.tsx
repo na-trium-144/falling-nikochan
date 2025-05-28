@@ -50,7 +50,7 @@ const applyTheme = () => {
       "dark:bg-orange-950",
       "dark:from-orange-950",
       "dark:to-orange-975",
-      "dark:text-stone-300",
+      "dark:text-stone-300"
     );
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */

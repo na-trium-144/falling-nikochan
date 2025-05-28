@@ -86,9 +86,9 @@ export function MusicArea(props: Props) {
             levelLength,
             Math.max(
               0,
-              (props.ytPlayer.current.getCurrentTime() || 0) - props.ytBeginSec,
-            ),
-          ),
+              (props.ytPlayer.current.getCurrentTime() || 0) - props.ytBeginSec
+            )
+          )
         );
       }
     }, 50);

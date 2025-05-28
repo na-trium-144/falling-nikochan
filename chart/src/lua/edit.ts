@@ -44,7 +44,7 @@ export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
 export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
   chart: L,
   line: number,
-  content: string,
+  content: string
 ) {
   chart.lua = chart.lua
     .slice(0, line)
@@ -83,7 +83,7 @@ export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
 export function replaceLua<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   line: number,
-  content: string,
+  content: string
 ) {
   chart.lua = chart.lua
     .slice(0, line)
@@ -150,7 +150,7 @@ function stepLuaCommand(s: Step) {
 export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
   chart: L,
   step: Step,
-  modify: boolean,
+  modify: boolean
 ): { chart: L; luaLine: number | null } {
   for (let ri = 0; ri < chart.rest.length; ri++) {
     const rest = chart.rest[ri];
