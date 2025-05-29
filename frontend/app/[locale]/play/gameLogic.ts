@@ -130,9 +130,9 @@ export default function useGameLogic(
               hitCountByType.current[Number(a)] >
               hitCountByType.current[Number(b)]
                 ? a
-                : b,
-            ),
-          ),
+                : b
+            )
+          )
         );
       }
       let candidate: Note6 | Note7 | null = null;
@@ -221,7 +221,7 @@ export default function useGameLogic(
         }
         if (candidateLate !== null) {
           lateTimes.current.push(
-            candidateLate + userOffset /* + audioLatency */,
+            candidateLate + userOffset /* + audioLatency */
           );
         }
       } else if (now && candidateBig !== null) {
@@ -230,14 +230,14 @@ export default function useGameLogic(
         notesBigYetDone.current.shift();
         if (candidateLateBig !== null) {
           lateTimes.current.push(
-            candidateLateBig + userOffset /* + audioLatency */,
+            candidateLateBig + userOffset /* + audioLatency */
           );
         }
       } else {
         playSE("hit");
       }
     },
-    [getCurrentTimeSec, judge, userOffset, playSE],
+    [getCurrentTimeSec, judge, userOffset, playSE]
   );
   // 0.1s以上過ぎたものをmiss判定にする
   useEffect(() => {

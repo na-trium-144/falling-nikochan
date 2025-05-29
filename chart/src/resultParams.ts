@@ -51,7 +51,12 @@ export const ResultSerializedSchema = () =>
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [7] bigScore100
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(12000)), // [8] score100
       v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)), // [9] judgeCount
-      v.nullable(v.union([v.literal(false), v.pipe(v.number(), v.integer(), v.minValue(0))])), // [10] bigCount
+      v.nullable(
+        v.union([
+          v.literal(false),
+          v.pipe(v.number(), v.integer(), v.minValue(0)),
+        ])
+      ), // [10] bigCount
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
     ]),
   ]);

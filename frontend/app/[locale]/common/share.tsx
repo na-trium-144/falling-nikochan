@@ -11,7 +11,7 @@ export function useShareLink(
   brief: ChartMin | ChartBrief | undefined | null,
   lang?: string,
   resultParam?: string,
-  date?: number | null,
+  date?: number | null
 ) {
   const [origin, setOrigin] = useState<string>("");
   const searchParams = new URLSearchParams();

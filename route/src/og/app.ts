@@ -51,7 +51,7 @@ const ogApp = (config: {
         }
         const brief = (await briefRes.json()) as ChartBrief;
         const lvType = levelTypes.indexOf(
-          brief.levels.filter((l) => !l.unlisted).at(0)?.type || "",
+          brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
         );
         const sBrief = msgpack.serialize([
           brief.ytId,
@@ -160,9 +160,9 @@ const ogApp = (config: {
         res(
           config.fetchStatic(
             env(c),
-            new URL(imagePath, new URL(c.req.url).origin),
-          ),
-        ),
+            new URL(imagePath, new URL(c.req.url).origin)
+          )
+        )
       )
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
@@ -206,9 +206,9 @@ const ogApp = (config: {
             res(
               config.fetchStatic(
                 env(c),
-                new URL(imagePath, new URL(c.req.url).origin),
-              ),
-            ),
+                new URL(imagePath, new URL(c.req.url).origin)
+              )
+            )
           )
             .then((image) => image.arrayBuffer())
             .then((buf) => {
@@ -237,7 +237,7 @@ const ogApp = (config: {
             brief,
             pBgImageBin,
             resultParams,
-            pInputTypeImageBin,
+            pInputTypeImageBin
           );
           break;
       }
