@@ -14,6 +14,7 @@ import { OGResult } from "./ogResult.js";
 import { env } from "hono/adapter";
 import msgpack from "@ygoe/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
+import { cors } from "hono/cors";
 
 export interface ChartBriefMin {
   ytId: string;
@@ -29,6 +30,7 @@ const ogApp = (config: {
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
+    .use("/*", cors({ origin: "*" }))
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
 
