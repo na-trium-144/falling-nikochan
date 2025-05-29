@@ -5,10 +5,16 @@ import {
   baseScoreRate,
   bigScoreRate,
   chainScoreRate,
+  inputTypes,
   levelTypes,
   rankStr,
   ResultParams,
 } from "@falling-nikochan/chart";
+import KeyboardOne from "@icon-park/react/lib/icons/KeyboardOne";
+import MouseOne from "@icon-park/react/lib/icons/MouseOne";
+import Write from "@icon-park/react/lib/icons/Write";
+import ClickTap from "@icon-park/react/lib/icons/ClickTap";
+import GameThree from "@icon-park/react/lib/icons/GameThree";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -21,7 +27,9 @@ export function SharedResultBox(props: Props) {
   const ts = useTranslations("play.status");
   const [resultDate, setResultDate] = useState<string>("");
   useEffect(() => {
-    setResultDate(new Date(props.result.date).toLocaleDateString());
+    if (props.result.date) {
+      setResultDate(new Date(props.result.date).toLocaleDateString());
+    }
   }, [props.result.date]);
   return (
     <Box className="w-max mx-auto py-4 px-6 mt-4">
@@ -36,9 +44,24 @@ export function SharedResultBox(props: Props) {
           <span className="text-sm">{levelTypes[props.result.lvType]}-</span>
           <span className="text-lg">{props.result.lvDifficulty}</span>
         </span>
-        <span className="text-slate-500 dark:text-stone-400 ">
-          ({resultDate})
-        </span>
+        {props.result.date && (
+          <span className="text-slate-500 dark:text-stone-400 ">
+            <span>(</span>
+            <span>{resultDate}</span>
+            {props.result.inputType === inputTypes.keyboard ? (
+              <KeyboardOne className="inline-block ml-2 align-middle " />
+            ) : props.result.inputType === inputTypes.mouse ? (
+              <MouseOne className="inline-block ml-2 align-middle " />
+            ) : props.result.inputType === inputTypes.pen ? (
+              <Write className="inline-block ml-2 align-middle " />
+            ) : props.result.inputType === inputTypes.touch ? (
+              <ClickTap className="inline-block ml-2 align-middle " />
+            ) : props.result.inputType === inputTypes.gamepad ? (
+              <GameThree className="inline-block ml-2 align-middle " />
+            ) : null}
+            <span>)</span>
+          </span>
+        )}
       </p>
       <div
         className={
@@ -126,17 +149,19 @@ export function SharedResultBox(props: Props) {
               <span className="text-base ">{props.result.judgeCount[ji]}</span>
             </div>
           ))}
-          <div
-            className={
-              "flex flex-row items-baseline " +
-              (props.result.bigCount === null
-                ? "text-slate-400 dark:text-stone-600 "
-                : "")
-            }
-          >
-            <span className="flex-1 text-xs ">{ts("big")}</span>
-            <span className="text-base ">{props.result.bigCount || 0}</span>
-          </div>
+          {props.result.bigCount !== false && (
+            <div
+              className={
+                "flex flex-row items-baseline " +
+                (props.result.bigCount === null
+                  ? "text-slate-400 dark:text-stone-600 "
+                  : "")
+              }
+            >
+              <span className="flex-1 text-xs ">{ts("big")}</span>
+              <span className="text-base ">{props.result.bigCount || 0}</span>
+            </div>
+          )}
         </div>
       </div>
     </Box>

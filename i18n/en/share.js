@@ -17,9 +17,13 @@ export default {
     chartInfo: "Chart Information",
     otherPlayers: "Others' Play Records",
     bestScore: "Best Score",
+    detail: "Details",
+    copyScoreLink: "Copy Link",
+    shareScoreLink: "Share",
     start: "Start Game!",
     unavailable: "No levels have been published yet.",
     titleWithResult: "Play record on {date} - {title}",
+    titleWithResultNoDate: "Play record - {title}",
     descriptionWithResult:
       "Played the chart ({level}) of {title} created by {chartCreator}, " +
       "and scored {score, number, ::.00} points{status}. " +

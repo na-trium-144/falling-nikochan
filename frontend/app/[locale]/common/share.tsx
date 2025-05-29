@@ -11,7 +11,7 @@ export function useShareLink(
   brief: ChartMin | ChartBrief | undefined | null,
   lang?: string,
   resultParam?: string,
-  date?: Date
+  date?: number | null
 ) {
   const [origin, setOrigin] = useState<string>("");
   const searchParams = new URLSearchParams();
@@ -30,7 +30,7 @@ export function useShareLink(
 
   // /route/src/share.ts 内で指定しているタイトルとおなじ
   const newTitle = resultParam
-    ? titleShareResult(t, cid, brief, date)
+    ? titleShareResult(t, cid, brief, date ? new Date(date) : undefined)
     : titleShare(t, cid, brief);
 
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
@@ -55,7 +55,7 @@ export function useShareLink(
   useEffect(() => {
     const shareData = {
       title: resultParam
-        ? titleShareResult(t, cid, brief, date!)
+        ? titleShareResult(t, cid, brief, date ? new Date(date) : undefined)
         : titleShare(t, cid, brief),
       url: origin + sharePath + "?" + shareParams,
     };

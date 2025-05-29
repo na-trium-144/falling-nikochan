@@ -31,6 +31,7 @@ import {
   loadChart6,
   RecordGetSummary,
   RecordPost,
+  inputTypes,
 } from "@falling-nikochan/chart";
 import { ChartSeqData11, loadChart11 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
@@ -360,6 +361,7 @@ function Play(props: Props) {
     bigTotal,
     lateTimes,
     chartEnd,
+    hitType,
   } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
   const [fps, setFps] = useState<number>(0);
@@ -504,6 +506,7 @@ function Play(props: Props) {
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
+        const newResultDate = new Date();
         if (
           cid &&
           !auto &&
@@ -512,10 +515,13 @@ function Play(props: Props) {
         ) {
           if (score > bestScoreState) {
             setBestScore(cid, chartBrief.levels[lvIndex].hash, {
+              date: newResultDate.getTime(),
               baseScore,
               chainScore,
               bigScore,
               judgeCount,
+              bigCount: bigCount,
+              inputType: hitType,
             });
           }
           void (async () => {
@@ -559,7 +565,7 @@ function Play(props: Props) {
               //ignore
             }
           }
-          setResultDate(new Date());
+          setResultDate(newResultDate);
           setExitable((ex) =>
             Math.max(
               ex || 0,
@@ -591,6 +597,8 @@ function Play(props: Props) {
     judgeCount,
     stop,
     props.goResult,
+    bigCount,
+    hitType,
   ]);
 
   const onReady = useCallback(() => {
@@ -671,12 +679,26 @@ function Play(props: Props) {
           exit();
         } else {
           flash();
-          hit();
+          hit(inputTypes.keyboard);
         }
       }}
       onPointerDown={(e) => {
         flash();
-        hit();
+        switch (e.pointerType) {
+          case "mouse":
+            hit(inputTypes.mouse);
+            break;
+          case "pen":
+            hit(inputTypes.pen);
+            break;
+          case "touch":
+            hit(inputTypes.touch);
+            break;
+          default:
+            console.warn(`unknown pointer type: ${e.pointerType}`);
+            hit(0);
+            break;
+        }
         e.preventDefault();
       }}
       onPointerUp={(e) => e.preventDefault()}
@@ -896,6 +918,7 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
               record={record}
+              inputType={hitType}
             />
           )}
           {showStopped && (

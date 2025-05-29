@@ -34,7 +34,8 @@ export default function OGTemplate() {
       <div
         className={
           "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl " +
-          levelBgColors[1]
+          levelBgColors[1] +
+          (showDummyData ? "" : "invisible")
         }
       >
         <div
@@ -186,7 +187,7 @@ export default function OGTemplate() {
           style={{ top: "-1rem" }}
         />
         <RhythmicalSlime
-          className="-z-10 absolute scale-150 origin-bottom-right "
+          className="-z-10 absolute scale-165 origin-bottom-right "
           style={{
             bottom: "100%",
             right: "1rem",

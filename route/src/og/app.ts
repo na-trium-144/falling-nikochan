@@ -5,6 +5,8 @@ import { HTTPException } from "hono/http-exception";
 import {
   ChartBrief,
   deserializeResultParams,
+  inputTypes,
+  levelTypes,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { OGShare } from "./ogShare.js";
@@ -12,12 +14,14 @@ import { OGResult } from "./ogResult.js";
 import { env } from "hono/adapter";
 import msgpack from "@ygoe/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
+import { cors } from "hono/cors";
 
 export interface ChartBriefMin {
   ytId: string;
   title: string;
   composer: string;
   chartCreator: string;
+  lvType?: number; // 0, 1, 2
 }
 
 const ogApp = (config: {
@@ -26,6 +30,7 @@ const ogApp = (config: {
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
+    .use("/*", cors({ origin: "*" }))
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
 
@@ -47,11 +52,15 @@ const ogApp = (config: {
           });
         }
         const brief = (await briefRes.json()) as ChartBrief;
+        const lvType = levelTypes.indexOf(
+          brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
+        );
         const sBrief = msgpack.serialize([
           brief.ytId,
           brief.title,
           brief.composer,
           brief.chartCreator,
+          lvType >= 0 ? lvType : undefined,
         ]);
         let sBriefBin = "";
         for (let i = 0; i < sBrief.length; i++) {
@@ -89,6 +98,7 @@ const ogApp = (config: {
         title: briefArr[1],
         composer: briefArr[2],
         chartCreator: briefArr[3],
+        lvType: briefArr[4],
       };
 
       const lang = c.req.query("lang") || "en"; // c.get("language");
@@ -136,41 +146,101 @@ const ogApp = (config: {
           new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
         ),
       }));
-      let pBgImage: Response | Promise<Response>;
+      let imagePath: string;
       switch (c.req.param("type")) {
         case "share":
           // [locale]/ogTemplate/share をスクショしたpng画像を /assets に置く
-          pBgImage = config.fetchStatic(
-            env(c),
-            new URL(`/assets/ogTemplateShare.png`, new URL(c.req.url).origin)
-          );
+          imagePath = "/assets/ogTemplateShare.png";
           break;
         case "result":
-          pBgImage = config.fetchStatic(
-            env(c),
-            new URL(`/assets/ogTemplateResult.png`, new URL(c.req.url).origin)
-          );
+          imagePath = "/assets/ogTemplateResult.png";
           break;
         default:
           throw new HTTPException(404);
       }
+      const pBgImageBin = new Promise<Response>((res) =>
+        res(
+          config.fetchStatic(
+            env(c),
+            new URL(imagePath, new URL(c.req.url).origin)
+          )
+        )
+      )
+        .then((bgImage) => bgImage.arrayBuffer())
+        .then((buf) => {
+          const bgImageBuf = new Uint8Array(buf);
+          let bgImageBin = "";
+          for (let i = 0; i < bgImageBuf.byteLength; i++) {
+            bgImageBin += String.fromCharCode(bgImageBuf[i]);
+          }
+          return bgImageBin;
+        });
 
-      const bgImageBuf = new Uint8Array(await (await pBgImage).arrayBuffer());
-      let bgImageBin = "";
-      for (let i = 0; i < bgImageBuf.byteLength; i++) {
-        bgImageBin += String.fromCharCode(bgImageBuf[i]);
+      let pInputTypeImageBin: Promise<string> | null = null;
+      if (resultParams) {
+        let imagePath: string | null;
+        switch (resultParams.inputType) {
+          case inputTypes.keyboard:
+            imagePath = "/assets/icon-slate500-keyboard-one.svg";
+            break;
+          case inputTypes.mouse:
+            imagePath = "/assets/icon-slate500-mouse-one.svg";
+            break;
+          case inputTypes.touch:
+            imagePath = "/assets/icon-slate500-click-tap.svg";
+            break;
+          case inputTypes.pen:
+            imagePath = "/assets/icon-slate500-write.svg";
+            break;
+          case inputTypes.gamepad:
+            imagePath = "/assets/icon-slate500-game-three.svg";
+            break;
+          case null:
+            imagePath = null;
+            break;
+          default:
+            console.error(`unknown touch type ${resultParams.inputType}`);
+            imagePath = null;
+            break;
+        }
+        if (imagePath) {
+          pInputTypeImageBin = new Promise<Response>((res) =>
+            res(
+              config.fetchStatic(
+                env(c),
+                new URL(imagePath, new URL(c.req.url).origin)
+              )
+            )
+          )
+            .then((image) => image.arrayBuffer())
+            .then((buf) => {
+              const inputTypeImageBuf = new Uint8Array(buf);
+              let inputTypeImageBin = "";
+              for (let i = 0; i < inputTypeImageBuf.byteLength; i++) {
+                inputTypeImageBin += String.fromCharCode(inputTypeImageBuf[i]);
+              }
+              return inputTypeImageBin;
+            });
+        }
       }
 
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
         case "share":
-          Image = OGShare(cid, lang, brief, bgImageBin);
+          Image = OGShare(cid, lang, brief, pBgImageBin);
           break;
         case "result":
           if (!resultParams) {
             throw new HTTPException(400, { message: "missingResultParam" });
           }
-          Image = OGResult(cid, lang, brief, bgImageBin, resultParams);
+          Image = OGResult(
+            cid,
+            lang,
+            brief,
+            pBgImageBin,
+            resultParams,
+            pInputTypeImageBin
+          );
           break;
       }
       const imRes = new config.ImageResponse(await Image!, {
