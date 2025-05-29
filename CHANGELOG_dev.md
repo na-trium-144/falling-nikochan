@@ -1,3 +1,13 @@
+## ver. 12.18 - 2025/05/29 [#628](https://github.com/na-trium-144/falling-nikochan/pull/628)
+
+* プレイ記録共有時のパラメーターにキーボード操作かタッチ操作かの情報を追加
+* 保存済みのベストスコアからプレイ記録の共有リンクを生成できるようにする
+    * プレイ記録のパラメーターでdateがnullの状態・bigCountが存在しない(false)状態に対応
+* ogp画像内のサムネイルの枠の色にlevelの色を反映する
+* resultのogp画像でcomposerが空の時区切りのスラッシュが入っていたのを修正
+* /og にcorsを追加
+* chartListで表示するバッジの色をレベルの色に合わせるようにした & 未クリアの場合にもドットが表示されるようにした
+
 ## ver. 12.17 - 2025/05/28 [#636](https://github.com/na-trium-144/falling-nikochan/pull/636)
 
 * cid 10xxxx を使用禁止にする
