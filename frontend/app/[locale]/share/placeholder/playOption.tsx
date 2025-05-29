@@ -189,6 +189,7 @@ function LevelButton(props: {
       <LevelBadge
         className="absolute top-0.5 -right-3 "
         status={[props.status]}
+        levels={[levelTypes.indexOf(props.level.type)]}
       />
       <span className="inline-block text-center truncate w-full ">
         {props.level.name && (

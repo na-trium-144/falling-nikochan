@@ -1,5 +1,5 @@
 "use client";
-import { ChartBrief } from "@falling-nikochan/chart";
+import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -364,6 +364,10 @@ export function ChartListItem(props: CProps) {
 }
 function ChartListItemChildren(props: CProps) {
   const [status, setStatus] = useState<BadgeStatus[]>([]);
+  const levelColors =
+    props.brief?.levels
+      .filter((l) => !l.unlisted)
+      .map((l) => levelTypes.indexOf(l.type)) || [];
   useEffect(() => {
     if (props.badge) {
       setStatus(
@@ -378,7 +382,12 @@ function ChartListItemChildren(props: CProps) {
 
   return (
     <div className="relative flex flex-row items-center gap-2 ">
-      <LevelBadge className="absolute top-0 -right-1" status={status} />
+      <LevelBadge
+        className="absolute top-0 -right-1"
+        status={status}
+        levels={levelColors}
+        showDot
+      />
       <div className="flex-none ">
         {props.brief?.ytId ? (
           <img
