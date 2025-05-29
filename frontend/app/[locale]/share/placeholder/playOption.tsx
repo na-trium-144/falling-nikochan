@@ -30,6 +30,7 @@ import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/share";
 
 interface Props {
+  locale: string;
   cid: string;
   brief: ChartBrief;
   record: RecordGetSummary[] | null;
@@ -134,6 +135,7 @@ export function PlayOption(props: Props) {
                 brief={props.brief}
                 record={props.record}
                 selectedLevel={selectedLevel}
+                locale={props.locale}
               />
             ) : null}
           </div>

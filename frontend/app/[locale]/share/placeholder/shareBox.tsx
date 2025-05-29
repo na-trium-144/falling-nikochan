@@ -146,7 +146,12 @@ export function ShareBox(props: Props) {
         </p>
       )}
       {cid && brief && (
-        <PlayOption cid={cid} brief={brief} record={props.record} />
+        <PlayOption
+          cid={cid}
+          brief={brief}
+          record={props.record}
+          locale={props.locale}
+        />
       )}
     </>
   );

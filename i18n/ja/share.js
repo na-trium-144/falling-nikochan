@@ -23,6 +23,7 @@ export default {
     start: "ゲーム開始！",
     unavailable: "公開されている譜面がまだありません。",
     titleWithResult: "{date} のプレイ記録 - {title}",
+    titleWithResultNoDate: "プレイ記録 - {title}",
     descriptionWithResult:
       "{chartCreator} さん作成の {title} の譜面 ({level}) をプレイし、" +
       "結果は {score, number, ::.00} 点{status} でした。" +

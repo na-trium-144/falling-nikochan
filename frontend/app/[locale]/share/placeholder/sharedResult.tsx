@@ -27,7 +27,9 @@ export function SharedResultBox(props: Props) {
   const ts = useTranslations("play.status");
   const [resultDate, setResultDate] = useState<string>("");
   useEffect(() => {
-    setResultDate(new Date(props.result.date).toLocaleDateString());
+    if(props.result.date){
+      setResultDate(new Date(props.result.date).toLocaleDateString());
+    }
   }, [props.result.date]);
   return (
     <Box className="w-max mx-auto py-4 px-6 mt-4">

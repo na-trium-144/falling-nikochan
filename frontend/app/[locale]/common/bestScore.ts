@@ -8,9 +8,9 @@ export interface ResultData {
   chainScore: number;
   bigScore: number;
   judgeCount: [number, number, number, number];
-  bigCount: number | null;
-  inputType: number | null;
-  date: number;
+  bigCount?: number | null;
+  inputType?: number | null;
+  date?: number;
 }
 interface ResultDataOld extends ResultData {
   levelHash: string;
@@ -25,7 +25,7 @@ export function toResultParams(
   }
 ): ResultParams {
   return {
-    date: data.date !== null ? new Date(data.date) : null,
+    date: data.date !== undefined ? new Date(data.date) : null,
     lvName: level.name,
     lvType: levelTypes.indexOf(level.type),
     lvDifficulty: level.difficulty,
@@ -36,8 +36,8 @@ export function toResultParams(
       (data.baseScore + data.chainScore + data.bigScore) * 100
     ),
     judgeCount: data.judgeCount,
-    bigCount: data.bigCount || null,
-    inputType: data.inputType || null,
+    bigCount: data.bigCount !== undefined ? data.bigCount : null,
+    inputType: data.inputType !== undefined ? data.inputType : null,
   };
 }
 

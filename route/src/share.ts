@@ -72,10 +72,16 @@ const shareApp = (config: {
               cid: cid,
             });
         if (resultParams) {
-          newTitle = t("titleWithResult", {
-            title: newTitle,
-            date: resultParams.date.toLocaleDateString(qLang),
-          });
+          if (resultParams.date) {
+            newTitle = t("titleWithResult", {
+              title: newTitle,
+              date: resultParams.date.toLocaleDateString(qLang),
+            });
+          } else {
+            newTitle = t("titleWithResultNoDate", {
+              title: newTitle,
+            });
+          }
         }
         const newDescription = resultParams
           ? t("descriptionWithResult", {

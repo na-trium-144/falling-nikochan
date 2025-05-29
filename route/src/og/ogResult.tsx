@@ -34,7 +34,7 @@ export async function OGResult(
   brief: ChartBriefMin,
   bgImageBin: Promise<string>,
   params: ResultParams,
-  inputTypeImageBin: Promise<string> | null,
+  inputTypeImageBin: Promise<string> | null
 ) {
   const th = await getTranslations(lang, "share");
   const t = await getTranslations(lang, "play.result");
@@ -91,18 +91,20 @@ export async function OGResult(
           >
             {brief.title}
           </span>
-          {brief.composer && (<>
-            <span
-              style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
-            >
-              /
-            </span>
-            <span
-              style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
-            >
-              {brief.composer}
-            </span>
-          </>)}
+          {brief.composer && (
+            <>
+              <span
+                style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+              >
+                /
+              </span>
+              <span
+                style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+              >
+                {brief.composer}
+              </span>
+            </>
+          )}
         </div>
         <div
           style={{
@@ -169,29 +171,31 @@ export async function OGResult(
             fontFamily: fontMainUi,
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              bottom: 6 * 4,
-              right: 6 * 4,
-              ...text3xl,
-              color: slate500,
-              ...flexRow,
-            }}
-          >
-            <span>(</span>
-            <span>{params.date.toLocaleDateString(lang)}</span>
-            {inputTypeImageBin && (
-              <img
-                style={{
-                  marginLeft: 12,
-                  height: 30,
-                }}
-                src={`data:image/svg+xml;base64,${btoa(await inputTypeImageBin)}`}
-              />
-            )}
-            <span>)</span>
-          </div>
+          {params.date && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 6 * 4,
+                right: 6 * 4,
+                ...text3xl,
+                color: slate500,
+                ...flexRow,
+              }}
+            >
+              <span>(</span>
+              <span>{params.date.toLocaleDateString(lang)}</span>
+              {inputTypeImageBin && (
+                <img
+                  style={{
+                    marginLeft: 12,
+                    height: 30,
+                  }}
+                  src={`data:image/svg+xml;base64,${btoa(await inputTypeImageBin)}`}
+                />
+              )}
+              <span>)</span>
+            </div>
+          )}
           <div
             style={{
               ...flexRow,
