@@ -13,7 +13,7 @@ export interface ResultParams {
   bigScore100: number;
   score100: number;
   judgeCount: readonly [number, number, number, number];
-  bigCount: number | null; // null: 存在しない
+  bigCount: number | null | false; // null: 存在しない(max=0), false: データがない、不明
   inputType: number | null;
 }
 export const inputTypes = {
@@ -51,7 +51,7 @@ export const ResultSerializedSchema = () =>
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2000)), // [7] bigScore100
       v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(12000)), // [8] score100
       v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)), // [9] judgeCount
-      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), // [10] bigCount
+      v.nullable(v.union([v.literal(false), v.pipe(v.number(), v.integer(), v.minValue(0))])), // [10] bigCount
       v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))), // [11] inputType
     ]),
   ]);

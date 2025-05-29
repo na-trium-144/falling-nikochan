@@ -36,7 +36,7 @@ export function toResultParams(
       (data.baseScore + data.chainScore + data.bigScore) * 100
     ),
     judgeCount: data.judgeCount,
-    bigCount: data.bigCount !== undefined ? data.bigCount : null,
+    bigCount: data.bigCount !== undefined ? data.bigCount : false,
     inputType: data.inputType !== undefined ? data.inputType : null,
   };
 }

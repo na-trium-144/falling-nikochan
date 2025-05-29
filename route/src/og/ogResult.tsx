@@ -299,15 +299,17 @@ export async function OGResult(
             <span style={{ ...text4xl }}>{params.judgeCount[ji]}</span>
           </div>
         ))}
-        <div
-          style={{
-            ...flexRow,
-            color: params.bigCount === null ? slate400 : undefined,
-          }}
-        >
-          <span style={{ ...text2xl, flexGrow: 1 }}>{ts("big")}</span>
-          <span style={{ ...text4xl }}>{params.bigCount || 0}</span>
-        </div>
+        {params.bigCount !== false && (
+          <div
+            style={{
+              ...flexRow,
+              color: params.bigCount === null ? slate400 : undefined,
+            }}
+          >
+            <span style={{ ...text2xl, flexGrow: 1 }}>{ts("big")}</span>
+            <span style={{ ...text4xl }}>{params.bigCount || 0}</span>
+          </div>
+        )}
       </div>
       {/* zIndexが効かなさそうなので代わりに順番を変えて解決 */}
       <div
