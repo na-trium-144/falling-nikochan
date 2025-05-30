@@ -1,4 +1,4 @@
-const key = "numPlay";
+const key = "oldPlayRecords";
 interface Record {
   cid: string;
   lvHash: string;
