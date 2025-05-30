@@ -268,6 +268,19 @@ export async function initDb() {
       score: 100,
       fc: true,
       fb: false,
+      factor: 0.7,
+      editing: false,
+    });
+    await db.collection<PlayRecordEntry>("playRecord").insertOne({
+      cid: dummyCid,
+      lvHash: "dummy",
+      playedAt: Date.now(),
+      auto: false,
+      score: 100,
+      fc: true,
+      fb: false,
+      factor: 0.1,
+      editing: false,
     });
     await db.collection<PlayRecordEntry>("playRecord").insertOne({
       cid: dummyCid,
@@ -277,6 +290,8 @@ export async function initDb() {
       score: 50,
       fc: false,
       fb: false,
+      factor: 0.5,
+      editing: false,
     });
     await db.collection<PlayRecordEntry>("playRecord").insertOne({
       cid: dummyCid,
@@ -286,6 +301,19 @@ export async function initDb() {
       score: 50,
       fc: false,
       fb: false,
+      factor: 1,
+      editing: false,
+    });
+    await db.collection<PlayRecordEntry>("playRecord").insertOne({
+      cid: dummyCid,
+      lvHash: "dummy",
+      playedAt: Date.now(),
+      auto: false,
+      score: 30,
+      fc: false,
+      fb: false,
+      factor: 1,
+      editing: true,
     });
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid: dummyCid },

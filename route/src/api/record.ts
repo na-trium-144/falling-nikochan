@@ -17,6 +17,8 @@ export interface PlayRecordEntry {
   score: number;
   fc: boolean;
   fb: boolean;
+  factor?: number;
+  editing?: boolean;
 }
 const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get("/:cid", async (c) => {
@@ -42,29 +44,41 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           } satisfies RecordGetSummary;
           summary.push(s);
         }
+        const factor = typeof record.factor === "number" ? record.factor : 1;
         if (record.auto) {
-          s.countAuto++;
+          s.countAuto += factor;
         } else {
-          s.count++;
-          s.histogram[Math.floor(record.score / 10)]++;
+          s.count += factor;
+          s.histogram[Math.floor(record.score / 10)] += factor;
           if (record.fc) {
-            s.countFC++;
+            s.countFC += factor;
           }
           if (record.fb) {
-            s.countFB++;
+            s.countFB += factor;
           }
         }
       }
-      return c.json(summary, 200, {
-        "Cache-Control": cacheControl(env(c), 600),
-      });
+      return c.json(
+        summary.map((s) => ({
+          lvHash: s.lvHash,
+          count: Math.ceil(s.count),
+          countAuto: Math.ceil(s.countAuto),
+          histogram: s.histogram.map((h) => Math.ceil(h)),
+          countFC: Math.ceil(s.countFC),
+          countFB: Math.ceil(s.countFB),
+        })),
+        200,
+        {
+          "Cache-Control": cacheControl(env(c), 600),
+        }
+      );
     } finally {
       await client.close();
     }
   })
   .post("/:cid", async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { lvHash, auto, score, fc, fb } = v.parse(
+    const { lvHash, auto, score, fc, fb, factor, editing } = v.parse(
       RecordPostSchema(),
       await c.req.json()
     );
@@ -81,6 +95,8 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         score,
         fc,
         fb,
+        factor: typeof factor === "number" ? factor : 1,
+        editing: !!editing,
       });
       return c.body(null, 204);
     } finally {

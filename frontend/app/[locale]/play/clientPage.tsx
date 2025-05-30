@@ -60,6 +60,7 @@ import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
 import { isStandalone } from "@/common/pwaInstall.js";
+import { updateRecordFactor } from "@/common/recordFactor.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -555,6 +556,12 @@ function Play(props: Props) {
                   score,
                   fc: chainScore === chainScoreRate,
                   fb: bigScore === bigScoreRate,
+                  editing,
+                  factor: updateRecordFactor(
+                    cid,
+                    chartBrief.levels[lvIndex].hash,
+                    auto
+                  ),
                 } satisfies RecordPost),
                 credentials:
                   process.env.NODE_ENV === "development"
@@ -599,6 +606,7 @@ function Play(props: Props) {
     props.goResult,
     bigCount,
     hitType,
+    editing,
   ]);
 
   const onReady = useCallback(() => {
