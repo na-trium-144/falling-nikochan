@@ -19,5 +19,7 @@ export const RecordPostSchema = () =>
     score: v.pipe(v.number(), v.minValue(0), v.maxValue(120)),
     fc: v.boolean(),
     fb: v.boolean(),
+    factor: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(1))),
+    editing: v.optional(v.boolean()),
   });
 export type RecordPost = v.InferOutput<ReturnType<typeof RecordPostSchema>>;
