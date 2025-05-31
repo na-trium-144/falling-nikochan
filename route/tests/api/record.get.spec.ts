@@ -11,11 +11,25 @@ describe("GET /api/record/:cid", () => {
     expect(summary).toStrictEqual([
       {
         lvHash: "dummy",
-        count: 2,
-        countAuto: 1,
-        countFC: 1,
+        count: Math.ceil(0.7 + 0.1 + 0.5 + 1),
+        countAuto: Math.ceil(1),
+        countFC: Math.ceil(0.7 + 0.1),
         countFB: 0,
-        histogram: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+        histogram: [
+          0,
+          0,
+          0,
+          Math.ceil(1),
+          0,
+          Math.ceil(0.5),
+          0,
+          0,
+          0,
+          0,
+          Math.ceil(0.7 + 0.1),
+          0,
+          0,
+        ],
       },
     ]);
   });

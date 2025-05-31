@@ -15,7 +15,7 @@ export default async function Page({ params }: MetadataProps) {
         null,
         <AboutContent1 key={1} locale={locale} />,
         <AboutContent2 key={2} />,
-        <AboutContent3 key={3} />,
+        <AboutContent3 key={3} locale={locale} />,
         <AboutContent4 key={4} locale={locale} />,
         <AboutContent5 key={5} locale={locale} />,
       ]}

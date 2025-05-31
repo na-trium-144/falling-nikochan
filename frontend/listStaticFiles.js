@@ -18,5 +18,5 @@ function listFilesRecursively(dir) {
 writeFileSync(
   "out/assets/staticFiles.json",
   JSON.stringify(listFilesRecursively("")),
-  "utf-8",
+  "utf-8"
 );

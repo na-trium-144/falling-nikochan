@@ -1,14 +1,14 @@
-import { originURL } from '@/metadata'
-import type { MetadataRoute } from 'next'
+import { originURL } from "@/metadata";
+import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: '*',
-      allow: '/',
+      userAgent: "*",
+      allow: "/",
     },
-    sitemap: new URL('/sitemap.xml', originURL).toString(),
-  }
+    sitemap: new URL("/sitemap.xml", originURL).toString(),
+  };
 }

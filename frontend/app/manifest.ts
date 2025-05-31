@@ -13,7 +13,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     icons: [192, 256, 512, 1024]
       .map((size) => [
         {
-          src: process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
+          src:
+            process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
           sizes: `${size}x${size}`,
           type: "image/png",
           purpose: "any",

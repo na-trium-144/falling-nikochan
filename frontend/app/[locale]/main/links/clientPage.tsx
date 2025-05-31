@@ -15,6 +15,7 @@ import { ThemeSwitcher, useTheme } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useState } from "react";
 import Mail from "@icon-park/react/lib/icons/Mail";
+import { FestivalLink, useFestival } from "@/common/festival";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
@@ -22,13 +23,15 @@ export default function LinksPage({ locale }: { locale: string }) {
   const [mailAddress, setMailAddress] = useState<string>("");
   const deferShowMail = () =>
     setMailAddress(atob("bmlrb2NoYW5hYWExNDRAZ21haWwuY29t"));
+  const fes = useFestival();
 
   return (
     <IndexMain
       title={t("titleShort")}
       tabKey="links"
       mobileTabKey="links"
-      noBackButton
+      noBackButtonMobile
+      noBackButtonPC
       locale={locale}
     >
       <div className="mb-3 main-wide:hidden">
@@ -118,9 +121,11 @@ export default function LinksPage({ locale }: { locale: string }) {
               {t("changelog")}
             </Link>
           </p>
-      <p className="text-justify">
-        {t("supportedBrowsers", { browserslist: process.env.browserslist! })}
-      </p>
+          <p className="text-justify">
+            {t("supportedBrowsers", {
+              browserslist: process.env.browserslist!,
+            })}
+          </p>
           <p className="main-wide:hidden ">
             <Link
               className={linkStyle3}
@@ -178,6 +183,11 @@ export default function LinksPage({ locale }: { locale: string }) {
           <li>
             <ExternalLink href="https://utcode.net">ut.code();</ExternalLink>
           </li>
+          {fes.num && (
+            <li>
+              <FestivalLink {...fes} />
+            </li>
+          )}
         </ul>
       </div>
     </IndexMain>

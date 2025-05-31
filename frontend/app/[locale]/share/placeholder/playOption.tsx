@@ -5,8 +5,13 @@ import {
   levelTypes,
   rankStr,
   RecordGetSummary,
+  serializeResultParams,
 } from "@falling-nikochan/chart";
-import { getBestScore, ResultData } from "@/common/bestScore.js";
+import {
+  getBestScore,
+  ResultData,
+  toResultParams,
+} from "@/common/bestScore.js";
 import Button from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
@@ -21,8 +26,11 @@ import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
+import { useShareLink } from "@/common/share";
 
 interface Props {
+  locale: string;
   cid: string;
   brief: ChartBrief;
   record: RecordGetSummary[] | null;
@@ -36,14 +44,14 @@ export function PlayOption(props: Props) {
     setStatus(
       props.brief?.levels
         // .filter((l) => !l.unlisted)
-        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || [],
+        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
     );
   }, [props.cid, props.brief]);
 
   // levelが存在しない時 -1
   const [selectedLevel, setSelectedLevel] = useState<number | null>(
     // props.brief.levels.findIndex((l) => !l.unlisted),
-    null,
+    null
   );
   const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
@@ -97,7 +105,7 @@ export function PlayOption(props: Props) {
                     }
                   />
                 </li>
-              ),
+              )
           )}
         </ul>
         {levelsNum === 0 && <p>{t("unavailable")}</p>}
@@ -127,6 +135,7 @@ export function PlayOption(props: Props) {
                 brief={props.brief}
                 record={props.record}
                 selectedLevel={selectedLevel}
+                locale={props.locale}
               />
             ) : null}
           </div>
@@ -180,6 +189,7 @@ function LevelButton(props: {
       <LevelBadge
         className="absolute top-0.5 -right-3 "
         status={[props.status]}
+        levels={[levelTypes.indexOf(props.level.type)]}
       />
       <span className="inline-block text-center truncate w-full ">
         {props.level.name && (
@@ -204,6 +214,7 @@ function SelectedLevelInfo(props: {
   brief: ChartBrief;
   record: RecordGetSummary[] | null;
   selectedLevel: number;
+  locale: string;
 }) {
   const t = useTranslations("share");
   const [showBestDetail, setShowBestDetail] = useState(false);
@@ -212,18 +223,29 @@ function SelectedLevelInfo(props: {
     props.selectedLevel === null
       ? null
       : props.record?.find(
-          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash,
+          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
         );
 
   const [bestScoreState, setBestScoreState] = useState<(ResultData | null)[]>(
-    [],
+    []
   );
+  const [serializedParam, setSerializedParam] = useState<string[]>([]);
   useEffect(() => {
     const bestScoreState: (ResultData | null)[] = [];
+    const serializedParam: string[] = [];
     for (let i = 0; i < props.brief.levels.length; i++) {
-      bestScoreState.push(getBestScore(props.cid, props.brief.levels[i].hash));
+      const bestScore = getBestScore(props.cid, props.brief.levels[i].hash);
+      bestScoreState.push(bestScore);
+      serializedParam.push(
+        bestScore
+          ? serializeResultParams(
+              toResultParams(bestScore, props.brief.levels[i])
+            )
+          : ""
+      );
     }
     setBestScoreState(bestScoreState);
+    setSerializedParam(serializedParam);
   }, [props.cid, props.brief]);
 
   const selectedBestScore = bestScoreState.at(props.selectedLevel);
@@ -232,6 +254,14 @@ function SelectedLevelInfo(props: {
       selectedBestScore.chainScore +
       selectedBestScore.bigScore
     : 0;
+
+  const shareLink = useShareLink(
+    props.cid,
+    props.brief,
+    props.locale,
+    serializedParam.at(props.selectedLevel) || "",
+    selectedBestScore?.date
+  );
 
   return (
     <>
@@ -262,7 +292,7 @@ function SelectedLevelInfo(props: {
           </span>
           <span className="text-lg">
             {Math.floor(
-              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60,
+              Math.round(props.brief.levels[props.selectedLevel]?.length) / 60
             )}
           </span>
           <span className="text-lg">:</span>
@@ -312,6 +342,11 @@ function SelectedLevelInfo(props: {
         }
       >
         <p className="">{t("bestScore")}</p>
+        {showBestDetail && selectedBestScore?.date && (
+          <span className="text-sm text-slate-500 dark:text-stone-400">
+            ({new Date(selectedBestScore.date).toLocaleDateString()})
+          </span>
+        )}
         <div className="flex flex-row items-center ">
           <span
             className={
@@ -330,6 +365,15 @@ function SelectedLevelInfo(props: {
             <span className="text-xl ml-1 ">({rankStr(totalScore)})</span>
           )}
         </div>
+        {!showBestDetail && selectedBestScore && (
+          <span className="inline-block text-sm">
+            {t("detail")}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
+          </span>
+        )}
         {showBestDetail && selectedBestScore && (
           <>
             <span className="inline-block ">
@@ -374,6 +418,16 @@ function SelectedLevelInfo(props: {
           </>
         )}
       </button>
+      {showBestDetail && selectedBestScore && (
+        <span className="inline-block space-x-1 mt-1 ">
+          {shareLink.toClipboard && (
+            <Button text={t("copyScoreLink")} onClick={shareLink.toClipboard} />
+          )}
+          {shareLink.toAPI && (
+            <Button text={t("shareScoreLink")} onClick={shareLink.toAPI} />
+          )}
+        </span>
+      )}
     </>
   );
 }

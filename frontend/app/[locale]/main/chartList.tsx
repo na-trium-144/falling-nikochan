@@ -1,5 +1,5 @@
 "use client";
-import { ChartBrief } from "@falling-nikochan/chart";
+import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -31,7 +31,7 @@ interface PProps {
 export default function ChartListPage(props: PProps) {
   const { modal, openModal, openShareInternal } = useShareModal(
     props.locale,
-    props.mobileTabKey,
+    props.mobileTabKey
   );
 
   return (
@@ -110,14 +110,14 @@ export function ChartList(props: Props) {
         setBriefs(
           getRecent("play")
             .reverse()
-            .map((cid) => ({ cid, fetched: false })),
+            .map((cid) => ({ cid, fetched: false }))
         );
         break;
       case "recentEdit":
         setBriefs(
           getRecent("edit")
             .reverse()
-            .map((cid) => ({ cid, fetched: false })),
+            .map((cid) => ({ cid, fetched: false }))
         );
         break;
       case "latest":
@@ -126,7 +126,7 @@ export function ChartList(props: Props) {
           try {
             const latestRes = await fetch(
               process.env.BACKEND_PREFIX + `/api/${props.type}`,
-              { cache: "default" },
+              { cache: "default" }
             );
             if (latestRes.ok) {
               const latestCId = (await latestRes.json()) as { cid: string }[];
@@ -157,7 +157,7 @@ export function ChartList(props: Props) {
             ? null
             : props.maxRow !== undefined
               ? props.maxRow
-              : chartListMaxRow,
+              : chartListMaxRow
         );
         if (res.changed) {
           setBriefs(res.briefs);
@@ -210,7 +210,7 @@ export function ChartList(props: Props) {
                   ? () =>
                       props.onClickMobile!(
                         briefs.at(i)!.cid,
-                        briefs.at(i)!.brief,
+                        briefs.at(i)!.brief
                       )
                   : undefined
               }
@@ -228,7 +228,7 @@ export function ChartList(props: Props) {
                 "bg-sky-200/25 dark:bg-orange-800/10 "
               }
             />
-          ),
+          )
         )}
       </ul>
       <div className="absolute inset-x-0 top-2 w-max mx-auto ">
@@ -364,12 +364,16 @@ export function ChartListItem(props: CProps) {
 }
 function ChartListItemChildren(props: CProps) {
   const [status, setStatus] = useState<BadgeStatus[]>([]);
+  const levelColors =
+    props.brief?.levels
+      .filter((l) => !l.unlisted)
+      .map((l) => levelTypes.indexOf(l.type)) || [];
   useEffect(() => {
     if (props.badge) {
       setStatus(
         props.brief?.levels
           .filter((l) => !l.unlisted)
-          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || [],
+          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
       );
     } else {
       setStatus([]);
@@ -378,7 +382,12 @@ function ChartListItemChildren(props: CProps) {
 
   return (
     <div className="relative flex flex-row items-center gap-2 ">
-      <LevelBadge className="absolute top-0 -right-1" status={status} />
+      <LevelBadge
+        className="absolute top-0 -right-1"
+        status={status}
+        levels={levelColors}
+        showDot
+      />
       <div className="flex-none ">
         {props.brief?.ytId ? (
           <img

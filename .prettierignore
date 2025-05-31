@@ -1,0 +1,8 @@
+**/*.yml
+**/*.yaml
+**/*.md
+**/*.mdx
+.next/
+out/
+dist/
+.vercel/

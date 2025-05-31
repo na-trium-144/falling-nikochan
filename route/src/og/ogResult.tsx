@@ -23,6 +23,8 @@ import {
   slate500,
   amber500,
   slate400,
+  emerald500,
+  rose400,
 } from "./style.js";
 import { ChartBriefMin } from "./app.js";
 
@@ -30,8 +32,9 @@ export async function OGResult(
   cid: string,
   lang: string,
   brief: ChartBriefMin,
-  bgImageBin: string,
-  params: ResultParams
+  bgImageBin: Promise<string>,
+  params: ResultParams,
+  inputTypeImageBin: Promise<string> | null
 ) {
   const th = await getTranslations(lang, "share");
   const t = await getTranslations(lang, "play.result");
@@ -52,7 +55,7 @@ export async function OGResult(
           width: "100%",
           position: "absolute",
         }}
-        src={`data:image/png;base64,${btoa(bgImageBin)}`}
+        src={`data:image/png;base64,${btoa(await bgImageBin)}`}
       />
       <div
         style={{
@@ -88,16 +91,20 @@ export async function OGResult(
           >
             {brief.title}
           </span>
-          <span
-            style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
-          >
-            /
-          </span>
-          <span
-            style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
-          >
-            {brief.composer}
-          </span>
+          {brief.composer && (
+            <>
+              <span
+                style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+              >
+                /
+              </span>
+              <span
+                style={{ ...text4xl, fontFamily: fontTitle, marginLeft: 4 * 4 }}
+              >
+                {brief.composer}
+              </span>
+            </>
+          )}
         </div>
         <div
           style={{
@@ -164,17 +171,31 @@ export async function OGResult(
             fontFamily: fontMainUi,
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              bottom: 6 * 4,
-              right: 6 * 4,
-              ...text3xl,
-              color: slate500,
-            }}
-          >
-            {`(${params.date.toLocaleDateString(lang)})`}
-          </div>
+          {params.date && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 6 * 4,
+                right: 6 * 4,
+                ...text3xl,
+                color: slate500,
+                ...flexRow,
+              }}
+            >
+              <span>(</span>
+              <span>{params.date.toLocaleDateString(lang)}</span>
+              {inputTypeImageBin && (
+                <img
+                  style={{
+                    marginLeft: 12,
+                    height: 30,
+                  }}
+                  src={`data:image/svg+xml;base64,${btoa(await inputTypeImageBin)}`}
+                />
+              )}
+              <span>)</span>
+            </div>
+          )}
           <div
             style={{
               ...flexRow,
@@ -278,15 +299,17 @@ export async function OGResult(
             <span style={{ ...text4xl }}>{params.judgeCount[ji]}</span>
           </div>
         ))}
-        <div
-          style={{
-            ...flexRow,
-            color: params.bigCount === null ? slate400 : undefined,
-          }}
-        >
-          <span style={{ ...text2xl, flexGrow: 1 }}>{ts("big")}</span>
-          <span style={{ ...text4xl }}>{params.bigCount || 0}</span>
-        </div>
+        {params.bigCount !== false && (
+          <div
+            style={{
+              ...flexRow,
+              color: params.bigCount === null ? slate400 : undefined,
+            }}
+          >
+            <span style={{ ...text2xl, flexGrow: 1 }}>{ts("big")}</span>
+            <span style={{ ...text4xl }}>{params.bigCount || 0}</span>
+          </div>
+        )}
       </div>
       {/* zIndexが効かなさそうなので代わりに順番を変えて解決 */}
       <div
@@ -294,10 +317,10 @@ export async function OGResult(
           position: "absolute",
           top: 0,
           right: 0,
-          width: 124 * 4,
-          height: (124 * 4 * 9) / 16,
+          width: (120 + 4) * 4,
+          height: ((120 * 9) / 16 + 4) * 4,
           borderBottomLeftRadius: 12,
-          backgroundColor: amber500,
+          backgroundColor: [emerald500, amber500, rose400][params.lvType],
         }}
       />
       <img

@@ -31,6 +31,7 @@ import {
   loadChart6,
   RecordGetSummary,
   RecordPost,
+  inputTypes,
 } from "@falling-nikochan/chart";
 import { ChartSeqData11, loadChart11 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
@@ -59,6 +60,7 @@ import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
 import { isStandalone } from "@/common/pwaInstall.js";
+import { updateRecordFactor } from "@/common/recordFactor.js";
 import Title from "@/common/titleLogo.js";
 import { levelColors } from "@/common/levelColors.js";
 
@@ -362,6 +364,7 @@ function Play(props: Props) {
     bigTotal,
     lateTimes,
     chartEnd,
+    hitType,
   } = useGameLogic(getCurrentTimeSec, auto, userOffset, playSE);
 
   const [fps, setFps] = useState<number>(0);
@@ -506,6 +509,7 @@ function Play(props: Props) {
   useEffect(() => {
     if (chartPlaying && chartEnd && endSecPassed) {
       if (!showResult) {
+        const newResultDate = new Date();
         if (
           cid &&
           !auto &&
@@ -514,10 +518,13 @@ function Play(props: Props) {
         ) {
           if (score > bestScoreState) {
             setBestScore(cid, chartBrief.levels[lvIndex].hash, {
+              date: newResultDate.getTime(),
               baseScore,
               chainScore,
               bigScore,
               judgeCount,
+              bigCount: bigCount,
+              inputType: hitType,
             });
           }
           void (async () => {
@@ -551,6 +558,12 @@ function Play(props: Props) {
                   score,
                   fc: chainScore === chainScoreRate,
                   fb: bigScore === bigScoreRate,
+                  editing,
+                  factor: updateRecordFactor(
+                    cid,
+                    chartBrief.levels[lvIndex].hash,
+                    auto
+                  ),
                 } satisfies RecordPost),
                 credentials:
                   process.env.NODE_ENV === "development"
@@ -561,12 +574,12 @@ function Play(props: Props) {
               //ignore
             }
           }
-          setResultDate(new Date());
+          setResultDate(newResultDate);
           setExitable((ex) =>
             Math.max(
               ex || 0,
-              performance.now() + resultAnimDelays.reduce((a, b) => a + b, 0),
-            ),
+              performance.now() + resultAnimDelays.reduce((a, b) => a + b, 0)
+            )
           );
           stop();
         }, 1000);
@@ -593,6 +606,9 @@ function Play(props: Props) {
     judgeCount,
     stop,
     props.goResult,
+    bigCount,
+    hitType,
+    editing,
   ]);
 
   const onReady = useCallback(() => {
@@ -673,12 +689,26 @@ function Play(props: Props) {
           exit();
         } else {
           flash();
-          hit();
+          hit(inputTypes.keyboard);
         }
       }}
       onPointerDown={(e) => {
         flash();
-        hit();
+        switch (e.pointerType) {
+          case "mouse":
+            hit(inputTypes.mouse);
+            break;
+          case "pen":
+            hit(inputTypes.pen);
+            break;
+          case "touch":
+            hit(inputTypes.touch);
+            break;
+          default:
+            console.warn(`unknown pointer type: ${e.pointerType}`);
+            hit(0);
+            break;
+        }
         e.preventDefault();
       }}
       onPointerUp={(e) => e.preventDefault()}
@@ -801,7 +831,7 @@ function Play(props: Props) {
               }
               onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
-              onPointerUp={(e)=> e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
             >
               <Pause className="inline-block align-middle " />
               {!isTouch && (
@@ -898,6 +928,7 @@ function Play(props: Props) {
               }
               largeResult={largeResult}
               record={record}
+              inputType={hitType}
             />
           )}
           {showStopped && (

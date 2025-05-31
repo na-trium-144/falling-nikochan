@@ -16,6 +16,8 @@ describe("POST /api/record/:cid", () => {
         score: 100,
         fc: true,
         fb: false,
+        factor: 0.5,
+        editing: false,
       } satisfies RecordPost),
     });
     expect(res.status).toBe(204);
@@ -36,6 +38,8 @@ describe("POST /api/record/:cid", () => {
         score: 100,
         fc: true,
         fb: false,
+        factor: 0.5,
+        editing: false,
       });
     } finally {
       client.close();
@@ -50,6 +54,8 @@ describe("POST /api/record/:cid", () => {
         score: 50,
         fc: false,
         fb: true,
+        factor: 0.5,
+        editing: false,
       } as RecordPost),
     });
     expect(res.status).toBe(204);

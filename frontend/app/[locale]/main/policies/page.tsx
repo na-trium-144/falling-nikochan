@@ -13,7 +13,13 @@ export default async function PolicyTab({ params }: MetadataProps) {
   const Policies = await importPoliciesMDX(locale);
   const t = await getTranslations(params, "main.policies");
   return (
-    <IndexMain title={t("title")} tabKey="policies" mobileTabKey="links" locale={locale}>
+    <IndexMain
+      title={t("title")}
+      tabKey="policies"
+      mobileTabKey="links"
+      locale={locale}
+      noBackButtonPC
+    >
       <div className="text-justify">
         <Policies />
       </div>

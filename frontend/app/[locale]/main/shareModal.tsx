@@ -13,14 +13,14 @@ export function useShareModal(
   from: "play" | "top",
   config?: {
     noResetTitle?: boolean;
-  },
+  }
 ) {
   const th = useTranslations("share");
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
   const [modalRecord, setModalRecord] = useState<RecordGetSummary[] | null>(
-    null,
+    null
   );
   const [modalAppearing, setModalAppearing] = useState<boolean>(false);
   const router = useRouter();
@@ -52,7 +52,7 @@ export function useShareModal(
         .catch(() => setModalRecord([]));
       setTimeout(() => setModalAppearing(true));
     },
-    [th],
+    [th]
   );
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
@@ -62,12 +62,12 @@ export function useShareModal(
           JSON.stringify({
             cid,
             fromPlay: from === "play",
-          } satisfies ShareInternalSession),
+          } satisfies ShareInternalSession)
         );
         router.push(`/${locale}/main/shareInternal`);
       }
     },
-    [locale, from, router],
+    [locale, from, router]
   );
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる

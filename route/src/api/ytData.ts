@@ -51,7 +51,7 @@ export function normalizeEntry(data: {
 export async function getYTDataEntry(
   e: Bindings,
   db: Db,
-  ytId: string,
+  ytId: string
 ): Promise<YTDataEntry | undefined> {
   const entry = await db.collection<YTDataEntry>("ytData").findOne({ ytId });
   if (entry && entry.lastFetched > Date.now() - 24 * 60 * 60 * 1000) {
@@ -67,11 +67,11 @@ export async function getYTDataEntry(
           part: "snippet,localizations",
           id: ytId,
           key: e.GOOGLE_API_KEY,
-        }),
+        })
     );
     if (!res.ok) {
       console.error(
-        `Failed to fetch YT data for ${ytId}: ${res.status} ${await res.text()}`,
+        `Failed to fetch YT data for ${ytId}: ${res.status} ${await res.text()}`
       );
       return undefined;
     }
@@ -94,7 +94,7 @@ export async function getYTDataEntry(
       db.collection<YTDataEntry>("ytData").updateOne(
         { ytId },
         { $set: entry },
-        { upsert: true },
+        { upsert: true }
       );
       return entry;
     } catch (e) {

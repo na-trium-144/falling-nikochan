@@ -29,8 +29,14 @@ export function titleShareResult(
   brief: ChartMin | ChartBrief | null | undefined,
   date: Date | undefined
 ): string {
-  return t("titleWithResult", {
-    date: date?.toLocaleDateString(),
-    title: titleShare(t, cid, brief),
-  });
+  if (date) {
+    return t("titleWithResult", {
+      date: date.toLocaleDateString(),
+      title: titleShare(t, cid, brief),
+    });
+  } else {
+    return t("titleWithResultNoDate", {
+      title: titleShare(t, cid, brief),
+    });
+  }
 }

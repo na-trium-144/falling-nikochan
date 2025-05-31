@@ -49,7 +49,7 @@ const shareApp = (config: {
       // if (c.req.path.startsWith("/share")) {
       placeholderUrl = new URL(
         `/${qLang}/share/placeholder`,
-        new URL(c.req.url).origin,
+        new URL(c.req.url).origin
       );
       // } else {
       //   placeholderUrl = new URL(
@@ -72,10 +72,16 @@ const shareApp = (config: {
               cid: cid,
             });
         if (resultParams) {
-          newTitle = t("titleWithResult", {
-            title: newTitle,
-            date: resultParams.date.toLocaleDateString(qLang),
-          });
+          if (resultParams.date) {
+            newTitle = t("titleWithResult", {
+              title: newTitle,
+              date: resultParams.date.toLocaleDateString(qLang),
+            });
+          } else {
+            newTitle = t("titleWithResultNoDate", {
+              title: newTitle,
+            });
+          }
         }
         const newDescription = resultParams
           ? t("descriptionWithResult", {
@@ -134,8 +140,8 @@ const shareApp = (config: {
             new URL(
               (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
                 ogQuery.toString(),
-              new URL(c.req.url).origin,
-            ).toString(),
+              new URL(c.req.url).origin
+            ).toString()
           )
           .replaceAll("PLACEHOLDER_DESCRIPTION", descriptionEscapedHtml)
           .replaceAll("PLACEHOLDER_BRIEF", briefEscapedHtml);

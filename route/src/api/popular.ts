@@ -15,6 +15,7 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       const records = db.collection<PlayRecordEntry>("playRecord").find({
         playedAt: { $gt: Date.now() - 1000 * 60 * 60 * 24 * popularDays },
+        editing: { $ne: true },
       });
       const cidCounts: { cid: string; count: number }[] = [];
       const chartEntries = new Map<string, ChartLevelBrief[] | undefined>();
@@ -35,11 +36,12 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           chartEntries.set(record.cid, lb);
         }
         if (lb && lb.find((l) => l.hash === record.lvHash)) {
+          const factor = typeof record.factor === "number" ? record.factor : 1;
           const cidCount = cidCounts.find((c) => c.cid === record.cid);
           if (cidCount) {
-            cidCount.count++;
+            cidCount.count += factor;
           } else {
-            cidCounts.push({ cid: record.cid, count: 1 });
+            cidCounts.push({ cid: record.cid, count: factor });
           }
         }
       }
@@ -48,12 +50,12 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         200,
         {
           "cache-control": cacheControl(env(c), 600),
-        },
+        }
       );
     } finally {
       await client.close();
     }
-  },
+  }
 );
 
 export default popularApp;

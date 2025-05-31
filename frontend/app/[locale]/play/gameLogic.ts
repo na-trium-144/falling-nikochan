@@ -22,7 +22,7 @@ export default function useGameLogic(
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
-  playSE: (s: SEType) => void,
+  playSE: (s: SEType) => void
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
   const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
@@ -45,6 +45,8 @@ export default function useGameLogic(
   const chainScore = (bonus / (bonusTotal || 1)) * chainScoreRate;
   const bigScore = (bigCount / (bigTotal || 1)) * bigScoreRate;
   const score = baseScore + chainScore + bigScore;
+  const hitCountByType = useRef<Record<number, number>>({});
+  const [hitType, setHitType] = useState<number | null>(null);
 
   const chartEnd = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
 
@@ -65,6 +67,8 @@ export default function useGameLogic(
     setBonus(0);
     setBigCount(0);
     setBigTotal(notesCopy.filter((n) => n.big).length);
+    hitCountByType.current = {};
+    setHitType(null);
   }, []);
 
   // Noteに判定を保存し、scoreとchainを更新
@@ -111,112 +115,130 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal],
+    [bonusTotal, notesTotal, bigTotal]
   );
 
   // キーを押したときの判定
-  const hit = useCallback(() => {
-    const now = getCurrentTimeSec();
-    let candidate: Note6 | Note7 | null = null;
-    let candidateJudge: number = 0;
-    let candidateLate: number | null = null;
-    while (now !== undefined && notesYetDone.current.length >= 1) {
-      const n = notesYetDone.current[0];
-      const late = now - n.hitTimeSec;
-      if (Math.abs(late) <= goodSec) {
-        console.log(`Good (${late} s)`);
-        candidate = n;
-        candidateJudge = 1;
-        candidateLate = late;
-        break;
-      } else if (Math.abs(late) <= okSec) {
-        console.log(`OK (${late} s)`);
-        candidate = n;
-        candidateJudge = 2;
-        candidateLate = late;
-        break;
-      } else if (late <= badLateSec && late >= badFastSec) {
-        console.log(`Bad (${late} s)`);
-        candidate = n;
-        candidateJudge = 3;
-        candidateLate = late;
-        break;
-      } else if (late > badLateSec) {
-        // miss
-        console.log("miss in hit()");
-        judge(n, now, 4);
-        notesYetDone.current.shift();
-        candidateLate = late;
-        continue;
-      } else {
-        // not yet
-        break;
-      }
-    }
-    let candidateBig: Note6 | Note7 | null = null;
-    let candidateJudgeBig: number = 0;
-    let candidateLateBig: number | null = null;
-    while (now !== undefined && notesBigYetDone.current.length >= 1) {
-      const n = notesBigYetDone.current[0];
-      const late = now - n.hitTimeSec;
-      if (Math.abs(late) <= goodSec) {
-        console.log(`Big Good (${late} s)`);
-        candidateBig = n;
-        candidateJudgeBig = 1;
-        candidateLateBig = late;
-        break;
-      } else if (Math.abs(late) <= okSec) {
-        console.log(`Big OK (${late} s)`);
-        candidateBig = n;
-        candidateJudgeBig = 2;
-        candidateLateBig = late;
-        break;
-      } else if (late <= badLateSec && late >= badFastSec) {
-        console.log(`Big Bad (${late} s)`);
-        candidateBig = n;
-        candidateJudgeBig = 3;
-        candidateLateBig = late;
-        break;
-      } else if (late > badLateSec) {
-        // miss
-        console.log("Big miss in hit()");
-        judge(n, now, 4);
-        notesBigYetDone.current.shift();
-        candidateLateBig = late;
-        continue;
-      } else {
-        // not yet
-        break;
-      }
-    }
-    // candidateJudgeとcandidateJudgeBigのうち近い方を判定する
-    if (
-      now &&
-      candidate !== null &&
-      (candidateBig === null || candidateJudge <= candidateJudgeBig)
-    ) {
-      playSE("hit");
-      judge(candidate, now, candidateJudge);
-      notesYetDone.current.shift();
-      if (candidate.big) {
-        notesBigYetDone.current.push(candidate);
-      }
-      if (candidateLate !== null) {
-        lateTimes.current.push(candidateLate + userOffset /* + audioLatency */);
-      }
-    } else if (now && candidateBig !== null) {
-      playSE("hitBig");
-      judge(candidateBig, now, candidateJudgeBig);
-      notesBigYetDone.current.shift();
-      if (candidateLateBig !== null) {
-        lateTimes.current.push(
-          candidateLateBig + userOffset /* + audioLatency */,
+  const hit = useCallback(
+    (type: number) => {
+      const now = getCurrentTimeSec();
+      if (now !== undefined) {
+        hitCountByType.current[type] = (hitCountByType.current[type] || 0) + 1;
+        setHitType(
+          Number(
+            Object.keys(hitCountByType.current).reduce((a, b) =>
+              hitCountByType.current[Number(a)] >
+              hitCountByType.current[Number(b)]
+                ? a
+                : b
+            )
+          )
         );
       }
-    } else {
-      playSE("hit");
-    }
-  }, [getCurrentTimeSec, judge, userOffset, playSE]);
+      let candidate: Note6 | Note7 | null = null;
+      let candidateJudge: number = 0;
+      let candidateLate: number | null = null;
+      while (now !== undefined && notesYetDone.current.length >= 1) {
+        const n = notesYetDone.current[0];
+        const late = now - n.hitTimeSec;
+        if (Math.abs(late) <= goodSec) {
+          console.log(`Good (${late} s)`);
+          candidate = n;
+          candidateJudge = 1;
+          candidateLate = late;
+          break;
+        } else if (Math.abs(late) <= okSec) {
+          console.log(`OK (${late} s)`);
+          candidate = n;
+          candidateJudge = 2;
+          candidateLate = late;
+          break;
+        } else if (late <= badLateSec && late >= badFastSec) {
+          console.log(`Bad (${late} s)`);
+          candidate = n;
+          candidateJudge = 3;
+          candidateLate = late;
+          break;
+        } else if (late > badLateSec) {
+          // miss
+          console.log("miss in hit()");
+          judge(n, now, 4);
+          notesYetDone.current.shift();
+          candidateLate = late;
+          continue;
+        } else {
+          // not yet
+          break;
+        }
+      }
+      let candidateBig: Note6 | Note7 | null = null;
+      let candidateJudgeBig: number = 0;
+      let candidateLateBig: number | null = null;
+      while (now !== undefined && notesBigYetDone.current.length >= 1) {
+        const n = notesBigYetDone.current[0];
+        const late = now - n.hitTimeSec;
+        if (Math.abs(late) <= goodSec) {
+          console.log(`Big Good (${late} s)`);
+          candidateBig = n;
+          candidateJudgeBig = 1;
+          candidateLateBig = late;
+          break;
+        } else if (Math.abs(late) <= okSec) {
+          console.log(`Big OK (${late} s)`);
+          candidateBig = n;
+          candidateJudgeBig = 2;
+          candidateLateBig = late;
+          break;
+        } else if (late <= badLateSec && late >= badFastSec) {
+          console.log(`Big Bad (${late} s)`);
+          candidateBig = n;
+          candidateJudgeBig = 3;
+          candidateLateBig = late;
+          break;
+        } else if (late > badLateSec) {
+          // miss
+          console.log("Big miss in hit()");
+          judge(n, now, 4);
+          notesBigYetDone.current.shift();
+          candidateLateBig = late;
+          continue;
+        } else {
+          // not yet
+          break;
+        }
+      }
+      // candidateJudgeとcandidateJudgeBigのうち近い方を判定する
+      if (
+        now &&
+        candidate !== null &&
+        (candidateBig === null || candidateJudge <= candidateJudgeBig)
+      ) {
+        playSE("hit");
+        judge(candidate, now, candidateJudge);
+        notesYetDone.current.shift();
+        if (candidate.big) {
+          notesBigYetDone.current.push(candidate);
+        }
+        if (candidateLate !== null) {
+          lateTimes.current.push(
+            candidateLate + userOffset /* + audioLatency */
+          );
+        }
+      } else if (now && candidateBig !== null) {
+        playSE("hitBig");
+        judge(candidateBig, now, candidateJudgeBig);
+        notesBigYetDone.current.shift();
+        if (candidateLateBig !== null) {
+          lateTimes.current.push(
+            candidateLateBig + userOffset /* + audioLatency */
+          );
+        }
+      } else {
+        playSE("hit");
+      }
+    },
+    [getCurrentTimeSec, judge, userOffset, playSE]
+  );
   // 0.1s以上過ぎたものをmiss判定にする
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -292,5 +314,6 @@ export default function useGameLogic(
     bigTotal,
     chartEnd,
     lateTimes,
+    hitType,
   };
 }

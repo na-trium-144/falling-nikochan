@@ -29,7 +29,7 @@ export default function EditTab({ locale }: { locale: string }) {
         process.env.BACKEND_PREFIX + `/api/brief/${cid}`,
         {
           cache: "no-store",
-        },
+        }
       );
       setCidFetching(false);
       if (res.ok) {
@@ -66,7 +66,8 @@ export default function EditTab({ locale }: { locale: string }) {
       title={t("title")}
       tabKey="edit"
       mobileTabKey="edit"
-      noBackButton
+      noBackButtonMobile
+      noBackButtonPC
       locale={locale}
     >
       <p className="text-justify">{t("welcome")}</p>

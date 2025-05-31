@@ -19,10 +19,10 @@ export default function ProgressBar(props: Props) {
           (props.fixedColor !== undefined
             ? props.fixedColor
             : props.value < 0.5
-            ? levelBgColors[0]
-            : props.value < 0.75
-            ? levelBgColors[1]
-            : levelBgColors[2])
+              ? levelBgColors[0]
+              : props.value < 0.75
+                ? levelBgColors[1]
+                : levelBgColors[2])
         }
         style={{
           width: Math.min(1, props.value) * 100 + "%",

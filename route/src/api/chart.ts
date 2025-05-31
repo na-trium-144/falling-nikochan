@@ -47,7 +47,7 @@ interface Passwd {
 export async function getChartEntry(
   db: Db,
   cid: string,
-  p: Passwd | null,
+  p: Passwd | null
 ): Promise<{
   entry: ChartEntry;
   chart:
@@ -77,7 +77,7 @@ export async function getChartEntry(
           null,
           undefined,
           "",
-          null,
+          null
         ),
       };
     } else {
@@ -102,7 +102,7 @@ export async function getChartEntry(
           cid,
           p.rawPasswd,
           p.pSecretSalt,
-          entry.pRandomSalt,
+          entry.pRandomSalt
         )) === entry.pServerHash) ||
         (p.v9PasswdHash !== undefined &&
           p.v9UserSalt !== undefined &&
@@ -117,7 +117,7 @@ export async function getChartEntry(
 
 export function getPUserHash(
   pServerHash: string,
-  pUserSalt: string,
+  pUserSalt: string
 ): Promise<string> {
   return hash(pServerHash + pUserSalt);
 }
@@ -125,7 +125,7 @@ export function getPServerHash(
   cid: string,
   rawPasswd: string,
   pSecretSalt: string,
-  pRandomSalt: string,
+  pRandomSalt: string
 ): Promise<string> {
   return hash(cid + rawPasswd + pSecretSalt + pRandomSalt);
 }
@@ -217,7 +217,7 @@ export type ChartEntry = ChartEntryCompressed &
   );
 
 export async function unzipEntry(
-  entry: ChartEntryCompressed,
+  entry: ChartEntryCompressed
 ): Promise<ChartEntry> {
   if (!entry.levelsCompressed) {
     throw new Error("levelsCompressed is null");
@@ -233,10 +233,10 @@ export async function unzipEntry(
 }
 
 export async function zipEntry(
-  entry: ChartEntry,
+  entry: ChartEntry
 ): Promise<ChartEntryCompressed> {
   const levelsCompressed: Buffer = await promisify(gzip)(
-    JSON.stringify(entry.levels),
+    JSON.stringify(entry.levels)
   );
   return {
     cid: entry.cid,
@@ -267,7 +267,7 @@ export async function chartToEntry(
   addIp: string | null,
   ytData: YTDataEntry | undefined,
   pSecretSalt: string,
-  prevEntry: ChartEntry | null,
+  prevEntry: ChartEntry | null
 ): Promise<ChartEntry> {
   const chartBrief = await createBrief(chart, updatedAt);
   const pRandomSalt =
@@ -287,7 +287,7 @@ export async function chartToEntry(
       cid,
       chart.changePasswd,
       pSecretSalt,
-      pRandomSalt,
+      pRandomSalt
     );
   }
   const ip = prevEntry?.ip || [];
@@ -340,7 +340,7 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
 }
 
 export function entryToChart(
-  entry: ChartEntry,
+  entry: ChartEntry
 ): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit | Chart11Edit {
   switch (entry.ver) {
     case 4:

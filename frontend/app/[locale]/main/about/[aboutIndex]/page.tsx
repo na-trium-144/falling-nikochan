@@ -9,7 +9,6 @@ import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata } from "@/metadata.js";
 import { maxAboutPageIndex } from "./pager.js";
 
-
 export const dynamic = "force-static";
 export const dynamicParams = false;
 export function generateStaticParams() {
@@ -24,7 +23,12 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const aboutIndex = (await params).aboutIndex;
   const t = await getTranslations(params, `about.${aboutIndex}`);
-  return initMetadata(params, `/main/about/${aboutIndex}`, t("title"), t("description"));
+  return initMetadata(
+    params,
+    `/main/about/${aboutIndex}`,
+    t("title"),
+    t("description")
+  );
 }
 
 export default async function AboutTab({ params }: Props) {
@@ -53,7 +57,7 @@ export default async function AboutTab({ params }: Props) {
         ) : aboutIndex === 2 ? (
           <AboutContent2 />
         ) : aboutIndex === 3 ? (
-          <AboutContent3 />
+          <AboutContent3 locale={locale} />
         ) : aboutIndex === 4 ? (
           <AboutContent4 locale={locale} />
         ) : aboutIndex === 5 ? (

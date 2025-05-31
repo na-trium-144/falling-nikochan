@@ -7,13 +7,13 @@ import jaError from "./ja/error.js";
 export const locales = ["en", "ja"];
 
 export async function getMessages(locale) {
-  switch(locale){
-  case "en":
-    return enError;
-  case "ja":
-    return jaError;
-  default:
-    throw new Error(`locale ${locale} is not defined in staticImport.js`);
+  switch (locale) {
+    case "en":
+      return enError;
+    case "ja":
+      return jaError;
+    default:
+      throw new Error(`locale ${locale} is not defined in staticImport.js`);
   }
 }
 

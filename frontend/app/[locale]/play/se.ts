@@ -20,11 +20,11 @@ export function useSE(cid: string | undefined, userOffset: number) {
         gainNode.current.gain.value = v / 100;
       }
     },
-    [cid],
+    [cid]
   );
   // undefined=未取得 null=取得不能
   const [audioLatency, setAudioLatency] = useState<number | null | undefined>(
-    undefined,
+    undefined
   );
   const [enableSE, setEnableSE_] = useState<boolean>(true);
   const offsetPlusLatency = userOffset - (enableSE ? audioLatency || 0 : 0);
@@ -39,7 +39,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
         audioContext.current?.resume();
       }
     },
-    [audioContext],
+    [audioContext]
   );
   useEffect(() => {
     if ("AudioContext" in window) {
@@ -59,7 +59,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
       const vol = Number(
         localStorage.getItem(`seVolume-${cid}`) ||
           localStorage.getItem("seVolume") ||
-          100,
+          100
       );
       setSEVolume_(vol);
       gainNode.current.gain.value = vol / 100;
@@ -75,7 +75,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
           .then((aryBuf) => audioContext.current!.decodeAudioData(aryBuf))
           .then((audio) => {
             audioBuffer.current = audio;
-          }),
+          })
       );
       return () => {
         gainNode.current?.disconnect();
@@ -135,7 +135,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
         source.addEventListener("ended", () => source.disconnect());
       }
     },
-    [enableSE],
+    [enableSE]
   );
 
   return {

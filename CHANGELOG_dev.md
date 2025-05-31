@@ -1,3 +1,33 @@
+## ver. 12.19 - 2025/05/30 [#638](https://github.com/na-trium-144/falling-nikochan/pull/638)
+
+* テストプレイ中の記録は人気譜面リストの並び順に反映しない
+    * 他の人のプレイ記録 の表示にはカウントする
+* 1ユーザーが複数回同じ譜面をプレイした場合の回数を少なくカウントする(人気譜面リストの並び順 & 他の人のプレイ記録 として表示される数の両方)
+    * 1回=1, 2回=1.5, 3回=1.83, 4回=2.08, 11回=3.02, 31回=4.02
+
+## ver. 12.18 - 2025/05/29 [#628](https://github.com/na-trium-144/falling-nikochan/pull/628)
+
+* プレイ記録共有時のパラメーターにキーボード操作かタッチ操作かの情報を追加
+* 保存済みのベストスコアからプレイ記録の共有リンクを生成できるようにする
+    * プレイ記録のパラメーターでdateがnullの状態・bigCountが存在しない(false)状態に対応
+* ogp画像内のサムネイルの枠の色にlevelの色を反映する
+* resultのogp画像でcomposerが空の時区切りのスラッシュが入っていたのを修正
+* /og にcorsを追加
+* chartListで表示するバッジの色をレベルの色に合わせるようにした & 未クリアの場合にもドットが表示されるようにした
+
+## ver. 12.17 - 2025/05/28 [#636](https://github.com/na-trium-144/falling-nikochan/pull/636)
+
+* cid 10xxxx を使用禁止にする
+
+## ver. 12.16 - 2025/05/28 [#629](https://github.com/na-trium-144/falling-nikochan/pull/629)
+
+* GitHub Actionによるprettierのcheckを導入
+
+## ver. 12.15 - 2025/05/23 [#620](https://github.com/na-trium-144/falling-nikochan/pull/620)
+
+* PC表示でも /main/latest などのページに戻るボタンを追加
+* メインページのタブを現在開いているタブかどうかに関わらず常にクリック可能にした
+
 ## ver. 12.13 - 2025/05/20 [#604](https://github.com/na-trium-144/falling-nikochan/pull/604)
 
 * productionのデプロイ先をVercelからCloudflareWorkerに変更

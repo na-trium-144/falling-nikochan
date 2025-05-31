@@ -46,9 +46,8 @@ export default {
         "Falling Nikochan では音源をダウンロードする必要はなく、<youtube>YouTube</youtube>を埋め込んで音源を再生するので、" +
         "YouTube にアップロードされている楽曲であればなんでも使用できます。",
       content3:
-        "音源を再配布しているわけではないので、" +
-        " <small>(違法アップロードされているものや YouTube 埋め込みでの利用を禁止されているものなどを除き)</small> " +
-        "ほとんどの場合著作権などで問題になることはありません。",
+        "音源を再配布しているわけではないので、ほとんどの場合著作権などで問題になることはありません。" +
+        "<small>(詳細は<linkPolicies>利用規約</linkPolicies>を参照してください)</small>",
       content4:
         "譜面を作って Falling Nikochan のサーバーにアップロードすると、譜面ID (6桁の数字) が発行されます。",
       content5:

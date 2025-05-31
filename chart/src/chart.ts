@@ -57,7 +57,7 @@ import { defaultCopyBuffer } from "./command.js";
 export const YoutubeIdSchema = () =>
   v.pipe(
     v.string(),
-    v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters"),
+    v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters")
   );
 export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
 export const LuaLineSchema = () =>
@@ -87,7 +87,7 @@ export const ChartBriefSchema = () =>
         bpmMax: v.pipe(v.number(), v.gtValue(0)),
         length: v.pipe(v.number(), v.minValue(0)),
         unlisted: v.boolean(),
-      }),
+      })
     ),
   });
 export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
@@ -105,15 +105,17 @@ export const convertToPlay = convertToPlay11;
 
 export async function validateChart(chart: ChartUntil11): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 11 && chart.ver !== 12) chart = await convertTo11(chart as ChartUntil9);
+  if (chart.ver !== 11 && chart.ver !== 12)
+    chart = await convertTo11(chart as ChartUntil9);
   v.parse(ChartEditSchema11(), chart);
   return { ...chart, ver: 12 };
 }
 export async function validateChartMin(
-  chart: ChartUntil11Min,
+  chart: ChartUntil11Min
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 11 && chart.ver !== 12) chart = await convertTo11Min(chart as ChartUntil9Min);
+  if (chart.ver !== 11 && chart.ver !== 12)
+    chart = await convertTo11Min(chart as ChartUntil9Min);
   v.parse(ChartMinSchema11(), chart);
   return { ...chart, ver: 12 };
 }
@@ -137,7 +139,7 @@ export function numEvents(chart: ChartEdit): number {
         l.rest.length +
         l.bpmChanges.length +
         l.speedChanges.length +
-        l.signature.length,
+        l.signature.length
     )
     .reduce((a, b) => a + b);
 }
@@ -227,12 +229,12 @@ export function copyLevel(level: LevelEdit): LevelEdit {
 
 export async function createBrief(
   chart: ChartEdit,
-  updatedAt: number,
+  updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
   try {
     levelHashes = await Promise.all(
-      chart.levels.map((level) => hashLevel(level)),
+      chart.levels.map((level) => hashLevel(level))
     );
   } catch {
     //

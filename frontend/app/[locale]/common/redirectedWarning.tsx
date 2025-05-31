@@ -3,6 +3,7 @@
 import Caution from "@icon-park/react/lib/icons/Caution";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { WarningBox } from "./box";
 
 export function RedirectedWarning() {
   const t = useTranslations("main");
@@ -11,19 +12,13 @@ export function RedirectedWarning() {
   useEffect(
     () =>
       setShowRedirectWarning(
-        new URLSearchParams(window.location.search).has("redirected"),
+        new URLSearchParams(window.location.search).has("redirected")
       ),
-    [],
+    []
   );
 
   return (
-    <div
-      className={
-        "text-center text-sm mx-6 my-2 px-3 py-2 h-max " +
-        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 " +
-        (showRedirectWarning ? "" : "hidden ")
-      }
-    >
+    <WarningBox hidden={!showRedirectWarning}>
       <Caution className="inline-block align-middle mr-1 " />
       {t.rich("redirected", {
         url: () => (
@@ -36,6 +31,6 @@ export function RedirectedWarning() {
           </span>
         ),
       })}
-    </div>
+    </WarningBox>
   );
 }

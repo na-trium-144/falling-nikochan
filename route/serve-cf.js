@@ -19,7 +19,7 @@ const app = new Hono({ strict: false })
     const url = new URL(c.req.raw.url);
     return c.redirect(
       env(c).BACKEND_OG_PREFIX + url.pathname + url.search,
-      307,
+      307
     );
   })
   .route("/sitemap.xml", sitemapApp)
@@ -28,7 +28,7 @@ const app = new Hono({ strict: false })
     shareApp({
       fetchBrief: fetchBrief({ fetchStatic }),
       fetchStatic,
-    }),
+    })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
