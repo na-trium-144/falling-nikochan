@@ -216,7 +216,7 @@ function Slime(props: PropsS) {
   }, [props]);
   return (
     <span
-      className="relative "
+      className="relative transition-all ease-in-out duration-150 "
       style={{
         width:
           (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) * 54 * props.playUIScale,
