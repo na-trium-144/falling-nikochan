@@ -31,7 +31,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.15.0",
+      "version": "12.20.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -40,7 +40,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.15.0",
+      "version": "12.20.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "^5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -49,7 +49,7 @@
         "@icon-park/react": "^1.4.2",
         "@mdx-js/loader": "^3.1.0",
         "@mdx-js/react": "^3.1.0",
-        "@next/mdx": "^15.3.1",
+        "@next/mdx": "^15.3.3",
         "@ygoe/msgpack": "^1.0.3",
         "ace-builds": "^1.41.0",
         "file-saver": "^2.0.5",
@@ -71,14 +71,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.15.0",
+      "version": "12.20.0",
       "dependencies": {
         "next-intl": "^4.0.2",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.15.0",
+      "version": "12.20.0",
       "dependencies": {
         "@hono/node-server": "^1.14.2",
         "@vercel/og": "^0.6.8",
@@ -96,7 +96,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.15.0",
+      "version": "12.20.0",
     },
   },
   "overrides": {
@@ -464,7 +464,7 @@
 
     "@next/eslint-plugin-next": ["@next/eslint-plugin-next@15.3.1", "", { "dependencies": { "fast-glob": "3.3.1" } }, "sha512-oEs4dsfM6iyER3jTzMm4kDSbrQJq8wZw5fmT6fg2V3SMo+kgG+cShzLfEV20senZzv8VF+puNLheiGPlBGsv2A=="],
 
-    "@next/mdx": ["@next/mdx@15.3.1", "", { "dependencies": { "source-map": "^0.7.0" }, "peerDependencies": { "@mdx-js/loader": ">=0.15.0", "@mdx-js/react": ">=0.15.0" }, "optionalPeers": ["@mdx-js/loader", "@mdx-js/react"] }, "sha512-dnpuJRfqqCPFfLDy2hIej41JAl424zk1JOgRd7jjWu2aTeX6oi0gXdcnMAK4lhf7Xl9zSkL2stzDc1YtlB1xyg=="],
+    "@next/mdx": ["@next/mdx@15.3.3", "", { "dependencies": { "source-map": "^0.7.0" }, "peerDependencies": { "@mdx-js/loader": ">=0.15.0", "@mdx-js/react": ">=0.15.0" }, "optionalPeers": ["@mdx-js/loader", "@mdx-js/react"] }, "sha512-kJI7E/353vsoGa2usU/P36gDSA0iVc9xqJFFiPgLrSgWlivkANTRXjrnNVmVpHZ6ETmiZP52fMuKwmT9/FSmNQ=="],
 
     "@next/swc-darwin-arm64": ["@next/swc-darwin-arm64@15.3.1", "", { "os": "darwin", "cpu": "arm64" }, "sha512-hjDw4f4/nla+6wysBL07z52Gs55Gttp5Bsk5/8AncQLJoisvTBP0pRIBK/B16/KqQyH+uN4Ww8KkcAqJODYH3w=="],
 
