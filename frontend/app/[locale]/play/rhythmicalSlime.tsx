@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import {
   BPMChange,
   BPMChange1,
+  getStep,
   Signature5,
   SignatureState,
+  stepCmp,
+  stepZero,
 } from "@falling-nikochan/chart";
 import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
-import { Step, stepAdd, stepSub, stepZero } from "@falling-nikochan/chart";
+import { Step, stepAdd, stepSub } from "@falling-nikochan/chart";
 import { useDisplayMode } from "@/scale.js";
 import { SlimeSVG } from "@/common/slime";
 
@@ -33,7 +36,7 @@ interface SlimeState {
 }
 export default function RhythmicalSlime(props: Props) {
   const { playing, getCurrentTimeSec, bpmChanges } = props;
-  const step = useRef<Step>(stepZero());
+  const step = useRef<Step | null>(null);
   const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
@@ -57,6 +60,24 @@ export default function RhythmicalSlime(props: Props) {
               (lastPreparingSec.current - now) * 1000
             );
             return;
+          }
+          if (!step.current) {
+            // play開始直後にstepを初期化 (zeroとは限らない)
+            step.current = getStep(bpmChanges, now, 32);
+            if (stepCmp(step.current, stepZero()) < 0) {
+              step.current = stepZero();
+            } else {
+              const ss = getSignatureState(props.signature, step.current);
+              step.current = ss.stepAligned;
+              const slimeIndex = ss.count.fourth;
+              const slimeSize = ss.bar[slimeIndex];
+              const slimeSizeStep = {
+                fourth: 0,
+                numerator: 1,
+                denominator: slimeSize / 4,
+              };
+              step.current = stepAdd(ss.stepAligned, slimeSizeStep);
+            }
           }
           const ss = getSignatureState(props.signature, step.current);
           step.current = ss.stepAligned;
@@ -128,7 +149,7 @@ export default function RhythmicalSlime(props: Props) {
         }
       };
     } else {
-      step.current = stepZero();
+      step.current = null;
       prevSS.current = null;
       lastPreparingSec.current = null;
       setSlimeStates([]);
