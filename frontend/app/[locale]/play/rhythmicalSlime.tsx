@@ -197,6 +197,10 @@ function Slime(props: PropsS) {
     size = props.size;
     prevSize.current = size;
   }
+  const [firstFrame, setFirstFrame] = useState<boolean>(true);
+  useEffect(() => {
+    requestAnimationFrame(() => setFirstFrame(false));
+  }, []);
   const prevJumpMid = useRef<number | null>(null);
   const [jumpingMidDate, setJumpingMidDate] =
     useState<DOMHighResTimeStamp | null>(null);
@@ -226,7 +230,7 @@ function Slime(props: PropsS) {
       <SlimeSVG
         className="absolute inset-x-0 bottom-0 "
         appearingAnim
-        hidden={!props.exists}
+        hidden={firstFrame || !props.exists}
         jumpingMid={jumpingMidDate}
         duration={durationSec.current}
         noLoop
