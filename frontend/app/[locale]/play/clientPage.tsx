@@ -287,7 +287,7 @@ function Play(props: Props) {
     statusSpace.height < 30 * playUIScale &&
     !statusHide;
   const mainWindowSpace = useResizeDetector();
-  
+
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
     if (!auto && cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
@@ -725,7 +725,11 @@ function Play(props: Props) {
         e.preventDefault();
       }}
       onPointerUp={(e) => {
-        if (e.pointerType === "touch" && detectOS() === "ios" && enableIOSThru) {
+        if (
+          e.pointerType === "touch" &&
+          detectOS() === "ios" &&
+          enableIOSThru
+        ) {
           iosRelease();
         }
         e.preventDefault();
