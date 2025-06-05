@@ -11,6 +11,8 @@ import {
   baseScoreRate,
   chainScoreRate,
   bigScoreRate,
+  okSecThru,
+  goodSecThru,
 } from "@falling-nikochan/chart";
 import { displayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote7, Note7 } from "@falling-nikochan/chart";
@@ -183,12 +185,13 @@ export default function useGameLogic(
         const late0 = iosPrevRelease.current - n0.hitTimeSec;
         const late1 = now - n1.hitTimeSec;
         if (
-          Math.abs(late0) <= okSec &&
+          Math.abs(late0) <= okSecThru &&
           late1 <= badLateSec &&
           late1 >= badFastSec
         ) {
           // iosPrevReleaseのタイミングで1つ目の音符を、今2つ目の音符を叩いたことにする
-          if (Math.abs(late0) <= goodSec) {
+          // iosPrevReleaseで使う判定基準は通常のgood,okよりも厳しめ (悪用を防ぐため)
+          if (Math.abs(late0) <= goodSecThru) {
             candidateThru0 = { note: n0, judge: 1, late: late0 };
           } else {
             candidateThru0 = { note: n0, judge: 2, late: late0 };
@@ -236,10 +239,10 @@ export default function useGameLogic(
         candidateThru0 &&
         candidateThru1 &&
         (!candidate ||
-          (Math.abs(candidateThru0.judge) < Math.abs(candidate.judge) && // ここは等号の場合thruでない通常判定を優先
-            Math.abs(candidateThru1.judge) < Math.abs(candidate.judge))) &&
+          (Math.abs(candidateThru0.judge) <= Math.abs(candidate.judge) &&
+            Math.abs(candidateThru1.judge) < Math.abs(candidate.judge))) && // ここは等号の場合thruでない通常判定を優先
         (!candidateBig ||
-          (Math.abs(candidateThru0.judge) < Math.abs(candidateBig.judge) &&
+          (Math.abs(candidateThru0.judge) <= Math.abs(candidateBig.judge) &&
             Math.abs(candidateThru1.judge) < Math.abs(candidateBig.judge)))
       ) {
         playSE("hit");
@@ -301,10 +304,10 @@ export default function useGameLogic(
           : null;
         const late = now - n.hitTimeSec;
         if (late > badLateSec) {
-          if (lateThru && Math.abs(lateThru) <= goodSec) {
+          if (lateThru && Math.abs(lateThru) <= goodSecThru) {
             console.log("hit thru in interval", 1);
             judge(n, now, 1);
-          } else if (lateThru && Math.abs(lateThru) <= okSec) {
+          } else if (lateThru && Math.abs(lateThru) <= okSecThru) {
             console.log("hit thru in interval", 2);
             judge(n, now, 2);
           } else {
