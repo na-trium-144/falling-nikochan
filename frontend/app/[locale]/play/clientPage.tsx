@@ -59,7 +59,7 @@ import { useSE } from "./se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
-import { isStandalone } from "@/common/pwaInstall.js";
+import { detectOS, isStandalone } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
 
 export function InitPlay({ locale }: { locale: string }) {
@@ -357,7 +357,7 @@ function Play(props: Props) {
     notesAll,
     resetNotesAll,
     hit,
-    release,
+    iosRelease,
     judgeCount,
     bigCount,
     bigTotal,
@@ -691,10 +691,6 @@ function Play(props: Props) {
           hit(inputTypes.keyboard);
         }
       }}
-      onKeyUp={() => {
-        // todo: あとで消す
-        release();
-      }}
       onPointerDown={(e) => {
         flash();
         switch (e.pointerType) {
@@ -715,7 +711,9 @@ function Play(props: Props) {
         e.preventDefault();
       }}
       onPointerUp={(e) => {
-        release();
+        if (e.pointerType === "touch" && detectOS() === "ios") {
+          iosRelease();
+        }
         e.preventDefault();
       }}
     >

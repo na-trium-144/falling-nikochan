@@ -122,7 +122,7 @@ export default function useGameLogic(
   );
 
   const iosPrevRelease = useRef<number | null>(null);
-  const release = useCallback(() => {
+  const iosRelease = useCallback(() => {
     const now = getCurrentTimeSec();
     if (now !== undefined) {
       iosPrevRelease.current = now;
@@ -409,7 +409,7 @@ export default function useGameLogic(
     notesAll,
     resetNotesAll,
     hit,
-    release,
+    iosRelease,
     judgeCount,
     bigCount: bigTotal === 0 ? null : bigCount,
     bigTotal,
