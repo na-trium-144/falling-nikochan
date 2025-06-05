@@ -357,6 +357,7 @@ function Play(props: Props) {
     notesAll,
     resetNotesAll,
     hit,
+    release,
     judgeCount,
     bigCount,
     bigTotal,
@@ -690,6 +691,10 @@ function Play(props: Props) {
           hit(inputTypes.keyboard);
         }
       }}
+      onKeyUp={() => {
+        // todo: あとで消す
+        release();
+      }}
       onPointerDown={(e) => {
         flash();
         switch (e.pointerType) {
@@ -709,7 +714,10 @@ function Play(props: Props) {
         }
         e.preventDefault();
       }}
-      onPointerUp={(e) => e.preventDefault()}
+      onPointerUp={(e) => {
+        release();
+        e.preventDefault();
+      }}
     >
       {musicAreaOk && (
         <>
