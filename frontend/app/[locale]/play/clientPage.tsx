@@ -287,9 +287,7 @@ function Play(props: Props) {
     statusSpace.height < 30 * playUIScale &&
     !statusHide;
   const mainWindowSpace = useResizeDetector();
-  const readySmall =
-    !!mainWindowSpace.height && mainWindowSpace.height < 36 * rem;
-
+  
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
     if (!auto && cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
@@ -896,7 +894,7 @@ function Play(props: Props) {
               setLimitMaxFPS={setLimitMaxFPS}
               editing={editing}
               lateTimes={lateTimes.current}
-              small={readySmall}
+              maxHeight={(mainWindowSpace.height || 0) - 12 * rem}
             />
           )}
           {showResult && chartBrief && (
