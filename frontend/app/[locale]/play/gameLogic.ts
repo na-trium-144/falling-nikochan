@@ -148,7 +148,6 @@ export default function useGameLogic(
         );
       }
       let candidate: HitCandidate | null = null;
-      let candidateThru: HitCandidate | null = null;
       while (now !== undefined && notesYetDone.current.length >= 1) {
         const n = notesYetDone.current[0];
         const late = now - n.hitTimeSec;
@@ -172,11 +171,12 @@ export default function useGameLogic(
           break;
         }
       }
+      let candidateThru0: HitCandidate | null = null;
+      let candidateThru1: HitCandidate | null = null;
       if (
         iosPrevRelease.current !== null &&
         now !== undefined &&
-        notesYetDone.current.length >= 2 &&
-        candidate
+        notesYetDone.current.length >= 2
       ) {
         const n0 = notesYetDone.current[0];
         const n1 = notesYetDone.current[1];
@@ -184,22 +184,21 @@ export default function useGameLogic(
         const late1 = now - n1.hitTimeSec;
         if (
           Math.abs(late0) <= okSec &&
-          Math.abs(late1) <= Math.abs(candidate.late) &&
           late1 <= badLateSec &&
           late1 >= badFastSec
         ) {
           // iosPrevReleaseのタイミングで1つ目の音符を、今2つ目の音符を叩いたことにする
           if (Math.abs(late0) <= goodSec) {
-            candidateThru = { note: n0, judge: 1, late: late0 };
+            candidateThru0 = { note: n0, judge: 1, late: late0 };
           } else {
-            candidateThru = { note: n0, judge: 2, late: late0 };
+            candidateThru0 = { note: n0, judge: 2, late: late0 };
           }
           if (Math.abs(late1) <= goodSec) {
-            candidate = { note: n1, judge: 1, late: late1 };
+            candidateThru1 = { note: n1, judge: 1, late: late1 };
           } else if (Math.abs(late1) <= okSec) {
-            candidate = { note: n1, judge: 2, late: late1 };
+            candidateThru1 = { note: n1, judge: 2, late: late1 };
           } else {
-            candidate = { note: n1, judge: 3, late: late1 };
+            candidateThru1 = { note: n1, judge: 3, late: late1 };
           }
         }
         iosPrevRelease.current = null;
@@ -230,12 +229,39 @@ export default function useGameLogic(
         }
       }
 
-      // candidateJudgeとcandidateJudgeBigのうち近い方を判定する
+      // candidateThru, candidate, candidateJudgeBig のうち近いものを判定する
+      // 通常のcandidateが最優先
       if (
+        now &&
+        candidateThru0 &&
+        candidateThru1 &&
+        (!candidate ||
+          (Math.abs(candidateThru0.judge) < Math.abs(candidate.judge) && // ここは等号の場合thruでない通常判定を優先
+            Math.abs(candidateThru1.judge) < Math.abs(candidate.judge))) &&
+        (!candidateBig ||
+          (Math.abs(candidateThru0.judge) < Math.abs(candidateBig.judge) &&
+            Math.abs(candidateThru1.judge) < Math.abs(candidateBig.judge)))
+      ) {
+        playSE("hit");
+        console.log("hit thru", candidateThru0.judge, candidateThru1.judge);
+        judge(candidateThru0.note, now, candidateThru0.judge);
+        notesYetDone.current.shift();
+        if (candidateThru0.note.big) {
+          notesBigYetDone.current.push(candidateThru0.note);
+        }
+        judge(candidateThru1.note, now, candidateThru1.judge);
+        notesYetDone.current.shift();
+        if (candidateThru1.note.big) {
+          notesBigYetDone.current.push(candidateThru1.note);
+        }
+        lateTimes.current.push(
+          candidateThru1.late + userOffset /* + audioLatency */
+        );
+      } else if (
         now &&
         candidate &&
         (!candidateBig ||
-          Math.abs(candidate.late) <= Math.abs(candidateBig.judge))
+          Math.abs(candidate.judge) <= Math.abs(candidateBig.judge)) // ここは等号の場合bigでない通常判定を優先
       ) {
         playSE("hit");
         console.log("hit", candidate.judge);
@@ -247,14 +273,6 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidate.late + userOffset /* + audioLatency */
         );
-        if (candidateThru) {
-          console.log("hit thru", candidate.judge);
-          judge(candidateThru.note, now, candidateThru.judge);
-          notesYetDone.current.shift();
-          if (candidateThru.note.big) {
-            notesBigYetDone.current.push(candidateThru.note);
-          }
-        }
       } else if (now && candidateBig) {
         playSE("hitBig");
         console.log("hitBig", candidateBig.judge);
@@ -289,13 +307,6 @@ export default function useGameLogic(
           } else if (lateThru && Math.abs(lateThru) <= okSec) {
             console.log("hit thru in interval", 2);
             judge(n, now, 2);
-          } else if (
-            lateThru &&
-            lateThru <= badLateSec &&
-            lateThru >= badFastSec
-          ) {
-            console.log("hit thru in interval", 3);
-            judge(n, now, 3);
           } else {
             console.log("miss in interval");
             judge(n, now, 4);
