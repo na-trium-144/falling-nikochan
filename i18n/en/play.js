@@ -21,6 +21,7 @@ export default {
         "Judgment is adjusted by the sound delay estimated ({latency} seconds in this environment).",
       unknownSELatency:
         "There may be a delay in sound output. Please adjust the judgment timing manually.",
+      enableIOSThru: "Predict and correct unresponsive taps (iOS)",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
       offsetSecond: "sec",

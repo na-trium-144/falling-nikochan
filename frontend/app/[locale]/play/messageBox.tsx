@@ -19,6 +19,7 @@ import {
   okSec,
 } from "@falling-nikochan/chart";
 import Select from "@/common/select";
+import { detectOS } from "@/common/pwaInstall";
 
 interface MessageProps {
   isTouch: boolean;
@@ -31,6 +32,8 @@ interface MessageProps {
   setUserOffset: (o: number) => void;
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
+  enableIOSThru: boolean;
+  setEnableIOSThru: (s: boolean) => void;
   audioLatency: number | null | undefined;
   limitMaxFPS: number;
   setLimitMaxFPS: (f: number) => void;
@@ -162,6 +165,8 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
+  const [isIOS, setIsIOS] = useState<boolean>(false);
+  useEffect(() => setIsIOS(detectOS() === "ios"), []);
   return (
     <div className="relative pr-8 min-h-58 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
@@ -180,10 +185,11 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             className=""
             value={props.enableSE}
             onChange={(v) => props.setEnableSE(v)}
+            disabled={isIOS && props.enableIOSThru}
           >
             {t("enableSE")}
           </CheckBox>
-          {props.enableSE && (
+          {props.enableSE && !(isIOS && props.enableIOSThru) && (
             <p className="ml-2 text-sm max-w-64 text-justify ">
               <Caution className="inline-block align-middle mr-1" />
               {props.audioLatency === undefined
@@ -196,6 +202,17 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             </p>
           )}
         </li>
+        {isIOS && (
+          <li className="">
+            <CheckBox
+              className="align-top " // 2行になる場合があるため
+              value={props.enableIOSThru}
+              onChange={(v) => props.setEnableIOSThru(v)}
+            >
+              {t("enableIOSThru")}
+            </CheckBox>
+          </li>
+        )}
         {/* <li className="">
           <CheckBox
             className=""
