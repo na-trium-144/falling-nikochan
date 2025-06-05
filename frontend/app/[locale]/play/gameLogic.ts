@@ -222,27 +222,45 @@ export default function useGameLogic(
         iosPrevRelease.current = null;
       }
 
+      // 通常音符は最も早いものを優先するのに対し、
+      // big音符の判定では最もlate=0に近いものを優先する
       let candidateBig: HitCandidate | null = null;
-      while (now !== undefined && notesBigYetDone.current.length >= 1) {
-        const n = notesBigYetDone.current[0];
+      for (
+        let i = 0;
+        now !== undefined && i < notesBigYetDone.current.length;
+
+      ) {
+        const n = notesBigYetDone.current[i];
         const late = now - n.hitTimeSec;
         if (Math.abs(late) <= goodSec) {
           candidateBig = { note: n, judge: 1, late };
-          break;
+          i++;
         } else if (Math.abs(late) <= okSec) {
           candidateBig = { note: n, judge: 2, late };
-          break;
+          i++;
         } else if (late <= badLateSec && late >= badFastSec) {
           candidateBig = { note: n, judge: 3, late };
-          break;
+          i++;
         } else if (late > badLateSec) {
           // miss
-          console.log("Big miss in hit()");
-          judge(n, now, 4);
-          notesBigYetDone.current.shift();
+          if (i === 0) {
+            console.log("Big miss in hit()");
+            judge(n, now, 4);
+            notesBigYetDone.current.shift();
+          } else {
+            // 音符は早い順に並んでいるので必ずi=0のはず?だが一応
+            i++;
+          }
           continue;
         } else {
-          // not yet
+          // late < badFastSec ... not yet
+          break;
+        }
+        // 判定線を過ぎているなら、それより後(=判定線に近い)の音符もチェックしcandidateBigを上書きする
+        // そうでなければbreak
+        if (late > 0) {
+          continue;
+        } else {
           break;
         }
       }
@@ -304,7 +322,7 @@ export default function useGameLogic(
           Math.abs(candidate.judge) <= Math.abs(candidateBig.judge)) // ここは等号の場合bigでない通常判定を優先
       ) {
         playSE("hit");
-        console.log("hit", candidate.judge);
+        console.log("hit", candidate.judge, candidateBig?.judge);
         judge(candidate.note, now, candidate.judge);
         notesYetDone.current.shift();
         if (candidate.note.big) {
@@ -317,7 +335,9 @@ export default function useGameLogic(
         playSE("hitBig");
         console.log("hitBig", candidateBig.judge);
         judge(candidateBig.note, now, candidateBig.judge);
-        notesBigYetDone.current.shift();
+        notesBigYetDone.current = notesBigYetDone.current.filter(
+          (n) => n !== candidateBig.note
+        );
         lateTimes.current.push(
           candidateBig.late + userOffset /* + audioLatency */
         );
@@ -355,13 +375,7 @@ export default function useGameLogic(
           iosPrevRelease.current = null;
           continue;
         } else if (auto && late >= 0) {
-          console.log("auto");
-          playSE("hit");
-          judge(n, now, 1);
-          notesYetDone.current.shift();
-          if (n.big) {
-            notesBigYetDone.current.push(n);
-          }
+          hit(0);
           continue;
         } else {
           nextMissTime = late;
@@ -377,10 +391,7 @@ export default function useGameLogic(
           notesBigYetDone.current.shift();
           continue;
         } else if (auto && late >= 0) {
-          console.log("auto");
-          playSE("hitBig");
-          judge(n, now, 1);
-          notesBigYetDone.current.shift();
+          hit(0);
           continue;
         } else {
           nextMissTime =
@@ -398,7 +409,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [auto, getCurrentTimeSec, judge, playSE]);
+  }, [auto, getCurrentTimeSec, judge, playSE, hit]);
 
   return {
     baseScore,
