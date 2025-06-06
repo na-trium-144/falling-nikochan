@@ -1,3 +1,8 @@
+## ver. 12.24 - 2025/06/06 [#655](https://github.com/na-trium-144/falling-nikochan/pull/655)
+
+* miss判定の処理が必要以上の周期で呼ばれていたのを修正
+    * miss判定をするループとオート判定をするループを別にした
+
 ## ver. 12.23 - 2025/06/06 [#653](https://github.com/na-trium-144/falling-nikochan/pull/653)
 
 * Thru判定時に表示される音符の位置を判定を行った時刻(スルー後の位置)ではなく判定結果基準での位置に変更
