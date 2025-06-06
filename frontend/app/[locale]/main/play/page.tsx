@@ -19,12 +19,16 @@ export default async function Page({ params }: MetadataProps) {
         brief: (await (await briefApp.request(`/${cid}`)).json()) as ChartBrief,
       } satisfies ChartLineBrief;
     } catch (e) {
-      console.error(`Error fetching brief for ${cid}:`, e);
-      return {
-        cid,
-        fetched: true,
-        brief: undefined,
-      } satisfies ChartLineBrief;
+      if (process.env.NODE_ENV === "development" || process.env.ALLOW_FETCH_ERROR) {
+        console.error(`Error fetching brief for ${cid}:`, e);
+        return {
+          cid,
+          fetched: true,
+          brief: undefined,
+        } satisfies ChartLineBrief;
+      } else {
+        throw e;
+      }
     }
   });
   const pOriginalBriefs = originalCId.map(async (cid) => {
@@ -36,13 +40,17 @@ export default async function Page({ params }: MetadataProps) {
         original: true,
       } satisfies ChartLineBrief;
     } catch (e) {
-      console.error(`Error fetching brief for ${cid}:`, e);
-      return {
-        cid,
-        fetched: true,
-        brief: undefined,
-        original: true,
-      } satisfies ChartLineBrief;
+      if (process.env.NODE_ENV === "development" || process.env.ALLOW_FETCH_ERROR) {
+        console.error(`Error fetching brief for ${cid}:`, e);
+        return {
+          cid,
+          fetched: true,
+          brief: undefined,
+          original: true,
+        } satisfies ChartLineBrief;
+      } else {
+        throw e;
+      }
     }
   });
   return (

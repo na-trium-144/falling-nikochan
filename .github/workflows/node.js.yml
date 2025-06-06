@@ -32,6 +32,8 @@ jobs:
     - run: npm ci
     - run: npm run lint
     - run: npm run nbuild
+      env:
+        ALLOW_FETCH_ERROR: "1"
 
   test: # uses bun
     runs-on: ubuntu-latest
