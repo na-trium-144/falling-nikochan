@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
 import { ChartList } from "../chartList.js";
@@ -9,14 +9,20 @@ import { CidSchema, rateLimitMin } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
-import { isStandalone } from "@/common/pwaInstall.js";
+import { detectOS, isStandalone } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
+import Caution from "@icon-park/react/lib/icons/Caution.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
   const te = useTranslations("error");
   const router = useRouter();
+
+  const [isSafari, setIsSafari] = useState<boolean>(false);
+  useEffect(() => {
+    setIsSafari(detectOS() === "ios" || navigator.vendor.includes("Apple"));
+  }, []);
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
@@ -117,6 +123,12 @@ export default function EditTab({ locale }: { locale: string }) {
       </div>
       <div className="mb-3">
         <h3 className="mb-2 text-xl font-bold font-title">{t("recentEdit")}</h3>
+        {isSafari && (
+          <p className="pl-2 mb-1 text-justify">
+            <Caution className="inline-block mr-1 translate-y-0.5 " />
+            {t("safariLSWarning")}
+          </p>
+        )}
         <ChartList
           type="recentEdit"
           fetchAll
