@@ -83,6 +83,9 @@ export default {
       newDesc:
         "You can save a chart to the server once every {rateLimitMin} minutes." +
         " (You can overwrite a chart as many times as you want.)",
+      safariLSWarning:
+        "In Mac Safari and iOS, if you do not access the website for 7 days, " +
+        "all data saved in the browser, such as the list of edited charts and passwords, will be deleted.",
     },
     chartList: {
       showAll: "Show More",
