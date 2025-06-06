@@ -349,13 +349,14 @@ export default function useGameLogic(
     },
     [getCurrentTimeSec, judge, userOffset, playSE]
   );
-  // 0.1s以上過ぎたものをmiss判定にする
+
+  // badLateSec以上過ぎたものをmiss判定にする
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const removeOneNote = () => {
       timer = null;
       const now = getCurrentTimeSec();
-      let nextMissTime: number | null = null;
+      const nextMissTime: number[] = [];
       while (now !== undefined && notesYetDone.current.length >= 1) {
         const n = notesYetDone.current[0];
         const lateThru = iosPrevRelease.current
@@ -376,11 +377,8 @@ export default function useGameLogic(
           notesYetDone.current.shift();
           iosPrevRelease.current = null;
           continue;
-        } else if (auto && late >= 0) {
-          hit(0);
-          continue;
         } else {
-          nextMissTime = late;
+          nextMissTime.push(badLateSec - late);
           break;
         }
       }
@@ -392,17 +390,13 @@ export default function useGameLogic(
           judge({ note: n, judge: 4, late });
           notesBigYetDone.current.shift();
           continue;
-        } else if (auto && late >= 0) {
-          hit(0);
-          continue;
         } else {
-          nextMissTime =
-            nextMissTime !== null && nextMissTime < late ? nextMissTime : late;
+          nextMissTime.push(badLateSec - late);
           break;
         }
       }
-      if (nextMissTime !== null) {
-        timer = setTimeout(removeOneNote, -Math.ceil(nextMissTime * 1000));
+      if (nextMissTime.length > 0) {
+        timer = setTimeout(removeOneNote, Math.min(...nextMissTime) * 1000);
       }
     };
     removeOneNote();
@@ -411,7 +405,49 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [auto, getCurrentTimeSec, judge, playSE, hit]);
+  }, [getCurrentTimeSec, judge]);
+  useEffect(() => {
+    if (auto) {
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const removeOneNote = () => {
+        console.log("auto");
+        timer = null;
+        const now = getCurrentTimeSec();
+        const nextHitTime: number[] = [];
+        while (now !== undefined && notesYetDone.current.length >= 1) {
+          const n = notesYetDone.current[0];
+          const late = now - n.hitTimeSec;
+          if (late >= 0) {
+            hit(0);
+            continue;
+          } else {
+            nextHitTime.push(-late);
+            break;
+          }
+        }
+        while (now !== undefined && notesBigYetDone.current.length >= 1) {
+          const n = notesBigYetDone.current[0];
+          const late = now - n.hitTimeSec;
+          if (late >= 0) {
+            hit(0);
+            continue;
+          } else {
+            nextHitTime.push(-late);
+            break;
+          }
+        }
+        if (nextHitTime.length > 0) {
+          timer = setTimeout(removeOneNote, Math.min(...nextHitTime) * 1000);
+        }
+      };
+      removeOneNote();
+      return () => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+      };
+    }
+  }, [auto, getCurrentTimeSec, hit]);
 
   return {
     baseScore,
