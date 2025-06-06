@@ -19,7 +19,10 @@ export default async function Page({ params }: MetadataProps) {
         brief: (await (await briefApp.request(`/${cid}`)).json()) as ChartBrief,
       } satisfies ChartLineBrief;
     } catch (e) {
-      if (process.env.NODE_ENV === "development" || process.env.ALLOW_FETCH_ERROR) {
+      if (
+        process.env.NODE_ENV === "development" ||
+        process.env.ALLOW_FETCH_ERROR
+      ) {
         console.error(`Error fetching brief for ${cid}:`, e);
         return {
           cid,
@@ -40,7 +43,10 @@ export default async function Page({ params }: MetadataProps) {
         original: true,
       } satisfies ChartLineBrief;
     } catch (e) {
-      if (process.env.NODE_ENV === "development" || process.env.ALLOW_FETCH_ERROR) {
+      if (
+        process.env.NODE_ENV === "development" ||
+        process.env.ALLOW_FETCH_ERROR
+      ) {
         console.error(`Error fetching brief for ${cid}:`, e);
         return {
           cid,
