@@ -1,4 +1,6 @@
+export const goodSecThru = 0.025;
 export const goodSec = 0.04;
+export const okSecThru = 0.04;
 export const okSec = 0.08;
 export const badLateSec = 0.15;
 export const badFastSec = -0.25;
