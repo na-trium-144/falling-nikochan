@@ -390,7 +390,7 @@ export default function useGameLogic(
           notesBigYetDone.current.shift();
           continue;
         } else {
-          nextMissTime.push(badLateSec - late);
+          nextMissTime.push(okSec - late);
           break;
         }
       }
