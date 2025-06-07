@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { Bindings, cacheControl } from "./env.js";
 import { SitemapItemLoose, SitemapStream } from "sitemap";
-import { createGzip } from "node:zlib";
 import { Readable } from "node:stream";
 import { env } from "hono/adapter";
 import { MongoClient } from "mongodb";
@@ -56,12 +55,10 @@ const sitemapApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     const smStream = new SitemapStream({
       hostname: "https://nikochan.utcode.net/",
     });
-    const smGzip = smStream.pipe(createGzip());
     Readable.from(staticSitemapItems.concat(allCharts)).pipe(smStream);
     // smStream.end();
-    return c.body(Readable.toWeb(smGzip), 200, {
+    return c.body(Readable.toWeb(smStream), 200, {
       "Content-Type": "application/xml",
-      "Content-Encoding": "gzip",
       "Cache-Control": cacheControl(env(c), 86400),
     });
   }
