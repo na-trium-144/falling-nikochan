@@ -299,7 +299,7 @@ function Nikochan(props: NProps) {
           left={note.targetX * boxSize + marginX}
           bottom={targetY * boxSize + marginY}
           noteSize={noteSize}
-          big={displayNote.bigDone}
+          big={!!displayNote.bigBonus}
           chain={displayNote.chain || 0}
           particleAssets={props.particleAssets}
         />
