@@ -1,3 +1,7 @@
+## ver. 12 26 - 2025/06/07 [#657](https://github.com/na-trium-144/falling-nikochan/pull/657)
+
+* cloudflareがレスポンスを自動で圧縮するので、バックエンド側でsitemapをgzip圧縮しない
+
 ## ver. 12.25 - 2025/06/07 [#656](https://github.com/na-trium-144/falling-nikochan/pull/656)
 
 * 大音符のボーナス点が入らなかった場合でもエフェクトが大音符を叩いた時のもの(2重particle)になっていたのを修正
