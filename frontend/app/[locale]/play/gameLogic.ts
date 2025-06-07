@@ -240,10 +240,8 @@ export default function useGameLogic(
         } else if (Math.abs(late) <= okSec) {
           candidateBig = { note: n, judge: 2, late };
           i++;
-        } else if (late <= badLateSec && late >= badFastSec) {
-          candidateBig = { note: n, judge: 3, late };
-          i++;
-        } else if (late > badLateSec) {
+        } else if (late > okSec) {
+          // big判定にbadは無い
           // miss
           if (i === 0) {
             console.log("Big miss in hit()");
@@ -385,13 +383,14 @@ export default function useGameLogic(
       while (now !== undefined && notesBigYetDone.current.length >= 1) {
         const n = notesBigYetDone.current[0];
         const late = now - n.hitTimeSec;
-        if (late > badLateSec) {
+        if (late > okSec) {
+          // big判定にbadは無い
           console.log("Big miss in interval");
           judge({ note: n, judge: 4, late });
           notesBigYetDone.current.shift();
           continue;
         } else {
-          nextMissTime.push(badLateSec - late);
+          nextMissTime.push(okSec - late);
           break;
         }
       }
