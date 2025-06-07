@@ -59,7 +59,7 @@ import { useSE } from "./se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
-import { isStandalone } from "@/common/pwaInstall.js";
+import { detectOS, isStandalone } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
 import Title from "@/common/titleLogo.js";
 import { levelColors } from "@/common/levelColors.js";
@@ -289,8 +289,6 @@ function Play(props: Props) {
     statusSpace.height < 30 * playUIScale &&
     !statusHide;
   const mainWindowSpace = useResizeDetector();
-  const readySmall =
-    !!mainWindowSpace.height && mainWindowSpace.height < 36 * rem;
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
   const reloadBestScore = useCallback(() => {
@@ -331,6 +329,7 @@ function Play(props: Props) {
     ytPlayer.current?.setVolume(vol);
   }, [cid]);
 
+  const [enableIOSThru, setEnableIOSThru_] = useState<boolean>(false);
   const {
     playSE,
     enableSE,
@@ -339,7 +338,22 @@ function Play(props: Props) {
     setSEVolume,
     audioLatency,
     offsetPlusLatency,
-  } = useSE(cid, userOffset);
+  } = useSE(cid, userOffset, !enableIOSThru);
+  const setEnableIOSThru = useCallback((v: boolean) => {
+    setEnableIOSThru_(v);
+    localStorage.setItem("enableIOSThru", v ? "1" : "0");
+  }, []);
+  useEffect(() => {
+    if (detectOS() === "ios") {
+      const enableIOSThruInitial =
+        localStorage.getItem("enableIOSThru") === "1" ||
+        localStorage.getItem("enableIOSThru") == null;
+      setEnableIOSThru_(enableIOSThruInitial);
+    } else {
+      setEnableIOSThru_(false);
+      localStorage.removeItem("enableIOSThru");
+    }
+  }, []);
 
   // ytPlayerから現在時刻を取得
   // offsetを引いた後の値
@@ -359,6 +373,7 @@ function Play(props: Props) {
     notesAll,
     resetNotesAll,
     hit,
+    iosRelease,
     judgeCount,
     bigCount,
     bigTotal,
@@ -711,7 +726,16 @@ function Play(props: Props) {
         }
         e.preventDefault();
       }}
-      onPointerUp={(e) => e.preventDefault()}
+      onPointerUp={(e) => {
+        if (
+          e.pointerType === "touch" &&
+          detectOS() === "ios" &&
+          enableIOSThru
+        ) {
+          iosRelease();
+        }
+        e.preventDefault();
+      }}
     >
       {musicAreaOk && (
         <>
@@ -771,7 +795,7 @@ function Play(props: Props) {
             onError={onError}
             ytVolume={ytVolume}
             setYtVolume={setYtVolume}
-            enableSE={enableSE}
+            enableSE={enableSE && !enableIOSThru}
             seVolume={seVolume}
             setSEVolume={setSEVolume}
           />
@@ -869,12 +893,14 @@ function Play(props: Props) {
               setUserOffset={setUserOffset}
               enableSE={enableSE}
               setEnableSE={setEnableSE}
+              enableIOSThru={enableIOSThru}
+              setEnableIOSThru={setEnableIOSThru}
               audioLatency={audioLatency}
               limitMaxFPS={limitMaxFPS}
               setLimitMaxFPS={setLimitMaxFPS}
               editing={editing}
               lateTimes={lateTimes.current}
-              small={readySmall}
+              maxHeight={(mainWindowSpace.height || 0) - 12 * rem}
             />
           )}
           {showResult && chartBrief && (

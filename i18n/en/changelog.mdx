@@ -2,6 +2,13 @@ import { Key } from "@/common/key.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { TranslateIcon } from "@/common/mdxIcons.js";
 
+## ver. 12.21 - 06/06/2025
+
+- Added a feature to predict and correct unresponsiveness in Safari on iOS.
+  - If a tap does not respond and is skipped, it will not result in a miss judgment, allowing the chain to continue (though this may not always happen).
+  - The tap sound is not corrected, so it is turned off when the unresponsiveness correction is enabled.
+- Fixed the judgment for big notes that are placed in short intervals.
+
 ## ver. 12.19 - 05/30/2025
 
 - The play count from test plays in the chart editor is no longer reflected in the order of popular charts.

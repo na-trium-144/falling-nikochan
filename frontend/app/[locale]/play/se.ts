@@ -2,7 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type SEType = "hit" | "hitBig";
 
-export function useSE(cid: string | undefined, userOffset: number) {
+export function useSE(
+  cid: string | undefined,
+  userOffset: number,
+  enableSE2: boolean
+) {
   const audioContext = useRef<AudioContext | null>(null);
   const audioHit = useRef<AudioBuffer | null>(null);
   const audioHitBig = useRef<AudioBuffer | null>(null);
@@ -28,19 +32,18 @@ export function useSE(cid: string | undefined, userOffset: number) {
   );
   const [enableSE, setEnableSE_] = useState<boolean>(true);
   const offsetPlusLatency = userOffset - (enableSE ? audioLatency || 0 : 0);
-  const setEnableSE = useCallback(
-    (v: boolean) => {
-      const enableSE = v && "AudioContext" in window;
-      setEnableSE_(enableSE);
-      localStorage.setItem("enableSE", enableSE ? "1" : "0");
-      if (!enableSE) {
-        audioContext.current?.suspend();
-      } else {
-        audioContext.current?.resume();
-      }
-    },
-    [audioContext]
-  );
+  const setEnableSE = useCallback((v: boolean) => {
+    const enableSE = v && "AudioContext" in window;
+    setEnableSE_(enableSE);
+    localStorage.setItem("enableSE", enableSE ? "1" : "0");
+  }, []);
+  useEffect(() => {
+    if (enableSE && enableSE2) {
+      audioContext.current?.resume();
+    } else {
+      audioContext.current?.suspend();
+    }
+  }, [enableSE, enableSE2]);
   useEffect(() => {
     if ("AudioContext" in window) {
       audioContext.current = new AudioContext();
@@ -119,6 +122,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
       }
       if (
         enableSE &&
+        enableSE2 &&
         audioContext.current &&
         gainNode.current &&
         audioBuffer &&
@@ -135,7 +139,7 @@ export function useSE(cid: string | undefined, userOffset: number) {
         source.addEventListener("ended", () => source.disconnect());
       }
     },
-    [enableSE]
+    [enableSE, enableSE2]
   );
 
   return {

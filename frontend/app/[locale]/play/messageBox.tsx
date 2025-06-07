@@ -19,9 +19,12 @@ import {
   okSec,
 } from "@falling-nikochan/chart";
 import Select from "@/common/select";
+import { detectOS } from "@/common/pwaInstall";
+import { useDisplayMode } from "@/scale";
 
 interface MessageProps {
   isTouch: boolean;
+  maxHeight: number;
   back?: () => void;
   start: () => void;
   exit: () => void;
@@ -31,18 +34,22 @@ interface MessageProps {
   setUserOffset: (o: number) => void;
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
+  enableIOSThru: boolean;
+  setEnableIOSThru: (s: boolean) => void;
   audioLatency: number | null | undefined;
   limitMaxFPS: number;
   setLimitMaxFPS: (f: number) => void;
   editing: boolean;
   lateTimes: number[];
-  small: boolean;
   // hasExplicitSpeedChange: boolean;
   // displaySpeed: boolean;
   // setDisplaySpeed: (s: boolean) => void;
 }
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.message");
+  const { rem } = useDisplayMode();
+  const small = props.maxHeight < 24 * rem;
+
   const [slideIn, setSlideIn] = useState<boolean | null>(null);
   const [optionOpen, setOptionOpen] = useState<boolean>(false);
   const [optionSlideIn, setOptionSlideIn] = useState<boolean | null>(null);
@@ -61,22 +68,22 @@ export function ReadyMessage(props: MessageProps) {
     }
   }, [optionOpen, optionSlideIn]);
 
-  // props.small は clientPage.tsx のreadySmall (mainWindowの高さで決まる)
   return (
     <CenterBox
       className="overflow-clip "
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      {props.small && (
+      {small && (
         <div
           className={
-            (optionOpen ? "" : "hidden ") +
+            (optionOpen ? "flex flex-col " : "hidden ") +
             "relative transition-all duration-200 ease-out " +
             (optionSlideIn !== true
               ? "translate-x-full opacity-0 "
               : "translate-x-0 opacity-100 ")
           }
+          style={{ maxHeight: props.maxHeight }}
         >
           <p className="text-lg font-title font-bold mb-1">
             <button
@@ -95,7 +102,7 @@ export function ReadyMessage(props: MessageProps) {
       )}
       <div
         className={
-          (optionOpen && props.small ? "hidden " : "") +
+          (optionOpen && small ? "hidden " : "flex flex-col ") +
           "relative transition-all duration-200 ease-out " +
           (!props.back
             ? ""
@@ -103,6 +110,7 @@ export function ReadyMessage(props: MessageProps) {
               ? "translate-x-full opacity-0 "
               : "translate-x-0 opacity-100 ")
         }
+        style={{ maxHeight: props.maxHeight }}
       >
         <p className="text-lg font-title font-bold mb-2">
           {props.back && (
@@ -142,7 +150,7 @@ export function ReadyMessage(props: MessageProps) {
             {t("editingNotification")}
           </p>
         )}
-        {props.small ? (
+        {small ? (
           <button
             className={"block w-max relative mx-auto mt-2 " + linkStyle1}
             onClick={() => setOptionOpen(!optionOpen)}
@@ -162,10 +170,17 @@ export function ReadyMessage(props: MessageProps) {
 }
 function OptionMenu(props: MessageProps & { header?: boolean }) {
   const t = useTranslations("play.message");
+  const [isIOS, setIsIOS] = useState<boolean>(false);
+  useEffect(() => setIsIOS(detectOS() === "ios"), []);
   return (
-    <div className="relative pr-8 min-h-58 max-w-full flex flex-col items-center ">
+    <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <ul className="flex-1 flex flex-col w-fit justify-center text-left list-disc ml-6 space-y-1 ">
+      <ul
+        className={
+          "flex-1 h-full flex flex-col w-fit justify-center text-left list-disc " +
+          "ml-2 px-4 space-y-1 overflow-y-auto overflow-x-visible "
+        }
+      >
         <li className="">
           <CheckBox
             className=""
@@ -180,10 +195,11 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             className=""
             value={props.enableSE}
             onChange={(v) => props.setEnableSE(v)}
+            disabled={isIOS && props.enableIOSThru}
           >
             {t("enableSE")}
           </CheckBox>
-          {props.enableSE && (
+          {props.enableSE && !(isIOS && props.enableIOSThru) && (
             <p className="ml-2 text-sm max-w-64 text-justify ">
               <Caution className="inline-block align-middle mr-1" />
               {props.audioLatency === undefined
@@ -196,6 +212,17 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             </p>
           )}
         </li>
+        {isIOS && (
+          <li className="">
+            <CheckBox
+              className="align-top " // 2行になる場合があるため
+              value={props.enableIOSThru}
+              onChange={(v) => props.setEnableIOSThru(v)}
+            >
+              {t("enableIOSThru")}
+            </CheckBox>
+          </li>
+        )}
         {/* <li className="">
           <CheckBox
             className=""
@@ -247,7 +274,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
   const t = useTranslations("play.message");
   const diffMaxSec = -badFastSec;
   return (
-    <div className="absolute inset-y-0 right-0 w-4 overflow-visible ">
+    <div className="absolute inset-y-0 right-1.5 w-4 overflow-visible ">
       <div className="absolute inset-y-0 inset-x-0.5 rounded-xs bg-slate-200 dark:bg-stone-700 " />
       <div className="absolute top-1/2 inset-x-0 h-0 border-b border-slate-300 dark:border-stone-600" />
       <div
