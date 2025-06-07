@@ -1,3 +1,8 @@
+## ver. 12.25 - 2025/06/07 [#656](https://github.com/na-trium-144/falling-nikochan/pull/656)
+
+* 大音符のボーナス点が入らなかった場合でもエフェクトが大音符を叩いた時のもの(2重particle)になっていたのを修正
+* 大音符のbad判定では今までスコアを入れていなかったのにSEが鳴っていたのを、bad判定はmissにするようにした
+
 ## ver. 12.24 - 2025/06/06 [#655](https://github.com/na-trium-144/falling-nikochan/pull/655)
 
 * miss判定の処理が必要以上の周期で呼ばれていたのを修正
