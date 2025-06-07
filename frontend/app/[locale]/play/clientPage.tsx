@@ -1025,10 +1025,10 @@ function Play(props: Props) {
           isTouch={isTouch}
         />
       )}
-      <Title
+      {/*<Title
         className="absolute left-0 top-0 h-32 scale-175 origin-top-left "
         anim={false}
-      />
+      />*/}
       <div
         className="absolute inset-0 z-10 "
         style={{ textShadow: "0.15rem 0.2rem 0.2rem rgb(0, 0, 0, 0.7)" }}
