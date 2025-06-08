@@ -5,6 +5,7 @@ import { Readable } from "node:stream";
 import { env } from "hono/adapter";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "./api/chart.js";
+import { text } from "node:stream/consumers";
 
 const staticSitemapItems: SitemapItemLoose[] = [
   { url: "/", priority: 1 },
@@ -57,7 +58,7 @@ const sitemapApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     });
     Readable.from(staticSitemapItems.concat(allCharts)).pipe(smStream);
     // smStream.end();
-    return c.body(Readable.toWeb(smStream), 200, {
+    return c.body(await text(smStream), 200, {
       "Content-Type": "application/xml",
       "Cache-Control": cacheControl(env(c), 86400),
     });
