@@ -39,6 +39,12 @@ interface MessageProps {
   audioLatency: number | null | undefined;
   limitMaxFPS: number;
   setLimitMaxFPS: (f: number) => void;
+  userBegin: number | null;
+  setUserBegin: (b: number | null) => void;
+  ytBegin: number;
+  ytEnd: number;
+  playbackRate: number;
+  setPlaybackRate: (r: number) => void;
   editing: boolean;
   lateTimes: number[];
   // hasExplicitSpeedChange: boolean;
@@ -255,6 +261,43 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               onClick={() => props.setUserOffset(props.userOffset + 0.01)}
             />
           </div>
+        </li>
+        <li>
+          <span className="mr-2">{t("playbackRate")}</span>
+          <Select
+            options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
+            values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+            value={props.playbackRate.toString()}
+            onChange={(s: string) => props.setPlaybackRate(Number(s))}
+          />
+        </li>
+        <li>
+          <CheckBox
+            className=""
+            value={props.userBegin !== null}
+            onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
+          >
+            {t("userBegin")}
+            {props.userBegin !== null && (
+              <>
+                <span className="mr-2">:</span>
+                <span className="mr-1 inline-block text-right w-7">{Math.round(props.userBegin)}</span>
+                <span className="mr-1">{t("offsetSecond")}</span>
+                <span className="mr-1">〜</span>
+                <span className="mr-1 inline-block text-right w-7">{Math.round(props.ytEnd)}</span>
+                <span className="">{t("offsetSecond")}</span>
+              </>
+            )}
+          </CheckBox>
+          <input
+            type="range"
+            className="block w-full"
+            min={props.ytBegin}
+            max={props.ytEnd}
+            disabled={props.userBegin === null}
+            value={props.userBegin ?? props.ytBegin}
+            onChange={(e) => props.setUserBegin(Number(e.target.value))}
+          />
         </li>
         <li>
           <span className="mr-2">{t("limitFPS")}</span>

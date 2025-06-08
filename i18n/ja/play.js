@@ -28,12 +28,15 @@ export default {
       limitFPS: "フレームレート",
       noLimit: "制限なし",
       off: "オフ",
+      playbackRate: "再生速度を変える",
+      userBegin: "途中から練習",
     },
     score: {
       auto: "オートプレイ",
       score: "スコア",
       bestScore: "ベストスコア",
       chain: "コンボ",
+      playbackRate: "再生速度変更"
     },
     status: {
       good: "よい",

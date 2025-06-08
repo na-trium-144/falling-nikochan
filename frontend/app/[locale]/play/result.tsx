@@ -30,6 +30,7 @@ interface Props extends ResultParams {
   isTouch: boolean;
   newRecord: number;
   auto: boolean;
+  optionChanged: boolean;
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
@@ -247,36 +248,41 @@ export default function Result(props: Props) {
           )}
         </div>
       </div>
-      {!props.auto && (shareLink.toClipboard || shareLink.toAPI) && (
-        <div
-          className={
-            "mb-2 " +
-            (props.largeResult
-              ? "flex flex-row items-baseline justify-center space-x-2 "
-              : "flex flex-col items-center")
-          }
-          style={{ ...appearingAnimation3(7) }}
-        >
-          <span>{t("shareResult")}</span>
-          <span className="inline-block space-x-1">
-            {shareLink.toClipboard && (
-              <Button text={t("copyLink")} onClick={shareLink.toClipboard} />
-            )}
-            {shareLink.toAPI && (
-              <Button text={t("shareLink")} onClick={shareLink.toAPI} />
-            )}
-          </span>
-        </div>
-      )}
-      {!props.auto && props.record?.histogram && props.record.count >= 5 && (
-        <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
-          <p>{t("otherPlayers")}</p>
-          <RecordHistogram
-            histogram={props.record.histogram}
-            bestScoreTotal={props.score100 / 100}
-          />
-        </div>
-      )}
+      {!props.auto &&
+        !props.optionChanged &&
+        (shareLink.toClipboard || shareLink.toAPI) && (
+          <div
+            className={
+              "mb-2 " +
+              (props.largeResult
+                ? "flex flex-row items-baseline justify-center space-x-2 "
+                : "flex flex-col items-center")
+            }
+            style={{ ...appearingAnimation3(7) }}
+          >
+            <span>{t("shareResult")}</span>
+            <span className="inline-block space-x-1">
+              {shareLink.toClipboard && (
+                <Button text={t("copyLink")} onClick={shareLink.toClipboard} />
+              )}
+              {shareLink.toAPI && (
+                <Button text={t("shareLink")} onClick={shareLink.toAPI} />
+              )}
+            </span>
+          </div>
+        )}
+      {!props.auto &&
+        !props.optionChanged &&
+        props.record?.histogram &&
+        props.record.count >= 5 && (
+          <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
+            <p>{t("otherPlayers")}</p>
+            <RecordHistogram
+              histogram={props.record.histogram}
+              bestScoreTotal={props.score100 / 100}
+            />
+          </div>
+        )}
       <div style={{ ...appearingAnimation3(7) }}>
         <Button
           text={t("reset")}
