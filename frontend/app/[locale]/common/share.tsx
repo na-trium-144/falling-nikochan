@@ -116,17 +116,17 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
     <div
       className={
         modalBg +
-        "transition-opacity duration-200 " +
+        "transition-opacity duration-200 z-30! " +
         (props.modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
       }
       onClick={props.closeModal}
     >
-      <div className="absolute inset-12">
+      <div className="absolute inset-0">
         <Box
           onClick={(e) => e.stopPropagation()}
           className={
             "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
-            "flex flex-col " +
+            "flex flex-col items-center " +
             "p-6 " +
             "shadow-lg " +
             "transition-transform duration-200 origin-center " +
@@ -136,11 +136,20 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
           <p className="text-lg font-title font-bold mb-2">
             &lt; {t("shareImage")} &gt;
           </p>
-          <div className="shrink min-h-0 w-dvw max-w-full relative aspect-1200/630 bg-slate-300 ">
-            {/*<img
+          <div
+            className="max-w-full relative aspect-1200/630 bg-slate-300 "
+            style={{
+              width:
+                `min(` +
+                `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
+                `calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 10) / 4}rem) * (1200 / 630)` +
+                `)`,
+            }}
+          >
+            <img
               src={process.env.BACKEND_PREFIX + props.ogPath}
               className="absolute inset-0 "
-            />*/}
+            />
           </div>
           <Button text={t("close")} onClick={props.closeModal} />
         </Box>
