@@ -907,7 +907,7 @@ function Play(props: Props) {
               hidden={showReady}
               auto={auto}
               lang={props.locale}
-              date={resultDate || new Date()}
+              date={resultDate || new Date(2025, 6, 1)}
               cid={cid || ""}
               brief={chartBrief}
               lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}

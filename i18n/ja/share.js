@@ -29,5 +29,9 @@ export default {
       "結果は {score, number, ::.00} 点{status} でした。" +
       main.main.descriptionVerbose,
     sharedResult: "共有されたプレイ記録",
+    image: {
+      shareImage: "結果を画像として保存・共有",
+      close: "閉じる",
+    },
   },
 };
