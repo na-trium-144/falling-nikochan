@@ -24,6 +24,7 @@ export default function useGameLogic(
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
+  playbackRate: number,
   playSE: (s: SEType) => void
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
@@ -395,7 +396,10 @@ export default function useGameLogic(
         }
       }
       if (nextMissTime.length > 0) {
-        timer = setTimeout(removeOneNote, Math.min(...nextMissTime) * 1000);
+        timer = setTimeout(
+          removeOneNote,
+          (Math.min(...nextMissTime) * 1000) / playbackRate
+        );
       }
     };
     removeOneNote();
@@ -404,7 +408,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [getCurrentTimeSec, judge]);
+  }, [getCurrentTimeSec, judge, playbackRate]);
   useEffect(() => {
     if (auto) {
       let timer: ReturnType<typeof setTimeout> | null = null;
@@ -436,7 +440,10 @@ export default function useGameLogic(
           }
         }
         if (nextHitTime.length > 0) {
-          timer = setTimeout(removeOneNote, Math.min(...nextHitTime) * 1000);
+          timer = setTimeout(
+            removeOneNote,
+            (Math.min(...nextHitTime) * 1000) / playbackRate
+          );
         }
       };
       removeOneNote();
@@ -446,7 +453,7 @@ export default function useGameLogic(
         }
       };
     }
-  }, [auto, getCurrentTimeSec, hit]);
+  }, [auto, getCurrentTimeSec, hit, playbackRate]);
 
   return {
     baseScore,
