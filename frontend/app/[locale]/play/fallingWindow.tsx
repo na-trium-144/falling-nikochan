@@ -131,20 +131,23 @@ export default function FallingWindow(props: Props) {
             left={0}
             right="-100%"
             bottom={targetY * boxSize + marginY}
+            style={{ zIndex: -10 }}
           />
         )}
-        {boxSize && marginX !== undefined && marginY !== undefined && (
-          <NikochansMemo
-            displayNotes={displayNotes.current}
-            notes={notes}
-            noteSize={noteSize}
-            boxSize={boxSize}
-            marginX={marginX}
-            marginY={marginY}
-            nikochanAssets={nikochanAssets}
-            particleAssets={particleAssets}
-          />
-        )}
+        <div className="absoulte inset-0 z-0 isolate">
+          {boxSize && marginX !== undefined && marginY !== undefined && (
+            <NikochansMemo
+              displayNotes={displayNotes.current}
+              notes={notes}
+              noteSize={noteSize}
+              boxSize={boxSize}
+              marginX={marginX}
+              marginY={marginY}
+              nikochanAssets={nikochanAssets}
+              particleAssets={particleAssets}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -183,8 +186,6 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       displayNoteByDomIndex.push(null);
     }
   }
-  console.log(noteIdByDomIndex)
-  console.log(displayNoteByDomIndex)
   return noteIdByDomIndex.current.map((n, i) => (
     <Nikochan
       key={i}
@@ -280,6 +281,7 @@ function Nikochan(props: NProps) {
                 (noteSize * bigScale(note.big)) / 2 +
                 marginY
               : 2 * boxSize,
+          zIndex: displayNote ? -displayNote.id : 0,
         }}
       >
         <img
