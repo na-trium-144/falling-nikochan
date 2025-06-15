@@ -161,11 +161,35 @@ interface MProps {
   particleAssets: RefObject<string[]>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
-  return props.displayNotes.map((d) => (
+  const noteIdByDomIndex = useRef<(number | null)[]>([]);
+  for (const d of props.displayNotes) {
+    if (noteIdByDomIndex.current.indexOf(d.id) < 0) {
+      const freeId = noteIdByDomIndex.current.indexOf(null);
+      if (freeId < 0) {
+        noteIdByDomIndex.current.push(d.id);
+      } else {
+        noteIdByDomIndex.current[freeId] = d.id;
+      }
+    }
+  }
+  const displayNoteByDomIndex: (DisplayNote6 | DisplayNote7 | null)[] = [];
+  for (let i = 0; i < noteIdByDomIndex.current.length; i++) {
+    const n = noteIdByDomIndex.current[i];
+    const d = props.displayNotes.find((d) => d.id === n);
+    if (d) {
+      displayNoteByDomIndex.push(d);
+    } else {
+      noteIdByDomIndex.current[i] = null;
+      displayNoteByDomIndex.push(null);
+    }
+  }
+  console.log(noteIdByDomIndex)
+  console.log(displayNoteByDomIndex)
+  return noteIdByDomIndex.current.map((n, i) => (
     <Nikochan
-      key={d.id}
-      displayNote={d}
-      note={props.notes[d.id]}
+      key={i}
+      displayNote={displayNoteByDomIndex[i]}
+      note={n !== null ? props.notes[n] : null}
       noteSize={props.noteSize}
       marginX={props.marginX}
       marginY={props.marginY}
@@ -177,9 +201,9 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
 });
 
 interface NProps {
-  displayNote: DisplayNote6 | DisplayNote7;
+  displayNote: DisplayNote6 | DisplayNote7 | null;
   noteSize: number;
-  note: Note6 | Note7;
+  note: Note6 | Note7 | null;
   marginX: number;
   marginY: number;
   boxSize: number;
@@ -198,9 +222,11 @@ function Nikochan(props: NProps) {
   const [enableFadeIn, setEnableFadeIn] = useState<boolean>(true);
   const [appeared, setAppeared] = useState<boolean>(false);
   useEffect(() => {
-    const x = displayNote.pos.x * boxSize + marginX;
-    const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
-    const size = noteSize * bigScale(note.big);
+    const x = displayNote ? displayNote.pos.x * boxSize + marginX : -boxSize;
+    const y = displayNote
+      ? displayNote.pos.y * boxSize + targetY * boxSize + marginY
+      : 2 * boxSize;
+    const size = note ? noteSize * bigScale(note.big) : noteSize;
     const isOffScreen =
       x + size / 2 < 0 ||
       x - size / 2 > window.innerWidth ||
@@ -219,42 +245,48 @@ function Nikochan(props: NProps) {
       <div
         className={
           "absolute " +
-          (displayNote.done === 0
-            ? enableFadeIn
-              ? appeared
-                ? "transition ease-linear duration-100 opacity-100"
-                : "opacity-0"
-              : "opacity-100"
-            : displayNote.done === 1
-              ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
-              : displayNote.done === 2
-                ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
-                : displayNote.done === 3
-                  ? "transition ease-linear duration-300 opacity-0"
-                  : displayNote.done === 4
-                    ? "transition ease-linear duration-200 opacity-0"
-                    : "")
+          (displayNote === null
+            ? "hidden "
+            : displayNote.done === 0
+              ? enableFadeIn
+                ? appeared
+                  ? "transition ease-linear duration-100 opacity-100"
+                  : "opacity-0"
+                : "opacity-100"
+              : displayNote.done === 1
+                ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+                : displayNote.done === 2
+                  ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
+                  : displayNote.done === 3
+                    ? "transition ease-linear duration-300 opacity-0"
+                    : displayNote.done === 4
+                      ? "transition ease-linear duration-200 opacity-0"
+                      : "")
         }
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-          width: noteSize * bigScale(note.big),
-          height: noteSize * bigScale(note.big),
+          width: note ? noteSize * bigScale(note.big) : noteSize,
+          height: note ? noteSize * bigScale(note.big) : noteSize,
           left:
-            displayNote.pos.x * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginX,
+            displayNote && note
+              ? displayNote.pos.x * boxSize -
+                (noteSize * bigScale(note.big)) / 2 +
+                marginX
+              : -boxSize,
           bottom:
-            displayNote.pos.y * boxSize +
-            targetY * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginY,
+            displayNote && note
+              ? displayNote.pos.y * boxSize +
+                targetY * boxSize -
+                (noteSize * bigScale(note.big)) / 2 +
+                marginY
+              : 2 * boxSize,
         }}
       >
         <img
           decoding="async"
           src={
             props.nikochanAssets.current[
-              displayNote.done <= 3 ? displayNote.done : 0
+              displayNote && displayNote.done <= 3 ? displayNote.done : 0
             ]
           }
           className="w-full h-full "
@@ -281,7 +313,7 @@ function Nikochan(props: NProps) {
             </span>
           )}*/}
       </div>
-      {[1].includes(displayNote.done) && (
+      {displayNote && note && [1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
           left={note.targetX * boxSize + marginX}
@@ -290,20 +322,23 @@ function Nikochan(props: NProps) {
           chain={displayNote.chain || 0}
         />
       )}
-      {displayNote.chain && [1, 2].includes(displayNote.done) && (
-        <Particle
-          particleNum={
-            // 6,8,10,12
-            6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
-          }
-          left={note.targetX * boxSize + marginX}
-          bottom={targetY * boxSize + marginY}
-          noteSize={noteSize}
-          big={!!displayNote.bigBonus}
-          chain={displayNote.chain || 0}
-          particleAssets={props.particleAssets}
-        />
-      )}
+      {displayNote &&
+        note &&
+        displayNote.chain &&
+        [1, 2].includes(displayNote.done) && (
+          <Particle
+            particleNum={
+              // 6,8,10,12
+              6 + Math.floor(3 * Math.min(1, displayNote.chain / bonusMax)) * 2
+            }
+            left={note.targetX * boxSize + marginX}
+            bottom={targetY * boxSize + marginY}
+            noteSize={noteSize}
+            big={!!displayNote.bigBonus}
+            chain={displayNote.chain || 0}
+            particleAssets={props.particleAssets}
+          />
+        )}
     </>
   );
 }
