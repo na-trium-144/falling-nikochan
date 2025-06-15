@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { SlimeSVG } from "./slime";
 // import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 
 interface Props {
@@ -146,6 +147,14 @@ export function FlexYouTube(props: Props) {
       }}
       ref={ref}
     >
+      <img
+        className="absolute inset-0 w-full h-full object-cover object-center -z-20"
+        src={`https://i.ytimg.com/vi/${id}/default.jpg`}
+      />
+      <div className="absolute inset-0 bg-gray-500/50 backdrop-blur-xs -z-10 flex flex-row items-center justify-center ">
+        <SlimeSVG />
+        Loading...
+      </div>
       <div
         className="absolute right-0 top-0 origin-top-right "
         style={{

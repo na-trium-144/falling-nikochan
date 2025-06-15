@@ -1,4 +1,16 @@
-## ver. 12 26 - 2025/06/07 [#657](https://github.com/na-trium-144/falling-nikochan/pull/657)
+## ver. 12.28 - 2025/06/16 [#662](https://github.com/na-trium-144/falling-nikochan/pull/662)
+
+* shareページのモバイルでのスクロール方法を変更
+* YouTubeの読み込み前に動画サムネイル+Loading...を表示するようにした
+
+## ver. 12.27 - 2025/06/15 [#660](https://github.com/na-trium-144/falling-nikochan/pull/660)
+
+* editのラグを修正
+    * changeLevelの結果を一旦即時反映
+    * lua実行完了までに別の変更を加えた場合前の変更はキャンセル
+    * コードの編集中にchartが変更されても編集中のコードを上書きしない
+
+## ver. 12.26 - 2025/06/07 [#657](https://github.com/na-trium-144/falling-nikochan/pull/657)
 
 * cloudflareがレスポンスを自動で圧縮するので、バックエンド側でsitemapをgzip圧縮しない
 
