@@ -266,7 +266,7 @@ function SelectedLevelInfo(props: {
   return (
     <>
       <p>{t("chartInfo")}</p>
-      <div className="inline-flex flex-col main-wide:flex-row items-baseline">
+      <div className="inline-flex flex-col main-wide:flex-row main-wide:items-baseline items-center">
         <div className="">
           <span className="text-lg mx-1.5 ">
             <FourthNote />
@@ -313,7 +313,8 @@ function SelectedLevelInfo(props: {
           </span>
         </div>
       </div>
-      <p className="mt-2 ">
+      <p className="mt-2 min-w-65 ">
+        {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
         {props.record !== null && (
           <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>

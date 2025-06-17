@@ -469,21 +469,24 @@ function Page(props: Props) {
   // レベルの更新
   // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
   const changeLevel = async (
-    newLevel: LevelMin | string[] | null | undefined
+    newLevel: LevelMin | LevelEdit | { lua: string[] } | null | undefined
   ) => {
     if (chart && newLevel && currentLevelIndex < chart.levels.length) {
-      const newChart: ChartEdit = {
+      let newChart: ChartEdit = {
         ...chart,
         levels: chart.levels.map((l) => ({ ...l })),
       };
-      if (Array.isArray(newLevel)) {
-        newChart.levels[currentLevelIndex].lua = newLevel;
-      } else {
-        newChart.levels[currentLevelIndex] = {
-          ...newChart.levels[currentLevelIndex],
-          ...newLevel,
-        };
-      }
+      newChart.levels[currentLevelIndex] = {
+        ...newChart.levels[currentLevelIndex],
+        ...newLevel,
+      };
+      luaExecutor.abortExec();
+      changeChart(newChart);
+      // 再度コピーしないとstateが更新されない
+      newChart = {
+        ...newChart,
+        levels: newChart.levels.map((l) => ({ ...l })),
+      };
       const levelFreezed = await luaExecutor.exec(
         newChart.levels[currentLevelIndex].lua.join("\n")
       );
@@ -815,7 +818,7 @@ function Page(props: Props) {
           speed
         );
       }
-      changeLevel(newLevel?.lua);
+      changeLevel(newLevel);
     }
   };
   const speedChangeHere =
@@ -857,7 +860,7 @@ function Page(props: Props) {
           );
         }
       }
-      changeLevel(newLevel?.lua);
+      changeLevel(newLevel);
     }
   };
 
@@ -879,7 +882,7 @@ function Page(props: Props) {
         currentSignatureIndex,
         s
       );
-      changeLevel(newLevel?.lua);
+      changeLevel(newLevel);
     }
   };
   const toggleSignatureChangeHere = () => {
@@ -895,7 +898,7 @@ function Page(props: Props) {
           currentLevel,
           currentSignatureIndex
         );
-        changeLevel(newLevel?.lua);
+        changeLevel(newLevel);
       } else {
         const newLevel = luaAddBeatChange(currentLevel, {
           step: currentStep,
@@ -903,7 +906,7 @@ function Page(props: Props) {
           bars: currentSignature.bars,
           barNum: 0,
         });
-        changeLevel(newLevel?.lua);
+        changeLevel(newLevel);
       }
     }
   };
@@ -981,7 +984,7 @@ function Page(props: Props) {
             (n) => stepCmp(n.step, currentStep) == 0
           )
         );
-        changeLevel(newLevel?.lua);
+        changeLevel(newLevel);
       }
     }
     ref.current?.focus();
@@ -990,7 +993,7 @@ function Page(props: Props) {
     if (chart && currentLevel && hasCurrentNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaDeleteNote(levelCopied, currentNoteIndex);
-      changeLevel(newLevel?.lua);
+      changeLevel(newLevel);
     }
     ref.current?.focus();
   };
@@ -998,7 +1001,7 @@ function Page(props: Props) {
     if (chart && currentLevel && hasCurrentNote) {
       const levelCopied = { ...currentLevel };
       const newLevel = luaUpdateNote(levelCopied, currentNoteIndex, n);
-      changeLevel(newLevel?.lua);
+      changeLevel(newLevel);
     }
     // ref.current.focus();
   };

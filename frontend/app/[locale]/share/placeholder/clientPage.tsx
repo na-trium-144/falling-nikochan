@@ -93,7 +93,7 @@ export default function ShareChart(props: Props) {
   const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
 
   return (
-    <main className="flex flex-col w-full h-full overflow-x-clip overflow-y-auto items-center ">
+    <main className="w-full h-full overflow-x-clip overflow-y-auto ">
       {aboutPageIndex !== null && (
         <AboutModal
           contents={props.aboutContents}
@@ -101,53 +101,64 @@ export default function ShareChart(props: Props) {
           setAboutPageIndex={setAboutPageIndex}
         />
       )}
-      <Link
-        href={`/${locale}`}
-        className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
-        style={{
-          marginLeft: "-20rem",
-          marginRight: "-20rem",
-        }}
-        prefetch={!process.env.NO_PREFETCH}
-      >
-        <Title className="absolute inset-0 " anim />
-      </Link>
-      <div className="basis-0 flex-1" />
-      <div className="flex-none mb-3 text-center px-6">
-        {tm("description")}
+      <div className="flex flex-col w-full min-h-full items-center ">
         <Link
-          href={`/${locale}/main/about/1`}
-          className={"main-wide:hidden " + linkStyle3}
+          href={`/${locale}`}
+          className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
+          style={{
+            marginLeft: "-20rem",
+            marginRight: "-20rem",
+          }}
+          prefetch={!process.env.NO_PREFETCH}
         >
-          {tm("about.title")}
+          <Title className="absolute inset-0 " anim />
         </Link>
-        <button
-          className={"hidden main-wide:inline " + linkStyle3}
-          onClick={() => setAboutPageIndex(1)}
+        <div className="basis-0 flex-1" />
+        <div className="flex-none mb-3 text-center px-6">
+          {tm("description")}
+          <Link
+            href={`/${locale}/main/about/1`}
+            className={"main-wide:hidden " + linkStyle3}
+          >
+            {tm("about.title")}
+          </Link>
+          <button
+            className={"hidden main-wide:inline " + linkStyle3}
+            onClick={() => setAboutPageIndex(1)}
+          >
+            {tm("about.title")}
+          </button>
+        </div>
+        <RedirectedWarning />
+        <div
+          className={
+            "basis-auto grow-6 shrink min-h-0 w-full px-3 main-wide:px-6 " +
+            "flex flex-col items-center justify-center"
+          }
         >
-          {tm("about.title")}
-        </button>
+          <Box className="w-max h-max max-w-full p-6">
+            <ShareBox
+              cid={cid}
+              brief={brief}
+              record={record}
+              sharedResult={sharedResult}
+              locale={locale}
+              forceShowCId
+            />
+          </Box>
+        </div>
+        <div className="flex-none basis-15 main-wide:hidden " />
+        <PCFooter locale={locale} nav />
       </div>
-      <RedirectedWarning />
       <div
         className={
-          "basis-auto grow-6 shrink min-h-0 w-full px-3 main-wide:px-6 " +
-          "flex flex-col items-center justify-center"
+          "fixed bottom-0 inset-x-0 backdrop-blur-2xs " +
+          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0 " +
+          "dark:from-orange-950 dark:to-orange-950/0 "
         }
       >
-        <Box className="overflow-y-auto w-max h-max max-w-full max-h-full p-6">
-          <ShareBox
-            cid={cid}
-            brief={brief}
-            record={record}
-            sharedResult={sharedResult}
-            locale={locale}
-            forceShowCId
-          />
-        </Box>
+        <MobileFooter locale={locale} tabKey={null} />
       </div>
-      <PCFooter locale={locale} nav />
-      <MobileFooter locale={locale} tabKey={null} />
     </main>
   );
 }

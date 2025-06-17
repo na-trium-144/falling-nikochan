@@ -97,7 +97,7 @@ interface Props {
   currentLevel: LevelEdit | undefined;
   currentStepStr: string | null;
   barLines: { barNum: number; luaLine: number }[];
-  changeLevel: (lua: string[]) => void;
+  changeLevel: (level: { lua: string[] }) => void;
   currentLine: number | null;
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
@@ -160,22 +160,28 @@ export function LuaTabProvider(props: PProps) {
   useEffect(() => {
     const currentLevelCode = currentLevel?.lua.join("\n");
     if (
+      !codeChanged &&
       currentLevelCode !== undefined &&
       previousLevelCode.current !== currentLevelCode
     ) {
       previousLevelCode.current = currentLevelCode;
       setCode(currentLevelCode);
     }
-  }, [currentLevel]);
-  useEffect(() => {
-    if (codeChanged) {
-      const t = setTimeout(() => {
-        setCodeChanged(false);
-        changeLevel(code.split("\n"));
-      }, 500);
-      return () => clearTimeout(t);
+  }, [codeChanged, currentLevel]);
+
+  const changeCodeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const changeCode = (code: string) => {
+    setCode(code);
+    setCodeChanged(true);
+    if (changeCodeTimeout.current !== null) {
+      clearTimeout(changeCodeTimeout.current);
     }
-  }, [code, codeChanged, changeLevel]);
+    changeCodeTimeout.current = setTimeout(() => {
+      changeCodeTimeout.current = null;
+      setCodeChanged(false);
+      changeLevel({ lua: code.split("\n") });
+    }, 500);
+  };
 
   return (
     <LuaPositionContext.Provider value={{ data, setData }}>
@@ -228,8 +234,7 @@ export function LuaTabProvider(props: PProps) {
           enableSnippets={true}
           onChange={(value) => {
             if (visible) {
-              setCode(value);
-              setCodeChanged(true);
+              changeCode(value);
             }
           }}
           onCursorChange={(sel) => {
