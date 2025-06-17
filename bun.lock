@@ -80,7 +80,7 @@
       "name": "@falling-nikochan/route",
       "version": "12.28.0",
       "dependencies": {
-        "@hono/node-server": "^1.14.3",
+        "@hono/node-server": "^1.14.4",
         "@vercel/og": "^0.6.8",
         "@ygoe/msgpack": "^1.0.3",
         "dotenv": "^16.4.7",
@@ -382,7 +382,7 @@
 
     "@formatjs/intl-localematcher": ["@formatjs/intl-localematcher@0.5.10", "", { "dependencies": { "tslib": "2" } }, "sha512-af3qATX+m4Rnd9+wHcjJ4w2ijq+rAVP3CCinJQvFv1kgSu1W6jypUmvleJxcewdxmutM8dmIRZFxO/IQBZmP2Q=="],
 
-    "@hono/node-server": ["@hono/node-server@1.14.3", "", { "peerDependencies": { "hono": "^4" } }, "sha512-KuDMwwghtFYSmIpr4WrKs1VpelTrptvJ+6x6mbUcZnFcc213cumTF5BdqfHyW93B19TNI4Vaev14vOI2a0Ie3w=="],
+    "@hono/node-server": ["@hono/node-server@1.14.4", "", { "peerDependencies": { "hono": "^4" } }, "sha512-DnxpshhYewr2q9ZN8ez/M5mmc3sucr8CT1sIgIy1bkeUXut9XWDkqHoFHRhWIQgkYnKpVRxunyhK7WzpJeJ6qQ=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
