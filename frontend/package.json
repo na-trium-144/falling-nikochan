@@ -10,7 +10,7 @@
     "firefox 128"
   ],
   "dependencies": {
-    "@fontsource/kaisei-opti": "^5.2.5",
+    "@fontsource/kaisei-opti": "^5.2.6",
     "@fontsource/merriweather": "=5.2.5",
     "@fontsource/noto-sans": "^5.2.6",
     "@fontsource/noto-sans-jp": "^5.2.5",
