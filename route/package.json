@@ -6,7 +6,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "dependencies": {
-    "@hono/node-server": "^1.14.3",
+    "@hono/node-server": "^1.14.4",
     "@vercel/og": "^0.6.8",
     "@ygoe/msgpack": "^1.0.3",
     "dotenv": "^16.4.7",
