@@ -27,6 +27,7 @@ interface Props {
   onReady: () => void;
   onStart: () => void;
   onStop: () => void;
+  onPlaybackRateChange: (rate: number) => void;
   onError: (ec: number) => void;
   ytVolume: number;
   setYtVolume: (vol: number) => void;
@@ -129,6 +130,7 @@ export function MusicArea(props: Props) {
             onStart={props.onStart}
             onStop={props.onStop}
             onError={props.onError}
+            onPlaybackRateChange={props.onPlaybackRateChange}
           />
         )}
         <div

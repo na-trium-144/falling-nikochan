@@ -52,6 +52,7 @@ interface Props {
   score: number;
   best: number;
   auto: boolean;
+  playbackRate: number;
 }
 export function ScoreDisp(props: Props) {
   const t = useTranslations("play.score");
@@ -67,9 +68,19 @@ export function ScoreDisp(props: Props) {
         </span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim alignAt2nd />
       </div>
-      {props.auto ? (
+      {props.auto ? (<>
         <div className="text-center mt-1 " style={{ fontSize: 20 }}>
           &lt;&lt; {t("auto")} &gt;&gt;
+        </div>
+        {props.playbackRate !== 1 && (
+          <span className="text-center" style={{fontSize: 24, marginTop: -4, marginRight: "30%"}}>×{props.playbackRate}</span>
+
+          )}
+        </>
+      ) : props.playbackRate !== 1 ? (
+        <div className="text-center ">
+          <span style={{fontSize: 16, marginRight: 8}}>{t("playbackRate")}:</span>
+          <span style={{fontSize: 24}}>×{props.playbackRate}</span>
         </div>
       ) : (
         <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
