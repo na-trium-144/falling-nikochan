@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/share";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
+import Pic from "@icon-park/react/lib/icons/Pic";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
@@ -135,161 +136,169 @@ export default function Result(props: Props) {
       visibility: showing >= index ? "visible" : "hidden",
     }) as const;
   return (
-    <CenterBox
-      ref={ref}
-      className={
-        "overflow-y-auto overflow-x-clip " +
-        (props.hidden ? "hidden " : "") +
-        (showing >= resultAnimDelays.length ? "touch-pan-y " : "touch-none ")
-      }
-      style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
-      onPointerDown={(e) => e.stopPropagation()}
-      onPointerUp={(e) => e.stopPropagation()}
-    >
-      <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
-      <div
+    <>
+      <CenterBox
+        ref={ref}
         className={
-          "my-2 flex justify-center items-center " +
-          (props.largeResult ? "flwx-row space-x-2 " : "flex-col space-y-1 ")
+          "overflow-y-auto overflow-x-clip " +
+          (props.hidden ? "hidden " : "") +
+          (showing >= resultAnimDelays.length ? "touch-pan-y " : "touch-none ")
         }
+        style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
       >
-        <div className="flex-1 w-56">
-          <ResultRow
-            visible={showing >= 1}
-            name={t("baseScore")}
-            scoreStyle={jumpingAnimation(1)}
-            score100={props.baseScore100}
-          />
-          <ResultRow
-            visible={showing >= 2}
-            name={t("chainBonus")}
-            scoreStyle={jumpingAnimation(2)}
-            score100={props.chainScore100}
-          />
-          <ResultRow
-            visible={showing >= 3}
-            name={t("bigNoteBonus")}
-            scoreStyle={
-              props.bigCount === null
-                ? appearingAnimation3(3)
-                : jumpingAnimation(3)
-            }
-            score100={props.bigScore100}
-            disabled={props.bigCount === null}
-          />
-          <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
-          <ResultRow
-            visible={showing >= 4}
-            name={t("totalScore")}
-            scoreStyle={jumpingAnimation(4)}
-            score100={props.score100}
-          />
-          <div ref={refTotal} />
-        </div>
+        <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
         <div
-          ref={refRank}
           className={
-            "flex-none w-56 flex flex-col justify-center items-center " +
-            (props.largeResult ? "space-y-2 " : "space-y-1 ")
+            "my-2 flex justify-center items-center " +
+            (props.largeResult ? "flwx-row space-x-2 " : "flex-col space-y-1 ")
           }
         >
-          <div style={{ ...appearingAnimation(5) }}>
-            <span className="mr-2">{t("rank")}:</span>
-            <span className={props.largeResult ? "text-4xl" : "text-3xl"}>
-              {rankStr(props.score100 / 100)}
+          <div className="flex-1 w-56">
+            <ResultRow
+              visible={showing >= 1}
+              name={t("baseScore")}
+              scoreStyle={jumpingAnimation(1)}
+              score100={props.baseScore100}
+            />
+            <ResultRow
+              visible={showing >= 2}
+              name={t("chainBonus")}
+              scoreStyle={jumpingAnimation(2)}
+              score100={props.chainScore100}
+            />
+            <ResultRow
+              visible={showing >= 3}
+              name={t("bigNoteBonus")}
+              scoreStyle={
+                props.bigCount === null
+                  ? appearingAnimation3(3)
+                  : jumpingAnimation(3)
+              }
+              score100={props.bigScore100}
+              disabled={props.bigCount === null}
+            />
+            <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
+            <ResultRow
+              visible={showing >= 4}
+              name={t("totalScore")}
+              scoreStyle={jumpingAnimation(4)}
+              score100={props.score100}
+            />
+            <div ref={refTotal} />
+          </div>
+          <div
+            ref={refRank}
+            className={
+              "flex-none w-56 flex flex-col justify-center items-center " +
+              (props.largeResult ? "space-y-2 " : "space-y-1 ")
+            }
+          >
+            <div style={{ ...appearingAnimation(5) }}>
+              <span className="mr-2">{t("rank")}:</span>
+              <span className={props.largeResult ? "text-4xl" : "text-3xl"}>
+                {rankStr(props.score100 / 100)}
+              </span>
+            </div>
+            {props.chainScore100 === chainScoreRate * 100 ? (
+              <div
+                className={props.largeResult ? "text-2xl" : "text-xl"}
+                style={{ ...appearingAnimation(5) }}
+              >
+                <span className="">
+                  {props.baseScore100 === baseScoreRate * 100
+                    ? t("perfect")
+                    : t("full")}
+                </span>
+                {props.bigScore100 === bigScoreRate * 100 && (
+                  <span className="font-bold">+</span>
+                )}
+                <span>!</span>
+              </div>
+            ) : (
+              <div
+                className={props.largeResult ? "text-xl" : ""}
+                style={{ ...appearingAnimation2(6) }}
+              >
+                {t(
+                  "message." +
+                    (props.score100 >= 9000
+                      ? "A."
+                      : props.score100 >= 7000
+                        ? "B."
+                        : "C.") +
+                    (Math.floor(messageRandom.current * 3) + 1)
+                )}
+              </div>
+            )}
+            {props.newRecord > 0 && (
+              <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
+                <span className={props.largeResult ? "text-xl " : ""}>
+                  {t("newRecord")}
+                </span>
+                <span
+                  className={"ml-1 " + (props.largeResult ? "" : "text-sm")}
+                >
+                  (+
+                  {Math.floor(props.newRecord)}.
+                  {(Math.floor(props.newRecord * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+                  )
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+        {!props.auto && (shareLink.toClipboard || shareLink.toAPI) && (
+          <div
+            className={
+              "mb-2 " +
+              (props.largeResult
+                ? "flex flex-row items-baseline justify-center space-x-2 "
+                : "flex flex-col items-center")
+            }
+            style={{ ...appearingAnimation3(7) }}
+          >
+            <span>{t("shareResult")}</span>
+            <span className="inline-block space-x-1">
+              {shareLink.toClipboard && (
+                <Button text={t("copyLink")} onClick={shareLink.toClipboard} />
+              )}
+              {shareLink.toAPI && (
+                <Button text={t("shareLink")} onClick={shareLink.toAPI} />
+              )}
+              <Button onClick={shareLink.openModal}>
+                <Pic className="inline-block align-middle " />
+              </Button>
             </span>
           </div>
-          {props.chainScore100 === chainScoreRate * 100 ? (
-            <div
-              className={props.largeResult ? "text-2xl" : "text-xl"}
-              style={{ ...appearingAnimation(5) }}
-            >
-              <span className="">
-                {props.baseScore100 === baseScoreRate * 100
-                  ? t("perfect")
-                  : t("full")}
-              </span>
-              {props.bigScore100 === bigScoreRate * 100 && (
-                <span className="font-bold">+</span>
-              )}
-              <span>!</span>
-            </div>
-          ) : (
-            <div
-              className={props.largeResult ? "text-xl" : ""}
-              style={{ ...appearingAnimation2(6) }}
-            >
-              {t(
-                "message." +
-                  (props.score100 >= 9000
-                    ? "A."
-                    : props.score100 >= 7000
-                      ? "B."
-                      : "C.") +
-                  (Math.floor(messageRandom.current * 3) + 1)
-              )}
-            </div>
-          )}
-          {props.newRecord > 0 && (
-            <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
-              <span className={props.largeResult ? "text-xl " : ""}>
-                {t("newRecord")}
-              </span>
-              <span className={"ml-1 " + (props.largeResult ? "" : "text-sm")}>
-                (+
-                {Math.floor(props.newRecord)}.
-                {(Math.floor(props.newRecord * 100) % 100)
-                  .toString()
-                  .padStart(2, "0")}
-                )
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-      {!props.auto && (shareLink.toClipboard || shareLink.toAPI) && (
-        <div
-          className={
-            "mb-2 " +
-            (props.largeResult
-              ? "flex flex-row items-baseline justify-center space-x-2 "
-              : "flex flex-col items-center")
-          }
-          style={{ ...appearingAnimation3(7) }}
-        >
-          <span>{t("shareResult")}</span>
-          <span className="inline-block space-x-1">
-            {shareLink.toClipboard && (
-              <Button text={t("copyLink")} onClick={shareLink.toClipboard} />
-            )}
-            {shareLink.toAPI && (
-              <Button text={t("shareLink")} onClick={shareLink.toAPI} />
-            )}
-          </span>
-        </div>
-      )}
-      {!props.auto && props.record?.histogram && props.record.count >= 5 && (
-        <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
-          <p>{t("otherPlayers")}</p>
-          <RecordHistogram
-            histogram={props.record.histogram}
-            bestScoreTotal={props.score100 / 100}
+        )}
+        {!props.auto && props.record?.histogram && props.record.count >= 5 && (
+          <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
+            <p>{t("otherPlayers")}</p>
+            <RecordHistogram
+              histogram={props.record.histogram}
+              bestScoreTotal={props.score100 / 100}
+            />
+          </div>
+        )}
+        <div style={{ ...appearingAnimation3(7) }}>
+          <Button
+            text={t("reset")}
+            keyName={props.isTouch ? undefined : "Space"}
+            onClick={() => props.reset()}
+          />
+          <Button
+            text={t("exit")}
+            keyName={props.isTouch ? undefined : "Esc"}
+            onClick={() => props.exit()}
           />
         </div>
-      )}
-      <div style={{ ...appearingAnimation3(7) }}>
-        <Button
-          text={t("reset")}
-          keyName={props.isTouch ? undefined : "Space"}
-          onClick={() => props.reset()}
-        />
-        <Button
-          text={t("exit")}
-          keyName={props.isTouch ? undefined : "Esc"}
-          onClick={() => props.exit()}
-        />
-      </div>
-    </CenterBox>
+      </CenterBox>
+      {shareLink.modal}
+    </>
   );
 }
 

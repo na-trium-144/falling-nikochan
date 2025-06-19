@@ -1,10 +1,12 @@
 "use client";
 
 import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { titleShare, titleShareResult } from "./title";
 import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
+import { Box, modalBg } from "./box";
+import Button from "./button";
 
 export function useShareLink(
   cid: string | undefined,
@@ -38,14 +40,14 @@ export function useShareLink(
     // og画像の生成は時間がかかるので、
     // 共有される前にogを1回fetchしておくことにより、
     // cloudflareにキャッシュさせる
-    void fetch(ogPath);
+    void fetch(process.env.BACKEND_PREFIX + ogPath);
     navigator.clipboard.writeText(
       newTitle + "\n" + origin + sharePath + "?" + shareParams
     );
   }, [ogPath, newTitle, origin, sharePath, shareParams]);
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
-    void fetch(ogPath);
+    void fetch(process.env.BACKEND_PREFIX + ogPath);
     navigator.share(shareData!);
   }, [shareData, ogPath]);
   useEffect(() => {
@@ -68,6 +70,17 @@ export function useShareLink(
     }
   }, [origin, cid, brief, sharePath, shareParams, resultParam, t, date]);
 
+  const [modalOpened, setModalOpened] = useState<boolean>(false);
+  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
+  const openModal = useCallback(() => {
+    setModalOpened(true);
+    setTimeout(() => setModalAppearing(true));
+  }, []);
+  const closeModal = useCallback(() => {
+    setModalAppearing(false);
+    setTimeout(() => setModalOpened(false), 200);
+  }, []);
+
   return {
     url: (
       <>
@@ -81,5 +94,66 @@ export function useShareLink(
     path: sharePath + "?" + shareParams,
     toClipboard: hasClipboard ? toClipboard : null,
     toAPI: shareData ? toAPI : null,
+    openModal,
+    modal: modalOpened && (
+      <ShareImageModal
+        modalAppearing={modalAppearing}
+        closeModal={closeModal}
+        ogPath={ogPath}
+      />
+    ),
   };
 }
+
+interface MProps {
+  modalAppearing: boolean;
+  closeModal: () => void;
+  ogPath: string;
+}
+const ShareImageModal = memo(function ShareImageModal(props: MProps) {
+  const t = useTranslations("share.image");
+  return (
+    <div
+      className={
+        modalBg +
+        "transition-opacity duration-200 z-30! " +
+        (props.modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
+      }
+      onClick={props.closeModal}
+    >
+      <div className="absolute inset-0">
+        <Box
+          onClick={(e) => e.stopPropagation()}
+          className={
+            "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
+            "flex flex-col items-center " +
+            "p-6 " +
+            "shadow-lg " +
+            "transition-transform duration-200 origin-center " +
+            (props.modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
+          }
+        >
+          <p className="text-lg font-title font-bold mb-2">
+            &lt; {t("shareImage")} &gt;
+          </p>
+          <div
+            className="max-w-full relative aspect-1200/630 bg-slate-300 "
+            style={{
+              width:
+                `min(` +
+                `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
+                `calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 10) / 4}rem) * (1200 / 630)` +
+                `)`,
+            }}
+          >
+            <img
+              src={process.env.BACKEND_PREFIX + props.ogPath}
+              className="absolute inset-0 "
+            />
+          </div>
+          <Button text={t("close")} onClick={props.closeModal} />
+        </Box>
+      </div>
+    </div>
+  );
+});
