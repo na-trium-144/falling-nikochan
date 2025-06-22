@@ -377,14 +377,17 @@ function Play(props: Props) {
   }, []);
 
   // ytPlayerから現在時刻を取得
+  // 動画基準なのでplaybackRateが1でない場合現実の秒単位とは異なる
   // offsetを引いた後の値
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       return (
-        ytPlayer.current?.getCurrentTime() - chartSeq.offset - offsetPlusLatency
+        ytPlayer.current?.getCurrentTime() -
+        chartSeq.offset -
+        offsetPlusLatency * playbackRate
       );
     }
-  }, [chartSeq, chartPlaying, offsetPlusLatency]);
+  }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
   const {
     baseScore,
     chainScore,
