@@ -109,22 +109,7 @@ const shareApp = (config: {
               chartCreator: brief.chartCreator || t("chartCreatorEmpty"),
               title: brief.title,
             });
-        let titleEscapedJsStr = ""; // "{...\"TITLE\"}" inside script tag
-        let titleEscapedHtml = ""; // <title>TITLE</title>, "TITLE" inside meta tag
         const briefStr = JSON.stringify(brief);
-        let briefEscapedHtml = "";
-        let descriptionEscapedHtml = "";
-        for (let i = 0; i < newTitle.length; i++) {
-          titleEscapedJsStr +=
-            "\\\\u" + newTitle.charCodeAt(i).toString(16).padStart(4, "0");
-          titleEscapedHtml += "&#" + newTitle.charCodeAt(i) + ";";
-        }
-        for (let i = 0; i < briefStr.length; i++) {
-          briefEscapedHtml += "&#" + briefStr.charCodeAt(i) + ";";
-        }
-        for (let i = 0; i < newDescription.length; i++) {
-          descriptionEscapedHtml += "&#" + newDescription.charCodeAt(i) + ";";
-        }
         // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
         const ogQuery = new URLSearchParams();
         ogQuery.set("lang", qLang);
@@ -132,8 +117,8 @@ const shareApp = (config: {
         ogQuery.set("v", packageJson.version);
         let replacedBody = (await res.text())
           .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL, but not chunk script tag
-          .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + titleEscapedJsStr)
-          .replaceAll("PLACEHOLDER_TITLE", titleEscapedHtml)
+          .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + escapeJs(newTitle)) // "{...\"TITLE\"}" inside script tag
+          .replaceAll("PLACEHOLDER_TITLE", escapeHtml(newTitle)) // <title>TITLE</title>, "TITLE" inside meta tag
           .replaceAll(
             "https://placeholder_og_image/",
             // キャッシュ対策のためクエリにバージョンを入れ、ogの仕様変更した場合に再取得してもらえるようにする
@@ -143,8 +128,8 @@ const shareApp = (config: {
               new URL(c.req.url).origin
             ).toString()
           )
-          .replaceAll("PLACEHOLDER_DESCRIPTION", descriptionEscapedHtml)
-          .replaceAll("PLACEHOLDER_BRIEF", briefEscapedHtml);
+          .replaceAll("PLACEHOLDER_DESCRIPTION", escapeHtml(newDescription))
+          .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr));
         if (c.req.path.startsWith("/share") && lang !== qLang) {
           const q = new URLSearchParams(c.req.query());
           q.delete("lang");
@@ -172,4 +157,20 @@ const shareApp = (config: {
         });
       }
     });
+
+function escapeJs(str: string): string {
+  let jsStr = "";
+  for (let i = 0; i < str.length; i++) {
+    jsStr += "\\\\u" + str.charCodeAt(i).toString(16).padStart(4, "0");
+  }
+  return jsStr;
+}
+function escapeHtml(str: string): string {
+  let htmlStr = "";
+  for (const codePoint of str) {
+    htmlStr += "&#" + codePoint.codePointAt(0) + ";";
+  }
+  return htmlStr;
+}
+
 export default shareApp;

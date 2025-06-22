@@ -12,24 +12,36 @@ interface Props {
   chartSeq: ChartSeqData6 | ChartSeqData11 | null;
   getCurrentTimeSec: () => number | undefined;
   hasExplicitSpeedChange: boolean;
+  playbackRate: number;
 }
 export default function BPMSign(props: Props) {
   const { playUIScale } = useDisplayMode();
-  const { chartPlaying, chartSeq, getCurrentTimeSec, hasExplicitSpeedChange } =
-    props;
+  const {
+    chartPlaying,
+    chartSeq,
+    getCurrentTimeSec,
+    hasExplicitSpeedChange,
+    playbackRate,
+  } = props;
 
   const [flip, setFlip] = useState<boolean>(false);
 
   // chart.bpmChanges 内の現在のインデックス
   const [currentBpmIndex, setCurrentBpmIndex] = useState<number>(0);
-  const displayBpm = chartSeq?.bpmChanges.at(currentBpmIndex)?.bpm;
+  const displayBpmOriginal = chartSeq?.bpmChanges.at(currentBpmIndex)?.bpm;
+  const displayBpm = displayBpmOriginal
+    ? displayBpmOriginal * playbackRate
+    : undefined;
   const nextBpmIndex = useRef<number | null>(null);
 
   const [currentSpeedIndex, setCurrentSpeedIndex] = useState<number>(0);
-  const displaySpeed =
+  const displaySpeedOriginal =
     chartSeq && "speedChanges" in chartSeq
       ? chartSeq.speedChanges.at(currentSpeedIndex)?.bpm
       : undefined;
+  const displaySpeed = displaySpeedOriginal
+    ? displaySpeedOriginal * playbackRate
+    : undefined;
 
   // bpmを更新
   const prevPlaying1 = useRef<boolean>(false);
@@ -73,7 +85,9 @@ export default function BPMSign(props: Props) {
             timer = null;
             setNextBpmIndex(currentBpmIndex + 1);
           },
-          (chartSeq.bpmChanges[currentBpmIndex + 1].timeSec - now) * 1000 - 100
+          ((chartSeq.bpmChanges[currentBpmIndex + 1].timeSec - now) * 1000) /
+            playbackRate -
+            100
         );
       }
       return () => {
@@ -82,7 +96,14 @@ export default function BPMSign(props: Props) {
         }
       };
     }
-  }, [chartPlaying, chartSeq, currentBpmIndex, getCurrentTimeSec, flip]);
+  }, [
+    chartPlaying,
+    chartSeq,
+    currentBpmIndex,
+    getCurrentTimeSec,
+    flip,
+    playbackRate,
+  ]);
   // ↑ flipは使っていないが意図的に追加している
   // ↑ なんでだっけ?
 
@@ -110,7 +131,7 @@ export default function BPMSign(props: Props) {
           timer = null;
           setCurrentSpeedIndex(currentSpeedIndex + 1);
         },
-        (nextSpeedChangeTime - now) * 1000
+        ((nextSpeedChangeTime - now) * 1000) / playbackRate
       );
     }
     return () => {
@@ -124,6 +145,7 @@ export default function BPMSign(props: Props) {
     currentSpeedIndex,
     getCurrentTimeSec,
     hasExplicitSpeedChange,
+    playbackRate,
   ]);
 
   return (
