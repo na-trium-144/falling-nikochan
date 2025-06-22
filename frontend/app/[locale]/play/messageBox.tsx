@@ -54,8 +54,8 @@ interface MessageProps {
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.message");
   const { rem } = useDisplayMode();
-  const small = props.maxHeight < 20 * rem;
-  const optionMinHeight = 10 * rem;
+  const small = props.maxHeight < 22 * rem;
+  const optionMinHeight = 12 * rem;
 
   const [slideIn, setSlideIn] = useState<boolean | null>(null);
   const [optionOpen, setOptionOpen] = useState<boolean>(false);
