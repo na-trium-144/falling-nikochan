@@ -54,7 +54,8 @@ interface MessageProps {
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.message");
   const { rem } = useDisplayMode();
-  const small = props.maxHeight < 24 * rem;
+  const small = props.maxHeight < 20 * rem;
+  const optionMinHeight = 10 * rem;
 
   const [slideIn, setSlideIn] = useState<boolean | null>(null);
   const [optionOpen, setOptionOpen] = useState<boolean>(false);
@@ -89,7 +90,7 @@ export function ReadyMessage(props: MessageProps) {
               ? "translate-x-full opacity-0 "
               : "translate-x-0 opacity-100 ")
           }
-          style={{ maxHeight: props.maxHeight }}
+          style={{ maxHeight: Math.max(optionMinHeight, props.maxHeight) }}
         >
           <p className="text-lg font-title font-bold mb-1">
             <button
@@ -116,7 +117,7 @@ export function ReadyMessage(props: MessageProps) {
               ? "translate-x-full opacity-0 "
               : "translate-x-0 opacity-100 ")
         }
-        style={{ maxHeight: props.maxHeight }}
+        style={{ maxHeight: small ? undefined : props.maxHeight }}
       >
         <p className="text-lg font-title font-bold mb-2">
           {props.back && (
@@ -185,7 +186,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
         <ul
           className={
             "h-full flex flex-col w-fit justify-center text-left list-disc " +
-            "m-auto pl-4 space-y-1 overflow-visible "
+            "m-auto pl-6 pr-2 space-y-1 overflow-visible "
           }
         >
           <li className="">
