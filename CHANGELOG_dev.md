@@ -1,3 +1,8 @@
+## ver. 12.30 - 2025/06/22 [#658](https://github.com/na-trium-144/falling-nikochan/pull/658)
+
+* 再生開始位置と再生速度を変更するオプションを追加
+* オプション画面のスクロールの挙動を修正
+
 ## ver. 12.28 - 2025/06/16 [#662](https://github.com/na-trium-144/falling-nikochan/pull/662)
 
 * shareページのモバイルでのスクロール方法を変更
