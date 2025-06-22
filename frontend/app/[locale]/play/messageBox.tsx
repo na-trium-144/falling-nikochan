@@ -267,8 +267,8 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           <li>
             <span className="mr-2">{t("playbackRate")}</span>
             <Select
-              options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
-              values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+              options={["✕0.5", "✕0.75", "✕1", "✕1.25", "✕1.5", "✕1.75", "✕2"]}
+              values={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"]}
               value={props.playbackRate.toString()}
               onChange={(s: string) => props.setPlaybackRate(Number(s))}
             />
