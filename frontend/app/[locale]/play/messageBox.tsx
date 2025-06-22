@@ -287,11 +287,11 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
                     {Math.round(props.userBegin)}
                   </span>
                   <span className="mr-1">{t("offsetSecond")}</span>
-                  <span className="mr-1">〜</span>
+                  {/*<span className="mr-1">〜</span>
                   <span className="mr-1 inline-block text-right w-7">
                     {Math.round(props.ytEnd)}
                   </span>
-                  <span className="">{t("offsetSecond")}</span>
+                  <span className="">{t("offsetSecond")}</span>*/}
                 </>
               )}
             </CheckBox>

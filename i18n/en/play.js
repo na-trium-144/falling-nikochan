@@ -30,12 +30,15 @@ export default {
       limitFPS: "Frame Rate",
       noLimit: "No Limit",
       off: "Off",
+      playbackRate: "Playback Speed",
+      userBegin: "Practice from",
     },
     score: {
       auto: "Auto Play",
       score: "Score",
       bestScore: "Best Score",
       chain: "{chain, plural, =1 {chain} other {chains}}",
+      playbackRate: "Speed",
     },
     status: {
       good: "Good",
