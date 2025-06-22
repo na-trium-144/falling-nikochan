@@ -36,7 +36,7 @@ export default {
       score: "スコア",
       bestScore: "ベストスコア",
       chain: "コンボ",
-      playbackRate: "再生速度変更"
+      playbackRate: "再生速度変更",
     },
     status: {
       good: "よい",
