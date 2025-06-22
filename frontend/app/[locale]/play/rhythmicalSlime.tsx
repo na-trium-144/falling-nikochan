@@ -22,6 +22,7 @@ interface Props {
   playing: boolean;
   bpmChanges?: BPMChange[] | BPMChange1[];
   signature: Signature[] | Signature5[];
+  playbackRate: number;
 }
 interface SlimeState {
   // 対象の時刻の3/6ステップ前からしゃがむ
@@ -35,7 +36,7 @@ interface SlimeState {
   animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
-  const { playing, getCurrentTimeSec, bpmChanges } = props;
+  const { playing, getCurrentTimeSec, bpmChanges, playbackRate } = props;
   const step = useRef<Step | null>(null);
   const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
@@ -57,7 +58,7 @@ export default function RhythmicalSlime(props: Props) {
           ) {
             timer = setTimeout(
               nextStep,
-              (lastPreparingSec.current - now) * 1000
+              ((lastPreparingSec.current - now) * 1000) / playbackRate
             );
             return;
           }
@@ -99,7 +100,10 @@ export default function RhythmicalSlime(props: Props) {
               setCurrentBar(ss.bar);
             };
             if (barChangeSec > now) {
-              setTimeout(barChange, (barChangeSec - now) * 1000);
+              setTimeout(
+                barChange,
+                ((barChangeSec - now) * 1000) / playbackRate
+              );
             } else {
               barChange();
             }
@@ -158,7 +162,7 @@ export default function RhythmicalSlime(props: Props) {
       );
       setCurrentBar(props.signature[0]?.bars[0] || []);
     }
-  }, [bpmChanges, playing, getCurrentTimeSec, props.signature]);
+  }, [bpmChanges, playing, getCurrentTimeSec, props.signature, playbackRate]);
 
   const { playUIScale } = useDisplayMode();
 
@@ -175,6 +179,7 @@ export default function RhythmicalSlime(props: Props) {
           state={slimeStates[i]}
           getCurrentTimeSec={getCurrentTimeSec}
           playUIScale={playUIScale}
+          playbackRate={playbackRate}
         />
       ))}
     </div>
@@ -187,6 +192,7 @@ interface PropsS {
   exists: boolean;
   state?: SlimeState;
   playUIScale: number;
+  playbackRate: number;
 }
 function Slime(props: PropsS) {
   const prevSize = useRef<4 | 8 | 16 | null>(null);
@@ -205,19 +211,20 @@ function Slime(props: PropsS) {
   const [jumpingMidDate, setJumpingMidDate] =
     useState<DOMHighResTimeStamp | null>(null);
   const durationSec = useRef<number>(0);
+  const { getCurrentTimeSec, state, playbackRate } = props;
   useEffect(() => {
-    const now = props.getCurrentTimeSec();
-    if (now === undefined || props.state === undefined) {
+    const now = getCurrentTimeSec();
+    if (now === undefined || state === undefined) {
       setJumpingMidDate(null);
       prevJumpMid.current = null;
-    } else if (prevJumpMid.current !== props.state.jumpMidSec) {
-      prevJumpMid.current = props.state.jumpMidSec;
-      durationSec.current = props.state.animDuration;
+    } else if (prevJumpMid.current !== state.jumpMidSec) {
+      prevJumpMid.current = state.jumpMidSec;
+      durationSec.current = state.animDuration / playbackRate;
       setJumpingMidDate(
-        performance.now() + (props.state.jumpMidSec - now) * 1000
+        performance.now() + ((state.jumpMidSec - now) * 1000) / playbackRate
       );
     }
-  }, [props]);
+  }, [getCurrentTimeSec, state, playbackRate]);
   return (
     <span
       className="relative transition-all ease-in-out duration-150 "

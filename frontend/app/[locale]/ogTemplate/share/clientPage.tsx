@@ -105,6 +105,7 @@ export default function OGTemplate() {
           getCurrentTimeSec={() => undefined}
           playing={false}
           bpmChanges={[]}
+          playbackRate={1}
         />
         <div className="scale-150 absolute w-full h-full bottom-0 left-0 origin-bottom-left">
           <BPMSign
@@ -112,6 +113,7 @@ export default function OGTemplate() {
             chartSeq={null}
             getCurrentTimeSec={() => undefined}
             hasExplicitSpeedChange={false}
+            playbackRate={1}
           />
         </div>
       </div>
