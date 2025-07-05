@@ -436,7 +436,7 @@ export function MetaTab(props: Props2) {
               } else {
                 window
                   .open(
-                    `/${props.locale}/play?sid=${props.sessionId}`,
+                    `/${props.locale}/play?sid=${props.sessionId}&newwin=1`,
                     "_blank"
                   )
                   ?.focus();

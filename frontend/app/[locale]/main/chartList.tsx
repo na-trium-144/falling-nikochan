@@ -320,7 +320,12 @@ export function ChartListItem(props: CProps) {
       {props.onClick || (props.newTab && !isStandalone) ? (
         <>
           <a
-            href={props.href}
+            href={
+              props.href +
+              (props.newTab
+                ? (props.href.includes("?") ? "&" : "?") + "newwin=1"
+                : "")
+            }
             className={
               chartListStyle +
               (props.onClickMobile ? "hidden main-wide:block " : "")

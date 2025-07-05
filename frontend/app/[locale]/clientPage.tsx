@@ -287,7 +287,10 @@ function InputDirect(props: { locale: string }) {
           actualValue=""
           updateValue={(cid) =>
             window
-              .open(`/${props.locale}/play?cid=${cid}&lvIndex=0`, "_blank")
+              .open(
+                `/${props.locale}/play?cid=${cid}&lvIndex=0&newwin=1`,
+                "_blank"
+              )
               ?.focus()
           }
           isValid={(t) => v.safeParse(CidSchema(), t).success}

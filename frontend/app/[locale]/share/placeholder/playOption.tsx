@@ -156,7 +156,9 @@ export function PlayOption(props: Props) {
               if (isStandalone()) {
                 router.push(`/play?sid=${sessionId}`);
               } else {
-                window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
+                window
+                  .open(`/play?sid=${sessionId}&newwin=1`, "_blank")
+                  ?.focus();
               }
             }}
           />

@@ -60,7 +60,7 @@ export function ExternalLink(props: Props) {
               : linkStyle3) +
           props.className
         }
-        href={props.href}
+        href={props.href + (props.href?.includes("?") ? "&" : "?") + "newwin=1"}
         target="_blank"
       >
         <LinkChildren {...props} />

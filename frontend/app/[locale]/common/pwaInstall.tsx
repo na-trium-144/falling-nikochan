@@ -19,15 +19,30 @@ export function useStandaloneDetector() {
   return state;
 }
 export function isStandalone() {
-  return (
-    new URLSearchParams(location.search).get("utm_source") === "homescreen" ||
-    sessionStorage.getItem("fromHomeScreen") === "1" ||
+  if (new URLSearchParams(location.search).get("utm_source") === "homescreen") {
+    return true;
+  }
+  if (new URLSearchParams(location.search).get("newwin")) {
+    // from window.open()
+    return false;
+  }
+  if (sessionStorage.getItem("fromHomeScreen") === "1") {
+    return true;
+  }
+  if (
     window.matchMedia("(display-mode: standalone)").matches ||
-    (sessionStorage.getItem("fromHomeScreen") !== "0" &&
-      window.matchMedia("(display-mode: fullscreen)").matches) ||
     (navigator as any).standalone ||
     document.referrer.includes("android-app://")
-  );
+  ) {
+    return true;
+  }
+  if (sessionStorage.getItem("fromHomeScreen") === "0") {
+    return false;
+  }
+  if (window.matchMedia("(display-mode: fullscreen)").matches) {
+    return true;
+  }
+  return false;
 }
 
 interface BeforeInstallPromptEvent extends Event {

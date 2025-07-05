@@ -42,7 +42,7 @@ export default function EditTab({ locale }: { locale: string }) {
         if (isStandalone()) {
           router.push(`/${locale}/edit?cid=${cid}`);
         } else {
-          window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
+          window.open(`/${locale}/edit?cid=${cid}&newwin=1`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
         }
         setCIdErrorMsg("");
         setInputCId(cid);
