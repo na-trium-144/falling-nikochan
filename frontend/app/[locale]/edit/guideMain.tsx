@@ -32,7 +32,10 @@ export function GuideMain(props: Props) {
         />
         <ul className="list-inside list-disc flex-1 ">{props.content}</ul>
         <p className="w-max m-auto">
-          <Button text={props.index === 1 ? t("agreeClose") : t("close")} onClick={props.close} />
+          <Button
+            text={props.index === 1 ? t("agreeClose") : t("close")}
+            onClick={props.close}
+          />
         </p>
       </Box>
     </div>
