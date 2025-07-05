@@ -489,6 +489,7 @@ function Play(props: Props) {
         clearTimeout(showLoadingTimeout.current);
       }
       setShowLoading(false);
+      setShowReady(false);
       setInitDone(false);
       setExitable(performance.now());
     } else if (ytReady && chartSeq && !initDone) {
