@@ -1,3 +1,7 @@
+## ver. 12.32 - 2025/07/05 [#696](https://github.com/na-trium-144/falling-nikochan/pull/696)
+
+* 譜面編集ヘルプの1ページ目に利用規約のリンクを追加 (GooglePlayのデベロッパープログラムポリシーに書いてあったので一応)
+
 ## ver. 12.30 - 2025/06/22 [#658](https://github.com/na-trium-144/falling-nikochan/pull/658)
 
 * 再生開始位置と再生速度を変更するオプションを追加
