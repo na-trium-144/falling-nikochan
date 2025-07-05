@@ -29,7 +29,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       .flat(),
     start_url: "/?utm_source=homescreen",
     id: "/",
-    display: "standalone",
+    display: "fullscreen",
     orientation: "any",
     scope: "/",
     theme_color: themeColorLight,

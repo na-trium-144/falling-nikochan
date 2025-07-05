@@ -21,8 +21,10 @@ export function useStandaloneDetector() {
 export function isStandalone() {
   return (
     new URLSearchParams(location.search).get("utm_source") === "homescreen" ||
-    sessionStorage.getItem("fromHomeScreen") ||
+    sessionStorage.getItem("fromHomeScreen") === "1" ||
     window.matchMedia("(display-mode: standalone)").matches ||
+    (sessionStorage.getItem("fromHomeScreen") !== "0" &&
+      window.matchMedia("(display-mode: fullscreen)").matches) ||
     (navigator as any).standalone ||
     document.referrer.includes("android-app://")
   );
@@ -84,6 +86,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   useEffect(() => {
     if (isStandalone()) {
       sessionStorage.setItem("fromHomeScreen", "1");
+    } else {
+      sessionStorage.setItem("fromHomeScreen", "0");
     }
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1"
