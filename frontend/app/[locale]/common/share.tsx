@@ -170,9 +170,10 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
           onClick={(e) => e.stopPropagation()}
           className={
             "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
-            "flex flex-col items-center " +
+            "flex flex-col items-center text-center " +
             "p-6 " +
             "shadow-lg " +
+            "overflow-y-auto " +
             "transition-transform duration-200 origin-center " +
             (props.modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
           }
@@ -191,7 +192,7 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
                 // 7+2: &lt; {t("shareImage")} &gt;
                 // 10: Button
                 `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
-                `calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630)` +
+                `max(20rem, calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630))` +
                 `)`,
             }}
           >
@@ -210,10 +211,12 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
                 text={t("download")}
                 onClick={() => saveAs(imageBlob, `${props.cid}.png`)}
               />
-              {hasClipboard && (
-                <Button text={t("copy")} onClick={toClipboard} />
-              )}
-              {shareData && <Button text={t("share")} onClick={toAPI} />}
+              <span className="inline-block">
+                {hasClipboard && (
+                  <Button text={t("copy")} onClick={toClipboard} />
+                )}
+                {shareData && <Button text={t("share")} onClick={toAPI} />}
+              </span>
             </p>
           )}
           <Button text={t("close")} onClick={props.closeModal} />
