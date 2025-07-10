@@ -29,5 +29,12 @@ export default {
       "and scored {score, number, ::.00} points{status}. " +
       main.main.descriptionVerbose,
     sharedResult: "Shared Play Record",
+    image: {
+      shareImage: "Save or Share Result as Image",
+      download: "Download",
+      copy: "Copy",
+      share: "Share",
+      close: "Close",
+    },
   },
 };
