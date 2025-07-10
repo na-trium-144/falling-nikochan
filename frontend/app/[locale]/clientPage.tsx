@@ -197,7 +197,7 @@ export default function TopPage(props: Props) {
         />
 
         <PCFooter locale={locale} />
-        <div className="flex-none basis-14 main-wide:hidden " />
+        <div className="flex-none basis-15 main-wide:hidden " />
       </div>
       <div
         className={

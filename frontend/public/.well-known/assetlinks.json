@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "net.utcode.nikochan.twa",
+      "sha256_cert_fingerprints": [
+        "AF:C5:CB:5E:09:FF:4D:FF:8E:3C:25:55:F9:6E:02:27:25:A3:23:07:8B:7A:1C:41:97:55:DB:9E:96:65:CD:8A",
+        "40:2D:09:DE:00:04:D7:B3:2B:A6:8E:0A:D0:C2:D5:78:96:08:6F:05:0B:5C:76:D4:B3:7E:19:00:3D:23:99:8A"
+      ]
+    }
+  }
+]

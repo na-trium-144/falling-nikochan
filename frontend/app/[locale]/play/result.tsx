@@ -31,6 +31,7 @@ interface Props extends ResultParams {
   isTouch: boolean;
   newRecord: number;
   auto: boolean;
+  optionChanged: boolean;
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
@@ -251,7 +252,9 @@ export default function Result(props: Props) {
             )}
           </div>
         </div>
-        {!props.auto && (shareLink.toClipboard || shareLink.toAPI) && (
+        {!props.auto &&
+          !props.optionChanged &&
+          (shareLink.toClipboard || shareLink.toAPI) && (
           <div
             className={
               "mb-2 " +
@@ -275,7 +278,10 @@ export default function Result(props: Props) {
             </span>
           </div>
         )}
-        {!props.auto && props.record?.histogram && props.record.count >= 5 && (
+        {!props.auto &&
+          !props.optionChanged &&
+          props.record?.histogram &&
+          props.record.count >= 5 && (
           <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
             <p>{t("otherPlayers")}</p>
             <RecordHistogram
