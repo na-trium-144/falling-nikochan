@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
 import { Box, modalBg } from "./box";
 import Button from "./button";
-import { linkStyle3 } from "./linkStyle";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
 
