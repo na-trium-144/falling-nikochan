@@ -7,6 +7,9 @@ import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
 import { Box, modalBg } from "./box";
 import Button from "./button";
+import { linkStyle3 } from "./linkStyle";
+import { SlimeSVG } from "./slime";
+import saveAs from "file-saver";
 
 export function useShareLink(
   cid: string | undefined,
@@ -100,6 +103,7 @@ export function useShareLink(
         modalAppearing={modalAppearing}
         closeModal={closeModal}
         ogPath={ogPath}
+        cid={cid || "undefined"}
       />
     ),
   };
@@ -109,9 +113,48 @@ interface MProps {
   modalAppearing: boolean;
   closeModal: () => void;
   ogPath: string;
+  cid: string;
 }
 const ShareImageModal = memo(function ShareImageModal(props: MProps) {
   const t = useTranslations("share.image");
+  const [imageBlob, setImageBlob] = useState<Blob>();
+  useEffect(() => {
+    fetch(process.env.BACKEND_PREFIX + props.ogPath).then((r) =>
+      r.blob().then((b) => setImageBlob(b))
+    );
+  }, [props.ogPath]);
+
+  const [hasClipboard, setHasClipboard] = useState<boolean>(false);
+  const toClipboard = useCallback(() => {
+    const clipboardItem = new ClipboardItem({ "image/png": imageBlob! });
+    void navigator.clipboard.write([clipboardItem]);
+  }, [imageBlob]);
+  const [shareData, setShareData] = useState<object | null>(null);
+  const toAPI = useCallback(() => {
+    navigator.share(shareData!);
+  }, [shareData]);
+  useEffect(() => {
+    setHasClipboard(!!navigator?.clipboard && "write" in navigator.clipboard);
+  }, []);
+  useEffect(() => {
+    if (imageBlob) {
+      const shareData = {
+        files: [
+          new File([imageBlob], `${props.cid}.png`, {
+            type: "image/png",
+          }),
+        ],
+      };
+      if (
+        !!navigator?.share &&
+        !!navigator.canShare &&
+        navigator.canShare(shareData)
+      ) {
+        setShareData(shareData);
+      }
+    }
+  }, [props.cid, imageBlob]);
+
   return (
     <div
       className={
@@ -120,8 +163,10 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
         (props.modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
       }
       onClick={props.closeModal}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
     >
-      <div className="absolute inset-0">
+      <div className="absolute inset-12">
         <Box
           onClick={(e) => e.stopPropagation()}
           className={
@@ -137,12 +182,17 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
             &lt; {t("shareImage")} &gt;
           </p>
           <div
-            className="max-w-full relative aspect-1200/630 bg-slate-300 "
+            className="max-w-full relative aspect-1200/630 bg-slate-300 mb-2 isolate "
             style={{
               width:
                 `min(` +
+                `45rem, ` +
+                // 12: 外側margin
+                // 6: padding
+                // 7+2: &lt; {t("shareImage")} &gt;
+                // 10: Button
                 `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
-                `calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 10) / 4}rem) * (1200 / 630)` +
+                `calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630)` +
                 `)`,
             }}
           >
@@ -150,7 +200,23 @@ const ShareImageModal = memo(function ShareImageModal(props: MProps) {
               src={process.env.BACKEND_PREFIX + props.ogPath}
               className="absolute inset-0 "
             />
+            <div className="absolute inset-0 bg-gray-500/50 backdrop-blur-xs -z-10 flex flex-row items-center justify-center ">
+              <SlimeSVG />
+              Loading...
+            </div>
           </div>
+          {imageBlob && (
+            <p className="mb-1">
+              <Button
+                text={t("download")}
+                onClick={() => saveAs(imageBlob, `${props.cid}.png`)}
+              />
+              {hasClipboard && (
+                <Button text={t("copy")} onClick={toClipboard} />
+              )}
+              {shareData && <Button text={t("share")} onClick={toAPI} />}
+            </p>
+          )}
           <Button text={t("close")} onClick={props.closeModal} />
         </Box>
       </div>

@@ -958,7 +958,9 @@ function Play(props: Props) {
               lvType={levelTypes.indexOf(
                 chartBrief?.levels.at(lvIndex || 0)?.type || ""
               )}
-              lvDifficulty={chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0}
+              lvDifficulty={
+                chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0
+              }
               baseScore100={
                 props.goResult
                   ? exampleResult.baseScore100

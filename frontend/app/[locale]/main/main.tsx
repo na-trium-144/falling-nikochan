@@ -98,7 +98,12 @@ export function IndexMain(props: Props) {
             )}
           </nav>
         )}
-        <Box className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}>
+        {/* fixed のコンテナが外側を参照するようにするため、backdrop-filterなし (ここでは後ろに何もないのでいずれにしても不要) */}
+        <Box
+          className={
+            "flex flex-col p-6 overflow-y-auto min-h-0 flex-1 backdrop-blur-none! "
+          }
+        >
           {!props.noBackButtonPC && (
             <button
               className={"hidden main-wide:block w-max mb-3 " + linkStyle1}

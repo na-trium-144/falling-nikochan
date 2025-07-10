@@ -28,6 +28,7 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/share";
+import Pic from "@icon-park/react/lib/icons/Pic";
 
 interface Props {
   locale: string;
@@ -125,7 +126,7 @@ export function PlayOption(props: Props) {
               "bg-white dark:bg-stone-800 " +
               "main-wide:transition-all main-wide:duration-200 origin-left " +
               (selectedLevel !== null && selectedLevel >= 0
-                ? "scale-100 "
+                ? "" // scale-100 だがfixedのコンテナが外側を参照するようにするため、指定なし
                 : "scale-0 px-0! py-0! ")
             }
           >
@@ -427,8 +428,12 @@ function SelectedLevelInfo(props: {
           {shareLink.toAPI && (
             <Button text={t("shareScoreLink")} onClick={shareLink.toAPI} />
           )}
+          <Button onClick={shareLink.openModal}>
+            <Pic className="inline-block align-middle " />
+          </Button>
         </span>
       )}
+      {shareLink.modal}
     </>
   );
 }

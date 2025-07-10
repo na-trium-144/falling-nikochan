@@ -31,6 +31,9 @@ export default {
     sharedResult: "共有されたプレイ記録",
     image: {
       shareImage: "結果を画像として保存・共有",
+      download: "ダウンロード",
+      copy: "コピー",
+      share: "共有",
       close: "閉じる",
     },
   },
