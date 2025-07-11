@@ -15,7 +15,6 @@ import { fetchBrief } from "@/common/briefCache";
 import { Box, modalBg } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
-import { ShareInternalSession } from "../main/shareInternal/clientPage";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
@@ -75,14 +74,10 @@ export function SharePageModalProvider(props: {
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
       if (brief) {
-        sessionStorage.setItem(
-          "shareInternal",
-          JSON.stringify({
-            cid,
-            fromPlay: props.from === "play",
-          } satisfies ShareInternalSession)
+        router.push(
+          `/${props.locale}/main/shareInternal` +
+            `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
         );
-        router.push(`/${props.locale}/main/shareInternal`);
       }
     },
     [props.locale, props.from, router]
