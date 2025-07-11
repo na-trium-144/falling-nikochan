@@ -8,6 +8,7 @@ import IntlProvider from "./intlProvider.js";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeProvider } from "./common/theme.jsx";
 import { PWAInstallProvider } from "./common/pwaInstall.jsx";
+import { ShareImageModalProvider } from "./common/share.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -32,7 +33,9 @@ export default async function RootLayout({
       <body className="w-full h-dvh overflow-hidden touch-none ">
         <IntlProvider locale={locale} messages={await getMessages(locale)}>
           <ThemeProvider>
-            <PWAInstallProvider>{children}</PWAInstallProvider>
+            <PWAInstallProvider>
+              <ShareImageModalProvider>{children}</ShareImageModalProvider>
+            </PWAInstallProvider>
           </ThemeProvider>
         </IntlProvider>
       </body>

@@ -306,7 +306,6 @@ export default function Result(props: Props) {
           />
         </div>
       </CenterBox>
-      {shareLink.modal}
     </>
   );
 }

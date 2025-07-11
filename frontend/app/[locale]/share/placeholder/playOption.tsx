@@ -126,7 +126,7 @@ export function PlayOption(props: Props) {
               "bg-white dark:bg-stone-800 " +
               "main-wide:transition-all main-wide:duration-200 origin-left " +
               (selectedLevel !== null && selectedLevel >= 0
-                ? "" // scale-100 だがfixedのコンテナが外側を参照するようにするため、指定なし
+                ? "scale-100 "
                 : "scale-0 px-0! py-0! ")
             }
           >
@@ -433,7 +433,6 @@ function SelectedLevelInfo(props: {
           </Button>
         </span>
       )}
-      {shareLink.modal}
     </>
   );
 }
