@@ -14,7 +14,7 @@ import { isSample } from "@falling-nikochan/chart";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
 import { useTranslations } from "next-intl";
-import { useShareLink } from "@/common/share.js";
+import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
 

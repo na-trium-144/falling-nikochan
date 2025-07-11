@@ -8,7 +8,7 @@ import IntlProvider from "./intlProvider.js";
 import { initMetadata, initViewport, MetadataProps } from "./metadata.js";
 import { ThemeProvider } from "./common/theme.jsx";
 import { PWAInstallProvider } from "./common/pwaInstall.jsx";
-import { ShareImageModalProvider } from "./common/share.jsx";
+import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));

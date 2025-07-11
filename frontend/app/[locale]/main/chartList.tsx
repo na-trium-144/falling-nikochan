@@ -13,11 +13,11 @@ import {
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
-import { useShareModal } from "./shareModal.jsx";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
 import { getBestScore } from "@/common/bestScore.js";
+import { useSharePageModal } from "@/common/sharePageModal.jsx";
 
 interface PProps {
   locale: string;
@@ -29,10 +29,7 @@ interface PProps {
   badge?: boolean;
 }
 export default function ChartListPage(props: PProps) {
-  const { modal, openModal, openShareInternal } = useShareModal(
-    props.locale,
-    props.mobileTabKey
-  );
+  const { openModal, openShareInternal } = useSharePageModal();
 
   return (
     <IndexMain
@@ -40,7 +37,6 @@ export default function ChartListPage(props: PProps) {
       tabKey={props.tabKey}
       mobileTabKey={props.mobileTabKey}
       locale={props.locale}
-      modal={modal}
     >
       <h3
         className={

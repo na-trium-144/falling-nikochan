@@ -15,7 +15,7 @@ import {
   serializeResultParams,
 } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { useShareLink } from "@/common/share";
+import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
 import Pic from "@icon-park/react/lib/icons/Pic";

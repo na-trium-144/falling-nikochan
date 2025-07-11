@@ -25,7 +25,6 @@ interface Props {
   noBackButtonMobile?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   noBackButtonPC?: boolean;
   locale: string;
-  modal?: ReactNode;
 }
 export function IndexMain(props: Props) {
   const locale = props.locale;
@@ -33,7 +32,6 @@ export function IndexMain(props: Props) {
 
   return (
     <main className="flex flex-col w-full h-full items-center ">
-      {props.modal}
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>

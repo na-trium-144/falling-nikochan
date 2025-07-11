@@ -20,7 +20,6 @@ import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
 import { SmallDomainShare } from "./common/small.jsx";
 import { fetchBrief } from "./common/briefCache.js";
-import { useShareModal } from "./main/shareModal.jsx";
 import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
 import { Box, modalBg } from "./common/box.jsx";
@@ -28,6 +27,7 @@ import { Pager, pagerButtonClass } from "./common/pager.jsx";
 import { maxAboutPageIndex } from "./main/about/[aboutIndex]/pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
+import { useSharePageModal } from "./common/sharePageModal.jsx";
 
 interface Props {
   locale: string;
@@ -48,15 +48,13 @@ export default function TopPage(props: Props) {
     }
   }, [menuMove]);
   const { locale } = props;
-  const { modal, openModal, openShareInternal } = useShareModal(locale, "top");
+  const { openModal, openShareInternal } = useSharePageModal();
   const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
   const fes = useFestival();
 
   return (
     <main className="w-full h-full overflow-x-clip overflow-y-auto ">
-      {modal ? (
-        modal
-      ) : aboutPageIndex !== null ? (
+      {aboutPageIndex !== null ? (
         <AboutModal
           contents={props.aboutContents}
           aboutPageIndex={aboutPageIndex}

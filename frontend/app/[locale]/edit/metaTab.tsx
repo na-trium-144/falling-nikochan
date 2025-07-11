@@ -23,7 +23,7 @@ import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { chartMaxEvent } from "@falling-nikochan/chart";
-import { useShareLink } from "@/common/share";
+import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 

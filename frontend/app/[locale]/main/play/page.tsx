@@ -4,6 +4,7 @@ import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import briefApp from "@falling-nikochan/route/dist/src/api/brief.js";
 import { ChartLineBrief } from "../fetch.js";
+import { SharePageModalProvider } from "@/common/sharePageModal.jsx";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
@@ -11,6 +12,7 @@ export async function generateMetadata({ params }: MetadataProps) {
 }
 
 export default async function Page({ params }: MetadataProps) {
+  const locale = (await params).locale;
   const pSampleBriefs = sampleCId.map(async (cid) => {
     try {
       return {
@@ -60,10 +62,13 @@ export default async function Page({ params }: MetadataProps) {
     }
   });
   return (
-    <PlayTab
-      locale={(await params).locale}
-      sampleBriefs={await Promise.all(pSampleBriefs)}
-      originalBriefs={await Promise.all(pOriginalBriefs)}
-    />
+    <SharePageModalProvider locale={locale} from="play" noResetTitle>
+      {/* noResetTitle: PlayTabでは独自のpopstateハンドラを実装しているため、sharePageModal側で閉じる際にタイトルを戻す処理は不要 */}
+      <PlayTab
+        locale={locale}
+        sampleBriefs={await Promise.all(pSampleBriefs)}
+        originalBriefs={await Promise.all(pOriginalBriefs)}
+      />
+    </SharePageModalProvider>
   );
 }

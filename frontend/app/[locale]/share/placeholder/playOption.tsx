@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { useShareLink } from "@/common/share";
+import { useShareLink } from "@/common/shareLinkAndImage";
 import Pic from "@icon-park/react/lib/icons/Pic";
 
 interface Props {
