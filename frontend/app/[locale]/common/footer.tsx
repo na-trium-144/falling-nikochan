@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
+import { ChangeLogPopup } from "./changeLog.jsx";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
@@ -37,6 +38,7 @@ export function PCFooter(props: Props) {
   const t = useTranslations("footer");
   const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
+  const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
 
   return (
     <footer className="py-3 hidden main-wide:block relative text-center ">
@@ -61,22 +63,30 @@ export function PCFooter(props: Props) {
         </div>
       )}
       <div className={"flex-row items-baseline space-x-3"}>
-        <Link
-          className={"inline-block relative group " + linkStyle1}
-          href={`/${props.locale}/main/version`}
-          prefetch={!process.env.NO_PREFETCH}
-        >
-          <span>ver.</span>
-          <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
-          <Comment className="inline-block translate-y-0.5 " />
-          <span
-            className={
-              "absolute w-3 h-3 rounded-full bg-red-500 " +
-              (isLastVisitedOld ? "inline-block " : "hidden ")
-            }
-            style={{ top: "-0.1rem", right: "-0.25rem" }}
+        <div className="inline-block relative">
+          <button
+            className={"inline-block relative " + linkStyle1}
+            onClick={() => {
+              setShowChangeLog(!showChangeLog);
+            }}
+          >
+            <span>ver.</span>
+            <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
+            <Comment className="inline-block translate-y-0.5 " />
+            <span
+              className={
+                "absolute w-3 h-3 rounded-full bg-red-500 " +
+                (isLastVisitedOld ? "inline-block " : "hidden ")
+              }
+              style={{ top: "-0.1rem", right: "-0.25rem" }}
+            />
+          </button>
+          <ChangeLogPopup
+            locale={props.locale}
+            open={showChangeLog}
+            onClose={() => setShowChangeLog(false)}
           />
-        </Link>
+        </div>
         <LangSwitcher locale={props.locale}>
           <Translate className="absolute bottom-1 left-0 " />
           <span className="ml-5 ">Language</span>

@@ -104,6 +104,7 @@ export default {
       supportedBrowsers:
         "Supported browsers are {browserslist}. " +
         "Some parts may not function or display properly in earlier versions.",
+      showAll: "Show More",
     },
     links: {
       title: "Contact and Other Links",
