@@ -1,3 +1,7 @@
+## ver. 12.35 - 2025/07/12 [#704](https://github.com/na-trium-144/falling-nikochan/pull/704)
+
+* PC表示でバージョン番号をクリックした際ページ遷移せずに更新履歴を表示するようにした
+
 ## ver. 12.34 - 2025/07/12 [#703](https://github.com/na-trium-144/falling-nikochan/pull/703)
 
 * serviceworkerの更新時のステータスで
