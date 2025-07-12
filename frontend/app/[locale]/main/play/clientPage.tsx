@@ -6,11 +6,11 @@ import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { numLatest, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { useShareModal } from "../shareModal.jsx";
 import { ChartLineBrief } from "../fetch.js";
 import Input from "@/common/input.jsx";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { titleWithSiteName } from "@/common/title.js";
+import { useSharePageModal } from "@/common/sharePageModal.jsx";
 
 interface Props {
   locale: string;
@@ -21,11 +21,7 @@ export default function PlayTab(props: Props) {
   const t = useTranslations("main.play");
   const { locale } = props;
 
-  const { modal, openModal, openShareInternal } = useShareModal(
-    locale,
-    "play",
-    { noResetTitle: true }
-  );
+  const { openModal, openShareInternal } = useSharePageModal();
 
   const [searchText, setSearchText_] = useState<string>("");
   const [searching, setSearching] = useState<boolean>(false);
@@ -130,7 +126,6 @@ export default function PlayTab(props: Props) {
       noBackButtonMobile
       noBackButtonPC
       locale={locale}
-      modal={modal}
     >
       <div className="flex-none mb-3 ">
         <h3 className="mb-2 flex items-baseline ">

@@ -1,3 +1,9 @@
+## ver. 12.33 - 2025/07/12 [#659](https://github.com/na-trium-144/falling-nikochan/pull/659)
+
+* プレイ結果を画像として保存・共有する機能の追加
+* shareModalをsharePageModalに改名しカスタムフックでmodalコンポーネントを返すのではなくContext/Providerでの実装に変更
+* shareInternalページのデータをsessionStorageではなくクエリ管理に変更
+
 ## ver. 12.32 - 2025/07/05 [#696](https://github.com/na-trium-144/falling-nikochan/pull/696)
 
 * 譜面編集ヘルプの1ページ目に利用規約のリンクを追加 (GooglePlayのデベロッパープログラムポリシーに書いてあったので一応)

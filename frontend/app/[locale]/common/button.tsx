@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 
@@ -22,6 +23,7 @@ interface Props {
   className?: string;
   onClick?: () => void;
   text?: string;
+  children?: ReactNode;
   keyName?: string | string[];
   disabled?: boolean;
   loading?: boolean;
@@ -42,7 +44,9 @@ export default function Button(props: Props) {
       disabled={props.disabled || props.loading}
     >
       {props.loading && <SlimeSVG />}
-      <span className={props.keyName ? "mr-1" : ""}>{props.text}</span>
+      <span className={props.keyName ? "mr-1" : ""}>
+        {props.text ?? props.children}
+      </span>
       {Array.isArray(props.keyName)
         ? props.keyName.map((k, i) => (
             <>

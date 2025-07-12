@@ -32,6 +32,7 @@ import {
   RecordGetSummary,
   RecordPost,
   inputTypes,
+  emptyBrief,
 } from "@falling-nikochan/chart";
 import { ChartSeqData11, loadChart11 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
@@ -939,7 +940,7 @@ function Play(props: Props) {
               maxHeight={(mainWindowSpace.height || 0) - 12 * rem}
             />
           )}
-          {showResult && chartBrief && (
+          {showResult && (
             <Result
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
@@ -950,14 +951,16 @@ function Play(props: Props) {
                 playbackRate !== 1
               }
               lang={props.locale}
-              date={resultDate || new Date()}
+              date={resultDate || new Date(2025, 6, 1)}
               cid={cid || ""}
-              brief={chartBrief}
-              lvName={chartBrief.levels.at(lvIndex || 0)?.name || ""}
+              brief={chartBrief || emptyBrief()}
+              lvName={chartBrief?.levels.at(lvIndex || 0)?.name || ""}
               lvType={levelTypes.indexOf(
-                chartBrief.levels.at(lvIndex || 0)?.type || ""
+                chartBrief?.levels.at(lvIndex || 0)?.type || ""
               )}
-              lvDifficulty={chartBrief.levels.at(lvIndex || 0)?.difficulty || 0}
+              lvDifficulty={
+                chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0
+              }
               baseScore100={
                 props.goResult
                   ? exampleResult.baseScore100
