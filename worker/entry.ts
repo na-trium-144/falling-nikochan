@@ -59,98 +59,173 @@ function returnBody(body: string | ReadableStream | null, headers: Headers) {
   });
 }
 
+interface InitAssetsState {
+  type: "initAssets";
+  state: InitAssetsResult;
+  progressNum?: number;
+  totalNum?: number;
+  progressSize?: number;
+}
+function sendInitState(
+  state: InitAssetsResult,
+  progressNum?: number,
+  totalNum?: number,
+  progressSize?: number
+) {
+  // クライアントに初期化状態を送信する
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({
+        type: "initAssets",
+        state,
+        progressNum,
+        totalNum,
+        progressSize,
+      } satisfies InitAssetsState);
+    });
+  });
+  return state;
+}
+
+let initInProgress = false;
+
+type InitAssetsResult =
+  | "done"
+  | "failed"
+  | "updating"
+  | "noUpdate"
+  | "inProgress";
 async function initAssetsCache(config: {
   clearOld: boolean;
-}): Promise<boolean> {
-  // true = success
-  const cache = await mainCache();
-  const tmp = await tmpCache();
-  let filesRes: Response;
-  let remoteVerRes: Response;
+}): Promise<InitAssetsResult> {
+  if (initInProgress) {
+    console.warn("initAssetsCache: already in progress");
+    return sendInitState("inProgress");
+  }
+  initInProgress = true;
   try {
-    filesRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
-      { cache: "no-store" }
-    );
-    remoteVerRes = await fetch(
+    let remoteVer: BuildVer;
+    const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
       { cache: "no-store" }
     );
-  } catch (e) {
-    console.error(e);
-    return false;
-  }
-  if (!filesRes.ok || !remoteVerRes.ok) {
-    console.error("initAssetsCache: failed to fetch json");
-    return false;
-  }
-  const files = ((await filesRes.json()) as string[])
-    .map((file) => {
-      let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
-      if (pathname.endsWith(".html")) {
-        pathname = pathname.slice(0, -5);
-      }
-      return pathname;
-    })
-    .filter((n) => !n.endsWith(".ttf"));
-  // tmpCacheにデータを入れる
-  let failed = false;
-  await Promise.all(
-    files.map(async (pathname: string) => {
-      if (
-        pathname.startsWith("/_next") &&
-        ((await cache.match(pathname)) || (await tmp.match(pathname)))
-      ) {
-        // パス名にハッシュが入っているので更新する必要がない
-        return;
-      }
-      try {
-        const res = await fetch(
-          (process.env.ASSET_PREFIX || self.origin) + pathname,
-          { cache: "no-cache" }
-        );
-        if (res.ok) {
-          tmp.put(pathname, returnBody(res.body, res.headers));
-        } else {
-          console.error(`failed to fetch ${pathname}: ${res.status}`);
-          failed = true;
+    if (!remoteRes.ok) {
+      return sendInitState("failed");
+    }
+    remoteVer = await remoteRes.json();
+    const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
+      cache.match("/buildVer").then((res) => res?.json())
+    );
+    if (
+      remoteVer.version === cacheVer?.version &&
+      remoteVer.commit === cacheVer?.commit &&
+      remoteVer.date === cacheVer?.date
+    ) {
+      return sendInitState("noUpdate");
+    }
+
+    sendInitState("updating");
+
+    const cache = await mainCache();
+    const tmp = await tmpCache();
+    let filesRes: Response;
+    let remoteVerRes: Response;
+    try {
+      filesRes = await fetch(
+        (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
+        { cache: "no-store" }
+      );
+      remoteVerRes = await fetch(
+        (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+        { cache: "no-store" }
+      );
+    } catch (e) {
+      console.error(e);
+      return sendInitState("failed");
+    }
+    if (!filesRes.ok || !remoteVerRes.ok) {
+      console.error("initAssetsCache: failed to fetch json");
+      return sendInitState("failed");
+    }
+    const files = ((await filesRes.json()) as string[])
+      .map((file) => {
+        let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
+        if (pathname.endsWith(".html")) {
+          pathname = pathname.slice(0, -5);
         }
-      } catch (e) {
-        console.error(`failed to fetch ${pathname}: ${e}`);
-        failed = true;
-      }
-    })
-  );
-  // 1つでも失敗したら中断
-  if (failed) {
-    console.error("initAssetsCache: failed to fetch some files");
-    return false;
-  }
-  if (config.clearOld) {
-    const keys = await cache.keys();
+        return pathname;
+      })
+      .filter((n) => !n.endsWith(".ttf"));
+    // tmpCacheにデータを入れる
+    let failed = false;
+    let totalNum = files.length;
+    let progressNum = 0;
+    let progressSize = 0;
     await Promise.all(
-      keys.map(async (req) => {
-        if (!files.includes(new URL(req.url).pathname)) {
-          console.warn(`delete ${req.url}`);
-          await cache.delete(req);
+      files.map(async (pathname: string) => {
+        if (
+          pathname.startsWith("/_next") &&
+          ((await cache.match(pathname)) || (await tmp.match(pathname)))
+        ) {
+          // パス名にハッシュが入っているので更新する必要がない
+          totalNum--;
+          sendInitState("updating", progressNum, totalNum, progressSize);
+          return;
+        }
+        try {
+          const res = await fetch(
+            (process.env.ASSET_PREFIX || self.origin) + pathname,
+            { cache: "no-cache" }
+          );
+          if (res.ok) {
+            tmp.put(pathname, returnBody(res.clone().body, res.headers));
+            progressNum++;
+            const size = (await res.arrayBuffer()).byteLength;
+            progressSize += size;
+            sendInitState("updating", progressNum, totalNum, progressSize);
+          } else {
+            console.error(`failed to fetch ${pathname}: ${res.status}`);
+            failed = true;
+          }
+        } catch (e) {
+          console.error(`failed to fetch ${pathname}: ${e}`);
+          failed = true;
         }
       })
     );
+    // 1つでも失敗したら中断
+    if (failed) {
+      console.error("initAssetsCache: failed to fetch some files");
+      return sendInitState("failed");
+    }
+    if (config.clearOld) {
+      const keys = await cache.keys();
+      await Promise.all(
+        keys.map(async (req) => {
+          if (!files.includes(new URL(req.url).pathname)) {
+            console.warn(`delete ${req.url}`);
+            await cache.delete(req);
+          }
+        })
+      );
+    }
+    // tmpからmainに移す
+    await Promise.all(
+      files.map(async (pathname: string) => {
+        const res = await tmp.match(pathname);
+        if (res) {
+          await cache.put(pathname, res);
+          await tmp.delete(pathname);
+        }
+      })
+    );
+    // finished
+    await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
+    console.log("initAssetsCache: finished");
+    return sendInitState("done");
+  } finally {
+    initInProgress = false;
   }
-  // tmpからmainに移す
-  await Promise.all(
-    files.map(async (pathname: string) => {
-      const res = await tmp.match(pathname);
-      if (res) {
-        await cache.put(pathname, res);
-        await tmp.delete(pathname);
-      }
-    })
-  );
-  // finished
-  await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
-  console.log("initAssetsCache: finished");
-  return true;
 }
 
 interface BuildVer {
@@ -201,34 +276,16 @@ const app = new Hono({ strict: false })
   .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", (c) => fetch(c.req.raw))
   .get("/worker/checkUpdate", async (c) => {
-    let remoteVer: BuildVer;
-    const remoteRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
-      { cache: "no-store" }
-    );
-    if (!remoteRes.ok) {
-      return c.body(null, 500);
-    }
-    remoteVer = await remoteRes.json();
-    const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
-      cache.match("/buildVer").then((res) => res?.json())
-    );
-    if (remoteVer.version !== cacheVer?.version) {
-      return c.json({ version: true, commit: true });
-    } else if (
-      remoteVer.commit !== cacheVer?.commit ||
-      remoteVer.date !== cacheVer?.date
-    ) {
-      return c.json({ version: false, commit: true });
-    } else {
-      return c.json({ version: false, commit: false });
-    }
-  })
-  .get("/worker/initAssets", async (c) => {
-    if (await initAssetsCache({ clearOld: !!c.req.query("clearOld") })) {
-      return c.body(null);
-    } else {
-      return c.body(null, 503);
+    switch (await initAssetsCache({ clearOld: false })) {
+      case "done":
+        return c.body(null, 200);
+      case "noUpdate":
+        return c.body(null, 204);
+      case "updating":
+      case "inProgress":
+        return c.body(null, 202);
+      case "failed":
+        return c.body(null, 502);
     }
   })
   .get("/*", async (c) => {

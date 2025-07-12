@@ -14,9 +14,6 @@ import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
-import { usePWAInstall, useStandaloneDetector } from "./pwaInstall.js";
-import { Box } from "./box.js";
-import { SlimeSVG } from "./slime.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
@@ -114,7 +111,6 @@ export function MobileFooter(props: MobileProps) {
         "flex flex-row items-center justify-stretch relative"
       }
     >
-      <PWAUpdateNotification />
       {mobileTabTitleKeys.map((key, i) => (
         <Link
           key={i}
@@ -150,33 +146,5 @@ export function MobileFooter(props: MobileProps) {
         </Link>
       ))}
     </footer>
-  );
-}
-
-export function PWAUpdateNotification() {
-  const t = useTranslations("main.pwa");
-  const pwa = usePWAInstall();
-  const isStandalone = useStandaloneDetector();
-  return (
-    <Box
-      className={
-        "absolute bottom-full inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg " +
-        "transition-all duration-200 origin-bottom " +
-        (pwa.workerUpdate !== null && isStandalone
-          ? "ease-in scale-100 opacity-100 "
-          : "ease-out scale-0 opacity-0 ")
-      }
-    >
-      {pwa.workerUpdate === "updating" ? (
-        <>
-          <SlimeSVG />
-          {t("updating")}
-        </>
-      ) : pwa.workerUpdate === "done" ? (
-        t("updateDone")
-      ) : pwa.workerUpdate === "failed" ? (
-        t("updateFailed")
-      ) : null}
-    </Box>
   );
 }
