@@ -330,10 +330,10 @@ const app = new Hono({ strict: false })
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
-self.addEventListener("install", (e) => {
+self.addEventListener("install", () => {
   console.log("service worker install");
   self.skipWaiting();
-  e.waitUntil(initAssetsCache({ clearOld: true }));
+  // e.waitUntil(initAssetsCache({ clearOld: true }));
 });
 self.addEventListener("activate", (e) => {
   console.log("service worker activate");
