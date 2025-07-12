@@ -1,3 +1,10 @@
+## ver. 12.34 - 2025/07/12 [#703](https://github.com/na-trium-144/falling-nikochan/pull/703)
+
+* serviceworkerの更新時のステータスで
+    * プログレスバーを表示するようにした
+    * fetchのレスポンスではなくpostMessageで返すようにした
+    * 表示処理をfooterからProviderに移動
+
 ## ver. 12.33 - 2025/07/12 [#659](https://github.com/na-trium-144/falling-nikochan/pull/659)
 
 * プレイ結果を画像として保存・共有する機能の追加
