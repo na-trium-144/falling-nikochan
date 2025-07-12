@@ -203,15 +203,16 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
                 className="max-w-full relative aspect-1200/630 bg-slate-300 mb-2 isolate "
                 style={{
                   width:
-                    `min(` +
-                    `45rem, ` +
-                    // 12: 外側margin
-                    // 6: padding
-                    // 7+2: &lt; {t("shareImage")} &gt;
-                    // 10: Button
-                    `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
-                    `max(20rem, calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630))` +
-                    `)`,
+                    "min(45rem, calc(100dvw - 9rem), max(20rem, calc((100dvh - 17.25rem) * (1200 / 630)))",
+                  // `min(` +
+                  // `45rem, ` +
+                  // // 12: 外側margin
+                  // // 6: padding
+                  // // 7+2: &lt; {t("shareImage")} &gt;
+                  // // 10: Button
+                  // `calc(100dvw - ${((12 + 6) * 2) / 4}rem), ` +
+                  // `max(20rem, calc((100dvh - ${((12 + 6) * 2 + 7 + 2 + 2 + 10 + 2 + 10) / 4}rem) * (1200 / 630))` +
+                  // `)`,
                 }}
               >
                 <img
