@@ -18,6 +18,7 @@ import { usePWAInstall, useStandaloneDetector } from "./pwaInstall.js";
 import { Box } from "./box.js";
 import { SlimeSVG } from "./slime.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
+import { levelBgColors } from "./levelColors.js";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
@@ -167,14 +168,34 @@ export function PWAUpdateNotification() {
           : "ease-out scale-0 opacity-0 ")
       }
     >
-      {pwa.workerUpdate === "updating" ? (
+      {pwa.workerUpdate?.state === "updating" ? (
         <>
           <SlimeSVG />
           {t("updating")}
+          {pwa.workerUpdate?.progressSize !== undefined && (
+            <span className="ml-2 text-sm">
+              ({(pwa.workerUpdate?.progressSize / 1024 / 1024).toFixed(2)} MB)
+            </span>
+          )}
+          <span
+            className={
+              "absolute bottom-0 left-0 rounded-full h-1 " + levelBgColors[1]
+            }
+            style={{
+              width:
+                Math.min(
+                  1,
+                  (pwa.workerUpdate?.progressNum || 0) /
+                    (pwa.workerUpdate?.totalNum || 1)
+                ) *
+                  100 +
+                "%",
+            }}
+          />
         </>
-      ) : pwa.workerUpdate === "done" ? (
+      ) : pwa.workerUpdate?.state === "done" ? (
         t("updateDone")
-      ) : pwa.workerUpdate === "failed" ? (
+      ) : pwa.workerUpdate?.state === "failed" ? (
         t("updateFailed")
       ) : null}
     </Box>
