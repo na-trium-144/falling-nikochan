@@ -11,7 +11,10 @@ import {
 import { useTranslations } from "next-intl";
 import Button from "./button";
 import { hasTouch } from "@/scale";
-import { WarningBox } from "./box";
+import { Box, WarningBox } from "./box";
+import { SlimeSVG } from "./slime";
+import { levelBgColors } from "./levelColors";
+import ProgressBar from "./progressBar";
 
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
@@ -38,7 +41,6 @@ export interface PWAStates {
   detectedOS: "android" | "ios" | null;
   deferredPrompt: BeforeInstallPromptEvent | null;
   install: () => void;
-  workerUpdate: InitAssetsState | null;
 }
 const PWAContext = createContext<PWAStates>({
   dismissed: false,
@@ -46,7 +48,6 @@ const PWAContext = createContext<PWAStates>({
   detectedOS: null,
   deferredPrompt: null,
   install: () => undefined,
-  workerUpdate: null,
 });
 export const usePWAInstall = () => useContext(PWAContext);
 export function detectOS(): "android" | "ios" | null {
@@ -87,6 +88,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   const [detectedOS, setDetectedOS] = useState<"android" | "ios" | null>(null);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+
+  // standaloneでない場合はアップデート状態に関わらず表示しないのでnull
   const [workerUpdate, setWorkerUpdate] = useState<null | InitAssetsState>(
     null
   );
@@ -136,21 +139,24 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
           1000
         );
         reg.addEventListener("updatefound", () => {
-          setWorkerUpdate({ state: "updating" });
+          if (isStandalone()) {
+            setWorkerUpdate({ state: "updating" });
+          }
           if (updateFetching !== null) clearTimeout(updateFetching);
           const newWorker = reg.installing;
           newWorker?.addEventListener("statechange", () => {
-            if (newWorker?.state === "installed") {
+            if (newWorker?.state === "installed" && isStandalone()) {
               setWorkerUpdate({ state: "done" });
             }
           });
         });
       });
       navigator.serviceWorker.addEventListener("message", (event) => {
-        console.log("Service Worker message:", event.data);
+        // console.log("Service Worker message:", event.data);
         if (
           event.data.type === "initAssets" &&
-          ["updating", "done", "failed"].includes(event.data.state)
+          ["updating", "done", "failed"].includes(event.data.state) &&
+          isStandalone()
         ) {
           setWorkerUpdate(event.data);
         }
@@ -176,6 +182,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     });
   }, [deferredPrompt]);
 
+  const t = useTranslations("main.pwa");
+
   return (
     <PWAContext.Provider
       value={{
@@ -184,13 +192,53 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         detectedOS,
         deferredPrompt,
         install,
-        workerUpdate,
       }}
     >
       {props.children}
+      <Box
+        className={
+          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg " +
+          "transition-all duration-200 origin-bottom " +
+          (workerUpdate !== null
+            ? "ease-in scale-100 opacity-100 "
+            : "ease-out scale-0 opacity-0 ")
+        }
+      >
+        {workerUpdate?.state === "updating" ? (
+          <>
+            <SlimeSVG />
+            {t("updating")}
+            {workerUpdate?.progressSize !== undefined && (
+              <span className="ml-2 text-sm">
+                (
+                <span className="inline-block mr-1 min-w-max w-8 text-center">
+                  {(workerUpdate.progressSize / 1024 / 1024).toFixed(2)}
+                </span>
+                MB)
+              </span>
+            )}
+            {workerUpdate?.progressNum !== undefined && (
+              <ProgressBar
+                className="absolute! bottom-0 inset-x-1 "
+                fixedColor={levelBgColors[1]}
+                value={
+                  (workerUpdate?.progressNum || 0) /
+                  (workerUpdate?.totalNum || 1)
+                }
+              />
+            )}
+          </>
+        ) : workerUpdate?.state === "done" ? (
+          t("updateDone")
+        ) : workerUpdate?.state === "failed" ? (
+          t("updateFailed")
+        ) : null}
+      </Box>
     </PWAContext.Provider>
   );
 }
+
+// トップページに表示するPWAの案内表示
 export function PWAInstallMain() {
   const t = useTranslations("main.pwa");
   const pwa = usePWAInstall();

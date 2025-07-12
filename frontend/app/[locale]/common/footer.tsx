@@ -14,11 +14,7 @@ import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
-import { usePWAInstall, useStandaloneDetector } from "./pwaInstall.js";
-import { Box } from "./box.js";
-import { SlimeSVG } from "./slime.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
-import { levelBgColors } from "./levelColors.js";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
@@ -115,7 +111,6 @@ export function MobileFooter(props: MobileProps) {
         "flex flex-row items-center justify-stretch relative"
       }
     >
-      <PWAUpdateNotification />
       {mobileTabTitleKeys.map((key, i) => (
         <Link
           key={i}
@@ -151,53 +146,5 @@ export function MobileFooter(props: MobileProps) {
         </Link>
       ))}
     </footer>
-  );
-}
-
-export function PWAUpdateNotification() {
-  const t = useTranslations("main.pwa");
-  const pwa = usePWAInstall();
-  const isStandalone = useStandaloneDetector();
-  return (
-    <Box
-      className={
-        "absolute bottom-full inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg " +
-        "transition-all duration-200 origin-bottom " +
-        (pwa.workerUpdate !== null && isStandalone
-          ? "ease-in scale-100 opacity-100 "
-          : "ease-out scale-0 opacity-0 ")
-      }
-    >
-      {pwa.workerUpdate?.state === "updating" ? (
-        <>
-          <SlimeSVG />
-          {t("updating")}
-          {pwa.workerUpdate?.progressSize !== undefined && (
-            <span className="ml-2 text-sm">
-              ({(pwa.workerUpdate?.progressSize / 1024 / 1024).toFixed(2)} MB)
-            </span>
-          )}
-          <span
-            className={
-              "absolute bottom-0 left-0 rounded-full h-1 " + levelBgColors[1]
-            }
-            style={{
-              width:
-                Math.min(
-                  1,
-                  (pwa.workerUpdate?.progressNum || 0) /
-                    (pwa.workerUpdate?.totalNum || 1)
-                ) *
-                  100 +
-                "%",
-            }}
-          />
-        </>
-      ) : pwa.workerUpdate?.state === "done" ? (
-        t("updateDone")
-      ) : pwa.workerUpdate?.state === "failed" ? (
-        t("updateFailed")
-      ) : null}
-    </Box>
   );
 }
