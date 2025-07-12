@@ -146,19 +146,48 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
           const newWorker = reg.installing;
           newWorker?.addEventListener("statechange", () => {
             if (newWorker?.state === "installed" && isStandalone()) {
-              setWorkerUpdate({ state: "done" });
+              // setWorkerUpdate({ state: "done" });
+              updateFetching = setTimeout(() => {
+                fetch("/worker/checkUpdate")
+                  .then((res) => {
+                    // okの場合、messageイベントで受け取るのでここでは何もしない
+                    if (!res.ok) {
+                      setWorkerUpdate({ state: "failed" });
+                    }
+                  })
+                  .catch(() => {
+                    setWorkerUpdate({ state: "failed" });
+                  });
+              }, 1000);
             }
           });
         });
       });
       navigator.serviceWorker.addEventListener("message", (event) => {
         // console.log("Service Worker message:", event.data);
-        if (
-          event.data.type === "initAssets" &&
-          ["updating", "done", "failed"].includes(event.data.state) &&
-          isStandalone()
-        ) {
-          setWorkerUpdate(event.data);
+        if (event.data.type === "initAssets" && isStandalone()) {
+          switch ((event.data as InitAssetsState).state) {
+            case "done":
+            case "failed":
+            case "updating":
+              setWorkerUpdate(event.data);
+              break;
+            case "noUpdate":
+              setWorkerUpdate((current) => {
+                if (current?.state === "updating") {
+                  // serviceworkerのinstallのためにupdatingになり、その後assetの更新はない場合
+                  return { state: "done" };
+                }
+                return null;
+              });
+              break;
+            case "inProgress":
+              // ignore
+              break;
+            default:
+              console.warn("Unknown worker update state:", event.data.state);
+              break;
+          }
         }
       });
     }

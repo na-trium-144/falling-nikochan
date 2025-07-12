@@ -333,7 +333,7 @@ const app = new Hono({ strict: false })
 self.addEventListener("install", (e) => {
   console.log("service worker install");
   self.skipWaiting();
-  e.waitUntil(initAssetsCache({ clearOld: true }));
+  // e.waitUntil(initAssetsCache({ clearOld: true }));
 });
 self.addEventListener("activate", (e) => {
   console.log("service worker activate");

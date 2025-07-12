@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/worker",
-  "version": "12.36.0",
+  "version": "12.37.0",
   "private": true,
   "type": "module",
   "browserslist": [
