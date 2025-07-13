@@ -263,7 +263,9 @@ export function AccordionLike(props: {
   children: ReactNode;
   // reset?: () => void;
 }) {
-  const [opened, anim, setOpened] = useDelayedDisplayState(200);
+  const [opened, anim, setOpened] = useDelayedDisplayState(200, {
+    initial: !props.hidden,
+  });
   useEffect(() => {
     setOpened(!props.hidden);
   }, [props.hidden, setOpened]);

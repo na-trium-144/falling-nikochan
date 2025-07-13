@@ -59,7 +59,9 @@ export function ReadyMessage(props: MessageProps) {
   const optionMinHeight = 12 * rem;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, slideIn, setSlideIn] = useDelayedDisplayState(200, !!props.back);
+  const [_, slideIn, setSlideIn] = useDelayedDisplayState(200, {
+    delayed: !!props.back,
+  });
   const [optionOpen, optionSlideIn, setOptionOpen] =
     useDelayedDisplayState(200);
 

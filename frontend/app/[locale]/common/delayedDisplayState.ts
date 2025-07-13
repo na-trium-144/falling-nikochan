@@ -6,11 +6,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // falseに変わる際にはinnerからdelayミリ秒遅れてouterに反映される。
 export function useDelayedDisplayState(
   delay: number,
-  initValue?: boolean
+  initValue?: { initial?: boolean; delayed?: boolean }
 ): [boolean, boolean, (value: boolean, runAfter?: () => void) => void] {
-  const [valueOuter, setValueOuter] = useState<boolean>(false);
-  const [valueInnerNext, setValueInnerNext] = useState<boolean>(false);
-  const [valueInner, setValueInner] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [delayedInitialValue, _setDelayedInitialValue] = useState<
+    boolean | undefined
+  >(initValue?.delayed);
+  const [valueOuter, setValueOuter] = useState<boolean>(!!initValue?.initial);
+  const [valueInnerNext, setValueInnerNext] = useState<boolean>(
+    !!initValue?.initial
+  );
+  const [valueInner, setValueInner] = useState<boolean>(!!initValue?.initial);
   useEffect(() => {
     const i = requestAnimationFrame(() => setValueInner(valueInnerNext));
     return () => {
@@ -41,13 +47,10 @@ export function useDelayedDisplayState(
     },
     [delay]
   );
-  const isFirstRun = useRef<boolean>(true);
   useEffect(() => {
-    if (!isFirstRun.current) return;
-    if (initValue === true) {
-      setValue(initValue);
+    if (delayedInitialValue !== undefined) {
+      setValue(delayedInitialValue);
     }
-    isFirstRun.current = false;
-  }, [initValue, setValue]);
+  }, [delayedInitialValue, setValue]);
   return [valueOuter, valueInner, setValue];
 }
