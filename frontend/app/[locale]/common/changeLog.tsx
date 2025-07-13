@@ -36,7 +36,8 @@ interface PopupProps {
 export function ChangeLogPopup(props: PopupProps) {
   const t = useTranslations("main.version");
   const changeLog = useChangeLog();
-  const [popupOpened, popupAppearing, setPopupOpened] = useDelayedDisplayState(200);
+  const [popupOpened, popupAppearing, setPopupOpened] =
+    useDelayedDisplayState(200);
   useEffect(() => {
     if (props.open) {
       updateLastVisited();
@@ -56,6 +57,7 @@ export function ChangeLogPopup(props: PopupProps) {
         <Box
           className={
             "absolute bottom-full left-1/2 -translate-x-2/4 z-30 origin-bottom " +
+            "shadow-lg " +
             "transition-all duration-200 " +
             (popupAppearing
               ? "ease-in scale-100 opacity-100 "
