@@ -204,7 +204,10 @@ function Nikochan(props: NProps) {
     x - size / 2 > window.innerWidth ||
     y - size / 2 > boxSize ||
     y + size / 2 < 0;
-  const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, !isOffScreen);
+  const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(
+    0,
+    !isOffScreen
+  );
   return (
     <>
       <div
