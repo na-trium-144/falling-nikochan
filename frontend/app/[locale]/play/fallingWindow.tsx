@@ -204,6 +204,7 @@ function Nikochan(props: NProps) {
     x - size / 2 > window.innerWidth ||
     y - size / 2 > boxSize ||
     y + size / 2 < 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(
     0,
     !isOffScreen
