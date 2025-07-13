@@ -15,6 +15,7 @@ import { fetchBrief } from "@/common/briefCache";
 import { Box, modalBg } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
+import { useDelayedDisplayState } from "./delayedDisplayState";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
@@ -39,7 +40,8 @@ export function SharePageModalProvider(props: {
   const [modalRecord, setModalRecord] = useState<RecordGetSummary[] | null>(
     null
   );
-  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
+  const [modalOpened, modalAppearing, setModalOpened] =
+    useDelayedDisplayState(200);
   const router = useRouter();
   const openModal = useCallback(
     (cid: string) => {
@@ -67,9 +69,9 @@ export function SharePageModalProvider(props: {
         })
         .then((record) => setModalRecord(record))
         .catch(() => setModalRecord([]));
-      setTimeout(() => setModalAppearing(true));
+      setModalOpened(true);
     },
-    [th]
+    [th, setModalOpened]
   );
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
@@ -90,7 +92,10 @@ export function SharePageModalProvider(props: {
         const cid = window.location.pathname.slice(7);
         openModal(cid);
       } else {
-        setModalAppearing(false);
+        setModalOpened(false, () => {
+          setModalCId(null);
+          setModalBrief(null);
+        });
         if (!props.noResetTitle) {
           switch (props.from) {
             case "play":
@@ -101,20 +106,16 @@ export function SharePageModalProvider(props: {
               break;
           }
         }
-        setTimeout(() => {
-          setModalCId(null);
-          setModalBrief(null);
-        }, 200);
       }
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, [openModal, props.from, tp, props.noResetTitle]);
+  }, [openModal, props.from, tp, props.noResetTitle, setModalOpened]);
 
   return (
     <SharePageModalContext.Provider value={{ openModal, openShareInternal }}>
       {props.children}
-      {modalCId && modalBrief && (
+      {modalOpened && (
         <div
           className={
             modalBg +
@@ -136,7 +137,7 @@ export function SharePageModalProvider(props: {
               }
             >
               <ShareBox
-                cid={modalCId}
+                cid={modalCId || ""}
                 brief={modalBrief}
                 record={modalRecord}
                 locale={props.locale}

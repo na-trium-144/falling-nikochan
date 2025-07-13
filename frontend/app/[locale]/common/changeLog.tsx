@@ -13,6 +13,7 @@ import { linkStyle1 } from "./linkStyle";
 import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { updateLastVisited } from "./version";
+import { useDelayedDisplayState } from "./delayedDisplayState";
 
 const ChangeLogContext = createContext<ReactNode>(null);
 export const useChangeLog = () => useContext(ChangeLogContext);
@@ -35,18 +36,13 @@ interface PopupProps {
 export function ChangeLogPopup(props: PopupProps) {
   const t = useTranslations("main.version");
   const changeLog = useChangeLog();
-  const [popupOpened, setPopupOpened] = useState<boolean>(false);
-  const [popupAppearing, setPopupAppearing] = useState<boolean>(false);
+  const [popupOpened, popupAppearing, setPopupOpened] = useDelayedDisplayState(200);
   useEffect(() => {
     if (props.open) {
       updateLastVisited();
-      setPopupOpened(true);
-      setTimeout(() => setPopupAppearing(true));
-    } else {
-      setPopupAppearing(false);
-      setTimeout(() => setPopupOpened(false), 200);
     }
-  }, [props.open]);
+    setPopupOpened(props.open);
+  }, [props.open, setPopupOpened]);
   return (
     popupOpened && (
       <>
