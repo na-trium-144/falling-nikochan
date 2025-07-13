@@ -2,19 +2,23 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// trueに変わる際にはouterから1フレーム遅れてinnerに反映され、
-// falseに変わる際にはinnerからdelayミリ秒遅れてouterに反映される。
+/**
+ * trueに変わる際にはouterから1フレーム遅れてinnerに反映され、
+ * falseに変わる際にはinnerからdelayミリ秒遅れてouterに反映される。
+ *
+ * initValue.initial がtrueの場合、最初のフレームからinnerもouterもtrue
+ * initValue.delayed がtrueの場合、最初のフレームではouterのみtrueで、1フレーム遅れてinnerがtrueになる
+ * どちらもtrueでない場合、デフォルトはfalse
+ */
 export function useDelayedDisplayState(
   delay: number,
   initValue?: { initial?: boolean; delayed?: boolean }
 ): [boolean, boolean, (value: boolean, runAfter?: () => void) => void] {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [delayedInitialValue, _setDelayedInitialValue] = useState<
-    boolean | undefined
-  >(initValue?.delayed);
-  const [valueOuter, setValueOuter] = useState<boolean>(!!initValue?.initial);
+  const [valueOuter, setValueOuter] = useState<boolean>(
+    !!initValue?.delayed || !!initValue?.initial
+  );
   const [valueInnerNext, setValueInnerNext] = useState<boolean>(
-    !!initValue?.initial
+    !!initValue?.delayed || !!initValue?.initial
   );
   const [valueInner, setValueInner] = useState<boolean>(!!initValue?.initial);
   useEffect(() => {
@@ -47,10 +51,5 @@ export function useDelayedDisplayState(
     },
     [delay]
   );
-  useEffect(() => {
-    if (delayedInitialValue !== undefined) {
-      setValue(delayedInitialValue);
-    }
-  }, [delayedInitialValue, setValue]);
   return [valueOuter, valueInner, setValue];
 }
