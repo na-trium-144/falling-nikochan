@@ -21,6 +21,7 @@ import {
 import Select from "@/common/select";
 import { detectOS } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
+import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 
 interface MessageProps {
   isTouch: boolean;
@@ -57,23 +58,12 @@ export function ReadyMessage(props: MessageProps) {
   const small = props.maxHeight < 22 * rem;
   const optionMinHeight = 12 * rem;
 
-  const [slideIn, setSlideIn] = useState<boolean | null>(null);
-  const [optionOpen, setOptionOpen] = useState<boolean>(false);
-  const [optionSlideIn, setOptionSlideIn] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (props.back && slideIn === null) {
-      requestAnimationFrame(() => setSlideIn(true));
-    }
-  }, [props.back, slideIn]);
-  useEffect(() => {
-    if (optionOpen && optionSlideIn === null) {
-      requestAnimationFrame(() => setOptionSlideIn(true));
-    }
-    if (!optionOpen && optionSlideIn !== null) {
-      setOptionSlideIn(null);
-    }
-  }, [optionOpen, optionSlideIn]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, slideIn, setSlideIn] = useDelayedDisplayState(200, {
+    delayed: !!props.back,
+  });
+  const [optionOpen, optionSlideIn, setOptionOpen] =
+    useDelayedDisplayState(200);
 
   return (
     <CenterBox
@@ -95,10 +85,7 @@ export function ReadyMessage(props: MessageProps) {
           <p className="text-lg font-title font-bold mb-1">
             <button
               className={pagerButtonClass + "mr-4 align-bottom "}
-              onClick={() => {
-                setOptionSlideIn(false);
-                setTimeout(() => setOptionOpen(false), 200);
-              }}
+              onClick={() => setOptionOpen(false)}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
             </button>
@@ -123,10 +110,7 @@ export function ReadyMessage(props: MessageProps) {
           {props.back && (
             <button
               className={pagerButtonClass + "mr-4 align-bottom "}
-              onClick={() => {
-                setSlideIn(false);
-                setTimeout(props.back!, 200);
-              }}
+              onClick={() => setSlideIn(false, props.back!)}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
             </button>

@@ -1,3 +1,7 @@
+## ver. 12.38 - 2025/07/14 [#707](https://github.com/na-trium-144/falling-nikochan/pull/707)
+
+* アニメーション用の遅延setStateをカスタムフック(useDelayedDisplayState)にまとめた
+
 ## ver. 12.35 - 2025/07/12 [#704](https://github.com/na-trium-144/falling-nikochan/pull/704)
 
 * PC表示でバージョン番号をクリックした際ページ遷移せずに更新履歴を表示するようにした

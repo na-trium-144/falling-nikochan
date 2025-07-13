@@ -15,6 +15,7 @@ import { Box, modalBg } from "./box";
 import Button from "./button";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
+import { useDelayedDisplayState } from "./delayedDisplayState";
 
 export function useShareLink(
   cid: string | undefined,
@@ -111,22 +112,23 @@ export const useShareImageModalContext = () =>
   useContext(ShareImageModalContext);
 
 export function ShareImageModalProvider(props: { children: React.ReactNode }) {
-  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
-  const [modalOpened, setModalOpened] = useState<boolean>(false);
+  const [modalOpened, modalAppearing, setModalOpened] =
+    useDelayedDisplayState(200);
   const [ogPath, setOgPath] = useState<string>("");
   const [cid, setCid] = useState<string>("");
 
-  const openModal = useCallback((ogPath: string, cid: string) => {
-    setOgPath(ogPath);
-    setCid(cid);
-    setModalOpened(true);
-    setTimeout(() => setModalAppearing(true));
-  }, []);
+  const openModal = useCallback(
+    (ogPath: string, cid: string) => {
+      setOgPath(ogPath);
+      setCid(cid);
+      setModalOpened(true);
+    },
+    [setModalOpened]
+  );
 
   const closeModal = useCallback(() => {
-    setModalAppearing(false);
-    setTimeout(() => setModalOpened(false), 200);
-  }, []);
+    setModalOpened(false);
+  }, [setModalOpened]);
 
   const t = useTranslations("share.image");
   const [imageBlob, setImageBlob] = useState<Blob>();

@@ -1,18 +1,13 @@
 "use client";
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
 import { linkStyle1 } from "./linkStyle";
 import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { updateLastVisited } from "./version";
+import { useDelayedDisplayState } from "./delayedDisplayState";
 
 const ChangeLogContext = createContext<ReactNode>(null);
 export const useChangeLog = () => useContext(ChangeLogContext);
@@ -35,18 +30,14 @@ interface PopupProps {
 export function ChangeLogPopup(props: PopupProps) {
   const t = useTranslations("main.version");
   const changeLog = useChangeLog();
-  const [popupOpened, setPopupOpened] = useState<boolean>(false);
-  const [popupAppearing, setPopupAppearing] = useState<boolean>(false);
+  const [popupOpened, popupAppearing, setPopupOpened] =
+    useDelayedDisplayState(200);
   useEffect(() => {
     if (props.open) {
       updateLastVisited();
-      setPopupOpened(true);
-      setTimeout(() => setPopupAppearing(true));
-    } else {
-      setPopupAppearing(false);
-      setTimeout(() => setPopupOpened(false), 200);
     }
-  }, [props.open]);
+    setPopupOpened(props.open);
+  }, [props.open, setPopupOpened]);
   return (
     popupOpened && (
       <>
@@ -60,6 +51,7 @@ export function ChangeLogPopup(props: PopupProps) {
         <Box
           className={
             "absolute bottom-full left-1/2 -translate-x-2/4 z-30 origin-bottom " +
+            "shadow-lg " +
             "transition-all duration-200 " +
             (popupAppearing
               ? "ease-in scale-100 opacity-100 "

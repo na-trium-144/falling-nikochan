@@ -14,7 +14,7 @@ import {
 import { useDisplayMode } from "./scale.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import Input from "./common/input.jsx";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
@@ -28,6 +28,7 @@ import { maxAboutPageIndex } from "./main/about/[aboutIndex]/pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
+import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
 
 interface Props {
   locale: string;
@@ -37,25 +38,27 @@ export default function TopPage(props: Props) {
   const { screenWidth, rem } = useDisplayMode();
   const router = useRouter();
   const t = useTranslations("main");
-  const [menuMove, setMenuMove] = useState<boolean>(false);
-  const [menuMove2, setMenuMove2] = useState<boolean>(false);
+  const [menuMove, menuMoveAnim, setMenuMove] = useDelayedDisplayState(200);
   const menuMoveAnimClass =
     "min-h-0 shrink-2 transition-opacity duration-200 ease-linear " +
-    (menuMove2 ? "opacity-0 " : "opacity-100 ");
-  useEffect(() => {
-    if (menuMove) {
-      setTimeout(() => setMenuMove2(true));
-    }
-  }, [menuMove]);
+    (menuMoveAnim ? "opacity-0 " : "opacity-100 ");
   const { locale } = props;
   const { openModal, openShareInternal } = useSharePageModal();
-  const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
+  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
+  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
+  const setAboutPageIndex = useCallback(
+    (i: number | null) => {
+      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
+    },
+    [setAboutOpen_]
+  );
   const fes = useFestival();
 
   return (
     <main className="w-full h-full overflow-x-clip overflow-y-auto ">
-      {aboutPageIndex !== null ? (
+      {aboutPageIndex !== null && aboutOpen ? (
         <AboutModal
+          aboutAnim={aboutAnim}
           contents={props.aboutContents}
           aboutPageIndex={aboutPageIndex}
           setAboutPageIndex={setAboutPageIndex}
@@ -66,7 +69,7 @@ export default function TopPage(props: Props) {
           "flex flex-col w-full min-h-full h-max items-center " +
           (menuMove
             ? "transition-[max-height] duration-200 ease-out " +
-              (menuMove2 ? "max-h-full " : "max-h-max")
+              (menuMoveAnim ? "max-h-full " : "max-h-max")
             : "")
         }
       >
@@ -148,7 +151,7 @@ export default function TopPage(props: Props) {
         <div
           className={
             "shrink-1 h-dvh transition-all duration-200 ease-in " +
-            (menuMove2 ? "max-h-[50vh] " : "max-h-0 ")
+            (menuMoveAnim ? "max-h-[50vh] " : "max-h-0 ")
           }
         />
         <nav
@@ -190,7 +193,7 @@ export default function TopPage(props: Props) {
         <div
           className={
             "shrink-1 h-dvh transition-all duration-200 ease-in " +
-            (menuMove2 ? "max-h-[50vh] " : "max-h-0 ")
+            (menuMoveAnim ? "max-h-[50vh] " : "max-h-0 ")
           }
         />
 
@@ -298,6 +301,7 @@ function InputDirect(props: { locale: string }) {
 }
 
 interface AProps {
+  aboutAnim: boolean;
   contents: ReactNode[];
   aboutPageIndex: number;
   setAboutPageIndex: (i: number | null) => void;
@@ -305,21 +309,13 @@ interface AProps {
 export function AboutModal(props: AProps) {
   const tm = useTranslations("main.about");
   const t = useTranslations(`about.${props.aboutPageIndex}`);
-  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
-  useEffect(() => {
-    setTimeout(() => setModalAppearing(true));
-  }, [props.aboutPageIndex]);
-  const close = () => {
-    setModalAppearing(false);
-    setTimeout(() => props.setAboutPageIndex(null), 200);
-  };
 
   return (
     <div
       className={
         modalBg +
         "transition-opacity duration-200 " +
-        (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
+        (props.aboutAnim ? "ease-in opacity-100 " : "ease-out opacity-0 ")
       }
       onClick={close}
     >
@@ -330,7 +326,7 @@ export function AboutModal(props: AProps) {
             "p-6 overflow-x-clip overflow-y-auto " +
             "shadow-lg " +
             "transition-transform duration-200 origin-center " +
-            (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
+            (props.aboutAnim ? "ease-in scale-100 " : "ease-out scale-0 ")
           }
           onClick={(e) => e.stopPropagation()}
         >

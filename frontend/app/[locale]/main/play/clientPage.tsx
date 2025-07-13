@@ -11,6 +11,7 @@ import Input from "@/common/input.jsx";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
+import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 
 interface Props {
   locale: string;
@@ -262,25 +263,20 @@ export function AccordionLike(props: {
   children: ReactNode;
   // reset?: () => void;
 }) {
-  const [hidden, setHidden] = useState<boolean>(false);
-  const [transparent, setTransparent] = useState<boolean>(false);
+  const [opened, anim, setOpened] = useDelayedDisplayState(200, {
+    initial: !props.hidden,
+  });
   useEffect(() => {
-    if (props.hidden) {
-      setTransparent(true);
-      setTimeout(() => setHidden(true), 200);
-    } else {
-      setHidden(false);
-      requestAnimationFrame(() => setTransparent(false));
-    }
-  }, [props.hidden]);
+    setOpened(!props.hidden);
+  }, [props.hidden, setOpened]);
 
   return (
     <div
       className={
         // main-wide:
         "transition-all duration-500 " +
-        (hidden ? "hidden " : "") +
-        (transparent
+        (!opened ? "hidden " : "") +
+        (!anim
           ? "m-0! ease-out opacity-0 max-h-0 pointer-events-none "
           : "ease-in opacity-100 max-h-200 ") +
         props.className
