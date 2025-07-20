@@ -1,6 +1,7 @@
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import ChartListPage from "../chartList";
+import { SharePageModalProvider } from "@/common/sharePageModal";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
@@ -9,14 +10,17 @@ export async function generateMetadata({ params }: MetadataProps) {
 
 export default async function Page({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
+  const locale = (await params).locale;
   return (
-    <ChartListPage
-      locale={(await params).locale}
-      title={t("recent")}
-      type="recent"
-      tabKey={null}
-      mobileTabKey="top"
-      badge
-    />
+    <SharePageModalProvider locale={locale} from="top">
+      <ChartListPage
+        locale={locale}
+        title={t("recent")}
+        type="recent"
+        tabKey={null}
+        mobileTabKey="top"
+        badge
+      />
+    </SharePageModalProvider>
   );
 }

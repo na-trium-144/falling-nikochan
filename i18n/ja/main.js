@@ -106,6 +106,7 @@ export default {
       supportedBrowsers:
         "対応ブラウザは {browserslist} です。" +
         "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
+      showAll: "もっと見る",
     },
     links: {
       title: "お問い合わせ先・その他リンク",

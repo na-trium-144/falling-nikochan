@@ -11,14 +11,24 @@ export default function Title(props: Props) {
   const [nikochanPhase, setNikochanPhase] = useState<number>(
     props.anim ? 0 : 2
   );
+  const [nikochanPhaseNext, setNikochanPhaseNext] = useState<number>(
+    props.anim ? 0 : 2
+  );
+  useEffect(() => {
+    const i = requestAnimationFrame(() => setNikochanPhase(nikochanPhaseNext));
+    return () => {
+      cancelAnimationFrame(i);
+    };
+  }, [nikochanPhaseNext]);
   const [barFlash, setBarFlash] = useState<boolean>(props.anim ? false : true);
   useEffect(() => {
     if (nikochanPhase === 0) {
-      requestAnimationFrame(() => setNikochanPhase(1));
+      setNikochanPhaseNext(1);
       setTimeout(
         () =>
           requestAnimationFrame(() => {
             setNikochanPhase(2);
+            setNikochanPhaseNext(2);
             setBarFlash(true);
           }),
         300

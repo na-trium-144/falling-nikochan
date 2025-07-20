@@ -92,6 +92,18 @@ export const ChartBriefSchema = () =>
   });
 export type ChartBrief = v.InferOutput<ReturnType<typeof ChartBriefSchema>>;
 
+export function emptyBrief(): ChartBrief {
+  return {
+    ytId: "",
+    title: "",
+    composer: "",
+    chartCreator: "",
+    updatedAt: 0,
+    published: false,
+    locale: "",
+    levels: [],
+  };
+}
 export const currentChartVer = 12;
 export const lastIncompatibleVer = 6;
 export type ChartMin = Chart11Min;

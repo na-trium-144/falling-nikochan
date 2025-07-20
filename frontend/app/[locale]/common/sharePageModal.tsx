@@ -1,20 +1,38 @@
+"use client";
+
 import { titleShare, titleWithSiteName } from "@/common/title";
 import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useTranslations } from "next-intl";
 import { fetchBrief } from "@/common/briefCache";
 import { Box, modalBg } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
-import { ShareInternalSession } from "./shareInternal/clientPage";
+import { useDelayedDisplayState } from "./delayedDisplayState";
 
-export function useShareModal(
-  locale: string,
-  from: "play" | "top",
-  config?: {
-    noResetTitle?: boolean;
-  }
-) {
+interface SharePageModalState {
+  openModal: (cid: string) => void;
+  openShareInternal: (cid: string, brief?: ChartBrief) => void;
+}
+const SharePageModalContext = createContext<SharePageModalState>({
+  openModal: () => {},
+  openShareInternal: () => {},
+});
+export const useSharePageModal = () => useContext(SharePageModalContext);
+
+export function SharePageModalProvider(props: {
+  children: ReactNode;
+  locale: string;
+  from: "top" | "play";
+  noResetTitle?: boolean;
+}) {
   const th = useTranslations("share");
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
@@ -22,7 +40,8 @@ export function useShareModal(
   const [modalRecord, setModalRecord] = useState<RecordGetSummary[] | null>(
     null
   );
-  const [modalAppearing, setModalAppearing] = useState<boolean>(false);
+  const [modalOpened, modalAppearing, setModalOpened] =
+    useDelayedDisplayState(200);
   const router = useRouter();
   const openModal = useCallback(
     (cid: string) => {
@@ -50,24 +69,20 @@ export function useShareModal(
         })
         .then((record) => setModalRecord(record))
         .catch(() => setModalRecord([]));
-      setTimeout(() => setModalAppearing(true));
+      setModalOpened(true);
     },
-    [th]
+    [th, setModalOpened]
   );
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
       if (brief) {
-        sessionStorage.setItem(
-          "shareInternal",
-          JSON.stringify({
-            cid,
-            fromPlay: from === "play",
-          } satisfies ShareInternalSession)
+        router.push(
+          `/${props.locale}/main/shareInternal` +
+            `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
         );
-        router.push(`/${locale}/main/shareInternal`);
       }
     },
-    [locale, from, router]
+    [props.locale, props.from, router]
   );
 
   // modalのcloseと、exclusiveModeのリセットは window.history.back(); でpopstateイベントを呼び出しその中で行われる
@@ -77,9 +92,12 @@ export function useShareModal(
         const cid = window.location.pathname.slice(7);
         openModal(cid);
       } else {
-        setModalAppearing(false);
-        if (!config?.noResetTitle) {
-          switch (from) {
+        setModalOpened(false, () => {
+          setModalCId(null);
+          setModalBrief(null);
+        });
+        if (!props.noResetTitle) {
+          switch (props.from) {
             case "play":
               document.title = titleWithSiteName(tp("title"));
               break;
@@ -88,48 +106,47 @@ export function useShareModal(
               break;
           }
         }
-        setTimeout(() => {
-          setModalCId(null);
-          setModalBrief(null);
-        }, 200);
       }
     };
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
-  }, [openModal, from, tp, config?.noResetTitle]);
+  }, [openModal, props.from, tp, props.noResetTitle, setModalOpened]);
 
-  const modal: ReactNode = modalCId && modalBrief && (
-    <div
-      className={
-        modalBg +
-        "transition-opacity duration-200 " +
-        (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
-      }
-      onClick={() => window.history.back()}
-    >
-      <div className="absolute inset-12">
-        <Box
-          onClick={(e) => e.stopPropagation()}
+  return (
+    <SharePageModalContext.Provider value={{ openModal, openShareInternal }}>
+      {props.children}
+      {modalOpened && (
+        <div
           className={
-            "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
-            "flex flex-col " +
-            "p-6 overflow-x-clip overflow-y-auto " +
-            "shadow-lg " +
-            "transition-transform duration-200 origin-center " +
-            (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
+            modalBg +
+            "transition-opacity duration-200 " +
+            (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
           }
+          onClick={() => window.history.back()}
         >
-          <ShareBox
-            cid={modalCId}
-            brief={modalBrief}
-            record={modalRecord}
-            locale={locale}
-            backButton={() => window.history.back()}
-          />
-        </Box>
-      </div>
-    </div>
+          <div className="absolute inset-12">
+            <Box
+              onClick={(e) => e.stopPropagation()}
+              className={
+                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
+                "flex flex-col " +
+                "p-6 overflow-x-clip overflow-y-auto " +
+                "shadow-lg " +
+                "transition-transform duration-200 origin-center " +
+                (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
+              }
+            >
+              <ShareBox
+                cid={modalCId || ""}
+                brief={modalBrief}
+                record={modalRecord}
+                locale={props.locale}
+                backButton={() => window.history.back()}
+              />
+            </Box>
+          </div>
+        </div>
+      )}
+    </SharePageModalContext.Provider>
   );
-
-  return { modal, openModal, openShareInternal };
 }

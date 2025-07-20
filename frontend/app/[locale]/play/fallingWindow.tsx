@@ -7,6 +7,7 @@ import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote7, DisplayNote7, Note7 } from "@falling-nikochan/chart";
+import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 
 interface Props {
   className?: string;
@@ -195,25 +196,18 @@ function Nikochan(props: NProps) {
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
 
-  const [enableFadeIn, setEnableFadeIn] = useState<boolean>(true);
-  const [appeared, setAppeared] = useState<boolean>(false);
-  useEffect(() => {
-    const x = displayNote.pos.x * boxSize + marginX;
-    const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
-    const size = noteSize * bigScale(note.big);
-    const isOffScreen =
-      x + size / 2 < 0 ||
-      x - size / 2 > window.innerWidth ||
-      y - size / 2 > boxSize ||
-      y + size / 2 < 0;
-    if (isOffScreen) {
-      setEnableFadeIn(false);
-    } else {
-      // set appeared after rendering next frame to ensure fade transition
-      requestAnimationFrame(() => setAppeared(true));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const x = displayNote.pos.x * boxSize + marginX;
+  const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
+  const size = noteSize * bigScale(note.big);
+  const isOffScreen =
+    x + size / 2 < 0 ||
+    x - size / 2 > window.innerWidth ||
+    y - size / 2 > boxSize ||
+    y + size / 2 < 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, {
+    delayed: !isOffScreen,
+  });
   return (
     <>
       <div

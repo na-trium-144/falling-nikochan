@@ -6,11 +6,12 @@ import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { numLatest, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { useShareModal } from "../shareModal.jsx";
 import { ChartLineBrief } from "../fetch.js";
 import Input from "@/common/input.jsx";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { titleWithSiteName } from "@/common/title.js";
+import { useSharePageModal } from "@/common/sharePageModal.jsx";
+import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 
 interface Props {
   locale: string;
@@ -21,11 +22,7 @@ export default function PlayTab(props: Props) {
   const t = useTranslations("main.play");
   const { locale } = props;
 
-  const { modal, openModal, openShareInternal } = useShareModal(
-    locale,
-    "play",
-    { noResetTitle: true }
-  );
+  const { openModal, openShareInternal } = useSharePageModal();
 
   const [searchText, setSearchText_] = useState<string>("");
   const [searching, setSearching] = useState<boolean>(false);
@@ -130,7 +127,6 @@ export default function PlayTab(props: Props) {
       noBackButtonMobile
       noBackButtonPC
       locale={locale}
-      modal={modal}
     >
       <div className="flex-none mb-3 ">
         <h3 className="mb-2 flex items-baseline ">
@@ -267,25 +263,20 @@ export function AccordionLike(props: {
   children: ReactNode;
   // reset?: () => void;
 }) {
-  const [hidden, setHidden] = useState<boolean>(false);
-  const [transparent, setTransparent] = useState<boolean>(false);
+  const [opened, anim, setOpened] = useDelayedDisplayState(200, {
+    initial: !props.hidden,
+  });
   useEffect(() => {
-    if (props.hidden) {
-      setTransparent(true);
-      setTimeout(() => setHidden(true), 200);
-    } else {
-      setHidden(false);
-      requestAnimationFrame(() => setTransparent(false));
-    }
-  }, [props.hidden]);
+    setOpened(!props.hidden);
+  }, [props.hidden, setOpened]);
 
   return (
     <div
       className={
         // main-wide:
         "transition-all duration-500 " +
-        (hidden ? "hidden " : "") +
-        (transparent
+        (!opened ? "hidden " : "") +
+        (!anim
           ? "m-0! ease-out opacity-0 max-h-0 pointer-events-none "
           : "ease-in opacity-100 max-h-200 ") +
         props.className

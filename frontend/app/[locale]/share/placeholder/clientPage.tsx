@@ -6,7 +6,7 @@ import {
   RecordGetSummary,
   ResultParams,
 } from "@falling-nikochan/chart";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
@@ -17,6 +17,7 @@ import Title from "@/common/titleLogo.jsx";
 import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { MobileFooter, PCFooter } from "@/common/footer.jsx";
 import { AboutModal } from "@/clientPage.jsx";
+import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -90,12 +91,20 @@ export default function ShareChart(props: Props) {
     }
   }, [t]);
 
-  const [aboutPageIndex, setAboutPageIndex] = useState<number | null>(null);
+  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
+  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
+  const setAboutPageIndex = useCallback(
+    (i: number | null) => {
+      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
+    },
+    [setAboutOpen_]
+  );
 
   return (
     <main className="w-full h-full overflow-x-clip overflow-y-auto ">
-      {aboutPageIndex !== null && (
+      {aboutPageIndex !== null && aboutOpen && (
         <AboutModal
+          aboutAnim={aboutAnim}
           contents={props.aboutContents}
           aboutPageIndex={aboutPageIndex}
           setAboutPageIndex={setAboutPageIndex}

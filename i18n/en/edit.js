@@ -276,6 +276,7 @@ export default {
         6: "Notes Tab",
         7: "Code Tab",
       },
+      agreeClose: "Agree to the terms and close",
       close: "Close",
     },
   },

@@ -1,3 +1,28 @@
+## ver. 12.38 - 2025/07/14 [#707](https://github.com/na-trium-144/falling-nikochan/pull/707)
+
+* アニメーション用の遅延setStateをカスタムフック(useDelayedDisplayState)にまとめた
+
+## ver. 12.35 - 2025/07/12 [#704](https://github.com/na-trium-144/falling-nikochan/pull/704)
+
+* PC表示でバージョン番号をクリックした際ページ遷移せずに更新履歴を表示するようにした
+
+## ver. 12.34 - 2025/07/12 [#703](https://github.com/na-trium-144/falling-nikochan/pull/703)
+
+* serviceworkerの更新時のステータスで
+    * プログレスバーを表示するようにした
+    * fetchのレスポンスではなくpostMessageで返すようにした
+    * 表示処理をfooterからProviderに移動
+
+## ver. 12.33 - 2025/07/12 [#659](https://github.com/na-trium-144/falling-nikochan/pull/659)
+
+* プレイ結果を画像として保存・共有する機能の追加
+* shareModalをsharePageModalに改名しカスタムフックでmodalコンポーネントを返すのではなくContext/Providerでの実装に変更
+* shareInternalページのデータをsessionStorageではなくクエリ管理に変更
+
+## ver. 12.32 - 2025/07/05 [#696](https://github.com/na-trium-144/falling-nikochan/pull/696)
+
+* 譜面編集ヘルプの1ページ目に利用規約のリンクを追加 (GooglePlayのデベロッパープログラムポリシーに書いてあったので一応)
+
 ## ver. 12.30 - 2025/06/22 [#658](https://github.com/na-trium-144/falling-nikochan/pull/658)
 
 * 再生開始位置と再生速度を変更するオプションを追加
