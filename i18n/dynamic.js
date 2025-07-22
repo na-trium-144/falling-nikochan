@@ -1,6 +1,7 @@
 import { createTranslator } from "next-intl";
 
 export const locales = ["en", "ja"];
+export const localesFull = ["en", "ja", "ja-JP"]; // workaround https://github.com/honojs/hono/issues/4294
 
 export async function getMessages(locale) {
   return {

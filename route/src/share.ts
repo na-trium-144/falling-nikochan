@@ -1,4 +1,9 @@
-import { Bindings, cacheControl, languageDetector } from "./env.js";
+import {
+  Bindings,
+  cacheControl,
+  languageDetector,
+  languageParser,
+} from "./env.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
   baseScoreRate,
@@ -27,6 +32,7 @@ const shareApp = (config: {
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use(config.languageDetector || languageDetector())
+    .use(languageParser())
     .get("/:cid{[0-9]+}", async (c) => {
       const lang = c.get("language");
       const qLang = c.req.query("lang") || lang;
