@@ -1,5 +1,5 @@
 import { Context, Hono } from "hono";
-import { Bindings, languageDetector } from "./env.js";
+import { Bindings, languageDetector, languageParser } from "./env.js";
 import { isbot } from "isbot";
 import { env } from "hono/adapter";
 
@@ -11,6 +11,7 @@ const redirectApp = (config: {
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use(config?.languageDetector || languageDetector())
+    .use(languageParser())
     .get("/edit/:cid", (c) => {
       // deprecated (used until ver6.15)
       const cid = c.req.param("cid");

@@ -5,8 +5,9 @@ import {
   onError,
   redirectApp,
   shareApp,
+  languageParser,
 } from "@falling-nikochan/route";
-import { locales } from "@falling-nikochan/i18n/staticMin.js";
+import { localesFull } from "@falling-nikochan/i18n/staticMin.js";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -243,13 +244,14 @@ const languageDetector = async (c: Context, next: () => Promise<void>) => {
   const cache = await configCache();
   const preferredLang2 = await cache.match("/lang").then((res) => res?.text());
   let lang: string;
-  if (preferredLang && locales.includes(preferredLang)) {
+  if (preferredLang && localesFull.includes(preferredLang)) {
     lang = preferredLang;
-  } else if (preferredLang2 && locales.includes(preferredLang2)) {
+  } else if (preferredLang2 && localesFull.includes(preferredLang2)) {
     lang = preferredLang2;
   } else {
-    lang = systemLangs.find((l) => locales.includes(l)) || "en";
+    lang = systemLangs.find((l) => localesFull.includes(l)) || "en";
   }
+  lang = lang.split("-")[0];
   c.set("language", lang);
   cache.put("/lang", new Response(lang));
   await next();
@@ -327,6 +329,7 @@ const app = new Hono({ strict: false })
     }
   })
   .use(languageDetector)
+  .use(languageParser())
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
