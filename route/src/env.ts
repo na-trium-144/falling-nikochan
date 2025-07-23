@@ -70,7 +70,7 @@ export function languageDetector() {
     dotenv.config({ path: join(dirname(process.cwd()), ".env") });
   }
   return honoLanguageDetector({
-    convertDetectedLanguage: (lang) => lang.split('-')[0],
+    convertDetectedLanguage: (lang) => lang.split("-")[0],
     supportedLanguages: locales,
     fallbackLanguage: "en",
     order: ["cookie", "header"],
