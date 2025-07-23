@@ -155,7 +155,9 @@ async function initAssetsCache(config: {
         }
         return pathname;
       })
-      .filter((n) => !n.endsWith(".ttf"));
+      .filter((n) => !n.endsWith(".ttf"))
+      .filter((n) => !n.includes("icon"))
+      .filter((n) => !n.includes("ogTemplate"));
     // tmpCacheにデータを入れる
     let failed = false;
     let totalNum = files.length;
