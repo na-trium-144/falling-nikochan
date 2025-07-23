@@ -68,7 +68,7 @@ export async function initMetadata(
         sizes: "256x256",
         type: "image/png",
       },
-      apple: [192, 256, 512, 1024].map((size) => ({
+      apple: [180, 1024].map((size) => ({
         url: process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
         sizes: `${size}x${size}`,
         type: "image/png",
