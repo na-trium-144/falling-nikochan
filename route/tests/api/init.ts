@@ -28,7 +28,6 @@ import {
   notFound,
   onError,
   languageDetector,
-  languageParser,
   fetchStatic,
   fetchBrief,
 } from "@falling-nikochan/route";
@@ -44,7 +43,6 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .use(languageParser())
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
