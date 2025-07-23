@@ -1,11 +1,10 @@
-import { localesFull } from "@falling-nikochan/i18n/dynamic.js";
+import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
 import briefApp from "./api/brief.js";
 import { Hono } from "hono";
 import { onError } from "./error.js";
-import { createMiddleware } from "hono/factory";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -71,7 +70,7 @@ export function languageDetector() {
     dotenv.config({ path: join(dirname(process.cwd()), ".env") });
   }
   return honoLanguageDetector({
-    supportedLanguages: localesFull,
+    supportedLanguages: locales,
     fallbackLanguage: "en",
     order: ["cookie", "header"],
     lookupCookie: "language",
@@ -82,12 +81,5 @@ export function languageDetector() {
       httpOnly: false,
     },
     // debug: process.env.API_ENV === "development",
-  });
-}
-
-export function languageParser() {
-  return createMiddleware(async (c, next) => {
-    c.set("language", c.get("language").split("-")[0]);
-    await next();
   });
 }

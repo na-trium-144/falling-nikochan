@@ -4,7 +4,6 @@ import {
   sitemapApp,
   shareApp,
   languageDetector,
-  languageParser,
   onError,
   notFound,
   fetchBrief,
@@ -33,7 +32,6 @@ const app = new Hono({ strict: false })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .use(languageParser())
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 

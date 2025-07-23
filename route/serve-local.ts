@@ -8,7 +8,6 @@ import {
   shareApp,
   Bindings,
   languageDetector,
-  languageParser,
   onError,
   notFound,
   fetchStatic,
@@ -58,7 +57,6 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     })
   )
   .use(languageDetector())
-  .use(languageParser())
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 

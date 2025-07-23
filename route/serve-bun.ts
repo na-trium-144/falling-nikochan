@@ -11,7 +11,6 @@ import {
   notFound,
   fetchStatic,
   fetchBrief,
-  languageParser,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -56,7 +55,6 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     })
   )
   .use(languageDetector())
-  .use(languageParser())
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
