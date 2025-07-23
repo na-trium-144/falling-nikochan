@@ -1,3 +1,7 @@
+## ver. 12.39 - 2025/07/22 [#712](https://github.com/na-trium-144/falling-nikochan/pull/712), [#713](https://github.com/na-trium-144/falling-nikochan/pull/713)
+
+* accept-languageがja-JPの場合jaにフォールバックする処理を追加
+
 ## ver. 12.38 - 2025/07/14 [#707](https://github.com/na-trium-144/falling-nikochan/pull/707)
 
 * アニメーション用の遅延setStateをカスタムフック(useDelayedDisplayState)にまとめた
