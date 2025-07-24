@@ -86,6 +86,7 @@ import { titleWithSiteName } from "@/common/title.js";
 import { Chart8Edit } from "@falling-nikochan/chart";
 import { SlimeSVG } from "@/common/slime.js";
 import { useRouter } from "next/navigation.js";
+import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 
 export default function EditAuth(props: {
   locale: string;
@@ -245,6 +246,7 @@ export default function EditAuth(props: {
               setErrorStatus(undefined);
               setErrorMsg(undefined);
               addRecent("edit", cidInitial.current);
+              updatePlayCountForReview();
             } catch (e) {
               console.error(e);
               setChart(undefined);

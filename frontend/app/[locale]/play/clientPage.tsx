@@ -60,7 +60,11 @@ import { useSE } from "./se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
-import { detectOS, isStandalone } from "@/common/pwaInstall.js";
+import {
+  detectOS,
+  isStandalone,
+  updatePlayCountForReview,
+} from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
 
 export function InitPlay({ locale }: { locale: string }) {
@@ -145,6 +149,7 @@ export function InitPlay({ locale }: { locale: string }) {
                 setErrorStatus(undefined);
                 setErrorMsg(undefined);
                 addRecent("play", session?.cid || cidFromParam || "");
+                updatePlayCountForReview();
               } else {
                 setChartSeq(undefined);
                 setErrorStatus(undefined);
