@@ -37,7 +37,7 @@ export function isAndroidTWA() {
     (new URLSearchParams(location.search).get("utm_source") ===
       "nikochan.twa" ||
       sessionStorage.getItem("fromAndroidTWA") ||
-      document.referrer.includes("android-app://net.utcode.nikochan.twa"))
+      document.referrer.includes("android-app://net.utcode.nikochan.twa/"))
   );
 }
 
@@ -163,7 +163,11 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       };
       checkReview();
       window.addEventListener("pageshow", checkReview);
-      return () => window.removeEventListener("pageshow", checkReview);
+      window.addEventListener("popstate", checkReview);
+      return () => {
+        window.removeEventListener("pageshow", checkReview);
+        window.removeEventListener("popstate", checkReview);
+      }
     }
   }, []);
 
