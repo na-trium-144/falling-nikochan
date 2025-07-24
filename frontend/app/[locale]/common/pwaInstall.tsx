@@ -158,6 +158,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             location.href = "nikochan-in-app-review://review";
           }, 200);
           localStorage.setItem("lastReviewDate", Date.now().toString());
+          localStorage.removeItem("playCountForReview");
         }
       };
       checkReview();
