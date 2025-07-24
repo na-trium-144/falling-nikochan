@@ -15,7 +15,7 @@ export async function fetchBrief(
   const staleLS = localStorage.getItem(briefKeyOld(cid));
   let stale: string | undefined = undefined;
   let cache: Cache | undefined = undefined;
-  if("caches" in window){
+  if ("caches" in window) {
     cache = await window.caches.open(briefCacheName);
     window.caches
       .keys()

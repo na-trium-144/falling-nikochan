@@ -167,7 +167,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       return () => {
         window.removeEventListener("pageshow", checkReview);
         window.removeEventListener("popstate", checkReview);
-      }
+      };
     }
   }, []);
 
