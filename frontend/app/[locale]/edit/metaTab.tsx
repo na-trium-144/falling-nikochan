@@ -24,7 +24,7 @@ import { HelpIcon } from "@/common/caption";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import { isStandalone } from "@/common/pwaInstall";
+import { isStandalone, updatePlayCountForReview } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -223,6 +223,7 @@ export function MetaTab(props: Props2) {
                 `/${props.locale}/edit?cid=${resBody.cid}`
               );
               addRecent("edit", resBody.cid);
+              updatePlayCountForReview();
               onSave(resBody.cid, props.chart!.changePasswd);
             } else {
               setErrorMsg(te("badResponse"));

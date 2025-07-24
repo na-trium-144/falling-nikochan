@@ -24,11 +24,29 @@ export function useStandaloneDetector() {
 export function isStandalone() {
   return (
     new URLSearchParams(location.search).get("utm_source") === "homescreen" ||
+    new URLSearchParams(location.search).get("utm_source") === "nikochan.twa" ||
     sessionStorage.getItem("fromHomeScreen") ||
     window.matchMedia("(display-mode: standalone)").matches ||
     (navigator as any).standalone ||
     document.referrer.includes("android-app://")
   );
+}
+export function isAndroidTWA() {
+  return (
+    detectOS() === "android" &&
+    (new URLSearchParams(location.search).get("utm_source") ===
+      "nikochan.twa" ||
+      sessionStorage.getItem("fromAndroidTWA") ||
+      document.referrer.includes("android-app://net.utcode.nikochan.twa"))
+  );
+}
+
+export function updatePlayCountForReview() {
+  localStorage.setItem(
+    "playCountForReview",
+    (Number(localStorage.getItem("playCountForReview") || "0") + 1).toString()
+  );
+  localStorage.setItem("lastPlayedDate", Date.now().toString());
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -102,10 +120,52 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     if (isStandalone()) {
       sessionStorage.setItem("fromHomeScreen", "1");
     }
+    if (isAndroidTWA()) {
+      sessionStorage.setItem("fromAndroidTWA", "1");
+    }
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
   }, []);
+  useEffect(() => {
+    if (isAndroidTWA()) {
+      const checkReview = () => {
+        if (localStorage.getItem("firstOpenDate") === null) {
+          localStorage.setItem("firstOpenDate", Date.now().toString());
+        }
+        const firstOpenDate = Number(localStorage.getItem("firstOpenDate")!);
+        const lastReviewDate: number | null = JSON.parse(
+          localStorage.getItem("lastReviewDate") || "null"
+        );
+        const playCount = Number(
+          localStorage.getItem("playCountForReview") || "0"
+        );
+        const lastPlayedDate: number | null = JSON.parse(
+          localStorage.getItem("lastPlayedDate") || "null"
+        );
+        // インストールから3日以上、lastReviewDateから45日以上、プレイ回数が5回以上、最後のプレイから2h以内で、play,editページ以外の場合
+        if (
+          Date.now() - firstOpenDate > 3 * 24 * 60 * 60 * 1000 &&
+          (lastReviewDate === null ||
+            Date.now() - lastReviewDate > 45 * 24 * 60 * 60 * 1000) &&
+          playCount >= 5 &&
+          lastPlayedDate !== null &&
+          Date.now() - lastPlayedDate < 2 * 60 * 60 * 1000 &&
+          !location.pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
+        ) {
+          setTimeout(() => {
+            console.log("Requesting in-app review");
+            location.href = "nikochan-in-app-review://review";
+          }, 200);
+          localStorage.setItem("lastReviewDate", Date.now().toString());
+        }
+      };
+      checkReview();
+      window.addEventListener("pageshow", checkReview);
+      return () => window.removeEventListener("pageshow", checkReview);
+    }
+  }, []);
+
   useEffect(() => {
     switch (detectOS()) {
       case "android": {
