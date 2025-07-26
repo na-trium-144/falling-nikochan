@@ -1,3 +1,19 @@
+## ver. 12.41 - 2025/07/24 [#715](https://github.com/na-trium-144/falling-nikochan/pull/715)
+
+* TWAで起動した際(`utm_source=nikochan.twa`) 一定条件で in app review を呼び出す機能を追加
+
+## ver. 12.40 - 2025/07/23 [#714](https://github.com/na-trium-144/falling-nikochan/pull/714)
+
+* manifestの1024アイコンをsvgに変更、apple-touch-iconは180に変更
+* assets内のsvgをビルド時に小さくする
+* iconとogTemplateはserviceWorkerのキャッシュから除外
+* apple-touch-iconの角丸を削除
+* pngquantでpngイメージを圧縮
+
+## ver. 12.39 - 2025/07/22 [#712](https://github.com/na-trium-144/falling-nikochan/pull/712), [#713](https://github.com/na-trium-144/falling-nikochan/pull/713)
+
+* accept-languageがja-JPの場合jaにフォールバックする処理を追加
+
 ## ver. 12.38 - 2025/07/14 [#707](https://github.com/na-trium-144/falling-nikochan/pull/707)
 
 * アニメーション用の遅延setStateをカスタムフック(useDelayedDisplayState)にまとめた

@@ -17,7 +17,7 @@
     "prepare": "npm run t",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "ndev": "cd frontend && node ./initAssets.js && next dev -H 0.0.0.0",
-    "nbuild": "cd frontend && node ./initAssets.js && next build && node ./listStaticFiles.js",
+    "nbuild": "cd frontend && node ./initAssets.js && next build && node ./listStaticFiles.js && svgo -f ./public/assets/ -o ./out/assets/",
     "swbuild": "cd worker && tsc && webpack",
     "ldev": "cd route/ && tsx watch serve-local.ts",
     "bdev": "cd route/ && bun run --hot serve-bun.ts"

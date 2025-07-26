@@ -10,23 +10,37 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: "Falling Nikochan",
     short_name: "Nikochan",
     description: t("description"),
-    icons: [192, 256, 512, 1024]
-      .map((size) => [
-        {
-          src:
-            process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
-          sizes: `${size}x${size}`,
-          type: "image/png",
-          purpose: "any",
-        } as const,
-        {
-          src: process.env.ASSET_PREFIX + `/assets/app-icon-${size}.png?v=2`,
-          sizes: `${size}x${size}`,
-          type: "image/png",
-          purpose: "maskable",
-        } as const,
-      ])
-      .flat(),
+    icons: [
+      ...[192, 512]
+        .map((size) => [
+          {
+            src:
+              process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=2`,
+            sizes: `${size}x${size}`,
+            type: "image/png",
+            purpose: "any",
+          } as const,
+          {
+            src: process.env.ASSET_PREFIX + `/assets/app-icon-${size}.png?v=2`,
+            sizes: `${size}x${size}`,
+            type: "image/png",
+            purpose: "maskable",
+          } as const,
+        ])
+        .flat(),
+      {
+        src: process.env.ASSET_PREFIX + "/assets/app-icon-any.svg?v=2",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: process.env.ASSET_PREFIX + "/assets/app-icon.svg?v=2",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "maskable",
+      },
+    ],
     start_url: "/?utm_source=homescreen",
     id: "/",
     display: "standalone",
