@@ -116,16 +116,6 @@ export default function TopPage(props: Props) {
             openShareInternal={openShareInternal}
           />
         </div>
-        {process.env.NODE_ENV === "development" && (
-          <div
-            className={
-              "basis-auto grow-1 my-auto h-max mb-3 text-center px-6 " +
-              menuMoveAnimClass
-            }
-          >
-            <InputDirect locale={locale} />
-          </div>
-        )}
 
         <div
           className={
@@ -272,31 +262,6 @@ function InputCId(props: {
           url: () => <SmallDomainShare />,
         })}
       </p>
-    </>
-  );
-}
-
-function InputDirect(props: { locale: string }) {
-  const t = useTranslations("main");
-  return (
-    <>
-      <h4 className="mb-1 ">
-        <span className="text-lg font-bold font-title">
-          {t("inputDirect")}:
-        </span>
-        <Input
-          className="ml-4 w-20"
-          actualValue=""
-          updateValue={(cid) =>
-            window
-              .open(`/${props.locale}/play?cid=${cid}&lvIndex=0`, "_blank")
-              ?.focus()
-          }
-          isValid={(t) => v.safeParse(CidSchema(), t).success}
-          left
-        />
-      </h4>
-      <p className="text-sm ">({t("inputDirectDevonly")})</p>
     </>
   );
 }
