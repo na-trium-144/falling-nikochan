@@ -62,6 +62,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
 import {
   detectOS,
+  historyBackWithReview,
   isStandalone,
   updatePlayCountForReview,
 } from "@/common/pwaInstall.js";
@@ -473,7 +474,7 @@ function Play(props: Props) {
   const exit = useCallback(() => {
     // router.replace(`/share/${cid}`);
     if (isStandalone()) {
-      history.back();
+      historyBackWithReview();
     } else {
       window.close();
     }

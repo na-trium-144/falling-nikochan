@@ -16,6 +16,7 @@ import { Box, modalBg } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
+import { historyBackWithReview } from "./pwaInstall";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
@@ -122,7 +123,9 @@ export function SharePageModalProvider(props: {
             "transition-opacity duration-200 " +
             (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
           }
-          onClick={() => window.history.back()}
+          onClick={() => {
+            historyBackWithReview();
+          }}
         >
           <div className="absolute inset-12">
             <Box
@@ -141,7 +144,9 @@ export function SharePageModalProvider(props: {
                 brief={modalBrief}
                 record={modalRecord}
                 locale={props.locale}
-                backButton={() => window.history.back()}
+                backButton={() => {
+                  historyBackWithReview();
+                }}
               />
             </Box>
           </div>

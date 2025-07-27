@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { pagerButtonClass } from "./pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
+import { historyBackWithReview } from "./pwaInstall.jsx";
 
 interface MProps {
   className?: string;
@@ -20,7 +21,9 @@ export function MobileHeader(props: MProps) {
       {!props.noBackButton && (
         <button
           className={pagerButtonClass + "absolute left-3 inset-y-3 "}
-          onClick={() => history.back()}
+          onClick={() => {
+            historyBackWithReview();
+          }}
         >
           <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
         </button>

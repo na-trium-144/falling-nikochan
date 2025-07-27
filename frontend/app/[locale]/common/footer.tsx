@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
 import { ChangeLogPopup } from "./changeLog.jsx";
+import { LinkWithReview } from "./pwaInstall.jsx";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
@@ -51,14 +52,13 @@ export function PCFooter(props: Props) {
           }
         >
           {pcTabTitleKeys.map((key, i) => (
-            <Link
+            <LinkWithReview
               key={i}
               className={"px-2 " + linkStyle1}
               href={`/${props.locale}${tabURLs[key]}`}
-              prefetch={!process.env.NO_PREFETCH}
             >
               {tm(key + ".title")}
-            </Link>
+            </LinkWithReview>
           ))}
         </div>
       )}
@@ -122,14 +122,13 @@ export function MobileFooter(props: MobileProps) {
       }
     >
       {mobileTabTitleKeys.map((key, i) => (
-        <Link
+        <LinkWithReview
           key={i}
           className={
             "w-full text-xl space-y-1 flex flex-col items-center main-wide:hidden " +
             (props.tabKey === key ? "" : "text-slate-500 dark:text-stone-400 ")
           }
           href={`/${props.locale}${tabURLs[key]}`}
-          prefetch={!process.env.NO_PREFETCH}
         >
           {i === 0 ? (
             <Home
@@ -153,7 +152,7 @@ export function MobileFooter(props: MobileProps) {
             />
           )}
           <span className="text-sm ">{tm(key + ".titleShort")}</span>
-        </Link>
+        </LinkWithReview>
       ))}
     </footer>
   );

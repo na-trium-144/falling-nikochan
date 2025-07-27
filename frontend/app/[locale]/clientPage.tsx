@@ -4,7 +4,7 @@ import Link from "next/link";
 import { linkStyle1, linkStyle3 } from "./common/linkStyle.js";
 import Title from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
-import { PWAInstallMain } from "./common/pwaInstall.js";
+import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
   MobileFooter,
   PCFooter,
@@ -179,6 +179,7 @@ export default function TopPage(props: Props) {
               }
               prefetch={!process.env.NO_PREFETCH}
               onClick={(e) => {
+                requestReview();
                 setMenuMove(true);
                 setTimeout(() => {
                   router.push(`/${locale}${tabURLs[key]}`);
