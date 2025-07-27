@@ -8,7 +8,6 @@ import More from "@icon-park/react/lib/icons/More";
 import Search from "@icon-park/react/lib/icons/Search";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
-import Link from "next/link";
 import { linkStyle1 } from "./linkStyle.js";
 import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
