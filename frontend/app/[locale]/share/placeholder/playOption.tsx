@@ -155,9 +155,11 @@ export function PlayOption(props: Props) {
                 brief: props.brief,
               });
               if (isStandalone()) {
-                router.push(`/play?sid=${sessionId}`);
+                router.push(`/${props.locale}/play?sid=${sessionId}`);
               } else {
-                window.open(`/play?sid=${sessionId}`, "_blank")?.focus();
+                window
+                  .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
+                  ?.focus();
               }
             }}
           />
