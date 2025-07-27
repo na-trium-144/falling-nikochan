@@ -1,3 +1,9 @@
+## ver. 12.42 - 2025/07/28 [#717](https://github.com/na-trium-144/falling-nikochan/pull/717)
+
+* share→playを開く際に /play ではなく /locale/play を使うようにする (prefetchに失敗していたのを修正)
+* そうするとdev環境限定inputDirectが要らないので削除
+* 少しでもdiffを減らすためbuildCommitをポップアップchangeLogから消した
+
 ## ver. 12.41 - 2025/07/24 [#715](https://github.com/na-trium-144/falling-nikochan/pull/715)
 
 * TWAで起動した際(`utm_source=nikochan.twa`) 一定条件で in app review を呼び出す機能を追加

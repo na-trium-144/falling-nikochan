@@ -70,11 +70,11 @@ export function ChangeLogPopup(props: PopupProps) {
               <span className="inline-block">
                 <span className="ml-2">ver.</span>
                 <span className="ml-1">{process.env.buildVersion}</span>
-                {process.env.buildCommit && (
+                {/*process.env.buildCommit && (
                   <span className="ml-1 text-sm">
                     ({process.env.buildCommit})
                   </span>
-                )}
+                )*/}
               </span>
             </p>
             <h3 className="text-xl font-bold font-title">{t("changelog")}</h3>
