@@ -1,6 +1,6 @@
 {
   "installCommand": "rm -f package-lock.json && bun i --frozen-lockfile",
-  "buildCommand": "bun nbuild && bun swbuild",
+  "buildCommand": "bun ./build-multi.js",
   "outputDirectory": "frontend/out",
   "devCommand": null,
   "framework": null,
