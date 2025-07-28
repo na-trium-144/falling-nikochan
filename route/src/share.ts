@@ -116,7 +116,8 @@ const shareApp = (config: {
         if (resultParams) ogQuery.set("result", qResult!);
         ogQuery.set("v", packageJson.version);
         let replacedBody = (await res.text())
-          .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL, but not chunk script tag
+          .replaceAll('/share/placeholder\\"', `/share/${cid}\\"`) // for canonical URL in script tag
+          .replaceAll('/share/placeholder"', `/share/${cid}"`) // for canonical URL
           .replaceAll('\\"PLACEHOLDER_TITLE', '\\"' + escapeJs(newTitle)) // "{...\"TITLE\"}" inside script tag
           .replaceAll("PLACEHOLDER_TITLE", escapeHtml(newTitle)) // <title>TITLE</title>, "TITLE" inside meta tag
           .replaceAll(
@@ -128,7 +129,12 @@ const shareApp = (config: {
               new URL(c.req.url).origin
             ).toString()
           )
+          .replaceAll(
+            '\\"PLACEHOLDER_DESCRIPTION',
+            '\\"' + escapeJs(newDescription)
+          )
           .replaceAll("PLACEHOLDER_DESCRIPTION", escapeHtml(newDescription))
+          .replaceAll('\\"PLACEHOLDER_BRIEF', '\\"' + escapeJs(briefStr))
           .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr));
         if (c.req.path.startsWith("/share") && lang !== qLang) {
           const q = new URLSearchParams(c.req.query());
