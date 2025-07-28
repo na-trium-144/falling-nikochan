@@ -6,7 +6,7 @@ import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { numLatest, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { ChartLineBrief } from "../fetch.js";
+import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { titleWithSiteName } from "@/common/title.js";
@@ -233,7 +233,6 @@ export default function PlayTab(props: Props) {
         )}
         <ChartList
           briefs={props.originalBriefs}
-          fetchAll
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
           onClickMobile={openShareInternal}
@@ -243,7 +242,6 @@ export default function PlayTab(props: Props) {
         />
         <ChartList
           briefs={props.sampleBriefs}
-          fetchAll
           href={(cid) => `/share/${cid}`}
           onClick={openModal}
           onClickMobile={openShareInternal}

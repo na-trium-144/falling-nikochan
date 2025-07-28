@@ -18,7 +18,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             .collection<ChartEntryCompressed>("chart")
             .find({ published: true, deleted: false })
             .sort({ updatedAt: -1 })
-            .limit(numLatest)
+            // .limit(numLatest)
             .project<{ cid: string }>({ _id: 0, cid: 1 })
             .toArray()
         ).filter((e) => !isSample(e.cid)),

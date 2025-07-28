@@ -4,12 +4,7 @@ import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import {
-  ChartLineBrief,
-  chartListMaxRow,
-  fetchAndFilterBriefs,
-} from "./fetch.js";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
@@ -18,6 +13,9 @@ import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
 import { getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
+import { fetchBrief } from "@/common/briefCache.js";
+import { useResizeDetector } from "react-resize-detector";
+import { useDisplayMode } from "@/scale.jsx";
 
 interface PProps {
   locale: string;
@@ -48,7 +46,6 @@ export default function ChartListPage(props: PProps) {
       </h3>
       <ChartList
         type={props.type}
-        fetchAll
         creator
         href={(cid) => `/share/${cid}`}
         onClick={openModal}
@@ -64,14 +61,23 @@ export default function ChartListPage(props: PProps) {
 
 export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
+export interface ChartLineBrief {
+  cid: string;
+  fetching?: boolean;
+  fetched: boolean;
+  brief?: ChartBrief;
+  original?: boolean;
+}
+type ErrorMsg = { status: number | null; message: string };
+
 interface Props {
   type?: ChartListType;
   briefs?:
     | ChartLineBrief[]
     | { status: number | null; message: string }
     | undefined;
-  fetchAll?: boolean;
   maxRow?: number;
+  scrollRef?: RefObject<HTMLElement>;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
@@ -88,12 +94,13 @@ export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
   const te = useTranslations("error");
 
+  // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    ChartLineBrief[] | { status: number | null; message: string } | undefined
+    (ChartLineBrief | null)[] | ErrorMsg | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<
-    ChartLineBrief[] | { status: number | null; message: string } | undefined
-  >(props.briefs);
+  const prevPropBriefs = useRef<ChartLineBrief[] | ErrorMsg | undefined>(
+    props.briefs
+  );
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
       setBriefs(props.briefs);
@@ -101,6 +108,7 @@ export function ChartList(props: Props) {
     }
   }, [props.briefs]);
   useEffect(() => {
+    // 譜面リストのfetch (中身のbriefのfetchは別で行う)
     switch (props.type) {
       case "recent":
         setBriefs(
@@ -144,44 +152,87 @@ export function ChartList(props: Props) {
         })();
     }
   }, [props.type]);
+
+  // 現在の画面サイズに応じた最大サイズ
+  const maxRow = props.maxRow || 6; // TODO
+
   useEffect(() => {
-    void (async () => {
-      if (Array.isArray(briefs)) {
-        const res = await fetchAndFilterBriefs(
-          briefs,
-          props.fetchAll
-            ? null
-            : props.maxRow !== undefined
-              ? props.maxRow
-              : chartListMaxRow
-        );
-        if (res.changed) {
-          setBriefs(res.briefs);
-          if (props.type === "recent") {
-            updateRecent("play", briefs.map(({ cid }) => cid).reverse());
-          }
-          if (props.type === "recentEdit") {
-            updateRecent("edit", briefs.map(({ cid }) => cid).reverse());
-          }
+    if (Array.isArray(briefs)) {
+      let changed = false;
+      for (let i = 0; i < briefs.length && i < maxRow; i++) {
+        const b = briefs[i];
+        if (b !== null && !b.fetched && !b.fetching) {
+          b.fetching = true;
+          changed = true;
+          fetchBrief(b.cid).then(({ brief, is404 }) => {
+            setBriefs((briefs) => {
+              if (Array.isArray(briefs)) {
+                if (is404) {
+                  briefs[i] = null;
+                } else {
+                  briefs[i]!.fetched = true;
+                  briefs[i]!.brief = brief;
+                }
+                return briefs.slice();
+              } else {
+                // そんなことあるのか...?
+                return briefs;
+              }
+            });
+          });
         }
       }
-    })();
-  }, [briefs, props.type, props.fetchAll, props.maxRow]);
-  const maxRow = props.fetchAll
-    ? Array.isArray(briefs)
-      ? briefs.length
-      : 0
-    : props.maxRow !== undefined
-      ? props.maxRow
-      : chartListMaxRow;
-  const fetching =
-    briefs === undefined ||
-    (Array.isArray(briefs) &&
-      briefs.slice(0, maxRow).some(({ fetched }) => !fetched));
+      if (changed) {
+        setBriefs(briefs.slice());
+      }
+    }
+  }, [briefs, props.type, maxRow]);
+  useEffect(() => {
+    if (Array.isArray(briefs)) {
+      if (props.type === "recent") {
+        updateRecent(
+          "play",
+          briefs
+            .filter((b) => b !== null)
+            .map(({ cid }) => cid)
+            .reverse()
+        );
+      }
+      if (props.type === "recentEdit") {
+        updateRecent(
+          "edit",
+          briefs
+            .filter((b) => b !== null)
+            .map(({ cid }) => cid)
+            .reverse()
+        );
+      }
+    }
+  }, [briefs, props.type]);
+
+  const filteredBriefs: ChartLineBrief[] | ErrorMsg | undefined = Array.isArray(
+    briefs
+  )
+    ? briefs.filter((b) => b !== null).slice(0, maxRow)
+    : briefs;
+  // filteredBriefs内で最初にfetch中のbriefのインデックス
+  // すべてfetch完了なら-1
+  const firstFetchingIndex: number =
+    filteredBriefs === undefined
+      ? 0
+      : Array.isArray(filteredBriefs)
+        ? filteredBriefs.findIndex((b) => !b.fetched)
+        : -1;
+
+  const ulSize = useResizeDetector();
+  const { rem } = useDisplayMode();
+  const ulCols = () =>
+    ulSize.width ? Math.floor(ulSize.width / (18 * rem)) : 1;
 
   return (
     <div className="relative w-full h-max ">
       <ul
+        ref={ulSize.ref}
         className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
         style={{
           gridTemplateColumns: `repeat(auto-fill, minmax(min(18rem, 100%), 1fr))`,
@@ -190,28 +241,34 @@ export function ChartList(props: Props) {
         }}
       >
         {Array.from(new Array(maxRow)).map((_, i) =>
-          Array.isArray(briefs) && briefs.at(i) && !fetching ? (
+          Array.isArray(filteredBriefs) &&
+          filteredBriefs.at(i) &&
+          (firstFetchingIndex === -1 || i < firstFetchingIndex) ? (
             <ChartListItem
               key={i}
-              cid={briefs.at(i)!.cid}
-              brief={briefs.at(i)!.brief}
-              href={props.href(briefs.at(i)!.cid)}
+              cid={filteredBriefs.at(i)!.cid}
+              brief={filteredBriefs.at(i)!.brief}
+              href={props.href(filteredBriefs.at(i)!.cid)}
               onClick={
                 props.onClick
-                  ? () => props.onClick!(briefs.at(i)!.cid, briefs.at(i)!.brief)
+                  ? () =>
+                      props.onClick!(
+                        filteredBriefs.at(i)!.cid,
+                        filteredBriefs.at(i)!.brief
+                      )
                   : undefined
               }
               onClickMobile={
                 props.onClickMobile
                   ? () =>
                       props.onClickMobile!(
-                        briefs.at(i)!.cid,
-                        briefs.at(i)!.brief
+                        filteredBriefs.at(i)!.cid,
+                        filteredBriefs.at(i)!.brief
                       )
                   : undefined
               }
               creator={props.creator}
-              original={briefs.at(i)!.original}
+              original={filteredBriefs.at(i)!.original}
               newTab={props.newTab}
               dateDiff={props.dateDiff}
               badge={props.badge}
@@ -227,31 +284,39 @@ export function ChartList(props: Props) {
           )
         )}
       </ul>
-      <div className="absolute inset-x-0 top-2 w-max mx-auto ">
-        {fetching && props.showLoading ? (
-          <>
-            <SlimeSVG />
-            Loading...
-          </>
-        ) : briefs && "message" in briefs ? (
-          (briefs.status ? `${briefs.status}: ` : "") +
-          (te.has(`api.${briefs.message}`)
+      {firstFetchingIndex >= 0 && props.showLoading ? (
+        <div
+          className="absolute inset-x-0 w-max mx-auto "
+          style={{
+            // h-10 + gap-1
+            top:
+              0.5 +
+              (11 / 4) * Math.round(firstFetchingIndex / ulCols()) +
+              "rem",
+          }}
+        >
+          <SlimeSVG />
+          Loading...
+        </div>
+      ) : briefs && "message" in briefs ? (
+        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+          {briefs.status ? `${briefs.status}: ` : ""}
+          {te.has(`api.${briefs.message}`)
             ? te(`api.${briefs.message}`)
-            : te("unknownApiError"))
-        ) : Array.isArray(briefs) && briefs.length === 0 ? (
-          props.search ? (
-            t("notFound")
-          ) : (
-            t("empty")
-          )
-        ) : null}
-      </div>
-      {Array.isArray(briefs) && briefs.length > maxRow ? (
+            : te("unknownApiError")}
+        </div>
+      ) : Array.isArray(briefs) && briefs.length === 0 ? (
+        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+          {props.search ? t("notFound") : t("empty")}
+        </div>
+      ) : null}
+      {Array.isArray(briefs) &&
+      briefs.filter((b) => b !== null).length > maxRow ? (
         props.onMoreClick ? (
           <button
             className={
               "block w-max mx-auto mt-2 " +
-              (fetching ? "invisible " : "") +
+              (firstFetchingIndex >= 0 ? "invisible " : "") +
               linkStyle1
             }
             onClick={props.onMoreClick}
@@ -266,7 +331,7 @@ export function ChartList(props: Props) {
           <Link
             className={
               "block w-max mx-auto mt-2 " +
-              (fetching ? "invisible " : "") +
+              (firstFetchingIndex >= 0 ? "invisible " : "") +
               linkStyle1
             }
             href={props.moreHref}
