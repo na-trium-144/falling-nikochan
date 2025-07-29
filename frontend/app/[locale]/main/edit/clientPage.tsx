@@ -131,6 +131,7 @@ export default function EditTab({ locale }: { locale: string }) {
         )}
         <ChartList
           type="recentEdit"
+          fetchAll
           href={(cid) => `/${locale}/edit?cid=${cid}`}
           newTab
           showLoading

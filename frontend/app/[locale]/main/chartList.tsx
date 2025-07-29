@@ -28,13 +28,15 @@ interface PProps {
 }
 export default function ChartListPage(props: PProps) {
   const { openModal, openShareInternal } = useSharePageModal();
-
+  const boxSize = useResizeDetector();
+  const { rem } = useDisplayMode();
   return (
     <IndexMain
       title={props.title}
       tabKey={props.tabKey}
       mobileTabKey={props.mobileTabKey}
       locale={props.locale}
+      boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
       <h3
         className={
@@ -54,6 +56,10 @@ export default function ChartListPage(props: PProps) {
         dateDiff={props.dateDiff}
         moreHref={null}
         badge={props.badge}
+        containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
+        containerHeight={
+          boxSize.height ? boxSize.height - (12 / 4) * rem : undefined
+        }
       />
     </IndexMain>
   );
@@ -69,7 +75,7 @@ export interface ChartLineBrief {
   original?: boolean;
 }
 type ErrorMsg = { status: number | null; message: string };
-
+const chartListMaxRow = 6;
 interface Props {
   type?: ChartListType;
   briefs?:
@@ -77,7 +83,9 @@ interface Props {
     | { status: number | null; message: string }
     | undefined;
   maxRow?: number;
-  scrollRef?: RefObject<HTMLElement>;
+  fetchAll?: boolean;
+  containerHeight?: number;
+  containerRef?: RefObject<HTMLElement | null>;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
@@ -153,13 +161,28 @@ export function ChartList(props: Props) {
     }
   }, [props.type]);
 
+  const ulSize = useResizeDetector();
+  const { rem } = useDisplayMode();
+  const itemMinWidth = 18; // * rem
+  const itemMinHeight = 11 / 4; // h-10 + gap-1
+  const ulCols = ulSize.width
+    ? Math.floor(ulSize.width / (itemMinWidth * rem))
+    : 1;
   // 現在の画面サイズに応じた最大サイズ
-  const maxRow = props.maxRow || 6; // TODO
+  const [pagination, setPagination] = useState<number>(1);
+  const maxRow: number =
+    props.maxRow ||
+    (props.containerHeight
+      ? Math.ceil(
+          (props.containerHeight * pagination) / (itemMinHeight * rem)
+        ) * ulCols
+      : chartListMaxRow);
+  const fetchAll = props.fetchAll;
 
   useEffect(() => {
     if (Array.isArray(briefs)) {
       let changed = false;
-      for (let i = 0; i < briefs.length && i < maxRow; i++) {
+      for (let i = 0; i < briefs.length && (fetchAll || i < maxRow); i++) {
         const b = briefs[i];
         if (b !== null && !b.fetched && !b.fetching) {
           b.fetching = true;
@@ -186,7 +209,7 @@ export function ChartList(props: Props) {
         setBriefs(briefs.slice());
       }
     }
-  }, [briefs, props.type, maxRow]);
+  }, [briefs, props.type, maxRow, fetchAll]);
   useEffect(() => {
     if (Array.isArray(briefs)) {
       if (props.type === "recent") {
@@ -213,8 +236,14 @@ export function ChartList(props: Props) {
   const filteredBriefs: ChartLineBrief[] | ErrorMsg | undefined = Array.isArray(
     briefs
   )
-    ? briefs.filter((b) => b !== null).slice(0, maxRow)
+    ? fetchAll
+      ? briefs.filter((b) => b !== null)
+      : briefs.filter((b) => b !== null).slice(0, maxRow)
     : briefs;
+  const filteredNumRows =
+    Array.isArray(filteredBriefs) && (fetchAll || props.containerRef)
+      ? filteredBriefs.length
+      : maxRow;
   // filteredBriefs内で最初にfetch中のbriefのインデックス
   // すべてfetch完了なら-1
   const firstFetchingIndex: number =
@@ -223,11 +252,36 @@ export function ChartList(props: Props) {
       : Array.isArray(filteredBriefs)
         ? filteredBriefs.findIndex((b) => !b.fetched)
         : -1;
+  const padHeightForScroll: number =
+    Array.isArray(briefs) &&
+    briefs.filter((b) => b !== null).length > maxRow &&
+    props.containerRef
+      ? 2 * rem
+      : 0;
 
-  const ulSize = useResizeDetector();
-  const { rem } = useDisplayMode();
-  const ulCols = () =>
-    ulSize.width ? Math.floor(ulSize.width / (18 * rem)) : 1;
+  useEffect(() => {
+    const onScroll = () => {
+      if (
+        props.containerRef?.current &&
+        padHeightForScroll > 0 &&
+        props.containerRef.current.scrollTop +
+          props.containerRef.current.clientHeight >=
+          props.containerRef.current.scrollHeight - padHeightForScroll
+      ) {
+        setPagination(
+          Math.floor(
+            props.containerRef.current.scrollHeight /
+              props.containerRef.current.clientHeight
+          ) + 1
+        );
+      }
+    };
+    if (props.containerRef?.current) {
+      props.containerRef.current.addEventListener("scroll", onScroll);
+      return () =>
+        props.containerRef?.current.removeEventListener("scroll", onScroll);
+    }
+  }, [props.containerRef, padHeightForScroll, itemMinHeight, rem]);
 
   return (
     <div className="relative w-full h-max ">
@@ -235,12 +289,12 @@ export function ChartList(props: Props) {
         ref={ulSize.ref}
         className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
         style={{
-          gridTemplateColumns: `repeat(auto-fill, minmax(min(18rem, 100%), 1fr))`,
+          gridTemplateColumns: `repeat(auto-fill, minmax(min(${itemMinWidth}rem, 100%), 1fr))`,
           // max 3 columns
-          maxWidth: 4 * 18 - 0.1 + "rem",
+          maxWidth: 4 * itemMinWidth - 0.1 + "rem",
         }}
       >
-        {Array.from(new Array(maxRow)).map((_, i) =>
+        {Array.from(new Array(filteredNumRows)).map((_, i) =>
           Array.isArray(filteredBriefs) &&
           filteredBriefs.at(i) &&
           (firstFetchingIndex === -1 || i < firstFetchingIndex) ? (
@@ -288,10 +342,9 @@ export function ChartList(props: Props) {
         <div
           className="absolute inset-x-0 w-max mx-auto "
           style={{
-            // h-10 + gap-1
             top:
               0.5 +
-              (11 / 4) * Math.round(firstFetchingIndex / ulCols()) +
+              itemMinHeight * Math.round(firstFetchingIndex / ulCols) +
               "rem",
           }}
         >
@@ -347,6 +400,9 @@ export function ChartList(props: Props) {
       ) : props.moreHref || props.onMoreClick ? (
         <div className="w-0 h-6 mt-2 " />
       ) : null}
+      {padHeightForScroll > 0 && (
+        <div className="w-0" style={{ height: padHeightForScroll }} />
+      )}
     </div>
   );
 }
