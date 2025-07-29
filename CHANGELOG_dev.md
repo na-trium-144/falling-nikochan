@@ -1,3 +1,7 @@
+## ver. 12.45 - 2025/07/30 [#720](https://github.com/na-trium-144/falling-nikochan/pull/720)
+
+* clsx導入、classNameの記述を全置き換え
+
 ## ver. 12.44 - 2025/07/29 [#719](https://github.com/na-trium-144/falling-nikochan/pull/719)
 
 * 新着譜面リストと検索結果のリストを無限スクロール可能にする
