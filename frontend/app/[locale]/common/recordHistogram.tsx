@@ -1,3 +1,4 @@
+import clsx from "clsx";
 interface Props {
   histogram: number[];
   bestScoreTotal: number | null;
@@ -14,10 +15,10 @@ export function RecordHistogram(props: Props) {
         <div key={i} className="w-5 min-w-0 shrink relative">
           {[7, 10, 12].includes(i) && (
             <div
-              className={
-                "absolute inset-0 -z-10 " +
-                "border-l border-slate-500/20 dark:border-stone-400/20 "
-              }
+              className={clsx(
+                "absolute inset-0 -z-10",
+                "border-l border-slate-500/20 dark:border-stone-400/20"
+              )}
             />
           )}
           <div className="h-8 relative border-b border-slate-500/20 dark:border-stone-400/20 ">
@@ -53,12 +54,12 @@ function HistorgramColumn(props: {
   }
   return (
     <div
-      className={
-        "absolute inset-x-0 bottom-0 min-h-[1px] " +
-        (hasBestScore
-          ? "bg-orange-300 dark:bg-sky-800 "
-          : "bg-slate-500 dark:bg-stone-400 ")
-      }
+      className={clsx(
+        "absolute inset-x-0 bottom-0 min-h-[1px]",
+        hasBestScore
+          ? "bg-orange-300 dark:bg-sky-800"
+          : "bg-slate-500 dark:bg-stone-400"
+      )}
       style={{
         height: (value / props.histogramMax) * 100 + "%",
       }}

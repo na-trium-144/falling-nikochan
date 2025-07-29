@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import {
   findBpmIndexFromStep,
   getSignatureState,
@@ -147,9 +148,9 @@ export default function TimeBar(props: Props) {
 
   return (
     <div
-      className={
+      className={clsx(
         "h-6 bg-slate-200 dark:bg-stone-700 relative mt-10 mb-20 overflow-visible"
-      }
+      )}
       ref={timeBarRef}
     >
       {/* 秒数目盛り */}
@@ -327,12 +328,12 @@ export default function TimeBar(props: Props) {
             n.hitTimeSec !== notesAll[n.id + 1]?.hitTimeSec && (
               <span
                 key={n.id}
-                className={
-                  "absolute rounded-full " +
-                  (n.hitTimeSec === notesAll[currentNoteIndex]?.hitTimeSec
-                    ? "bg-red-400 "
-                    : "bg-yellow-400 ")
-                }
+                className={clsx(
+                  "absolute rounded-full",
+                  n.hitTimeSec === notesAll[currentNoteIndex]?.hitTimeSec
+                    ? "bg-red-400"
+                    : "bg-yellow-400"
+                )}
                 style={{
                   width: n.big ? "1.5rem" : "1rem",
                   height: n.big ? "1.5rem" : "1rem",

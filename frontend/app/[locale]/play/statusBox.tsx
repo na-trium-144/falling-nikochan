@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { Box } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
@@ -28,20 +29,20 @@ export default function StatusBox(props: Props) {
 
   return (
     <Box
-      className={
-        props.className + " p-3 " + (isMobile ? "" : " origin-top-right")
-      }
+      className={clsx(
+        props.className , " p-3", isMobile ||" origin-top-right",
+      )}
       style={{
         ...props.style,
         fontSize: textScale * rem,
       }}
     >
       <div
-        className={
+        className={clsx(
           props.isMobile
-            ? "flex flex-row h-full items-center justify-between "
-            : "w-48"
-        }
+            ?"flex flex-row h-full items-center justify-between"
+            :"w-48"
+        )}
       >
         {["good", "ok", "bad", "miss"].map((name, ji) => (
           <StatusItem key={ji}>
@@ -64,12 +65,12 @@ export default function StatusBox(props: Props) {
         </StatusItem>
         {props.isMobile && screenWidth >= 39 * rem && (
           <span
-            className={
-              "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2 " +
+            className={clsx(
+             "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2",
               (props.bigTotal === 0
-                ? "text-slate-400 dark:text-stone-600 "
-                : "")
-            }
+                ?"text-slate-400 dark:text-stone-600"
+                :"")
+            )}
           >
             <span className="flex-1">/</span>
             <span>{props.bigTotal}</span>
@@ -107,12 +108,12 @@ function StatusItem(props: {
   const isMobile = screenWidth < screenHeight;
   return (
     <div
-      className={
+      className={clsx(
         (isMobile
-          ? "flex-1 basis-1 flex flex-col "
-          : "flex flex-row items-baseline " + (props.wide ? "" : "mr-12 ")) +
-        (props.disabled ? "text-slate-400 dark:text-stone-600 " : "")
-      }
+          ?"flex-1 basis-1 flex flex-col"
+          :"flex flex-row items-baseline", props.wide ||"mr-12",) +
+        props.disabled &&"text-slate-400 dark:text-stone-600",
+      )}
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
         lineHeight: isMobile ? 1 : undefined,
@@ -154,7 +155,7 @@ function StatusName(props: { children: ReactNode }) {
   const isMobile = screenWidth < screenHeight;
   return (
     <span
-      className={isMobile ? "h-max w-full text-center text-nowrap " : "flex-1"}
+      className={clsx(isMobile ?"h-max w-full text-center text-nowrap" :"flex-1")}
     >
       {props.children}
     </span>

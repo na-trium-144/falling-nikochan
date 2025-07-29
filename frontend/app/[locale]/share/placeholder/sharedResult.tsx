@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { Box } from "@/common/box";
 import { levelColors } from "@/common/levelColors";
 import { JudgeIcon } from "@/play/statusBox";
@@ -40,7 +41,7 @@ export function SharedResultBox(props: Props) {
         {props.result.lvName && (
           <span className="font-title mr-2">{props.result.lvName}</span>
         )}
-        <span className={"mr-2 " + levelColors[props.result.lvType]}>
+        <span className={clsx("mr-2", levelColors[props.result.lvType])}>
           <span className="text-sm">{levelTypes[props.result.lvType]}-</span>
           <span className="text-lg">{props.result.lvDifficulty}</span>
         </span>
@@ -64,16 +65,16 @@ export function SharedResultBox(props: Props) {
         )}
       </p>
       <div
-        className={
-          "flex flex-col items-center gap-2 " +
-          "main-wide:flex-row main-wide:gap-6 "
-        }
+        className={clsx(
+          "flex flex-col items-center gap-2",
+          "main-wide:flex-row main-wide:gap-6"
+        )}
       >
         <div
-          className={
-            "flex flex-col items-center gap-2 " +
+          className={clsx(
+            "flex flex-col items-center gap-2",
             "share-wide2:flex-row share-wide2:gap-6"
-          }
+          )}
         >
           <div className="flex flex-col w-48">
             {(
@@ -85,12 +86,12 @@ export function SharedResultBox(props: Props) {
             ).map(([name, score100], i) => (
               <p
                 key={i}
-                className={
-                  "flex flex-row w-full items-baseline " +
-                  (name === "bigNoteBonus" && props.result.bigCount === null
-                    ? "text-slate-400 dark:text-stone-600 "
-                    : "")
-                }
+                className={clsx(
+                  "flex flex-row w-full items-baseline",
+                  name === "bigNoteBonus" && props.result.bigCount === null
+                    ? "text-slate-400 dark:text-stone-600"
+                    : ""
+                )}
               >
                 <span className="flex-1 text-sm ">{t(name)}:</span>
                 <span className="text-2xl">{Math.floor(score100 / 100)}</span>
@@ -135,10 +136,10 @@ export function SharedResultBox(props: Props) {
           </div>
         </div>
         <div
-          className={
-            "w-32 flex flex-col justify-center " +
-            "text-slate-500 dark:text-stone-400 "
-          }
+          className={clsx(
+            "w-32 flex flex-col justify-center",
+            "text-slate-500 dark:text-stone-400"
+          )}
         >
           {["good", "ok", "bad", "miss"].map((name, ji) => (
             <div key={ji} className="flex flex-row items-baseline ">
@@ -151,12 +152,12 @@ export function SharedResultBox(props: Props) {
           ))}
           {props.result.bigCount !== false && (
             <div
-              className={
-                "flex flex-row items-baseline " +
-                (props.result.bigCount === null
-                  ? "text-slate-400 dark:text-stone-600 "
-                  : "")
-              }
+              className={clsx(
+                "flex flex-row items-baseline",
+                props.result.bigCount === null
+                  ? "text-slate-400 dark:text-stone-600"
+                  : ""
+              )}
             >
               <span className="flex-1 text-xs ">{ts("big")}</span>
               <span className="text-base ">{props.result.bigCount || 0}</span>

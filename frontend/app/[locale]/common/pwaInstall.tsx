@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import {
   createContext,
   ReactNode,
@@ -109,7 +110,7 @@ export function LinkWithReview(props: LinkProps) {
   const router = useRouter();
   return isAndroidTWA ? (
     <button
-      className={props.className}
+      className={clsx(props.className)}
       onClick={() => {
         requestReview();
         router.push(props.href);
@@ -322,13 +323,13 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     >
       {props.children}
       <Box
-        className={
-          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg " +
-          "transition-all duration-200 origin-bottom " +
-          (workerUpdate !== null
-            ? "ease-in scale-100 opacity-100 "
-            : "ease-out scale-0 opacity-0 ")
-        }
+        className={clsx(
+          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg",
+          "transition-all duration-200 origin-bottom",
+          workerUpdate !== null
+            ? "ease-in scale-100 opacity-100"
+            : "ease-out scale-0 opacity-0"
+        )}
       >
         {workerUpdate?.state === "updating" ? (
           <>
@@ -388,7 +389,7 @@ export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
       if (pwa.deferredPrompt) {
         if (props.block) {
           return (
-            <div className={props.className}>
+            <div className={clsx(props.className)}>
               <p>{t("installWithPrompt")}</p>
               <Button text={t("install")} onClick={pwa.install} />
             </div>
@@ -402,10 +403,12 @@ export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
           );
         }
       } else {
-        return <p className={props.className}>{t("installWithoutPrompt")}</p>;
+        return (
+          <p className={clsx(props.className)}>{t("installWithoutPrompt")}</p>
+        );
       }
     } else if (pwa.detectedOS === "ios") {
-      return <p className={props.className}>{t("installIOS")}</p>;
+      return <p className={clsx(props.className)}>{t("installIOS")}</p>;
     }
   }
   return null;

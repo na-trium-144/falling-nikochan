@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
@@ -282,15 +283,15 @@ export function AccordionLike(props: {
 
   return (
     <div
-      className={
+      className={clsx(
         // main-wide:
-        "transition-all duration-500 " +
-        (!opened ? "hidden " : "") +
-        (!anim
-          ? "m-0! ease-out opacity-0 max-h-0 pointer-events-none "
-          : "ease-in opacity-100 max-h-200 ") +
+        "transition-all duration-500",
+        !opened && "hidden",
+        !anim
+          ? "m-0! ease-out opacity-0 max-h-0 pointer-events-none"
+          : "ease-in opacity-100 max-h-200",
         props.className
-      }
+      )}
     >
       {props.children}
     </div>

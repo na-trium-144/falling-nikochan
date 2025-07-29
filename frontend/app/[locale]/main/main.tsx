@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { MobileHeader } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import {
@@ -39,11 +40,11 @@ export function IndexMain(props: Props) {
       </MobileHeader>
       <Link
         href={`/${locale}`}
-        className={
-          "hidden main-wide:block w-full " +
-          "shrink-0 basis-24 relative " +
+        className={clsx(
+          "hidden main-wide:block w-full",
+          "shrink-0 basis-24 relative",
           linkStyle1
-        }
+        )}
         style={{
           marginLeft: "-20rem",
           marginRight: "-20rem",
@@ -54,30 +55,30 @@ export function IndexMain(props: Props) {
       </Link>
       <RedirectedWarning />
       <div
-        className={
-          "w-full overflow-hidden " +
-          "shrink-0 basis-0 grow-2 " +
-          "flex flex-row items-stretch justify-center px-3 main-wide:px-6 "
-        }
+        className={clsx(
+          "w-full overflow-hidden",
+          "shrink-0 basis-0 grow-2",
+          "flex flex-row items-stretch justify-center px-3 main-wide:px-6"
+        )}
       >
         {props.tabKey !== null && (
           <nav
-            className={
-              "hidden main-wide:flex " +
-              "flex-col h-max w-64 shrink-0 my-auto " +
-              "transition ease-out duration-200 "
-            }
+            className={clsx(
+              "hidden main-wide:flex",
+              "flex-col h-max w-64 shrink-0 my-auto",
+              "transition ease-out duration-200"
+            )}
           >
             {pcTabTitleKeys.map((key, i) =>
               key === props.tabKey ? (
                 <LinkWithReview
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
-                  className={
-                    "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs " +
-                    "text-center rounded-r-none py-3 pl-2 pr-2 " +
-                    "hover:bg-white hover:dark:bg-stone-800 active:shadow-inner "
-                  }
+                  className={clsx(
+                    "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs",
+                    "text-center rounded-r-none py-3 pl-2 pr-2",
+                    "hover:bg-white hover:dark:bg-stone-800 active:shadow-inner"
+                  )}
                 >
                   {t(key + ".title")}
                 </LinkWithReview>
@@ -85,10 +86,10 @@ export function IndexMain(props: Props) {
                 <LinkWithReview
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
-                  className={
-                    " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
-                    "rounded-l-lg py-3 pl-2 pr-2 "
-                  }
+                  className={clsx(
+                    " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
+                    "rounded-l-lg py-3 pl-2 pr-2"
+                  )}
                 >
                   {t(key + ".title")}
                 </LinkWithReview>
@@ -98,11 +99,11 @@ export function IndexMain(props: Props) {
         )}
         <Box
           ref={props.boxRef}
-          className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}
+          className={clsx("flex flex-col p-6 overflow-y-auto min-h-0 flex-1")}
         >
           {!props.noBackButtonPC && (
             <button
-              className={"hidden main-wide:block w-max mb-3 " + linkStyle1}
+              className={clsx("hidden main-wide:block w-max mb-3", linkStyle1)}
               onClick={() => {
                 historyBackWithReview();
               }}

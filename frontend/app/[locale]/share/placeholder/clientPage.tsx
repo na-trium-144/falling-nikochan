@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import {
   ChartBrief,
   deserializeResultParams,
@@ -113,7 +114,10 @@ export default function ShareChart(props: Props) {
       <div className="flex flex-col w-full min-h-full items-center ">
         <Link
           href={`/${locale}`}
-          className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
+          className={clsx(
+            "w-full grow-3 shrink-0 basis-24 relative",
+            linkStyle1
+          )}
           style={{
             marginLeft: "-20rem",
             marginRight: "-20rem",
@@ -127,12 +131,12 @@ export default function ShareChart(props: Props) {
           {tm("description")}
           <Link
             href={`/${locale}/main/about/1`}
-            className={"main-wide:hidden " + linkStyle3}
+            className={clsx("main-wide:hidden", linkStyle3)}
           >
             {tm("about.title")}
           </Link>
           <button
-            className={"hidden main-wide:inline " + linkStyle3}
+            className={clsx("hidden main-wide:inline", linkStyle3)}
             onClick={() => setAboutPageIndex(1)}
           >
             {tm("about.title")}
@@ -140,10 +144,10 @@ export default function ShareChart(props: Props) {
         </div>
         <RedirectedWarning />
         <div
-          className={
-            "basis-auto grow-6 shrink min-h-0 w-full px-3 main-wide:px-6 " +
+          className={clsx(
+            "basis-auto grow-6 shrink min-h-0 w-full px-3 main-wide:px-6",
             "flex flex-col items-center justify-center"
-          }
+          )}
         >
           <Box className="w-max h-max max-w-full p-6">
             <ShareBox
@@ -160,11 +164,11 @@ export default function ShareChart(props: Props) {
         <PCFooter locale={locale} nav />
       </div>
       <div
-        className={
-          "fixed bottom-0 inset-x-0 backdrop-blur-2xs " +
-          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0 " +
-          "dark:from-orange-950 dark:to-orange-950/0 "
-        }
+        className={clsx(
+          "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
+          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
+          "dark:from-orange-950 dark:to-orange-950/0"
+        )}
       >
         <MobileFooter locale={locale} tabKey={null} />
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import AceEditor from "react-ace";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import "ace-builds/src-min-noconflict/theme-github";
@@ -187,7 +188,7 @@ export function LuaTabProvider(props: PProps) {
     <LuaPositionContext.Provider value={{ data, setData }}>
       {props.children}
       <div
-        className={"absolute " + (visible ? "" : "hidden")}
+        className={clsx("absolute", visible || "hidden")}
         style={{ top, left, width, height }}
       >
         <AceEditor

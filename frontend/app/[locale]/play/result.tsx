@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import { useEffect, useRef, useState } from "react";
@@ -140,21 +141,21 @@ export default function Result(props: Props) {
     <>
       <CenterBox
         ref={ref}
-        className={
-          "overflow-y-auto overflow-x-clip " +
-          (props.hidden ? "hidden " : "") +
-          (showing >= resultAnimDelays.length ? "touch-pan-y " : "touch-none ")
-        }
+        className={clsx(
+          "overflow-y-auto overflow-x-clip",
+          props.hidden && "hidden",
+          showing >= resultAnimDelays.length ? "touch-pan-y" : "touch-none"
+        )}
         style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
         <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
         <div
-          className={
-            "my-2 flex justify-center items-center " +
-            (props.largeResult ? "flwx-row space-x-2 " : "flex-col space-y-1 ")
-          }
+          className={clsx(
+            "my-2 flex justify-center items-center",
+            props.largeResult ? "flwx-row space-x-2" : "flex-col space-y-1"
+          )}
         >
           <div className="flex-1 w-56">
             <ResultRow
@@ -191,20 +192,22 @@ export default function Result(props: Props) {
           </div>
           <div
             ref={refRank}
-            className={
-              "flex-none w-56 flex flex-col justify-center items-center " +
-              (props.largeResult ? "space-y-2 " : "space-y-1 ")
-            }
+            className={clsx(
+              "flex-none w-56 flex flex-col justify-center items-center",
+              props.largeResult ? "space-y-2" : "space-y-1"
+            )}
           >
             <div style={{ ...appearingAnimation(5) }}>
               <span className="mr-2">{t("rank")}:</span>
-              <span className={props.largeResult ? "text-4xl" : "text-3xl"}>
+              <span
+                className={clsx(props.largeResult ? "text-4xl" : "text-3xl")}
+              >
                 {rankStr(props.score100 / 100)}
               </span>
             </div>
             {props.chainScore100 === chainScoreRate * 100 ? (
               <div
-                className={props.largeResult ? "text-2xl" : "text-xl"}
+                className={clsx(props.largeResult ? "text-2xl" : "text-xl")}
                 style={{ ...appearingAnimation(5) }}
               >
                 <span className="">
@@ -219,7 +222,7 @@ export default function Result(props: Props) {
               </div>
             ) : (
               <div
-                className={props.largeResult ? "text-xl" : ""}
+                className={clsx(props.largeResult ? "text-xl" : "")}
                 style={{ ...appearingAnimation2(6) }}
               >
                 {t(
@@ -235,12 +238,10 @@ export default function Result(props: Props) {
             )}
             {props.newRecord > 0 && (
               <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
-                <span className={props.largeResult ? "text-xl " : ""}>
+                <span className={clsx(props.largeResult ? "text-xl" : "")}>
                   {t("newRecord")}
                 </span>
-                <span
-                  className={"ml-1 " + (props.largeResult ? "" : "text-sm")}
-                >
+                <span className={clsx("ml-1", props.largeResult || "text-sm")}>
                   (+
                   {Math.floor(props.newRecord)}.
                   {(Math.floor(props.newRecord * 100) % 100)
@@ -256,12 +257,12 @@ export default function Result(props: Props) {
           !props.optionChanged &&
           (shareLink.toClipboard || shareLink.toAPI) && (
             <div
-              className={
-                "mb-2 " +
-                (props.largeResult
-                  ? "flex flex-row items-baseline justify-center space-x-2 "
-                  : "flex flex-col items-center")
-              }
+              className={clsx(
+                "mb-2",
+                props.largeResult
+                  ? "flex flex-row items-baseline justify-center space-x-2"
+                  : "flex flex-col items-center"
+              )}
               style={{ ...appearingAnimation3(7) }}
             >
               <span>{t("shareResult")}</span>
@@ -321,12 +322,12 @@ interface RowProps {
 function ResultRow(props: RowProps) {
   return (
     <p
-      className={
-        "flex flex-row items-baseline " +
-        (props.visible ? "" : "opacity-0 ") +
-        (props.disabled ? "text-slate-400 dark:text-stone-600 " : "") +
-        (props.className || "")
-      }
+      className={clsx(
+        "flex flex-row items-baseline",
+        props.visible || "opacity-0",
+        props.disabled && "text-slate-400 dark:text-stone-600",
+        props.className
+      )}
     >
       <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">
         {props.name}:

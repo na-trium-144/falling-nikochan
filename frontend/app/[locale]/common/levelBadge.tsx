@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import FiveStarBadge from "@icon-park/react/lib/icons/FiveStarBadge";
 import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
 import { ResultData } from "./bestScore";
@@ -33,13 +34,12 @@ export function LevelBadge(props: Props) {
   ];
   return props.status.toReversed().map((s, i) => (
     <span
-      className={
-        "w-5 h-5 text-center text-base " +
-        ["text-emerald-600 ", "text-amber-600 ", "text-rose-600 "][
+      className={clsx(
+        "w-5 h-5 text-center text-base",
+        ["text-emerald-600", "text-amber-600", "text-rose-600"][
           props.levels.toReversed()[i]
-        ] +
-        props.className
-      }
+        ] + props.className
+      )}
       style={{ transform: `translateX(${-i * 0.8}rem)` }}
       key={i}
     >

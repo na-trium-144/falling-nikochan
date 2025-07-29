@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
@@ -73,18 +74,18 @@ export function ReadyMessage(props: MessageProps) {
     >
       {small && (
         <div
-          className={
-            (optionOpen ? "flex flex-col " : "hidden ") +
-            "relative transition-all duration-200 ease-out " +
-            (optionSlideIn !== true
-              ? "translate-x-full opacity-0 "
-              : "translate-x-0 opacity-100 ")
-          }
+          className={clsx(
+            optionOpen ? "flex flex-col" : "hidden",
+            "relative transition-all duration-200 ease-out",
+            optionSlideIn !== true
+              ? "translate-x-full opacity-0"
+              : "translate-x-0 opacity-100"
+          )}
           style={{ maxHeight: Math.max(optionMinHeight, props.maxHeight) }}
         >
           <p className="text-lg font-title font-bold mb-1">
             <button
-              className={pagerButtonClass + "mr-4 align-bottom "}
+              className={clsx(pagerButtonClass, "mr-4 align-bottom")}
               onClick={() => setOptionOpen(false)}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
@@ -95,21 +96,21 @@ export function ReadyMessage(props: MessageProps) {
         </div>
       )}
       <div
-        className={
-          (optionOpen && small ? "hidden " : "flex flex-col ") +
-          "relative transition-all duration-200 ease-out " +
-          (!props.back
+        className={clsx(
+          (optionOpen && small ? "hidden" : "flex flex-col") +
+            "relative transition-all duration-200 ease-out",
+          !props.back
             ? ""
             : slideIn !== true
-              ? "translate-x-full opacity-0 "
-              : "translate-x-0 opacity-100 ")
-        }
+              ? "translate-x-full opacity-0"
+              : "translate-x-0 opacity-100"
+        )}
         style={{ maxHeight: small ? undefined : props.maxHeight }}
       >
         <p className="text-lg font-title font-bold mb-2">
           {props.back && (
             <button
-              className={pagerButtonClass + "mr-4 align-bottom "}
+              className={clsx(pagerButtonClass, "mr-4 align-bottom")}
               onClick={() => setSlideIn(false, props.back!)}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
@@ -143,7 +144,7 @@ export function ReadyMessage(props: MessageProps) {
         )}
         {small ? (
           <button
-            className={"block w-max relative mx-auto mt-2 " + linkStyle1}
+            className={clsx("block w-max relative mx-auto mt-2", linkStyle1)}
             onClick={() => setOptionOpen(!optionOpen)}
           >
             <RightOne className="absolute left-0 bottom-1 " theme="filled" />
@@ -168,10 +169,10 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
       {props.header && <p className="mb-2">{t("option")}</p>}
       <div className="flex-1 w-full min-w-fit overflow-y-auto overflow-x-visible">
         <ul
-          className={
-            "h-full flex flex-col w-fit justify-center text-left list-disc " +
-            "m-auto pl-6 pr-2 space-y-1 overflow-visible "
-          }
+          className={clsx(
+            "h-full flex flex-col w-fit justify-center text-left list-disc",
+            "m-auto pl-6 pr-2 space-y-1 overflow-visible"
+          )}
         >
           <li className="">
             <CheckBox
@@ -318,30 +319,30 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
         {props.times.length > 0 && (
           <>
             <div
-              className={
-                "absolute inset-x-0.5 rounded-xs border " +
-                "border-red-200 bg-red-300/20 dark:border-red-800 dark:bg-red-600/20 "
-              }
+              className={clsx(
+                "absolute inset-x-0.5 rounded-xs border",
+                "border-red-200 bg-red-300/20 dark:border-red-800 dark:bg-red-600/20"
+              )}
               style={{
                 top: `${(badFastSec / diffMaxSec) * 50}%`,
                 height: `${((-badFastSec + badLateSec) / diffMaxSec) * 50}%`,
               }}
             />
             <div
-              className={
-                "absolute inset-x-0.5 rounded-xs border " +
-                "border-sky-200 bg-sky-300/30 dark:border-sky-800 dark:bg-sky-600/30 "
-              }
+              className={clsx(
+                "absolute inset-x-0.5 rounded-xs border",
+                "border-sky-200 bg-sky-300/30 dark:border-sky-800 dark:bg-sky-600/30"
+              )}
               style={{
                 top: `${-(okSec / diffMaxSec) * 50}%`,
                 height: `${2 * (okSec / diffMaxSec) * 50}%`,
               }}
             />
             <div
-              className={
-                "absolute inset-x-0.5 rounded-xs border " +
-                "border-lime-200 bg-lime-300/40 dark:border-lime-800 dark:bg-lime-600/40 "
-              }
+              className={clsx(
+                "absolute inset-x-0.5 rounded-xs border",
+                "border-lime-200 bg-lime-300/40 dark:border-lime-800 dark:bg-lime-600/40"
+              )}
               style={{
                 top: `${-(goodSec / diffMaxSec) * 50}%`,
                 height: `${2 * (goodSec / diffMaxSec) * 50}%`,
@@ -381,7 +382,7 @@ export function StopMessage(props: MessageProps2) {
 
   return (
     <CenterBox
-      className={props.hidden ? "hidden" : ""}
+      className={clsx(props.hidden ? "hidden" : "")}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
@@ -99,12 +100,12 @@ export default function EditTab({ locale }: { locale: string }) {
             left
           />
           <ExternalLink
-            className={"ml-1 " + (inputCId !== "" ? "" : "hidden! ")}
+            className={clsx("ml-1", inputCId !== "" ? "" : "hidden!")}
             href={`/${locale}/edit?cid=${inputCId}`}
           >
             {t("newTab")}
           </ExternalLink>
-          <span className={cidFetching ? "inline-block " : "hidden "}>
+          <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
             <SlimeSVG />
             Loading...
           </span>

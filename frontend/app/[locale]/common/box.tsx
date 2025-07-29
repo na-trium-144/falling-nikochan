@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { ReactNode, MouseEvent } from "react";
 
 export const modalBg =
@@ -17,11 +18,11 @@ export function Box(props: Props) {
   return (
     <div
       ref={props.ref}
-      className={
-        "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs " +
-        (props.hidden ? "hidden " : "") +
-        (props.className || "")
-      }
+      className={clsx(
+        "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs",
+        props.hidden && "hidden",
+        props.className
+      )}
       style={props.style}
       onClick={props.onClick}
       onPointerDown={props.onPointerDown}
@@ -36,11 +37,11 @@ export function CenterBox(props: Props) {
   return (
     <Box
       ref={props.ref}
-      className={
-        "absolute inset-0 w-max max-w-full h-max m-auto p-6 text-center z-20 " +
-        (props.hidden ? "hidden " : "") +
-        (props.className || "")
-      }
+      className={clsx(
+        "absolute inset-0 w-max max-w-full h-max m-auto p-6 text-center z-20",
+        props.hidden && "hidden",
+        props.className
+      )}
       style={props.style}
       onClick={props.onClick}
       onPointerDown={props.onPointerDown}
@@ -54,11 +55,11 @@ export function CenterBox(props: Props) {
 export function WarningBox(props: Props) {
   return (
     <div
-      className={
-        "text-center text-sm mx-6 my-2 px-3 py-2 h-max " +
-        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 backdrop-blur-2xs " +
-        (props.hidden ? "hidden " : "")
-      }
+      className={clsx(
+        "text-center text-sm mx-6 my-2 px-3 py-2 h-max",
+        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 backdrop-blur-2xs",
+        props.hidden && "hidden"
+      )}
       ref={props.ref}
       style={props.style}
       onClick={props.onClick}

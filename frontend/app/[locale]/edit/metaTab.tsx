@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import Button, { buttonStyle } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
@@ -546,7 +547,10 @@ export function MetaTab(props: Props2) {
         </HelpIcon>
         <span className="inline-block ml-1">
           <Button text={t("saveToLocal")} onClick={download} />
-          <label className={buttonStyle + " inline-block"} htmlFor="upload-bin">
+          <label
+            className={clsx(buttonStyle, " inline-block")}
+            htmlFor="upload-bin"
+          >
             {t("loadFromLocal")}
           </label>
           <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>

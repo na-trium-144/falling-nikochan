@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { memo, RefObject, useEffect, useRef, useState } from "react";
 import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
@@ -123,7 +124,7 @@ export default function FallingWindow(props: Props) {
   }, []);
 
   return (
-    <div className={props.className} style={props.style} ref={ref}>
+    <div className={clsx(props.className)} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
@@ -211,9 +212,9 @@ function Nikochan(props: NProps) {
   return (
     <>
       <div
-        className={
-          "absolute " +
-          (displayNote.done === 0
+        className={clsx(
+          "absolute",
+          displayNote.done === 0
             ? enableFadeIn
               ? appeared
                 ? "transition ease-linear duration-100 opacity-100"
@@ -227,8 +228,8 @@ function Nikochan(props: NProps) {
                   ? "transition ease-linear duration-300 opacity-0"
                   : displayNote.done === 4
                     ? "transition ease-linear duration-200 opacity-0"
-                    : "")
-        }
+                    : ""
+        )}
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
           width: noteSize * bigScale(note.big),
@@ -258,12 +259,12 @@ function Nikochan(props: NProps) {
           displayNote.chainBonus !== undefined &&
           displayNote.chain && (
             <span
-              className={
-                "absolute w-12 text-xs " +
+              className={clsx(
+               "absolute w-12 text-xs",
                 (displayNote.chain >= 100 || displayNote.bigDone
-                  ? "text-orange-500 "
-                  : "")
-              }
+                  ?"text-orange-500"
+                  :"")
+              )}
               style={{ bottom: "100%", left: "100%" }}
             >
               ×{" "}
@@ -350,12 +351,12 @@ function Ripple(props: RProps) {
         <div
           key={i}
           ref={r}
-          className={
-            "absolute origin-center opacity-0 " +
-            (props.chain >= bonusMax
-              ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70 "
-              : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70 ")
-          }
+          className={clsx(
+            "absolute origin-center opacity-0",
+            props.chain >= bonusMax
+              ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70"
+              : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70"
+          )}
           style={{
             borderWidth: rippleWidth / 20,
             borderRadius: "50%",

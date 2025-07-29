@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import {
   Note,
   DisplayNote,
@@ -92,15 +93,15 @@ export default function FallingWindow(props: Props) {
     pendingNoteUpdate || currentLevel?.notes[currentNoteIndex];
 
   return (
-    <div className={props.className} style={props.style} ref={ref}>
+    <div className={clsx(props.className)} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
           <div
-            className={
-              "absolute h-0.5 transition duration-100 " +
+            className={clsx(
+              "absolute h-0.5 transition duration-100",
               "bg-gray-400 shadow-none"
-            }
+            )}
             style={{
               left: 0,
               right: 0,
@@ -300,12 +301,12 @@ function NikochanAndTrace(props: NProps) {
         currentNoteIndexと一致していたら赤色にする
       */}
       <div
-        className={
-          "absolute rounded-full " +
-          (displayNote.current.id === currentNoteIndex
-            ? "bg-red-400 "
-            : "bg-yellow-400 ")
-        }
+        className={clsx(
+          "absolute rounded-full",
+          displayNote.current.id === currentNoteIndex
+            ? "bg-red-400"
+            : "bg-yellow-400"
+        )}
         style={{
           width: noteSize * bigScale(notes[displayNote.current.id].big),
           height: noteSize * bigScale(notes[displayNote.current.id].big),
@@ -330,12 +331,12 @@ function NikochanAndTrace(props: NProps) {
                   */
         <span
           key={di}
-          className={
-            "absolute border-b origin-bottom-left " +
-            (displayNote.history[di].id === currentNoteIndex
-              ? "border-red-300 z-10 "
-              : "border-gray-300 ")
-          }
+          className={clsx(
+            "absolute border-b origin-bottom-left",
+            displayNote.history[di].id === currentNoteIndex
+              ? "border-red-300 z-10"
+              : "border-gray-300"
+          )}
           style={{
             width:
               Math.sqrt(

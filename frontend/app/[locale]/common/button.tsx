@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { ReactNode } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
@@ -31,11 +32,11 @@ interface Props {
 export default function Button(props: Props) {
   return (
     <button
-      className={
+      className={clsx(
         (props.disabled || props.loading ? buttonStyleDisabled : buttonStyle) +
-        (props.loading ? "cursor-wait " : "") +
+          props.loading && "cursor-wait",
         props.className
-      }
+      )}
       onClick={() => props.onClick && props.onClick()}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
@@ -44,7 +45,7 @@ export default function Button(props: Props) {
       disabled={props.disabled || props.loading}
     >
       {props.loading && <SlimeSVG />}
-      <span className={props.keyName ? "mr-1" : ""}>
+      <span className={clsx(props.keyName ? "mr-1" : "")}>
         {props.text ?? props.children}
       </span>
       {Array.isArray(props.keyName)

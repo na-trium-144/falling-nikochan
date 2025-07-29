@@ -1,3 +1,4 @@
+import clsx from "clsx";
 /*
 クエリパラメーター
 
@@ -9,7 +10,7 @@
 
 */
 
-"use client";
+("use client");
 
 const exampleResult = {
   baseScore100: 777,
@@ -715,9 +716,9 @@ function Play(props: Props) {
 
   return (
     <main
-      className={
-        "overflow-hidden w-full h-dvh relative select-none flex flex-col touch-none "
-      }
+      className={clsx(
+        "overflow-hidden w-full h-dvh relative select-none flex flex-col touch-none"
+      )}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
@@ -794,22 +795,22 @@ function Play(props: Props) {
         </>
       )}
       <div
-        className={
-          "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch " +
-          (isMobile ? "flex-col" : "flex-row-reverse")
-        }
+        className={clsx(
+          "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch",
+          isMobile ? "flex-col" : "flex-row-reverse"
+        )}
       >
         <div
-          className={
-            (isMobile ? "" : "w-1/3 overflow-x-visible ") +
+          className={clsx(
+            isMobile || "w-1/3 overflow-x-visible",
             "flex-none flex flex-col items-stretch"
-          }
+          )}
         >
           <MusicArea
-            className={
-              "z-20 transition-transform duration-500 ease-in-out " +
-              (musicAreaOk ? "translate-y-0 " : "translate-y-[-40vw] ")
-            }
+            className={clsx(
+              "z-20 transition-transform duration-500 ease-in-out",
+              musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
+            )}
             ready={musicAreaOk}
             playing={chartPlaying}
             ytBeginSec={ytBegin}
@@ -834,13 +835,13 @@ function Play(props: Props) {
           {!isMobile && (
             <>
               <StatusBox
-                className={
-                  "z-10 flex-none m-3 self-end " +
-                  "transition-opacity duration-100 " +
-                  (!statusHide && musicAreaOk && notesAll.length > 0
-                    ? "ease-in opacity-100 "
-                    : "ease-out opacity-0 ")
-                }
+                className={clsx(
+                  "z-10 flex-none m-3 self-end",
+                  "transition-opacity duration-100",
+                  !statusHide && musicAreaOk && notesAll.length > 0
+                    ? "ease-in opacity-100"
+                    : "ease-out opacity-0"
+                )}
                 judgeCount={judgeCount}
                 bigCount={bigCount || 0}
                 bigTotal={bigTotal}
@@ -852,7 +853,7 @@ function Play(props: Props) {
             </>
           )}
         </div>
-        <div className={"relative flex-1"} ref={mainWindowSpace.ref}>
+        <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
           <FallingWindow
             limitMaxFPS={limitMaxFPS}
             className="absolute inset-0"
@@ -863,13 +864,13 @@ function Play(props: Props) {
             barFlash={barFlash}
           />
           <div
-            className={
-              "absoulte inset-0 " +
-              "transition-all duration-200 " +
-              (cloudsOk
-                ? "opacity-100 translate-y-0 "
-                : "opacity-0 translate-y-[-300px]")
-            }
+            className={clsx(
+              "absoulte inset-0",
+              "transition-all duration-200",
+              cloudsOk
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-[-300px]"
+            )}
           >
             <ScoreDisp
               score={score}
@@ -879,17 +880,15 @@ function Play(props: Props) {
             />
             <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
             <button
-              className={
-                "absolute rounded-full cursor-pointer leading-1 " +
-                "top-0 inset-x-0 mx-auto w-max text-xl " +
-                (isTouch
-                  ? "bg-white/50 dark:bg-stone-800/50 p-2 "
-                  : "py-2 px-1 ") +
-                (isMobile ? "mt-10 " : "") +
-                "hover:bg-slate-200/50 active:bg-slate-300/50 " +
-                "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50 " +
+              className={clsx(
+                "absolute rounded-full cursor-pointer leading-1",
+                "top-0 inset-x-0 mx-auto w-max text-xl",
+                isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2" : "py-2 px-1",
+                isMobile && "mt-10",
+                "hover:bg-slate-200/50 active:bg-slate-300/50",
+                "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
                 linkStyle1
-              }
+              )}
               onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
@@ -902,10 +901,10 @@ function Play(props: Props) {
           </div>
           {!initDone && (
             <CenterBox
-              className={
-                "transition-opacity duration-200 ease-out " +
-                (showLoading ? "opacity-100" : "opacity-0")
-              }
+              className={clsx(
+                "transition-opacity duration-200 ease-out",
+                showLoading ? "opacity-100" : "opacity-0"
+              )}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
             >
@@ -1019,22 +1018,22 @@ function Play(props: Props) {
         </div>
       </div>
       <div
-        className={
-          "relative w-full " +
-          "transition-transform duration-200 ease-out " +
-          (initAnim ? "translate-y-0 " : "translate-y-[30vh] ")
-        }
+        className={clsx(
+          "relative w-full",
+          "transition-transform duration-200 ease-out",
+          initAnim ? "translate-y-0" : "translate-y-[30vh]"
+        )}
         style={{
           height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
           maxHeight: "15vh",
         }}
       >
         <div
-          className={
-            "-z-30 absolute inset-x-0 bottom-0 " +
-            "bg-lime-500 bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 " +
-            "dark:bg-lime-800 dark:from-lime-900 dark:via-lime-800 dark:to-lime-700 "
-          }
+          className={clsx(
+            "-z-30 absolute inset-x-0 bottom-0",
+            "bg-lime-500 bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
+            "dark:bg-lime-800 dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
+          )}
           style={{ top: "-1rem" }}
         />
         {chartSeq && (
@@ -1052,10 +1051,10 @@ function Play(props: Props) {
           />
         )}
         <BPMSign
-          className={
-            "transition-opacity duration-200 ease-out " +
-            (initAnim && chartSeq ? "opacity-100 " : "opacity-0 ")
-          }
+          className={clsx(
+            "transition-opacity duration-200 ease-out",
+            initAnim && chartSeq ? "opacity-100" : "opacity-0"
+          )}
           chartPlaying={chartPlaying}
           chartSeq={chartSeq || null}
           getCurrentTimeSec={getCurrentTimeSec}

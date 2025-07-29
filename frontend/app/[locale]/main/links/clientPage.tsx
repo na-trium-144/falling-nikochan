@@ -1,5 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
+import clsx from "clsx";
 import { IndexMain } from "../main";
 import { ExternalLink } from "@/common/extLink";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
@@ -42,11 +43,11 @@ export default function LinksPage({ locale }: { locale: string }) {
             <span className="ml-1">Language:</span>
             <LangSwitcher locale={locale}>
               <span
-                className={
-                  "inline-block align-top mx-1 px-1 " +
+                className={clsx(
+                  "inline-block align-top mx-1 px-1",
                   linkStyle1 +
-                  "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none "
-                }
+                    "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
+                )}
               >
                 <span className="flex flex-row items-center ">
                   <span className="flex-1 text-center ">
@@ -72,11 +73,11 @@ export default function LinksPage({ locale }: { locale: string }) {
             <span className="ml-1 ">{t("theme")}:</span>
             <ThemeSwitcher>
               <span
-                className={
-                  "inline-block align-top mx-1 px-1 " +
+                className={clsx(
+                  "inline-block align-top mx-1 px-1",
                   linkStyle1 +
-                  "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none "
-                }
+                    "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
+                )}
               >
                 <span className="flex flex-row items-center ">
                   <span className="flex-1 text-center">
@@ -114,7 +115,7 @@ export default function LinksPage({ locale }: { locale: string }) {
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
             <Link
-              className={linkStyle3 + "ml-2 inline-block "}
+              className={clsx(linkStyle3, "ml-2 inline-block")}
               href={`/${locale}/main/version`}
               prefetch={!process.env.NO_PREFETCH}
             >
@@ -128,7 +129,7 @@ export default function LinksPage({ locale }: { locale: string }) {
           </p>
           <p className="main-wide:hidden ">
             <Link
-              className={linkStyle3}
+              className={clsx(linkStyle3)}
               href={`/${locale}/main/policies`}
               prefetch={!process.env.NO_PREFETCH}
             >

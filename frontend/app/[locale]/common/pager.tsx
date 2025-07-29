@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import Link from "next/link";
 
 export const pagerButtonClass =
@@ -16,16 +17,16 @@ interface Props {
 export function Pager(props: Props) {
   return (
     <div
-      className={
-        "flex flex-col main-wide:flex-row items-center mb-4 " +
-        "space-y-2 main-wide:space-y-0 main-wide:space-x-2 "
-      }
+      className={clsx(
+        "flex flex-col main-wide:flex-row items-center mb-4",
+        "space-y-2 main-wide:space-y-0 main-wide:space-x-2"
+      )}
     >
       <div>
         {props.index > 1 ? (
           props.hrefBefore ? (
             <Link
-              className={pagerButtonClass}
+              className={clsx(pagerButtonClass)}
               href={props.hrefBefore}
               scroll={false}
               replace
@@ -34,7 +35,10 @@ export function Pager(props: Props) {
               &lt;
             </Link>
           ) : (
-            <button className={pagerButtonClass} onClick={props.onClickBefore}>
+            <button
+              className={clsx(pagerButtonClass)}
+              onClick={props.onClickBefore}
+            >
               &lt;
             </button>
           )
@@ -49,7 +53,7 @@ export function Pager(props: Props) {
         {props.index < props.maxIndex ? (
           props.hrefAfter ? (
             <Link
-              className={pagerButtonClass}
+              className={clsx(pagerButtonClass)}
               href={props.hrefAfter}
               scroll={false}
               replace
@@ -58,7 +62,10 @@ export function Pager(props: Props) {
               &gt;
             </Link>
           ) : (
-            <button className={pagerButtonClass} onClick={props.onClickAfter}>
+            <button
+              className={clsx(pagerButtonClass)}
+              onClick={props.onClickAfter}
+            >
               &gt;
             </button>
           )

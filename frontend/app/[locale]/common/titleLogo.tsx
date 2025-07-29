@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 import TargetLine from "./targetLine.js";
 
@@ -37,20 +38,22 @@ export default function Title(props: Props) {
   }, [nikochanPhase]);
 
   return (
-    <div className={"leading-none text-center mx-auto w-96 " + props.className}>
+    <div
+      className={clsx("leading-none text-center mx-auto w-96", props.className)}
+    >
       <TargetLine barFlash={barFlash} left={0} right={0} bottom="2.2rem" />
       <span className="text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7 ">
         Falling Nikochan
       </span>
       <div
-        className={
-          "absolute " +
-          (nikochanPhase === 0
-            ? "-translate-y-28 translate-x-14 opacity-0 "
+        className={clsx(
+          "absolute",
+          nikochanPhase === 0
+            ? "-translate-y-28 translate-x-14 opacity-0"
             : nikochanPhase === 1
               ? "transition-transform ease-linear duration-300"
-              : "")
-        }
+              : ""
+        )}
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
           width: "1.5rem",

@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import Down from "@icon-park/react/lib/icons/Down";
 import { buttonStyle, buttonStyleDisabled } from "./button.js";
 
@@ -12,9 +13,10 @@ export default function Select(props: Props) {
   return (
     <span className="inline-block relative">
       <select
-        className={
-          (props.disabled ? buttonStyleDisabled : buttonStyle) + "pr-6"
-        }
+        className={clsx(
+          props.disabled ? buttonStyleDisabled : buttonStyle,
+          "pr-6"
+        )}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
         disabled={props.disabled}
