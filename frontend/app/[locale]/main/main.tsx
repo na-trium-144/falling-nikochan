@@ -9,7 +9,7 @@ import {
   TabKeys,
   tabURLs,
 } from "@/common/footer.js";
-import { ReactNode } from "react";
+import { ReactNode, RefObject } from "react";
 import Link from "next/link";
 import Title from "@/common/titleLogo.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
@@ -26,6 +26,7 @@ interface Props {
   noBackButtonMobile?: boolean; // モバイル表示で戻るボタンを非表示 (footerから直接開けるページの場合非表示にする)
   noBackButtonPC?: boolean;
   locale: string;
+  boxRef?: RefObject<HTMLDivElement | null>;
 }
 export function IndexMain(props: Props) {
   const locale = props.locale;
@@ -95,7 +96,10 @@ export function IndexMain(props: Props) {
             )}
           </nav>
         )}
-        <Box className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}>
+        <Box
+          ref={props.boxRef}
+          className={"flex flex-col p-6 overflow-y-auto min-h-0 flex-1 "}
+        >
           {!props.noBackButtonPC && (
             <button
               className={"hidden main-wide:block w-max mb-3 " + linkStyle1}

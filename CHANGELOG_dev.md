@@ -1,3 +1,7 @@
+## ver. 12.44 - 2025/07/29 [#719](https://github.com/na-trium-144/falling-nikochan/pull/719)
+
+* 新着譜面リストと検索結果のリストを無限スクロール可能にする
+
 ## ver. 12.42 - 2025/07/28 [#717](https://github.com/na-trium-144/falling-nikochan/pull/717)
 
 * share→playを開く際に /play ではなく /locale/play を使うようにする (prefetchに失敗していたのを修正)

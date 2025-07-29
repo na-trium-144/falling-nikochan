@@ -47,8 +47,9 @@ export default {
       recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
-      latest: "Latest Charts",
-      latestDesc: "List of charts recently created or updated.",
+      latest: "Latest Charts / All Charts",
+      latestDesc:
+        "List of published charts. Sorted by the most recently created or updated.",
       latestDesc2:
         "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       sample: "Sample Charts",

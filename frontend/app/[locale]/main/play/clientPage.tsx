@@ -4,14 +4,23 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import { numLatest, popularDays } from "@falling-nikochan/chart";
+import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { ChartLineBrief } from "../fetch.js";
+import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
+import { useResizeDetector } from "react-resize-detector";
+import { useDisplayMode } from "@/scale.jsx";
 
 interface Props {
   locale: string;
@@ -31,11 +40,9 @@ export default function PlayTab(props: Props) {
   const [searchResult, setSearchResult] = useState<
     ChartLineBrief[] | { status: number | null; message: string } | undefined
   >();
-  const [searchMaxRow, setSearchMaxRow] = useState<number>(numLatest);
   const setSearchText = useCallback(
     (v: string, noDelay?: boolean) => {
       setSearchText_(v);
-      setSearchMaxRow(numLatest);
       if (abortSearching.current) {
         abortSearching.current.abort();
         abortSearching.current = null;
@@ -119,6 +126,9 @@ export default function PlayTab(props: Props) {
     return () => window.removeEventListener("popstate", handler);
   }, [setSearchText]);
 
+  const boxSize = useResizeDetector();
+  const { rem } = useDisplayMode();
+
   return (
     <IndexMain
       title={t("title")}
@@ -127,6 +137,7 @@ export default function PlayTab(props: Props) {
       noBackButtonMobile
       noBackButtonPC
       locale={locale}
+      boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
       <div className="flex-none mb-3 ">
         <h3 className="mb-2 flex items-baseline ">
@@ -150,12 +161,11 @@ export default function PlayTab(props: Props) {
             onClick={openModal}
             onClickMobile={openShareInternal}
             showLoading
-            maxRow={Math.min(
-              searchMaxRow,
-              Array.isArray(searchResult) ? searchResult.length : 0
-            )}
-            onMoreClick={() => setSearchMaxRow((prev) => prev + numLatest)}
             badge
+            containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
+            containerHeight={
+              boxSize.height ? boxSize.height - (12 / 4) * rem : undefined
+            }
           />
         )}
       </div>

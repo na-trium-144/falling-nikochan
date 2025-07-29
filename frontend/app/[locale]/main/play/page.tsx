@@ -3,8 +3,8 @@ import { initMetadata, MetadataProps } from "@/metadata.js";
 import { ChartBrief, originalCId, sampleCId } from "@falling-nikochan/chart";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import briefApp from "@falling-nikochan/route/dist/src/api/brief.js";
-import { ChartLineBrief } from "../fetch.js";
 import { SharePageModalProvider } from "@/common/sharePageModal.jsx";
+import { ChartLineBrief } from "../chartList.jsx";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
