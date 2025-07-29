@@ -361,7 +361,7 @@ export default function EditAuth(props: {
               {process.env.NODE_ENV === "development" && (
                 <p className="mt-2 ">
                   <button
-                    className={clsx(linkStyle1 , "w-max m-auto")}
+                    className={clsx(linkStyle1, "w-max m-auto")}
                     onClick={() => {
                       void (async () => {
                         await fetchChart(false, true, editPasswd, savePasswd);
@@ -1033,9 +1033,9 @@ function Page(props: Props) {
   return (
     <main
       className={clsx(
-       "w-full h-dvh overflow-x-clip overflow-y-auto",
-       "edit-wide:overflow-y-clip",
-        (dragMode !== null ?"touch-none" :"")
+        "w-full h-dvh overflow-x-clip overflow-y-auto",
+        "edit-wide:overflow-y-clip",
+        dragMode !== null && "touch-none"
       )}
       tabIndex={0}
       ref={ref}
@@ -1099,10 +1099,10 @@ function Page(props: Props) {
     >
       <div
         className={clsx(
-         "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs",
-         "flex edit-wide:hidden flex-row items-center",
-         "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200",
-         "dark:from-orange-975/0 dark:to-orange-975"
+          "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs",
+          "flex edit-wide:hidden flex-row items-center",
+          "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200",
+          "dark:from-orange-975/0 dark:to-orange-975"
         )}
       >
         <MobileHeader className="flex-1 ">
@@ -1116,9 +1116,9 @@ function Page(props: Props) {
           <div className="absolute inset-6">
             <Box
               className={clsx(
-               "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
-               "p-6 overflow-x-clip overflow-y-auto",
-               "shadow-lg"
+                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
+                "p-6 overflow-x-clip overflow-y-auto",
+                "shadow-lg"
               )}
             >
               {props.modal}
@@ -1139,14 +1139,14 @@ function Page(props: Props) {
         <LuaTabProvider>
           <div
             className={clsx(
-             "w-full",
-             "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row"
+              "w-full",
+              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row"
             )}
           >
             <div
               className={clsx(
-               "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
-               "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
+                "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
+                "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
               )}
             >
               <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
@@ -1162,17 +1162,17 @@ function Page(props: Props) {
               </div>
               <div
                 className={clsx(
-                 "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
-                  (levelBgColors[
-                    levelTypes.indexOfcurrentLevel?.type,
-                  ] || levelBgColors[1]) +
-                  chart ||"invisible",
+                  "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
+                  levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
+                    levelBgColors[1],
+                  chart || "invisible "
                 )}
               >
                 <FlexYouTube
                   fixedSide="width"
                   className={clsx(
-                   "w-full h-max","edit-wide:w-full edit-wide:h-auto"
+                    "w-full h-max",
+                    "edit-wide:w-full edit-wide:h-auto"
                   )}
                   control={true}
                   id={chart?.ytId}
@@ -1185,9 +1185,9 @@ function Page(props: Props) {
               </div>
               <div
                 className={clsx(
-                 "relative",
-                 "w-full aspect-square",
-                 "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
+                  "relative",
+                  "w-full aspect-square",
+                  "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
                 )}
               >
                 <FallingWindow
@@ -1205,7 +1205,8 @@ function Page(props: Props) {
               {chart && isTouch && (
                 <button
                   className={clsx(
-                   "self-start flex flex-row items-center", linkStyle1
+                    "self-start flex flex-row items-center",
+                    linkStyle1
                   )}
                   onClick={() => {
                     setDragMode(
@@ -1237,9 +1238,9 @@ function Page(props: Props) {
             </div>
             <div
               className={clsx(
-               "p-3 flex flex-col items-stretch",
-               "h-5/6",
-               "edit-wide:h-full edit-wide:flex-1"
+                "p-3 flex flex-col items-stretch",
+                "h-5/6",
+                "edit-wide:h-full edit-wide:flex-1"
               )}
             >
               <div>
@@ -1395,9 +1396,9 @@ function Page(props: Props) {
               </div>
               <Box
                 className={clsx(
-                 "p-3 overflow-auto",
-                 "min-h-96 relative",
-                 "edit-wide:flex-1 edit-wide:min-h-0"
+                  "p-3 overflow-auto",
+                  "min-h-96 relative",
+                  "edit-wide:flex-1 edit-wide:min-h-0"
                 )}
               >
                 {tab === 0 ? (
@@ -1501,8 +1502,8 @@ function Page(props: Props) {
               </Box>
               <div
                 className={clsx(
-                 "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm",
-                 "h-24 max-h-24 edit-wide:h-auto overflow-auto"
+                  "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm",
+                  "h-24 max-h-24 edit-wide:h-auto overflow-auto"
                 )}
               >
                 {luaExecutor.running ? (

@@ -75,11 +75,10 @@ export function AboutContent2() {
           <div
             className={clsx(
               "absolute",
-              nikochanPhase === 0
-                ? "-translate-y-28 translate-x-14"
-                : nikochanPhase === 1
-                  ? "transition ease-linear duration-700"
-                  : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+              nikochanPhase === 0 && "-translate-y-28 translate-x-14",
+              nikochanPhase === 1 && "transition ease-linear duration-700",
+              nikochanPhase === 2 &&
+                "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
             )}
             style={{
               /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
@@ -125,11 +124,10 @@ export function AboutContent2() {
           <div
             className={clsx(
               "absolute",
-              nikochanPhase === 0
-                ? "-translate-y-28 translate-x-14"
-                : nikochanPhase === 1
-                  ? "transition ease-linear duration-700"
-                  : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+              nikochanPhase === 0 && "-translate-y-28 translate-x-14",
+              nikochanPhase === 1 && "transition ease-linear duration-700",
+              nikochanPhase === 2 &&
+                "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
             )}
             style={{
               /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */

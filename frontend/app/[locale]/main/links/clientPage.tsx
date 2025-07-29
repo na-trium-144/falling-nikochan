@@ -45,8 +45,8 @@ export default function LinksPage({ locale }: { locale: string }) {
               <span
                 className={clsx(
                   "inline-block align-top mx-1 px-1",
-                  linkStyle1 +
-                    "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
+                  linkStyle1,
+                  "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
                 )}
               >
                 <span className="flex flex-row items-center ">
@@ -75,8 +75,8 @@ export default function LinksPage({ locale }: { locale: string }) {
               <span
                 className={clsx(
                   "inline-block align-top mx-1 px-1",
-                  linkStyle1 +
-                    "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
+                  linkStyle1,
+                  "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
                 )}
               >
                 <span className="flex flex-row items-center ">

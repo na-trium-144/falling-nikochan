@@ -100,7 +100,7 @@ export default function EditTab({ locale }: { locale: string }) {
             left
           />
           <ExternalLink
-            className={clsx("ml-1", inputCId !== "" ? "" : "hidden!")}
+            className={clsx("ml-1", inputCId !== "" || "hidden!")}
             href={`/${locale}/edit?cid=${inputCId}`}
           >
             {t("newTab")}

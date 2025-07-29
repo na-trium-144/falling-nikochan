@@ -222,7 +222,7 @@ export default function Result(props: Props) {
               </div>
             ) : (
               <div
-                className={clsx(props.largeResult ? "text-xl" : "")}
+                className={clsx(props.largeResult && "text-xl")}
                 style={{ ...appearingAnimation2(6) }}
               >
                 {t(
@@ -238,7 +238,7 @@ export default function Result(props: Props) {
             )}
             {props.newRecord > 0 && (
               <div ref={refBest} style={{ ...appearingAnimation2(6) }}>
-                <span className={clsx(props.largeResult ? "text-xl" : "")}>
+                <span className={clsx(props.largeResult && "text-xl")}>
                   {t("newRecord")}
                 </span>
                 <span className={clsx("ml-1", props.largeResult || "text-sm")}>

@@ -373,7 +373,8 @@ export function ChartList(props: Props) {
           <button
             className={clsx(
               "block w-max mx-auto mt-2",
-              (firstFetchingIndex >= 0 ? "invisible" : "") + linkStyle1
+              firstFetchingIndex >= 0 && "invisible",
+              linkStyle1
             )}
             onClick={props.onMoreClick}
           >
@@ -387,7 +388,8 @@ export function ChartList(props: Props) {
           <Link
             className={clsx(
               "block w-max mx-auto mt-2",
-              (firstFetchingIndex >= 0 ? "invisible" : "") + linkStyle1
+              firstFetchingIndex >= 0 && "invisible",
+              linkStyle1
             )}
             href={props.moreHref}
             prefetch={!process.env.NO_PREFETCH}
@@ -441,7 +443,8 @@ export function ChartListItem(props: CProps) {
           <a
             href={props.href}
             className={clsx(
-              chartListStyle + props.onClickMobile && "hidden main-wide:block"
+              chartListStyle,
+              props.onClickMobile && "hidden main-wide:block"
             )}
             target={props.newTab ? "_blank" : undefined}
             onClick={

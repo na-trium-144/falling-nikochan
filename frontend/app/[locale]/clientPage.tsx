@@ -67,16 +67,20 @@ export default function TopPage(props: Props) {
       ) : null}
       <div
         className={clsx(
-         "flex flex-col w-full min-h-full h-max items-center",
-          (menuMove
-            ?"transition-[max-height] duration-200 ease-out",
-              menuMoveAnim ?"max-h-full" :"max-h-max",
-            :"")
+          "flex flex-col w-full min-h-full h-max items-center",
+          menuMove &&
+            clsx(
+              "transition-[max-height] duration-200 ease-out",
+              menuMoveAnim ? "max-h-full" : "max-h-max"
+            )
         )}
       >
         <Link
           href={`/${locale}`}
-          className={clsx("w-full grow-3 shrink-0 basis-24 relative", linkStyle1)}
+          className={clsx(
+            "w-full grow-3 shrink-0 basis-24 relative",
+            linkStyle1
+          )}
           style={{
             marginLeft: "-20rem",
             marginRight: "-20rem",
@@ -86,7 +90,9 @@ export default function TopPage(props: Props) {
           <Title className="absolute inset-0 " anim />
         </Link>
         <div className="basis-0 flex-1 " />
-        <div className={clsx("grow-0 mb-3 text-center px-6", menuMoveAnimClass)}>
+        <div
+          className={clsx("grow-0 mb-3 text-center px-6", menuMoveAnimClass)}
+        >
           {t("description")}
           <Link
             href={`/${locale}/main/about/1`}
@@ -108,7 +114,7 @@ export default function TopPage(props: Props) {
         </div>
         <div
           className={clsx(
-           "basis-auto grow-1 my-auto h-max mb-3 text-center px-6",
+            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6",
             menuMoveAnimClass
           )}
         >
@@ -120,7 +126,7 @@ export default function TopPage(props: Props) {
 
         <div
           className={clsx(
-           "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6",
+            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6",
             menuMoveAnimClass
           )}
         >
@@ -141,16 +147,16 @@ export default function TopPage(props: Props) {
 
         <div
           className={clsx(
-           "shrink-1 h-dvh transition-all duration-200 ease-in",
-            menuMoveAnim ?"max-h-[50vh]" :"max-h-0",
+            "shrink-1 h-dvh transition-all duration-200 ease-in",
+            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
           )}
         />
         <nav
           className={clsx(
-           "shrink-0 basis-auto grow-3",
-           "hidden main-wide:flex",
-           "flex-col justify-center w-64",
-           "transition ease-out duration-200"
+            "shrink-0 basis-auto grow-3",
+            "hidden main-wide:flex",
+            "flex-col justify-center w-64",
+            "transition ease-out duration-200"
           )}
           style={{
             transform: menuMove
@@ -165,8 +171,8 @@ export default function TopPage(props: Props) {
               key={i}
               href={`/${locale}${tabURLs[key]}`}
               className={clsx(
-               " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
-               "rounded-lg p-3"
+                "text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
+                "rounded-lg p-3"
               )}
               prefetch={!process.env.NO_PREFETCH}
               onClick={(e) => {
@@ -184,8 +190,8 @@ export default function TopPage(props: Props) {
         </nav>
         <div
           className={clsx(
-           "shrink-1 h-dvh transition-all duration-200 ease-in",
-            menuMoveAnim ?"max-h-[50vh]" :"max-h-0",
+            "shrink-1 h-dvh transition-all duration-200 ease-in",
+            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
           )}
         />
 
@@ -194,9 +200,9 @@ export default function TopPage(props: Props) {
       </div>
       <div
         className={clsx(
-         "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
-         "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
-         "dark:from-orange-950 dark:to-orange-950/0"
+          "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
+          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
+          "dark:from-orange-950 dark:to-orange-950/0"
         )}
       >
         <MobileFooter locale={locale} tabKey="top" />
@@ -251,7 +257,7 @@ function InputCId(props: {
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
-        <span className={clsx(cidFetching ?"inline-block" :"hidden")}>
+        <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
           <SlimeSVG />
           Loading...
         </span>
@@ -280,26 +286,26 @@ export function AboutModal(props: AProps) {
   return (
     <div
       className={clsx(
-        modalBg +
-       "transition-opacity duration-200",
-        props.aboutAnim ?"ease-in opacity-100" :"ease-out opacity-0",
+        modalBg,
+        "transition-opacity duration-200",
+        props.aboutAnim ? "ease-in opacity-100" : "ease-out opacity-0"
       )}
       onClick={close}
     >
       <div className="absolute inset-12">
         <Box
           className={clsx(
-           "absolute inset-0 m-auto w-160 h-max max-w-full max-h-full",
-           "p-6 overflow-x-clip overflow-y-auto",
-           "shadow-lg",
-           "transition-transform duration-200 origin-center",
-            props.aboutAnim ?"ease-in scale-100" :"ease-out scale-0",
+            "absolute inset-0 m-auto w-160 h-max max-w-full max-h-full",
+            "p-6 overflow-x-clip overflow-y-auto",
+            "shadow-lg",
+            "transition-transform duration-200 origin-center",
+            props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
           )}
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
             <button
-              className={clsx(pagerButtonClass , "absolute left-0 inset-y-0")}
+              className={clsx(pagerButtonClass, "absolute left-0 inset-y-0")}
               onClick={close}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />

@@ -103,7 +103,7 @@ export function PlayOption(props: Props) {
                       "border-slate-400 dark:border-stone-600",
                       "bg-white dark:bg-stone-800",
                       "invisible",
-                      selectedLevel === i ? "main-wide:visible" : ""
+                      selectedLevel === i && "main-wide:visible"
                     )}
                   />
                 </li>
@@ -181,12 +181,14 @@ function LevelButton(props: {
       className={clsx(
         "cursor-pointer w-full",
         "relative rounded px-2 py-0.5 my-0.5",
-        (props.selected
+        props.selected
           ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50"
-          : "hover:shadow hover:mt-0 hover:mb-1",
-        "hover:bg-sky-200/50 dark:hover:bg-orange-800/50",
-        "active:mt-0.5 active:mb-0.5",
-        "active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50")
+          : clsx(
+              "hover:shadow hover:mt-0 hover:mb-1",
+              "hover:bg-sky-200/50 dark:hover:bg-orange-800/50",
+              "active:mt-0.5 active:mb-0.5",
+              "active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50"
+            )
       )}
       onClick={props.onClick}
     >
@@ -201,9 +203,7 @@ function LevelButton(props: {
         )}
         <span
           className={clsx(
-            props.selected
-              ? levelColors[levelTypes.indexOf(props.level.type)]
-              : ""
+            props.selected && levelColors[levelTypes.indexOf(props.level.type)]
           )}
         >
           <span className="text-sm">{props.level.type}-</span>
@@ -338,9 +338,11 @@ function SelectedLevelInfo(props: {
         className={clsx(
           "w-full mt-2 px-2 rounded-lg",
           "flex flex-col items-center",
-          (selectedBestScore &&
-            "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60",
-          "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800")
+          selectedBestScore &&
+            clsx(
+              "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60",
+              "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800"
+            )
         )}
         onClick={() =>
           setShowBestDetail(!!selectedBestScore && !showBestDetail)
@@ -355,7 +357,7 @@ function SelectedLevelInfo(props: {
         <div className="flex flex-row items-center ">
           <span
             className={clsx(
-              selectedBestScore ? "" : "text-slate-400 dark:text-stone-600"
+              selectedBestScore || "text-slate-400 dark:text-stone-600"
             )}
           >
             <span className="inline-block text-2xl">

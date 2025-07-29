@@ -33,8 +33,8 @@ export default function Button(props: Props) {
   return (
     <button
       className={clsx(
-        (props.disabled || props.loading ? buttonStyleDisabled : buttonStyle) +
-          props.loading && "cursor-wait",
+        props.disabled || props.loading ? buttonStyleDisabled : buttonStyle,
+        props.loading && "cursor-wait",
         props.className
       )}
       onClick={() => props.onClick && props.onClick()}
@@ -45,7 +45,7 @@ export default function Button(props: Props) {
       disabled={props.disabled || props.loading}
     >
       {props.loading && <SlimeSVG />}
-      <span className={clsx(props.keyName ? "mr-1" : "")}>
+      <span className={clsx(props.keyName && "mr-1")}>
         {props.text ?? props.children}
       </span>
       {Array.isArray(props.keyName)

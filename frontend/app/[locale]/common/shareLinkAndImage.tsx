@@ -178,7 +178,8 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
       {modalOpened && (
         <div
           className={clsx(
-            modalBg + "transition-opacity duration-200 z-30!",
+            modalBg,
+            "transition-opacity duration-200 z-30!",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
           onClick={closeModal}

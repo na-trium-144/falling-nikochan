@@ -97,13 +97,12 @@ export function ReadyMessage(props: MessageProps) {
       )}
       <div
         className={clsx(
-          (optionOpen && small ? "hidden" : "flex flex-col") +
-            "relative transition-all duration-200 ease-out",
-          !props.back
-            ? ""
-            : slideIn !== true
+          optionOpen && small ? "hidden" : "flex flex-col",
+          "relative transition-all duration-200 ease-out",
+          props.back &&
+            (slideIn !== true
               ? "translate-x-full opacity-0"
-              : "translate-x-0 opacity-100"
+              : "translate-x-0 opacity-100")
         )}
         style={{ maxHeight: small ? undefined : props.maxHeight }}
       >
@@ -382,7 +381,7 @@ export function StopMessage(props: MessageProps2) {
 
   return (
     <CenterBox
-      className={clsx(props.hidden ? "hidden" : "")}
+      className={clsx(props.hidden && "hidden")}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >

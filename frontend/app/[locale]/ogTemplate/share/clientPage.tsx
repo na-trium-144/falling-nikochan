@@ -31,7 +31,8 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl",
-          levelBgColors[1] + showDummyData || "invisible"
+          levelBgColors[1],
+          showDummyData || "invisible"
         )}
       >
         <div

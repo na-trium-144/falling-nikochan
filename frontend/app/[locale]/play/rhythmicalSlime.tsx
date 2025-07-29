@@ -169,7 +169,7 @@ export default function RhythmicalSlime(props: Props) {
 
   return (
     <div
-      className={clsx(props.className, " flex flex-row-reverse")}
+      className={clsx(props.className, "flex flex-row-reverse")}
       style={props.style}
     >
       {Array.from(new Array(maxSlimeNum)).map((_, i) => (

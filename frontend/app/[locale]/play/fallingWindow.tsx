@@ -214,21 +214,20 @@ function Nikochan(props: NProps) {
       <div
         className={clsx(
           "absolute",
-          displayNote.done === 0
-            ? enableFadeIn
+          displayNote.done === 0 &&
+            (enableFadeIn
               ? appeared
                 ? "transition ease-linear duration-100 opacity-100"
                 : "opacity-0"
-              : "opacity-100"
-            : displayNote.done === 1
-              ? "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
-              : displayNote.done === 2
-                ? "transition ease-linear duration-300 -translate-y-2 opacity-0"
-                : displayNote.done === 3
-                  ? "transition ease-linear duration-300 opacity-0"
-                  : displayNote.done === 4
-                    ? "transition ease-linear duration-200 opacity-0"
-                    : ""
+              : "opacity-100"),
+          displayNote.done === 1 &&
+            "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125",
+          displayNote.done === 2 &&
+            "transition ease-linear duration-300 -translate-y-2 opacity-0",
+          displayNote.done === 3 &&
+            "transition ease-linear duration-300 opacity-0",
+          displayNote.done === 4 &&
+            "transition ease-linear duration-200 opacity-0"
         )}
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
@@ -261,9 +260,7 @@ function Nikochan(props: NProps) {
             <span
               className={clsx(
                "absolute w-12 text-xs",
-                (displayNote.chain >= 100 || displayNote.bigDone
-                  ?"text-orange-500"
-                  :"")
+                (displayNote.chain >= 100 || displayNote.bigDone) && "text-orange-500"
               )}
               style={{ bottom: "100%", left: "100%" }}
             >

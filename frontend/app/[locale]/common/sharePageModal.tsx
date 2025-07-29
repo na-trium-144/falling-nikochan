@@ -120,7 +120,8 @@ export function SharePageModalProvider(props: {
       {modalOpened && (
         <div
           className={clsx(
-            modalBg + "transition-opacity duration-200",
+            modalBg,
+            "transition-opacity duration-200",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
           onClick={() => {

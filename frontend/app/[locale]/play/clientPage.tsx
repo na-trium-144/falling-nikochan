@@ -1,4 +1,5 @@
-import clsx from "clsx";
+"use client";
+
 /*
 クエリパラメーター
 
@@ -10,8 +11,6 @@ import clsx from "clsx";
 
 */
 
-("use client");
-
 const exampleResult = {
   baseScore100: 777,
   chainScore100: 2000,
@@ -21,6 +20,7 @@ const exampleResult = {
   bigCount: 55,
 } as const;
 
+import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {

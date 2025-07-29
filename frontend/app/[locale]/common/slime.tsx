@@ -87,14 +87,16 @@ const SlimeSVGInner = memo(function SlimeSVGInner(
   return (
     <span
       className={clsx(
-        (props.className
+        props.className
           ? props.className
-          :"inline-block w-[1.5em] align-bottom translate-y-[-0.2em] mx-1") +
-        (props.appearingAnim
-          ?"transition-all duration-250 origin-bottom",
+          : "inline-block w-[1.5em] align-bottom translate-y-[-0.2em] mx-1",
+        props.appearingAnim &&
+          clsx(
+            "transition-all duration-250 origin-bottom",
             props.appearing
- ?"ease-in opacity-100 scale-y-100" :"ease-out opacity-0 scale-y-0",
-          :"")
+              ? "ease-in opacity-100 scale-y-100"
+              : "ease-out opacity-0 scale-y-0"
+          )
       )}
     >
       {/*width="117.89705" height="105.69147"*/}

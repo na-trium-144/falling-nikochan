@@ -126,7 +126,7 @@ export function MobileFooter(props: MobileProps) {
           key={i}
           className={clsx(
             "w-full text-xl space-y-1 flex flex-col items-center main-wide:hidden",
-            props.tabKey === key ? "" : "text-slate-500 dark:text-stone-400"
+            props.tabKey === key || "text-slate-500 dark:text-stone-400"
           )}
           href={`/${props.locale}${tabURLs[key]}`}
         >

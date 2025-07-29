@@ -134,7 +134,7 @@ export function ChainDisp(props: ChainProps) {
     <Cloud
       className={clsx(
         "flex flex-col",
-        props.chain >= 100 ? "text-orange-500 dark:text-yellow-400" : ""
+        props.chain >= 100 && "text-orange-500 dark:text-yellow-400"
       )}
       left
     >

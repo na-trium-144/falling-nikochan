@@ -548,7 +548,7 @@ export function MetaTab(props: Props2) {
         <span className="inline-block ml-1">
           <Button text={t("saveToLocal")} onClick={download} />
           <label
-            className={clsx(buttonStyle, " inline-block")}
+            className={clsx(buttonStyle, "inline-block")}
             htmlFor="upload-bin"
           >
             {t("loadFromLocal")}

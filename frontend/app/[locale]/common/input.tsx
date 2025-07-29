@@ -37,8 +37,8 @@ export default function Input(props: Props) {
         "mx-1 px-1 font-main-ui text-base",
         !props.left && "text-right",
         "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none",
-        (props.isValid && !props.isValid(value) ? "text-red-500" : "") +
-          props.disabled &&
+        props.isValid && !props.isValid(value) && "text-red-500",
+        props.disabled &&
           "text-slate-400 border-slate-200 dark:text-stone-600 dark:border-stone-700",
         props.className
       )}

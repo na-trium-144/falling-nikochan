@@ -35,7 +35,8 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl",
-          levelBgColors[1] + showDummyData || "invisible"
+          levelBgColors[1],
+          showDummyData || "invisible"
         )}
       >
         <div
@@ -137,7 +138,7 @@ export default function OGTemplate() {
               </p>
             </div>
             <div className="w-72 flex flex-col items-center justify-center space-y-4">
-              <div className={clsx(showDummyData ? "" : "invisible")}>
+              <div className={clsx(showDummyData || "invisible")}>
                 <span className="mr-2 text-2xl ">{t("rank")}:</span>
                 <span className={clsx("text-5xl")}>S+</span>
               </div>

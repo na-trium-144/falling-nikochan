@@ -32,7 +32,8 @@ export function ExternalLink(props: Props) {
       <button
         className={clsx(
           "relative inline-block w-max",
-          linkStyle1 + props.className
+          linkStyle1,
+          props.className
         )}
         onClick={props.onClick}
       >
@@ -44,7 +45,8 @@ export function ExternalLink(props: Props) {
       <Link
         className={clsx(
           "relative inline-block w-max",
-          linkStyle1 + props.className
+          linkStyle1,
+          props.className
         )}
         href={props.href}
       >
@@ -56,11 +58,12 @@ export function ExternalLink(props: Props) {
       <a
         className={clsx(
           "relative inline-block w-max",
-          (props.href?.startsWith("/")
+          props.href?.startsWith("/")
             ? linkStyle1
             : props.noColor
               ? linkStyle2
-              : linkStyle3) + props.className
+              : linkStyle3,
+          props.className
         )}
         href={props.href}
         target="_blank"

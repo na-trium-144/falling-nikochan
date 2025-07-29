@@ -164,9 +164,8 @@ export default function LevelTab(props: Props) {
               <span
                 className={clsx(
                   "inline-block mr-2",
-                  i === props.currentLevelIndex
-                    ? levelColors[levelTypes.indexOf(level.type)]
-                    : ""
+                  i === props.currentLevelIndex &&
+                    levelColors[levelTypes.indexOf(level.type)]
                 )}
               >
                 <span className="text-sm">{level.type}-</span>
@@ -207,7 +206,7 @@ export default function LevelTab(props: Props) {
                 value={t === currentLevel.type}
                 className={clsx(
                   "ml-2",
-                  t === currentLevel.type ? levelColors[i] : ""
+                  t === currentLevel.type && levelColors[i]
                 )}
                 onChange={() => {
                   currentLevel.type = t;
