@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { Key } from "@/common/key.js";
 import TargetLine from "@/common/targetLine.js";
 import { useTranslations } from "next-intl";
@@ -47,11 +48,11 @@ export function AboutContent2() {
   return (
     <>
       <div
-        className={
-          "flex flex-col space-y-2 items-center " +
-          "main-wide:flex-row main-wide:space-y-0 main-wide:space-x-2 " +
-          "main-wide:items-stretch main-wide:mb-4 "
-        }
+        className={clsx(
+          "flex flex-col space-y-2 items-center",
+          "main-wide:flex-row main-wide:space-y-0 main-wide:space-x-2",
+          "main-wide:items-stretch main-wide:mb-4"
+        )}
       >
         <div className="flex-1 space-y-2">
           <p>{t("content1")}</p>
@@ -64,22 +65,21 @@ export function AboutContent2() {
           </p>
         </div>
         <div
-          className={
-            "shrink-0 relative " +
-            "max-w-full w-60 h-28 " +
+          className={clsx(
+            "shrink-0 relative",
+            "max-w-full w-60 h-28",
             "main-wide:basis-3/12 main-wide:w-auto main-wide:min-h-full"
-          }
+          )}
         >
           <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
           <div
-            className={
-              "absolute " +
-              (nikochanPhase === 0
-                ? "-translate-y-28 translate-x-14"
-                : nikochanPhase === 1
-                  ? "transition ease-linear duration-700"
-                  : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125")
-            }
+            className={clsx(
+              "absolute",
+              nikochanPhase === 0 && "-translate-y-28 translate-x-14",
+              nikochanPhase === 1 && "transition ease-linear duration-700",
+              nikochanPhase === 2 &&
+                "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+            )}
             style={{
               /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
               width: 20,
@@ -99,22 +99,22 @@ export function AboutContent2() {
         </div>
       </div>
       <div
-        className={
-          "flex flex-col space-y-2 items-center " +
-          "main-wide:flex-row-reverse main-wide:space-y-0 main-wide:space-x-2 " +
-          "main-wide:mb-4 "
-        }
+        className={clsx(
+          "flex flex-col space-y-2 items-center",
+          "main-wide:flex-row-reverse main-wide:space-y-0 main-wide:space-x-2",
+          "main-wide:mb-4"
+        )}
       >
         <div className="flex-1 space-y-2 text-center">
           <p>{t("content3")}</p>
           <p>{t("content4")}</p>
         </div>
         <div
-          className={
-            "shrink-0 relative " +
-            "max-w-full w-60 h-28 " +
+          className={clsx(
+            "shrink-0 relative",
+            "max-w-full w-60 h-28",
             "main-wide:basis-3/12 main-wide:w-auto main-wide:min-h-full"
-          }
+          )}
         >
           <div className="absolute top-0 left-0">
             <span className="inline-block text-lg w-6 text-right">{chain}</span>
@@ -122,14 +122,13 @@ export function AboutContent2() {
           </div>
           <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
           <div
-            className={
-              "absolute " +
-              (nikochanPhase === 0
-                ? "-translate-y-28 translate-x-14"
-                : nikochanPhase === 1
-                  ? "transition ease-linear duration-700"
-                  : "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125")
-            }
+            className={clsx(
+              "absolute",
+              nikochanPhase === 0 && "-translate-y-28 translate-x-14",
+              nikochanPhase === 1 && "transition ease-linear duration-700",
+              nikochanPhase === 2 &&
+                "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125"
+            )}
             style={{
               /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
               width: 20 * 1.5,

@@ -1,3 +1,4 @@
+import clsx from "clsx/lite";
 import {
   emptyLevel,
   copyLevel,
@@ -140,14 +141,12 @@ export default function LevelTab(props: Props) {
         {props.chart?.levels.map((level, i) => (
           <li key={i}>
             <button
-              className={
+              className={clsx(
                 i === props.currentLevelIndex
-                  ? "text-blue-600 dark:text-blue-400 "
-                  : "hover:text-slate-500 hover:dark:text-stone-400 " +
-                    (level.unlisted
-                      ? "text-slate-400 dark:text-stone-600 "
-                      : "")
-              }
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "hover:text-slate-500 hover:dark:text-stone-400",
+                level.unlisted && "text-slate-400 dark:text-stone-600"
+              )}
               onClick={() => props.setCurrentLevelIndex(i)}
             >
               <span className="inline-block w-5 translate-y-0.5">
@@ -163,23 +162,20 @@ export default function LevelTab(props: Props) {
                 <span className="text-sm mr-2">{t("unlisted")}</span>
               )}
               <span
-                className={
-                  "inline-block mr-2 " +
-                  (i === props.currentLevelIndex
-                    ? levelColors[levelTypes.indexOf(level.type)]
-                    : "")
-                }
+                className={clsx(
+                  "inline-block mr-2",
+                  i === props.currentLevelIndex &&
+                    levelColors[levelTypes.indexOf(level.type)]
+                )}
               >
                 <span className="text-sm">{level.type}-</span>
                 <span className="text-lg">{levelsDifficulty[i]}</span>
               </span>
               <span
-                className={
-                  "inline-block " +
-                  (level.notes.length
-                    ? ""
-                    : "text-slate-400 dark:text-stone-600 ")
-                }
+                className={clsx(
+                  "inline-block",
+                  level.notes.length || "text-slate-400 dark:text-stone-600"
+                )}
               >
                 ({level.notes.length} notes)
               </span>
@@ -208,9 +204,10 @@ export default function LevelTab(props: Props) {
               <CheckBox
                 key={t}
                 value={t === currentLevel.type}
-                className={
-                  "ml-2 " + (t === currentLevel.type ? levelColors[i] : "")
-                }
+                className={clsx(
+                  "ml-2",
+                  t === currentLevel.type && levelColors[i]
+                )}
                 onChange={() => {
                   currentLevel.type = t;
                   props.changeChart({ ...props.chart! });

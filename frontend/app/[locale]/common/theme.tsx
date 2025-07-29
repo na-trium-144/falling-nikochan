@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
@@ -124,7 +125,7 @@ export function ThemeSwitcher(props: { children: ReactNode }) {
   const t = useTranslations("footer");
 
   return (
-    <span className={"inline-block relative " + linkStyle1}>
+    <span className={clsx("inline-block relative", linkStyle1)}>
       <select
         className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
         value={String(theme)}

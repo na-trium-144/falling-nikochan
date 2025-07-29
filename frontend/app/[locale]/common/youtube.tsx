@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { useEffect, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { SlimeSVG } from "./slime";
@@ -136,10 +137,11 @@ export function FlexYouTube(props: Props) {
   }, [id, control, ytPlayer]);
   return (
     <div
-      className={
-        "relative " + props.className
-        /* + " flex justify-center items-center"*/
-      }
+      className={clsx(
+        "relative",
+        props.className
+        /* "flex justify-center items-center" */
+      )}
       style={{
         ...props.style,
         width: fixedSide === "height" && height ? (height * 16) / 9 : undefined,

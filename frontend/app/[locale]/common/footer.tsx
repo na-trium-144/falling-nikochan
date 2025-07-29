@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import Comment from "@icon-park/react/lib/icons/Comment";
 import Edit from "@icon-park/react/lib/icons/Edit";
 import Home from "@icon-park/react/lib/icons/Home";
@@ -44,16 +45,16 @@ export function PCFooter(props: Props) {
     <footer className="py-3 hidden main-wide:block relative text-center ">
       {props.nav && (
         <div
-          className={
-            "text-center mb-2 divide-solid divide-slate-800 dark:divide-stone-300 " +
-            "flex items-stretch w-max mx-auto " +
-            "divide-x flex-row "
-          }
+          className={clsx(
+            "text-center mb-2 divide-solid divide-slate-800 dark:divide-stone-300",
+            "flex items-stretch w-max mx-auto",
+            "divide-x flex-row"
+          )}
         >
           {pcTabTitleKeys.map((key, i) => (
             <LinkWithReview
               key={i}
-              className={"px-2 " + linkStyle1}
+              className={clsx("px-2", linkStyle1)}
               href={`/${props.locale}${tabURLs[key]}`}
             >
               {tm(key + ".title")}
@@ -61,10 +62,10 @@ export function PCFooter(props: Props) {
           ))}
         </div>
       )}
-      <div className={"flex-row items-baseline space-x-3"}>
+      <div className={clsx("flex-row items-baseline space-x-3")}>
         <div className="inline-block relative">
           <button
-            className={"inline-block relative " + linkStyle1}
+            className={clsx("inline-block relative", linkStyle1)}
             onClick={() => {
               setShowChangeLog(!showChangeLog);
             }}
@@ -73,10 +74,10 @@ export function PCFooter(props: Props) {
             <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
             <Comment className="inline-block translate-y-0.5 " />
             <span
-              className={
-                "absolute w-3 h-3 rounded-full bg-red-500 " +
-                (isLastVisitedOld ? "inline-block " : "hidden ")
-              }
+              className={clsx(
+                "absolute w-3 h-3 rounded-full bg-red-500",
+                isLastVisitedOld ? "inline-block" : "hidden"
+              )}
               style={{ top: "-0.1rem", right: "-0.25rem" }}
             />
           </button>
@@ -114,19 +115,19 @@ export function MobileFooter(props: MobileProps) {
     : ["#1d293d" /*slate-800*/, "#62748e" /*slate-500*/];
   return (
     <footer
-      className={
-        "pt-3 pb-1 z-10 w-full " +
-        "main-wide:h-0 main-wide:p-0! " +
+      className={clsx(
+        "pt-3 pb-1 z-10 w-full",
+        "main-wide:h-0 main-wide:p-0!",
         "flex flex-row items-center justify-stretch relative"
-      }
+      )}
     >
       {mobileTabTitleKeys.map((key, i) => (
         <LinkWithReview
           key={i}
-          className={
-            "w-full text-xl space-y-1 flex flex-col items-center main-wide:hidden " +
-            (props.tabKey === key ? "" : "text-slate-500 dark:text-stone-400 ")
-          }
+          className={clsx(
+            "w-full text-xl space-y-1 flex flex-col items-center main-wide:hidden",
+            props.tabKey === key || "text-slate-500 dark:text-stone-400"
+          )}
           href={`/${props.locale}${tabURLs[key]}`}
         >
           {i === 0 ? (

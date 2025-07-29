@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { FourthNote } from "@/common/fourthNote.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";
@@ -150,7 +151,7 @@ export default function BPMSign(props: Props) {
 
   return (
     <div
-      className={"-z-20 absolute origin-bottom-left " + props.className}
+      className={clsx("-z-20 absolute origin-bottom-left", props.className)}
       style={{
         bottom: "100%",
         left: "0.8rem",
@@ -162,20 +163,20 @@ export default function BPMSign(props: Props) {
         style={{ borderRadius: "100%/6px" }}
       />
       <div
-        className={
-          "rounded-sm mb-6 py-1 px-1.5 overflow-hidden " +
-          "bg-amber-500 bg-gradient-to-t from-amber-600 to-amber-500 " +
-          "dark:bg-amber-800 dark:from-amber-900 dark:to-amber-800 " +
-          "border-b-2 border-r-2 border-amber-800 dark:border-amber-950 " +
-          "transition-transform duration-100 " +
-          (flip ? "scale-x-0 " : "scale-x-100 ")
-        }
+        className={clsx(
+          "rounded-sm mb-6 py-1 px-1.5 overflow-hidden",
+          "bg-amber-500 bg-gradient-to-t from-amber-600 to-amber-500",
+          "dark:bg-amber-800 dark:from-amber-900 dark:to-amber-800",
+          "border-b-2 border-r-2 border-amber-800 dark:border-amber-950",
+          "transition-transform duration-100",
+          flip ? "scale-x-0" : "scale-x-100"
+        )}
       >
         <div
-          className={
-            "flex flex-row items-baseline w-22 overflow-hidden " +
-            (chartSeq === null ? "invisible " : "")
-          }
+          className={clsx(
+            "flex flex-row items-baseline w-22 overflow-hidden",
+            chartSeq === null && "invisible"
+          )}
         >
           <span className="flex-none text-xl w-max">
             <FourthNote />
@@ -190,9 +191,9 @@ export default function BPMSign(props: Props) {
         </div>
         {hasExplicitSpeedChange && (
           <div
-            className={
-              "flex flex-row items-baseline w-15 m-auto overflow-visible "
-            }
+            className={clsx(
+              "flex flex-row items-baseline w-15 m-auto overflow-visible"
+            )}
           >
             <span className="flex-none text-sm/3 w-max">
               <SmilingFace className="inline-block align-bottom " />

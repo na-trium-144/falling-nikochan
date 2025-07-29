@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
@@ -16,10 +17,10 @@ function Cloud(props: CProps) {
 
   return (
     <div
-      className={
-        "absolute top-0 " +
-        (props.left ? "origin-top-left" : "origin-top-right")
-      }
+      className={clsx(
+        "absolute top-0",
+        props.left ? "origin-top-left" : "origin-top-right"
+      )}
       style={{
         left: props.left ? 0.75 * playUIScale + "rem" : undefined,
         right: props.left ? undefined : 0.75 * playUIScale + "rem",
@@ -34,7 +35,7 @@ function Cloud(props: CProps) {
         className="absolute inset-0 -z-10 "
       />
       <div
-        className={props.className}
+        className={clsx(props.className)}
         style={{
           width: 225,
           height: 115,
@@ -131,10 +132,10 @@ export function ChainDisp(props: ChainProps) {
   ];
   return (
     <Cloud
-      className={
-        "flex flex-col " +
-        (props.chain >= 100 ? "text-orange-500 dark:text-yellow-400 " : "")
-      }
+      className={clsx(
+        "flex flex-col",
+        props.chain >= 100 && "text-orange-500 dark:text-yellow-400"
+      )}
       left
     >
       <div

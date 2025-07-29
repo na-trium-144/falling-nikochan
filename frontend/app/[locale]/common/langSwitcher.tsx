@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { linkStyle1 } from "./linkStyle";
@@ -15,7 +16,7 @@ interface LangProps {
 export function LangSwitcher(props: LangProps) {
   const router = useRouter();
   return (
-    <span className={"inline-block relative " + linkStyle1}>
+    <span className={clsx("inline-block relative", linkStyle1)}>
       <select
         className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
         value={props.locale}

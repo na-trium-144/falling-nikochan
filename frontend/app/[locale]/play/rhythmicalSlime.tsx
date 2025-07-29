@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import clsx from "clsx/lite";
 import {
   BPMChange,
   BPMChange1,
@@ -168,7 +169,7 @@ export default function RhythmicalSlime(props: Props) {
 
   return (
     <div
-      className={props.className + " flex flex-row-reverse "}
+      className={clsx(props.className, "flex flex-row-reverse")}
       style={props.style}
     >
       {Array.from(new Array(maxSlimeNum)).map((_, i) => (

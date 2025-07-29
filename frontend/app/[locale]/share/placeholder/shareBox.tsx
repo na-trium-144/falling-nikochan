@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { PlayOption } from "./playOption.js";
 import {
   ChartBrief,
@@ -45,27 +46,28 @@ export function ShareBox(props: Props) {
   return (
     <>
       <div
-        className={
-          "flex flex-col space-y-2 " +
-          "main-wide:space-y-0 main-wide:flex-row-reverse main-wide:items-center "
-        }
+        className={clsx(
+          "flex flex-col space-y-2",
+          "main-wide:space-y-0 main-wide:flex-row-reverse main-wide:items-center"
+        )}
       >
         <FlexYouTube
           fixedSide="width"
-          className={"w-full main-wide:basis-1/3 share-yt-wide:w-80 "}
+          className={clsx("w-full main-wide:basis-1/3 share-yt-wide:w-80")}
           id={brief?.ytId}
           control={true}
           ytPlayer={ytPlayer}
         />
         <div className="main-wide:flex-1 main-wide:self-start">
           <div
-            className={
-              "mb-2 " + (props.forceShowCId ? "" : "hidden main-wide:block ")
-            }
+            className={clsx(
+              "mb-2",
+              props.forceShowCId || "hidden main-wide:block"
+            )}
           >
             {props.backButton && (
               <button
-                className={pagerButtonClass + "mr-4 "}
+                className={clsx(pagerButtonClass, "mr-4")}
                 onClick={props.backButton}
               >
                 <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
@@ -126,7 +128,7 @@ export function ShareBox(props: Props) {
             {t("shareLink")}:
           </span>
           <a
-            className={"inline-block py-2 " + linkStyle1}
+            className={clsx("inline-block py-2", linkStyle1)}
             href={shareLink.path}
             onClick={(e) => e.preventDefault()}
           >

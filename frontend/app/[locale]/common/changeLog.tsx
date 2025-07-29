@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
@@ -42,28 +43,28 @@ export function ChangeLogPopup(props: PopupProps) {
     popupOpened && (
       <>
         <div
-          className={"fixed z-20 inset-0 "}
+          className={clsx("fixed z-20 inset-0")}
           onClick={(e) => {
             props.onClose();
             e.stopPropagation();
           }}
         />
         <Box
-          className={
-            "absolute bottom-full left-1/2 -translate-x-2/4 z-30 origin-bottom " +
-            "shadow-lg " +
-            "transition-all duration-200 " +
-            (popupAppearing
-              ? "ease-in scale-100 opacity-100 "
-              : "ease-out scale-0 opacity-0 ")
-          }
+          className={clsx(
+            "absolute bottom-full left-1/2 -translate-x-2/4 z-30 origin-bottom",
+            "shadow-lg",
+            "transition-all duration-200",
+            popupAppearing
+              ? "ease-in scale-100 opacity-100"
+              : "ease-out scale-0 opacity-0"
+          )}
         >
           <div
-            className={
-              "w-120 m-4 h-80 overflow-hidden " +
-              "bg-gradient-to-t bg-clip-text text-transparent to-15% from-3% " +
-              "from-slate-800/0 to-slate-800 dark:from-stone-300/0 dark:to-stone-300 "
-            }
+            className={clsx(
+              "w-120 m-4 h-80 overflow-hidden",
+              "bg-gradient-to-t bg-clip-text text-transparent to-15% from-3%",
+              "from-slate-800/0 to-slate-800 dark:from-stone-300/0 dark:to-stone-300"
+            )}
           >
             <p className="">
               <span className="inline-block">Falling Nikochan</span>
@@ -80,9 +81,9 @@ export function ChangeLogPopup(props: PopupProps) {
             <h3 className="text-xl font-bold font-title">{t("changelog")}</h3>
             <div className="text-left ">{changeLog}</div>
           </div>
-          <div className={"absolute bottom-4 inset-x-0 "}>
+          <div className={clsx("absolute bottom-4 inset-x-0")}>
             <Link
-              className={"block w-max mx-auto mt-2 " + linkStyle1}
+              className={clsx("block w-max mx-auto mt-2", linkStyle1)}
               href={`/${props.locale}/main/version`}
               prefetch={!process.env.NO_PREFETCH}
             >

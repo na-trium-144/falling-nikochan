@@ -1,5 +1,6 @@
 "use client";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
+import clsx from "clsx/lite";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
@@ -39,10 +40,10 @@ export default function ChartListPage(props: PProps) {
       boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
       <h3
-        className={
-          "flex-none mb-2 text-xl font-bold font-title " +
-          "hidden main-wide:block "
-        }
+        className={clsx(
+          "flex-none mb-2 text-xl font-bold font-title",
+          "hidden main-wide:block"
+        )}
       >
         {props.title}
       </h3>
@@ -333,10 +334,10 @@ export function ChartList(props: Props) {
           ) : (
             <li
               key={i}
-              className={
-                "w-full max-w-108 mx-auto h-10 rounded " +
-                "bg-sky-200/25 dark:bg-orange-800/10 "
-              }
+              className={clsx(
+                "w-full max-w-108 mx-auto h-10 rounded",
+                "bg-sky-200/25 dark:bg-orange-800/10"
+              )}
             />
           )
         )}
@@ -370,11 +371,11 @@ export function ChartList(props: Props) {
       briefs.filter((b) => b !== null).length > maxRow ? (
         props.onMoreClick ? (
           <button
-            className={
-              "block w-max mx-auto mt-2 " +
-              (firstFetchingIndex >= 0 ? "invisible " : "") +
+            className={clsx(
+              "block w-max mx-auto mt-2",
+              firstFetchingIndex >= 0 && "invisible",
               linkStyle1
-            }
+            )}
             onClick={props.onMoreClick}
           >
             {t("showAll")}
@@ -385,11 +386,11 @@ export function ChartList(props: Props) {
           </button>
         ) : props.moreHref ? (
           <Link
-            className={
-              "block w-max mx-auto mt-2 " +
-              (firstFetchingIndex >= 0 ? "invisible " : "") +
+            className={clsx(
+              "block w-max mx-auto mt-2",
+              firstFetchingIndex >= 0 && "invisible",
               linkStyle1
-            }
+            )}
             href={props.moreHref}
             prefetch={!process.env.NO_PREFETCH}
           >
@@ -436,15 +437,15 @@ export function ChartListItem(props: CProps) {
   // ~54rem: 2列 -> 18~27rem
   // ~72rem: 3列 -> 18~24rem
   return (
-    <li className={"w-full max-w-108 mx-auto h-max "}>
+    <li className={clsx("w-full max-w-108 mx-auto h-max")}>
       {props.onClick || (props.newTab && !isStandalone) ? (
         <>
           <a
             href={props.href}
-            className={
-              chartListStyle +
-              (props.onClickMobile ? "hidden main-wide:block " : "")
-            }
+            className={clsx(
+              chartListStyle,
+              props.onClickMobile && "hidden main-wide:block"
+            )}
             target={props.newTab ? "_blank" : undefined}
             onClick={
               props.onClick
@@ -460,7 +461,7 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={chartListStyle + "main-wide:hidden "}
+              className={clsx(chartListStyle, "main-wide:hidden")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
@@ -473,7 +474,7 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={chartListStyle}
+          className={clsx(chartListStyle)}
           prefetch={!process.env.NO_PREFETCH}
         >
           <ChartListItemChildren {...props} />
@@ -533,10 +534,10 @@ function ChartListItemChildren(props: CProps) {
           )}
           {props.creator && (
             <span
-              className={
-                "inline-block leading-3 max-w-full " +
-                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis "
-              }
+              className={clsx(
+                "inline-block leading-3 max-w-full",
+                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis"
+              )}
             >
               <span className="ml-2 text-xs/3">by</span>
               <span className="ml-1 font-title text-sm/3">
@@ -597,7 +598,7 @@ function DateDiff(props: DProps) {
   }, [props.date]);
 
   if (output) {
-    return <span className={props.className}>({output})</span>;
+    return <span className={clsx(props.className)}>({output})</span>;
   } else {
     return null;
   }

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)
@@ -32,16 +33,15 @@ export default function Input(props: Props) {
   return (
     <input
       type={props.passwd ? "password" : "text"}
-      className={
-        "mx-1 px-1 font-main-ui text-base " +
-        (!props.left ? "text-right " : "") +
-        "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none " +
-        (props.isValid && !props.isValid(value) ? "text-red-500 " : "") +
-        (props.disabled
-          ? "text-slate-400 border-slate-200 dark:text-stone-600 dark:border-stone-700 "
-          : "") +
-        (props.className || "")
-      }
+      className={clsx(
+        "mx-1 px-1 font-main-ui text-base",
+        !props.left && "text-right",
+        "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none",
+        props.isValid && !props.isValid(value) && "text-red-500",
+        props.disabled &&
+          "text-slate-400 border-slate-200 dark:text-stone-600 dark:border-stone-700",
+        props.className
+      )}
       value={value}
       onKeyDown={(e) => e.stopPropagation()}
       onKeyUp={(e) => e.stopPropagation()}

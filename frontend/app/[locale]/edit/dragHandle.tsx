@@ -1,5 +1,6 @@
 "use client";
 import { ReactNode, useState } from "react";
+import clsx from "clsx/lite";
 
 interface Props {
   className?: string;
@@ -13,11 +14,11 @@ export default function DragHandle(props: Props) {
   // なぜかドラッグ中のカーソルがcursor-grabbingにならない なぜ?
   return (
     <div
-      className={
-        props.className +
-        " z-10 " +
-        (dragging ? "cursor-grabbing " : "cursor-grab ")
-      }
+      className={clsx(
+        props.className,
+        "z-10",
+        dragging ? "cursor-grabbing" : "cursor-grab"
+      )}
       style={props.style}
       onPointerMove={(e) => {
         if (dragging) {

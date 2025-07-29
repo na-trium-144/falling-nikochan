@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
 import {
   createContext,
@@ -176,11 +177,11 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
       {props.children}
       {modalOpened && (
         <div
-          className={
-            modalBg +
-            "transition-opacity duration-200 z-30! " +
-            (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
-          }
+          className={clsx(
+            modalBg,
+            "transition-opacity duration-200 z-30!",
+            modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
+          )}
           onClick={closeModal}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
@@ -188,15 +189,15 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
           <div className="absolute inset-12">
             <Box
               onClick={(e) => e.stopPropagation()}
-              className={
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
-                "flex flex-col items-center text-center " +
-                "p-6 " +
-                "shadow-lg " +
-                "overflow-y-auto " +
-                "transition-transform duration-200 origin-center " +
-                (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
-              }
+              className={clsx(
+                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
+                "flex flex-col items-center text-center",
+                "p-6",
+                "shadow-lg",
+                "overflow-y-auto",
+                "transition-transform duration-200 origin-center",
+                modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
+              )}
             >
               <p className="text-lg font-title font-bold mb-2">
                 &lt; {t("shareImage")} &gt;

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
 import { linkStyle3 } from "@/common/linkStyle";
 import { SmallDomainShare } from "@/common/small";
@@ -16,11 +17,11 @@ export function AboutContent3({ locale }: { locale: string }) {
   return (
     <>
       <div
-        className={
-          "flex flex-row space-x-2 mb-4 items-center " +
-          "main-wide:flex-col main-wide:space-x-0 main-wide:space-y-2 " +
-          "main-wide:mb-4 "
-        }
+        className={clsx(
+          "flex flex-row space-x-2 mb-4 items-center",
+          "main-wide:flex-col main-wide:space-x-0 main-wide:space-y-2",
+          "main-wide:mb-4"
+        )}
       >
         <div className="flex-1 space-y-2 text-center">
           <p>{t("content1")}</p>
@@ -43,7 +44,7 @@ export function AboutContent3({ locale }: { locale: string }) {
               linkPolicies: (c) => (
                 <Link
                   href={`/${locale}/main/policies`}
-                  className={linkStyle3}
+                  className={clsx(linkStyle3)}
                   prefetch={!process.env.NO_PREFETCH}
                 >
                   {c}
@@ -54,18 +55,18 @@ export function AboutContent3({ locale }: { locale: string }) {
         </div>
         {screenWidth >= 25 * rem && (
           <Box
-            className={
-              "rounded-none! relative " +
-              "basis-1/3 shrink max-w-32 h-48 " +
-              "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24 "
-            }
+            className={clsx(
+              "rounded-none! relative",
+              "basis-1/3 shrink max-w-32 h-48",
+              "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24"
+            )}
           >
             <div
-              className={
-                "absolute bg-amber-600 rounded-sm m-1 " +
-                "top-0 inset-x-0 p-1 pl-10 h-12 " +
-                "main-wide:left-auto main-wide:pl-1 main-wide:pb-3 main-wide:w-20 main-wide:h-14 "
-              }
+              className={clsx(
+                "absolute bg-amber-600 rounded-sm m-1",
+                "top-0 inset-x-0 p-1 pl-10 h-12",
+                "main-wide:left-auto main-wide:pl-1 main-wide:pb-3 main-wide:w-20 main-wide:h-14"
+              )}
             >
               <div className="bg-black w-full h-full text-center flex items-center justify-center">
                 <Youtube

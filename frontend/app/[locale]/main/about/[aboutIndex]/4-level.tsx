@@ -1,3 +1,4 @@
+import clsx from "clsx/lite";
 import { levelTypes } from "@falling-nikochan/chart";
 import { levelColors } from "@/common/levelColors";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
@@ -13,7 +14,9 @@ export async function AboutContent4(props: Props) {
         <p>
           {t.rich("content1", {
             level: (c) => (
-              <span className={"inline-block ml-0.5 " + levelColors[Number(c)]}>
+              <span
+                className={clsx("inline-block ml-0.5", levelColors[Number(c)])}
+              >
                 <span className="text-sm">{levelTypes[Number(c)]}-</span>
                 <span className="">{4 + Number(c) * 4}</span>
               </span>
@@ -23,7 +26,7 @@ export async function AboutContent4(props: Props) {
         <p>
           {t.rich("content2", {
             level: (c) => (
-              <span className={"mx-1 " + levelColors[Number(c)]}>
+              <span className={clsx("mx-1", levelColors[Number(c)])}>
                 {levelTypes[Number(c)]}
               </span>
             ),

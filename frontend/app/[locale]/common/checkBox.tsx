@@ -1,3 +1,4 @@
+import clsx from "clsx/lite";
 import CheckCorrect from "@icon-park/react/lib/icons/CheckCorrect";
 import Square from "@icon-park/react/lib/icons/Square";
 
@@ -11,12 +12,12 @@ interface Props {
 export default function CheckBox(props: Props) {
   return (
     <button
-      className={
-        "hover:text-slate-500 disabled:text-slate-400 " +
-        "hover:dark:text-stone-500 disabled:dark:text-stone-600 " +
-        "text-left pl-5 " +
+      className={clsx(
+        "hover:text-slate-500 disabled:text-slate-400",
+        "hover:dark:text-stone-500 disabled:dark:text-stone-600",
+        "text-left pl-5",
         props.className
-      }
+      )}
       onClick={() => props.onChange(!props.value)}
       disabled={props.disabled}
     >

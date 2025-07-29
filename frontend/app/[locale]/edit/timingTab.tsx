@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import Input from "@/common/input.js";
 import {
   Step,
@@ -116,7 +117,7 @@ export default function TimingTab(props: Props) {
         <HelpIcon>{t.rich("ytEndHelp", { br: () => <br /> })}</HelpIcon>
         <CheckBox
           value={props.currentLevel?.ytEnd === "note"}
-          className={"ml-2 "}
+          className={clsx("ml-2")}
           onChange={() => props.setYTEnd("note")}
         >
           {t("ytEndAuto")}
@@ -127,7 +128,7 @@ export default function TimingTab(props: Props) {
         </CheckBox>
         <CheckBox
           value={props.currentLevel?.ytEnd === "yt"}
-          className={"ml-2 "}
+          className={clsx("ml-2")}
           onChange={() => props.setYTEnd("yt")}
         >
           {t("ytEndFull")}
@@ -137,7 +138,7 @@ export default function TimingTab(props: Props) {
         </CheckBox>
         <CheckBox
           value={typeof props.currentLevel?.ytEnd === "number"}
-          className={"ml-2 "}
+          className={clsx("ml-2")}
           onChange={() => props.setYTEnd(props.currentLevel?.ytEndSec || 0)}
         >
           {t("ytEndAt")}
@@ -594,7 +595,7 @@ function InputSig(props: PropsS) {
   return (
     <>
       <Input
-        className={"w-8 " + props.className}
+        className={clsx("w-8", props.className)}
         actualValue={num.toString()}
         updateValue={(v: string) => {
           props.updateValue(
@@ -609,9 +610,9 @@ function InputSig(props: PropsS) {
         isValid={beatNumValid}
         disabled={props.disabled}
       />
-      <span className={"mx-1 " + props.className}>/</span>
+      <span className={clsx("mx-1", props.className)}>/</span>
       <Input
-        className={"w-8 " + props.className}
+        className={clsx("w-8", props.className)}
         actualValue={(denom * 4).toString()}
         updateValue={(v: string) => {
           props.updateValue(
