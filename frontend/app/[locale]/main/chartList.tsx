@@ -279,7 +279,7 @@ export function ChartList(props: Props) {
     if (props.containerRef?.current) {
       props.containerRef.current.addEventListener("scroll", onScroll);
       return () =>
-        props.containerRef?.current.removeEventListener("scroll", onScroll);
+        props.containerRef?.current?.removeEventListener("scroll", onScroll);
     }
   }, [props.containerRef, padHeightForScroll, itemMinHeight, rem]);
 

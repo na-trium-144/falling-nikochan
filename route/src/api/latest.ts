@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
-import { isSample, numLatest } from "@falling-nikochan/chart";
+import { isSample } from "@falling-nikochan/chart";
 
 const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
