@@ -334,15 +334,16 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
           <>
             <SlimeSVG />
             {t("updating")}
-            {workerUpdate?.progressSize !== undefined && (
+            {/*workerUpdate?.progressSize !== undefined && (
               <span className="ml-2 text-sm">
                 (
                 <span className="inline-block mr-1 min-w-max w-8 text-center">
+                  {/* 不正確? 実際にはダウンロード時も保存時も圧縮されている * /}
                   {(workerUpdate.progressSize / 1024 / 1024).toFixed(2)}
                 </span>
                 MB)
               </span>
-            )}
+            )*/}
             {workerUpdate?.progressNum !== undefined && (
               <ProgressBar
                 className="absolute! bottom-0 inset-x-1 "
