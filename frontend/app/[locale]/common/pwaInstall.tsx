@@ -16,7 +16,7 @@ import { Box, WarningBox } from "./box";
 import { SlimeSVG } from "./slime";
 import { levelBgColors } from "./levelColors";
 import ProgressBar from "./progressBar";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 
 export function useStandaloneDetector() {
@@ -310,6 +310,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   }, [deferredPrompt]);
 
   const t = useTranslations("main.pwa");
+  const pathname = usePathname();
 
   return (
     <PWAContext.Provider
@@ -326,7 +327,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         className={clsx(
           "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg",
           "transition-all duration-200 origin-bottom",
-          workerUpdate !== null
+          workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
             ? "ease-in scale-100 opacity-100"
             : "ease-out scale-0 opacity-0"
         )}
