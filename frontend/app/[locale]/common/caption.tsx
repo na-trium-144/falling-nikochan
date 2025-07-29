@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import Help from "@icon-park/react/lib/icons/Help";
 import { createContext, ReactNode, useContext, useRef, useState } from "react";
 

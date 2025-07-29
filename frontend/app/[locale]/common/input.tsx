@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)

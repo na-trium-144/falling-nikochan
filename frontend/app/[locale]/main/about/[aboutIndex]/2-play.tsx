@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { Key } from "@/common/key.js";
 import TargetLine from "@/common/targetLine.js";
 import { useTranslations } from "next-intl";

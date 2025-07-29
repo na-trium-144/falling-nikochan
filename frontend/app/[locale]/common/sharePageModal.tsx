@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { titleShare, titleWithSiteName } from "@/common/title";
 import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
 import {

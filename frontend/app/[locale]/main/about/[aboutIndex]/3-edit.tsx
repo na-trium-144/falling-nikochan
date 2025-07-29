@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
 import { linkStyle3 } from "@/common/linkStyle";
 import { SmallDomainShare } from "@/common/small";

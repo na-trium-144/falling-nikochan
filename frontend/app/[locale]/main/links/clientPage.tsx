@@ -1,6 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { IndexMain } from "../main";
 import { ExternalLink } from "@/common/extLink";
 import DownOne from "@icon-park/react/lib/icons/DownOne";

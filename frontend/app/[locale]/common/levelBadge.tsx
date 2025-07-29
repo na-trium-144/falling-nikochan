@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import FiveStarBadge from "@icon-park/react/lib/icons/FiveStarBadge";
 import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
 import { ResultData } from "./bestScore";

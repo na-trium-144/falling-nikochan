@@ -20,7 +20,7 @@ const exampleResult = {
   bigCount: 55,
 } as const;
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {

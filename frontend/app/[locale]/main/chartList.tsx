@@ -1,6 +1,6 @@
 "use client";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";

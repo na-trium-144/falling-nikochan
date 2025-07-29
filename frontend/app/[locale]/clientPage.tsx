@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import Link from "next/link";
 import { linkStyle1, linkStyle3 } from "./common/linkStyle.js";
 import Title from "./common/titleLogo.js";

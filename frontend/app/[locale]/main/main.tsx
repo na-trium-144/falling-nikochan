@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { MobileHeader } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import {

@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { Box } from "@/common/box";
 import { levelColors } from "@/common/levelColors";
 import { JudgeIcon } from "@/play/statusBox";

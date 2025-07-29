@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { PlayOption } from "./playOption.js";
 import {
   ChartBrief,

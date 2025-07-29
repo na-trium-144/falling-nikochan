@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import Button, { buttonStyle } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";

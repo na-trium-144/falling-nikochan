@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";

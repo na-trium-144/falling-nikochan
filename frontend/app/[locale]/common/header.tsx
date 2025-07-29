@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { ReactNode } from "react";
 import { pagerButtonClass } from "./pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";

@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
 
 export const modalBg =

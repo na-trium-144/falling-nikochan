@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";

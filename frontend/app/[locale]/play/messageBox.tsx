@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";

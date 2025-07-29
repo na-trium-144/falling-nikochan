@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";

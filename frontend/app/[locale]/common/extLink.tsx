@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle.js";
 import { useStandaloneDetector } from "./pwaInstall";
 import Link from "next/link";

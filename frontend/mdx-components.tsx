@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { ExternalLink } from "@/common/extLink";
 import { linkStyle3 } from "@/common/linkStyle";
 import type { MDXComponents } from "mdx/types";

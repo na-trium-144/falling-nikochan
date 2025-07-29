@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { linkStyle1 } from "./linkStyle";

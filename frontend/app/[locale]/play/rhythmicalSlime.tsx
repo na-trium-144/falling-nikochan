@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import {
   BPMChange,
   BPMChange1,

@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { memo, RefObject, useEffect, useRef, useState } from "react";
 import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";

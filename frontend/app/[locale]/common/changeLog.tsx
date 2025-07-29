@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";

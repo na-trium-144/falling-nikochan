@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";

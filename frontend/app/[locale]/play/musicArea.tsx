@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
 import { levelBgColors } from "@/common/levelColors";
 import ProgressBar from "@/common/progressBar.js";

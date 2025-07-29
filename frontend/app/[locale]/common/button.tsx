@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { ReactNode } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";

@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 interface Props {
   className?: string;
   style?: object;

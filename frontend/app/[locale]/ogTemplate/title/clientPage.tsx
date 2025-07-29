@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";

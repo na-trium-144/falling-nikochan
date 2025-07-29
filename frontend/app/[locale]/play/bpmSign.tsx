@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { FourthNote } from "@/common/fourthNote.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useRef, useState } from "react";

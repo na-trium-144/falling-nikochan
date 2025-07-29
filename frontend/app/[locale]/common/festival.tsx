@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ExternalLink } from "./extLink";

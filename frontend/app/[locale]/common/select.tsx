@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import Down from "@icon-park/react/lib/icons/Down";
 import { buttonStyle, buttonStyleDisabled } from "./button.js";
 

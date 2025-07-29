@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import Comment from "@icon-park/react/lib/icons/Comment";
 import Edit from "@icon-park/react/lib/icons/Edit";
 import Home from "@icon-park/react/lib/icons/Home";

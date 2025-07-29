@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
 import {
   createContext,

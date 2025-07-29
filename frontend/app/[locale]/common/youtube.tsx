@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { useEffect, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { SlimeSVG } from "./slime";

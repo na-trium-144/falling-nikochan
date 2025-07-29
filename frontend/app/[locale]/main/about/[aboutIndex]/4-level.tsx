@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import { levelTypes } from "@falling-nikochan/chart";
 import { levelColors } from "@/common/levelColors";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";

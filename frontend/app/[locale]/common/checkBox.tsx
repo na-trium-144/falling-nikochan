@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import clsx from "clsx/lite";
 import CheckCorrect from "@icon-park/react/lib/icons/CheckCorrect";
 import Square from "@icon-park/react/lib/icons/Square";
 
