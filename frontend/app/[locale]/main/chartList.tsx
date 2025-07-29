@@ -170,13 +170,12 @@ export function ChartList(props: Props) {
     : 1;
   // 現在の画面サイズに応じた最大サイズ
   const [pagination, setPagination] = useState<number>(1);
+  const maxRowPerPage = props.containerHeight
+    ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
+    : undefined;
   const maxRow: number =
     props.maxRow ||
-    (props.containerHeight
-      ? Math.ceil(
-          (props.containerHeight * pagination) / (itemMinHeight * rem)
-        ) * ulCols
-      : chartListMaxRow);
+    (props.containerHeight ? maxRowPerPage! * pagination : chartListMaxRow);
   const fetchAll = props.fetchAll;
 
   useEffect(() => {
@@ -269,10 +268,8 @@ export function ChartList(props: Props) {
           props.containerRef.current.scrollHeight - padHeightForScroll
       ) {
         setPagination(
-          Math.floor(
-            props.containerRef.current.scrollHeight /
-              props.containerRef.current.clientHeight
-          ) + 1
+          Math.floor(props.containerRef.current.scrollHeight / maxRowPerPage!) +
+            1
         );
       }
     };
@@ -281,7 +278,13 @@ export function ChartList(props: Props) {
       return () =>
         props.containerRef?.current?.removeEventListener("scroll", onScroll);
     }
-  }, [props.containerRef, padHeightForScroll, itemMinHeight, rem]);
+  }, [
+    props.containerRef,
+    padHeightForScroll,
+    itemMinHeight,
+    rem,
+    maxRowPerPage,
+  ]);
 
   return (
     <div className="relative w-full h-max ">
