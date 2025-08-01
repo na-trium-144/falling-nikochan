@@ -31,7 +31,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.43.0",
+      "version": "12.45.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -40,7 +40,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.43.0",
+      "version": "12.45.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -73,21 +73,21 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.43.0",
+      "version": "12.45.0",
       "dependencies": {
         "next-intl": "^4.3.1",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.43.0",
+      "version": "12.45.0",
       "dependencies": {
         "@hono/node-server": "^1.15.0",
         "@vercel/og": "^0.6.8",
         "@ygoe/msgpack": "^1.0.3",
         "dotenv": "^16.4.7",
         "hono": "^4.8.2",
-        "isbot": "^5.1.28",
+        "isbot": "^5.1.29",
         "moji": "^0.5.1",
         "mongodb": "^6.17.0",
         "sitemap": "^8.0.0",
@@ -98,7 +98,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.43.0",
+      "version": "12.45.0",
     },
   },
   "overrides": {
@@ -1192,7 +1192,7 @@
 
     "isarray": ["isarray@2.0.5", "", {}, "sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw=="],
 
-    "isbot": ["isbot@5.1.28", "", {}, "sha512-qrOp4g3xj8YNse4biorv6O5ZShwsJM0trsoda4y7j/Su7ZtTTfVXFzbKkpgcSoDrHS8FcTuUwcU04YimZlZOxw=="],
+    "isbot": ["isbot@5.1.29", "", {}, "sha512-DelDWWoa3mBoyWTq3wjp+GIWx/yZdN7zLUE7NFhKjAiJ+uJVRkbLlwykdduCE4sPUUy8mlTYTmdhBUYu91F+sw=="],
 
     "isexe": ["isexe@2.0.0", "", {}, "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="],
 
