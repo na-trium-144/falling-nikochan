@@ -348,7 +348,6 @@ self.addEventListener("fetch", (e) => {
     (process.env.ASSET_PREFIX &&
       new URL(e.request.url).origin === process.env.ASSET_PREFIX)
   ) {
-    // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
     return handle(app)(e);
   }
 });
