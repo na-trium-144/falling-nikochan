@@ -7,7 +7,7 @@
   "types": "dist/src/index.d.ts",
   "dependencies": {
     "@hono/node-server": "^1.18.0",
-    "@vercel/og": "^0.6.8",
+    "@vercel/og": "^0.8.5",
     "@ygoe/msgpack": "^1.0.3",
     "dotenv": "^16.6.1",
     "hono": "^4.8.2",
