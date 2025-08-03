@@ -79,7 +79,7 @@ interface EProps {
 function StorageEditor(props: EProps) {
   const [code, setCode_] = useState<string>("");
   const [isError, setIsError] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
+  const [message, setMessage] = useState<string[]>([]);
   const themeState = useTheme();
   const { rem } = useDisplayMode();
   const [showEditor, setShowEditor] = useState<boolean>(false);
@@ -108,9 +108,9 @@ function StorageEditor(props: EProps) {
       if (props.storage) {
         try {
           const oldKeys = Object.keys(props.storage);
-          const newObj = YAML.parse(code);
+          const newObj = YAML.parse(code || "{}");
           const newKeys = Object.keys(newObj);
-          let changes: string = "";
+          const changes: string[] = [];
           for (const key of newKeys) {
             let newValue: string;
             if (
@@ -124,13 +124,15 @@ function StorageEditor(props: EProps) {
               newValue = JSON.stringify(newObj[key]);
             }
             if (props.storage.getItem(key) !== newValue) {
-              changes += `${key}: '${props.storage.getItem(key)}' -> '${newValue}' \n`;
+              changes.push(
+                `${key}: '${props.storage.getItem(key)}' -> '${newValue}'`
+              );
               props.storage.setItem(key, newValue);
             }
           }
           for (const key of oldKeys) {
             if (!newKeys.includes(key)) {
-              changes += `removed ${key}: '${props.storage.getItem(key)}'\n`;
+              changes.push(`removed ${key}: '${props.storage.getItem(key)}'`);
               props.storage.removeItem(key);
             }
           }
@@ -138,7 +140,7 @@ function StorageEditor(props: EProps) {
           setMessage(changes);
         } catch (e) {
           setIsError(true);
-          setMessage(String(e));
+          setMessage([String(e)]);
         }
       }
     },
@@ -181,12 +183,14 @@ function StorageEditor(props: EProps) {
           />
           <div
             className={clsx(
-              "bg-slate-200 dark:bg-stone-700 mt-2 p-1 text-sm rounded-sm",
+              "bg-slate-200 dark:bg-stone-700 mt-2 p-1 text-sm rounded-sm break-all",
               "h-12 max-h-12 overflow-auto",
               isError && "text-red-600 dark:text-red-400"
             )}
           >
-            {message}
+            {message.map((m, i) => (
+              <p key={i}>{m}</p>
+            ))}
           </div>
         </div>
       )}
