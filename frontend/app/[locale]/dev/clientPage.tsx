@@ -113,6 +113,7 @@ function StorageEditor(props: EProps) {
           const newObj = YAML.parse(code || "{}");
           const newKeys = Object.keys(newObj);
           const changes: string[] = [];
+          props.storage.clear();
           for (const key of newKeys) {
             let newValue: string;
             if (
@@ -127,20 +128,18 @@ function StorageEditor(props: EProps) {
             }
             if (!(key in initialStorageData.current)) {
               changes.push(`${key}: '${newValue}' (added)`);
-              props.storage.setItem(key, newValue);
             } else if (initialStorageData.current[key] !== newValue) {
               changes.push(
                 `${key}: '${initialStorageData.current[key]}' -> '${newValue}'`
               );
-              props.storage.setItem(key, newValue);
             }
+            props.storage.setItem(key, newValue);
           }
           for (const key of Object.keys(initialStorageData.current)) {
             if (!newKeys.includes(key)) {
               changes.push(
                 `${key}: removed '${initialStorageData.current[key]}'`
               );
-              props.storage.removeItem(key);
             }
           }
           setIsError(false);
