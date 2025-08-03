@@ -1,3 +1,7 @@
+## ver. 12.46 - 2025/08/04 [#732](https://github.com/na-trium-144/falling-nikochan/pull/732)
+
+* localStorageを編集できるデバッグページ追加 (バージョン情報を7回クリックで表示)
+
 ## ver. 12.45 - 2025/07/30 [#720](https://github.com/na-trium-144/falling-nikochan/pull/720)
 
 * clsx導入、classNameの記述を全置き換え
