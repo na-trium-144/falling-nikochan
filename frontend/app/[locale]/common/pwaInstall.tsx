@@ -84,12 +84,15 @@ export function requestReview(): boolean {
     ) {
       localStorage.setItem("lastReviewDate", Date.now().toString());
       localStorage.removeItem("playCountForReview");
-      console.log("Requesting in-app review");
-      location.href = "nikochan-in-app-review://review";
+      forceRequestReview();
       return true;
     }
   }
   return false;
+}
+export function forceRequestReview() {
+  console.log("Requesting in-app review");
+  location.href = "nikochan-in-app-review://review";
 }
 export function historyBackWithReview() {
   if (requestReview()) {
@@ -98,6 +101,10 @@ export function historyBackWithReview() {
   } else {
     history.back();
   }
+}
+export function historyBackWithForceReview() {
+  forceRequestReview();
+  setTimeout(() => history.back(), 250);
 }
 
 interface LinkProps {

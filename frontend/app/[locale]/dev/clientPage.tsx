@@ -19,6 +19,12 @@ import { linkStyle1 } from "@/common/linkStyle";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Right from "@icon-park/react/lib/icons/Right";
 import Down from "@icon-park/react/lib/icons/Down";
+import {
+  forceRequestReview,
+  historyBackWithForceReview,
+  useAndroidTWADetector,
+} from "@/common/pwaInstall";
+import Button from "@/common/button";
 
 export function DevPage(props: { locale: string }) {
   const t = useTranslations("dev");
@@ -28,6 +34,7 @@ export function DevPage(props: { locale: string }) {
     setLS(localStorage);
     setSS(sessionStorage);
   }, []);
+  const isAndroidTWA = useAndroidTWADetector();
 
   return (
     <main className="w-full h-full overflow-clip ">
@@ -54,6 +61,14 @@ export function DevPage(props: { locale: string }) {
             </div>
             <StorageEditor storage={ls} name="LocalStorage" />
             <StorageEditor storage={ss} name="SessionStorage" />
+            {isAndroidTWA && (
+              <div className="text-center">
+                <Button onClick={forceRequestReview}>forceRequestReview</Button>
+                <Button onClick={historyBackWithForceReview}>
+                  historyBackWithForceReview
+                </Button>
+              </div>
+            )}
           </Box>
         </div>
         <div className="flex-none basis-15 main-wide:hidden " />
