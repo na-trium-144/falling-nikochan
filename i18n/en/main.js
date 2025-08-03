@@ -131,6 +131,11 @@ export default {
       "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
       "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",
   },
+  dev: {
+    title: "Debugging Tools",
+    description: "Hidden page for debugging purposes",
+    back: "Back",
+  },
   footer: {
     theme: "Theme",
     light: "Light",
