@@ -132,6 +132,11 @@ export default {
     festival:
       "ut.code(); 第{num}回{kind, select, mf {五月祭} kf {駒場祭} other {other}}ウェブサイトに戻る",
   },
+  dev: {
+    title: "デバッグ用",
+    description: "デバッグ用の隠しページ",
+    back: "戻る",
+  },
   footer: {
     theme: "テーマ色",
     light: "ライト",
