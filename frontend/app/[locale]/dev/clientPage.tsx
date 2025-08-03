@@ -121,7 +121,10 @@ function StorageEditor(props: EProps) {
               !isNaN(new Date(newObj[key]).getTime())
             ) {
               newValue = String(new Date(newObj[key]).getTime());
+            } else if (newObj[key] === null) {
+              newValue = "";
             } else if (typeof newObj[key] !== "object") {
+              // string, number
               newValue = String(newObj[key]);
             } else {
               newValue = JSON.stringify(newObj[key]);
