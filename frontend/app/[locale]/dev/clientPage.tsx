@@ -11,7 +11,7 @@ import "ace-builds/src-min-noconflict/theme-github";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/mode-yaml";
 import "ace-builds/src-min-noconflict/ext-searchbox";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
 import YAML from "yaml";
@@ -83,23 +83,26 @@ function StorageEditor(props: EProps) {
   const themeState = useTheme();
   const { rem } = useDisplayMode();
   const [showEditor, setShowEditor] = useState<boolean>(false);
+  const initialStorageData = useRef<Record<string, string>>({});
 
   useEffect(() => {
     if (props.storage) {
       const keys = Object.keys(props.storage);
       keys.sort();
-      setCode_(
-        keys
-          .map((key) => {
-            const valueStr = props.storage!.getItem(key);
-            if (Number(valueStr) > new Date(2024, 1, 1).getTime()) {
-              return `${key}: ` + new Date(Number(valueStr)).toISOString();
-            } else {
-              return `${key}: ` + valueStr;
-            }
-          })
-          .join("\n")
-      );
+      initialStorageData.current = {};
+      const initialCode: string[] = [];
+      for (const key of keys) {
+        const valueStr = props.storage.getItem(key)!;
+        if (Number(valueStr) > new Date(2024, 1, 1).getTime()) {
+          initialCode.push(
+            `${key}: ` + new Date(Number(valueStr)).toISOString()
+          );
+        } else {
+          initialCode.push(`${key}: ` + valueStr);
+        }
+        initialStorageData.current[key] = valueStr;
+      }
+      setCode_(initialCode.join("\n"));
     }
   }, [props.storage]);
   const setCode = useCallback(
@@ -107,7 +110,6 @@ function StorageEditor(props: EProps) {
       setCode_(code);
       if (props.storage) {
         try {
-          const oldKeys = Object.keys(props.storage);
           const newObj = YAML.parse(code || "{}");
           const newKeys = Object.keys(newObj);
           const changes: string[] = [];
@@ -123,16 +125,21 @@ function StorageEditor(props: EProps) {
             } else {
               newValue = JSON.stringify(newObj[key]);
             }
-            if (props.storage.getItem(key) !== newValue) {
+            if (!(key in initialStorageData.current)) {
+              changes.push(`${key}: '${newValue}' (added)`);
+              props.storage.setItem(key, newValue);
+            } else if (initialStorageData.current[key] !== newValue) {
               changes.push(
-                `${key}: '${props.storage.getItem(key)}' -> '${newValue}'`
+                `${key}: '${initialStorageData.current[key]}' -> '${newValue}'`
               );
               props.storage.setItem(key, newValue);
             }
           }
-          for (const key of oldKeys) {
+          for (const key of Object.keys(initialStorageData.current)) {
             if (!newKeys.includes(key)) {
-              changes.push(`removed ${key}: '${props.storage.getItem(key)}'`);
+              changes.push(
+                `${key}: removed '${initialStorageData.current[key]}'`
+              );
               props.storage.removeItem(key);
             }
           }
@@ -173,7 +180,7 @@ function StorageEditor(props: EProps) {
             mode="yaml"
             theme={themeState.isDark ? "monokai" : "github"}
             width="calc(100dvw - 6rem)"
-            height="calc(100dvh - 15rem)" // てきとう
+            height="calc(100dvh - 16rem)" // てきとう
             tabSize={2}
             fontSize={1 * rem}
             value={code}
@@ -184,7 +191,7 @@ function StorageEditor(props: EProps) {
           <div
             className={clsx(
               "bg-slate-200 dark:bg-stone-700 mt-2 p-1 text-sm rounded-sm break-all",
-              "h-12 max-h-12 overflow-auto",
+              "h-18 max-h-18 overflow-auto",
               isError && "text-red-600 dark:text-red-400"
             )}
           >
