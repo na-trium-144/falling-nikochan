@@ -275,8 +275,21 @@ const app = new Hono({ strict: false })
       fetchStatic,
     })
   )
-  .all("/api/*", (c) => fetch(c.req.raw))
-  .get("/og/*", (c) => fetch(c.req.raw))
+  // return fetch(...) だと、30xリダイレクトを含む場合エラー
+  .all("/api/*", async (c) => {
+    const res = await fetch(c.req.raw);
+    return new Response(res.body, {
+      headers: res.headers,
+      status: res.status,
+    });
+  })
+  .get("/og/*", async (c) => {
+    const res = await fetch(c.req.raw);
+    return new Response(res.body, {
+      headers: res.headers,
+      status: res.status,
+    });
+  })
   .get("/worker/checkUpdate", async (c) => {
     switch (await initAssetsCache({ clearOld: false })) {
       case "done":
