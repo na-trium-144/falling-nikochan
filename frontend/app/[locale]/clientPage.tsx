@@ -283,6 +283,7 @@ export function AboutModal(props: AProps) {
   const tm = useTranslations("main.about");
   const t = useTranslations(`about.${props.aboutPageIndex}`);
 
+  const close = () => props.setAboutPageIndex(null);
   return (
     <div
       className={clsx(
@@ -295,7 +296,7 @@ export function AboutModal(props: AProps) {
       <div className="absolute inset-12">
         <Box
           className={clsx(
-            "absolute inset-0 m-auto w-160 h-max max-w-full max-h-full",
+            "absolute inset-0 m-auto w-180 h-max max-w-full max-h-full",
             "p-6 overflow-x-clip overflow-y-auto",
             "shadow-lg",
             "transition-transform duration-200 origin-center",
