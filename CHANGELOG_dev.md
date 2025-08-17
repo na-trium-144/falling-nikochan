@@ -1,3 +1,7 @@
+## ver. 12.47 - 2025/08/18 [#734](https://github.com/na-trium-144/falling-nikochan/pull/734)
+
+* ServiceWorkerが /og のパスを返す際30xリダイレクトを含むためエラーになっていたのを修正
+
 ## ver. 12.46 - 2025/08/04 [#732](https://github.com/na-trium-144/falling-nikochan/pull/732)
 
 * localStorageを編集できるデバッグページ追加 (バージョン情報を7回クリックで表示)
