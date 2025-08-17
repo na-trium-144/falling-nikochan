@@ -5,6 +5,7 @@ import { Key } from "@/common/key.js";
 import TargetLine from "@/common/targetLine.js";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import Caution from "@icon-park/react/lib/icons/Caution.js";
 
 export function AboutContent2() {
   const t = useTranslations("about.2");
@@ -146,6 +147,16 @@ export function AboutContent2() {
             />
           </div>
         </div>
+      </div>
+      <div className="mb-4 text-sm space-y-2">
+        <p className="">
+          <Caution className="inline-block mr-1 translate-y-0.5 " />
+          {t("contentIOS")}
+        </p>
+        <ul className="list-inside list-disc">
+          <li>{t("contentIOS2")}</li>
+          <li>{t("contentIOS3")}</li>
+        </ul>
       </div>
     </>
   );
