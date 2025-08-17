@@ -1,3 +1,7 @@
+## ver. 12.48 - 2025/08/18 [#733](https://github.com/na-trium-144/falling-nikochan/pull/733)
+
+* ios無反応補正についてaboutの2ページに追記
+
 ## ver. 12.47 - 2025/08/18 [#734](https://github.com/na-trium-144/falling-nikochan/pull/734)
 
 * ServiceWorkerが /og のパスを返す際30xリダイレクトを含むためエラーになっていたのを修正
