@@ -276,15 +276,11 @@ const app = new Hono({ strict: false })
     })
   )
   // return fetch(...) だと、30xリダイレクトを含む場合エラー
-  .all("/api/*", async (c) => {
-    const res = await fetch(c.req.raw);
-    return new Response(res.body, {
-      headers: res.headers,
-      status: res.status,
-    });
-  })
+  .all("/api/*", (c) => fetch(c.req.raw))
   .get("/og/*", async (c) => {
-    const res = await fetch(c.req.raw);
+    const res = await fetch(c.req.url, {
+      credentials: "omit",
+    });
     return new Response(res.body, {
       headers: res.headers,
       status: res.status,
