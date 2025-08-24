@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ExternalLink } from "./extLink";
@@ -44,7 +45,7 @@ export function FestivalLink(props: Props) {
   const t = useTranslations("main");
   if (props.num && props.kind) {
     return (
-      <span className={props.className}>
+      <span className={clsx(props.className)}>
         <ExternalLink href="https://festival.utcode.net" className="inline!">
           {/* テキストが長く、iOSで収まらない & アイコンがあるわけでもない のでinline */}
           {t("festival", { kind: props.kind, num: props.num })}

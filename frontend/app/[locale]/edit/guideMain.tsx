@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { Box, modalBg } from "@/common/box.js";
 import { Pager } from "@/common/pager.js";
 import Button from "@/common/button.js";
@@ -18,7 +19,7 @@ interface Props {
 export function GuideMain(props: Props) {
   const t = useTranslations("edit.guide");
   return (
-    <div className={modalBg}>
+    <div className={clsx(modalBg)}>
       <Box
         className="absolute inset-6 m-auto p-6 overflow-y-auto shadow-md flex flex-col"
         style={{ maxWidth: "40rem", maxHeight: "40rem" }}

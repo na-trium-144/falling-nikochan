@@ -275,8 +275,17 @@ const app = new Hono({ strict: false })
       fetchStatic,
     })
   )
+  // return fetch(...) だと、30xリダイレクトを含む場合エラー
   .all("/api/*", (c) => fetch(c.req.raw))
-  .get("/og/*", (c) => fetch(c.req.raw))
+  .get("/og/*", async (c) => {
+    const res = await fetch(c.req.url, {
+      credentials: "omit",
+    });
+    return new Response(res.body, {
+      headers: res.headers,
+      status: res.status,
+    });
+  })
   .get("/worker/checkUpdate", async (c) => {
     switch (await initAssetsCache({ clearOld: false })) {
       case "done":
@@ -348,7 +357,6 @@ self.addEventListener("fetch", (e) => {
     (process.env.ASSET_PREFIX &&
       new URL(e.request.url).origin === process.env.ASSET_PREFIX)
   ) {
-    // @ts-expect-error Type 'void' is not assignable to type 'undefined'.
     return handle(app)(e);
   }
 });

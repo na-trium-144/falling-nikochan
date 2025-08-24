@@ -47,8 +47,9 @@ export default {
       recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
-      latest: "Latest Charts",
-      latestDesc: "List of charts recently created or updated.",
+      latest: "Latest Charts / All Charts",
+      latestDesc:
+        "List of published charts. Sorted by the most recently created or updated.",
       latestDesc2:
         "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       sample: "Sample Charts",
@@ -129,6 +130,11 @@ export default {
     festival:
       "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
       "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",
+  },
+  dev: {
+    title: "Debugging Tools",
+    description: "Hidden page for debugging purposes",
+    back: "Back",
   },
   footer: {
     theme: "Theme",

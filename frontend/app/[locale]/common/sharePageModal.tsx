@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import { titleShare, titleWithSiteName } from "@/common/title";
 import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
 import {
@@ -16,6 +17,7 @@ import { Box, modalBg } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
+import { historyBackWithReview } from "./pwaInstall";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
@@ -117,31 +119,35 @@ export function SharePageModalProvider(props: {
       {props.children}
       {modalOpened && (
         <div
-          className={
-            modalBg +
-            "transition-opacity duration-200 " +
-            (modalAppearing ? "ease-in opacity-100 " : "ease-out opacity-0 ")
-          }
-          onClick={() => window.history.back()}
+          className={clsx(
+            modalBg,
+            "transition-opacity duration-200",
+            modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
+          )}
+          onClick={() => {
+            historyBackWithReview();
+          }}
         >
           <div className="absolute inset-12">
             <Box
               onClick={(e) => e.stopPropagation()}
-              className={
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
-                "flex flex-col " +
-                "p-6 overflow-x-clip overflow-y-auto " +
-                "shadow-lg " +
-                "transition-transform duration-200 origin-center " +
-                (modalAppearing ? "ease-in scale-100 " : "ease-out scale-0 ")
-              }
+              className={clsx(
+                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
+                "flex flex-col",
+                "p-6 overflow-x-clip overflow-y-auto",
+                "shadow-lg",
+                "transition-transform duration-200 origin-center",
+                modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
+              )}
             >
               <ShareBox
                 cid={modalCId || ""}
                 brief={modalBrief}
                 record={modalRecord}
                 locale={props.locale}
-                backButton={() => window.history.back()}
+                backButton={() => {
+                  historyBackWithReview();
+                }}
               />
             </Box>
           </div>

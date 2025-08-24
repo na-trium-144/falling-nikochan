@@ -28,6 +28,15 @@ export default {
       content4:
         "The more Nikochans you hit in a row without missing, " +
         "the more Chain bonus points you get, and the more score you get.",
+      contentIOS:
+        "On iOS, bugs in browsers (including browsers other than Safari) can cause taps with two or more fingers to go unresponsive. " +
+        "Falling Nikochan predicts this under certain conditions and compensates for it. " +
+        "If a tap goes unresponsive and the note is skipped, the chain continues without being marked as a miss. " +
+        "(This is enabled by default, but can be disabled.)",
+      contentIOS2:
+        "This compensation is not 100% accurate, and some notes may be marked as misses, or in rare cases, notes that were not tapped may be respond.",
+      contentIOS3:
+        "Also, since tap sounds are not compensated for, they are turned off when this compensation is enabled.",
       chain: "{chain, plural, =1 {chain} other {chains}}",
       description:
         "The rule is simple: hit the notes when Nikochan (smiley faces) overlaps the line. " +

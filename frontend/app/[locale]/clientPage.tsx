@@ -1,10 +1,11 @@
 "use client";
 
+import clsx from "clsx/lite";
 import Link from "next/link";
 import { linkStyle1, linkStyle3 } from "./common/linkStyle.js";
 import Title from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
-import { PWAInstallMain } from "./common/pwaInstall.js";
+import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
   MobileFooter,
   PCFooter,
@@ -65,17 +66,21 @@ export default function TopPage(props: Props) {
         />
       ) : null}
       <div
-        className={
-          "flex flex-col w-full min-h-full h-max items-center " +
-          (menuMove
-            ? "transition-[max-height] duration-200 ease-out " +
-              (menuMoveAnim ? "max-h-full " : "max-h-max")
-            : "")
-        }
+        className={clsx(
+          "flex flex-col w-full min-h-full h-max items-center",
+          menuMove &&
+            clsx(
+              "transition-[max-height] duration-200 ease-out",
+              menuMoveAnim ? "max-h-full" : "max-h-max"
+            )
+        )}
       >
         <Link
           href={`/${locale}`}
-          className={"w-full grow-3 shrink-0 basis-24 relative " + linkStyle1}
+          className={clsx(
+            "w-full grow-3 shrink-0 basis-24 relative",
+            linkStyle1
+          )}
           style={{
             marginLeft: "-20rem",
             marginRight: "-20rem",
@@ -85,53 +90,45 @@ export default function TopPage(props: Props) {
           <Title className="absolute inset-0 " anim />
         </Link>
         <div className="basis-0 flex-1 " />
-        <div className={"grow-0 mb-3 text-center px-6 " + menuMoveAnimClass}>
+        <div
+          className={clsx("grow-0 mb-3 text-center px-6", menuMoveAnimClass)}
+        >
           {t("description")}
           <Link
             href={`/${locale}/main/about/1`}
-            className={"main-wide:hidden " + linkStyle3}
+            className={clsx("main-wide:hidden", linkStyle3)}
           >
             {t("about.title")}
           </Link>
           <button
-            className={"hidden main-wide:inline " + linkStyle3}
+            className={clsx("hidden main-wide:inline", linkStyle3)}
             onClick={() => setAboutPageIndex(1)}
           >
             {t("about.title")}
           </button>
         </div>
         <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
-        <div className={"basis-auto grow-2 " + menuMoveAnimClass}>
+        <div className={clsx("basis-auto grow-2", menuMoveAnimClass)}>
           <RedirectedWarning />
           <PWAInstallMain />
         </div>
         <div
-          className={
-            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6 " +
+          className={clsx(
+            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6",
             menuMoveAnimClass
-          }
+          )}
         >
           <InputCId
             openModal={openModal}
             openShareInternal={openShareInternal}
           />
         </div>
-        {process.env.NODE_ENV === "development" && (
-          <div
-            className={
-              "basis-auto grow-1 my-auto h-max mb-3 text-center px-6 " +
-              menuMoveAnimClass
-            }
-          >
-            <InputDirect locale={locale} />
-          </div>
-        )}
 
         <div
-          className={
-            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6 " +
+          className={clsx(
+            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6",
             menuMoveAnimClass
-          }
+          )}
         >
           <h3 className="mb-2 text-xl font-bold font-title">
             {t("play.recent")}
@@ -149,18 +146,18 @@ export default function TopPage(props: Props) {
         </div>
 
         <div
-          className={
-            "shrink-1 h-dvh transition-all duration-200 ease-in " +
-            (menuMoveAnim ? "max-h-[50vh] " : "max-h-0 ")
-          }
+          className={clsx(
+            "shrink-1 h-dvh transition-all duration-200 ease-in",
+            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
+          )}
         />
         <nav
-          className={
-            "shrink-0 basis-auto grow-3 " +
-            "hidden main-wide:flex " +
-            "flex-col justify-center w-64 " +
-            "transition ease-out duration-200 "
-          }
+          className={clsx(
+            "shrink-0 basis-auto grow-3",
+            "hidden main-wide:flex",
+            "flex-col justify-center w-64",
+            "transition ease-out duration-200"
+          )}
           style={{
             transform: menuMove
               ? `translateX(-${
@@ -173,12 +170,13 @@ export default function TopPage(props: Props) {
             <Link
               key={i}
               href={`/${locale}${tabURLs[key]}`}
-              className={
-                " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner " +
-                "rounded-lg p-3 "
-              }
+              className={clsx(
+                "text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
+                "rounded-lg p-3"
+              )}
               prefetch={!process.env.NO_PREFETCH}
               onClick={(e) => {
+                requestReview();
                 setMenuMove(true);
                 setTimeout(() => {
                   router.push(`/${locale}${tabURLs[key]}`);
@@ -191,21 +189,21 @@ export default function TopPage(props: Props) {
           ))}
         </nav>
         <div
-          className={
-            "shrink-1 h-dvh transition-all duration-200 ease-in " +
-            (menuMoveAnim ? "max-h-[50vh] " : "max-h-0 ")
-          }
+          className={clsx(
+            "shrink-1 h-dvh transition-all duration-200 ease-in",
+            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
+          )}
         />
 
         <PCFooter locale={locale} />
         <div className="flex-none basis-15 main-wide:hidden " />
       </div>
       <div
-        className={
-          "fixed bottom-0 inset-x-0 backdrop-blur-2xs " +
-          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0 " +
-          "dark:from-orange-950 dark:to-orange-950/0 "
-        }
+        className={clsx(
+          "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
+          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
+          "dark:from-orange-950 dark:to-orange-950/0"
+        )}
       >
         <MobileFooter locale={locale} tabKey="top" />
       </div>
@@ -259,7 +257,7 @@ function InputCId(props: {
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
-        <span className={cidFetching ? "inline-block " : "hidden "}>
+        <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
           <SlimeSVG />
           Loading...
         </span>
@@ -275,31 +273,6 @@ function InputCId(props: {
   );
 }
 
-function InputDirect(props: { locale: string }) {
-  const t = useTranslations("main");
-  return (
-    <>
-      <h4 className="mb-1 ">
-        <span className="text-lg font-bold font-title">
-          {t("inputDirect")}:
-        </span>
-        <Input
-          className="ml-4 w-20"
-          actualValue=""
-          updateValue={(cid) =>
-            window
-              .open(`/${props.locale}/play?cid=${cid}&lvIndex=0`, "_blank")
-              ?.focus()
-          }
-          isValid={(t) => v.safeParse(CidSchema(), t).success}
-          left
-        />
-      </h4>
-      <p className="text-sm ">({t("inputDirectDevonly")})</p>
-    </>
-  );
-}
-
 interface AProps {
   aboutAnim: boolean;
   contents: ReactNode[];
@@ -310,29 +283,30 @@ export function AboutModal(props: AProps) {
   const tm = useTranslations("main.about");
   const t = useTranslations(`about.${props.aboutPageIndex}`);
 
+  const close = () => props.setAboutPageIndex(null);
   return (
     <div
-      className={
-        modalBg +
-        "transition-opacity duration-200 " +
-        (props.aboutAnim ? "ease-in opacity-100 " : "ease-out opacity-0 ")
-      }
+      className={clsx(
+        modalBg,
+        "transition-opacity duration-200",
+        props.aboutAnim ? "ease-in opacity-100" : "ease-out opacity-0"
+      )}
       onClick={close}
     >
       <div className="absolute inset-12">
         <Box
-          className={
-            "absolute inset-0 m-auto w-160 h-max max-w-full max-h-full " +
-            "p-6 overflow-x-clip overflow-y-auto " +
-            "shadow-lg " +
-            "transition-transform duration-200 origin-center " +
-            (props.aboutAnim ? "ease-in scale-100 " : "ease-out scale-0 ")
-          }
+          className={clsx(
+            "absolute inset-0 m-auto w-180 h-max max-w-full max-h-full",
+            "p-6 overflow-x-clip overflow-y-auto",
+            "shadow-lg",
+            "transition-transform duration-200 origin-center",
+            props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
             <button
-              className={pagerButtonClass + "absolute left-0 inset-y-0 "}
+              className={clsx(pagerButtonClass, "absolute left-0 inset-y-0")}
               onClick={close}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />

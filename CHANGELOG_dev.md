@@ -1,3 +1,29 @@
+## ver. 12.48 - 2025/08/18 [#733](https://github.com/na-trium-144/falling-nikochan/pull/733)
+
+* ios無反応補正についてaboutの2ページに追記
+
+## ver. 12.47 - 2025/08/18 [#734](https://github.com/na-trium-144/falling-nikochan/pull/734)
+
+* ServiceWorkerが /og のパスを返す際30xリダイレクトを含むためエラーになっていたのを修正
+
+## ver. 12.46 - 2025/08/04 [#732](https://github.com/na-trium-144/falling-nikochan/pull/732)
+
+* localStorageを編集できるデバッグページ追加 (バージョン情報を7回クリックで表示)
+
+## ver. 12.45 - 2025/07/30 [#720](https://github.com/na-trium-144/falling-nikochan/pull/720)
+
+* clsx導入、classNameの記述を全置き換え
+
+## ver. 12.44 - 2025/07/29 [#719](https://github.com/na-trium-144/falling-nikochan/pull/719)
+
+* 新着譜面リストと検索結果のリストを無限スクロール可能にする
+
+## ver. 12.42 - 2025/07/28 [#717](https://github.com/na-trium-144/falling-nikochan/pull/717)
+
+* share→playを開く際に /play ではなく /locale/play を使うようにする (prefetchに失敗していたのを修正)
+* そうするとdev環境限定inputDirectが要らないので削除
+* 少しでもdiffを減らすためbuildCommitをポップアップchangeLogから消した
+
 ## ver. 12.41 - 2025/07/24 [#715](https://github.com/na-trium-144/falling-nikochan/pull/715)
 
 * TWAで起動した際(`utm_source=nikochan.twa`) 一定条件で in app review を呼び出す機能を追加

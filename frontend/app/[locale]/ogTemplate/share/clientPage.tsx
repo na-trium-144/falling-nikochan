@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";
@@ -28,17 +29,17 @@ export default function OGTemplate() {
         anim={false}
       />
       <div
-        className={
-          "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl " +
-          levelBgColors[1] +
-          (showDummyData ? "" : "invisible")
-        }
+        className={clsx(
+          "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl",
+          levelBgColors[1],
+          showDummyData || "invisible"
+        )}
       >
         <div
-          className={
-            "w-full aspect-[16/9] bg-gray-500 " +
-            (showDummyData ? "" : "invisible")
-          }
+          className={clsx(
+            "w-full aspect-[16/9] bg-gray-500",
+            showDummyData || "invisible"
+          )}
         >
           Thumbnail Here
         </div>
@@ -48,29 +49,29 @@ export default function OGTemplate() {
         <span className="inline-block ">{showDummyData && 444444}</span>
       </div>
       <div
-        className={
-          "pl-20 mt-12 text-7xl font-title " +
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
-          (showDummyData ? "" : "invisible")
-        }
+        className={clsx(
+          "pl-20 mt-12 text-7xl font-title",
+          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          showDummyData || "invisible"
+        )}
       >
         TitleたいとるTitleたいとるTitleたいとるTitleたいとるTitleたいとるTitleたいとる
       </div>
       <div
-        className={
-          "pl-20 mt-4 text-5xl font-title " +
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
-          (showDummyData ? "" : "invisible")
-        }
+        className={clsx(
+          "pl-20 mt-4 text-5xl font-title",
+          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          showDummyData || "invisible"
+        )}
       >
         composer作曲者composer作曲者composer作曲者composer作曲者composer作曲者composer作曲者
       </div>
       <div
-        className={
-          "pl-20 mt-4 font-title text-5xl " +
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible " +
-          (showDummyData ? "" : "invisible")
-        }
+        className={clsx(
+          "pl-20 mt-4 font-title text-5xl",
+          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          showDummyData || "invisible"
+        )}
       >
         <span className="font-main-ui text-4xl mr-5 ">
           {t("chartCreator")}:
@@ -81,11 +82,11 @@ export default function OGTemplate() {
       </div>
       <div className="absolute bottom-0 w-full h-6">
         <div
-          className={
-            "-z-30 absolute inset-x-0 bottom-0 " +
-            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 " +
-            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700 "
-          }
+          className={clsx(
+            "-z-30 absolute inset-x-0 bottom-0",
+            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
+            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
+          )}
           style={{ top: "-1rem" }}
         />
         <RhythmicalSlime

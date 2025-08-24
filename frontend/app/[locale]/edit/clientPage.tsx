@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import {
   Chart9Edit,
   findInsertLine,
@@ -360,7 +361,7 @@ export default function EditAuth(props: {
               {process.env.NODE_ENV === "development" && (
                 <p className="mt-2 ">
                   <button
-                    className={linkStyle1 + "w-max m-auto "}
+                    className={clsx(linkStyle1, "w-max m-auto")}
                     onClick={() => {
                       void (async () => {
                         await fetchChart(false, true, editPasswd, savePasswd);
@@ -1031,11 +1032,11 @@ function Page(props: Props) {
 
   return (
     <main
-      className={
-        "w-full h-dvh overflow-x-clip overflow-y-auto " +
-        "edit-wide:overflow-y-clip " +
-        (dragMode !== null ? "touch-none " : "")
-      }
+      className={clsx(
+        "w-full h-dvh overflow-x-clip overflow-y-auto",
+        "edit-wide:overflow-y-clip",
+        dragMode !== null && "touch-none"
+      )}
       tabIndex={0}
       ref={ref}
       onKeyDown={(e) => {
@@ -1097,12 +1098,12 @@ function Page(props: Props) {
       }}
     >
       <div
-        className={
-          "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs " +
-          "flex edit-wide:hidden flex-row items-center " +
-          "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200 " +
-          "dark:from-orange-975/0 dark:to-orange-975 "
-        }
+        className={clsx(
+          "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs",
+          "flex edit-wide:hidden flex-row items-center",
+          "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200",
+          "dark:from-orange-975/0 dark:to-orange-975"
+        )}
       >
         <MobileHeader className="flex-1 ">
           {t("titleShort")} ID: {cid}
@@ -1111,14 +1112,14 @@ function Page(props: Props) {
       </div>
       <div className="w-0 h-13 edit-wide:hidden" />
       {chart === undefined ? (
-        <div className={modalBg} onClick={(e) => e.stopPropagation()}>
+        <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-6">
             <Box
-              className={
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full " +
-                "p-6 overflow-x-clip overflow-y-auto " +
-                "shadow-lg "
-              }
+              className={clsx(
+                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
+                "p-6 overflow-x-clip overflow-y-auto",
+                "shadow-lg"
+              )}
             >
               {props.modal}
             </Box>
@@ -1137,16 +1138,16 @@ function Page(props: Props) {
       <CaptionProvider>
         <LuaTabProvider>
           <div
-            className={
-              "w-full " +
-              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row "
-            }
+            className={clsx(
+              "w-full",
+              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row"
+            )}
           >
             <div
-              className={
-                "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3 " +
-                "min-w-0 grow-0 shrink-0 flex flex-col items-stretch "
-              }
+              className={clsx(
+                "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
+                "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
+              )}
             >
               <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
                 <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
@@ -1160,19 +1161,19 @@ function Page(props: Props) {
                 <Button text={t("help")} onClick={openGuide} />
               </div>
               <div
-                className={
-                  "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center " +
-                  (levelBgColors[
-                    levelTypes.indexOf(currentLevel?.type || "")
-                  ] || levelBgColors[1]) +
-                  (chart ? "" : "invisible ")
-                }
+                className={clsx(
+                  "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
+                  levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
+                    levelBgColors[1],
+                  chart || "invisible "
+                )}
               >
                 <FlexYouTube
                   fixedSide="width"
-                  className={
-                    "w-full h-max " + "edit-wide:w-full edit-wide:h-auto "
-                  }
+                  className={clsx(
+                    "w-full h-max",
+                    "edit-wide:w-full edit-wide:h-auto"
+                  )}
                   control={true}
                   id={chart?.ytId}
                   ytPlayer={ytPlayer}
@@ -1183,11 +1184,11 @@ function Page(props: Props) {
                 />
               </div>
               <div
-                className={
-                  "relative " +
-                  "w-full aspect-square " +
-                  "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto "
-                }
+                className={clsx(
+                  "relative",
+                  "w-full aspect-square",
+                  "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
+                )}
               >
                 <FallingWindow
                   inCodeTab={isCodeTab}
@@ -1203,9 +1204,10 @@ function Page(props: Props) {
               </div>
               {chart && isTouch && (
                 <button
-                  className={
-                    "self-start flex flex-row items-center " + linkStyle1
-                  }
+                  className={clsx(
+                    "self-start flex flex-row items-center",
+                    linkStyle1
+                  )}
                   onClick={() => {
                     setDragMode(
                       dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
@@ -1235,11 +1237,11 @@ function Page(props: Props) {
               )}
             </div>
             <div
-              className={
-                "p-3 flex flex-col items-stretch " +
-                "h-5/6 " +
-                "edit-wide:h-full edit-wide:flex-1 "
-              }
+              className={clsx(
+                "p-3 flex flex-col items-stretch",
+                "h-5/6",
+                "edit-wide:h-full edit-wide:flex-1"
+              )}
             >
               <div>
                 <span className="mr-1">{t("playerControl")}:</span>
@@ -1393,11 +1395,11 @@ function Page(props: Props) {
                 )}
               </div>
               <Box
-                className={
-                  "p-3 overflow-auto " +
-                  "min-h-96 relative " +
+                className={clsx(
+                  "p-3 overflow-auto",
+                  "min-h-96 relative",
                   "edit-wide:flex-1 edit-wide:min-h-0"
-                }
+                )}
               >
                 {tab === 0 ? (
                   <MetaTab
@@ -1499,10 +1501,10 @@ function Page(props: Props) {
                 />
               </Box>
               <div
-                className={
-                  "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm " +
-                  "h-24 max-h-24 edit-wide:h-auto overflow-auto "
-                }
+                className={clsx(
+                  "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm",
+                  "h-24 max-h-24 edit-wide:h-auto overflow-auto"
+                )}
               >
                 {luaExecutor.running ? (
                   <div className="m-1">

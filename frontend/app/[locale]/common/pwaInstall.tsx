@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
@@ -15,28 +16,35 @@ import { Box, WarningBox } from "./box";
 import { SlimeSVG } from "./slime";
 import { levelBgColors } from "./levelColors";
 import ProgressBar from "./progressBar";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
   useEffect(() => setState(isStandalone()), []);
   return state;
 }
-export function isStandalone() {
+export function isStandalone(): boolean {
   return (
     new URLSearchParams(location.search).get("utm_source") === "homescreen" ||
     new URLSearchParams(location.search).get("utm_source") === "nikochan.twa" ||
-    sessionStorage.getItem("fromHomeScreen") ||
+    !!sessionStorage.getItem("fromHomeScreen") ||
     window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as any).standalone ||
+    !!(navigator as any).standalone ||
     document.referrer.includes("android-app://")
   );
 }
-export function isAndroidTWA() {
+export function useAndroidTWADetector() {
+  const [state, setState] = useState<boolean | null>(null);
+  useEffect(() => setState(isAndroidTWA()), []);
+  return state;
+}
+export function isAndroidTWA(): boolean {
   return (
     detectOS() === "android" &&
     (new URLSearchParams(location.search).get("utm_source") ===
       "nikochan.twa" ||
-      sessionStorage.getItem("fromAndroidTWA") ||
+      !!sessionStorage.getItem("fromAndroidTWA") ||
       document.referrer.includes("android-app://net.utcode.nikochan.twa/"))
   );
 }
@@ -47,6 +55,81 @@ export function updatePlayCountForReview() {
     (Number(localStorage.getItem("playCountForReview") || "0") + 1).toString()
   );
   localStorage.setItem("lastPlayedDate", Date.now().toString());
+}
+export function requestReview(): boolean {
+  if (isAndroidTWA()) {
+    // ユーザーのインタラクションによってトリガーしないといけない
+    // 当初全てのページのpopstateに仕込もうとしていたが、うまくいかなかったので、
+    // 現在はトップページおよびfooterのナビゲーションと、ほぼすべてのhistory.back()に仕込んでいる
+    // 戻るボタン・戻るジェスチャーを使う人には効かない...
+    if (localStorage.getItem("firstOpenDate") === null) {
+      localStorage.setItem("firstOpenDate", Date.now().toString());
+    }
+    const firstOpenDate = Number(localStorage.getItem("firstOpenDate")!);
+    const lastReviewDate: number | null = JSON.parse(
+      localStorage.getItem("lastReviewDate") || "null"
+    );
+    const playCount = Number(localStorage.getItem("playCountForReview") || "0");
+    const lastPlayedDate: number | null = JSON.parse(
+      localStorage.getItem("lastPlayedDate") || "null"
+    );
+    // インストールから3日以上、lastReviewDateから45日以上、プレイ回数が5回以上、最後のプレイから2h以内で、play,editページ以外の場合
+    if (
+      Date.now() - firstOpenDate > 3 * 24 * 60 * 60 * 1000 &&
+      (lastReviewDate === null ||
+        Date.now() - lastReviewDate > 45 * 24 * 60 * 60 * 1000) &&
+      playCount >= 5 &&
+      lastPlayedDate !== null &&
+      Date.now() - lastPlayedDate < 2 * 60 * 60 * 1000
+    ) {
+      localStorage.setItem("lastReviewDate", Date.now().toString());
+      localStorage.removeItem("playCountForReview");
+      forceRequestReview();
+      return true;
+    }
+  }
+  return false;
+}
+export function forceRequestReview() {
+  console.log("Requesting in-app review");
+  location.href = "nikochan-in-app-review://review";
+}
+export function historyBackWithReview() {
+  if (requestReview()) {
+    // 短すぎると、in-app-reviewがキャンセルされる?
+    setTimeout(() => history.back(), 250);
+  } else {
+    history.back();
+  }
+}
+export function historyBackWithForceReview() {
+  forceRequestReview();
+  setTimeout(() => history.back(), 250);
+}
+
+interface LinkProps {
+  href: string;
+  className?: string;
+  children: ReactNode;
+}
+export function LinkWithReview(props: LinkProps) {
+  const isAndroidTWA = useAndroidTWADetector();
+  const router = useRouter();
+  return isAndroidTWA ? (
+    <button
+      className={clsx(props.className)}
+      onClick={() => {
+        requestReview();
+        router.push(props.href);
+      }}
+    >
+      {props.children}
+    </button>
+  ) : (
+    <Link {...props} prefetch={!process.env.NO_PREFETCH}>
+      {props.children}
+    </Link>
+  );
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -126,49 +209,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
-  }, []);
-  useEffect(() => {
-    if (isAndroidTWA()) {
-      const checkReview = () => {
-        if (localStorage.getItem("firstOpenDate") === null) {
-          localStorage.setItem("firstOpenDate", Date.now().toString());
-        }
-        const firstOpenDate = Number(localStorage.getItem("firstOpenDate")!);
-        const lastReviewDate: number | null = JSON.parse(
-          localStorage.getItem("lastReviewDate") || "null"
-        );
-        const playCount = Number(
-          localStorage.getItem("playCountForReview") || "0"
-        );
-        const lastPlayedDate: number | null = JSON.parse(
-          localStorage.getItem("lastPlayedDate") || "null"
-        );
-        // インストールから3日以上、lastReviewDateから45日以上、プレイ回数が5回以上、最後のプレイから2h以内で、play,editページ以外の場合
-        if (
-          Date.now() - firstOpenDate > 3 * 24 * 60 * 60 * 1000 &&
-          (lastReviewDate === null ||
-            Date.now() - lastReviewDate > 45 * 24 * 60 * 60 * 1000) &&
-          playCount >= 5 &&
-          lastPlayedDate !== null &&
-          Date.now() - lastPlayedDate < 2 * 60 * 60 * 1000 &&
-          !location.pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
-        ) {
-          setTimeout(() => {
-            console.log("Requesting in-app review");
-            location.href = "nikochan-in-app-review://review";
-          }, 200);
-          localStorage.setItem("lastReviewDate", Date.now().toString());
-          localStorage.removeItem("playCountForReview");
-        }
-      };
-      checkReview();
-      window.addEventListener("pageshow", checkReview);
-      window.addEventListener("popstate", checkReview);
-      return () => {
-        window.removeEventListener("pageshow", checkReview);
-        window.removeEventListener("popstate", checkReview);
-      };
-    }
   }, []);
 
   useEffect(() => {
@@ -277,6 +317,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
   }, [deferredPrompt]);
 
   const t = useTranslations("main.pwa");
+  const pathname = usePathname();
 
   return (
     <PWAContext.Provider
@@ -290,27 +331,28 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     >
       {props.children}
       <Box
-        className={
-          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg " +
-          "transition-all duration-200 origin-bottom " +
-          (workerUpdate !== null
-            ? "ease-in scale-100 opacity-100 "
-            : "ease-out scale-0 opacity-0 ")
-        }
+        className={clsx(
+          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg",
+          "transition-all duration-200 origin-bottom",
+          workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
+            ? "ease-in scale-100 opacity-100"
+            : "ease-out scale-0 opacity-0"
+        )}
       >
         {workerUpdate?.state === "updating" ? (
           <>
             <SlimeSVG />
             {t("updating")}
-            {workerUpdate?.progressSize !== undefined && (
+            {/*workerUpdate?.progressSize !== undefined && (
               <span className="ml-2 text-sm">
                 (
                 <span className="inline-block mr-1 min-w-max w-8 text-center">
+                  {/* 不正確? 実際にはダウンロード時も保存時も圧縮されている * /}
                   {(workerUpdate.progressSize / 1024 / 1024).toFixed(2)}
                 </span>
                 MB)
               </span>
-            )}
+            )*/}
             {workerUpdate?.progressNum !== undefined && (
               <ProgressBar
                 className="absolute! bottom-0 inset-x-1 "
@@ -355,7 +397,7 @@ export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
       if (pwa.deferredPrompt) {
         if (props.block) {
           return (
-            <div className={props.className}>
+            <div className={clsx(props.className)}>
               <p>{t("installWithPrompt")}</p>
               <Button text={t("install")} onClick={pwa.install} />
             </div>
@@ -369,10 +411,12 @@ export function PWAInstallDesc(props: { block?: boolean; className?: string }) {
           );
         }
       } else {
-        return <p className={props.className}>{t("installWithoutPrompt")}</p>;
+        return (
+          <p className={clsx(props.className)}>{t("installWithoutPrompt")}</p>
+        );
       }
     } else if (pwa.detectedOS === "ios") {
-      return <p className={props.className}>{t("installIOS")}</p>;
+      return <p className={clsx(props.className)}>{t("installIOS")}</p>;
     }
   }
   return null;

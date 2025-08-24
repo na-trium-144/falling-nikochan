@@ -1,15 +1,11 @@
 "use client";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
+import clsx from "clsx/lite";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import {
-  ChartLineBrief,
-  chartListMaxRow,
-  fetchAndFilterBriefs,
-} from "./fetch.js";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
@@ -18,6 +14,9 @@ import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
 import { getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
+import { fetchBrief } from "@/common/briefCache.js";
+import { useResizeDetector } from "react-resize-detector";
+import { useDisplayMode } from "@/scale.jsx";
 
 interface PProps {
   locale: string;
@@ -30,25 +29,26 @@ interface PProps {
 }
 export default function ChartListPage(props: PProps) {
   const { openModal, openShareInternal } = useSharePageModal();
-
+  const boxSize = useResizeDetector();
+  const { rem } = useDisplayMode();
   return (
     <IndexMain
       title={props.title}
       tabKey={props.tabKey}
       mobileTabKey={props.mobileTabKey}
       locale={props.locale}
+      boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
       <h3
-        className={
-          "flex-none mb-2 text-xl font-bold font-title " +
-          "hidden main-wide:block "
-        }
+        className={clsx(
+          "flex-none mb-2 text-xl font-bold font-title",
+          "hidden main-wide:block"
+        )}
       >
         {props.title}
       </h3>
       <ChartList
         type={props.type}
-        fetchAll
         creator
         href={(cid) => `/share/${cid}`}
         onClick={openModal}
@@ -57,6 +57,10 @@ export default function ChartListPage(props: PProps) {
         dateDiff={props.dateDiff}
         moreHref={null}
         badge={props.badge}
+        containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
+        containerHeight={
+          boxSize.height ? boxSize.height - (12 / 4) * rem : undefined
+        }
       />
     </IndexMain>
   );
@@ -64,14 +68,25 @@ export default function ChartListPage(props: PProps) {
 
 export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
+export interface ChartLineBrief {
+  cid: string;
+  fetching?: boolean;
+  fetched: boolean;
+  brief?: ChartBrief;
+  original?: boolean;
+}
+type ErrorMsg = { status: number | null; message: string };
+const chartListMaxRow = 6;
 interface Props {
   type?: ChartListType;
   briefs?:
     | ChartLineBrief[]
     | { status: number | null; message: string }
     | undefined;
-  fetchAll?: boolean;
   maxRow?: number;
+  fetchAll?: boolean;
+  containerHeight?: number;
+  containerRef?: RefObject<HTMLElement | null>;
   creator?: boolean;
   showLoading?: boolean; // briefsがundefinedか、briefsにfetched:falseが含まれる場合にloadingを表示する
   dateDiff?: boolean;
@@ -88,12 +103,13 @@ export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
   const te = useTranslations("error");
 
+  // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    ChartLineBrief[] | { status: number | null; message: string } | undefined
+    (ChartLineBrief | null)[] | ErrorMsg | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<
-    ChartLineBrief[] | { status: number | null; message: string } | undefined
-  >(props.briefs);
+  const prevPropBriefs = useRef<ChartLineBrief[] | ErrorMsg | undefined>(
+    props.briefs
+  );
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
       setBriefs(props.briefs);
@@ -101,6 +117,7 @@ export function ChartList(props: Props) {
     }
   }, [props.briefs]);
   useEffect(() => {
+    // 譜面リストのfetch (中身のbriefのfetchは別で行う)
     switch (props.type) {
       case "recent":
         setBriefs(
@@ -144,74 +161,172 @@ export function ChartList(props: Props) {
         })();
     }
   }, [props.type]);
+
+  const ulSize = useResizeDetector();
+  const { rem } = useDisplayMode();
+  const itemMinWidth = 18; // * rem
+  const itemMinHeight = 11 / 4; // h-10 + gap-1
+  const ulCols = ulSize.width
+    ? Math.floor(ulSize.width / (itemMinWidth * rem))
+    : 1;
+  // 現在の画面サイズに応じた最大サイズ
+  const [pagination, setPagination] = useState<number>(1);
+  const maxRowPerPage = props.containerHeight
+    ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
+    : undefined;
+  const maxRow: number =
+    props.maxRow ||
+    (props.containerHeight ? maxRowPerPage! * pagination : chartListMaxRow);
+  const fetchAll = props.fetchAll;
+
   useEffect(() => {
-    void (async () => {
-      if (Array.isArray(briefs)) {
-        const res = await fetchAndFilterBriefs(
-          briefs,
-          props.fetchAll
-            ? null
-            : props.maxRow !== undefined
-              ? props.maxRow
-              : chartListMaxRow
-        );
-        if (res.changed) {
-          setBriefs(res.briefs);
-          if (props.type === "recent") {
-            updateRecent("play", briefs.map(({ cid }) => cid).reverse());
-          }
-          if (props.type === "recentEdit") {
-            updateRecent("edit", briefs.map(({ cid }) => cid).reverse());
-          }
+    if (Array.isArray(briefs)) {
+      let changed = false;
+      for (let i = 0; i < briefs.length && (fetchAll || i < maxRow); i++) {
+        const b = briefs[i];
+        if (b !== null && !b.fetched && !b.fetching) {
+          b.fetching = true;
+          changed = true;
+          fetchBrief(b.cid).then(({ brief, is404 }) => {
+            setBriefs((briefs) => {
+              if (Array.isArray(briefs)) {
+                if (is404) {
+                  briefs[i] = null;
+                } else {
+                  briefs[i]!.fetched = true;
+                  briefs[i]!.brief = brief;
+                }
+                return briefs.slice();
+              } else {
+                // そんなことあるのか...?
+                return briefs;
+              }
+            });
+          });
         }
       }
-    })();
-  }, [briefs, props.type, props.fetchAll, props.maxRow]);
-  const maxRow = props.fetchAll
-    ? Array.isArray(briefs)
-      ? briefs.length
-      : 0
-    : props.maxRow !== undefined
-      ? props.maxRow
-      : chartListMaxRow;
-  const fetching =
-    briefs === undefined ||
-    (Array.isArray(briefs) &&
-      briefs.slice(0, maxRow).some(({ fetched }) => !fetched));
+      if (changed) {
+        setBriefs(briefs.slice());
+      }
+    }
+  }, [briefs, props.type, maxRow, fetchAll]);
+  useEffect(() => {
+    if (Array.isArray(briefs)) {
+      if (props.type === "recent") {
+        updateRecent(
+          "play",
+          briefs
+            .filter((b) => b !== null)
+            .map(({ cid }) => cid)
+            .reverse()
+        );
+      }
+      if (props.type === "recentEdit") {
+        updateRecent(
+          "edit",
+          briefs
+            .filter((b) => b !== null)
+            .map(({ cid }) => cid)
+            .reverse()
+        );
+      }
+    }
+  }, [briefs, props.type]);
+
+  const filteredBriefs: ChartLineBrief[] | ErrorMsg | undefined = Array.isArray(
+    briefs
+  )
+    ? fetchAll
+      ? briefs.filter((b) => b !== null)
+      : briefs.filter((b) => b !== null).slice(0, maxRow)
+    : briefs;
+  const filteredNumRows =
+    Array.isArray(filteredBriefs) && (fetchAll || props.containerRef)
+      ? filteredBriefs.length
+      : maxRow;
+  // filteredBriefs内で最初にfetch中のbriefのインデックス
+  // すべてfetch完了なら-1
+  const firstFetchingIndex: number =
+    filteredBriefs === undefined
+      ? 0
+      : Array.isArray(filteredBriefs)
+        ? filteredBriefs.findIndex((b) => !b.fetched)
+        : -1;
+  const padHeightForScroll: number =
+    Array.isArray(briefs) &&
+    briefs.filter((b) => b !== null).length > maxRow &&
+    props.containerRef
+      ? 2 * rem
+      : 0;
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (
+        props.containerRef?.current &&
+        padHeightForScroll > 0 &&
+        props.containerRef.current.scrollTop +
+          props.containerRef.current.clientHeight >=
+          props.containerRef.current.scrollHeight - padHeightForScroll
+      ) {
+        setPagination(
+          Math.floor(props.containerRef.current.scrollHeight / maxRowPerPage!) +
+            1
+        );
+      }
+    };
+    if (props.containerRef?.current) {
+      props.containerRef.current.addEventListener("scroll", onScroll);
+      return () =>
+        props.containerRef?.current?.removeEventListener("scroll", onScroll);
+    }
+  }, [
+    props.containerRef,
+    padHeightForScroll,
+    itemMinHeight,
+    rem,
+    maxRowPerPage,
+  ]);
 
   return (
     <div className="relative w-full h-max ">
       <ul
+        ref={ulSize.ref}
         className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
         style={{
-          gridTemplateColumns: `repeat(auto-fill, minmax(min(18rem, 100%), 1fr))`,
+          gridTemplateColumns: `repeat(auto-fill, minmax(min(${itemMinWidth}rem, 100%), 1fr))`,
           // max 3 columns
-          maxWidth: 4 * 18 - 0.1 + "rem",
+          maxWidth: 4 * itemMinWidth - 0.1 + "rem",
         }}
       >
-        {Array.from(new Array(maxRow)).map((_, i) =>
-          Array.isArray(briefs) && briefs.at(i) && !fetching ? (
+        {Array.from(new Array(filteredNumRows)).map((_, i) =>
+          Array.isArray(filteredBriefs) &&
+          filteredBriefs.at(i) &&
+          (firstFetchingIndex === -1 || i < firstFetchingIndex) ? (
             <ChartListItem
               key={i}
-              cid={briefs.at(i)!.cid}
-              brief={briefs.at(i)!.brief}
-              href={props.href(briefs.at(i)!.cid)}
+              cid={filteredBriefs.at(i)!.cid}
+              brief={filteredBriefs.at(i)!.brief}
+              href={props.href(filteredBriefs.at(i)!.cid)}
               onClick={
                 props.onClick
-                  ? () => props.onClick!(briefs.at(i)!.cid, briefs.at(i)!.brief)
+                  ? () =>
+                      props.onClick!(
+                        filteredBriefs.at(i)!.cid,
+                        filteredBriefs.at(i)!.brief
+                      )
                   : undefined
               }
               onClickMobile={
                 props.onClickMobile
                   ? () =>
                       props.onClickMobile!(
-                        briefs.at(i)!.cid,
-                        briefs.at(i)!.brief
+                        filteredBriefs.at(i)!.cid,
+                        filteredBriefs.at(i)!.brief
                       )
                   : undefined
               }
               creator={props.creator}
-              original={briefs.at(i)!.original}
+              original={filteredBriefs.at(i)!.original}
               newTab={props.newTab}
               dateDiff={props.dateDiff}
               badge={props.badge}
@@ -219,41 +334,48 @@ export function ChartList(props: Props) {
           ) : (
             <li
               key={i}
-              className={
-                "w-full max-w-108 mx-auto h-10 rounded " +
-                "bg-sky-200/25 dark:bg-orange-800/10 "
-              }
+              className={clsx(
+                "w-full max-w-108 mx-auto h-10 rounded",
+                "bg-sky-200/25 dark:bg-orange-800/10"
+              )}
             />
           )
         )}
       </ul>
-      <div className="absolute inset-x-0 top-2 w-max mx-auto ">
-        {fetching && props.showLoading ? (
-          <>
-            <SlimeSVG />
-            Loading...
-          </>
-        ) : briefs && "message" in briefs ? (
-          (briefs.status ? `${briefs.status}: ` : "") +
-          (te.has(`api.${briefs.message}`)
+      {firstFetchingIndex >= 0 && props.showLoading ? (
+        <div
+          className="absolute inset-x-0 w-max mx-auto "
+          style={{
+            top:
+              0.5 +
+              itemMinHeight * Math.round(firstFetchingIndex / ulCols) +
+              "rem",
+          }}
+        >
+          <SlimeSVG />
+          Loading...
+        </div>
+      ) : briefs && "message" in briefs ? (
+        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+          {briefs.status ? `${briefs.status}: ` : ""}
+          {te.has(`api.${briefs.message}`)
             ? te(`api.${briefs.message}`)
-            : te("unknownApiError"))
-        ) : Array.isArray(briefs) && briefs.length === 0 ? (
-          props.search ? (
-            t("notFound")
-          ) : (
-            t("empty")
-          )
-        ) : null}
-      </div>
-      {Array.isArray(briefs) && briefs.length > maxRow ? (
+            : te("unknownApiError")}
+        </div>
+      ) : Array.isArray(briefs) && briefs.length === 0 ? (
+        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+          {props.search ? t("notFound") : t("empty")}
+        </div>
+      ) : null}
+      {Array.isArray(briefs) &&
+      briefs.filter((b) => b !== null).length > maxRow ? (
         props.onMoreClick ? (
           <button
-            className={
-              "block w-max mx-auto mt-2 " +
-              (fetching ? "invisible " : "") +
+            className={clsx(
+              "block w-max mx-auto mt-2",
+              firstFetchingIndex >= 0 && "invisible",
               linkStyle1
-            }
+            )}
             onClick={props.onMoreClick}
           >
             {t("showAll")}
@@ -264,11 +386,11 @@ export function ChartList(props: Props) {
           </button>
         ) : props.moreHref ? (
           <Link
-            className={
-              "block w-max mx-auto mt-2 " +
-              (fetching ? "invisible " : "") +
+            className={clsx(
+              "block w-max mx-auto mt-2",
+              firstFetchingIndex >= 0 && "invisible",
               linkStyle1
-            }
+            )}
             href={props.moreHref}
             prefetch={!process.env.NO_PREFETCH}
           >
@@ -282,6 +404,9 @@ export function ChartList(props: Props) {
       ) : props.moreHref || props.onMoreClick ? (
         <div className="w-0 h-6 mt-2 " />
       ) : null}
+      {padHeightForScroll > 0 && (
+        <div className="w-0" style={{ height: padHeightForScroll }} />
+      )}
     </div>
   );
 }
@@ -312,15 +437,15 @@ export function ChartListItem(props: CProps) {
   // ~54rem: 2列 -> 18~27rem
   // ~72rem: 3列 -> 18~24rem
   return (
-    <li className={"w-full max-w-108 mx-auto h-max "}>
+    <li className={clsx("w-full max-w-108 mx-auto h-max")}>
       {props.onClick || (props.newTab && !isStandalone) ? (
         <>
           <a
             href={props.href}
-            className={
-              chartListStyle +
-              (props.onClickMobile ? "hidden main-wide:block " : "")
-            }
+            className={clsx(
+              chartListStyle,
+              props.onClickMobile && "hidden main-wide:block"
+            )}
             target={props.newTab ? "_blank" : undefined}
             onClick={
               props.onClick
@@ -336,7 +461,7 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={chartListStyle + "main-wide:hidden "}
+              className={clsx(chartListStyle, "main-wide:hidden")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
@@ -349,7 +474,7 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={chartListStyle}
+          className={clsx(chartListStyle)}
           prefetch={!process.env.NO_PREFETCH}
         >
           <ChartListItemChildren {...props} />
@@ -409,10 +534,10 @@ function ChartListItemChildren(props: CProps) {
           )}
           {props.creator && (
             <span
-              className={
-                "inline-block leading-3 max-w-full " +
-                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis "
-              }
+              className={clsx(
+                "inline-block leading-3 max-w-full",
+                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis"
+              )}
             >
               <span className="ml-2 text-xs/3">by</span>
               <span className="ml-1 font-title text-sm/3">
@@ -473,7 +598,7 @@ function DateDiff(props: DProps) {
   }, [props.date]);
 
   if (output) {
-    return <span className={props.className}>({output})</span>;
+    return <span className={clsx(props.className)}>({output})</span>;
   } else {
     return null;
   }

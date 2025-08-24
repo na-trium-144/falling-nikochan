@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx/lite";
 import Title from "@/common/titleLogo";
 import BPMSign from "@/play/bpmSign";
 import RhythmicalSlime from "@/play/rhythmicalSlime";
@@ -18,11 +19,11 @@ export default function OGTemplate() {
       />
       <div className="absolute bottom-0 w-full h-6">
         <div
-          className={
-            "-z-30 absolute inset-x-0 bottom-0 " +
-            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200 " +
-            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700 "
-          }
+          className={clsx(
+            "-z-30 absolute inset-x-0 bottom-0",
+            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
+            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
+          )}
           style={{ top: "-1rem" }}
         />
         <RhythmicalSlime

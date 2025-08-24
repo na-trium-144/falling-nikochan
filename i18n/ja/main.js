@@ -49,8 +49,9 @@ export default {
       recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
-      latest: "新着譜面",
-      latestDesc: "最近作成・更新された譜面の一覧です。",
+      latest: "新着譜面・すべての譜面",
+      latestDesc:
+        "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
       latestDesc2:
         "譜面を制作する方へ: 譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
       sample: "サンプル譜面",
@@ -130,6 +131,11 @@ export default {
     },
     festival:
       "ut.code(); 第{num}回{kind, select, mf {五月祭} kf {駒場祭} other {other}}ウェブサイトに戻る",
+  },
+  dev: {
+    title: "デバッグ用",
+    description: "デバッグ用の隠しページ",
+    back: "戻る",
   },
   footer: {
     theme: "テーマ色",
