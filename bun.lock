@@ -16,7 +16,7 @@
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "babel-loader": "^10.0.0",
-        "core-js": "^3.42.0",
+        "core-js": "^3.45.1",
         "eslint": "^9.22.0",
         "eslint-config-next": "^15.3.3",
         "eslint-config-prettier": "^10.1.8",
@@ -31,7 +31,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -40,7 +40,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -73,14 +73,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "next-intl": "^4.3.4",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "@hono/node-server": "^1.18.0",
         "@vercel/og": "^0.8.5",
@@ -98,7 +98,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.45.0",
+      "version": "12.48.0",
     },
   },
   "overrides": {
@@ -832,7 +832,7 @@
 
     "cookie-signature": ["cookie-signature@1.2.2", "", {}, "sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg=="],
 
-    "core-js": ["core-js@3.42.0", "", {}, "sha512-Sz4PP4ZA+Rq4II21qkNqOEDTDrCvcANId3xpIgB34NDkWc3UduWj2dqEtN9yZIq8Dk3HyPI33x9sqqU5C8sr0g=="],
+    "core-js": ["core-js@3.45.1", "", {}, "sha512-L4NPsJlCfZsPeXukyzHFlg/i7IIVwHSItR0wg0FLNqYClJ4MQYTYLbC7EkjKYRLZF2iof2MUgN0EGy7MdQFChg=="],
 
     "core-js-compat": ["core-js-compat@3.44.0", "", { "dependencies": { "browserslist": "^4.25.1" } }, "sha512-JepmAj2zfl6ogy34qfWtcE7nHKAJnKsQFRn++scjVS2bZFllwptzw61BZcZFYBPpUznLfAvh0LGhxKppk04ClA=="],
 
