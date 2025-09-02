@@ -187,6 +187,7 @@ export default function PlayTab(props: Props) {
           showLoading
           moreHref={`/${locale}/main/popular`}
           badge
+          fixedRows
         />
       </AccordionLike>
       <AccordionLike
@@ -209,6 +210,7 @@ export default function PlayTab(props: Props) {
           dateDiff
           moreHref={`/${locale}/main/latest`}
           badge
+          fixedRows
         />
       </AccordionLike>
       <AccordionLike

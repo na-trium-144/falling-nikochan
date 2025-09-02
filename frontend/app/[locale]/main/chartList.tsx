@@ -30,7 +30,6 @@ interface PProps {
 export default function ChartListPage(props: PProps) {
   const { openModal, openShareInternal } = useSharePageModal();
   const boxSize = useResizeDetector();
-  const { rem } = useDisplayMode();
   return (
     <IndexMain
       title={props.title}
@@ -58,9 +57,7 @@ export default function ChartListPage(props: PProps) {
         moreHref={null}
         badge={props.badge}
         containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-        containerHeight={
-          boxSize.height ? boxSize.height - (12 / 4) * rem : undefined
-        }
+        containerHeight={boxSize.height} // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
       />
     </IndexMain>
   );
@@ -83,6 +80,7 @@ interface Props {
     | { status: number | null; message: string }
     | undefined;
   fetchAll?: boolean;
+  fixedRows?: boolean; // 表示数を6個で固定する
   containerHeight?: number;
   containerRef?: RefObject<HTMLElement | null>;
   creator?: boolean;
@@ -174,7 +172,7 @@ export function ChartList(props: Props) {
     ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
     : undefined;
   // この個数は空でも枠を表示する
-  const fixedRow = props.containerHeight ? 0 : 6;
+  const fixedRow = props.fixedRows ? 6 : 0;
   // 最大で表示する個数
   const maxRow = props.containerHeight ? maxRowPerPage! * pagination : fixedRow;
   const fetchAll = props.fetchAll;
@@ -269,14 +267,19 @@ export function ChartList(props: Props) {
     const onScroll = () => {
       if (
         props.containerRef?.current &&
+        props.containerHeight &&
         padHeightForScroll > 0 &&
-        props.containerRef.current.scrollTop +
-          props.containerRef.current.clientHeight >=
-          props.containerRef.current.scrollHeight - padHeightForScroll
+        maxRowPerPage
       ) {
-        setPagination(
-          Math.floor(props.containerRef.current.scrollHeight / maxRowPerPage!) +
-            1
+        setPagination((pagination) =>
+          Math.max(
+            Math.floor(
+              (props.containerRef!.current!.scrollTop +
+                props.containerHeight!) /
+                ((itemMinHeight * rem * maxRowPerPage!) / ulCols)
+            ) + 1,
+            pagination
+          )
         );
       }
     };
@@ -291,6 +294,8 @@ export function ChartList(props: Props) {
     itemMinHeight,
     rem,
     maxRowPerPage,
+    ulCols,
+    props.containerHeight,
   ]);
 
   return (
