@@ -76,14 +76,12 @@ export interface ChartLineBrief {
   original?: boolean;
 }
 type ErrorMsg = { status: number | null; message: string };
-const chartListMaxRow = 6;
 interface Props {
   type?: ChartListType;
   briefs?:
     | ChartLineBrief[]
     | { status: number | null; message: string }
     | undefined;
-  maxRow?: number;
   fetchAll?: boolean;
   containerHeight?: number;
   containerRef?: RefObject<HTMLElement | null>;
@@ -171,18 +169,24 @@ export function ChartList(props: Props) {
     : 1;
   // 現在の画面サイズに応じた最大サイズ
   const [pagination, setPagination] = useState<number>(1);
+  // 1ページあたりに表示できる最大数
   const maxRowPerPage = props.containerHeight
     ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
     : undefined;
-  const maxRow: number =
-    props.maxRow ||
-    (props.containerHeight ? maxRowPerPage! * pagination : chartListMaxRow);
+  // この個数は空でも枠を表示する
+  const fixedRow = props.containerHeight ? 0 : 6;
+  // 最大で表示する個数
+  const maxRow = props.containerHeight ? maxRowPerPage! * pagination : fixedRow;
   const fetchAll = props.fetchAll;
 
   useEffect(() => {
     if (Array.isArray(briefs)) {
       let changed = false;
-      for (let i = 0; i < briefs.length && (fetchAll || i < maxRow); i++) {
+      for (
+        let i = 0;
+        i < briefs.length && (fetchAll || (maxRow && i < maxRow));
+        i++
+      ) {
         const b = briefs[i];
         if (b !== null && !b.fetched && !b.fetching) {
           b.fetching = true;
@@ -240,10 +244,11 @@ export function ChartList(props: Props) {
       ? briefs.filter((b) => b !== null)
       : briefs.filter((b) => b !== null).slice(0, maxRow)
     : briefs;
+  // エラーなどを除いた実際のbriefの項目数
   const filteredNumRows =
     Array.isArray(filteredBriefs) && (fetchAll || props.containerRef)
       ? filteredBriefs.length
-      : maxRow;
+      : 0;
   // filteredBriefs内で最初にfetch中のbriefのインデックス
   // すべてfetch完了なら-1
   const firstFetchingIndex: number =
@@ -254,6 +259,7 @@ export function ChartList(props: Props) {
         : -1;
   const padHeightForScroll: number =
     Array.isArray(briefs) &&
+    maxRow !== undefined &&
     briefs.filter((b) => b !== null).length > maxRow &&
     props.containerRef
       ? 2 * rem
@@ -298,48 +304,49 @@ export function ChartList(props: Props) {
           maxWidth: 4 * itemMinWidth - 0.1 + "rem",
         }}
       >
-        {Array.from(new Array(filteredNumRows)).map((_, i) =>
-          Array.isArray(filteredBriefs) &&
-          filteredBriefs.at(i) &&
-          (firstFetchingIndex === -1 || i < firstFetchingIndex) ? (
-            <ChartListItem
-              key={i}
-              cid={filteredBriefs.at(i)!.cid}
-              brief={filteredBriefs.at(i)!.brief}
-              href={props.href(filteredBriefs.at(i)!.cid)}
-              onClick={
-                props.onClick
-                  ? () =>
-                      props.onClick!(
-                        filteredBriefs.at(i)!.cid,
-                        filteredBriefs.at(i)!.brief
-                      )
-                  : undefined
-              }
-              onClickMobile={
-                props.onClickMobile
-                  ? () =>
-                      props.onClickMobile!(
-                        filteredBriefs.at(i)!.cid,
-                        filteredBriefs.at(i)!.brief
-                      )
-                  : undefined
-              }
-              creator={props.creator}
-              original={filteredBriefs.at(i)!.original}
-              newTab={props.newTab}
-              dateDiff={props.dateDiff}
-              badge={props.badge}
-            />
-          ) : (
-            <li
-              key={i}
-              className={clsx(
-                "w-full max-w-108 mx-auto h-10 rounded",
-                "bg-sky-200/25 dark:bg-orange-800/10"
-              )}
-            />
-          )
+        {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
+          (_, i) =>
+            Array.isArray(filteredBriefs) &&
+            filteredBriefs.at(i) &&
+            (firstFetchingIndex === -1 || i < firstFetchingIndex) ? (
+              <ChartListItem
+                key={i}
+                cid={filteredBriefs.at(i)!.cid}
+                brief={filteredBriefs.at(i)!.brief}
+                href={props.href(filteredBriefs.at(i)!.cid)}
+                onClick={
+                  props.onClick
+                    ? () =>
+                        props.onClick!(
+                          filteredBriefs.at(i)!.cid,
+                          filteredBriefs.at(i)!.brief
+                        )
+                    : undefined
+                }
+                onClickMobile={
+                  props.onClickMobile
+                    ? () =>
+                        props.onClickMobile!(
+                          filteredBriefs.at(i)!.cid,
+                          filteredBriefs.at(i)!.brief
+                        )
+                    : undefined
+                }
+                creator={props.creator}
+                original={filteredBriefs.at(i)!.original}
+                newTab={props.newTab}
+                dateDiff={props.dateDiff}
+                badge={props.badge}
+              />
+            ) : (
+              <li
+                key={i}
+                className={clsx(
+                  "w-full max-w-108 mx-auto h-10 rounded",
+                  "bg-sky-200/25 dark:bg-orange-800/10"
+                )}
+              />
+            )
         )}
       </ul>
       {firstFetchingIndex >= 0 && props.showLoading ? (
