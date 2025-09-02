@@ -22,7 +22,7 @@
         "eslint-config-prettier": "^10.1.8",
         "globals": "^16.3.0",
         "prettier": "^3.6.2",
-        "tsx": "^4.20.3",
+        "tsx": "^4.20.5",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.38.0",
         "webpack": "^5.101.0",
@@ -31,7 +31,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -40,7 +40,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -73,14 +73,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "next-intl": "^4.3.4",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.45.0",
+      "version": "12.48.0",
       "dependencies": {
         "@hono/node-server": "^1.18.0",
         "@vercel/og": "^0.8.5",
@@ -98,7 +98,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.45.0",
+      "version": "12.48.0",
     },
   },
   "overrides": {
@@ -1694,7 +1694,7 @@
 
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
-    "tsx": ["tsx@4.20.3", "", { "dependencies": { "esbuild": "~0.25.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-qjbnuR9Tr+FJOMBqJCW5ehvIo/buZq7vH7qD7JziU98h6l3qGy0a/yPFjwO+y0/T7GFpNgNAvEcPPVfyT8rrPQ=="],
+    "tsx": ["tsx@4.20.5", "", { "dependencies": { "esbuild": "~0.25.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-+wKjMNU9w/EaQayHXb7WA7ZaHY6hN8WgfvHNQ3t1PnU91/7O8TcTnIhCDYTZwnt8JsO9IBqZ30Ln1r7pPF52Aw=="],
 
     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
 
