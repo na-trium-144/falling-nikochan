@@ -26,7 +26,7 @@
     "react-ace": "^14.0.1",
     "react-resize-detector": "^12.1.0",
     "remote-web-worker": "^0.0.9",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
