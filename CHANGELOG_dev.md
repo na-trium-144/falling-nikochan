@@ -1,3 +1,7 @@
+## ver. 12.49 - 2025/09/02 [#735](https://github.com/na-trium-144/falling-nikochan/pull/735)
+
+* プレイ中のコンテキストメニューを無効化
+
 ## ver. 12.48 - 2025/08/18 [#733](https://github.com/na-trium-144/falling-nikochan/pull/733)
 
 * ios無反応補正についてaboutの2ページに追記

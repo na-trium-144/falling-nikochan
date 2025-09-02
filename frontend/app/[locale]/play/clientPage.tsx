@@ -714,6 +714,14 @@ function Play(props: Props) {
     setTimeout(() => setBarFlash(false), 100);
   };
 
+  useEffect(() => {
+    const disableMenu = (e: Event) => {
+      e.preventDefault();
+    };
+    document.addEventListener("contextmenu", disableMenu);
+    return () => document.removeEventListener("contextmenu", disableMenu);
+  }, []);
+
   return (
     <main
       className={clsx(
