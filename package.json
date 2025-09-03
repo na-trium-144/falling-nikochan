@@ -30,6 +30,8 @@
     "worker"
   ],
   "dependencies": {
+    "@next/mdx": "=15.5.2",
+    "next": "=15.5.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
@@ -37,21 +39,21 @@
     "@babel/preset-env": "^7.28.0",
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.32.0",
-    "@types/bun": "^1.2.19",
+    "@types/bun": "^1.2.21",
     "@types/node": "^22.15.19",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "babel-loader": "^10.0.0",
     "core-js": "^3.42.0",
     "eslint": "^9.22.0",
-    "eslint-config-next": "^15.3.3",
+    "eslint-config-next": "=15.5.2",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.3.0",
     "prettier": "^3.6.2",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "webpack": "^5.101.0",
+    "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1"
   },
   "overrides": {
