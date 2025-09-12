@@ -17,6 +17,10 @@ export interface Bindings {
   BACKEND_OG_PREFIX?: string;
   VERCEL_PROTECTION_BYPASS_SECRET?: string;
   GOOGLE_API_KEY?: string;
+  TWITTER_API_KEY?: string;
+  TWITTER_API_KEY_SECRET?: string;
+  TWITTER_ACCESS_TOKEN?: string;
+  TWITTER_ACCESS_TOKEN_SECRET?: string;
 }
 
 export function secretSalt(e: Bindings) {
