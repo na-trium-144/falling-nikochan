@@ -6,7 +6,6 @@ import { ChartEntryCompressed, ChartLevelBrief } from "./chart.js";
 import { PlayRecordEntry } from "./record.js";
 import { numLatest, popularDays } from "@falling-nikochan/chart";
 
-
 export interface CidCount {
   cid: string;
   count: number;
@@ -54,13 +53,9 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      return c.json(
-        await getPopularCharts(db),
-        200,
-        {
-          "cache-control": cacheControl(env(c), 600),
-        }
-      );
+      return c.json(await getPopularCharts(db), 200, {
+        "cache-control": cacheControl(env(c), 600),
+      });
     } finally {
       await client.close();
     }
