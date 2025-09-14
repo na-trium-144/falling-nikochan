@@ -52,7 +52,7 @@ export async function postChart(
       twitterText.extractUrls(brief.title).length > 0 ||
       twitterText.extractUrls(brief.composer).length > 0
     ) {
-      reportToDiscord(
+      await reportToDiscord(
         env,
         "Skipped posting tweet due to URL in song title or composer.\n\n" +
           "Original message:\n" +
@@ -61,7 +61,7 @@ export async function postChart(
       return "skipped";
     }
     if (!(await checkTextSafety(env, messageJoined()))) {
-      reportToDiscord(
+      await reportToDiscord(
         env,
         "Skipped posting tweet due to unsafe content detected by Gemini.\n\n" +
           "Original message:\n" +
@@ -74,7 +74,7 @@ export async function postChart(
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {
-      reportToDiscord(
+      await reportToDiscord(
         env,
         "Skipped posting tweet due to duplicate tweet error.\n\n" +
           "Original message:\n" +
@@ -82,7 +82,7 @@ export async function postChart(
       );
       return "skipped";
     }
-    reportToDiscord(
+    await reportToDiscord(
       env,
       "Error trying to post tweet:\n" +
         String(e) +
@@ -114,7 +114,7 @@ export async function postPopular(
     if (
       messageEntries.some((entry) => twitterText.extractUrls(entry).length > 0)
     ) {
-      reportToDiscord(
+      await reportToDiscord(
         env,
         "Skipped posting popular charts tweet due to URL in song title or composer.\n\n" +
           "Original message:\n" +
@@ -126,7 +126,7 @@ export async function postPopular(
     if (
       !(await checkTextSafety(env, messageHeader + messageEntries.join("")))
     ) {
-      reportToDiscord(
+      await reportToDiscord(
         env,
         "Skipped posting popular charts tweet due to unsafe content detected by Gemini.\n\n" +
           "Original message:\n" +
@@ -140,7 +140,7 @@ export async function postPopular(
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {
-      reportToDiscord(
+      await reportToDiscord(
         env,
         "Skipped posting popular charts tweet due to duplicate tweet error.\n\n" +
           "Original message:\n" +
@@ -149,7 +149,7 @@ export async function postPopular(
       );
       return "skipped";
     }
-    reportToDiscord(
+    await reportToDiscord(
       env,
       "Error trying to post popular charts tweet:\n" +
         String(e) +
