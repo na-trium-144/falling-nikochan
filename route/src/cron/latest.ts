@@ -51,6 +51,7 @@ export async function checkNewCharts(env: Bindings) {
       console.log(`New chart found: ${entry.cid}`);
       const brief = entryToBrief(entry);
       const postResult = await postChart(env, entry.cid, brief, "new");
+      console.log(postResult);
       if (postResult !== "error") {
         await db
           .collection("chart")
@@ -61,6 +62,7 @@ export async function checkNewCharts(env: Bindings) {
       console.log(`Updated chart found: ${entry.cid}`);
       const brief = entryToBrief(entry);
       const postResult = await postChart(env, entry.cid, brief, "update");
+      console.log(postResult);
       if (postResult !== "error") {
         await db
           .collection("chart")
