@@ -73,7 +73,7 @@ export async function postChart(
     await client.v2.tweet(messageJoined());
     return "ok";
   } catch (e) {
-    if(String(e).includes("duplicate")) {
+    if (String(e).includes("duplicate")) {
       reportToDiscord(
         env,
         "Skipped posting tweet due to duplicate tweet error.\n\n" +
@@ -88,6 +88,72 @@ export async function postChart(
         String(e) +
         "\n\nOriginal message:\n" +
         messageJoined()
+    );
+    return "error";
+  }
+}
+
+export async function postPopular(
+  env: Bindings,
+  briefs: ChartBrief[]
+): Promise<"ok" | "error" | "skipped"> {
+  const client = newTwitterClient(env);
+  const messageHeader = `#fallingnikochan 人気の譜面ランキング\n\n`;
+  const maxEntryLen = Math.floor(
+    (280 - parseTweet(messageHeader).weightedLength) / briefs.length
+  );
+  const messageEntries: string[] = [];
+  for (const [index, brief] of briefs.entries()) {
+    let line = `${index + 1}. ${brief.title} / ${brief.composer}\n`;
+    while (parseTweet(line).weightedLength > maxEntryLen) {
+      line = line.slice(0, -3) + "…\n";
+    }
+    messageEntries.push(line);
+  }
+  try {
+    if (messageEntries.some((entry) => extractUrls(entry).length > 0)) {
+      reportToDiscord(
+        env,
+        "Skipped posting popular charts tweet due to URL in song title or composer.\n\n" +
+          "Original message:\n" +
+          messageHeader +
+          messageEntries.join("")
+      );
+      return "skipped";
+    }
+    if (
+      !(await checkTextSafety(env, messageHeader + messageEntries.join("")))
+    ) {
+      reportToDiscord(
+        env,
+        "Skipped posting popular charts tweet due to unsafe content detected by Gemini.\n\n" +
+          "Original message:\n" +
+          messageHeader +
+          messageEntries.join("")
+      );
+      return "skipped";
+    }
+
+    await client.v2.tweet(messageHeader + messageEntries.join(""));
+    return "ok";
+  } catch (e) {
+    if (String(e).includes("duplicate")) {
+      reportToDiscord(
+        env,
+        "Skipped posting popular charts tweet due to duplicate tweet error.\n\n" +
+          "Original message:\n" +
+          messageHeader +
+          messageEntries.join("")
+      );
+      return "skipped";
+    }
+    reportToDiscord(
+      env,
+      "Error trying to post popular charts tweet:\n" +
+        String(e) +
+        "\n\nOriginal message:\n" +
+        messageHeader +
+        messageEntries.join("")
     );
     return "error";
   }
