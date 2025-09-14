@@ -37,11 +37,11 @@ export async function checkNewCharts(env: Bindings) {
             published: true,
             deleted: false,
             notifiedAt: { $exists: true },
-            $expr: {
-              $gt: [
-                "$updatedAt",
-                { $add: ["$notifiedAt", 12 * 60 * 60 * 1000] },
-              ],
+            $where: function () {
+              return (
+                this.notifiedAt !== undefined &&
+                this.updatedAt > this.notifiedAt + 12 * 60 * 60 * 1000
+              );
             },
           })
           .toArray()
