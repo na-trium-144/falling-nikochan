@@ -7,6 +7,8 @@ import {
   onError,
   notFound,
   fetchBrief,
+  reportPopularCharts,
+  checkNewCharts,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -35,4 +37,9 @@ const app = new Hono({ strict: false })
   .onError(onError({ fetchStatic }))
   .notFound(notFound);
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(reportPopularCharts(env).then(() => checkNewCharts(env)));
+  },
+};

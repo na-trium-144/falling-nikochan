@@ -8,4 +8,7 @@
     "directory": "frontend/out",
     "binding": "ASSETS",
   },
+  "triggers": {
+    "crons": ["*/15 * * * *"],
+  },
 }

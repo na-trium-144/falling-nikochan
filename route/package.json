@@ -1,22 +1,27 @@
 {
   "name": "@falling-nikochan/route",
-  "version": "12.50.0",
+  "version": "12.51.0",
   "private": true,
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "dependencies": {
+    "@google/genai": "^1.19.0",
     "@hono/node-server": "^1.18.0",
     "@vercel/og": "^0.8.5",
     "@ygoe/msgpack": "^1.0.3",
+    "discord.js": "^14.22.1",
     "dotenv": "^16.6.1",
     "hono": "^4.9.6",
     "isbot": "^5.1.29",
     "moji": "^0.5.1",
     "mongodb": "^6.18.0",
-    "sitemap": "^8.0.0"
+    "sitemap": "^8.0.0",
+    "twitter-api-v2": "^1.27.0",
+    "twitter-text": "^3.1.0"
   },
   "devDependencies": {
-    "@types/moji": "^0.5.3"
+    "@types/moji": "^0.5.3",
+    "@types/twitter-text": "^3.1.10"
   }
 }

@@ -12,6 +12,7 @@ import {
   notFound,
   fetchStatic,
   fetchBrief,
+  cronTestApp,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -31,6 +32,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchStatic,
     })
   )
+  .route("/cron", cronTestApp)
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
