@@ -49,26 +49,22 @@ export async function checkNewCharts(env: Bindings) {
     );
     for (const entry of newCharts) {
       console.log(`New chart found: ${entry.cid}`);
-      try {
-        const brief = entryToBrief(entry);
-        await postChart(env, entry.cid, brief, "new");
+      const brief = entryToBrief(entry);
+      const postResult = await postChart(env, entry.cid, brief, "new");
+      if (postResult !== "error") {
         await db
           .collection("chart")
           .updateOne({ cid: entry.cid }, { $set: { notifiedAt: Date.now() } });
-      } catch (e) {
-        console.error(`Failed to post new chart ${entry.cid}:`, e);
       }
     }
     for (const entry of updatedCharts) {
       console.log(`Updated chart found: ${entry.cid}`);
-      try {
-        const brief = entryToBrief(entry);
-        await postChart(env, entry.cid, brief, "update");
+      const brief = entryToBrief(entry);
+      const postResult = await postChart(env, entry.cid, brief, "update");
+      if (postResult !== "error") {
         await db
           .collection("chart")
           .updateOne({ cid: entry.cid }, { $set: { notifiedAt: Date.now() } });
-      } catch (e) {
-        console.error(`Failed to post updated chart ${entry.cid}:`, e);
       }
     }
   } finally {

@@ -21,6 +21,9 @@ export interface Bindings {
   TWITTER_API_KEY_SECRET?: string;
   TWITTER_ACCESS_TOKEN?: string;
   TWITTER_ACCESS_TOKEN_SECRET?: string;
+  GEMINI_API_KEY?: string;
+  DISCORD_WEBHOOK_ID?: string;
+  DISCORD_WEBHOOK_TOKEN?: string;
 }
 
 export function secretSalt(e: Bindings) {

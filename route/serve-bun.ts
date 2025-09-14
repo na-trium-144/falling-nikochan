@@ -63,4 +63,5 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
 export default {
   port: port,
   fetch: app.fetch,
+  idleTimeout: 255,
 };

@@ -43,7 +43,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
         * `NO_PREFETCH` (frontend): `1` or unset
         * `GOOGLE_API_KEY` (backend): API key for YouTube Data API v3 (optional)
         * `ALLOW_FETCH_ERROR` (frontend): `1` or unset
-        * `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET` (backend): (optional)
+        * `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`,`GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` (for cronjob)
 * Install dependencies
     ```sh
     npm ci  # or  bun i
