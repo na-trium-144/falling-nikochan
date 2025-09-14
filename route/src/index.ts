@@ -7,3 +7,5 @@ export { default as sitemapApp } from "./sitemap.js";
 export { languageDetector, fetchStatic, fetchBrief } from "./env.js";
 export type { Bindings } from "./env.js";
 export { default as cronTestApp } from "./cron/app.js";
+export { reportPopularCharts } from "./cron/popular.js";
+export { checkNewCharts } from "./cron/latest.js";
