@@ -16,8 +16,8 @@
     "isbot": "^5.1.29",
     "moji": "^0.5.1",
     "mongodb": "^6.18.0",
+    "oauth-1.0a": "^2.2.6",
     "sitemap": "^8.0.0",
-    "twitter-api-v2": "^1.27.0",
     "twitter-text": "^3.1.0"
   },
   "devDependencies": {

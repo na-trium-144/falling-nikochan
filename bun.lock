@@ -33,7 +33,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "12.50.0",
+      "version": "12.51.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -42,7 +42,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "12.50.0",
+      "version": "12.51.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -73,14 +73,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "12.50.0",
+      "version": "12.51.0",
       "dependencies": {
         "next-intl": "^4.3.4",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "12.50.0",
+      "version": "12.51.0",
       "dependencies": {
         "@google/genai": "^1.19.0",
         "@hono/node-server": "^1.18.0",
@@ -92,8 +92,8 @@
         "isbot": "^5.1.29",
         "moji": "^0.5.1",
         "mongodb": "^6.18.0",
+        "oauth-1.0a": "^2.2.6",
         "sitemap": "^8.0.0",
-        "twitter-api-v2": "^1.27.0",
         "twitter-text": "^3.1.0",
       },
       "devDependencies": {
@@ -103,7 +103,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "12.50.0",
+      "version": "12.51.0",
     },
   },
   "overrides": {
@@ -1489,6 +1489,8 @@
 
     "nth-check": ["nth-check@2.1.1", "", { "dependencies": { "boolbase": "^1.0.0" } }, "sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w=="],
 
+    "oauth-1.0a": ["oauth-1.0a@2.2.6", "", {}, "sha512-6bkxv3N4Gu5lty4viIcIAnq5GbxECviMBeKR3WX/q87SPQ8E8aursPZUtsXDnxCs787af09WPRBLqYrf/lwoYQ=="],
+
     "object-assign": ["object-assign@3.0.0", "", {}, "sha512-jHP15vXVGeVh1HuaA2wY6lxk+whK/x4KBG88VXeRma7CCun7iGD5qPc4eYykQ9sdQvg8jkwFKsSxHln2ybW3xQ=="],
 
     "object-inspect": ["object-inspect@1.13.4", "", {}, "sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew=="],
@@ -1768,8 +1770,6 @@
     "tsx": ["tsx@4.20.3", "", { "dependencies": { "esbuild": "~0.25.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-qjbnuR9Tr+FJOMBqJCW5ehvIo/buZq7vH7qD7JziU98h6l3qGy0a/yPFjwO+y0/T7GFpNgNAvEcPPVfyT8rrPQ=="],
 
     "twemoji-parser": ["twemoji-parser@11.0.2", "", {}, "sha512-5kO2XCcpAql6zjdLwRwJjYvAZyDy3+Uj7v1ipBzLthQmDL7Ce19bEqHr3ImSNeoSW2OA8u02XmARbXHaNO8GhA=="],
-
-    "twitter-api-v2": ["twitter-api-v2@1.27.0", "", {}, "sha512-hbIFwzg0NeOcFOdmJqtKMCXjLjc0INff/7NwhnZ2zpnw65oku8i+0eMxo5M0iTc1hs+inD/IpDw3S0Xh2c45QQ=="],
 
     "twitter-text": ["twitter-text@3.1.0", "", { "dependencies": { "@babel/runtime": "^7.3.1", "core-js": "^2.5.0", "punycode": "1.4.1", "twemoji-parser": "^11.0.2" } }, "sha512-nulfUi3FN6z0LUjYipJid+eiwXvOLb8Ass7Jy/6zsXmZK3URte043m8fL3FyDzrK+WLpyqhHuR/TcARTN/iuGQ=="],
 
