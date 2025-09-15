@@ -21,9 +21,7 @@ export async function checkNewCharts(env: Bindings) {
             published: true,
             deleted: false,
             notifiedAt: { $exists: false },
-            updatedAt: {
-              $gte: new Date(Date.now() - 24 * 60 * 60 * 1000).getTime(),
-            },
+            updatedAt: { $gte: Date.now() - 24 * 60 * 60 * 1000 },
           })
           .toArray()
       ).map((compressed) => unzipEntry(compressed))
@@ -36,16 +34,16 @@ export async function checkNewCharts(env: Bindings) {
           .find({
             published: true,
             deleted: false,
-            notifiedAt: { $exists: true },
-            $where: function () {
-              return (
-                this.notifiedAt !== undefined &&
-                this.updatedAt > this.notifiedAt + 12 * 60 * 60 * 1000
-              );
-            },
+            // notifiedAt: { $exists: true },
+            notifiedAt: { $lt: Date.now() - 12 * 60 * 60 * 1000 },
+            updatedAt: { $gte: Date.now() - 24 * 60 * 60 * 1000 },
           })
           .toArray()
-      ).map((compressed) => unzipEntry(compressed))
+      )
+        .filter(
+          (chart) => chart.updatedAt > chart.notifiedAt! + 12 * 60 * 60 * 1000
+        )
+        .map((compressed) => unzipEntry(compressed))
     );
     for (const entry of newCharts) {
       console.log(`New chart found: ${entry.cid}`);
