@@ -1,4 +1,4 @@
-## ver. 12.51 - 2025/09/14 [#764](https://github.com/na-trium-144/falling-nikochan/pull/764)
+## ver. 12.51 - 2025/09/14 [#764](https://github.com/na-trium-144/falling-nikochan/pull/764), [#766](https://github.com/na-trium-144/falling-nikochan/pull/766)
 
 * cloudflare workersのcronで譜面の更新通知と人気の譜面リストをTwitterに投稿するようにした
     * gemini apiを使って不適切な投稿を除外
