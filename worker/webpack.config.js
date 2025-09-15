@@ -45,6 +45,9 @@ const config = {
         "@falling-nikochan/i18n/staticMin.js",
       "./api/app.js": false,
       "./og/app.js": false,
+      "./cron/app.js": false,
+      "./cron/latest.js": false,
+      "./cron/popular.js": false,
       "./sitemap.js": false,
     },
     fallback: {

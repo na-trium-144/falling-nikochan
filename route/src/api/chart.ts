@@ -149,6 +149,7 @@ export interface ChartEntryCompressed {
   pServerHash: string | null; // see comment in chartFile.ts
   pRandomSalt: string | null;
   updatedAt: number;
+  notifiedAt?: number; // 最後にcronで通知した時刻
   ip: string[];
   locale: string;
   copyBuffer?: (NoteCommand9 | null)[];
