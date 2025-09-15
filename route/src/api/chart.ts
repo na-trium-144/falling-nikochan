@@ -44,6 +44,63 @@ interface Passwd {
  *
  * パスワードが不要なアクセス (/api/brief など) ではpをnullにする
  */
+export async function getChartEntryCompressed(
+  db: Db,
+  cid: string,
+  p: Passwd | null
+): Promise<ChartEntryCompressed> {
+  if (!v.parse(CidSchema(), cid)) {
+    throw new HTTPException(400, { message: "invalidChartId" });
+  }
+  const entryCompressed = await db
+    .collection<ChartEntryCompressed>("chart")
+    .findOne({ cid, deleted: false });
+  if (entryCompressed === null) {
+    if (process.env.API_ENV === "development" && isSample(cid)) {
+      const chart = getSample(cid);
+      return zipEntry(
+        await chartToEntry(
+          { ...chart, changePasswd: "a" },
+          cid,
+          0,
+          null,
+          undefined,
+          "",
+          null
+        )
+      );
+    } else {
+      throw new HTTPException(404, { message: "chartIdNotFound" });
+    }
+  }
+  if (typeof entryCompressed.published !== "boolean") {
+    entryCompressed.published = false;
+  }
+
+  if (
+    p === null ||
+    p.bypass ||
+    (entryCompressed.pServerHash === null &&
+      entryCompressed.pRandomSalt === null) ||
+    (entryCompressed.pServerHash !== null &&
+      entryCompressed.pRandomSalt !== null &&
+      ((p.rawPasswd !== undefined &&
+        (await getPServerHash(
+          cid,
+          p.rawPasswd,
+          p.pSecretSalt,
+          entryCompressed.pRandomSalt
+        )) === entryCompressed.pServerHash) ||
+        (p.v9PasswdHash !== undefined &&
+          p.v9UserSalt !== undefined &&
+          (await getPUserHash(entryCompressed.pServerHash, p.v9UserSalt)) ===
+            p.v9PasswdHash)))
+  ) {
+    return entryCompressed;
+  } else {
+    throw new HTTPException(401, { message: "badPassword" });
+  }
+}
 export async function getChartEntry(
   db: Db,
   cid: string,
@@ -59,60 +116,12 @@ export async function getChartEntry(
     | Chart9Edit
     | Chart11Edit;
 }> {
-  if (!v.parse(CidSchema(), cid)) {
-    throw new HTTPException(400, { message: "invalidChartId" });
-  }
-  const entryCompressed = await db
-    .collection<ChartEntryCompressed>("chart")
-    .findOne({ cid, deleted: false });
-  if (entryCompressed === null) {
-    if (process.env.API_ENV === "development" && isSample(cid)) {
-      const chart = getSample(cid);
-      return {
-        chart,
-        entry: await chartToEntry(
-          { ...chart, changePasswd: "a" },
-          cid,
-          0,
-          null,
-          undefined,
-          "",
-          null
-        ),
-      };
-    } else {
-      throw new HTTPException(404, { message: "chartIdNotFound" });
-    }
-  }
-  if (typeof entryCompressed.published !== "boolean") {
-    entryCompressed.published = false;
-  }
+  const entryCompressed = await getChartEntryCompressed(db, cid, p);
 
   const entry = await unzipEntry(entryCompressed);
   const chart = entryToChart(entry);
 
-  if (
-    p === null ||
-    p.bypass ||
-    (entry.pServerHash === null && entry.pRandomSalt === null) ||
-    (entry.pServerHash !== null &&
-      entry.pRandomSalt !== null &&
-      ((p.rawPasswd !== undefined &&
-        (await getPServerHash(
-          cid,
-          p.rawPasswd,
-          p.pSecretSalt,
-          entry.pRandomSalt
-        )) === entry.pServerHash) ||
-        (p.v9PasswdHash !== undefined &&
-          p.v9UserSalt !== undefined &&
-          (await getPUserHash(entry.pServerHash, p.v9UserSalt)) ===
-            p.v9PasswdHash)))
-  ) {
-    return { entry, chart };
-  } else {
-    throw new HTTPException(401, { message: "badPassword" });
-  }
+  return { entry, chart };
 }
 
 export function getPUserHash(

@@ -6,7 +6,7 @@ import { postChart } from "./twitter.js";
 import { checkNewCharts } from "./latest.js";
 import { timeout } from "hono/timeout";
 import { reportToDiscord } from "./discord.js";
-import { entryToBrief, getChartEntry } from "../api/chart.js";
+import { entryToBrief, getChartEntryCompressed } from "../api/chart.js";
 import { reportPopularCharts } from "./popular.js";
 
 const cronTestApp = new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -34,7 +34,7 @@ const cronTestApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { entry } = await getChartEntry(db, cid, null);
+      const entry = await getChartEntryCompressed(db, cid, null);
       const brief = entryToBrief(entry);
       await postChart(env(c), cid, brief, "new");
       return c.body(null, 200);

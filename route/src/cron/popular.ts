@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import { Bindings } from "../env.js";
 import { CidCount, getPopularCharts } from "../api/popular.js";
-import { entryToBrief, getChartEntry } from "../api/chart.js";
+import { entryToBrief, getChartEntryCompressed } from "../api/chart.js";
 import { ChartBrief } from "@falling-nikochan/chart";
 import { postPopular } from "./twitter.js";
 
@@ -25,7 +25,9 @@ export async function reportPopularCharts(env: Bindings) {
       const popularCids: CidCount[] = await getPopularCharts(db);
       const popularBriefs: ChartBrief[] = await Promise.all(
         popularCids.map(async ({ cid }) =>
-          getChartEntry(db, cid, null).then(({ entry }) => entryToBrief(entry))
+          getChartEntryCompressed(db, cid, null).then((entry) =>
+            entryToBrief(entry)
+          )
         )
       );
       const result = await postPopular(env, popularBriefs.slice(0, 6));

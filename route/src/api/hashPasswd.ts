@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie, setCookie } from "hono/cookie";
-import { getChartEntry, getPUserHash } from "./chart.js";
+import { getChartEntryCompressed, getPUserHash } from "./chart.js";
 import { randomBytes } from "node:crypto";
 import { MongoClient } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
@@ -57,7 +57,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { entry } = await getChartEntry(db, cid, {
+      const entry = await getChartEntryCompressed(db, cid, {
         rawPasswd: p,
         pSecretSalt,
       });

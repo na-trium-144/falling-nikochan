@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { entryToBrief, getChartEntry } from "./chart.js";
+import { entryToBrief, getChartEntryCompressed } from "./chart.js";
 import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
@@ -14,7 +14,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      const { entry } = await getChartEntry(db, cid, null);
+      const entry = await getChartEntryCompressed(db, cid, null);
       return c.json(entryToBrief(entry), 200, {
         "cache-control": cacheControl(env(c), 600),
       });
