@@ -56,28 +56,21 @@ export async function postChart(
   brief: ChartBrief,
   postType: "new" | "update"
 ): Promise<"ok" | "error" | "skipped"> {
-  const messageHeader =
-    postType === "new"
-      ? `#fallingnikochan 新しい譜面が公開されました!\n`
-      : `#fallingnikochan 譜面が更新されました!\n`;
-  const messageID = `ID: ${cid}\n`;
   let messageAboutSong = `${brief.title} / ${brief.composer}`;
   const messageAboutLevel =
     brief.levels
       .slice(0, 3)
       .map((lv) => `${lv.type}-${lv.difficulty}`)
       .join(", ") + (brief.levels.length > 3 ? ",…" : "");
-  const messageFooter = "\n\n誰でもこのURLから遊べます: ";
-  const messageURL = `https://nikochan.utcode.net/share/${cid}`;
   const messageJoined = () =>
     [
-      messageHeader,
-      messageID,
-      messageAboutSong,
-      "\n",
+      postType === "new"
+        ? `#fallingnikochan 新しい譜面が公開されました!\n`
+        : `#fallingnikochan 譜面が更新されました!\n`,
+      `誰でもこのURLから遊べます: https://nikochan.utcode.net/share/${cid}\n\n`,
+      // `ID: ${cid}\n`,
+      messageAboutSong + "\n",
       messageAboutLevel,
-      messageFooter,
-      messageURL,
     ].join("");
   while (twitterText.parseTweet(messageJoined()).weightedLength > 280) {
     messageAboutSong = messageAboutSong.slice(0, -2) + "…";
