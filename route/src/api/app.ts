@@ -13,6 +13,8 @@ import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import popularApp from "./popular.js";
 import searchApp from "./search.js";
+import { bodyLimit } from "hono/body-limit";
+import { fileMaxSize } from "@falling-nikochan/chart";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -21,6 +23,15 @@ const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     cors({
       origin: process.env.API_ENV === "development" ? (origin) => origin : "*",
       credentials: process.env.API_ENV === "development",
+    })
+  )
+  .use(
+    "/*",
+    bodyLimit({
+      maxSize: fileMaxSize,
+      onError: (c) => {
+        return c.json({ message: "tooLargeFile" }, 413);
+      },
     })
   )
   .route("/brief", briefApp)
