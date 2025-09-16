@@ -83,7 +83,7 @@
       "version": "12.53.0",
       "dependencies": {
         "@google/genai": "^1.19.0",
-        "@hono/node-server": "^1.18.0",
+        "@hono/node-server": "^1.19.2",
         "@vercel/og": "^0.8.5",
         "@ygoe/msgpack": "^1.0.3",
         "discord.js": "^14.22.1",
@@ -409,7 +409,7 @@
 
     "@google/genai": ["@google/genai@1.19.0", "", { "dependencies": { "google-auth-library": "^9.14.2", "ws": "^8.18.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": "^1.11.4" }, "optionalPeers": ["@modelcontextprotocol/sdk"] }, "sha512-mIMV3M/KfzzFA//0fziK472wKBJ1TdJLhozIUJKTPLyTDN1NotU+hyoHW/N0cfrcEWUK20YA0GxCeHC4z0SbMA=="],
 
-    "@hono/node-server": ["@hono/node-server@1.18.0", "", { "peerDependencies": { "hono": "^4" } }, "sha512-CJ0H3/ouk/JWnyiuYOJLdpuWhO2D2BTNigHaFixnW3CrwZb+E+4s/KoFkcikHXcVmXoxaLJx1nlGa3JChEFtFA=="],
+    "@hono/node-server": ["@hono/node-server@1.19.2", "", { "peerDependencies": { "hono": "^4" } }, "sha512-lndWsd9De/btN998Aiv6gkeMVV2h9Cc0AR0qwFTmxx/YFh/PbrjgoxTpHaNaRn6F4GAkPiVJwI0W0gQF4Wn8EA=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 
