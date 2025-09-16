@@ -7,7 +7,7 @@
   "types": "dist/src/index.d.ts",
   "dependencies": {
     "@google/genai": "^1.19.0",
-    "@hono/node-server": "^1.18.0",
+    "@hono/node-server": "^1.19.2",
     "@vercel/og": "^0.8.5",
     "@ygoe/msgpack": "^1.0.3",
     "discord.js": "^14.22.1",
