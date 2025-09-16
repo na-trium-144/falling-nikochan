@@ -33,7 +33,7 @@
     "dotenv": "^16.6.1",
     "postcss": "^8.5.6",
     "svgo": "^4.0.0",
-    "tailwindcss": "^4.1.11",
+    "tailwindcss": "^4.1.13",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
 }
