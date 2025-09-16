@@ -4,13 +4,11 @@ import { env } from "hono/adapter";
 import { MongoClient } from "mongodb";
 import { postChart } from "./twitter.js";
 import { checkNewCharts } from "./latest.js";
-import { timeout } from "hono/timeout";
 import { reportToDiscord } from "./discord.js";
 import { entryToBrief, getChartEntryCompressed } from "../api/chart.js";
 import { reportPopularCharts } from "./popular.js";
 
 const cronTestApp = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .use("/*", timeout(255000))
   .post("/latest", async (c) => {
     await checkNewCharts(env(c));
     return c.body(null, 200);

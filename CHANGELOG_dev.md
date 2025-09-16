@@ -1,3 +1,7 @@
+## ver. 12.53 - 2025/09/16 [#768](https://github.com/na-trium-144/falling-nikochan/pull/768)
+
+* honoの bodyLimit ミドルウェアを使ってbodyを読まずにエラーを返す
+
 ## ver. 12.51 - 2025/09/14 [#764](https://github.com/na-trium-144/falling-nikochan/pull/764), [#766](https://github.com/na-trium-144/falling-nikochan/pull/766)
 
 * cloudflare workersのcronで譜面の更新通知と人気の譜面リストをTwitterに投稿するようにした
