@@ -15,7 +15,9 @@ export async function reportPopularCharts(env: Bindings) {
       .findOne({}, { projection: { _id: 0, popularReportedAt: 1 } });
     if (
       lastReportedAt &&
-      Date.now() - lastReportedAt.popularReportedAt < 1000 * 60 * 60 * 24 * 3
+      Date.now() - lastReportedAt.popularReportedAt <
+        1000 * 60 * 60 * (24 * 2 + 12) &&
+      (new Date().getUTCHours() + 9) % 24 < 17
     ) {
       console.log(
         "Popular charts have been reported within the last 3 days. Skipping."
