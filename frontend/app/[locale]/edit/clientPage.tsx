@@ -689,14 +689,20 @@ function Page(props: Props) {
     ytPlayer.current?.pauseVideo();
     ref.current?.focus();
   };
-  const changeCurrentTimeSec = (timeSec: number, focus = true) => {
-    if (ytPlayer.current?.seekTo) {
-      ytPlayer.current?.seekTo(timeSec, true);
-    }
-    if (focus) {
-      ref.current?.focus();
-    }
-  };
+  const changeCurrentTimeSec = useCallback(
+    (timeSec: number, focus = true) => {
+      if (!playing) {
+        setCurrentTimeSecWithoutOffset(timeSec);
+        if (ytPlayer.current?.seekTo) {
+          ytPlayer.current?.seekTo(timeSec, true);
+        }
+      }
+      if (focus) {
+        ref.current?.focus();
+      }
+    },
+    [playing]
+  );
   const seekRight1 = () => {
     if (currentLevel) {
       if (
@@ -751,7 +757,7 @@ function Page(props: Props) {
         ref.current?.focus();
       }
     },
-    [chart, currentLevel]
+    [chart, currentLevel, changeCurrentTimeSec]
   );
   const seekSec = (moveSec: number, focus = true) => {
     if (chart) {
@@ -760,13 +766,15 @@ function Page(props: Props) {
   };
 
   useEffect(() => {
-    const i = setInterval(() => {
-      if (ytPlayer.current?.getCurrentTime) {
-        setCurrentTimeSecWithoutOffset(ytPlayer.current.getCurrentTime());
-      }
-    }, 50);
-    return () => clearInterval(i);
-  }, []);
+    if (playing) {
+      const i = setInterval(() => {
+        if (ytPlayer.current?.getCurrentTime) {
+          setCurrentTimeSecWithoutOffset(ytPlayer.current.getCurrentTime());
+        }
+      }, 50);
+      return () => clearInterval(i);
+    }
+  }, [playing]);
 
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
