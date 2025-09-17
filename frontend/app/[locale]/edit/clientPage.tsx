@@ -785,7 +785,7 @@ function Page(props: Props) {
 
   const { playSE, audioLatency } = useSE(cid, 0, true);
   const audioLatencyRef = useRef<number>(null!);
-  audioLatencyRef.current = audioLatency;
+  audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {
     if (playing && ytPlayer.current) {
       let index = 0;
