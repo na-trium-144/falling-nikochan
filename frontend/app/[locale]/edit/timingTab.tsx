@@ -27,6 +27,7 @@ import CornerDownLeft from "@icon-park/react/lib/icons/CornerDownLeft";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";
+import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 
 interface Props {
   offset?: number;
@@ -52,6 +53,10 @@ interface Props {
   currentLevelLength: number;
   ytDuration: number;
   currentStep: Step;
+  enableSE: boolean;
+  setEnableSE: (enableSE: boolean) => void;
+  seVolume: number;
+  setSEVolume: (seVolume: number) => void;
 }
 export default function TimingTab(props: Props) {
   const t = useTranslations("edit.timing");
@@ -153,6 +158,35 @@ export default function TimingTab(props: Props) {
           />
           <span>{t("offsetSecond")}</span>
         </CheckBox>
+      </div>
+      <div className="mb-3">
+        <CheckBox value={props.enableSE} onChange={(v) => props.setEnableSE(v)}>
+          {t("se")}
+          <VolumeNotice
+            theme="filled"
+            className={clsx(
+              "inline-block align-middle ml-2",
+              props.enableSE || "text-slate-400 dark:text-stone-600"
+            )}
+          />
+          <span
+            className={clsx(
+              "inline-block text-sm w-8 text-center",
+              props.enableSE || "text-slate-400 dark:text-stone-600"
+            )}
+          >
+            {props.seVolume}
+          </span>
+        </CheckBox>
+        <input
+          type="range"
+          className="align-middle "
+          min={0}
+          max={100}
+          disabled={!props.enableSE}
+          value={props.seVolume}
+          onChange={(e) => props.setSEVolume(parseInt(e.target.value))}
+        />
       </div>
       <div>
         <span>{t("step")}</span>

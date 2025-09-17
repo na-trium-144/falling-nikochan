@@ -783,7 +783,8 @@ function Page(props: Props) {
     }
   }, [chart, currentLevelIndex]);
 
-  const { playSE, audioLatency } = useSE(cid, 0, true);
+  const [enableSE, setEnableSE] = useState<boolean>(true);
+  const { playSE, audioLatency, seVolume, setSEVolume } = useSE(cid, 0, enableSE);
   const audioLatencyRef = useRef<number>(null!);
   audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {
@@ -1510,6 +1511,10 @@ function Page(props: Props) {
                     setYTEnd={setYTEnd}
                     currentLevelLength={currentLevelLength}
                     ytDuration={ytDuration}
+                    enableSE={enableSE}
+                    setEnableSE={setEnableSE}
+                    seVolume={seVolume}
+                    setSEVolume={setSEVolume}
                   />
                 ) : tab === 2 ? (
                   <LevelTab
