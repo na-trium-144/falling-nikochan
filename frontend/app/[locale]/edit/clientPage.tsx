@@ -88,6 +88,7 @@ import { Chart8Edit } from "@falling-nikochan/chart";
 import { SlimeSVG } from "@/common/slime.js";
 import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
+import { useSE } from "@/common/se.js";
 
 export default function EditAuth(props: {
   locale: string;
@@ -773,6 +774,47 @@ function Page(props: Props) {
       setNotesAll(loadChart(convertToPlay(chart, currentLevelIndex)).notes);
     }
   }, [chart, currentLevelIndex]);
+
+  const { playSE, audioLatency } = useSE(cid, 0, true);
+  const audioLatencyRef = useRef<number>(null!);
+  audioLatencyRef.current = audioLatency;
+  useEffect(() => {
+    if (playing && ytPlayer.current) {
+      let index = 0;
+      let t: ReturnType<typeof setTimeout> | null = null;
+      const now =
+        ytPlayer.current.getCurrentTime() -
+        (chart?.offset || 0) +
+        audioLatencyRef.current;
+      while (index < notesAll.length && notesAll[index].hitTimeSec < now) {
+        index++;
+      }
+      const playOne = () => {
+        if (ytPlayer.current) {
+          const now =
+            ytPlayer.current.getCurrentTime() -
+            (chart?.offset || 0) +
+            audioLatencyRef.current;
+          t = null;
+          while (index < notesAll.length && notesAll[index].hitTimeSec <= now) {
+            playSE(notesAll[index].big ? "hitBig" : "hit");
+            index++;
+          }
+          if (index < notesAll.length) {
+            t = setTimeout(playOne, (notesAll[index].hitTimeSec - now) * 1000);
+          }
+        }
+      };
+      if (index < notesAll.length) {
+        t = setTimeout(playOne, (notesAll[index].hitTimeSec - now) * 1000);
+      }
+      return () => {
+        if (t !== null) {
+          clearTimeout(t);
+        }
+      };
+    }
+  }, [playing, notesAll, playSE, chart?.offset]);
 
   const [tab, setTab] = useState<number>(0);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
