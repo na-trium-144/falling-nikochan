@@ -122,6 +122,8 @@ export default function EditAuth(props: {
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const [hasChange, setHasChange] = useState<boolean>(false);
 
+  const passwdRef = useRef<HTMLInputElement>(null);
+
   // PWAでテストプレイを押した場合に編集中の譜面データをsessionStorageに退避
   const saveEditSession = useCallback(() => {
     sessionStorage.setItem(
@@ -304,6 +306,12 @@ export default function EditAuth(props: {
     const ft = setTimeout(() => void fetchChart(true, false, "", true));
     return () => clearTimeout(ft);
   }, [fetchChart, t]);
+  useEffect(() => {
+    if(chart === undefined && !loading && !errorStatus && !errorMsg && passwdRef.current){
+      passwdRef.current.focus();
+      passwdRef.current.select();
+    }
+  }, [chart, loading, errorStatus, errorMsg]);
 
   return (
     <Page
@@ -345,10 +353,12 @@ export default function EditAuth(props: {
               <p>{t("enterPasswd")}</p>
               {passwdFailed && <p>{t("passwdFailed")}</p>}
               <Input
+                ref={passwdRef}
                 actualValue={editPasswd}
                 updateValue={setEditPasswd}
                 left
                 passwd
+                onEnter={(editPasswd) => fetchChart(false, false, editPasswd, savePasswd)}
               />
               <Button
                 text={t("submitPasswd")}
