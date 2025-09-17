@@ -52,7 +52,7 @@
         "@mdx-js/loader": "^3.1.1",
         "@mdx-js/react": "^3.1.1",
         "@ygoe/msgpack": "^1.0.3",
-        "ace-builds": "^1.42.0",
+        "ace-builds": "^1.43.3",
         "clsx": "^2.1.1",
         "file-saver": "^2.0.5",
         "react-ace": "^14.0.1",
@@ -723,7 +723,7 @@
 
     "accepts": ["accepts@2.0.0", "", { "dependencies": { "mime-types": "^3.0.0", "negotiator": "^1.0.0" } }, "sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng=="],
 
-    "ace-builds": ["ace-builds@1.42.0", "", {}, "sha512-nRDbpHguujCh9Lb00jtJAblR6d5JEi6RVrHtj+TAlUqRYwWl5Es7iHnyXUOmTcMfkzQ2/TPn45G/yvdQGa0ZXw=="],
+    "ace-builds": ["ace-builds@1.43.3", "", {}, "sha512-MCl9rALmXwIty/4Qboijo/yNysx1r6hBTzG+6n/TiOm5LFhZpEvEIcIITPFiEOEFDfgBOEmxu+a4f54LEFM6Sg=="],
 
     "acorn": ["acorn@8.15.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg=="],
 
