@@ -139,6 +139,11 @@ export default function OGTemplate() {
             </div>
             <div className="w-72 flex flex-col items-center justify-center space-y-4">
               <div className={clsx(showDummyData || "invisible")}>
+                <span className={clsx("text-3xl")}>(</span>
+                <span className="mr-2 text-2xl">{t("playbackRate")}:</span>
+                <span className={clsx("text-3xl")}>×1.25)</span>
+              </div>
+              <div className={clsx(showDummyData || "invisible")}>
                 <span className="mr-2 text-2xl ">{t("rank")}:</span>
                 <span className={clsx("text-5xl")}>S+</span>
               </div>
