@@ -84,6 +84,7 @@ export default function Result(props: Props) {
     props.score100,
     ...props.judgeCount,
     props.bigCount,
+    props.playbackRate4,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
