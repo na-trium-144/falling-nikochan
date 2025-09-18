@@ -368,11 +368,7 @@ export function MetaTab(props: Props2) {
             />
           </span>
         </div>
-        {!isTouch && (
-          <div className="ml-2">
-            {t("dragDropPossible", { extension: downloadExtension })}
-          </div>
-        )}
+        {!isTouch && <div className="ml-2">{t("dragDropPossible")}</div>}
       </div>
       <MetaEdit
         {...props}

@@ -1146,7 +1146,7 @@ function Page(props: Props) {
     ref.current?.focus();
   };
 
-  const { load, downloadExtension } = useChartFile({
+  const { load } = useChartFile({
     cid,
     chart,
     savePasswd: !!savePasswd,
@@ -1293,7 +1293,7 @@ function Page(props: Props) {
           }}
         >
           <Box className="absolute inset-6 m-auto w-max h-max p-6 shadow-md">
-            <p>{t("dragOver", { extension: downloadExtension })}</p>
+            <p>{t("dragOver")}</p>
           </Box>
         </div>
       )}

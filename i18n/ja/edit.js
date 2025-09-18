@@ -33,7 +33,7 @@ export default {
     zoom: "拡大",
     running: "スクリプトを実行中...",
     cancel: "キャンセル",
-    dragOver: "～.{extension} ファイルをドラッグ&ドロップして読み込む",
+    dragOver: "ファイルをドラッグ&ドロップして読み込む",
     timeBar: {
       bpm: "BPM",
       speed: "速度",
@@ -123,7 +123,7 @@ export default {
       saveToLocal: "保存",
       loadFromLocal: "ファイルを開く",
       dragDropPossible:
-        "〜.{extension} ファイルをドラッグ&ドロップして読み込むこともできます。",
+        "ファイルをドラッグ&ドロップして読み込むこともできます。",
     },
     timing: {
       title: "タイミング",
