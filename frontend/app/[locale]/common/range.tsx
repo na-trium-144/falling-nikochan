@@ -16,6 +16,7 @@ export default function Range(rangeProps: Props) {
   const [hovered, setHovered] = useState(false);
   // const [focused, setFocused] = useState(false);
   const [active, setActive] = useState(false);
+
   return (
     <ReactRange
       step={1}
@@ -28,20 +29,26 @@ export default function Range(rangeProps: Props) {
         <div
           {...props}
           className={clsx(
-            "relative inline-block rounded-full h-2 w-40 my-2",
-            "bg-slate-400/50 dark:bg-stone-600/50",
+            "relative inline-block h-5 w-40 my-1 isolation",
             rangeProps.className
           )}
         >
           <div
             className={clsx(
-              "absolute inset-y-0 left-0 rounded-full -z-10",
-              rangeProps.disabled
-                ? "bg-transparent"
-                : "bg-blue-400 dark:bg-amber-800"
+              "absolute inset-y-1.5 inset-x-0 rounded-full -z-10",
+              "bg-slate-400/50 dark:bg-stone-600/50"
             )}
-            style={{ width: (rangeProps.value / rangeProps.max) * 100 + "%" }}
-          />
+          >
+            <div
+              className={clsx(
+                "absolute inset-y-0 left-0 rounded-full",
+                rangeProps.disabled
+                  ? "bg-transparent"
+                  : "bg-blue-400 dark:bg-amber-800"
+              )}
+              style={{ width: (rangeProps.value / rangeProps.max) * 100 + "%" }}
+            />
+          </div>
           {children}
         </div>
       )}
