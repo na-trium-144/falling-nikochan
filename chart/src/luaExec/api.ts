@@ -116,6 +116,7 @@ export function luaAccel(state: LuaExecResult, ...args: any[]) {
       step: { ...state.step },
       timeSec: 0,
       luaLine: args[0],
+      interp: false,
     });
   } else {
     throw "invalid argument for Accel()";

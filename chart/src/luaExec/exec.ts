@@ -124,6 +124,7 @@ export async function luaExec(
       step: stepZero(),
       timeSec: 0,
       luaLine: null,
+      interp: false,
     });
   }
   if (result.levelFreezed.signature.length === 0) {

@@ -1,4 +1,5 @@
 import { LevelEdit } from "../chart.js";
+import { Level11Edit } from "../legacy/chart11.js";
 import { Chart3 } from "../legacy/chart3.js";
 import { Level5 } from "../legacy/chart5.js";
 import { Level9Edit } from "../legacy/chart9.js";
@@ -80,7 +81,7 @@ export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
   }
 }
 // コマンドを置き換え
-export function replaceLua<L extends LevelEdit | Level5 | Chart3>(
+export function replaceLua<L extends LevelEdit | Level11Edit | Level5 | Chart3>(
   chart: L,
   line: number,
   content: string
@@ -147,7 +148,7 @@ function stepLuaCommand(s: Step) {
 // 挿入する行、またはnullを返す。
 // modify=trueの場合、既存のStepコマンドを分割する必要がある場合は分割し、
 // Stepコマンドを追加する必要がある場合は追加する。
-export function findInsertLine<L extends LevelEdit | Level5 | Chart3>(
+export function findInsertLine<L extends LevelEdit | Level11Edit | Level5 | Chart3>(
   chart: L,
   step: Step,
   modify: boolean
