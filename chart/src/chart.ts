@@ -32,27 +32,28 @@ route/ 内の定義
 import * as v from "valibot";
 import { difficulty } from "./difficulty.js";
 import { hashLevel7 } from "./legacy/chart7.js";
-import { ChartUntil9, ChartUntil9Min, Level9Min } from "./legacy/chart9.js";
+import { Level9Min } from "./legacy/chart9.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero } from "./step.js";
-import {
-  Chart11Edit,
-  Chart11Min,
-  ChartEditSchema11,
-  ChartMinSchema11,
-  ChartUntil11,
-  ChartUntil11Min,
-  convertTo11,
-  convertTo11Min,
-  convertToMin11,
-  convertToPlay11,
-  Level11Edit,
-  Level11Freeze,
-  Level11Play,
-} from "./legacy/chart11.js";
+import { ChartUntil11, ChartUntil11Min } from "./legacy/chart11.js";
 import { defaultCopyBuffer } from "./command.js";
+import {
+  Chart13Edit,
+  Chart13Min,
+  ChartEditSchema13,
+  ChartMinSchema13,
+  ChartUntil13,
+  ChartUntil13Min,
+  convertTo13,
+  convertTo13Min,
+  convertToMin13,
+  convertToPlay13,
+  Level13Edit,
+  Level13Freeze,
+  Level13Play,
+} from "./legacy/chart13.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -104,32 +105,32 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 12;
+export const currentChartVer = 13;
 export const lastIncompatibleVer = 6;
-export type ChartMin = Chart11Min;
+export type ChartMin = Chart13Min;
 export type LevelMin = Level9Min;
-export type ChartEdit = Chart11Edit;
-export type LevelFreeze = Level11Freeze;
-export type LevelEdit = Level11Edit;
-export type LevelPlay = Level11Play;
-export const convertToMin = convertToMin11;
-export const convertToPlay = convertToPlay11;
+export type ChartEdit = Chart13Edit;
+export type LevelFreeze = Level13Freeze;
+export type LevelEdit = Level13Edit;
+export type LevelPlay = Level13Play;
+export const convertToMin = convertToMin13;
+export const convertToPlay = convertToPlay13;
 
-export async function validateChart(chart: ChartUntil11): Promise<ChartEdit> {
+export async function validateChart(chart: ChartUntil13): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 11 && chart.ver !== 12)
-    chart = await convertTo11(chart as ChartUntil9);
-  v.parse(ChartEditSchema11(), chart);
-  return { ...chart, ver: 12 };
+  if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
+  chart satisfies Chart13Edit;
+  v.parse(ChartEditSchema13(), chart);
+  return { ...chart, ver: 13 };
 }
 export async function validateChartMin(
-  chart: ChartUntil11Min
+  chart: ChartUntil13Min
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 11 && chart.ver !== 12)
-    chart = await convertTo11Min(chart as ChartUntil9Min);
-  v.parse(ChartMinSchema11(), chart);
-  return { ...chart, ver: 12 };
+  if (chart.ver !== 13) chart = await convertTo13Min(chart as ChartUntil11Min);
+  chart satisfies Chart13Min;
+  v.parse(ChartMinSchema13(), chart);
+  return { ...chart, ver: 13 };
 }
 
 export async function hash(text: string) {
