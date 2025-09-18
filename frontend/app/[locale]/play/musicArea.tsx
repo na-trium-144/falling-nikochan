@@ -377,8 +377,8 @@ export function MusicArea(props: Props) {
           <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
           <Range
             className="flex-1 mx-1 "
-            min="0"
-            max="100"
+            min={0}
+            max={100}
             disabled={!ytVolumeCtrlAvailable}
             value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
             onChange={props.setYtVolume}
