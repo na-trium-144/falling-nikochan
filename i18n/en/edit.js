@@ -208,6 +208,7 @@ export default {
       changeHere: "Change here",
       editedInCode: "Cannot be changed because it is edited in the Code tab.",
       se: "Tap sound",
+      beatSE: "Metronome sound",
     },
     level: {
       title: "Levels",

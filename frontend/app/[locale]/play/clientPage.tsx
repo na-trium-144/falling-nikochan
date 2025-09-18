@@ -361,10 +361,10 @@ function Play(props: Props) {
   const [enableIOSThru, setEnableIOSThru_] = useState<boolean>(false);
   const {
     playSE,
-    enableSE,
-    setEnableSE,
-    seVolume,
-    setSEVolume,
+    enableHitSE,
+    setEnableHitSE,
+    hitVolume,
+    setHitVolume,
     audioLatency,
     offsetPlusLatency,
   } = useSE(cid, userOffset, !enableIOSThru);
@@ -836,9 +836,9 @@ function Play(props: Props) {
             onPlaybackRateChange={setPlaybackRate}
             ytVolume={ytVolume}
             setYtVolume={setYtVolume}
-            enableSE={enableSE && !enableIOSThru}
-            seVolume={seVolume}
-            setSEVolume={setSEVolume}
+            enableSE={enableHitSE && !enableIOSThru}
+            seVolume={hitVolume}
+            setSEVolume={setHitVolume}
           />
           {!isMobile && (
             <>
@@ -935,8 +935,8 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
-              enableSE={enableSE}
-              setEnableSE={setEnableSE}
+              enableSE={enableHitSE}
+              setEnableSE={setEnableHitSE}
               enableIOSThru={enableIOSThru}
               setEnableIOSThru={setEnableIOSThru}
               audioLatency={audioLatency}

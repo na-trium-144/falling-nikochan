@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type SEType = "hit" | "hitBig";
+export type SEType = "hit" | "hitBig" | "beat" | "beat1";
 
 export function useSE(
   cid: string | undefined,
@@ -10,18 +10,35 @@ export function useSE(
   const audioContext = useRef<AudioContext | null>(null);
   const audioHit = useRef<AudioBuffer | null>(null);
   const audioHitBig = useRef<AudioBuffer | null>(null);
-  const gainNode = useRef<GainNode | null>(null);
+  const audioBeat = useRef<AudioBuffer | null>(null);
+  const audioBeat1 = useRef<AudioBuffer | null>(null);
+  const gainNodeHit = useRef<GainNode | null>(null);
+  const gainNodeBeat = useRef<GainNode | null>(null);
   const lastPlayed = useRef<{ [key in SEType]?: DOMHighResTimeStamp }>({});
-  const [seVolume, setSEVolume_] = useState<number>(100);
-  const setSEVolume = useCallback(
+  const [hitVolume, setHitVolume_] = useState<number>(100);
+  const setHitVolume = useCallback(
     (v: number) => {
-      setSEVolume_(v);
+      setHitVolume_(v);
       localStorage.setItem("seVolume", v.toString());
       if (cid) {
         localStorage.setItem(`seVolume-${cid}`, v.toString());
       }
-      if (gainNode.current) {
-        gainNode.current.gain.value = v / 100;
+      if (gainNodeHit.current) {
+        gainNodeHit.current.gain.value = v / 100;
+      }
+    },
+    [cid]
+  );
+  const [beatVolume, setBeatVolume_] = useState<number>(30);
+  const setBeatVolume = useCallback(
+    (v: number) => {
+      setBeatVolume_(v);
+      localStorage.setItem("beatVolume", v.toString());
+      if (cid) {
+        localStorage.setItem(`beatVolume-${cid}`, v.toString());
+      }
+      if (gainNodeBeat.current) {
+        gainNodeBeat.current.gain.value = v / 100;
       }
     },
     [cid]
@@ -30,20 +47,27 @@ export function useSE(
   const [audioLatency, setAudioLatency] = useState<number | null | undefined>(
     undefined
   );
-  const [enableSE, setEnableSE_] = useState<boolean>(true);
-  const offsetPlusLatency = userOffset - (enableSE ? audioLatency || 0 : 0);
-  const setEnableSE = useCallback((v: boolean) => {
+  const [enableHitSE, setEnableHitSE_] = useState<boolean>(true);
+  const [enableBeatSE, setEnableBeatSE_] = useState<boolean>(true);
+  // playでのオフセット調整に使い、playではbeatは使わないので無視している
+  const offsetPlusLatency = userOffset - (enableHitSE ? audioLatency || 0 : 0);
+  const setEnableHitSE = useCallback((v: boolean) => {
     const enableSE = v && "AudioContext" in window;
-    setEnableSE_(enableSE);
+    setEnableHitSE_(enableSE);
     localStorage.setItem("enableSE", enableSE ? "1" : "0");
   }, []);
+  const setEnableBeatSE = useCallback((v: boolean) => {
+    const enableSE = v && "AudioContext" in window;
+    setEnableBeatSE_(enableSE);
+    localStorage.setItem("enableBeatSE", enableSE ? "1" : "0");
+  }, []);
   useEffect(() => {
-    if (enableSE && enableSE2) {
+    if ((enableHitSE || enableBeatSE) && enableSE2) {
       audioContext.current?.resume();
     } else {
       audioContext.current?.suspend();
     }
-  }, [enableSE, enableSE2]);
+  }, [enableHitSE, enableBeatSE, enableSE2]);
   useEffect(() => {
     if ("AudioContext" in window) {
       audioContext.current = new AudioContext();
@@ -53,24 +77,47 @@ export function useSE(
           audioContext.current?.baseLatency !== undefined &&
           audioContext.current?.outputLatency !== undefined);
       if (enableSEInitial) {
-        setEnableSE_(true);
+        setEnableHitSE_(true);
       } else {
-        setEnableSE_(false);
+        setEnableHitSE_(false);
+      }
+      const enableBeatSEInitial =
+        localStorage.getItem("enableBeatSE") === "1" ||
+        (localStorage.getItem("enableBeatSE") == null &&
+          audioContext.current?.baseLatency !== undefined &&
+          audioContext.current?.outputLatency !== undefined);
+      if (enableBeatSEInitial) {
+        setEnableBeatSE_(true);
+      } else {
+        setEnableBeatSE_(false);
+      }
+      if (!enableSEInitial && !enableBeatSEInitial) {
         audioContext.current?.suspend();
       }
-      gainNode.current = audioContext.current.createGain();
+      gainNodeHit.current = audioContext.current.createGain();
+      gainNodeBeat.current = audioContext.current.createGain();
       const vol = Number(
         localStorage.getItem(`seVolume-${cid}`) ||
           localStorage.getItem("seVolume") ||
           100
       );
-      setSEVolume_(vol);
-      gainNode.current.gain.value = vol / 100;
-      gainNode.current.connect(audioContext.current.destination);
+      setHitVolume_(vol);
+      gainNodeHit.current.gain.value = vol / 100;
+      gainNodeHit.current.connect(audioContext.current.destination);
+      const vol2 = Number(
+        localStorage.getItem(`beatVolume-${cid}`) ||
+          localStorage.getItem("beatVolume") ||
+          30
+      );
+      setBeatVolume_(vol2);
+      gainNodeBeat.current.gain.value = vol2 / 100;
+      gainNodeBeat.current.connect(audioContext.current.destination);
       (
         [
           ["hit", audioHit],
           ["hitBig", audioHitBig],
+          ["beat", audioBeat],
+          ["beat1", audioBeat1],
         ] as const
       ).forEach(([name, audioBuffer]) =>
         fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`)
@@ -81,13 +128,16 @@ export function useSE(
           })
       );
       return () => {
-        gainNode.current?.disconnect();
-        gainNode.current = null;
+        gainNodeHit.current?.disconnect();
+        gainNodeHit.current = null;
+        gainNodeBeat.current?.disconnect();
+        gainNodeBeat.current = null;
         audioContext.current?.close();
         audioContext.current = null;
       };
     } else {
-      setEnableSE_(false);
+      setEnableHitSE_(false);
+      setEnableBeatSE_(false);
     }
   }, [cid]);
   useEffect(() => {
@@ -110,21 +160,38 @@ export function useSE(
   const playSE = useCallback(
     (s: SEType) => {
       let audioBuffer: AudioBuffer | null;
+      let enableThisSE: boolean;
+      let gainNode: GainNode | null;
       switch (s) {
         case "hit":
           audioBuffer = audioHit.current;
+          enableThisSE = enableHitSE;
+          gainNode = gainNodeHit.current;
           break;
         case "hitBig":
           audioBuffer = audioHitBig.current;
+          enableThisSE = enableHitSE;
+          gainNode = gainNodeHit.current;
+          break;
+        case "beat":
+          audioBuffer = audioBeat.current;
+          enableThisSE = enableBeatSE;
+          gainNode = gainNodeBeat.current;
+          break;
+        case "beat1":
+          audioBuffer = audioBeat1.current;
+          enableThisSE = enableBeatSE;
+          gainNode = gainNodeBeat.current;
           break;
         default:
+          s satisfies never;
           return;
       }
       if (
-        enableSE &&
+        enableThisSE &&
         enableSE2 &&
         audioContext.current &&
-        gainNode.current &&
+        gainNode &&
         audioBuffer &&
         // 同時押しオートで音量が大きくなりすぎるのを防ぐ
         // しかし2個や3個同時押しと1個が全く同じ音になるので、違和感あるかも
@@ -134,20 +201,24 @@ export function useSE(
         lastPlayed.current[s] = performance.now();
         const source = audioContext.current.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(gainNode.current);
+        source.connect(gainNode);
         source.start();
         source.addEventListener("ended", () => source.disconnect());
       }
     },
-    [enableSE, enableSE2]
+    [enableHitSE, enableBeatSE, enableSE2]
   );
 
   return {
     playSE,
-    enableSE,
-    setEnableSE,
-    seVolume,
-    setSEVolume,
+    enableHitSE,
+    setEnableHitSE,
+    enableBeatSE,
+    setEnableBeatSE,
+    hitVolume,
+    setHitVolume,
+    beatVolume,
+    setBeatVolume,
     audioLatency,
     offsetPlusLatency,
   };

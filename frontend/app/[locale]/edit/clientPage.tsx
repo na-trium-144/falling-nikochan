@@ -802,12 +802,18 @@ function Page(props: Props) {
     }
   }, [chart, currentLevelIndex]);
 
-  const [enableSE, setEnableSE] = useState<boolean>(true);
-  const { playSE, audioLatency, seVolume, setSEVolume } = useSE(
-    cid,
-    0,
-    enableSE
-  );
+  const {
+    playSE,
+    audioLatency,
+    enableHitSE,
+    setEnableHitSE,
+    hitVolume,
+    setHitVolume,
+    enableBeatSE,
+    setEnableBeatSE,
+    beatVolume,
+    setBeatVolume,
+  } = useSE(cid, 0, true);
   const audioLatencyRef = useRef<number>(null!);
   audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {
@@ -847,6 +853,42 @@ function Page(props: Props) {
       };
     }
   }, [playing, notesAll, playSE, chart?.offset]);
+  useEffect(() => {
+    if (playing && ytPlayer.current && currentLevel) {
+      let t: ReturnType<typeof setTimeout> | null = null;
+      const now =
+        ytPlayer.current.getCurrentTime() -
+        (chart?.offset || 0) +
+        audioLatencyRef.current;
+      let step = getStep(currentLevel.bpmChanges, now, 4);
+      const playOne = () => {
+        if (ytPlayer.current && currentLevel) {
+          const now =
+            ytPlayer.current.getCurrentTime() -
+            (chart?.offset || 0) +
+            audioLatencyRef.current;
+          t = null;
+          while (getTimeSec(currentLevel.bpmChanges, step) <= now) {
+            const ss = getSignatureState(currentLevel.signature, step);
+            if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
+              playSE(ss.count.fourth === 0 ? "beat1" : "beat");
+            }
+            step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
+          }
+          t = setTimeout(
+            playOne,
+            (getTimeSec(currentLevel.bpmChanges, step) - now) * 1000
+          );
+        }
+      };
+      playOne();
+      return () => {
+        if (t !== null) {
+          clearTimeout(t);
+        }
+      };
+    }
+  }, [playing, currentLevel, playSE, chart?.offset]);
 
   const [tab, setTab] = useState<number>(0);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
@@ -1581,10 +1623,14 @@ function Page(props: Props) {
                     setYTEnd={setYTEnd}
                     currentLevelLength={currentLevelLength}
                     ytDuration={ytDuration}
-                    enableSE={enableSE}
-                    setEnableSE={setEnableSE}
-                    seVolume={seVolume}
-                    setSEVolume={setSEVolume}
+                    enableHitSE={enableHitSE}
+                    setEnableHitSE={setEnableHitSE}
+                    hitVolume={hitVolume}
+                    setHitVolume={setHitVolume}
+                    enableBeatSE={enableBeatSE}
+                    setEnableBeatSE={setEnableBeatSE}
+                    beatVolume={beatVolume}
+                    setBeatVolume={setBeatVolume}
                   />
                 ) : tab === 2 ? (
                   <LevelTab

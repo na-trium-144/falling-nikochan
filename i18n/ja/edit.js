@@ -194,6 +194,7 @@ export default {
       changeHere: "ここで変化",
       editedInCode: "Code タブで編集されているため変更できません。",
       se: "タップ音",
+      beatSE: "メトロノーム音",
     },
     level: {
       title: "レベル",
