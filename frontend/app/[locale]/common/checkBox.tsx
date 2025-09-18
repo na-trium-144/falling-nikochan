@@ -15,7 +15,7 @@ export default function CheckBox(props: Props) {
       className={clsx(
         "hover:text-slate-500 disabled:text-slate-400",
         "hover:dark:text-stone-500 disabled:dark:text-stone-600",
-        "text-left pl-5",
+        "text-left pl-5 cursor-pointer",
         props.className
       )}
       onClick={() => props.onChange(!props.value)}

@@ -12,6 +12,7 @@ import Youtube from "@icon-park/react/lib/icons/Youtube";
 import { linkStyle1 } from "@/common/linkStyle";
 import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
+import Range from "@/common/range";
 
 interface Props {
   ready: boolean;
@@ -374,14 +375,13 @@ export function MusicArea(props: Props) {
         <div className="flex flex-row items-center ">
           <Youtube className="text-xl " />
           <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
-          <input
+          <Range
             className="flex-1 mx-1 "
-            type="range"
             min="0"
             max="100"
             disabled={!ytVolumeCtrlAvailable}
             value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
-            onChange={(e) => props.setYtVolume(parseInt(e.target.value))}
+            onChange={props.setYtVolume}
           />
         </div>
         <div className="flex flex-row items-center mt-3 ">
@@ -399,14 +399,13 @@ export function MusicArea(props: Props) {
           >
             {props.enableSE ? props.seVolume : t("off")}
           </span>
-          <input
-            type="range"
+          <Range
             className="flex-1 mx-1 "
             min={0}
             max={100}
             disabled={!props.enableSE}
             value={props.enableSE ? props.seVolume : 0}
-            onChange={(e) => props.setSEVolume(parseInt(e.target.value))}
+            onChange={props.setSEVolume}
           />
         </div>
       </div>

@@ -28,6 +28,7 @@ import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
+import Range from "@/common/range";
 
 interface Props {
   offset?: number;
@@ -178,14 +179,13 @@ export default function TimingTab(props: Props) {
             {props.seVolume}
           </span>
         </CheckBox>
-        <input
-          type="range"
+        <Range
           className="align-middle "
           min={0}
           max={100}
           disabled={!props.enableSE}
           value={props.seVolume}
-          onChange={(e) => props.setSEVolume(parseInt(e.target.value))}
+          onChange={props.setSEVolume}
         />
       </div>
       <div>

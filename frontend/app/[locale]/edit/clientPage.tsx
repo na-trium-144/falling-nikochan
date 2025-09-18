@@ -307,7 +307,13 @@ export default function EditAuth(props: {
     return () => clearTimeout(ft);
   }, [fetchChart, t]);
   useEffect(() => {
-    if(chart === undefined && !loading && !errorStatus && !errorMsg && passwdRef.current){
+    if (
+      chart === undefined &&
+      !loading &&
+      !errorStatus &&
+      !errorMsg &&
+      passwdRef.current
+    ) {
       passwdRef.current.focus();
       passwdRef.current.select();
     }
@@ -358,7 +364,9 @@ export default function EditAuth(props: {
                 updateValue={setEditPasswd}
                 left
                 passwd
-                onEnter={(editPasswd) => fetchChart(false, false, editPasswd, savePasswd)}
+                onEnter={(editPasswd) =>
+                  fetchChart(false, false, editPasswd, savePasswd)
+                }
               />
               <Button
                 text={t("submitPasswd")}
@@ -794,7 +802,11 @@ function Page(props: Props) {
   }, [chart, currentLevelIndex]);
 
   const [enableSE, setEnableSE] = useState<boolean>(true);
-  const { playSE, audioLatency, seVolume, setSEVolume } = useSE(cid, 0, enableSE);
+  const { playSE, audioLatency, seVolume, setSEVolume } = useSE(
+    cid,
+    0,
+    enableSE
+  );
   const audioLatencyRef = useRef<number>(null!);
   audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {
