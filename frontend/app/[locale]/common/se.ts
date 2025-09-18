@@ -5,7 +5,15 @@ export type SEType = "hit" | "hitBig" | "beat" | "beat1";
 export function useSE(
   cid: string | undefined,
   userOffset: number,
-  enableSE2: boolean
+  enableSE2: boolean,
+  lsKeys: {
+    hitVolume: string;
+    hitVolumeCid?: string;
+    beatVolume?: string;
+    beatVolumeCid?: string;
+    enableHitSE: string;
+    enableBeatSE?: string;
+  }
 ) {
   const audioContext = useRef<AudioContext | null>(null);
   const audioHit = useRef<AudioBuffer | null>(null);
@@ -19,29 +27,31 @@ export function useSE(
   const setHitVolume = useCallback(
     (v: number) => {
       setHitVolume_(v);
-      localStorage.setItem("seVolume", v.toString());
-      if (cid) {
-        localStorage.setItem(`seVolume-${cid}`, v.toString());
+      localStorage.setItem(lsKeys.hitVolume, v.toString());
+      if (lsKeys.hitVolumeCid) {
+        localStorage.setItem(lsKeys.hitVolumeCid, v.toString());
       }
       if (gainNodeHit.current) {
         gainNodeHit.current.gain.value = v / 100;
       }
     },
-    [cid]
+    [lsKeys.hitVolume, lsKeys.hitVolumeCid]
   );
   const [beatVolume, setBeatVolume_] = useState<number>(30);
   const setBeatVolume = useCallback(
     (v: number) => {
       setBeatVolume_(v);
-      localStorage.setItem("beatVolume", v.toString());
-      if (cid) {
-        localStorage.setItem(`beatVolume-${cid}`, v.toString());
+      if (lsKeys.beatVolume) {
+        localStorage.setItem(lsKeys.beatVolume, v.toString());
+      }
+      if (lsKeys.beatVolumeCid) {
+        localStorage.setItem(lsKeys.beatVolumeCid, v.toString());
       }
       if (gainNodeBeat.current) {
         gainNodeBeat.current.gain.value = v / 100;
       }
     },
-    [cid]
+    [lsKeys.beatVolume, lsKeys.beatVolumeCid]
   );
   // undefined=未取得 null=取得不能
   const [audioLatency, setAudioLatency] = useState<number | null | undefined>(
@@ -51,16 +61,24 @@ export function useSE(
   const [enableBeatSE, setEnableBeatSE_] = useState<boolean>(true);
   // playでのオフセット調整に使い、playではbeatは使わないので無視している
   const offsetPlusLatency = userOffset - (enableHitSE ? audioLatency || 0 : 0);
-  const setEnableHitSE = useCallback((v: boolean) => {
-    const enableSE = v && "AudioContext" in window;
-    setEnableHitSE_(enableSE);
-    localStorage.setItem("enableSE", enableSE ? "1" : "0");
-  }, []);
-  const setEnableBeatSE = useCallback((v: boolean) => {
-    const enableSE = v && "AudioContext" in window;
-    setEnableBeatSE_(enableSE);
-    localStorage.setItem("enableBeatSE", enableSE ? "1" : "0");
-  }, []);
+  const setEnableHitSE = useCallback(
+    (v: boolean) => {
+      const enableSE = v && "AudioContext" in window;
+      setEnableHitSE_(enableSE);
+      localStorage.setItem(lsKeys.enableHitSE, enableSE ? "1" : "0");
+    },
+    [lsKeys.enableHitSE]
+  );
+  const setEnableBeatSE = useCallback(
+    (v: boolean) => {
+      const enableSE = v && "AudioContext" in window;
+      setEnableBeatSE_(enableSE);
+      if (lsKeys.enableBeatSE) {
+        localStorage.setItem(lsKeys.enableBeatSE, enableSE ? "1" : "0");
+      }
+    },
+    [lsKeys.enableBeatSE]
+  );
   useEffect(() => {
     if ((enableHitSE || enableBeatSE) && enableSE2) {
       audioContext.current?.resume();
@@ -72,8 +90,8 @@ export function useSE(
     if ("AudioContext" in window) {
       audioContext.current = new AudioContext();
       const enableSEInitial =
-        localStorage.getItem("enableSE") === "1" ||
-        (localStorage.getItem("enableSE") == null &&
+        localStorage.getItem(lsKeys.enableHitSE) === "1" ||
+        (localStorage.getItem(lsKeys.enableHitSE) == null &&
           audioContext.current?.baseLatency !== undefined &&
           audioContext.current?.outputLatency !== undefined);
       if (enableSEInitial) {
@@ -82,10 +100,11 @@ export function useSE(
         setEnableHitSE_(false);
       }
       const enableBeatSEInitial =
-        localStorage.getItem("enableBeatSE") === "1" ||
-        (localStorage.getItem("enableBeatSE") == null &&
-          audioContext.current?.baseLatency !== undefined &&
-          audioContext.current?.outputLatency !== undefined);
+        lsKeys.enableBeatSE &&
+        (localStorage.getItem(lsKeys.enableBeatSE) === "1" ||
+          (localStorage.getItem(lsKeys.enableBeatSE) == null &&
+            audioContext.current?.baseLatency !== undefined &&
+            audioContext.current?.outputLatency !== undefined));
       if (enableBeatSEInitial) {
         setEnableBeatSE_(true);
       } else {
@@ -97,16 +116,17 @@ export function useSE(
       gainNodeHit.current = audioContext.current.createGain();
       gainNodeBeat.current = audioContext.current.createGain();
       const vol = Number(
-        localStorage.getItem(`seVolume-${cid}`) ||
-          localStorage.getItem("seVolume") ||
+        localStorage.getItem(lsKeys.hitVolume) ||
+          (lsKeys.hitVolumeCid && localStorage.getItem(lsKeys.hitVolumeCid)) ||
           100
       );
       setHitVolume_(vol);
       gainNodeHit.current.gain.value = vol / 100;
       gainNodeHit.current.connect(audioContext.current.destination);
       const vol2 = Number(
-        localStorage.getItem(`beatVolume-${cid}`) ||
-          localStorage.getItem("beatVolume") ||
+        (lsKeys.beatVolume && localStorage.getItem(lsKeys.beatVolume)) ||
+          (lsKeys.beatVolumeCid &&
+            localStorage.getItem(lsKeys.beatVolumeCid)) ||
           30
       );
       setBeatVolume_(vol2);
@@ -139,7 +159,14 @@ export function useSE(
       setEnableHitSE_(false);
       setEnableBeatSE_(false);
     }
-  }, [cid]);
+  }, [
+    lsKeys.enableHitSE,
+    lsKeys.enableBeatSE,
+    lsKeys.hitVolume,
+    lsKeys.hitVolumeCid,
+    lsKeys.beatVolume,
+    lsKeys.beatVolumeCid,
+  ]);
   useEffect(() => {
     // AudioContext初期化直後はLatencyとして0が返ってくるが、
     // なぜか少し待ってから? or 実際にSEを再生してから? 取得すると違う値になる

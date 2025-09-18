@@ -813,7 +813,14 @@ function Page(props: Props) {
     setEnableBeatSE,
     beatVolume,
     setBeatVolume,
-  } = useSE(cid, 0, true);
+  } = useSE(cid, 0, true, {
+    hitVolume: "seVolume",
+    hitVolumeCid: cid ? `seVolume-${cid}` : undefined,
+    enableHitSE: "enableSEEdit",
+    beatVolume: "beatVolume",
+    beatVolumeCid: cid ? `beatVolume-${cid}` : undefined,
+    enableBeatSE: "enableBeatEdit",
+  });
   const audioLatencyRef = useRef<number>(null!);
   audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {

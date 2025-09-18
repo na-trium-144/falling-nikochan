@@ -367,7 +367,11 @@ function Play(props: Props) {
     setHitVolume,
     audioLatency,
     offsetPlusLatency,
-  } = useSE(cid, userOffset, !enableIOSThru);
+  } = useSE(cid, userOffset, !enableIOSThru, {
+    hitVolume: "seVolume",
+    hitVolumeCid: cid ? `seVolume-${cid}` : undefined,
+    enableHitSE: "enableSE",
+  });
   const setEnableIOSThru = useCallback((v: boolean) => {
     setEnableIOSThru_(v);
     localStorage.setItem("enableIOSThru", v ? "1" : "0");
