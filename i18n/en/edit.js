@@ -121,7 +121,8 @@ export default {
         "The saved file is not password protected.",
       saveToLocal: "Save",
       loadFromLocal: "Open file",
-      dragDropPossible: "You can also drag & drop a 〜.{extension} file to load.",
+      dragDropPossible:
+        "You can also drag & drop a 〜.{extension} file to load.",
     },
     timing: {
       title: "Timing",

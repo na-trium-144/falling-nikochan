@@ -1180,7 +1180,7 @@ function Page(props: Props) {
         }
       }}
       onDragOver={(e) => {
-        if(chart !== undefined){
+        if (chart !== undefined) {
           // エディタの読み込みが完了するまでは無効
           e.preventDefault();
           setDragOver(true);

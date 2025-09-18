@@ -122,7 +122,8 @@ export default {
         "保存したファイルにはパスワードはかかっていません。",
       saveToLocal: "保存",
       loadFromLocal: "ファイルを開く",
-      dragDropPossible: "〜.{extension} ファイルをドラッグ&ドロップして読み込むこともできます。",
+      dragDropPossible:
+        "〜.{extension} ファイルをドラッグ&ドロップして読み込むこともできます。",
     },
     timing: {
       title: "タイミング",
