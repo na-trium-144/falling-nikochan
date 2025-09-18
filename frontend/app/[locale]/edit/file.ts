@@ -290,11 +290,13 @@ export function useChartFile(props: Props) {
         }
       }
       if (newChart) {
-        return {
-          isError: false,
-          chart: newChart,
-          originalVer,
-        };
+        if (confirm(t("confirmLoad"))) {
+          return {
+            isError: false,
+            chart: newChart,
+            originalVer,
+          };
+        }
       }
       return {
         isError: true,

@@ -89,6 +89,7 @@ import { SlimeSVG } from "@/common/slime.js";
 import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
+import { useChartFile } from "./file";
 
 export default function EditAuth(props: {
   locale: string;
@@ -1103,6 +1104,15 @@ function Page(props: Props) {
     ref.current?.focus();
   };
 
+  const { load, downloadExtension } = useChartFile({
+    cid,
+    chart,
+    savePasswd: !!savePasswd,
+    currentPasswd: props.currentPasswd,
+    locale,
+  });
+  const [dragOver, setDragOver] = useState<boolean>(false);
+
   return (
     <main
       className={clsx(
@@ -1169,6 +1179,13 @@ function Page(props: Props) {
           setDragMode("p");
         }
       }}
+      onDragOver={(e) => {
+        if(chart !== undefined){
+          // エディタの読み込みが完了するまでは無効
+          e.preventDefault();
+          setDragOver(true);
+        }
+      }}
     >
       <div
         className={clsx(
@@ -1207,6 +1224,37 @@ function Page(props: Props) {
           locale={locale}
         />
       ) : null}
+
+      {dragOver && (
+        <div
+          className={clsx(modalBg, "z-30!")}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = async (event) => {
+                const result = await load(event.target!.result as ArrayBuffer);
+                if (result.isError) {
+                  if (result.message) {
+                    alert(result.message);
+                  }
+                } else {
+                  setChart(result.chart!);
+                  setConvertedFrom(result.originalVer!);
+                }
+              };
+              reader.readAsArrayBuffer(file);
+            }
+          }}
+        >
+          <Box className="absolute inset-6 m-auto w-max h-max p-6 shadow-md">
+            <p>{t("dragOver", { extension: downloadExtension })}</p>
+          </Box>
+        </div>
+      )}
 
       <CaptionProvider>
         <LuaTabProvider>

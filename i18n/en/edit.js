@@ -33,6 +33,7 @@ export default {
     zoom: "Zoom",
     running: "Running the script...",
     cancel: "Cancel",
+    dragOver: "Drag & drop a 〜.{extension} file to load",
     timeBar: {
       bpm: "BPM",
       speed: "Speed",
@@ -120,6 +121,7 @@ export default {
         "The saved file is not password protected.",
       saveToLocal: "Save",
       loadFromLocal: "Open file",
+      dragDropPossible: "You can also drag & drop a 〜.{extension} file to load.",
     },
     timing: {
       title: "Timing",

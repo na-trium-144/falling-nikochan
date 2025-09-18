@@ -16,6 +16,7 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { useChartFile } from "./file";
+import { useDisplayMode } from "@/scale.js";
 
 interface Props {
   chart?: ChartEdit;
@@ -151,6 +152,7 @@ export function MetaTab(props: Props2) {
     props.chart?.levels &&
     props.chart.levels.length > 0 &&
     props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
+  const { isTouch } = useDisplayMode();
 
   const { remoteSave, remoteDelete, downloadExtension, localSave, load } =
     useChartFile({
@@ -211,10 +213,8 @@ export function MetaTab(props: Props2) {
       if (result.isError) {
         setUploadMsg(result.message || "");
       } else {
-        if (confirm(t("confirmLoad"))) {
-          props.setChart(result.chart!);
-          props.setConvertedFrom(result.originalVer!);
-        }
+        props.setChart(result.chart!);
+        props.setConvertedFrom(result.originalVer!);
       }
     }
   };
@@ -342,30 +342,37 @@ export function MetaTab(props: Props2) {
       </p>
 
       <div className="mb-4">
-        <span className="">{t("localSaveLoad")}</span>
-        <HelpIcon>
-          {t.rich("localSaveLoadHelp", {
-            br: () => <br />,
-            extension: downloadExtension,
-          })}
-        </HelpIcon>
-        <span className="inline-block ml-1">
-          <Button text={t("saveToLocal")} onClick={download} />
-          <label
-            className={clsx(buttonStyle, "inline-block")}
-            htmlFor="upload-bin"
-          >
-            {t("loadFromLocal")}
-          </label>
-          <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>
-          <input
-            type="file"
-            className="hidden"
-            id="upload-bin"
-            name="upload-bin"
-            onChange={upload}
-          />
-        </span>
+        <div>
+          <span className="">{t("localSaveLoad")}</span>
+          <HelpIcon>
+            {t.rich("localSaveLoadHelp", {
+              br: () => <br />,
+              extension: downloadExtension,
+            })}
+          </HelpIcon>
+          <span className="inline-block ml-1">
+            <Button text={t("saveToLocal")} onClick={download} />
+            <label
+              className={clsx(buttonStyle, "inline-block")}
+              htmlFor="upload-bin"
+            >
+              {t("loadFromLocal")}
+            </label>
+            <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>
+            <input
+              type="file"
+              className="hidden"
+              id="upload-bin"
+              name="upload-bin"
+              onChange={upload}
+            />
+          </span>
+        </div>
+        {!isTouch && (
+          <div className="ml-2">
+            {t("dragDropPossible", { extension: downloadExtension })}
+          </div>
+        )}
       </div>
       <MetaEdit
         {...props}
