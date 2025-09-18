@@ -9,6 +9,7 @@ import {
   fetchBrief,
   reportPopularCharts,
   checkNewCharts,
+  reportToDiscord,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -40,6 +41,25 @@ const app = new Hono({ strict: false })
 export default {
   fetch: app.fetch,
   async scheduled(controller, env, ctx) {
-    ctx.waitUntil(reportPopularCharts(env).then(() => checkNewCharts(env)));
+    ctx.waitUntil(
+      (async () => {
+        try {
+          await reportPopularCharts(env);
+        } catch (e) {
+          await reportToDiscord(
+            env,
+            "Uncaught exception in reportPopularCharts():\n" + String(e)
+          );
+        }
+        try {
+          await checkNewCharts(env);
+        } catch (e) {
+          await reportToDiscord(
+            env,
+            "Uncaught exception in checkNewCharts():\n" + String(e)
+          );
+        }
+      })()
+    );
   },
 };
