@@ -257,13 +257,17 @@ export async function OGResult(
                 justifyContent: "center",
               }}
             >
-              <div style={{ ...flexRow }}>
-                <span style={{ ...text3xl }}>(</span>
-                <span style={{ marginRight: 2 * 4, ...text2xl }}>
-                  {t("playbackRate")}:
-                </span>
-                <span style={{ ...text3xl }}>×{params.playbackRate4 / 4})</span>
-              </div>
+              {params.playbackRate4 !== 4 && (
+                <div style={{ ...flexRow }}>
+                  <span style={{ ...text3xl }}>(</span>
+                  <span style={{ marginRight: 2 * 4, ...text2xl }}>
+                    {t("playbackRate")}:
+                  </span>
+                  <span style={{ ...text3xl }}>
+                    ×{params.playbackRate4 / 4})
+                  </span>
+                </div>
+              )}
               <div style={{ ...flexRow }}>
                 <span style={{ marginRight: 2 * 4, ...text2xl }}>
                   {t("rank")}:
