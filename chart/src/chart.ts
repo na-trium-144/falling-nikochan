@@ -107,6 +107,7 @@ export function emptyBrief(): ChartBrief {
 }
 export const currentChartVer = 13;
 export const lastIncompatibleVer = 6;
+export const lastHashChangeVer = 12;
 export type ChartMin = Chart13Min;
 export type LevelMin = Level9Min;
 export type ChartEdit = Chart13Edit;

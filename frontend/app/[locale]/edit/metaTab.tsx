@@ -9,6 +9,7 @@ import {
   ChartEdit,
   ChartMin,
   convertToMin,
+  lastHashChangeVer,
   lastIncompatibleVer,
   validateChartMin,
 } from "@falling-nikochan/chart";
@@ -478,11 +479,18 @@ export function MetaTab(props: Props2) {
         )}
         {
           /*props.convertedFrom < currentChartVer*/
-          props.convertedFrom <= lastIncompatibleVer && (
+          props.convertedFrom <= lastIncompatibleVer ? (
             <span className="inline-block ml-1 text-amber-600 text-sm ">
               <Caution className="inline-block mr-1 translate-y-0.5 " />
               {t("convertingIncompatible", { ver: props.convertedFrom })}
             </span>
+          ) : (
+            props.convertedFrom <= lastHashChangeVer && (
+              <span className="inline-block ml-1 text-amber-600 text-sm ">
+                <Caution className="inline-block mr-1 translate-y-0.5 " />
+                {t("convertingHashChange", { ver: props.convertedFrom })}
+              </span>
+            )
           )
         }
       </div>
