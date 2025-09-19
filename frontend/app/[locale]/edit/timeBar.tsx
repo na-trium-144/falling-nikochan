@@ -377,7 +377,7 @@ export default function TimeBar(props: Props) {
                     ),
                 }}
               />
-              <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-800/15 backdrop-blur-2xs shadow-sm">
+              <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-800/15 backdrop-blur-2xs">
                 {(
                   currentLevel.speedChanges[currentSpeedIndex].bpm +
                   ((currentLevel.speedChanges[currentSpeedIndex + 1].bpm -
