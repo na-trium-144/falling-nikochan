@@ -36,11 +36,16 @@ interface Props {
   currentLevel: LevelEdit | undefined;
   currentBpmIndex?: number;
   currentBpm?: number;
-  setCurrentBpm: (bpm: number | null, speed: number | null) => void;
+  setCurrentBpm: (
+    bpm: number | null,
+    speed: number | null,
+    interp: boolean
+  ) => void;
   bpmChangeHere: boolean;
   toggleBpmChangeHere: (bpm: boolean | null, speed: boolean | null) => void;
   currentSpeedIndex?: number;
   currentSpeed?: number;
+  currentSpeedInterp: boolean;
   prevSignature?: Signature;
   speedChangeHere: boolean;
   currentSignature?: SignatureWithLua;
@@ -193,11 +198,12 @@ export default function TimingTab(props: Props) {
             // bpmの変更時にspeedも変える
             if (
               !props.speedChangeHere &&
-              props.currentBpm === props.currentSpeed
+              props.currentBpm === props.currentSpeed &&
+              !props.currentSpeedInterp
             ) {
-              props.setCurrentBpm(Number(v), Number(v));
+              props.setCurrentBpm(Number(v), Number(v), false);
             } else {
-              props.setCurrentBpm(Number(v), null);
+              props.setCurrentBpm(Number(v), null, false);
             }
           }}
           disabled={props.bpmChangeHere || !bpmChangeable}
@@ -230,11 +236,12 @@ export default function TimingTab(props: Props) {
               // bpmの変更時にspeedも変える
               if (
                 props.speedChangeHere &&
-                props.currentBpm === props.currentSpeed
+                props.currentBpm === props.currentSpeed &&
+                !props.currentSpeedInterp
               ) {
-                props.setCurrentBpm(Number(v), Number(v));
+                props.setCurrentBpm(Number(v), Number(v), false);
               } else {
-                props.setCurrentBpm(Number(v), null);
+                props.setCurrentBpm(Number(v), null, false);
               }
             }}
             disabled={!props.bpmChangeHere || !bpmChangeable}
@@ -265,7 +272,9 @@ export default function TimingTab(props: Props) {
                 ? props.currentSpeed.toString()
                 : ""
           }
-          updateValue={(v: string) => props.setCurrentBpm(null, Number(v))}
+          updateValue={(v: string) =>
+            props.setCurrentBpm(null, Number(v), props.currentSpeedInterp)
+          }
           disabled={props.speedChangeHere || !speedChangeable}
           isValid={speedValid}
         />
@@ -281,10 +290,26 @@ export default function TimingTab(props: Props) {
           >
             {t("changeHere")}
           </CheckBox>
+          <CheckBox
+            className="mr-1"
+            value={props.speedChangeHere && props.currentSpeedInterp}
+            onChange={() =>
+              props.setCurrentBpm(
+                null,
+                props.currentSpeed!,
+                !props.currentSpeedInterp
+              )
+            }
+            disabled={!props.speedChangeHere || !speedChangeable || !props.currentSpeedIndex || props.currentSpeedIndex <= 0}
+          >
+            {t("interp")}
+          </CheckBox>
           <Input
             className="w-16 mx-1"
             actualValue={props.currentSpeed?.toString() || ""}
-            updateValue={(v: string) => props.setCurrentBpm(null, Number(v))}
+            updateValue={(v: string) =>
+              props.setCurrentBpm(null, Number(v), props.currentSpeedInterp)
+            }
             disabled={!props.speedChangeHere || !speedChangeable}
             isValid={speedValid}
           />

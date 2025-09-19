@@ -808,7 +808,12 @@ function Page(props: Props) {
     currentSpeedIndex !== undefined
       ? currentLevel.speedChanges[currentSpeedIndex].bpm
       : 120;
-  const changeBpm = (bpm: number | null, speed: number | null) => {
+  const currentSpeedInterp =
+    currentLevel &&
+    currentLevel.speedChanges.length > 0 &&
+    currentSpeedIndex !== undefined &&
+    currentLevel.speedChanges[currentSpeedIndex].interp;
+  const changeBpm = (bpm: number | null, speed: number | null, interp: boolean) => {
     if (currentLevel) {
       let newLevel: LevelEdit | null = null;
       if (currentBpmIndex !== undefined && bpm !== null) {
@@ -818,7 +823,8 @@ function Page(props: Props) {
         newLevel = luaUpdateSpeedChange(
           newLevel || currentLevel,
           currentSpeedIndex,
-          speed
+          speed,
+          interp,
         );
       }
       changeLevel(newLevel);
@@ -1450,6 +1456,7 @@ function Page(props: Props) {
                     currentSpeed={
                       currentSpeedIndex !== undefined ? currentSpeed : undefined
                     }
+                    currentSpeedInterp={currentSpeedInterp}
                     speedChangeHere={!!speedChangeHere}
                     prevSignature={prevSignature}
                     currentSignature={currentSignature}

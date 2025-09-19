@@ -83,11 +83,11 @@ export async function luaExec(
           `$1AccelStatic(${ln},$2)$3`
         )
         .replace(
-          /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
+          /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
           `$1AccelBeginStatic(${ln},$2)$3`
         )
         .replace(
-          /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
+          /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
           `$1AccelEndStatic(${ln},$2)$3`
         )
     );
