@@ -12,6 +12,7 @@ import {
 } from "./init";
 import {
   Chart11Edit,
+  Chart13Edit,
   Chart4,
   Chart5,
   Chart6,
@@ -29,7 +30,7 @@ describe("GET /api/chartFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/chartFile/100000?p=p");
     expect(res.status).toBe(200);
-    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).toStrictEqual({ ...dummyChart(), published: true });
   });
   test("should return ChartEdit if password hash with pUserSalt matches", async () => {
@@ -52,7 +53,7 @@ describe("GET /api/chartFile/:cid", () => {
       }
     );
     expect(res.status).toBe(200);
-    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).toStrictEqual({ ...dummyChart(), published: true });
   });
   test("should return Chart11 if chart version is 11", async () => {

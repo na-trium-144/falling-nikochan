@@ -23,6 +23,8 @@ import {
   BPMChange9,
   Signature9,
   Chart11Edit,
+  SpeedChangeWithLua13,
+  Chart13Edit,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { gzip, gunzip } from "node:zlib";
@@ -114,7 +116,8 @@ export async function getChartEntry(
     | Chart7
     | Chart8Edit
     | Chart9Edit
-    | Chart11Edit;
+    | Chart11Edit
+    | Chart13Edit;
 }> {
   const entryCompressed = await getChartEntryCompressed(db, cid, p);
 
@@ -148,7 +151,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
   offset: number;
   ytId: string;
   title: string;
@@ -217,6 +220,17 @@ export interface ChartLevelCore11 {
   ytEndSec: number;
   ytEnd: "note" | "yt" | number;
 }
+export interface ChartLevelCore13 {
+  notes: NoteCommand9[];
+  rest: Rest9[];
+  bpmChanges: BPMChange9[];
+  speedChanges: SpeedChangeWithLua13[];
+  signature: Signature9[];
+  lua: string[];
+  ytBegin: number;
+  ytEndSec: number;
+  ytEnd: "note" | "yt" | number;
+}
 export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
@@ -224,6 +238,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 7 | 8; levels: ChartLevelCore7[] }
     | { ver: 9 | 10; levels: ChartLevelCore9[] }
     | { ver: 11 | 12; levels: ChartLevelCore11[] }
+    | { ver: 13; levels: ChartLevelCore13[] }
   );
 
 export async function unzipEntry(
@@ -351,7 +366,7 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
 
 export function entryToChart(
   entry: ChartEntry
-): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit | Chart11Edit {
+): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit | Chart11Edit | Chart13Edit {
   switch (entry.ver) {
     case 4:
       return {
@@ -498,6 +513,7 @@ export function entryToChart(
       };
     case 11:
     case 12:
+    case 13:
       return {
         falling: "nikochan",
         ver: entry.ver,
@@ -524,8 +540,9 @@ export function entryToChart(
         changePasswd: null,
         locale: entry.locale,
         copyBuffer: entry.copyBuffer!,
-      };
+      } as Chart11Edit | Chart13Edit;
     default:
+      entry satisfies never;
       throw new HTTPException(500, { message: "unsupportedChartVersion" });
   }
 }
