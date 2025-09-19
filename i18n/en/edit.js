@@ -204,6 +204,7 @@ export default {
         "to divide it.",
       changeHere: "Change here",
       editedInCode: "Cannot be changed because it is edited in the Code tab.",
+      interp: "Smoothly",
     },
     level: {
       title: "Levels",

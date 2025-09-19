@@ -300,7 +300,12 @@ export default function TimingTab(props: Props) {
                 !props.currentSpeedInterp
               )
             }
-            disabled={!props.speedChangeHere || !speedChangeable || !props.currentSpeedIndex || props.currentSpeedIndex <= 0}
+            disabled={
+              !props.speedChangeHere ||
+              !speedChangeable ||
+              !props.currentSpeedIndex ||
+              props.currentSpeedIndex <= 0
+            }
           >
             {t("interp")}
           </CheckBox>

@@ -813,7 +813,11 @@ function Page(props: Props) {
     currentLevel.speedChanges.length > 0 &&
     currentSpeedIndex !== undefined &&
     currentLevel.speedChanges[currentSpeedIndex].interp;
-  const changeBpm = (bpm: number | null, speed: number | null, interp: boolean) => {
+  const changeBpm = (
+    bpm: number | null,
+    speed: number | null,
+    interp: boolean
+  ) => {
     if (currentLevel) {
       let newLevel: LevelEdit | null = null;
       if (currentBpmIndex !== undefined && bpm !== null) {
@@ -824,7 +828,7 @@ function Page(props: Props) {
           newLevel || currentLevel,
           currentSpeedIndex,
           speed,
-          interp,
+          interp
         );
       }
       changeLevel(newLevel);
@@ -1456,7 +1460,7 @@ function Page(props: Props) {
                     currentSpeed={
                       currentSpeedIndex !== undefined ? currentSpeed : undefined
                     }
-                    currentSpeedInterp={currentSpeedInterp}
+                    currentSpeedInterp={!!currentSpeedInterp}
                     speedChangeHere={!!speedChangeHere}
                     prevSignature={prevSignature}
                     currentSignature={currentSignature}

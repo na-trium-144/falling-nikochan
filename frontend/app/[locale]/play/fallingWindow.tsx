@@ -91,7 +91,9 @@ export default function FallingWindow(props: Props) {
       now !== undefined
     ) {
       displayNotes.current = notes
-        .map((n) => (n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)))
+        .map((n) =>
+          n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
+        )
         .filter((n) => n !== null);
     } else {
       displayNotes.current = [];

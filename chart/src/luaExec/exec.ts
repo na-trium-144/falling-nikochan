@@ -1,6 +1,13 @@
 import { LuaFactory } from "wasmoon";
 import { Step, stepZero } from "../step.js";
-import { luaAccel, luaAccelEnd, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
+import {
+  luaAccel,
+  luaAccelEnd,
+  luaBeat,
+  luaBPM,
+  luaNote,
+  luaStep,
+} from "./api.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";

@@ -366,7 +366,15 @@ export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
 
 export function entryToChart(
   entry: ChartEntry
-): Chart4 | Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit | Chart11Edit | Chart13Edit {
+):
+  | Chart4
+  | Chart5
+  | Chart6
+  | Chart7
+  | Chart8Edit
+  | Chart9Edit
+  | Chart11Edit
+  | Chart13Edit {
   switch (entry.ver) {
     case 4:
       return {

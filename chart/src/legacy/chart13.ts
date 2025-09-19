@@ -13,7 +13,7 @@ import {
   SignatureSchema9,
 } from "./chart9.js";
 import {
-    Chart11Edit,
+  Chart11Edit,
   Chart11Min,
   ChartUntil11,
   ChartUntil11Min,
@@ -83,7 +83,9 @@ export const ChartEditSchema13 = () =>
     published: v.boolean(),
   });
 
-export type SpeedChangeWithLua13 = v.InferOutput<ReturnType<typeof SpeedChangeSchema13>>;
+export type SpeedChangeWithLua13 = v.InferOutput<
+  ReturnType<typeof SpeedChangeSchema13>
+>;
 export type SpeedChange13 = Omit<SpeedChangeWithLua13, "luaLine">;
 export type Level13Freeze = v.InferOutput<
   ReturnType<typeof LevelFreezeSchema13>

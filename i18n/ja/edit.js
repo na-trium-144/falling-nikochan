@@ -190,7 +190,7 @@ export default {
         "4 / 4 + 3 / 4 のように分けて指定するとよいです。",
       changeHere: "ここで変化",
       editedInCode: "Code タブで編集されているため変更できません。",
-      interp: "なめらかに"
+      interp: "なめらかに",
     },
     level: {
       title: "レベル",
