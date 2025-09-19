@@ -17,7 +17,7 @@ export interface ChartSeqData13 {
 export interface DisplayParam13 {
   // 時刻(判定時刻 - 秒数)
   timeSecBefore: number;
-  // u = u0 + du t + ddu t^2
+  // u = u0 + du t + ddu t^2 / 2
   u0: number;
   du: number;
   ddu: number;
@@ -107,12 +107,14 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
       // tEnd <= 時刻 <= tBegin の間、
       //  t = tBegin - 時刻  > 0
       //  u = u(tBegin) + du * t
-      const du = ts.bpm / 120;
-      let ddu = 0;
-      if(ts.interp && ti >= 1){
-        const tsPrev = level.speedChanges[ti - 1];
-        ddu = (tsPrev.bpm - ts.bpm) / 120 / (tBegin - tEnd);
-      }else{
+      let du: number;
+      let ddu: number;
+      const tsNext = level.speedChanges.at(ti + 1);
+      if (tsNext?.interp && tBegin !== tEnd) {
+        du = tsNext.bpm / 120;
+        ddu = (ts.bpm - tsNext.bpm) / 120 / (tBegin - tEnd);
+      } else {
+        du = ts.bpm / 120;
         ddu = 0;
       }
       display.push({
@@ -122,7 +124,10 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
         ddu: ddu,
       });
 
-      const uEnd = u + du * (tBegin - tEnd) + ddu * (tBegin - tEnd) * (tBegin - tEnd);
+      const uEnd =
+        u +
+        du * (tBegin - tEnd) +
+        (ddu * (tBegin - tEnd) * (tBegin - tEnd)) / 2;
 
       if (
         (u <= uRangeMax && uRangeMax <= uEnd) ||
@@ -141,11 +146,8 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
       u = uEnd;
     }
     if (appearTimeSec === null) {
-      console.error("Failed to calculate appearTimeSec");
-      console.error("speedChanges:", level.speedChanges);
-      console.error("hitTimeSec:", hitTimeSec);
-      console.error("uRange:", uRangeMin, uRangeMax);
-      appearTimeSec = hitTimeSec;
+      // Speed=0から譜面が始まる場合
+      appearTimeSec = -Infinity;
     }
     notes.push({
       ver: 13,
@@ -203,7 +205,7 @@ export function displayNote13(
     const dispParam = note.display[di];
     const { u0, du, ddu } = dispParam;
     const t = note.hitTimeSec - dispParam.timeSecBefore - timeSec;
-    const u = u0 + du * t + ddu * t * t;
+    const u = u0 + du * t + (ddu * t * t) / 2;
     return {
       id: note.id,
       pos: {

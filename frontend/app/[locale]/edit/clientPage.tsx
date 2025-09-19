@@ -1336,6 +1336,7 @@ function Page(props: Props) {
               <div className="flex-none">
                 <TimeBar
                   currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
+                  currentTimeSec={currentTimeSec}
                   currentNoteIndex={currentNoteIndex}
                   currentStep={currentStep}
                   chart={chart}
