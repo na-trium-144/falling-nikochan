@@ -3,7 +3,11 @@ import Button, { buttonStyle } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
 import { ChangeEvent, useEffect, useState } from "react";
-import { ChartEdit, lastHashChangeVer, lastIncompatibleVer } from "@falling-nikochan/chart";
+import {
+  ChartEdit,
+  lastHashChangeVer,
+  lastIncompatibleVer,
+} from "@falling-nikochan/chart";
 import { initSession, SessionData } from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
