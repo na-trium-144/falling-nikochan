@@ -86,6 +86,7 @@ export function useShareLink(
   useEffect(() => {
     const shareData = {
       title: newTitle,
+      text: newTitle,
       url: origin + sharePath + "?" + shareParams,
     };
     if (
