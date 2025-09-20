@@ -962,9 +962,8 @@ function Play(props: Props) {
               hidden={showReady}
               auto={auto}
               optionChanged={
-                (userBegin !== null &&
-                  Math.round(userBegin) > Math.round(ytBegin)) ||
-                playbackRate !== 1
+                userBegin !== null &&
+                Math.round(userBegin) > Math.round(ytBegin)
               }
               lang={props.locale}
               date={resultDate || new Date(2025, 6, 1)}
@@ -1016,6 +1015,7 @@ function Play(props: Props) {
               largeResult={largeResult}
               record={record}
               inputType={hitType}
+              playbackRate4={playbackRate * 4}
             />
           )}
           {showStopped && (

@@ -257,7 +257,18 @@ export async function OGResult(
                 justifyContent: "center",
               }}
             >
-              <div style={{ ...flexRow }}>
+              {params.playbackRate4 !== 4 && (
+                <div style={{ ...flexRow, marginBottom: 4 * 4 }}>
+                  <span style={{ ...text3xl }}>(</span>
+                  <span style={{ marginRight: 2 * 4, ...text2xl }}>
+                    {t("playbackRate")}:
+                  </span>
+                  <span style={{ ...text3xl }}>
+                    ×{params.playbackRate4 / 4})
+                  </span>
+                </div>
+              )}
+              <div style={{ ...flexRow, marginBottom: 4 * 4 }}>
                 <span style={{ marginRight: 2 * 4, ...text2xl }}>
                   {t("rank")}:
                 </span>
@@ -266,7 +277,7 @@ export async function OGResult(
                 </span>
               </div>
               {params.chainScore100 === chainScoreRate * 100 ? (
-                <div style={{ ...flexRow, marginTop: 4 * 4, ...text3xl }}>
+                <div style={{ ...flexRow, ...text3xl }}>
                   <span>
                     {params.baseScore100 === baseScoreRate * 100
                       ? t("perfect")
@@ -296,7 +307,24 @@ export async function OGResult(
             <span style={{ ...text2xl, flexGrow: 1, marginLeft: 8 * 4 }}>
               {ts(name)}
             </span>
-            <span style={{ ...text4xl }}>{params.judgeCount[ji]}</span>
+            <div
+              style={{
+                ...text4xl,
+                ...flexRow,
+                width: 4 * 7,
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ position: "relative", width: "max-content" }}>
+                {params.judgeCount[ji] % 10}
+                <span
+                  style={{ position: "absolute", insetBlock: 0, right: "100%" }}
+                >
+                  {params.judgeCount[ji] >= 10 &&
+                    Math.floor(params.judgeCount[ji] / 10)}
+                </span>
+              </span>
+            </div>
           </div>
         ))}
         {params.bigCount !== false && (
@@ -307,7 +335,25 @@ export async function OGResult(
             }}
           >
             <span style={{ ...text2xl, flexGrow: 1 }}>{ts("big")}</span>
-            <span style={{ ...text4xl }}>{params.bigCount || 0}</span>
+            <div
+              style={{
+                ...text4xl,
+                ...flexRow,
+                width: 4 * 7,
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ position: "relative", width: "max-content" }}>
+                {(params.bigCount || 0) % 10}
+                <span
+                  style={{ position: "absolute", insetBlock: 0, right: "100%" }}
+                >
+                  {params.bigCount &&
+                    params.bigCount >= 10 &&
+                    Math.floor(params.bigCount / 10)}
+                </span>
+              </span>
+            </div>
           </div>
         )}
       </div>

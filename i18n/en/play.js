@@ -81,6 +81,7 @@ export default {
       otherPlayers: "Others' Play Records",
       copyLink: "Copy Link",
       shareLink: "Share",
+      playbackRate: "Speed",
     },
   },
 };
