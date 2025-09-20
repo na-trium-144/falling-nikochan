@@ -196,7 +196,14 @@ export default function PlayTab(props: Props) {
       >
         <h3 className="mb-2 text-xl font-bold font-title">{t("latest")}</h3>
         <p className="pl-2 text-justify ">
-          {t("latestDesc")}
+          {t.rich("latestDesc", {
+            unicodeX: () => <span className="text-lg/6">𝕏</span>,
+            twitter: (c) => (
+              <ExternalLink className="" href="https://twitter.com/nikochan144">
+                <span className="text-sm">{c}</span>
+              </ExternalLink>
+            ),
+          })}
           {/*<span className="text-sm ">(最新の{numLatest}件まで)</span>*/}
         </p>
         <p className="pl-2 mb-1 text-justify text-sm ">({t("latestDesc2")})</p>

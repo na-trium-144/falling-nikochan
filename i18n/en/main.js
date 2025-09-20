@@ -49,7 +49,8 @@ export default {
       popularDesc: "Charts played many times in the last {popularDays} days.",
       latest: "Latest Charts / All Charts",
       latestDesc:
-        "List of published charts. Sorted by the most recently created or updated.",
+        "List of published charts. Sorted by the most recently created or updated. " +
+        "Updates are also announced on the official account of <unicodeX></unicodeX> <twitter>@nikochan144</twitter>.",
       latestDesc2:
         "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       sample: "Sample Charts",
@@ -126,6 +127,8 @@ export default {
       contactForm: "Contact Form",
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",
+      officialAccount: "Falling Nikochan Official Account (@nikochan144)",
+      officialAccountShort: "Official Account",
     },
     festival:
       "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +

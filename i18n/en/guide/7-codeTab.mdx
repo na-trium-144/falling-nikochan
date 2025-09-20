@@ -20,6 +20,8 @@ Please note that replacing is not Ctrl+R. (It will reload the page.)
     - a must be an integer greater than or equal to 0, and b must be an integer greater than or equal to 1.
   - `BPM(bpm value)`: Changes the BPM. Must be a positive number.
   - `Accel(speed value)`: Changes the speed. 0 and negative values can also be used.
+  - `AccelBegin(speed value)` 〜 `AccelEnd(speed value)`: Smooth speed change.
+    - (Due to specifications, `Accel` and `AccelBegin` are the same. The change starts from the last `Accel` or `AccelBegin` before `AccelEnd`.)
   - `Beat(beat)` or `Beat(beat, a, b)`: Changes the beat.
     - For example, `{{4, 4, 4, 4}}` is 4/4 beat,
     `{{4, 4, 4, 8}}` is 7/8 beat,
