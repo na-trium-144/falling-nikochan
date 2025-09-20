@@ -12,7 +12,9 @@ export async function checkNewCharts(env: Bindings) {
   try {
     await client.connect();
     const db = client.db("nikochan");
-    // まだ通知したことがなく、今から24h以内に更新されている
+    const now = Date.now();
+
+    // まだ通知したことがなく、今から24h以内に更新されており、更新から15分以上経過している
     const newCharts = await Promise.all(
       (
         await db
@@ -21,12 +23,13 @@ export async function checkNewCharts(env: Bindings) {
             published: true,
             deleted: false,
             notifiedAt: { $exists: false },
-            updatedAt: { $gte: Date.now() - 24 * 60 * 60 * 1000 },
+            updatedAt: { $gte: now - 24 * 60 * 60 * 1000, $lte: now - 15 * 60 * 1000 },
           })
           .toArray()
       ).map((compressed) => unzipEntry(compressed))
     );
-    // 最後の通知から12h以上後に更新されている
+
+    // 最後の通知から12h以上後に更新されており、更新から15分以上経過している
     const updatedCharts = await Promise.all(
       (
         await db
@@ -34,9 +37,8 @@ export async function checkNewCharts(env: Bindings) {
           .find({
             published: true,
             deleted: false,
-            // notifiedAt: { $exists: true },
-            notifiedAt: { $lt: Date.now() - 12 * 60 * 60 * 1000 },
-            updatedAt: { $gte: Date.now() - 24 * 60 * 60 * 1000 },
+            notifiedAt: { $lt: now - 12 * 60 * 60 * 1000 },
+            updatedAt: { $gte: now - 24 * 60 * 60 * 1000, $lte: now - 15 * 60 * 1000 },
           })
           .toArray()
       )
@@ -45,6 +47,7 @@ export async function checkNewCharts(env: Bindings) {
         )
         .map((compressed) => unzipEntry(compressed))
     );
+
     for (const entry of newCharts) {
       console.log(`New chart found: ${entry.cid}`);
       const brief = entryToBrief(entry);
@@ -53,7 +56,7 @@ export async function checkNewCharts(env: Bindings) {
       if (postResult !== "error") {
         await db
           .collection("chart")
-          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: Date.now() } });
+          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: now } });
       }
     }
     for (const entry of updatedCharts) {
@@ -64,7 +67,7 @@ export async function checkNewCharts(env: Bindings) {
       if (postResult !== "error") {
         await db
           .collection("chart")
-          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: Date.now() } });
+          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: now } });
       }
     }
   } finally {
