@@ -16,7 +16,7 @@ import {
 } from "@falling-nikochan/chart";
 import { displayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, Note13 } from "@falling-nikochan/chart";
-import { SEType } from "./se";
+import { SEType } from "@/common/se";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,

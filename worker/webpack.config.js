@@ -48,6 +48,7 @@ const config = {
       "./cron/app.js": false,
       "./cron/latest.js": false,
       "./cron/popular.js": false,
+      "./cron/discord.js": false,
       "./sitemap.js": false,
     },
     fallback: {

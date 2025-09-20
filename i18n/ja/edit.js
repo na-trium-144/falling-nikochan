@@ -33,6 +33,7 @@ export default {
     zoom: "拡大",
     running: "スクリプトを実行中...",
     cancel: "キャンセル",
+    dragOver: "ファイルをドラッグ&ドロップして読み込む",
     timeBar: {
       bpm: "BPM",
       speed: "速度",
@@ -124,6 +125,8 @@ export default {
         "保存したファイルにはパスワードはかかっていません。",
       saveToLocal: "保存",
       loadFromLocal: "ファイルを開く",
+      dragDropPossible:
+        "ファイルをドラッグ&ドロップして読み込むこともできます。",
     },
     timing: {
       title: "タイミング",
@@ -194,6 +197,8 @@ export default {
       changeHere: "ここで変化",
       editedInCode: "Code タブで編集されているため変更できません。",
       interp: "なめらかに",
+      se: "タップ音",
+      beatSE: "メトロノーム音",
     },
     level: {
       title: "レベル",

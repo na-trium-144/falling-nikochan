@@ -9,3 +9,4 @@ export type { Bindings } from "./env.js";
 export { default as cronTestApp } from "./cron/app.js";
 export { reportPopularCharts } from "./cron/popular.js";
 export { checkNewCharts } from "./cron/latest.js";
+export { reportToDiscord } from "./cron/discord.js";

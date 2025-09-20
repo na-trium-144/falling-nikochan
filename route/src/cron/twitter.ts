@@ -65,8 +65,9 @@ export async function postChart(
   const messageJoined = () =>
     [
       postType === "new"
-        ? `#fallingnikochan 新しい譜面が公開されました!\n`
-        : `#fallingnikochan 譜面が更新されました!\n`,
+        ? `#fallingnikochan 新しい譜面が公開されました!`
+        : `#fallingnikochan 譜面が更新されました!`,
+      ` (${new Date().getUTCFullYear()}/${new Date().getUTCMonth() + 1}/${new Date().getUTCDate()})\n`,
       `誰でもこのURLから遊べます: https://nikochan.utcode.net/share/${cid}\n\n`,
       // `ID: ${cid}\n`,
       messageAboutSong + "\n",
