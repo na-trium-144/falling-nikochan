@@ -2,7 +2,7 @@ import { expect, test, describe } from "bun:test";
 import {
   app,
   dummyChart,
-  dummyChart7,
+  dummyChart11,
   dummyCid,
   dummyDate,
   initDb,
@@ -199,7 +199,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart7() }),
+      body: msgpack.serialize({ ...dummyChart11() }),
     });
     expect(res.status).toBe(409);
     const body = await res.json();

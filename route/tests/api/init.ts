@@ -7,6 +7,7 @@ import {
 import { PlayRecordEntry } from "@falling-nikochan/route/src/api/record";
 import {
   Chart11Edit,
+  Chart13Edit,
   Chart4,
   Chart5,
   Chart6,
@@ -15,7 +16,7 @@ import {
   Chart9Edit,
   currentChartVer,
   defaultCopyBuffer,
-  Level11Play,
+  Level13Play,
   Level6Play,
   stepZero,
 } from "@falling-nikochan/chart";
@@ -48,7 +49,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
-export function dummyChart(): Chart11Edit {
+export function dummyChart(): Chart13Edit {
   return {
     falling: "nikochan",
     ver: currentChartVer,
@@ -89,7 +90,13 @@ export function dummyChart(): Chart11Edit {
           },
         ],
         speedChanges: [
-          { step: stepZero(), timeSec: 0, bpm: 240, luaLine: null },
+          {
+            step: stepZero(),
+            timeSec: 0,
+            bpm: 240,
+            interp: false,
+            luaLine: null,
+          },
         ],
         signature: [
           {
@@ -106,6 +113,9 @@ export function dummyChart(): Chart11Edit {
       },
     ],
   };
+}
+export function dummyChart12(): Chart11Edit {
+  return { ...dummyChart(), ver: 12 };
 }
 export function dummyChart11(): Chart11Edit {
   return { ...dummyChart(), ver: 11 };
@@ -164,9 +174,9 @@ export function dummyChart4(): Chart4 {
   };
 }
 
-export function dummyLevel11(): Level11Play {
+export function dummyLevel13(): Level13Play {
   return {
-    ver: 12,
+    ver: 13,
     offset: 1.23,
     notes: [
       {
@@ -188,7 +198,9 @@ export function dummyLevel11(): Level11Play {
         luaLine: null,
       },
     ],
-    speedChanges: [{ step: stepZero(), timeSec: 0, bpm: 240, luaLine: null }],
+    speedChanges: [
+      { step: stepZero(), timeSec: 0, bpm: 240, interp: false, luaLine: null },
+    ],
     signature: [
       {
         step: stepZero(),
@@ -514,7 +526,7 @@ export async function initDb() {
         $set: await zipEntry({
           ...(await chartToEntry(
             {
-              ...dummyChart11(),
+              ...dummyChart(),
               changePasswd: "p",
             },
             String(Number(dummyCid) + 11),
@@ -526,6 +538,28 @@ export async function initDb() {
           )),
           ver: 11,
           levels: dummyChart11().levels,
+        }),
+      },
+      { upsert: true }
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 12) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 12),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null
+          )),
+          ver: 12,
+          levels: dummyChart12().levels,
         }),
       },
       { upsert: true }

@@ -8,15 +8,15 @@ import {
   stepToFloat,
   stepZero,
 } from "./step.js";
-import { displayNote7, DisplayNote7, Note7 } from "./legacy/seq7.js";
+import { DisplayNote7 } from "./legacy/seq7.js";
 import { BPMChange1 } from "./legacy/chart1.js";
 import { Signature5 } from "./legacy/chart5.js";
-import { loadChart11 } from "./legacy/seq11.js";
+import { displayNote13, loadChart13, Note13 } from "./legacy/seq13.js";
 
-export type Note = Note7;
+export type Note = Note13;
 export type DisplayNote = DisplayNote7;
-export const displayNote = displayNote7;
-export const loadChart = loadChart11;
+export const displayNote = displayNote13;
+export const loadChart = loadChart13;
 
 /**
  * 判定線の位置

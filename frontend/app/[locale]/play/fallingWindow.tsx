@@ -7,13 +7,13 @@ import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
-import { displayNote7, DisplayNote7, Note7 } from "@falling-nikochan/chart";
+import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 
 interface Props {
   className?: string;
   style?: object;
-  notes: Note6[] | Note7[];
+  notes: Note6[] | Note13[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setFPS?: (fps: number) => void;
@@ -91,7 +91,9 @@ export default function FallingWindow(props: Props) {
       now !== undefined
     ) {
       displayNotes.current = notes
-        .map((n) => (n.ver === 6 ? displayNote6(n, now) : displayNote7(n, now)))
+        .map((n) =>
+          n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
+        )
         .filter((n) => n !== null);
     } else {
       displayNotes.current = [];
@@ -154,7 +156,7 @@ export default function FallingWindow(props: Props) {
 
 interface MProps {
   displayNotes: DisplayNote6[] | DisplayNote7[];
-  notes: Note6[] | Note7[];
+  notes: Note6[] | Note13[];
   noteSize: number;
   boxSize: number;
   marginX: number;
@@ -181,7 +183,7 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
 interface NProps {
   displayNote: DisplayNote6 | DisplayNote7;
   noteSize: number;
-  note: Note6 | Note7;
+  note: Note6 | Note13;
   marginX: number;
   marginY: number;
   boxSize: number;

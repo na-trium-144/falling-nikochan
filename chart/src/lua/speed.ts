@@ -1,16 +1,21 @@
 import { LevelEdit } from "../chart.js";
-import { BPMChange } from "../bpm.js";
+import { BPMChange, SpeedChange } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
 import { Chart3 } from "../legacy/chart3.js";
 import { BPMChange1 } from "../legacy/chart1.js";
+import { Level11Edit } from "../legacy/chart11.js";
 
-function accelLuaCommand(bpm: number) {
-  return `Accel(${bpm})`;
+function accelLuaCommand(bpm: number, interp: boolean) {
+  if (interp) {
+    return `AccelEnd(${bpm})`;
+  } else {
+    return `Accel(${bpm})`;
+  }
 }
-export function luaAddSpeedChange<L extends LevelEdit | Chart3>(
+export function luaAddSpeedChange<L extends LevelEdit | Level11Edit | Chart3>(
   chart: L,
-  change: BPMChange | BPMChange1
+  change: SpeedChange | BPMChange | BPMChange1
 ): L | null {
   const insert = findInsertLine(chart, change.step, true);
   if (insert.luaLine === null) {
@@ -18,8 +23,15 @@ export function luaAddSpeedChange<L extends LevelEdit | Chart3>(
   }
   chart = insert.chart;
 
-  insertLua(chart, insert.luaLine, accelLuaCommand(change.bpm));
-  chart.speedChanges.push({ ...change, luaLine: insert.luaLine });
+  insertLua(
+    chart,
+    insert.luaLine,
+    accelLuaCommand(change.bpm, "interp" in change && change.interp)
+  );
+  (chart.speedChanges as Array<SpeedChange | BPMChange | BPMChange1>).push({
+    ...change,
+    luaLine: insert.luaLine,
+  });
   chart.speedChanges = chart.speedChanges.sort((a, b) =>
     stepCmp(a.step, b.step)
   );
@@ -28,12 +40,17 @@ export function luaAddSpeedChange<L extends LevelEdit | Chart3>(
 export function luaUpdateSpeedChange(
   chart: LevelEdit,
   index: number,
-  bpm: number
+  bpm: number,
+  interp: boolean
 ) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }
-  replaceLua(chart, chart.speedChanges[index].luaLine, accelLuaCommand(bpm));
+  replaceLua(
+    chart,
+    chart.speedChanges[index].luaLine,
+    accelLuaCommand(bpm, interp)
+  );
   chart.speedChanges[index].bpm = bpm;
   // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   return chart;

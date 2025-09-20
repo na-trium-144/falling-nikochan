@@ -27,15 +27,15 @@ import {
   bigScoreRate,
   chainScoreRate,
   ChartSeqData6,
-  Level11Play,
   levelTypes,
   loadChart6,
   RecordGetSummary,
   RecordPost,
   inputTypes,
   emptyBrief,
+  Level13Play,
 } from "@falling-nikochan/chart";
-import { ChartSeqData11, loadChart11 } from "@falling-nikochan/chart";
+import { ChartSeqData13, loadChart13 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -80,7 +80,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData11>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData13>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorStatus, setErrorStatus] = useState<number>();
@@ -120,7 +120,7 @@ export function InitPlay({ locale }: { locale: string }) {
     //   " | Falling Nikochan";
 
     if (session?.level) {
-      setChartSeq(loadChart11(session.level));
+      setChartSeq(loadChart13(session.level));
       setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
@@ -134,18 +134,17 @@ export function InitPlay({ locale }: { locale: string }) {
           );
           if (res.ok) {
             try {
-              const seq: Level6Play | Level11Play = msgpack.deserialize(
+              const seq: Level6Play | Level13Play = msgpack.deserialize(
                 await res.arrayBuffer()
               );
               console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 11 || seq.ver === 12) {
+              if (seq.ver === 6 || seq.ver === 13) {
                 switch (seq.ver) {
                   case 6:
                     setChartSeq(loadChart6(seq));
                     break;
-                  case 11:
-                  case 12:
-                    setChartSeq(loadChart11(seq));
+                  case 13:
+                    setChartSeq(loadChart13(seq));
                     break;
                 }
                 setErrorStatus(undefined);
@@ -212,7 +211,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
-  chartSeq?: ChartSeqData6 | ChartSeqData11;
+  chartSeq?: ChartSeqData6 | ChartSeqData13;
   editing: boolean;
   showFps: boolean;
   displaySpeed: boolean;

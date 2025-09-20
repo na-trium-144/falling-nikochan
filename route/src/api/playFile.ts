@@ -8,9 +8,9 @@ import {
   convertTo6,
   Level6Play,
   CidSchema,
-  Level11Play,
-  convertToPlay11,
-  convertTo11,
+  Level13Play,
+  convertToPlay13,
+  convertTo13,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -36,7 +36,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         throw new HTTPException(404, { message: "levelNotFound" });
       }
 
-      let level: Level6Play | Level11Play;
+      let level: Level6Play | Level13Play;
       switch (chart.ver) {
         case 4:
         case 5:
@@ -57,13 +57,15 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         case 8:
         case 9:
         case 10:
-          level = convertToPlay11(await convertTo11(chart), lvIndex);
-          break;
         case 11:
         case 12:
-          level = convertToPlay11(chart, lvIndex);
+          level = convertToPlay13(await convertTo13(chart), lvIndex);
+          break;
+        case 13:
+          level = convertToPlay13(chart, lvIndex);
           break;
         default:
+          chart satisfies never;
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
