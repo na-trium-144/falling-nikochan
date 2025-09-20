@@ -1,6 +1,6 @@
 import { Key } from "@/common/key.js";
 import { SlimeSVG } from "@/common/slime.js";
-import { TranslateIcon } from "@/common/mdxIcons.js";
+import { TranslateIcon, SunIcon, HelpIcon } from "@/common/mdxIcons.js";
 
 ## ver. 13.0 - 09/21/2025
 
@@ -212,5 +212,87 @@ import { TranslateIcon } from "@/common/mdxIcons.js";
 
 ## ver. 7.0 - 02/11/2025
 
-- The entire app now supports English. It automatically detects your browser settings, but you can also switch to English using the <TranslateIcon /> Language button at the bottom of the screen.
-- When the app is updated, the link to this update history page (the version number at the bottom of the screen) will be marked as unread.
+- Changes to score data specifications (〜.fn7.yml): You can now specify whether notes start displaying from the top of the screen or as if they're being thrown upwards.
+  - This allows you to achieve, for example, notes falling from directly above (vx = 0).
+  - When loading legacy chart data on the play mode, the previous program is used, and the behavior is exactly the same as before.
+  - When loading legacy chart data on the chart editing mode and saving it overwrites it, it is converted to the ver. 7 chart format. This change may result in some note behavior changes from previous versions. Please test play to ensure the chart is not unintended.
+- The entire app now supports English. Browser settings and other settings are automatically detected, but you can also switch languages using the <TranslateIcon /> Language button at the bottom of the screen.
+  - Some parts of the play screen and editing screen that were previously written in English are now almost entirely displayed in Japanese when in Japanese display mode.
+- The display of song titles and other information on the play screen has been enlarged.
+- The help screen for chart editing has been reduced in text and made easier to read. For more detailed explanations, hover (or tap) the <HelpIcon /> in the editing screen.
+- Users can now choose whether or not to save passwords when editing charts.
+- When the app is updated, the link to this update history page (next to the version number at the bottom of the screen) now displays an unread mark.
+
+## ver. 6.11 - 11/24/2024
+
+- Added the ability to make charts public / Added a "Latest charts" list to the top page (Play page).
+- (Charts uploaded prior to this will be private by default.)
+- Up to 25 charts will be displayed in order of newest. Feel free to submit your own.
+
+## ver. 6.1 - 11/17/2024
+
+- The format of files saved locally when editing charts has been changed. (〜.fn6.yml)
+  - Files can be opened in text editors such as Notepad.
+  - Files in previous formats (such as 〜.fn5.mpk) can still be loaded (they will be automatically converted to the new format).
+
+## ver. 5.28 - 11/15/2024
+
+- Added the ability to hide certain levels of charts uploaded to the server.
+  - Select a level in the Level tab of the chart editing screen and check "Hide this level" to prevent it from appearing on the chart sharing screen.
+
+## ver. 5.26 - 11/12/2024
+
+- Improved display on the results screen.
+
+## ver. 5.25 - 11/10/2024
+
+- Added an effect display when hitting Nikochan.
+  - Instead, the chart multiplier display in the upper right corner of Nikochan has been removed.
+- A hidden feature has been added to display the current frame rate.
+  - Adding `&fps=` to the end of the URL on the gameplay screen will display it in the lower left corner.
+
+## ver. 5.22 - 11/09/2024
+
+- A dark theme has been implemented. You can switch to it from the <SunIcon /> Theme button in the lower right corner of menu pages, etc.
+- The play screen and editing screen now always open in a new tab.
+
+## ver. 5.19 - 11/05/2024
+
+- Fixed a bug that caused a YouTube video to automatically restart after playing to the end.
+
+## ver. 5.17 - 11/05/2024
+
+- Improvement in chart editing:
+  - Added a 1/30 second skip button and rearranged the order of the control buttons.
+  - Changed the 1 bar skip button to <Key className="text-sm p-0.5">PageUp</Key> / <Key className="text-sm p-0.5">PageDown</Key> instead of <Key className="text-sm p-0.5">Shift</Key> + Left/Right.
+  - Added a button to turn on/off the feature that moves notes on the screen when using touch controls, and made other usability improvements.
+
+## ver. 5.15 - 11/02/2024
+
+- Improved display of the Recently Played/Recently Edited charts list
+  - The most recently played charts are now at the top
+  - Only the first five charts are displayed, and the rest can be displayed by pressing the "Show All" button
+
+## ver. 5.14 - 10/31/2024
+
+- Added display of play time during play
+
+## ver. 5.12 - 10/30/2024
+
+- Added version number and update history.
+
+## ver. 5 - 10/20/2024
+
+- Implemented time signature changes
+
+## ver. 4 - 10/11/2024
+
+- Added the ability to create multiple levels per chart
+
+## ver. 3 - 10/07/2024
+
+- Added a code editor and a Lua notation system
+
+## ver. 2 - 09/29/2024
+
+## ver. 1 - 09/25/2024
