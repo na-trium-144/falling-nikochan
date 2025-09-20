@@ -23,7 +23,10 @@ export async function checkNewCharts(env: Bindings) {
             published: true,
             deleted: false,
             notifiedAt: { $exists: false },
-            updatedAt: { $gte: now - 24 * 60 * 60 * 1000, $lte: now - 15 * 60 * 1000 },
+            updatedAt: {
+              $gte: now - 24 * 60 * 60 * 1000,
+              $lte: now - 15 * 60 * 1000,
+            },
           })
           .toArray()
       ).map((compressed) => unzipEntry(compressed))
@@ -38,7 +41,10 @@ export async function checkNewCharts(env: Bindings) {
             published: true,
             deleted: false,
             notifiedAt: { $lt: now - 12 * 60 * 60 * 1000 },
-            updatedAt: { $gte: now - 24 * 60 * 60 * 1000, $lte: now - 15 * 60 * 1000 },
+            updatedAt: {
+              $gte: now - 24 * 60 * 60 * 1000,
+              $lte: now - 15 * 60 * 1000,
+            },
           })
           .toArray()
       )
