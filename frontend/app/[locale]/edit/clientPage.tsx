@@ -88,6 +88,8 @@ import { Chart8Edit } from "@falling-nikochan/chart";
 import { SlimeSVG } from "@/common/slime.js";
 import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
+import { useSE } from "@/common/se.js";
+import { useChartFile } from "./file";
 
 export default function EditAuth(props: {
   locale: string;
@@ -120,6 +122,8 @@ export default function EditAuth(props: {
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const [hasChange, setHasChange] = useState<boolean>(false);
+
+  const passwdRef = useRef<HTMLInputElement>(null);
 
   // PWAでテストプレイを押した場合に編集中の譜面データをsessionStorageに退避
   const saveEditSession = useCallback(() => {
@@ -303,6 +307,18 @@ export default function EditAuth(props: {
     const ft = setTimeout(() => void fetchChart(true, false, "", true));
     return () => clearTimeout(ft);
   }, [fetchChart, t]);
+  useEffect(() => {
+    if (
+      chart === undefined &&
+      !loading &&
+      !errorStatus &&
+      !errorMsg &&
+      passwdRef.current
+    ) {
+      passwdRef.current.focus();
+      passwdRef.current.select();
+    }
+  }, [chart, loading, errorStatus, errorMsg]);
 
   return (
     <Page
@@ -344,10 +360,14 @@ export default function EditAuth(props: {
               <p>{t("enterPasswd")}</p>
               {passwdFailed && <p>{t("passwdFailed")}</p>}
               <Input
+                ref={passwdRef}
                 actualValue={editPasswd}
                 updateValue={setEditPasswd}
                 left
                 passwd
+                onEnter={(editPasswd) =>
+                  fetchChart(false, false, editPasswd, savePasswd)
+                }
               />
               <Button
                 text={t("submitPasswd")}
@@ -688,14 +708,20 @@ function Page(props: Props) {
     ytPlayer.current?.pauseVideo();
     ref.current?.focus();
   };
-  const changeCurrentTimeSec = (timeSec: number, focus = true) => {
-    if (ytPlayer.current?.seekTo) {
-      ytPlayer.current?.seekTo(timeSec, true);
-    }
-    if (focus) {
-      ref.current?.focus();
-    }
-  };
+  const changeCurrentTimeSec = useCallback(
+    (timeSec: number, focus = true) => {
+      if (!playing) {
+        setCurrentTimeSecWithoutOffset(timeSec);
+        if (ytPlayer.current?.seekTo) {
+          ytPlayer.current?.seekTo(timeSec, true);
+        }
+      }
+      if (focus) {
+        ref.current?.focus();
+      }
+    },
+    [playing]
+  );
   const seekRight1 = () => {
     if (currentLevel) {
       if (
@@ -750,7 +776,7 @@ function Page(props: Props) {
         ref.current?.focus();
       }
     },
-    [chart, currentLevel]
+    [chart, currentLevel, changeCurrentTimeSec]
   );
   const seekSec = (moveSec: number, focus = true) => {
     if (chart) {
@@ -759,13 +785,15 @@ function Page(props: Props) {
   };
 
   useEffect(() => {
-    const i = setInterval(() => {
-      if (ytPlayer.current?.getCurrentTime) {
-        setCurrentTimeSecWithoutOffset(ytPlayer.current.getCurrentTime());
-      }
-    }, 50);
-    return () => clearInterval(i);
-  }, []);
+    if (playing) {
+      const i = setInterval(() => {
+        if (ytPlayer.current?.getCurrentTime) {
+          setCurrentTimeSecWithoutOffset(ytPlayer.current.getCurrentTime());
+        }
+      }, 50);
+      return () => clearInterval(i);
+    }
+  }, [playing]);
 
   const [notesAll, setNotesAll] = useState<Note[]>([]);
   useEffect(() => {
@@ -773,6 +801,101 @@ function Page(props: Props) {
       setNotesAll(loadChart(convertToPlay(chart, currentLevelIndex)).notes);
     }
   }, [chart, currentLevelIndex]);
+
+  const {
+    playSE,
+    audioLatency,
+    enableHitSE,
+    setEnableHitSE,
+    hitVolume,
+    setHitVolume,
+    enableBeatSE,
+    setEnableBeatSE,
+    beatVolume,
+    setBeatVolume,
+  } = useSE(cid, 0, true, {
+    hitVolume: "seVolume",
+    hitVolumeCid: cid ? `seVolume-${cid}` : undefined,
+    enableHitSE: "enableSEEdit",
+    beatVolume: "beatVolume",
+    beatVolumeCid: cid ? `beatVolume-${cid}` : undefined,
+    enableBeatSE: "enableBeatEdit",
+  });
+  const audioLatencyRef = useRef<number>(null!);
+  audioLatencyRef.current = audioLatency || 0;
+  useEffect(() => {
+    if (playing && ytPlayer.current) {
+      let index = 0;
+      let t: ReturnType<typeof setTimeout> | null = null;
+      const now =
+        ytPlayer.current.getCurrentTime() -
+        (chart?.offset || 0) +
+        audioLatencyRef.current;
+      while (index < notesAll.length && notesAll[index].hitTimeSec < now) {
+        index++;
+      }
+      const playOne = () => {
+        if (ytPlayer.current) {
+          const now =
+            ytPlayer.current.getCurrentTime() -
+            (chart?.offset || 0) +
+            audioLatencyRef.current;
+          t = null;
+          while (index < notesAll.length && notesAll[index].hitTimeSec <= now) {
+            playSE(notesAll[index].big ? "hitBig" : "hit");
+            index++;
+          }
+          if (index < notesAll.length) {
+            t = setTimeout(playOne, (notesAll[index].hitTimeSec - now) * 1000);
+          }
+        }
+      };
+      if (index < notesAll.length) {
+        t = setTimeout(playOne, (notesAll[index].hitTimeSec - now) * 1000);
+      }
+      return () => {
+        if (t !== null) {
+          clearTimeout(t);
+        }
+      };
+    }
+  }, [playing, notesAll, playSE, chart?.offset]);
+  useEffect(() => {
+    if (playing && ytPlayer.current && currentLevel) {
+      let t: ReturnType<typeof setTimeout> | null = null;
+      const now =
+        ytPlayer.current.getCurrentTime() -
+        (chart?.offset || 0) +
+        audioLatencyRef.current;
+      let step = getStep(currentLevel.bpmChanges, now, 4);
+      const playOne = () => {
+        if (ytPlayer.current && currentLevel) {
+          const now =
+            ytPlayer.current.getCurrentTime() -
+            (chart?.offset || 0) +
+            audioLatencyRef.current;
+          t = null;
+          while (getTimeSec(currentLevel.bpmChanges, step) <= now) {
+            const ss = getSignatureState(currentLevel.signature, step);
+            if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
+              playSE(ss.count.fourth === 0 ? "beat1" : "beat");
+            }
+            step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
+          }
+          t = setTimeout(
+            playOne,
+            (getTimeSec(currentLevel.bpmChanges, step) - now) * 1000
+          );
+        }
+      };
+      playOne();
+      return () => {
+        if (t !== null) {
+          clearTimeout(t);
+        }
+      };
+    }
+  }, [playing, currentLevel, playSE, chart?.offset]);
 
   const [tab, setTab] = useState<number>(0);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
@@ -1030,6 +1153,15 @@ function Page(props: Props) {
     ref.current?.focus();
   };
 
+  const { load } = useChartFile({
+    cid,
+    chart,
+    savePasswd: !!savePasswd,
+    currentPasswd: props.currentPasswd,
+    locale,
+  });
+  const [dragOver, setDragOver] = useState<boolean>(false);
+
   return (
     <main
       className={clsx(
@@ -1096,6 +1228,13 @@ function Page(props: Props) {
           setDragMode("p");
         }
       }}
+      onDragOver={(e) => {
+        if (chart !== undefined) {
+          // エディタの読み込みが完了するまでは無効
+          e.preventDefault();
+          setDragOver(true);
+        }
+      }}
     >
       <div
         className={clsx(
@@ -1134,6 +1273,37 @@ function Page(props: Props) {
           locale={locale}
         />
       ) : null}
+
+      {dragOver && (
+        <div
+          className={clsx(modalBg, "z-30!")}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = async (event) => {
+                const result = await load(event.target!.result as ArrayBuffer);
+                if (result.isError) {
+                  if (result.message) {
+                    alert(result.message);
+                  }
+                } else {
+                  setChart(result.chart!);
+                  setConvertedFrom(result.originalVer!);
+                }
+              };
+              reader.readAsArrayBuffer(file);
+            }
+          }}
+        >
+          <Box className="absolute inset-6 m-auto w-max h-max p-6 shadow-md">
+            <p>{t("dragOver")}</p>
+          </Box>
+        </div>
+      )}
 
       <CaptionProvider>
         <LuaTabProvider>
@@ -1460,6 +1630,14 @@ function Page(props: Props) {
                     setYTEnd={setYTEnd}
                     currentLevelLength={currentLevelLength}
                     ytDuration={ytDuration}
+                    enableHitSE={enableHitSE}
+                    setEnableHitSE={setEnableHitSE}
+                    hitVolume={hitVolume}
+                    setHitVolume={setHitVolume}
+                    enableBeatSE={enableBeatSE}
+                    setEnableBeatSE={setEnableBeatSE}
+                    beatVolume={beatVolume}
+                    setBeatVolume={setBeatVolume}
                   />
                 ) : tab === 2 ? (
                   <LevelTab

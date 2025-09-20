@@ -23,6 +23,7 @@ import Select from "@/common/select";
 import { detectOS } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
+import Range from "@/common/range";
 
 interface MessageProps {
   isTouch: boolean;
@@ -279,14 +280,13 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
                 </>
               )}
             </CheckBox>
-            <input
-              type="range"
-              className="block w-full"
+            <Range
+              className="block! w-full!"
               min={props.ytBegin}
               max={props.ytEnd}
               disabled={props.userBegin === null}
               value={props.userBegin ?? props.ytBegin}
-              onChange={(e) => props.setUserBegin(Number(e.target.value))}
+              onChange={props.setUserBegin}
             />
           </li>
           <li>

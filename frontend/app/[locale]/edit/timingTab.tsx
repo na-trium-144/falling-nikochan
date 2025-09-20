@@ -27,6 +27,9 @@ import CornerDownLeft from "@icon-park/react/lib/icons/CornerDownLeft";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";
+import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
+import Range from "@/common/range";
+import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 
 interface Props {
   offset?: number;
@@ -52,6 +55,14 @@ interface Props {
   currentLevelLength: number;
   ytDuration: number;
   currentStep: Step;
+  enableHitSE: boolean;
+  setEnableHitSE: (enableSE: boolean) => void;
+  hitVolume: number;
+  setHitVolume: (seVolume: number) => void;
+  enableBeatSE: boolean;
+  setEnableBeatSE: (enableSE: boolean) => void;
+  beatVolume: number;
+  setBeatVolume: (seVolume: number) => void;
 }
 export default function TimingTab(props: Props) {
   const t = useTranslations("edit.timing");
@@ -153,6 +164,69 @@ export default function TimingTab(props: Props) {
           />
           <span>{t("offsetSecond")}</span>
         </CheckBox>
+      </div>
+      <div className="">
+        <CheckBox
+          value={props.enableHitSE}
+          onChange={(v) => props.setEnableHitSE(v)}
+        >
+          <SmilingFace className={clsx("inline-block align-middle mr-1")} />
+          {t("se")}
+          <VolumeNotice
+            theme="filled"
+            className={clsx(
+              "inline-block align-middle ml-2",
+              props.enableHitSE || "text-slate-400 dark:text-stone-600"
+            )}
+          />
+          <span
+            className={clsx(
+              "inline-block text-sm w-8 text-center",
+              props.enableHitSE || "text-slate-400 dark:text-stone-600"
+            )}
+          >
+            {props.hitVolume}
+          </span>
+        </CheckBox>
+        <Range
+          className="align-middle "
+          min={0}
+          max={100}
+          disabled={!props.enableHitSE}
+          value={props.hitVolume}
+          onChange={props.setHitVolume}
+        />
+      </div>
+      <div className="mb-3">
+        <CheckBox
+          value={props.enableBeatSE}
+          onChange={(v) => props.setEnableBeatSE(v)}
+        >
+          {t("beatSE")}
+          <VolumeNotice
+            theme="filled"
+            className={clsx(
+              "inline-block align-middle ml-2",
+              props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+            )}
+          />
+          <span
+            className={clsx(
+              "inline-block text-sm w-8 text-center",
+              props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+            )}
+          >
+            {props.beatVolume}
+          </span>
+        </CheckBox>
+        <Range
+          className="align-middle "
+          min={0}
+          max={100}
+          disabled={!props.enableBeatSE}
+          value={props.beatVolume}
+          onChange={props.setBeatVolume}
+        />
       </div>
       <div>
         <span>{t("step")}</span>

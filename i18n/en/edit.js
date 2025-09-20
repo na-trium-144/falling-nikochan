@@ -33,6 +33,7 @@ export default {
     zoom: "Zoom",
     running: "Running the script...",
     cancel: "Cancel",
+    dragOver: "Drag & drop a file to load",
     timeBar: {
       bpm: "BPM",
       speed: "Speed",
@@ -120,6 +121,7 @@ export default {
         "The saved file is not password protected.",
       saveToLocal: "Save",
       loadFromLocal: "Open file",
+      dragDropPossible: "You can also drag & drop the file to load.",
     },
     timing: {
       title: "Timing",
@@ -204,6 +206,8 @@ export default {
         "to divide it.",
       changeHere: "Change here",
       editedInCode: "Cannot be changed because it is edited in the Code tab.",
+      se: "Tap sound",
+      beatSE: "Metronome sound",
     },
     level: {
       title: "Levels",

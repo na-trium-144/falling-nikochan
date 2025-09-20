@@ -57,7 +57,7 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { Level6Play } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
-import { useSE } from "./se.js";
+import { useSE } from "@/common/se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
@@ -361,13 +361,17 @@ function Play(props: Props) {
   const [enableIOSThru, setEnableIOSThru_] = useState<boolean>(false);
   const {
     playSE,
-    enableSE,
-    setEnableSE,
-    seVolume,
-    setSEVolume,
+    enableHitSE,
+    setEnableHitSE,
+    hitVolume,
+    setHitVolume,
     audioLatency,
     offsetPlusLatency,
-  } = useSE(cid, userOffset, !enableIOSThru);
+  } = useSE(cid, userOffset, !enableIOSThru, {
+    hitVolume: "seVolume",
+    hitVolumeCid: cid ? `seVolume-${cid}` : undefined,
+    enableHitSE: "enableSE",
+  });
   const setEnableIOSThru = useCallback((v: boolean) => {
     setEnableIOSThru_(v);
     localStorage.setItem("enableIOSThru", v ? "1" : "0");
@@ -836,9 +840,9 @@ function Play(props: Props) {
             onPlaybackRateChange={setPlaybackRate}
             ytVolume={ytVolume}
             setYtVolume={setYtVolume}
-            enableSE={enableSE && !enableIOSThru}
-            seVolume={seVolume}
-            setSEVolume={setSEVolume}
+            enableSE={enableHitSE && !enableIOSThru}
+            seVolume={hitVolume}
+            setSEVolume={setHitVolume}
           />
           {!isMobile && (
             <>
@@ -935,8 +939,8 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
-              enableSE={enableSE}
-              setEnableSE={setEnableSE}
+              enableSE={enableHitSE}
+              setEnableSE={setEnableHitSE}
               enableIOSThru={enableIOSThru}
               setEnableIOSThru={setEnableIOSThru}
               audioLatency={audioLatency}
