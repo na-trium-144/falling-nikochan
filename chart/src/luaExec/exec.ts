@@ -1,6 +1,13 @@
 import { LuaFactory } from "wasmoon";
 import { Step, stepZero } from "../step.js";
-import { luaAccel, luaBeat, luaBPM, luaNote, luaStep } from "./api.js";
+import {
+  luaAccel,
+  luaAccelEnd,
+  luaBeat,
+  luaBPM,
+  luaNote,
+  luaStep,
+} from "./api.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";
@@ -53,6 +60,8 @@ export async function luaExec(
         ["Beat", luaBeat],
         ["BPM", luaBPM],
         ["Accel", luaAccel],
+        ["AccelBegin", luaAccel],
+        ["AccelEnd", luaAccelEnd],
       ] as const
     ).forEach(([name, func]) => {
       lua.global.set(name, (...args: any[]) => func(result, null, ...args));
@@ -79,6 +88,14 @@ export async function luaExec(
         .replace(
           /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
           `$1AccelStatic(${ln},$2)$3`
+        )
+        .replace(
+          /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
+          `$1AccelBeginStatic(${ln},$2)$3`
+        )
+        .replace(
+          /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
+          `$1AccelEndStatic(${ln},$2)$3`
         )
     );
     // console.log(codeStatic);
@@ -124,6 +141,7 @@ export async function luaExec(
       step: stepZero(),
       timeSec: 0,
       luaLine: null,
+      interp: false,
     });
   }
   if (result.levelFreezed.signature.length === 0) {

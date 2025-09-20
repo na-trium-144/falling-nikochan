@@ -1,3 +1,15 @@
+## ver. 13.0 - 2025/09/21 [#769](https://github.com/na-trium-144/falling-nikochan/pull/769),[#770](https://github.com/na-trium-144/falling-nikochan/pull/770), [#771](https://github.com/na-trium-144/falling-nikochan/pull/771), [#772](https://github.com/na-trium-144/falling-nikochan/pull/772)
+
+* 編集画面にプレイ時と同様の音符のタップ音 & メトロノーム音を追加
+* 編集画面のカーソル移動をYouTubeと同期しないようにすることで高速化
+* パスワードをenterで送信可能に
+* スライダーのUI (range input) のデザインを変更
+* ドラッグ&ドロップで譜面ファイルを読み込めるようにした
+* SpeedChangeにinterpパラメータを追加
+* 共有タイトルに#fallingnikochanを含める
+* result共有パラメータにplaybackRateを追加 & Date短縮
+* ogResultの判定数表示を1の位中央揃えに変更
+
 ## ver. 12.53 - 2025/09/16 [#768](https://github.com/na-trium-144/falling-nikochan/pull/768)
 
 * honoの bodyLimit ミドルウェアを使ってbodyを読まずにエラーを返す

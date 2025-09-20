@@ -79,6 +79,7 @@ export default {
       otherPlayers: "みんなのプレイ記録",
       copyLink: "リンクをコピー",
       shareLink: "共有",
+      playbackRate: "再生速度",
     },
   },
 };

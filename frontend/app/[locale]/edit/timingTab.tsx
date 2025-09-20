@@ -27,6 +27,9 @@ import CornerDownLeft from "@icon-park/react/lib/icons/CornerDownLeft";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";
+import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
+import Range from "@/common/range";
+import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 
 interface Props {
   offset?: number;
@@ -36,11 +39,16 @@ interface Props {
   currentLevel: LevelEdit | undefined;
   currentBpmIndex?: number;
   currentBpm?: number;
-  setCurrentBpm: (bpm: number | null, speed: number | null) => void;
+  setCurrentBpm: (
+    bpm: number | null,
+    speed: number | null,
+    interp: boolean
+  ) => void;
   bpmChangeHere: boolean;
   toggleBpmChangeHere: (bpm: boolean | null, speed: boolean | null) => void;
   currentSpeedIndex?: number;
   currentSpeed?: number;
+  currentSpeedInterp: boolean;
   prevSignature?: Signature;
   speedChangeHere: boolean;
   currentSignature?: SignatureWithLua;
@@ -52,6 +60,14 @@ interface Props {
   currentLevelLength: number;
   ytDuration: number;
   currentStep: Step;
+  enableHitSE: boolean;
+  setEnableHitSE: (enableSE: boolean) => void;
+  hitVolume: number;
+  setHitVolume: (seVolume: number) => void;
+  enableBeatSE: boolean;
+  setEnableBeatSE: (enableSE: boolean) => void;
+  beatVolume: number;
+  setBeatVolume: (seVolume: number) => void;
 }
 export default function TimingTab(props: Props) {
   const t = useTranslations("edit.timing");
@@ -154,6 +170,69 @@ export default function TimingTab(props: Props) {
           <span>{t("offsetSecond")}</span>
         </CheckBox>
       </div>
+      <div className="">
+        <CheckBox
+          value={props.enableHitSE}
+          onChange={(v) => props.setEnableHitSE(v)}
+        >
+          <SmilingFace className={clsx("inline-block align-middle mr-1")} />
+          {t("se")}
+          <VolumeNotice
+            theme="filled"
+            className={clsx(
+              "inline-block align-middle ml-2",
+              props.enableHitSE || "text-slate-400 dark:text-stone-600"
+            )}
+          />
+          <span
+            className={clsx(
+              "inline-block text-sm w-8 text-center",
+              props.enableHitSE || "text-slate-400 dark:text-stone-600"
+            )}
+          >
+            {props.hitVolume}
+          </span>
+        </CheckBox>
+        <Range
+          className="align-middle "
+          min={0}
+          max={100}
+          disabled={!props.enableHitSE}
+          value={props.hitVolume}
+          onChange={props.setHitVolume}
+        />
+      </div>
+      <div className="mb-3">
+        <CheckBox
+          value={props.enableBeatSE}
+          onChange={(v) => props.setEnableBeatSE(v)}
+        >
+          {t("beatSE")}
+          <VolumeNotice
+            theme="filled"
+            className={clsx(
+              "inline-block align-middle ml-2",
+              props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+            )}
+          />
+          <span
+            className={clsx(
+              "inline-block text-sm w-8 text-center",
+              props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+            )}
+          >
+            {props.beatVolume}
+          </span>
+        </CheckBox>
+        <Range
+          className="align-middle "
+          min={0}
+          max={100}
+          disabled={!props.enableBeatSE}
+          value={props.beatVolume}
+          onChange={props.setBeatVolume}
+        />
+      </div>
       <div>
         <span>{t("step")}</span>
         <HelpIcon>{t.rich("stepHelp", { br: () => <br /> })}</HelpIcon>
@@ -193,11 +272,12 @@ export default function TimingTab(props: Props) {
             // bpmの変更時にspeedも変える
             if (
               !props.speedChangeHere &&
-              props.currentBpm === props.currentSpeed
+              props.currentBpm === props.currentSpeed &&
+              !props.currentSpeedInterp
             ) {
-              props.setCurrentBpm(Number(v), Number(v));
+              props.setCurrentBpm(Number(v), Number(v), false);
             } else {
-              props.setCurrentBpm(Number(v), null);
+              props.setCurrentBpm(Number(v), null, false);
             }
           }}
           disabled={props.bpmChangeHere || !bpmChangeable}
@@ -230,11 +310,12 @@ export default function TimingTab(props: Props) {
               // bpmの変更時にspeedも変える
               if (
                 props.speedChangeHere &&
-                props.currentBpm === props.currentSpeed
+                props.currentBpm === props.currentSpeed &&
+                !props.currentSpeedInterp
               ) {
-                props.setCurrentBpm(Number(v), Number(v));
+                props.setCurrentBpm(Number(v), Number(v), false);
               } else {
-                props.setCurrentBpm(Number(v), null);
+                props.setCurrentBpm(Number(v), null, false);
               }
             }}
             disabled={!props.bpmChangeHere || !bpmChangeable}
@@ -265,7 +346,9 @@ export default function TimingTab(props: Props) {
                 ? props.currentSpeed.toString()
                 : ""
           }
-          updateValue={(v: string) => props.setCurrentBpm(null, Number(v))}
+          updateValue={(v: string) =>
+            props.setCurrentBpm(null, Number(v), props.currentSpeedInterp)
+          }
           disabled={props.speedChangeHere || !speedChangeable}
           isValid={speedValid}
         />
@@ -281,10 +364,31 @@ export default function TimingTab(props: Props) {
           >
             {t("changeHere")}
           </CheckBox>
+          <CheckBox
+            className="mr-1"
+            value={props.speedChangeHere && props.currentSpeedInterp}
+            onChange={() =>
+              props.setCurrentBpm(
+                null,
+                props.currentSpeed!,
+                !props.currentSpeedInterp
+              )
+            }
+            disabled={
+              !props.speedChangeHere ||
+              !speedChangeable ||
+              !props.currentSpeedIndex ||
+              props.currentSpeedIndex <= 0
+            }
+          >
+            {t("interp")}
+          </CheckBox>
           <Input
             className="w-16 mx-1"
             actualValue={props.currentSpeed?.toString() || ""}
-            updateValue={(v: string) => props.setCurrentBpm(null, Number(v))}
+            updateValue={(v: string) =>
+              props.setCurrentBpm(null, Number(v), props.currentSpeedInterp)
+            }
             disabled={!props.speedChangeHere || !speedChangeable}
             isValid={speedValid}
           />

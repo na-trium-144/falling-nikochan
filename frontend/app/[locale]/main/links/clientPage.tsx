@@ -174,6 +174,17 @@ export default function LinksPage({ locale }: { locale: string }) {
             </ExternalLink>
           </li>
           <li>
+            <span className="text-lg/6 px-0.5 mr-1">𝕏</span>
+            <ExternalLink href="https://twitter.com/@nikochan144">
+              <span className="hidden main-wide:inline">
+                {t("officialAccount")}
+              </span>
+              <span className="main-wide:hidden">
+                {t("officialAccountShort")}
+              </span>
+            </ExternalLink>
+          </li>
+          <li>
             <Github className="inline-block align-middle mr-1" />
             <span className="mr-1">GitHub:</span>
             <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">

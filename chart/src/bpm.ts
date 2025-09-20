@@ -1,4 +1,5 @@
 import { BPMChange1 } from "./legacy/chart1.js";
+import { SpeedChange13, SpeedChangeWithLua13 } from "./legacy/chart13.js";
 import { BPMChange9 } from "./legacy/chart9.js";
 import { stepCmp, stepToFloat } from "./step.js";
 
@@ -10,6 +11,8 @@ import { stepCmp, stepToFloat } from "./step.js";
 export type BPMChange = BPMChange9;
 export type BPMChangeWithLua = BPMChange9;
 
+export type SpeedChange = SpeedChange13;
+export type SpeedChangeWithLua = SpeedChangeWithLua13;
 /**
  * stepが正しいとしてtimeSecを再計算
  */

@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "12.53.0",
+  "version": "13.0.0",
   "private": true,
   "type": "module",
   "browserslist": [
@@ -22,6 +22,7 @@
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
     "react-ace": "^14.0.1",
+    "react-range": "^1.10.0",
     "react-resize-detector": "^12.3.0",
     "remote-web-worker": "^0.0.9",
     "yaml": "^2.8.1"

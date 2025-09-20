@@ -25,6 +25,7 @@ import { ChartEdit, LevelEdit } from "@falling-nikochan/chart";
 
 interface Props {
   currentTimeSecWithoutOffset: number;
+  currentTimeSec: number;
   currentNoteIndex: number;
   currentStep: Step;
   chart?: ChartEdit;
@@ -37,7 +38,9 @@ export default function TimeBar(props: Props) {
   const t = useTranslations("edit.timeBar");
   const {
     currentTimeSecWithoutOffset,
+    currentTimeSec,
     currentNoteIndex,
+    currentStep,
     chart,
     currentLevel,
     notesAll,
@@ -145,11 +148,14 @@ export default function TimeBar(props: Props) {
     currentLevel && beginSignatureIndex !== undefined
       ? getBarLength(currentLevel.signature[beginSignatureIndex])
       : undefined;
+  const currentSpeedIndex =
+    currentLevel &&
+    findBpmIndexFromStep(currentLevel.speedChanges, currentStep);
 
   return (
     <div
       className={clsx(
-        "h-6 bg-slate-200 dark:bg-stone-700 relative mt-10 mb-20 overflow-visible"
+        "h-6 bg-slate-200 dark:bg-stone-700 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
       )}
       ref={timeBarRef}
     >
@@ -248,7 +254,29 @@ export default function TimeBar(props: Props) {
                   left: timeBarPos(ch.timeSec + chart.offset),
                 }}
               >
-                <span className="absolute bottom-0">{ch.bpm}</span>
+                <span className="absolute bottom-0">
+                  {ch.bpm}
+                  {currentLevel.speedChanges[i + 1]?.interp && (
+                    <span
+                      className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+                      style={{
+                        width:
+                          timeBarPos(currentLevel.speedChanges[i + 1].timeSec) -
+                          timeBarPos(ch.timeSec),
+                      }}
+                    />
+                  )}
+                  {ch.interp && i >= 1 && (
+                    <span
+                      className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+                      style={{
+                        width:
+                          timeBarPos(ch.timeSec) -
+                          timeBarPos(currentLevel.speedChanges[i - 1].timeSec),
+                      }}
+                    />
+                  )}
+                </span>
               </span>
             )
         )}
@@ -317,6 +345,52 @@ export default function TimeBar(props: Props) {
       >
         {timeStr(currentTimeSecWithoutOffset)}
       </span>
+      {/* interpの場合現在speed */}
+      {currentLevel &&
+        currentSpeedIndex !== undefined &&
+        currentSpeedIndex + 1 < currentLevel.speedChanges.length &&
+        currentLevel.speedChanges[currentSpeedIndex + 1].interp && (
+          <>
+            <div
+              className="absolute z-10"
+              style={{
+                bottom: -3.75 * rem,
+                left: timeBarPos(currentTimeSecWithoutOffset),
+              }}
+            >
+              <span
+                className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+                style={{
+                  width:
+                    timeBarPos(
+                      currentLevel.speedChanges[currentSpeedIndex + 1].timeSec
+                    ) - timeBarPos(currentTimeSec),
+                }}
+              />
+              <span
+                className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+                style={{
+                  width:
+                    timeBarPos(currentTimeSec) -
+                    timeBarPos(
+                      currentLevel.speedChanges[currentSpeedIndex].timeSec
+                    ),
+                }}
+              />
+              <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-800/15 backdrop-blur-2xs">
+                {(
+                  currentLevel.speedChanges[currentSpeedIndex].bpm +
+                  ((currentLevel.speedChanges[currentSpeedIndex + 1].bpm -
+                    currentLevel.speedChanges[currentSpeedIndex].bpm) /
+                    (currentLevel.speedChanges[currentSpeedIndex + 1].timeSec -
+                      currentLevel.speedChanges[currentSpeedIndex].timeSec)) *
+                    (currentTimeSec -
+                      currentLevel.speedChanges[currentSpeedIndex].timeSec)
+                ).toFixed(2)}
+              </span>
+            </div>
+          </>
+        )}
       {/* にこちゃんの位置 */}
       {chart &&
         notesAll.map(

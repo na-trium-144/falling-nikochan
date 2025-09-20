@@ -33,6 +33,7 @@ export default {
     zoom: "Zoom",
     running: "Running the script...",
     cancel: "Cancel",
+    dragOver: "Drag & drop a file to load",
     timeBar: {
       bpm: "BPM",
       speed: "Speed",
@@ -109,6 +110,9 @@ export default {
         "and some notes may behave differently. " +
         "Saving will overwrite the previous chart data with the converted data. " +
         "(For details, please check the update history at the bottom of the top page.)",
+      convertingHashChange:
+        "This chart has been converted from an old format (ver.{ver}), " +
+        "and saving this will reset all users' play history for this chart.",
       shareLink: "Share link",
       copy: "Copy",
       share: "Share",
@@ -120,6 +124,7 @@ export default {
         "The saved file is not password protected.",
       saveToLocal: "Save",
       loadFromLocal: "Open file",
+      dragDropPossible: "You can also drag & drop the file to load.",
     },
     timing: {
       title: "Timing",
@@ -204,6 +209,9 @@ export default {
         "to divide it.",
       changeHere: "Change here",
       editedInCode: "Cannot be changed because it is edited in the Code tab.",
+      interp: "Smoothly",
+      se: "Tap sound",
+      beatSE: "Metronome sound",
     },
     level: {
       title: "Levels",

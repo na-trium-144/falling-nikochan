@@ -116,6 +116,24 @@ export function luaAccel(state: LuaExecResult, ...args: any[]) {
       step: { ...state.step },
       timeSec: 0,
       luaLine: args[0],
+      interp: false,
+    });
+  } else {
+    throw "invalid argument for Accel()";
+  }
+}
+export function luaAccelEnd(state: LuaExecResult, ...args: any[]) {
+  if (
+    args.length === 2 &&
+    (typeof args[0] === "number" || args[0] === null) &&
+    typeof args[1] === "number"
+  ) {
+    state.levelFreezed.speedChanges.push({
+      bpm: args[1],
+      step: { ...state.step },
+      timeSec: 0,
+      luaLine: args[0],
+      interp: true,
     });
   } else {
     throw "invalid argument for Accel()";

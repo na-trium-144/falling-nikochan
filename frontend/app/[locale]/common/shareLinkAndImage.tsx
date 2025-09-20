@@ -9,7 +9,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { titleShare, titleShareResult } from "./title";
 import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
 import { Box, modalBg } from "./box";
@@ -41,9 +40,29 @@ export function useShareLink(
     : `/og/share/${cid}?${searchParams.toString()}`;
 
   // /route/src/share.ts 内で指定しているタイトルとおなじ
-  const newTitle = resultParam
-    ? titleShareResult(t, cid, brief, date ? new Date(date) : undefined)
-    : titleShare(t, cid, brief);
+  let newTitle: string = brief?.composer
+    ? t("titleWithComposer", {
+        title: brief?.title,
+        composer: brief?.composer,
+        cid: cid || "",
+      })
+    : t("title", {
+        title: brief?.title || "",
+        cid: cid || "",
+      });
+  if (resultParam) {
+    if (date) {
+      newTitle = t("titleWithResult", {
+        date: new Date(date).toLocaleDateString(),
+        title: newTitle,
+      });
+    } else {
+      newTitle = t("titleWithResultNoDate", {
+        title: newTitle,
+      });
+    }
+  }
+  newTitle += " #fallingnikochan";
 
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
   const toClipboard = useCallback(() => {
@@ -66,9 +85,8 @@ export function useShareLink(
   }, []);
   useEffect(() => {
     const shareData = {
-      title: resultParam
-        ? titleShareResult(t, cid, brief, date ? new Date(date) : undefined)
-        : titleShare(t, cid, brief),
+      title: newTitle,
+      text: newTitle,
       url: origin + sharePath + "?" + shareParams,
     };
     if (
@@ -78,7 +96,7 @@ export function useShareLink(
     ) {
       setShareData(shareData);
     }
-  }, [origin, cid, brief, sharePath, shareParams, resultParam, t, date]);
+  }, [origin, newTitle, sharePath, shareParams]);
 
   const shareImageCtx = useShareImageModalContext();
   const openModal = useCallback(

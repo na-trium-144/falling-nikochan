@@ -132,7 +132,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
     * `:cid` - Chart ID
     * `:lvIndex` - Level index number
     * Response
-        * [Level6Play](chart/src/legacy/chart6.ts) or [Level11Play](chart/src/legacy/chart11.ts) serialized with MessagePack with status code 200
+        * [Level6Play](chart/src/legacy/chart6.ts) or [Level13Play](chart/src/legacy/chart13.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 400 (invalid cid),
             * 404 (cid or level not found),
@@ -158,7 +158,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
                 * The cookie value `pUserSalt` must be set and match with that used for the hash.
             * `pbypass=1` (only on development environment) bypass the password check
     * Response
-        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts), [Chart8Edit](chart/src/legacy/chart8.ts), [Chart9Edit](chart/src/legacy/chart9.ts) or [Chart11Edit](chart/src/legacy/chart11.ts) serialized with MessagePack with status code 200
+        * [Chart4](chart/src/legacy/chart4.ts), [Chart5](chart/src/legacy/chart5.ts), [Chart6](chart/src/legacy/chart6.ts), [Chart7](chart/src/legacy/chart7.ts), [Chart8Edit](chart/src/legacy/chart8.ts), [Chart9Edit](chart/src/legacy/chart9.ts), [Chart11Edit](chart/src/legacy/chart11.ts) or [Chart13Edit](chart/src/legacy/chart13.ts) serialized with MessagePack with status code 200
         * `{message?: string}` as JSON with status code
             * 400 (invalid cid),
             * 401 (wrong passwd),
@@ -167,14 +167,14 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
 * `POST /api/chartFile/:cid` - Post the chart file. The previous password is required. If the posted chart data has a different password, it will be used next time.
     * `:cid` - Chart ID
     * Query Parameters: same as GET
-    * Request Body: [Chart11Edit](chart/src/legacy/chart11.ts) serialized with MessagePack
+    * Request Body: [Chart13Edit](chart/src/legacy/chart13.ts) serialized with MessagePack
     * Response
         * empty response with status code 204
         * `{message?: string}` as JSON with status code
             * 400 (invalid cid),
             * 401 (wrong passwd),
             * 404 (cid not found),
-            * 409 (chart data is Chart9 or older),
+            * 409 (chart data is Chart11 or older),
             * 413 (too large),
             * 415 (invalid data),
             * or 500 (other error)
@@ -190,7 +190,7 @@ See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart 
             * or 500 (other error)
 * `GET /api/newChartFile` - returns 400.
 * `POST /api/newChartFile` - Create a new chart file.
-    * Request Body: [Chart11Edit](chart/src/legacy/chart11.ts) serialized with MessagePack
+    * Request Body: [Chart13Edit](chart/src/legacy/chart13.ts) serialized with MessagePack
     * Response
         * `{cid: string}` as JSON with status code 200
         * `{message?: string}` as JSON with status code

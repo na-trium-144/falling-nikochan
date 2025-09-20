@@ -15,8 +15,8 @@ import {
   goodSecThru,
 } from "@falling-nikochan/chart";
 import { displayNote6, Note6 } from "@falling-nikochan/chart";
-import { displayNote7, Note7 } from "@falling-nikochan/chart";
-import { SEType } from "./se";
+import { displayNote13, Note13 } from "@falling-nikochan/chart";
+import { SEType } from "@/common/se";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
@@ -27,10 +27,10 @@ export default function useGameLogic(
   playbackRate: number,
   playSE: (s: SEType) => void
 ) {
-  const [notesAll, setNotesAll] = useState<Note6[] | Note7[]>([]);
-  const notesYetDone = useRef<Note6[] | Note7[]>([]); // まだ判定していないNote
-  const notesBigYetDone = useRef<(Note6 | Note7)[]>([]); // 通常判定がおわってbig判定がまだのNote
-  const iosThruNote = useRef<Note6 | Note7 | null>(null); // iosThru判定が発生した場合の音符 (判定終了済みではあり、notesYetDoneには含まれない)
+  const [notesAll, setNotesAll] = useState<Note6[] | Note13[]>([]);
+  const notesYetDone = useRef<Note6[] | Note13[]>([]); // まだ判定していないNote
+  const notesBigYetDone = useRef<(Note6 | Note13)[]>([]); // 通常判定がおわってbig判定がまだのNote
+  const iosThruNote = useRef<Note6 | Note13 | null>(null); // iosThru判定が発生した場合の音符 (判定終了済みではあり、notesYetDoneには含まれない)
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
@@ -59,9 +59,9 @@ export default function useGameLogic(
 
   const lateTimes = useRef<number[]>([]);
 
-  const resetNotesAll = useCallback((notes: Note6[] | Note7[]) => {
+  const resetNotesAll = useCallback((notes: Note6[] | Note13[]) => {
     // note.done などを書き換えるため、元データを壊さないようdeepcopy
-    const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note7[];
+    const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note13[];
     setNotesAll(notesCopy.slice());
     notesYetDone.current = notesCopy;
     notesBigYetDone.current = [];
@@ -92,7 +92,7 @@ export default function useGameLogic(
           c.note.hitPos = (
             c.note.ver === 6
               ? displayNote6(c.note, c.note.hitTimeSec + c.late)
-              : displayNote7(c.note, c.note.hitTimeSec + c.late)
+              : displayNote13(c.note, c.note.hitTimeSec + c.late)
           )?.pos; // 位置を固定
         }
         c.note.done = c.judge;
@@ -132,7 +132,7 @@ export default function useGameLogic(
     }
   }, [getCurrentTimeSec]);
   interface HitCandidate {
-    note: Note6 | Note7;
+    note: Note6 | Note13;
     judge: 1 | 2 | 3 | 4;
     late: number;
   }

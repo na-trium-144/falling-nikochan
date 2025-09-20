@@ -1,13 +1,14 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useEffect, useState } from "react";
+import { useEffect, useState, RefObject } from "react";
 
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)
 // updatevalue: 値を更新 isValidがtrueの場合にのみ呼ばれる
 // updateinvalidvalue: isValidがfalseだった場合呼ばれる
 // isvalid: 値が有効かチェックする関数
 interface Props {
+  ref?: RefObject<HTMLInputElement | null>;
   actualValue: string;
   updateValue: (v: string) => void;
   updateInvalidValue?: (v: string) => void;
@@ -17,9 +18,10 @@ interface Props {
   className?: string;
   passwd?: boolean;
   disabled?: boolean;
+  onEnter?: (v: string) => void; // これが呼ばれた時点では値がまだ外側のstateに反映されていない場合がある
 }
 export default function Input(props: Props) {
-  const [value, setValue] = useState<string>("");
+  const [value, setValue] = useState<string>(props.actualValue);
   const [focus, setFocus] = useState<boolean>(false);
   const [valueSetTimer, setValueSetTimer] = useState<ReturnType<
     typeof setTimeout
@@ -32,6 +34,7 @@ export default function Input(props: Props) {
 
   return (
     <input
+      ref={props.ref}
       type={props.passwd ? "password" : "text"}
       className={clsx(
         "mx-1 px-1 font-main-ui text-base",
@@ -43,7 +46,21 @@ export default function Input(props: Props) {
         props.className
       )}
       value={value}
-      onKeyDown={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (
+          e.key === "Enter" &&
+          props.onEnter &&
+          (!props.isValid || props.isValid(value))
+        ) {
+          if (valueSetTimer !== null) {
+            clearTimeout(valueSetTimer);
+          }
+          setValueSetTimer(null);
+          props.updateValue(value);
+          props.onEnter(value);
+        }
+      }}
       onKeyUp={(e) => e.stopPropagation()}
       onChange={(e) => {
         setValue(e.target.value);

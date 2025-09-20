@@ -38,6 +38,7 @@ export function toResultParams(
     judgeCount: data.judgeCount,
     bigCount: data.bigCount !== undefined ? data.bigCount : false,
     inputType: data.inputType !== undefined ? data.inputType : null,
+    playbackRate4: 4, // x1以外の記録は保存されないので
   };
 }
 

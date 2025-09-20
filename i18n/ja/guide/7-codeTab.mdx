@@ -22,6 +22,8 @@ import { CautionIcon } from "@/common/mdxIcons";
     - a は0以上の整数、 b は1以上の整数にしてください。
   - `BPM(bpmの値)`: BPMを変更します。正の数値にしてください。
   - `Accel(速度の値)`: 速度を変更します。0や負の値も使えます。
+  - `AccelBegin(速度の値)` 〜 `AccelEnd(速度の値)`: なめらかな速度変化をします。
+    - (仕様上 `Accel` と `AccelBegin` は同一です。 `AccelEnd` の前の最後の `Accel` または `AccelBegin` から変化を開始します。)
   - `Beat(拍子)` または `Beat(拍子, a, b)`: 拍子を変更します。
     - 例えば 4/4 拍子なら `{{4, 4, 4, 4}}`、
     7/8 拍子なら `{{4, 4, 4, 8}}`、
