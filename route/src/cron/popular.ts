@@ -7,6 +7,7 @@ import { postPopular } from "./twitter.js";
 
 export async function reportPopularCharts(env: Bindings) {
   const client = new MongoClient(env.MONGODB_URI);
+  let popularBriefs: ChartBrief[];
   try {
     await client.connect();
     const db = client.db("nikochan");
@@ -25,7 +26,7 @@ export async function reportPopularCharts(env: Bindings) {
       return;
     } else {
       const popularCids: CidCount[] = await getPopularCharts(db);
-      const popularBriefs: ChartBrief[] = await Promise.all(
+      popularBriefs = await Promise.all(
         popularCids.map(async ({ cid }) =>
           getChartEntryCompressed(db, cid, null).then((entry) =>
             entryToBrief(entry)
