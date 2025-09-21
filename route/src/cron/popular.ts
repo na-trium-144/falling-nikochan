@@ -32,18 +32,28 @@ export async function reportPopularCharts(env: Bindings) {
           )
         )
       );
-      const result = await postPopular(env, popularBriefs.slice(0, 6));
-      if (result !== "error") {
-        await db
-          .collection("meta")
-          .updateOne(
-            {},
-            { $set: { popularReportedAt: Date.now() } },
-            { upsert: true }
-          );
-      }
     }
   } finally {
+    // Close the initial MongoClient before calling postPopular
     await client.close();
+  }
+
+  const result = await postPopular(env, popularBriefs.slice(0, 6));
+  if (result !== "error") {
+    // Create a new MongoClient for the update operation
+    const newClient = new MongoClient(env.MONGODB_URI);
+    try {
+      await newClient.connect();
+      const newDb = newClient.db("nikochan");
+      await newDb
+        .collection("meta")
+        .updateOne(
+          {},
+          { $set: { popularReportedAt: Date.now() } },
+          { upsert: true }
+        );
+    } finally {
+      await newClient.close();
+    }
   }
 }

@@ -9,13 +9,16 @@ import { postChart } from "./twitter.js";
 
 export async function checkNewCharts(env: Bindings) {
   const client = new MongoClient(env.MONGODB_URI);
+  let newCharts: ChartEntryCompressed[] = [];
+  let updatedCharts: ChartEntryCompressed[] = [];
+  const now = Date.now();
+
   try {
     await client.connect();
     const db = client.db("nikochan");
-    const now = Date.now();
 
-    // まだ通知したことがなく、今から24h以内に更新されており、更新から15分以上経過している
-    const newCharts = await Promise.all(
+    // Fetch new charts
+    newCharts = await Promise.all(
       (
         await db
           .collection<ChartEntryCompressed>("chart")
@@ -32,8 +35,8 @@ export async function checkNewCharts(env: Bindings) {
       ).map((compressed) => unzipEntry(compressed))
     );
 
-    // 最後の通知から12h以上後に更新されており、更新から15分以上経過している
-    const updatedCharts = await Promise.all(
+    // Fetch updated charts
+    updatedCharts = await Promise.all(
       (
         await db
           .collection<ChartEntryCompressed>("chart")
@@ -53,30 +56,50 @@ export async function checkNewCharts(env: Bindings) {
         )
         .map((compressed) => unzipEntry(compressed))
     );
-
-    for (const entry of newCharts) {
-      console.log(`New chart found: ${entry.cid}`);
-      const brief = entryToBrief(entry);
-      const postResult = await postChart(env, entry.cid, brief, "new");
-      console.log(postResult);
-      if (postResult !== "error") {
-        await db
-          .collection("chart")
-          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: now } });
-      }
-    }
-    for (const entry of updatedCharts) {
-      console.log(`Updated chart found: ${entry.cid}`);
-      const brief = entryToBrief(entry);
-      const postResult = await postChart(env, entry.cid, brief, "update");
-      console.log(postResult);
-      if (postResult !== "error") {
-        await db
-          .collection("chart")
-          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: now } });
-      }
-    }
   } finally {
+    // Close the initial client
     await client.close();
+  }
+
+  // Process new charts
+  for (const entry of newCharts) {
+    console.log(`New chart found: ${entry.cid}`);
+    const brief = entryToBrief(entry);
+    const postResult = await postChart(env, entry.cid, brief, "new");
+    console.log(postResult);
+
+    if (postResult !== "error") {
+      const newClient = new MongoClient(env.MONGODB_URI);
+      try {
+        await newClient.connect();
+        const db = newClient.db("nikochan");
+        await db
+          .collection("chart")
+          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: now } });
+      } finally {
+        await newClient.close();
+      }
+    }
+  }
+
+  // Process updated charts
+  for (const entry of updatedCharts) {
+    console.log(`Updated chart found: ${entry.cid}`);
+    const brief = entryToBrief(entry);
+    const postResult = await postChart(env, entry.cid, brief, "update");
+    console.log(postResult);
+
+    if (postResult !== "error") {
+      const newClient = new MongoClient(env.MONGODB_URI);
+      try {
+        await newClient.connect();
+        const db = newClient.db("nikochan");
+        await db
+          .collection("chart")
+          .updateOne({ cid: entry.cid }, { $set: { notifiedAt: now } });
+      } finally {
+        await newClient.close();
+      }
+    }
   }
 }
