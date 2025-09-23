@@ -12,7 +12,7 @@ For more information, play, and chart creation, please visit the [Falling Nikoch
 >
 > 遊び方などの説明、プレイ、譜面作成 は、 [Falling Nikochan トップページ](https://nikochan.utcode.net) からどうぞ。
 
-YouTube: [@nikochan144](http://www.youtube.com/@nikochan144)
+YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@nikochan144](https://x.com/nikochan144)
 
 [<img src="https://github.com/na-trium-144/falling-nikochan/blob/main/.github/screenshot.jpg?raw=true" width=960 />](https://www.youtube.com/watch?v=reUvjq5TRus)
 
