@@ -37,7 +37,7 @@ const newChartFileApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         "Returns the chart ID (cid) of the newly created chart. " +
         `This endpoint is rate limited to one request per ${rateLimitMin} minutes. `,
       requestBody: {
-        description: "Chart data in MessagePack format",
+        description: "Chart data in MessagePack format. See also response type of GET /api/chartFile.",
         required: true,
         content: {
           "application/vnd.msgpack": {

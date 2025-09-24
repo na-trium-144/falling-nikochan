@@ -8,7 +8,7 @@ import { MongoClient } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
 /**
@@ -21,30 +21,6 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       "Generate a unique hash of the password to be used when accessing the chart. " +
       "The correct password for the chart is required. " +
       "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
-    parameters: [
-      {
-        name: "cid",
-        in: "path",
-        required: true,
-        schema: CidSchema(),
-        description: "The chart ID",
-      },
-      {
-        name: "p",
-        in: "query",
-        required: true,
-        schema: v.pipe(v.string(), v.minLength(1)),
-        description: "The password in plain text",
-      },
-      {
-        name: "pUserSalt",
-        in: "cookie",
-        required: false,
-        schema: v.string(),
-        description:
-          "The salt stored in a cookie. If not present, a new one will be generated and set in the response cookie.",
-      },
-    ],
     responses: {
       200: {
         description: "sha256 hash of (cid + passwd + hashKey)",
@@ -87,12 +63,12 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
+  validator("param", v.object({ cid: CidSchema() })),
+  validator("query", v.object({ p: v.pipe(v.string(), v.minLength(1)) })),
+  validator("cookie", v.object({ pUserSalt: v.optional(v.string()) })),
   async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { p } = v.parse(
-      v.object({ p: v.pipe(v.string(), v.minLength(1)) }),
-      c.req.query()
-    );
+    const { cid } = c.req.valid("param");
+    const { p } = c.req.valid("query");
     let pUserSalt: string;
     const newUserSalt = () =>
       randomBytes(16)

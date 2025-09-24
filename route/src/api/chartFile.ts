@@ -27,7 +27,7 @@ import { getCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { getYTDataEntry } from "./ytData.js";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
@@ -56,101 +56,64 @@ interface ChartFileAppVars {
   db: Db;
   pSecretSalt: string;
 }
-const querySchema = {
-  p: v.pipe(v.string(), v.minLength(1)),
-  ph: HashSchema(),
-  pbypass: v.string(),
-};
-const parametersSchema = [
-  {
-    name: "cid",
-    in: "path",
-    required: true,
-    schema: CidSchema(),
-    description: "The chart ID",
-  },
-  {
-    name: "p",
-    in: "query",
-    required: false,
-    schema: querySchema.p,
-    description: "The password for the chart.",
-  },
-  {
-    name: "ph",
-    in: "query",
-    required: false,
-    schema: querySchema.ph,
-    description:
-      "The password hash for the chart, obtained from /api/hashPasswd.",
-  },
-  ...(process.env.API_ENV === "development"
-    ? [
-        {
-          name: "pbypass",
-          in: "query",
-          required: false,
-          schema: querySchema.pbypass,
-          description:
-            "Bypass password authentication if not empty (development environment only).",
-        },
-      ]
-    : []),
-  {
-    name: "pUserSalt",
-    in: "cookie",
-    required: false,
-    schema: v.pipe(v.string(), v.minLength(1)),
-    description:
-      "The user-specific salt for password hashing, obtained from /api/hashPasswd.",
-  },
-];
 const chartFileApp = new Hono<{
   Bindings: Bindings;
   Variables: ChartFileAppVars;
 }>({ strict: false })
-  .use("/:cid", async (c, next) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { p, ph, pbypass } = v.parse(
+  .on(
+    ["GET", "POST", "DELETE"],
+    "/:cid",
+    validator("param", v.object({ cid: CidSchema() })),
+    validator(
+      "query",
       v.object({
-        p: v.optional(querySchema.p),
-        ph: v.optional(querySchema.ph),
-        pbypass: v.optional(querySchema.pbypass),
-      }),
-      c.req.query()
-    );
-    const ip = String(
-      c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
-    ); // nullもundefinedも文字列にしちゃう
-    const v9UserSalt =
-      env(c).API_ENV === "development"
-        ? getCookie(c, "pUserSalt")
-        : getCookie(c, "pUserSalt", "host");
-    const bypass = !!pbypass && env(c).API_ENV === "development";
-    const pSecretSalt = secretSalt(env(c));
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      let { entry, chart } = await getChartEntry(db, cid, {
-        bypass,
-        rawPasswd: p,
-        v9PasswdHash: ph,
-        v9UserSalt,
-        pSecretSalt,
-      });
-      // 必要なデータをコンテキストに保存
-      c.set("cid", cid);
-      c.set("ip", ip);
-      c.set("entry", entry);
-      c.set("chart", chart);
-      c.set("db", db);
-      c.set("pSecretSalt", pSecretSalt);
-      await next();
-    } finally {
-      await client.close();
+        p: v.pipe(v.string(), v.minLength(1)),
+        ph: HashSchema(),
+        pbypass: v.string(),
+      })
+    ),
+    validator(
+      "cookie",
+      v.object({
+        pUserSalt: v.optional(v.string()),
+      })
+    ),
+    async (c, next) => {
+      const { cid } = c.req.valid("param");
+      const { p, ph, pbypass } = c.req.valid("query");
+      const ip = String(
+        c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim()
+      ); // nullもundefinedも文字列にしちゃう
+      const v9UserSalt =
+        env(c).API_ENV === "development"
+          ? getCookie(c, "pUserSalt")
+          : getCookie(c, "pUserSalt", "host");
+      const bypass = !!pbypass && env(c).API_ENV === "development";
+      const pSecretSalt = secretSalt(env(c));
+      const client = new MongoClient(env(c).MONGODB_URI);
+      try {
+        await client.connect();
+        const db = client.db("nikochan");
+        let { entry, chart } = await getChartEntry(db, cid, {
+          bypass,
+          rawPasswd: p,
+          v9PasswdHash: ph,
+          v9UserSalt,
+          pSecretSalt,
+        });
+        // 必要なデータをコンテキストに保存
+        c.set("cid", cid);
+        c.set("ip", ip);
+        c.set("entry", entry);
+        c.set("chart", chart);
+        c.set("db", db);
+        c.set("pSecretSalt", pSecretSalt);
+        await next();
+      } finally {
+        await client.close();
+      }
     }
-  })
+  )
   .get(
     "/:cid",
     describeRoute({
@@ -160,7 +123,6 @@ const chartFileApp = new Hono<{
         `while this documentation only describes Chart${currentChartVer}Edit format. ` +
         `The file format used by the chart editor is a subset of Chart${currentChartVer}Edit, ` +
         `so it is possible to import API data into the chart editor, but not the other way around.`,
-      parameters: parametersSchema,
       responses: {
         200: {
           description: "Successful response",
@@ -208,7 +170,6 @@ const chartFileApp = new Hono<{
     describeRoute({
       description:
         "Soft delete a chart. The chart will be marked as deleted and won't appear in searches or latest/popular lists. Requires a password.",
-      parameters: parametersSchema,
       responses: {
         204: {
           description: "No content, chart deleted successfully",
@@ -261,12 +222,12 @@ const chartFileApp = new Hono<{
         "Update a chart file with new data in MessagePack format. " +
         `The chart data format must be the latest format, Chart${currentChartVer}Edit. ` +
         "The previous password is required. If the posted chart data has a different password, it will be used next time.",
-      parameters: parametersSchema,
       requestBody: {
-        description: "Chart data in MessagePack format",
+        description: "Chart data in MessagePack format. See also GET response.",
         required: true,
         content: {
           "application/vnd.msgpack": {
+            // ↓scalarのUIに現れない...
             schema: ChartEditSchema13(),
           },
         },

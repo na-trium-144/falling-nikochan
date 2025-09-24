@@ -5,21 +5,13 @@ import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartBriefSchema, CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
 const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   describeRoute({
-    parameters: [
-      {
-        name: "cid",
-        in: "path",
-        required: true,
-        schema: CidSchema(),
-        description: "The chart ID",
-      },
-    ],
+    description: "Get brief information about the chart.",
     responses: {
       200: {
         description: "Successful response",
@@ -47,8 +39,9 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
+  validator("param", v.object({ cid: CidSchema() })),
   async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
+    const { cid } = c.req.valid("param");
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();

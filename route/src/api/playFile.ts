@@ -16,7 +16,7 @@ import {
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
 const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
@@ -26,22 +26,6 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
       "Note that the level data is either in Chart6Play or Chart13Play format, " +
       `while this documentation only describes Chart${currentChartVer}Play format. `,
-    parameters: [
-      {
-        name: "cid",
-        in: "path",
-        required: true,
-        schema: CidSchema(),
-        description: "CID of the chart.",
-      },
-      {
-        name: "lvIndex",
-        in: "path",
-        required: true,
-        schema: { type: "string", pattern: "^[0-9]+$" },
-        description: "Level index (0-based) of the chart.",
-      },
-    ],
     responses: {
       200: {
         description: "chart file in MessagePack format.",
@@ -71,14 +55,15 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
+  validator(
+    "param",
+    v.object({
+      cid: CidSchema(),
+      lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
+    })
+  ),
   async (c) => {
-    const { cid, lvIndex } = v.parse(
-      v.object({
-        cid: CidSchema(),
-        lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
-      }),
-      c.req.param()
-    );
+    const { cid, lvIndex } = c.req.valid("param");
 
     const client = new MongoClient(env(c).MONGODB_URI);
     try {

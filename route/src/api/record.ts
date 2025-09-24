@@ -9,7 +9,7 @@ import {
 import * as v from "valibot";
 import { MongoClient } from "mongodb";
 import { env } from "hono/adapter";
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
 export interface PlayRecordEntry {
@@ -28,15 +28,6 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     "/:cid",
     describeRoute({
       description: "Get play record summary for the chart.",
-      parameters: [
-        {
-          name: "cid",
-          in: "path",
-          required: true,
-          schema: CidSchema(),
-          description: "The chart id",
-        },
-      ],
       responses: {
         200: {
           description: "Successful response",
@@ -64,8 +55,9 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         },
       },
     }),
+    validator("param", v.object({ cid: CidSchema() })),
     async (c) => {
-      const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
+      const { cid } = c.req.valid("param");
       const client = new MongoClient(env(c).MONGODB_URI);
       try {
         await client.connect();
@@ -124,24 +116,6 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     "/:cid",
     describeRoute({
       description: "Post a play record for a single play of the chart.",
-      parameters: [
-        {
-          name: "cid",
-          in: "path",
-          required: true,
-          schema: CidSchema(),
-          description: "The chart id",
-        },
-      ],
-      requestBody: {
-        description: "The play record",
-        required: true,
-        content: {
-          "application/json": {
-            schema: RecordPostSchema(),
-          },
-        },
-      },
       responses: {
         204: {
           description: "No content for successful response",
@@ -164,12 +138,12 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
         },
       },
     }),
+    validator("param", v.object({ cid: CidSchema() })),
+    validator("json", RecordPostSchema()),
     async (c) => {
-      const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-      const { lvHash, auto, score, fc, fb, factor, editing } = v.parse(
-        RecordPostSchema(),
-        await c.req.json()
-      );
+      const { cid } = c.req.valid("param");
+      const { lvHash, auto, score, fc, fb, factor, editing } =
+        c.req.valid("json");
 
       const client = new MongoClient(env(c).MONGODB_URI);
       try {
