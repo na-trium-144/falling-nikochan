@@ -131,6 +131,9 @@ export default {
       officialChannelShort: "公式チャンネル",
       officialAccount: "Falling Nikochan 公式アカウント (@nikochan144)",
       officialAccountShort: "公式アカウント",
+      apiReference: "Falling Nikochan API リファレンス",
+      apiReferenceShort: "API リファレンス",
+      aboutUTCode: "ut.code(); について",
     },
     festival:
       "ut.code(); 第{num}回{kind, select, mf {五月祭} kf {駒場祭} other {other}}ウェブサイトに戻る",

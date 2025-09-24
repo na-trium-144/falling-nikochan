@@ -129,6 +129,9 @@ export default {
       officialChannelShort: "Official Channel",
       officialAccount: "Falling Nikochan Official Account (@nikochan144)",
       officialAccountShort: "Official Account",
+      apiReference: "Falling Nikochan API Reference",
+      apiReferenceShort: "API Reference",
+      aboutUTCode: "About ut.code();",
     },
     festival:
       "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +

@@ -9,6 +9,7 @@ import { text } from "node:stream/consumers";
 
 const staticSitemapItems: SitemapItemLoose[] = [
   { url: "/", priority: 1 },
+  { url: "/api" },
   // {url: "/edit", priority: 0},
   { url: "/main/about/1" },
   { url: "/main/about/2" },
