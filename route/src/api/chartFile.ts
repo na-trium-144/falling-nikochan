@@ -67,9 +67,9 @@ const chartFileApp = new Hono<{
     validator(
       "query",
       v.object({
-        p: v.pipe(v.string(), v.minLength(1)),
-        ph: HashSchema(),
-        pbypass: v.string(),
+        p: v.optional(v.pipe(v.string(), v.minLength(1))),
+        ph: v.optional(HashSchema()),
+        pbypass: v.optional(v.string()),
       })
     ),
     validator(
