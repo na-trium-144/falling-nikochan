@@ -23,7 +23,8 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
     responses: {
       200: {
-        description: "sha256(sha256(cid + passwd + secretSalt + pRandomSalt) + pUserSalt)",
+        description:
+          "sha256(sha256(cid + passwd + secretSalt + pRandomSalt) + pUserSalt)",
         content: {
           "text/plain": {
             schema: v.string(),
