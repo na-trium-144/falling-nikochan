@@ -8,18 +8,68 @@ import { MongoClient } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
+import { describeRoute, resolver, validator } from "hono-openapi";
+import { errorLiteral } from "../error.js";
 
 /**
  * chartFile のコメントを参照
  */
 const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
+  describeRoute({
+    description:
+      "Generate a unique hash of the password to be used when accessing the chart. " +
+      "The correct password for the chart is required. " +
+      "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
+    responses: {
+      200: {
+        description:
+          "sha256(sha256(cid + passwd + secretSalt + pRandomSalt) + pUserSalt)",
+        content: {
+          "text/plain": {
+            schema: v.string(),
+          },
+        },
+        headers: {
+          "Set-Cookie": {
+            description:
+              "Sets the pUserSalt cookie if it was not present in the request.",
+            schema: v.string(),
+          },
+        },
+      },
+      400: {
+        description: "invalid chart id or password not specified",
+        content: {
+          "application/json": {
+            schema: resolver(v.object({ message: v.string() })),
+          },
+        },
+      },
+      401: {
+        description: "wrong password",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("badPassword")),
+          },
+        },
+      },
+      404: {
+        description: "chart id not found",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("chartIdNotFound")),
+          },
+        },
+      },
+    },
+  }),
+  validator("param", v.object({ cid: CidSchema() })),
+  validator("query", v.object({ p: v.pipe(v.string(), v.minLength(1)) })),
+  validator("cookie", v.object({ pUserSalt: v.optional(v.string()) })),
   async (c) => {
-    const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
-    const { p } = v.parse(
-      v.object({ p: v.pipe(v.string(), v.minLength(1)) }),
-      c.req.query()
-    );
+    const { cid } = c.req.valid("param");
+    const { p } = c.req.valid("query");
     let pUserSalt: string;
     const newUserSalt = () =>
       randomBytes(16)

@@ -44,6 +44,7 @@ const config = {
       "@falling-nikochan/i18n/dynamic.js":
         "@falling-nikochan/i18n/staticMin.js",
       "./api/app.js": false,
+      "./api/brief.js": false,
       "./og/app.js": false,
       "./cron/app.js": false,
       "./cron/latest.js": false,

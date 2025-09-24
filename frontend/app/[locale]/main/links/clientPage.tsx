@@ -17,6 +17,8 @@ import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useState } from "react";
 import Mail from "@icon-park/react/lib/icons/Mail";
 import { FestivalLink, useFestival } from "@/common/festival";
+import Code from "@icon-park/react/lib/icons/Code";
+import FormOne from "@icon-park/react/lib/icons/FormOne";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
@@ -142,6 +144,7 @@ export default function LinksPage({ locale }: { locale: string }) {
         <h3 className="mb-2 text-xl font-bold font-title">{t("title")}</h3>
         <ul className="list-disc ml-6 space-y-1 ">
           <li>
+            <FormOne className="inline-block align-middle mr-1" />
             <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
               {t("contactForm")}
             </ExternalLink>
@@ -193,7 +196,18 @@ export default function LinksPage({ locale }: { locale: string }) {
             </ExternalLink>
           </li>
           <li>
-            <ExternalLink href="https://utcode.net">ut.code();</ExternalLink>
+            <Code className="inline-block align-middle mr-1" />
+            <ExternalLink href="/api" forceColor>
+              <span className="hidden main-wide:inline">
+                {t("apiReference")}
+              </span>
+              <span className="main-wide:hidden">{t("apiReferenceShort")}</span>
+            </ExternalLink>
+          </li>
+          <li>
+            <ExternalLink href="https://utcode.net">
+              {t("aboutUTCode")}
+            </ExternalLink>
           </li>
           {fes.num && (
             <li>

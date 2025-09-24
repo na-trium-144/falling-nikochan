@@ -4,6 +4,7 @@ import { ValiError } from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
+import * as v from "valibot";
 
 export function notFound(): Response {
   throw new HTTPException(404);
@@ -72,4 +73,14 @@ async function errorResponse(
     )
     .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
+}
+
+export async function errorLiteral(...message: string[]) {
+  const t = await getTranslations("en", "error");
+  if (message.some((m) => !t.has("api." + m))) {
+    throw new Error("Unknown error message key in " + message);
+  }
+  return v.object({
+    message: v.union([...message.map((m) => v.literal(m))]),
+  });
 }

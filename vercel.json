@@ -20,6 +20,10 @@
       "destination": "/api"
     },
     {
+      "source": "/api",
+      "destination": "/api"
+    },
+    {
       "source": "/share/([0-9]+.*)",
       "destination": "/api"
     },

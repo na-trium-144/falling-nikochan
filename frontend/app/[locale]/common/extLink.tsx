@@ -9,6 +9,7 @@ import EfferentThree from "@icon-park/react/lib/icons/EfferentThree";
 interface Props {
   className?: string;
   noColor?: boolean;
+  forceColor?: boolean;
   href?: string;
   children?: React.ReactNode;
   icon?: React.ReactNode;
@@ -58,7 +59,7 @@ export function ExternalLink(props: Props) {
       <a
         className={clsx(
           "relative inline-block w-max",
-          props.href?.startsWith("/")
+          props.href?.startsWith("/") && !props.forceColor
             ? linkStyle1
             : props.noColor
               ? linkStyle2

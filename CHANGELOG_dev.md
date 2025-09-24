@@ -1,3 +1,9 @@
+## ver. 13.1 - 2025/09/25  [#773](https://github.com/na-trium-144/falling-nikochan/pull/773)
+
+* OpenAPIのAPI定義を追加
+* queryパラメータなどのvalidation処理をhono-openapiのvalidatorと統合
+* ScalarによるAPIドキュメントを追加
+
 ## ver. 13.0 - 2025/09/21 [#769](https://github.com/na-trium-144/falling-nikochan/pull/769),[#770](https://github.com/na-trium-144/falling-nikochan/pull/770), [#771](https://github.com/na-trium-144/falling-nikochan/pull/771), [#772](https://github.com/na-trium-144/falling-nikochan/pull/772)
 
 * 編集画面にプレイ時と同様の音符のタップ音 & メトロノーム音を追加

@@ -11,20 +11,59 @@ import {
   Level13Play,
   convertToPlay13,
   convertTo13,
+  LevelPlaySchema13,
+  currentChartVer,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
+import { describeRoute, resolver, validator } from "hono-openapi";
+import { errorLiteral } from "../error.js";
 
 const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
+  describeRoute({
+    description:
+      "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
+      "Note that the level data is either in Chart6Play or Chart13Play format, " +
+      `while this documentation only describes Chart${currentChartVer}Play format. `,
+    responses: {
+      200: {
+        description: "chart file in MessagePack format.",
+        content: {
+          "application/vnd.msgpack": {
+            schema: resolver(LevelPlaySchema13()),
+          },
+        },
+      },
+      400: {
+        description: "invalid chart id",
+        content: {
+          "application/json": {
+            schema: resolver(v.object({ message: v.string() })),
+          },
+        },
+      },
+      404: {
+        description: "chart id not found or level index out of range",
+        content: {
+          "application/json": {
+            schema: resolver(
+              await errorLiteral("chartIdNotFound", "levelNotFound")
+            ),
+          },
+        },
+      },
+    },
+  }),
+  validator(
+    "param",
+    v.object({
+      cid: CidSchema(),
+      lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
+    })
+  ),
   async (c) => {
-    const { cid, lvIndex } = v.parse(
-      v.object({
-        cid: CidSchema(),
-        lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
-      }),
-      c.req.param()
-    );
+    const { cid, lvIndex } = c.req.valid("param");
 
     const client = new MongoClient(env(c).MONGODB_URI);
     try {

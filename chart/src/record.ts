@@ -2,15 +2,19 @@ import * as v from "valibot";
 import { HashSchema } from "./chart.js";
 
 // GET /api/record -> RecordGetSummary[]
-export interface RecordGetSummary {
-  lvHash: string;
-  countAuto: number;
-  // excluding auto play:
-  count: number;
-  countFC: number;
-  countFB: number;
-  histogram: number[]; // number[13]
-}
+export const RecordGetSummarySchema = () =>
+  v.object({
+    lvHash: HashSchema(),
+    countAuto: v.number(),
+    // excluding auto play:
+    count: v.number(),
+    countFC: v.number(),
+    countFB: v.number(),
+    histogram: v.array(v.number()), // number[13]
+  });
+export type RecordGetSummary = v.InferOutput<
+  ReturnType<typeof RecordGetSummarySchema>
+>;
 
 export const RecordPostSchema = () =>
   v.object({
