@@ -74,7 +74,7 @@ export const ChartBriefSchema = () =>
     title: v.string(),
     composer: v.string(),
     chartCreator: v.string(),
-    updatedAt: v.number(), // <- Date.getTime()
+    updatedAt: v.pipe(v.number(), v.description("value from Date.getTime()")),
     published: v.boolean(),
     locale: v.string(),
     levels: v.array(

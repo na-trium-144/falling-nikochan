@@ -65,7 +65,12 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     },
   }),
   validator("param", v.object({ cid: CidSchema() })),
-  validator("query", v.object({ p: v.pipe(v.string(), v.minLength(1)) })),
+  validator(
+    "query",
+    v.object({
+      p: v.pipe(v.string(), v.minLength(1), v.description("plain password")),
+    })
+  ),
   validator("cookie", v.object({ pUserSalt: v.optional(v.string()) })),
   async (c) => {
     const { cid } = c.req.valid("param");
