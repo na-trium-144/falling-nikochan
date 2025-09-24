@@ -8,12 +8,85 @@ import { MongoClient } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
+import { describeRoute, resolver } from "hono-openapi";
+import { errorLiteral } from "../error.js";
 
 /**
  * chartFile のコメントを参照
  */
 const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
+  describeRoute({
+    description:
+      "Generate a unique hash of the password to be used when accessing the chart. " +
+      "The correct password for the chart is required. " +
+      "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
+    parameters: [
+      {
+        name: "cid",
+        in: "path",
+        required: true,
+        schema: CidSchema(),
+        description: "The chart ID",
+      },
+      {
+        name: "p",
+        in: "query",
+        required: true,
+        schema: v.pipe(v.string(), v.minLength(1)),
+        description: "The password in plain text",
+      },
+      {
+        name: "pUserSalt",
+        in: "cookie",
+        required: false,
+        schema: v.string(),
+        description:
+          "The salt stored in a cookie. If not present, a new one will be generated and set in the response cookie.",
+      },
+    ],
+    responses: {
+      200: {
+        description: "sha256 hash of (cid + passwd + hashKey)",
+        content: {
+          "text/plain": {
+            schema: v.string(),
+          },
+        },
+        headers: {
+          "Set-Cookie": {
+            description:
+              "Sets the pUserSalt cookie if it was not present in the request.",
+            schema: v.string(),
+          },
+        },
+      },
+      400: {
+        description: "invalid chart id or password not specified",
+        content: {
+          "application/json": {
+            schema: resolver(v.object({ message: v.string() })),
+          },
+        },
+      },
+      401: {
+        description: "wrong password",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("badPassword")),
+          },
+        },
+      },
+      404: {
+        description: "chart id not found",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("chartIdNotFound")),
+          },
+        },
+      },
+    },
+  }),
   async (c) => {
     const { cid } = v.parse(v.object({ cid: CidSchema() }), c.req.param());
     const { p } = v.parse(

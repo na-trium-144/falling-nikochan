@@ -5,9 +5,35 @@ import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
 import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
+import { describeRoute, resolver } from "hono-openapi";
 
 const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  describeRoute({
+    description:
+      "Search charts by text in the title, artist, tags, and author name. " +
+      "Multiple words are treated as AND condition. " +
+      "The search is case-insensitive and ignores spaces and special characters.",
+    parameters: [
+      {
+        name: "q",
+        in: "query",
+        required: true,
+        schema: { type: "string" },
+        description: "Search query",
+      },
+    ],
+    responses: {
+      200: {
+        description: "Successful response",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(v.object({ cid: v.string() }))),
+          },
+        },
+      },
+    },
+  }),
   async (c) => {
     const { q } = v.parse(
       v.object({

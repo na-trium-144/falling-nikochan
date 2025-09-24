@@ -5,11 +5,15 @@ import { env } from "hono/adapter";
 import { ChartEntryCompressed, ChartLevelBrief } from "./chart.js";
 import { PlayRecordEntry } from "./record.js";
 import { numLatest, popularDays } from "@falling-nikochan/chart";
+import { describeRoute, resolver } from "hono-openapi";
+import * as v from "valibot";
 
-export interface CidCount {
-  cid: string;
-  count: number;
-}
+const CidCountSchema = v.object({
+  cid: v.string(),
+  count: v.number(),
+});
+export type CidCount = v.InferOutput<typeof CidCountSchema>;
+
 export async function getPopularCharts(db: Db): Promise<CidCount[]> {
   const records = db.collection<PlayRecordEntry>("playRecord").find({
     playedAt: { $gt: Date.now() - 1000 * 60 * 60 * 24 * popularDays },
@@ -48,6 +52,21 @@ export async function getPopularCharts(db: Db): Promise<CidCount[]> {
 
 const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  describeRoute({
+    description:
+      `Get the list of popular charts in the last ${popularDays} days. ` +
+      `Returns up to ${numLatest} charts.`,
+    responses: {
+      200: {
+        description: "Successful response",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(CidCountSchema)),
+          },
+        },
+      },
+    },
+  }),
   async (c) => {
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
