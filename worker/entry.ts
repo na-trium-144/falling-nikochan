@@ -277,6 +277,7 @@ const app = new Hono({ strict: false })
   )
   // return fetch(...) だと、30xリダイレクトを含む場合エラー
   .all("/api/*", (c) => fetch(c.req.raw))
+  .all("/api", (c) => fetch(c.req.raw))
   .get("/og/*", async (c) => {
     const res = await fetch(c.req.url, {
       credentials: "omit",
