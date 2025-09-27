@@ -127,7 +127,7 @@ export async function postPopular(
   briefs: ChartBrief[]
 ): Promise<"ok" | "error" | "skipped"> {
   const messageHeader =
-    `#fallingnikochan 人気の譜面ランキング ` +
+    `アクセス数の多い譜面ランキング ` +
     `${new Date().getUTCFullYear()}/${new Date().getUTCMonth() + 1}/${new Date().getUTCDate()}\n\n`;
   const maxEntryLen = Math.floor(
     (280 - twitterText.parseTweet(messageHeader).weightedLength) / briefs.length
