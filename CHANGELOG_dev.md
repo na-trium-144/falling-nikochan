@@ -1,3 +1,7 @@
+## ver. 13.4 - 2025/09/28 [#776](https://github.com/na-trium-144/falling-nikochan/pull/776)
+
+* モバイル表示でも更新情報未読マークを追加
+
 ## ver. 13.3 - 2025/09/28 [#775](https://github.com/na-trium-144/falling-nikochan/pull/775)
 
 * プレイ時に使用する時刻をyoutubeから取るのではなくperformance.now()基準にする
