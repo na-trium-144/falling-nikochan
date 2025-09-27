@@ -1,4 +1,8 @@
-## ver. 13.1 - 2025/09/25  [#773](https://github.com/na-trium-144/falling-nikochan/pull/773)
+## ver. 13.3 - 2025/09/28 [#775](https://github.com/na-trium-144/falling-nikochan/pull/775)
+
+* プレイ時に使用する時刻をyoutubeから取るのではなくperformance.now()基準にする
+
+## ver. 13.1 - 2025/09/25 [#773](https://github.com/na-trium-144/falling-nikochan/pull/773)
 
 * OpenAPIのAPI定義を追加
 * queryパラメータなどのvalidation処理をhono-openapiのvalidatorと統合
