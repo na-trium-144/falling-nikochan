@@ -390,13 +390,29 @@ function Play(props: Props) {
   // ytPlayerから現在時刻を取得
   // 動画基準なのでplaybackRateが1でない場合現実の秒単位とは異なる
   // offsetを引いた後の値
+  const ytStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
-      return (
+      const ytNow =
         ytPlayer.current?.getCurrentTime() -
         chartSeq.offset -
-        offsetPlusLatency * playbackRate
-      );
+        offsetPlusLatency * playbackRate;
+      if (ytStartTimeStamp.current === null) {
+        ytStartTimeStamp.current =
+          performance.now() - (ytNow * 1000) / playbackRate;
+      }
+      const now =
+        ((performance.now() - ytStartTimeStamp.current) / 1000) * playbackRate;
+      // ずれを少しずつ補正する
+      ytStartTimeStamp.current -=
+        (((ytNow - now) * 1000) / playbackRate) *
+        (1 -
+          Math.exp(
+            -(performance.now() - timeStampLastAdjusted.current) / 1000
+          ));
+      timeStampLastAdjusted.current = performance.now();
+      return now;
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
   const {
@@ -687,6 +703,7 @@ function Play(props: Props) {
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
+    ytStartTimeStamp.current = null;
   }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref, reloadBestScore]);
   const onStop = useCallback(() => {
     console.log("stop ->", ytPlayer.current?.getPlayerState());
@@ -705,6 +722,7 @@ function Play(props: Props) {
         break;
     }
     ref.current?.focus();
+    ytStartTimeStamp.current = null;
   }, [chartPlaying, ref]);
   const onError = useCallback((ec: number) => {
     setYtError(ec);
