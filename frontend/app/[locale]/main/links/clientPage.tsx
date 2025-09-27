@@ -14,11 +14,12 @@ import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Mail from "@icon-park/react/lib/icons/Mail";
 import { FestivalLink, useFestival } from "@/common/festival";
 import Code from "@icon-park/react/lib/icons/Code";
 import FormOne from "@icon-park/react/lib/icons/FormOne";
+import { lastVisitedOld } from "@/common/version";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
@@ -27,6 +28,8 @@ export default function LinksPage({ locale }: { locale: string }) {
   const deferShowMail = () =>
     setMailAddress(atob("bmlrb2NoYW5hYWExNDRAZ21haWwuY29t"));
   const fes = useFestival();
+  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
+  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
 
   return (
     <IndexMain
@@ -117,11 +120,18 @@ export default function LinksPage({ locale }: { locale: string }) {
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
             <Link
-              className={clsx(linkStyle3, "ml-2 inline-block")}
+              className={clsx(linkStyle3, "ml-2 inline-block relative")}
               href={`/${locale}/main/version`}
               prefetch={!process.env.NO_PREFETCH}
             >
               {t("changelog")}
+              <span
+                className={clsx(
+                  "absolute w-3 h-3 rounded-full bg-red-500",
+                  isLastVisitedOld ? "inline-block" : "hidden"
+                )}
+                style={{ top: "-0.1rem", right: "-0.35rem" }}
+              />
             </Link>
           </p>
           <p className="text-justify">

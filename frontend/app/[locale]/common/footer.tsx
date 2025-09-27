@@ -110,9 +110,16 @@ interface MobileProps {
 export function MobileFooter(props: MobileProps) {
   const tm = useTranslations("main");
   const themeState = useTheme();
+  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsLastVisitedOld(lastVisitedOld());
+  }, []);
+
   const iconFill = themeState.isDark
     ? ["#d6d3d1" /*stone-300*/, "#a6a09b" /*stone-400*/]
     : ["#1d293d" /*slate-800*/, "#62748e" /*slate-500*/];
+
   return (
     <footer
       className={clsx(
@@ -146,10 +153,19 @@ export function MobileFooter(props: MobileProps) {
               fill={props.tabKey === key ? iconFill : iconFill[1]}
             />
           ) : (
-            <More
-              theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[1]}
-            />
+            <div className="relative">
+              <More
+                theme={props.tabKey === key ? "two-tone" : "outline"}
+                fill={props.tabKey === key ? iconFill : iconFill[1]}
+              />
+              <span
+                className={clsx(
+                  "absolute w-3 h-3 rounded-full bg-red-500",
+                  isLastVisitedOld ? "inline-block" : "hidden"
+                )}
+                style={{ top: "-0.1rem", right: "-0.5rem" }}
+              />
+            </div>
           )}
           <span className="text-sm ">{tm(key + ".titleShort")}</span>
         </LinkWithReview>
