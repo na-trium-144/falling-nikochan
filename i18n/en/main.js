@@ -110,7 +110,7 @@ export default {
     },
     links: {
       title: "Contact and Other Links",
-      titleShort: "other",
+      titleShort: "Other",
       description: "Contact and other links of Falling Nikochan.",
       about: "About Falling Nikochan",
       supportedBrowsers:
