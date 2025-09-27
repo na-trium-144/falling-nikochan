@@ -392,6 +392,7 @@ function Play(props: Props) {
   // offsetを引いた後の値
   const ytStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
+  const timeStampCumulatedDiff = useRef<number>(0);
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       const ytNow =
@@ -401,16 +402,17 @@ function Play(props: Props) {
       if (ytStartTimeStamp.current === null) {
         ytStartTimeStamp.current =
           performance.now() - (ytNow * 1000) / playbackRate;
+        timeStampCumulatedDiff.current = 0;
       }
       const now =
         ((performance.now() - ytStartTimeStamp.current) / 1000) * playbackRate;
-      // ずれを少しずつ補正する
+      const dt = (performance.now() - timeStampLastAdjusted.current) / 1000;
+      const diff = ((ytNow - now) * 1000) / playbackRate;
+      timeStampCumulatedDiff.current += diff * dt;
+      // ずれを少しずつ補正する (PI制御)
       ytStartTimeStamp.current -=
-        (((ytNow - now) * 1000) / playbackRate) *
-        (1 -
-          Math.exp(
-            -(performance.now() - timeStampLastAdjusted.current) / 1000
-          ));
+        (1 * diff + 1 * timeStampCumulatedDiff.current) * (1 - Math.exp(-dt));
+      timeStampCumulatedDiff.current *= Math.exp(-dt);
       timeStampLastAdjusted.current = performance.now();
       return now;
     }
