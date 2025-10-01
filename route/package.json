@@ -6,7 +6,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "dependencies": {
-    "@google/genai": "^1.19.0",
+    "@google/genai": "^1.21.0",
     "@hono/node-server": "^1.19.2",
     "@hono/standard-validator": "^0.1.5",
     "@hono/swagger-ui": "^0.5.2",
