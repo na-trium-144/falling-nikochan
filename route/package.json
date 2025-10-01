@@ -20,7 +20,7 @@
     "hono-openapi": "^1.0.8",
     "isbot": "^5.1.30",
     "moji": "^0.5.1",
-    "mongodb": "^6.19.0",
+    "mongodb": "^6.20.0",
     "oauth-1.0a": "^2.2.6",
     "sitemap": "^8.0.0",
     "twitter-text": "^3.1.0"
