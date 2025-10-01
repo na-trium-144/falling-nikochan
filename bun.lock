@@ -13,7 +13,7 @@
         "@babel/preset-env": "^7.28.3",
         "@eslint/eslintrc": "^3.3.0",
         "@eslint/js": "^9.35.0",
-        "@types/bun": "^1.2.21",
+        "@types/bun": "^1.2.23",
         "@types/node": "^22.15.19",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
@@ -33,7 +33,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -42,7 +42,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -74,14 +74,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "next-intl": "^4.3.9",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@google/genai": "^1.19.0",
         "@hono/node-server": "^1.19.2",
@@ -109,7 +109,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "13.0.0",
+      "version": "13.4.0",
     },
   },
   "overrides": {
@@ -595,7 +595,7 @@
 
     "@tailwindcss/postcss": ["@tailwindcss/postcss@4.1.13", "", { "dependencies": { "@alloc/quick-lru": "^5.2.0", "@tailwindcss/node": "4.1.13", "@tailwindcss/oxide": "4.1.13", "postcss": "^8.4.41", "tailwindcss": "4.1.13" } }, "sha512-HLgx6YSFKJT7rJqh9oJs/TkBFhxuMOfUKSBEPYwV+t78POOBsdQ7crhZLzwcH3T0UyUuOzU/GK5pk5eKr3wCiQ=="],
 
-    "@types/bun": ["@types/bun@1.2.21", "", { "dependencies": { "bun-types": "1.2.21" } }, "sha512-NiDnvEqmbfQ6dmZ3EeUO577s4P5bf4HCTXtI6trMc6f6RzirY5IrF3aIookuSpyslFzrnvv2lmEWv5HyC1X79A=="],
+    "@types/bun": ["@types/bun@1.2.23", "", { "dependencies": { "bun-types": "1.2.23" } }, "sha512-le8ueOY5b6VKYf19xT3McVbXqLqmxzPXHsQT/q9JHgikJ2X22wyTW3g3ohz2ZMnp7dod6aduIiq8A14Xyimm0A=="],
 
     "@types/debug": ["@types/debug@4.1.12", "", { "dependencies": { "@types/ms": "*" } }, "sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ=="],
 
@@ -833,7 +833,7 @@
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
 
-    "bun-types": ["bun-types@1.2.21", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-sa2Tj77Ijc/NTLS0/Odjq/qngmEPZfbfnOERi0KRUYhT9R8M4VBioWVmMWE5GrYbKMc+5lVybXygLdibHaqVqw=="],
+    "bun-types": ["bun-types@1.2.23", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-R9f0hKAZXgFU3mlrA0YpE/fiDvwV0FT9rORApt2aQVWSuJDzZOyB5QLc0N/4HF57CS8IXJ6+L5E4W1bW6NS2Aw=="],
 
     "bytes": ["bytes@3.1.2", "", {}, "sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg=="],
 
