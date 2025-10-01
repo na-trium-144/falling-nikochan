@@ -33,7 +33,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -42,7 +42,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -74,16 +74,16 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "next-intl": "^4.3.9",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
-        "@google/genai": "^1.19.0",
+        "@google/genai": "^1.21.0",
         "@hono/node-server": "^1.19.2",
         "@hono/standard-validator": "^0.1.5",
         "@hono/swagger-ui": "^0.5.2",
@@ -109,7 +109,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "13.0.0",
+      "version": "13.4.0",
     },
   },
   "overrides": {
@@ -413,7 +413,7 @@
 
     "@formatjs/intl-localematcher": ["@formatjs/intl-localematcher@0.5.10", "", { "dependencies": { "tslib": "2" } }, "sha512-af3qATX+m4Rnd9+wHcjJ4w2ijq+rAVP3CCinJQvFv1kgSu1W6jypUmvleJxcewdxmutM8dmIRZFxO/IQBZmP2Q=="],
 
-    "@google/genai": ["@google/genai@1.19.0", "", { "dependencies": { "google-auth-library": "^9.14.2", "ws": "^8.18.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": "^1.11.4" }, "optionalPeers": ["@modelcontextprotocol/sdk"] }, "sha512-mIMV3M/KfzzFA//0fziK472wKBJ1TdJLhozIUJKTPLyTDN1NotU+hyoHW/N0cfrcEWUK20YA0GxCeHC4z0SbMA=="],
+    "@google/genai": ["@google/genai@1.21.0", "", { "dependencies": { "google-auth-library": "^9.14.2", "ws": "^8.18.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": "^1.11.4" }, "optionalPeers": ["@modelcontextprotocol/sdk"] }, "sha512-k47DECR8BF9z7IJxQd3reKuH2eUnOH5NlJWSe+CKM6nbXx+wH3hmtWQxUQR9M8gzWW1EvFuRVgjQssEIreNZsw=="],
 
     "@hono/node-server": ["@hono/node-server@1.19.2", "", { "peerDependencies": { "hono": "^4" } }, "sha512-lndWsd9De/btN998Aiv6gkeMVV2h9Cc0AR0qwFTmxx/YFh/PbrjgoxTpHaNaRn6F4GAkPiVJwI0W0gQF4Wn8EA=="],
 
