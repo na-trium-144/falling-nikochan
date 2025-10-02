@@ -19,6 +19,7 @@ import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { MobileFooter, PCFooter } from "@/common/footer.jsx";
 import { AboutModal } from "@/clientPage.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -131,15 +132,31 @@ export default function ShareChart(props: Props) {
           {tm("description")}
           <Link
             href={`/${locale}/main/about/1`}
-            className={clsx("main-wide:hidden", linkStyle3)}
+            className={clsx(
+              "main-wide:hidden inline-block",
+              "ml-2",
+              linkStyle3
+            )}
           >
-            {tm("about.title")}
+            {tm("aboutNikochan")}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
           </Link>
           <button
-            className={clsx("hidden main-wide:inline", linkStyle3)}
+            className={clsx(
+              "hidden main-wide:inline-block",
+              "ml-2",
+              linkStyle3
+            )}
             onClick={() => setAboutPageIndex(1)}
           >
-            {tm("about.title")}
+            {tm("aboutNikochan")}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
           </button>
         </div>
         <RedirectedWarning />

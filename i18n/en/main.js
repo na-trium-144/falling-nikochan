@@ -30,8 +30,9 @@ export default {
     inputIdDesc2: "You can also play by accessing the chart URL (<url></url>).",
     inputDirect: "Enter Chart ID and go to play screen directly",
     inputDirectDevonly: "dev environment only, instead of /share/cid path",
+    aboutNikochan: "Learn more about Falling Nikochan",
     about: {
-      title: "What is Falling Nikochan?",
+      title: "About Falling Nikochan",
     },
     top: {
       titleShort: "Home",

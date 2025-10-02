@@ -30,6 +30,7 @@ import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 
 interface Props {
   locale: string;
@@ -96,15 +97,31 @@ export default function TopPage(props: Props) {
           {t("description")}
           <Link
             href={`/${locale}/main/about/1`}
-            className={clsx("main-wide:hidden", linkStyle3)}
+            className={clsx(
+              "main-wide:hidden inline-block",
+              "ml-2",
+              linkStyle3
+            )}
           >
-            {t("about.title")}
+            {t("aboutNikochan")}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
           </Link>
           <button
-            className={clsx("hidden main-wide:inline", linkStyle3)}
+            className={clsx(
+              "hidden main-wide:inline-block",
+              "ml-2",
+              linkStyle3
+            )}
             onClick={() => setAboutPageIndex(1)}
           >
-            {t("about.title")}
+            {t("aboutNikochan")}
+            <ArrowRight
+              className="inline-block align-middle ml-2 "
+              theme="filled"
+            />
           </button>
         </div>
         <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
