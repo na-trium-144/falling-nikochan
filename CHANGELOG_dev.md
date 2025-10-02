@@ -1,3 +1,8 @@
+## ver. 13.6 - 2025/10/03 [#797](https://github.com/na-trium-144/falling-nikochan/pull/797)
+
+* キャッシュがない状態でshareを開くと空ページになるバグを修正
+* shareページのタイトルが「share.titleWithComposer」と表示される場合があるのを強制上書き
+
 ## ver. 13.4 - 2025/09/28 [#776](https://github.com/na-trium-144/falling-nikochan/pull/776)
 
 * モバイル表示でも更新情報未読マークを追加
