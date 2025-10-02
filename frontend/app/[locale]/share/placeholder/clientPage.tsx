@@ -74,6 +74,10 @@ export default function ShareChart(props: Props) {
     }
     setBrief(brief);
     document.title = titleShare(t, cid, brief);
+    setTimeout(() => {
+      // Next.jsが元のタイトルに戻してしまう場合があるので、再度上書き
+      document.title = titleShare(t, cid, brief);
+    }, 100);
     setRecord(null);
     fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
       .then((res) => {
