@@ -44,7 +44,23 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     pathname = pathname.slice(0, -5);
   }
   pathname = pathname.replaceAll("[", "%5B").replaceAll("]", "%5D");
-  return (await cache.match(pathname)) || new Response(null, { status: 404 });
+  const res = await cache.match(pathname);
+  if (res) {
+    return res;
+  } else {
+    // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
+    console.warn(`${url} is not in cache`);
+    const res = await fetch(
+      (process.env.ASSET_PREFIX || self.origin) + url.pathname
+    );
+    if (res.ok) {
+      const returnRes = returnBody(res.body, res.headers);
+      await (await mainCache()).put(url.pathname, returnRes.clone());
+      return returnRes;
+    } else {
+      return res;
+    }
+  }
 }
 
 // serviceWorkerからクライアントに返すため、cache-controlを削除したresponseを作成
@@ -320,23 +336,7 @@ const app = new Hono({ strict: false })
         // pass
       }
     }
-    const res = await fetchStatic(null, new URL(c.req.url));
-    if (res.ok) {
-      return res;
-    } else {
-      // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
-      console.warn(`${c.req.url} is not in cache`);
-      const res = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + c.req.path
-      );
-      if (res.ok) {
-        const returnRes = returnBody(res.body, res.headers);
-        await (await mainCache()).put(c.req.path, returnRes.clone());
-        return returnRes;
-      } else {
-        return res;
-      }
-    }
+    return await fetchStatic(null, new URL(c.req.url));
   })
   .use(languageDetector)
   .onError(onError({ fetchStatic }))
