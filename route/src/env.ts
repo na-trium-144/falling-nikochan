@@ -36,6 +36,9 @@ export function secretSalt(e: Bindings) {
   }
 }
 
+// Cache duration for API endpoints (in seconds)
+export const API_CACHE_MAX_AGE = 600;
+
 export function cacheControl(e: Bindings, age: number | null) {
   if (age) {
     if (e.API_CACHE_EDGE) {

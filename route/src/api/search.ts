@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
 import { MongoClient } from "mongodb";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings, cacheControl, API_CACHE_MAX_AGE } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
 import * as v from "valibot";
@@ -12,7 +12,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
   cache({
     cacheName: "api-search",
-    cacheControl: "max-age=600",
+    cacheControl: `max-age=${API_CACHE_MAX_AGE}`,
   }),
   describeRoute({
     description:
@@ -39,7 +39,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       .filter((s) => s);
     if (normalizedQueries.length === 0) {
       return c.json([], 200, {
-        "cache-control": cacheControl(env(c), 600),
+        "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
       });
     }
     console.log(normalizedQueries);
@@ -88,7 +88,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           .map((r) => ({ cid: r.cid })),
         200,
         {
-          "cache-control": cacheControl(env(c), 600),
+          "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
         }
       );
     } finally {

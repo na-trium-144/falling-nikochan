@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cache } from "hono/cache";
 import { entryToBrief, getChartEntryCompressed } from "./chart.js";
 import { MongoClient } from "mongodb";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings, cacheControl, API_CACHE_MAX_AGE } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartBriefSchema, CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
@@ -13,7 +13,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
   cache({
     cacheName: "api-brief",
-    cacheControl: "max-age=600",
+    cacheControl: `max-age=${API_CACHE_MAX_AGE}`,
   }),
   describeRoute({
     description: "Get brief information about the chart.",
@@ -53,7 +53,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       const entry = await getChartEntryCompressed(db, cid, null);
       return c.json(entryToBrief(entry), 200, {
-        "cache-control": cacheControl(env(c), 600),
+        "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
       });
     } finally {
       await client.close();
