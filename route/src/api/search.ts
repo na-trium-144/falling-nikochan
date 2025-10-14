@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
@@ -9,6 +10,10 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 
 const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  cache({
+    cacheName: "api-search",
+    cacheControl: "max-age=600",
+  }),
   describeRoute({
     description:
       "Search charts by text in the title, artist, tags, and author name. " +

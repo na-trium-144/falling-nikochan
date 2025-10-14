@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { Db, MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
@@ -52,6 +53,10 @@ export async function getPopularCharts(db: Db): Promise<CidCount[]> {
 
 const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  cache({
+    cacheName: "api-popular",
+    cacheControl: "max-age=600",
+  }),
   describeRoute({
     description:
       `Get the list of popular charts in the last ${popularDays} days. ` +

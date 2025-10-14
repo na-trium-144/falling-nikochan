@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { entryToBrief, getChartEntryCompressed } from "./chart.js";
 import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
@@ -10,6 +11,10 @@ import { errorLiteral } from "../error.js";
 
 const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid",
+  cache({
+    cacheName: "api-brief",
+    cacheControl: "max-age=600",
+  }),
   describeRoute({
     description: "Get brief information about the chart.",
     responses: {

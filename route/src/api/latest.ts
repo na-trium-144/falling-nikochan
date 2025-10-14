@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
@@ -9,6 +10,10 @@ import * as v from "valibot";
 
 const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  cache({
+    cacheName: "api-latest",
+    cacheControl: "max-age=600",
+  }),
   describeRoute({
     description:
       "Get the list of all charts that are published and not deleted. " +
