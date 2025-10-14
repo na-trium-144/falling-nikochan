@@ -109,7 +109,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           })),
           200,
           {
-            "Cache-Control": cacheControl(env(c), API_CACHE_MAX_AGE),
+            "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
           }
         );
       } finally {
