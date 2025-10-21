@@ -24,7 +24,7 @@
         "eslint-config-prettier": "^10.1.8",
         "globals": "^16.3.0",
         "prettier": "^3.6.2",
-        "tsx": "^4.20.5",
+        "tsx": "^4.20.6",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.38.0",
         "webpack": "^5.101.3",
@@ -33,7 +33,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -42,7 +42,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -74,14 +74,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "next-intl": "^4.3.9",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "13.0.0",
+      "version": "13.4.0",
       "dependencies": {
         "@google/genai": "^1.19.0",
         "@hono/node-server": "^1.19.2",
@@ -109,7 +109,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "13.0.0",
+      "version": "13.4.0",
     },
   },
   "overrides": {
@@ -1805,7 +1805,7 @@
 
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
-    "tsx": ["tsx@4.20.5", "", { "dependencies": { "esbuild": "~0.25.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-+wKjMNU9w/EaQayHXb7WA7ZaHY6hN8WgfvHNQ3t1PnU91/7O8TcTnIhCDYTZwnt8JsO9IBqZ30Ln1r7pPF52Aw=="],
+    "tsx": ["tsx@4.20.6", "", { "dependencies": { "esbuild": "~0.25.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-ytQKuwgmrrkDTFP4LjR0ToE2nqgy886GpvRSpU0JAnrdBYppuY5rLkRUYPU1yCryb24SsKBTL/hlDQAEFVwtZg=="],
 
     "twemoji-parser": ["twemoji-parser@11.0.2", "", {}, "sha512-5kO2XCcpAql6zjdLwRwJjYvAZyDy3+Uj7v1ipBzLthQmDL7Ce19bEqHr3ImSNeoSW2OA8u02XmARbXHaNO8GhA=="],
 
