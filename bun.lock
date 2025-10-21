@@ -33,7 +33,7 @@
     },
     "chart": {
       "name": "@falling-nikochan/chart",
-      "version": "13.4.0",
+      "version": "13.6.0",
       "dependencies": {
         "@ygoe/msgpack": "^1.0.3",
         "valibot": "^1.0.0",
@@ -42,7 +42,7 @@
     },
     "frontend": {
       "name": "@falling-nikochan/frontend",
-      "version": "13.4.0",
+      "version": "13.6.0",
       "dependencies": {
         "@fontsource/kaisei-opti": "=5.2.5",
         "@fontsource/merriweather": "=5.2.5",
@@ -74,14 +74,14 @@
     },
     "i18n": {
       "name": "@falling-nikochan/i18n",
-      "version": "13.4.0",
+      "version": "13.6.0",
       "dependencies": {
         "next-intl": "^4.3.9",
       },
     },
     "route": {
       "name": "@falling-nikochan/route",
-      "version": "13.4.0",
+      "version": "13.6.0",
       "dependencies": {
         "@google/genai": "^1.21.0",
         "@hono/node-server": "^1.19.2",
@@ -95,7 +95,7 @@
         "dotenv": "^16.6.1",
         "hono": "^4.9.7",
         "hono-openapi": "^1.1.0",
-        "isbot": "^5.1.30",
+        "isbot": "^5.1.31",
         "moji": "^0.5.1",
         "mongodb": "^6.20.0",
         "oauth-1.0a": "^2.2.6",
@@ -109,7 +109,7 @@
     },
     "worker": {
       "name": "@falling-nikochan/worker",
-      "version": "13.4.0",
+      "version": "13.6.0",
     },
   },
   "overrides": {
@@ -1291,7 +1291,7 @@
 
     "isarray": ["isarray@2.0.5", "", {}, "sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw=="],
 
-    "isbot": ["isbot@5.1.30", "", {}, "sha512-3wVJEonAns1OETX83uWsk5IAne2S5zfDcntD2hbtU23LelSqNXzXs9zKjMPOLMzroCgIjCfjYAEHrd2D6FOkiA=="],
+    "isbot": ["isbot@5.1.31", "", {}, "sha512-DPgQshehErHAqSCKDb3rNW03pa2wS/v5evvUqtxt6TTnHRqAG8FdzcSSJs9656pK6Y+NT7K9R4acEYXLHYfpUQ=="],
 
     "isexe": ["isexe@2.0.0", "", {}, "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="],
 
