@@ -84,7 +84,7 @@
       "version": "13.6.0",
       "dependencies": {
         "@google/genai": "^1.21.0",
-        "@hono/node-server": "^1.19.2",
+        "@hono/node-server": "^1.19.5",
         "@hono/standard-validator": "^0.1.5",
         "@hono/swagger-ui": "^0.5.2",
         "@scalar/hono-api-reference": "^0.9.19",
@@ -415,7 +415,7 @@
 
     "@google/genai": ["@google/genai@1.21.0", "", { "dependencies": { "google-auth-library": "^9.14.2", "ws": "^8.18.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": "^1.11.4" }, "optionalPeers": ["@modelcontextprotocol/sdk"] }, "sha512-k47DECR8BF9z7IJxQd3reKuH2eUnOH5NlJWSe+CKM6nbXx+wH3hmtWQxUQR9M8gzWW1EvFuRVgjQssEIreNZsw=="],
 
-    "@hono/node-server": ["@hono/node-server@1.19.2", "", { "peerDependencies": { "hono": "^4" } }, "sha512-lndWsd9De/btN998Aiv6gkeMVV2h9Cc0AR0qwFTmxx/YFh/PbrjgoxTpHaNaRn6F4GAkPiVJwI0W0gQF4Wn8EA=="],
+    "@hono/node-server": ["@hono/node-server@1.19.5", "", { "peerDependencies": { "hono": "^4" } }, "sha512-iBuhh+uaaggeAuf+TftcjZyWh2GEgZcVGXkNtskLVoWaXhnJtC5HLHrU8W1KHDoucqO1MswwglmkWLFyiDn4WQ=="],
 
     "@hono/standard-validator": ["@hono/standard-validator@0.1.5", "", { "peerDependencies": { "@standard-schema/spec": "1.0.0", "hono": ">=3.9.0" } }, "sha512-EIyZPPwkyLn6XKwFj5NBEWHXhXbgmnVh2ceIFo5GO7gKI9WmzTjPDKnppQB0KrqKeAkq3kpoW4SIbu5X1dgx3w=="],
 
