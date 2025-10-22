@@ -23,7 +23,9 @@
     "mongodb": "^6.20.0",
     "oauth-1.0a": "^2.2.6",
     "sitemap": "^8.0.0",
-    "twitter-text": "^3.1.0"
+    "twitter-text": "^3.1.0",
+    "@falling-nikochan/chart": "workspace:*",
+    "@falling-nikochan/i18n": "workspace:*"
   },
   "devDependencies": {
     "@types/moji": "^0.5.3",
