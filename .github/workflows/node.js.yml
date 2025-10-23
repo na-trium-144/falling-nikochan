@@ -71,7 +71,7 @@ jobs:
         include-hidden-files: true
 
   vercel-deploy:
-    needs: [check-lockfile, lint, test, vercel-build]
+    needs: [lint, test, vercel-build]
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
