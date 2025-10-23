@@ -10,7 +10,7 @@
     "frontend:lint": "cd frontend && tsc --noEmit && eslint app/",
     "lint": "tsc && npm run chart:lint && npm run i18n:lint && npm run route:lint && npm run worker:lint && npm run frontend:lint",
     "format": "prettier --write .",
-    "route:test": "cd route && bun test",
+    "route:test": "cd route && vitest run --no-file-parallelism",
     "chart:t": "cd chart && tsc",
     "route:t": "cd route && tsc",
     "t": "npm run chart:t && npm run route:t",

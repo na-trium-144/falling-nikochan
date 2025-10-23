@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
         with:
-          bun-version: "1.2"
-      - run: bun i --frozen-lockfile
+          node-version: 20.x
+      - run: npm ci
       - name: Pull Vercel Environment Information
-        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
         env:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
-        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
         with:
@@ -32,11 +32,11 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - run: rm -rf .git
-      - run: bun i -g wrangler@latest
+      - run: npm i -g wrangler@latest
       - name: Publish to Cloudflare Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
           accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
       - name: Deploy Project Artifacts to Vercel
-        run: bunx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

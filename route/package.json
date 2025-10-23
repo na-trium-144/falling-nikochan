@@ -5,6 +5,9 @@
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "scripts": {
+    "test": "vitest run --no-file-parallelism"
+  },
   "dependencies": {
     "@google/genai": "^1.21.0",
     "@hono/node-server": "^1.19.5",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@types/moji": "^0.5.3",
-    "@types/twitter-text": "^3.1.10"
+    "@types/twitter-text": "^3.1.10",
+    "vitest": "^2.0.4"
   }
 }

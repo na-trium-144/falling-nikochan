@@ -1,4 +1,4 @@
-import { expect, test, describe } from "bun:test";
+import { expect, test, describe } from "vitest";
 import { hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -15,8 +15,8 @@ describe("GET /api/hashPasswd/:cid", () => {
       ?.split(";")[0]
       .split("=")[1];
     console.log(pUserSalt);
-    expect(pUserSalt).toBeString();
-    expect(pUserSalt).not.toBeEmpty();
+    expect(pUserSalt).toBeTypeOf('string');
+    expect(pUserSalt).not.to.be.empty;
 
     let pServerHash: string;
     const client = new MongoClient(process.env.MONGODB_URI!);
