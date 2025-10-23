@@ -46,7 +46,7 @@ describe("POST /api/newChartFile", () => {
     const dateAfter = new Date();
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.cid).toBeTypeOf('string');
+    expect(body.cid).toBeTypeOf("string");
 
     const client = new MongoClient(process.env.MONGODB_URI!);
     try {

@@ -15,7 +15,7 @@ describe("GET /api/hashPasswd/:cid", () => {
       ?.split(";")[0]
       .split("=")[1];
     console.log(pUserSalt);
-    expect(pUserSalt).toBeTypeOf('string');
+    expect(pUserSalt).toBeTypeOf("string");
     expect(pUserSalt).not.to.be.empty;
 
     let pServerHash: string;
