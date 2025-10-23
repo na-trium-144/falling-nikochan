@@ -1,3 +1,7 @@
+## ver. 13.7 - 2025/10/23 [#801](https://github.com/na-trium-144/falling-nikochan/pull/801)
+
+* 現在のワークスペースの使い方がbun 1.3で動作しなくなったため、bun対応を諦めnpmワークスペースに移行
+
 ## ver. 13.6 - 2025/10/03 [#797](https://github.com/na-trium-144/falling-nikochan/pull/797)
 
 * キャッシュがない状態でshareを開くと空ページになるバグを修正

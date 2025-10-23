@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "13.6.0",
+  "version": "13.7.0",
   "private": true,
   "type": "module",
   "browserslist": [
@@ -9,6 +9,11 @@
     "safari 16.4",
     "firefox 128"
   ],
+  "scripts": {
+    "lint": "tsc --noEmit && eslint app/",
+    "dev": "node ./initAssets.js && next dev -H 0.0.0.0",
+    "build": "node ./initAssets.js && next build && node ./listStaticFiles.js && svgo -f ./public/assets/ -o ./out/assets/"
+  },
   "dependencies": {
     "@fontsource/kaisei-opti": "=5.2.5",
     "@fontsource/merriweather": "=5.2.5",
