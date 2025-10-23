@@ -47,7 +47,7 @@ jobs:
     - run: npm ci
     - run: npx prettier --check .
 
-  vercel-build: # uses bun
+  vercel-build:
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
