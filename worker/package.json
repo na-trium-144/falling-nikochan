@@ -3,6 +3,10 @@
   "version": "13.6.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "lint": "tsc && eslint ./entry.ts",
+    "build": "tsc && webpack"
+  },
   "browserslist": [
     "chrome 111",
     "edge 111",

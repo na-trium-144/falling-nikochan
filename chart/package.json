@@ -5,6 +5,10 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint src/",
+    "t": "tsc"
+  },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
     "valibot": "^1.0.0",
