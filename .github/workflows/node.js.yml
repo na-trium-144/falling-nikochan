@@ -49,7 +49,7 @@ jobs:
 
   vercel-build:
     runs-on: ubuntu-latest
-    if: secrets.VERCEL_PROJECT_ID != ''
+    if: env.VERCEL_PROJECT_ID != ''
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
