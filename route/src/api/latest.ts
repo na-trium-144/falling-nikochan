@@ -1,6 +1,7 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { MongoClient } from "mongodb";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings, cacheControl, API_CACHE_MAX_AGE } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./chart.js";
 import { isSample } from "@falling-nikochan/chart";
@@ -9,6 +10,10 @@ import * as v from "valibot";
 
 const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  cache({
+    cacheName: "api-latest",
+    cacheControl: `max-age=${API_CACHE_MAX_AGE}`,
+  }),
   describeRoute({
     description:
       "Get the list of all charts that are published and not deleted. " +
@@ -41,7 +46,7 @@ const latestApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         ).filter((e) => !isSample(e.cid)),
         200,
         {
-          "cache-control": cacheControl(env(c), 600),
+          "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
         }
       );
     } finally {

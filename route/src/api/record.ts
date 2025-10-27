@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { Bindings, cacheControl } from "../env.js";
+import { cache } from "hono/cache";
+import { Bindings, cacheControl, API_CACHE_MAX_AGE } from "../env.js";
 import {
   CidSchema,
   RecordGetSummary,
@@ -26,6 +27,10 @@ export interface PlayRecordEntry {
 const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .get(
     "/:cid",
+    cache({
+      cacheName: "api-record",
+      cacheControl: `max-age=${API_CACHE_MAX_AGE}`,
+    }),
     describeRoute({
       description: "Get play record summary for the chart.",
       responses: {
@@ -104,7 +109,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           })),
           200,
           {
-            "Cache-Control": cacheControl(env(c), 600),
+            "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
           }
         );
       } finally {
