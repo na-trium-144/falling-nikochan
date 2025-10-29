@@ -60,6 +60,7 @@ export async function postChart(
   const messageAboutLevel =
     brief.levels
       .slice(0, 3)
+      .filter((lv) => !lv.unlisted)
       .map((lv) => `${lv.type}-${lv.difficulty}`)
       .join(", ") + (brief.levels.length > 3 ? ",…" : "");
   const messageJoined = () =>
