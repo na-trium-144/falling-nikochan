@@ -1,3 +1,7 @@
+## ver. 13.8 - 2025/10/29 [#819](https://github.com/na-trium-144/falling-nikochan/pull/819)
+
+* オートプレイ中のキー・タップ判定を無効化
+
 ## ver. 13.7 - 2025/10/23 [#801](https://github.com/na-trium-144/falling-nikochan/pull/801)
 
 * 現在のワークスペースの使い方がbun 1.3で動作しなくなったため、bun対応を諦めnpmワークスペースに移行
