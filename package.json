@@ -35,7 +35,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "babel-loader": "^10.0.0",
-    "core-js": "^3.42.0",
+    "core-js": "^3.46.0",
     "eslint": "^9.22.0",
     "eslint-config-next": "=15.5.4",
     "eslint-config-prettier": "^10.1.8",
