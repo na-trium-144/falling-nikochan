@@ -1,3 +1,8 @@
+## ver. 13.9 - 2025/11/03 [#829](https://github.com/na-trium-144/falling-nikochan/pull/829)
+
+* 人気順表示(/api/popular)で短い曲のプレイ回数のカウントを低く見積もるように変更
+    * 最後までプレイしたら1回とカウントされる仕様であり、極端に短い曲は途中で中断することが少なく有利になってしまうため。
+
 ## ver. 13.8 - 2025/10/29 [#819](https://github.com/na-trium-144/falling-nikochan/pull/819)
 
 * オートプレイ中のキー・タップ判定を無効化
