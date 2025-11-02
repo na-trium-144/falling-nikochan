@@ -37,8 +37,13 @@ export async function getPopularCharts(db: Db): Promise<CidCount[]> {
       )?.levelBrief;
       chartEntries.set(record.cid, lb);
     }
-    if (lb && lb.find((l) => l.hash === record.lvHash)) {
-      const factor = typeof record.factor === "number" ? record.factor : 1;
+    const l = lb?.find((l) => l.hash === record.lvHash);
+    if (l) {
+      // 曲の長さに応じて重み付けの上限を制限。 2min => 1, 1min => 0.7, 30s => 0.5, 10s => 0.3
+      const factor = Math.min(
+        typeof record.factor === "number" ? record.factor : 1,
+        Math.max(0.3, Math.sqrt(l.length / 120))
+      );
       const cidCount = cidCounts.find((c) => c.cid === record.cid);
       if (cidCount) {
         cidCount.count += factor;
