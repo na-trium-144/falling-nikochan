@@ -12,7 +12,7 @@
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
-    "@google/genai": "^1.26.0",
+    "@google/genai": "^1.28.0",
     "@hono/node-server": "^1.19.5",
     "@hono/standard-validator": "^0.1.5",
     "@hono/swagger-ui": "^0.5.2",
