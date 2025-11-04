@@ -7,7 +7,7 @@ import {
   NoteCommand,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
   findBpmIndexFromStep,
@@ -90,6 +90,7 @@ import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartFile } from "./file";
+import { useChartState } from "./hooks/useChartState";
 
 export default function EditAuth(props: {
   locale: string;
@@ -422,8 +423,8 @@ interface Props {
 }
 function Page(props: Props) {
   const {
-    chart,
-    setChart,
+    chart: propsChart,
+    setChart: propsSetChart,
     cid,
     setCid,
     convertedFrom,
@@ -431,15 +432,41 @@ function Page(props: Props) {
     locale,
     currentLevelIndex,
     setCurrentLevelIndex,
-    hasChange,
-    setHasChange,
+    hasChange: propsHasChange,
+    setHasChange: propsSetHasChange,
     guidePage,
     setGuidePage,
   } = props;
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
-  const currentLevel = chart?.levels.at(currentLevelIndex);
+  // Use useChartState hook for better state management
+  const chartState = useChartState(propsChart);
+  const { chart, hasChange, setChart, changeChart, setHasChange } = chartState;
+
+  // Sync with props
+  useEffect(() => {
+    if (propsChart && propsChart !== chart) {
+      setChart(propsChart);
+    }
+  }, [propsChart, chart, setChart]);
+
+  useEffect(() => {
+    if (chart && chart !== propsChart) {
+      propsSetChart(chart);
+    }
+  }, [chart, propsChart, propsSetChart]);
+
+  useEffect(() => {
+    if (hasChange !== propsHasChange) {
+      propsSetHasChange(hasChange);
+    }
+  }, [hasChange, propsHasChange, propsSetHasChange]);
+
+  // Derive currentLevel using useMemo
+  const currentLevel = useMemo(() => {
+    return chart?.levels.at(currentLevelIndex);
+  }, [chart, currentLevelIndex]);
 
   const luaExecutor = useLuaExecutor();
 
@@ -455,19 +482,12 @@ function Page(props: Props) {
     }
   }, [chart, savePasswd, props.savePasswdInitial]);
 
-  // 譜面の更新 (メタデータのみを変更する場合に使う)
-  const changeChart = useCallback(
-    (chart: ChartEdit) => {
-      setHasChange(true);
-      setChart(chart);
-    },
-    [setChart, setHasChange]
-  );
+  // Document title update - use more specific dependencies
   useEffect(() => {
     document.title = titleWithSiteName(
       t("title", { title: chart?.title || "", cid: cid || "" })
     );
-  });
+  }, [chart?.title, cid, t]);
   useEffect(() => {
     void (async () => {
       if (chart) {
@@ -489,39 +509,56 @@ function Page(props: Props) {
     })();
   }, [sessionId, chart, currentLevelIndex, cid]);
 
-  // レベルの更新
-  // levelMin(メタデータのみを更新する場合)、LevelEdit(luaの変更を含むレベルデータの変更) または lua のみを引数にとり、実行し、chartに反映
-  const changeLevel = async (
-    newLevel: LevelMin | LevelEdit | { lua: string[] } | null | undefined
-  ) => {
-    if (chart && newLevel && currentLevelIndex < chart.levels.length) {
-      let newChart: ChartEdit = {
-        ...chart,
-        levels: chart.levels.map((l) => ({ ...l })),
-      };
-      newChart.levels[currentLevelIndex] = {
-        ...newChart.levels[currentLevelIndex],
-        ...newLevel,
-      };
-      luaExecutor.abortExec();
-      changeChart(newChart);
-      // 再度コピーしないとstateが更新されない
-      newChart = {
-        ...newChart,
-        levels: newChart.levels.map((l) => ({ ...l })),
-      };
-      const levelFreezed = await luaExecutor.exec(
-        newChart.levels[currentLevelIndex].lua.join("\n")
-      );
-      if (levelFreezed) {
-        newChart.levels[currentLevelIndex] = {
-          ...newChart.levels[currentLevelIndex],
-          ...levelFreezed,
+  // Level update - Lua execution is now separated into useEffect
+  // This function only updates the Lua code in the chart
+  const updateLevelLua = useCallback(
+    (newLevel: LevelMin | LevelEdit | { lua: string[] }) => {
+      if (chart && newLevel && currentLevelIndex < chart.levels.length) {
+        const newChart: ChartEdit = {
+          ...chart,
+          levels: chart.levels.map((l, i) =>
+            i === currentLevelIndex ? { ...l, ...newLevel } : { ...l }
+          ),
         };
         changeChart(newChart);
       }
-    }
-  };
+    },
+    [chart, currentLevelIndex, changeChart]
+  );
+
+  // Lua execution side effect - runs when level Lua code changes
+  const currentLevelLua = currentLevel?.lua;
+  useEffect(() => {
+    if (!currentLevelLua || !chart) return;
+
+    const execute = async () => {
+      luaExecutor.abortExec();
+      const levelFreezed = await luaExecutor.exec(currentLevelLua.join("\n"));
+      if (levelFreezed) {
+        const newChart: ChartEdit = {
+          ...chart,
+          levels: chart.levels.map((l, i) =>
+            i === currentLevelIndex
+              ? { ...l, ...levelFreezed }
+              : { ...l }
+          ),
+        };
+        changeChart(newChart);
+      }
+    };
+
+    void execute();
+  }, [currentLevelLua, currentLevelIndex, chart, changeChart, luaExecutor]);
+
+  // For backward compatibility, keep changeLevel that calls updateLevelLua
+  const changeLevel = useCallback(
+    async (newLevel: LevelMin | LevelEdit | { lua: string[] } | null | undefined) => {
+      if (newLevel) {
+        updateLevelLua(newLevel);
+      }
+    },
+    [updateLevelLua]
+  );
 
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
@@ -543,12 +580,22 @@ function Page(props: Props) {
   // setCurrentTimeSecWithoutOffset はchangeCurrentTimeSecが呼び出されたときまたはsetIntervalで呼ばれる
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
     useState<number>(0);
-  // 現在時刻に対応するstep
-  const [currentStep, setCurrentStep] = useState<Step>(stepZero());
-  const [currentLine, setCurrentLine] = useState<number | null>(null);
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
   const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
+
+  // Derive currentTimeSec using useMemo
+  const currentTimeSec = useMemo(() => {
+    return currentTimeSecWithoutOffset - (chart?.offset || 0);
+  }, [currentTimeSecWithoutOffset, chart?.offset]);
+
+  // Derive currentStep using useMemo
+  const currentStep = useMemo<Step>(() => {
+    if (!currentLevel) return stepZero();
+    return getStep(currentLevel.bpmChanges, currentTimeSec, snapDivider);
+  }, [currentLevel, currentTimeSec, snapDivider]);
+
+  const [currentLine, setCurrentLine] = useState<number | null>(null);
 
   const ss =
     currentLevel && getSignatureState(currentLevel.signature, currentStep);
@@ -562,70 +609,66 @@ function Page(props: Props) {
         : "")
     : null;
 
-  // offsetを引いた後の時刻
-  const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
   // 現在選択中の音符 (currentStepSnappedに一致)
   const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(-1);
-  const hasCurrentNote =
-    currentNoteIndex >= 0 &&
-    currentLevel?.notes.at(currentNoteIndex) !== undefined;
-  const [notesCountInStep, setNotesCountInStep] = useState<number>(0);
-  const [notesIndexInStep, setNotesIndexInStep] = useState<number>(0);
-  const canAddNote = !(
-    (currentLevel?.type === "Single" && notesCountInStep >= 1) ||
-    (currentLevel?.type === "Double" && notesCountInStep >= 2)
-  );
-  useEffect(() => {
-    if (currentLevel) {
-      let notesCountInStep = 0;
-      let notesIndexInStep = 0;
-      for (let i = 0; i < currentLevel.notes.length; i++) {
-        const n = currentLevel.notes[i];
-        if (stepCmp(currentStep, n.step) > 0) {
-          continue;
-        } else if (stepCmp(currentStep, n.step) == 0) {
-          if (i < currentNoteIndex) {
-            notesIndexInStep++;
-          }
-          notesCountInStep++;
-        } else {
-          break;
-        }
-      }
-      setNotesCountInStep(notesCountInStep);
-      setNotesIndexInStep(notesIndexInStep);
+
+  // Derive note-related states using useMemo
+  const hasCurrentNote = useMemo(() => {
+    return (
+      currentNoteIndex >= 0 &&
+      currentLevel?.notes.at(currentNoteIndex) !== undefined
+    );
+  }, [currentNoteIndex, currentLevel]);
+
+  const { notesCountInStep, notesIndexInStep } = useMemo(() => {
+    if (!currentLevel) {
+      return { notesCountInStep: 0, notesIndexInStep: 0 };
     }
+
+    let notesCountInStep = 0;
+    let notesIndexInStep = 0;
+    for (let i = 0; i < currentLevel.notes.length; i++) {
+      const n = currentLevel.notes[i];
+      if (stepCmp(currentStep, n.step) > 0) {
+        continue;
+      } else if (stepCmp(currentStep, n.step) === 0) {
+        if (i < currentNoteIndex) {
+          notesIndexInStep++;
+        }
+        notesCountInStep++;
+      } else {
+        break;
+      }
+    }
+    return { notesCountInStep, notesIndexInStep };
   }, [currentLevel, currentStep, currentNoteIndex]);
 
-  // currentTimeが変わったときcurrentStepを更新
+  const canAddNote = useMemo(() => {
+    return !(
+      (currentLevel?.type === "Single" && notesCountInStep >= 1) ||
+      (currentLevel?.type === "Double" && notesCountInStep >= 2)
+    );
+  }, [currentLevel?.type, notesCountInStep]);
+
+  // Update currentLine and currentNoteIndex when step changes
   const prevTimeSec = useRef<number>(-1);
-  const prevSnapDivider = useRef<number>(-1);
   useEffect(() => {
     if (
       currentLevel &&
-      (currentTimeSec !== prevTimeSec.current ||
-        snapDivider !== prevSnapDivider.current)
+      currentTimeSec !== prevTimeSec.current
     ) {
-      const step = getStep(
-        currentLevel.bpmChanges,
-        currentTimeSec,
-        snapDivider
-      );
-      if (stepCmp(step, currentStep) !== 0) {
-        setCurrentStep(step);
-      }
       let noteIndex: number | undefined = undefined;
       if (
         !hasCurrentNote ||
-        stepCmp(currentLevel.notes[currentNoteIndex].step, step) != 0
+        stepCmp(currentLevel.notes[currentNoteIndex].step, currentStep) !== 0
       ) {
         if (currentTimeSec < prevTimeSec.current) {
           noteIndex = currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, step) == 0
+            (n) => stepCmp(n.step, currentStep) === 0
           );
         } else {
           noteIndex = currentLevel.notes.findIndex(
-            (n) => stepCmp(n.step, step) == 0
+            (n) => stepCmp(n.step, currentStep) === 0
           );
         }
         if (currentNoteIndex !== noteIndex) {
@@ -636,17 +679,15 @@ function Page(props: Props) {
       if (noteIndex !== undefined && noteIndex >= 0) {
         line = currentLevel.notes[noteIndex].luaLine;
       } else {
-        line = findInsertLine(currentLevel, step, false).luaLine;
+        line = findInsertLine(currentLevel, currentStep, false).luaLine;
       }
       if (currentLine !== line) {
         setCurrentLine(line);
       }
     }
     prevTimeSec.current = currentTimeSec;
-    prevSnapDivider.current = snapDivider;
   }, [
     currentLevel,
-    snapDivider,
     currentTimeSec,
     currentStep,
     currentNoteIndex,
@@ -739,7 +780,7 @@ function Page(props: Props) {
     ref.current?.focus();
   };
   const seekLeft1 = () => {
-    if (chart) {
+    if (chart && currentLevel) {
       if (
         hasCurrentNote &&
         currentLevel.notes[currentNoteIndex - 1] &&
@@ -795,11 +836,10 @@ function Page(props: Props) {
     }
   }, [playing]);
 
-  const [notesAll, setNotesAll] = useState<Note[]>([]);
-  useEffect(() => {
-    if (chart) {
-      setNotesAll(loadChart(convertToPlay(chart, currentLevelIndex)).notes);
-    }
+  // Derive notesAll using useMemo instead of useState + useEffect
+  const notesAll = useMemo<Note[]>(() => {
+    if (!chart) return [];
+    return loadChart(convertToPlay(chart, currentLevelIndex)).notes;
   }, [chart, currentLevelIndex]);
 
   const {
