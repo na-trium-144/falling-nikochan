@@ -455,7 +455,7 @@ function Page(props: Props) {
     }
   }, [chart, savePasswd, props.savePasswdInitial]);
 
-  // 譜面の更新 (メタデータの変更など)
+  // 譜面の更新 (メタデータのみを変更する場合に使う)
   const changeChart = useCallback(
     (chart: ChartEdit) => {
       setHasChange(true);
@@ -490,7 +490,7 @@ function Page(props: Props) {
   }, [sessionId, chart, currentLevelIndex, cid]);
 
   // レベルの更新
-  // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
+  // levelMin(メタデータのみを更新する場合)、LevelEdit(luaの変更を含むレベルデータの変更) または lua のみを引数にとり、実行し、chartに反映
   const changeLevel = async (
     newLevel: LevelMin | LevelEdit | { lua: string[] } | null | undefined
   ) => {
@@ -538,8 +538,9 @@ function Page(props: Props) {
 
   const ref = useRef<HTMLDivElement | null>(null);
 
-  // 現在時刻 offsetを引く前
-  // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
+  // 現在時刻 offsetを引く前の値
+  // 変更するにはchangeCurrentTimeSecを呼ぶ。
+  // setCurrentTimeSecWithoutOffset はchangeCurrentTimeSecが呼び出されたときまたはsetIntervalで呼ばれる
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
     useState<number>(0);
   // 現在時刻に対応するstep
@@ -762,7 +763,6 @@ function Page(props: Props) {
   };
   const seekStepAbs = useCallback(
     (newStep: Step, focus = false) => {
-      // デフォルト引数はluaTabからの呼び出しで使う
       if (chart && currentLevel) {
         if (stepCmp(newStep, stepZero()) < 0) {
           newStep = stepZero();
@@ -1139,7 +1139,6 @@ function Page(props: Props) {
       const newLevel = luaUpdateNote(levelCopied, currentNoteIndex, n);
       changeLevel(newLevel);
     }
-    // ref.current.focus();
   };
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
