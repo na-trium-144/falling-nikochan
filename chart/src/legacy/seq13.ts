@@ -111,8 +111,14 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
       let ddu: number;
       const tsNext = level.speedChanges.at(ti + 1);
       if (tsNext?.interp && tBegin !== tEnd) {
-        du = tsNext.bpm / 120;
-        ddu = (ts.bpm - tsNext.bpm) / 120 / (tBegin - tEnd);
+        let nextBpm = tsNext.bpm;
+        if (tBegin < tsNext.timeSec) {
+          nextBpm =
+            ts.bpm +
+            ((tsNext.bpm - ts.bpm) / (tsNext.timeSec - tEnd)) * (tBegin - tEnd);
+        }
+        du = nextBpm / 120;
+        ddu = (ts.bpm - nextBpm) / 120 / (tBegin - tEnd);
       } else {
         du = ts.bpm / 120;
         ddu = 0;
@@ -145,6 +151,13 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
       tBegin = tEnd;
       u = uEnd;
     }
+    // 判定時刻が速度変化中の場合に判定を過ぎた後の速度を安定化する
+    display.unshift({
+      timeSecBefore: 0,
+      u0: display[0].u0,
+      du: display[0].du,
+      ddu: 0,
+    });
     if (appearTimeSec === null) {
       // Speed=0から譜面が始まる場合
       appearTimeSec = -Infinity;
