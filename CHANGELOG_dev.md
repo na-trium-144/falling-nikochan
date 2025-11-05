@@ -1,3 +1,7 @@
+## ver. 13.10 - 2025/11/05 [#832](https://github.com/na-trium-144/falling-nikochan/pull/832)
+
+* 速度変化中に音符がある場合の動作を修正
+
 ## ver. 13.9 - 2025/11/03 [#829](https://github.com/na-trium-144/falling-nikochan/pull/829)
 
 * 人気順表示(/api/popular)で短い曲のプレイ回数のカウントを低く見積もるように変更
