@@ -1,6 +1,7 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { Db, MongoClient } from "mongodb";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings, cacheControl, API_CACHE_MAX_AGE } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed, ChartLevelBrief } from "./chart.js";
 import { PlayRecordEntry } from "./record.js";
@@ -57,6 +58,10 @@ export async function getPopularCharts(db: Db): Promise<CidCount[]> {
 
 const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  cache({
+    cacheName: "api-popular",
+    cacheControl: `max-age=${API_CACHE_MAX_AGE}`,
+  }),
   describeRoute({
     description:
       `Get the list of popular charts in the last ${popularDays} days. ` +
@@ -78,7 +83,7 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       return c.json(await getPopularCharts(db), 200, {
-        "cache-control": cacheControl(env(c), 600),
+        "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
       });
     } finally {
       await client.close();
