@@ -25,6 +25,7 @@
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.43.4",
     "clsx": "^2.1.1",
+    "eventemitter3": "^5.0.1",
     "file-saver": "^2.0.5",
     "react-ace": "^14.0.1",
     "react-range": "^1.10.0",
