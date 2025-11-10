@@ -205,20 +205,17 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
-      luaLine: null,
     })!;
     level = luaAddSpeedChange(level, {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
-      luaLine: null,
     })!;
     level = luaAddBeatChange(level, {
       step: stepZero(),
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
-      luaLine: null,
     })!;
   }
   return level;

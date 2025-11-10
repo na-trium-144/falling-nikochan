@@ -17,6 +17,8 @@ import {
   getSignatureState,
   getStep,
   getTimeSec,
+  LevelForLuaEdit,
+  LevelForLuaEditLatest,
   LevelFreeze,
   LevelMin,
   LevelPlay,
@@ -143,11 +145,20 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#offset = ofs;
   }
 
-  #meta: LevelMin;
-  // TODO: luaをmetaと分ける?
+  #meta: Omit<LevelMin, "lua">;
+  #lua: string[];
   #freeze: LevelFreeze;
 
-  updateMeta(newMeta: Partial<LevelMin>) {
+  #luaEditData(): LevelForLuaEditLatest {
+    return JSON.parse(
+      JSON.stringify({
+        ...this.#freeze,
+        lua: this.#lua,
+      } satisfies LevelForLuaEditLatest)
+    );
+  }
+
+  updateMeta(newMeta: Partial<Omit<LevelMin, "lua">>) {
     this.#meta = { ...this.#meta, ...newMeta };
     if ("ytEnd" in newMeta) {
       this.resetYTEnd();
@@ -171,7 +182,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     luaExecutor.abortExec();
     const levelFreezed = await luaExecutor.exec(lua.join("\n"));
     if (levelFreezed) {
-      this.#meta.lua = lua;
+      this.#lua = lua;
       this.updateFreeze(levelFreezed);
     }
   }
@@ -243,7 +254,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     while (lastRest !== undefined && stepCmp(step, lastRest) <= 0) {
       const ss = getSignatureState(this.#freeze.signature, step);
       if (stepCmp(ss.offset, stepZero()) === 0) {
-        const line = findInsertLine(this.#freeze, step, false).luaLine;
+        const line = findInsertLine(this.#luaEditData(), step, false).luaLine;
         if (line !== null) {
           barLines.push({ barNum: ss.barNum + 1, luaLine: line });
         }
@@ -321,48 +332,57 @@ export class LevelEditing extends EventEmitter<EventType> {
     );
   }
   changeBpm(bpm: number | null, speed: number | null, interp: boolean) {
-    let newLevel: LevelFreeze = this.#freeze;
+    let newLevel = this.#luaEditData();
     if (bpm !== null) {
-      newLevel = luaUpdateBpmChange(newLevel, this.#current.bpmIndex, bpm);
+      newLevel =
+        luaUpdateBpmChange(newLevel, this.#current.bpmIndex, bpm) ?? newLevel;
     }
     if (speed !== null) {
-      newLevel = luaUpdateSpeedChange(
-        newLevel,
-        this.#current.speedIndex,
-        speed,
-        interp
-      );
+      newLevel =
+        luaUpdateSpeedChange(
+          newLevel,
+          this.#current.speedIndex,
+          speed,
+          interp
+        ) ?? newLevel;
     }
     this.updateFreeze(newLevel);
     this.updateLua(newLevel.lua);
   }
   changeSignature(s: Signature) {
-    const newLevel = luaUpdateBeatChange(this, this.#current.signatureIndex, s);
+    let newLevel = this.#luaEditData();
+    newLevel =
+      luaUpdateBeatChange(newLevel, this.#current.signatureIndex, s) ??
+      newLevel;
     this.updateFreeze(newLevel);
     this.updateLua(newLevel.lua);
   }
   toggleBpmChangeHere(bpm: boolean | null, speed: boolean | null) {
-    let newLevel: LevelEdit | null = null;
+    let newLevel = this.#luaEditData();
     if (bpm !== null) {
       if (bpm && !this.bpmChangeHere) {
-        newLevel = luaAddBpmChange(newLevel, {
-          step: this.#current.step,
-          bpm: this.currentBpm,
-          timeSec: this.#current.timeSec,
-        });
+        newLevel =
+          luaAddBpmChange(newLevel, {
+            step: this.#current.step,
+            bpm: this.currentBpm,
+            timeSec: this.#current.timeSec,
+          }) ?? newLevel;
       } else if (!bpm && this.bpmChangeHere) {
-        newLevel = luaDeleteBpmChange(newLevel, this.#current.bpmIndex);
+        newLevel =
+          luaDeleteBpmChange(newLevel, this.#current.bpmIndex) ?? newLevel;
       }
     }
     if (speed !== null) {
       if (speed && !this.speedChangeHere) {
-        newLevel = luaAddSpeedChange(newLevel, {
-          step: this.#current.step,
-          bpm: this.currentBpm,
-          timeSec: this.#current.timeSec,
-        });
+        newLevel =
+          luaAddSpeedChange(newLevel, {
+            step: this.#current.step,
+            bpm: this.currentBpm,
+            timeSec: this.#current.timeSec,
+          }) ?? newLevel;
       } else if (!speed && this.speedChangeHere) {
-        newLevel = luaDeleteSpeedChange(newLevel, this.#current.speedIndex);
+        newLevel =
+          luaDeleteSpeedChange(newLevel, this.#current.speedIndex) ?? newLevel;
       }
     }
     this.updateFreeze(newLevel);
@@ -370,30 +390,29 @@ export class LevelEditing extends EventEmitter<EventType> {
   }
   toggleSignatureChangeHere() {
     if (stepCmp(this.#current.step, stepZero()) > 0) {
+      let newLevel = this.#luaEditData();
       if (this.signatureChangeHere) {
-        const newLevel = luaDeleteBeatChange(
-          this,
-          this.#current.signatureIndex
-        );
-        this.updateFreeze(newLevel);
-        this.updateLua(newLevel.lua);
+        newLevel =
+          luaDeleteBeatChange(newLevel, this.#current.signatureIndex) ??
+          newLevel;
       } else {
-        const newLevel = luaAddBeatChange(this, {
-          step: this.#current.step,
-          offset: this.#current.signatureState.offset,
-          bars: this.currentSignature?.bars,
-          barNum: 0,
-        });
-        this.updateFreeze(newLevel);
-        this.updateLua(newLevel.lua);
+        newLevel =
+          luaAddBeatChange(newLevel, {
+            step: this.#current.step,
+            offset: this.#current.signatureState.offset,
+            bars: this.currentSignature?.bars,
+            barNum: 0,
+          }) ?? newLevel;
       }
+      this.updateFreeze(newLevel);
+      this.updateLua(newLevel.lua);
     }
   }
 
   addNote(n: NoteCommand | null | undefined = chart?.copyBuffer[0]) {
     if (n) {
-      const levelCopied = { ...this.#freeze };
-      const newLevel = luaAddNote(levelCopied, n, this.#current.step);
+      let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
+      newLevel = luaAddNote(newLevel, n, this.#current.step);
       if (newLevel !== null) {
         // 追加したnoteは同じ時刻の音符の中でも最後
         this.updateFreeze(newLevel);
@@ -403,8 +422,8 @@ export class LevelEditing extends EventEmitter<EventType> {
   }
   deleteNote() {
     if (this.#current.noteIndex !== undefined) {
-      const levelCopied = { ...this.#freeze };
-      const newLevel = luaDeleteNote(levelCopied, this.#current.noteIndex);
+      let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
+      newLevel = luaDeleteNote(newLevel, this.#current.noteIndex);
       if (newLevel !== null) {
         this.updateFreeze(newLevel);
       }
@@ -412,8 +431,8 @@ export class LevelEditing extends EventEmitter<EventType> {
   }
   updateNote(n: NoteCommand) {
     if (this.#current.noteIndex !== undefined) {
-      const levelCopied = { ...this.#freeze };
-      const newLevel = luaUpdateNote(levelCopied, this.#current.noteIndex, n);
+      let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
+      newLevel = luaUpdateNote(newLevel, this.#current.noteIndex, n);
       if (newLevel !== null) {
         this.updateFreeze(newLevel);
       }
