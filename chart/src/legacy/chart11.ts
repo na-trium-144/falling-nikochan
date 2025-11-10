@@ -87,6 +87,7 @@ export type YTEnd11 = v.InferOutput<ReturnType<typeof YTEndSchema11>>;
 export type Level11Freeze = v.InferOutput<
   ReturnType<typeof LevelFreezeSchema11>
 >;
+export type Level11Min = v.InferOutput<ReturnType<typeof LevelMinSchema11>>;
 export type Level11Edit = v.InferOutput<ReturnType<typeof LevelEditSchema11>>;
 export type Level11Play = v.InferOutput<ReturnType<typeof LevelPlaySchema11>>;
 export type Chart11Min = v.InferOutput<ReturnType<typeof ChartMinSchema11>>;

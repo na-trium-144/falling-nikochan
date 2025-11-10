@@ -1,5 +1,5 @@
 import { getBarLength, Signature, toStepArray } from "./signature.js";
-import { BPMChange } from "./bpm.js";
+import { BPMChange, BPMChangeWithLua } from "./bpm.js";
 import {
   Step,
   stepAdd,
@@ -38,7 +38,7 @@ export interface Pos {
   y: number;
 }
 
-function defaultBpmChange(): BPMChange {
+function defaultBpmChange(): BPMChangeWithLua {
   return { timeSec: 0, bpm: 120, step: stepZero(), luaLine: null };
 }
 /**

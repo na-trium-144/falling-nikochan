@@ -2,7 +2,13 @@ import { LevelEdit } from "../chart.js";
 import { Signature, updateBarNum } from "../signature.js";
 import { Level5, Signature5 } from "../legacy/chart5.js";
 import { stepCmp } from "../step.js";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
+import {
+  deleteLua,
+  findInsertLine,
+  insertLua,
+  LevelForLuaEdit,
+  replaceLua,
+} from "./edit.js";
 
 function beatLuaCommand(s: Signature | Signature5) {
   let num = s.offset.fourth * s.offset.denominator + s.offset.numerator;
@@ -23,7 +29,7 @@ function beatLuaCommand(s: Signature | Signature5) {
       .join(", ")}}, ${num}, ${denom})`;
   }
 }
-export function luaAddBeatChange<L extends LevelEdit | Level5>(
+export function luaAddBeatChange<L extends LevelForLuaEdit>(
   chart: L,
   change: Signature | Signature5
 ): L | null {
@@ -32,17 +38,23 @@ export function luaAddBeatChange<L extends LevelEdit | Level5>(
     return null;
   }
   chart = insert.chart;
+  if (!chart.signature) {
+    return null;
+  }
   insertLua(chart, insert.luaLine, beatLuaCommand(change));
   chart.signature.push({ ...change, luaLine: insert.luaLine });
   chart.signature = chart.signature.sort((a, b) => stepCmp(a.step, b.step));
   updateBarNum(chart.signature);
   return chart;
 }
-export function luaUpdateBeatChange(
-  chart: LevelEdit,
+export function luaUpdateBeatChange<L extends LevelForLuaEdit>(
+  chart: L,
   index: number,
   change: Signature | Signature5
 ) {
+  if (!chart.signature) {
+    return null;
+  }
   if (chart.signature[index].luaLine === null) {
     return null;
   }
@@ -54,7 +66,13 @@ export function luaUpdateBeatChange(
   updateBarNum(chart.signature);
   return chart;
 }
-export function luaDeleteBeatChange(chart: LevelEdit, index: number) {
+export function luaDeleteBeatChange<L extends LevelForLuaEdit>(
+  chart: L,
+  index: number
+) {
+  if (!chart.signature) {
+    return null;
+  }
   if (chart.signature[index].luaLine === null) {
     return null;
   }

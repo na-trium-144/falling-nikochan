@@ -1,8 +1,17 @@
-import { LevelEdit } from "../chart.js";
+import { BPMChange, BPMChangeWithLua, SpeedChange, SpeedChangeWithLua } from "../bpm.js";
+import { LevelEdit, LevelFreeze } from "../chart.js";
+import { NoteCommand, RestStep } from "../command.js";
 import { Level11Edit } from "../legacy/chart11.js";
-import { Chart3 } from "../legacy/chart3.js";
-import { Level5 } from "../legacy/chart5.js";
-import { Level9Edit } from "../legacy/chart9.js";
+import { SpeedChangeWithLua13 } from "../legacy/chart13.js";
+import {
+  BPMChangeWithLua3,
+  Chart3,
+  NoteCommandWithLua3,
+  RestStep3,
+} from "../legacy/chart3.js";
+import { Level5, SignatureWithLua5 } from "../legacy/chart5.js";
+import { BPMChange9, Level9Edit, NoteCommand9, Rest9, Signature9 } from "../legacy/chart9.js";
+import { Signature, SignatureWithLua } from "../signature.js";
 import {
   Step,
   stepAdd,
@@ -12,7 +21,33 @@ import {
   stepZero,
 } from "../step.js";
 
-export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
+/**
+ * chart/src/lua/ 以下の関数はいずれも引数に渡されたレベルオブジェクトを直接書き換える場合がある。
+ * とても良くないんだけど、これを仕様変更してすべてを動作確認するのはめんどいので放置している (TODO?)
+ *
+ * 書き換えられたくないレベルデータは呼び出し元でディープコピーしよう
+ */
+export interface LevelForLuaEditLatest {
+  notes: NoteCommand[];
+  rest: RestStep[];
+  bpmChanges: BPMChangeWithLua[];
+  speedChanges: SpeedChangeWithLua[];
+  signature: SignatureWithLua[];
+  lua: string[];
+}
+export interface LevelForLuaEdit {
+  notes: NoteCommand9[] | NoteCommandWithLua3[];
+  rest: Rest9[] | RestStep3[];
+  bpmChanges: BPMChange9[] | BPMChangeWithLua3[];
+  speedChanges: SpeedChangeWithLua13[] | BPMChange9[] | BPMChangeWithLua3[];
+  signature?: Signature9[] | SignatureWithLua5[];
+  lua: string[];
+}
+
+export function findStepFromLua(
+  chart: LevelForLuaEdit,
+  line: number
+): Step | null {
   for (const n of chart.notes) {
     if (n.luaLine === line) {
       return n.step;
@@ -33,17 +68,21 @@ export function findStepFromLua(chart: LevelEdit, line: number): Step | null {
       return n.step;
     }
   }
-  for (const n of chart.signature) {
-    if (n.luaLine === line) {
-      return n.step;
+  if (chart.signature) {
+    for (const n of chart.signature) {
+      if (n.luaLine === line) {
+        return n.step;
+      }
     }
   }
   return null;
 }
 
-// コマンドを挿入
-export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
-  chart: L,
+/**
+ * コマンドを挿入
+ */
+export function insertLua(
+  chart: LevelForLuaEdit,
   line: number,
   content: string
 ) {
@@ -72,7 +111,7 @@ export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
       n.luaLine++;
     }
   });
-  if ("signature" in chart) {
+  if (chart.signature) {
     chart.signature.forEach((n) => {
       if (n.luaLine !== null && n.luaLine >= line) {
         n.luaLine++;
@@ -80,9 +119,11 @@ export function insertLua<L extends LevelEdit | Level9Edit | Level5 | Chart3>(
     });
   }
 }
-// コマンドを置き換え
-export function replaceLua<L extends LevelEdit | Level11Edit | Level5 | Chart3>(
-  chart: L,
+/**
+ * コマンドを置き換え
+ */
+export function replaceLua(
+  chart: LevelForLuaEdit,
   line: number,
   content: string
 ) {
@@ -91,11 +132,14 @@ export function replaceLua<L extends LevelEdit | Level11Edit | Level5 | Chart3>(
     .concat([content])
     .concat(chart.lua.slice(line + 1));
 }
-// コマンドを削除
-export function deleteLua(chart: LevelEdit, line: number) {
+/**
+ * コマンドを削除
+ *
+ * 以降の行番号がすべて1ずれる
+ * 削除した行のコマンドに対応するデータはとりあえずnull
+ */
+export function deleteLua(chart: LevelForLuaEdit, line: number) {
   chart.lua = chart.lua.slice(0, line).concat(chart.lua.slice(line + 1));
-  // 以降の行番号がすべて1ずれる
-  // 削除した行のコマンドに対応するデータはとりあえずnull
   chart.notes.forEach((n) => {
     if (n.luaLine === line) {
       n.luaLine = null;
@@ -124,7 +168,7 @@ export function deleteLua(chart: LevelEdit, line: number) {
       n.luaLine--;
     }
   });
-  chart.signature.forEach((n) => {
+  chart.signature?.forEach((n) => {
     if (n.luaLine === line) {
       n.luaLine = null;
     } else if (n.luaLine !== null && n.luaLine >= line) {
@@ -144,13 +188,18 @@ function stepLuaCommand(s: Step) {
   }
   return `Step(${num}, ${denom})`;
 }
-// 時刻stepにコマンドを挿入する準備
-// 挿入する行、またはnullを返す。
-// modify=trueの場合、既存のStepコマンドを分割する必要がある場合は分割し、
-// Stepコマンドを追加する必要がある場合は追加する。
-export function findInsertLine<
-  L extends LevelEdit | Level11Edit | Level5 | Chart3,
->(chart: L, step: Step, modify: boolean): { chart: L; luaLine: number | null } {
+/**
+ * 時刻stepにコマンドを挿入する準備
+ *
+ * 挿入する行、またはnullを返す。
+ * modify=trueの場合、既存のStepコマンドを分割する必要がある場合は分割し、
+ * Stepコマンドを追加する必要がある場合は追加する。
+ */
+export function findInsertLine<L extends LevelForLuaEdit>(
+  chart: L,
+  step: Step,
+  modify: boolean
+): { chart: L; luaLine: number | null } {
   for (let ri = 0; ri < chart.rest.length; ri++) {
     const rest = chart.rest[ri];
     if (stepCmp(rest.begin, step) === 0) {
