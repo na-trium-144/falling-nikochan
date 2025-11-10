@@ -17,6 +17,7 @@ import {
   getSignatureState,
   getStep,
   getTimeSec,
+  LevelEdit,
   LevelForLuaEdit,
   LevelForLuaEditLatest,
   LevelFreeze,
@@ -58,9 +59,11 @@ import { useLuaExecutor } from "./luaTab";
 // new時
 // setGuidePage(1);
 
-type EventType =
-  | "changeAny" // 再render用
-  | "changeAnyData"; // toObject()で出力するデータに変化があるとき (session管理 & hasChange で使う)
+const eventTypes = [
+  "changeAny", // 再render用
+  "changeAnyData", // toObject()で出力するデータに変化があるとき (session管理 & hasChange で使う)
+] as const;
+type EventType = (typeof eventTypes)[number];
 export class ChartEditing extends EventEmitter<EventType> {
   #offset: number;
   #published: boolean;
@@ -71,11 +74,12 @@ export class ChartEditing extends EventEmitter<EventType> {
     chartCreator: string;
   };
   #levels: LevelEditing[];
-  #currentLevelIndex: number;
+  #currentLevelIndex: number | undefined; // 範囲外にはせず、levelsが空の場合undefined
   #copyBuffer: (NoteCommand | null)[];
   readonly #locale: string;
 
   constructor(obj: ChartEdit, locale: string) {
+    super();
     this.#locale = locale;
     this.#offset = obj.offset;
     this.#published = obj.published;
@@ -85,8 +89,16 @@ export class ChartEditing extends EventEmitter<EventType> {
       composer: obj.composer,
       chartCreator: obj.chartCreator,
     };
-    // chart.#levels =
+    this.#levels = obj.levels.map(
+      (l) => new LevelEditing(l, () => this.#offset)
+    );
+    for (const level of this.#levels) {
+      for (const type of eventTypes) {
+        level.on(type, () => this.emit(type));
+      }
+    }
     this.#copyBuffer = obj.copyBuffer;
+    this.#currentLevelIndex = this.#levels.length >= 1 ? 0 : undefined;
   }
   toObject(): ChartEdit {
     return {
@@ -97,7 +109,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       changePasswd: null,
       published: this.#published,
       ...this.#meta,
-      levels: [],
+      levels: this.#levels.map((l) => l.toObject()),
       copyBuffer: this.#copyBuffer,
     };
   }
@@ -109,27 +121,30 @@ export class ChartEditing extends EventEmitter<EventType> {
     return [...this.#levels] as const;
   }
   get currentLevel() {
-    return this.#levels[this.#currentLevelIndex];
+    if (this.#currentLevelIndex !== undefined) {
+      return this.#levels[this.#currentLevelIndex];
+    } else {
+      return undefined;
+    }
   }
   get offset() {
     return this.#offset;
   }
   setOffset(ofs: number) {
     this.#offset = ofs;
-    for (const level of this.levels) {
-      level._setOffset(ofs);
-    }
     this.emit("changeAny");
     this.emit("changeAnyData");
   }
 
   copyNote(copyIndex: number) {
-    this.#copyBuffer[copyIndex] =
-      this.currentLevel.freeze.notes[this.currentLevel.current.noteIndex];
-    this.emit("changeAny");
+    if (this.currentLevel?.current.noteIndex !== undefined) {
+      this.#copyBuffer[copyIndex] =
+        this.currentLevel.freeze.notes[this.currentLevel.current.noteIndex];
+      this.emit("changeAny");
+    }
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
-    if (this.#copyBuffer[copyIndex]) {
+    if (this.#copyBuffer[copyIndex] && this.currentLevel) {
       if (this.currentLevel.current.noteIndex !== undefined && !forceAdd) {
         this.currentLevel.updateNote(this.#copyBuffer[copyIndex]);
       } else {
@@ -139,15 +154,59 @@ export class ChartEditing extends EventEmitter<EventType> {
   }
 }
 export class LevelEditing extends EventEmitter<EventType> {
-  #offset: number;
-  _setOffset(ofs: number) {
-    // chart.setOffset() からのみ呼ばれる
-    this.#offset = ofs;
-  }
-
+  // これは親のChartEditingと同期
+  #offset: () => number;
+  // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
   #meta: Omit<LevelMin, "lua">;
   #lua: string[];
   #freeze: LevelFreeze;
+
+  constructor(level: LevelEdit, offset: () => number) {
+    super();
+    this.#offset = offset;
+    this.#meta = {
+      name: level.name,
+      type: level.type,
+      unlisted: level.unlisted,
+      ytBegin: level.ytBegin,
+      ytEnd: level.ytEnd,
+      ytEndSec: level.ytEndSec,
+    };
+    this.#lua = level.lua;
+    this.#freeze = {
+      notes: level.notes,
+      rest: level.rest,
+      bpmChanges: level.bpmChanges,
+      speedChanges: level.speedChanges,
+      signature: level.signature,
+    };
+    // 以下はupdateFreeze()内で初期化される
+    this.#notes = [];
+    this.#lengthSec = 0;
+    this.#ytDuration = 0;
+    this.#barLines = [];
+    this.#current = new CursorState();
+
+    this.resetYTEnd();
+    this.updateMeta({});
+    this.updateFreeze({});
+  }
+  toObject(): LevelEdit {
+    return {
+      name: this.#meta.name,
+      type: this.#meta.type,
+      unlisted: this.#meta.unlisted,
+      ytBegin: this.#meta.ytBegin,
+      ytEnd: this.#meta.ytEnd,
+      ytEndSec: this.#meta.ytEndSec,
+      notes: this.#freeze.notes,
+      rest: this.#freeze.rest,
+      bpmChanges: this.#freeze.bpmChanges,
+      speedChanges: this.#freeze.speedChanges,
+      signature: this.#freeze.signature,
+      lua: this.#lua,
+    };
+  }
 
   #luaEditData(): LevelForLuaEditLatest {
     return JSON.parse(
@@ -168,7 +227,12 @@ export class LevelEditing extends EventEmitter<EventType> {
   }
   updateFreeze(newFreeze: Partial<LevelFreeze>) {
     this.#freeze = { ...this.#freeze, ...newFreeze };
-    this.#resetCurrent(this.#current.timeSec, this.#current.snapDivider);
+    this.#current.reset(
+      this.#current.timeSec,
+      this.#current.snapDivider,
+      this.#freeze,
+      this.#lua
+    );
     this.#resetBarLines();
     this.#resetNotes();
     this.#resetLengthSec();
@@ -193,12 +257,15 @@ export class LevelEditing extends EventEmitter<EventType> {
   get freeze() {
     return { ...this.#freeze } as const;
   }
+  get lua() {
+    return [...this.#lua] as const;
+  }
 
   #notes: Note[];
   #resetNotes() {
     this.#notes = loadChart({
       ver: currentChartVer,
-      offset: this.#offset,
+      offset: this.#offset(),
       ...this.#freeze,
       ...this.#meta,
     } satisfies LevelPlay).notes;
@@ -213,7 +280,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     if (this.#freeze.notes.length > 0) {
       this.#lengthSec =
         getTimeSec(this.#freeze.bpmChanges, this.#freeze.notes.at(-1)!.step) +
-        this.#offset;
+        this.#offset();
     }
     this.resetYTEnd();
     this.emit("changeAny");
@@ -274,7 +341,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       this.#current.timeSec != timeSec ||
       this.#current.snapDivider != snapDivider
     ) {
-      this.#current.reset(timeSec, snapDivider, this.#freeze);
+      this.#current.reset(timeSec, snapDivider, this.#freeze, this.#lua);
     }
   }
   selectNextNote() {
@@ -389,7 +456,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.updateLua(newLevel.lua);
   }
   toggleSignatureChangeHere() {
-    if (stepCmp(this.#current.step, stepZero()) > 0) {
+    if (stepCmp(this.#current.step, stepZero()) > 0 && this.currentSignature) {
       let newLevel = this.#luaEditData();
       if (this.signatureChangeHere) {
         newLevel =
@@ -400,7 +467,7 @@ export class LevelEditing extends EventEmitter<EventType> {
           luaAddBeatChange(newLevel, {
             step: this.#current.step,
             offset: this.#current.signatureState.offset,
-            bars: this.currentSignature?.bars,
+            bars: this.currentSignature.bars,
             barNum: 0,
           }) ?? newLevel;
       }
@@ -409,7 +476,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
   }
 
-  addNote(n: NoteCommand | null | undefined = chart?.copyBuffer[0]) {
+  addNote(n: NoteCommand | null | undefined) {
     if (n) {
       let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
       newLevel = luaAddNote(newLevel, n, this.#current.step);
@@ -441,18 +508,23 @@ export class LevelEditing extends EventEmitter<EventType> {
 }
 export class CursorState extends EventEmitter<EventType> {
   // 現在のカーソル位置と、それに応じて変わる情報
-  #timeSec: number;
-  #snapDivider: number;
-  #step: Step;
+  #timeSec: number = 0;
+  #snapDivider: number = 1;
+  #step: Step = stepZero();
   #noteIndex: number | undefined;
-  #line: number | null;
-  #signatureState: SignatureState;
+  #line: number | null = null;
+  #signatureState: SignatureState = null!;
   #notesIndexBegin: number | undefined;
   #notesIndexEnd: number | undefined;
-  #bpmIndex: number;
-  #speedIndex: number;
-  #signatureIndex: number;
-  reset(timeSec: number, snapDivider: number, freeze: LevelFreeze) {
+  #bpmIndex: number = 0;
+  #speedIndex: number = 0;
+  #signatureIndex: number = 0;
+  reset(
+    timeSec: number,
+    snapDivider: number,
+    freeze: LevelFreeze,
+    lua: string[]
+  ) {
     this.#snapDivider = snapDivider;
     const step = getStep(freeze.bpmChanges, timeSec, snapDivider);
     this.#step = step;
@@ -477,21 +549,7 @@ export class CursorState extends EventEmitter<EventType> {
     if (this.#noteIndex !== undefined) {
       this.#line = freeze.notes[this.#noteIndex].luaLine;
     } else {
-      this.#line = findInsertLine(freeze, step, false).luaLine;
-    }
-
-    this.#notesIndexBegin = undefined;
-    this.#notesIndexEnd = undefined;
-    for (let i = 0; i < freeze.notes.length; i++) {
-      const n = freeze.notes[i];
-      if (stepCmp(step, n.step) > 0) {
-        notesIndexBegin = i + 1;
-        notesIndexEnd = i + 1;
-      } else if (stepCmp(step, n.step) == 0) {
-        notesIndexEnd = i + 1;
-      } else {
-        break;
-      }
+      this.#line = findInsertLine({ ...freeze, lua }, step, false).luaLine;
     }
 
     this.#signatureState = getSignatureState(freeze.signature, step);
