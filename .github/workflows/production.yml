@@ -24,6 +24,7 @@ jobs:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
+          BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
         run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4

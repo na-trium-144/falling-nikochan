@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/worker",
-  "version": "13.10.0",
+  "version": "13.11.0",
   "private": true,
   "type": "module",
   "scripts": {

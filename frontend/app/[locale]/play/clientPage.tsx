@@ -637,10 +637,6 @@ function Play(props: Props) {
                     auto
                   ),
                 } satisfies RecordPost),
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
               });
             } catch {
               //ignore
