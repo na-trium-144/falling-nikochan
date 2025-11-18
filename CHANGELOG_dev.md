@@ -1,3 +1,7 @@
+## ver. 13.11 - 2025/11/19 [#835](https://github.com/na-trium-144/falling-nikochan/pull/835)
+
+* メインのバックエンドがサーバーエラーを起こしている場合にサブのバックエンドを試す
+
 ## ver. 13.10 - 2025/11/05 [#832](https://github.com/na-trium-144/falling-nikochan/pull/832)
 
 * 速度変化中に音符がある場合の動作を修正
