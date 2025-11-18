@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
-import { Bindings, cacheControl, API_CACHE_MAX_AGE } from "../env.js";
+import { Bindings, cacheControl } from "../env.js";
 import {
   CidSchema,
   RecordGetSummary,
@@ -12,6 +12,9 @@ import { MongoClient } from "mongodb";
 import { env } from "hono/adapter";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
+
+// Cache duration for this API endpoint (in seconds)
+const CACHE_MAX_AGE = 600;
 
 export interface PlayRecordEntry {
   cid: string;
@@ -29,7 +32,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     "/:cid",
     cache({
       cacheName: "api-record",
-      cacheControl: `max-age=${API_CACHE_MAX_AGE}`,
+      cacheControl: `max-age=${CACHE_MAX_AGE}`,
     }),
     describeRoute({
       description: "Get play record summary for the chart.",
@@ -109,7 +112,7 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           })),
           200,
           {
-            "cache-control": cacheControl(env(c), API_CACHE_MAX_AGE),
+            "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
           }
         );
       } finally {
