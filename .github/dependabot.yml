@@ -12,3 +12,13 @@ updates:
     open-pull-requests-limit: 50
     ignore:
       - dependency-name: "@fontsource/*"
+    groups:
+      next:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "eslint-config-next"
+      tailwindcss:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"

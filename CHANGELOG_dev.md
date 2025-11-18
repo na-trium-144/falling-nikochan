@@ -1,3 +1,24 @@
+## ver. 13.11 - 2025/11/19 [#835](https://github.com/na-trium-144/falling-nikochan/pull/835)
+
+* メインのバックエンドがサーバーエラーを起こしている場合にサブのバックエンドを試す
+
+## ver. 13.10 - 2025/11/05 [#832](https://github.com/na-trium-144/falling-nikochan/pull/832)
+
+* 速度変化中に音符がある場合の動作を修正
+
+## ver. 13.9 - 2025/11/03 [#829](https://github.com/na-trium-144/falling-nikochan/pull/829)
+
+* 人気順表示(/api/popular)で短い曲のプレイ回数のカウントを低く見積もるように変更
+    * 最後までプレイしたら1回とカウントされる仕様であり、極端に短い曲は途中で中断することが少なく有利になってしまうため。
+
+## ver. 13.8 - 2025/10/29 [#819](https://github.com/na-trium-144/falling-nikochan/pull/819)
+
+* オートプレイ中のキー・タップ判定を無効化
+
+## ver. 13.7 - 2025/10/23 [#801](https://github.com/na-trium-144/falling-nikochan/pull/801)
+
+* 現在のワークスペースの使い方がbun 1.3で動作しなくなったため、bun対応を諦めnpmワークスペースに移行
+
 ## ver. 13.6 - 2025/10/03 [#797](https://github.com/na-trium-144/falling-nikochan/pull/797)
 
 * キャッシュがない状態でshareを開くと空ページになるバグを修正

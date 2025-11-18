@@ -5,20 +5,7 @@ on:
 permissions:
   contents: read
 jobs:
-  check-lockfile:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: oven-sh/setup-bun@v2
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20.x
-    - run: bun i --ignore-scripts --lockfile-only
-    - run: npm i --ignore-scripts --package-lock-only
-    - name: Abort if lockfile changed
-      run: '[ -z "$(git status -s)" ]'
-
-  lint: # uses node
+  lint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -35,7 +22,7 @@ jobs:
       env:
         ALLOW_FETCH_ERROR: "1"
 
-  test: # uses bun
+  test:
     runs-on: ubuntu-latest
     env:
       MONGODB_URI: mongodb://localhost:27017
@@ -43,33 +30,40 @@ jobs:
       # API_NO_RATELIMIT: "1"
     steps:
     - uses: actions/checkout@v4
-    - uses: oven-sh/setup-bun@v2
-    - run: bun i --frozen-lock
-    - run: bun mongo-docker
-    - run: bun route:test
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - run: npm ci
+    - run: npm run mongo-docker
+    - run: npm run -w route test
 
   format:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: oven-sh/setup-bun@v2
-    - run: bun i --frozen-lock
-    - run: bunx prettier --check .
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - run: npm ci
+    - run: npx prettier --check .
 
-  vercel-build: # uses bun
+  vercel-build:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
     - uses: actions/checkout@v4
-    - uses: oven-sh/setup-bun@v2
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
     - name: Pull Vercel Environment Information
-      run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
       env:
         MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
-      run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:
@@ -78,7 +72,7 @@ jobs:
         include-hidden-files: true
 
   vercel-deploy:
-    needs: [check-lockfile, lint, test, vercel-build]
+    needs: [lint, test, vercel-build]
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -86,14 +80,16 @@ jobs:
     steps:
     # .vercel/output と、それとは別に node_modules も必要
     - uses: actions/checkout@v4
-    - uses: oven-sh/setup-bun@v2
-    - run: bun i --frozen-lockfile
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - run: npm ci
     - name: Pull Vercel Environment Information
-      run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Download .vercel/output
       uses: actions/download-artifact@v4
       with:
         name: vercel-output
         path: .vercel/output
     - name: Deploy Project Artifacts to Vercel
-      run: bunx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

@@ -637,10 +637,6 @@ function Play(props: Props) {
                     auto
                   ),
                 } satisfies RecordPost),
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
               });
             } catch {
               //ignore
@@ -767,29 +763,31 @@ function Play(props: Props) {
           stop();
         } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
           exit();
-        } else {
+        } else if (!(chartPlaying && auto)) {
           flash();
           hit(inputTypes.keyboard);
         }
       }}
       onPointerDown={(e) => {
-        flash();
-        switch (e.pointerType) {
-          case "mouse":
-            hit(inputTypes.mouse);
-            break;
-          case "pen":
-            hit(inputTypes.pen);
-            break;
-          case "touch":
-            hit(inputTypes.touch);
-            break;
-          default:
-            console.warn(`unknown pointer type: ${e.pointerType}`);
-            hit(0);
-            break;
+        if (!(chartPlaying && auto)) {
+          flash();
+          switch (e.pointerType) {
+            case "mouse":
+              hit(inputTypes.mouse);
+              break;
+            case "pen":
+              hit(inputTypes.pen);
+              break;
+            case "touch":
+              hit(inputTypes.touch);
+              break;
+            default:
+              console.warn(`unknown pointer type: ${e.pointerType}`);
+              hit(0);
+              break;
+          }
+          e.preventDefault();
         }
-        e.preventDefault();
       }}
       onPointerUp={(e) => {
         if (

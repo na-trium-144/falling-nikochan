@@ -1,4 +1,4 @@
-import { expect, test, describe } from "bun:test";
+import { expect, test, describe } from "vitest";
 import { app, dummyChart, dummyDate, initDb } from "./init";
 import { ChartBrief, hashLevel } from "@falling-nikochan/chart";
 

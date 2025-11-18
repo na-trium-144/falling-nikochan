@@ -1,4 +1,4 @@
-import { expect, test, describe } from "bun:test";
+import { expect, test, describe } from "vitest";
 import { app, dummyLevel13, dummyLevel6, initDb } from "./init";
 import { Level13Play, Level6Play } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";

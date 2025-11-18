@@ -27,6 +27,9 @@ const config = {
     new webpack.DefinePlugin({
       "process.env.API_ENV": JSON.stringify(process.env.API_ENV),
       "process.env.ASSET_PREFIX": JSON.stringify(process.env.ASSET_PREFIX),
+      "process.env.BACKEND_ALT_PREFIX": JSON.stringify(
+        process.env.BACKEND_ALT_PREFIX
+      ),
       process: "{cwd:()=>''}",
     }),
   ],

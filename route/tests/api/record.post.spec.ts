@@ -1,4 +1,4 @@
-import { expect, test, describe } from "bun:test";
+import { expect, test, describe } from "vitest";
 import { app, initDb } from "./init";
 import { RecordPost, hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";

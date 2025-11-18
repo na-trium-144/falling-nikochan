@@ -18,13 +18,13 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
 
 ## Development
 
-* Install [Node.js](https://nodejs.org/ja/download) (>=20) or [Bun](https://bun.sh/docs/installation) (>=1.2).
+* Install [Node.js](https://nodejs.org/ja/download) (>=20).
 * Install [MongoDB](https://www.mongodb.com/docs/manual/installation/) and run on `localhost:27017`
     * If you have Docker installed, it is easy to run and recommended
         ```sh
         docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest
         ```
-        * or `npm run mongo-docker`, `bun mongo-docker` does the same.
+        * or `npm run mongo-docker` does the same.
     * Falling Nikochan creates and uses a database named `nikochan` in it
 * Create a `.env` file with the following contents
     ```sh
@@ -40,26 +40,27 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         * `ASSET_PREFIX` (backend & frontend): `https://domain-of-your-assets/` or unset
         * `BACKEND_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
         * `BACKEND_OG_PREFIX` (backend): alternate backend for og image generation, `https://domain-of-your-backend/` or unset
+        * `BACKEND_ALT_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
         * `NO_PREFETCH` (frontend): `1` or unset
         * `GOOGLE_API_KEY` (backend): API key for YouTube Data API v3 (optional)
         * `ALLOW_FETCH_ERROR` (frontend): `1` or unset
         * `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`,`GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` (for cronjob)
 * Install dependencies
     ```sh
-    npm ci  # or  bun i
+    npm ci
     ```
     * [GitHub Action ensures](.github/workflows/sync-lock.yaml) the two lockfiles synchronized with package.json.
 * Common files (chart/)
     * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
         ```sh
-        npm run t  # or  bun t
+        npm run t
         ```
 * Backend
     * Serves /api, /share, /og, and / (redirect).
     * Built with Hono, so it can be run with many runtimes.
-    * For a local development environment, server can be run with Node.js or Bun (`http://localhost:8787`)
+    * For a local development environment, server can be run with Node.js (`http://localhost:8787`)
         ```sh
-        npm run ldev  # or  bun bdev
+        npm run ldev
         ```
     * For the deployment, currently using Cloudflare Worker and Vercel
 * Frontend
@@ -67,20 +68,17 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
         * Instead, `/ja/share/placeholder` shows the placeholder page.
         ```sh
-        npm run ndev  # or  bun ndev
+        npm run ndev
         ```
     * Or, SSR with exported html files
         * All pages should work by accessing the backend (`http://localhost:8787`) after building frontend, but there is no hot-reload.
         ```sh
         npm run nbuild && npm run swbuild
-        # or  bun nbuild && bun swbuild
         ```
-    * As of Bun v1.2.2, `bun -b nbuild` seems to be unstable for this project.
 * Service Worker
     * Build frontend and service worker
     ```sh
     npm run nbuild && npm run swbuild
-    # or  bun nbuild && bun swbuild
     ```
     * Access the backend (`http://localhost:8787`) to see the service worker in action
     * The service worker ([worker/entry.ts](worker/entry.ts) bundled into /sw.js) fetches and stores all the assets and the pages, except for /api and /og.
