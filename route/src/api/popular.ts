@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cache } from "hono/cache";
 import { Db, MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
@@ -7,6 +8,9 @@ import { PlayRecordEntry } from "./record.js";
 import { numLatest, popularDays } from "@falling-nikochan/chart";
 import { describeRoute, resolver } from "hono-openapi";
 import * as v from "valibot";
+
+// Cache duration for this API endpoint (in seconds)
+const CACHE_MAX_AGE = 600;
 
 const CidCountSchema = v.object({
   cid: v.string(),
@@ -57,6 +61,10 @@ export async function getPopularCharts(db: Db): Promise<CidCount[]> {
 
 const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
+  cache({
+    cacheName: "api-popular",
+    cacheControl: `max-age=${CACHE_MAX_AGE}`,
+  }),
   describeRoute({
     description:
       `Get the list of popular charts in the last ${popularDays} days. ` +
@@ -78,7 +86,7 @@ const popularApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
       return c.json(await getPopularCharts(db), 200, {
-        "cache-control": cacheControl(env(c), 600),
+        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
       });
     } finally {
       await client.close();

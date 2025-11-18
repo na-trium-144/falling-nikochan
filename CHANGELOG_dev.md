@@ -1,3 +1,7 @@
+## ver. 13.12 - 2025/11/19 [#798](https://github.com/na-trium-144/falling-nikochan/pull/798)
+
+* キャッシュできるAPIでHonoのCache Middlewareを使う
+
 ## ver. 13.11 - 2025/11/19 [#835](https://github.com/na-trium-144/falling-nikochan/pull/835)
 
 * メインのバックエンドがサーバーエラーを起こしている場合にサブのバックエンドを試す
