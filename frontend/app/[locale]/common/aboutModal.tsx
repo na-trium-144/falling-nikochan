@@ -3,7 +3,10 @@ import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { Pager, pagerButtonClass } from "./pager";
-import { AboutContent, maxAboutPageIndex } from "@/main/about/[aboutIndex]/aboutContents";
+import {
+  AboutContent,
+  maxAboutPageIndex,
+} from "@/main/about/[aboutIndex]/aboutContents";
 
 interface AProps {
   aboutAnim: boolean;

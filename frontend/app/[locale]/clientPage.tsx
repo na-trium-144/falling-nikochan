@@ -15,7 +15,7 @@ import {
 import { useDisplayMode } from "./scale.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ReactNode, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import Input from "./common/input.jsx";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
@@ -31,7 +31,6 @@ import { AboutModal } from "./common/aboutModal.jsx";
 
 interface Props {
   locale: string;
-  aboutContents: ReactNode[];
 }
 export default function TopPage(props: Props) {
   const { screenWidth, rem } = useDisplayMode();

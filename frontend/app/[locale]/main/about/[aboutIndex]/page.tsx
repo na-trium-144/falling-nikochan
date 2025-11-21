@@ -1,10 +1,5 @@
 import { IndexMain } from "@/main/main.js";
-import { AboutContent2 } from "./2-play.js";
-import { AboutContent1 } from "./1-about.js";
-import { AboutContent3 } from "./3-edit.js";
 import { Pager } from "@/common/pager.js";
-import { AboutContent4 } from "./4-level.js";
-import { AboutContent5 } from "./5-judge.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata } from "@/metadata.js";
 import { AboutContent, maxAboutPageIndex } from "./aboutContents.jsx";
