@@ -61,9 +61,9 @@ export function AboutModal(props: AProps) {
           />
           <div
             className="flex-1 flex flex-row "
-            style={{ width: maxAboutPageIndex * 100 + "%" }}
+            style={{ width: (maxAboutPageIndex + 1) * 100 + "%" }}
           >
-            {Array.from(new Array(maxAboutPageIndex)).map((_, i) => (
+            {Array.from(new Array(maxAboutPageIndex + 1)).map((_, i) => (
               // 選択中のページ以外を非表示にするが、
               // 非表示のページも含めてコンテンツの高さが最も高いものに合わせたサイズで表示させたいので、
               // 全部横に並べて非表示のページをtranslateXで画面外に送る
