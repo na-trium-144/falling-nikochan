@@ -7,7 +7,7 @@ import { AboutContent4 } from "./4-level.js";
 import { AboutContent5 } from "./5-judge.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata } from "@/metadata.js";
-import { maxAboutPageIndex } from "./pager.js";
+import { AboutContent, maxAboutPageIndex } from "./aboutContents.jsx";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -52,19 +52,7 @@ export default async function AboutTab({ params }: Props) {
         title={t("title")}
       />
       <div className="flex-1 text-center">
-        {aboutIndex === 1 ? (
-          <AboutContent1 locale={locale} />
-        ) : aboutIndex === 2 ? (
-          <AboutContent2 />
-        ) : aboutIndex === 3 ? (
-          <AboutContent3 locale={locale} />
-        ) : aboutIndex === 4 ? (
-          <AboutContent4 locale={locale} />
-        ) : aboutIndex === 5 ? (
-          <AboutContent5 locale={locale} />
-        ) : (
-          <p>Not Found</p>
-        )}
+        <AboutContent index={aboutIndex} locale={locale} />
       </div>
     </IndexMain>
   );

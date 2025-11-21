@@ -1,3 +1,5 @@
+"use client";
+
 import {
   badFastSec,
   badLateSec,
@@ -9,14 +11,11 @@ import {
   okSec,
   rankStr,
 } from "@falling-nikochan/chart";
-import { getTranslations } from "@falling-nikochan/i18n/dynamic";
+import { useTranslations } from "next-intl";
 import { JudgeIcon } from "@/play/statusBox.js";
 
-interface Props {
-  locale: string;
-}
-export async function AboutContent5(props: Props) {
-  const t = await getTranslations(props.locale, "about.5");
+export function AboutContent5() {
+  const t = useTranslations("about.5");
   return (
     <>
       <div className="mb-4 space-y-2">

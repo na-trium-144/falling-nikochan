@@ -54,6 +54,8 @@ export default {
       latestDesc:
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。" +
         "<unicodeX></unicodeX> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
+      latestDescText:
+        "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
       latestDesc2:
         "譜面を制作する方へ: 譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
       sample: "サンプル譜面",
