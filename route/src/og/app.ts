@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { ExecutionContext, Hono } from "hono";
 import { Bindings, cacheControl } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
@@ -26,7 +26,11 @@ export interface ChartBriefMin {
 
 const ogApp = (config: {
   ImageResponse: any;
-  fetchBrief: (e: Bindings, cid: string) => Response | Promise<Response>;
+  fetchBrief: (
+    e: Bindings,
+    cid: string,
+    ctx: ExecutionContext | undefined
+  ) => Response | Promise<Response>;
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -38,7 +42,13 @@ const ogApp = (config: {
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
       if (!c.req.query("brief")) {
-        const briefRes = await config.fetchBrief(env(c), cid);
+        let executionCtx: ExecutionContext | undefined = undefined;
+        try {
+          executionCtx = c.executionCtx;
+        } catch {
+          //ignore
+        }
+        const briefRes = await config.fetchBrief(env(c), cid, executionCtx);
         if (!briefRes.ok) {
           let message = "";
           try {

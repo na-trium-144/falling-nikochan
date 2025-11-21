@@ -317,7 +317,7 @@ const app = new Hono({ strict: false })
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: (_e, cid: string) =>
+      fetchBrief: (_e, cid: string /*, _ctx */) =>
         fetchAPI(self.origin + `/api/brief/${cid}`),
       fetchStatic,
       languageDetector,
