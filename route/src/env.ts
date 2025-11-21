@@ -3,7 +3,7 @@ import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
 import briefApp from "./api/brief.js";
-import { Hono } from "hono";
+import { ExecutionContext, Hono } from "hono";
 import { onError } from "./error.js";
 
 export interface Bindings {
@@ -52,11 +52,11 @@ export const fetchBrief =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
   }) =>
-  (e: Bindings, cid: string) => {
+  (e: Bindings, cid: string, ctx: ExecutionContext | undefined) => {
     return new Hono<{ Bindings: Bindings }>({ strict: false })
       .route("/api/brief", briefApp)
       .onError(onError({ fetchStatic: config.fetchStatic }))
-      .request(`/api/brief/${cid}`, undefined, e);
+      .request(`/api/brief/${cid}`, undefined, e, ctx);
   };
 export function fetchStatic(e: Bindings, url: URL) {
   return fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
