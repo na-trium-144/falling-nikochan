@@ -1,13 +1,12 @@
+"use client";
+
 import clsx from "clsx/lite";
 import { levelTypes } from "@falling-nikochan/chart";
 import { levelColors } from "@/common/levelColors";
-import { getTranslations } from "@falling-nikochan/i18n/dynamic";
+import { useTranslations } from "next-intl";
 
-interface Props {
-  locale: string;
-}
-export async function AboutContent4(props: Props) {
-  const t = await getTranslations(props.locale, "about.4");
+export function AboutContent4() {
+  const t = useTranslations("about.4");
   return (
     <>
       <div className="mb-4 space-y-2">

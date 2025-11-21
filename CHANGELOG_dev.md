@@ -1,3 +1,7 @@
+## ver. 13.13 - 2025/11/21 [#836](https://github.com/na-trium-144/falling-nikochan/pull/836)
+
+* /main 以下の各ページにもFallingNikochanについてのモーダル表示へのリンクを表示する
+
 ## ver. 13.12 - 2025/11/19 [#798](https://github.com/na-trium-144/falling-nikochan/pull/798)
 
 * キャッシュできるAPIでHonoのCache Middlewareを使う
