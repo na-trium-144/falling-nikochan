@@ -90,395 +90,68 @@ import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartFile } from "./file";
+import { useChartState } from "./chartState.js";
 
-export default function EditAuth(props: {
+export default function Edit(props: {
   locale: string;
   guideContents: ReactNode[];
 }) {
   const { locale } = props;
-  const t = useTranslations("edit");
-  const te = useTranslations("error");
-  const router = useRouter();
-
-  // cid が "new" の場合空のchartで編集をはじめて、post時にcidが振られる
-  const cidInitial = useRef<string>("");
-  const [cid, setCid] = useState<string | undefined>("");
-
-  // chartのgetやpostに必要なパスワード
-  // post時には前のchartのパスワードを入力し、その後は新しいパスワードを使う
-  const [editPasswd, setEditPasswd] = useState<string>("");
-  // fetchに成功したらセット、
-  // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
-  const currentPasswd = useRef<string | null>(null);
-  const [savePasswd, setSavePasswd] = useState<boolean>(false);
-  const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
   const [guidePage, setGuidePage] = useState<number | null>(null);
 
-  const [chart, setChart] = useState<ChartEdit>();
-  const [errorStatus, setErrorStatus] = useState<number>();
-  const [errorMsg, setErrorMsg] = useState<string>();
-  const [convertedFrom, setConvertedFrom] = useState<number>(currentChartVer);
-
-  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
-  const [hasChange, setHasChange] = useState<boolean>(false);
-
-  const passwdRef = useRef<HTMLInputElement>(null);
-
-  // PWAでテストプレイを押した場合に編集中の譜面データをsessionStorageに退避
-  const saveEditSession = useCallback(() => {
-    sessionStorage.setItem(
-      "editSession",
-      JSON.stringify({
-        cid,
-        editPasswd,
-        currentPasswd,
-        savePasswd,
-        chart,
-        convertedFrom,
-        currentLevelIndex,
-        hasChange,
-      })
-    );
-  }, [
-    cid,
-    editPasswd,
-    currentPasswd,
-    savePasswd,
-    chart,
-    convertedFrom,
-    currentLevelIndex,
-    hasChange,
-  ]);
-  const fetchChart = useCallback(
-    async (
-      isFirst: boolean,
-      bypass: boolean,
-      editPasswd: string,
-      savePasswd: boolean
-    ) => {
-      if (sessionStorage.getItem("editSession")) {
-        const data = JSON.parse(sessionStorage.getItem("editSession")!);
-        sessionStorage.removeItem("editSession");
-        if (
-          data.cid === cidInitial.current ||
-          (data.cid === undefined && cidInitial.current === "new")
-        ) {
-          setCid(data.cid);
-          setEditPasswd(data.editPasswd);
-          currentPasswd.current = data.currentPasswd.current;
-          setSavePasswd(data.savePasswd);
-          setChart(data.chart);
-          setConvertedFrom(data.convertedFrom);
-          setCurrentLevelIndex(data.currentLevelIndex);
-          setHasChange(data.hasChange);
-          setPasswdFailed(false);
-          setLoading(false);
-          setErrorStatus(undefined);
-          setErrorMsg(undefined);
-          return;
-        }
-      }
-      if (cidInitial.current === "new") {
-        setGuidePage(1);
-        setCid(undefined);
-        setPasswdFailed(false);
-        setLoading(false);
-        setChart(emptyChart(locale));
-      } else if (cidInitial.current) {
-        setCid(cidInitial.current);
-        setPasswdFailed(false);
-        setLoading(true);
-        const q = new URLSearchParams();
-        if (getPasswd(cidInitial.current)) {
-          q.set("ph", getPasswd(cidInitial.current)!);
-        }
-        if (editPasswd) {
-          currentPasswd.current = editPasswd;
-          q.set("p", currentPasswd.current);
-        } else {
-          currentPasswd.current = null;
-        }
-        if (bypass) {
-          q.set("pbypass", "1");
-        }
-        let res: Response | null = null;
-        try {
-          res = await fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/chartFile/${cidInitial.current}?` +
-              q.toString(),
-            {
-              cache: "no-store",
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            }
-          );
-          if (res?.ok) {
-            try {
-              const chartRes:
-                | Chart5
-                | Chart6
-                | Chart7
-                | Chart8Edit
-                | Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
-              setConvertedFrom(chartRes.ver);
-              const chart: ChartEdit = await validateChart(chartRes);
-              if (savePasswd) {
-                if (currentPasswd.current) {
-                  try {
-                    const res = await fetch(
-                      process.env.BACKEND_PREFIX +
-                        `/api/hashPasswd/${cidInitial.current}?p=${currentPasswd.current}`,
-                      {
-                        credentials:
-                          process.env.NODE_ENV === "development"
-                            ? "include"
-                            : "same-origin",
-                      }
-                    );
-                    setPasswd(cidInitial.current, await res.text());
-                  } catch {
-                    //ignore
-                  }
-                }
-              } else {
-                unsetPasswd(cidInitial.current);
-              }
-              setChart(chart);
-              setErrorStatus(undefined);
-              setErrorMsg(undefined);
-              addRecent("edit", cidInitial.current);
-              updatePlayCountForReview();
-            } catch (e) {
-              console.error(e);
-              setChart(undefined);
-              setErrorStatus(undefined);
-              setErrorMsg(te("badResponse"));
-            }
-          } else {
-            if (res?.status === 401) {
-              if (!isFirst) {
-                setPasswdFailed(true);
-              }
-              setChart(undefined);
-            } else {
-              setChart(undefined);
-              setErrorStatus(res?.status);
-              try {
-                const message = ((await res?.json()) as { message?: string })
-                  .message;
-                if (te.has("api." + message)) {
-                  setErrorMsg(te("api." + message));
-                } else {
-                  setErrorMsg(message || te("unknownApiError"));
-                }
-              } catch {
-                setErrorMsg(te("unknownApiError"));
-              }
-            }
-          }
-        } catch (e) {
-          console.error(e);
-          setChart(undefined);
-          setErrorStatus(undefined);
-          setErrorMsg(te("api.fetchError"));
-        }
-        setLoading(false);
-      } else {
-        router.push(`/${locale}/main/edit`);
-      }
-    },
-    [locale, te, router]
-  );
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has("cid")) {
-      cidInitial.current = params.get("cid")!;
-    }
-    setSavePasswd(preferSavePasswd());
-    document.title = titleWithSiteName(
-      t("title", { title: "", cid: cidInitial.current })
-    );
-    // 保存済みの古いハッシュを更新する必要があるので、savePasswd=true
-    // レンダリングの都合上 cidInitial.current を先に反映させたいため、setTimeoutで1段階遅延
-    const ft = setTimeout(() => void fetchChart(true, false, "", true));
-    return () => clearTimeout(ft);
-  }, [fetchChart, t]);
-  useEffect(() => {
-    if (
-      chart === undefined &&
-      !loading &&
-      !errorStatus &&
-      !errorMsg &&
-      passwdRef.current
-    ) {
-      passwdRef.current.focus();
-      passwdRef.current.select();
-    }
-  }, [chart, loading, errorStatus, errorMsg]);
-
-  return (
-    <Page
-      saveEditSession={saveEditSession}
-      guideContents={props.guideContents}
-      chart={chart}
-      setChart={setChart}
-      cid={cid}
-      setCid={setCid}
-      guidePage={guidePage}
-      setGuidePage={setGuidePage}
-      convertedFrom={convertedFrom}
-      setConvertedFrom={setConvertedFrom}
-      locale={locale}
-      currentPasswd={currentPasswd}
-      savePasswdInitial={savePasswd}
-      currentLevelIndex={currentLevelIndex}
-      setCurrentLevelIndex={setCurrentLevelIndex}
-      hasChange={hasChange}
-      setHasChange={setHasChange}
-      modal={
-        chart === undefined ? (
-          loading ? (
-            <p>
-              <SlimeSVG />
-              Loading...
-            </p>
-          ) : errorStatus !== undefined || errorMsg !== undefined ? (
-            <p>
-              {errorStatus ? `${errorStatus}: ` : ""}
-              {errorMsg}
-            </p>
-          ) : (
-            <div className="text-center ">
-              <p className="mb-2 ">
-                <span className="">{t("chartId")}:</span>
-                <span className="ml-2 ">{cid}</span>
-              </p>
-              <p>{t("enterPasswd")}</p>
-              {passwdFailed && <p>{t("passwdFailed")}</p>}
-              <Input
-                ref={passwdRef}
-                actualValue={editPasswd}
-                updateValue={setEditPasswd}
-                left
-                passwd
-                onEnter={(editPasswd) =>
-                  fetchChart(false, false, editPasswd, savePasswd)
-                }
-              />
-              <Button
-                text={t("submitPasswd")}
-                onClick={() => fetchChart(false, false, editPasswd, savePasswd)}
-              />
-              <p>
-                <CheckBox value={savePasswd} onChange={setSavePasswd}>
-                  {t("savePasswd")}
-                </CheckBox>
-              </p>
-              {process.env.NODE_ENV === "development" && (
-                <p className="mt-2 ">
-                  <button
-                    className={clsx(linkStyle1, "w-max m-auto")}
-                    onClick={() => {
-                      void (async () => {
-                        await fetchChart(false, true, editPasswd, savePasswd);
-                      })();
-                    }}
-                  >
-                    {t("bypassPasswd")}
-                  </button>
-                </p>
-              )}
-            </div>
-          )
-        ) : null
-      }
-    />
-  );
-}
-
-interface Props {
-  saveEditSession: () => void;
-  guideContents: ReactNode[];
-  chart?: ChartEdit;
-  setChart: (chart: ChartEdit) => void;
-  cid: string | undefined;
-  setCid: (cid: string | undefined) => void;
-  guidePage: number | null;
-  setGuidePage: (v: number | null) => void;
-  convertedFrom: number;
-  setConvertedFrom: (v: number) => void;
-  locale: string;
-  currentPasswd: { current: string | null };
-  savePasswdInitial: boolean;
-  currentLevelIndex: number;
-  setCurrentLevelIndex: (v: number) => void;
-  hasChange: boolean;
-  setHasChange: (v: boolean) => void;
-  modal?: ReactNode;
-}
-function Page(props: Props) {
-  const {
-    chart,
-    setChart,
-    cid,
-    setCid,
-    convertedFrom,
-    setConvertedFrom,
-    locale,
-    currentLevelIndex,
-    setCurrentLevelIndex,
-    hasChange,
-    setHasChange,
-    guidePage,
-    setGuidePage,
-  } = props;
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
-  const currentLevel = chart?.levels.at(currentLevelIndex);
+  const {
+    chart,
+    convertedFrom,
+    currentLevelIndex,
+    setCurrentLevelIndex,
+    cid,
+    currentPasswd,
+    savePasswd,
+    setSavePasswd,
+    loadStatus,
+    isNewChart,
+    fetchChart,
+    saveEditSession,
+  } = useChartState({
+    onLoad: (cid) => {
+      if (cid === "new") {
+        setGuidePage(1);
+      } else {
+        addRecent("edit", cid);
+      }
+      updatePlayCountForReview();
+    },
+    locale,
+  });
 
   const luaExecutor = useLuaExecutor();
 
-  const [sessionId, setSessionId] = useState<number>();
-  const [sessionData, setSessionData] = useState<SessionData>();
-  const chartNumEvent = chart ? numEvents(chart) : 0;
   // 変更する場合は空文字列以外をセットすると、サーバーへ送信時にchart.changePasswdにセットされる
   const [newPasswd, setNewPasswd] = useState<string>("");
-  const [savePasswd, setSavePasswd] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (chart && savePasswd === null) {
-      setSavePasswd(props.savePasswdInitial);
-    }
-  }, [chart, savePasswd, props.savePasswdInitial]);
 
-  // 譜面の更新 (メタデータの変更など)
-  const changeChart = useCallback(
-    (chart: ChartEdit) => {
-      setHasChange(true);
-      setChart(chart);
-    },
-    [setChart, setHasChange]
-  );
   useEffect(() => {
     document.title = titleWithSiteName(
-      t("title", { title: chart?.title || "", cid: cid || "" })
+      t("title", { title: chart?.meta.title || "", cid: cid || "" })
     );
   });
+
+  const [sessionId, setSessionId] = useState<number>();
+  const [sessionData, setSessionData] = useState<SessionData>();
+
   useEffect(() => {
-    void (async () => {
+    if (sessionId === undefined) {
+      setSessionId(initSession(null));
+    }
+    const updateSession = async () => {
       if (chart) {
-        if (sessionId === undefined) {
-          setSessionId(initSession(null));
-        }
         const data = {
           cid: cid,
           lvIndex: currentLevelIndex,
-          brief: await createBrief(chart, new Date().getTime()),
-          level: convertToPlay(chart, currentLevelIndex),
+          brief: await createBrief(chart.toObject(), new Date().getTime()),
+          level: convertToPlay(chart.toObject(), currentLevelIndex),
           editing: true,
         };
         setSessionData(data);
@@ -486,42 +159,12 @@ function Page(props: Props) {
         // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
         // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
       }
-    })();
+    };
+    chart?.on("changeAnyData", updateSession);
+    return () => {
+      chart?.off("changeAnyData", updateSession);
+    };
   }, [sessionId, chart, currentLevelIndex, cid]);
-
-  // レベルの更新
-  // levelMin(メタデータ更新時) または lua のみを引数にとり、実行し、chartに反映
-  const changeLevel = async (
-    newLevel: LevelMin | LevelEdit | { lua: string[] } | null | undefined
-  ) => {
-    if (chart && newLevel && currentLevelIndex < chart.levels.length) {
-      let newChart: ChartEdit = {
-        ...chart,
-        levels: chart.levels.map((l) => ({ ...l })),
-      };
-      newChart.levels[currentLevelIndex] = {
-        ...newChart.levels[currentLevelIndex],
-        ...newLevel,
-      };
-      luaExecutor.abortExec();
-      changeChart(newChart);
-      // 再度コピーしないとstateが更新されない
-      newChart = {
-        ...newChart,
-        levels: newChart.levels.map((l) => ({ ...l })),
-      };
-      const levelFreezed = await luaExecutor.exec(
-        newChart.levels[currentLevelIndex].lua.join("\n")
-      );
-      if (levelFreezed) {
-        newChart.levels[currentLevelIndex] = {
-          ...newChart.levels[currentLevelIndex],
-          ...levelFreezed,
-        };
-        changeChart(newChart);
-      }
-    }
-  };
 
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
@@ -538,19 +181,20 @@ function Page(props: Props) {
 
   const ref = useRef<HTMLDivElement | null>(null);
 
+  const currentLevel = chart?.levels.at(currentLevelIndex);
+
   // 現在時刻 offsetを引く前
   // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
   const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
     useState<number>(0);
   // 現在時刻に対応するstep
-  const [currentStep, setCurrentStep] = useState<Step>(stepZero());
-  const [currentLine, setCurrentLine] = useState<number | null>(null);
+  const currentStep = currentLevel?.current.step;
+  const currentLine = currentLevel?.current.line;
   // snapの刻み幅 を1stepの4n分の1にする
   const [snapDivider, setSnapDivider] = useState<number>(4);
   const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
 
-  const ss =
-    currentLevel && getSignatureState(currentLevel.signature, currentStep);
+  const ss = currentLevel?.current.signatureState;
   const currentStepStr = ss
     ? ss.barNum +
       1 +
@@ -564,119 +208,20 @@ function Page(props: Props) {
   // offsetを引いた後の時刻
   const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
   // 現在選択中の音符 (currentStepSnappedに一致)
-  const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(-1);
+  const currentNoteIndex = currentLevel?.current.noteIndex;
   const hasCurrentNote =
+    currentNoteIndex !== undefined &&
     currentNoteIndex >= 0 &&
-    currentLevel?.notes.at(currentNoteIndex) !== undefined;
-  const [notesCountInStep, setNotesCountInStep] = useState<number>(0);
-  const [notesIndexInStep, setNotesIndexInStep] = useState<number>(0);
-  const canAddNote = !(
-    (currentLevel?.type === "Single" && notesCountInStep >= 1) ||
-    (currentLevel?.type === "Double" && notesCountInStep >= 2)
-  );
-  useEffect(() => {
-    if (currentLevel) {
-      let notesCountInStep = 0;
-      let notesIndexInStep = 0;
-      for (let i = 0; i < currentLevel.notes.length; i++) {
-        const n = currentLevel.notes[i];
-        if (stepCmp(currentStep, n.step) > 0) {
-          continue;
-        } else if (stepCmp(currentStep, n.step) == 0) {
-          if (i < currentNoteIndex) {
-            notesIndexInStep++;
-          }
-          notesCountInStep++;
-        } else {
-          break;
-        }
-      }
-      setNotesCountInStep(notesCountInStep);
-      setNotesIndexInStep(notesIndexInStep);
-    }
-  }, [currentLevel, currentStep, currentNoteIndex]);
-
-  // currentTimeが変わったときcurrentStepを更新
-  const prevTimeSec = useRef<number>(-1);
-  const prevSnapDivider = useRef<number>(-1);
-  useEffect(() => {
-    if (
-      currentLevel &&
-      (currentTimeSec !== prevTimeSec.current ||
-        snapDivider !== prevSnapDivider.current)
-    ) {
-      const step = getStep(
-        currentLevel.bpmChanges,
-        currentTimeSec,
-        snapDivider
-      );
-      if (stepCmp(step, currentStep) !== 0) {
-        setCurrentStep(step);
-      }
-      let noteIndex: number | undefined = undefined;
-      if (
-        !hasCurrentNote ||
-        stepCmp(currentLevel.notes[currentNoteIndex].step, step) != 0
-      ) {
-        if (currentTimeSec < prevTimeSec.current) {
-          noteIndex = currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, step) == 0
-          );
-        } else {
-          noteIndex = currentLevel.notes.findIndex(
-            (n) => stepCmp(n.step, step) == 0
-          );
-        }
-        if (currentNoteIndex !== noteIndex) {
-          setCurrentNoteIndex(noteIndex);
-        }
-      }
-      let line: number | null;
-      if (noteIndex !== undefined && noteIndex >= 0) {
-        line = currentLevel.notes[noteIndex].luaLine;
-      } else {
-        line = findInsertLine(currentLevel, step, false).luaLine;
-      }
-      if (currentLine !== line) {
-        setCurrentLine(line);
-      }
-    }
-    prevTimeSec.current = currentTimeSec;
-    prevSnapDivider.current = snapDivider;
-  }, [
-    currentLevel,
-    snapDivider,
-    currentTimeSec,
-    currentStep,
-    currentNoteIndex,
-    currentLine,
-    hasCurrentNote,
-  ]);
-
-  // それぞれの小節線位置のコード内での行番号
-  const [barLines, setBarLines] = useState<
-    { barNum: number; luaLine: number }[]
-  >([]);
-  useEffect(() => {
-    const barLines: { barNum: number; luaLine: number }[] = [];
-    if (currentLevel) {
-      let step = stepZero();
-      const lastRest = currentLevel.rest.at(
-        currentLevel.rest.length - 1
-      )?.begin;
-      while (lastRest !== undefined && stepCmp(step, lastRest) <= 0) {
-        const ss = getSignatureState(currentLevel.signature, step);
-        if (stepCmp(ss.offset, stepZero()) === 0) {
-          const line = findInsertLine(currentLevel, step, false).luaLine;
-          if (line !== null) {
-            barLines.push({ barNum: ss.barNum + 1, luaLine: line });
-          }
-        }
-        step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
-      }
-    }
-    setBarLines(barLines);
-  }, [currentLevel]);
+    currentLevel?.freeze.notes.at(currentNoteIndex) !== undefined;
+  const notesCountInStep = currentLevel?.current.notesCountInStep;
+  const notesIndexInStep = currentLevel?.current.notesIndexInStep;
+  const canAddNote =
+    notesCountInStep === undefined ||
+    !(
+      (currentLevel?.meta.type === "Single" && notesCountInStep >= 1) ||
+      (currentLevel?.meta.type === "Double" && notesCountInStep >= 2)
+    );
+  const barLines = currentLevel?.barLines;
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -726,11 +271,14 @@ function Page(props: Props) {
     if (currentLevel) {
       if (
         hasCurrentNote &&
-        currentLevel.notes[currentNoteIndex + 1] &&
-        stepCmp(currentStep, currentLevel.notes[currentNoteIndex + 1].step) ===
-          0
+        currentStep &&
+        currentLevel.freeze.notes[currentNoteIndex + 1] &&
+        stepCmp(
+          currentStep,
+          currentLevel.freeze.notes[currentNoteIndex + 1].step
+        ) === 0
       ) {
-        setCurrentNoteIndex(currentNoteIndex + 1);
+        currentLevel.selectNextNote();
       } else {
         seekStepRel(1);
       }
@@ -741,11 +289,14 @@ function Page(props: Props) {
     if (chart) {
       if (
         hasCurrentNote &&
-        currentLevel.notes[currentNoteIndex - 1] &&
-        stepCmp(currentStep, currentLevel.notes[currentNoteIndex - 1].step) ===
-          0
+        currentStep &&
+        currentLevel.freeze.notes[currentNoteIndex - 1] &&
+        stepCmp(
+          currentStep,
+          currentLevel.freeze.notes[currentNoteIndex - 1].step
+        ) === 0
       ) {
-        setCurrentNoteIndex(currentNoteIndex - 1);
+        currentLevel.selectPrevNote();
       } else {
         seekStepRel(-1);
       }
@@ -753,12 +304,14 @@ function Page(props: Props) {
     ref.current?.focus();
   };
   const seekStepRel = (move: number) => {
-    let newStep = stepAdd(currentStep, {
-      fourth: 0,
-      numerator: move,
-      denominator: snapDivider,
-    });
-    seekStepAbs(newStep, true);
+    if (currentStep) {
+      let newStep = stepAdd(currentStep, {
+        fourth: 0,
+        numerator: move,
+        denominator: snapDivider,
+      });
+      seekStepAbs(newStep, true);
+    }
   };
   const seekStepAbs = useCallback(
     (newStep: Step, focus = false) => {
@@ -768,7 +321,7 @@ function Page(props: Props) {
           newStep = stepZero();
         }
         changeCurrentTimeSec(
-          getTimeSec(currentLevel.bpmChanges, newStep) + chart.offset,
+          getTimeSec(currentLevel.freeze.bpmChanges, newStep) + chart.offset,
           focus
         );
       }
@@ -795,13 +348,6 @@ function Page(props: Props) {
     }
   }, [playing]);
 
-  const [notesAll, setNotesAll] = useState<Note[]>([]);
-  useEffect(() => {
-    if (chart) {
-      setNotesAll(loadChart(convertToPlay(chart, currentLevelIndex)).notes);
-    }
-  }, [chart, currentLevelIndex]);
-
   const {
     playSE,
     audioLatency,
@@ -824,7 +370,8 @@ function Page(props: Props) {
   const audioLatencyRef = useRef<number>(null!);
   audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {
-    if (playing && ytPlayer.current) {
+    const notesAll = currentLevel?.notes;
+    if (playing && ytPlayer.current && notesAll) {
       let index = 0;
       let t: ReturnType<typeof setTimeout> | null = null;
       const now =
@@ -836,6 +383,7 @@ function Page(props: Props) {
       }
       const playOne = () => {
         if (ytPlayer.current) {
+          const notesAll = currentLevel.notes;
           const now =
             ytPlayer.current.getCurrentTime() -
             (chart?.offset || 0) +
@@ -859,7 +407,7 @@ function Page(props: Props) {
         }
       };
     }
-  }, [playing, notesAll, playSE, chart?.offset]);
+  }, [playing, chart?.offset, playSE, currentLevel]);
   useEffect(() => {
     if (playing && ytPlayer.current && currentLevel) {
       let t: ReturnType<typeof setTimeout> | null = null;
@@ -867,7 +415,7 @@ function Page(props: Props) {
         ytPlayer.current.getCurrentTime() -
         (chart?.offset || 0) +
         audioLatencyRef.current;
-      let step = getStep(currentLevel.bpmChanges, now, 4);
+      let step = getStep(currentLevel.freeze.bpmChanges, now, 4);
       const playOne = () => {
         if (ytPlayer.current && currentLevel) {
           const now =
@@ -875,8 +423,8 @@ function Page(props: Props) {
             (chart?.offset || 0) +
             audioLatencyRef.current;
           t = null;
-          while (getTimeSec(currentLevel.bpmChanges, step) <= now) {
-            const ss = getSignatureState(currentLevel.signature, step);
+          while (getTimeSec(currentLevel.freeze.bpmChanges, step) <= now) {
+            const ss = getSignatureState(currentLevel.freeze.signature, step);
             if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
               playSE(ss.count.fourth === 0 ? "beat1" : "beat");
             }
@@ -884,7 +432,7 @@ function Page(props: Props) {
           }
           t = setTimeout(
             playOne,
-            (getTimeSec(currentLevel.bpmChanges, step) - now) * 1000
+            (getTimeSec(currentLevel.freeze.bpmChanges, step) - now) * 1000
           );
         }
       };
@@ -909,168 +457,6 @@ function Page(props: Props) {
     }
   }, [dragMode, isTouch, chart]);
 
-  const changeOffset = (ofs: number) => {
-    if (chart /*&& offsetValid(ofs)*/) {
-      changeChart({ ...chart, offset: ofs });
-    }
-  };
-  const currentBpmIndex =
-    currentLevel && findBpmIndexFromStep(currentLevel.bpmChanges, currentStep);
-  const currentBpm =
-    currentLevel &&
-    currentLevel.bpmChanges.length > 0 &&
-    currentBpmIndex !== undefined
-      ? currentLevel.bpmChanges[currentBpmIndex].bpm
-      : 120;
-  const currentSpeedIndex =
-    currentLevel &&
-    findBpmIndexFromStep(currentLevel.speedChanges, currentStep);
-  const currentSpeed =
-    currentLevel &&
-    currentLevel.speedChanges.length > 0 &&
-    currentSpeedIndex !== undefined
-      ? currentLevel.speedChanges[currentSpeedIndex].bpm
-      : 120;
-  const currentSpeedInterp =
-    currentLevel &&
-    currentLevel.speedChanges.length > 0 &&
-    currentSpeedIndex !== undefined &&
-    currentLevel.speedChanges[currentSpeedIndex].interp;
-  const changeBpm = (
-    bpm: number | null,
-    speed: number | null,
-    interp: boolean
-  ) => {
-    if (currentLevel) {
-      let newLevel: LevelEdit | null = null;
-      if (currentBpmIndex !== undefined && bpm !== null) {
-        newLevel = luaUpdateBpmChange(currentLevel, currentBpmIndex, bpm);
-      }
-      if (currentSpeedIndex !== undefined && speed !== null) {
-        newLevel = luaUpdateSpeedChange(
-          newLevel || currentLevel,
-          currentSpeedIndex,
-          speed,
-          interp
-        );
-      }
-      changeLevel(newLevel);
-    }
-  };
-  const speedChangeHere =
-    currentLevel &&
-    currentSpeedIndex !== undefined &&
-    currentLevel.speedChanges.length > 0 &&
-    stepCmp(currentLevel.speedChanges[currentSpeedIndex].step, currentStep) ===
-      0;
-  const bpmChangeHere =
-    currentLevel &&
-    currentBpmIndex !== undefined &&
-    currentLevel.bpmChanges.length > 0 &&
-    stepCmp(currentLevel.bpmChanges[currentBpmIndex].step, currentStep) === 0;
-  const toggleBpmChangeHere = (bpm: boolean | null, speed: boolean | null) => {
-    if (chart && currentLevel && stepCmp(currentStep, stepZero()) > 0) {
-      let newLevel: LevelEdit | null = null;
-      if (currentBpmIndex !== undefined && bpm !== null) {
-        if (bpm && !bpmChangeHere) {
-          newLevel = luaAddBpmChange(currentLevel, {
-            step: currentStep,
-            bpm: currentBpm,
-            timeSec: currentTimeSec,
-          });
-        } else if (!bpm && bpmChangeHere) {
-          newLevel = luaDeleteBpmChange(currentLevel, currentBpmIndex);
-        }
-      }
-      if (currentSpeedIndex !== undefined && speed !== null) {
-        if (speed && !speedChangeHere) {
-          newLevel = luaAddSpeedChange(newLevel || currentLevel, {
-            step: currentStep,
-            bpm: currentSpeed,
-            timeSec: currentTimeSec,
-          });
-        } else if (!speed && speedChangeHere) {
-          newLevel = luaDeleteSpeedChange(
-            newLevel || currentLevel,
-            currentSpeedIndex
-          );
-        }
-      }
-      changeLevel(newLevel);
-    }
-  };
-
-  const currentSignatureIndex =
-    currentLevel && findBpmIndexFromStep(currentLevel.signature, currentStep);
-  const currentSignature = currentLevel?.signature.at(
-    currentSignatureIndex || 0
-  );
-  const prevSignature =
-    currentSignatureIndex && currentSignatureIndex > 0
-      ? currentLevel?.signature.at(currentSignatureIndex - 1)
-      : undefined;
-  const signatureChangeHere =
-    currentSignature && stepCmp(currentSignature.step, currentStep) === 0;
-  const changeSignature = (s: Signature) => {
-    if (chart && currentLevel && currentSignatureIndex !== undefined) {
-      const newLevel = luaUpdateBeatChange(
-        currentLevel,
-        currentSignatureIndex,
-        s
-      );
-      changeLevel(newLevel);
-    }
-  };
-  const toggleSignatureChangeHere = () => {
-    if (
-      chart &&
-      currentLevel &&
-      currentSignatureIndex !== undefined &&
-      currentSignature &&
-      stepCmp(currentStep, stepZero()) > 0
-    ) {
-      if (signatureChangeHere) {
-        const newLevel = luaDeleteBeatChange(
-          currentLevel,
-          currentSignatureIndex
-        );
-        changeLevel(newLevel);
-      } else {
-        const newLevel = luaAddBeatChange(currentLevel, {
-          step: currentStep,
-          offset: getSignatureState(currentLevel.signature, currentStep).offset,
-          bars: currentSignature.bars,
-          barNum: 0,
-        });
-        changeLevel(newLevel);
-      }
-    }
-  };
-
-  const setYTBegin = (begin: number) => {
-    if (chart && currentLevel) {
-      currentLevel.ytBegin = begin;
-      changeChart({ ...chart });
-    }
-  };
-  const [currentLevelLength, setCurrentLevelLength] = useState<number>(0);
-  useEffect(() => {
-    if (currentLevel) {
-      let length = 0;
-      if (currentLevel.notes.length > 0) {
-        length =
-          getTimeSec(currentLevel.bpmChanges, currentLevel.notes.at(-1)!.step) +
-          (chart?.offset || 0);
-      }
-      if (currentLevelLength !== length) {
-        setCurrentLevelLength(length);
-      }
-      if (currentLevel.ytEnd === "note" && currentLevel.ytEndSec !== length) {
-        currentLevel.ytEndSec = length;
-        changeChart({ ...chart! });
-      }
-    }
-  }, [currentLevel, chart, changeChart, currentLevelLength]);
   const [ytDuration, setYTDuration] = useState<number>(0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -1080,86 +466,40 @@ function Page(props: Props) {
         setYTDuration(duration);
       }
       if (chart) {
-        let hasChange = false;
         for (const level of chart.levels) {
-          if (level.ytEnd === "yt" && level.ytEndSec !== duration) {
-            level.ytEndSec = duration;
-            hasChange = true;
-          }
-        }
-        if (hasChange) {
-          changeChart({ ...chart });
+          level.setYTDuration(duration);
         }
       }
     }
   });
-  const setYTEnd = (end: number | "note" | "yt") => {
-    if (chart && currentLevel) {
-      currentLevel.ytEnd = end;
-      if (end === "note") {
-        currentLevel.ytEndSec = currentLevelLength;
-      } else if (end === "yt") {
-        currentLevel.ytEndSec = ytDuration;
-      } else {
-        currentLevel.ytEndSec = end;
-      }
-      changeChart({ ...chart });
-    }
-  };
 
   const addNote = (
     n: NoteCommand | null | undefined = chart?.copyBuffer[0]
   ) => {
     if (chart && currentLevel && n && canAddNote) {
-      const levelCopied = { ...currentLevel };
-      const newLevel = luaAddNote(levelCopied, n, currentStep);
-      if (newLevel !== null) {
-        // 追加したnoteは同じ時刻の音符の中でも最後
-        setCurrentNoteIndex(
-          currentLevel.notes.findLastIndex(
-            (n) => stepCmp(n.step, currentStep) == 0
-          )
-        );
-        changeLevel(newLevel);
-      }
+    
     }
     ref.current?.focus();
   };
   const deleteNote = () => {
     if (chart && currentLevel && hasCurrentNote) {
-      const levelCopied = { ...currentLevel };
-      const newLevel = luaDeleteNote(levelCopied, currentNoteIndex);
-      changeLevel(newLevel);
     }
     ref.current?.focus();
   };
   const updateNote = (n: NoteCommand) => {
     if (chart && currentLevel && hasCurrentNote) {
-      const levelCopied = { ...currentLevel };
-      const newLevel = luaUpdateNote(levelCopied, currentNoteIndex, n);
-      changeLevel(newLevel);
+      
     }
     // ref.current.focus();
   };
   const copyNote = (copyIndex: number) => {
     if (chart && currentLevel && hasCurrentNote) {
-      const newCopyBuf = chart.copyBuffer.slice();
-      newCopyBuf[copyIndex] = currentLevel.notes[currentNoteIndex];
-      // copyBufferの更新は未保存の変更とみなさない (changeChart にしない)
-      setChart({ ...chart, copyBuffer: newCopyBuf });
+      
     }
     ref.current?.focus();
   };
   const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
-    if (chart?.copyBuffer[copyIndex]) {
-      if (chart) {
-        if (hasCurrentNote && !forceAdd) {
-          updateNote(chart.copyBuffer[copyIndex]);
-        } else {
-          addNote(chart.copyBuffer[copyIndex]);
-        }
-      }
-    }
+    
     ref.current?.focus();
   };
 
@@ -1270,7 +610,25 @@ function Page(props: Props) {
                 "shadow-lg"
               )}
             >
-              {props.modal}
+              {loading ? (
+                <p>
+                  <SlimeSVG />
+                  Loading...
+                </p>
+              ) : errorStatus !== undefined || errorMsg !== undefined ? (
+                <p>
+                  {errorStatus ? `${errorStatus}: ` : ""}
+                  {errorMsg}
+                </p>
+              ) : (
+                <PasswdPrompt
+                  cid={cid}
+                  passwdFailed={passwdFailed}
+                  fetchChart={fetchChart}
+                  savePasswd={savePasswd}
+                  setSavePasswd={setSavePasswd}
+                />
+              )}
             </Box>
           </div>
         </div>

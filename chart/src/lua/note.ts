@@ -3,9 +3,15 @@ import { NoteCommand, NoteCommandWithLua } from "../command.js";
 import { Chart3, NoteCommand3 } from "../legacy/chart3.js";
 import { NoteCommand7 } from "../legacy/chart7.js";
 import { Step, stepCmp } from "../step.js";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
+import {
+  deleteLua,
+  findInsertLine,
+  insertLua,
+  LevelForLuaEdit,
+  replaceLua,
+} from "./edit.js";
 
-function noteLuaCommand(n: NoteCommand | NoteCommand3 | NoteCommand7) {
+function noteLuaCommand(n: NoteCommand | NoteCommand3) {
   if ("fall" in n) {
     return (
       `Note(${n.hitX}, ${n.hitVX}, ${n.hitVY}, ` +
@@ -19,8 +25,8 @@ function noteLuaCommand(n: NoteCommand | NoteCommand3 | NoteCommand7) {
   }
 }
 export function luaAddNote<
-  L extends LevelEdit | Chart3,
-  N extends NoteCommand | NoteCommand3 | NoteCommand7,
+  L extends LevelForLuaEdit,
+  N extends NoteCommand | NoteCommand3,
 >(chart: L, n: N, step: Step): L | null {
   const insert = findInsertLine(chart, step, true);
   if (insert.luaLine === null) {
@@ -35,10 +41,10 @@ export function luaAddNote<
   chart.notes = chart.notes.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }
-export function luaDeleteNote(
-  chart: LevelEdit,
+export function luaDeleteNote<L extends LevelForLuaEdit>(
+  chart: L,
   currentNoteIndex: number
-): LevelEdit | null {
+): L | null {
   const n = chart.notes[currentNoteIndex];
   if (n.luaLine === null) {
     return null;
@@ -47,11 +53,11 @@ export function luaDeleteNote(
   chart.notes = chart.notes.filter((_, i) => i !== currentNoteIndex);
   return chart;
 }
-export function luaUpdateNote(
-  chart: LevelEdit,
+export function luaUpdateNote<L extends LevelForLuaEdit>(
+  chart: L,
   currentNoteIndex: number,
-  n: NoteCommand | NoteCommand7
-): LevelEdit | null {
+  n: NoteCommand
+): L | null {
   const oldN = chart.notes[currentNoteIndex];
   if (oldN.luaLine === null) {
     return null;
