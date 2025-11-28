@@ -41,7 +41,12 @@ export function SharedResultBox(props: Props) {
         {props.result.lvName && (
           <span className="font-title mr-2">{props.result.lvName}</span>
         )}
-        <span className={clsx("inline-block mr-2", levelColors[props.result.lvType])}>
+        <span
+          className={clsx(
+            "inline-block mr-2",
+            levelColors[props.result.lvType]
+          )}
+        >
           <span className="text-sm">{levelTypes[props.result.lvType]}-</span>
           <span className="text-lg">{props.result.lvDifficulty}</span>
         </span>
