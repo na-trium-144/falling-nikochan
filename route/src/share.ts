@@ -102,6 +102,10 @@ const shareApp = (config: {
                 levelTypes[resultParams.lvType] +
                 "-" +
                 resultParams.lvDifficulty.toString(),
+              playbackRate:
+                resultParams.playbackRate4 !== 4
+                  ? `, ${tr("playbackRate")}×${resultParams.playbackRate4 / 4}`
+                  : "",
               score: (resultParams.score100 / 100).toString(),
               status:
                 resultParams.chainScore100 === chainScoreRate * 100

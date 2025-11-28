@@ -1,3 +1,7 @@
+## ver. 13.15 - 2025/11/29 [#840](https://github.com/na-trium-144/falling-nikochan/pull/840)
+
+* SharedResultとdescriptionWithResultにplaybackRateの表示を追加
+
 ## ver. 13.13 - 2025/11/21 [#836](https://github.com/na-trium-144/falling-nikochan/pull/836)
 
 * /main 以下の各ページにもFallingNikochanについてのモーダル表示へのリンクを表示する

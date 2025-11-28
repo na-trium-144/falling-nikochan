@@ -25,7 +25,7 @@ export default {
     titleWithResult: "Play record on {date} - {title}",
     titleWithResultNoDate: "Play record - {title}",
     descriptionWithResult:
-      "Played the chart ({level}) of {title} created by {chartCreator}, " +
+      "Played the chart ({level}{playbackRate}) of {title} created by {chartCreator}, " +
       "and scored {score, number, ::.00} points{status}. " +
       main.main.descriptionVerbose,
     sharedResult: "Shared Play Record",
