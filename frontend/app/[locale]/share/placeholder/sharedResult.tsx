@@ -33,7 +33,7 @@ export function SharedResultBox(props: Props) {
     }
   }, [props.result.date]);
   return (
-    <Box className="w-max mx-auto py-4 px-6 mt-4">
+    <Box className="w-max max-w-full mx-auto py-4 px-6 mt-4">
       <p className="text-lg font-title font-bold text-center ">
         &lt; {th("sharedResult")} &gt;
       </p>
@@ -41,12 +41,18 @@ export function SharedResultBox(props: Props) {
         {props.result.lvName && (
           <span className="font-title mr-2">{props.result.lvName}</span>
         )}
-        <span className={clsx("mr-2", levelColors[props.result.lvType])}>
+        <span className={clsx("inline-block mr-2", levelColors[props.result.lvType])}>
           <span className="text-sm">{levelTypes[props.result.lvType]}-</span>
           <span className="text-lg">{props.result.lvDifficulty}</span>
         </span>
+        {props.result.playbackRate4 !== 4 && (
+          <span className="inline-block mr-2">
+            <span className="mr-1">{t("playbackRate")}:</span>
+            <span className="text-lg">×{props.result.playbackRate4 / 4}</span>
+          </span>
+        )}
         {props.result.date && (
-          <span className="text-slate-500 dark:text-stone-400 ">
+          <span className="inline-block text-slate-500 dark:text-stone-400 ">
             <span>(</span>
             <span>{resultDate}</span>
             {props.result.inputType === inputTypes.keyboard ? (
@@ -66,7 +72,7 @@ export function SharedResultBox(props: Props) {
       </p>
       <div
         className={clsx(
-          "flex flex-col items-center gap-2",
+          "flex flex-col justify-center items-center gap-2",
           "main-wide:flex-row main-wide:gap-6"
         )}
       >
