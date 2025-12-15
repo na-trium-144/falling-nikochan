@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
-    "valibot": "^1.0.0",
+    "valibot": "^1.2.0",
     "wasmoon": "^1.16.0"
   }
 }
