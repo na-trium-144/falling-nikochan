@@ -11,8 +11,7 @@
     "ndev": "npm run dev -w frontend",
     "nbuild": "npm run build -w frontend",
     "swbuild": "npm run build -w worker",
-    "ldev": "npm run dev -w route",
-    "bdev": "cd route/ && bun run --hot serve-bun.ts"
+    "ldev": "npm run dev -w route"
   },
   "workspaces": [
     "chart",

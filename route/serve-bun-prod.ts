@@ -11,7 +11,6 @@ import {
   notFound,
   fetchStatic,
   fetchBrief,
-  cronTestApp,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -30,7 +29,6 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchStatic,
     })
   )
-  .route("/cron", cronTestApp)
   .route("/sitemap.xml", sitemapApp)
   .route(
     "/share",
@@ -43,7 +41,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(
     "/*",
     serveStatic({
-      root: "../frontend/out",
+      root: "./frontend/out",
       rewriteRequestPath: (path) => {
         if (path.match(/\/[^/]+\.[^/]+$/)) {
           // path with extension

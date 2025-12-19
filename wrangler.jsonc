@@ -9,6 +9,6 @@
     "binding": "ASSETS",
   },
   "triggers": {
-    "crons": ["*/15 * * * *"],
+    // "crons": ["*/15 * * * *"],
   },
 }

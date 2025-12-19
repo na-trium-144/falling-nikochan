@@ -1,3 +1,7 @@
+## ver. 13.16 - 2025/12/20
+
+* dockerでセルフホストインスタンスにデプロイ
+
 ## ver. 13.15 - 2025/11/29 [#840](https://github.com/na-trium-144/falling-nikochan/pull/840)
 
 * SharedResultとdescriptionWithResultにplaybackRateの表示を追加
