@@ -49,6 +49,7 @@ jobs:
         run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   docker-build:
+    needs: [Deploy-Production]
     strategy:
       fail-fast: false
       matrix:
@@ -73,17 +74,19 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan:latest-${{ matrix.arch }}
-          build-args: |
-            MONGODB_URI=${{ secrets.PRODUCTION_MONGODB_URI }}
-            ASSET_PREFIX=${{ vars.PRODUCTION_ASSET_PREFIX }}
-            NO_PREFETCH=${{ vars.PRODUCTION_NO_PREFETCH }}
-            BACKEND_ALT_PREFIX=${{ secrets.BACKEND_ALT_PREFIX }}
 
   docker-push-manifest:
     needs: [docker-build]

@@ -7,7 +7,6 @@ docker-compose.yml
 */public/assets/buildVer.json
 */dist/
 /node_modules/
-/.vercel*
 .vite
 .next
 */out/
