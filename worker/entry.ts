@@ -395,7 +395,7 @@ self.addEventListener("fetch", (e) => {
   if (
     new URL(e.request.url).origin === self.origin ||
     (process.env.ASSET_PREFIX &&
-      new URL(e.request.url).origin === process.env.ASSET_PREFIX)
+      e.request.url.startsWith(process.env.ASSET_PREFIX))
   ) {
     return handle(app)(e);
   }
