@@ -3,14 +3,14 @@ on:
   push:
     branches:
       - main
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 jobs:
-  Deploy-Production:
+  vercel-build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v4
@@ -32,24 +32,9 @@ jobs:
           name: vercel-output
           path: .vercel/output
           include-hidden-files: true
-      - run: rm -rf .git
-      - run: npm i -g wrangler@latest
-      # - name: Publish to Cloudflare Worker
-      #   uses: cloudflare/wrangler-action@v3
-      #   with:
-      #     apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
-      #     accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
-          accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main
-      - name: Deploy Project Artifacts to Vercel
-        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   docker-build:
-    needs: [Deploy-Production]
+    needs: [vercel-build]
     strategy:
       fail-fast: false
       matrix:
@@ -109,8 +94,61 @@ jobs:
             ${{ env.REPO }}:latest-arm64
           docker manifest push ${{ env.REPO }}:latest
 
+  deploy-vercel:
+    needs: [docker-push-manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - name: Pull Vercel Environment Information
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+      - name: Deploy Project Artifacts to Vercel
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  deploy-cf:
+    needs: [docker-push-manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+      - run: rm -rf .git
+      - run: npm i -g wrangler@latest
+      # - name: Publish to Cloudflare Worker
+      #   uses: cloudflare/wrangler-action@v3
+      #   with:
+      #     apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
+      #     accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
+          accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
+          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main
+
   deploy-selfhosting:
-    needs: [Deploy-Production, docker-push-manifest]
+    needs: [docker-push-manifest]
     runs-on: ubuntu-latest
     permissions:
       contents: read
