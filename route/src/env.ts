@@ -14,6 +14,7 @@ export interface Bindings {
   SECRET_SALT?: string;
   API_CACHE_EDGE?: "1";
   ASSET_PREFIX?: string;
+  BACKEND_PREFIX?: string;
   BACKEND_OG_PREFIX?: string;
   VERCEL_PROTECTION_BYPASS_SECRET?: string;
   GOOGLE_API_KEY?: string;
@@ -59,17 +60,20 @@ export const fetchBrief =
       .request(`/api/brief/${cid}`, undefined, e, ctx);
   };
 export function fetchStatic(e: Bindings, url: URL) {
-  return fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
-    headers: {
-      // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
-      // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
-      ...(e.VERCEL_PROTECTION_BYPASS_SECRET
-        ? {
-            "x-vercel-protection-bypass": e.VERCEL_PROTECTION_BYPASS_SECRET,
-          }
-        : {}),
-    },
-  });
+  return fetch(
+    new URL(url.pathname, e.ASSET_PREFIX || e.BACKEND_PREFIX || url.origin),
+    {
+      headers: {
+        // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
+        // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
+        ...(e.VERCEL_PROTECTION_BYPASS_SECRET
+          ? {
+              "x-vercel-protection-bypass": e.VERCEL_PROTECTION_BYPASS_SECRET,
+            }
+          : {}),
+      },
+    }
+  );
 }
 
 export function languageDetector() {

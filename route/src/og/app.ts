@@ -90,7 +90,10 @@ const ogApp = (config: {
         );
         ogQuery.set("v", packageJson.version);
         return c.redirect(
-          `${new URL(c.req.url).origin}${c.req.path}?${ogQuery.toString()}`,
+          new URL(
+            `${c.req.path}?${ogQuery.toString()}`,
+            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+          ),
           307
         );
       }
@@ -153,7 +156,10 @@ const ogApp = (config: {
         ...f,
         pData: config.fetchStatic(
           env(c),
-          new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
+          new URL(
+            `/assets/${f.file}`,
+            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+          )
         ),
       }));
       let imagePath: string;
@@ -172,7 +178,10 @@ const ogApp = (config: {
         res(
           config.fetchStatic(
             env(c),
-            new URL(imagePath, new URL(c.req.url).origin)
+            new URL(
+              imagePath,
+              env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+            )
           )
         )
       )
@@ -218,7 +227,10 @@ const ogApp = (config: {
             res(
               config.fetchStatic(
                 env(c),
-                new URL(imagePath, new URL(c.req.url).origin)
+                new URL(
+                  imagePath,
+                  env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+                )
               )
             )
           )
@@ -278,7 +290,10 @@ const ogApp = (config: {
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)
       c.redirect(
-        `${new URL(c.req.url).origin}/og/share/${c.req.param("cid")}`,
+        new URL(
+          `/og/share/${c.req.param("cid")}`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        ),
         301
       )
     );

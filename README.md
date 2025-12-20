@@ -38,9 +38,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         * `VERCEL_PROTECTION_BYPASS_SECRET` (backend): string
         * `API_CACHE_EDGE` (backend): `1` or unset
         * `ASSET_PREFIX` (backend & frontend): `https://domain-of-your-assets/` or unset
-        * `BACKEND_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
+        * `BACKEND_PREFIX` (backend & frontend): `https://domain-of-your-backend/` or unset
+            * needed when origin of page is different from backend origin. (separate development server, or behind reverse proxy etc.)
         * `BACKEND_OG_PREFIX` (backend): alternate backend for og image generation, `https://domain-of-your-backend/` or unset
+            * used by cloudflare worker entrypoint only
         * `BACKEND_ALT_PREFIX` (frontend): `https://domain-of-your-backend/` or unset
+            * used when backend returns 5xx
         * `NO_PREFETCH` (frontend): `1` or unset
         * `GOOGLE_API_KEY` (backend): API key for YouTube Data API v3 (optional)
         * `ALLOW_FETCH_ERROR` (frontend): `1` or unset
