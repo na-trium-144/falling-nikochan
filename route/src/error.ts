@@ -14,7 +14,11 @@ export const onError =
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
   }) =>
   async (err: any, c: Context) => {
-    console.error(`Error: ${err} in ${c.req.path}`);
+    if (err instanceof Error) {
+      console.error(`Error in ${c.req.path}: ${err.message}\n${err.stack}`);
+    } else {
+      console.error(`Error in ${c.req.path}: ${err}`);
+    }
     try {
       const lang = c.get("language") || "en";
       if (err instanceof TypeError) {
