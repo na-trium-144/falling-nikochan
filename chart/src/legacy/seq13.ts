@@ -134,19 +134,63 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
         u +
         du * (tBegin - tEnd) +
         (ddu * (tBegin - tEnd) * (tBegin - tEnd)) / 2;
-
-      if (
-        (u <= uRangeMax && uRangeMax <= uEnd) ||
-        (u <= uRangeMax && ti === 0 && du > 0)
-      ) {
-        const tAppear = (uRangeMax - u) / du;
-        appearTimeSec = tBegin - tAppear;
-      } else if (
-        (u >= uRangeMin && uRangeMin >= uEnd) ||
-        (u >= uRangeMin && ti === 0 && du < 0)
-      ) {
-        const tAppear = (uRangeMin - u) / du;
-        appearTimeSec = tBegin - tAppear;
+      if (ddu === 0) {
+        if (
+          (u <= uRangeMax && uRangeMax <= uEnd) ||
+          (u <= uRangeMax && ti === 0 && du > 0)
+        ) {
+          const tAppear = (uRangeMax - u) / du;
+          appearTimeSec = tBegin - tAppear;
+        } else if (
+          (u >= uRangeMin && uRangeMin >= uEnd) ||
+          (u >= uRangeMin && ti === 0 && du < 0)
+        ) {
+          const tAppear = (uRangeMin - u) / du;
+          appearTimeSec = tBegin - tAppear;
+        }
+      } else {
+        // u + du * dt + ddu * dt * dt / 2 == uRangeMax となるdt
+        if (du * du - 2 * ddu * (u - uRangeMax) >= 0) {
+          let dt_uRangeMax: number | null = null;
+          let dt_uRangeMax_1 =
+            (-du + Math.sqrt(du * du - 2 * ddu * (u - uRangeMax))) / ddu;
+          if (dt_uRangeMax_1 >= 0 && dt_uRangeMax_1 < tBegin - tEnd) {
+            dt_uRangeMax = dt_uRangeMax_1;
+          }
+          let dt_uRangeMax_2: number | null =
+            (-du - Math.sqrt(du * du - 2 * ddu * (u - uRangeMax))) / ddu;
+          if (
+            dt_uRangeMax_2 >= 0 &&
+            dt_uRangeMax_2 < tBegin - tEnd &&
+            (dt_uRangeMax === null || dt_uRangeMax < dt_uRangeMax_2)
+          ) {
+            dt_uRangeMax = dt_uRangeMax_2;
+          }
+          if (dt_uRangeMax !== null) {
+            appearTimeSec = tBegin - dt_uRangeMax;
+          }
+        }
+        // u + du * dt + ddu * dt * dt / 2 == uRangeMin となるdt
+        if (du * du - 2 * ddu * (u - uRangeMin) >= 0) {
+          let dt_uRangeMin: number | null = null;
+          let dt_uRangeMin_1 =
+            (-du + Math.sqrt(du * du - 2 * ddu * (u - uRangeMin))) / ddu;
+          if (dt_uRangeMin_1 >= 0 && dt_uRangeMin_1 < tBegin - tEnd) {
+            dt_uRangeMin = dt_uRangeMin_1;
+          }
+          let dt_uRangeMin_2: number | null =
+            (-du - Math.sqrt(du * du - 2 * ddu * (u - uRangeMin))) / ddu;
+          if (
+            dt_uRangeMin_2 >= 0 &&
+            dt_uRangeMin_2 < tBegin - tEnd &&
+            (dt_uRangeMin === null || dt_uRangeMin < dt_uRangeMin_2)
+          ) {
+            dt_uRangeMin = dt_uRangeMin_2;
+          }
+          if (dt_uRangeMin !== null) {
+            appearTimeSec = tBegin - dt_uRangeMin;
+          }
+        }
       }
       tBegin = tEnd;
       u = uEnd;
