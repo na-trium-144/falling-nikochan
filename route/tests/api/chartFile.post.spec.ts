@@ -13,6 +13,27 @@ import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 describe("POST /api/chartFile/:cid", () => {
+  test.skipIf(
+    process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT
+  )("should return 429 for too many requests", async () => {
+    await initDb();
+    const res1 = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+    });
+    expect(res1.status).toBe(204);
+
+    const res2 = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+    });
+    expect(res2.status).toBe(429);
+    const body = await res2.json();
+    expect(body).toStrictEqual({ message: "tooManyRequest" });
+  });
+
   test("should update chart if raw password matches", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100000?p=p", {
@@ -224,7 +245,13 @@ describe("POST /api/chartFile/:cid", () => {
       expect(res.status).toBe(204);
 
       expect(
-        (await app.request("/api/chartFile/100000?p=p")).status
+        (
+          await app.request("/api/chartFile/100000?p=p", {
+            headers: {
+              "x-forwarded-for": "123", // rateLimit回避
+            },
+          })
+        ).status
       ).toStrictEqual(200);
     });
     test("should be changed if changePasswd is not null", async () => {
@@ -240,10 +267,22 @@ describe("POST /api/chartFile/:cid", () => {
       expect(res.status).toBe(204);
 
       expect(
-        (await app.request("/api/chartFile/100000?p=p")).status
+        (
+          await app.request("/api/chartFile/100000?p=p", {
+            headers: {
+              "x-forwarded-for": "123",
+            },
+          })
+        ).status
       ).toStrictEqual(401);
       expect(
-        (await app.request("/api/chartFile/100000?p=newPasswd")).status
+        (
+          await app.request("/api/chartFile/100000?p=newPasswd", {
+            headers: {
+              "x-forwarded-for": "456",
+            },
+          })
+        ).status
       ).toStrictEqual(200);
     });
   });
@@ -329,7 +368,10 @@ describe("POST /api/chartFile/:cid", () => {
       });
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
+        headers: {
+          "Content-Type": "application/vnd.msgpack",
+          "x-forwarded-for": "123",
+        },
         body: msgpack.serialize({ ...dummyChart(), published: true }),
       });
       const dateAfter = new Date();

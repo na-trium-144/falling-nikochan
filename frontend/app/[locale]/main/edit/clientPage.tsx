@@ -6,7 +6,7 @@ import { IndexMain } from "../main.js";
 import Input from "@/common/input.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
-import { CidSchema, rateLimitMin } from "@falling-nikochan/chart";
+import { CidSchema, rateLimit } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
@@ -120,7 +120,9 @@ export default function EditTab({ locale }: { locale: string }) {
             {t("newButton")}
           </ExternalLink>
         </h3>
-        <p className="pl-2 text-justify">{t("newDesc", { rateLimitMin })}</p>
+        <p className="pl-2 text-justify">
+          {t("newDesc", { rateLimitMin: rateLimit.newChartFile / 60 })}
+        </p>
       </div>
       <div className="mb-3">
         <h3 className="mb-2 text-xl font-bold font-title">{t("recentEdit")}</h3>
