@@ -43,6 +43,33 @@ export interface Note13 {
 }
 
 /**
+ * Solves a*x^2 + b*x + c = 0
+ * @returns An array of two roots [root1, root2], or null if there are no real roots.
+ * root1 is from `+ sqrt`, root2 is from `- sqrt`.
+ */
+function solveQuadEquation(
+  a: number,
+  b: number,
+  c: number
+): { plus: number; minus: number } | null {
+  if (a === 0) {
+    if (b === 0) {
+      return null;
+    }
+    const root = -c / b;
+    return { plus: root, minus: root };
+  }
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    return null;
+  }
+  const sqrtDiscriminant = Math.sqrt(discriminant);
+  const root1 = (-b + sqrtDiscriminant) / (2 * a);
+  const root2 = (-b - sqrtDiscriminant) / (2 * a);
+  return { plus: root1, minus: root2 };
+}
+
+/**
  * chartを読み込む
  */
 export function loadChart13(level: Level13Play): ChartSeqData13 {
@@ -69,28 +96,28 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
 
     let uRangeMin: number, uRangeMax: number;
     if (c.fall) {
-      // max: dy/du = 0 or y(t) = 1.5 or x(t) = 2 or x(t) = -0.5
-      // min: y(t) = -0.5 or x(t) = 2 or x(t) = -0.5
+      // max: dy/du = 0 or y(u) = 1.5 or x(u) = 2 or x(u) = -0.5
+      // min: y(u) = -0.5 or x(u) = 2 or x(u) = -0.5
       const uTop = vy / ay;
-      let uMaxY: number, uMinY: number;
-      if (vy === 0) {
-        uMaxY = uTop;
-        uMinY = uTop;
-      } else if (vy > 0) {
-        uMaxY = (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - 1.5))) / ay;
-        uMinY = (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      let uMaxY: number | null, uMinY: number | null;
+      const u_y15 = solveQuadEquation(ay / 2, -vy, 1.5 - targetY);
+      const u_y05 = solveQuadEquation(ay / 2, -vy, -0.5 - targetY);
+      if (vy > 0) {
+        uMaxY = u_y15 ? u_y15.minus : uTop;
+        uMinY = u_y05?.minus ?? -Infinity; // should not happen?
       } else {
-        uMinY = (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - 1.5))) / ay;
-        uMaxY = (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+        uMinY = u_y15?.plus ?? -Infinity;
+        uMaxY = u_y05 ? u_y05.plus : uTop;
       }
       const uMaxX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
       const uMinX = Math.min((2 - targetX) / vx, (-0.5 - targetX) / vx);
-      uRangeMax = Math.min(uMaxX, isNaN(uMaxY) ? uTop : uMaxY);
-      uRangeMin = Math.max(uMinX, isNaN(uMinY) ? uTop : uMinY);
+      uRangeMax = Math.min(uMaxX, uMaxY);
+      uRangeMin = Math.max(uMinX, uMinY);
     } else {
       // y(t) = -0.5 or x(t) = 2 or x(t) = -0.5
-      const uMaxY = (vy + Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
-      const uMinY = (vy - Math.sqrt(vy * vy + 2 * ay * (targetY - -0.5))) / ay;
+      const u_y05 = solveQuadEquation(ay / 2, -vy, -0.5 - targetY);
+      const uMaxY = u_y05?.plus ?? Infinity; // should not happen?
+      const uMinY = u_y05?.minus ?? -Infinity;
       const uMaxX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
       const uMinX = Math.min((2 - targetX) / vx, (-0.5 - targetX) / vx);
       uRangeMax = Math.min(uMaxX, uMaxY);
@@ -150,45 +177,33 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
         }
       } else {
         // u + du * dt + ddu * dt * dt / 2 == uRangeMax となるdt
-        if (du * du - 2 * ddu * (u - uRangeMax) >= 0) {
-          let dt_uRangeMax: number | null = null;
-          let dt_uRangeMax_1 =
-            (-du + Math.sqrt(du * du - 2 * ddu * (u - uRangeMax))) / ddu;
-          if (dt_uRangeMax_1 >= 0 && dt_uRangeMax_1 < tBegin - tEnd) {
-            dt_uRangeMax = dt_uRangeMax_1;
-          }
-          let dt_uRangeMax_2: number | null =
-            (-du - Math.sqrt(du * du - 2 * ddu * (u - uRangeMax))) / ddu;
+        const dt_uRangeMax = solveQuadEquation(ddu / 2, du, u - uRangeMax);
+        if (dt_uRangeMax) {
           if (
-            dt_uRangeMax_2 >= 0 &&
-            dt_uRangeMax_2 < tBegin - tEnd &&
-            (dt_uRangeMax === null || dt_uRangeMax < dt_uRangeMax_2)
+            dt_uRangeMax.plus >= 0 &&
+            (dt_uRangeMax.plus < tBegin - tEnd || ti === 0)
           ) {
-            dt_uRangeMax = dt_uRangeMax_2;
-          }
-          if (dt_uRangeMax !== null) {
-            appearTimeSec = tBegin - dt_uRangeMax;
+            appearTimeSec = tBegin - dt_uRangeMax.plus;
+          } else if (
+            dt_uRangeMax.minus >= 0 &&
+            (dt_uRangeMax.minus < tBegin - tEnd || ti === 0)
+          ) {
+            appearTimeSec = tBegin - dt_uRangeMax.minus;
           }
         }
         // u + du * dt + ddu * dt * dt / 2 == uRangeMin となるdt
-        if (du * du - 2 * ddu * (u - uRangeMin) >= 0) {
-          let dt_uRangeMin: number | null = null;
-          let dt_uRangeMin_1 =
-            (-du + Math.sqrt(du * du - 2 * ddu * (u - uRangeMin))) / ddu;
-          if (dt_uRangeMin_1 >= 0 && dt_uRangeMin_1 < tBegin - tEnd) {
-            dt_uRangeMin = dt_uRangeMin_1;
-          }
-          let dt_uRangeMin_2: number | null =
-            (-du - Math.sqrt(du * du - 2 * ddu * (u - uRangeMin))) / ddu;
+        const dt_uRangeMin = solveQuadEquation(ddu / 2, du, u - uRangeMin);
+        if (dt_uRangeMin) {
           if (
-            dt_uRangeMin_2 >= 0 &&
-            dt_uRangeMin_2 < tBegin - tEnd &&
-            (dt_uRangeMin === null || dt_uRangeMin < dt_uRangeMin_2)
+            dt_uRangeMin.plus >= 0 &&
+            (dt_uRangeMin.plus < tBegin - tEnd || ti === 0)
           ) {
-            dt_uRangeMin = dt_uRangeMin_2;
-          }
-          if (dt_uRangeMin !== null) {
-            appearTimeSec = tBegin - dt_uRangeMin;
+            appearTimeSec = tBegin - dt_uRangeMin.plus;
+          } else if (
+            dt_uRangeMin.minus >= 0 &&
+            (dt_uRangeMin.minus < tBegin - tEnd || ti === 0)
+          ) {
+            appearTimeSec = tBegin - dt_uRangeMin.minus;
           }
         }
       }
