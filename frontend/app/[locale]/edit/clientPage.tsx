@@ -5,6 +5,7 @@ import {
   Chart9Edit,
   findInsertLine,
   NoteCommand,
+  rateLimit,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
@@ -112,6 +113,7 @@ export default function EditAuth(props: {
   const currentPasswd = useRef<string | null>(null);
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
   const [passwdFailed, setPasswdFailed] = useState<boolean>(false);
+  const [rateLimited, setRateLimited] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [guidePage, setGuidePage] = useState<number | null>(null);
 
@@ -173,6 +175,7 @@ export default function EditAuth(props: {
           setCurrentLevelIndex(data.currentLevelIndex);
           setHasChange(data.hasChange);
           setPasswdFailed(false);
+          setRateLimited(false);
           setLoading(false);
           setErrorStatus(undefined);
           setErrorMsg(undefined);
@@ -183,11 +186,13 @@ export default function EditAuth(props: {
         setGuidePage(1);
         setCid(undefined);
         setPasswdFailed(false);
+        setRateLimited(false);
         setLoading(false);
         setChart(emptyChart(locale));
       } else if (cidInitial.current) {
         setCid(cidInitial.current);
         setPasswdFailed(false);
+        setRateLimited(false);
         setLoading(true);
         const q = new URLSearchParams();
         if (getPasswd(cidInitial.current)) {
@@ -263,6 +268,9 @@ export default function EditAuth(props: {
               if (!isFirst) {
                 setPasswdFailed(true);
               }
+              setChart(undefined);
+            } else if (res?.status === 429) {
+              setRateLimited(true);
               setChart(undefined);
             } else {
               setChart(undefined);
@@ -359,6 +367,11 @@ export default function EditAuth(props: {
               </p>
               <p>{t("enterPasswd")}</p>
               {passwdFailed && <p>{t("passwdFailed")}</p>}
+              {rateLimited && (
+                <p>
+                  {t("tooManyRequestWithSec", { sec: rateLimit.chartFile })}
+                </p>
+              )}
               <Input
                 ref={passwdRef}
                 actualValue={editPasswd}

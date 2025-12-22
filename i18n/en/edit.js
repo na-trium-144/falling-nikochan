@@ -7,6 +7,7 @@ export default {
     chartId: "Chart ID",
     enterPasswd: "Enter the password to edit.",
     passwdFailed: "Password is incorrect.",
+    tooManyRequestWithSec: "Please wait {sec} seconds and try again",
     submitPasswd: "Go",
     savePasswd: "Save password",
     bypassPasswd: "Skip password input (dev only)",
