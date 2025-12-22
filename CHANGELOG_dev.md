@@ -1,3 +1,8 @@
+## ver. 13.18 - 2025/12/23 [#873](https://github.com/na-trium-144/falling-nikochan/pull/873)
+
+* 速度変化中に音符が出現する場合の出現位置の計算を修正
+* seq13.tsに二次方程式を解く関数を追加してリファクタリング
+
 ## ver. 13.17 - 2025/12/23 [#871](https://github.com/na-trium-144/falling-nikochan/pull/871)
 
 * /api/chartFileに3秒のratelimitを追加, パスワード入力時に429が返ってきた場合のエラーメッセージ処理を追加
