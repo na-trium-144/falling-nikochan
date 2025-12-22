@@ -34,7 +34,7 @@ import {
 } from "@falling-nikochan/route";
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .route("/api", apiApp)
+  .route("/api", await apiApp({ getConnInfo: () => null }))
   .route(
     "/share",
     shareApp({

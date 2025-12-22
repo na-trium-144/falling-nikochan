@@ -37,16 +37,24 @@ export function useChartFile(props: Props) {
   const te = useTranslations("error");
 
   const errorFromResponse = useCallback(
-    (res: Response) => {
+    async (res: Response) => {
       try {
-        const message = (res as unknown as { message?: string }).message;
+        const message = (await res.json()).message;
         if (te.has("api." + message)) {
-          return te("api." + message);
+          console.log(
+            "errorFromResponse:",
+            message,
+            "=>",
+            te("api." + message)
+          );
+          return String(res.status) + ": " + te("api." + message);
         } else {
-          return message || te("unknownApiError");
+          console.log("errorFromResponse:", message, "(message not found)");
+          return String(res.status) + ": " + (message || te("unknownApiError"));
         }
       } catch {
-        return te("unknownApiError");
+        console.log("errorFromResponse: (unknown message)");
+        return String(res.status) + ": " + te("unknownApiError");
       }
     },
     [te]
@@ -117,7 +125,7 @@ export function useChartFile(props: Props) {
         } else {
           return {
             isError: true,
-            message: errorFromResponse(res),
+            message: await errorFromResponse(res),
           };
         }
       } catch (e) {
@@ -159,7 +167,7 @@ export function useChartFile(props: Props) {
         } else {
           return {
             isError: true,
-            message: errorFromResponse(res),
+            message: await errorFromResponse(res),
           };
         }
       } catch (e) {

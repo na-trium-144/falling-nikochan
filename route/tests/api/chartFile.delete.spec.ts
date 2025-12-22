@@ -25,6 +25,21 @@ import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 describe("DELETE /api/chartFile/:cid", () => {
+  test.skipIf(
+    process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT
+  )("should return 429 for too many requests", async () => {
+    await initDb();
+    const res1 = await app.request("/api/chartFile/100000?p=p");
+    expect(res1.status).toBe(200);
+
+    const res2 = await app.request("/api/chartFile/100000?p=p", {
+      method: "delete",
+    });
+    expect(res2.status).toBe(429);
+    const body = await res2.json();
+    expect(body).toStrictEqual({ message: "tooManyRequest" });
+  });
+
   test("should delete ChartEdit if password hash matches", async () => {
     await initDb();
     expect((await app.request("/api/brief/100000")).status).toBe(200);

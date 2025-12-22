@@ -1,3 +1,9 @@
+## ver. 13.17 - 2025/12/23 [#871](https://github.com/na-trium-144/falling-nikochan/pull/871)
+
+* /api/chartFileに3秒のratelimitを追加, パスワード入力時に429が返ってきた場合のエラーメッセージ処理を追加
+* x-forwarded-forがない場合リモートのipアドレスを取得してratelimitの判定をする
+* editのmetaTabでのエラーメッセージ表示を修正
+
 ## ver. 13.16 - 2025/12/20
 
 * dockerでセルフホストインスタンスにデプロイ
