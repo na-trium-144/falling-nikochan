@@ -277,10 +277,10 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   const inputReq = input instanceof Request ? input : new Request(input, init);
   const inputUrl = new URL(inputReq.url);
   const res = await fetch(inputReq.clone());
-  // メインのバックエンドがダウンしていた場合(500番台のエラーで、通信エラーでないとき)に、代替バックエンドを試す
-  // ただし別サーバーなのでcookieは使えないため、編集関係のAPIは除外
+  // メインのバックエンドがダウンしていた場合(500番台のエラー or 403(cloudflareが返す) で、通信エラーでないとき)に、代替バックエンドを試す
+  // ただし別サーバーでcookieは使えないため、編集関係のAPIは除外
   if (
-    res.status >= 500 &&
+    (res.status >= 500 || res.status === 403) &&
     process.env.BACKEND_ALT_PREFIX &&
     !inputUrl.pathname.startsWith("/api/chartFile") &&
     !inputUrl.pathname.startsWith("/api/newChartFile") &&
