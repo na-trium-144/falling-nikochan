@@ -7,7 +7,7 @@ services:
     container_name: falling-nikochan-app
     restart: always
     ports:
-      - "80:8787"
+      - "8787:8787"
     env_file:
       - .env
     command: bun ./route/serve-bun-prod.ts
