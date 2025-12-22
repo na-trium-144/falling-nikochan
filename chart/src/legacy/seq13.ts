@@ -66,7 +66,7 @@ function solveQuadEquation(
   const sqrtDiscriminant = Math.sqrt(discriminant);
   const root1 = (-b + sqrtDiscriminant) / (2 * a);
   const root2 = (-b - sqrtDiscriminant) / (2 * a);
-  return { plus: root1, minus: root2 };
+  return { plus: Math.max(root1, root2), minus: Math.min(root1, root2) };
 }
 
 /**
