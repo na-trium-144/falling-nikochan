@@ -1,7 +1,8 @@
 import { join, dirname } from "node:path";
 import webpack from "webpack";
-import dotenv from "dotenv";
+import LicensePlugin from "webpack-license-plugin";
 // import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const config = {
@@ -31,6 +32,13 @@ const config = {
         process.env.BACKEND_ALT_PREFIX
       ),
       process: "{cwd:()=>''}",
+    }),
+    new LicensePlugin({
+      outputFilename: "assets/oss-licenses/worker.json",
+      includeNoticeText: true,
+      excludedPackageTest: (packageName /*, version*/) => {
+        return packageName.startsWith("@falling-nikochan");
+      },
     }),
   ],
   resolve: {

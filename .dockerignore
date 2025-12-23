@@ -5,6 +5,7 @@ docker-compose.yml
 */public/assets/*.ttf
 */public/assets/wasmoon_glue.wasm
 */public/assets/buildVer.json
+*/public/assets/oss-licenses/
 */dist/
 /node_modules/
 .vite

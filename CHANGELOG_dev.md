@@ -1,3 +1,7 @@
+## ver. 13.19 - 2025/12/23 [#874](https://github.com/na-trium-144/falling-nikochan/pull/874)
+
+* /main/policiesページにサードパーティーのライブラリのライセンスを表示する機能を追加
+
 ## ver. 13.18 - 2025/12/23 [#873](https://github.com/na-trium-144/falling-nikochan/pull/873)
 
 * 速度変化中に音符が出現する場合の出現位置の計算を修正
