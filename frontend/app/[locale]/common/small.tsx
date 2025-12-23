@@ -6,7 +6,7 @@ export function Small(props: { children: ReactNode }) {
 export function SmallDomainOnly() {
   return (
     <Small>
-      nikochan.
+      nikochan*.
       <wbr />
       utcode.
       <wbr />
