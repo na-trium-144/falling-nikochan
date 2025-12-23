@@ -14,11 +14,11 @@ import { ExternalLink } from "@/common/extLink";
 interface LicenseOutput {
   name: string;
   version: string;
-  author: string;
-  repository: string;
-  source: string;
-  license: string;
-  licenseText: string;
+  author?: string;
+  repository?: string;
+  source?: string;
+  license?: string;
+  licenseText?: string;
   noticeText?: string;
 }
 
@@ -81,33 +81,36 @@ export function OSSLicensesList() {
 function LicenseDetail(props: { license: LicenseOutput }) {
   const t = useTranslations("main.policies.license");
   const [open, setOpen] = useState<boolean>(false);
-  let author: string;
-  if (/.* <.*@.*>/.test(props.license.author)) {
-    // remove email
-    author = props.license.author.replace(/(.*) <.*@.*>/, "$1");
-  } else {
-    author = props.license.author;
-  }
+  let author: string = props.license.author ?? "";
+  // remove email or url
+  author = author.replace(/(.*) <.*@.*>/, "$1");
+  author = author.replace(/(.*) \(https?:\/\/.*\)/, "$1");
   let repositoryURL: string;
-  if (props.license.repository.startsWith("http")) {
+  if (props.license.repository?.startsWith("http")) {
     repositoryURL = props.license.repository;
-  } else if (props.license.repository.startsWith("git+http")) {
-    repositoryURL = props.license.repository.slice(4);
-  } else if (props.license.repository.startsWith("git@")) {
+  } else if (props.license.repository?.startsWith("git+http")) {
+    repositoryURL = props.license.repository?.slice(4);
+  } else if (props.license.repository?.startsWith("git@")) {
     repositoryURL =
       "https://" +
       props.license.repository
         .slice(4)
         .replace(":", "/")
         .replace(/\.git$/, "");
-  } else if (/github:[\w-]+\/[\w-]+/.test(props.license.repository)) {
+  } else if (
+    props.license.repository &&
+    /github:[\w-]+\/[\w-]+/.test(props.license.repository)
+  ) {
     repositoryURL = `https://github.com/${props.license.repository.slice(7)}`;
-  } else if (/[\w-]+\/[\w-]+/.test(props.license.repository)) {
+  } else if (
+    props.license.repository &&
+    /[\w-]+\/[\w-]+/.test(props.license.repository)
+  ) {
     // assume github username/repository
     repositoryURL = `https://github.com/${props.license.repository}`;
   } else {
     // fallback to source url
-    repositoryURL = props.license.source;
+    repositoryURL = props.license.source ?? "";
   }
 
   return (
@@ -117,8 +120,12 @@ function LicenseDetail(props: { license: LicenseOutput }) {
         onClick={() => setOpen(!open)}
       >
         <span className="font-bold">{props.license.name}</span>
-        <span className="inline-block font-bold text-sm ml-1">{props.license.version}</span>
-        <span className="inline-block font-bold ml-1">({props.license.license})</span>
+        <span className="inline-block font-bold text-sm ml-1">
+          {props.license.version}
+        </span>
+        <span className="inline-block font-bold ml-1">
+          ({props.license.license})
+        </span>
         {author && <span className="inline-block ml-2">{author}</span>}
         {open ? (
           <DownOne theme="filled" className="inline-block align-middle ml-2" />
@@ -130,7 +137,12 @@ function LicenseDetail(props: { license: LicenseOutput }) {
         <>
           <p className="ml-4 mt-1 text-left">
             <span className="text-sm mr-1">{t("source")}:</span>
-            <ExternalLink className="text-sm max-w-full break-all" href={repositoryURL}>{repositoryURL}</ExternalLink>
+            <ExternalLink
+              className="text-sm max-w-full break-all"
+              href={repositoryURL}
+            >
+              {repositoryURL}
+            </ExternalLink>
           </p>
           <pre
             className={clsx(
