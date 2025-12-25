@@ -54,13 +54,10 @@ export function useDisplayMode(): DisplayMode {
 }
 
 export function hasTouch() {
-  // Bug in FireFox+Windows 10, navigator.maxTouchPoints is incorrect when script is running inside frame.
-  // TBD: report to bugzilla.
-  const navigator = (window.top || window).navigator;
-  const maxTouchPoints = Number.isFinite(navigator.maxTouchPoints)
-    ? navigator.maxTouchPoints
+  const maxTouchPoints = Number.isFinite(window.navigator.maxTouchPoints)
+    ? window.navigator.maxTouchPoints
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (navigator as any).msMaxTouchPoints;
+      (window.navigator as any).msMaxTouchPoints;
   if (Number.isFinite(maxTouchPoints)) {
     // Windows 10 system reports that it supports touch, even though it acutally doesn't (ignore msMaxTouchPoints === 256).
     return maxTouchPoints > 0 && maxTouchPoints !== 256;
