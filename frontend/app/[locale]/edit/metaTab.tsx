@@ -20,7 +20,7 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { useChartFile } from "./file";
-import { useDisplayMode } from "@/scale.js";
+import { isInsideFrame, useDisplayMode } from "@/scale.js";
 
 interface Props {
   chart?: ChartEdit;
@@ -240,7 +240,7 @@ export function MetaTab(props: Props2) {
           onClick={() => {
             if (props.sessionData) {
               initSession(props.sessionData, props.sessionId);
-              if (isStandalone()) {
+              if (isStandalone() || isInsideFrame()) {
                 props.saveEditSession();
                 router.push(`/${props.locale}/play?sid=${props.sessionId}`);
               } else {

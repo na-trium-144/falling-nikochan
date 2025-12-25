@@ -46,7 +46,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { CenterBox } from "@/common/box.js";
-import { useDisplayMode } from "@/scale.js";
+import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
 import Result, { resultAnimDelays } from "./result.js";
 import { getBestScore, setBestScore } from "@/common/bestScore.js";
@@ -495,7 +495,7 @@ function Play(props: Props) {
   }, [chartPlaying, ytVolume]);
   const exit = useCallback(() => {
     // router.replace(`/share/${cid}`);
-    if (isStandalone()) {
+    if (isStandalone() || isInsideFrame()) {
       historyBackWithReview();
     } else {
       window.close();
