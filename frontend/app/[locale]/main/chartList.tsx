@@ -16,7 +16,7 @@ import { getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
-import { useDisplayMode } from "@/scale.jsx";
+import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 
 interface PProps {
   locale: string;
@@ -444,13 +444,14 @@ interface CProps {
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
+  const isInsideFrame = useInsideFrameDetector();
 
   // ~36rem: 1列 -> 18~36rem -> max-width:27rem
   // ~54rem: 2列 -> 18~27rem
   // ~72rem: 3列 -> 18~24rem
   return (
     <li className={clsx("w-full max-w-108 mx-auto h-max")}>
-      {props.onClick || (props.newTab && !isStandalone) ? (
+      {props.onClick || (props.newTab && !isStandalone && !isInsideFrame) ? (
         <>
           <a
             href={props.href}

@@ -30,6 +30,7 @@ import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import Pic from "@icon-park/react/lib/icons/Pic";
+import { isInsideFrame } from "@/scale";
 
 interface Props {
   locale: string;
@@ -155,7 +156,7 @@ export function PlayOption(props: Props) {
                 lvIndex: selectedLevel,
                 brief: props.brief,
               });
-              if (isStandalone()) {
+              if (isStandalone() || isInsideFrame()) {
                 router.push(`/${props.locale}/play?sid=${sessionId}`);
               } else {
                 window

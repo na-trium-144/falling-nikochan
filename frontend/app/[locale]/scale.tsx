@@ -65,3 +65,12 @@ export function hasTouch() {
     return "ontouchstart" in window;
   }
 }
+
+export function isInsideFrame() {
+  return window.self !== window.top;
+}
+export function useInsideFrameDetector() {
+  const [state, setState] = useState<boolean | null>(null);
+  useEffect(() => setState(isInsideFrame()), []);
+  return state;
+}
