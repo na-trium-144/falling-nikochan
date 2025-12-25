@@ -46,7 +46,13 @@ export default function Range(rangeProps: Props) {
                   ? "bg-transparent"
                   : "bg-blue-400 dark:bg-amber-800"
               )}
-              style={{ width: (rangeProps.value / rangeProps.max) * 100 + "%" }}
+              style={{
+                width:
+                  ((rangeProps.value - rangeProps.min) /
+                    (rangeProps.max - rangeProps.min)) *
+                    100 +
+                  "%",
+              }}
             />
           </div>
           {children}
