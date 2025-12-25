@@ -1,3 +1,8 @@
+## ver. 13.20 - 2025/12/26 [#876](https://github.com/na-trium-144/falling-nikochan/pull/876)
+
+* 短い間隔でBPMが変わる時アニメーションを省略
+* Rangeスライダーの背景がThumbの位置とずれるのを修正
+
 ## ver. 13.19 - 2025/12/23 [#874](https://github.com/na-trium-144/falling-nikochan/pull/874)
 
 * /main/policiesページにサードパーティーのライブラリのライセンスを表示する機能を追加
