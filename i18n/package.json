@@ -8,6 +8,6 @@
     "lint": "eslint && node verifyKeys.js"
   },
   "dependencies": {
-    "next-intl": "^4.4.0"
+    "next-intl": "^4.6.1"
   }
 }
