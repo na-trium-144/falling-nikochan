@@ -53,9 +53,23 @@ export default function BPMSign(props: Props) {
         chartSeq !== null ? chartSeq.bpmChanges[currentBpmIndex].bpm : 120;
       const nextBpm =
         chartSeq !== null ? chartSeq.bpmChanges[nextIndex].bpm : 120;
+      const prevInterval =
+        chartSeq !== null
+          ? chartSeq.bpmChanges[nextIndex].timeSec -
+            chartSeq.bpmChanges[currentBpmIndex].timeSec
+          : Infinity;
+      const nextInterval =
+        chartSeq !== null && nextIndex + 1 < chartSeq.bpmChanges.length
+          ? chartSeq.bpmChanges[nextIndex + 1].timeSec -
+            chartSeq.bpmChanges[nextIndex].timeSec
+          : Infinity;
       if (nextBpmIndex.current !== null) {
         nextBpmIndex.current = nextIndex;
-      } else if (Math.abs(prevBpm - nextBpm) >= 10) {
+      } else if (
+        Math.abs(prevBpm - nextBpm) >= 10 &&
+        prevInterval >= 0.1 &&
+        nextInterval >= 0.2
+      ) {
         setFlip(true);
         nextBpmIndex.current = nextIndex;
         setTimeout(() => {
