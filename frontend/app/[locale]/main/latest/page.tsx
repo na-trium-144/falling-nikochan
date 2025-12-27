@@ -5,7 +5,7 @@ import { SharePageModalProvider } from "@/common/sharePageModal";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
-  return initMetadata(params, "/main/latest", t("latest"), t("latestDesc"));
+  return initMetadata(params, "/main/latest", t("latest"), t("latestDescText"));
 }
 
 export default async function Page({ params }: MetadataProps) {

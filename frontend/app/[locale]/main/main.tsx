@@ -10,14 +10,17 @@ import {
   TabKeys,
   tabURLs,
 } from "@/common/footer.js";
-import { ReactNode, RefObject } from "react";
+import { ReactNode, RefObject, useCallback, useState } from "react";
 import Link from "next/link";
 import Title from "@/common/titleLogo.js";
-import { linkStyle1 } from "@/common/linkStyle.js";
+import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { historyBackWithReview, LinkWithReview } from "@/common/pwaInstall";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
+import { useDelayedDisplayState } from "@/common/delayedDisplayState";
+import { AboutModal } from "@/common/aboutModal";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -33,8 +36,25 @@ export function IndexMain(props: Props) {
   const locale = props.locale;
   const t = useTranslations("main");
 
+  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
+  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
+  const setAboutPageIndex = useCallback(
+    (i: number | null) => {
+      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
+    },
+    [setAboutOpen_]
+  );
+
   return (
     <main className="flex flex-col w-full h-full items-center ">
+      {aboutPageIndex !== null && aboutOpen ? (
+        <AboutModal
+          aboutAnim={aboutAnim}
+          aboutPageIndex={aboutPageIndex}
+          setAboutPageIndex={setAboutPageIndex}
+          locale={props.locale}
+        />
+      ) : null}
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
@@ -53,6 +73,19 @@ export function IndexMain(props: Props) {
       >
         <Title className="absolute inset-0 " />
       </Link>
+      <div className="my-2 text-center px-6 hidden main-wide:block">
+        {t("description")}
+        <button
+          className={clsx("hidden main-wide:inline-block", "ml-2", linkStyle3)}
+          onClick={() => setAboutPageIndex(1)}
+        >
+          {t("aboutNikochan")}
+          <ArrowRight
+            className="inline-block align-middle ml-2 "
+            theme="filled"
+          />
+        </button>
+      </div>
       <RedirectedWarning />
       <div
         className={clsx(

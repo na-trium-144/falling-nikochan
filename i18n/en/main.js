@@ -52,6 +52,8 @@ export default {
       latestDesc:
         "List of published charts. Sorted by the most recently created or updated. " +
         "Updates are also announced on the official account of <unicodeX></unicodeX> <twitter>@nikochan144</twitter>.",
+      latestDescText:
+        "List of published charts. Sorted by the most recently created or updated. ",
       latestDesc2:
         "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       sample: "Sample Charts",

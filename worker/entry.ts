@@ -273,13 +273,52 @@ const languageDetector = async (c: Context, next: () => Promise<void>) => {
   await next();
 };
 
+async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
+  const inputReq = input instanceof Request ? input : new Request(input, init);
+  const inputUrl = new URL(inputReq.url);
+  const res = await fetch(inputReq.clone());
+  // メインのバックエンドがダウンしていた場合(500番台のエラー or 403(cloudflareが返す) で、通信エラーでないとき)に、代替バックエンドを試す
+  // ただし別サーバーでcookieは使えないため、編集関係のAPIは除外
+  if (
+    (res.status >= 500 || res.status === 403) &&
+    process.env.BACKEND_ALT_PREFIX &&
+    !inputUrl.pathname.startsWith("/api/chartFile") &&
+    !inputUrl.pathname.startsWith("/api/newChartFile") &&
+    !inputUrl.pathname.startsWith("/api/hashPasswd")
+  ) {
+    const altReq = new Request(
+      process.env.BACKEND_ALT_PREFIX + inputUrl.pathname + inputUrl.search,
+      {
+        body: inputReq.body ? await inputReq.blob() : null,
+        cache: inputReq.cache,
+        credentials: inputReq.credentials,
+        headers: inputReq.headers,
+        integrity: inputReq.integrity,
+        keepalive: inputReq.keepalive,
+        method: inputReq.method,
+        mode: inputReq.mode,
+        // priority: inputReq.priority,
+        redirect: inputReq.redirect,
+        referrer: inputReq.referrer,
+        referrerPolicy: inputReq.referrerPolicy,
+        signal: inputReq.signal,
+      }
+    );
+    const resAlt = await fetch(altReq);
+    if (resAlt.ok) {
+      return resAlt;
+    }
+  }
+  return res;
+}
 const app = new Hono({ strict: false })
   .route(
     "/share",
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: (_e, cid: string) => fetch(self.origin + `/api/brief/${cid}`),
+      fetchBrief: (_e, cid: string /*, _ctx */) =>
+        fetchAPI(self.origin + `/api/brief/${cid}`),
       fetchStatic,
       languageDetector,
     })
@@ -291,11 +330,11 @@ const app = new Hono({ strict: false })
       fetchStatic,
     })
   )
-  // return fetch(...) だと、30xリダイレクトを含む場合エラー
-  .all("/api/*", (c) => fetch(c.req.raw))
-  .all("/api", (c) => fetch(c.req.raw))
+  .all("/api/*", (c) => fetchAPI(c.req.raw))
+  .all("/api", (c) => fetchAPI(c.req.raw))
   .get("/og/*", async (c) => {
-    const res = await fetch(c.req.url, {
+    // return fetch(...) だと、30xリダイレクトを含む場合エラー
+    const res = await fetchAPI(c.req.url, {
       credentials: "omit",
     });
     return new Response(res.body, {
@@ -356,7 +395,7 @@ self.addEventListener("fetch", (e) => {
   if (
     new URL(e.request.url).origin === self.origin ||
     (process.env.ASSET_PREFIX &&
-      new URL(e.request.url).origin === process.env.ASSET_PREFIX)
+      e.request.url.startsWith(process.env.ASSET_PREFIX))
   ) {
     return handle(app)(e);
   }

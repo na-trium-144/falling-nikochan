@@ -7,7 +7,7 @@ import {
   RecordGetSummary,
   ResultParams,
 } from "@falling-nikochan/chart";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
@@ -17,7 +17,7 @@ import Link from "next/link.js";
 import Title from "@/common/titleLogo.jsx";
 import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { MobileFooter, PCFooter } from "@/common/footer.jsx";
-import { AboutModal } from "@/clientPage.jsx";
+import { AboutModal } from "@/common/aboutModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 
@@ -46,7 +46,6 @@ const dummyBrief = {
 
 interface Props {
   locale: string;
-  aboutContents: ReactNode[];
 }
 export default function ShareChart(props: Props) {
   const t = useTranslations("share");
@@ -112,9 +111,9 @@ export default function ShareChart(props: Props) {
       {aboutPageIndex !== null && aboutOpen && (
         <AboutModal
           aboutAnim={aboutAnim}
-          contents={props.aboutContents}
           aboutPageIndex={aboutPageIndex}
           setAboutPageIndex={setAboutPageIndex}
+          locale={props.locale}
         />
       )}
       <div className="flex flex-col w-full min-h-full items-center ">

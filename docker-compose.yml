@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    image: ghcr.io/na-trium-144/falling-nikochan/falling-nikochan:latest
+    container_name: falling-nikochan-app
+    restart: always
+    ports:
+      - "8787:8787"
+    env_file:
+      - .env
+    command: bun ./route/serve-bun-prod.ts
+
+  cron:
+    build: .
+    image: ghcr.io/na-trium-144/falling-nikochan/falling-nikochan:latest
+    container_name: falling-nikochan-cron
+    restart: on-failure
+    env_file:
+      - .env
+    # This command runs the cron job script in a loop every 15 minutes (900 seconds).
+    command: >
+      sh -c "while true; do
+        echo '[$(date)] Running cron job...';
+        bun ./route/cronjob.ts;
+        echo '[$(date)] Cron job finished. Sleeping for 15 minutes.';
+        sleep 900;
+      done"

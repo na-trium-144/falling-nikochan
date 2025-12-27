@@ -14,12 +14,21 @@ const redirectApp = (config: {
     .get("/edit/:cid", (c) => {
       // deprecated (used until ver6.15)
       const cid = c.req.param("cid");
-      return c.redirect(`${new URL(c.req.url).origin}/edit?cid=${cid}`, 301);
+      return c.redirect(
+        new URL(
+          `/edit?cid=${cid}`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        ),
+        301
+      );
     })
     .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
       const params = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.get("language");
-      const redirected = `${new URL(c.req.url).origin}/${lang}${c.req.path}${params ? "?" + params : ""}`;
+      const redirected = new URL(
+        `/${lang}${c.req.path}${params ? "?" + params : ""}`,
+        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+      );
       if (isbot(c.req.header("User-Agent"))) {
         // crawlerに対してはリダイレクトのレスポンスを返す代わりにリダイレクト先のページを直接返す
         const res = await config.fetchStatic(env(c), new URL(redirected));

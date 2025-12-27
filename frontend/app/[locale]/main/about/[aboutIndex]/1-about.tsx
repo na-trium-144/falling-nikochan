@@ -1,8 +1,10 @@
-import { PWAInstallDesc } from "@/common/pwaInstall";
-import { getTranslations } from "@falling-nikochan/i18n/dynamic";
+"use client";
 
-export async function AboutContent1({ locale }: { locale: string }) {
-  const t = await getTranslations(locale, "about.1");
+import { PWAInstallDesc } from "@/common/pwaInstall";
+import { useTranslations } from "next-intl";
+
+export function AboutContent1() {
+  const t = useTranslations("about.1");
   return (
     <>
       <div className="mb-4">

@@ -15,7 +15,7 @@ import {
 import { useDisplayMode } from "./scale.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ReactNode, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import Input from "./common/input.jsx";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
@@ -23,18 +23,14 @@ import { SmallDomainShare } from "./common/small.jsx";
 import { fetchBrief } from "./common/briefCache.js";
 import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
-import { Box, modalBg } from "./common/box.jsx";
-import { Pager, pagerButtonClass } from "./common/pager.jsx";
-import { maxAboutPageIndex } from "./main/about/[aboutIndex]/pager.js";
-import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
+import { AboutModal } from "./common/aboutModal.jsx";
 
 interface Props {
   locale: string;
-  aboutContents: ReactNode[];
 }
 export default function TopPage(props: Props) {
   const { screenWidth, rem } = useDisplayMode();
@@ -61,9 +57,9 @@ export default function TopPage(props: Props) {
       {aboutPageIndex !== null && aboutOpen ? (
         <AboutModal
           aboutAnim={aboutAnim}
-          contents={props.aboutContents}
           aboutPageIndex={aboutPageIndex}
           setAboutPageIndex={setAboutPageIndex}
+          locale={props.locale}
         />
       ) : null}
       <div
@@ -91,9 +87,7 @@ export default function TopPage(props: Props) {
           <Title className="absolute inset-0 " anim />
         </Link>
         <div className="basis-0 flex-1 " />
-        <div
-          className={clsx("grow-0 mb-3 text-center px-6", menuMoveAnimClass)}
-        >
+        <div className="grow-0 my-2 text-center px-6">
           {t("description")}
           <Link
             href={`/${locale}/main/about/1`}
@@ -288,84 +282,5 @@ function InputCId(props: {
         })}
       </p>
     </>
-  );
-}
-
-interface AProps {
-  aboutAnim: boolean;
-  contents: ReactNode[];
-  aboutPageIndex: number;
-  setAboutPageIndex: (i: number | null) => void;
-}
-export function AboutModal(props: AProps) {
-  const tm = useTranslations("main.about");
-  const t = useTranslations(`about.${props.aboutPageIndex}`);
-
-  const close = () => props.setAboutPageIndex(null);
-  return (
-    <div
-      className={clsx(
-        modalBg,
-        "transition-opacity duration-200",
-        props.aboutAnim ? "ease-in opacity-100" : "ease-out opacity-0"
-      )}
-      onClick={close}
-    >
-      <div className="absolute inset-12">
-        <Box
-          className={clsx(
-            "absolute inset-0 m-auto w-180 h-max max-w-full max-h-full",
-            "p-6 overflow-x-clip overflow-y-auto",
-            "shadow-lg",
-            "transition-transform duration-200 origin-center",
-            props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
-            <button
-              className={clsx(pagerButtonClass, "absolute left-0 inset-y-0")}
-              onClick={close}
-            >
-              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
-            </button>
-            {tm("title")}
-          </h3>
-          <Pager
-            index={props.aboutPageIndex}
-            maxIndex={maxAboutPageIndex}
-            onClickBefore={() =>
-              props.setAboutPageIndex(props.aboutPageIndex - 1)
-            }
-            onClickAfter={() =>
-              props.setAboutPageIndex(props.aboutPageIndex + 1)
-            }
-            title={t("title")}
-          />
-          <div
-            className="flex-1 flex flex-row "
-            style={{ width: props.contents.length * 100 + "%" }}
-          >
-            {props.contents.map((c, i) => (
-              // 選択中のページ以外を非表示にするが、
-              // 非表示のページも含めてコンテンツの高さが最も高いものに合わせたサイズで表示させたいので、
-              // 全部横に並べて非表示のページをtranslateXで画面外に送る
-              <div
-                key={i}
-                className="basis-0 flex-1 relative h-max text-center"
-                style={{
-                  transform:
-                    i === props.aboutPageIndex
-                      ? `translateX(-${i * 100}%)`
-                      : `translateX(100vw)`,
-                }}
-              >
-                {c}
-              </div>
-            ))}
-          </div>
-        </Box>
-      </div>
-    </div>
   );
 }

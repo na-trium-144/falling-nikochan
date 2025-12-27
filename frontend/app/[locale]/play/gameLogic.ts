@@ -237,7 +237,6 @@ export default function useGameLogic(
       for (
         let i = 0;
         now !== undefined && i < notesBigYetDone.current.length;
-
       ) {
         const n = notesBigYetDone.current[i];
         const late = now - n.hitTimeSec;

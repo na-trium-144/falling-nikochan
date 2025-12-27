@@ -12,7 +12,7 @@ import {
 import { HTTPException } from "hono/http-exception";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
-import { Context, Hono } from "hono";
+import { Context, ExecutionContext, Hono } from "hono";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -21,7 +21,11 @@ bodyを無理やり書き換える。
 */
 
 const shareApp = (config: {
-  fetchBrief: (e: Bindings, cid: string) => Response | Promise<Response>;
+  fetchBrief: (
+    e: Bindings,
+    cid: string,
+    ctx: ExecutionContext | undefined
+  ) => Response | Promise<Response>;
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
@@ -42,14 +46,20 @@ const shareApp = (config: {
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
-      const pBriefRes = config.fetchBrief(env(c), cid);
+      let executionCtx: ExecutionContext | undefined = undefined;
+      try {
+        executionCtx = c.executionCtx;
+      } catch {
+        //ignore
+      }
+      const pBriefRes = config.fetchBrief(env(c), cid, executionCtx);
       const t = await getTranslations(qLang, "share");
       const tr = await getTranslations(qLang, "play.result");
       let placeholderUrl: URL;
       // if (c.req.path.startsWith("/share")) {
       placeholderUrl = new URL(
         `/${qLang}/share/placeholder`,
-        new URL(c.req.url).origin
+        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
       );
       // } else {
       //   placeholderUrl = new URL(
@@ -92,6 +102,10 @@ const shareApp = (config: {
                 levelTypes[resultParams.lvType] +
                 "-" +
                 resultParams.lvDifficulty.toString(),
+              playbackRate:
+                resultParams.playbackRate4 !== 4
+                  ? `, ${tr("playbackRate")}×${resultParams.playbackRate4 / 4}`
+                  : "",
               score: (resultParams.score100 / 100).toString(),
               status:
                 resultParams.chainScore100 === chainScoreRate * 100
@@ -126,7 +140,7 @@ const shareApp = (config: {
             new URL(
               (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
                 ogQuery.toString(),
-              new URL(c.req.url).origin
+              env(c).BACKEND_PREFIX || new URL(c.req.url).origin
             ).toString()
           )
           .replaceAll(

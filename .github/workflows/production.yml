@@ -1,16 +1,16 @@
 name: Vercel Production Deployment
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-permissions:
-  contents: read
 on:
   push:
     branches:
       - main
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 jobs:
-  Deploy-Production:
+  vercel-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v4
@@ -24,6 +24,7 @@ jobs:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
+          BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
         run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
@@ -31,12 +32,137 @@ jobs:
           name: vercel-output
           path: .vercel/output
           include-hidden-files: true
-      - run: rm -rf .git
-      - run: npm i -g wrangler@latest
-      - name: Publish to Cloudflare Worker
-        uses: cloudflare/wrangler-action@v3
+
+  docker-build:
+    needs: [vercel-build]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
         with:
-          apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
-          accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan:latest-${{ matrix.arch }}
+
+  docker-push-manifest:
+    needs: [docker-build]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create and push manifest
+        env:
+          REPO: ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan
+        run: |
+          docker manifest create ${{ env.REPO }}:latest \
+            ${{ env.REPO }}:latest-amd64 \
+            ${{ env.REPO }}:latest-arm64
+          docker manifest push ${{ env.REPO }}:latest
+
+  deploy-vercel:
+    needs: [docker-push-manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - name: Pull Vercel Environment Information
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
       - name: Deploy Project Artifacts to Vercel
         run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  deploy-cf:
+    needs: [docker-push-manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+      - run: rm -rf .git
+      - run: npm i -g wrangler@latest
+      # - name: Publish to Cloudflare Worker
+      #   uses: cloudflare/wrangler-action@v3
+      #   with:
+      #     apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
+      #     accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
+          accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
+          command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main
+
+  deploy-selfhosting:
+    needs: [docker-push-manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SELFHOST_HOST }}
+          username: ${{ secrets.SELFHOST_USERNAME }}
+          key: ${{ secrets.SELFHOST_KEY }}
+          port: ${{ secrets.SELFHOST_PORT }}
+          script: |
+            cd ~/falling-nikochan
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose pull
+            docker compose up -d
+            docker system prune -f

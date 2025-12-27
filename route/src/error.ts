@@ -61,7 +61,10 @@ async function errorResponse(
   const t = await getTranslations(lang, "error");
   return (
     await (
-      await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin))
+      await fetchStatic(
+        e,
+        new URL(`/${lang}/errorPlaceholder`, e.BACKEND_PREFIX || origin)
+      )
     ).text()
   )
     .replaceAll("PLACEHOLDER_STATUS", String(status))

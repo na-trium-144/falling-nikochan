@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { ExecutionContext, Hono } from "hono";
 import { Bindings, cacheControl } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
@@ -26,7 +26,11 @@ export interface ChartBriefMin {
 
 const ogApp = (config: {
   ImageResponse: any;
-  fetchBrief: (e: Bindings, cid: string) => Response | Promise<Response>;
+  fetchBrief: (
+    e: Bindings,
+    cid: string,
+    ctx: ExecutionContext | undefined
+  ) => Response | Promise<Response>;
   fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -38,7 +42,13 @@ const ogApp = (config: {
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
       if (!c.req.query("brief")) {
-        const briefRes = await config.fetchBrief(env(c), cid);
+        let executionCtx: ExecutionContext | undefined = undefined;
+        try {
+          executionCtx = c.executionCtx;
+        } catch {
+          //ignore
+        }
+        const briefRes = await config.fetchBrief(env(c), cid, executionCtx);
         if (!briefRes.ok) {
           let message = "";
           try {
@@ -80,7 +90,10 @@ const ogApp = (config: {
         );
         ogQuery.set("v", packageJson.version);
         return c.redirect(
-          `${new URL(c.req.url).origin}${c.req.path}?${ogQuery.toString()}`,
+          new URL(
+            `${c.req.path}?${ogQuery.toString()}`,
+            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+          ),
           307
         );
       }
@@ -143,7 +156,10 @@ const ogApp = (config: {
         ...f,
         pData: config.fetchStatic(
           env(c),
-          new URL(`/assets/${f.file}`, new URL(c.req.url).origin)
+          new URL(
+            `/assets/${f.file}`,
+            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+          )
         ),
       }));
       let imagePath: string;
@@ -162,7 +178,10 @@ const ogApp = (config: {
         res(
           config.fetchStatic(
             env(c),
-            new URL(imagePath, new URL(c.req.url).origin)
+            new URL(
+              imagePath,
+              env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+            )
           )
         )
       )
@@ -208,7 +227,10 @@ const ogApp = (config: {
             res(
               config.fetchStatic(
                 env(c),
-                new URL(imagePath, new URL(c.req.url).origin)
+                new URL(
+                  imagePath,
+                  env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+                )
               )
             )
           )
@@ -268,7 +290,10 @@ const ogApp = (config: {
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)
       c.redirect(
-        `${new URL(c.req.url).origin}/og/share/${c.req.param("cid")}`,
+        new URL(
+          `/og/share/${c.req.param("cid")}`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        ),
         301
       )
     );

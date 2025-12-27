@@ -1,3 +1,23 @@
+## ver. 13.16 - 2025/12/20
+
+* dockerでセルフホストインスタンスにデプロイ
+
+## ver. 13.15 - 2025/11/29 [#840](https://github.com/na-trium-144/falling-nikochan/pull/840)
+
+* SharedResultとdescriptionWithResultにplaybackRateの表示を追加
+
+## ver. 13.13 - 2025/11/21 [#836](https://github.com/na-trium-144/falling-nikochan/pull/836)
+
+* /main 以下の各ページにもFallingNikochanについてのモーダル表示へのリンクを表示する
+
+## ver. 13.12 - 2025/11/19 [#798](https://github.com/na-trium-144/falling-nikochan/pull/798)
+
+* キャッシュできるAPIでHonoのCache Middlewareを使う
+
+## ver. 13.11 - 2025/11/19 [#835](https://github.com/na-trium-144/falling-nikochan/pull/835)
+
+* メインのバックエンドがサーバーエラーを起こしている場合にサブのバックエンドを試す
+
 ## ver. 13.10 - 2025/11/05 [#832](https://github.com/na-trium-144/falling-nikochan/pull/832)
 
 * 速度変化中に音符がある場合の動作を修正

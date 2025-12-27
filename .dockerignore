@@ -1,0 +1,14 @@
+.github
+Dockerfile
+docker-compose.yml
+.env
+*/public/assets/*.ttf
+*/public/assets/wasmoon_glue.wasm
+*/public/assets/buildVer.json
+*/dist/
+/node_modules/
+.vite
+.next
+*/out/
+*.tsbuildinfo
+next-env.d.ts

@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "13.10.0",
+  "version": "13.16.0",
   "private": true,
   "type": "module",
   "browserslist": [
@@ -31,7 +31,7 @@
     "react-range": "^1.10.0",
     "react-resize-detector": "^12.3.0",
     "remote-web-worker": "^0.0.9",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
