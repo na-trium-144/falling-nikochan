@@ -160,9 +160,26 @@ const shareApp = (config: {
             `location.replace("${newPath}");` +
             "</script></body></html>";
         }
+
+        const thisURL = new URL(
+          `/share/${cid}`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        );
+        const oembedJsonURL = new URL(
+          `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=json`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        );
+        const oembedXmlURL = new URL(
+          `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=xml`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        );
         return c.text(replacedBody, 200, {
           "Content-Type": res.headers.get("Content-Type") || "text/plain",
           "Cache-Control": cacheControl(env(c), null),
+          "Link": [
+            `<${oembedJsonURL.toString()}>; rel="alternate"; type="application/json+oembed"; title="${escapeHtml(newTitle)}"`,
+            `<${oembedXmlURL.toString()}>; rel="alternate"; type="text/xml+oembed"; title="${escapeHtml(newTitle)}"`,
+          ],
         });
       } else {
         let message = "";
