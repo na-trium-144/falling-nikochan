@@ -10,6 +10,10 @@ export async function generateMetadata({ params }: MetadataProps) {
     {
       image: "https://placeholder_og_image/",
       noAlternate: true,
+      alternateTypes: {
+        "application/json+oembed": "https://placeholder_oembed/json",
+        "text/xml+oembed": "https://placeholder_oembed/xml",
+      },
       custom: { nikochanSharingBrief: "PLACEHOLDER_BRIEF" },
     }
   );
