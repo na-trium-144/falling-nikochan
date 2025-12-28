@@ -91,6 +91,7 @@ import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartFile } from "./file";
 import { useChartState } from "./chartState.js";
+import { PasswdPrompt } from "./passwdPrompt.jsx";
 
 export default function Edit(props: {
   locale: string;
@@ -102,20 +103,7 @@ export default function Edit(props: {
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
-  const {
-    chart,
-    convertedFrom,
-    currentLevelIndex,
-    setCurrentLevelIndex,
-    cid,
-    currentPasswd,
-    savePasswd,
-    setSavePasswd,
-    loadStatus,
-    isNewChart,
-    fetchChart,
-    saveEditSession,
-  } = useChartState({
+  const { chart, loadStatus, fetchChart, savePasswd, setSavePasswd, saveEditSession } = useChartState({
     onLoad: (cid) => {
       if (cid === "new") {
         setGuidePage(1);
@@ -134,8 +122,9 @@ export default function Edit(props: {
 
   useEffect(() => {
     document.title = titleWithSiteName(
-      t("title", { title: chart?.meta.title || "", cid: cid || "" })
+      t("title", { title: chart?.meta.title || "", cid: chart?.cid || "" })
     );
+    // dependencyなし: 常時実行
   });
 
   const [sessionId, setSessionId] = useState<number>();
@@ -148,10 +137,10 @@ export default function Edit(props: {
     const updateSession = async () => {
       if (chart) {
         const data = {
-          cid: cid,
-          lvIndex: currentLevelIndex,
+          cid: chart.cid,
+          lvIndex: chart.currentLevelIndex || 0,
           brief: await createBrief(chart.toObject(), new Date().getTime()),
-          level: convertToPlay(chart.toObject(), currentLevelIndex),
+          level: convertToPlay(chart.toObject(), chart.currentLevelIndex || 0),
           editing: true,
         };
         setSessionData(data);
@@ -164,11 +153,11 @@ export default function Edit(props: {
     return () => {
       chart?.off("changeAnyData", updateSession);
     };
-  }, [sessionId, chart, currentLevelIndex, cid]);
+  }, [sessionId, chart]);
 
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
-      if (hasChange) {
+      if (chart?.hasChange) {
         const confirmationMessage = t("confirmUnsaved");
 
         (e || window.event).returnValue = confirmationMessage; //Gecko + IE
@@ -177,57 +166,30 @@ export default function Edit(props: {
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
-  }, [hasChange, sessionId, t]);
+  }, [chart, t]);
 
   const ref = useRef<HTMLDivElement | null>(null);
 
-  const currentLevel = chart?.levels.at(currentLevelIndex);
-
-  // 現在時刻 offsetを引く前
-  // setはytPlayerから取得。変更するにはchangeCurrentTimeSecを呼ぶ
-  const [currentTimeSecWithoutOffset, setCurrentTimeSecWithoutOffset] =
-    useState<number>(0);
-  // 現在時刻に対応するstep
-  const currentStep = currentLevel?.current.step;
-  const currentLine = currentLevel?.current.line;
-  // snapの刻み幅 を1stepの4n分の1にする
-  const [snapDivider, setSnapDivider] = useState<number>(4);
   const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
 
-  const ss = currentLevel?.current.signatureState;
-  const currentStepStr = ss
-    ? ss.barNum +
+  const currentStepStr = chart?.currentLevel?.current.signatureState
+    ? chart.currentLevel.current.signatureState.barNum +
       1 +
       ";" +
-      (ss.count.fourth + 1) +
-      (ss.count.numerator > 0
-        ? "+" + ss.count.numerator + "/" + ss.count.denominator * 4
+      (chart.currentLevel.current.signatureState.count.fourth + 1) +
+      (chart.currentLevel.current.signatureState.count.numerator > 0
+        ? "+" +
+          chart.currentLevel.current.signatureState.count.numerator +
+          "/" +
+          chart.currentLevel.current.signatureState.count.denominator * 4
         : "")
     : null;
 
-  // offsetを引いた後の時刻
-  const currentTimeSec = currentTimeSecWithoutOffset - (chart?.offset || 0);
-  // 現在選択中の音符 (currentStepSnappedに一致)
-  const currentNoteIndex = currentLevel?.current.noteIndex;
-  const hasCurrentNote =
-    currentNoteIndex !== undefined &&
-    currentNoteIndex >= 0 &&
-    currentLevel?.freeze.notes.at(currentNoteIndex) !== undefined;
-  const notesCountInStep = currentLevel?.current.notesCountInStep;
-  const notesIndexInStep = currentLevel?.current.notesIndexInStep;
-  const canAddNote =
-    notesCountInStep === undefined ||
-    !(
-      (currentLevel?.meta.type === "Single" && notesCountInStep >= 1) ||
-      (currentLevel?.meta.type === "Double" && notesCountInStep >= 2)
-    );
-  const barLines = currentLevel?.barLines;
-
-  const ytPlayer = useRef<YouTubePlayer>(undefined);
+  const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
-  const changePlaybackRate = (rate: number) => {
+  const changePlaybackRate = useCallback((rate: number) => {
     ytPlayer.current?.setPlaybackRate(rate);
-  };
+  }, []);
 
   // ytPlayerが再生中
   const [playing, setPlaying] = useState<boolean>(false);
@@ -245,83 +207,36 @@ export default function Edit(props: {
     console.log("stop");
     setPlaying(false);
   }, []);
-  const start = () => {
+  const start = useCallback(() => {
     ytPlayer.current?.playVideo();
     ref.current?.focus();
-  };
-  const stop = () => {
+  }, []);
+  const stop = useCallback(() => {
     ytPlayer.current?.pauseVideo();
     ref.current?.focus();
-  };
-  const changeCurrentTimeSec = useCallback(
+  }, []);
+  const setAndSeekCurrentTimeWithoutOffset = useCallback(
     (timeSec: number, focus = true) => {
       if (!playing) {
-        setCurrentTimeSecWithoutOffset(timeSec);
-        if (ytPlayer.current?.seekTo) {
-          ytPlayer.current?.seekTo(timeSec, true);
-        }
+        chart?.setCurrentTimeWithoutOffset(timeSec);
+        ytPlayer.current?.seekTo?.(timeSec, true);
       }
       if (focus) {
         ref.current?.focus();
       }
     },
-    [playing]
+    [playing, chart]
   );
-  const seekRight1 = () => {
-    if (currentLevel) {
-      if (
-        hasCurrentNote &&
-        currentStep &&
-        currentLevel.freeze.notes[currentNoteIndex + 1] &&
-        stepCmp(
-          currentStep,
-          currentLevel.freeze.notes[currentNoteIndex + 1].step
-        ) === 0
-      ) {
-        currentLevel.selectNextNote();
-      } else {
-        seekStepRel(1);
-      }
-    }
-    ref.current?.focus();
-  };
-  const seekLeft1 = () => {
-    if (chart) {
-      if (
-        hasCurrentNote &&
-        currentStep &&
-        currentLevel.freeze.notes[currentNoteIndex - 1] &&
-        stepCmp(
-          currentStep,
-          currentLevel.freeze.notes[currentNoteIndex - 1].step
-        ) === 0
-      ) {
-        currentLevel.selectPrevNote();
-      } else {
-        seekStepRel(-1);
-      }
-    }
-    ref.current?.focus();
-  };
-  const seekStepRel = (move: number) => {
-    if (currentStep) {
-      let newStep = stepAdd(currentStep, {
-        fourth: 0,
-        numerator: move,
-        denominator: snapDivider,
-      });
-      seekStepAbs(newStep, true);
-    }
-  };
   const seekStepAbs = useCallback(
     (newStep: Step, focus = false) => {
       // デフォルト引数はluaTabからの呼び出しで使う
-      if (chart && currentLevel) {
+      if (chart?.currentLevel) {
         if (stepCmp(newStep, stepZero()) < 0) {
           newStep = stepZero();
         }
-        changeCurrentTimeSec(
-          getTimeSec(currentLevel.freeze.bpmChanges, newStep) + chart.offset,
+        setAndSeekCurrentTimeWithoutOffset(
+          getTimeSec(chart.currentLevel.freeze.bpmChanges, newStep) +
+            chart.offset,
           focus
         );
       }
@@ -329,11 +244,73 @@ export default function Edit(props: {
         ref.current?.focus();
       }
     },
-    [chart, currentLevel, changeCurrentTimeSec]
+    [chart, setAndSeekCurrentTimeWithoutOffset]
   );
+  const seekStepRel = useCallback(
+    (move: number) => {
+      if (chart?.currentLevel?.current.step) {
+        let newStep = stepAdd(chart.currentLevel.current.step, {
+          fourth: 0,
+          numerator: move,
+          denominator: chart.currentLevel.current.snapDivider,
+        });
+        seekStepAbs(newStep, true);
+      }
+    },
+    [chart, seekStepAbs]
+  );
+  const seekRight1 = useCallback(() => {
+    if (chart?.currentLevel) {
+      if (
+        chart.currentLevel.hasCurrentNote &&
+        chart.currentLevel.current.step &&
+        chart.currentLevel.current.noteIndex !== undefined &&
+        chart.currentLevel.freeze.notes.at(
+          chart.currentLevel.current.noteIndex + 1
+        ) &&
+        stepCmp(
+          chart.currentLevel.current.step,
+          chart.currentLevel.freeze.notes.at(
+            chart.currentLevel.current.noteIndex + 1
+          )!.step
+        ) === 0
+      ) {
+        chart.currentLevel.selectNextNote();
+      } else {
+        seekStepRel(1);
+      }
+    }
+    ref.current?.focus();
+  }, [chart, seekStepRel]);
+  const seekLeft1 = useCallback(() => {
+    if (chart?.currentLevel) {
+      if (
+        chart.currentLevel.hasCurrentNote &&
+        chart.currentLevel.current.step &&
+        chart.currentLevel.current.noteIndex !== undefined &&
+        chart.currentLevel.freeze.notes.at(
+          chart.currentLevel.current.noteIndex - 1
+        ) &&
+        stepCmp(
+          chart.currentLevel.current.step,
+          chart.currentLevel.freeze.notes.at(
+            chart.currentLevel.current.noteIndex - 1
+          )!.step
+        ) === 0
+      ) {
+        chart.currentLevel.selectPrevNote();
+      } else {
+        seekStepRel(-1);
+      }
+    }
+    ref.current?.focus();
+  }, [chart, seekStepRel]);
   const seekSec = (moveSec: number, focus = true) => {
-    if (chart) {
-      changeCurrentTimeSec(currentTimeSec + chart.offset + moveSec, focus);
+    if (chart?.currentLevel) {
+      setAndSeekCurrentTimeWithoutOffset(
+        chart.currentLevel.current.timeSec + chart.offset + moveSec,
+        focus
+      );
     }
   };
 
@@ -341,12 +318,12 @@ export default function Edit(props: {
     if (playing) {
       const i = setInterval(() => {
         if (ytPlayer.current?.getCurrentTime) {
-          setCurrentTimeSecWithoutOffset(ytPlayer.current.getCurrentTime());
+          chart?.setCurrentTimeWithoutOffset(ytPlayer.current.getCurrentTime());
         }
       }, 50);
       return () => clearInterval(i);
     }
-  }, [playing]);
+  }, [playing, chart]);
 
   const {
     playSE,
@@ -359,91 +336,125 @@ export default function Edit(props: {
     setEnableBeatSE,
     beatVolume,
     setBeatVolume,
-  } = useSE(cid, 0, true, {
+  } = useSE(chart?.cid, 0, true, {
     hitVolume: "seVolume",
-    hitVolumeCid: cid ? `seVolume-${cid}` : undefined,
+    hitVolumeCid: chart?.cid ? `seVolume-${chart?.cid}` : undefined,
     enableHitSE: "enableSEEdit",
     beatVolume: "beatVolume",
-    beatVolumeCid: cid ? `beatVolume-${cid}` : undefined,
+    beatVolumeCid: chart?.cid ? `beatVolume-${chart?.cid}` : undefined,
     enableBeatSE: "enableBeatEdit",
   });
   const audioLatencyRef = useRef<number>(null!);
   audioLatencyRef.current = audioLatency || 0;
   useEffect(() => {
-    const notesAll = currentLevel?.notes;
-    if (playing && ytPlayer.current && notesAll) {
-      let index = 0;
-      let t: ReturnType<typeof setTimeout> | null = null;
-      const now =
-        ytPlayer.current.getCurrentTime() -
-        (chart?.offset || 0) +
-        audioLatencyRef.current;
-      while (index < notesAll.length && notesAll[index].hitTimeSec < now) {
-        index++;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const initSETimer = () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
       }
-      const playOne = () => {
-        if (ytPlayer.current) {
-          const notesAll = currentLevel.notes;
-          const now =
-            ytPlayer.current.getCurrentTime() -
-            (chart?.offset || 0) +
-            audioLatencyRef.current;
-          t = null;
-          while (index < notesAll.length && notesAll[index].hitTimeSec <= now) {
-            playSE(notesAll[index].big ? "hitBig" : "hit");
-            index++;
-          }
-          if (index < notesAll.length) {
-            t = setTimeout(playOne, (notesAll[index].hitTimeSec - now) * 1000);
-          }
+      if (playing && ytPlayer.current && chart?.currentLevel) {
+        let index = 0;
+        const now =
+          ytPlayer.current.getCurrentTime() -
+          (chart.offset || 0) +
+          audioLatencyRef.current;
+        while (
+          index < chart.currentLevel.notes.length &&
+          chart.currentLevel.notes[index].hitTimeSec < now
+        ) {
+          index++;
         }
-      };
-      if (index < notesAll.length) {
-        t = setTimeout(playOne, (notesAll[index].hitTimeSec - now) * 1000);
-      }
-      return () => {
-        if (t !== null) {
-          clearTimeout(t);
-        }
-      };
-    }
-  }, [playing, chart?.offset, playSE, currentLevel]);
-  useEffect(() => {
-    if (playing && ytPlayer.current && currentLevel) {
-      let t: ReturnType<typeof setTimeout> | null = null;
-      const now =
-        ytPlayer.current.getCurrentTime() -
-        (chart?.offset || 0) +
-        audioLatencyRef.current;
-      let step = getStep(currentLevel.freeze.bpmChanges, now, 4);
-      const playOne = () => {
-        if (ytPlayer.current && currentLevel) {
-          const now =
-            ytPlayer.current.getCurrentTime() -
-            (chart?.offset || 0) +
-            audioLatencyRef.current;
-          t = null;
-          while (getTimeSec(currentLevel.freeze.bpmChanges, step) <= now) {
-            const ss = getSignatureState(currentLevel.freeze.signature, step);
-            if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
-              playSE(ss.count.fourth === 0 ? "beat1" : "beat");
+        const playOne = () => {
+          if (ytPlayer.current) {
+            const now =
+              ytPlayer.current.getCurrentTime() -
+              (chart?.offset || 0) +
+              audioLatencyRef.current;
+            timer = null;
+            while (
+              index < chart.currentLevel!.notes.length &&
+              chart.currentLevel!.notes[index].hitTimeSec <= now
+            ) {
+              playSE(chart.currentLevel!.notes[index].big ? "hitBig" : "hit");
+              index++;
             }
-            step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
+            if (index < chart.currentLevel!.notes.length) {
+              timer = setTimeout(
+                playOne,
+                (chart.currentLevel!.notes[index].hitTimeSec - now) * 1000
+              );
+            }
           }
-          t = setTimeout(
+        };
+        if (index < chart.currentLevel!.notes.length) {
+          timer = setTimeout(
             playOne,
-            (getTimeSec(currentLevel.freeze.bpmChanges, step) - now) * 1000
+            (chart.currentLevel!.notes[index].hitTimeSec - now) * 1000
           );
         }
-      };
-      playOne();
-      return () => {
-        if (t !== null) {
-          clearTimeout(t);
-        }
-      };
-    }
-  }, [playing, currentLevel, playSE, chart?.offset]);
+      }
+    };
+    initSETimer();
+    chart?.on("changeAnyData", initSETimer);
+    return () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+      chart?.off("changeAnyData", initSETimer);
+    };
+  }, [playing, chart, playSE]);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const initSETimer = () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      if (playing && ytPlayer.current && chart?.currentLevel) {
+        const now =
+          ytPlayer.current.getCurrentTime() -
+          (chart?.offset || 0) +
+          audioLatencyRef.current;
+        let step = getStep(chart.currentLevel.freeze.bpmChanges, now, 4);
+        const playOne = () => {
+          if (ytPlayer.current && chart.currentLevel) {
+            const now =
+              ytPlayer.current.getCurrentTime() -
+              (chart?.offset || 0) +
+              audioLatencyRef.current;
+            timer = null;
+            while (
+              getTimeSec(chart.currentLevel.freeze.bpmChanges, step) <= now
+            ) {
+              const ss = getSignatureState(
+                chart.currentLevel.freeze.signature,
+                step
+              );
+              if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
+                playSE(ss.count.fourth === 0 ? "beat1" : "beat");
+              }
+              step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
+            }
+            timer = setTimeout(
+              playOne,
+              (getTimeSec(chart.currentLevel.freeze.bpmChanges, step) - now) *
+                1000
+            );
+          }
+        };
+        playOne();
+      }
+    };
+    initSETimer();
+    chart?.on("changeAnyData", initSETimer);
+    return () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+      chart?.off("changeAnyData", initSETimer);
+    };
+  }, [playing, playSE, chart]);
 
   const [tab, setTab] = useState<number>(0);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
@@ -457,59 +468,14 @@ export default function Edit(props: {
     }
   }, [dragMode, isTouch, chart]);
 
-  const [ytDuration, setYTDuration] = useState<number>(0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (ytPlayer.current?.getDuration) {
-      const duration = ytPlayer.current.getDuration();
-      if (duration !== ytDuration) {
-        setYTDuration(duration);
-      }
-      if (chart) {
-        for (const level of chart.levels) {
-          level.setYTDuration(duration);
-        }
-      }
+      chart?.setYTDuration(ytPlayer.current.getDuration());
     }
+    // dependencyなし: 常時実行
   });
 
-  const addNote = (
-    n: NoteCommand | null | undefined = chart?.copyBuffer[0]
-  ) => {
-    if (chart && currentLevel && n && canAddNote) {
-    
-    }
-    ref.current?.focus();
-  };
-  const deleteNote = () => {
-    if (chart && currentLevel && hasCurrentNote) {
-    }
-    ref.current?.focus();
-  };
-  const updateNote = (n: NoteCommand) => {
-    if (chart && currentLevel && hasCurrentNote) {
-      
-    }
-    // ref.current.focus();
-  };
-  const copyNote = (copyIndex: number) => {
-    if (chart && currentLevel && hasCurrentNote) {
-      
-    }
-    ref.current?.focus();
-  };
-  const pasteNote = (copyIndex: number, forceAdd: boolean = false) => {
-    
-    ref.current?.focus();
-  };
-
-  const { load } = useChartFile({
-    cid,
-    chart,
-    savePasswd: !!savePasswd,
-    currentPasswd: props.currentPasswd,
-    locale,
-  });
+  const { load } = useChartFile(chart);
   const [dragOver, setDragOver] = useState<boolean>(false);
 
   return (
@@ -534,32 +500,28 @@ export default function Edit(props: {
             seekLeft1();
           } else if (e.key === "Right" || e.key === "ArrowRight") {
             seekRight1();
-          } else if (e.key === "PageUp") {
-            seekStepRel(-snapDivider * 4);
-          } else if (e.key === "PageDown") {
-            seekStepRel(snapDivider * 4);
+          } else if (e.key === "PageUp" && chart?.currentLevel) {
+            seekStepRel(-chart.currentLevel.current.snapDivider * 4);
+          } else if (e.key === "PageDown" && chart?.currentLevel) {
+            seekStepRel(chart?.currentLevel?.current.snapDivider * 4);
           } else if (e.key === ",") {
             seekSec(-1 / 30);
           } else if (e.key === ".") {
             seekSec(1 / 30);
           } else if (e.key === "c") {
-            copyNote(0);
+            chart.copyNote(0);
           } else if (e.key === "v") {
-            pasteNote(0);
-          } else if (
-            Number(e.key) >= 1 &&
-            Number(e.key) <= chart.copyBuffer.length - 1
-          ) {
-            pasteNote(Number(e.key));
+            chart.pasteNote(0);
+          } else if (Number(e.key) >= 1) {
+            chart.pasteNote(Number(e.key));
           } else if (e.key === "n") {
-            pasteNote(0, true);
+            chart.pasteNote(0, true);
           } else if (e.key === "b") {
-            if (
-              currentNoteIndex >= 0 &&
-              currentLevel?.notes[currentNoteIndex]
-            ) {
-              const n = currentLevel.notes[currentNoteIndex];
-              updateNote({ ...n, big: !n.big });
+            if (chart?.currentLevel?.hasCurrentNote) {
+              const n = chart.currentLevel.freeze.notes.at(
+                chart.currentLevel.current.noteIndex!
+              )!;
+              chart.currentLevel.updateNote({ ...n, big: !n.big });
             }
           } else if (e.key === "Shift") {
             setDragMode("v");
@@ -595,7 +557,7 @@ export default function Edit(props: {
         )}
       >
         <MobileHeader className="flex-1 ">
-          {t("titleShort")} ID: {cid}
+          {t("titleShort")} ID: {chart?.cid}
         </MobileHeader>
         <Button text={t("help")} onClick={openGuide} />
       </div>
@@ -610,25 +572,12 @@ export default function Edit(props: {
                 "shadow-lg"
               )}
             >
-              {loading ? (
-                <p>
-                  <SlimeSVG />
-                  Loading...
-                </p>
-              ) : errorStatus !== undefined || errorMsg !== undefined ? (
-                <p>
-                  {errorStatus ? `${errorStatus}: ` : ""}
-                  {errorMsg}
-                </p>
-              ) : (
                 <PasswdPrompt
-                  cid={cid}
-                  passwdFailed={passwdFailed}
+                  loadStatus={loadStatus}
                   fetchChart={fetchChart}
                   savePasswd={savePasswd}
                   setSavePasswd={setSavePasswd}
                 />
-              )}
             </Box>
           </div>
         </div>
@@ -690,7 +639,7 @@ export default function Edit(props: {
               <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
                 <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
                   <span className="text-nowrap ">{t("titleShort")}</span>
-                  <span className="grow-1 text-nowrap ">ID: {cid}</span>
+                  <span className="grow-1 text-nowrap ">ID: {chart?.cid}</span>
                   <span className="min-w-0 overflow-clip shrink-1 text-nowrap text-slate-500 dark:text-stone-400 ">
                     <span className="">ver.</span>
                     <span className="ml-1">{process.env.buildVersion}</span>
@@ -701,7 +650,7 @@ export default function Edit(props: {
               <div
                 className={clsx(
                   "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
-                  levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
+                  levelBgColors[levelTypes.indexOf(chart?.currentLevel?.meta.type || "")] ||
                     levelBgColors[1],
                   chart || "invisible "
                 )}
@@ -713,7 +662,7 @@ export default function Edit(props: {
                     "edit-wide:w-full edit-wide:h-auto"
                   )}
                   control={true}
-                  id={chart?.ytId}
+                  id={chart?.meta.ytId}
                   ytPlayer={ytPlayer}
                   onReady={onReady}
                   onStart={onStart}
@@ -731,10 +680,10 @@ export default function Edit(props: {
                 <FallingWindow
                   inCodeTab={isCodeTab}
                   className="absolute inset-0"
-                  notes={notesAll}
-                  currentTimeSec={currentTimeSec || 0}
-                  currentNoteIndex={currentNoteIndex}
-                  currentLevel={currentLevel}
+                  notes={chart?.currentLevel?.notes}
+                  currentTimeSec={chart?.currentLevel?.current.timeSec || 0}
+                  currentNoteIndex={chart?.currentLevel?.current.noteIndex}
+                  currentLevel={chart?.currentLevel}
                   updateNote={updateNote}
                   dragMode={dragMode}
                   setDragMode={setDragMode}

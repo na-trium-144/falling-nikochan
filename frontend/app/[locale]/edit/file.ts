@@ -2,6 +2,7 @@ import {
   ChartEdit,
   ChartMin,
   convertToMin,
+  currentChartVer,
   validateChartMin,
 } from "@falling-nikochan/chart";
 import saveAs from "file-saver";
@@ -13,6 +14,7 @@ import msgpack from "@ygoe/msgpack";
 import { getPasswd, setPasswd, unsetPasswd } from "@/common/passwdCache.js";
 import { addRecent } from "@/common/recent";
 import { isStandalone, updatePlayCountForReview } from "@/common/pwaInstall";
+import { ChartEditing } from "./chartState";
 
 export interface FileSaveResult {
   isError: boolean;
@@ -25,14 +27,7 @@ export interface FileLoadResult {
   chart?: ChartEdit;
   originalVer?: number;
 }
-interface Props {
-  cid: string | undefined;
-  chart: ChartEdit | undefined;
-  savePasswd: boolean;
-  currentPasswd: RefObject<string | null>;
-  locale: string;
-}
-export function useChartFile(props: Props) {
+export function useChartFile(chart: ChartEditing | undefined) {
   const t = useTranslations("edit.meta");
   const te = useTranslations("error");
 
@@ -53,143 +48,143 @@ export function useChartFile(props: Props) {
   );
 
   const remoteSave = useCallback<() => Promise<FileSaveResult>>(async () => {
-    const onSave = async (cid: string, changePasswd: string | null) => {
-      if (changePasswd) {
-        if (props.savePasswd) {
-          try {
-            fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${cid}?p=${changePasswd}`,
-              {
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              }
-            ).then(async (res) => {
-              setPasswd(cid, await res.text());
-            });
-          } catch {
-            //ignore
-          }
-        } else {
-          unsetPasswd(cid);
-        }
-      }
-    };
-    if (props.cid === undefined) {
-      try {
-        const res = await fetch(
-          process.env.BACKEND_PREFIX + `/api/newChartFile`,
-          {
-            method: "POST",
-            body: msgpack.serialize(props.chart),
-            cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          }
-        );
-        if (res.ok) {
-          try {
-            const resBody = (await res.json()) as {
-              message?: string;
-              cid?: string;
-            };
-            if (typeof resBody.cid === "string") {
-              addRecent("edit", resBody.cid);
-              updatePlayCountForReview();
-              onSave(resBody.cid, props.chart!.changePasswd);
-              return {
-                isError: false,
-                cid: resBody.cid,
-                message: t("saveDone"),
-              };
+    if (chart) {
+      const onSave = async (cid: string) => {
+        // 新規作成と上書きで共通の処理
+        if (chart.changePasswd) {
+          if (chart.savePasswd) {
+            try {
+              fetch(
+                process.env.BACKEND_PREFIX +
+                  `/api/hashPasswd/${cid}?p=${chart.changePasswd}`,
+                {
+                  credentials:
+                    process.env.NODE_ENV === "development"
+                      ? "include"
+                      : "same-origin",
+                }
+              ).then(async (res) => {
+                setPasswd(cid, await res.text());
+              });
+            } catch {
+              //ignore
             }
-          } catch {
-            // pass through
+          } else {
+            unsetPasswd(cid);
           }
+        }
+        chart.resetOnSave(cid);
+      };
+      if (chart.cid === undefined) {
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX + `/api/newChartFile`,
+            {
+              method: "POST",
+              body: msgpack.serialize(chart.toObject()),
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            }
+          );
+          if (res.ok) {
+            try {
+              const resBody = (await res.json()) as {
+                message?: string;
+                cid?: string;
+              };
+              if (typeof resBody.cid === "string") {
+                addRecent("edit", resBody.cid);
+                updatePlayCountForReview();
+                onSave(resBody.cid);
+                return {
+                  isError: false,
+                  cid: resBody.cid,
+                  message: t("saveDone"),
+                };
+              }
+            } catch {
+              // pass through
+            }
+            return {
+              isError: true,
+              message: te("badResponse"),
+            };
+          } else {
+            return {
+              isError: true,
+              message: errorFromResponse(res),
+            };
+          }
+        } catch (e) {
+          console.error(e);
           return {
             isError: true,
-            message: te("badResponse"),
-          };
-        } else {
-          return {
-            isError: true,
-            message: errorFromResponse(res),
+            message: te("api.fetchError"),
           };
         }
-      } catch (e) {
-        console.error(e);
-        return {
-          isError: true,
-          message: te("api.fetchError"),
-        };
+      } else {
+        const q = new URLSearchParams();
+        if (chart.currentPasswd) {
+          q.set("p", chart.currentPasswd);
+        } else if (getPasswd(chart.cid)) {
+          q.set("ph", getPasswd(chart.cid)!);
+        }
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/chartFile/${chart.cid}?` +
+              q.toString(),
+            {
+              method: "POST",
+              body: msgpack.serialize(chart.toObject()),
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            }
+          );
+          if (res.ok) {
+            onSave(chart.cid);
+            return {
+              isError: false,
+              cid: chart.cid,
+              message: t("saveDone"),
+            };
+          } else {
+            return {
+              isError: true,
+              message: errorFromResponse(res),
+            };
+          }
+        } catch (e) {
+          console.error(e);
+          return {
+            isError: true,
+            message: te("api.fetchError"),
+          };
+        }
       }
     } else {
-      const q = new URLSearchParams();
-      if (props.currentPasswd.current) {
-        q.set("p", props.currentPasswd.current);
-      } else if (getPasswd(props.cid)) {
-        q.set("ph", getPasswd(props.cid)!);
-      }
-      try {
-        const res = await fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/chartFile/${props.cid}?` +
-            q.toString(),
-          {
-            method: "POST",
-            body: msgpack.serialize(props.chart),
-            cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          }
-        );
-        if (res.ok) {
-          onSave(props.cid, props.chart!.changePasswd);
-          return {
-            isError: false,
-            cid: props.cid,
-            message: t("saveDone"),
-          };
-        } else {
-          return {
-            isError: true,
-            message: errorFromResponse(res),
-          };
-        }
-      } catch (e) {
-        console.error(e);
-        return {
-          isError: true,
-          message: te("api.fetchError"),
-        };
-      }
+      throw new Error("chart is empty");
     }
-  }, [
-    errorFromResponse,
-    props.chart,
-    props.cid,
-    props.currentPasswd,
-    props.savePasswd,
-    t,
-    te,
-  ]);
+  }, [errorFromResponse, chart, t, te]);
+
   const remoteDelete = useCallback<() => Promise<void>>(async () => {
+    if(chart){
     const q = new URLSearchParams();
-    if (props.currentPasswd.current) {
-      q.set("p", props.currentPasswd.current);
-    } else if (getPasswd(props.cid!)) {
-      q.set("ph", getPasswd(props.cid!)!);
+    if (chart.currentPasswd) {
+      q.set("p", chart.currentPasswd);
+    } else if (getPasswd(chart.cid!)) {
+      q.set("ph", getPasswd(chart.cid!)!);
     }
     try {
       const res = await fetch(
         process.env.BACKEND_PREFIX +
-          `/api/chartFile/${props.cid}?` +
+          `/api/chartFile/${chart.cid}?` +
           q.toString(),
         {
           method: "DELETE",
@@ -208,15 +203,18 @@ export function useChartFile(props: Props) {
     } catch (e) {
       console.error(e);
     }
-  }, [props.cid, props.currentPasswd]);
+  }else{
+    throw new Error("chart is empty")
+  }
+  }, [chart]);
 
-  const downloadExtension = `fn${props.chart?.ver}.yml`;
+  const downloadExtension = `fn${currentChartVer}.yml`;
   const localSave = useCallback<() => FileSaveResult>(() => {
-    if (props.chart) {
-      const yml = YAML.stringify(convertToMin(props.chart), {
+    if (chart) {
+      const yml = YAML.stringify(convertToMin(chart.toObject()), {
         indentSeq: false,
       });
-      const filename = `${props.cid}_${props.chart.title}.${downloadExtension}`;
+      const filename = `${chart.cid}_${chart.meta.title}.${downloadExtension}`;
       saveAs(new Blob([yml]), filename);
       return {
         isError: false,
@@ -227,7 +225,7 @@ export function useChartFile(props: Props) {
         isError: true,
       };
     }
-  }, [downloadExtension, props.chart, props.cid, t]);
+  }, [downloadExtension, chart, t]);
   const load = useCallback<(buffer: ArrayBuffer) => Promise<FileLoadResult>>(
     async (buffer: ArrayBuffer) => {
       let originalVer: number = 0;

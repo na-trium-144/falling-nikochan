@@ -11,7 +11,9 @@ import {
   Chart8Edit,
   Chart9Edit,
   ChartEdit,
+  ChartUntil13,
   currentChartVer,
+  emptyChart,
   findBpmIndexFromStep,
   findInsertLine,
   getSignatureState,
@@ -55,6 +57,8 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import EventEmitter from "eventemitter3";
 import { useLuaExecutor } from "./luaTab";
+import { HTTPException } from "hono/http-exception";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 // new時
 // setGuidePage(1);
@@ -77,10 +81,39 @@ export class ChartEditing extends EventEmitter<EventType> {
   #currentLevelIndex: number | undefined; // 範囲外にはせず、levelsが空の場合undefined
   #copyBuffer: (NoteCommand | null)[];
   readonly #locale: string;
+  #convertedFrom: number;
+  #hasChange: boolean;
+  // 新規譜面はundefined 保存で変わる
+  #cid: string | undefined;
+  // fetchに成功したらセット、
+  // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
+  #currentPasswd: string | null;
+  // 新しいパスワード
+  #changePasswd: string | null;
 
-  constructor(obj: ChartEdit, locale: string) {
+  constructor(
+    obj: ChartEdit,
+    options: {
+      locale: string;
+      cid: string | undefined;
+      currentPasswd: string | null;
+      convertedFrom?: number;
+      currentLevelIndex?: number;
+      hasChange?: boolean;
+    }
+  ) {
     super();
-    this.#locale = locale;
+    this.#locale = options.locale;
+    this.#convertedFrom = options.convertedFrom ?? obj.ver;
+    this.#cid = options.cid;
+    this.#currentPasswd = options.currentPasswd;
+    this.#changePasswd = null;
+
+    this.#hasChange = options.hasChange ?? false;
+    this.on("changeAnyData", () => {
+      this.#hasChange = true;
+    });
+
     this.#offset = obj.offset;
     this.#published = obj.published;
     this.#meta = {
@@ -98,7 +131,18 @@ export class ChartEditing extends EventEmitter<EventType> {
       }
     }
     this.#copyBuffer = obj.copyBuffer;
-    this.#currentLevelIndex = this.#levels.length >= 1 ? 0 : undefined;
+    this.#currentLevelIndex =
+      (options.currentLevelIndex ?? this.#levels.length >= 1) ? 0 : undefined;
+  }
+  resetOnSave(cid: string) {
+    this.#convertedFrom = currentChartVer;
+    this.#hasChange = false;
+    if (this.#changePasswd) {
+      this.#currentPasswd = this.changePasswd;
+    }
+    this.#changePasswd = null;
+    this.#cid = cid;
+    this.emit("changeAny");
   }
   toObject(): ChartEdit {
     return {
@@ -106,11 +150,11 @@ export class ChartEditing extends EventEmitter<EventType> {
       ver: currentChartVer,
       offset: this.#offset,
       locale: this.#locale,
-      changePasswd: null,
       published: this.#published,
       ...this.#meta,
       levels: this.#levels.map((l) => l.toObject()),
       copyBuffer: this.#copyBuffer,
+      changePasswd: this.#changePasswd,
     };
   }
 
@@ -127,13 +171,55 @@ export class ChartEditing extends EventEmitter<EventType> {
       return undefined;
     }
   }
+  get currentLevelIndex() {
+    return this.#currentLevelIndex;
+  }
   get offset() {
     return this.#offset;
   }
-  setOffset(ofs: number) {
-    this.#offset = ofs;
+  get convertedFrom() {
+    return this.#convertedFrom;
+  }
+  get hasChange() {
+    return this.#hasChange;
+    // constructorで"changeAnyData"イベント時にtrueになるようコールバックを設定している
+  }
+  get cid() {
+    return this.#cid;
+  }
+  get currentPasswd() {
+    return this.#currentPasswd;
+  }
+  get changePasswd() {
+    return this.#changePasswd;
+  }
+  set changePasswd(pw: string | null) {
+    this.#changePasswd = pw;
     this.emit("changeAny");
     this.emit("changeAnyData");
+  }
+
+  setOffset(ofs: number) {
+    const oldOffset = this.#offset;
+    this.#offset = ofs;
+    for (const level of this.#levels) {
+      level.setCurrentTimeWithoutOffset(level.current.timeSec + oldOffset);
+    }
+    this.emit("changeAny");
+    this.emit("changeAnyData");
+  }
+  setCurrentTimeWithoutOffset(
+    timeSecWithoutOffset: number,
+    snapDivider?: number
+  ) {
+    for (const level of this.#levels) {
+      level.setCurrentTimeWithoutOffset(timeSecWithoutOffset, snapDivider);
+    }
+  }
+  setYTDuration(duration: number) {
+    for (const level of this.#levels) {
+      level.setYTDuration(duration);
+    }
   }
 
   copyNote(copyIndex: number) {
@@ -141,14 +227,15 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#copyBuffer[copyIndex] =
         this.currentLevel.freeze.notes[this.currentLevel.current.noteIndex];
       this.emit("changeAny");
+      // dataに変化があるが、changeAnyDataは呼ばない
     }
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
-    if (this.#copyBuffer[copyIndex] && this.currentLevel) {
+    if (this.#copyBuffer.at(copyIndex) && this.currentLevel) {
       if (this.currentLevel.current.noteIndex !== undefined && !forceAdd) {
-        this.currentLevel.updateNote(this.#copyBuffer[copyIndex]);
+        this.currentLevel.updateNote(this.#copyBuffer.at(copyIndex)!);
       } else {
-        this.currentLevel.addNote(this.#copyBuffer[copyIndex]);
+        this.currentLevel.addNote(this.#copyBuffer.at(copyIndex)!);
       }
     }
   }
@@ -336,7 +423,14 @@ export class LevelEditing extends EventEmitter<EventType> {
   }
 
   #current: CursorState;
-  setCurrentTime(timeSec: number, snapDivider: number) {
+  setCurrentTimeWithoutOffset(
+    timeSecWithoutOffset: number,
+    snapDivider?: number
+  ) {
+    const timeSec = timeSecWithoutOffset - this.#offset();
+    if (snapDivider === undefined) {
+      snapDivider = this.#current.snapDivider;
+    }
     if (
       this.#current.timeSec != timeSec ||
       this.#current.snapDivider != snapDivider
@@ -358,6 +452,13 @@ export class LevelEditing extends EventEmitter<EventType> {
     return this.#current;
   }
 
+  get hasCurrentNote() {
+    return (
+      this.#current.noteIndex !== undefined &&
+      this.#current.noteIndex >= 0 &&
+      this.#freeze.notes.at(this.#current.noteIndex) !== undefined
+    );
+  }
   get currentBpm() {
     return this.#freeze.bpmChanges.at(this.#current.bpmIndex)?.bpm ?? 120;
   }
@@ -476,6 +577,15 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
   }
 
+  get canAddNote() {
+    return (
+      this.#current.notesCountInStep === undefined ||
+      !(
+        (this.#meta.type === "Single" && this.#current.notesCountInStep >= 1) ||
+        (this.#meta.type === "Double" && this.#current.notesCountInStep >= 2)
+      )
+    );
+  }
   addNote(n: NoteCommand | null | undefined) {
     if (n) {
       let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
@@ -508,7 +618,9 @@ export class LevelEditing extends EventEmitter<EventType> {
 }
 export class CursorState extends EventEmitter<EventType> {
   // 現在のカーソル位置と、それに応じて変わる情報
+  // timeSecはoffsetを引いたあとの時刻
   #timeSec: number = 0;
+  // snapの刻み幅 を1stepの4n分の1にする
   #snapDivider: number = 1;
   #step: Step = stepZero();
   #noteIndex: number | undefined;
@@ -625,75 +737,76 @@ interface Props {
   onLoad: (cid: string) => void;
   locale: string;
 }
+export type ChartAndState =
+  | {
+      chart: ChartEditing;
+      state: "ok";
+    }
+  | {
+      state:
+        | undefined
+        | "loading"
+        | "passwdFailedSilent"
+        | "passwdFailed"
+        | Error
+        | HTTPException;
+    };
+export type LoadState = ChartAndState["state"];
+interface EditSession {
+  cid: string | undefined;
+  currentPasswd: string | null;
+  chart: ChartEdit;
+  convertedFrom: number;
+  currentLevelIndex: number | undefined;
+  hasChange: boolean;
+  savePasswd: boolean;
+}
+export interface FetchChartOptions {
+  isFirst?: boolean;
+  bypass?: boolean;
+  editPasswd: string;
+  savePasswd: boolean;
+}
 // chartとパスワードの管理まではこのフックの範囲
 export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
   const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
 
-  const chartRef = useRef<ChartEditing | undefined>(undefined);
+  const [chartState, setChartState] = useState<ChartAndState>({
+    state: undefined,
+  });
   useEffect(() => {
-    chartRef.current?.on("changeAny", rerender);
-    return () => {
-      chartRef.current?.off("changeAny", rerender);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartRef.current, rerender]);
-
-  const [convertedFrom, setConvertedFrom] = useState<number>(currentChartVer);
-
-  // const [hasChange, setHasChange] = useState<boolean>(false);
-
-  // 新規譜面はundefined 保存で変わる
-  const [cid, setCid] = useState<string | undefined>(undefined);
-
-  // fetchに成功したらセット、
-  // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
-  const currentPasswd = useRef<string | null>(null);
-
-  // パスワードを保存するかどうか
-  // これは譜面読み込み後もmetaタブのチェックボックスに引き継がれる
-  const [savePasswd, setSavePasswd] = useState<boolean>(false);
-  useEffect(() => {
-    setSavePasswd(preferSavePasswd());
-  }, []);
-
-  const [loadStatus, setLoadStatus] = useState<
-    | "undefined"
-    | "loading"
-    | "passwdFailed"
-    | { status?: number; msg: string }
-    | "ok"
-  >("undefined");
-  const [isNewChart, setIsNewChart] = useState<boolean>(false);
+    if (chartState.state === "ok") {
+      chartState.chart.on("changeAny", rerender);
+      return () => {
+        chartState.chart.off("changeAny", rerender);
+      };
+    }
+  }, [chartState, rerender]);
 
   const t = useTranslations("edit");
-  const te = useTranslations("error");
   const router = useRouter();
 
   const { onLoad, locale } = props;
 
+  // パスワードを保存するかどうか
+  // これは譜面読み込み後もmetaタブのチェックボックスに引き継がれる
+  const [savePasswd, setSavePasswd] = useState<boolean>(false);
+
   const fetchChart = useCallback(
-    async (
-      cid: string,
-      isFirst: boolean,
-      bypass: boolean,
-      editPasswd: string,
-      savePasswd: boolean
-    ) => {
-      setLoadStatus("loading");
+    async (cid: string, options: FetchChartOptions) => {
+      setChartState({ state: "loading" });
+      setSavePasswd(options.savePasswd);
 
       const q = new URLSearchParams();
       if (getPasswd(cid)) {
         q.set("ph", getPasswd(cid)!);
       }
-      if (editPasswd) {
-        currentPasswd.current = editPasswd;
-        q.set("p", currentPasswd.current);
-      } else {
-        currentPasswd.current = null;
+      if (options.editPasswd) {
+        q.set("p", options.editPasswd);
       }
-      if (bypass) {
+      if (options.bypass) {
         q.set("pbypass", "1");
       }
       let res: Response | null = null;
@@ -708,17 +821,16 @@ export function useChartState(props: Props) {
                 : "same-origin",
           }
         );
-        if (res?.ok) {
+        if (res.ok) {
           try {
             const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
               msgpack.deserialize(await res.arrayBuffer());
-            const chart: ChartEdit = await validateChart(chartRes);
-            if (savePasswd) {
-              if (currentPasswd.current) {
+            if (options.savePasswd) {
+              if (options.editPasswd) {
                 try {
                   const res = await fetch(
                     process.env.BACKEND_PREFIX +
-                      `/api/hashPasswd/${cid}?p=${currentPasswd.current}`,
+                      `/api/hashPasswd/${cid}?p=${options.editPasswd}`,
                     {
                       credentials:
                         process.env.NODE_ENV === "development"
@@ -734,121 +846,125 @@ export function useChartState(props: Props) {
             } else {
               unsetPasswd(cid);
             }
-            setConvertedFrom(chartRes.ver);
-            chartRef.current = chart;
-            setLoadStatus("ok");
+            setChartState({
+              chart: new ChartEditing(await validateChart(chartRes), {
+                locale,
+                cid,
+                currentPasswd: options.editPasswd || null,
+                convertedFrom: chartRes.ver,
+              }),
+              state: "ok",
+            });
             onLoad(cid);
           } catch (e) {
             console.error(e);
-            setLoadStatus({ msg: te("badResponse") });
+            setChartState({ state: new Error("badResponse") });
           }
         } else {
-          if (res?.status === 401) {
-            if (!isFirst) {
-              setLoadStatus("passwdFailed");
+          if (res.status === 401) {
+            if (options.isFirst) {
+              setChartState({ state: "passwdFailedSilent" });
+            } else {
+              setChartState({ state: "passwdFailed" });
             }
           } else {
             try {
-              const message = ((await res?.json()) as { message?: string })
+              const message = ((await res.json()) as { message?: string })
                 .message;
-              if (te.has("api." + message)) {
-                setLoadStatus({
-                  status: res?.status,
-                  msg: te("api." + message),
-                });
-              } else {
-                setLoadStatus({
-                  status: res?.status,
-                  msg: message || te("unknownApiError"),
-                });
-              }
+              setChartState({
+                state: new HTTPException(res.status as ContentfulStatusCode, {
+                  message: message || "",
+                }),
+              });
             } catch {
-              setLoadStatus({
-                status: res?.status,
-                msg: te("unknownApiError"),
+              setChartState({
+                state: new HTTPException(res.status as ContentfulStatusCode, {
+                  message: "",
+                }),
               });
             }
           }
         }
       } catch (e) {
         console.error(e);
-        chartRef.current = undefined;
-        setLoadStatus({ msg: te("api.fetchError") });
+        setChartState({ state: new Error("fetchError") });
       }
     },
-    [te]
+    [locale, onLoad]
   );
 
   useEffect(() => {
-    if (loadStatus === "undefined") {
+    if (chartState.state === undefined) {
       const params = new URLSearchParams(window.location.search);
       const cid = params.get("cid");
       if (sessionStorage.getItem("editSession")) {
-        const data = JSON.parse(sessionStorage.getItem("editSession")!);
+        const data = JSON.parse(
+          sessionStorage.getItem("editSession")!
+        ) as EditSession;
         sessionStorage.removeItem("editSession");
         if (data.cid === cid || (data.cid === undefined && cid === "new")) {
-          setCid(data.cid);
-          currentPasswd.current = data.currentPasswd.current;
+          setChartState({
+            chart: new ChartEditing(data.chart, {
+              cid: data.cid,
+              currentPasswd: data.currentPasswd,
+              convertedFrom: data.convertedFrom,
+              currentLevelIndex: data.currentLevelIndex,
+              hasChange: data.hasChange,
+              locale,
+            }),
+            state: "ok",
+          });
           setSavePasswd(data.savePasswd);
-          chartRef.current = data.chart;
-          setConvertedFrom(data.convertedFrom);
-          setCurrentLevelIndex(data.currentLevelIndex);
-          setHasChange(data.hasChange);
-          setLoadStatus("ok");
           // onLoad();
           return;
         }
       }
+
+      const savePasswd = preferSavePasswd();
+      setSavePasswd(savePasswd);
+
       if (cid === "new") {
-        setIsNewChart(true);
-        setCid(undefined);
-        setLoadStatus("ok");
+        setChartState({
+          chart: new ChartEditing(emptyChart(locale), {
+            locale,
+            cid: undefined,
+            currentPasswd: null,
+          }),
+          state: "ok",
+        });
         onLoad("new");
-        chartRef.current = emptyChart(locale);
       } else if (cid) {
-        setCid(cid);
-        void fetchChart(cid, true, false, "", true);
+        void fetchChart(cid, { isFirst: true, editPasswd: "", savePasswd });
       } else {
         router.push(`/${locale}/main/edit`);
       }
     }
-  }, [fetchChart, t, locale, router, loadStatus]);
+  }, [fetchChart, t, locale, router, chartState, onLoad, savePasswd]);
 
   // PWAでテストプレイを押した場合に編集中の譜面データをsessionStorageに退避
   const saveEditSession = useCallback(() => {
-    sessionStorage.setItem(
-      "editSession",
-      JSON.stringify({
-        cid,
-        currentPasswd,
-        savePasswd,
-        chart: chartRef.current,
-        convertedFrom,
-        currentLevelIndex,
-        hasChange,
-      })
-    );
-  }, [
-    cid,
-    currentPasswd,
-    savePasswd,
-    convertedFrom,
-    currentLevelIndex,
-    hasChange,
-  ]);
+    if (chartState.state === "ok") {
+      sessionStorage.setItem(
+        "editSession",
+        JSON.stringify({
+          cid: chartState.chart.cid,
+          currentPasswd: chartState.chart.currentPasswd,
+          chart: chartState.chart.toObject(),
+          convertedFrom: chartState.chart.convertedFrom,
+          currentLevelIndex: chartState.chart.currentLevelIndex,
+          hasChange: chartState.chart.hasChange,
+          savePasswd: !!savePasswd,
+        } satisfies EditSession)
+      );
+    }
+  }, [chartState, savePasswd]);
 
   return {
-    chart: chartRef.current,
-    convertedFrom,
-    currentLevelIndex,
-    setCurrentLevelIndex,
-    cid,
-    currentPasswd,
-    savePasswd,
-    setSavePasswd,
-    loadStatus,
-    isNewChart,
+    chart: chartState.state === "ok" ? chartState.chart : undefined,
+    loadStatus: chartState.state,
     fetchChart,
     saveEditSession,
+    savePasswd,
+    setSavePasswd
   };
 }

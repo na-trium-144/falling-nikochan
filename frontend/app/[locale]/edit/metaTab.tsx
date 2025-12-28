@@ -175,19 +175,12 @@ export function MetaTab(props: Props2) {
       setErrorMsg(result.message || "");
     } else {
       setErrorMsg(result.message || "");
-      props.setCid(result.cid!);
       history.replaceState(
         null,
         "",
         `/${props.locale}/edit?cid=${result.cid!}`
       );
-      props.setHasChange(false);
-      props.setConvertedFrom(props.chart!.ver);
-      if (props.chart!.changePasswd) {
-        props.currentPasswd.current = props.chart!.changePasswd;
-      }
     }
-    props.chart!.changePasswd = null;
     setSaving(false);
   };
   const deleteChart = async () => {
