@@ -30,6 +30,7 @@ export async function initMetadata(
     image?: string;
     noAlternate?: boolean;
     custom?: { [key: string]: string };
+    alternateTypes?: { [key: string]: string };
   }
 ): Promise<Metadata> {
   const locale = (await params).locale || "en";
@@ -54,6 +55,7 @@ export async function initMetadata(
                 },
                 {} as { [key: string]: string }
               ),
+          types: options?.alternateTypes || {},
         }
       : undefined,
     description,
