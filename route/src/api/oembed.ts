@@ -82,8 +82,8 @@ const oembedApp = async (config: {
     async (c) => {
       const {
         url: embedUrl,
-        // maxwidth,
-        // maxheight,
+        maxwidth,
+        maxheight,
         format: resFormat,
       } = c.req.valid("query");
       const match = new URL(embedUrl).pathname.match(
@@ -112,6 +112,12 @@ const oembedApp = async (config: {
         `/share/${cid}`,
         new URL(env(c).BACKEND_PREFIX || c.req.url).origin
       );
+      const width = Math.round(maxwidth || 640);
+      const height = Math.round(
+        maxheight
+          ? Math.min(maxheight, ((maxwidth || Infinity) / 4) * 3)
+          : (width / 4) * 3
+      );
       const oembed: v.InferOutput<ReturnType<typeof OEmbedSchema>> = {
         type: "rich",
         version: "1.0",
@@ -129,10 +135,9 @@ const oembedApp = async (config: {
         provider_name: "Falling Nikochan",
         provider_url: new URL(env(c).BACKEND_PREFIX || c.req.url).origin,
         cache_age: CACHE_MAX_AGE,
-        // TODO: maxwidth, maxheight
-        html: `<iframe width="640" height="480" src="${iframeURL}" sandbox="allow-scripts allow-same-origin"></iframe>`,
-        width: 640,
-        height: 480,
+        html: `<iframe width="${width}" height="${height}" src="${iframeURL}" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>`,
+        width,
+        height,
       };
 
       switch (resFormat) {
