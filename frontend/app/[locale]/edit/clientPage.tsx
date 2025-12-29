@@ -89,7 +89,6 @@ import { SlimeSVG } from "@/common/slime.js";
 import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
-import { useChartFile } from "./file";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
 
@@ -103,7 +102,20 @@ export default function Edit(props: {
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
-  const { chart, loadStatus, fetchChart, savePasswd, setSavePasswd, saveEditSession } = useChartState({
+  const {
+    chart,
+    loadStatus,
+    fetchChart,
+    savePasswd,
+    setSavePasswd,
+    saveEditSession,
+    saveState,
+    remoteSave,
+    localSaveState,
+    localSave,
+    localLoadState,
+    localLoad,
+  } = useChartState({
     onLoad: (cid) => {
       if (cid === "new") {
         setGuidePage(1);
@@ -475,7 +487,6 @@ export default function Edit(props: {
     // dependencyなし: 常時実行
   });
 
-  const { load } = useChartFile(chart);
   const [dragOver, setDragOver] = useState<boolean>(false);
 
   return (
@@ -572,12 +583,12 @@ export default function Edit(props: {
                 "shadow-lg"
               )}
             >
-                <PasswdPrompt
-                  loadStatus={loadStatus}
-                  fetchChart={fetchChart}
-                  savePasswd={savePasswd}
-                  setSavePasswd={setSavePasswd}
-                />
+              <PasswdPrompt
+                loadStatus={loadStatus}
+                fetchChart={fetchChart}
+                savePasswd={savePasswd}
+                setSavePasswd={setSavePasswd}
+              />
             </Box>
           </div>
         </div>
@@ -602,15 +613,7 @@ export default function Edit(props: {
             if (file) {
               const reader = new FileReader();
               reader.onload = async (event) => {
-                const result = await load(event.target!.result as ArrayBuffer);
-                if (result.isError) {
-                  if (result.message) {
-                    alert(result.message);
-                  }
-                } else {
-                  setChart(result.chart!);
-                  setConvertedFrom(result.originalVer!);
-                }
+                await localLoad(event.target!.result as ArrayBuffer);
               };
               reader.readAsArrayBuffer(file);
             }
@@ -650,8 +653,9 @@ export default function Edit(props: {
               <div
                 className={clsx(
                   "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
-                  levelBgColors[levelTypes.indexOf(chart?.currentLevel?.meta.type || "")] ||
-                    levelBgColors[1],
+                  levelBgColors[
+                    levelTypes.indexOf(chart?.currentLevel?.meta.type || "")
+                  ] || levelBgColors[1],
                   chart || "invisible "
                 )}
               >

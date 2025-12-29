@@ -11,7 +11,9 @@ import {
   Chart8Edit,
   Chart9Edit,
   ChartEdit,
+  ChartMin,
   ChartUntil13,
+  convertToMin,
   currentChartVer,
   emptyChart,
   findBpmIndexFromStep,
@@ -50,6 +52,7 @@ import {
   stepCmp,
   stepZero,
   validateChart,
+  validateChartMin,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import msgpack from "@ygoe/msgpack";
@@ -57,8 +60,11 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import EventEmitter from "eventemitter3";
 import { useLuaExecutor } from "./luaTab";
-import { HTTPException } from "hono/http-exception";
-import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { APIError } from "@/common/apiError";
+import saveAs from "file-saver";
+import YAML from "yaml";
+import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
+import { isStandalone } from "@/common/pwaInstall";
 
 // new時
 // setGuidePage(1);
@@ -748,10 +754,10 @@ export type ChartAndState =
         | "loading"
         | "passwdFailedSilent"
         | "passwdFailed"
-        | Error
-        | HTTPException;
+        | APIError;
     };
 export type LoadState = ChartAndState["state"];
+export type SaveState = undefined | "saving" | "ok" | APIError;
 interface EditSession {
   cid: string | undefined;
   currentPasswd: string | null;
@@ -858,7 +864,7 @@ export function useChartState(props: Props) {
             onLoad(cid);
           } catch (e) {
             console.error(e);
-            setChartState({ state: new Error("badResponse") });
+            setChartState({ state: new APIError(null, "badResponse") });
           }
         } else {
           if (res.status === 401) {
@@ -868,29 +874,263 @@ export function useChartState(props: Props) {
               setChartState({ state: "passwdFailed" });
             }
           } else {
-            try {
-              const message = ((await res.json()) as { message?: string })
-                .message;
-              setChartState({
-                state: new HTTPException(res.status as ContentfulStatusCode, {
-                  message: message || "",
-                }),
-              });
-            } catch {
-              setChartState({
-                state: new HTTPException(res.status as ContentfulStatusCode, {
-                  message: "",
-                }),
-              });
-            }
+            setChartState({ state: await APIError.fromRes(res) });
           }
         }
       } catch (e) {
         console.error(e);
-        setChartState({ state: new Error("fetchError") });
+        setChartState({ state: new APIError(null, "fetchError") });
       }
     },
     [locale, onLoad]
+  );
+
+  const [saveState, setSaveState] = useState<SaveState>(undefined);
+  const remoteSave = useCallback<() => Promise<void>>(async () => {
+    if (chartState.state === "ok") {
+      const onSave = async (cid: string) => {
+        // 新規作成と上書きで共通の処理
+        if (chartState.chart.changePasswd) {
+          if (savePasswd) {
+            try {
+              fetch(
+                process.env.BACKEND_PREFIX +
+                  `/api/hashPasswd/${cid}?p=${chartState.chart.changePasswd}`,
+                {
+                  credentials:
+                    process.env.NODE_ENV === "development"
+                      ? "include"
+                      : "same-origin",
+                }
+              ).then(async (res) => {
+                setPasswd(cid, await res.text());
+              });
+            } catch {
+              //ignore
+            }
+          } else {
+            unsetPasswd(cid);
+          }
+        }
+        chartState.chart.resetOnSave(cid);
+      };
+
+      setSaveState("saving");
+      if (chartState.chart.cid === undefined) {
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX + `/api/newChartFile`,
+            {
+              method: "POST",
+              body: msgpack.serialize(chartState.chart.toObject()),
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            }
+          );
+          if (res.ok) {
+            try {
+              const resBody = (await res.json()) as {
+                message?: string;
+                cid?: string;
+              };
+              if (typeof resBody.cid === "string") {
+                onLoad(resBody.cid);
+                onSave(resBody.cid);
+                setSaveState("ok");
+                return;
+              }
+            } catch {
+              // pass through
+            }
+            setSaveState(new APIError(null, "badResponse"));
+            return;
+          } else {
+            setSaveState(await APIError.fromRes(res));
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+          setSaveState(new APIError(null, "fetchError"));
+          return;
+        }
+      } else {
+        const q = new URLSearchParams();
+        if (chartState.chart.currentPasswd) {
+          q.set("p", chartState.chart.currentPasswd);
+        } else if (getPasswd(chartState.chart.cid)) {
+          q.set("ph", getPasswd(chartState.chart.cid)!);
+        }
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/chartFile/${chartState.chart.cid}?` +
+              q.toString(),
+            {
+              method: "POST",
+              body: msgpack.serialize(chartState.chart.toObject()),
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            }
+          );
+          if (res.ok) {
+            onSave(chartState.chart.cid);
+            setSaveState("ok");
+            return;
+          } else {
+            setSaveState(await APIError.fromRes(res));
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+          setSaveState(new APIError(null, "fetchError"));
+          return;
+        }
+      }
+    } else {
+      throw new Error("chart is empty");
+    }
+  }, [chartState, onLoad, savePasswd]);
+
+  const remoteDelete = useCallback<() => Promise<void>>(async () => {
+    if (chartState.state === "ok") {
+      const q = new URLSearchParams();
+      if (chartState.chart.currentPasswd) {
+        q.set("p", chartState.chart.currentPasswd);
+      } else if (getPasswd(chartState.chart.cid!)) {
+        q.set("ph", getPasswd(chartState.chart.cid!)!);
+      }
+      try {
+        const res = await fetch(
+          process.env.BACKEND_PREFIX +
+            `/api/chartFile/${chartState.chart.cid}?` +
+            q.toString(),
+          {
+            method: "DELETE",
+            cache: "no-store",
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
+          }
+        );
+        if (res.ok) {
+          if (isStandalone()) {
+            history.back();
+          } else {
+            window.close();
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      throw new Error("chart is empty");
+    }
+  }, [chartState]);
+
+  const downloadExtension = `fn${currentChartVer}.yml`;
+  const [localSaveState, setLocalSaveState] = useState<SaveState>(undefined);
+  const localSave = useCallback<() => string>(() => {
+    if (chartState.state === "ok") {
+      setLocalSaveState("saving");
+      const yml = YAML.stringify(convertToMin(chartState.chart.toObject()), {
+        indentSeq: false,
+      });
+      const filename = `${chartState.chart.cid}_${chartState.chart.meta.title}.${downloadExtension}`;
+      saveAs(new Blob([yml]), filename);
+      return filename;
+    } else {
+      return "";
+    }
+  }, [downloadExtension, chartState]);
+  const [localLoadState, setLocalLoadState] = useState<LoadState>(undefined);
+  const localLoad = useCallback<(buffer: ArrayBuffer) => Promise<void>>(
+    async (buffer: ArrayBuffer) => {
+      setLocalLoadState("loading");
+      let originalVer: number = 0;
+      let newChart: ChartEdit | null = null;
+      try {
+        const content: ChartMin = YAML.parse(new TextDecoder().decode(buffer));
+        if (typeof content.ver === "number") {
+          originalVer = content.ver;
+        }
+        const newChartMin = await validateChartMin(content);
+        newChart = {
+          ...newChartMin,
+          changePasswd: null,
+          published: false,
+          levels: await Promise.all(
+            newChartMin.levels.map(async (l) => ({
+              ...l,
+              ...(
+                await luaExec(
+                  process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                  l.lua.join("\n"),
+                  false
+                )
+              ).levelFreezed,
+            }))
+          ),
+        };
+      } catch (e1) {
+        console.warn("fallback to msgpack deserialize");
+        try {
+          const content: ChartMin = msgpack.deserialize(buffer);
+          if (typeof content.ver === "number") {
+            originalVer = content.ver;
+          }
+          const newChartMin = await validateChartMin(content);
+          newChart = {
+            ...newChartMin,
+            changePasswd: null,
+            published: false,
+            levels: await Promise.all(
+              newChartMin.levels.map(async (l) => ({
+                ...l,
+                ...(
+                  await luaExec(
+                    process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                    l.lua.join("\n"),
+                    false
+                  )
+                ).levelFreezed,
+              }))
+            ),
+          };
+        } catch (e2) {
+          console.error(e1);
+          console.error(e2);
+          setLocalLoadState(new APIError(null, "loadFail"));
+          return;
+        }
+      }
+      if (newChart) {
+        if (confirm(t("confirmLoad"))) {
+          setChartState({
+            chart: new ChartEditing(newChart, {
+              locale,
+              cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
+              currentPasswd:
+                chartState.state === "ok"
+                  ? chartState.chart.currentPasswd
+                  : null,
+              convertedFrom: originalVer,
+            }),
+            state: "ok",
+          });
+          setLocalLoadState("ok");
+          return;
+        }
+      }
+      return setLocalLoadState(undefined);
+    },
+    [chartState, locale, t]
   );
 
   useEffect(() => {
@@ -965,6 +1205,12 @@ export function useChartState(props: Props) {
     fetchChart,
     saveEditSession,
     savePasswd,
-    setSavePasswd
+    setSavePasswd,
+    saveState,
+    remoteSave,
+    localSaveState,
+    localSave,
+    localLoadState,
+    localLoad,
   };
 }
