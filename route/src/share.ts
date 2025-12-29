@@ -124,6 +124,18 @@ const shareApp = (config: {
               title: brief.title,
             });
         const briefStr = JSON.stringify(brief);
+        const thisURL = new URL(
+          `/share/${cid}`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        );
+        const oembedJsonURL = new URL(
+          `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=json`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        );
+        const oembedXmlURL = new URL(
+          `/api/oembed?url=${encodeURIComponent(thisURL.toString())}&format=xml`,
+          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        );
         // キャッシュが正しく動作するように、クエリパラメータの順番が常に一定である必要がある
         const ogQuery = new URLSearchParams();
         ogQuery.set("lang", qLang);
@@ -149,7 +161,15 @@ const shareApp = (config: {
           )
           .replaceAll("PLACEHOLDER_DESCRIPTION", escapeHtml(newDescription))
           .replaceAll('\\"PLACEHOLDER_BRIEF', '\\"' + escapeJs(briefStr))
-          .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr));
+          .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr))
+          .replaceAll(
+            "https://placeholder_oembed/json",
+            oembedJsonURL.toString()
+          )
+          .replaceAll(
+            "https://placeholder_oembed/xml",
+            oembedXmlURL.toString()
+          );
         if (c.req.path.startsWith("/share") && lang !== qLang) {
           const q = new URLSearchParams(c.req.query());
           q.delete("lang");
@@ -160,9 +180,17 @@ const shareApp = (config: {
             `location.replace("${newPath}");` +
             "</script></body></html>";
         }
+
         return c.text(replacedBody, 200, {
           "Content-Type": res.headers.get("Content-Type") || "text/plain",
           "Cache-Control": cacheControl(env(c), null),
+          /*
+          discordで動作しないらしい?: https://github.com/discord/discord-api-docs/issues/7370
+          "Link": [
+            `<${oembedJsonURL.toString()}>; rel="alternate"; type="application/json+oembed"; title="${escapeHtml(newTitle)}"`,
+            `<${oembedXmlURL.toString()}>; rel="alternate"; type="text/xml+oembed"; title="${escapeHtml(newTitle)}"`,
+          ],
+          */
         });
       } else {
         let message = "";

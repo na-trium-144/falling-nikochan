@@ -29,7 +29,8 @@
     "mongodb": "^6.20.0",
     "oauth-1.0a": "^2.2.6",
     "sitemap": "^9.0.0",
-    "twitter-text": "^3.1.0"
+    "twitter-text": "^3.1.0",
+    "xmlbuilder2": "^4.0.3"
   },
   "devDependencies": {
     "@types/moji": "^0.5.3",

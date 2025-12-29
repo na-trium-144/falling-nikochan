@@ -13,6 +13,7 @@ import msgpack from "@ygoe/msgpack";
 import { getPasswd, setPasswd, unsetPasswd } from "@/common/passwdCache.js";
 import { addRecent } from "@/common/recent";
 import { isStandalone, updatePlayCountForReview } from "@/common/pwaInstall";
+import { isInsideFrame } from "@/scale";
 
 export interface FileSaveResult {
   isError: boolean;
@@ -207,7 +208,7 @@ export function useChartFile(props: Props) {
         }
       );
       if (res.ok) {
-        if (isStandalone()) {
+        if (isStandalone() || isInsideFrame()) {
           history.back();
         } else {
           window.close();
