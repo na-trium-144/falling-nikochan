@@ -15,6 +15,7 @@ import {
   ChartUntil13,
   convertToMin,
   currentChartVer,
+  difficulty,
   emptyChart,
   findBpmIndexFromStep,
   findInsertLine,
@@ -54,12 +55,12 @@ import {
   validateChart,
   validateChartMin,
 } from "@falling-nikochan/chart";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import msgpack from "@ygoe/msgpack";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import EventEmitter from "eventemitter3";
-import { useLuaExecutor } from "./luaTab";
+import { LuaExecutor, useLuaExecutor } from "./luaTab";
 import { APIError } from "@/common/apiError";
 import saveAs from "file-saver";
 import YAML from "yaml";
@@ -76,8 +77,9 @@ const eventTypes = [
 type EventType = (typeof eventTypes)[number];
 export class ChartEditing extends EventEmitter<EventType> {
   #offset: number;
-  #published: boolean;
+  #luaExecutorRef: RefObject<LuaExecutor>;
   #meta: {
+    published: boolean;
     ytId: string;
     title: string;
     composer: string;
@@ -100,6 +102,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   constructor(
     obj: ChartEdit,
     options: {
+      luaExecutorRef: RefObject<LuaExecutor>;
       locale: string;
       cid: string | undefined;
       currentPasswd: string | null;
@@ -109,6 +112,8 @@ export class ChartEditing extends EventEmitter<EventType> {
     }
   ) {
     super();
+    this.#luaExecutorRef = options.luaExecutorRef;
+
     this.#locale = options.locale;
     this.#convertedFrom = options.convertedFrom ?? obj.ver;
     this.#cid = options.cid;
@@ -121,21 +126,22 @@ export class ChartEditing extends EventEmitter<EventType> {
     });
 
     this.#offset = obj.offset;
-    this.#published = obj.published;
     this.#meta = {
+      published: obj.published,
       ytId: obj.ytId,
       title: obj.title,
       composer: obj.composer,
       chartCreator: obj.chartCreator,
     };
     this.#levels = obj.levels.map(
-      (l) => new LevelEditing(l, () => this.#offset)
+      (l) =>
+        new LevelEditing(
+          l,
+          (type) => this.emit(type),
+          () => this.#offset,
+          this.#luaExecutorRef
+        )
     );
-    for (const level of this.#levels) {
-      for (const type of eventTypes) {
-        level.on(type, () => this.emit(type));
-      }
-    }
     this.#copyBuffer = obj.copyBuffer;
     this.#currentLevelIndex =
       (options.currentLevelIndex ?? this.#levels.length >= 1) ? 0 : undefined;
@@ -156,7 +162,6 @@ export class ChartEditing extends EventEmitter<EventType> {
       ver: currentChartVer,
       offset: this.#offset,
       locale: this.#locale,
-      published: this.#published,
       ...this.#meta,
       levels: this.#levels.map((l) => l.toObject()),
       copyBuffer: this.#copyBuffer,
@@ -177,8 +182,64 @@ export class ChartEditing extends EventEmitter<EventType> {
       return undefined;
     }
   }
+  addLevel(level: LevelEdit) {
+    this.#levels.push(
+      new LevelEditing(
+        level,
+        (type) => this.emit(type),
+        () => this.#offset,
+        this.#luaExecutorRef
+      )
+    );
+    this.#currentLevelIndex = this.#levels.length - 1;
+    this.emit("changeAny");
+    this.emit("changeAnyData");
+  }
+  deleteLevel() {
+    if (this.#currentLevelIndex !== undefined && this.#levels.length > 0) {
+      this.#levels.splice(this.#currentLevelIndex, 1);
+      if (this.#levels.length === 0) {
+        this.#currentLevelIndex = undefined;
+      } else if (this.#currentLevelIndex >= this.#levels.length) {
+        this.#currentLevelIndex = this.#levels.length - 1;
+      }
+      this.emit("changeAny");
+      this.emit("changeAnyData");
+    }
+  }
+  moveLevelUp() {
+    if (this.#currentLevelIndex !== undefined && this.#currentLevelIndex > 0) {
+      const idx = this.#currentLevelIndex;
+      const tmp = this.#levels[idx];
+      this.#levels[idx] = this.#levels[idx - 1];
+      this.#levels[idx - 1] = tmp;
+      this.#currentLevelIndex = idx - 1;
+      this.emit("changeAny");
+      this.emit("changeAnyData");
+    }
+  }
+  moveLevelDown() {
+    if (
+      this.#currentLevelIndex !== undefined &&
+      this.#currentLevelIndex < this.#levels.length - 1
+    ) {
+      const idx = this.#currentLevelIndex;
+      const tmp = this.#levels[idx];
+      this.#levels[idx] = this.#levels[idx + 1];
+      this.#levels[idx + 1] = tmp;
+      this.#currentLevelIndex = idx + 1;
+      this.emit("changeAny");
+      this.emit("changeAnyData");
+    }
+  }
   get currentLevelIndex() {
     return this.#currentLevelIndex;
+  }
+  setCurrentLevelIndex(index: number) {
+    if (index >= 0 && index < this.#levels.length) {
+      this.#currentLevelIndex = index;
+      this.emit("changeAny");
+    }
   }
   get offset() {
     return this.#offset;
@@ -199,7 +260,10 @@ export class ChartEditing extends EventEmitter<EventType> {
   get changePasswd() {
     return this.#changePasswd;
   }
-  set changePasswd(pw: string | null) {
+  setChangePasswd(pw: string | null) {
+    if (!pw) {
+      pw = null;
+    }
     this.#changePasswd = pw;
     this.emit("changeAny");
     this.emit("changeAnyData");
@@ -229,34 +293,61 @@ export class ChartEditing extends EventEmitter<EventType> {
   }
 
   copyNote(copyIndex: number) {
-    if (this.currentLevel?.current.noteIndex !== undefined) {
-      this.#copyBuffer[copyIndex] =
-        this.currentLevel.freeze.notes[this.currentLevel.current.noteIndex];
+    if (this.currentLevel?.hasCurrentNote) {
+      this.#copyBuffer[copyIndex] = this.currentLevel.currentNote!;
       this.emit("changeAny");
       // dataに変化があるが、changeAnyDataは呼ばない
     }
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
     if (this.#copyBuffer.at(copyIndex) && this.currentLevel) {
-      if (this.currentLevel.current.noteIndex !== undefined && !forceAdd) {
+      if (this.currentLevel?.hasCurrentNote && !forceAdd) {
         this.currentLevel.updateNote(this.#copyBuffer.at(copyIndex)!);
       } else {
         this.currentLevel.addNote(this.#copyBuffer.at(copyIndex)!);
       }
     }
   }
+  hasCopyBuf(copyIndex: number) {
+    return !!this.#copyBuffer.at(copyIndex);
+  }
+
+  updateMeta(
+    newMeta: Partial<{
+      published: boolean;
+      ytId: string;
+      title: string;
+      composer: string;
+      chartCreator: string;
+    }>
+  ) {
+    this.#meta = { ...this.#meta, ...newMeta };
+    this.emit("changeAny");
+    this.emit("changeAnyData");
+  }
 }
 export class LevelEditing extends EventEmitter<EventType> {
   // これは親のChartEditingと同期
   #offset: () => number;
+  #luaExecutorRef: RefObject<LuaExecutor>;
   // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
   #meta: Omit<LevelMin, "lua">;
   #lua: string[];
   #freeze: LevelFreeze;
 
-  constructor(level: LevelEdit, offset: () => number) {
+  constructor(
+    level: LevelEdit,
+    parentEmit: (type: EventType) => void,
+    offset: () => number,
+    luaExecutorRef: RefObject<LuaExecutor>
+  ) {
     super();
+    for (const type of eventTypes) {
+      this.on(type, () => parentEmit(type));
+    }
     this.#offset = offset;
+    this.#luaExecutorRef = luaExecutorRef;
+
     this.#meta = {
       name: level.name,
       type: level.type,
@@ -274,11 +365,13 @@ export class LevelEditing extends EventEmitter<EventType> {
       signature: level.signature,
     };
     // 以下はupdateFreeze()内で初期化される
-    this.#notes = [];
+    this.#seqNotes = [];
+    this.#difficulty = 0;
+    this.#maxHitNum = 1;
     this.#lengthSec = 0;
     this.#ytDuration = 0;
     this.#barLines = [];
-    this.#current = new CursorState();
+    this.#current = new CursorState((type) => this.emit(type));
 
     this.resetYTEnd();
     this.updateMeta({});
@@ -327,17 +420,17 @@ export class LevelEditing extends EventEmitter<EventType> {
       this.#lua
     );
     this.#resetBarLines();
-    this.#resetNotes();
+    this.#resetSeqNotes();
+    this.#resetDifficulty();
     this.#resetLengthSec();
     this.emit("changeAny");
     this.emit("changeAnyData");
   }
-  async updateLua(
-    luaExecutor: ReturnType<typeof useLuaExecutor>,
-    lua: string[]
-  ) {
-    luaExecutor.abortExec();
-    const levelFreezed = await luaExecutor.exec(lua.join("\n"));
+  async updateLua(lua: string[]) {
+    this.#luaExecutorRef.current.abortExec();
+    const levelFreezed = await this.#luaExecutorRef.current.exec(
+      lua.join("\n")
+    );
     if (levelFreezed) {
       this.#lua = lua;
       this.updateFreeze(levelFreezed);
@@ -354,17 +447,46 @@ export class LevelEditing extends EventEmitter<EventType> {
     return [...this.#lua] as const;
   }
 
-  #notes: Note[];
-  #resetNotes() {
-    this.#notes = loadChart({
+  #seqNotes: Note[];
+  #resetSeqNotes() {
+    this.#seqNotes = loadChart({
       ver: currentChartVer,
       offset: this.#offset(),
       ...this.#freeze,
       ...this.#meta,
     } satisfies LevelPlay).notes;
   }
-  get notes() {
-    return [...this.#notes] as const;
+  get seqNotes() {
+    return [...this.#seqNotes] as const;
+  }
+
+  #difficulty: number;
+  #resetDifficulty() {
+    this.#difficulty = difficulty(this.toObject(), this.#meta.type);
+  }
+  get difficulty() {
+    return this.#difficulty;
+  }
+
+  #maxHitNum: number;
+  #resetMaxHitNum() {
+    let prevStep: Step = { fourth: -1, numerator: 0, denominator: 4 };
+    this.#maxHitNum = 1;
+    let hitNum = 0;
+    for (let i = 0; i < this.#freeze.notes.length; i++) {
+      const n = this.#freeze.notes[i];
+      if (stepCmp(prevStep, n.step) < 0) {
+        prevStep = n.step;
+        hitNum = 1;
+        continue;
+      } else if (stepCmp(prevStep, n.step) == 0) {
+        hitNum++;
+        this.#maxHitNum = Math.max(hitNum, this.#maxHitNum);
+      }
+    }
+  }
+  get maxHitNum() {
+    return this.#maxHitNum;
   }
 
   #lengthSec: number;
@@ -383,9 +505,14 @@ export class LevelEditing extends EventEmitter<EventType> {
   }
   #ytDuration: number;
   setYTDuration(duration: number) {
-    this.#ytDuration = duration;
-    // これはgetterがなく直接的には何にも影響を与えないのでイベントをemitする必要はない
-    this.resetYTEnd();
+    if (this.#ytDuration !== duration) {
+      this.#ytDuration = duration;
+      this.resetYTEnd();
+      this.emit("changeAny");
+    }
+  }
+  get ytDuration() {
+    return this.#ytDuration;
   }
   resetYTEnd() {
     if (
@@ -444,6 +571,14 @@ export class LevelEditing extends EventEmitter<EventType> {
       this.#current.reset(timeSec, snapDivider, this.#freeze, this.#lua);
     }
   }
+  setSnapDivider(snapDivider: number) {
+    this.#current.reset(
+      this.#current.timeSec,
+      snapDivider,
+      this.#freeze,
+      this.#lua
+    );
+  }
   selectNextNote() {
     if (this.#current.noteIndex !== undefined) {
       this.#current.setNoteIndex(this.#current.noteIndex + 1);
@@ -465,11 +600,25 @@ export class LevelEditing extends EventEmitter<EventType> {
       this.#freeze.notes.at(this.#current.noteIndex) !== undefined
     );
   }
+  get currentNote() {
+    if (this.#current.noteIndex !== undefined && this.#current.noteIndex >= 0) {
+      return this.#freeze.notes.at(this.#current.noteIndex);
+    } else {
+      return undefined;
+    }
+  }
+  get currentSeqNote() {
+    if (this.#current.noteIndex !== undefined && this.#current.noteIndex >= 0) {
+      return this.seqNotes.at(this.#current.noteIndex);
+    } else {
+      return undefined;
+    }
+  }
   get currentBpm() {
-    return this.#freeze.bpmChanges.at(this.#current.bpmIndex)?.bpm ?? 120;
+    return this.#freeze.bpmChanges.at(this.#current.bpmIndex)?.bpm;
   }
   get currentSpeed() {
-    return this.#freeze.speedChanges.at(this.#current.speedIndex)?.bpm ?? 120;
+    return this.#freeze.speedChanges.at(this.#current.speedIndex)?.bpm;
   }
   get currentSpeedInterp() {
     return this.#freeze.speedChanges.at(this.#current.speedIndex)?.interp;
@@ -538,7 +687,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         newLevel =
           luaAddBpmChange(newLevel, {
             step: this.#current.step,
-            bpm: this.currentBpm,
+            bpm: this.currentBpm || 120,
             timeSec: this.#current.timeSec,
           }) ?? newLevel;
       } else if (!bpm && this.bpmChangeHere) {
@@ -551,7 +700,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         newLevel =
           luaAddSpeedChange(newLevel, {
             step: this.#current.step,
-            bpm: this.currentBpm,
+            bpm: this.currentBpm || 120,
             timeSec: this.#current.timeSec,
           }) ?? newLevel;
       } else if (!speed && this.speedChangeHere) {
@@ -592,15 +741,13 @@ export class LevelEditing extends EventEmitter<EventType> {
       )
     );
   }
-  addNote(n: NoteCommand | null | undefined) {
-    if (n) {
-      let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
-      newLevel = luaAddNote(newLevel, n, this.#current.step);
-      if (newLevel !== null) {
-        // 追加したnoteは同じ時刻の音符の中でも最後
-        this.updateFreeze(newLevel);
-        this.#current.setNoteIndex(this.#current.notesIndexEnd! - 1);
-      }
+  addNote(n: NoteCommand) {
+    let newLevel: LevelForLuaEditLatest | null = this.#luaEditData();
+    newLevel = luaAddNote(newLevel, n, this.#current.step);
+    if (newLevel !== null) {
+      // 追加したnoteは同じ時刻の音符の中でも最後
+      this.updateFreeze(newLevel);
+      this.#current.setNoteIndex(this.#current.notesIndexEnd! - 1);
     }
   }
   deleteNote() {
@@ -637,6 +784,12 @@ export class CursorState extends EventEmitter<EventType> {
   #bpmIndex: number = 0;
   #speedIndex: number = 0;
   #signatureIndex: number = 0;
+  constructor(parentEmit: (type: EventType) => void) {
+    super();
+    for (const type of eventTypes) {
+      this.on(type, () => parentEmit(type));
+    }
+  }
   reset(
     timeSec: number,
     snapDivider: number,
@@ -742,6 +895,7 @@ export class CursorState extends EventEmitter<EventType> {
 interface Props {
   onLoad: (cid: string) => void;
   locale: string;
+  luaExecutor: LuaExecutor;
 }
 export type ChartAndState =
   | {
@@ -757,6 +911,7 @@ export type ChartAndState =
         | APIError;
     };
 export type LoadState = ChartAndState["state"];
+export type LocalLoadState = undefined | "loading" | "ok" | "loadFail";
 export type SaveState = undefined | "saving" | "ok" | APIError;
 interface EditSession {
   cid: string | undefined;
@@ -773,6 +928,7 @@ export interface FetchChartOptions {
   editPasswd: string;
   savePasswd: boolean;
 }
+export const downloadExtension = `fn${currentChartVer}.yml`;
 // chartとパスワードの管理まではこのフックの範囲
 export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -795,6 +951,11 @@ export function useChartState(props: Props) {
   const router = useRouter();
 
   const { onLoad, locale } = props;
+  const onLoadRef = useRef<(cid: string) => void>(null!);
+  onLoadRef.current = onLoad;
+
+  const luaExecutorRef = useRef<LuaExecutor>(null!);
+  luaExecutorRef.current = props.luaExecutor;
 
   // パスワードを保存するかどうか
   // これは譜面読み込み後もmetaタブのチェックボックスに引き継がれる
@@ -854,6 +1015,7 @@ export function useChartState(props: Props) {
             }
             setChartState({
               chart: new ChartEditing(await validateChart(chartRes), {
+                luaExecutorRef,
                 locale,
                 cid,
                 currentPasswd: options.editPasswd || null,
@@ -861,7 +1023,7 @@ export function useChartState(props: Props) {
               }),
               state: "ok",
             });
-            onLoad(cid);
+            onLoadRef.current(cid);
           } catch (e) {
             console.error(e);
             setChartState({ state: new APIError(null, "badResponse") });
@@ -882,7 +1044,7 @@ export function useChartState(props: Props) {
         setChartState({ state: new APIError(null, "fetchError") });
       }
     },
-    [locale, onLoad]
+    [locale]
   );
 
   const [saveState, setSaveState] = useState<SaveState>(undefined);
@@ -937,7 +1099,7 @@ export function useChartState(props: Props) {
                 cid?: string;
               };
               if (typeof resBody.cid === "string") {
-                onLoad(resBody.cid);
+                onLoadRef.current(resBody.cid);
                 onSave(resBody.cid);
                 setSaveState("ok");
                 return;
@@ -995,15 +1157,26 @@ export function useChartState(props: Props) {
     } else {
       throw new Error("chart is empty");
     }
-  }, [chartState, onLoad, savePasswd]);
+  }, [chartState, savePasswd]);
 
   const remoteDelete = useCallback<() => Promise<void>>(async () => {
-    if (chartState.state === "ok") {
+    if (chartState.state === "ok" && chartState.chart.cid) {
+      while (true) {
+        const m = window.prompt(
+          t("confirmDelete", { cid: chartState.chart.cid })
+        );
+        if (m === null) {
+          return;
+        }
+        if (m === chartState.chart.cid) {
+          break;
+        }
+      }
       const q = new URLSearchParams();
       if (chartState.chart.currentPasswd) {
         q.set("p", chartState.chart.currentPasswd);
-      } else if (getPasswd(chartState.chart.cid!)) {
-        q.set("ph", getPasswd(chartState.chart.cid!)!);
+      } else if (getPasswd(chartState.chart.cid)) {
+        q.set("ph", getPasswd(chartState.chart.cid)!);
       }
       try {
         const res = await fetch(
@@ -1032,9 +1205,8 @@ export function useChartState(props: Props) {
     } else {
       throw new Error("chart is empty");
     }
-  }, [chartState]);
+  }, [chartState, t]);
 
-  const downloadExtension = `fn${currentChartVer}.yml`;
   const [localSaveState, setLocalSaveState] = useState<SaveState>(undefined);
   const localSave = useCallback<() => string>(() => {
     if (chartState.state === "ok") {
@@ -1044,12 +1216,14 @@ export function useChartState(props: Props) {
       });
       const filename = `${chartState.chart.cid}_${chartState.chart.meta.title}.${downloadExtension}`;
       saveAs(new Blob([yml]), filename);
+      setLocalSaveState("ok");
       return filename;
     } else {
       return "";
     }
-  }, [downloadExtension, chartState]);
-  const [localLoadState, setLocalLoadState] = useState<LoadState>(undefined);
+  }, [chartState]);
+  const [localLoadState, setLocalLoadState] =
+    useState<LocalLoadState>(undefined);
   const localLoad = useCallback<(buffer: ArrayBuffer) => Promise<void>>(
     async (buffer: ArrayBuffer) => {
       setLocalLoadState("loading");
@@ -1106,14 +1280,15 @@ export function useChartState(props: Props) {
         } catch (e2) {
           console.error(e1);
           console.error(e2);
-          setLocalLoadState(new APIError(null, "loadFail"));
+          setLocalLoadState("loadFail");
           return;
         }
       }
       if (newChart) {
-        if (confirm(t("confirmLoad"))) {
+        if (confirm(t("meta.confirmLoad"))) {
           setChartState({
             chart: new ChartEditing(newChart, {
+              luaExecutorRef,
               locale,
               cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
               currentPasswd:
@@ -1145,6 +1320,7 @@ export function useChartState(props: Props) {
         if (data.cid === cid || (data.cid === undefined && cid === "new")) {
           setChartState({
             chart: new ChartEditing(data.chart, {
+              luaExecutorRef,
               cid: data.cid,
               currentPasswd: data.currentPasswd,
               convertedFrom: data.convertedFrom,
@@ -1155,7 +1331,7 @@ export function useChartState(props: Props) {
             state: "ok",
           });
           setSavePasswd(data.savePasswd);
-          // onLoad();
+          // onLoadRef.current();
           return;
         }
       }
@@ -1166,20 +1342,21 @@ export function useChartState(props: Props) {
       if (cid === "new") {
         setChartState({
           chart: new ChartEditing(emptyChart(locale), {
+            luaExecutorRef,
             locale,
             cid: undefined,
             currentPasswd: null,
           }),
           state: "ok",
         });
-        onLoad("new");
+        onLoadRef.current("new");
       } else if (cid) {
         void fetchChart(cid, { isFirst: true, editPasswd: "", savePasswd });
       } else {
         router.push(`/${locale}/main/edit`);
       }
     }
-  }, [fetchChart, t, locale, router, chartState, onLoad, savePasswd]);
+  }, [fetchChart, t, locale, router, chartState, savePasswd]);
 
   // PWAでテストプレイを押した場合に編集中の譜面データをsessionStorageに退避
   const saveEditSession = useCallback(() => {

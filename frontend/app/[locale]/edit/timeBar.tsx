@@ -22,31 +22,15 @@ import { useDisplayMode } from "@/scale.js";
 import { getBarLength } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartEdit, LevelEdit } from "@falling-nikochan/chart";
+import { ChartEditing } from "./chartState.js";
 
 interface Props {
-  currentTimeSecWithoutOffset: number;
-  currentTimeSec: number;
-  currentNoteIndex: number;
-  currentStep: Step;
-  chart?: ChartEdit;
-  currentLevel?: LevelEdit;
-  notesAll: Note[];
-  snapDivider: number;
+  chart?: ChartEditing;
   timeBarPxPerSec: number;
 }
 export default function TimeBar(props: Props) {
   const t = useTranslations("edit.timeBar");
-  const {
-    currentTimeSecWithoutOffset,
-    currentTimeSec,
-    currentNoteIndex,
-    currentStep,
-    chart,
-    currentLevel,
-    notesAll,
-    snapDivider,
-    timeBarPxPerSec,
-  } = props;
+  const { chart, timeBarPxPerSec } = props;
   const { rem } = useDisplayMode();
 
   const timeBarResize = useResizeDetector();
@@ -55,75 +39,84 @@ export default function TimeBar(props: Props) {
   // timebar左端の時刻
   const [timeBarBeginSec, setTimeBarBeginSec] = useState<number>(-1);
   const [timeBarBeginStep, setTimeBarBeginStep] = useState<Step>(stepZero());
-  // 現在のカーソル位置中心に拡大縮小
   const timeBarPxPerSecPrev = useRef<number>(timeBarPxPerSec);
-  useEffect(() => {
-    if (timeBarPxPerSecPrev.current !== timeBarPxPerSec) {
-      setTimeBarBeginSec(
-        currentTimeSecWithoutOffset -
-          (currentTimeSecWithoutOffset - timeBarBeginSec) /
-            (timeBarPxPerSec / timeBarPxPerSecPrev.current)
-      );
-      timeBarPxPerSecPrev.current = timeBarPxPerSec;
-    }
-  }, [timeBarPxPerSec, currentTimeSecWithoutOffset, timeBarBeginSec]);
 
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
     (timeSec - timeBarBeginSec) * timeBarPxPerSec;
   const marginPxLeft = 4 * rem;
   useEffect(() => {
-    const marginPxRight = timeBarWidth / 2;
-    if (
-      currentTimeSecWithoutOffset - timeBarBeginSec <
-      marginPxLeft / timeBarPxPerSec
-    ) {
-      const timeBarBeginSec =
-        currentTimeSecWithoutOffset - marginPxLeft / timeBarPxPerSec;
-      setTimeBarBeginSec(timeBarBeginSec);
-    } else if (
-      currentTimeSecWithoutOffset - timeBarBeginSec >
-      (timeBarWidth - marginPxRight) / timeBarPxPerSec
-    ) {
-      const timeBarBeginSec =
-        currentTimeSecWithoutOffset -
-        (timeBarWidth - marginPxRight) / timeBarPxPerSec;
-      setTimeBarBeginSec(timeBarBeginSec);
-    }
-    if (chart && currentLevel) {
-      setTimeBarBeginStep(
-        getStep(
-          currentLevel.bpmChanges,
-          timeBarBeginSec - chart.offset,
-          snapDivider
-        )
-      );
-    }
-  }, [
-    currentTimeSecWithoutOffset,
-    timeBarBeginSec,
-    timeBarWidth,
-    chart,
-    snapDivider,
-    timeBarPxPerSec,
-    marginPxLeft,
-    currentLevel,
-  ]);
+    const updateTimeBarBegin = () => {
+      if (chart?.currentLevel) {
+        const marginPxRight = timeBarWidth / 2;
+        // 現在のカーソル位置中心に拡大縮小
+        if (
+          timeBarPxPerSecPrev.current !== timeBarPxPerSec &&
+          chart?.currentLevel
+        ) {
+          setTimeBarBeginSec(
+            chart.currentLevel.current.timeSec +
+              chart.offset -
+              (chart.currentLevel.current.timeSec +
+                chart.offset -
+                timeBarBeginSec) /
+                (timeBarPxPerSec / timeBarPxPerSecPrev.current)
+          );
+          timeBarPxPerSecPrev.current = timeBarPxPerSec;
+        }
+        if (
+          chart.currentLevel.current.timeSec + chart.offset - timeBarBeginSec <
+          marginPxLeft / timeBarPxPerSec
+        ) {
+          const timeBarBeginSec =
+            chart.currentLevel.current.timeSec +
+            chart.offset -
+            marginPxLeft / timeBarPxPerSec;
+          setTimeBarBeginSec(timeBarBeginSec);
+        } else if (
+          chart.currentLevel.current.timeSec + chart.offset - timeBarBeginSec >
+          (timeBarWidth - marginPxRight) / timeBarPxPerSec
+        ) {
+          const timeBarBeginSec =
+            chart.currentLevel.current.timeSec +
+            chart.offset -
+            (timeBarWidth - marginPxRight) / timeBarPxPerSec;
+          setTimeBarBeginSec(timeBarBeginSec);
+        }
+        setTimeBarBeginStep(
+          getStep(
+            chart.currentLevel.freeze.bpmChanges,
+            timeBarBeginSec - chart.offset,
+            chart.currentLevel.current.snapDivider
+          )
+        );
+      }
+    };
+    updateTimeBarBegin();
+    chart?.on("changeAny", updateTimeBarBegin);
+    return () => {
+      chart?.off("changeAny", updateTimeBarBegin);
+    };
+  }, [timeBarBeginSec, timeBarWidth, chart, timeBarPxPerSec, marginPxLeft]);
 
   // timebarに表示するstep目盛りのリスト
   const timeBarSteps: { step: Step; timeSec: number }[] = [];
-  if (chart && currentLevel) {
+  if (chart?.currentLevel) {
     timeBarSteps.push({
       step: timeBarBeginStep,
-      timeSec: getTimeSec(currentLevel.bpmChanges, timeBarBeginStep),
+      timeSec: getTimeSec(
+        chart.currentLevel.freeze.bpmChanges,
+        timeBarBeginStep
+      ),
     });
     while (true) {
       const s = stepAdd(timeBarSteps[timeBarSteps.length - 1].step, {
         fourth: 0,
         numerator: 1,
-        denominator: snapDivider,
+        denominator: chart.currentLevel.current.snapDivider,
       });
-      const t = getTimeSec(currentLevel.bpmChanges, s) + chart.offset;
+      const t =
+        getTimeSec(chart.currentLevel.freeze.bpmChanges, s) + chart.offset;
       if (t - timeBarBeginSec < timeBarWidth / timeBarPxPerSec) {
         timeBarSteps.push({ step: s, timeSec: t });
       } else {
@@ -133,24 +126,30 @@ export default function TimeBar(props: Props) {
   }
 
   const beginBpmIndex =
-    currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
-      ? findBpmIndexFromStep(currentLevel.bpmChanges, timeBarBeginStep)
+    chart?.currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(
+          chart.currentLevel.freeze.bpmChanges,
+          timeBarBeginStep
+        )
       : undefined;
   const beginSpeedIndex =
-    currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
-      ? findBpmIndexFromStep(currentLevel.speedChanges, timeBarBeginStep)
+    chart?.currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(
+          chart.currentLevel.freeze.speedChanges,
+          timeBarBeginStep
+        )
       : undefined;
   const beginSignatureIndex =
-    currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
-      ? findBpmIndexFromStep(currentLevel.signature, timeBarBeginStep)
+    chart?.currentLevel && stepCmp(timeBarBeginStep, stepZero()) > 0
+      ? findBpmIndexFromStep(
+          chart.currentLevel.freeze.signature,
+          timeBarBeginStep
+        )
       : undefined;
   const beginBarLength =
-    currentLevel && beginSignatureIndex !== undefined
-      ? getBarLength(currentLevel.signature[beginSignatureIndex])
+    chart?.currentLevel && beginSignatureIndex !== undefined
+      ? getBarLength(chart.currentLevel.freeze.signature[beginSignatureIndex])
       : undefined;
-  const currentSpeedIndex =
-    currentLevel &&
-    findBpmIndexFromStep(currentLevel.speedChanges, currentStep);
 
   return (
     <div
@@ -176,12 +175,12 @@ export default function TimeBar(props: Props) {
         )
       )}
       {/* step目盛り 目盛りのリストは別で計算してある */}
-      {props.currentLevel &&
+      {chart?.currentLevel &&
         timeBarSteps
           .map(({ step, timeSec }) => ({
             step,
             timeSec,
-            ss: getSignatureState(props.currentLevel!.signature, step),
+            ss: getSignatureState(chart.currentLevel!.freeze.signature, step),
           }))
           .map(
             ({ step, timeSec, ss }, dt) =>
@@ -210,76 +209,83 @@ export default function TimeBar(props: Props) {
       <div className="absolute" style={{ bottom: -2.5 * rem, left: 0 }}>
         <span className="mr-1">{t("bpm")}:</span>
         {beginBpmIndex !== undefined && (
-          <span>{currentLevel?.bpmChanges[beginBpmIndex]?.bpm.toString()}</span>
+          <span>
+            {chart?.currentLevel?.freeze.bpmChanges[
+              beginBpmIndex
+            ]?.bpm.toString()}
+          </span>
         )}
       </div>
-      {chart &&
-        currentLevel?.bpmChanges.map(
-          (ch, i) =>
-            ch.timeSec + chart.offset >= timeBarBeginSec &&
-            ch.timeSec + chart.offset <
-              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
-              <span
-                key={i}
-                className="absolute "
-                style={{
-                  bottom: -2.5 * rem,
-                  left: timeBarPos(ch.timeSec + chart.offset),
-                }}
-              >
-                <span className="absolute bottom-0">{ch.bpm}</span>
-              </span>
-            )
-        )}
+      {chart?.currentLevel?.freeze.bpmChanges.map(
+        (ch, i) =>
+          ch.timeSec + chart.offset >= timeBarBeginSec &&
+          ch.timeSec + chart.offset <
+            timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+            <span
+              key={i}
+              className="absolute "
+              style={{
+                bottom: -2.5 * rem,
+                left: timeBarPos(ch.timeSec + chart.offset),
+              }}
+            >
+              <span className="absolute bottom-0">{ch.bpm}</span>
+            </span>
+          )
+      )}
       {/* speed変化 */}
       <div className="absolute" style={{ bottom: -3.75 * rem, left: 0 }}>
         <span className="mr-1">{t("speed")}:</span>
         {beginSpeedIndex !== undefined && (
           <span>
-            {currentLevel?.speedChanges[beginSpeedIndex]?.bpm.toString()}
+            {chart?.currentLevel?.freeze.speedChanges[
+              beginSpeedIndex
+            ]?.bpm.toString()}
           </span>
         )}
       </div>
-      {chart &&
-        currentLevel?.speedChanges.map(
-          (ch, i) =>
-            ch.timeSec + chart.offset >= timeBarBeginSec &&
-            ch.timeSec + chart.offset <
-              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
-              <span
-                key={i}
-                className="absolute "
-                style={{
-                  bottom: -3.75 * rem,
-                  left: timeBarPos(ch.timeSec + chart.offset),
-                }}
-              >
-                <span className="absolute bottom-0">
-                  {ch.bpm}
-                  {currentLevel.speedChanges[i + 1]?.interp && (
-                    <span
-                      className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
-                      style={{
-                        width:
-                          timeBarPos(currentLevel.speedChanges[i + 1].timeSec) -
-                          timeBarPos(ch.timeSec),
-                      }}
-                    />
-                  )}
-                  {ch.interp && i >= 1 && (
-                    <span
-                      className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
-                      style={{
-                        width:
-                          timeBarPos(ch.timeSec) -
-                          timeBarPos(currentLevel.speedChanges[i - 1].timeSec),
-                      }}
-                    />
-                  )}
-                </span>
+      {chart?.currentLevel?.freeze.speedChanges.map(
+        (ch, i) =>
+          ch.timeSec + chart.offset >= timeBarBeginSec &&
+          ch.timeSec + chart.offset <
+            timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
+            <span
+              key={i}
+              className="absolute "
+              style={{
+                bottom: -3.75 * rem,
+                left: timeBarPos(ch.timeSec + chart.offset),
+              }}
+            >
+              <span className="absolute bottom-0">
+                {ch.bpm}
+                {chart.currentLevel!.freeze.speedChanges[i + 1]?.interp && (
+                  <span
+                    className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+                    style={{
+                      width:
+                        timeBarPos(
+                          chart.currentLevel!.freeze.speedChanges[i + 1].timeSec
+                        ) - timeBarPos(ch.timeSec),
+                    }}
+                  />
+                )}
+                {ch.interp && i >= 1 && (
+                  <span
+                    className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+                    style={{
+                      width:
+                        timeBarPos(ch.timeSec) -
+                        timeBarPos(
+                          chart.currentLevel!.freeze.speedChanges[i - 1].timeSec
+                        ),
+                    }}
+                  />
+                )}
               </span>
-            )
-        )}
+            </span>
+          )
+      )}
       {/* signature変化 */}
       <div className="absolute" style={{ bottom: -5 * rem, left: 0 }}>
         <span className="mr-1">{t("beat")}:</span>
@@ -292,146 +298,166 @@ export default function TimeBar(props: Props) {
           </>
         ))}
       </div>
-      {chart &&
-        currentLevel?.signature
-          .map((sig) => ({
-            sig,
-            len: getBarLength(sig),
-            sec: getTimeSec(currentLevel.bpmChanges, sig.step),
-          }))
-          .map(
-            ({ len, sec }, i) =>
-              sec + chart.offset >= timeBarBeginSec &&
-              sec + chart.offset <
-                timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
-                <span
-                  key={i}
-                  className="absolute border-l-2 border-slate-600 dark:border-stone-400 "
-                  style={{
-                    top: -4,
-                    bottom: -5 * rem,
-                    left: timeBarPos(sec + chart.offset),
-                  }}
-                >
-                  <span className="absolute bottom-0">
-                    {len.map((len, i) => (
-                      <span key={i}>
-                        {i >= 1 && <span className="mx-0.5">+</span>}
-                        <span>{stepImproper(len)}</span>
-                        <span>/</span>
-                        <span>{len.denominator * 4}</span>
-                      </span>
-                    ))}
-                  </span>
-                </span>
-              )
-          )}
-      {/* 現在位置カーソル */}
-      <div
-        className="absolute border-l border-amber-400 shadow shadow-yellow-400"
-        style={{
-          top: -2.5 * rem,
-          bottom: -5 * rem,
-          left: timeBarPos(currentTimeSecWithoutOffset),
-        }}
-      />
-      {/* 現在時刻 */}
-      <span
-        className="absolute "
-        style={{
-          top: -2.5 * rem,
-          left: timeBarPos(currentTimeSecWithoutOffset),
-        }}
-      >
-        {timeStr(currentTimeSecWithoutOffset)}
-      </span>
-      {/* interpの場合現在speed */}
-      {currentLevel &&
-        currentSpeedIndex !== undefined &&
-        currentSpeedIndex + 1 < currentLevel.speedChanges.length &&
-        currentLevel.speedChanges[currentSpeedIndex + 1].interp && (
-          <>
-            <div
-              className="absolute z-10"
-              style={{
-                bottom: -3.75 * rem,
-                left: timeBarPos(currentTimeSecWithoutOffset),
-              }}
-            >
+      {chart?.currentLevel?.freeze.signature
+        .map((sig) => ({
+          sig,
+          len: getBarLength(sig),
+          sec: getTimeSec(chart.currentLevel!.freeze.bpmChanges, sig.step),
+        }))
+        .map(
+          ({ len, sec }, i) =>
+            sec + chart.offset >= timeBarBeginSec &&
+            sec + chart.offset <
+              timeBarBeginSec + timeBarWidth / timeBarPxPerSec && (
               <span
-                className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+                key={i}
+                className="absolute border-l-2 border-slate-600 dark:border-stone-400 "
                 style={{
-                  width:
-                    timeBarPos(
-                      currentLevel.speedChanges[currentSpeedIndex + 1].timeSec
-                    ) - timeBarPos(currentTimeSec),
-                }}
-              />
-              <span
-                className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
-                style={{
-                  width:
-                    timeBarPos(currentTimeSec) -
-                    timeBarPos(
-                      currentLevel.speedChanges[currentSpeedIndex].timeSec
-                    ),
-                }}
-              />
-              <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-800/15 backdrop-blur-2xs">
-                {(
-                  currentLevel.speedChanges[currentSpeedIndex].bpm +
-                  ((currentLevel.speedChanges[currentSpeedIndex + 1].bpm -
-                    currentLevel.speedChanges[currentSpeedIndex].bpm) /
-                    (currentLevel.speedChanges[currentSpeedIndex + 1].timeSec -
-                      currentLevel.speedChanges[currentSpeedIndex].timeSec)) *
-                    (currentTimeSec -
-                      currentLevel.speedChanges[currentSpeedIndex].timeSec)
-                ).toFixed(2)}
-              </span>
-            </div>
-          </>
-        )}
-      {/* にこちゃんの位置 */}
-      {chart &&
-        notesAll.map(
-          (n) =>
-            n.hitTimeSec + chart.offset > timeBarBeginSec &&
-            n.hitTimeSec + chart.offset <
-              timeBarBeginSec + timeBarWidth / timeBarPxPerSec &&
-            // 同じ位置に2つ以上の音符を重ねない
-            n.hitTimeSec !== notesAll[n.id + 1]?.hitTimeSec && (
-              <span
-                key={n.id}
-                className={clsx(
-                  "absolute rounded-full",
-                  n.hitTimeSec === notesAll[currentNoteIndex]?.hitTimeSec
-                    ? "bg-red-400"
-                    : "bg-yellow-400"
-                )}
-                style={{
-                  width: n.big ? "1.5rem" : "1rem",
-                  height: n.big ? "1.5rem" : "1rem",
-                  top: ((6 / 4 - (n.big ? 1.5 : 1)) * rem) / 2,
-                  left:
-                    timeBarPos(n.hitTimeSec + chart.offset) -
-                    ((n.big ? 1.5 : 1) * rem) / 2,
+                  top: -4,
+                  bottom: -5 * rem,
+                  left: timeBarPos(sec + chart.offset),
                 }}
               >
-                {/* 重なっている音符の数 */}
-                <span
-                  className="absolute inset-x-0 text-center"
-                  style={{ top: n.big ? "0.125rem" : 0 }}
-                >
-                  {(() => {
-                    const length = notesAll
-                      .slice(0, n.id)
-                      .filter((n2) => n.hitTimeSec === n2.hitTimeSec).length;
-                    return length > 0 ? length + 1 : null;
-                  })()}
+                <span className="absolute bottom-0">
+                  {len.map((len, i) => (
+                    <span key={i}>
+                      {i >= 1 && <span className="mx-0.5">+</span>}
+                      <span>{stepImproper(len)}</span>
+                      <span>/</span>
+                      <span>{len.denominator * 4}</span>
+                    </span>
+                  ))}
                 </span>
               </span>
             )
         )}
+      {/* 現在位置カーソル */}
+      {chart?.currentLevel && (
+        <div
+          className="absolute border-l border-amber-400 shadow shadow-yellow-400"
+          style={{
+            top: -2.5 * rem,
+            bottom: -5 * rem,
+            left: timeBarPos(chart.currentLevel.current.timeSec + chart.offset),
+          }}
+        />
+      )}
+      {/* 現在時刻 */}
+      {chart?.currentLevel && (
+        <span
+          className="absolute "
+          style={{
+            top: -2.5 * rem,
+            left: timeBarPos(chart.currentLevel.current.timeSec + chart.offset),
+          }}
+        >
+          {timeStr(chart.currentLevel.current.timeSec + chart.offset)}
+        </span>
+      )}
+      {/* interpの場合現在speed */}
+      {chart?.currentLevel?.freeze.speedChanges.at(
+        chart.currentLevel.current.speedIndex + 1
+      )?.interp && (
+        <>
+          <div
+            className="absolute z-10"
+            style={{
+              bottom: -3.75 * rem,
+              left: timeBarPos(
+                chart.currentLevel.current.timeSec + chart.offset
+              ),
+            }}
+          >
+            <span
+              className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+              style={{
+                width:
+                  timeBarPos(
+                    chart.currentLevel.freeze.speedChanges.at(
+                      chart.currentLevel.current.speedIndex + 1
+                    )!.timeSec
+                  ) - timeBarPos(chart.currentLevel.current.timeSec),
+              }}
+            />
+            <span
+              className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+              style={{
+                width:
+                  timeBarPos(chart.currentLevel.current.timeSec) -
+                  timeBarPos(
+                    chart.currentLevel.freeze.speedChanges.at(
+                      chart.currentLevel.current.speedIndex
+                    )!.timeSec
+                  ),
+              }}
+            />
+            <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-800/15 backdrop-blur-2xs">
+              {(
+                chart.currentLevel.freeze.speedChanges.at(
+                  chart.currentLevel.current.speedIndex
+                )!.bpm +
+                ((chart.currentLevel.freeze.speedChanges.at(
+                  chart.currentLevel.current.speedIndex + 1
+                )!.bpm -
+                  chart.currentLevel.freeze.speedChanges.at(
+                    chart.currentLevel.current.speedIndex
+                  )!.bpm) /
+                  (chart.currentLevel.freeze.speedChanges.at(
+                    chart.currentLevel.current.speedIndex + 1
+                  )!.timeSec -
+                    chart.currentLevel.freeze.speedChanges.at(
+                      chart.currentLevel.current.speedIndex
+                    )!.timeSec)) *
+                  (chart.currentLevel.current.timeSec -
+                    chart.currentLevel.freeze.speedChanges.at(
+                      chart.currentLevel.current.speedIndex
+                    )!.timeSec)
+              ).toFixed(2)}
+            </span>
+          </div>
+        </>
+      )}
+      {/* にこちゃんの位置 */}
+      {chart?.currentLevel?.seqNotes.map(
+        (n) =>
+          n.hitTimeSec + chart.offset > timeBarBeginSec &&
+          n.hitTimeSec + chart.offset <
+            timeBarBeginSec + timeBarWidth / timeBarPxPerSec &&
+          // 同じ位置に2つ以上の音符を重ねない
+          n.hitTimeSec !==
+            chart.currentLevel?.seqNotes.at(n.id + 1)?.hitTimeSec && (
+            <span
+              key={n.id}
+              className={clsx(
+                "absolute rounded-full",
+                n.hitTimeSec === chart.currentLevel?.currentSeqNote?.hitTimeSec
+                  ? "bg-red-400"
+                  : "bg-yellow-400"
+              )}
+              style={{
+                width: n.big ? "1.5rem" : "1rem",
+                height: n.big ? "1.5rem" : "1rem",
+                top: ((6 / 4 - (n.big ? 1.5 : 1)) * rem) / 2,
+                left:
+                  timeBarPos(n.hitTimeSec + chart.offset) -
+                  ((n.big ? 1.5 : 1) * rem) / 2,
+              }}
+            >
+              {/* 重なっている音符の数 */}
+              <span
+                className="absolute inset-x-0 text-center"
+                style={{ top: n.big ? "0.125rem" : 0 }}
+              >
+                {(() => {
+                  const length = chart
+                    .currentLevel!.seqNotes.slice(0, n.id)
+                    .filter((n2) => n.hitTimeSec === n2.hitTimeSec).length;
+                  return length > 0 ? length + 1 : null;
+                })()}
+              </span>
+            </span>
+          )
+      )}
     </div>
   );
 }

@@ -10,31 +10,18 @@ import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";
+import { ChartEditing } from "./chartState";
 
 interface Props {
-  currentNoteIndex: number;
-  hasCurrentNote: boolean;
-  notesCountInStep: number;
-  notesIndexInStep: number;
-  canAddNote: boolean;
-  addNote: () => void;
-  deleteNote: () => void;
-  updateNote: (n: NoteCommand) => void;
-  copyNote: (i: number) => void;
-  pasteNote: (i: number) => void;
-  hasCopyBuf: boolean[];
-  currentStep: Step;
-  currentLevel: LevelEdit | undefined;
+  chart?: ChartEditing;
 }
 export default function NoteTab(props: Props) {
   const t = useTranslations("edit.note");
   const noteEditable =
-    props.currentLevel?.notes[props.currentNoteIndex] &&
-    props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null;
+    props.chart?.currentLevel?.currentNote &&
+    props.chart?.currentLevel?.currentNote.luaLine !== null;
 
-  const ss =
-    props.currentLevel &&
-    getSignatureState(props.currentLevel.signature, props.currentStep);
+  const ss = props.chart?.currentLevel?.current.signatureState;
   return (
     <div className="flex flex-col h-full">
       <div>
@@ -61,22 +48,26 @@ export default function NoteTab(props: Props) {
         <div className="inline-block ml-2 w-28">
           <span>{t("noteNum")}</span>
           <span className="inline-block text-right w-6">
-            {props.hasCurrentNote ? props.notesIndexInStep + 1 : "-"}
+            {props.chart?.currentLevel?.hasCurrentNote
+              ? props.chart.currentLevel.current.notesIndexInStep! + 1
+              : "-"}
           </span>
           <span className="ml-1 ">/</span>
-          <span className="inline-block ml-1">{props.notesCountInStep}</span>
+          <span className="inline-block ml-1">
+            {props.chart?.currentLevel?.current.notesCountInStep}
+          </span>
         </div>
         <div className="inline-block">
           <Button
             keyName="N"
             text={t("noteAdd")}
-            onClick={() => props.addNote()}
-            disabled={!props.canAddNote}
+            onClick={() => props.chart?.pasteNote(0)}
+            disabled={!props.chart?.currentLevel?.canAddNote}
           />
-          {props.hasCurrentNote && (
+          {props.chart?.currentLevel?.hasCurrentNote && (
             <Button
               text={t("noteDelete")}
-              onClick={props.deleteNote}
+              onClick={props.chart?.currentLevel?.deleteNote}
               disabled={!noteEditable}
             />
           )}
@@ -85,10 +76,14 @@ export default function NoteTab(props: Props) {
       <div className="mb-1">
         <span>{t("totalNotes")}:</span>
         <span className="inline-block w-12 text-right">
-          {props.hasCurrentNote ? props.currentNoteIndex + 1 : "-"}
+          {props.chart?.currentLevel?.hasCurrentNote
+            ? props.chart.currentLevel.current.noteIndex! + 1
+            : "-"}
         </span>
         <span className="mx-1">/</span>
-        <span className="">{props.currentLevel?.notes.length || 0}</span>
+        <span className="">
+          {props.chart?.currentLevel?.freeze.notes.length || 0}
+        </span>
       </div>
       <NoteEdit {...props} />
       <span className="flex-1 mb-4 " />
@@ -104,13 +99,13 @@ function CopyPasteButton(props: Props) {
     <>
       <div className="flex flex-col items-stretch">
         <Button
-          onClick={() => props.pasteNote(0)}
+          onClick={() => props.chart?.pasteNote(0)}
           text={t("paste")}
           keyName="V"
-          disabled={!props.hasCopyBuf[0]}
+          disabled={!props.chart?.hasCopyBuf(0)}
         />
         <Button
-          onClick={() => props.copyNote(0)}
+          onClick={() => props.chart?.copyNote(0)}
           text={t("copy")}
           keyName="C"
         />
@@ -118,12 +113,12 @@ function CopyPasteButton(props: Props) {
       {Array.from(new Array(9)).map((_, i) => (
         <div key={i} className="flex flex-col items-stretch">
           <Button
-            onClick={() => props.pasteNote(i + 1)}
+            onClick={() => props.chart?.pasteNote(i + 1)}
             keyName={(i + 1).toString()}
-            disabled={!props.hasCopyBuf[i + 1]}
+            disabled={!props.chart?.hasCopyBuf(i + 1)}
           />
           <Button
-            onClick={() => props.copyNote(i + 1)}
+            onClick={() => props.chart?.copyNote(i + 1)}
             text={(i + 1).toString()}
           />
         </div>
@@ -134,16 +129,11 @@ function CopyPasteButton(props: Props) {
 
 function NoteEdit(props: Props) {
   const t = useTranslations("edit.note");
-  const { currentNoteIndex, currentLevel } = props;
   const noteEditable =
-    props.currentLevel?.notes[props.currentNoteIndex] &&
-    props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null;
-  if (
-    currentLevel &&
-    currentNoteIndex >= 0 &&
-    currentLevel.notes[currentNoteIndex]
-  ) {
-    const n = currentLevel.notes[currentNoteIndex];
+    props.chart?.currentLevel?.currentNote &&
+    props.chart?.currentLevel?.currentNote.luaLine !== null;
+  if (props.chart?.currentLevel?.currentNote) {
+    const n = props.chart?.currentLevel?.currentNote;
     const nv = Math.sqrt(Math.pow(n.hitVX, 2) + Math.pow(n.hitVY, 2));
     return (
       <>
@@ -169,7 +159,10 @@ function NoteEdit(props: Props) {
                   className="w-20"
                   actualValue={n.hitX.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitX: Number(v) })
+                    props.chart?.currentLevel?.updateNote({
+                      ...n,
+                      hitX: Number(v),
+                    })
                   }
                   isValid={(v) =>
                     v !== "" &&
@@ -207,7 +200,10 @@ function NoteEdit(props: Props) {
                   className="w-20"
                   actualValue={n.hitVX.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitVX: Number(v) })
+                    props.chart?.currentLevel?.updateNote({
+                      ...n,
+                      hitVX: Number(v),
+                    })
                   }
                   isValid={(v) => v !== "" && !isNaN(Number(v))}
                   disabled={!noteEditable}
@@ -220,7 +216,10 @@ function NoteEdit(props: Props) {
                   className="w-20"
                   actualValue={n.hitVY.toString()}
                   updateValue={(v) =>
-                    props.updateNote({ ...n, hitVY: Number(v) })
+                    props.chart?.currentLevel?.updateNote({
+                      ...n,
+                      hitVY: Number(v),
+                    })
                   }
                   isValid={(v) => v !== "" && !isNaN(Number(v))}
                   disabled={!noteEditable}
@@ -235,7 +234,7 @@ function NoteEdit(props: Props) {
                   className="w-20"
                   actualValue={(Math.round(nv * 100) / 100).toString()}
                   updateValue={(v) =>
-                    props.updateNote({
+                    props.chart?.currentLevel?.updateNote({
                       ...n,
                       hitVX: (Number(v) / nv) * n.hitVX,
                       hitVY: (Number(v) / nv) * n.hitVY,
@@ -257,7 +256,7 @@ function NoteEdit(props: Props) {
                     180
                   ).toFixed(2)}
                   updateValue={(v) =>
-                    props.updateNote({
+                    props.chart?.currentLevel?.updateNote({
                       ...n,
                       hitVX: nv * Math.cos((Number(v) / 180) * Math.PI),
                       hitVY: nv * Math.sin((Number(v) / 180) * Math.PI),
@@ -275,7 +274,9 @@ function NoteEdit(props: Props) {
           <CheckBox
             className="ml-2 mr-1"
             value={n.big}
-            onChange={(v) => props.updateNote({ ...n, big: v })}
+            onChange={(v) =>
+              props.chart?.currentLevel?.updateNote({ ...n, big: v })
+            }
             disabled={!noteEditable}
           >
             <span>{t("big")}</span>
@@ -289,11 +290,13 @@ function NoteEdit(props: Props) {
             value={n.fall ? "1" : "0"}
             values={["1", "0"]}
             options={[t("fallModeTrue"), t("fallModeFalse")]}
-            onChange={(v) => props.updateNote({ ...n, fall: !!Number(v) })}
+            onChange={(v) =>
+              props.chart?.currentLevel?.updateNote({ ...n, fall: !!Number(v) })
+            }
             disabled={!noteEditable}
           />
         </div>
-        {props.currentLevel?.notes[props.currentNoteIndex] && !noteEditable && (
+        {props.chart?.currentLevel?.currentNote && !noteEditable && (
           <p className="ml-2 mt-4 text-sm">{t("editedInCode")}</p>
         )}
       </>

@@ -28,8 +28,17 @@ import { useResizeDetector } from "react-resize-detector";
 import { useTranslations } from "next-intl";
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
+import { ChartEditing } from "./chartState";
 
-export function useLuaExecutor() {
+export interface LuaExecutor {
+  stdout: string[];
+  err: string[];
+  errLine: number | null;
+  running: boolean;
+  exec: (code: string) => Promise<LevelFreeze | null>;
+  abortExec: () => void;
+}
+export function useLuaExecutor(): LuaExecutor {
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
   const [errLine, setErrLine] = useState<number | null>(null);
@@ -95,16 +104,13 @@ export function useLuaExecutor() {
 // ので、Editorを表示するdivを絶対座標で別に配置ししている
 interface Props {
   visible: boolean;
-  currentLevel: LevelEdit | undefined;
+  chart?: ChartEditing;
   currentStepStr: string | null;
-  barLines: { barNum: number; luaLine: number }[];
-  changeLevel: (level: { lua: string[] }) => void;
-  currentLine: number | null;
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
   err: string[];
 }
-interface LuaPositionData extends Props {
+interface LuaPositionData {
   top: number;
   left: number;
   width: number;
@@ -119,39 +125,17 @@ const LuaPositionContext = createContext<LuaPositionContext>(null!);
 interface PProps {
   children: ReactNode;
 }
-export function LuaTabProvider(props: PProps) {
+export function LuaTabProvider(props: Props & PProps) {
   const themeState = useTheme();
   const [data, setData] = useState<LuaPositionData>({
-    visible: false,
     top: 0,
     left: 0,
     width: 0,
     height: 0,
-    currentLine: null,
-    currentStepStr: "",
-    barLines: [],
-    currentLevel: undefined,
-    changeLevel: () => {},
-    seekStepAbs: () => {},
-    errLine: null,
-    err: [],
   });
 
-  const {
-    top,
-    left,
-    width,
-    height,
-    visible,
-    currentLine,
-    currentStepStr,
-    barLines,
-    currentLevel,
-    changeLevel,
-    seekStepAbs,
-    errLine,
-    err,
-  } = data;
+  const { top, left, width, height } = data;
+  const { visible, chart, currentStepStr, seekStepAbs, errLine, err } = props;
   const { rem } = useDisplayMode();
   const t = useTranslations("edit.code");
   const previousLevelCode = useRef<string>("");
@@ -159,16 +143,23 @@ export function LuaTabProvider(props: PProps) {
   const [codeChanged, setCodeChanged] = useState<boolean>(false);
 
   useEffect(() => {
-    const currentLevelCode = currentLevel?.lua.join("\n");
-    if (
-      !codeChanged &&
-      currentLevelCode !== undefined &&
-      previousLevelCode.current !== currentLevelCode
-    ) {
-      previousLevelCode.current = currentLevelCode;
-      setCode(currentLevelCode);
-    }
-  }, [codeChanged, currentLevel]);
+    const updateCode = () => {
+      const currentLevelCode = chart?.currentLevel?.lua.join("\n");
+      if (
+        !codeChanged &&
+        currentLevelCode !== undefined &&
+        previousLevelCode.current !== currentLevelCode
+      ) {
+        previousLevelCode.current = currentLevelCode;
+        setCode(currentLevelCode);
+      }
+    };
+    updateCode();
+    chart?.on("changeAnyData", updateCode);
+    return () => {
+      chart?.off("changeAnyData", updateCode);
+    };
+  }, [codeChanged, chart]);
 
   const changeCodeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const changeCode = (code: string) => {
@@ -180,7 +171,7 @@ export function LuaTabProvider(props: PProps) {
     changeCodeTimeout.current = setTimeout(() => {
       changeCodeTimeout.current = null;
       setCodeChanged(false);
-      changeLevel({ lua: code.split("\n") });
+      chart?.currentLevel?.updateLua(code.split("\n"));
     }, 500);
   };
 
@@ -200,14 +191,17 @@ export function LuaTabProvider(props: PProps) {
           fontSize={1 * rem}
           value={code}
           annotations={[
-            ...barLines.map((bl) => ({
+            ...(chart?.currentLevel?.barLines.map((bl) => ({
               row: bl.luaLine,
               column: 1,
               text: `${bl.barNum};`,
               type: "info",
-            })),
+            })) || []),
             {
-              row: currentLine === null ? -1 : currentLine,
+              row:
+                chart?.currentLevel?.current.line == null
+                  ? -1
+                  : chart?.currentLevel?.current.line,
               column: 1,
               text: t("currentLine", { step: currentStepStr || "null" }),
               type: "warning",
@@ -239,8 +233,11 @@ export function LuaTabProvider(props: PProps) {
             }
           }}
           onCursorChange={(sel) => {
-            if (currentLevel && visible) {
-              const step = findStepFromLua(currentLevel, sel.cursor.row);
+            if (chart?.currentLevel && visible) {
+              const step = findStepFromLua(
+                chart.currentLevel.toObject(),
+                sel.cursor.row
+              );
               if (step !== null) {
                 seekStepAbs(step);
               }
@@ -252,22 +249,11 @@ export function LuaTabProvider(props: PProps) {
   );
 }
 
-export function LuaTabPlaceholder(
-  props: Props & { parentContainer: HTMLDivElement | null }
-) {
+export function LuaTabPlaceholder(props: {
+  parentContainer: HTMLDivElement | null;
+}) {
   const { ref } = useResizeDetector();
-  const {
-    visible,
-    currentLine,
-    currentStepStr,
-    barLines,
-    currentLevel,
-    changeLevel,
-    seekStepAbs,
-    errLine,
-    err,
-    parentContainer,
-  } = props;
+  const { parentContainer } = props;
   const { setData } = useContext(LuaPositionContext);
   useEffect(() => {
     const onScroll = () => {
@@ -278,15 +264,6 @@ export function LuaTabPlaceholder(
           left: rect.left + window.scrollX,
           width: rect.width,
           height: rect.height,
-          visible,
-          currentLine,
-          currentStepStr,
-          barLines,
-          currentLevel,
-          changeLevel,
-          seekStepAbs,
-          errLine,
-          err,
         });
       }
     };
@@ -297,19 +274,6 @@ export function LuaTabPlaceholder(
       window.removeEventListener("resize", onScroll);
       parentContainer?.removeEventListener("scroll", onScroll);
     };
-  }, [
-    visible,
-    currentLine,
-    currentStepStr,
-    barLines,
-    currentLevel,
-    changeLevel,
-    seekStepAbs,
-    ref,
-    setData,
-    errLine,
-    err,
-    parentContainer,
-  ]);
+  }, [ref, setData, parentContainer]);
   return <div ref={ref} className="absolute inset-3 -z-10 " />;
 }

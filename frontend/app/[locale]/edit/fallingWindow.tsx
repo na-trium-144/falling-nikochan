@@ -13,25 +13,20 @@ import { NoteCommand } from "@falling-nikochan/chart";
 import Arrow from "./arrow.js";
 import DragHandle from "./dragHandle.js";
 import { useDisplayMode } from "@/scale.js";
-import { LevelEdit } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
+import { ChartEditing } from "./chartState.js";
 
 interface Props {
   className?: string;
   style?: object;
-  notes: Note[];
-  currentLevel: LevelEdit | undefined;
-  currentTimeSec: number;
-  currentNoteIndex: number;
-  updateNote: (n: NoteCommand) => void;
+  chart?: ChartEditing;
   dragMode: null | "p" | "v" | "a";
   setDragMode: (mode: null | "p" | "v" | "a") => void;
   inCodeTab: boolean;
 }
 
 export default function FallingWindow(props: Props) {
-  const { notes, currentLevel, currentTimeSec, currentNoteIndex, dragMode } =
-    props;
+  const { chart, dragMode } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
@@ -43,54 +38,71 @@ export default function FallingWindow(props: Props) {
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   const noteEditable =
-    props.currentLevel?.notes[props.currentNoteIndex] &&
-    props.currentLevel?.notes[props.currentNoteIndex].luaLine !== null &&
+    chart?.currentLevel?.currentNote &&
+    chart?.currentLevel?.currentNote.luaLine !== null &&
     !props.inCodeTab;
 
   const [displayNotes, setDisplayNotes] = useState<
     { current: DisplayNote; history: DisplayNote[] }[]
   >([]);
   useEffect(() => {
-    const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] = [];
-    if (
-      marginX !== undefined &&
-      marginY !== undefined &&
-      boxSize &&
-      currentTimeSec !== undefined
-    ) {
-      for (let ni = 0; ni < notes.length; ni++) {
-        const dn = {
-          current: displayNote(notes[ni], currentTimeSec),
-          history: [] as DisplayNote[],
-        };
-        if (dn.current !== null) {
-          for (let dt = 0; dt < 5; dt += 0.3) {
-            const dn2 = displayNote(notes[ni], currentTimeSec + dt);
-            if (dn2 !== null) {
-              dn.history.push(dn2);
-            } else {
-              break;
+    const updateDisplayNotes = () => {
+      const displayNotes: { current: DisplayNote; history: DisplayNote[] }[] =
+        [];
+      if (
+        marginX !== undefined &&
+        marginY !== undefined &&
+        boxSize &&
+        chart?.currentLevel
+      ) {
+        for (let ni = 0; ni < chart.currentLevel.seqNotes.length; ni++) {
+          const dn = {
+            current: displayNote(
+              chart.currentLevel.seqNotes[ni],
+              chart.currentLevel.current.timeSec
+            ),
+            history: [] as DisplayNote[],
+          };
+          if (dn.current !== null) {
+            for (let dt = 0; dt < 5; dt += 0.3) {
+              const dn2 = displayNote(
+                chart.currentLevel.seqNotes[ni],
+                chart.currentLevel.current.timeSec + dt
+              );
+              if (dn2 !== null) {
+                dn.history.push(dn2);
+              } else {
+                break;
+              }
             }
-          }
-          for (let dt = 0; dt < 5; dt += 0.3) {
-            const dn2 = displayNote(notes[ni], currentTimeSec - dt);
-            if (dn2 !== null) {
-              dn.history.unshift(dn2);
-            } else {
-              break;
+            for (let dt = 0; dt < 5; dt += 0.3) {
+              const dn2 = displayNote(
+                chart.currentLevel.seqNotes[ni],
+                chart.currentLevel.current.timeSec - dt
+              );
+              if (dn2 !== null) {
+                dn.history.unshift(dn2);
+              } else {
+                break;
+              }
             }
+            displayNotes.push({ current: dn.current, history: dn.history });
           }
-          displayNotes.push({ current: dn.current, history: dn.history });
         }
       }
-    }
-    setDisplayNotes(displayNotes);
-  }, [notes, boxSize, marginX, marginY, currentTimeSec]);
+      setDisplayNotes(displayNotes);
+    };
+    updateDisplayNotes();
+    chart?.on("changeAny", updateDisplayNotes);
+    return () => {
+      chart?.off("changeAny", updateDisplayNotes);
+    };
+  }, [boxSize, marginX, marginY, chart]);
 
   const [pendingNoteUpdate, setPendingNoteUpdate] =
     useState<NoteCommand | null>(null);
   const currentNote: NoteCommand | undefined =
-    pendingNoteUpdate || currentLevel?.notes[currentNoteIndex];
+    pendingNoteUpdate || chart?.currentLevel?.currentNote;
 
   return (
     <div className={clsx(props.className)} style={props.style} ref={ref}>
@@ -114,16 +126,17 @@ export default function FallingWindow(props: Props) {
             boxSize &&
             marginX !== undefined &&
             marginY !== undefined &&
-            d.current.id < notes.length && (
+            chart?.currentLevel &&
+            d.current.id < chart.currentLevel.seqNotes.length && (
               <NikochanAndTrace
                 key={di}
                 displayNote={d}
-                currentNoteIndex={currentNoteIndex}
+                currentNoteIndex={chart.currentLevel.current.noteIndex}
                 boxSize={boxSize}
                 marginX={marginX}
                 marginY={marginY}
                 noteSize={noteSize}
-                notes={notes}
+                notes={chart.currentLevel.seqNotes}
               />
             )
         )}
@@ -190,7 +203,7 @@ export default function FallingWindow(props: Props) {
                     }}
                     onMoveEnd={() => {
                       if (pendingNoteUpdate) {
-                        props.updateNote(pendingNoteUpdate);
+                        chart?.currentLevel?.updateNote(pendingNoteUpdate);
                         setPendingNoteUpdate(null);
                       }
                     }}
@@ -252,7 +265,7 @@ export default function FallingWindow(props: Props) {
                     }}
                     onMoveEnd={() => {
                       if (pendingNoteUpdate) {
-                        props.updateNote(pendingNoteUpdate);
+                        chart?.currentLevel?.updateNote(pendingNoteUpdate);
                         setPendingNoteUpdate(null);
                       }
                     }}
@@ -278,12 +291,12 @@ export default function FallingWindow(props: Props) {
 
 interface NProps {
   displayNote: { current: DisplayNote; history: DisplayNote[] };
-  currentNoteIndex: number;
+  currentNoteIndex: number | undefined;
   boxSize: number;
   marginX: number;
   marginY: number;
   noteSize: number;
-  notes: Note[];
+  notes: readonly Note[];
 }
 function NikochanAndTrace(props: NProps) {
   const {

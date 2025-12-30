@@ -102,6 +102,8 @@ export default function Edit(props: {
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
 
+  const luaExecutor = useLuaExecutor();
+
   const {
     chart,
     loadStatus,
@@ -111,26 +113,24 @@ export default function Edit(props: {
     saveEditSession,
     saveState,
     remoteSave,
+    remoteDelete,
     localSaveState,
     localSave,
     localLoadState,
     localLoad,
   } = useChartState({
+    luaExecutor,
     onLoad: (cid) => {
       if (cid === "new") {
         setGuidePage(1);
       } else {
         addRecent("edit", cid);
+        history.replaceState(null, "", `/${locale}/edit?cid=${cid}`);
       }
       updatePlayCountForReview();
     },
     locale,
   });
-
-  const luaExecutor = useLuaExecutor();
-
-  // 変更する場合は空文字列以外をセットすると、サーバーへ送信時にchart.changePasswdにセットされる
-  const [newPasswd, setNewPasswd] = useState<string>("");
 
   useEffect(() => {
     document.title = titleWithSiteName(
@@ -372,8 +372,8 @@ export default function Edit(props: {
           (chart.offset || 0) +
           audioLatencyRef.current;
         while (
-          index < chart.currentLevel.notes.length &&
-          chart.currentLevel.notes[index].hitTimeSec < now
+          index < chart.currentLevel.seqNotes.length &&
+          chart.currentLevel.seqNotes[index].hitTimeSec < now
         ) {
           index++;
         }
@@ -385,24 +385,26 @@ export default function Edit(props: {
               audioLatencyRef.current;
             timer = null;
             while (
-              index < chart.currentLevel!.notes.length &&
-              chart.currentLevel!.notes[index].hitTimeSec <= now
+              index < chart.currentLevel!.seqNotes.length &&
+              chart.currentLevel!.seqNotes[index].hitTimeSec <= now
             ) {
-              playSE(chart.currentLevel!.notes[index].big ? "hitBig" : "hit");
+              playSE(
+                chart.currentLevel!.seqNotes[index].big ? "hitBig" : "hit"
+              );
               index++;
             }
-            if (index < chart.currentLevel!.notes.length) {
+            if (index < chart.currentLevel!.seqNotes.length) {
               timer = setTimeout(
                 playOne,
-                (chart.currentLevel!.notes[index].hitTimeSec - now) * 1000
+                (chart.currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
               );
             }
           }
         };
-        if (index < chart.currentLevel!.notes.length) {
+        if (index < chart.currentLevel!.seqNotes.length) {
           timer = setTimeout(
             playOne,
-            (chart.currentLevel!.notes[index].hitTimeSec - now) * 1000
+            (chart.currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
           );
         }
       }
@@ -529,9 +531,7 @@ export default function Edit(props: {
             chart.pasteNote(0, true);
           } else if (e.key === "b") {
             if (chart?.currentLevel?.hasCurrentNote) {
-              const n = chart.currentLevel.freeze.notes.at(
-                chart.currentLevel.current.noteIndex!
-              )!;
+              const n = chart.currentLevel.currentNote!;
               chart.currentLevel.updateNote({ ...n, big: !n.big });
             }
           } else if (e.key === "Shift") {
@@ -626,7 +626,14 @@ export default function Edit(props: {
       )}
 
       <CaptionProvider>
-        <LuaTabProvider>
+        <LuaTabProvider
+          visible={tab === 4}
+          chart={chart}
+          currentStepStr={currentStepStr}
+          seekStepAbs={seekStepAbs}
+          errLine={luaExecutor.running ? null : luaExecutor.errLine}
+          err={luaExecutor.err}
+        >
           <div
             className={clsx(
               "w-full",
@@ -684,11 +691,7 @@ export default function Edit(props: {
                 <FallingWindow
                   inCodeTab={isCodeTab}
                   className="absolute inset-0"
-                  notes={chart?.currentLevel?.notes}
-                  currentTimeSec={chart?.currentLevel?.current.timeSec || 0}
-                  currentNoteIndex={chart?.currentLevel?.current.noteIndex}
-                  currentLevel={chart?.currentLevel}
-                  updateNote={updateNote}
+                  chart={chart}
                   dragMode={dragMode}
                   setDragMode={setDragMode}
                 />
@@ -762,23 +765,29 @@ export default function Edit(props: {
                 <span className="inline-block">
                   <Button
                     onClick={() => {
-                      if (ready) {
-                        seekStepRel(-snapDivider * 4);
+                      if (ready && chart?.currentLevel) {
+                        seekStepRel(
+                          -chart.currentLevel.current.snapDivider * 4
+                        );
                       }
                     }}
                     text={t("playerControls.moveStep", {
-                      step: -snapDivider * 4,
+                      step: chart?.currentLevel
+                        ? -chart.currentLevel.current.snapDivider * 4
+                        : 4,
                     })}
                     keyName="PageUp"
                   />
                   <Button
                     onClick={() => {
-                      if (ready) {
-                        seekStepRel(snapDivider * 4);
+                      if (ready && chart?.currentLevel) {
+                        seekStepRel(chart.currentLevel.current.snapDivider * 4);
                       }
                     }}
                     text={t("playerControls.moveStep", {
-                      step: snapDivider * 4,
+                      step: chart?.currentLevel
+                        ? chart.currentLevel.current.snapDivider * 4
+                        : 4,
                     })}
                     keyName="PageDn"
                   />
@@ -825,17 +834,7 @@ export default function Edit(props: {
                 </span>
               </div>
               <div className="flex-none">
-                <TimeBar
-                  currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
-                  currentTimeSec={currentTimeSec}
-                  currentNoteIndex={currentNoteIndex}
-                  currentStep={currentStep}
-                  chart={chart}
-                  currentLevel={currentLevel}
-                  notesAll={notesAll}
-                  snapDivider={snapDivider}
-                  timeBarPxPerSec={timeBarPxPerSec}
-                />
+                <TimeBar chart={chart} timeBarPxPerSec={timeBarPxPerSec} />
               </div>
               <div className="flex flex-row items-baseline">
                 <span>{t("stepUnit")} =</span>
@@ -843,9 +842,11 @@ export default function Edit(props: {
                 <span className="ml-1">/</span>
                 <Input
                   className="w-12"
-                  actualValue={String(snapDivider * 4)}
+                  actualValue={String(
+                    (chart?.currentLevel?.current.snapDivider ?? 1) * 4
+                  )}
                   updateValue={(v: string) => {
-                    setSnapDivider(Number(v) / 4);
+                    chart?.currentLevel?.setSnapDivider(Number(v) / 4);
                   }}
                   isValid={(v) =>
                     !isNaN(Number(v)) &&
@@ -895,64 +896,24 @@ export default function Edit(props: {
               >
                 {tab === 0 ? (
                   <MetaTab
-                    saveEditSession={props.saveEditSession}
+                    saveEditSession={saveEditSession}
                     sessionId={sessionId}
                     sessionData={sessionData}
-                    chartNumEvent={chartNumEvent}
                     chart={chart}
-                    setChart={changeChart}
-                    convertedFrom={convertedFrom}
-                    setConvertedFrom={setConvertedFrom}
-                    cid={cid}
-                    setCid={(newCid: string) => setCid(newCid)}
-                    hasChange={hasChange}
-                    setHasChange={setHasChange}
-                    currentLevelIndex={currentLevelIndex}
                     locale={locale}
-                    currentPasswd={props.currentPasswd}
-                    newPasswd={newPasswd}
-                    setNewPasswd={setNewPasswd}
                     savePasswd={!!savePasswd}
                     setSavePasswd={setSavePasswd}
+                    remoteSave={remoteSave}
+                    saveState={saveState}
+                    remoteDelete={remoteDelete}
+                    localSaveState={localSaveState}
+                    localSave={localSave}
+                    localLoadState={localLoadState}
+                    localLoad={localLoad}
                   />
                 ) : tab === 1 ? (
                   <TimingTab
-                    offset={chart?.offset}
-                    setOffset={changeOffset}
-                    currentLevel={currentLevel}
-                    prevBpm={
-                      currentBpmIndex !== undefined && currentBpmIndex >= 1
-                        ? currentLevel?.bpmChanges[currentBpmIndex - 1].bpm
-                        : undefined
-                    }
-                    currentBpmIndex={currentBpmIndex}
-                    currentBpm={
-                      currentBpmIndex !== undefined ? currentBpm : undefined
-                    }
-                    setCurrentBpm={changeBpm}
-                    bpmChangeHere={!!bpmChangeHere}
-                    toggleBpmChangeHere={toggleBpmChangeHere}
-                    prevSpeed={
-                      currentSpeedIndex !== undefined && currentSpeedIndex >= 1
-                        ? currentLevel?.speedChanges[currentSpeedIndex - 1].bpm
-                        : undefined
-                    }
-                    currentSpeedIndex={currentSpeedIndex}
-                    currentSpeed={
-                      currentSpeedIndex !== undefined ? currentSpeed : undefined
-                    }
-                    currentSpeedInterp={!!currentSpeedInterp}
-                    speedChangeHere={!!speedChangeHere}
-                    prevSignature={prevSignature}
-                    currentSignature={currentSignature}
-                    setCurrentSignature={changeSignature}
-                    signatureChangeHere={!!signatureChangeHere}
-                    toggleSignatureChangeHere={toggleSignatureChangeHere}
-                    currentStep={currentStep}
-                    setYTBegin={setYTBegin}
-                    setYTEnd={setYTEnd}
-                    currentLevelLength={currentLevelLength}
-                    ytDuration={ytDuration}
+                    chart={chart}
                     enableHitSE={enableHitSE}
                     setEnableHitSE={setEnableHitSE}
                     hitVolume={hitVolume}
@@ -963,43 +924,11 @@ export default function Edit(props: {
                     setBeatVolume={setBeatVolume}
                   />
                 ) : tab === 2 ? (
-                  <LevelTab
-                    chart={chart}
-                    currentLevelIndex={currentLevelIndex}
-                    setCurrentLevelIndex={setCurrentLevelIndex}
-                    changeChart={changeChart}
-                  />
+                  <LevelTab chart={chart} />
                 ) : tab === 3 ? (
-                  <NoteTab
-                    currentNoteIndex={currentNoteIndex}
-                    hasCurrentNote={hasCurrentNote}
-                    notesIndexInStep={notesIndexInStep}
-                    notesCountInStep={notesCountInStep}
-                    canAddNote={canAddNote}
-                    addNote={addNote}
-                    deleteNote={deleteNote}
-                    updateNote={updateNote}
-                    copyNote={copyNote}
-                    pasteNote={pasteNote}
-                    hasCopyBuf={
-                      chart ? chart.copyBuffer.map((n) => n !== null) : []
-                    }
-                    currentStep={currentStep}
-                    currentLevel={currentLevel}
-                  />
+                  <NoteTab chart={chart} />
                 ) : null}
-                <LuaTabPlaceholder
-                  parentContainer={ref.current}
-                  visible={tab === 4}
-                  currentLine={currentLine}
-                  currentStepStr={currentStepStr}
-                  barLines={barLines}
-                  currentLevel={currentLevel}
-                  changeLevel={changeLevel}
-                  seekStepAbs={seekStepAbs}
-                  errLine={luaExecutor.running ? null : luaExecutor.errLine}
-                  err={luaExecutor.err}
-                />
+                <LuaTabPlaceholder parentContainer={ref.current} />
               </Box>
               <div
                 className={clsx(
