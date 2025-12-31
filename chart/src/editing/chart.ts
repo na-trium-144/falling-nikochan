@@ -56,13 +56,6 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.#currentPasswd = options.currentPasswd;
     this.#changePasswd = null;
 
-    this.#hasChange = options.hasChange ?? false;
-    this.#numEvents = numEvents(this.toObject());
-    this.on("change", () => {
-      this.#hasChange = true;
-      this.#numEvents = numEvents(this.toObject());
-    });
-
     this.#offset = obj.offset;
     this.#meta = {
       published: obj.published,
@@ -82,7 +75,14 @@ export class ChartEditing extends EventEmitter<EventType> {
     );
     this.#copyBuffer = obj.copyBuffer;
     this.#currentLevelIndex =
-      (options.currentLevelIndex ?? this.#levels.length >= 1) ? 0 : undefined;
+      options.currentLevelIndex ?? (this.#levels.length >= 1 ? 0 : undefined);
+
+    this.#hasChange = options.hasChange ?? false;
+    this.#numEvents = numEvents(this.toObject());
+    this.on("change", () => {
+      this.#hasChange = true;
+      this.#numEvents = numEvents(this.toObject());
+    });
   }
   resetOnSave(cid: string) {
     this.#convertedFrom = currentChartVer;
@@ -112,7 +112,10 @@ export class ChartEditing extends EventEmitter<EventType> {
       ver: currentChartVer,
       offset: this.#offset,
       locale: this.#locale,
-      ...this.#meta,
+      ytId: this.#meta.ytId,
+      title: this.#meta.title,
+      composer: this.#meta.composer,
+      chartCreator: this.#meta.chartCreator,
       levels: this.#levels.map((l) => ({
         name: l.meta.name,
         type: l.meta.type,
@@ -143,7 +146,14 @@ export class ChartEditing extends EventEmitter<EventType> {
     }
   }
   addLevel(level: LevelEdit) {
-    this.#levels.push(
+    if (this.#currentLevelIndex === undefined) {
+      this.#currentLevelIndex = this.#levels.length;
+    } else {
+      this.#currentLevelIndex = this.#currentLevelIndex + 1;
+    }
+    this.#levels.splice(
+      this.#currentLevelIndex,
+      0,
       new LevelEditing(
         level,
         (type) => this.emit(type),
@@ -151,7 +161,6 @@ export class ChartEditing extends EventEmitter<EventType> {
         this.#luaExecutorRef
       )
     );
-    this.#currentLevelIndex = this.#levels.length - 1;
     this.emit("rerender");
     this.emit("change");
   }
