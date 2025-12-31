@@ -23,39 +23,12 @@ interface Props {
 }
 export default function LevelTab(props: Props) {
   const t = useTranslations("edit.level");
-  const _addLevel = () => {
-    if (props.chart) {
-      props.changeChart({
-        ...props.chart,
-        levels: props.chart.levels.concat([emptyLevel(currentLevel)]),
-      });
-      props.setCurrentLevelIndex(props.chart.levels.length);
-    }
-  };
-  const _duplicateLevel = () => {
-    if (props.chart && currentLevel) {
-      props.changeChart({
-        ...props.chart,
-        levels: props.chart.levels.concat([copyLevel(currentLevel)]),
-      });
-      props.setCurrentLevelIndex(props.chart.levels.length);
-    }
-  };
-  const _deleteLevel = () => {
-    if (props.chart && window.confirm(t("deleteConfirm"))) {
-      props.changeChart({
-        ...props.chart,
-        levels: props.chart.levels.filter(
-          (_, i) => i !== props.currentLevelIndex
-        ),
-      });
-      props.setCurrentLevelIndex(0);
-    }
-  };
+  const { chart } = props;
+  const currentLevel = chart?.currentLevel;
 
   const levelTypeDisabled = [
-    props.chart?.currentLevel && props.chart?.currentLevel?.maxHitNum > 1,
-    props.chart?.currentLevel && props.chart?.currentLevel?.maxHitNum > 2,
+    currentLevel && currentLevel?.maxHitNum > 1,
+    currentLevel && currentLevel?.maxHitNum > 2,
     false,
   ];
 
@@ -65,63 +38,53 @@ export default function LevelTab(props: Props) {
         <span className="mr-1">{t("levelsList")}:</span>
         <Button
           text={t("levelAdd")}
-          onClick={() =>
-            props.chart?.addLevel(
-              emptyLevel(props.chart?.currentLevel?.toObject())
-            )
-          }
+          onClick={() => chart?.addLevel(emptyLevel(currentLevel?.toObject()))}
         />
-        {props.chart?.currentLevel && (
+        {currentLevel && (
           <>
             <Button
               text={t("levelDuplicate")}
               onClick={() =>
-                props.chart?.currentLevel &&
-                props.chart?.addLevel(
-                  copyLevel(props.chart?.currentLevel?.toObject())
-                )
+                currentLevel &&
+                chart?.addLevel(copyLevel(currentLevel?.toObject()))
               }
             />
             <Button
               text={t("levelDelete")}
               onClick={() => {
-                if (props.chart && window.confirm(t("deleteConfirm"))) {
-                  props.chart.deleteLevel();
+                if (chart && window.confirm(t("deleteConfirm"))) {
+                  chart.deleteLevel();
                 }
               }}
-              disabled={props.chart.levels.length <= 1}
+              disabled={chart.levels.length <= 1}
             />
             <Button
               text="↑"
-              onClick={props.chart?.moveLevelUp}
-              disabled={props.chart?.currentLevelIndex === 0}
+              onClick={chart?.moveLevelUp}
+              disabled={chart?.currentLevelIndex === 0}
             />
             <Button
               text="↓"
-              onClick={props.chart?.moveLevelDown}
-              disabled={
-                props.chart?.currentLevelIndex === props.chart.levels.length - 1
-              }
+              onClick={chart?.moveLevelDown}
+              disabled={chart.currentLevelIndex === chart.levels.length - 1}
             />
           </>
         )}
       </p>
       <ul className="ml-2 mt-2 mb-2 space-y-1 max-h-32 overflow-y-auto">
-        {props.chart?.levels.map((level, i) => (
+        {chart?.levels.map((level, i) => (
           <li key={i}>
             <button
               className={clsx(
-                i === props.chart?.currentLevelIndex
+                i === chart?.currentLevelIndex
                   ? "text-blue-600 dark:text-blue-400"
                   : "hover:text-slate-500 hover:dark:text-stone-400",
                 level.meta.unlisted && "text-slate-400 dark:text-stone-600"
               )}
-              onClick={() => props.chart?.setCurrentLevelIndex(i)}
+              onClick={() => chart?.setCurrentLevelIndex(i)}
             >
               <span className="inline-block w-5 translate-y-0.5">
-                {i === props.chart?.currentLevelIndex && (
-                  <RightOne theme="filled" />
-                )}
+                {i === chart?.currentLevelIndex && <RightOne theme="filled" />}
               </span>
               <span className="inline-block w-4 mr-2 text-right">{i + 1}.</span>
               {level.meta.name && (
@@ -135,7 +98,7 @@ export default function LevelTab(props: Props) {
               <span
                 className={clsx(
                   "inline-block mr-2",
-                  i === props.chart?.currentLevelIndex &&
+                  i === chart?.currentLevelIndex &&
                     levelColors[levelTypes.indexOf(level.meta.type)]
                 )}
               >
@@ -156,15 +119,15 @@ export default function LevelTab(props: Props) {
         ))}
       </ul>
       <hr className="mb-3 " />
-      {props.chart?.currentLevel && (
+      {currentLevel && (
         <>
           <p className="flex flex-row items-baseline mb-1">
             <span className="w-max">{t("levelName")}:</span>
             <Input
               className="font-title shrink"
-              actualValue={props.chart.currentLevel.meta.name}
+              actualValue={currentLevel.meta.name}
               updateValue={(n) => {
-                props.chart?.currentLevel?.updateMeta({ name: n });
+                currentLevel?.updateMeta({ name: n });
               }}
               left
             />
@@ -174,13 +137,13 @@ export default function LevelTab(props: Props) {
             {levelTypesConst.map((t, i) => (
               <CheckBox
                 key={t}
-                value={t === props.chart?.currentLevel?.meta.type}
+                value={t === currentLevel?.meta.type}
                 className={clsx(
                   "ml-2",
-                  t === props.chart?.currentLevel?.meta.type && levelColors[i]
+                  t === currentLevel?.meta.type && levelColors[i]
                 )}
                 onChange={() => {
-                  props.chart?.currentLevel?.updateMeta({ type: t });
+                  currentLevel?.updateMeta({ type: t });
                 }}
                 disabled={levelTypeDisabled[i]}
               >
@@ -190,11 +153,11 @@ export default function LevelTab(props: Props) {
           </p>
           <p>
             <CheckBox
-              value={props.chart?.currentLevel?.meta.unlisted}
+              value={currentLevel?.meta.unlisted}
               className="ml-0"
               onChange={() => {
-                props.chart?.currentLevel?.updateMeta({
-                  unlisted: !props.chart.currentLevel.meta.unlisted,
+                currentLevel?.updateMeta({
+                  unlisted: !currentLevel.meta.unlisted,
                 });
               }}
             >

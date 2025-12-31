@@ -293,7 +293,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   }
 
   copyNote(copyIndex: number) {
-    if (this.currentLevel?.hasCurrentNote) {
+    if (this.currentLevel?.currentNote) {
       this.#copyBuffer[copyIndex] = this.currentLevel.currentNote!;
       this.emit("rerender");
       // dataに変化があるが、changeは呼ばない
@@ -301,7 +301,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
     if (this.#copyBuffer.at(copyIndex) && this.currentLevel) {
-      if (this.currentLevel?.hasCurrentNote && !forceAdd) {
+      if (this.currentLevel?.currentNote && !forceAdd) {
         this.currentLevel.updateNote(this.#copyBuffer.at(copyIndex)!);
       } else {
         this.currentLevel.addNote(this.#copyBuffer.at(copyIndex)!);
@@ -585,7 +585,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
   }
   selectPrevNote() {
-    if (this.#current.noteIndex !== undefined) {
+    if (this.#current.noteIndex !== undefined && this.#current.noteIndex >= 1) {
       this.#current.setNoteIndex(this.#current.noteIndex - 1);
     }
   }
@@ -593,16 +593,26 @@ export class LevelEditing extends EventEmitter<EventType> {
     return this.#current;
   }
 
-  get hasCurrentNote() {
-    return (
-      this.#current.noteIndex !== undefined &&
-      this.#current.noteIndex >= 0 &&
-      this.#freeze.notes.at(this.#current.noteIndex) !== undefined
-    );
-  }
   get currentNote() {
     if (this.#current.noteIndex !== undefined && this.#current.noteIndex >= 0) {
       return this.#freeze.notes.at(this.#current.noteIndex);
+    } else {
+      return undefined;
+    }
+  }
+  get currentNoteEditable() {
+    return !!this.currentNote && this.currentNote.luaLine !== null;
+  }
+  get nextNote() {
+    if (this.#current.noteIndex !== undefined) {
+      return this.#freeze.notes.at(this.#current.noteIndex + 1);
+    } else {
+      return undefined;
+    }
+  }
+  get prevNote() {
+    if (this.#current.noteIndex !== undefined && this.#current.noteIndex >= 1) {
+      return this.#freeze.notes.at(this.#current.noteIndex - 1);
     } else {
       return undefined;
     }
@@ -614,22 +624,92 @@ export class LevelEditing extends EventEmitter<EventType> {
       return undefined;
     }
   }
+  get currentBpmChange() {
+    return this.#freeze.bpmChanges.at(this.#current.bpmIndex);
+  }
   get currentBpm() {
-    return this.#freeze.bpmChanges.at(this.#current.bpmIndex)?.bpm;
+    return this.currentBpmChange?.bpm;
+  }
+  get currentBpmEditable() {
+    return !!this.currentBpmChange && this.currentBpmChange.luaLine !== null;
+  }
+  get prevBpmChange() {
+    return this.#current.bpmIndex > 0
+      ? this.#freeze.bpmChanges.at(this.#current.bpmIndex - 1)
+      : undefined;
+  }
+  get prevBpm(){
+    return this.prevBpmChange?.bpm;
+  }
+  findBpmChangeFromStep(s: Step) {
+    if(stepCmp(s, stepZero()) > 0){
+      const i = findBpmIndexFromStep(this.#freeze.bpmChanges, s)
+      if(i !== undefined){
+        return this.#freeze.bpmChanges.at(i);
+      }
+    }
+    return undefined;
+  }
+  get currentSpeedChange(){
+    return this.#freeze.speedChanges.at(this.#current.speedIndex);
   }
   get currentSpeed() {
-    return this.#freeze.speedChanges.at(this.#current.speedIndex)?.bpm;
+    return this.currentSpeedChange?.bpm;
   }
   get currentSpeedInterp() {
-    return this.#freeze.speedChanges.at(this.#current.speedIndex)?.interp;
+    return this.currentSpeedChange?.interp;
+  }
+  get currentSpeedEditable() {
+    return !!this.currentSpeedChange && this.currentSpeedChange.luaLine !== null;
+  }
+  get prevSpeedChange(){
+    return this.#current.speedIndex > 0
+      ? this.#freeze.speedChanges.at(this.#current.speedIndex - 1)
+      : undefined;
+  }
+  get prevSpeed(){
+    return this.prevSpeedChange?.bpm;
+  }
+  get nextSpeedChange() {
+    return this.#freeze.speedChanges.at(this.#current.speedIndex + 1);
+  }
+  get nextSpeed(){
+    return this.nextSpeedChange?.bpm;
+  }
+  get nextSpeedInterp() {
+    return this.nextSpeedChange?.interp;
+  }
+  findSpeedChangeFromStep(s: Step) {
+    if(stepCmp(s, stepZero()) > 0){
+      const i = findBpmIndexFromStep(this.#freeze.speedChanges, s)
+      if(i !== undefined){
+        return this.#freeze.speedChanges.at(i);
+      }
+    }
+    return undefined;
   }
   get currentSignature() {
     return this.#freeze.signature.at(this.#current.signatureIndex);
+  }
+  get currentSignatureEditable() {
+    return (
+      !!this.currentSignature &&
+      this.currentSignature.luaLine !== null
+    );
   }
   get prevSignature() {
     return this.#current.signatureIndex > 0
       ? this.#freeze.signature.at(this.#current.signatureIndex - 1)
       : undefined;
+  }
+  findSignatureFromStep(s: Step) {
+    if(stepCmp(s, stepZero()) > 0){
+      const i = findBpmIndexFromStep(this.#freeze.signature, s)
+      if(i !== undefined){
+        return this.#freeze.signature.at(i);
+      }
+    }
+    return undefined;
   }
   get bpmChangeHere() {
     const currentBpmStep = this.#freeze.bpmChanges.at(
@@ -859,6 +939,20 @@ export class CursorState extends EventEmitter<EventType> {
   }
   get signatureState() {
     return this.#signatureState;
+  }
+  get currentStepStr() {
+    return (
+      this.signatureState.barNum +
+      1 +
+      ";" +
+      (this.signatureState.count.fourth + 1) +
+      (this.signatureState.count.numerator > 0
+        ? "+" +
+          this.signatureState.count.numerator +
+          "/" +
+          this.signatureState.count.denominator * 4
+        : "")
+    );
   }
   get notesIndexBegin() {
     return this.#notesIndexBegin;
@@ -1385,6 +1479,7 @@ export function useChartState(props: Props) {
     setSavePasswd,
     saveState,
     remoteSave,
+    remoteDelete,
     localSaveState,
     localSave,
     localLoadState,

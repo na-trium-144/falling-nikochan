@@ -136,6 +136,8 @@ export function LuaTabProvider(props: Props & PProps) {
 
   const { top, left, width, height } = data;
   const { visible, chart, currentStepStr, seekStepAbs, errLine, err } = props;
+  const currentLevel = chart?.currentLevel;
+  const cur = currentLevel?.current;
   const { rem } = useDisplayMode();
   const t = useTranslations("edit.code");
   const previousLevelCode = useRef<string>("");
@@ -144,7 +146,7 @@ export function LuaTabProvider(props: Props & PProps) {
 
   useEffect(() => {
     const updateCode = () => {
-      const currentLevelCode = chart?.currentLevel?.lua.join("\n");
+      const currentLevelCode = currentLevel?.lua.join("\n");
       if (
         !codeChanged &&
         currentLevelCode !== undefined &&
@@ -159,7 +161,7 @@ export function LuaTabProvider(props: Props & PProps) {
     return () => {
       chart?.off("change", updateCode);
     };
-  }, [codeChanged, chart]);
+  }, [codeChanged, chart, currentLevel]);
 
   const changeCodeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const changeCode = (code: string) => {
@@ -171,7 +173,7 @@ export function LuaTabProvider(props: Props & PProps) {
     changeCodeTimeout.current = setTimeout(() => {
       changeCodeTimeout.current = null;
       setCodeChanged(false);
-      chart?.currentLevel?.updateLua(code.split("\n"));
+      currentLevel?.updateLua(code.split("\n"));
     }, 500);
   };
 
@@ -191,17 +193,14 @@ export function LuaTabProvider(props: Props & PProps) {
           fontSize={1 * rem}
           value={code}
           annotations={[
-            ...(chart?.currentLevel?.barLines.map((bl) => ({
+            ...(currentLevel?.barLines.map((bl) => ({
               row: bl.luaLine,
               column: 1,
               text: `${bl.barNum};`,
               type: "info",
             })) || []),
             {
-              row:
-                chart?.currentLevel?.current.line == null
-                  ? -1
-                  : chart?.currentLevel?.current.line,
+              row: cur?.line == null ? -1 : cur.line,
               column: 1,
               text: t("currentLine", { step: currentStepStr || "null" }),
               type: "warning",
@@ -233,9 +232,9 @@ export function LuaTabProvider(props: Props & PProps) {
             }
           }}
           onCursorChange={(sel) => {
-            if (chart?.currentLevel && visible) {
+            if (currentLevel && visible) {
               const step = findStepFromLua(
-                chart.currentLevel.toObject(),
+                currentLevel.toObject(),
                 sel.cursor.row
               );
               if (step !== null) {

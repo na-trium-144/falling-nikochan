@@ -131,6 +131,8 @@ export default function Edit(props: {
     },
     locale,
   });
+  const currentLevel = chart?.currentLevel;
+  const cur = currentLevel?.current;
 
   useEffect(() => {
     document.title = titleWithSiteName(
@@ -183,19 +185,6 @@ export default function Edit(props: {
   const ref = useRef<HTMLDivElement | null>(null);
 
   const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
-
-  const currentStepStr = chart?.currentLevel?.current.signatureState
-    ? chart.currentLevel.current.signatureState.barNum +
-      1 +
-      ";" +
-      (chart.currentLevel.current.signatureState.count.fourth + 1) +
-      (chart.currentLevel.current.signatureState.count.numerator > 0
-        ? "+" +
-          chart.currentLevel.current.signatureState.count.numerator +
-          "/" +
-          chart.currentLevel.current.signatureState.count.denominator * 4
-        : "")
-    : null;
 
   const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -260,67 +249,47 @@ export default function Edit(props: {
   );
   const seekStepRel = useCallback(
     (move: number) => {
-      if (chart?.currentLevel?.current.step) {
-        let newStep = stepAdd(chart.currentLevel.current.step, {
+      if (cur?.step) {
+        let newStep = stepAdd(cur?.step, {
           fourth: 0,
           numerator: move,
-          denominator: chart.currentLevel.current.snapDivider,
+          denominator: cur?.snapDivider,
         });
         seekStepAbs(newStep, true);
       }
     },
-    [chart, seekStepAbs]
+    [cur, seekStepAbs]
   );
   const seekRight1 = useCallback(() => {
-    if (chart?.currentLevel) {
+    if (currentLevel && cur) {
       if (
-        chart.currentLevel.hasCurrentNote &&
-        chart.currentLevel.current.step &&
-        chart.currentLevel.current.noteIndex !== undefined &&
-        chart.currentLevel.freeze.notes.at(
-          chart.currentLevel.current.noteIndex + 1
-        ) &&
-        stepCmp(
-          chart.currentLevel.current.step,
-          chart.currentLevel.freeze.notes.at(
-            chart.currentLevel.current.noteIndex + 1
-          )!.step
-        ) === 0
+        currentLevel?.nextNote &&
+        stepCmp(cur?.step, currentLevel.nextNote.step) === 0
       ) {
-        chart.currentLevel.selectNextNote();
+        currentLevel.selectNextNote();
       } else {
         seekStepRel(1);
       }
     }
     ref.current?.focus();
-  }, [chart, seekStepRel]);
+  }, [cur, currentLevel, seekStepRel]);
   const seekLeft1 = useCallback(() => {
-    if (chart?.currentLevel) {
+    if (currentLevel && cur) {
       if (
-        chart.currentLevel.hasCurrentNote &&
-        chart.currentLevel.current.step &&
-        chart.currentLevel.current.noteIndex !== undefined &&
-        chart.currentLevel.freeze.notes.at(
-          chart.currentLevel.current.noteIndex - 1
-        ) &&
-        stepCmp(
-          chart.currentLevel.current.step,
-          chart.currentLevel.freeze.notes.at(
-            chart.currentLevel.current.noteIndex - 1
-          )!.step
-        ) === 0
+        currentLevel.prevNote &&
+        stepCmp(cur?.step, currentLevel.prevNote.step) === 0
       ) {
-        chart.currentLevel.selectPrevNote();
+        currentLevel.selectPrevNote();
       } else {
         seekStepRel(-1);
       }
     }
     ref.current?.focus();
-  }, [chart, seekStepRel]);
+  }, [cur, currentLevel, seekStepRel]);
   const seekSec = (moveSec: number, focus = true) => {
-    if (chart?.currentLevel) {
+    if (chart && cur) {
       setAndSeekCurrentTimeWithoutOffset(
-        chart.currentLevel.current.timeSec + chart.offset + moveSec,
+        cur?.timeSec + chart.offset + moveSec,
         focus
       );
     }
@@ -365,15 +334,15 @@ export default function Edit(props: {
         clearTimeout(timer);
         timer = null;
       }
-      if (playing && ytPlayer.current && chart?.currentLevel) {
+      if (playing && ytPlayer.current && currentLevel) {
         let index = 0;
         const now =
           ytPlayer.current.getCurrentTime() -
           (chart.offset || 0) +
           audioLatencyRef.current;
         while (
-          index < chart.currentLevel.seqNotes.length &&
-          chart.currentLevel.seqNotes[index].hitTimeSec < now
+          index < currentLevel.seqNotes.length &&
+          currentLevel.seqNotes[index].hitTimeSec < now
         ) {
           index++;
         }
@@ -385,26 +354,24 @@ export default function Edit(props: {
               audioLatencyRef.current;
             timer = null;
             while (
-              index < chart.currentLevel!.seqNotes.length &&
-              chart.currentLevel!.seqNotes[index].hitTimeSec <= now
+              index < currentLevel!.seqNotes.length &&
+              currentLevel!.seqNotes[index].hitTimeSec <= now
             ) {
-              playSE(
-                chart.currentLevel!.seqNotes[index].big ? "hitBig" : "hit"
-              );
+              playSE(currentLevel!.seqNotes[index].big ? "hitBig" : "hit");
               index++;
             }
-            if (index < chart.currentLevel!.seqNotes.length) {
+            if (index < currentLevel!.seqNotes.length) {
               timer = setTimeout(
                 playOne,
-                (chart.currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
+                (currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
               );
             }
           }
         };
-        if (index < chart.currentLevel!.seqNotes.length) {
+        if (index < currentLevel!.seqNotes.length) {
           timer = setTimeout(
             playOne,
-            (chart.currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
+            (currentLevel!.seqNotes[index].hitTimeSec - now) * 1000
           );
         }
       }
@@ -417,7 +384,7 @@ export default function Edit(props: {
       }
       chart?.off("change", initSETimer);
     };
-  }, [playing, chart, playSE]);
+  }, [playing, chart, currentLevel, playSE]);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const initSETimer = () => {
@@ -425,26 +392,21 @@ export default function Edit(props: {
         clearTimeout(timer);
         timer = null;
       }
-      if (playing && ytPlayer.current && chart?.currentLevel) {
+      if (playing && ytPlayer.current && currentLevel) {
         const now =
           ytPlayer.current.getCurrentTime() -
           (chart?.offset || 0) +
           audioLatencyRef.current;
-        let step = getStep(chart.currentLevel.freeze.bpmChanges, now, 4);
+        let step = getStep(currentLevel.freeze.bpmChanges, now, 4);
         const playOne = () => {
-          if (ytPlayer.current && chart.currentLevel) {
+          if (ytPlayer.current && currentLevel) {
             const now =
               ytPlayer.current.getCurrentTime() -
               (chart?.offset || 0) +
               audioLatencyRef.current;
             timer = null;
-            while (
-              getTimeSec(chart.currentLevel.freeze.bpmChanges, step) <= now
-            ) {
-              const ss = getSignatureState(
-                chart.currentLevel.freeze.signature,
-                step
-              );
+            while (getTimeSec(currentLevel.freeze.bpmChanges, step) <= now) {
+              const ss = getSignatureState(currentLevel.freeze.signature, step);
               if (ss.count.numerator === 0 && stepCmp(step, stepZero()) >= 0) {
                 playSE(ss.count.fourth === 0 ? "beat1" : "beat");
               }
@@ -452,8 +414,7 @@ export default function Edit(props: {
             }
             timer = setTimeout(
               playOne,
-              (getTimeSec(chart.currentLevel.freeze.bpmChanges, step) - now) *
-                1000
+              (getTimeSec(currentLevel.freeze.bpmChanges, step) - now) * 1000
             );
           }
         };
@@ -468,7 +429,7 @@ export default function Edit(props: {
       }
       chart?.off("change", initSETimer);
     };
-  }, [playing, playSE, chart]);
+  }, [playing, playSE, chart, currentLevel]);
 
   const [tab, setTab] = useState<number>(0);
   const tabNameKeys = ["meta", "timing", "level", "note", "code"];
@@ -513,10 +474,10 @@ export default function Edit(props: {
             seekLeft1();
           } else if (e.key === "Right" || e.key === "ArrowRight") {
             seekRight1();
-          } else if (e.key === "PageUp" && chart?.currentLevel) {
-            seekStepRel(-chart.currentLevel.current.snapDivider * 4);
-          } else if (e.key === "PageDown" && chart?.currentLevel) {
-            seekStepRel(chart?.currentLevel?.current.snapDivider * 4);
+          } else if (e.key === "PageUp" && cur) {
+            seekStepRel(-cur?.snapDivider * 4);
+          } else if (e.key === "PageDown" && cur) {
+            seekStepRel(cur?.snapDivider * 4);
           } else if (e.key === ",") {
             seekSec(-1 / 30);
           } else if (e.key === ".") {
@@ -530,9 +491,9 @@ export default function Edit(props: {
           } else if (e.key === "n") {
             chart.pasteNote(0, true);
           } else if (e.key === "b") {
-            if (chart?.currentLevel?.hasCurrentNote) {
-              const n = chart.currentLevel.currentNote!;
-              chart.currentLevel.updateNote({ ...n, big: !n.big });
+            if (currentLevel?.currentNote) {
+              const n = currentLevel.currentNote;
+              currentLevel.updateNote({ ...n, big: !n.big });
             }
           } else if (e.key === "Shift") {
             setDragMode("v");
@@ -629,7 +590,7 @@ export default function Edit(props: {
         <LuaTabProvider
           visible={tab === 4}
           chart={chart}
-          currentStepStr={currentStepStr}
+          currentStepStr={cur?.currentStepStr || null}
           seekStepAbs={seekStepAbs}
           errLine={luaExecutor.running ? null : luaExecutor.errLine}
           err={luaExecutor.err}
@@ -661,7 +622,7 @@ export default function Edit(props: {
                 className={clsx(
                   "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
                   levelBgColors[
-                    levelTypes.indexOf(chart?.currentLevel?.meta.type || "")
+                    levelTypes.indexOf(currentLevel?.meta.type || "")
                   ] || levelBgColors[1],
                   chart || "invisible "
                 )}
@@ -765,29 +726,23 @@ export default function Edit(props: {
                 <span className="inline-block">
                   <Button
                     onClick={() => {
-                      if (ready && chart?.currentLevel) {
-                        seekStepRel(
-                          -chart.currentLevel.current.snapDivider * 4
-                        );
+                      if (ready && cur) {
+                        seekStepRel(-cur?.snapDivider * 4);
                       }
                     }}
                     text={t("playerControls.moveStep", {
-                      step: chart?.currentLevel
-                        ? -chart.currentLevel.current.snapDivider * 4
-                        : 4,
+                      step: -(cur?.snapDivider || 1) * 4,
                     })}
                     keyName="PageUp"
                   />
                   <Button
                     onClick={() => {
-                      if (ready && chart?.currentLevel) {
-                        seekStepRel(chart.currentLevel.current.snapDivider * 4);
+                      if (ready && cur) {
+                        seekStepRel(cur?.snapDivider * 4);
                       }
                     }}
                     text={t("playerControls.moveStep", {
-                      step: chart?.currentLevel
-                        ? chart.currentLevel.current.snapDivider * 4
-                        : 4,
+                      step: (cur?.snapDivider || 1) * 4,
                     })}
                     keyName="PageDn"
                   />
@@ -842,11 +797,9 @@ export default function Edit(props: {
                 <span className="ml-1">/</span>
                 <Input
                   className="w-12"
-                  actualValue={String(
-                    (chart?.currentLevel?.current.snapDivider ?? 1) * 4
-                  )}
+                  actualValue={String((cur?.snapDivider ?? 1) * 4)}
                   updateValue={(v: string) => {
-                    chart?.currentLevel?.setSnapDivider(Number(v) / 4);
+                    currentLevel?.setSnapDivider(Number(v) / 4);
                   }}
                   isValid={(v) =>
                     !isNaN(Number(v)) &&

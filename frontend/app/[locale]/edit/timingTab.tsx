@@ -44,6 +44,9 @@ interface Props {
   setBeatVolume: (seVolume: number) => void;
 }
 export default function TimingTab(props: Props) {
+  const { chart } = props;
+  const currentLevel = chart?.currentLevel;
+  const cur = currentLevel?.current;
   const t = useTranslations("edit.timing");
 
   const offsetValid = (offset: string) =>
@@ -54,44 +57,15 @@ export default function TimingTab(props: Props) {
   const ytEndValid = (offset: string) =>
     offset !== "" &&
     !isNaN(Number(offset)) &&
-    props.chart?.currentLevel !== undefined &&
-    Number(offset) >= props.chart.currentLevel.lengthSec &&
-    Number(offset) <= props.chart.currentLevel.ytDuration;
-
-  const bpmChangeable =
-    props.chart?.currentLevel?.freeze.bpmChanges.at(
-      props.chart.currentLevel.current.bpmIndex
-    ) &&
-    props.chart.currentLevel.freeze.bpmChanges.at(
-      props.chart.currentLevel.current.bpmIndex
-    )!.luaLine !== null;
-  const speedChangeable =
-    props.chart?.currentLevel?.freeze.speedChanges.at(
-      props.chart.currentLevel.current.speedIndex
-    ) &&
-    props.chart.currentLevel.freeze.speedChanges.at(
-      props.chart.currentLevel.current.speedIndex
-    )!.luaLine !== null;
-  const signatureChangeable =
-    props.chart?.currentLevel?.freeze.signature.at(
-      props.chart.currentLevel.current.signatureIndex
-    ) &&
-    props.chart.currentLevel.freeze.signature.at(
-      props.chart.currentLevel.current.signatureIndex
-    )!.luaLine !== null;
+    currentLevel !== undefined &&
+    Number(offset) >= currentLevel.lengthSec &&
+    Number(offset) <= currentLevel.ytDuration;
 
   const currentBarLength =
-    props.chart?.currentLevel?.currentSignature &&
-    getBarLength(props.chart.currentLevel.currentSignature);
+    currentLevel?.currentSignature &&
+    getBarLength(currentLevel.currentSignature);
   const prevBarLength =
-    props.chart?.currentLevel?.freeze.signature.at(
-      props.chart.currentLevel.current.signatureIndex - 1
-    ) &&
-    getBarLength(
-      props.chart.currentLevel.freeze.signature.at(
-        props.chart.currentLevel.current.signatureIndex - 1
-      )!
-    );
+    currentLevel?.prevSignature && getBarLength(currentLevel.prevSignature);
 
   return (
     <>
@@ -101,11 +75,9 @@ export default function TimingTab(props: Props) {
         <Input
           className="w-16"
           actualValue={
-            props.chart?.offset !== undefined
-              ? props.chart.offset.toString()
-              : ""
+            chart?.offset !== undefined ? chart.offset.toString() : ""
           }
-          updateValue={(v: string) => props.chart?.setOffset(Number(v))}
+          updateValue={(v: string) => chart?.setOffset(Number(v))}
           isValid={offsetValid}
         />
         <span>{t("offsetSecond")}</span>
@@ -115,9 +87,9 @@ export default function TimingTab(props: Props) {
         <HelpIcon>{t.rich("ytBeginHelp", { br: () => <br /> })}</HelpIcon>
         <Input
           className="w-16"
-          actualValue={props.chart?.currentLevel?.meta.ytBegin.toString() || ""}
+          actualValue={currentLevel?.meta.ytBegin.toString() || ""}
           updateValue={(v: string) =>
-            props.chart?.currentLevel?.updateMeta({ ytBegin: Number(v) })
+            currentLevel?.updateMeta({ ytBegin: Number(v) })
           }
           isValid={offsetValid}
         />
@@ -127,38 +99,33 @@ export default function TimingTab(props: Props) {
         <span>{t("ytEnd")}</span>
         <HelpIcon>{t.rich("ytEndHelp", { br: () => <br /> })}</HelpIcon>
         <CheckBox
-          value={props.chart?.currentLevel?.meta.ytEnd === "note"}
+          value={currentLevel?.meta.ytEnd === "note"}
           className={clsx("ml-2")}
-          onChange={() =>
-            props.chart?.currentLevel?.updateMeta({ ytEnd: "note" })
-          }
+          onChange={() => currentLevel?.updateMeta({ ytEnd: "note" })}
         >
           {t("ytEndAuto")}
           <span className="text-sm ml-1">
-            ({Math.round((props.chart?.currentLevel?.lengthSec || 0) * 10) / 10}{" "}
+            ({Math.round((currentLevel?.lengthSec || 0) * 10) / 10}{" "}
             {t("offsetSecond")})
           </span>
         </CheckBox>
         <CheckBox
-          value={props.chart?.currentLevel?.meta.ytEnd === "yt"}
+          value={currentLevel?.meta.ytEnd === "yt"}
           className={clsx("ml-2")}
-          onChange={() =>
-            props.chart?.currentLevel?.updateMeta({ ytEnd: "yt" })
-          }
+          onChange={() => currentLevel?.updateMeta({ ytEnd: "yt" })}
         >
           {t("ytEndFull")}
           <span className="text-sm ml-1">
-            (
-            {Math.round((props.chart?.currentLevel?.ytDuration || 0) * 10) / 10}{" "}
+            ({Math.round((currentLevel?.ytDuration || 0) * 10) / 10}{" "}
             {t("offsetSecond")})
           </span>
         </CheckBox>
         <CheckBox
-          value={typeof props.chart?.currentLevel?.meta.ytEnd === "number"}
+          value={typeof currentLevel?.meta.ytEnd === "number"}
           className={clsx("ml-2")}
           onChange={() =>
-            props.chart?.currentLevel?.updateMeta({
-              ytEnd: props.chart?.currentLevel?.meta.ytEndSec || 0,
+            currentLevel?.updateMeta({
+              ytEnd: currentLevel?.meta.ytEndSec || 0,
             })
           }
         >
@@ -166,14 +133,13 @@ export default function TimingTab(props: Props) {
           <Input
             className="w-16"
             actualValue={(
-              Math.round((props.chart?.currentLevel?.meta.ytEndSec || 0) * 10) /
-              10
+              Math.round((currentLevel?.meta.ytEndSec || 0) * 10) / 10
             ).toString()}
             updateValue={(v: string) =>
-              props.chart?.currentLevel?.updateMeta({ ytEnd: Number(v) })
+              currentLevel?.updateMeta({ ytEnd: Number(v) })
             }
             isValid={ytEndValid}
-            disabled={typeof props.chart?.currentLevel?.meta.ytEnd !== "number"}
+            disabled={typeof currentLevel?.meta.ytEnd !== "number"}
           />
           <span>{t("offsetSecond")}</span>
         </CheckBox>
@@ -245,32 +211,23 @@ export default function TimingTab(props: Props) {
         <span>{t("step")}</span>
         <HelpIcon>{t.rich("stepHelp", { br: () => <br /> })}</HelpIcon>
         <span className="inline-block text-right w-6">
-          {(props.chart?.currentLevel?.current.signatureState.barNum || 0) + 1}
+          {(cur?.signatureState.barNum || 0) + 1}
         </span>
         <span className="ml-1 ">;</span>
         <span className="inline-block text-right w-6">
-          {(props.chart?.currentLevel?.current.signatureState.count.fourth ||
-            0) + 1}
+          {(cur?.signatureState.count.fourth || 0) + 1}
         </span>
         <div className="w-20 inline-block">
-          {props.chart?.currentLevel &&
-            props.chart?.currentLevel?.current.signatureState.count.numerator >
-              0 && (
-              <>
-                <span className="ml-2 ">+</span>
-                <span className="inline-block text-right w-6">
-                  {
-                    props.chart?.currentLevel.current.signatureState?.count
-                      .numerator
-                  }
-                </span>
-                <span className="ml-1 mr-1">/</span>
-                <span>
-                  {props.chart?.currentLevel?.current.signatureState.count
-                    .denominator * 4}
-                </span>
-              </>
-            )}
+          {cur && cur?.signatureState.count.numerator > 0 && (
+            <>
+              <span className="ml-2 ">+</span>
+              <span className="inline-block text-right w-6">
+                {cur.signatureState.count.numerator}
+              </span>
+              <span className="ml-1 mr-1">/</span>
+              <span>{cur.signatureState.count.denominator * 4}</span>
+            </>
+          )}
         </div>
       </div>
       <div className="ml-2">
@@ -279,93 +236,76 @@ export default function TimingTab(props: Props) {
         <Input
           className="w-16 ml-1"
           actualValue={
-            props.chart?.currentLevel?.bpmChangeHere
-              ? props.chart.currentLevel.freeze.bpmChanges
-                  .at(props.chart.currentLevel.current.bpmIndex - 1)
-                  ?.toString() || ""
-              : props.chart?.currentLevel?.currentBpm !== undefined
-                ? props.chart?.currentLevel?.currentBpm.toString()
+            currentLevel?.bpmChangeHere
+              ? currentLevel.prevBpm?.toString() || ""
+              : currentLevel?.currentBpm !== undefined
+                ? currentLevel?.currentBpm.toString()
                 : ""
           }
           updateValue={(v: string) => {
             // bpmの変更時にspeedも変える
             if (
-              !props.chart?.currentLevel?.speedChangeHere &&
-              props.chart?.currentLevel?.currentBpm ===
-                props.chart?.currentLevel?.currentSpeed &&
-              !props.chart?.currentLevel?.currentSpeedInterp
+              !currentLevel?.speedChangeHere &&
+              currentLevel?.currentBpm === currentLevel?.currentSpeed &&
+              !currentLevel?.currentSpeedInterp
             ) {
-              props.chart?.currentLevel?.changeBpm(Number(v), Number(v), false);
+              currentLevel?.changeBpm(Number(v), Number(v), false);
             } else {
-              props.chart?.currentLevel?.changeBpm(Number(v), null, false);
+              currentLevel?.changeBpm(Number(v), null, false);
             }
           }}
-          disabled={props.chart?.currentLevel?.bpmChangeHere || !bpmChangeable}
+          disabled={
+            currentLevel?.bpmChangeHere || !currentLevel?.currentBpmEditable
+          }
           isValid={bpmValid}
         />
         <span className="inline-block ml-1">
           <span>→</span>
           <CheckBox
             className="ml-4 mr-1"
-            value={!!props.chart?.currentLevel?.bpmChangeHere}
+            value={!!currentLevel?.bpmChangeHere}
             onChange={() => {
               // bpmの変更時にspeedも変える
-              if (
-                props.chart?.currentLevel?.currentBpm ==
-                props.chart?.currentLevel?.currentSpeed
-              ) {
-                props.chart?.currentLevel?.toggleBpmChangeHere(
-                  !props.chart?.currentLevel?.bpmChangeHere,
-                  !props.chart?.currentLevel?.bpmChangeHere
+              if (currentLevel?.currentBpm == currentLevel?.currentSpeed) {
+                currentLevel?.toggleBpmChangeHere(
+                  !currentLevel?.bpmChangeHere,
+                  !currentLevel?.bpmChangeHere
                 );
               } else {
-                props.chart?.currentLevel?.toggleBpmChangeHere(
-                  !props.chart?.currentLevel?.bpmChangeHere,
+                currentLevel?.toggleBpmChangeHere(
+                  !currentLevel?.bpmChangeHere,
                   null
                 );
               }
             }}
-            disabled={
-              props.chart?.currentLevel &&
-              stepCmp(props.chart?.currentLevel?.current.step, stepZero()) <= 0
-            }
+            disabled={cur && stepCmp(cur.step, stepZero()) <= 0}
           >
             {t("changeHere")}
           </CheckBox>
           <Input
             className="w-16 mx-1"
-            actualValue={
-              props.chart?.currentLevel?.currentBpm?.toString() || ""
-            }
+            actualValue={currentLevel?.currentBpm?.toString() || ""}
             updateValue={(v: string) => {
               // bpmの変更時にspeedも変える
               if (
-                props.chart?.currentLevel?.speedChangeHere &&
-                props.chart?.currentLevel?.currentBpm ===
-                  props.chart?.currentLevel?.currentSpeed &&
-                !props.chart?.currentLevel?.currentSpeedInterp
+                currentLevel?.speedChangeHere &&
+                currentLevel?.currentBpm === currentLevel?.currentSpeed &&
+                !currentLevel?.currentSpeedInterp
               ) {
-                props.chart?.currentLevel?.changeBpm(
-                  Number(v),
-                  Number(v),
-                  false
-                );
+                currentLevel?.changeBpm(Number(v), Number(v), false);
               } else {
-                props.chart?.currentLevel?.changeBpm(Number(v), null, false);
+                currentLevel?.changeBpm(Number(v), null, false);
               }
             }}
             disabled={
-              !props.chart?.currentLevel?.bpmChangeHere || !bpmChangeable
+              !currentLevel?.bpmChangeHere || !currentLevel?.currentBpmEditable
             }
             isValid={bpmValid}
           />
         </span>
-        {props.chart?.currentLevel?.current.bpmIndex !== undefined &&
-          !bpmChangeable && (
-            <span className="ml-2 text-sm inline-block">
-              {t("editedInCode")}
-            </span>
-          )}
+        {cur && !currentLevel?.currentBpmEditable && (
+          <span className="ml-2 text-sm inline-block">{t("editedInCode")}</span>
+        )}
       </div>
       <div className="ml-2">
         <span>{t("speed")}</span>
@@ -377,23 +317,21 @@ export default function TimingTab(props: Props) {
         <Input
           className="w-16 ml-1"
           actualValue={
-            props.chart?.currentLevel?.speedChangeHere
-              ? props.chart?.currentLevel?.freeze.speedChanges
-                  .at(props.chart?.currentLevel?.current.speedIndex - 1)
-                  ?.toString() || ""
-              : props.chart?.currentLevel?.currentSpeed !== undefined
-                ? props.chart.currentLevel.currentSpeed.toString()
+            currentLevel?.speedChangeHere
+              ? currentLevel?.prevSpeed?.toString() || ""
+              : currentLevel?.currentSpeed !== undefined
+                ? currentLevel.currentSpeed.toString()
                 : ""
           }
           updateValue={(v: string) =>
-            props.chart?.currentLevel?.changeBpm(
+            currentLevel?.changeBpm(
               null,
               Number(v),
-              !!props.chart.currentLevel.currentSpeedInterp
+              !!currentLevel.currentSpeedInterp
             )
           }
           disabled={
-            props.chart?.currentLevel?.speedChangeHere || !speedChangeable
+            currentLevel?.speedChangeHere || !currentLevel?.currentSpeedEditable
           }
           isValid={speedValid}
         />
@@ -401,67 +339,60 @@ export default function TimingTab(props: Props) {
           <span>→</span>
           <CheckBox
             className="ml-4 mr-1"
-            value={!!props.chart?.currentLevel?.speedChangeHere}
+            value={!!currentLevel?.speedChangeHere}
             onChange={() =>
-              props.chart?.currentLevel?.toggleBpmChangeHere(
+              currentLevel?.toggleBpmChangeHere(
                 null,
-                !props.chart?.currentLevel?.speedChangeHere
+                !currentLevel?.speedChangeHere
               )
             }
-            disabled={
-              props.chart?.currentLevel &&
-              stepCmp(props.chart?.currentLevel?.current.step, stepZero()) <= 0
-            }
+            disabled={cur && stepCmp(cur.step, stepZero()) <= 0}
           >
             {t("changeHere")}
           </CheckBox>
           <CheckBox
             className="mr-1"
             value={
-              !!props.chart?.currentLevel?.speedChangeHere &&
-              !!props.chart?.currentLevel?.currentSpeedInterp
+              !!currentLevel?.speedChangeHere &&
+              !!currentLevel?.currentSpeedInterp
             }
             onChange={() =>
-              props.chart?.currentLevel?.currentSpeed &&
-              props.chart?.currentLevel?.changeBpm(
+              currentLevel?.currentSpeed &&
+              currentLevel?.changeBpm(
                 null,
-                props.chart?.currentLevel?.currentSpeed,
-                !props.chart?.currentLevel?.currentSpeedInterp
+                currentLevel?.currentSpeed,
+                !currentLevel?.currentSpeedInterp
               )
             }
             disabled={
-              !props.chart?.currentLevel?.speedChangeHere ||
-              !speedChangeable ||
-              !props.chart?.currentLevel?.current.speedIndex ||
-              props.chart?.currentLevel?.current.speedIndex <= 0
+              !currentLevel?.speedChangeHere ||
+              !currentLevel?.currentSpeedEditable ||
+              !cur?.speedIndex ||
+              cur.speedIndex <= 0
             }
           >
             {t("interp")}
           </CheckBox>
           <Input
             className="w-16 mx-1"
-            actualValue={
-              props.chart?.currentLevel?.currentSpeed?.toString() || ""
-            }
+            actualValue={currentLevel?.currentSpeed?.toString() || ""}
             updateValue={(v: string) =>
-              props.chart?.currentLevel?.changeBpm(
+              currentLevel?.changeBpm(
                 null,
                 Number(v),
-                !!props.chart?.currentLevel?.currentSpeedInterp
+                !!currentLevel?.currentSpeedInterp
               )
             }
             disabled={
-              !props.chart?.currentLevel?.speedChangeHere || !speedChangeable
+              !currentLevel?.speedChangeHere ||
+              !currentLevel?.currentSpeedEditable
             }
             isValid={speedValid}
           />
         </span>
-        {props.chart?.currentLevel?.current.speedIndex !== undefined &&
-          !speedChangeable && (
-            <span className="ml-2 text-sm inline-block">
-              {t("editedInCode")}
-            </span>
-          )}
+        {cur && !currentLevel?.currentSpeedEditable && (
+          <span className="ml-2 text-sm inline-block">{t("editedInCode")}</span>
+        )}
       </div>
       <div className="ml-2">
         <span>{t("beat")}</span>
@@ -471,7 +402,7 @@ export default function TimingTab(props: Props) {
         </HelpIcon>
         <span className="inline-block">
           <span className="ml-2">
-            {props.chart?.currentLevel?.signatureChangeHere
+            {currentLevel?.signatureChangeHere
               ? prevBarLength &&
                 stepImproper(
                   prevBarLength.reduce(
@@ -489,7 +420,7 @@ export default function TimingTab(props: Props) {
           </span>
           <span className="mx-1">/</span>
           <span className="">
-            {props.chart?.currentLevel?.signatureChangeHere
+            {currentLevel?.signatureChangeHere
               ? prevBarLength &&
                 prevBarLength.reduce((len, bl) => stepAdd(len, bl), stepZero())
                   .denominator * 4
@@ -504,19 +435,16 @@ export default function TimingTab(props: Props) {
           <span>→</span>
           <CheckBox
             className="ml-4 mr-1"
-            value={!!props.chart?.currentLevel?.signatureChangeHere}
+            value={!!currentLevel?.signatureChangeHere}
             onChange={() => {
-              props.chart?.currentLevel?.toggleSignatureChangeHere();
+              currentLevel?.toggleSignatureChangeHere();
             }}
-            disabled={
-              props.chart?.currentLevel &&
-              stepCmp(props.chart?.currentLevel?.current.step, stepZero()) <= 0
-            }
+            disabled={cur && stepCmp(cur.step, stepZero()) <= 0}
           >
             {t("changeHere")}
           </CheckBox>
         </span>
-        {props.chart?.currentLevel?.signatureChangeHere && currentBarLength && (
+        {currentLevel?.signatureChangeHere && currentBarLength && (
           <>
             <span className="ml-2">
               {stepImproper(
@@ -538,17 +466,15 @@ export default function TimingTab(props: Props) {
               <InputSig
                 className="text-sm"
                 allowZero
-                actualValue={
-                  props.chart?.currentLevel?.currentSignature?.offset
-                }
+                actualValue={currentLevel?.currentSignature?.offset}
                 updateValue={(v: Step) =>
-                  props.chart?.currentLevel?.currentSignature &&
-                  props.chart?.currentLevel?.changeSignature({
-                    ...props.chart?.currentLevel?.currentSignature,
+                  currentLevel?.currentSignature &&
+                  currentLevel?.changeSignature({
+                    ...currentLevel?.currentSignature,
                     offset: v,
                   })
                 }
-                disabled={!signatureChangeable}
+                disabled={!currentLevel?.currentSignatureEditable}
               />
               <span>)</span>
             </span>
@@ -556,7 +482,7 @@ export default function TimingTab(props: Props) {
         )}
       </div>
       <ul className="list-disc ml-2 pl-6">
-        {props.chart?.currentLevel?.currentSignature?.bars.map((bar, i) => (
+        {currentLevel?.currentSignature?.bars.map((bar, i) => (
           <li className="w-full" key={i}>
             <div className="flex flex-row w-full items-baseline ">
               <InputSig
@@ -572,14 +498,14 @@ export default function TimingTab(props: Props) {
                   } else {
                     newBar = barFromLength(newSig);
                   }
-                  props.chart?.currentLevel?.changeSignature({
-                    ...props.chart?.currentLevel?.currentSignature!,
-                    bars: props.chart?.currentLevel?.currentSignature!.bars.map(
-                      (b, j) => (i === j ? newBar : b)
+                  currentLevel?.changeSignature({
+                    ...currentLevel.currentSignature!,
+                    bars: currentLevel?.currentSignature!.bars.map((b, j) =>
+                      i === j ? newBar : b
                     ),
                   });
                 }}
-                disabled={!signatureChangeable}
+                disabled={!currentLevel?.currentSignatureEditable}
               />
               <span
                 className="shrink grow-0 text-right min-w-max "
@@ -616,9 +542,7 @@ export default function TimingTab(props: Props) {
                               break;
                           }
                           const remainingSig = stepSub(
-                            toStepArray(
-                              props.chart?.currentLevel?.currentSignature!
-                            )
+                            toStepArray(currentLevel.currentSignature!)
                               [i].slice(countIndex)
                               .reduce(
                                 (len, bs) => stepAdd(len, bs),
@@ -635,9 +559,9 @@ export default function TimingTab(props: Props) {
                               .slice(0, countIndex)
                               .concat([bs])
                               .concat(barFromLength(remainingSig));
-                            props.chart?.currentLevel?.changeSignature({
-                              ...props.chart?.currentLevel?.currentSignature!,
-                              bars: props.chart?.currentLevel?.currentSignature!.bars.map(
+                            currentLevel?.changeSignature({
+                              ...currentLevel.currentSignature!,
+                              bars: currentLevel?.currentSignature!.bars.map(
                                 (b, k) => (i === k ? newBar : b)
                               ),
                             });
@@ -645,7 +569,7 @@ export default function TimingTab(props: Props) {
                           }
                         }
                       }}
-                      disabled={!signatureChangeable}
+                      disabled={!currentLevel?.currentSignatureEditable}
                     >
                       <BeatSlime size={bs} />
                     </button>
@@ -654,37 +578,34 @@ export default function TimingTab(props: Props) {
               <button
                 className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
                 onClick={() => {
-                  props.chart?.currentLevel?.changeSignature({
-                    ...props.chart?.currentLevel?.currentSignature!,
-                    bars: props.chart?.currentLevel
+                  currentLevel?.changeSignature({
+                    ...currentLevel.currentSignature!,
+                    bars: currentLevel
                       ?.currentSignature!.bars.slice(0, i + 1)
                       .concat([[4, 4, 4, 4]])
                       .concat(
-                        props.chart?.currentLevel?.currentSignature!.bars.slice(
-                          i + 1
-                        )
+                        currentLevel?.currentSignature!.bars.slice(i + 1)
                       ),
                   });
                 }}
-                disabled={!signatureChangeable}
+                disabled={!currentLevel?.currentSignatureEditable}
               >
                 <CornerDownLeft />
               </button>
               <button
                 className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
                 onClick={() => {
-                  props.chart?.currentLevel?.changeSignature({
-                    ...props.chart?.currentLevel?.currentSignature!,
-                    bars: props.chart?.currentLevel?.currentSignature!.bars.filter(
+                  currentLevel?.changeSignature({
+                    ...currentLevel.currentSignature!,
+                    bars: currentLevel?.currentSignature!.bars.filter(
                       (_, k) => k !== i
                     ),
                   });
                 }}
                 disabled={
-                  (props.chart?.currentLevel &&
-                    props.chart?.currentLevel?.currentSignature!.bars.length <=
-                      1) ||
-                  !signatureChangeable
+                  (currentLevel &&
+                    currentLevel?.currentSignature!.bars.length <= 1) ||
+                  !currentLevel?.currentSignatureEditable
                 }
               >
                 <Close />
@@ -724,8 +645,9 @@ export default function TimingTab(props: Props) {
           </li>
         ))}
       </ul>
-      {props.chart?.currentLevel?.currentSignature !== undefined &&
-        !signatureChangeable && <p className="text-sm">{t("editedInCode")}</p>}
+      {currentLevel && !currentLevel?.currentSignatureEditable && (
+        <p className="text-sm">{t("editedInCode")}</p>
+      )}
     </>
   );
 }
