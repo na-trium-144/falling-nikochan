@@ -19,25 +19,15 @@ import {
 } from "react";
 import { useDisplayMode } from "@/scale.js";
 import { LuaExecResult } from "@falling-nikochan/chart/dist/luaExec";
-import { LevelFreeze } from "@falling-nikochan/chart";
+import { ChartEditing, LevelFreeze, LuaExecutor } from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme.js";
-import { LevelEdit } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import { useTranslations } from "next-intl";
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
-import { ChartEditing } from "./chartState";
 
-export interface LuaExecutor {
-  stdout: string[];
-  err: string[];
-  errLine: number | null;
-  running: boolean;
-  exec: (code: string) => Promise<LevelFreeze | null>;
-  abortExec: () => void;
-}
 export function useLuaExecutor(): LuaExecutor {
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
