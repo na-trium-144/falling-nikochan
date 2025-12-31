@@ -1,3 +1,23 @@
+## ver. 13.20 - 2025/12/26 [#876](https://github.com/na-trium-144/falling-nikochan/pull/876)
+
+* 短い間隔でBPMが変わる時アニメーションを省略
+* Rangeスライダーの背景がThumbの位置とずれるのを修正
+
+## ver. 13.19 - 2025/12/23 [#874](https://github.com/na-trium-144/falling-nikochan/pull/874)
+
+* /main/policiesページにサードパーティーのライブラリのライセンスを表示する機能を追加
+
+## ver. 13.18 - 2025/12/23 [#873](https://github.com/na-trium-144/falling-nikochan/pull/873)
+
+* 速度変化中に音符が出現する場合の出現位置の計算を修正
+* seq13.tsに二次方程式を解く関数を追加してリファクタリング
+
+## ver. 13.17 - 2025/12/23 [#871](https://github.com/na-trium-144/falling-nikochan/pull/871)
+
+* /api/chartFileに3秒のratelimitを追加, パスワード入力時に429が返ってきた場合のエラーメッセージ処理を追加
+* x-forwarded-forがない場合リモートのipアドレスを取得してratelimitの判定をする
+* editのmetaTabでのエラーメッセージ表示を修正
+
 ## ver. 13.16 - 2025/12/20
 
 * dockerでセルフホストインスタンスにデプロイ

@@ -7,6 +7,7 @@ import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
 // import babelRc from "./.babelrc" with { type: "json" };
 const babelRc = JSON.parse(readFileSync("./.babelrc", "utf-8"));
+import LicensePlugin from "webpack-license-plugin";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
@@ -46,6 +47,7 @@ const env = {
   // if not empty, disable all Next.js Link prefetch
   NO_PREFETCH: process.env.NO_PREFETCH || "",
 };
+console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
 writeFileSync(
   join(process.cwd(), "public/assets/buildVer.json"),
@@ -100,6 +102,20 @@ const nextConfig = {
           exclude: (r.exclude || []).concat([/core-js/]),
         })),
       },
+      plugins: [
+        ...config.plugins,
+        ...(process.env.NODE_ENV !== "development"
+          ? [
+              new LicensePlugin({
+                outputFilename: "../public/assets/oss-licenses/frontend.json",
+                includeNoticeText: true,
+                excludedPackageTest: (packageName /*, version*/) => {
+                  return packageName.startsWith("@falling-nikochan");
+                },
+              }),
+            ]
+          : []),
+      ],
     };
   },
 };

@@ -135,17 +135,18 @@ jobs:
           include-hidden-files: true
       - run: rm -rf .git
       - run: npm i -g wrangler@latest
-      # - name: Publish to Cloudflare Worker
-      #   uses: cloudflare/wrangler-action@v3
-      #   with:
-      #     apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
-      #     accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_ASSETS_API_TOKEN }}
           accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
           command: pages deploy .vercel/output/static --project-name=${{secrets.CF_ASSETS_PROJECT_NAME}} --branch=main
+      - run: cp -r .vercel/output/static ./frontend/out
+      - name: Publish to Cloudflare Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
+          accountId: ${{ secrets.CF_ASSETS_ACCOUNT_ID }}
 
   deploy-selfhosting:
     needs: [docker-push-manifest]

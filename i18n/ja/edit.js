@@ -7,6 +7,7 @@ export default {
     chartId: "譜面ID",
     enterPasswd: "編集用パスワードを入力してください。",
     passwdFailed: "パスワードが違います。",
+    tooManyRequestWithSec: "{sec}秒後にやり直してください",
     submitPasswd: "進む",
     savePasswd: "パスワードを保存",
     bypassPasswd: "パスワード入力をスキップ (dev環境限定)",

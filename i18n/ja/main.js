@@ -102,6 +102,11 @@ export default {
     },
     policies: {
       title: "利用規約っぽいもの",
+      license: {
+        showDetail: "詳細を表示",
+        closeDetail: "閉じる",
+        source: "ソース",
+      },
     },
     version: {
       title: "バージョン情報",

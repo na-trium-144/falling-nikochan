@@ -1,7 +1,7 @@
 import EditTab from "./clientPage.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 import { initMetadata, MetadataProps } from "@/metadata.js";
-import { rateLimitMin } from "@falling-nikochan/chart";
+import { rateLimit } from "@falling-nikochan/chart";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.edit");
@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: MetadataProps) {
     params,
     "/main/edit",
     t("title"),
-    t("description", { rateLimitMin })
+    t("description", { rateLimitMin: rateLimit.newChartFile / 60 })
   );
 }
 

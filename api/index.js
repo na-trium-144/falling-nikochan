@@ -17,13 +17,14 @@ import {
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
+import { getConnInfo } from "hono/vercel";
 
 // export const config = {
 //   runtime: "nodejs",
 // };
 
 const app = new Hono({ strict: false })
-  .route("/api", apiApp)
+  .route("/api", await apiApp({ getConnInfo }))
   .route(
     "/og",
     ogApp({

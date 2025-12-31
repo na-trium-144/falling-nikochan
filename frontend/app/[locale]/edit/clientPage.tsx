@@ -5,6 +5,7 @@ import {
   Chart9Edit,
   findInsertLine,
   NoteCommand,
+  rateLimit,
 } from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";

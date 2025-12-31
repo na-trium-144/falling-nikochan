@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { HTTPException } from "hono/http-exception";
+import { rateLimit } from "@falling-nikochan/chart";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -63,6 +64,9 @@ export function PasswdPrompt(props: PasswdProps) {
         </p>
         <p>{t("enterPasswd")}</p>
         {props.loadStatus === "passwdFailed" && <p>{t("passwdFailed")}</p>}
+        {props.loadStatus === "rateLimited" && (
+          <p>{t("tooManyRequestWithSec", { sec: rateLimit.chartFile })}</p>
+        )}
         <Input
           ref={passwdRef}
           actualValue={editPasswd}

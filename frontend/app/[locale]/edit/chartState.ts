@@ -1002,6 +1002,7 @@ export type ChartAndState =
         | "loading"
         | "passwdFailedSilent"
         | "passwdFailed"
+        | "rateLimited"
         | APIError;
     };
 export type LoadState = ChartAndState["state"];
@@ -1129,6 +1130,8 @@ export function useChartState(props: Props) {
             } else {
               setChartState({ state: "passwdFailed" });
             }
+          } else if (res?.status === 429) {
+            setChartState({ state: "rateLimited" });
           } else {
             setChartState({ state: await APIError.fromRes(res) });
           }

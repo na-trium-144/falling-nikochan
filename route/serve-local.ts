@@ -17,13 +17,14 @@ import {
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { ImageResponse } from "@vercel/og";
+import { getConnInfo } from "@hono/node-server/conninfo";
 
 const port = 8787;
 console.log(`Server is running on http://localhost:${port}`);
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(logger())
-  .route("/api", apiApp)
+  .route("/api", await apiApp({ getConnInfo }))
   .route(
     "/og",
     ogApp({

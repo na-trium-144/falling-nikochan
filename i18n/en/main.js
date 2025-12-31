@@ -99,6 +99,11 @@ export default {
     },
     policies: {
       title: "(Kind of) Terms of Use",
+      license: {
+        showDetail: "Show Details",
+        closeDetail: "Close",
+        source: "Source",
+      },
     },
     version: {
       title: "Version Info",
