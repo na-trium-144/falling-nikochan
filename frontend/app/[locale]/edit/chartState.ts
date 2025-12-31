@@ -10,6 +10,7 @@ import {
   Chart7,
   Chart8Edit,
   Chart9Edit,
+  ChartBrief,
   ChartEdit,
   ChartMin,
   ChartUntil13,
@@ -91,6 +92,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   readonly #locale: string;
   #convertedFrom: number;
   #hasChange: boolean;
+  #numEvents: number;
   // 新規譜面はundefined 保存で変わる
   #cid: string | undefined;
   // fetchに成功したらセット、
@@ -121,8 +123,10 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.#changePasswd = null;
 
     this.#hasChange = options.hasChange ?? false;
+    this.#numEvents = numEvents(this.toObject());
     this.on("change", () => {
       this.#hasChange = true;
+      this.#numEvents = numEvents(this.toObject());
     });
 
     this.#offset = obj.offset;
@@ -168,9 +172,31 @@ export class ChartEditing extends EventEmitter<EventType> {
       changePasswd: this.#changePasswd,
     };
   }
+  toMin(): ChartMin {
+    return {
+      falling: "nikochan",
+      ver: currentChartVer,
+      offset: this.#offset,
+      locale: this.#locale,
+      ...this.#meta,
+      levels: this.#levels.map((l) => ({
+        name: l.meta.name,
+        type: l.meta.type,
+        unlisted: l.meta.unlisted,
+        lua: [...l.lua],
+        ytBegin: l.meta.ytBegin,
+        ytEnd: l.meta.ytEnd,
+        ytEndSec: l.meta.ytEndSec,
+      })),
+      copyBuffer: this.#copyBuffer,
+    };
+  }
 
   get meta() {
     return { ...this.#meta } as const;
+  }
+  get numEvents() {
+    return this.#numEvents;
   }
   get levels() {
     return [...this.#levels] as const;
@@ -638,19 +664,19 @@ export class LevelEditing extends EventEmitter<EventType> {
       ? this.#freeze.bpmChanges.at(this.#current.bpmIndex - 1)
       : undefined;
   }
-  get prevBpm(){
+  get prevBpm() {
     return this.prevBpmChange?.bpm;
   }
   findBpmChangeFromStep(s: Step) {
-    if(stepCmp(s, stepZero()) > 0){
-      const i = findBpmIndexFromStep(this.#freeze.bpmChanges, s)
-      if(i !== undefined){
+    if (stepCmp(s, stepZero()) > 0) {
+      const i = findBpmIndexFromStep(this.#freeze.bpmChanges, s);
+      if (i !== undefined) {
         return this.#freeze.bpmChanges.at(i);
       }
     }
     return undefined;
   }
-  get currentSpeedChange(){
+  get currentSpeedChange() {
     return this.#freeze.speedChanges.at(this.#current.speedIndex);
   }
   get currentSpeed() {
@@ -660,29 +686,31 @@ export class LevelEditing extends EventEmitter<EventType> {
     return this.currentSpeedChange?.interp;
   }
   get currentSpeedEditable() {
-    return !!this.currentSpeedChange && this.currentSpeedChange.luaLine !== null;
+    return (
+      !!this.currentSpeedChange && this.currentSpeedChange.luaLine !== null
+    );
   }
-  get prevSpeedChange(){
+  get prevSpeedChange() {
     return this.#current.speedIndex > 0
       ? this.#freeze.speedChanges.at(this.#current.speedIndex - 1)
       : undefined;
   }
-  get prevSpeed(){
+  get prevSpeed() {
     return this.prevSpeedChange?.bpm;
   }
   get nextSpeedChange() {
     return this.#freeze.speedChanges.at(this.#current.speedIndex + 1);
   }
-  get nextSpeed(){
+  get nextSpeed() {
     return this.nextSpeedChange?.bpm;
   }
   get nextSpeedInterp() {
     return this.nextSpeedChange?.interp;
   }
   findSpeedChangeFromStep(s: Step) {
-    if(stepCmp(s, stepZero()) > 0){
-      const i = findBpmIndexFromStep(this.#freeze.speedChanges, s)
-      if(i !== undefined){
+    if (stepCmp(s, stepZero()) > 0) {
+      const i = findBpmIndexFromStep(this.#freeze.speedChanges, s);
+      if (i !== undefined) {
         return this.#freeze.speedChanges.at(i);
       }
     }
@@ -692,10 +720,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     return this.#freeze.signature.at(this.#current.signatureIndex);
   }
   get currentSignatureEditable() {
-    return (
-      !!this.currentSignature &&
-      this.currentSignature.luaLine !== null
-    );
+    return !!this.currentSignature && this.currentSignature.luaLine !== null;
   }
   get prevSignature() {
     return this.#current.signatureIndex > 0
@@ -703,9 +728,9 @@ export class LevelEditing extends EventEmitter<EventType> {
       : undefined;
   }
   findSignatureFromStep(s: Step) {
-    if(stepCmp(s, stepZero()) > 0){
-      const i = findBpmIndexFromStep(this.#freeze.signature, s)
-      if(i !== undefined){
+    if (stepCmp(s, stepZero()) > 0) {
+      const i = findBpmIndexFromStep(this.#freeze.signature, s);
+      if (i !== undefined) {
         return this.#freeze.signature.at(i);
       }
     }
@@ -1472,6 +1497,20 @@ export function useChartState(props: Props) {
       );
     }
   }, [chartState, savePasswd]);
+
+  useEffect(() => {
+    if (chartState.state === "ok") {
+      const resetStates = () => {
+        setSaveState(undefined);
+        setLocalSaveState(undefined);
+        setLocalLoadState(undefined);
+      };
+      chartState.chart.on("change", resetStates);
+      return () => {
+        chartState.chart.off("change", resetStates);
+      };
+    }
+  }, [chartState]);
 
   return {
     chart: chartState.state === "ok" ? chartState.chart : undefined,

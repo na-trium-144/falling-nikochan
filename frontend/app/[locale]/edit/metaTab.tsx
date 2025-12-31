@@ -135,11 +135,11 @@ export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
   const te = useTranslations("error");
   const router = useRouter();
-  const shareLink = useShareLink(props.chart?.cid, props.chart, props.locale);
-  // useEffect(() => {
-  //   setErrorMsg("");
-  //   setSaveMsg("");
-  // }, [props.chart]);
+  const shareLink = useShareLink(
+    props.chart?.cid,
+    props.chart?.toMin(),
+    props.locale
+  );
   const hasLevelData =
     props.chart?.levels &&
     props.chart.levels.length > 0 &&
@@ -153,12 +153,12 @@ export function MetaTab(props: Props2) {
       <div className="mb-2">
         <span className="">{t("eventNum")}:</span>
         <span className="inline-block">
-          <span className="ml-1">{props.chartNumEvent}</span>
+          <span className="ml-1">{props.chart?.numEvents}</span>
           <span className="ml-1 text-sm ">/</span>
           <span className="ml-1 text-sm ">{chartMaxEvent}</span>
         </span>
         <HelpIcon>{t.rich("eventNumHelp", { br: () => <br /> })}</HelpIcon>
-        <ProgressBar value={props.chartNumEvent / chartMaxEvent} />
+        <ProgressBar value={(props.chart?.numEvents || 0) / chartMaxEvent} />
       </div>
       <div className="mb-1">
         <ExternalLink
