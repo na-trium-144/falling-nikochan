@@ -19,7 +19,11 @@ import {
 } from "react";
 import { useDisplayMode } from "@/scale.js";
 import { LuaExecResult } from "@falling-nikochan/chart/dist/luaExec";
-import { ChartEditing, LevelFreeze, LuaExecutor } from "@falling-nikochan/chart";
+import {
+  ChartEditing,
+  LevelFreeze,
+  LuaExecutor,
+} from "@falling-nikochan/chart";
 import { Step } from "@falling-nikochan/chart";
 import { findStepFromLua } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme.js";

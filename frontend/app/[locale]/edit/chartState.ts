@@ -385,11 +385,13 @@ export function useChartState(props: Props) {
           levels: await Promise.all(
             newChartMin.levels.map(async (l) => ({
               ...l,
-              ...(await luaExec(
-                process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
-                l.lua.join("\n"),
-                false
-              )).levelFreezed,
+              ...(
+                await luaExec(
+                  process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                  l.lua.join("\n"),
+                  false
+                )
+              ).levelFreezed,
             }))
           ),
         };
@@ -408,11 +410,13 @@ export function useChartState(props: Props) {
             levels: await Promise.all(
               newChartMin.levels.map(async (l) => ({
                 ...l,
-                ...(await luaExec(
-                  process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
-                  l.lua.join("\n"),
-                  false
-                )).levelFreezed,
+                ...(
+                  await luaExec(
+                    process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                    l.lua.join("\n"),
+                    false
+                  )
+                ).levelFreezed,
               }))
             ),
           };

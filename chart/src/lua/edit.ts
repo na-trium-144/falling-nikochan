@@ -1,4 +1,9 @@
-import { BPMChange, BPMChangeWithLua, SpeedChange, SpeedChangeWithLua } from "../bpm.js";
+import {
+  BPMChange,
+  BPMChangeWithLua,
+  SpeedChange,
+  SpeedChangeWithLua,
+} from "../bpm.js";
 import { LevelEdit, LevelFreeze } from "../chart.js";
 import { NoteCommand, RestStep } from "../command.js";
 import { Level11Edit } from "../legacy/chart11.js";
@@ -10,7 +15,13 @@ import {
   RestStep3,
 } from "../legacy/chart3.js";
 import { Level5, SignatureWithLua5 } from "../legacy/chart5.js";
-import { BPMChange9, Level9Edit, NoteCommand9, Rest9, Signature9 } from "../legacy/chart9.js";
+import {
+  BPMChange9,
+  Level9Edit,
+  NoteCommand9,
+  Rest9,
+  Signature9,
+} from "../legacy/chart9.js";
 import { Signature, SignatureWithLua } from "../signature.js";
 import {
   Step,
