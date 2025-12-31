@@ -22,6 +22,7 @@ export default {
       enableIOSThru: "無反応を予測して補正(iOS)",
       displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
+      autoOffset: "自動調整",
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",

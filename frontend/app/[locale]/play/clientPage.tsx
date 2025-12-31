@@ -258,6 +258,18 @@ function Play(props: Props) {
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
+  const [autoOffset, setAutoOffset_] = useState<boolean>(false);
+  useEffect(() => {
+    // デフォルトでtrue
+    setAutoOffset_(
+      localStorage.getItem("autoOffset") === "1" ||
+        localStorage.getItem("autoOffset") === null
+    );
+  }, []);
+  const setAutoOffset = useCallback((v: boolean) => {
+    setAutoOffset_(v);
+    localStorage.setItem("autoOffset", v ? "1" : "0");
+  }, []);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -433,7 +445,15 @@ function Play(props: Props) {
     lateTimes,
     chartEnd,
     hitType,
-  } = useGameLogic(getCurrentTimeSec, auto, userOffset, playbackRate, playSE);
+  } = useGameLogic(
+    getCurrentTimeSec,
+    auto,
+    userOffset,
+    autoOffset,
+    setUserOffset,
+    playbackRate,
+    playSE
+  );
 
   const [fps, setFps] = useState<number>(0);
   // フレームレートが60を超える端末の場合に、60を超えないように制限する
@@ -956,6 +976,8 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
+              autoOffset={autoOffset}
+              setAutoOffset={setAutoOffset}
               enableSE={enableHitSE}
               setEnableSE={setEnableHitSE}
               enableIOSThru={enableIOSThru}

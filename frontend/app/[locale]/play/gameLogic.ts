@@ -24,6 +24,8 @@ export default function useGameLogic(
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
+  autoOffset: boolean,
+  setUserOffset: (v: number) => void,
   playbackRate: number,
   playSE: (s: SEType) => void
 ) {
@@ -58,6 +60,37 @@ export default function useGameLogic(
   const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
+
+  const autoAdjustOffset = useCallback(() => {
+    if (!auto && autoOffset) {
+      const lateTimesFiltered = lateTimes.current
+        .filter((t) => Math.abs(t - userOffset) <= okSec)
+        .concat(Array.from(new Array(20)).map(() => userOffset));
+      const avgLate =
+        lateTimesFiltered.reduce((sum, t) => sum + t, 0) /
+        lateTimesFiltered.length;
+      let newOffset = avgLate;
+      const maxAdjust = 0.005;
+      if (newOffset - userOffset > maxAdjust) {
+        newOffset = userOffset + maxAdjust;
+      }
+      if (newOffset - userOffset < -maxAdjust) {
+        newOffset = userOffset - maxAdjust;
+      }
+      if (Math.abs(newOffset - userOffset) > 0.001) {
+        // console.log(
+        //   "auto adjust offset",
+        //   userOffset,
+        //   "->",
+        //   newOffset,
+        //   "from",
+        //   lateTimesFiltered.length,
+        //   "samples"
+        // );
+        setUserOffset(newOffset);
+      }
+    }
+  }, [userOffset, autoOffset, setUserOffset, auto]);
 
   const resetNotesAll = useCallback((notes: Note6[] | Note13[]) => {
     // note.done などを書き換えるため、元データを壊さないようdeepcopy
@@ -311,6 +344,7 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateThru1.late / playbackRate + userOffset /* + audioLatency */
         );
+        autoAdjustOffset();
       } else if (
         now &&
         candidatePrevThru &&
@@ -337,6 +371,7 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidate.late / playbackRate + userOffset /* + audioLatency */
         );
+        autoAdjustOffset();
       } else if (now && candidateBig) {
         playSE("hitBig");
         console.log("hitBig", candidateBig.judge);
@@ -347,11 +382,19 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateBig.late / playbackRate + userOffset /* + audioLatency */
         );
+        autoAdjustOffset();
       } else {
         playSE("hit");
       }
     },
-    [getCurrentTimeSec, judge, userOffset, playSE, playbackRate]
+    [
+      getCurrentTimeSec,
+      judge,
+      userOffset,
+      playSE,
+      playbackRate,
+      autoAdjustOffset,
+    ]
   );
 
   // badLateSec以上過ぎたものをmiss判定にする

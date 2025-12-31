@@ -24,6 +24,7 @@ export default {
       enableIOSThru: "Predict and correct unresponsive taps (iOS)",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
+      autoOffset: "Auto",
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",

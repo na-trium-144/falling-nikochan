@@ -35,6 +35,8 @@ interface MessageProps {
   setAuto: (a: boolean) => void;
   userOffset: number;
   setUserOffset: (o: number) => void;
+  autoOffset: boolean;
+  setAutoOffset: (a: boolean) => void;
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
   enableIOSThru: boolean;
@@ -227,8 +229,17 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </CheckBox>
         </li>*/}
           <li className="">
-            {t("offset")}
             <div>
+              {t("offset")}
+              <CheckBox
+                className="ml-2"
+                value={props.autoOffset}
+                onChange={(v) => props.setAutoOffset(v)}
+              >
+                {t("autoOffset")}
+              </CheckBox>
+            </div>
+            <div className="ml-4">
               <Input
                 className="w-16"
                 actualValue={
@@ -237,15 +248,18 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
                 }
                 updateValue={(v) => props.setUserOffset(Number(v))}
                 isValid={(v) => !isNaN(Number(v))}
+                disabled={props.autoOffset}
               />
               <span className="mr-1 ">{t("offsetSecond")}</span>
               <Button
                 text="-"
                 onClick={() => props.setUserOffset(props.userOffset - 0.01)}
+                disabled={props.autoOffset}
               />
               <Button
                 text="+"
                 onClick={() => props.setUserOffset(props.userOffset + 0.01)}
+                disabled={props.autoOffset}
               />
             </div>
           </li>
