@@ -161,9 +161,9 @@ export default function Edit(props: {
         // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
       }
     };
-    chart?.on("changeAnyData", updateSession);
+    chart?.on("change", updateSession);
     return () => {
-      chart?.off("changeAnyData", updateSession);
+      chart?.off("change", updateSession);
     };
   }, [sessionId, chart]);
 
@@ -410,12 +410,12 @@ export default function Edit(props: {
       }
     };
     initSETimer();
-    chart?.on("changeAnyData", initSETimer);
+    chart?.on("change", initSETimer);
     return () => {
       if (timer !== null) {
         clearTimeout(timer);
       }
-      chart?.off("changeAnyData", initSETimer);
+      chart?.off("change", initSETimer);
     };
   }, [playing, chart, playSE]);
   useEffect(() => {
@@ -461,12 +461,12 @@ export default function Edit(props: {
       }
     };
     initSETimer();
-    chart?.on("changeAnyData", initSETimer);
+    chart?.on("change", initSETimer);
     return () => {
       if (timer !== null) {
         clearTimeout(timer);
       }
-      chart?.off("changeAnyData", initSETimer);
+      chart?.off("change", initSETimer);
     };
   }, [playing, playSE, chart]);
 

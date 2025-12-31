@@ -155,9 +155,9 @@ export function LuaTabProvider(props: Props & PProps) {
       }
     };
     updateCode();
-    chart?.on("changeAnyData", updateCode);
+    chart?.on("change", updateCode);
     return () => {
-      chart?.off("changeAnyData", updateCode);
+      chart?.off("change", updateCode);
     };
   }, [codeChanged, chart]);
 

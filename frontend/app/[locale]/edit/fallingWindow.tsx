@@ -93,9 +93,9 @@ export default function FallingWindow(props: Props) {
       setDisplayNotes(displayNotes);
     };
     updateDisplayNotes();
-    chart?.on("changeAny", updateDisplayNotes);
+    chart?.on("rerender", updateDisplayNotes);
     return () => {
-      chart?.off("changeAny", updateDisplayNotes);
+      chart?.off("rerender", updateDisplayNotes);
     };
   }, [boxSize, marginX, marginY, chart]);
 

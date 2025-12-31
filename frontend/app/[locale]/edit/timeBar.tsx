@@ -93,9 +93,9 @@ export default function TimeBar(props: Props) {
       }
     };
     updateTimeBarBegin();
-    chart?.on("changeAny", updateTimeBarBegin);
+    chart?.on("rerender", updateTimeBarBegin);
     return () => {
-      chart?.off("changeAny", updateTimeBarBegin);
+      chart?.off("rerender", updateTimeBarBegin);
     };
   }, [timeBarBeginSec, timeBarWidth, chart, timeBarPxPerSec, marginPxLeft]);
 

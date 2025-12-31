@@ -71,8 +71,8 @@ import { isStandalone } from "@/common/pwaInstall";
 // setGuidePage(1);
 
 const eventTypes = [
-  "changeAny", // 再render用
-  "changeAnyData", // toObject()で出力するデータに変化があるとき (session管理 & hasChange で使う)
+  "rerender", // 再render用
+  "change", // toObject()で出力するデータに変化があるとき (session管理 & hasChange で使う)
 ] as const;
 type EventType = (typeof eventTypes)[number];
 export class ChartEditing extends EventEmitter<EventType> {
@@ -121,7 +121,7 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.#changePasswd = null;
 
     this.#hasChange = options.hasChange ?? false;
-    this.on("changeAnyData", () => {
+    this.on("change", () => {
       this.#hasChange = true;
     });
 
@@ -154,7 +154,7 @@ export class ChartEditing extends EventEmitter<EventType> {
     }
     this.#changePasswd = null;
     this.#cid = cid;
-    this.emit("changeAny");
+    this.emit("rerender");
   }
   toObject(): ChartEdit {
     return {
@@ -192,8 +192,8 @@ export class ChartEditing extends EventEmitter<EventType> {
       )
     );
     this.#currentLevelIndex = this.#levels.length - 1;
-    this.emit("changeAny");
-    this.emit("changeAnyData");
+    this.emit("rerender");
+    this.emit("change");
   }
   deleteLevel() {
     if (this.#currentLevelIndex !== undefined && this.#levels.length > 0) {
@@ -203,8 +203,8 @@ export class ChartEditing extends EventEmitter<EventType> {
       } else if (this.#currentLevelIndex >= this.#levels.length) {
         this.#currentLevelIndex = this.#levels.length - 1;
       }
-      this.emit("changeAny");
-      this.emit("changeAnyData");
+      this.emit("rerender");
+      this.emit("change");
     }
   }
   moveLevelUp() {
@@ -214,8 +214,8 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#levels[idx] = this.#levels[idx - 1];
       this.#levels[idx - 1] = tmp;
       this.#currentLevelIndex = idx - 1;
-      this.emit("changeAny");
-      this.emit("changeAnyData");
+      this.emit("rerender");
+      this.emit("change");
     }
   }
   moveLevelDown() {
@@ -228,8 +228,8 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#levels[idx] = this.#levels[idx + 1];
       this.#levels[idx + 1] = tmp;
       this.#currentLevelIndex = idx + 1;
-      this.emit("changeAny");
-      this.emit("changeAnyData");
+      this.emit("rerender");
+      this.emit("change");
     }
   }
   get currentLevelIndex() {
@@ -238,7 +238,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   setCurrentLevelIndex(index: number) {
     if (index >= 0 && index < this.#levels.length) {
       this.#currentLevelIndex = index;
-      this.emit("changeAny");
+      this.emit("rerender");
     }
   }
   get offset() {
@@ -249,7 +249,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   }
   get hasChange() {
     return this.#hasChange;
-    // constructorで"changeAnyData"イベント時にtrueになるようコールバックを設定している
+    // constructorで"change"イベント時にtrueになるようコールバックを設定している
   }
   get cid() {
     return this.#cid;
@@ -265,8 +265,8 @@ export class ChartEditing extends EventEmitter<EventType> {
       pw = null;
     }
     this.#changePasswd = pw;
-    this.emit("changeAny");
-    this.emit("changeAnyData");
+    this.emit("rerender");
+    this.emit("change");
   }
 
   setOffset(ofs: number) {
@@ -275,8 +275,8 @@ export class ChartEditing extends EventEmitter<EventType> {
     for (const level of this.#levels) {
       level.setCurrentTimeWithoutOffset(level.current.timeSec + oldOffset);
     }
-    this.emit("changeAny");
-    this.emit("changeAnyData");
+    this.emit("rerender");
+    this.emit("change");
   }
   setCurrentTimeWithoutOffset(
     timeSecWithoutOffset: number,
@@ -295,8 +295,8 @@ export class ChartEditing extends EventEmitter<EventType> {
   copyNote(copyIndex: number) {
     if (this.currentLevel?.hasCurrentNote) {
       this.#copyBuffer[copyIndex] = this.currentLevel.currentNote!;
-      this.emit("changeAny");
-      // dataに変化があるが、changeAnyDataは呼ばない
+      this.emit("rerender");
+      // dataに変化があるが、changeは呼ばない
     }
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
@@ -322,8 +322,8 @@ export class ChartEditing extends EventEmitter<EventType> {
     }>
   ) {
     this.#meta = { ...this.#meta, ...newMeta };
-    this.emit("changeAny");
-    this.emit("changeAnyData");
+    this.emit("rerender");
+    this.emit("change");
   }
 }
 export class LevelEditing extends EventEmitter<EventType> {
@@ -408,8 +408,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     if ("ytEnd" in newMeta) {
       this.resetYTEnd();
     }
-    this.emit("changeAny");
-    this.emit("changeAnyData");
+    this.emit("rerender");
+    this.emit("change");
   }
   updateFreeze(newFreeze: Partial<LevelFreeze>) {
     this.#freeze = { ...this.#freeze, ...newFreeze };
@@ -423,8 +423,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#resetSeqNotes();
     this.#resetDifficulty();
     this.#resetLengthSec();
-    this.emit("changeAny");
-    this.emit("changeAnyData");
+    this.emit("rerender");
+    this.emit("change");
   }
   async updateLua(lua: string[]) {
     this.#luaExecutorRef.current.abortExec();
@@ -498,7 +498,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         this.#offset();
     }
     this.resetYTEnd();
-    this.emit("changeAny");
+    this.emit("rerender");
   }
   get lengthSec() {
     return this.#lengthSec;
@@ -508,7 +508,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     if (this.#ytDuration !== duration) {
       this.#ytDuration = duration;
       this.resetYTEnd();
-      this.emit("changeAny");
+      this.emit("rerender");
     }
   }
   get ytDuration() {
@@ -549,7 +549,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });
     }
     this.#barLines = barLines;
-    this.emit("changeAny");
+    this.emit("rerender");
   }
   get barLines() {
     return [...this.#barLines] as const;
@@ -828,7 +828,7 @@ export class CursorState extends EventEmitter<EventType> {
     this.#speedIndex = findBpmIndexFromStep(freeze.speedChanges, step);
     this.#signatureIndex = findBpmIndexFromStep(freeze.signature, step);
 
-    this.emit("changeAny");
+    this.emit("rerender");
   }
   setNoteIndex(index: number | undefined) {
     if (
@@ -839,7 +839,7 @@ export class CursorState extends EventEmitter<EventType> {
       index < this.#notesIndexEnd
     ) {
       this.#noteIndex = index;
-      this.emit("changeAny");
+      this.emit("rerender");
     }
   }
   get timeSec() {
@@ -940,9 +940,9 @@ export function useChartState(props: Props) {
   });
   useEffect(() => {
     if (chartState.state === "ok") {
-      chartState.chart.on("changeAny", rerender);
+      chartState.chart.on("rerender", rerender);
       return () => {
-        chartState.chart.off("changeAny", rerender);
+        chartState.chart.off("rerender", rerender);
       };
     }
   }, [chartState, rerender]);
