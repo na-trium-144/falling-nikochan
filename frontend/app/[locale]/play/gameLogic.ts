@@ -17,6 +17,7 @@ import {
 import { displayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, Note13 } from "@falling-nikochan/chart";
 import { SEType } from "@/common/se";
+import { OffsetEstimator } from "./offsetEstimator";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
@@ -60,53 +61,40 @@ export default function useGameLogic(
   const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
-
-  const autoAdjustOffset = useCallback(() => {
-    if (!auto && autoOffset) {
-      const lateTimesFiltered = lateTimes.current
-        .filter((t) => Math.abs(t - userOffset) <= okSec)
-        .concat(Array.from(new Array(20)).map(() => userOffset));
-      const avgLate =
-        lateTimesFiltered.reduce((sum, t) => sum + t, 0) /
-        lateTimesFiltered.length;
-      let newOffset = avgLate;
-      const maxAdjust = 0.005;
-      if (newOffset - userOffset > maxAdjust) {
-        newOffset = userOffset + maxAdjust;
-      }
-      if (newOffset - userOffset < -maxAdjust) {
-        newOffset = userOffset - maxAdjust;
-      }
-      if (Math.abs(newOffset - userOffset) > 0.001) {
-        // console.log(
-        //   "auto adjust offset",
-        //   userOffset,
-        //   "->",
-        //   newOffset,
-        //   "from",
-        //   lateTimesFiltered.length,
-        //   "samples"
-        // );
-        setUserOffset(newOffset);
-      }
+  const ofsEstimator = useRef<OffsetEstimator>(new OffsetEstimator(userOffset));
+  useEffect(() => {
+    if (getCurrentTimeSec() === undefined) {
+      ofsEstimator.current = new OffsetEstimator(userOffset);
     }
-  }, [userOffset, autoOffset, setUserOffset, auto]);
+  }, [getCurrentTimeSec, userOffset]);
+  const autoAdjustOffset = useCallback(
+    (ofs: number) => {
+      if (!auto && autoOffset && Math.abs(ofs - userOffset) <= okSec) {
+        setUserOffset(ofsEstimator.current.update(ofs));
+      }
+    },
+    [auto, autoOffset, userOffset, setUserOffset]
+  );
 
-  const resetNotesAll = useCallback((notes: Note6[] | Note13[]) => {
-    // note.done などを書き換えるため、元データを壊さないようdeepcopy
-    const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note13[];
-    setNotesAll(notesCopy.slice());
-    notesYetDone.current = notesCopy;
-    notesBigYetDone.current = [];
-    setJudgeCount([0, 0, 0, 0]);
-    setChain(0);
-    chainRef.current = 0;
-    setBonus(0);
-    setBigCount(0);
-    setBigTotal(notesCopy.filter((n) => n.big).length);
-    hitCountByType.current = {};
-    setHitType(null);
-  }, []);
+  const resetNotesAll = useCallback(
+    (notes: Note6[] | Note13[]) => {
+      // note.done などを書き換えるため、元データを壊さないようdeepcopy
+      const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note13[];
+      setNotesAll(notesCopy.slice());
+      notesYetDone.current = notesCopy;
+      notesBigYetDone.current = [];
+      setJudgeCount([0, 0, 0, 0]);
+      setChain(0);
+      chainRef.current = 0;
+      setBonus(0);
+      setBigCount(0);
+      setBigTotal(notesCopy.filter((n) => n.big).length);
+      hitCountByType.current = {};
+      setHitType(null);
+      ofsEstimator.current = new OffsetEstimator(userOffset);
+    },
+    [userOffset]
+  );
 
   // Noteに判定を保存し、scoreとchainを更新
   const judge = useCallback(
@@ -344,7 +332,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateThru1.late / playbackRate + userOffset /* + audioLatency */
         );
-        autoAdjustOffset();
+        autoAdjustOffset(
+          candidateThru1.late / playbackRate + userOffset /* + audioLatency */
+        );
       } else if (
         now &&
         candidatePrevThru &&
@@ -371,7 +361,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidate.late / playbackRate + userOffset /* + audioLatency */
         );
-        autoAdjustOffset();
+        autoAdjustOffset(
+          candidate.late / playbackRate + userOffset /* + audioLatency */
+        );
       } else if (now && candidateBig) {
         playSE("hitBig");
         console.log("hitBig", candidateBig.judge);
@@ -382,7 +374,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateBig.late / playbackRate + userOffset /* + audioLatency */
         );
-        autoAdjustOffset();
+        autoAdjustOffset(
+          candidateBig.late / playbackRate + userOffset /* + audioLatency */
+        );
       } else {
         playSE("hit");
       }
