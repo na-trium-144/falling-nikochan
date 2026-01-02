@@ -35,13 +35,13 @@ interface MessageProps {
   setAuto: (a: boolean) => void;
   userOffset: number;
   setUserOffset: (o: number) => void;
+  autoOffset: boolean;
+  setAutoOffset: (a: boolean) => void;
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
   enableIOSThru: boolean;
   setEnableIOSThru: (s: boolean) => void;
   audioLatency: number | null | undefined;
-  limitMaxFPS: number;
-  setLimitMaxFPS: (f: number) => void;
   userBegin: number | null;
   setUserBegin: (b: number | null) => void;
   ytBegin: number;
@@ -227,8 +227,18 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </CheckBox>
         </li>*/}
           <li className="">
-            {t("offset")}
             <div>
+              {t("offset")}
+              <CheckBox
+                className="ml-2"
+                value={props.autoOffset && !props.auto}
+                onChange={(v) => props.setAutoOffset(v)}
+                disabled={props.auto}
+              >
+                {t("autoOffset")}
+              </CheckBox>
+            </div>
+            <div className="ml-4">
               <Input
                 className="w-16"
                 actualValue={
@@ -287,15 +297,6 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               disabled={props.userBegin === null}
               value={props.userBegin ?? props.ytBegin}
               onChange={props.setUserBegin}
-            />
-          </li>
-          <li>
-            <span className="mr-2">{t("limitFPS")}</span>
-            <Select
-              options={[t("noLimit"), "60", "40", "30", "20"]}
-              values={["0", "60", "40", "30", "20"]}
-              value={String(props.limitMaxFPS)}
-              onChange={(v) => props.setLimitMaxFPS(Number(v))}
             />
           </li>
         </ul>
