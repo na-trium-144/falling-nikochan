@@ -1,3 +1,7 @@
+## ver. 14 (staging)
+
+* `VERSION_SUFFIX` でビルドバージョンに文字列を追加できるようにした
+
 ## ver. 13.22 - 2026/01/09 [#900](https://github.com/na-trium-144/falling-nikochan/pull/900)
 
 * list-discをbefore要素として自前実装したlist-disc-as-textに置き換え
