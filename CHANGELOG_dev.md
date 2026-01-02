@@ -1,6 +1,8 @@
 ## ver. 14 (staging)
 
-* `VERSION_SUFFIX` でビルドバージョンに文字列を追加できるようにした
+* stagingブランチとデプロイ環境を追加
+    * `VERSION_SUFFIX` でビルドバージョンに文字列を追加できるようにした
+* offset自動調整・フレームレート自動調整機能 [#879](https://github.com/na-trium-144/falling-nikochan/pull/879)
 
 ## ver. 13.22 - 2026/01/09 [#900](https://github.com/na-trium-144/falling-nikochan/pull/900)
 

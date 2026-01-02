@@ -263,6 +263,18 @@ function Play(props: Props) {
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
+  const [autoOffset, setAutoOffset_] = useState<boolean>(false);
+  useEffect(() => {
+    // デフォルトでtrue
+    setAutoOffset_(
+      localStorage.getItem("autoOffset") === "1" ||
+        localStorage.getItem("autoOffset") === null
+    );
+  }, []);
+  const setAutoOffset = useCallback((v: boolean) => {
+    setAutoOffset_(v);
+    localStorage.setItem("autoOffset", v ? "1" : "0");
+  }, []);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -443,21 +455,15 @@ function Play(props: Props) {
     auto,
     props.judgeForAuto,
     userOffset,
+    autoOffset,
+    setUserOffset,
     playbackRate,
     playSE
   );
 
-  const [fps, setFps] = useState<number>(0);
-  // フレームレートが60を超える端末の場合に、60を超えないように制限する
-  // 0=制限なし
-  const [limitMaxFPS, setLimitMaxFPS_] = useState<number>(60);
-  useEffect(() => {
-    setLimitMaxFPS_(Number(localStorage.getItem("limitMaxFPS") || 60));
-  }, []);
-  const setLimitMaxFPS = useCallback((v: number) => {
-    setLimitMaxFPS_(v);
-    localStorage.setItem("limitMaxFPS", v.toString());
-  }, []);
+  const [cbFps, setCbFps] = useState<number>(0);
+  const [runFps, setRunFps] = useState<number>(0);
+  const [renderFps, setRenderFps] = useState<number>(0);
 
   useEffect(() => {
     if (ref.current) {
@@ -896,12 +902,13 @@ function Play(props: Props) {
         </div>
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
           <FallingWindow
-            limitMaxFPS={limitMaxFPS}
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
             playing={chartPlaying}
-            setFPS={setFps}
+            setCbFPS={setCbFps}
+            setRunFPS={setRunFps}
+            setRenderFPS={setRenderFps}
             barFlash={barFlash}
           />
           <div
@@ -968,13 +975,13 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
+              autoOffset={autoOffset}
+              setAutoOffset={setAutoOffset}
               enableSE={enableHitSE}
               setEnableSE={setEnableHitSE}
               enableIOSThru={enableIOSThru}
               setEnableIOSThru={setEnableIOSThru}
               audioLatency={audioLatency}
-              limitMaxFPS={limitMaxFPS}
-              setLimitMaxFPS={setLimitMaxFPS}
               userBegin={userBegin}
               setUserBegin={setUserBegin}
               ytBegin={ytBegin}
@@ -1117,7 +1124,9 @@ function Play(props: Props) {
               isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
             />
             {showFps && (
-              <span className="absolute left-3 bottom-full">[{fps} FPS]</span>
+              <span className="absolute left-3 bottom-full">
+                [{renderFps} / {runFps} / {cbFps} FPS]
+              </span>
             )}
           </>
         )}
@@ -1128,7 +1137,11 @@ function Play(props: Props) {
               <span className="ml-2">ver.</span>
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
-            {showFps && <span className="inline-block ml-3">[{fps} FPS]</span>}
+            {showFps && (
+              <span className="inline-block ml-3">
+                [{renderFps} / {runFps} / {cbFps} FPS]
+              </span>
+            )}
           </div>
         )}
       </div>
