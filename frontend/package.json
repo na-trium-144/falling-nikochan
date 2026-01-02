@@ -33,13 +33,13 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/postcss": "4.1.18",
     "@types/file-saver": "^2.0.7",
     "@types/mdx": "^2.0.13",
     "dotenv": "^16.6.1",
     "postcss": "^8.5.6",
     "svgo": "^4.0.0",
-    "tailwindcss": "^4.1.15",
+    "tailwindcss": "4.1.18",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
 }
