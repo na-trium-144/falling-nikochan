@@ -42,8 +42,6 @@ interface MessageProps {
   enableIOSThru: boolean;
   setEnableIOSThru: (s: boolean) => void;
   audioLatency: number | null | undefined;
-  limitMaxFPS: number;
-  setLimitMaxFPS: (f: number) => void;
   userBegin: number | null;
   setUserBegin: (b: number | null) => void;
   ytBegin: number;
@@ -301,15 +299,6 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               disabled={props.userBegin === null}
               value={props.userBegin ?? props.ytBegin}
               onChange={props.setUserBegin}
-            />
-          </li>
-          <li>
-            <span className="mr-2">{t("limitFPS")}</span>
-            <Select
-              options={[t("noLimit"), "60", "40", "30", "20"]}
-              values={["0", "60", "40", "30", "20"]}
-              value={String(props.limitMaxFPS)}
-              onChange={(v) => props.setLimitMaxFPS(Number(v))}
             />
           </li>
         </ul>

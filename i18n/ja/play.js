@@ -26,8 +26,6 @@ export default {
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
-      limitFPS: "フレームレート",
-      noLimit: "制限なし",
       off: "オフ",
       playbackRate: "再生速度を変える",
       userBegin: "途中から練習",

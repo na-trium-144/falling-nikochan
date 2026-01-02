@@ -455,17 +455,9 @@ function Play(props: Props) {
     playSE
   );
 
-  const [fps, setFps] = useState<number>(0);
-  // フレームレートが60を超える端末の場合に、60を超えないように制限する
-  // 0=制限なし
-  const [limitMaxFPS, setLimitMaxFPS_] = useState<number>(60);
-  useEffect(() => {
-    setLimitMaxFPS_(Number(localStorage.getItem("limitMaxFPS") || 60));
-  }, []);
-  const setLimitMaxFPS = useCallback((v: number) => {
-    setLimitMaxFPS_(v);
-    localStorage.setItem("limitMaxFPS", v.toString());
-  }, []);
+  const [cbFps, setCbFps] = useState<number>(0);
+  const [runFps, setRunFps] = useState<number>(0);
+  const [renderFps, setRenderFps] = useState<number>(0);
 
   useEffect(() => {
     if (ref.current) {
@@ -904,12 +896,13 @@ function Play(props: Props) {
         </div>
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
           <FallingWindow
-            limitMaxFPS={limitMaxFPS}
             className="absolute inset-0"
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
             playing={chartPlaying}
-            setFPS={setFps}
+            setCbFPS={setCbFps}
+            setRunFPS={setRunFps}
+            setRenderFPS={setRenderFps}
             barFlash={barFlash}
           />
           <div
@@ -983,8 +976,6 @@ function Play(props: Props) {
               enableIOSThru={enableIOSThru}
               setEnableIOSThru={setEnableIOSThru}
               audioLatency={audioLatency}
-              limitMaxFPS={limitMaxFPS}
-              setLimitMaxFPS={setLimitMaxFPS}
               userBegin={userBegin}
               setUserBegin={setUserBegin}
               ytBegin={ytBegin}
@@ -1127,7 +1118,9 @@ function Play(props: Props) {
               isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
             />
             {showFps && (
-              <span className="absolute left-3 bottom-full">[{fps} FPS]</span>
+              <span className="absolute left-3 bottom-full">
+                [{renderFps} / {runFps} / {cbFps} FPS]
+              </span>
             )}
           </>
         )}
@@ -1138,7 +1131,11 @@ function Play(props: Props) {
               <span className="ml-2">ver.</span>
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
-            {showFps && <span className="inline-block ml-3">[{fps} FPS]</span>}
+            {showFps && (
+              <span className="inline-block ml-3">
+                [{renderFps} / {runFps} / {cbFps} FPS]
+              </span>
+            )}
           </div>
         )}
       </div>

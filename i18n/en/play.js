@@ -28,8 +28,6 @@ export default {
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
-      limitFPS: "Frame Rate",
-      noLimit: "No Limit",
       off: "Off",
       playbackRate: "Playback Speed",
       userBegin: "Practice from",
