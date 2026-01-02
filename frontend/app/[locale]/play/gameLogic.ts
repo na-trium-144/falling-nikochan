@@ -17,6 +17,7 @@ import {
 import { displayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, Note13 } from "@falling-nikochan/chart";
 import { SEType } from "@/common/se";
+import { OffsetEstimator } from "./offsetEstimator";
 
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
@@ -25,6 +26,8 @@ export default function useGameLogic(
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
+  autoOffset: boolean,
+  setUserOffset: (v: number) => void,
   playbackRate: number,
   playSE: (s: SEType) => void
 ) {
@@ -59,22 +62,40 @@ export default function useGameLogic(
   const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
+  const ofsEstimator = useRef<OffsetEstimator>(new OffsetEstimator(userOffset));
+  useEffect(() => {
+    if (getCurrentTimeSec() === undefined) {
+      ofsEstimator.current = new OffsetEstimator(userOffset);
+    }
+  }, [getCurrentTimeSec, userOffset]);
+  const autoAdjustOffset = useCallback(
+    (ofs: number) => {
+      if (!auto && autoOffset && Math.abs(ofs - userOffset) <= okSec) {
+        setUserOffset(ofsEstimator.current.update(ofs));
+      }
+    },
+    [auto, autoOffset, userOffset, setUserOffset]
+  );
 
-  const resetNotesAll = useCallback((notes: Note6[] | Note13[]) => {
-    // note.done などを書き換えるため、元データを壊さないようdeepcopy
-    const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note13[];
-    setNotesAll(notesCopy.slice());
-    notesYetDone.current = notesCopy;
-    notesBigYetDone.current = [];
-    setJudgeCount([0, 0, 0, 0]);
-    setChain(0);
-    chainRef.current = 0;
-    setBonus(0);
-    setBigCount(0);
-    setBigTotal(notesCopy.filter((n) => n.big).length);
-    hitCountByType.current = {};
-    setHitType(null);
-  }, []);
+  const resetNotesAll = useCallback(
+    (notes: Note6[] | Note13[]) => {
+      // note.done などを書き換えるため、元データを壊さないようdeepcopy
+      const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note13[];
+      setNotesAll(notesCopy.slice());
+      notesYetDone.current = notesCopy;
+      notesBigYetDone.current = [];
+      setJudgeCount([0, 0, 0, 0]);
+      setChain(0);
+      chainRef.current = 0;
+      setBonus(0);
+      setBigCount(0);
+      setBigTotal(notesCopy.filter((n) => n.big).length);
+      hitCountByType.current = {};
+      setHitType(null);
+      ofsEstimator.current = new OffsetEstimator(userOffset);
+    },
+    [userOffset]
+  );
 
   // Noteに判定を保存し、scoreとchainを更新
   const judge = useCallback(
@@ -312,6 +333,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateThru1.late / playbackRate + userOffset /* + audioLatency */
         );
+        autoAdjustOffset(
+          candidateThru1.late / playbackRate + userOffset /* + audioLatency */
+        );
       } else if (
         now &&
         candidatePrevThru &&
@@ -338,6 +362,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidate.late / playbackRate + userOffset /* + audioLatency */
         );
+        autoAdjustOffset(
+          candidate.late / playbackRate + userOffset /* + audioLatency */
+        );
       } else if (now && candidateBig) {
         playSE("hitBig");
         console.log("hitBig", candidateBig.judge);
@@ -348,11 +375,21 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateBig.late / playbackRate + userOffset /* + audioLatency */
         );
+        autoAdjustOffset(
+          candidateBig.late / playbackRate + userOffset /* + audioLatency */
+        );
       } else {
         playSE("hit");
       }
     },
-    [getCurrentTimeSec, judge, userOffset, playSE, playbackRate]
+    [
+      getCurrentTimeSec,
+      judge,
+      userOffset,
+      playSE,
+      playbackRate,
+      autoAdjustOffset,
+    ]
   );
 
   // badLateSec以上過ぎたものをmiss判定にする
