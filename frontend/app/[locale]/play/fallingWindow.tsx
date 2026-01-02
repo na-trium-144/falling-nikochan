@@ -96,15 +96,26 @@ export default function FallingWindow(props: Props) {
         runTriggeredTimeStamp.current === null &&
         Math.round(
           (performance.now() - prevRerender) / (1000 / cbFps.current)
-        ) >= Math.round(cbFps.current / runFps.current)
+        ) >= Math.round(cbFps.current / Math.max(runFps.current, 20))
       ) {
         setRerenderIndex((r) => {
           runTriggeredIndex.current = r + 1;
           return r + 1;
         });
         runTriggeredTimeStamp.current = performance.now();
-        prevRerender +=
-          (1000 / cbFps.current) * Math.round(cbFps.current / runFps.current);
+        if (
+          Math.round(
+            (performance.now() - prevRerender) / (1000 / cbFps.current)
+          ) >=
+          3 * Math.round(cbFps.current / Math.max(runFps.current, 20))
+        ) {
+          // 大幅に遅延している場合
+          prevRerender = performance.now();
+        } else {
+          prevRerender +=
+            (1000 / cbFps.current) *
+            Math.round(cbFps.current / Math.max(runFps.current, 20));
+        }
       }
     };
     animFrame = requestAnimationFrame(updateLoop);
