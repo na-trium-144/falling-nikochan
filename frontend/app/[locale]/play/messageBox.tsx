@@ -231,8 +231,9 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               {t("offset")}
               <CheckBox
                 className="ml-2"
-                value={props.autoOffset}
+                value={props.autoOffset && !props.auto}
                 onChange={(v) => props.setAutoOffset(v)}
+                disabled={props.auto}
               >
                 {t("autoOffset")}
               </CheckBox>
@@ -246,18 +247,15 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
                 }
                 updateValue={(v) => props.setUserOffset(Number(v))}
                 isValid={(v) => !isNaN(Number(v))}
-                disabled={props.autoOffset}
               />
               <span className="mr-1 ">{t("offsetSecond")}</span>
               <Button
                 text="-"
                 onClick={() => props.setUserOffset(props.userOffset - 0.01)}
-                disabled={props.autoOffset}
               />
               <Button
                 text="+"
                 onClick={() => props.setUserOffset(props.userOffset + 0.01)}
-                disabled={props.autoOffset}
               />
             </div>
           </li>
