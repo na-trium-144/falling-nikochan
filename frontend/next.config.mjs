@@ -38,7 +38,9 @@ try {
 const env = {
   buildDate: date,
   buildCommit: commit,
-  buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
+  buildVersion:
+    packageJson.version.split(".").slice(0, 2).join(".") +
+    (process.env.VERSION_SUFFIX || ""),
   browserslist: packageJson.browserslist.join(", "),
   // prefix for every asset URL
   ASSET_PREFIX: process.env.ASSET_PREFIX || "",
