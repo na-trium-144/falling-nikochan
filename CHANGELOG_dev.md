@@ -1,3 +1,7 @@
+## ver. 14 (staging)
+
+* `VERSION_SUFFIX` でビルドバージョンに文字列を追加できるようにした
+
 ## ver. 13.20 - 2025/12/26 [#876](https://github.com/na-trium-144/falling-nikochan/pull/876)
 
 * 短い間隔でBPMが変わる時アニメーションを省略
