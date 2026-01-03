@@ -69,12 +69,27 @@ export default function useGameLogic(
     }
   }, [getCurrentTimeSec, userOffset]);
   const autoAdjustOffset = useCallback(
-    (ofs: number) => {
-      if (!auto && autoOffset && Math.abs(ofs - userOffset) <= okSec) {
+    (ofs: number, now: number, noteIndex: number) => {
+      if (!auto && autoOffset) {
+        const late = now - notesAll[noteIndex].hitTimeSec;
+        if (noteIndex > 0) {
+          const latePrev = now - notesAll[noteIndex - 1].hitTimeSec;
+          if (Math.abs(latePrev) < Math.abs(late)) {
+            console.log(`prev (${latePrev}) is nearer than current (${late})`);
+            return;
+          }
+        }
+        if (noteIndex < notesAll.length - 1) {
+          const lateNext = now - notesAll[noteIndex + 1].hitTimeSec;
+          if (Math.abs(lateNext) < Math.abs(late)) {
+            console.log(`next (${lateNext}) is nearer than current (${late})`);
+            return;
+          }
+        }
         setUserOffset(ofsEstimator.current.update(ofs));
       }
     },
-    [auto, autoOffset, userOffset, setUserOffset]
+    [auto, autoOffset, setUserOffset, notesAll]
   );
 
   const resetNotesAll = useCallback(
@@ -333,9 +348,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateThru1.late / playbackRate + userOffset /* + audioLatency */
         );
-        autoAdjustOffset(
-          candidateThru1.late / playbackRate + userOffset /* + audioLatency */
-        );
+        // autoAdjustOffset(
+        //   candidateThru1.late / playbackRate + userOffset /* + audioLatency */
+        // );
       } else if (
         now &&
         candidatePrevThru &&
@@ -363,7 +378,9 @@ export default function useGameLogic(
           candidate.late / playbackRate + userOffset /* + audioLatency */
         );
         autoAdjustOffset(
-          candidate.late / playbackRate + userOffset /* + audioLatency */
+          candidate.late / playbackRate + userOffset /* + audioLatency */,
+          now,
+          candidate.note.id
         );
       } else if (now && candidateBig) {
         playSE("hitBig");
@@ -375,9 +392,9 @@ export default function useGameLogic(
         lateTimes.current.push(
           candidateBig.late / playbackRate + userOffset /* + audioLatency */
         );
-        autoAdjustOffset(
-          candidateBig.late / playbackRate + userOffset /* + audioLatency */
-        );
+        // autoAdjustOffset(
+        //   candidateBig.late / playbackRate + userOffset /* + audioLatency */
+        // );
       } else {
         playSE("hit");
       }
