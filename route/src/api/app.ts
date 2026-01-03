@@ -73,8 +73,17 @@ const apiApp = async (config: {
             "where anyone can create and share charts.",
         },
         servers: [
-          ...(process.env.API_ENV === "development" ? [{ url: "/api" }] : []),
-          { url: "https://nikochan.utcode.net/api" },
+          ...(process.env.API_ENV === "development"
+            ? [{ url: "/api", description: "Current Development Server" }]
+            : []),
+          {
+            url: "https://nikochan.utcode.net/api",
+            description: "Primary Server",
+          },
+          {
+            url: "https://nikochan-v.utcode.net/api",
+            description: "Alternative Server",
+          },
         ],
       },
     })
