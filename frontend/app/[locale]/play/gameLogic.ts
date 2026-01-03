@@ -72,18 +72,26 @@ export default function useGameLogic(
     (ofs: number, now: number, noteIndex: number) => {
       if (!auto && autoOffset) {
         const late = now - notesAll[noteIndex].hitTimeSec;
-        if (noteIndex > 0) {
-          const latePrev = now - notesAll[noteIndex - 1].hitTimeSec;
-          if (Math.abs(latePrev) < Math.abs(late)) {
+        for (let i = noteIndex - 1; i >= 0; i--) {
+          const latePrev = now - notesAll[i].hitTimeSec;
+          if (latePrev === late) {
+            continue;
+          } else if (Math.abs(latePrev) < Math.abs(late)) {
             console.log(`prev (${latePrev}) is nearer than current (${late})`);
             return;
+          } else {
+            break;
           }
         }
-        if (noteIndex < notesAll.length - 1) {
-          const lateNext = now - notesAll[noteIndex + 1].hitTimeSec;
-          if (Math.abs(lateNext) < Math.abs(late)) {
+        for (let i = noteIndex + 1; i < notesAll.length; i++) {
+          const lateNext = now - notesAll[i].hitTimeSec;
+          if (lateNext === late) {
+            continue;
+          } else if (Math.abs(lateNext) < Math.abs(late)) {
             console.log(`next (${lateNext}) is nearer than current (${late})`);
             return;
+          } else {
+            break;
           }
         }
         setUserOffset(ofsEstimator.current.update(ofs));
