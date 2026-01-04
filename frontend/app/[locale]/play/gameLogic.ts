@@ -142,22 +142,27 @@ export default function useGameLogic(
       const now = getCurrentTimeSec();
       if (now !== undefined) {
         hitCountByType.current[type] = (hitCountByType.current[type] || 0) + 1;
-        setHitType(
-          Number(
-            Object.keys(hitCountByType.current).reduce((a, b) =>
-              hitCountByType.current[Number(a)] >
-              hitCountByType.current[Number(b)]
-                ? a
-                : b
-            )
+        const hType = Number(
+          Object.keys(hitCountByType.current).reduce((a, b) =>
+            hitCountByType.current[Number(a)] >
+            hitCountByType.current[Number(b)]
+              ? a
+              : b
           )
         );
+        if (hitType != hType) setHitType(hType);
       }
       let candidate: HitCandidate | null = null;
       while (now !== undefined && notesYetDone.current.length >= 1) {
         const n = notesYetDone.current[0];
         const late = now - n.hitTimeSec;
-        if (Math.abs(late) <= goodSec * playbackRate) {
+        // 'auto' force 'Good'
+        if (auto) {
+          if (late >= 0) candidate = { note: n, judge: 1, late: 0 };
+          break;
+        }
+        // normal
+        else if (Math.abs(late) <= goodSec * playbackRate) {
           candidate = { note: n, judge: 1, late };
           break;
         } else if (Math.abs(late) <= okSec * playbackRate) {
@@ -182,7 +187,7 @@ export default function useGameLogic(
       // 1つ前の音符でThru判定が誤爆し1つ余分に消してしまった可能性を考慮
       // (音符1つ分しか考慮していないので、1つ目thru判定発生->2つ目ok->3つ目good みたいなケースはどうしようもない)
       let candidatePrevThru: HitCandidate | null = null;
-      if (now !== undefined && iosThruNote.current) {
+      if (!auto && now !== undefined && iosThruNote.current) {
         const n = iosThruNote.current;
         const late = now - n.hitTimeSec;
         if (Math.abs(late) <= goodSec * playbackRate) {
@@ -240,7 +245,13 @@ export default function useGameLogic(
       ) {
         const n = notesBigYetDone.current[i];
         const late = now - n.hitTimeSec;
-        if (Math.abs(late) <= goodSec * playbackRate) {
+        // 'auto' force 'Good'
+        if (auto && late >= 0) {
+          candidateBig = { note: n, judge: 1, late: 0 };
+          i++;
+        }
+        // normal
+        else if (Math.abs(late) <= goodSec * playbackRate) {
           candidateBig = { note: n, judge: 1, late };
           i++;
         } else if (Math.abs(late) <= okSec * playbackRate) {
@@ -356,6 +367,7 @@ export default function useGameLogic(
 
   // badLateSec以上過ぎたものをmiss判定にする
   useEffect(() => {
+    if (auto) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const removeOneNote = () => {
       timer = null;
@@ -416,7 +428,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [getCurrentTimeSec, judge, playbackRate]);
+  }, [auto, getCurrentTimeSec, judge, playbackRate]);
   useEffect(() => {
     if (auto) {
       let timer: ReturnType<typeof setTimeout> | null = null;
