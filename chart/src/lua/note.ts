@@ -1,7 +1,5 @@
-import { LevelEdit } from "../chart.js";
 import { NoteCommand, NoteCommandWithLua } from "../command.js";
-import { Chart3, NoteCommand3 } from "../legacy/chart3.js";
-import { NoteCommand7 } from "../legacy/chart7.js";
+import { NoteCommand3 } from "../legacy/chart3.js";
 import { Step, stepCmp } from "../step.js";
 import {
   deleteLua,

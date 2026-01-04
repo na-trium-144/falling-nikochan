@@ -7,6 +7,7 @@ import {
   targetY,
   bigScale,
   displayNote,
+  ChartEditing,
 } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import { NoteCommand } from "@falling-nikochan/chart";
@@ -14,7 +15,6 @@ import Arrow from "./arrow.js";
 import DragHandle from "./dragHandle.js";
 import { useDisplayMode } from "@/scale.js";
 import { useEffect, useState } from "react";
-import { ChartEditing } from "./chartState.js";
 
 interface Props {
   className?: string;

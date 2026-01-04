@@ -18,11 +18,6 @@ import {
   validateChart,
   validateChartMin,
   ChartEditing,
-  LevelEditing,
-  CursorState,
-  EventType,
-  LevelEdit,
-  NoteCommand,
   LuaExecutor,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -76,6 +71,7 @@ export interface FetchChartOptions {
 export const downloadExtension = `fn${currentChartVer}.yml`;
 
 export function useChartState(props: Props) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
   const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
 
@@ -305,7 +301,8 @@ export function useChartState(props: Props) {
   const remoteDelete = useCallback<() => Promise<void>>(async () => {
     if (chartState.state === "ok" && chartState.chart.cid) {
       while (true) {
-        const m = window.prompt(
+        // false positive TS7022: 'm' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+        const m: string | null = window.prompt(
           t("confirmDelete", { cid: chartState.chart.cid })
         );
         if (m === null) {

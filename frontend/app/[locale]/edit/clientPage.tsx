@@ -1,22 +1,13 @@
 "use client";
 
 import clsx from "clsx/lite";
-import {
-  Chart9Edit,
-  findInsertLine,
-  NoteCommand,
-  rateLimit,
-} from "@falling-nikochan/chart";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
 import {
-  findBpmIndexFromStep,
   getSignatureState,
   getStep,
   getTimeSec,
-  loadChart,
-  Note,
 } from "@falling-nikochan/chart";
 import Button from "@/common/button.js";
 import TimeBar from "./timeBar.js";
@@ -25,69 +16,28 @@ import TimingTab from "./timingTab.js";
 import NoteTab from "./noteTab.js";
 import { Box, modalBg } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
-import msgpack from "@ygoe/msgpack";
 import { addRecent } from "@/common/recent.js";
 import {
-  ChartEdit,
   convertToPlay,
   createBrief,
-  currentChartVer,
-  emptyChart,
-  LevelEdit,
-  LevelMin,
   levelTypes,
-  numEvents,
-  validateChart,
 } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
 import { MobileHeader } from "@/common/header.js";
-import {
-  getPasswd,
-  preferSavePasswd,
-  setPasswd,
-  unsetPasswd,
-} from "@/common/passwdCache.js";
 import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
-import {
-  luaAddBpmChange,
-  luaDeleteBpmChange,
-  luaUpdateBpmChange,
-} from "@falling-nikochan/chart";
-import {
-  luaAddSpeedChange,
-  luaDeleteSpeedChange,
-  luaUpdateSpeedChange,
-} from "@falling-nikochan/chart";
-import {
-  luaAddNote,
-  luaDeleteNote,
-  luaUpdateNote,
-} from "@falling-nikochan/chart";
 import Select from "@/common/select.js";
 import LevelTab from "./levelTab.js";
 import { initSession, SessionData } from "@/play/session.js";
-import {
-  luaAddBeatChange,
-  luaDeleteBeatChange,
-  luaUpdateBeatChange,
-} from "@falling-nikochan/chart";
 import { useDisplayMode } from "@/scale.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { GuideMain } from "./guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
-import { Signature } from "@falling-nikochan/chart";
-import { Chart5 } from "@falling-nikochan/chart";
-import { Chart6 } from "@falling-nikochan/chart";
-import { Chart7 } from "@falling-nikochan/chart";
-import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
 import { CaptionProvider, HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
-import { Chart8Edit } from "@falling-nikochan/chart";
 import { SlimeSVG } from "@/common/slime.js";
-import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartState } from "./chartState.js";

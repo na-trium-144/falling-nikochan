@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
-import { HTTPException } from "hono/http-exception";
 import { rateLimit } from "@falling-nikochan/chart";
+import { APIError } from "@/common/apiError";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -43,19 +43,13 @@ export function PasswdPrompt(props: PasswdProps) {
         Loading...
       </p>
     );
-  } else if (props.loadStatus instanceof Error) {
-    return (
-      <p>
-        {props.loadStatus instanceof HTTPException
-          ? `${props.loadStatus.status}: `
-          : ""}
-        {te.has("api." + props.loadStatus.message)
-          ? te("api." + props.loadStatus.message)
-          : te("unknownAPIError")}
-      </p>
-    );
+  } else if (props.loadStatus instanceof APIError) {
+    return <p>{props.loadStatus.format(te)}</p>;
   } else {
-    props.loadStatus satisfies "passwdFailed" | "passwdFailedSilent";
+    props.loadStatus satisfies
+      | "passwdFailed"
+      | "passwdFailedSilent"
+      | "rateLimited";
     return (
       <div className="text-center ">
         <p className="mb-2 ">

@@ -3,11 +3,9 @@ import {
   emptyLevel,
   copyLevel,
   levelTypes,
-  ChartEdit,
   levelTypesConst,
+  ChartEditing,
 } from "@falling-nikochan/chart";
-import { difficulty } from "@falling-nikochan/chart";
-import { Step, stepCmp } from "@falling-nikochan/chart";
 import Button from "@/common/button.js";
 import { HelpIcon } from "@/common/caption";
 import CheckBox from "@/common/checkBox.js";
@@ -15,8 +13,6 @@ import Input from "@/common/input.js";
 import { levelColors } from "@/common/levelColors";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { ChartEditing } from "./chartState";
 
 interface Props {
   chart?: ChartEditing;

@@ -1,10 +1,4 @@
-import { LevelEdit } from "../chart.js";
-import {
-  BPMChange,
-  BPMChangeWithLua,
-  SpeedChange,
-  SpeedChangeWithLua,
-} from "../bpm.js";
+import { BPMChange, SpeedChange } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import {
   deleteLua,
@@ -13,9 +7,7 @@ import {
   LevelForLuaEdit,
   replaceLua,
 } from "./edit.js";
-import { Chart3 } from "../legacy/chart3.js";
 import { BPMChange1 } from "../legacy/chart1.js";
-import { Level11Edit } from "../legacy/chart11.js";
 
 function accelLuaCommand(bpm: number, interp: boolean) {
   if (interp) {

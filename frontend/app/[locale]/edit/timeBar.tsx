@@ -2,27 +2,22 @@
 
 import clsx from "clsx/lite";
 import {
-  findBpmIndexFromStep,
+  ChartEditing,
   getSignatureState,
   getStep,
   getTimeSec,
-  Note,
-} from "@falling-nikochan/chart";
-import { useEffect, useRef, useState } from "react";
-import { useResizeDetector } from "react-resize-detector";
-import { timeSecStr, timeStr } from "./str.js";
-import {
   Step,
   stepAdd,
   stepCmp,
   stepImproper,
   stepZero,
 } from "@falling-nikochan/chart";
+import { useRef } from "react";
+import { useResizeDetector } from "react-resize-detector";
+import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
 import { getBarLength } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
-import { ChartEdit, LevelEdit } from "@falling-nikochan/chart";
-import { ChartEditing } from "./chartState.js";
 
 interface Props {
   chart?: ChartEditing;

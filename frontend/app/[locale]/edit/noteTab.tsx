@@ -1,16 +1,12 @@
-import { NoteCommand } from "@falling-nikochan/chart";
 import Button from "@/common/button.js";
 import Input from "@/common/input.js";
-import { Step } from "@falling-nikochan/chart";
 import { Key } from "@/common/key.js";
 import Mouse from "@icon-park/react/lib/icons/Mouse";
 import CheckBox from "@/common/checkBox.js";
-import { getSignatureState } from "@falling-nikochan/chart";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { LevelEdit } from "@falling-nikochan/chart";
-import { ChartEditing } from "./chartState";
+import { ChartEditing } from "@falling-nikochan/chart";
 
 interface Props {
   chart?: ChartEditing;
@@ -73,7 +69,7 @@ export default function NoteTab(props: Props) {
       <div className="mb-1">
         <span>{t("totalNotes")}:</span>
         <span className="inline-block w-12 text-right">
-          {currentLevel?.currentNote ? cur.noteIndex! + 1 : "-"}
+          {currentLevel?.currentNote ? cur!.noteIndex! + 1 : "-"}
         </span>
         <span className="mx-1">/</span>
         <span className="">{currentLevel?.freeze.notes.length || 0}</span>
@@ -87,6 +83,7 @@ export default function NoteTab(props: Props) {
   );
 }
 function CopyPasteButton(props: Props) {
+  const { chart } = props;
   const t = useTranslations("edit.note");
   return (
     <>

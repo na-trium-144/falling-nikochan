@@ -1,4 +1,3 @@
-import { LevelEdit } from "../chart.js";
 import { BPMChange, updateBpmTimeSec } from "../bpm.js";
 import { stepCmp } from "../step.js";
 import {
@@ -8,7 +7,6 @@ import {
   LevelForLuaEdit,
   replaceLua,
 } from "./edit.js";
-import { Chart3 } from "../legacy/chart3.js";
 import { BPMChange1 } from "../legacy/chart1.js";
 
 function bpmLuaCommand(bpm: number) {

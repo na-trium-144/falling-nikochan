@@ -3,6 +3,7 @@
 import clsx from "clsx/lite";
 import Input from "@/common/input.js";
 import {
+  ChartEditing,
   Step,
   stepAdd,
   stepCmp,
@@ -13,12 +14,9 @@ import {
   stepZero,
 } from "@falling-nikochan/chart";
 import CheckBox from "@/common/checkBox.js";
-import { getSignatureState } from "@falling-nikochan/chart";
 import {
   barFromLength,
   getBarLength,
-  Signature,
-  SignatureWithLua,
   toStepArray,
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
@@ -26,11 +24,9 @@ import Close from "@icon-park/react/lib/icons/Close";
 import CornerDownLeft from "@icon-park/react/lib/icons/CornerDownLeft";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { LevelEdit } from "@falling-nikochan/chart";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Range from "@/common/range";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
-import { ChartEditing } from "./chartState";
 
 interface Props {
   chart?: ChartEditing;

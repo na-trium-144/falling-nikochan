@@ -1,6 +1,5 @@
-import { LevelEdit } from "../chart.js";
 import { Signature, updateBarNum } from "../signature.js";
-import { Level5, Signature5 } from "../legacy/chart5.js";
+import { Signature5 } from "../legacy/chart5.js";
 import { stepCmp } from "../step.js";
 import {
   deleteLua,

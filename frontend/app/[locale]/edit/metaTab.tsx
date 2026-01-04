@@ -2,9 +2,9 @@ import clsx from "clsx/lite";
 import Button, { buttonStyle } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import {
-  ChartEdit,
+  ChartEditing,
   lastHashChangeVer,
   lastIncompatibleVer,
 } from "@falling-nikochan/chart";
@@ -20,12 +20,7 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { useDisplayMode } from "@/scale.js";
-import {
-  ChartEditing,
-  downloadExtension,
-  LocalLoadState,
-  SaveState,
-} from "./chartState";
+import { downloadExtension, LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
 
 interface Props {

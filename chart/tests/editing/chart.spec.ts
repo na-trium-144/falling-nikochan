@@ -66,7 +66,7 @@ describe("ChartEditing", () => {
       expect(rerendered).toBe(true);
       ce.levels[0].emit("change");
       expect(changed).toBe(true);
-    })
+    });
   });
   describe("resetOnSave", () => {
     test("should reset convertedFrom", () => {
