@@ -58,6 +58,15 @@ export const dummyChartData: ChartEdit = {
           luaLine: 1,
         },
         {
+          step: { fourth: 1, numerator: 0, denominator: 1 },
+          big: false,
+          hitX: 0,
+          hitVX: 1,
+          hitVY: 3,
+          fall: true,
+          luaLine: 1,
+        },
+        {
           step: { fourth: 3, numerator: 0, denominator: 1 },
           big: false,
           hitX: -1,
@@ -67,7 +76,18 @@ export const dummyChartData: ChartEdit = {
           luaLine: null,
         },
       ],
-      rest: [],
+      rest: [
+        {
+          begin: stepZero(),
+          duration: { fourth: 1, numerator: 0, denominator: 1 },
+          luaLine: 0,
+        },
+        {
+          begin: { fourth: 1, numerator: 0, denominator: 1 },
+          duration: { fourth: 1, numerator: 0, denominator: 1 },
+          luaLine: 0,
+        },
+      ],
       bpmChanges: [
         { step: stepZero(), bpm: 60, timeSec: 0, luaLine: 0 },
         {
@@ -79,7 +99,7 @@ export const dummyChartData: ChartEdit = {
         {
           step: { fourth: 3, numerator: 0, denominator: 1 },
           bpm: 120,
-          timeSec: 1,
+          timeSec: 2,
           luaLine: null,
         },
       ],
@@ -95,7 +115,7 @@ export const dummyChartData: ChartEdit = {
         {
           step: { fourth: 3, numerator: 0, denominator: 1 },
           bpm: 120,
-          timeSec: 1,
+          timeSec: 2,
           luaLine: 0,
           interp: true,
         },

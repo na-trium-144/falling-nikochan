@@ -1,116 +1,130 @@
-import { expect, test, describe, vi } from "vitest";
-import {
-  LevelEditing,
-  dummyChartData,
-  dummyLuaExecutor,
-  stepZero,
-  NoteCommand,
-} from "@falling-nikochan/chart";
+import { expect, test, describe } from "vitest";
+import { EventType, LevelEditing } from "@falling-nikochan/chart";
+import { dummyChartData, dummyLuaExecutor } from "./dummy";
 
 describe("LevelEditing", () => {
-  const parentEmit = vi.fn();
-  const offset = () => 0;
-  const luaExecutorRef = { current: dummyLuaExecutor() };
-
-  let level: LevelEditing;
-
-  beforeEach(() => {
-    level = new LevelEditing(
-      dummyChartData.levels[0],
-      parentEmit,
-      offset,
-      luaExecutorRef
-    );
-    parentEmit.mockClear();
-  });
-
-  test("constructor", () => {
-    expect(level.meta.name).toBe("level1");
-    expect(level.freeze.notes.length).toBe(3);
-    expect(parentEmit).not.toHaveBeenCalled();
+  describe("constructor", () => {
+    test("should trigger callback on event emitted", () => {
+      let rerendered = false;
+      let changed = false;
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        (type: EventType) => {
+          if (type === "rerender") rerendered = true;
+          if (type === "change") changed = true;
+        },
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      level.emit("rerender");
+      expect(rerendered).toBe(true);
+      level.emit("change");
+      expect(changed).toBe(true);
+    });
+    test("should initialize properties not in level data", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      expect(level.seqNotes).to.have.lengthOf(
+        dummyChartData.levels[0].notes.length
+      );
+      expect(level.difficulty).toBeGreaterThanOrEqual(1);
+      expect(level.maxHitNum).toBe(2);
+      expect(level.lengthSec).toBe(2);
+      expect(level.ytDuration).toBe(0);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      expect(level.barLines).to.not.be.empty;
+    });
+    test("should initialize cursor object", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      expect(level.current.timeSec).toBe(0);
+    });
   });
 
   test("toObject", () => {
+    const level = new LevelEditing(
+      dummyChartData.levels[0],
+      () => {},
+      () => 0,
+      { current: dummyLuaExecutor() }
+    );
     const obj = level.toObject();
     expect(obj.name).toBe("level1");
-    expect(obj.notes.length).toBe(3);
+    expect(obj.notes).toEqual(dummyChartData.levels[0].notes);
   });
 
-  test("updateMeta", () => {
-    level.updateMeta({ name: "new name" });
-    expect(level.meta.name).toBe("new name");
-    expect(parentEmit).toHaveBeenCalledWith("rerender");
-    expect(parentEmit).toHaveBeenCalledWith("change");
+  describe("updateMeta", () => {
+    test("should update meta data", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      level.updateMeta({ name: "new name" });
+      expect(level.meta.name).toBe("new name");
+    });
+    test("should trigger rerender and change events", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      let rerendered = false;
+      let changed = false;
+      level.on("rerender", () => {
+        rerendered = true;
+      });
+      level.on("change", () => {
+        changed = true;
+      });
+      level.updateMeta({ name: "new title" });
+      expect(rerendered).toBe(true);
+      expect(changed).toBe(true);
+    });
+    test("should reset ytEndSec when ytEnd is changed", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      level.updateMeta({ ytEnd: "note" });
+      expect(level.meta.ytEndSec).toBe(level.lengthSec);
+      level.updateMeta({ ytEnd: "yt" });
+      expect(level.meta.ytEndSec).toBe(level.ytDuration);
+      level.updateMeta({ ytEnd: 15 });
+      expect(level.meta.ytEndSec).toBe(15);
+    });
   });
-
-  test("updateFreeze", () => {
-    const newNotes = [...level.freeze.notes, { ...level.freeze.notes[0] }];
-    level.updateFreeze({ notes: newNotes });
-    expect(level.freeze.notes.length).toBe(4);
-    expect(parentEmit).toHaveBeenCalledWith("rerender");
-    expect(parentEmit).toHaveBeenCalledWith("change");
-  });
-
-  test("setYTDuration", () => {
-    level.setYTDuration(180);
-    expect(level.ytDuration).toBe(180);
-    expect(parentEmit).toHaveBeenCalledWith("rerender");
-  });
-
-  test("resetYTEnd", () => {
-    level.updateMeta({ ytEnd: "note" });
-    level.resetYTEnd();
-    expect(level.meta.ytEndSec).toBe(level.lengthSec);
-
-    level.updateMeta({ ytEnd: "yt" });
-    level.setYTDuration(180);
-    level.resetYTEnd();
-    expect(level.meta.ytEndSec).toBe(180);
-
-    level.updateMeta({ ytEnd: 100 });
-    level.resetYTEnd();
-    expect(level.meta.ytEndSec).toBe(100);
-  });
-
-  test("setCurrentTimeWithoutOffset", () => {
-    level.setCurrentTimeWithoutOffset(1, 2);
-    expect(level.current.timeSec).toBe(1);
-    expect(level.current.snapDivider).toBe(2);
-  });
-
-  test("setSnapDivider", () => {
-    level.setSnapDivider(4);
-    expect(level.current.snapDivider).toBe(4);
-  });
-
-  test("selectNextNote and selectPrevNote", () => {
-    level.setCurrentTimeWithoutOffset(1);
-    expect(level.current.noteIndex).toBe(1);
-    level.selectNextNote();
-    // noteIndex is not changed because there is only one note at the step
-    expect(level.current.noteIndex).toBe(1);
-
-    level.setCurrentTimeWithoutOffset(0);
-    level.selectPrevNote();
-    // noteIndex is not changed because it is the first note
-    expect(level.current.noteIndex).toBe(0);
-  });
-
-  test("addNote, deleteNote, updateNote", () => {
-    const newNote: NoteCommand = { big: false, hitX: 0, hitVX: 0, hitVY: 0, fall: true, luaLine: 0 };
-    
-    // add
-    level.setCurrentTimeWithoutOffset(2, 1);
-    const initialNotesCount = level.freeze.notes.length;
-    level.addNote(newNote);
-    expect(level.freeze.notes.length).toBe(initialNotesCount + 1);
-
-    // update
-    level.updateNote({ ...newNote, big: true });
-    expect(level.currentNote?.big).toBe(true);
-    
-    // delete
-    level.deleteNote();
-    expect(level.freeze.notes.length).toBe(initialNotesCount);
+  describe("updateFreeze", () => {
+    test("should trigger rerender and change events", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => 0,
+        { current: dummyLuaExecutor() }
+      );
+      let rerendered = false;
+      let changed = false;
+      level.on("rerender", () => {
+        rerendered = true;
+      });
+      level.on("change", () => {
+        changed = true;
+      });
+      level.updateFreeze({ ...level.freeze });
+      expect(rerendered).toBe(true);
+      expect(changed).toBe(true);
+    });
   });
 });

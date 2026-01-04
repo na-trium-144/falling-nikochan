@@ -78,13 +78,13 @@ export class LevelEditing extends EventEmitter<EventType> {
     // 以下はupdateFreeze()内で初期化される
     this.#seqNotes = [];
     this.#difficulty = 0;
-    this.#maxHitNum = 1;
+    this.#maxHitNum = 0;
     this.#lengthSec = 0;
     this.#ytDuration = 0;
     this.#barLines = [];
     this.#current = new CursorState((type) => this.emit(type));
 
-    this.resetYTEnd();
+    this.#resetYTEnd();
     this.updateMeta({});
     this.updateFreeze({});
   }
@@ -117,7 +117,7 @@ export class LevelEditing extends EventEmitter<EventType> {
   updateMeta(newMeta: Partial<Omit<LevelMin, "lua">>) {
     this.#meta = { ...this.#meta, ...newMeta };
     if ("ytEnd" in newMeta) {
-      this.resetYTEnd();
+      this.#resetYTEnd();
     }
     this.emit("rerender");
     this.emit("change");
@@ -134,6 +134,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#resetSeqNotes();
     this.#resetDifficulty();
     this.#resetLengthSec();
+    this.#resetMaxHitNum();
     this.emit("rerender");
     this.emit("change");
   }
@@ -208,7 +209,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         getTimeSec(this.#freeze.bpmChanges, this.#freeze.notes.at(-1)!.step) +
         this.#offset();
     }
-    this.resetYTEnd();
+    this.#resetYTEnd();
     this.emit("rerender");
   }
   get lengthSec() {
@@ -218,14 +219,14 @@ export class LevelEditing extends EventEmitter<EventType> {
   setYTDuration(duration: number) {
     if (this.#ytDuration !== duration) {
       this.#ytDuration = duration;
-      this.resetYTEnd();
+      this.#resetYTEnd();
       this.emit("rerender");
     }
   }
   get ytDuration() {
     return this.#ytDuration;
   }
-  resetYTEnd() {
+  #resetYTEnd() {
     if (
       this.#meta.ytEnd === "note" &&
       this.#meta.ytEndSec !== this.#lengthSec

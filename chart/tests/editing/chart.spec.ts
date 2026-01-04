@@ -47,6 +47,26 @@ describe("ChartEditing", () => {
       });
       expect(ce.numEvents).toBe(numEvents(dummyChartData));
     });
+    test("should propagate rerender and change event from levels", () => {
+      const ce = new ChartEditing(dummyChartData, {
+        luaExecutorRef: { current: dummyLuaExecutor() },
+        locale: "en",
+        cid: undefined,
+        currentPasswd: null,
+      });
+      let rerendered = false;
+      let changed = false;
+      ce.on("rerender", () => {
+        rerendered = true;
+      });
+      ce.on("change", () => {
+        changed = true;
+      });
+      ce.levels[0].emit("rerender");
+      expect(rerendered).toBe(true);
+      ce.levels[0].emit("change");
+      expect(changed).toBe(true);
+    })
   });
   describe("resetOnSave", () => {
     test("should reset convertedFrom", () => {
@@ -533,17 +553,20 @@ describe("ChartEditing", () => {
         currentPasswd: null,
         currentLevelIndex: 0,
       });
-      ce.currentLevel?.setCurrentTimeWithoutOffset(0);
+      ce.currentLevel?.setCurrentTimeWithoutOffset(0 + ce.offset);
       expect(ce.hasCopyBuf(1)).toBe(false);
 
+      expect(ce.currentLevel?.currentNote).not.toBeUndefined();
       ce.copyNote(1);
       expect(ce.hasCopyBuf(1)).toBe(true);
 
-      ce.currentLevel?.setCurrentTimeWithoutOffset(1);
+      ce.currentLevel?.setCurrentTimeWithoutOffset(1 + ce.offset);
+      expect(ce.currentLevel?.current.noteIndex).toBe(1);
       expect(ce.currentLevel?.currentNote?.hitX).toEqual(
         dummyChartData.levels[0].notes[1].hitX
       );
       ce.pasteNote(1);
+      expect(ce.currentLevel?.current.noteIndex).toBe(1);
       expect(ce.currentLevel?.currentNote?.hitX).toEqual(
         dummyChartData.levels[0].notes[0].hitX
       );
