@@ -8,7 +8,7 @@ import { stepCmp, stepToFloat } from "./step.js";
  *  (60 / bpmChanges[bi].bpm) *
  *  (bpmChanges[bi + 1].step - bpmChanges[bi].step);
  */
-export type BPMChange = BPMChange9;
+export type BPMChange = Omit<BPMChange9, "luaLine">;
 export type BPMChangeWithLua = BPMChange9;
 
 export type SpeedChange = SpeedChange13;

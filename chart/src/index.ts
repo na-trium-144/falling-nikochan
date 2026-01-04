@@ -33,3 +33,8 @@ export * from "./lua/edit.js";
 export * from "./lua/note.js";
 export * from "./lua/signature.js";
 export * from "./lua/speed.js";
+
+export * from "./editing/chart.js";
+export * from "./editing/level.js";
+export * from "./editing/cursor.js";
+export * from "./editing/types.js";
