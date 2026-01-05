@@ -156,13 +156,7 @@ export default function useGameLogic(
       while (now !== undefined && notesYetDone.current.length >= 1) {
         const n = notesYetDone.current[0];
         const late = now - n.hitTimeSec;
-        // 'auto' force 'Good'
-        if (auto) {
-          if (late >= 0) candidate = { note: n, judge: 1, late: 0 };
-          break;
-        }
-        // normal
-        else if (Math.abs(late) <= goodSec * playbackRate) {
+        if (Math.abs(late) <= goodSec * playbackRate) {
           candidate = { note: n, judge: 1, late };
           break;
         } else if (Math.abs(late) <= okSec * playbackRate) {
@@ -187,7 +181,7 @@ export default function useGameLogic(
       // 1つ前の音符でThru判定が誤爆し1つ余分に消してしまった可能性を考慮
       // (音符1つ分しか考慮していないので、1つ目thru判定発生->2つ目ok->3つ目good みたいなケースはどうしようもない)
       let candidatePrevThru: HitCandidate | null = null;
-      if (!auto && now !== undefined && iosThruNote.current) {
+      if (now !== undefined && iosThruNote.current) {
         const n = iosThruNote.current;
         const late = now - n.hitTimeSec;
         if (Math.abs(late) <= goodSec * playbackRate) {
@@ -245,13 +239,7 @@ export default function useGameLogic(
       ) {
         const n = notesBigYetDone.current[i];
         const late = now - n.hitTimeSec;
-        // 'auto' force 'Good'
-        if (auto && late >= 0) {
-          candidateBig = { note: n, judge: 1, late: 0 };
-          i++;
-        }
-        // normal
-        else if (Math.abs(late) <= goodSec * playbackRate) {
+        if (Math.abs(late) <= goodSec * playbackRate) {
           candidateBig = { note: n, judge: 1, late };
           i++;
         } else if (Math.abs(late) <= okSec * playbackRate) {
@@ -441,7 +429,12 @@ export default function useGameLogic(
           const n = notesYetDone.current[0];
           const late = now - n.hitTimeSec;
           if (late >= 0) {
-            hit(0);
+            playSE("hit");
+            judge({ note: n, judge: 1, late: 0 });
+            notesYetDone.current.shift();
+            if (n.big) {
+              notesBigYetDone.current.push(n);
+            }
             continue;
           } else {
             nextHitTime.push(-late);
@@ -452,7 +445,9 @@ export default function useGameLogic(
           const n = notesBigYetDone.current[0];
           const late = now - n.hitTimeSec;
           if (late >= 0) {
-            hit(0);
+            playSE("hitBig");
+            judge({ note: n, judge: 1, late: 0 });
+            notesBigYetDone.current.shift();
             continue;
           } else {
             nextHitTime.push(-late);
