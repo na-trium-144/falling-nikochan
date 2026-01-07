@@ -21,6 +21,7 @@ import { SEType } from "@/common/se";
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean,
+  judgeForAuto: boolean,
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
@@ -430,11 +431,15 @@ export default function useGameLogic(
           const n = notesYetDone.current[0];
           const late = now - n.hitTimeSec;
           if (late >= 0) {
-            playSE("hit");
-            judge({ note: n, judge: 1, late: 0 });
-            notesYetDone.current.shift();
-            if (n.big) {
-              notesBigYetDone.current.push(n);
+            if (judgeForAuto) {
+              hit(0);
+            } else {
+              playSE("hit");
+              judge({ note: n, judge: 1, late: 0 });
+              notesYetDone.current.shift();
+              if (n.big) {
+                notesBigYetDone.current.push(n);
+              }
             }
             continue;
           } else {
@@ -446,9 +451,13 @@ export default function useGameLogic(
           const n = notesBigYetDone.current[0];
           const late = now - n.hitTimeSec;
           if (late >= 0) {
-            playSE("hitBig");
-            judge({ note: n, judge: 1, late: 0 });
-            notesBigYetDone.current.shift();
+            if (judgeForAuto) {
+              hit(0);
+            } else {
+              playSE("hitBig");
+              judge({ note: n, judge: 1, late: 0 });
+              notesBigYetDone.current.shift();
+            }
             continue;
           } else {
             nextHitTime.push(-late);
