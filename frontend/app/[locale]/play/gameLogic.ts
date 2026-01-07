@@ -469,7 +469,7 @@ export default function useGameLogic(
         }
       };
     }
-  }, [auto, getCurrentTimeSec, hit, playbackRate]);
+  }, [auto, getCurrentTimeSec, hit, playbackRate, judge, playSE]);
 
   return {
     baseScore,
