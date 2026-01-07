@@ -21,6 +21,7 @@ import { SEType } from "@/common/se";
 export default function useGameLogic(
   getCurrentTimeSec: () => number | undefined,
   auto: boolean,
+  judgeForAuto: boolean,
   // 判定を行う際offsetはgetCurrentTimeSecの戻り値に含まれているので、
   // ここで指定するuserOffsetは判定には影響しない
   userOffset: number,
@@ -356,6 +357,7 @@ export default function useGameLogic(
 
   // badLateSec以上過ぎたものをmiss判定にする
   useEffect(() => {
+    if (auto) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const removeOneNote = () => {
       timer = null;
@@ -416,7 +418,7 @@ export default function useGameLogic(
         clearTimeout(timer);
       }
     };
-  }, [getCurrentTimeSec, judge, playbackRate]);
+  }, [auto, getCurrentTimeSec, judge, playbackRate]);
   useEffect(() => {
     if (auto) {
       let timer: ReturnType<typeof setTimeout> | null = null;
@@ -429,7 +431,16 @@ export default function useGameLogic(
           const n = notesYetDone.current[0];
           const late = now - n.hitTimeSec;
           if (late >= 0) {
-            hit(0);
+            if (judgeForAuto) {
+              hit(0);
+            } else {
+              playSE("hit");
+              judge({ note: n, judge: 1, late: 0 });
+              notesYetDone.current.shift();
+              if (n.big) {
+                notesBigYetDone.current.push(n);
+              }
+            }
             continue;
           } else {
             nextHitTime.push(-late);
@@ -440,7 +451,13 @@ export default function useGameLogic(
           const n = notesBigYetDone.current[0];
           const late = now - n.hitTimeSec;
           if (late >= 0) {
-            hit(0);
+            if (judgeForAuto) {
+              hit(0);
+            } else {
+              playSE("hitBig");
+              judge({ note: n, judge: 1, late: 0 });
+              notesBigYetDone.current.shift();
+            }
             continue;
           } else {
             nextHitTime.push(-late);
@@ -461,7 +478,7 @@ export default function useGameLogic(
         }
       };
     }
-  }, [auto, getCurrentTimeSec, hit, playbackRate]);
+  }, [auto, getCurrentTimeSec, hit, playbackRate, judge, playSE]);
 
   return {
     baseScore,

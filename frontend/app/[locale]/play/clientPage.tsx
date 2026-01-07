@@ -8,6 +8,7 @@
 * speed=1 で音符の速度変化を表示
 * result=1 でリザルト表示
 * auto=1 でオートプレイをデフォルトにする
+* judgeauto=1 でオートプレイ時にもユーザーのプレイと同じ判定を適用する (ver12.21〜13.20の動作)
 
 */
 
@@ -76,6 +77,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [goResult, setGoResult] = useState<boolean>(false);
   const [autoDefault, setAutoDefault] = useState<boolean>(false);
+  const [judgeForAuto, setJudgeForAuto] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -94,6 +96,7 @@ export function InitPlay({ locale }: { locale: string }) {
     setDisplaySpeed(searchParams.get("speed") !== null);
     setGoResult(searchParams.get("result") !== null);
     setAutoDefault(searchParams.get("auto") !== null);
+    setJudgeForAuto(searchParams.get("judgeauto") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -201,6 +204,7 @@ export function InitPlay({ locale }: { locale: string }) {
       displaySpeed={displaySpeed}
       goResult={goResult}
       autoDefault={autoDefault}
+      judgeForAuto={judgeForAuto}
       locale={locale}
     />
   );
@@ -217,6 +221,7 @@ interface Props {
   displaySpeed: boolean;
   goResult: boolean;
   autoDefault: boolean;
+  judgeForAuto: boolean;
   locale: string;
 }
 function Play(props: Props) {
@@ -433,7 +438,14 @@ function Play(props: Props) {
     lateTimes,
     chartEnd,
     hitType,
-  } = useGameLogic(getCurrentTimeSec, auto, userOffset, playbackRate, playSE);
+  } = useGameLogic(
+    getCurrentTimeSec,
+    auto,
+    props.judgeForAuto,
+    userOffset,
+    playbackRate,
+    playSE
+  );
 
   const [fps, setFps] = useState<number>(0);
   // フレームレートが60を超える端末の場合に、60を超えないように制限する
