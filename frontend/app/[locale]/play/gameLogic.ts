@@ -142,15 +142,16 @@ export default function useGameLogic(
       const now = getCurrentTimeSec();
       if (now !== undefined) {
         hitCountByType.current[type] = (hitCountByType.current[type] || 0) + 1;
-        const hType = Number(
-          Object.keys(hitCountByType.current).reduce((a, b) =>
-            hitCountByType.current[Number(a)] >
-            hitCountByType.current[Number(b)]
-              ? a
-              : b
+        setHitType(
+          Number(
+            Object.keys(hitCountByType.current).reduce((a, b) =>
+              hitCountByType.current[Number(a)] >
+              hitCountByType.current[Number(b)]
+                ? a
+                : b
+            )
           )
         );
-        if (hitType != hType) setHitType(hType);
       }
       let candidate: HitCandidate | null = null;
       while (now !== undefined && notesYetDone.current.length >= 1) {
