@@ -1,3 +1,8 @@
+## ver. 13.21 - 2026/01/07 [#897](https://github.com/na-trium-144/falling-nikochan/pull/897)
+
+* オートプレイ時に判定を行わず常によい(Good)判定になるように変更
+    * `judgeauto=1` クエリパラメータで従来の挙動にする
+
 ## ver. 13.20 - 2025/12/26 [#876](https://github.com/na-trium-144/falling-nikochan/pull/876)
 
 * 短い間隔でBPMが変わる時アニメーションを省略
