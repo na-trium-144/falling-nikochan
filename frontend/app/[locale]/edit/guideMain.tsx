@@ -31,9 +31,9 @@ export function GuideMain(props: Props) {
           onClickBefore={() => props.setIndex(props.index - 1)}
           onClickAfter={() => props.setIndex(props.index + 1)}
         />
-        <ul className="list-inside list-disc-as-text flex-1 ">
+        <div className="flex-1">
           {props.content}
-        </ul>
+        </div>
         <p className="w-max m-auto">
           <Button
             text={props.index === 1 ? t("agreeClose") : t("close")}
