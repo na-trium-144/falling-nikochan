@@ -488,164 +488,150 @@ export default function TimingTab(props: Props) {
           </>
         )}
       </div>
-      <ul className="list-disc-as-text ml-2 pl-6">
+      <ul className="list-disc-as-text ml-2">
         {props.currentSignature?.bars.map((bar, i) => (
-          <li className="w-full" key={i}>
-            <div className="flex flex-row w-full items-baseline ">
-              <InputSig
-                limitedDenominator
-                actualValue={currentBarLength![i]}
-                updateValue={(newSig: Step) => {
-                  const currentSig = currentBarLength![i];
-                  let newBar: (4 | 8 | 16)[];
-                  if (stepCmp(newSig, currentSig) >= 0) {
-                    newBar = bar.concat(
-                      barFromLength(stepSub(newSig, currentSig))
-                    );
-                  } else {
-                    newBar = barFromLength(newSig);
-                  }
-                  props.setCurrentSignature({
-                    ...props.currentSignature!,
-                    bars: props.currentSignature!.bars.map((b, j) =>
-                      i === j ? newBar : b
-                    ),
-                  });
-                }}
-                disabled={!signatureChangeable}
-              />
-              <span
-                className="shrink grow-0 text-right min-w-max "
-                style={{
-                  width:
-                    currentBarLength!.reduce(
-                      (max, len) => Math.max(max, stepToFloat(len)),
-                      0
-                    ) *
-                      2 *
-                      2 +
-                    "rem",
-                }}
-              >
-                {bar
-                  .slice()
-                  .reverse()
-                  .map((bs, j) => (
-                    <button
-                      key={j}
-                      className="rounded-full hover:bg-slate-200 active:bg-slate-300 p-1 "
-                      onClick={() => {
-                        const countIndex = bar.length - 1 - j;
-                        while (true) {
-                          switch (bs) {
-                            case 4:
-                              bs = 8;
-                              break;
-                            case 8:
-                              bs = 16;
-                              break;
-                            case 16:
-                              bs = 4;
-                              break;
-                          }
-                          const remainingSig = stepSub(
-                            toStepArray(props.currentSignature!)
-                              [i].slice(countIndex)
-                              .reduce(
-                                (len, bs) => stepAdd(len, bs),
-                                stepZero()
-                              ),
-                            stepSimplify({
-                              fourth: 0,
-                              numerator: 1,
-                              denominator: bs / 4,
-                            })
-                          );
-                          if (stepCmp(remainingSig, stepZero()) >= 0) {
-                            const newBar = bar
-                              .slice(0, countIndex)
-                              .concat([bs])
-                              .concat(barFromLength(remainingSig));
-                            props.setCurrentSignature({
-                              ...props.currentSignature!,
-                              bars: props.currentSignature!.bars.map((b, k) =>
-                                i === k ? newBar : b
-                              ),
-                            });
-                            return;
-                          }
-                        }
-                      }}
-                      disabled={!signatureChangeable}
-                    >
-                      <BeatSlime size={bs} />
-                    </button>
-                  ))}
-              </span>
-              <button
-                className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
-                onClick={() => {
-                  props.setCurrentSignature({
-                    ...props.currentSignature!,
-                    bars: props
-                      .currentSignature!.bars.slice(0, i + 1)
-                      .concat([[4, 4, 4, 4]])
-                      .concat(props.currentSignature!.bars.slice(i + 1)),
-                  });
-                }}
-                disabled={!signatureChangeable}
-              >
-                <CornerDownLeft />
-              </button>
-              <button
-                className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
-                onClick={() => {
-                  props.setCurrentSignature({
-                    ...props.currentSignature!,
-                    bars: props.currentSignature!.bars.filter(
-                      (_, k) => k !== i
-                    ),
-                  });
-                }}
-                disabled={
-                  props.currentSignature!.bars.length <= 1 ||
-                  !signatureChangeable
+          <li className="flex flex-row w-full items-baseline" key={i}>
+            <InputSig
+              limitedDenominator
+              actualValue={currentBarLength![i]}
+              updateValue={(newSig: Step) => {
+                const currentSig = currentBarLength![i];
+                let newBar: (4 | 8 | 16)[];
+                if (stepCmp(newSig, currentSig) >= 0) {
+                  newBar = bar.concat(
+                    barFromLength(stepSub(newSig, currentSig))
+                  );
+                } else {
+                  newBar = barFromLength(newSig);
                 }
-              >
-                <Close />
-              </button>
-              {i === 0 && (
-                <HelpIcon className="self-center">
-                  <p>
-                    {t.rich("beatBarHelp1", {
-                      br: () => <br />,
-                      slime: (c) => (
-                        <BeatSlime size={Number(c) as 4 | 8 | 16} />
-                      ),
-                    })}
-                  </p>
-                  <p className="mt-2">
-                    {t.rich("beatBarHelp2", {
-                      br: () => <br />,
-                      slime: (c) => (
-                        <BeatSlime size={Number(c) as 4 | 8 | 16} />
-                      ),
-                    })}
-                  </p>
-                  <p className="mt-2">
-                    {t.rich("beatBarHelp3", {
-                      br: () => <br />,
-                      slime: (c) => (
-                        <BeatSlime size={Number(c) as 4 | 8 | 16} />
-                      ),
-                      add: () => (
-                        <CornerDownLeft className="inline-block align-middle" />
-                      ),
-                    })}
-                  </p>
-                </HelpIcon>
-              )}
-            </div>
+                props.setCurrentSignature({
+                  ...props.currentSignature!,
+                  bars: props.currentSignature!.bars.map((b, j) =>
+                    i === j ? newBar : b
+                  ),
+                });
+              }}
+              disabled={!signatureChangeable}
+            />
+            <span
+              className="shrink grow-0 text-right min-w-max "
+              style={{
+                flexBasis:
+                  currentBarLength!.reduce(
+                    (max, len) => Math.max(max, stepToFloat(len)),
+                    0
+                  ) *
+                    2 *
+                    2 +
+                  "rem",
+              }}
+            >
+              {bar
+                .slice()
+                .reverse()
+                .map((bs, j) => (
+                  <button
+                    key={j}
+                    className="rounded-full hover:bg-slate-200 active:bg-slate-300 p-1 "
+                    onClick={() => {
+                      const countIndex = bar.length - 1 - j;
+                      while (true) {
+                        switch (bs) {
+                          case 4:
+                            bs = 8;
+                            break;
+                          case 8:
+                            bs = 16;
+                            break;
+                          case 16:
+                            bs = 4;
+                            break;
+                        }
+                        const remainingSig = stepSub(
+                          toStepArray(props.currentSignature!)
+                            [i].slice(countIndex)
+                            .reduce((len, bs) => stepAdd(len, bs), stepZero()),
+                          stepSimplify({
+                            fourth: 0,
+                            numerator: 1,
+                            denominator: bs / 4,
+                          })
+                        );
+                        if (stepCmp(remainingSig, stepZero()) >= 0) {
+                          const newBar = bar
+                            .slice(0, countIndex)
+                            .concat([bs])
+                            .concat(barFromLength(remainingSig));
+                          props.setCurrentSignature({
+                            ...props.currentSignature!,
+                            bars: props.currentSignature!.bars.map((b, k) =>
+                              i === k ? newBar : b
+                            ),
+                          });
+                          return;
+                        }
+                      }
+                    }}
+                    disabled={!signatureChangeable}
+                  >
+                    <BeatSlime size={bs} />
+                  </button>
+                ))}
+            </span>
+            <button
+              className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
+              onClick={() => {
+                props.setCurrentSignature({
+                  ...props.currentSignature!,
+                  bars: props
+                    .currentSignature!.bars.slice(0, i + 1)
+                    .concat([[4, 4, 4, 4]])
+                    .concat(props.currentSignature!.bars.slice(i + 1)),
+                });
+              }}
+              disabled={!signatureChangeable}
+            >
+              <CornerDownLeft />
+            </button>
+            <button
+              className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
+              onClick={() => {
+                props.setCurrentSignature({
+                  ...props.currentSignature!,
+                  bars: props.currentSignature!.bars.filter((_, k) => k !== i),
+                });
+              }}
+              disabled={
+                props.currentSignature!.bars.length <= 1 || !signatureChangeable
+              }
+            >
+              <Close />
+            </button>
+            {i === 0 && (
+              <HelpIcon className="self-center">
+                <p>
+                  {t.rich("beatBarHelp1", {
+                    br: () => <br />,
+                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
+                  })}
+                </p>
+                <p className="mt-2">
+                  {t.rich("beatBarHelp2", {
+                    br: () => <br />,
+                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
+                  })}
+                </p>
+                <p className="mt-2">
+                  {t.rich("beatBarHelp3", {
+                    br: () => <br />,
+                    slime: (c) => <BeatSlime size={Number(c) as 4 | 8 | 16} />,
+                    add: () => (
+                      <CornerDownLeft className="inline-block align-middle" />
+                    ),
+                  })}
+                </p>
+              </HelpIcon>
+            )}
           </li>
         ))}
       </ul>
