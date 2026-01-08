@@ -36,3 +36,26 @@ body {
   appearance: none;
   -webkit-appearance: none;
 }
+
+.list-disc-as-text {
+  list-style: none !important;
+  /*list-style-type: disc;*/
+}
+.list-disc-as-text.list-inside li {
+  margin-left: 1.2em;
+}
+.list-disc-as-text li::before {
+  /* 擬似要素でマーカーを作成 */
+  content: "・";
+  font-size: 1em; /* マーカーのサイズ微調整 */
+  width: 1em;
+  display: inline-block;
+  margin-right: 0.2em;
+  text-indent: 0;
+}
+.list-disc-as-text li {
+  text-indent: -1.2em !important;
+}
+.list-disc-as-text li * {
+  text-indent: 0;
+}

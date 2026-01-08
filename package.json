@@ -10,8 +10,8 @@
     "test": "npm run test --ws --if-present",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "ndev": "npm run dev -w frontend",
-    "nbuild": "npm run build -w frontend",
-    "swbuild": "npm run build -w worker",
+    "nbuild": "npm run build -w frontend && npm run postbuild -w frontend",
+    "swbuild": "npm run build -w worker && npm run postbuild -w frontend",
     "ldev": "npm run dev -w route"
   },
   "workspaces": [
@@ -39,13 +39,13 @@
     "eslint": "^9.39.1",
     "eslint-config-next": "15.5.9",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "prettier": "^3.7.4",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "vitest": "^4.0.15",
-    "webpack": "^5.103.0",
+    "vitest": "^4.0.16",
+    "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1",
     "webpack-license-plugin": "^4.5.1"
   }

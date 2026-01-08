@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/i18n",
-  "version": "13.20.0",
+  "version": "13.22.0",
   "private": true,
   "type": "module",
   "main": "index.js",
@@ -8,6 +8,6 @@
     "lint": "eslint && node verifyKeys.js"
   },
   "dependencies": {
-    "next-intl": "^4.4.0"
+    "next-intl": "^4.7.0"
   }
 }

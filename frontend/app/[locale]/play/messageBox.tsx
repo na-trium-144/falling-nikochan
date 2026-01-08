@@ -170,7 +170,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
       <div className="flex-1 w-full min-w-fit overflow-y-auto overflow-x-visible">
         <ul
           className={clsx(
-            "h-full flex flex-col w-fit justify-center text-left list-disc",
+            "h-full flex flex-col w-fit justify-center text-left list-disc-as-text",
             "m-auto pl-6 pr-2 space-y-1 overflow-visible"
           )}
         >
