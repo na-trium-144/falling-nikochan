@@ -18,6 +18,8 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
+import { useOSDetector } from "@/common/pwaInstall.jsx";
+import Select from "@/common/select.jsx";
 
 interface Props {
   cid: string | undefined;
@@ -42,6 +44,7 @@ export function ShareBox(props: Props) {
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const shareLink = useShareLink(cid, brief, locale);
+  const detectedOS = useOSDetector();
 
   return (
     <>
@@ -141,8 +144,33 @@ export function ShareBox(props: Props) {
             {shareLink.toClipboard && (
               <Button text={t("copy")} onClick={shareLink.toClipboard} />
             )}
-            {shareLink.toAPI && (
-              <Button text={t("share")} onClick={shareLink.toAPI} />
+            {detectedOS === undefined ? (
+              // placeholder dummy button
+              <Button text={t("share")} />
+            ) : detectedOS === null ? (
+              // ドロップダウンメニューのふりをしたselect
+              // TODO: better UI
+              <Select
+                classNameInner="min-w-0! w-20"
+                options={[t("share") + "...", t("copyForShare"), t("xPost")]}
+                values={["", "copyForShare", "xPost"]}
+                value={""}
+                disableFirstOption
+                onChange={(s: string) => {
+                  if (s === "copyForShare" && shareLink.toClipboard) {
+                    shareLink.toClipboard(true);
+                  } else if (s === "xPost") {
+                    window.open(shareLink.xPostIntent, "_blank")?.focus();
+                  }
+                }}
+              />
+            ) : (
+              // native share API on mobile
+              <Button
+                text={t("share")}
+                onClick={shareLink.toAPI ?? undefined}
+                disabled={!shareLink.toAPI}
+              />
             )}
           </span>
         </p>

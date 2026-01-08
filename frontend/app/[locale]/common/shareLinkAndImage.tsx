@@ -62,18 +62,29 @@ export function useShareLink(
       });
     }
   }
-  newTitle += " #fallingnikochan";
 
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
-  const toClipboard = useCallback(() => {
-    // og画像の生成は時間がかかるので、
-    // 共有される前にogを1回fetchしておくことにより、
-    // cloudflareにキャッシュさせる
-    void fetch(process.env.BACKEND_PREFIX + ogPath);
-    navigator.clipboard.writeText(
-      newTitle + "\n" + origin + sharePath + "?" + shareParams
-    );
-  }, [ogPath, newTitle, origin, sharePath, shareParams]);
+  const toClipboard = useCallback(
+    (withTitle: boolean = false) => {
+      // og画像の生成は時間がかかるので、
+      // 共有される前にogを1回fetchしておくことにより、
+      // cloudflareにキャッシュさせる
+      void fetch(process.env.BACKEND_PREFIX + ogPath);
+      if (withTitle) {
+        navigator.clipboard.writeText(
+          newTitle +
+            " #fallingnikochan\n" +
+            origin +
+            sharePath +
+            "?" +
+            shareParams
+        );
+      } else {
+        navigator.clipboard.writeText(origin + sharePath + "?" + shareParams);
+      }
+    },
+    [ogPath, newTitle, origin, sharePath, shareParams]
+  );
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
     void fetch(process.env.BACKEND_PREFIX + ogPath);
@@ -85,8 +96,8 @@ export function useShareLink(
   }, []);
   useEffect(() => {
     const shareData = {
-      title: newTitle,
-      text: newTitle,
+      title: newTitle + " #fallingnikochan",
+      text: newTitle + " #fallingnikochan",
       url: origin + sharePath + "?" + shareParams,
     };
     if (
@@ -97,6 +108,13 @@ export function useShareLink(
       setShareData(shareData);
     }
   }, [origin, newTitle, sharePath, shareParams]);
+  const xPostIntentParams = new URLSearchParams();
+  xPostIntentParams.set("hashtags", "fallingnikochan");
+  xPostIntentParams.set("related", "nikochan144");
+  xPostIntentParams.set("text", newTitle);
+  xPostIntentParams.set("url", origin + sharePath + "?" + shareParams);
+  const xPostIntent =
+    "https://twitter.com/intent/tweet?" + xPostIntentParams.toString();
 
   const shareImageCtx = useShareImageModalContext();
   const openModal = useCallback(
@@ -117,6 +135,7 @@ export function useShareLink(
     path: sharePath + "?" + shareParams,
     toClipboard: hasClipboard ? toClipboard : null,
     toAPI: shareData ? toAPI : null,
+    xPostIntent,
     openModal,
   };
 }
