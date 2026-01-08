@@ -488,7 +488,7 @@ export default function TimingTab(props: Props) {
           </>
         )}
       </div>
-      <ul className="list-disc ml-2 pl-6">
+      <ul className="list-disc-as-text ml-2 pl-6">
         {props.currentSignature?.bars.map((bar, i) => (
           <li className="w-full" key={i}>
             <div className="flex flex-row w-full items-baseline ">

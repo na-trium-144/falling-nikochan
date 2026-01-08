@@ -153,7 +153,7 @@ export function AboutContent2() {
           <Caution className="inline-block mr-1 translate-y-0.5 " />
           {t("contentIOS")}
         </p>
-        <ul className="list-inside list-disc">
+        <ul className="list-inside list-disc-as-text">
           <li>{t("contentIOS2")}</li>
           <li>{t("contentIOS3")}</li>
         </ul>
