@@ -59,7 +59,7 @@ export function AboutContent5() {
             b: (c) => <span className="font-bold">{c}</span>,
           })}
         </p>
-        <ul className="list-inside list-disc">
+        <ul className="list-inside list-disc-as-text">
           <li>
             {t.rich("content3", {
               baseScoreRate,
