@@ -16,6 +16,9 @@ import Button from "./button";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
 import { useDelayedDisplayState } from "./delayedDisplayState";
+import { useOSDetector } from "./pwaInstall";
+import Select from "./select";
+import Pic from "@icon-park/react/lib/icons/Pic";
 
 export function useShareLink(
   cid: string | undefined,
@@ -122,6 +125,8 @@ export function useShareLink(
     [shareImageCtx, ogPath, cid]
   );
 
+  const detectedOS = useOSDetector();
+
   return {
     url: (
       <>
@@ -133,10 +138,50 @@ export function useShareLink(
       </>
     ),
     path: sharePath + "?" + shareParams,
-    toClipboard: hasClipboard ? toClipboard : null,
-    toAPI: shareData ? toAPI : null,
-    xPostIntent,
-    openModal,
+    buttons: (
+      <>
+        <Button
+          className="mx-0.5"
+          text={t("copyURL")}
+          onClick={hasClipboard ? toClipboard : undefined}
+        />
+        {detectedOS === undefined ? (
+          // placeholder dummy button
+          <Button className="mx-0.5" text={t("share")} />
+        ) : detectedOS === null ? (
+          // ドロップダウンメニューのふりをしたselect
+          // TODO: better UI
+          <Select
+            classNameOuter="mx-0.5"
+            classNameInner="min-w-0! w-18"
+            options={[t("share"), t("copyForShare"), t("xPost")]}
+            values={["", "copyForShare", "xPost"]}
+            value={""}
+            disableFirstOption
+            onChange={(s: string) => {
+              if (s === "copyForShare" && hasClipboard) {
+                toClipboard(true);
+              } else if (s === "xPost") {
+                window.open(xPostIntent, "_blank")?.focus();
+              }
+            }}
+          />
+        ) : (
+          // native share API on mobile
+          <Button
+            className="mx-0.5"
+            text={t("share")}
+            onClick={toAPI}
+            disabled={!shareData}
+          />
+        )}
+      </>
+    ),
+    modalButton: (
+      <Button className="mx-0.5" onClick={openModal}>
+        <Pic className="inline-block align-middle " />
+      </Button>
+    ),
   };
 }
 
@@ -209,6 +254,8 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
     }
   }, [cid, imageBlob]);
 
+  const detectedOS = useOSDetector();
+
   return (
     <ShareImageModalContext.Provider value={{ openModal }}>
       {props.children}
@@ -267,15 +314,27 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               {imageBlob && (
                 <p className="mb-1">
                   <Button
+                    className="mx-0.5"
                     text={t("download")}
                     onClick={() => saveAs(imageBlob, `${cid}.png`)}
                   />
-                  <span className="inline-block">
-                    {hasClipboard && (
-                      <Button text={t("copy")} onClick={toClipboard} />
+                  <>
+                    <Button
+                      className="mx-0.5"
+                      text={t("copyImage")}
+                      onClick={hasClipboard ? toClipboard : undefined}
+                    />
+                    {detectedOS === undefined ? null : detectedOS ===
+                      null ? null : (
+                      // native share API on mobile
+                      <Button
+                        className="mx-0.5"
+                        text={t("share")}
+                        onClick={toAPI}
+                        disabled={!shareData}
+                      />
                     )}
-                    {shareData && <Button text={t("share")} onClick={toAPI} />}
-                  </span>
+                  </>{" "}
                 </p>
               )}
               <Button text={t("close")} onClick={closeModal} />

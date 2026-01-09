@@ -9,7 +9,6 @@ import {
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import Button from "@/common/button.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
@@ -18,8 +17,6 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
-import { useOSDetector } from "@/common/pwaInstall.jsx";
-import Select from "@/common/select.jsx";
 
 interface Props {
   cid: string | undefined;
@@ -44,7 +41,6 @@ export function ShareBox(props: Props) {
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const shareLink = useShareLink(cid, brief, locale);
-  const detectedOS = useOSDetector();
 
   return (
     <>
@@ -140,39 +136,7 @@ export function ShareBox(props: Props) {
               {shareLink.url}
             </span>
           </a>
-          <span className="inline-block ml-2 space-x-1">
-            {shareLink.toClipboard && (
-              <Button text={t("copy")} onClick={shareLink.toClipboard} />
-            )}
-            {detectedOS === undefined ? (
-              // placeholder dummy button
-              <Button text={t("share")} />
-            ) : detectedOS === null ? (
-              // ドロップダウンメニューのふりをしたselect
-              // TODO: better UI
-              <Select
-                classNameInner="min-w-0! w-20"
-                options={[t("share") + "...", t("copyForShare"), t("xPost")]}
-                values={["", "copyForShare", "xPost"]}
-                value={""}
-                disableFirstOption
-                onChange={(s: string) => {
-                  if (s === "copyForShare" && shareLink.toClipboard) {
-                    shareLink.toClipboard(true);
-                  } else if (s === "xPost") {
-                    window.open(shareLink.xPostIntent, "_blank")?.focus();
-                  }
-                }}
-              />
-            ) : (
-              // native share API on mobile
-              <Button
-                text={t("share")}
-                onClick={shareLink.toAPI ?? undefined}
-                disabled={!shareLink.toAPI}
-              />
-            )}
-          </span>
+          <span className="inline-block ml-2">{shareLink.buttons}</span>
         </p>
       )}
       {cid && brief && (

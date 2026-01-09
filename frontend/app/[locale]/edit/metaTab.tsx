@@ -313,14 +313,7 @@ export function MetaTab(props: Props2) {
                 {shareLink.url}
               </span>
             </ExternalLink>
-            <span className="inline-block ml-2 space-x-1">
-              {shareLink.toClipboard && (
-                <Button text={t("copy")} onClick={shareLink.toClipboard} />
-              )}
-              {shareLink.toAPI && (
-                <Button text={t("share")} onClick={shareLink.toAPI} />
-              )}
-            </span>
+            <span className="inline-block ml-2">{shareLink.buttons}</span>
           </div>
         </>
       )}

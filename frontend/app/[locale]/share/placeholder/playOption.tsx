@@ -29,7 +29,6 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import Pic from "@icon-park/react/lib/icons/Pic";
 
 interface Props {
   locale: string;
@@ -427,15 +426,8 @@ function SelectedLevelInfo(props: {
       </button>
       {showBestDetail && selectedBestScore && (
         <span className="inline-block space-x-1 mt-1 ">
-          {shareLink.toClipboard && (
-            <Button text={t("copyScoreLink")} onClick={shareLink.toClipboard} />
-          )}
-          {shareLink.toAPI && (
-            <Button text={t("shareScoreLink")} onClick={shareLink.toAPI} />
-          )}
-          <Button onClick={shareLink.openModal}>
-            <Pic className="inline-block align-middle " />
-          </Button>
+          {shareLink.buttons}
+          {shareLink.modalButton}
         </span>
       )}
     </>
