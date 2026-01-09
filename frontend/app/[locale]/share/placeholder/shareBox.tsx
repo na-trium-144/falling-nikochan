@@ -9,7 +9,6 @@ import {
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import Button from "@/common/button.js";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
@@ -137,14 +136,7 @@ export function ShareBox(props: Props) {
               {shareLink.url}
             </span>
           </a>
-          <span className="inline-block ml-2 space-x-1">
-            {shareLink.toClipboard && (
-              <Button text={t("copy")} onClick={shareLink.toClipboard} />
-            )}
-            {shareLink.toAPI && (
-              <Button text={t("share")} onClick={shareLink.toAPI} />
-            )}
-          </span>
+          <span className="inline-block ml-2">{shareLink.buttons}</span>
         </p>
       )}
       {cid && brief && (

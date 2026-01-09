@@ -78,8 +78,6 @@ export default {
       exit: "Exit",
       shareResult: "Share your result!",
       otherPlayers: "Others' Play Records",
-      copyLink: "Copy Link",
-      shareLink: "Share",
       playbackRate: "Speed",
     },
   },

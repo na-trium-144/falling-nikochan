@@ -170,6 +170,14 @@ export function detectOS(): "android" | "ios" | null {
   }
   return null;
 }
+export function useOSDetector() {
+  // undefined: 未検出、null: PCなど、"android" | "ios": 各OS
+  const [os, setOS] = useState<"android" | "ios" | null | undefined>(undefined);
+  useEffect(() => {
+    setOS(detectOS());
+  }, []);
+  return os;
+}
 
 interface InitAssetsState {
   type?: "initAssets";

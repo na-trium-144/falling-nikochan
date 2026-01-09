@@ -116,8 +116,6 @@ export default {
         "この譜面は旧バージョンのフォーマット (ver.{ver}) から変換されており、" +
         "保存すると全ユーザーのこの譜面のプレイ記録がリセットされます。",
       shareLink: "共有用リンク",
-      copy: "コピー",
-      share: "共有",
       localSaveLoad: "ローカルに保存/読み込み",
       localSaveLoadHelp:
         "現在の譜面をあなたの端末上に保存・読み込みできます。<br></br>" +

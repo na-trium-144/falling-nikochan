@@ -8,14 +8,18 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  disableFirstOption?: boolean;
+  classNameOuter?: string;
+  classNameInner?: string;
 }
 export default function Select(props: Props) {
   return (
-    <span className="inline-block relative">
+    <span className={clsx("inline-block relative", props.classNameOuter)}>
       <select
         className={clsx(
           props.disabled ? buttonStyleDisabled : buttonStyle,
-          "pr-6"
+          "pr-6",
+          props.classNameInner
         )}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
@@ -23,7 +27,12 @@ export default function Select(props: Props) {
       >
         {props.options.map((option, i) => {
           return (
-            <option key={i} value={props.values[i]}>
+            <option
+              key={i}
+              value={props.values[i]}
+              hidden={props.disableFirstOption && i === 0}
+              disabled={props.disableFirstOption && i === 0}
+            >
               {option}
             </option>
           );
