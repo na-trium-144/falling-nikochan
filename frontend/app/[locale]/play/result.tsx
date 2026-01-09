@@ -19,7 +19,6 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
-import Pic from "@icon-park/react/lib/icons/Pic";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
@@ -254,35 +253,23 @@ export default function Result(props: Props) {
             )}
           </div>
         </div>
-        {!props.auto &&
-          !props.optionChanged &&
-          (shareLink.toClipboard || shareLink.toAPI) && (
-            <div
-              className={clsx(
-                "mb-2",
-                props.largeResult
-                  ? "flex flex-row items-baseline justify-center space-x-2"
-                  : "flex flex-col items-center"
-              )}
-              style={{ ...appearingAnimation3(7) }}
-            >
-              <span>{t("shareResult")}</span>
-              <span className="inline-block space-x-1">
-                {shareLink.toClipboard && (
-                  <Button
-                    text={t("copyLink")}
-                    onClick={shareLink.toClipboard}
-                  />
-                )}
-                {shareLink.toAPI && (
-                  <Button text={t("shareLink")} onClick={shareLink.toAPI} />
-                )}
-                <Button onClick={shareLink.openModal}>
-                  <Pic className="inline-block align-middle " />
-                </Button>
-              </span>
-            </div>
-          )}
+        {!props.auto && !props.optionChanged && (
+          <div
+            className={clsx(
+              "mb-2",
+              props.largeResult
+                ? "flex flex-row items-baseline justify-center space-x-2"
+                : "flex flex-col items-center"
+            )}
+            style={{ ...appearingAnimation3(7) }}
+          >
+            <span>{t("shareResult")}</span>
+            <span className="inline-block">
+              {shareLink.buttons}
+              {shareLink.modalButton}
+            </span>
+          </div>
+        )}
         {!props.auto &&
           !props.optionChanged &&
           props.record?.histogram &&

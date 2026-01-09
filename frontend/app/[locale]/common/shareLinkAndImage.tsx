@@ -16,6 +16,9 @@ import Button from "./button";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
 import { useDelayedDisplayState } from "./delayedDisplayState";
+import { useOSDetector } from "./pwaInstall";
+import Select from "./select";
+import Pic from "@icon-park/react/lib/icons/Pic";
 
 export function useShareLink(
   cid: string | undefined,
@@ -62,18 +65,29 @@ export function useShareLink(
       });
     }
   }
-  newTitle += " #fallingnikochan";
 
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
-  const toClipboard = useCallback(() => {
-    // og画像の生成は時間がかかるので、
-    // 共有される前にogを1回fetchしておくことにより、
-    // cloudflareにキャッシュさせる
-    void fetch(process.env.BACKEND_PREFIX + ogPath);
-    navigator.clipboard.writeText(
-      newTitle + "\n" + origin + sharePath + "?" + shareParams
-    );
-  }, [ogPath, newTitle, origin, sharePath, shareParams]);
+  const toClipboard = useCallback(
+    (withTitle: boolean = false) => {
+      // og画像の生成は時間がかかるので、
+      // 共有される前にogを1回fetchしておくことにより、
+      // cloudflareにキャッシュさせる
+      void fetch(process.env.BACKEND_PREFIX + ogPath);
+      if (withTitle) {
+        navigator.clipboard.writeText(
+          newTitle +
+            " #fallingnikochan\n" +
+            origin +
+            sharePath +
+            "?" +
+            shareParams
+        );
+      } else {
+        navigator.clipboard.writeText(origin + sharePath + "?" + shareParams);
+      }
+    },
+    [ogPath, newTitle, origin, sharePath, shareParams]
+  );
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
     void fetch(process.env.BACKEND_PREFIX + ogPath);
@@ -85,8 +99,8 @@ export function useShareLink(
   }, []);
   useEffect(() => {
     const shareData = {
-      title: newTitle,
-      text: newTitle,
+      title: newTitle + " #fallingnikochan",
+      text: newTitle + " #fallingnikochan",
       url: origin + sharePath + "?" + shareParams,
     };
     if (
@@ -97,12 +111,21 @@ export function useShareLink(
       setShareData(shareData);
     }
   }, [origin, newTitle, sharePath, shareParams]);
+  const xPostIntentParams = new URLSearchParams();
+  xPostIntentParams.set("hashtags", "fallingnikochan");
+  xPostIntentParams.set("related", "nikochan144");
+  xPostIntentParams.set("text", newTitle);
+  xPostIntentParams.set("url", origin + sharePath + "?" + shareParams);
+  const xPostIntent =
+    "https://twitter.com/intent/tweet?" + xPostIntentParams.toString();
 
   const shareImageCtx = useShareImageModalContext();
   const openModal = useCallback(
     () => shareImageCtx.openModal(ogPath, cid || "undefined"),
     [shareImageCtx, ogPath, cid]
   );
+
+  const detectedOS = useOSDetector();
 
   return {
     url: (
@@ -115,9 +138,50 @@ export function useShareLink(
       </>
     ),
     path: sharePath + "?" + shareParams,
-    toClipboard: hasClipboard ? toClipboard : null,
-    toAPI: shareData ? toAPI : null,
-    openModal,
+    buttons: (
+      <>
+        <Button
+          className="mx-0.5"
+          text={t("copyURL")}
+          onClick={hasClipboard ? toClipboard : undefined}
+        />
+        {detectedOS === undefined ? (
+          // placeholder dummy button
+          <Button className="mx-0.5" text={t("share")} />
+        ) : detectedOS === null ? (
+          // ドロップダウンメニューのふりをしたselect
+          // TODO: better UI
+          <Select
+            classNameOuter="mx-0.5"
+            classNameInner="min-w-0! w-18"
+            options={[t("share"), t("copyForShare"), t("xPost")]}
+            values={["", "copyForShare", "xPost"]}
+            value={""}
+            disableFirstOption
+            onChange={(s: string) => {
+              if (s === "copyForShare" && hasClipboard) {
+                toClipboard(true);
+              } else if (s === "xPost") {
+                window.open(xPostIntent, "_blank")?.focus();
+              }
+            }}
+          />
+        ) : (
+          // native share API on mobile
+          <Button
+            className="mx-0.5"
+            text={t("share")}
+            onClick={toAPI}
+            disabled={!shareData}
+          />
+        )}
+      </>
+    ),
+    modalButton: (
+      <Button className="mx-0.5" onClick={openModal}>
+        <Pic className="inline-block align-middle " />
+      </Button>
+    ),
   };
 }
 
@@ -190,6 +254,8 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
     }
   }, [cid, imageBlob]);
 
+  const detectedOS = useOSDetector();
+
   return (
     <ShareImageModalContext.Provider value={{ openModal }}>
       {props.children}
@@ -248,15 +314,27 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               {imageBlob && (
                 <p className="mb-1">
                   <Button
+                    className="mx-0.5"
                     text={t("download")}
                     onClick={() => saveAs(imageBlob, `${cid}.png`)}
                   />
-                  <span className="inline-block">
-                    {hasClipboard && (
-                      <Button text={t("copy")} onClick={toClipboard} />
+                  <>
+                    <Button
+                      className="mx-0.5"
+                      text={t("copyImage")}
+                      onClick={hasClipboard ? toClipboard : undefined}
+                    />
+                    {detectedOS === undefined ? null : detectedOS ===
+                      null ? null : (
+                      // native share API on mobile
+                      <Button
+                        className="mx-0.5"
+                        text={t("share")}
+                        onClick={toAPI}
+                        disabled={!shareData}
+                      />
                     )}
-                    {shareData && <Button text={t("share")} onClick={toAPI} />}
-                  </span>
+                  </>{" "}
                 </p>
               )}
               <Button text={t("close")} onClick={closeModal} />
