@@ -15,7 +15,22 @@ export const skyFlatButtonBorderStyle1 = clsx(
 );
 export const skyFlatButtonBorderStyle2 = clsx(
   boxBorderStyle2,
-  "border-sky-300/80! dark:border-amber-800/50!",
+  "border-sky-300/80! dark:border-orange-800/50!",
+  "mask-linear-to-75%!",
+  "opacity-0 group-hover:opacity-100",
+  "group-active:mask-none!"
+);
+
+export const invertedFlatButtonStyle = clsx(
+  "relative group cursor-pointer",
+  "hover:bg-orange-200 hover:dark:bg-sky-950",
+  "active:bg-orange-200 active:dark:bg-sky-950",
+  "active:inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
+);
+export const invertedFlatButtonBorderStyle1 = skyFlatButtonBorderStyle1
+export const invertedFlatButtonBorderStyle2 = clsx(
+  boxBorderStyle2,
+  "border-orange-300/80! dark:border-sky-800/50!",
   "mask-linear-to-75%!",
   "opacity-0 group-hover:opacity-100",
   "group-active:mask-none!"

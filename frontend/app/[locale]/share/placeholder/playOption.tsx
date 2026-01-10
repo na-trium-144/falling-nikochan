@@ -33,6 +33,9 @@ import {
   boxButtonBorderStyle1,
   boxButtonBorderStyle2,
   boxButtonStyle,
+  invertedFlatButtonBorderStyle1,
+  invertedFlatButtonBorderStyle2,
+  invertedFlatButtonStyle,
   skyFlatButtonBorderStyle1,
   skyFlatButtonBorderStyle2,
   skyFlatButtonStyle,
@@ -355,16 +358,19 @@ function SelectedLevelInfo(props: {
         className={clsx(
           "w-full mt-2 px-2 rounded-lg",
           "flex flex-col items-center",
-          selectedBestScore &&
-            clsx(
-              "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60",
-              "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800"
-            )
+          selectedBestScore && invertedFlatButtonStyle
         )}
         onClick={() =>
           setShowBestDetail(!!selectedBestScore && !showBestDetail)
         }
       >
+        {selectedBestScore && (
+          <>
+            <span className={invertedFlatButtonBorderStyle1} />
+            <span className={invertedFlatButtonBorderStyle2} />
+            <ButtonHighlight />
+          </>
+        )}
         <p className="">{t("bestScore")}</p>
         {showBestDetail && selectedBestScore?.date && (
           <span className="text-sm text-slate-500 dark:text-stone-400">
