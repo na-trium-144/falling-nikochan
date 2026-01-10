@@ -35,7 +35,6 @@ import {
   emptyChart,
   LevelEdit,
   LevelMin,
-  levelTypes,
   numEvents,
   validateChart,
 } from "@falling-nikochan/chart";
@@ -76,7 +75,6 @@ import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { GuideMain } from "./guideMain.js";
-import { levelBgColors } from "@/common/levelColors.js";
 import { Signature } from "@falling-nikochan/chart";
 import { Chart5 } from "@falling-nikochan/chart";
 import { Chart6 } from "@falling-nikochan/chart";
@@ -96,6 +94,7 @@ import {
   skyFlatButtonBorderStyle2,
   skyFlatButtonStyle,
 } from "@/common/flatButton.jsx";
+import { useColorThief } from "@/common/colorThief.js";
 
 export default function EditAuth(props: {
   locale: string;
@@ -1190,6 +1189,8 @@ function Page(props: Props) {
   });
   const [dragOver, setDragOver] = useState<boolean>(false);
 
+  const colorThief = useColorThief();
+
   return (
     <main
       className={clsx(
@@ -1361,11 +1362,15 @@ function Page(props: Props) {
               <div
                 className={clsx(
                   "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
-                  levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
-                    levelBgColors[1],
-                  chart || "invisible "
+                  // levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
+                  //   levelBgColors[1],
+                  chart || "invisible",
+                  colorThief.boxStyle
                 )}
+                style={{ color: colorThief.currentColor }}
               >
+                <span className={clsx(colorThief.boxBorderStyle1)} />
+                <span className={clsx(colorThief.boxBorderStyle2)} />
                 <FlexYouTube
                   fixedSide="width"
                   className={clsx(
@@ -1380,6 +1385,14 @@ function Page(props: Props) {
                   onStop={onStop}
                   onPlaybackRateChange={setPlaybackRate}
                 />
+                {chart?.ytId && (
+                  <img
+                    ref={colorThief.imgRef}
+                    className="hidden"
+                    src={`https://i.ytimg.com/vi/${chart?.ytId}/mqdefault.jpg`}
+                    crossOrigin="anonymous"
+                  />
+                )}
               </div>
               <div
                 className={clsx(

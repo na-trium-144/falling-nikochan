@@ -18,8 +18,7 @@ import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
 import { useColorThief } from "@/common/colorThief.js";
-import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box.jsx";
-import { defaultThemeStyle, useTheme } from "@/common/theme.jsx";
+import { defaultThemeStyle } from "@/common/theme.jsx";
 import { ExternalLink } from "@/common/extLink.jsx";
 
 interface Props {
@@ -45,9 +44,7 @@ export function ShareBox(props: Props) {
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const shareLink = useShareLink(cid, brief, locale);
-  const { imgRef, colorLight, colorDark } = useColorThief();
-  const { isDark } = useTheme();
-  const color = isDark ? colorDark : colorLight;
+  const colorThief = useColorThief();
 
   interface YtMeta {
     title: string;
@@ -81,24 +78,15 @@ export function ShareBox(props: Props) {
             "w-full shrink-0 main-wide:basis-1/3 share-yt-wide:w-80",
             "p-2 rounded-lg",
             ytMeta &&
-              color &&
+              colorThief.ready &&
               "rounded-br-none main-wide:rounded-br-lg main-wide:rounded-bl-none",
             "relative",
-            // boxStyle,
-            "inset-shadow-button backdrop-blur-xs",
-            "inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25",
-            "bg-current/50"
+            colorThief.boxStyle
           )}
-          style={{
-            color: color
-              ? `rgb(${color[0]}, ${color[1]}, ${color[2]})`
-              : isDark
-                ? "var(--color-stone-700)"
-                : "var(--color-white) 50%",
-          }}
+          style={{ color: colorThief.currentColor }}
         >
-          <span className={boxBorderStyle1} />
-          <span className={clsx(boxBorderStyle2, "border-current/75!")} />
+          <span className={colorThief.boxBorderStyle1} />
+          <span className={colorThief.boxBorderStyle2} />
           <FlexYouTube
             fixedSide="width"
             className="w-full"
@@ -108,7 +96,7 @@ export function ShareBox(props: Props) {
           />
           {brief?.ytId && (
             <img
-              ref={imgRef}
+              ref={colorThief.imgRef}
               className="hidden"
               src={`https://i.ytimg.com/vi/${brief?.ytId}/mqdefault.jpg`}
               crossOrigin="anonymous"
@@ -129,31 +117,23 @@ export function ShareBox(props: Props) {
                   "px-2 pb-1 main-wide:pt-1 w-max max-w-full",
                   "rounded-b-lg main-wide:rounded-l-lg main-wide:rounded-r-none",
                   "relative",
-                  // boxStyle,
-                  "inset-shadow-button backdrop-blur-xs",
-                  "inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25",
-                  "bg-current/50",
-                  !(ytMeta && color) &&
+                  colorThief.boxStyle,
+                  !(ytMeta && colorThief.ready) &&
                     "-translate-y-full main-wide:translate-y-0 main-wide:translate-x-full",
                   "transition-transform duration-500 ease-out"
                 )}
-                style={{
-                  color: color
-                    ? `rgb(${color[0]}, ${color[1]}, ${color[2]})`
-                    : "transparent",
-                }}
+                style={{ color: colorThief.currentColor }}
               >
                 <span
                   className={clsx(
-                    boxBorderStyle1,
+                    colorThief.boxBorderStyle1,
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
                 <span
                   className={clsx(
-                    boxBorderStyle2,
-                    "border-t-0 main-wide:border-t main-wide:border-r-0",
-                    "border-current/75!"
+                    colorThief.boxBorderStyle2,
+                    "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
                 <ExternalLink
