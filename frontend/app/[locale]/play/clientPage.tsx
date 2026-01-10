@@ -949,7 +949,7 @@ function Play(props: Props) {
           </div>
           {!initDone && (
             <CenterBox
-              className={clsx(
+              classNameOuter={clsx(
                 "transition-opacity duration-200 ease-out",
                 showLoading ? "opacity-100" : "opacity-0"
               )}

@@ -7,6 +7,8 @@
   --color-orange-975: #20100a;
   --color-amber-975: #20180a;
   --blur-2xs: 2px;
+  --radius-box: 1.25rem;
+  --shadow-modal: var(--shadow-md);
 }
 @custom-variant dark (&:where(.dark, .dark *));
 

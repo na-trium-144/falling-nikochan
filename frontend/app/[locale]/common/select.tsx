@@ -1,6 +1,6 @@
 import clsx from "clsx/lite";
 import Down from "@icon-park/react/lib/icons/Down";
-import { buttonStyle, buttonStyleDisabled } from "./button.js";
+// import { buttonStyle, buttonStyleDisabled } from "./button.js";
 
 interface Props {
   options: string[];
@@ -17,7 +17,7 @@ export default function Select(props: Props) {
     <span className={clsx("inline-block relative", props.classNameOuter)}>
       <select
         className={clsx(
-          props.disabled ? buttonStyleDisabled : buttonStyle,
+          // props.disabled ? buttonStyleDisabled : buttonStyle,
           "pr-6",
           props.classNameInner
         )}

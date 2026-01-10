@@ -50,9 +50,9 @@ export function ChangeLogPopup(props: PopupProps) {
           }}
         />
         <Box
-          className={clsx(
+          classNameOuter={clsx(
             "absolute bottom-full left-1/2 -translate-x-2/4 z-30 origin-bottom",
-            "shadow-lg",
+            "shadow-modal",
             "transition-all duration-200",
             popupAppearing
               ? "ease-in scale-100 opacity-100"

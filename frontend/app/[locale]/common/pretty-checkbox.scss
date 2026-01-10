@@ -1,0 +1,30 @@
+$pretty--color-primary: #51a2ff; /* blue-400 */
+$pretty--color-warning: #973c00; /* amber-800  */
+
+@import "pretty-checkbox/src/scss/variables";
+@import "pretty-checkbox/src/scss/core";
+@import "pretty-checkbox/src/scss/essentials/keyframes";
+@import "pretty-checkbox/src/scss/essentials/functions";
+@import "pretty-checkbox/src/scss/essentials/mixins";
+/*@import "pretty-checkbox/src/scss/elements/default/fill";*/
+/*@import "pretty-checkbox/src/scss/elements/default/outline";*/
+/*@import "pretty-checkbox/src/scss/elements/default/thick";*/
+/*@import "pretty-checkbox/src/scss/elements/font-icon/general";*/
+@import "pretty-checkbox/src/scss/elements/svg/general";
+/*@import "pretty-checkbox/src/scss/elements/image/general";*/
+/*@import "pretty-checkbox/src/scss/elements/switch/general";*/
+/*@import "pretty-checkbox/src/scss/elements/switch/fill";*/
+/*@import "pretty-checkbox/src/scss/elements/switch/slim";*/
+@import "pretty-checkbox/src/scss/states/hover";
+@import "pretty-checkbox/src/scss/states/focus";
+/*@import "pretty-checkbox/src/scss/states/indeterminate";*/
+@import "pretty-checkbox/src/scss/extras/toggle";
+/*@import "pretty-checkbox/src/scss/extras/plain";*/
+/*@import "pretty-checkbox/src/scss/extras/round";*/
+@import "pretty-checkbox/src/scss/extras/curve";
+@import "pretty-checkbox/src/scss/extras/animation";
+@import "pretty-checkbox/src/scss/extras/disabled";
+/*@import "pretty-checkbox/src/scss/extras/locked";*/
+@import "pretty-checkbox/src/scss/extras/colors";
+/*@import "pretty-checkbox/src/scss/extras/bigger";*/
+/*@import "pretty-checkbox/src/scss/extras/print";*/

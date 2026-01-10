@@ -29,68 +29,67 @@ export default function StatusBox(props: Props) {
 
   return (
     <Box
-      className={clsx(props.className, "p-3", isMobile || "origin-top-right")}
-      style={{
+      classNameOuter={clsx(
+        props.className,
+        "p-3",
+        isMobile ? "origin-top-right" : "w-54"
+      )}
+      classNameInner={clsx(
+        props.isMobile ? "flex flex-row items-center justify-between" : ""
+      )}
+      styleOuter={{
         ...props.style,
         fontSize: textScale * rem,
       }}
     >
-      <div
-        className={clsx(
-          props.isMobile
-            ? "flex flex-row h-full items-center justify-between"
-            : "w-48"
-        )}
-      >
-        {["good", "ok", "bad", "miss"].map((name, ji) => (
-          <StatusItem key={ji}>
-            <StatusName>
-              <StatusIcon index={ji} />
-              {t(name)}
-            </StatusName>
-            <StatusValue>{props.judgeCount[ji]}</StatusValue>
-          </StatusItem>
-        ))}
-        <StatusItem wide disabled={props.bigTotal === 0}>
-          <StatusName>{t("big")}</StatusName>
-          <StatusValue>{props.bigCount}</StatusValue>
-          {!props.isMobile && (
-            <span className="w-12 pl-1 flex flex-row items-baseline">
-              <span className="flex-1">/</span>
-              <span>{props.bigTotal}</span>
-            </span>
-          )}
+      {["good", "ok", "bad", "miss"].map((name, ji) => (
+        <StatusItem key={ji}>
+          <StatusName>
+            <StatusIcon index={ji} />
+            {t(name)}
+          </StatusName>
+          <StatusValue>{props.judgeCount[ji]}</StatusValue>
         </StatusItem>
-        {props.isMobile && screenWidth >= 39 * rem && (
-          <span
-            className={clsx(
-              "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2",
-              props.bigTotal === 0 && "text-slate-400 dark:text-stone-600"
-            )}
-          >
+      ))}
+      <StatusItem wide disabled={props.bigTotal === 0}>
+        <StatusName>{t("big")}</StatusName>
+        <StatusValue>{props.bigCount}</StatusValue>
+        {!props.isMobile && (
+          <span className="w-12 pl-1 flex flex-row items-baseline">
             <span className="flex-1">/</span>
             <span>{props.bigTotal}</span>
           </span>
         )}
-        <StatusItem wide>
-          <StatusName>{t("remains")}</StatusName>
-          <StatusValue>
-            {props.notesTotal - props.judgeCount.reduce((sum, j) => sum + j, 0)}
-          </StatusValue>
-          {!props.isMobile && (
-            <span className="w-12 pl-1 flex flex-row items-baseline">
-              <span className="flex-1">/</span>
-              <span>{props.notesTotal}</span>
-            </span>
+      </StatusItem>
+      {props.isMobile && screenWidth >= 39 * rem && (
+        <span
+          className={clsx(
+            "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2",
+            props.bigTotal === 0 && "text-slate-400 dark:text-stone-600"
           )}
-        </StatusItem>
-        {props.isMobile && screenWidth >= 35 * rem && (
-          <span className="flex-none w-12 self-end translate-y-1 flex flex-row items-baseline">
+        >
+          <span className="flex-1">/</span>
+          <span>{props.bigTotal}</span>
+        </span>
+      )}
+      <StatusItem wide>
+        <StatusName>{t("remains")}</StatusName>
+        <StatusValue>
+          {props.notesTotal - props.judgeCount.reduce((sum, j) => sum + j, 0)}
+        </StatusValue>
+        {!props.isMobile && (
+          <span className="w-12 pl-1 flex flex-row items-baseline">
             <span className="flex-1">/</span>
             <span>{props.notesTotal}</span>
           </span>
         )}
-      </div>
+      </StatusItem>
+      {props.isMobile && screenWidth >= 35 * rem && (
+        <span className="flex-none w-12 self-end translate-y-1 flex flex-row items-baseline">
+          <span className="flex-1">/</span>
+          <span>{props.notesTotal}</span>
+        </span>
+      )}
     </Box>
   );
 }

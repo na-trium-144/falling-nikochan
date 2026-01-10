@@ -141,12 +141,12 @@ export default function Result(props: Props) {
     <>
       <CenterBox
         ref={ref}
-        className={clsx(
+        classNameInner={clsx(
           "overflow-y-auto overflow-x-clip",
-          props.hidden && "hidden",
           showing >= resultAnimDelays.length ? "touch-pan-y" : "touch-none"
         )}
-        style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+        hidden={props.hidden}
+        styleOuter={{ maxHeight: props.mainWindowHeight - 3 * rem }}
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >

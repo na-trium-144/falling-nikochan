@@ -1,6 +1,9 @@
 import clsx from "clsx/lite";
-import CheckCorrect from "@icon-park/react/lib/icons/CheckCorrect";
-import Square from "@icon-park/react/lib/icons/Square";
+import { Checkbox } from "pretty-checkbox-react";
+import { useTheme } from "./theme";
+// import "pretty-checkbox";
+// import "pretty-checkbox/src/pretty-checkbox.scss";
+import "./pretty-checkbox.scss";
 
 interface Props {
   children: React.ReactNode;
@@ -10,21 +13,29 @@ interface Props {
   disabled?: boolean;
 }
 export default function CheckBox(props: Props) {
+  const { isDark } = useTheme();
   return (
-    <button
+    <Checkbox
+      shape="curve"
+      animation="smooth"
+      color={isDark ? "danger-o" : "primary-o"}
       className={clsx(
-        "hover:text-slate-500 disabled:text-slate-400",
-        "hover:dark:text-stone-500 disabled:dark:text-stone-600",
-        "text-left pl-5 cursor-pointer",
+        !props.disabled && "hover:text-slate-500 hover:dark:text-stone-500",
         props.className
       )}
-      onClick={() => props.onChange(!props.value)}
+      icon={
+        <svg className="svg svg-icon" viewBox="0 0 20 20">
+          <path
+            d="M7.629,14.566c0.125,0.125,0.291,0.188,0.456,0.188c0.164,0,0.329-0.062,0.456-0.188l8.219-8.221c0.252-0.252,0.252-0.659,0-0.911c-0.252-0.252-0.659-0.252-0.911,0l-7.764,7.763L4.152,9.267c-0.252-0.251-0.66-0.251-0.911,0c-0.252,0.252-0.252,0.66,0,0.911L7.629,14.566z"
+            style={{ stroke: "currentColor", fill: "currentColor" }}
+          ></path>
+        </svg>
+      }
+      onChange={() => props.onChange(!props.value)}
       disabled={props.disabled}
+      state={props.value}
     >
-      <span className="inline-block w-0 -translate-x-5 translate-y-0.5">
-        {props.value ? <CheckCorrect /> : <Square />}
-      </span>
       {props.children}
-    </button>
+    </Checkbox>
   );
 }
