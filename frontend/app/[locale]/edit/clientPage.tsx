@@ -1277,11 +1277,11 @@ function Page(props: Props) {
         <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-6">
             <Box
-              className={clsx(
+              classNameOuter={clsx(
                 "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
-                "p-6 overflow-x-clip overflow-y-auto",
-                "shadow-lg"
+                "shadow-modal"
               )}
+              classNameInner={clsx("p-6 overflow-x-clip overflow-y-auto")}
             >
               {props.modal}
             </Box>
@@ -1322,7 +1322,7 @@ function Page(props: Props) {
             }
           }}
         >
-          <Box className="absolute inset-6 m-auto w-max h-max p-6 shadow-md">
+          <Box classNameOuter="absolute inset-6 m-auto w-max h-max p-6 shadow-modal">
             <p>{t("dragOver")}</p>
           </Box>
         </div>
@@ -1568,10 +1568,14 @@ function Page(props: Props) {
                   onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
                 />
               </div>
-              <div className="flex flex-row ml-3 mt-3">
+              <div className="flex flex-row ml-6 mt-3">
                 {tabNameKeys.map((key, i) =>
                   i === tab ? (
-                    <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
+                    <Box
+                      key={i}
+                      classNameOuter="rounded-b-none px-3 pt-2 pb-1"
+                      classNameBorder="border-b-0!"
+                    >
                       {t(`${key}.title`)}
                     </Box>
                   ) : (
@@ -1589,11 +1593,11 @@ function Page(props: Props) {
                 )}
               </div>
               <Box
-                className={clsx(
-                  "p-3 overflow-auto",
-                  "min-h-96 relative",
+                classNameOuter={clsx(
+                  "min-h-96",
                   "edit-wide:flex-1 edit-wide:min-h-0"
                 )}
+                classNameInner={clsx("p-3 overflow-auto relative")}
               >
                 {tab === 0 ? (
                   <MetaTab

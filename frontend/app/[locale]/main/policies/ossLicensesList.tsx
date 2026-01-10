@@ -53,7 +53,7 @@ export function OSSLicensesList() {
 
   if (open) {
     return (
-      <Box className="ml-6 p-4">
+      <Box classNameOuter="ml-6 p-4">
         <p className="mb-4">
           <button className={clsx(linkStyle1)} onClick={() => setOpen(false)}>
             <Close className="inline-block align-middle mr-2" />

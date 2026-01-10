@@ -30,13 +30,13 @@ export function AboutModal(props: AProps) {
     >
       <div className="absolute inset-12">
         <Box
-          className={clsx(
+          classNameOuter={clsx(
             "absolute inset-0 m-auto w-180 h-max max-w-full max-h-full",
-            "p-6 overflow-x-clip overflow-y-auto",
-            "shadow-lg",
+            "shadow-modal",
             "transition-transform duration-200 origin-center",
             props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
           )}
+          classNameInner={clsx("p-6 overflow-x-clip overflow-y-auto")}
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">

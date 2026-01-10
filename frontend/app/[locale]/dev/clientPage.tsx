@@ -46,7 +46,10 @@ export function DevPage(props: { locale: string }) {
             "flex items-center justify-center"
           )}
         >
-          <Box className="w-max h-max max-w-full max-h-full p-6 overflow-y-auto space-y-3">
+          <Box
+            classNameOuter="w-max h-max max-w-full max-h-full"
+            classNameInner="p-6 overflow-y-auto space-y-3"
+          >
             <div className="hidden mb-3 main-wide:flex flex-row items-center">
               <button
                 className={clsx("block w-max", linkStyle1)}

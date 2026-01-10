@@ -170,7 +170,7 @@ export default function ShareChart(props: Props) {
             "flex flex-col items-center justify-center"
           )}
         >
-          <Box className="w-max h-max max-w-full p-6">
+          <Box classNameOuter="w-max h-max max-w-full p-6">
             <ShareBox
               cid={cid}
               brief={brief}

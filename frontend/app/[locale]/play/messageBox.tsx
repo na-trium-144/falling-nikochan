@@ -69,7 +69,7 @@ export function ReadyMessage(props: MessageProps) {
 
   return (
     <CenterBox
-      className="overflow-clip "
+      classNameInner="overflow-clip"
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
@@ -382,7 +382,7 @@ export function StopMessage(props: MessageProps2) {
 
   return (
     <CenterBox
-      className={clsx(props.hidden && "hidden")}
+      hidden={props.hidden}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >

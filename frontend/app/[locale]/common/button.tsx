@@ -1,24 +1,70 @@
 import clsx from "clsx/lite";
-import { ReactNode } from "react";
+import { ReactNode, PointerEvent } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 
-export const buttonStyleDisabled =
-  "appearance-none " +
-  "m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center " +
-  "border border-slate-400 dark:border-stone-600 rounded-lg cursor-default " +
-  "bg-slate-400 dark:bg-stone-700 ";
-export const buttonStyle =
-  "appearance-none " +
-  "m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center " +
-  "border border-slate-400 dark:border-stone-600 rounded-lg cursor-pointer " +
-  "bg-blue-50 bg-gradient-to-t from-blue-100 to-blue-50 " +
-  "hover:bg-white hover:from-blue-50 hover:to-white " +
-  "active:bg-blue-200 active:from-blue-200 active:to-blue-200 " +
-  "dark:bg-amber-900 dark:from-amber-950 dark:to-amber-900 " +
-  "hover:dark:bg-amber-800 hover:dark:from-amber-900 hover:dark:to-amber-800 " +
-  "active:dark:bg-amber-975 active:dark:from-amber-975 active:dark:to-amber-975 " +
-  "shadow active:shadow-inner ";
+const buttonStyleDisabled = clsx(
+  "appearance-none",
+  "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-default",
+  "border border-blue-300/50 dark:border-amber-800/30 rounded-xl",
+  "bg-slate-300/50 dark:bg-stone-700/50"
+);
+const buttonStyle = clsx(
+  "appearance-none",
+  "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer",
+  "rounded-xl",
+  "group",
+  "bg-blue-50/75 bg-gradient-to-t from-blue-200/75 to-blue-50/75",
+  "active:bg-blue-200/75 active:from-blue-200/75 active:to-blue-200/50",
+  "dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75",
+  "active:dark:bg-amber-950/75 active:dark:from-amber-950/75 active:dark:to-amber-950/75",
+  "shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50",
+  "active:inset-shadow-[0.25rem_0.5rem_1rem] inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75"
+);
+function ButtonStyleElements(props: { disabled?: boolean }) {
+  if (props.disabled) {
+    return null;
+  }
+  return (
+    <>
+      <span
+        className={clsx(
+          "absolute inset-0 z-2 rounded-[inherit] pointer-events-none",
+          "border border-white/80 dark:border-stone-300/50",
+          "mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-75%",
+          "group-active:opacity-0"
+        )}
+      />
+      <span
+        className={clsx(
+          "absolute inset-0 z-1 rounded-[inherit] pointer-events-none",
+          "border border-blue-300/80 dark:border-amber-800/50",
+          "-mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-75%",
+          "group-active:mask-none"
+        )}
+      />
+      <span
+        className={clsx(
+          "absolute inset-0 z-3 rounded-[inherit]",
+          "bg-radial-[circle_3rem_at_var(--hl-x)_var(--hl-y)]",
+          "from-white/50 to-white/25",
+          "dark:from-stone-300/20 dark:to-stone-300/10",
+          "opacity-0 group-hover:opacity-100 group-active:opacity-25",
+          "transition-opacity duration-100"
+        )}
+        onPointerMove={updateButtonStyleHighlight}
+      />
+    </>
+  );
+}
+function updateButtonStyleHighlight(e: PointerEvent) {
+  const button = e.currentTarget as HTMLButtonElement;
+  const rect = button.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  button.style.setProperty("--hl-x", `${x}px`);
+  button.style.setProperty("--hl-y", `${y}px`);
+}
 
 interface Props {
   className?: string;
@@ -44,6 +90,7 @@ export default function Button(props: Props) {
       onKeyUp={(e) => e.stopPropagation()}
       disabled={props.disabled || props.loading}
     >
+      <ButtonStyleElements disabled={props.disabled || props.loading} />
       {props.loading && <SlimeSVG />}
       <span className={clsx(props.keyName && "mr-1")}>
         {props.text ?? props.children}
@@ -61,5 +108,26 @@ export default function Button(props: Props) {
             <Key className="text-xs p-0.5 ">{props.keyName}</Key>
           )}
     </button>
+  );
+}
+
+interface LabelProps {
+  className?: string;
+  children?: ReactNode;
+  htmlFor?: string;
+}
+export function ButtonStyledLabel(props: LabelProps) {
+  return (
+    <label
+      className={clsx(
+        buttonStyle,
+        "inline-block align-bottom",
+        props.className
+      )}
+      htmlFor={props.htmlFor}
+    >
+      <ButtonStyleElements />
+      {props.children}
+    </label>
   );
 }

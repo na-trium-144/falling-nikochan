@@ -83,6 +83,15 @@ const nextConfig = {
   output: "export",
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   env,
+  sassOptions: {
+    // pretty-checkbox が出すwarning
+    silenceDeprecations: [
+      "import",
+      "legacy-js-api",
+      "global-builtin",
+      "color-functions",
+    ],
+  },
   webpack: (config, options) => {
     return {
       ...config,

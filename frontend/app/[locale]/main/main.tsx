@@ -131,8 +131,9 @@ export function IndexMain(props: Props) {
           </nav>
         )}
         <Box
-          ref={props.boxRef}
-          className={clsx("flex flex-col p-6 overflow-y-auto min-h-0 flex-1")}
+          refInner={props.boxRef}
+          classNameOuter={clsx("min-h-0 flex-1 min-w-0")}
+          classNameInner={clsx("flex flex-col p-6 overflow-y-auto")}
         >
           {!props.noBackButtonPC && (
             <button
