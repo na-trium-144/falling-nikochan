@@ -33,7 +33,7 @@ export default function CheckBox(props: Props) {
       }
       onChange={() => props.onChange(!props.value)}
       disabled={props.disabled}
-      state={props.value}
+      checked={props.value}
     >
       {props.children}
     </Checkbox>
