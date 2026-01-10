@@ -91,7 +91,7 @@ export async function getYTDataEntry(
         localizations: data.items[0].localizations || {},
         lastFetched: Date.now(),
       };
-      db.collection<YTDataEntry>("ytData").updateOne(
+      await db.collection<YTDataEntry>("ytData").updateOne(
         { ytId },
         { $set: entry },
         { upsert: true }

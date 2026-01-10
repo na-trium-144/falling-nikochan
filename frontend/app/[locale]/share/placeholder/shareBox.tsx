@@ -17,6 +17,10 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
+import { useColorThief } from "@/common/colorThief.js";
+import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box.jsx";
+import { defaultThemeStyle, useTheme } from "@/common/theme.jsx";
+import { ExternalLink } from "@/common/extLink.jsx";
 
 interface Props {
   cid: string | undefined;
@@ -41,83 +45,200 @@ export function ShareBox(props: Props) {
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const shareLink = useShareLink(cid, brief, locale);
+  const { imgRef, colorLight, colorDark } = useColorThief();
+  const { isDark } = useTheme();
+  const color = isDark ? colorDark : colorLight;
+
+  interface YtMeta {
+    title: string;
+    channelTitle: string;
+  }
+  const [ytMeta, setYtMeta] = useState<YtMeta | null>(null);
+  useEffect(() => {
+    if (cid) {
+      fetch(
+        process.env.BACKEND_PREFIX + `/api/ytMeta/${cid}?lang=${locale}`
+      ).then(async (res) => {
+        if (res.ok) {
+          setYtMeta(await res.json());
+        } else {
+          setYtMeta(null);
+        }
+      });
+    }
+  }, [cid, locale]);
 
   return (
     <>
       <div
         className={clsx(
-          "flex flex-col space-y-2",
-          "main-wide:space-y-0 main-wide:flex-row-reverse main-wide:items-center"
+          "flex flex-col",
+          "main-wide:flex-row-reverse main-wide:items-end"
         )}
       >
-        <FlexYouTube
-          fixedSide="width"
-          className={clsx("w-full main-wide:basis-1/3 share-yt-wide:w-80")}
-          id={brief?.ytId}
-          control={true}
-          ytPlayer={ytPlayer}
-        />
-        <div className="main-wide:flex-1 main-wide:self-start">
-          <div
-            className={clsx(
-              "mb-2",
-              props.forceShowCId || "hidden main-wide:block"
-            )}
-          >
-            {props.backButton && (
-              <button
-                className={clsx(pagerButtonClass, "mr-4")}
-                onClick={props.backButton}
+        <div
+          className={clsx(
+            "w-full shrink-0 main-wide:basis-1/3 share-yt-wide:w-80",
+            "p-2 rounded-lg",
+            ytMeta &&
+              color &&
+              "rounded-br-none main-wide:rounded-br-lg main-wide:rounded-bl-none",
+            "relative",
+            // boxStyle,
+            "inset-shadow-button backdrop-blur-xs",
+            "inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25",
+            "bg-current/50"
+          )}
+          style={{
+            color: color
+              ? `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+              : isDark
+                ? "var(--color-stone-700)"
+                : "var(--color-white) 50%",
+          }}
+        >
+          <span className={boxBorderStyle1} />
+          <span className={clsx(boxBorderStyle2, "border-current/75!")} />
+          <FlexYouTube
+            fixedSide="width"
+            className="w-full"
+            id={brief?.ytId}
+            control={true}
+            ytPlayer={ytPlayer}
+          />
+          {brief?.ytId && (
+            <img
+              ref={imgRef}
+              className="hidden"
+              src={`https://i.ytimg.com/vi/${brief?.ytId}/mqdefault.jpg`}
+              crossOrigin="anonymous"
+            />
+          )}
+        </div>
+        <div className="main-wide:flex-1 main-wide:self-stretch min-w-0 flex flex-col items-start">
+          <div className="w-full h-full flex flex-col main-wide:flex-col-reverse items-start overflow-hidden">
+            <div
+              className={clsx(
+                "self-end w-max max-w-full pl-3",
+                "mb-2 main-wide:mb-0 main-wide:mt-2",
+                "text-right leading-0"
+              )}
+            >
+              <div
+                className={clsx(
+                  "px-2 pb-1 main-wide:pt-1 w-max max-w-full",
+                  "rounded-b-lg main-wide:rounded-l-lg main-wide:rounded-r-none",
+                  "relative",
+                  // boxStyle,
+                  "inset-shadow-button backdrop-blur-xs",
+                  "inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25",
+                  "bg-current/50",
+                  !(ytMeta && color) &&
+                    "-translate-y-full main-wide:translate-y-0 main-wide:translate-x-full",
+                  "transition-transform duration-500 ease-out"
+                )}
+                style={{
+                  color: color
+                    ? `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+                    : "transparent",
+                }}
               >
-                <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
-              </button>
-            )}
-            <span>{cid && `ID: ${cid}`}</span>
-          </div>
-          <p className="font-title text-2xl">{brief?.title}</p>
-          <p className="font-title text-lg">{brief?.composer}</p>
-          <p className="mt-1">
-            <span className="inline-block">
-              <span className="text-sm">
-                {brief && `${t("chartCreator")}:`}
-              </span>
-              <span className="ml-2 font-title text-lg">
-                {brief?.chartCreator}
-              </span>
-            </span>
-            <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
-              <span className="inline-block">
-                {updatedAt && `(${updatedAt})`}
-              </span>
-              <span>
-                {cid && isSample(cid) ? (
-                  <span className="ml-2">
-                    <International className="inline-block w-5 translate-y-0.5" />
-                    <span>{t("isSample")}</span>
+                <span
+                  className={clsx(
+                    boxBorderStyle1,
+                    "border-t-0 main-wide:border-t main-wide:border-r-0"
+                  )}
+                />
+                <span
+                  className={clsx(
+                    boxBorderStyle2,
+                    "border-t-0 main-wide:border-t main-wide:border-r-0",
+                    "border-current/75!"
+                  )}
+                />
+                <ExternalLink
+                  className={clsx(
+                    "max-w-full text-sm main-wide:text-base font-title",
+                    "overflow-hidden text-nowrap text-ellipsis"
+                  )}
+                  href={`https://www.youtube.com/watch?v=${brief?.ytId}`}
+                >
+                  {ytMeta?.title}
+                </ExternalLink>
+                <p
+                  className={clsx(
+                    "font-title text-xs main-wide:text-sm",
+                    defaultThemeStyle
+                  )}
+                >
+                  {ytMeta?.channelTitle}
+                </p>
+              </div>
+            </div>
+            <div className="flex-1" />
+            <div>
+              <div
+                className={clsx(
+                  "mb-2",
+                  props.forceShowCId || "hidden main-wide:block"
+                )}
+              >
+                {props.backButton && (
+                  <button
+                    className={clsx(pagerButtonClass, "mr-4")}
+                    onClick={props.backButton}
+                  >
+                    <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+                  </button>
+                )}
+                <span>{cid && `ID: ${cid}`}</span>
+              </div>
+              <p className="font-title text-2xl">{brief?.title}</p>
+              <p className="font-title text-lg">{brief?.composer}</p>
+              <p className="mt-1">
+                <span className="inline-block">
+                  <span className="text-sm">
+                    {brief && `${t("chartCreator")}:`}
                   </span>
-                ) : brief?.published ? (
-                  <span className="ml-2">
-                    <International className="inline-block w-5 translate-y-0.5" />
-                    <span>{t("isPublished")}</span>
+                  <span className="ml-2 font-title text-lg">
+                    {brief?.chartCreator}
                   </span>
-                ) : (
-                  <>
-                    {/*
+                </span>
+                <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
+                  <span className="inline-block">
+                    {updatedAt && `(${updatedAt})`}
+                  </span>
+                  <span>
+                    {cid && isSample(cid) ? (
+                      <span className="ml-2">
+                        <International className="inline-block w-5 translate-y-0.5" />
+                        <span>{t("isSample")}</span>
+                      </span>
+                    ) : brief?.published ? (
+                      <span className="ml-2">
+                        <International className="inline-block w-5 translate-y-0.5" />
+                        <span>{t("isPublished")}</span>
+                      </span>
+                    ) : (
+                      <>
+                        {/*
               <LinkTwo className="inline-block w-5 translate-y-0.5" />
               <span></span>
             */}
-                  </>
-                )}
-              </span>
-              {/*<span className="ml-2">
+                      </>
+                    )}
+                  </span>
+                  {/*<span className="ml-2">
                 <PlayOne
                   className="inline-block w-5 translate-y-0.5"
                   theme="filled"
                 />
                 <span>{brief.playCount || 0}</span>
               </span>*/}
-            </span>
-          </p>
+                </span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       {sharedResult && <SharedResultBox result={sharedResult} />}
