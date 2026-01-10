@@ -28,6 +28,12 @@ import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 import { AboutModal } from "./common/aboutModal.jsx";
+import {
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "./common/flatButton.jsx";
+import { ButtonHighlight } from "./common/button.jsx";
 
 interface Props {
   locale: string;
@@ -183,8 +189,8 @@ export default function TopPage(props: Props) {
               key={i}
               href={`/${locale}${tabURLs[key]}`}
               className={clsx(
-                "text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
-                "rounded-lg p-3"
+                "text-center rounded-box py-3 pl-2 pr-2",
+                skyFlatButtonStyle
               )}
               prefetch={!process.env.NO_PREFETCH}
               onClick={(e) => {
@@ -196,6 +202,9 @@ export default function TopPage(props: Props) {
                 e.preventDefault();
               }}
             >
+              <span className={skyFlatButtonBorderStyle1} />
+              <span className={skyFlatButtonBorderStyle2} />
+              <ButtonHighlight />
               {t(key + ".title")}
             </Link>
           ))}

@@ -9,6 +9,7 @@
   --blur-2xs: 2px;
   --radius-box: 1.25rem;
   --shadow-modal: var(--shadow-md);
+  --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
