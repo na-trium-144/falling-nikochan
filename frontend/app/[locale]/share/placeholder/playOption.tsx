@@ -13,7 +13,7 @@ import {
   ResultData,
   toResultParams,
 } from "@/common/bestScore.js";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight, buttonShadowStyle } from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
@@ -29,6 +29,14 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
+import {
+  boxButtonBorderStyle1,
+  boxButtonBorderStyle2,
+  boxButtonStyle,
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton";
 
 interface Props {
   locale: string;
@@ -64,12 +72,16 @@ export function PlayOption(props: Props) {
   return (
     <div
       className={clsx(
-        "mx-auto mt-4 p-2",
-        "w-max max-w-full rounded-lg border",
-        "border-sky-200 dark:border-orange-900",
-        "bg-sky-100/50 dark:bg-orange-950/50"
+        "mx-auto mt-4 p-3",
+        "w-max max-w-full rounded-xl",
+        // "border-sky-200 dark:border-orange-900",
+        "bg-sky-200/25 dark:bg-orange-950/25",
+        "relative",
+        "inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15"
       )}
     >
+      <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />
+      <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
       <div className="flex flex-col main-wide:flex-row">
         <p className="flex-none w-max self-begin main-wide:self-center ">
           {t("selectLevel")}:
@@ -179,18 +191,24 @@ function LevelButton(props: {
     <button
       className={clsx(
         "cursor-pointer w-full",
-        "relative rounded px-2 py-0.5 my-0.5",
-        props.selected
-          ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50"
-          : clsx(
-              "hover:shadow hover:mt-0 hover:mb-1",
-              "hover:bg-sky-200/50 dark:hover:bg-orange-800/50",
-              "active:mt-0.5 active:mb-0.5",
-              "active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50"
-            )
+        "relative rounded-lg px-2 py-0.5 my-0.5",
+        props.selected ? boxButtonStyle : skyFlatButtonStyle,
+        props.selected ? "shadow-2xs" : "hover:shadow-2xs",
+        buttonShadowStyle
       )}
       onClick={props.onClick}
     >
+      <span
+        className={clsx(
+          props.selected ? boxButtonBorderStyle1 : skyFlatButtonBorderStyle1
+        )}
+      />
+      <span
+        className={clsx(
+          props.selected ? boxButtonBorderStyle2 : skyFlatButtonBorderStyle2
+        )}
+      />
+      <ButtonHighlight />
       <LevelBadge
         className="absolute top-0.5 -right-3 "
         status={[props.status]}

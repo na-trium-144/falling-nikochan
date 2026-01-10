@@ -18,7 +18,7 @@ import {
   loadChart,
   Note,
 } from "@falling-nikochan/chart";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
@@ -91,6 +91,11 @@ import { useRouter } from "next/navigation.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartFile } from "./file";
+import {
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton.jsx";
 
 export default function EditAuth(props: {
   locale: string;
@@ -1581,12 +1586,28 @@ function Page(props: Props) {
                   ) : (
                     <button
                       key={i}
-                      className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
+                      className={clsx(
+                        "rounded-t-box px-3 pt-2 pb-1",
+                        skyFlatButtonStyle
+                      )}
                       onClick={() => {
                         setTab(i);
                         ref.current?.focus();
                       }}
                     >
+                      <span
+                        className={clsx(
+                          skyFlatButtonBorderStyle1,
+                          "border-b-0"
+                        )}
+                      />
+                      <span
+                        className={clsx(
+                          skyFlatButtonBorderStyle2,
+                          "border-b-0"
+                        )}
+                      />
+                      <ButtonHighlight />
                       {t(`${key}.title`)}
                     </button>
                   )

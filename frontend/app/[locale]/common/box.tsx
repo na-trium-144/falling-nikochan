@@ -4,6 +4,21 @@ import { ReactNode, MouseEvent } from "react";
 export const modalBg =
   "fixed inset-0 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
 
+export const boxStyle = clsx(
+  "bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs",
+  "inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25"
+);
+export const boxBorderStyle1 = clsx(
+  "absolute inset-0 z-2 rounded-[inherit] pointer-events-none",
+  "border border-white/100 dark:border-stone-400/50",
+  "mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%"
+);
+export const boxBorderStyle2 = clsx(
+  "absolute inset-0 z-1 rounded-[inherit] pointer-events-none",
+  "border border-slate-300/80 dark:border-stone-900/30",
+  "-mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%"
+);
+
 interface Props {
   ref?: { current: HTMLDivElement | null };
   children: ReactNode | ReactNode[];
@@ -23,8 +38,8 @@ export function Box(props: Props) {
       ref={props.ref}
       className={clsx(
         !props.classNameOuter?.includes("absolute") && "relative",
-        "rounded-box bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs",
-        "inset-shadow-[0.25rem_0.5rem_1rem] inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25",
+        "rounded-box",
+        boxStyle,
         props.hidden && "hidden",
         props.classNameOuter
       )}
@@ -33,24 +48,8 @@ export function Box(props: Props) {
       onPointerDown={props.onPointerDown}
       onPointerUp={props.onPointerUp}
     >
-      <span
-        className={clsx(
-          "absolute inset-0 z-2 rounded-[inherit] select-none pointer-events-none",
-          "border border-white/100 dark:border-stone-400/50",
-          "mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%",
-          "group-active:opacity-0",
-          props.classNameBorder
-        )}
-      />
-      <span
-        className={clsx(
-          "absolute inset-0 z-1 rounded-[inherit] select-none pointer-events-none",
-          "border border-slate-300/80 dark:border-stone-900/30",
-          "-mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%",
-          "group-active:mask-none",
-          props.classNameBorder
-        )}
-      />
+      <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
+      <span className={clsx(boxBorderStyle2, props.classNameBorder)} />
       <div
         className={clsx("w-full h-full", props.classNameInner)}
         style={props.styleInner}

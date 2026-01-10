@@ -17,6 +17,12 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
+import {
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton.jsx";
+import { ButtonHighlight, buttonShadowStyle } from "@/common/button.jsx";
 
 interface PProps {
   locale: string;
@@ -347,8 +353,8 @@ export function ChartList(props: Props) {
               <li
                 key={i}
                 className={clsx(
-                  "w-full max-w-108 mx-auto h-10 rounded",
-                  "bg-sky-200/25 dark:bg-orange-800/10"
+                  "w-full max-w-108 mx-auto h-10",
+                  chartListBgStyle
                 )}
               />
             )
@@ -423,13 +429,17 @@ export function ChartList(props: Props) {
   );
 }
 
-const chartListStyle =
-  "block w-full text-left cursor-pointer " +
-  "hover:shadow active:shadow-inner rounded px-1 py-0.5 " +
-  "hover:-translate-y-0.5 active:translate-y-0 " +
-  "hover:bg-sky-200/50 active:bg-sky-300/50 " +
-  "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 " +
-  "bg-sky-200/25 dark:bg-orange-800/10 ";
+const chartListBgStyle = "rounded-md bg-sky-200/50 dark:bg-orange-950/50";
+const chartListStyle = clsx(
+  "block w-full text-left cursor-pointer",
+  // "hover:shadow active:shadow-inner",
+  "pl-1.5 py-0.5",
+  // "hover:-translate-y-0.5 active:translate-y-0",
+  chartListBgStyle,
+  skyFlatButtonStyle,
+  "hover:shadow-sm",
+  buttonShadowStyle
+);
 interface CProps {
   cid: string;
   brief?: ChartBrief;
@@ -468,6 +478,9 @@ export function ChartListItem(props: CProps) {
                 : undefined
             }
           >
+            <span className={skyFlatButtonBorderStyle1} />
+            <span className={skyFlatButtonBorderStyle2} />
+            <ButtonHighlight />
             <ChartListItemChildren {...props} />
           </a>
           {props.onClickMobile && (
@@ -479,6 +492,9 @@ export function ChartListItem(props: CProps) {
                 e.preventDefault();
               }}
             >
+              <span className={skyFlatButtonBorderStyle1} />
+              <span className={skyFlatButtonBorderStyle2} />
+              <ButtonHighlight />
               <ChartListItemChildren {...props} />
             </a>
           )}
@@ -489,6 +505,9 @@ export function ChartListItem(props: CProps) {
           className={clsx(chartListStyle)}
           prefetch={!process.env.NO_PREFETCH}
         >
+          <span className={skyFlatButtonBorderStyle1} />
+          <span className={skyFlatButtonBorderStyle2} />
+          <ButtonHighlight />
           <ChartListItemChildren {...props} />
         </Link>
       )}
