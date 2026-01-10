@@ -138,7 +138,7 @@ export function FlexYouTube(props: Props) {
   return (
     <div
       className={clsx(
-        "relative",
+        "relative isolate",
         props.className
         /* "flex justify-center items-center" */
       )}
@@ -150,10 +150,17 @@ export function FlexYouTube(props: Props) {
       ref={ref}
     >
       <img
-        className="absolute inset-0 w-full h-full object-cover object-center -z-20"
+        className="absolute inset-0 opacity-50 w-full h-full object-cover object-center -z-20"
         src={`https://i.ytimg.com/vi/${id}/default.jpg`}
       />
-      <div className="absolute inset-0 bg-gray-500/50 backdrop-blur-xs -z-10 flex flex-row items-center justify-center ">
+      <div
+        className={clsx(
+          "absolute inset-0 bg-transparent backdrop-blur-xs -z-10",
+          "flex flex-row items-center justify-center",
+          "text-default dark:text-default-dark",
+          !id && "hidden"
+        )}
+      >
         <SlimeSVG />
         Loading...
       </div>

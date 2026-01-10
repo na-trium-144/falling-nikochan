@@ -27,6 +27,7 @@
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.43.5",
     "clsx": "^2.1.1",
+    "colorthief": "^2.6.0",
     "file-saver": "^2.0.5",
     "pretty-checkbox": "^3.0.3",
     "pretty-checkbox-react": "^3.2.0",
@@ -39,6 +40,7 @@
   "devDependencies": {
     "@icon-park/svg": "^1.4.2",
     "@tailwindcss/postcss": "4.1.18",
+    "@types/colorthief": "^2.6.0",
     "@types/file-saver": "^2.0.7",
     "@types/mdx": "^2.0.13",
     "dotenv": "^16.6.1",

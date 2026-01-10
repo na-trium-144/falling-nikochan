@@ -1,6 +1,6 @@
 import clsx from "clsx/lite";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
-import { levelBgColors } from "@/common/levelColors";
+import { levelColors } from "@/common/levelColors";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
@@ -101,19 +101,37 @@ export function MusicArea(props: Props) {
     return () => clearInterval(id);
   }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
+  const colorThief = useColorThief();
+
   return (
     <div
       className={clsx(
         "z-10 grow-0 shrink-0 pb-1 flex",
-        levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
-        props.isMobile ? "rounded-b-lg" : "rounded-bl-xl pl-3",
+        // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
+        props.isMobile ? "rounded-b-xl" : "rounded-bl-box pl-3",
         "relative flex-col",
-        props.className
+        props.className,
+        colorThief.boxStyle
       )}
+      style={{ color: colorThief.currentColor }}
       onPointerEnter={() => setPointerInVolumeCtrl(true)}
       onPointerLeave={() => setPointerInVolumeCtrl(false)}
       ref={ref}
     >
+      <span
+        className={clsx(
+          colorThief.boxBorderStyle1,
+          "border-t-0 border-r-0",
+          props.isMobile && "border-l-0"
+        )}
+      />
+      <span
+        className={clsx(
+          colorThief.boxBorderStyle2,
+          "border-t-0 border-r-0",
+          props.isMobile && "border-l-0"
+        )}
+      />
       <div
         className={clsx(
           "flex",
@@ -138,9 +156,18 @@ export function MusicArea(props: Props) {
             onPlaybackRateChange={props.onPlaybackRateChange}
           />
         )}
+        {props.chartBrief?.ytId && (
+          <img
+            ref={colorThief.imgRef}
+            className="hidden"
+            src={`https://i.ytimg.com/vi/${props.chartBrief?.ytId}/mqdefault.jpg`}
+            crossOrigin="anonymous"
+          />
+        )}
         <div
           className={clsx(
             "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
+            defaultThemeStyle,
             props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
           )}
         >
@@ -222,6 +249,8 @@ export function MusicArea(props: Props) {
                     )}
                     <span
                       className={clsx(
+                        levelColors.at(levelTypes.indexOf(props.lvType)) ||
+                          levelColors[1],
                         "align-bottom",
                         veryLargeTitle
                           ? "text-xl"
@@ -234,6 +263,8 @@ export function MusicArea(props: Props) {
                     </span>
                     <span
                       className={clsx(
+                        levelColors.at(levelTypes.indexOf(props.lvType)) ||
+                          levelColors[1],
                         "align-bottom",
                         veryLargeTitle
                           ? "text-3xl"
@@ -285,7 +316,7 @@ export function MusicArea(props: Props) {
               </span>
             </p>
           </div>
-          <p className="leading-0 mt-1 ">
+          <p className="leading-0 mt-1 text-black/40 dark:text-white/40">
             <span className="inline-flex flex-row justify-end w-3 overflow-visible ">
               <span className="text-right text-base/4 ">
                 {Math.floor(currentSec / 60)}
@@ -308,12 +339,13 @@ export function MusicArea(props: Props) {
       </div>
       <ProgressBar
         value={currentSec / levelLength}
-        fixedColor="bg-red-600"
+        fixedColor="bg-red-500/75"
         className={clsx(props.isMobile ? "mx-2" : "mr-1")}
       />
       <button
         className={clsx(
           "absolute rounded-full cursor-pointer leading-1",
+          defaultThemeStyle,
           props.isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
@@ -336,6 +368,7 @@ export function MusicArea(props: Props) {
       </button>
       <div
         className={clsx(
+          defaultThemeStyle,
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
