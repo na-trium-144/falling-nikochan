@@ -167,11 +167,11 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   return (
     <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <div className="flex-1 w-full min-w-fit overflow-y-auto overflow-x-visible">
+      <div className="flex-1 max-w-full w-fit overflow-y-auto overflow-x-visible">
         <ul
           className={clsx(
-            "h-full flex flex-col w-fit justify-center text-left list-disc-as-text",
-            "m-auto pl-6 pr-2 space-y-1 overflow-visible"
+            "h-full flex flex-col justify-center text-left list-disc-as-text",
+            "pl-6 pr-2 space-y-1 overflow-visible"
           )}
         >
           <li className="">
@@ -183,6 +183,17 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               {t("auto")}
             </CheckBox>
           </li>
+          {isIOS && (
+            <li className="">
+              <CheckBox
+                className="align-text-top" // 2行になる場合があるため todo:ちょっとずれてる
+                value={props.enableIOSThru}
+                onChange={(v) => props.setEnableIOSThru(v)}
+              >
+                {t("enableIOSThru")}
+              </CheckBox>
+            </li>
+          )}
           <li className="">
             <CheckBox
               className=""
@@ -192,30 +203,19 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             >
               {t("enableSE")}
             </CheckBox>
-            {props.enableSE && !(isIOS && props.enableIOSThru) && (
-              <p className="ml-2 text-sm max-w-64 text-justify ">
-                <Caution className="inline-block align-middle mr-1" />
-                {props.audioLatency === undefined
-                  ? null
-                  : props.audioLatency === null
+            {props.enableSE &&
+              !(isIOS && props.enableIOSThru) &&
+              props.audioLatency !== undefined && (
+                <p className="text-sm max-w-80 text-justify ">
+                  <Caution className="inline-block align-middle mr-1" />
+                  {props.audioLatency === null
                     ? t("unknownSELatency")
                     : t("enableSELatency", {
                         latency: props.audioLatency.toFixed(3),
                       })}
-              </p>
-            )}
+                </p>
+              )}
           </li>
-          {isIOS && (
-            <li className="">
-              <CheckBox
-                className="align-top " // 2行になる場合があるため
-                value={props.enableIOSThru}
-                onChange={(v) => props.setEnableIOSThru(v)}
-              >
-                {t("enableIOSThru")}
-              </CheckBox>
-            </li>
-          )}
           {/* <li className="">
           <CheckBox
             className=""
@@ -226,8 +226,54 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             {t("displaySpeed")}
           </CheckBox>
         </li>*/}
+          <li>
+            <span className="mr-2">{t("playbackRate")}</span>
+            <Select
+              options={["✕0.5", "✕0.75", "✕1", "✕1.25", "✕1.5", "✕1.75", "✕2"]}
+              values={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"]}
+              value={props.playbackRate.toString()}
+              onChange={(s: string) => props.setPlaybackRate(Number(s))}
+            />
+          </li>
+          <li>
+            <CheckBox
+              className=""
+              value={props.userBegin !== null}
+              onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
+            >
+              {t("userBegin")}
+              {props.userBegin !== null && (
+                <>
+                  <span className="">:</span>
+                  <span className="inline-block text-right w-6">
+                    {Math.floor(Math.round(props.userBegin) / 60)}
+                  </span>
+                  <span className="">:</span>
+                  <span className="inline-block text-left">
+                    {(Math.round(props.userBegin) % 60)
+                      .toString()
+                      .padStart(2, "0")}
+                  </span>
+                  {/*<span className="mr-1">{t("offsetSecond")}</span>*/}
+                  {/*<span className="mr-1">〜</span>
+                  <span className="mr-1 inline-block text-right w-7">
+                    {Math.round(props.ytEnd)}
+                  </span>
+                  <span className="">{t("offsetSecond")}</span>*/}
+                </>
+              )}
+            </CheckBox>
+            <Range
+              className="block! w-full!"
+              min={props.ytBegin}
+              max={props.ytEnd}
+              disabled={props.userBegin === null}
+              value={props.userBegin ?? props.ytBegin}
+              onChange={props.setUserBegin}
+            />
+          </li>
           <li className="">
-            <div>
+            <div className="inline-block">
               {t("offset")}
               <CheckBox
                 className="ml-2"
@@ -250,54 +296,16 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               />
               <span className="mr-1 ">{t("offsetSecond")}</span>
               <Button
+                className="h-8! py-0!"
                 text="-"
                 onClick={() => props.setUserOffset(props.userOffset - 0.01)}
               />
               <Button
+                className="h-8! py-0!"
                 text="+"
                 onClick={() => props.setUserOffset(props.userOffset + 0.01)}
               />
             </div>
-          </li>
-          <li>
-            <span className="mr-2">{t("playbackRate")}</span>
-            <Select
-              options={["✕0.5", "✕0.75", "✕1", "✕1.25", "✕1.5", "✕1.75", "✕2"]}
-              values={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"]}
-              value={props.playbackRate.toString()}
-              onChange={(s: string) => props.setPlaybackRate(Number(s))}
-            />
-          </li>
-          <li>
-            <CheckBox
-              className=""
-              value={props.userBegin !== null}
-              onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
-            >
-              {t("userBegin")}
-              {props.userBegin !== null && (
-                <>
-                  <span className="mr-2">:</span>
-                  <span className="mr-1 inline-block text-right w-7">
-                    {Math.round(props.userBegin)}
-                  </span>
-                  <span className="mr-1">{t("offsetSecond")}</span>
-                  {/*<span className="mr-1">〜</span>
-                  <span className="mr-1 inline-block text-right w-7">
-                    {Math.round(props.ytEnd)}
-                  </span>
-                  <span className="">{t("offsetSecond")}</span>*/}
-                </>
-              )}
-            </CheckBox>
-            <Range
-              className="block! w-full!"
-              min={props.ytBegin}
-              max={props.ytEnd}
-              disabled={props.userBegin === null}
-              value={props.userBegin ?? props.ytBegin}
-              onChange={props.setUserBegin}
-            />
           </li>
         </ul>
       </div>

@@ -17,10 +17,8 @@ export default {
       option: "Options",
       auto: "Auto Play",
       enableSE: "Enable Key/Tap Sounds",
-      enableSELatency:
-        "Judgment is adjusted by the sound delay estimated ({latency} seconds in this environment).",
-      unknownSELatency:
-        "There may be a delay in sound output. Please adjust the judgment timing manually.",
+      enableSELatency: "There may be a delay of {latency} seconds.",
+      unknownSELatency: "There may be a delay in sound output.",
       enableIOSThru: "Predict and correct unresponsive taps (iOS)",
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
