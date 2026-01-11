@@ -15,10 +15,8 @@ export default {
       option: "オプション",
       auto: "オートプレイ",
       enableSE: "キー/タップ音を鳴らす",
-      enableSELatency:
-        "サウンドの遅延分 (この環境では {latency} 秒) だけ判定が補正されます。",
-      unknownSELatency:
-        "サウンドの出力に遅延が生じる可能性があります。手動で判定タイミングを調整してください。",
+      enableSELatency: "{latency} 秒の遅延が生じます。",
+      unknownSELatency: "サウンドの出力に遅延が生じます。",
       enableIOSThru: "無反応を予測して補正(iOS)",
       displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
