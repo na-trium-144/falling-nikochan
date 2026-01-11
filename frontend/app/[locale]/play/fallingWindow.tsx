@@ -10,6 +10,7 @@ import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import { boxBorderStyle1, boxBorderStyle2 } from "@/common/box";
+import { useTheme } from "@/common/theme";
 
 interface Props {
   className?: string;
@@ -293,8 +294,8 @@ function Nikochan(props: NProps) {
   const x = displayNote.pos.x * boxSize + marginX;
   const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
   const size = noteSize * bigScale(note.big);
-  const headSize = noteSize * 0.9;
-  const tailSize = noteSize * 0.7;
+  const headSize = noteSize * 1;
+  const tailSize = noteSize * 0.85;
   const tailScaleFactor = 4;
   const tailScaleMax = 6;
   const velX = useRef<number>(0);
@@ -318,6 +319,7 @@ function Nikochan(props: NProps) {
   const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, {
     delayed: !isOffScreen,
   });
+  const {isDark} = useTheme();
   return (
     <>
       <div
@@ -361,30 +363,8 @@ function Nikochan(props: NProps) {
               displayNote.done <= 3 ? displayNote.done : 0
             ]
           }
-          className="absolute inset-0 w-full h-full -z-1 opacity-50"
+          className="absolute inset-0 w-full h-full opacity-70"
         />
-        <span
-          className={clsx(
-            "absolute -z-0 inset-[0.02em] m-auto rounded-full",
-            "border-[0.05em] border-black/35",
-            // "shadow-[0_0_0.15em] shadow-slate-800/50 dark:shadow-stone-300/50"
-          )}
-        >
-          {/*<span
-            className={clsx(
-              boxBorderStyle1,
-              "border-yellow-500/50! dark:border-amber-800/50!",
-              "border-[0.04em] mask-linear-to-75%!"
-            )}
-          />
-          <span
-            className={clsx(
-              boxBorderStyle2,
-              "border-black/75!",
-              "border-[0.04em] mask-linear-to-100%!"
-            )}
-          />*/}
-        </span>
         {/* chainBonusをにこちゃんの右上に表示する */}
         {/*{displayNote.baseScore !== undefined &&
           displayNote.chainBonus !== undefined &&
@@ -428,7 +408,7 @@ function Nikochan(props: NProps) {
             (tailSize * bigScale(note.big)) / 2 +
             marginY,
           transform: `rotate(${(velAngle * 180) / Math.PI}deg) scaleX(${Math.min(velLength * tailScaleFactor, tailScaleMax)})`,
-          opacity: 0.5 * Math.min(1, velLength * tailScaleFactor) ** 2,
+          opacity: (isDark ? 0.4 : 0.6) * Math.min(1, velLength * tailScaleFactor) ** 2,
         }}
         decoding="async"
         src={props.cometTailAsset.current}
