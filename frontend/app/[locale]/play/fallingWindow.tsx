@@ -20,10 +20,10 @@ interface Props {
   setCbFPS: (fps: number) => void;
   setRunFPS: (fps: number) => void;
   setRenderFPS: (fps: number) => void;
-  barFlash: boolean;
+  barFlash: FlashPos;
   noClear: boolean;
 }
-
+export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
   const {
     notes,
@@ -208,7 +208,13 @@ export default function FallingWindow(props: Props) {
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
           <TargetLine
-            barFlash={props.barFlash}
+            barFlash={
+              props.barFlash === undefined || marginX === undefined
+                ? undefined
+                : "targetX" in props.barFlash
+                  ? props.barFlash.targetX * boxSize + marginX
+                  : props.barFlash.clientX
+            }
             left={0}
             right="-100%"
             bottom={targetY * boxSize + marginY}
@@ -367,7 +373,7 @@ function Nikochan(props: NProps) {
           {/*<span
             className={clsx(
               boxBorderStyle1,
-              "border-yellow-500/50! dark:border-amber-300/50!",
+              "border-yellow-500/50! dark:border-amber-800/50!",
               "border-[0.04em] mask-linear-to-75%!"
             )}
           />
