@@ -111,6 +111,8 @@ export default function FallingWindow(props: Props) {
         ) {
           // 大幅に遅延している場合
           prevRerender = performance.now();
+          cbDeltas.current = [];
+          runDeltas.current = [];
         } else {
           prevRerender +=
             (1000 / cbFps.current) *
