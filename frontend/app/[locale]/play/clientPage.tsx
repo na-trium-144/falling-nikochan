@@ -24,7 +24,7 @@ const exampleResult = {
 
 import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow.js";
+import FallingWindow, { FlashPos } from "./fallingWindow.js";
 import {
   bigScoreRate,
   chainScoreRate,
@@ -439,6 +439,36 @@ function Play(props: Props) {
       return now;
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
+
+  // キーを押したとき一定時間光らせる
+  // ここではnoteのx座標の値そのままを扱う
+  const [barFlash, setBarFlash] = useState<FlashPos>(undefined);
+  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashAnimationFrame = useRef<ReturnType<
+    typeof requestAnimationFrame
+  > | null>(null);
+  const flash = useCallback((x: FlashPos) => {
+    if (flashAnimationFrame.current !== null) {
+      cancelAnimationFrame(flashAnimationFrame.current);
+      flashAnimationFrame.current = null;
+    }
+    if (flashTimeout.current !== null) {
+      clearTimeout(flashTimeout.current);
+      flashTimeout.current = null;
+      setBarFlash(undefined);
+      flashAnimationFrame.current = requestAnimationFrame(() => {
+        flashAnimationFrame.current = null;
+        flash(x);
+      });
+    } else {
+      setBarFlash(x);
+      flashTimeout.current = setTimeout(() => {
+        flashTimeout.current = null;
+        setBarFlash(undefined);
+      }, 100);
+    }
+  }, []);
+
   const {
     baseScore,
     chainScore,
@@ -463,7 +493,8 @@ function Play(props: Props) {
     autoOffset,
     setUserOffset,
     playbackRate,
-    playSE
+    playSE,
+    flash
   );
 
   const [cbFps, setCbFps] = useState<number>(0);
@@ -749,13 +780,6 @@ function Play(props: Props) {
     setYtError(ec);
   }, []);
 
-  // キーを押したとき一定時間光らせる
-  const [barFlash, setBarFlash] = useState<boolean>(false);
-  const flash = () => {
-    setBarFlash(true);
-    setTimeout(() => setBarFlash(false), 100);
-  };
-
   useEffect(() => {
     const disableMenu = (e: Event) => {
       e.preventDefault();
@@ -787,13 +811,17 @@ function Play(props: Props) {
         } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
           exit();
         } else if (!(chartPlaying && auto)) {
-          flash();
-          hit(inputTypes.keyboard);
+          const candidate = hit(inputTypes.keyboard);
+          if (candidate) {
+            flash({ targetX: candidate.note.targetX });
+          } else {
+            flash({ targetX: 0.5 });
+          }
         }
       }}
       onPointerDown={(e) => {
         if (!(chartPlaying && auto)) {
-          flash();
+          flash({ clientX: e.clientX });
           switch (e.pointerType) {
             case "mouse":
               hit(inputTypes.mouse);

@@ -20,11 +20,11 @@ interface Props {
   setCbFPS: (fps: number) => void;
   setRunFPS: (fps: number) => void;
   setRenderFPS: (fps: number) => void;
-  barFlash: boolean;
+  barFlash: FlashPos;
   noClear: boolean;
   playbackRate: number;
 }
-
+export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
   const {
     notes,
@@ -208,7 +208,13 @@ export default function FallingWindow(props: Props) {
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
           <TargetLine
-            barFlash={props.barFlash}
+            barFlash={
+              props.barFlash === undefined || marginX === undefined
+                ? undefined
+                : "targetX" in props.barFlash
+                  ? props.barFlash.targetX * boxSize + marginX
+                  : props.barFlash.clientX
+            }
             left={0}
             right="-100%"
             bottom={targetY * boxSize + marginY}

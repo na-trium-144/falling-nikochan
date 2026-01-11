@@ -29,7 +29,8 @@ export default function useGameLogic(
   autoOffset: boolean,
   setUserOffset: (v: number) => void,
   playbackRate: number,
-  playSE: (s: SEType) => void
+  playSE: (s: SEType) => void,
+  flash: (x: { targetX: number }) => void
 ) {
   const [notesAll, setNotesAll] = useState<Note6[] | Note13[]>([]);
   const notesYetDone = useRef<Note6[] | Note13[]>([]); // まだ判定していないNote
@@ -182,7 +183,7 @@ export default function useGameLogic(
     late: number;
   }
   // キーを押したときの判定
-  const hit = useCallback(
+  const hit = useCallback<(type: number) => HitCandidate | null>(
     (type: number) => {
       const now = getCurrentTimeSec();
       if (now !== undefined) {
@@ -359,6 +360,7 @@ export default function useGameLogic(
         // autoAdjustOffset(
         //   candidateThru1.late / playbackRate + userOffset /* + audioLatency */
         // );
+        return candidateThru1;
       } else if (
         now &&
         candidatePrevThru &&
@@ -369,6 +371,7 @@ export default function useGameLogic(
       ) {
         playSE("hit");
         console.log("prev thru");
+        return null;
       } else if (
         now &&
         candidate &&
@@ -390,6 +393,7 @@ export default function useGameLogic(
           now,
           candidate.note.id
         );
+        return candidate;
       } else if (now && candidateBig) {
         playSE("hitBig");
         console.log("hitBig", candidateBig.judge);
@@ -403,8 +407,10 @@ export default function useGameLogic(
         // autoAdjustOffset(
         //   candidateBig.late / playbackRate + userOffset /* + audioLatency */
         // );
+        return candidateBig;
       } else {
         playSE("hit");
+        return null;
       }
     },
     [
@@ -503,6 +509,7 @@ export default function useGameLogic(
                 notesBigYetDone.current.push(n);
               }
             }
+            flash({ targetX: n.targetX });
             continue;
           } else {
             nextHitTime.push(-late);
@@ -520,6 +527,7 @@ export default function useGameLogic(
               judge({ note: n, judge: 1, late: 0 });
               notesBigYetDone.current.shift();
             }
+            flash({ targetX: n.targetX });
             continue;
           } else {
             nextHitTime.push(-late);
@@ -540,7 +548,16 @@ export default function useGameLogic(
         }
       };
     }
-  }, [auto, getCurrentTimeSec, hit, playbackRate, judge, playSE]);
+  }, [
+    auto,
+    getCurrentTimeSec,
+    hit,
+    playbackRate,
+    judge,
+    playSE,
+    flash,
+    judgeForAuto,
+  ]);
 
   return {
     baseScore,
