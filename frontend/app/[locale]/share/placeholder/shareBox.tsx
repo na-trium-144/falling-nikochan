@@ -148,6 +148,7 @@ export function ShareBox(props: Props) {
                 <p
                   className={clsx(
                     "font-title text-xs main-wide:text-sm",
+                    "overflow-hidden text-nowrap text-ellipsis",
                     defaultThemeStyle
                   )}
                 >
