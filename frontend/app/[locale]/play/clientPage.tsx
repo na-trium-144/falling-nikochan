@@ -823,29 +823,6 @@ function Play(props: Props) {
         e.preventDefault();
       }}
     >
-      {musicAreaOk && (
-        <>
-          {/* play中に使用する画像を先に読み込んでキャッシュさせる */}
-          {[0, 1, 2, 3].map((i) => (
-            <img
-              src={process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`}
-              className="hidden"
-              decoding="async"
-              fetchPriority="low"
-              key={i}
-            />
-          ))}
-          {[4, 6, 8, 10, 12].map((i) => (
-            <img
-              src={process.env.ASSET_PREFIX + `/assets/particle${i}.svg`}
-              className="hidden"
-              decoding="async"
-              fetchPriority="low"
-              key={i}
-            />
-          ))}
-        </>
-      )}
       <div
         className={clsx(
           "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch",

@@ -9,6 +9,7 @@ import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
+import { boxBorderStyle1, boxBorderStyle2 } from "@/common/box";
 
 interface Props {
   className?: string;
@@ -166,6 +167,8 @@ export default function FallingWindow(props: Props) {
 
   const nikochanAssets = useRef<string[]>([]);
   const particleAssets = useRef<string[]>([]);
+  const cometTailAsset = useRef<string>("");
+  const cometHeadAsset = useRef<string>("");
   useEffect(() => {
     Promise.all(
       [0, 1, 2, 3].map((i) =>
@@ -187,6 +190,16 @@ export default function FallingWindow(props: Props) {
     ).then((urls) => {
       particleAssets.current = urls;
     });
+    fetch(process.env.ASSET_PREFIX + `/assets/comet-tail.svg`)
+      .then((res) => res.text())
+      .then((text) => {
+        cometTailAsset.current = `data:image/svg+xml;base64,${btoa(text)}`;
+      });
+    fetch(process.env.ASSET_PREFIX + `/assets/comet-head.svg`)
+      .then((res) => res.text())
+      .then((text) => {
+        cometHeadAsset.current = `data:image/svg+xml;base64,${btoa(text)}`;
+      });
   }, []);
 
   return (
@@ -211,6 +224,8 @@ export default function FallingWindow(props: Props) {
             marginY={marginY}
             nikochanAssets={nikochanAssets}
             particleAssets={particleAssets}
+            cometTailAsset={cometTailAsset}
+            cometHeadAsset={cometHeadAsset}
           />
         )}
       </div>
@@ -227,6 +242,8 @@ interface MProps {
   marginY: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
+  cometTailAsset: RefObject<string>;
+  cometHeadAsset: RefObject<string>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
   return props.displayNotes.map((d) => (
@@ -240,6 +257,8 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       boxSize={props.boxSize}
       nikochanAssets={props.nikochanAssets}
       particleAssets={props.particleAssets}
+      cometTailAsset={props.cometTailAsset}
+      cometHeadAsset={props.cometHeadAsset}
     />
   ));
 });
@@ -253,6 +272,8 @@ interface NProps {
   boxSize: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
+  cometTailAsset: RefObject<string>;
+  cometHeadAsset: RefObject<string>;
 }
 function Nikochan(props: NProps) {
   /* にこちゃん
@@ -266,6 +287,22 @@ function Nikochan(props: NProps) {
   const x = displayNote.pos.x * boxSize + marginX;
   const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
   const size = noteSize * bigScale(note.big);
+  const headSize = noteSize * 0.9;
+  const tailSize = noteSize * 0.7;
+  const tailScaleFactor = 4;
+  const tailScaleMax = 6;
+  const velX = useRef<number>(0);
+  const velY = useRef<number>(0);
+  const lastT = useRef<DOMHighResTimeStamp>(-Infinity);
+  const dt = (performance.now() - lastT.current) / 1000;
+  const a = Math.exp(-dt / 0.1);
+  velX.current = velX.current * a + displayNote.vel.x * (1 - a);
+  velY.current = velY.current * a + displayNote.vel.y * (1 - a);
+  lastT.current = performance.now();
+  const velLength = Math.sqrt(
+    velX.current * velX.current + velY.current * velY.current
+  );
+  const velAngle = Math.atan2(-velY.current, velX.current);
   const isOffScreen =
     x + size / 2 < 0 ||
     x - size / 2 > window.innerWidth ||
@@ -299,6 +336,7 @@ function Nikochan(props: NProps) {
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
           width: noteSize * bigScale(note.big),
           height: noteSize * bigScale(note.big),
+          fontSize: noteSize * bigScale(note.big), // 1em で参照できるように
           left:
             displayNote.pos.x * boxSize -
             (noteSize * bigScale(note.big)) / 2 +
@@ -317,8 +355,30 @@ function Nikochan(props: NProps) {
               displayNote.done <= 3 ? displayNote.done : 0
             ]
           }
-          className="w-full h-full "
+          className="absolute inset-0 w-full h-full -z-1 opacity-50"
         />
+        <span
+          className={clsx(
+            "absolute -z-0 inset-[0.02em] m-auto rounded-full",
+            "border-[0.05em] border-black/35",
+            // "shadow-[0_0_0.15em] shadow-slate-800/50 dark:shadow-stone-300/50"
+          )}
+        >
+          {/*<span
+            className={clsx(
+              boxBorderStyle1,
+              "border-yellow-500/50! dark:border-amber-300/50!",
+              "border-[0.04em] mask-linear-to-75%!"
+            )}
+          />
+          <span
+            className={clsx(
+              boxBorderStyle2,
+              "border-black/75!",
+              "border-[0.04em] mask-linear-to-100%!"
+            )}
+          />*/}
+        </span>
         {/* chainBonusをにこちゃんの右上に表示する */}
         {/*{displayNote.baseScore !== undefined &&
           displayNote.chainBonus !== undefined &&
@@ -338,7 +398,35 @@ function Nikochan(props: NProps) {
               ).toFixed(2)}
             </span>
           )}*/}
+        <img
+          decoding="async"
+          src={props.cometHeadAsset.current}
+          className="block absolute -z-5"
+          style={{
+            width: headSize * bigScale(note.big),
+            height: headSize * bigScale(note.big),
+            left: (size - headSize * bigScale(note.big)) / 2,
+            bottom: (size - headSize * bigScale(note.big)) / 2,
+          }}
+        />
       </div>
+      <img
+        className="block absolute -z-7 origin-left"
+        style={{
+          width: tailSize * Math.sqrt(bigScale(note.big)),
+          height: tailSize * bigScale(note.big),
+          left: displayNote.pos.x * boxSize + marginX,
+          bottom:
+            displayNote.pos.y * boxSize +
+            targetY * boxSize -
+            (tailSize * bigScale(note.big)) / 2 +
+            marginY,
+          transform: `rotate(${(velAngle * 180) / Math.PI}deg) scaleX(${Math.min(velLength * tailScaleFactor, tailScaleMax)})`,
+          opacity: 0.5 * Math.min(1, velLength * tailScaleFactor) ** 2,
+        }}
+        decoding="async"
+        src={props.cometTailAsset.current}
+      />
       {[1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
@@ -378,7 +466,7 @@ function Ripple(props: RProps) {
   const ref2 = useRef<HTMLDivElement>(null!);
   const animateDone = useRef<boolean>(false);
   const { noteSize } = props;
-  const rippleWidth = noteSize * 2 * (props.big ? 1.5 : 1);
+  const rippleWidth = noteSize * 2.5 * (props.big ? 1.5 : 1);
   const rippleHeight = rippleWidth * 0.7;
   useEffect(() => {
     if (!animateDone.current) {
@@ -449,8 +537,8 @@ function Particle(props: PProps) {
   const animateDone = useRef<boolean>(false);
   const bigAnimateDone = useRef<boolean>(false);
   const { noteSize, particleNum } = props;
-  const maxSize = noteSize * 1.8;
-  const bigSize = noteSize * 3;
+  const maxSize = noteSize * 2;
+  const bigSize = noteSize * 3.5;
   useEffect(() => {
     if (!animateDone.current) {
       const angle = Math.random() * 360;
