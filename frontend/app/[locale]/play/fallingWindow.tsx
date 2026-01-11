@@ -20,6 +20,7 @@ interface Props {
   setRunFPS: (fps: number) => void;
   setRenderFPS: (fps: number) => void;
   barFlash: boolean;
+  noClear: boolean;
 }
 
 export default function FallingWindow(props: Props) {
@@ -30,6 +31,7 @@ export default function FallingWindow(props: Props) {
     setCbFPS,
     setRenderFPS,
     setRunFPS,
+    noClear,
   } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
@@ -154,7 +156,9 @@ export default function FallingWindow(props: Props) {
         )
         .filter((n) => n !== null);
     } else {
-      displayNotes.current = [];
+      if (!noClear) {
+        displayNotes.current = [];
+      }
     }
   }
 

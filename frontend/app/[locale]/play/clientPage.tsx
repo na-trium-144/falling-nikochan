@@ -9,6 +9,7 @@
 * result=1 でリザルト表示
 * auto=1 でオートプレイをデフォルトにする
 * judgeauto=1 でオートプレイ時にもユーザーのプレイと同じ判定を適用する (ver12.21〜13.20の動作)
+* noclear=1 で停止時に音符を消さない
 
 */
 
@@ -78,6 +79,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [goResult, setGoResult] = useState<boolean>(false);
   const [autoDefault, setAutoDefault] = useState<boolean>(false);
   const [judgeForAuto, setJudgeForAuto] = useState<boolean>(false);
+  const [noClear, setNoClear] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -97,6 +99,7 @@ export function InitPlay({ locale }: { locale: string }) {
     setGoResult(searchParams.get("result") !== null);
     setAutoDefault(searchParams.get("auto") !== null);
     setJudgeForAuto(searchParams.get("judgeauto") !== null);
+    setNoClear(searchParams.get("noclear") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -205,6 +208,7 @@ export function InitPlay({ locale }: { locale: string }) {
       goResult={goResult}
       autoDefault={autoDefault}
       judgeForAuto={judgeForAuto}
+      noClear={noClear}
       locale={locale}
     />
   );
@@ -222,6 +226,7 @@ interface Props {
   goResult: boolean;
   autoDefault: boolean;
   judgeForAuto: boolean;
+  noClear: boolean;
   locale: string;
 }
 function Play(props: Props) {
@@ -910,6 +915,7 @@ function Play(props: Props) {
             setRunFPS={setRunFps}
             setRenderFPS={setRenderFps}
             barFlash={barFlash}
+            noClear={props.noClear}
           />
           <div
             className={clsx(
