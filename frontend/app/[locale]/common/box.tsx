@@ -20,7 +20,8 @@ export const boxBorderStyle2 = clsx(
 );
 
 interface Props {
-  ref?: { current: HTMLDivElement | null };
+  refOuter?: { current: HTMLDivElement | null };
+  refInner?: { current: HTMLDivElement | null };
   children: ReactNode | ReactNode[];
   hidden?: boolean;
   classNameOuter?: string;
@@ -35,7 +36,7 @@ interface Props {
 export function Box(props: Props) {
   return (
     <div
-      ref={props.ref}
+      ref={props.refOuter}
       className={clsx(
         !props.classNameOuter?.includes("absolute") && "relative",
         "rounded-box",
@@ -51,6 +52,7 @@ export function Box(props: Props) {
       <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
       <span className={clsx(boxBorderStyle2, props.classNameBorder)} />
       <div
+        ref={props.refInner}
         className={clsx("w-full h-full", props.classNameInner)}
         style={props.styleInner}
       >
@@ -63,7 +65,8 @@ export function Box(props: Props) {
 export function CenterBox(props: Props) {
   return (
     <Box
-      ref={props.ref}
+      refOuter={props.refOuter}
+      refInner={props.refInner}
       classNameOuter={clsx(
         "absolute inset-0 m-auto w-max h-max max-w-full text-center z-20",
         props.hidden && "hidden",
@@ -89,7 +92,7 @@ export function WarningBox(props: Props) {
         "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 backdrop-blur-2xs",
         props.hidden && "hidden"
       )}
-      ref={props.ref}
+      ref={props.refOuter}
       style={props.styleOuter}
       onClick={props.onClick}
       onPointerDown={props.onPointerDown}
