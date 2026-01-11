@@ -159,6 +159,7 @@ export default function FallingWindow(props: Props) {
           n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
         )
         .filter((n) => n !== null);
+      displayNotes.current.reverse();
     } else {
       if (!noClear) {
         displayNotes.current = [];
