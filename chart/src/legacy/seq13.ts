@@ -258,6 +258,7 @@ export function displayNote13(
     return {
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
+      vel: { x: 0, y: 0 },
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -278,11 +279,16 @@ export function displayNote13(
     const { u0, du, ddu } = dispParam;
     const t = note.hitTimeSec - dispParam.timeSecBefore - timeSec;
     const u = u0 + du * t + (ddu * t * t) / 2;
+    const u_ = du + ddu * t;
     return {
       id: note.id,
       pos: {
         x: note.targetX + note.vx * u,
         y: note.vy * u - (note.ay * u * u) / 2,
+      },
+      vel: {
+        x: note.vx * u_,
+        y: note.vy * u_ - note.ay * u * u_,
       },
       done: note.done,
       bigDone: note.bigDone,

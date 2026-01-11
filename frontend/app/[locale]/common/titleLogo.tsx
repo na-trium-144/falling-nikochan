@@ -64,7 +64,8 @@ export default function Title(props: Props) {
             process.env.ASSET_PREFIX +
             `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
           }
-          className="w-full h-full "
+          // ここだけopacity-70でない
+          className="w-full h-full opacity-100"
         />
       </div>
       <span

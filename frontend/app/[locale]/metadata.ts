@@ -64,18 +64,18 @@ export async function initMetadata(
     icons: {
       // これを1つでも書くと /app にファイルを置く metadata API が無効になるっぽい?
       icon: {
-        url: process.env.ASSET_PREFIX + "/assets/icon.png?v=2",
+        url: process.env.ASSET_PREFIX + "/assets/icon.png?v=3",
         sizes: "256x256",
         type: "image/png",
       },
       apple: [180, 1024].map((size) => ({
         url:
-          process.env.ASSET_PREFIX + `/assets/app-icon-${size}-apple.png?v=2`,
+          process.env.ASSET_PREFIX + `/assets/app-icon-${size}-apple.png?v=3`,
         sizes: `${size}x${size}`,
         type: "image/png",
       })),
       shortcut: {
-        url: "/favicon.ico?v=2",
+        url: "/favicon.ico?v=3",
         type: "image/x-icon",
       },
     },

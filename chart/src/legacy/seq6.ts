@@ -42,10 +42,13 @@ interface DisplayParam6 {
  * 画面上でその瞬間に表示する音符の管理
  * (画面の状態をstateにするため)
  * 時刻の情報を持たない
+ *
+ * ver14でvelを追加
  */
 export interface DisplayNote6 {
   id: number;
   pos: Pos;
+  vel: Pos;
   done: number;
   bigDone: boolean;
   baseScore?: number;
@@ -174,6 +177,7 @@ export function displayNote6(
     return {
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
+      vel: { x: 0, y: 0 },
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -198,6 +202,10 @@ export function displayNote6(
       pos: {
         x: a[0] + a[1] * t,
         y: b[0] + b[1] * t + b[2] * t * t,
+      },
+      vel: {
+        x: a[1],
+        y: b[1] + 2 * b[2] * t,
       },
       done: note.done,
       bigDone: note.bigDone,

@@ -1,0 +1,12 @@
+<svg class="comet-tail" viewBox="0 0 100 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tailGradient" x1="100%" y1="50%" x2="0%" y2="50%">
+      <stop offset="0%" stop-color="#facd00" stop-opacity="0" />
+      <stop offset="100%" stop-color="#facd00" stop-opacity="0.8" />
+    </linearGradient>
+    <filter id="tailBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+    </filter>
+  </defs>
+  <path d="M 100,16 L 0,4 L 0,28 Z" fill="url(#tailGradient)" filter="url(#tailBlur)" />
+</svg>
