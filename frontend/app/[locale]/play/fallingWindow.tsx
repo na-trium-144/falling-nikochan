@@ -9,7 +9,6 @@ import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
-import { boxBorderStyle1, boxBorderStyle2 } from "@/common/box";
 import { useTheme } from "@/common/theme";
 
 interface Props {
@@ -23,6 +22,7 @@ interface Props {
   setRenderFPS: (fps: number) => void;
   barFlash: FlashPos;
   noClear: boolean;
+  playbackRate: number;
 }
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
@@ -34,6 +34,7 @@ export default function FallingWindow(props: Props) {
     setRenderFPS,
     setRunFPS,
     noClear,
+    playbackRate,
   } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
@@ -230,6 +231,7 @@ export default function FallingWindow(props: Props) {
             boxSize={boxSize}
             marginX={marginX}
             marginY={marginY}
+            playbackRate={playbackRate}
             nikochanAssets={nikochanAssets}
             particleAssets={particleAssets}
             cometTailAsset={cometTailAsset}
@@ -248,6 +250,7 @@ interface MProps {
   boxSize: number;
   marginX: number;
   marginY: number;
+  playbackRate: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
   cometTailAsset: RefObject<string>;
@@ -263,6 +266,7 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       marginX={props.marginX}
       marginY={props.marginY}
       boxSize={props.boxSize}
+      playbackRate={props.playbackRate}
       nikochanAssets={props.nikochanAssets}
       particleAssets={props.particleAssets}
       cometTailAsset={props.cometTailAsset}
@@ -278,6 +282,7 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
+  playbackRate: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
   cometTailAsset: RefObject<string>;
@@ -290,20 +295,28 @@ function Nikochan(props: NProps) {
   1〜3: good, ok, bad
   4: miss は画像が0と同じ
   */
-  const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
+  const {
+    displayNote,
+    noteSize,
+    marginX,
+    marginY,
+    boxSize,
+    note,
+    playbackRate,
+  } = props;
 
   const x = displayNote.pos.x * boxSize + marginX;
   const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
   const size = noteSize * bigScale(note.big);
   const headSize = noteSize * 1;
   const tailSize = noteSize * 0.85;
-  const tailScaleFactor = 4;
-  const tailScaleMax = 6;
+  const tailScaleFactor = 0.25;
   const velX = useRef<number>(0);
   const velY = useRef<number>(0);
-  const lastT = useRef<DOMHighResTimeStamp>(-Infinity);
+  const lastT = useRef<DOMHighResTimeStamp>(performance.now());
   const dt = (performance.now() - lastT.current) / 1000;
-  const a = Math.exp(-dt / 0.1);
+  // TODO: 加速度? 速度? に応じて追従速度を変えた方が良くなる気がしなくもない
+  const a = Math.exp((-dt * playbackRate) / 0.1);
   velX.current = velX.current * a + displayNote.vel.x * (1 - a);
   velY.current = velY.current * a + displayNote.vel.y * (1 - a);
   lastT.current = performance.now();
@@ -320,7 +333,7 @@ function Nikochan(props: NProps) {
   const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, {
     delayed: !isOffScreen,
   });
-  const {isDark} = useTheme();
+  const { isDark } = useTheme();
   return (
     <>
       <div
@@ -408,8 +421,11 @@ function Nikochan(props: NProps) {
             targetY * boxSize -
             (tailSize * bigScale(note.big)) / 2 +
             marginY,
-          transform: `rotate(${(velAngle * 180) / Math.PI}deg) scaleX(${Math.min(velLength * tailScaleFactor, tailScaleMax)})`,
-          opacity: (isDark ? 0.4 : 0.6) * Math.min(1, velLength * tailScaleFactor) ** 2,
+          transform:
+            `rotate(${(velAngle * 180) / Math.PI}deg) ` +
+            `scaleX(${Math.log1p(velLength) * tailScaleFactor * boxSize / tailSize})`,
+          opacity:
+            (isDark ? 0.4 : 0.6) * Math.min(1, Math.log1p(velLength / 0.5)),
         }}
         decoding="async"
         src={props.cometTailAsset.current}

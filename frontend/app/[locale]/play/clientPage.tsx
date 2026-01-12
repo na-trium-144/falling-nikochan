@@ -921,6 +921,7 @@ function Play(props: Props) {
             setRenderFPS={setRenderFps}
             barFlash={barFlash}
             noClear={props.noClear}
+            playbackRate={playbackRate}
           />
           <div
             className={clsx(
