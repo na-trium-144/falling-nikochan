@@ -302,7 +302,6 @@ function Play(props: Props) {
     screenWidth,
     screenHeight,
     rem,
-    playUIScale,
     mobileStatusScale,
     largeResult,
   } = useDisplayMode();
@@ -313,22 +312,38 @@ function Play(props: Props) {
   const statusOverlaps =
     !isMobile &&
     statusSpace.height &&
-    statusSpace.height < 30 * playUIScale &&
+    // statusSpace.height < 30 * playUIScale &&
     !statusHide;
   const mainWindowSpace = useResizeDetector();
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
+  const [bestScoreCounts, setBestScoreCounts] = useState<number[] | null>(null);
+  // result表示の際に参照する過去のベストスコア
+  const [oldBestScoreState, setOldBestScoreState] = useState<number>(0);
+  const [oldBestScoreCounts, setOldBestScoreCounts] = useState<number[] | null>(
+    null
+  );
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
       const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
       if (data) {
         setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
+        setBestScoreCounts([...data.judgeCount, data.bigCount ?? 0]);
+      } else {
+        setBestScoreState(0);
+        setBestScoreCounts(null);
       }
     }
   }, [cid, lvIndex, chartBrief]);
+  const initOldBestScore = useCallback(() => {
+    setOldBestScoreState(bestScoreState);
+    setOldBestScoreCounts(bestScoreCounts);
+  }, [bestScoreState, bestScoreCounts]);
   useEffect(reloadBestScore, [reloadBestScore]);
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
+  const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
+  const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
   const exitableNow = () => exitable && exitable < performance.now();
@@ -648,6 +663,7 @@ function Play(props: Props) {
               bigCount: bigCount,
               inputType: hitType,
             });
+            reloadBestScore();
           }
           void (async () => {
             try {
@@ -733,6 +749,7 @@ function Play(props: Props) {
     bigCount,
     hitType,
     editing,
+    reloadBestScore,
   ]);
 
   const onReady = useCallback(() => {
@@ -743,20 +760,31 @@ function Play(props: Props) {
   const onStart = useCallback(() => {
     console.log("start ->", ytPlayer.current?.getPlayerState());
     if (chartSeq) {
+      initOldBestScore();
       setShowStopped(false);
       setShowReady(false);
       setShowResult(false);
       setChartPlaying(true);
+      setWasAutoPlay(auto);
+      setOldPlaybackRate(playbackRate);
       // setChartStarted(true);
       setExitable(null);
-      reloadBestScore();
       resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
     ytStartTimeStamp.current = null;
-  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref, reloadBestScore]);
+  }, [
+    chartSeq,
+    lateTimes,
+    resetNotesAll,
+    ytVolume,
+    ref,
+    initOldBestScore,
+    auto,
+    playbackRate,
+  ]);
   const onStop = useCallback(() => {
     console.log("stop ->", ytPlayer.current?.getPlayerState());
     switch (ytPlayer.current?.getPlayerState()) {
@@ -891,9 +919,10 @@ function Play(props: Props) {
           />
           {!isMobile && (
             <>
+              <div className="flex-1 basis-0" ref={statusSpace.ref} />
               <StatusBox
                 className={clsx(
-                  "z-10 flex-none m-3 self-end",
+                  "z-10 flex-none m-3 mb-6 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -905,8 +934,26 @@ function Play(props: Props) {
                 notesTotal={notesAll.length}
                 isMobile={false}
                 isTouch={isTouch}
+                best={
+                  chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreState
+                    : bestScoreState
+                }
+                bestCount={
+                  chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreCounts
+                    : bestScoreCounts
+                }
+                showBestScore={!auto && playbackRate === 1}
+                showBestCount={!auto && playbackRate === 1 && showReady}
+                showRemaining={!showReady}
+                showResult={
+                  !wasAutoPlay &&
+                  oldPlaybackRate === 1 &&
+                  showResult &&
+                  !showReady
+                }
               />
-              <div className="flex-1 basis-0" ref={statusSpace.ref} />
             </>
           )}
         </div>
@@ -1009,7 +1056,7 @@ function Play(props: Props) {
             <Result
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
-              auto={auto}
+              auto={wasAutoPlay}
               optionChanged={
                 userBegin !== null &&
                 Math.round(userBegin) > Math.round(ytBegin)
@@ -1053,18 +1100,18 @@ function Play(props: Props) {
               exit={exit}
               isTouch={isTouch}
               newRecord={
-                score > bestScoreState &&
-                !auto &&
-                playbackRate === 1 &&
+                score > oldBestScoreState &&
+                !wasAutoPlay &&
+                oldPlaybackRate === 1 &&
                 lvIndex !== undefined &&
                 chartBrief?.levels[lvIndex] !== undefined
-                  ? score - bestScoreState
+                  ? score - oldBestScoreState
                   : 0
               }
               largeResult={largeResult}
               record={record}
               inputType={hitType}
-              playbackRate4={playbackRate * 4}
+              playbackRate4={oldPlaybackRate * 4}
             />
           )}
           {showStopped && (
@@ -1134,6 +1181,25 @@ function Play(props: Props) {
               notesTotal={notesAll.length}
               isMobile={true}
               isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
+              best={
+                chartPlaying || (showResult && !showReady)
+                  ? oldBestScoreState
+                  : bestScoreState
+              }
+              bestCount={
+                chartPlaying || (showResult && !showReady)
+                  ? oldBestScoreCounts
+                  : bestScoreCounts
+              }
+              showBestScore={!auto && playbackRate === 1}
+              showBestCount={!auto && playbackRate === 1 && showReady}
+              showRemaining={!showReady}
+              showResult={
+                !wasAutoPlay &&
+                oldPlaybackRate === 1 &&
+                showResult &&
+                !showReady
+              }
             />
             {showFps && (
               <span className="absolute left-3 bottom-full">
@@ -1157,17 +1223,40 @@ function Play(props: Props) {
           </div>
         )}
       </div>
-      {!isMobile && statusHide && showResult && (
-        <StatusBox
-          className="z-20 absolute my-auto h-max inset-y-0"
+      {!isMobile && statusHide && showResult && !showReady && (
+        <div
+          className={clsx(
+            "z-20 absolute inset-y-0 my-auto",
+            "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
+          )}
           style={{ right: "0.75rem" }}
-          judgeCount={judgeCount}
-          bigCount={bigCount || 0}
-          bigTotal={bigTotal}
-          notesTotal={notesAll.length}
-          isMobile={false}
-          isTouch={isTouch}
-        />
+        >
+          <StatusBox
+            className="h-max"
+            judgeCount={judgeCount}
+            bigCount={bigCount || 0}
+            bigTotal={bigTotal}
+            notesTotal={notesAll.length}
+            isMobile={false}
+            isTouch={isTouch}
+            best={
+              chartPlaying || (showResult && !showReady)
+                ? oldBestScoreState
+                : bestScoreState
+            }
+            bestCount={
+              chartPlaying || (showResult && !showReady)
+                ? oldBestScoreCounts
+                : bestScoreCounts
+            }
+            showBestScore={!auto && playbackRate === 1}
+            showBestCount={!auto && playbackRate === 1 && showReady}
+            showRemaining={!showReady}
+            showResult={
+              !wasAutoPlay && oldPlaybackRate === 1 && showResult && !showReady
+            }
+          />
+        </div>
       )}
     </main>
   );
