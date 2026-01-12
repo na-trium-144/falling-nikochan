@@ -21,9 +21,14 @@ export function GuideMain(props: Props) {
   return (
     <div className={clsx(modalBg)}>
       <Box
-        classNameOuter="absolute inset-6 m-auto shadow-modal"
+        classNameOuter="shadow-modal"
         classNameInner="flex flex-col p-6 overflow-y-auto"
-        styleOuter={{ maxWidth: "40rem", maxHeight: "40rem" }}
+        styleOuter={{
+          width: "calc(100% - 3rem)",
+          height: "calc(100% - 3rem)",
+          maxWidth: "40rem",
+          maxHeight: "40rem",
+        }}
       >
         <Pager
           index={props.index}

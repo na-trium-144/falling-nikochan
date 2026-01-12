@@ -270,11 +270,11 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
         >
-          <div className="absolute inset-12">
+          <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
             <Box
               onClick={(e) => e.stopPropagation()}
               classNameOuter={clsx(
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
+                "w-max h-max max-w-full max-h-full",
                 "shadow-modal",
                 "transition-transform duration-200 origin-center",
                 modalAppearing ? "ease-in scale-100" : "ease-out scale-0"

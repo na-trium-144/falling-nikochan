@@ -1281,10 +1281,10 @@ function Page(props: Props) {
       <div className="w-0 h-13 edit-wide:hidden" />
       {chart === undefined ? (
         <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
-          <div className="absolute inset-6">
+          <div className="absolute inset-6 grid place-content-center">
             <Box
               classNameOuter={clsx(
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
+                "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
               classNameInner={clsx("p-6 overflow-x-clip overflow-y-auto")}
@@ -1328,7 +1328,7 @@ function Page(props: Props) {
             }
           }}
         >
-          <Box classNameOuter="absolute inset-6 m-auto w-max h-max p-6 shadow-modal">
+          <Box classNameOuter="w-max h-max p-6 shadow-modal">
             <p>{t("dragOver")}</p>
           </Box>
         </div>

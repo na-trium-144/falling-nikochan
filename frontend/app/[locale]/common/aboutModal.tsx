@@ -28,10 +28,10 @@ export function AboutModal(props: AProps) {
       )}
       onClick={close}
     >
-      <div className="absolute inset-12">
+      <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
         <Box
           classNameOuter={clsx(
-            "absolute inset-0 m-auto w-180 h-max max-w-full max-h-full",
+            "w-180 h-max max-w-full max-h-full",
             "shadow-modal",
             "transition-transform duration-200 origin-center",
             props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
