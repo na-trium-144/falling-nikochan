@@ -31,11 +31,11 @@ export default {
     score: {
       auto: "オートプレイ",
       score: "スコア",
-      bestScore: "ベストスコア",
       chain: "コンボ",
       playbackRate: "再生速度",
     },
     status: {
+      bestScore: "ベストスコア",
       good: "よい",
       ok: "まあまあ",
       bad: "だめ",

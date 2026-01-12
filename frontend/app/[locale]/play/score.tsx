@@ -62,43 +62,16 @@ export function ScoreDisp(props: Props) {
     <Cloud className="flex flex-col">
       <div
         className="flex flex-row items-baseline"
-        style={{ marginTop: 4, fontSize: 16 }}
+        style={{ marginTop: props.auto ? 8 : 20, marginRight: 6, fontSize: 20 }}
       >
         <span className="flex-1 min-w-0 overflow-visible text-nowrap ">
           {t("score")}
         </span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim alignAt2nd />
       </div>
-      {props.auto ? (
-        <>
-          <div className="text-center mt-1 " style={{ fontSize: 20 }}>
-            &lt;&lt; {t("auto")} &gt;&gt;
-          </div>
-          {props.playbackRate !== 1 && (
-            <span
-              className="text-center"
-              style={{ fontSize: 24, marginTop: -4, marginRight: "30%" }}
-            >
-              ×{props.playbackRate}
-            </span>
-          )}
-        </>
-      ) : props.playbackRate !== 1 ? (
-        <div className="text-center ">
-          <span style={{ fontSize: 16, marginRight: 8 }}>
-            {t("playbackRate")}:
-          </span>
-          <span style={{ fontSize: 24 }}>×{props.playbackRate}</span>
-        </div>
-      ) : (
-        <div className="flex flex-row items-baseline" style={{ marginTop: 4 }}>
-          <span
-            className="flex-1 min-w-0 overflow-visible text-nowrap "
-            style={{ fontSize: 16, marginRight: 8 }}
-          >
-            {t("bestScore")}
-          </span>
-          <NumDisp num={best} fontSize1={24} fontSize2={24} />
+      {props.auto && (
+        <div className="flex justify-center text-nowrap" style={{ marginRight: 6, fontSize: 20 }}>
+          <span className="inline-block">&lt;&lt; {t("auto")} &gt;&gt;</span>
         </div>
       )}
     </Cloud>
@@ -157,8 +130,8 @@ export function ChainDisp(props: ChainProps) {
           />
         </span>
         <span
-          className="text-left w-14 overflow-visible "
-          style={{ fontSize: 16 }}
+          className="text-left w-18 overflow-visible "
+          style={{ fontSize: 20 }}
         >
           {t("chain", { chain: props.chain })}
         </span>

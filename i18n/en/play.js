@@ -33,11 +33,11 @@ export default {
     score: {
       auto: "Auto Play",
       score: "Score",
-      bestScore: "Best Score",
       chain: "{chain, plural, =1 {chain} other {chains}}",
       playbackRate: "Speed",
     },
     status: {
+      bestScore: "Best Score",
       good: "Good",
       ok: "OK",
       bad: "Bad",
