@@ -2,7 +2,7 @@ import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
 
 export const modalBg =
-  "fixed inset-0 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
+  "fixed inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
 
 export const boxStyle = clsx(
   "bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs",
@@ -38,8 +38,18 @@ export function Box(props: Props) {
     <div
       ref={props.refOuter}
       className={clsx(
-        !props.classNameOuter?.includes("absolute") && "relative",
+        /*
+        外側のabsolute要素の中央に揃えたい場合、 absolute inset-0 m-auto を使うとsafariでバグる。
+        外側の要素を
+          grid place-content-center place-items-center grid-rows-1 grid-cols-1
+        にしておきBoxには何も指定しないようにするとうまくいく
+
+        width, height, max-width, max-height はclassNameOuterに指定すること。
+        内側の要素のサイズはgridとw-full,h-full指定により外側と同じになる (たぶん)
+        */
+        "relative",
         "rounded-box",
+        "grid grid-cols-1 grid-rows-1",
         boxStyle,
         props.hidden && "hidden",
         props.classNameOuter
@@ -64,23 +74,25 @@ export function Box(props: Props) {
 
 export function CenterBox(props: Props) {
   return (
-    <Box
-      refOuter={props.refOuter}
-      refInner={props.refInner}
-      classNameOuter={clsx(
-        "absolute inset-0 m-auto w-max h-max max-w-full text-center z-20",
-        props.hidden && "hidden",
-        props.classNameOuter
-      )}
-      classNameInner={clsx("p-6", props.classNameInner)}
-      styleOuter={props.styleOuter}
-      styleInner={props.styleInner}
-      onClick={props.onClick}
-      onPointerDown={props.onPointerDown}
-      onPointerUp={props.onPointerUp}
-    >
-      {props.children}
-    </Box>
+    <div className="absolute inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+      <Box
+        refOuter={props.refOuter}
+        refInner={props.refInner}
+        classNameOuter={clsx(
+          "w-max h-max max-w-full text-center z-20",
+          props.hidden && "hidden",
+          props.classNameOuter
+        )}
+        classNameInner={clsx("p-6", props.classNameInner)}
+        styleOuter={props.styleOuter}
+        styleInner={props.styleInner}
+        onClick={props.onClick}
+        onPointerDown={props.onPointerDown}
+        onPointerUp={props.onPointerUp}
+      >
+        {props.children}
+      </Box>
+    </div>
   );
 }
 
