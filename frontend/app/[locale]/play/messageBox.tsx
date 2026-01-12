@@ -57,8 +57,11 @@ interface MessageProps {
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.message");
   const { rem } = useDisplayMode();
-  const small = props.maxHeight < 22 * rem;
-  const optionMinHeight = 12 * rem;
+  // 開発者ツールで実測し、p-6分を除外 (言語やOSで表示内容若干変わるので、常にこの高さになるわけではない)
+  const optionHeight = 18.75 * rem - 3 * rem;
+  const fullHeight = 26.8 * rem - 3 * rem;
+  const optionMinHeight = optionHeight * 0.6;
+  const small = props.maxHeight < fullHeight - optionHeight + optionMinHeight;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, slideIn, setSlideIn] = useDelayedDisplayState(200, {
@@ -197,7 +200,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           <li className="">
             <CheckBox
               className=""
-              value={props.enableSE}
+              value={!(isIOS && props.enableIOSThru) && props.enableSE}
               onChange={(v) => props.setEnableSE(v)}
               disabled={isIOS && props.enableIOSThru}
             >

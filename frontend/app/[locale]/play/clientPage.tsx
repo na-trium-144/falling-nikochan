@@ -1002,7 +1002,7 @@ function Play(props: Props) {
               setPlaybackRate={changePlaybackRate}
               editing={editing}
               lateTimes={lateTimes.current}
-              maxHeight={(mainWindowSpace.height || 0) - 12 * rem}
+              maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
             />
           )}
           {showResult && (
