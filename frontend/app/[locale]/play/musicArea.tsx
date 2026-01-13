@@ -15,6 +15,7 @@ import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
 import { defaultThemeStyle } from "@/common/theme";
+import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box";
 
 interface Props {
   ready: boolean;
@@ -371,9 +372,9 @@ export function MusicArea(props: Props) {
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
-            : "top-full inset-x-0 mt-2 mr-1 p-3",
-          "rounded-lg border border-slate-400 dark:border-stone-600",
-          "bg-white/75 dark:bg-stone-800/75",
+            : "top-full left-3 right-1 mt-1 p-3",
+          "rounded-box",
+          boxStyle,
           "transition-all duration-200",
           volumeCtrlOpen
             ? "ease-out scale-100 opacity-100"
@@ -396,7 +397,9 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        {!props.isMobile && (
+        <span className={boxBorderStyle1} />
+        <span className={boxBorderStyle2} />
+        {/*{!props.isMobile && (
           <span
             className={clsx(
               "absolute inline-block right-2 top-0 w-4 h-4 -translate-y-1/2",
@@ -406,7 +409,7 @@ export function MusicArea(props: Props) {
               "bg-white dark:bg-stone-800"
             )}
           />
-        )}
+        )}*/}
         <div className="flex flex-row items-center ">
           <Youtube className="text-xl " />
           <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
