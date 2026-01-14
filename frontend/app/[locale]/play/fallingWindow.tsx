@@ -210,6 +210,7 @@ export default function FallingWindow(props: Props) {
         lastNow.current = now;
         // TODO: 加速度? 速度? に応じて追従速度を変えた方が良くなる気がしなくもない
         const velDamp = Math.exp(-dt / 0.1);
+        const headSize = noteSize * 1;
         const tailSize = noteSize * 0.85;
         const tailScaleFactor = 0.25;
         for (const dn of displayNotes.current) {
@@ -258,6 +259,36 @@ export default function FallingWindow(props: Props) {
               ctx.fill();
               ctx.restore();
             }
+
+            if (
+              n.done === 0 ||
+              (tailLength > noteSize / 2 && tailOpacity > 0.5)
+            ) {
+              ctx.save();
+              ctx.scale(tailsCanvasDPR, tailsCanvasDPR);
+              ctx.translate(
+                dn.pos.x * boxSize + canvasMarginX,
+                canvasMarginY + boxSize - targetY * boxSize - dn.pos.y * boxSize
+              );
+              ctx.globalAlpha = n.done === 0 ? 1 : tailOpacity;
+              ctx.beginPath();
+              const headRadius = (headSize * bigScale(n.big)) / 2;
+              ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+              const headGrad = ctx.createRadialGradient(
+                0,
+                0,
+                0,
+                0,
+                0,
+                headRadius
+              );
+              headGrad.addColorStop(0, "#ffe89dff");
+              headGrad.addColorStop(0.5, "#ffe89dcc");
+              headGrad.addColorStop(1, "#ffe89d00");
+              ctx.fillStyle = headGrad;
+              ctx.fill();
+              ctx.restore();
+            }
           }
         }
       }
@@ -279,7 +310,6 @@ export default function FallingWindow(props: Props) {
 
   const nikochanAssets = useRef<string[]>([]);
   const particleAssets = useRef<string[]>([]);
-  const cometHeadAsset = useRef<string>("");
   useEffect(() => {
     Promise.all(
       [0, 1, 2, 3].map((i) =>
@@ -301,11 +331,6 @@ export default function FallingWindow(props: Props) {
     ).then((urls) => {
       particleAssets.current = urls;
     });
-    fetch(process.env.ASSET_PREFIX + `/assets/comet-head.svg`)
-      .then((res) => res.text())
-      .then((text) => {
-        cometHeadAsset.current = `data:image/svg+xml;base64,${btoa(text)}`;
-      });
   }, []);
 
   return (
@@ -355,7 +380,6 @@ export default function FallingWindow(props: Props) {
           marginY={marginY}
           nikochanAssets={nikochanAssets}
           particleAssets={particleAssets}
-          cometHeadAsset={cometHeadAsset}
         />
       )}
     </div>
@@ -371,7 +395,6 @@ interface MProps {
   marginY: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
-  cometHeadAsset: RefObject<string>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
   return props.displayNotes.map((d) => (
@@ -385,7 +408,6 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       boxSize={props.boxSize}
       nikochanAssets={props.nikochanAssets}
       particleAssets={props.particleAssets}
-      cometHeadAsset={props.cometHeadAsset}
     />
   ));
 });
@@ -399,7 +421,6 @@ interface NProps {
   boxSize: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
-  cometHeadAsset: RefObject<string>;
 }
 function Nikochan(props: NProps) {
   /* にこちゃん
@@ -413,7 +434,6 @@ function Nikochan(props: NProps) {
   const x = displayNote.pos.x * boxSize + marginX;
   const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
   const size = noteSize * bigScale(note.big);
-  const headSize = noteSize * 1;
   const isOffScreen =
     x + size / 2 < 0 ||
     x - size / 2 > window.innerWidth ||
@@ -487,17 +507,6 @@ function Nikochan(props: NProps) {
               ).toFixed(2)}
             </span>
           )}*/}
-        <img
-          decoding="async"
-          src={props.cometHeadAsset.current}
-          className="block absolute -z-5"
-          style={{
-            width: headSize * bigScale(note.big),
-            height: headSize * bigScale(note.big),
-            left: (size - headSize * bigScale(note.big)) / 2,
-            bottom: (size - headSize * bigScale(note.big)) / 2,
-          }}
-        />
       </div>
       {[1].includes(displayNote.done) && (
         <Ripple
