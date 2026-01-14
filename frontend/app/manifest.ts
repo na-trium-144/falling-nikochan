@@ -7,8 +7,12 @@ export const dynamic = "force-static";
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations("en", "main");
   return {
-    name: "Falling Nikochan",
-    short_name: "Nikochan",
+    name:
+      "Falling Nikochan" +
+      (process.env.TITLE_SUFFIX ? ` ${process.env.TITLE_SUFFIX}` : ""),
+    short_name: process.env.TITLE_SUFFIX
+      ? `${process.env.TITLE_SUFFIX}`
+      : "Nikochan",
     description: t("description"),
     icons: [
       ...[192, 512]

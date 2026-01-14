@@ -40,8 +40,12 @@ const env = {
   buildCommit: commit,
   buildVersion:
     packageJson.version.split(".").slice(0, 2).join(".") +
-    (process.env.VERSION_SUFFIX || ""),
+    (process.env.VERSION_SUFFIX ||
+      (process.env.NODE_ENV === "development" ? "+dev" : "")),
   browserslist: packageJson.browserslist.join(", "),
+  TITLE_SUFFIX:
+    process.env.TITLE_SUFFIX ||
+    (process.env.NODE_ENV === "development" ? "Development" : ""),
   // prefix for every asset URL
   ASSET_PREFIX: process.env.ASSET_PREFIX || "",
   // prefix for every API call URL
