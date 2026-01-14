@@ -8,7 +8,6 @@ import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
-import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import { useTheme } from "@/common/theme";
 
 interface Props {
@@ -43,7 +42,8 @@ export default function FallingWindow(props: Props) {
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
+  const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasLeft = useRef<number>(0);
   const canvasTop = useRef<number>(0);
   const canvasWidth = useRef<number>(0);
@@ -70,7 +70,11 @@ export default function FallingWindow(props: Props) {
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
-  const canvasDPR = Math.min(1, 6.5 / noteSize);
+  const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
+  const nikochanCanvasDPR = useRef<number>(1);
+  useEffect(() => {
+    nikochanCanvasDPR.current = window.devicePixelRatio;
+  });
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
   // requestAnimationFrame() のコールバックの呼び出される間隔から測定する端末FPS
@@ -166,11 +170,76 @@ export default function FallingWindow(props: Props) {
     return () => clearInterval(i);
   }, [setRenderFPS]);
 
+  const ctx = tailsCanvasRef.current?.getContext("2d", {
+    alpha: true,
+    desynchronized: true,
+  });
+  const nctx = nikochanCanvasRef.current?.getContext("2d", {
+    alpha: true,
+    desynchronized: true,
+  });
+
+  const nikochan0Bitmap = useRef<ImageBitmap | null>(null);
+  const nikochan0BitmapBig = useRef<ImageBitmap | null>(null);
+  useEffect(() => {
+    (async () => {
+      const res = await fetch(
+        process.env.ASSET_PREFIX + `/assets/nikochan0.svg`
+      );
+      const svg = await res.text();
+      // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
+      // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
+      const svgResized = svg
+        .replace(
+          /width="(\d+)(\w*)"/,
+          `width="${noteSize * nikochanCanvasDPR.current}"`
+        )
+        .replace(
+          /height="(\d+)(\w*)"/,
+          `height="${noteSize * nikochanCanvasDPR.current}"`
+        );
+      const img = new Image();
+      img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
+      img.decode().then(async () => {
+        nikochan0Bitmap.current = await createImageBitmap(img, {
+          resizeWidth: noteSize * nikochanCanvasDPR.current,
+          resizeHeight: noteSize * nikochanCanvasDPR.current,
+          resizeQuality: "high",
+        });
+      });
+      const svgResizedBig = svg
+        .replace(
+          /width="(\d+)(\w*)"/,
+          `width="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+        )
+        .replace(
+          /height="(\d+)(\w*)"/,
+          `height="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+        );
+      const imgBig = new Image();
+      imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
+      imgBig.decode().then(async () => {
+        nikochan0BitmapBig.current = await createImageBitmap(imgBig, {
+          resizeWidth: noteSize * bigScale(true) * nikochanCanvasDPR.current,
+          resizeHeight: noteSize * bigScale(true) * nikochanCanvasDPR.current,
+          resizeQuality: "high",
+        });
+      });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noteSize, nikochanCanvasDPR.current]);
+
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
+  const noteFadeInStart = useRef<(DOMHighResTimeStamp | null)[]>([]);
   const tailVels = useRef<(Pos | null)[]>([]);
   useEffect(() => {
-    while (playing && notes.length >= tailVels.current.length) {
-      tailVels.current.push(null);
+    if (playing) {
+      while (notes.length >= tailVels.current.length) {
+        tailVels.current.push(null);
+      }
+      while (notes.length >= noteFadeInStart.current.length) {
+        noteFadeInStart.current.push(null);
+      }
     }
   }, [playing, notes]);
   const lastNow = useRef<number>(0);
@@ -179,10 +248,6 @@ export default function FallingWindow(props: Props) {
     runExecutedIndex.current = rerenderIndex;
     renderFpsCounter.current.push(performance.now());
     const now = getCurrentTimeSec();
-    const ctx = canvasRef.current?.getContext("2d", {
-      alpha: true,
-      desynchronized: true,
-    });
     if (
       playing &&
       marginX !== undefined &&
@@ -199,12 +264,68 @@ export default function FallingWindow(props: Props) {
         .filter((n) => n !== null);
       displayNotes.current.reverse(); // 奥に表示されるものが最初
 
+      if (nctx) {
+        nctx.clearRect(
+          0,
+          0,
+          canvasWidth.current * nikochanCanvasDPR.current,
+          canvasHeight.current * nikochanCanvasDPR.current
+        );
+        for (const dn of displayNotes.current) {
+          const n = notes[dn.id];
+          if (n.done > 0) {
+            // 判定後のエフェクトについてはNikochanコンポーネント内のimgタグで描画する
+            continue;
+          }
+          const size = noteSize * bigScale(n.big);
+          const left = dn.pos.x * boxSize + canvasMarginX - size / 2;
+          const top =
+            canvasMarginY +
+            boxSize -
+            targetY * boxSize -
+            dn.pos.y * boxSize -
+            size / 2;
+          const isOffScreen =
+            left + size < 0 ||
+            left - size > window.innerWidth ||
+            top - size > canvasMarginY + boxSize ||
+            top + size < 0;
+          // 出現直後は100msのフェードインをする。
+          // ただし最初から画面外にいるものについてはフェードインしない(開始時刻を-Infinityにすることで完了状態にする)
+          if (noteFadeInStart.current[dn.id] === null) {
+            if (isOffScreen) {
+              noteFadeInStart.current[dn.id] = -Infinity;
+            } else {
+              noteFadeInStart.current[dn.id] = performance.now();
+            }
+          }
+          nctx.globalAlpha =
+            0.7 *
+            Math.min(
+              1,
+              (performance.now() - noteFadeInStart.current[dn.id]!) / 100
+            );
+          if (n.big) {
+            nctx.drawImage(
+              nikochan0BitmapBig.current!,
+              left * nikochanCanvasDPR.current,
+              top * nikochanCanvasDPR.current
+            );
+          } else {
+            nctx.drawImage(
+              nikochan0Bitmap.current!,
+              left * nikochanCanvasDPR.current,
+              top * nikochanCanvasDPR.current
+            );
+          }
+        }
+      }
       if (ctx) {
         ctx.clearRect(
           0,
           0,
-          canvasWidth.current * canvasDPR,
-          canvasHeight.current * canvasDPR
+          canvasWidth.current * tailsCanvasDPR,
+          canvasHeight.current * tailsCanvasDPR
         );
         const dt = Math.max(0, now - lastNow.current);
         lastNow.current = now;
@@ -238,7 +359,7 @@ export default function FallingWindow(props: Props) {
 
             if (tailLength > noteSize / 2 && tailOpacity > 0.5) {
               ctx.save();
-              ctx.scale(canvasDPR, canvasDPR);
+              ctx.scale(tailsCanvasDPR, tailsCanvasDPR);
               ctx.translate(
                 dn.pos.x * boxSize + canvasMarginX,
                 canvasMarginY + boxSize - targetY * boxSize - dn.pos.y * boxSize
@@ -299,12 +420,21 @@ export default function FallingWindow(props: Props) {
           ctx.clearRect(
             0,
             0,
-            canvasWidth.current * canvasDPR,
-            canvasHeight.current * canvasDPR
+            canvasWidth.current * tailsCanvasDPR,
+            canvasHeight.current * tailsCanvasDPR
+          );
+        }
+        if (nctx) {
+          nctx.clearRect(
+            0,
+            0,
+            canvasWidth.current * nikochanCanvasDPR.current,
+            canvasHeight.current * nikochanCanvasDPR.current
           );
         }
       }
       tailVels.current = [];
+      noteFadeInStart.current = [];
     }
   }
 
@@ -341,7 +471,7 @@ export default function FallingWindow(props: Props) {
     >
       {/* For nikochans tail */}
       <canvas
-        ref={canvasRef}
+        ref={tailsCanvasRef}
         style={{
           zIndex: -7,
           position: "absolute",
@@ -352,12 +482,28 @@ export default function FallingWindow(props: Props) {
           pointerEvents: "none",
           opacity: isDark ? 0.4 : 0.6,
         }}
-        width={canvasWidth.current * canvasDPR}
-        height={canvasHeight.current * canvasDPR}
+        width={canvasWidth.current * tailsCanvasDPR}
+        height={canvasHeight.current * tailsCanvasDPR}
+      />
+      {/* For nikochan */}
+      <canvas
+        ref={nikochanCanvasRef}
+        style={{
+          zIndex: 0,
+          position: "absolute",
+          left: canvasLeft.current,
+          top: canvasTop.current,
+          width: canvasWidth.current,
+          height: canvasHeight.current,
+          pointerEvents: "none",
+        }}
+        width={canvasWidth.current * nikochanCanvasDPR.current}
+        height={canvasHeight.current * nikochanCanvasDPR.current}
       />
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
         <TargetLine
+          className="-z-3"
           barFlash={
             props.barFlash === undefined || marginX === undefined
               ? undefined
@@ -430,38 +576,38 @@ function Nikochan(props: NProps) {
   4: miss は画像が0と同じ
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
-
-  const x = displayNote.pos.x * boxSize + marginX;
-  const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
-  const size = noteSize * bigScale(note.big);
-  const isOffScreen =
-    x + size / 2 < 0 ||
-    x - size / 2 > window.innerWidth ||
-    y - size / 2 > boxSize ||
-    y + size / 2 < 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, {
-    delayed: !isOffScreen,
-  });
+  const [fadeoutStarted, setFadeoutStarted] = useState<boolean>(false);
+  useEffect(() => {
+    if (displayNote.done === 0) {
+      setFadeoutStarted(false);
+    }
+    if (displayNote.done >= 1 && !fadeoutStarted) {
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          setFadeoutStarted(true);
+        });
+      });
+    }
+  }, [displayNote.done, fadeoutStarted]);
   return (
     <>
       <div
         className={clsx(
           "absolute",
-          displayNote.done === 0 &&
-            (enableFadeIn
-              ? appeared
-                ? "transition ease-linear duration-100 opacity-100"
-                : "opacity-0"
-              : "opacity-100"),
-          displayNote.done === 1 &&
-            "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125",
-          displayNote.done === 2 &&
-            "transition ease-linear duration-300 -translate-y-2 opacity-0",
-          displayNote.done === 3 &&
-            "transition ease-linear duration-300 opacity-0",
-          displayNote.done === 4 &&
-            "transition ease-linear duration-200 opacity-0"
+          displayNote.done === 0
+            ? "opacity-0"
+            : !fadeoutStarted
+              ? "opacity-100"
+              : clsx(
+                  displayNote.done === 1 &&
+                    "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125",
+                  displayNote.done === 2 &&
+                    "transition ease-linear duration-300 -translate-y-2 opacity-0",
+                  displayNote.done === 3 &&
+                    "transition ease-linear duration-300 opacity-0",
+                  displayNote.done === 4 &&
+                    "transition ease-linear duration-200 opacity-0"
+                )
         )}
         style={{
           /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
@@ -469,14 +615,16 @@ function Nikochan(props: NProps) {
           height: noteSize * bigScale(note.big),
           fontSize: noteSize * bigScale(note.big), // 1em で参照できるように
           left:
-            displayNote.pos.x * boxSize -
+            (displayNote.done === 0 ? note.targetX : displayNote.pos.x) *
+              boxSize -
             (noteSize * bigScale(note.big)) / 2 +
             marginX,
           bottom:
-            displayNote.pos.y * boxSize +
+            (displayNote.done === 0 ? targetY : displayNote.pos.y) * boxSize +
             targetY * boxSize -
             (noteSize * bigScale(note.big)) / 2 +
             marginY,
+          willChange: "transform, opacity, left, bottom",
         }}
       >
         <img
