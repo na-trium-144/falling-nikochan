@@ -26,6 +26,7 @@ jobs:
           NO_PREFETCH: 1
           # BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
           VERSION_SUFFIX: +stg
+          TITLE_SUFFIX: Staging
         run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
