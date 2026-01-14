@@ -8,8 +8,9 @@ import { ChartLineBrief } from "../chartList.jsx";
 
 export async function generateMetadata({ params }: MetadataProps) {
   const t = await getTranslations(params, "main.play");
+  const rssUrl = (process.env.BACKEND_PREFIX || "") + "/rss.xml";
   return initMetadata(params, "/main/play", t("title"), t("description"), {
-    rssUrl: process.env.BACKEND_PREFIX + "/rss.xml",
+    rssUrl: rssUrl,
   });
 }
 
