@@ -50,6 +50,7 @@ export default {
       recent: "最近プレイした譜面",
       popular: "人気の譜面",
       popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
+      rss: "RSSフィード",
       latest: "新着譜面・すべての譜面",
       latestDesc:
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。" +

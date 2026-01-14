@@ -29,6 +29,7 @@ export async function initMetadata(
   options?: {
     image?: string;
     noAlternate?: boolean;
+    rssUrl?: string;
     custom?: { [key: string]: string };
   }
 ): Promise<Metadata> {
@@ -54,6 +55,11 @@ export async function initMetadata(
                 },
                 {} as { [key: string]: string }
               ),
+          types: options?.rssUrl
+            ? {
+                "application/rss+xml": options.rssUrl,
+              }
+            : undefined,
         }
       : undefined,
     description,

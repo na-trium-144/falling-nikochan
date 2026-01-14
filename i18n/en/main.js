@@ -48,6 +48,7 @@ export default {
       recent: "Recently Played Charts",
       popular: "Popular Charts",
       popularDesc: "Charts played many times in the last {popularDays} days.",
+      rss: "RSS Feed",
       latest: "Latest Charts / All Charts",
       latestDesc:
         "List of published charts. Sorted by the most recently created or updated. " +
