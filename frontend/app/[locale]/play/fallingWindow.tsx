@@ -2,7 +2,7 @@
 
 import clsx from "clsx/lite";
 import { memo, RefObject, useEffect, useRef, useState } from "react";
-import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
+import { targetY, bigScale, bonusMax, Pos } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
@@ -39,12 +39,38 @@ export default function FallingWindow(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
+  // nikochanの座標系で(0, 0)を指す位置がFallingWindowの座標系で(marginX, marginY)
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasLeft = useRef<number>(0);
+  const canvasTop = useRef<number>(0);
+  const canvasWidth = useRef<number>(0);
+  const canvasHeight = useRef<number>(0);
+  useEffect(() => {
+    if (ref.current && marginX !== undefined && marginY !== undefined) {
+      canvasLeft.current = -(
+        ref.current as HTMLDivElement
+      ).getBoundingClientRect().left;
+      canvasTop.current = -(
+        ref.current as HTMLDivElement
+      ).getBoundingClientRect().top;
+      canvasWidth.current = window.innerWidth;
+      canvasHeight.current = window.innerHeight;
+    }
+  }, [ref, marginX, marginY]);
+  const canvasMarginX =
+    marginX !== undefined ? -canvasLeft.current + marginX : undefined;
+  const canvasMarginY =
+    marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
+  const { isDark } = useTheme();
   const { rem } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
+
+  // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
+  const canvasDPR = Math.min(1, 6.5 / noteSize);
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
   // requestAnimationFrame() のコールバックの呼び出される間隔から測定する端末FPS
@@ -143,15 +169,28 @@ export default function FallingWindow(props: Props) {
   }, [setRenderFPS]);
 
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
+  const tailVels = useRef<(Pos | null)[]>([]);
+  useEffect(() => {
+    while (playing && notes.length >= tailVels.current.length) {
+      tailVels.current.push(null);
+    }
+  }, [playing, notes]);
+  const lastNow = useRef<number>(0);
   if (runExecutedIndex.current !== rerenderIndex) {
     performance.mark("nikochan-rerender");
     runExecutedIndex.current = rerenderIndex;
     renderFpsCounter.current.push(performance.now());
     const now = getCurrentTimeSec();
+    const ctx = canvasRef.current?.getContext("2d", {
+      alpha: true,
+      desynchronized: true,
+    });
     if (
       playing &&
       marginX !== undefined &&
       marginY !== undefined &&
+      canvasMarginX !== undefined &&
+      canvasMarginY !== undefined &&
       boxSize &&
       now !== undefined
     ) {
@@ -160,17 +199,88 @@ export default function FallingWindow(props: Props) {
           n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
         )
         .filter((n) => n !== null);
-      displayNotes.current.reverse();
+      displayNotes.current.reverse(); // 奥に表示されるものが最初
+
+      if (ctx) {
+        ctx.clearRect(
+          0,
+          0,
+          canvasWidth.current * canvasDPR,
+          canvasHeight.current * canvasDPR
+        );
+        const dt = Math.max(0, now - lastNow.current);
+        lastNow.current = now;
+        // TODO: 加速度? 速度? に応じて追従速度を変えた方が良くなる気がしなくもない
+        const velDamp = Math.exp(-dt / 0.1);
+        const tailSize = noteSize * 0.85;
+        const tailScaleFactor = 0.25;
+        for (const dn of displayNotes.current) {
+          if (!tailVels.current[dn.id]) {
+            tailVels.current[dn.id] = { x: 0, y: 0 };
+          } else {
+            tailVels.current[dn.id]!.x =
+              tailVels.current[dn.id]!.x * velDamp + dn.vel.x * (1 - velDamp);
+            tailVels.current[dn.id]!.y =
+              tailVels.current[dn.id]!.y * velDamp + dn.vel.y * (1 - velDamp);
+
+            const n = notes[dn.id];
+            const tailVel = tailVels.current[dn.id]!;
+            const log1pVelLength = Math.log1p(
+              Math.sqrt(tailVel.x * tailVel.x + tailVel.y * tailVel.y)
+            );
+            const tailLength =
+              log1pVelLength *
+              tailScaleFactor *
+              boxSize *
+              Math.sqrt(bigScale(n.big));
+            const tailWidth = tailSize * bigScale(n.big);
+            const tailOpacity = Math.min(1, log1pVelLength * 2);
+            const velAngle = Math.atan2(-tailVel.y, tailVel.x);
+
+            if (tailLength > noteSize / 2 && tailOpacity > 0.5) {
+              ctx.save();
+              ctx.scale(canvasDPR, canvasDPR);
+              ctx.translate(
+                dn.pos.x * boxSize + canvasMarginX,
+                canvasMarginY + boxSize - targetY * boxSize - dn.pos.y * boxSize
+              );
+              ctx.rotate(velAngle);
+              const tailGrad = ctx.createLinearGradient(tailLength, 0, 0, 0);
+              tailGrad.addColorStop(0, "#facd0000");
+              tailGrad.addColorStop(1, "#facd00cc");
+              ctx.beginPath();
+              ctx.moveTo(tailLength, 0);
+              ctx.lineTo(0, -tailWidth / 2);
+              ctx.lineTo(0, tailWidth / 2);
+              ctx.closePath();
+              ctx.fillStyle = tailGrad;
+              // ctx.shadowBlur = 10;
+              // ctx.shadowColor = "#facd0080";
+              ctx.globalAlpha = tailOpacity;
+              ctx.fill();
+              ctx.restore();
+            }
+          }
+        }
+      }
     } else {
       if (!noClear) {
         displayNotes.current = [];
+        if (ctx) {
+          ctx.clearRect(
+            0,
+            0,
+            canvasWidth.current * canvasDPR,
+            canvasHeight.current * canvasDPR
+          );
+        }
       }
+      tailVels.current = [];
     }
   }
 
   const nikochanAssets = useRef<string[]>([]);
   const particleAssets = useRef<string[]>([]);
-  const cometTailAsset = useRef<string>("");
   const cometHeadAsset = useRef<string>("");
   useEffect(() => {
     Promise.all(
@@ -193,11 +303,6 @@ export default function FallingWindow(props: Props) {
     ).then((urls) => {
       particleAssets.current = urls;
     });
-    fetch(process.env.ASSET_PREFIX + `/assets/comet-tail.svg`)
-      .then((res) => res.text())
-      .then((text) => {
-        cometTailAsset.current = `data:image/svg+xml;base64,${btoa(text)}`;
-      });
     fetch(process.env.ASSET_PREFIX + `/assets/comet-head.svg`)
       .then((res) => res.text())
       .then((text) => {
@@ -206,39 +311,55 @@ export default function FallingWindow(props: Props) {
   }, []);
 
   return (
-    <div className={clsx(props.className)} style={props.style} ref={ref}>
-      <div className="relative w-full h-full overflow-visible">
-        {/* 判定線 */}
-        {boxSize && marginY !== undefined && (
-          <TargetLine
-            barFlash={
-              props.barFlash === undefined || marginX === undefined
-                ? undefined
-                : "targetX" in props.barFlash
-                  ? props.barFlash.targetX * boxSize + marginX
-                  : props.barFlash.clientX
-            }
-            left={0}
-            right="-100%"
-            bottom={targetY * boxSize + marginY}
-          />
-        )}
-        {boxSize && marginX !== undefined && marginY !== undefined && (
-          <NikochansMemo
-            displayNotes={displayNotes.current}
-            notes={notes}
-            noteSize={noteSize}
-            boxSize={boxSize}
-            marginX={marginX}
-            marginY={marginY}
-            playbackRate={playbackRate}
-            nikochanAssets={nikochanAssets}
-            particleAssets={particleAssets}
-            cometTailAsset={cometTailAsset}
-            cometHeadAsset={cometHeadAsset}
-          />
-        )}
-      </div>
+    <div
+      className={clsx(props.className, "overflow-visible")}
+      style={props.style}
+      ref={ref}
+    >
+      {/* For nikochans tail */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          zIndex: -7,
+          position: "absolute",
+          left: canvasLeft.current,
+          top: canvasTop.current,
+          width: canvasWidth.current,
+          height: canvasHeight.current,
+          pointerEvents: "none",
+          opacity: isDark ? 0.4 : 0.6,
+        }}
+        width={canvasWidth.current * canvasDPR}
+        height={canvasHeight.current * canvasDPR}
+      />
+      {/* 判定線 */}
+      {boxSize && marginY !== undefined && (
+        <TargetLine
+          barFlash={
+            props.barFlash === undefined || marginX === undefined
+              ? undefined
+              : "targetX" in props.barFlash
+                ? props.barFlash.targetX * boxSize + marginX
+                : props.barFlash.clientX
+          }
+          left={0}
+          right="-100%"
+          bottom={targetY * boxSize + marginY}
+        />
+      )}
+      {boxSize && marginX !== undefined && marginY !== undefined && (
+        <NikochansMemo
+          displayNotes={displayNotes.current}
+          notes={notes}
+          noteSize={noteSize}
+          boxSize={boxSize}
+          marginX={marginX}
+          marginY={marginY}
+          nikochanAssets={nikochanAssets}
+          particleAssets={particleAssets}
+          cometHeadAsset={cometHeadAsset}
+        />
+      )}
     </div>
   );
 }
@@ -250,10 +371,8 @@ interface MProps {
   boxSize: number;
   marginX: number;
   marginY: number;
-  playbackRate: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
-  cometTailAsset: RefObject<string>;
   cometHeadAsset: RefObject<string>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
@@ -266,10 +385,8 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       marginX={props.marginX}
       marginY={props.marginY}
       boxSize={props.boxSize}
-      playbackRate={props.playbackRate}
       nikochanAssets={props.nikochanAssets}
       particleAssets={props.particleAssets}
-      cometTailAsset={props.cometTailAsset}
       cometHeadAsset={props.cometHeadAsset}
     />
   ));
@@ -282,10 +399,8 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
-  playbackRate: number;
   nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
-  cometTailAsset: RefObject<string>;
   cometHeadAsset: RefObject<string>;
 }
 function Nikochan(props: NProps) {
@@ -295,35 +410,12 @@ function Nikochan(props: NProps) {
   1〜3: good, ok, bad
   4: miss は画像が0と同じ
   */
-  const {
-    displayNote,
-    noteSize,
-    marginX,
-    marginY,
-    boxSize,
-    note,
-    playbackRate,
-  } = props;
+  const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
 
   const x = displayNote.pos.x * boxSize + marginX;
   const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
   const size = noteSize * bigScale(note.big);
   const headSize = noteSize * 1;
-  const tailSize = noteSize * 0.85;
-  const tailScaleFactor = 0.25;
-  const velX = useRef<number>(0);
-  const velY = useRef<number>(0);
-  const lastT = useRef<DOMHighResTimeStamp>(performance.now());
-  const dt = (performance.now() - lastT.current) / 1000;
-  // TODO: 加速度? 速度? に応じて追従速度を変えた方が良くなる気がしなくもない
-  const a = Math.exp((-dt * playbackRate) / 0.1);
-  velX.current = velX.current * a + displayNote.vel.x * (1 - a);
-  velY.current = velY.current * a + displayNote.vel.y * (1 - a);
-  lastT.current = performance.now();
-  const velLength = Math.sqrt(
-    velX.current * velX.current + velY.current * velY.current
-  );
-  const velAngle = Math.atan2(-velY.current, velX.current);
   const isOffScreen =
     x + size / 2 < 0 ||
     x - size / 2 > window.innerWidth ||
@@ -333,7 +425,6 @@ function Nikochan(props: NProps) {
   const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, {
     delayed: !isOffScreen,
   });
-  const { isDark } = useTheme();
   return (
     <>
       <div
@@ -410,26 +501,6 @@ function Nikochan(props: NProps) {
           }}
         />
       </div>
-      <img
-        className="block absolute -z-7 origin-left"
-        style={{
-          width: tailSize * Math.sqrt(bigScale(note.big)),
-          height: tailSize * bigScale(note.big),
-          left: displayNote.pos.x * boxSize + marginX,
-          bottom:
-            displayNote.pos.y * boxSize +
-            targetY * boxSize -
-            (tailSize * bigScale(note.big)) / 2 +
-            marginY,
-          transform:
-            `rotate(${(velAngle * 180) / Math.PI}deg) ` +
-            `scaleX(${Math.log1p(velLength) * tailScaleFactor * boxSize / tailSize})`,
-          opacity:
-            (isDark ? 0.4 : 0.6) * Math.min(1, Math.log1p(velLength / 0.5)),
-        }}
-        decoding="async"
-        src={props.cometTailAsset.current}
-      />
       {[1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
