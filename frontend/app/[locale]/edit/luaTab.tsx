@@ -1,13 +1,6 @@
 "use client";
 
 import clsx from "clsx/lite";
-import AceEditor from "react-ace";
-import "ace-builds/src-min-noconflict/ext-language_tools";
-import "ace-builds/src-min-noconflict/theme-github";
-import "ace-builds/src-min-noconflict/theme-monokai";
-import "ace-builds/src-min-noconflict/mode-lua";
-import "ace-builds/src-min-noconflict/snippets/lua";
-import "ace-builds/src-min-noconflict/ext-searchbox";
 import {
   createContext,
   ReactNode,
@@ -26,6 +19,20 @@ import { useTheme } from "@/common/theme.js";
 import { LevelEdit } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
+const AceEditor = dynamic(
+  async () => {
+    const ace = await import("react-ace");
+    await import("ace-builds/src-min-noconflict/ext-language_tools");
+    await import("ace-builds/src-min-noconflict/theme-tomorrow");
+    await import("ace-builds/src-min-noconflict/theme-tomorrow_night");
+    await import("ace-builds/src-min-noconflict/mode-lua");
+    await import("ace-builds/src-min-noconflict/snippets/lua");
+    await import("ace-builds/src-min-noconflict/ext-searchbox");
+    return ace;
+  },
+  { ssr: false }
+);
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
 
@@ -188,16 +195,17 @@ export function LuaTabProvider(props: PProps) {
     <LuaPositionContext.Provider value={{ data, setData }}>
       {props.children}
       <div
-        className={clsx("absolute", visible || "hidden")}
+        className={clsx("absolute rounded-box", visible || "hidden")}
         style={{ top, left, width, height }}
       >
         <AceEditor
           mode="lua"
-          theme={themeState.isDark ? "monokai" : "github"}
+          theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
           width="100%"
           height="100%"
           tabSize={2}
           fontSize={1 * rem}
+          highlightActiveLine={false}
           value={code}
           annotations={[
             ...barLines.map((bl) => ({
@@ -225,9 +233,30 @@ export function LuaTabProvider(props: PProps) {
               endRow: errLine === null ? -1 : errLine,
               startCol: 0,
               endCol: 1,
-              type: "fullLine",
-              // なぜか座標はAce側で指定してくれるのにposition:absoluteが無い
+              type: "fullLine" as const,
               className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
+            },
+            ...barLines.map((bl) => ({
+              startRow: bl.luaLine,
+              endRow: bl.luaLine,
+              startCol: 0,
+              endCol: 1,
+              type: "fullLine" as const,
+              className: clsx(
+                "absolute h-[1px]! bg-gray-500",
+                "shadow-[0_0_2px] shadow-gray-500/75"
+              ),
+            })),
+            {
+              startRow: currentLine === null ? -1 : currentLine,
+              endRow: currentLine === null ? -1 : currentLine,
+              startCol: 0,
+              endCol: 1,
+              type: "fullLine" as const,
+              className: clsx(
+                "absolute h-0!",
+                "shadow-[0_0.7em_0.5em_0.2em] shadow-yellow-400/50"
+              ),
             },
           ]}
           enableBasicAutocompletion={true}
@@ -311,5 +340,5 @@ export function LuaTabPlaceholder(
     err,
     parentContainer,
   ]);
-  return <div ref={ref} className="absolute inset-3 -z-10 " />;
+  return <div ref={ref} className="absolute inset-[1px] -z-10 " />;
 }
