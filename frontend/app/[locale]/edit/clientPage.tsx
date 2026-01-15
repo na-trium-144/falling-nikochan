@@ -1361,7 +1361,7 @@ function Page(props: Props) {
               </div>
               <div
                 className={clsx(
-                  "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
+                  "relative grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
                   // levelBgColors[levelTypes.indexOf(currentLevel?.type || "")] ||
                   //   levelBgColors[1],
                   chart || "invisible",
