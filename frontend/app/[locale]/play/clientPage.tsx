@@ -490,6 +490,7 @@ function Play(props: Props) {
     bigScore,
     score,
     chain,
+    maxChain,
     notesAll,
     resetNotesAll,
     hit,
@@ -981,11 +982,18 @@ function Play(props: Props) {
           >
             <ScoreDisp
               score={score}
-              best={bestScoreState}
+              best={auto ? 0 : bestScoreState}
               auto={auto}
               playbackRate={playbackRate}
+              pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
+              baseScore={baseScore}
             />
-            <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
+            <ChainDisp
+              chain={chain}
+              maxChain={maxChain}
+              fc={judgeCount[2] + judgeCount[3] === 0}
+              notesTotal={notesAll.length}
+            />
             <button
               className={clsx(
                 "absolute rounded-full cursor-pointer leading-1",

@@ -60,6 +60,7 @@ export default function useGameLogic(
   const chartEnd = judgeCount.reduce((sum, j) => sum + j, 0) == notesTotal;
 
   const [chain, setChain] = useState<number>(0);
+  const [maxChain, setMaxChain] = useState<number>(0);
   const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
@@ -110,6 +111,7 @@ export default function useGameLogic(
       notesBigYetDone.current = [];
       setJudgeCount([0, 0, 0, 0]);
       setChain(0);
+      setMaxChain(0);
       chainRef.current = 0;
       setBonus(0);
       setBigCount(0);
@@ -160,6 +162,7 @@ export default function useGameLogic(
         }
         chainRef.current = thisChain;
         setChain(thisChain);
+        setMaxChain((max) => Math.max(max, thisChain));
         setJudgeCount((judgeCount) => {
           judgeCount = judgeCount.slice() as [number, number, number, number];
           judgeCount[c.judge - 1]++;
@@ -565,6 +568,7 @@ export default function useGameLogic(
     bigScore,
     score,
     chain,
+    maxChain,
     notesAll,
     resetNotesAll,
     hit,
