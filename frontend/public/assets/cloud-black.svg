@@ -3,20 +3,42 @@
 
 <svg
    width="225"
-   height="114.99999"
-   viewBox="0 0 59.531251 30.427081"
+   height="115"
+   viewBox="0 0 59.180291 30.225467"
    version="1.1"
    id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs1" />
+     id="defs1">
+    <linearGradient
+       id="linearGradient1">
+       <!-- stroke: stone-500/80: #79716b -> stone-900/80: #1c1917 -->
+      <stop
+         style="stop-color:#000000;stop-opacity:0.8;"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#79716b;stop-opacity:0.8;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient1"
+       id="linearGradient2"
+       x1="44.783806"
+       y1="41.798313"
+       x2="24.542959"
+       y2="-13.812961"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
   <g
      id="layer1"
-     transform="translate(-5.0270833)">
-     <!-- fill: bg-stone-800/75 41,37,36  stroke: stone-300: 214,211,209 -->
+     transform="translate(-5.073244)">
+     <!-- fill: bg-stone-700/50 #44403b -->
     <path
-       style="fill:#292524;fill-opacity:0.75;stroke:#d6d3d1;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#44403b;fill-opacity:0.5;stroke:url(#linearGradient2);stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        d="M 10.59601,-1.9755361 C 4.9808701,0.20655147 3.8669034,4.2966456 7.3272646,9.3299738 3.5192914,13.058568 5.0917029,21.439185 12.830421,21.321725 c 2.751336,11.259639 21.409569,11.167559 26.033783,1.733553 9.234506,7.583333 23.428443,2.918534 20.716176,-9.414262 6.435966,-2.617501 6.028485,-14.6761782 -2.568757,-14.6761782"
        id="path3" />
   </g>

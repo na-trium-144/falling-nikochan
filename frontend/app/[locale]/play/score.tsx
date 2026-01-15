@@ -22,6 +22,8 @@ function Cloud(props: CProps) {
         props.left ? "origin-top-left" : "origin-top-right"
       )}
       style={{
+        width: 225,
+        height: 115,
         left: props.left ? 0.75 * playUIScale + "rem" : undefined,
         right: props.left ? undefined : 0.75 * playUIScale + "rem",
         transform: `scale(${playUIScale * 0.8})`,
@@ -35,12 +37,10 @@ function Cloud(props: CProps) {
         className="absolute inset-0 -z-10 "
       />
       <div
-        className={clsx(props.className)}
+        className={clsx(props.className, "absolute")}
         style={{
-          width: 225,
-          height: 115,
-          paddingLeft: 16,
-          paddingRight: 22,
+          left: 16,
+          right: 24,
         }}
       >
         {props.children}
@@ -53,25 +53,41 @@ interface Props {
   score: number;
   best: number;
   auto: boolean;
+  baseScore: number;
+  pc: boolean;
   playbackRate: number;
 }
 export function ScoreDisp(props: Props) {
   const t = useTranslations("play.score");
   const { score, best } = props;
+  const lch = useColorWithLerp(props.pc ? props.baseScore / 80 : 0);
   return (
     <Cloud className="flex flex-col">
       <div
-        className="flex flex-row items-baseline"
-        style={{ marginTop: props.auto ? 8 : 20, marginRight: 6, fontSize: 20 }}
+        className="relative flex flex-row items-baseline origin-bottom"
+        style={{
+          marginTop: 14,
+          fontSize: 20,
+          color: `oklch(${lch[0]} ${lch[1]} ${lch[2]})`,
+          transform: `rotate(-1.5deg)`,
+        }}
       >
         <span className="flex-1 min-w-0 overflow-visible text-nowrap ">
           {t("score")}
         </span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim alignAt2nd />
       </div>
+      <SkewedProgressBar
+        value={score / 120}
+        invertedValue={best / 120}
+        borderValues={[70 / 120, 100 / 120]}
+      />
       {props.auto && (
-        <div className="flex justify-center text-nowrap" style={{ marginRight: 6, fontSize: 20 }}>
-          <span className="inline-block">&lt;&lt; {t("auto")} &gt;&gt;</span>
+        <div
+          className="flex justify-center text-nowrap"
+          style={{ fontSize: 20, marginTop: 4 }}
+        >
+          <span className="inline-block">- {t("auto")} -</span>
         </div>
       )}
     </Cloud>
@@ -81,43 +97,44 @@ export function ScoreDisp(props: Props) {
 function lerp(start: number, end: number, t: number) {
   return start + t * (end - start);
 }
+function useColorWithLerp(c: number) {
+  const factorClip = (c: number) => Math.min(1, Math.max(0, c));
+  const lchLight = [
+    lerp(0.279, 0.705, factorClip((c - 0.1) / 0.9)),
+    lerp(0.041, 0.213, factorClip((c - 0.25) / 0.75)),
+    lerp(260.031, 47.604, factorClip(c / 0.25)),
+  ];
+  const lchDark = [
+    lerp(0.869, 0.852, factorClip(c / 0.1)),
+    lerp(0.005, 0.199, factorClip((c - 0.1) / 0.9)),
+    lerp(56.366, 91.936, factorClip(c / 0.1)),
+  ];
+  const { isDark } = useTheme();
+  return isDark ? lchDark : lchLight;
+}
 interface ChainProps {
   style?: object;
   chain: number;
+  maxChain: number;
+  notesTotal: number;
   fc: boolean;
 }
 // slate-800: oklch(0.279 0.041 260.031); -> orange-500: oklch(0.705 0.213 47.604);
 // stone-300: oklch(0.869 0.005 56.366); -> yellow-400: oklch(0.852 0.199 91.936);
 export function ChainDisp(props: ChainProps) {
-  const themeState = useTheme();
   const t = useTranslations("play.score");
-  const factorClip = (c: number) =>
-    props.fc ? Math.min(1, Math.max(0, c)) : 0;
-  const lchLight = [
-    lerp(0.279, 0.705, factorClip((props.chain - 10) / 90)),
-    lerp(0.041, 0.213, factorClip((props.chain - 25) / 75)),
-    lerp(260.031, 47.604, factorClip(props.chain / 25)),
-  ];
-  const lchDark = [
-    lerp(0.869, 0.852, factorClip(props.chain / 100)),
-    lerp(0.005, 0.199, factorClip((props.chain - 10) / 90)),
-    lerp(56.366, 91.936, factorClip(props.chain / 10)),
-  ];
+  const lch = useColorWithLerp(props.fc ? props.chain / 100 : 0);
   return (
     <Cloud
-      className={clsx(
-        "flex flex-col",
-        props.chain >= 100 && "text-orange-500 dark:text-yellow-400"
-      )}
+      className="flex flex-col"
       left
     >
       <div
-        className="flex flex-row items-baseline justify-center "
+        className="relative flex flex-row items-baseline justify-center origin-bottom"
         style={{
-          marginTop: 20,
-          color: themeState.isDark
-            ? `oklch(${lchDark[0]} ${lchDark[1]} ${lchDark[2]})`
-            : `oklch(${lchLight[0]} ${lchLight[1]} ${lchLight[2]})`,
+          marginTop: 14,
+          color: `oklch(${lch[0]} ${lch[1]} ${lch[2]})`,
+          transform: `rotate(1.5deg)`,
         }}
       >
         <span style={{ width: 112, marginRight: 8 }}>
@@ -136,7 +153,105 @@ export function ChainDisp(props: ChainProps) {
           {t("chain", { chain: props.chain })}
         </span>
       </div>
+      <SkewedProgressBar
+        reversed
+        value={props.chain / props.notesTotal}
+        subValue={props.maxChain / props.notesTotal}
+      />
     </Cloud>
+  );
+}
+
+interface PProps {
+  value: number;
+  borderValues?: number[];
+  invertedValue?: number;
+  subValue?: number;
+  reversed?: boolean;
+}
+function SkewedProgressBar(props: PProps) {
+  return (
+    <div
+      className={clsx(
+        "absolute rounded-full bg-current/5 shadow-[0_0_0.1em] shadow-current/10",
+        "m-auto origin-bottom perspective-origin-bottom"
+      )}
+      style={{
+        zIndex: -1,
+        top: 54,
+        left: 0,
+        right: 0,
+        height: 12,
+        width: 180,
+        transform:
+          `perspective(100px) ` +
+          `rotateY(${props.reversed ? 15 : -15}deg) ` +
+          `translateX(${props.reversed ? 11 : -11}%) ` +
+          `translateZ(10px)`,
+      }}
+    >
+      <SkewedProgressBarItem
+        value={1}
+        className={clsx("border border-slate-300 dark:border-stone-700")}
+        reversed={props.reversed}
+      />
+      {props.borderValues?.map((bv, i) => (
+        <SkewedProgressBarItem
+          key={i}
+          value={bv}
+          className={clsx("border border-slate-300 dark:border-stone-700")}
+          reversed={props.reversed}
+        />
+      ))}
+      {props.invertedValue !== undefined && (
+        <SkewedProgressBarItem
+          value={props.invertedValue}
+          className={clsx(
+            "bg-orange-300/20 border border-orange-300/50",
+            "dark:bg-sky-800/20 dark:border-sky-800/50"
+          )}
+          reversed={props.reversed}
+        />
+      )}
+      <SkewedProgressBarItem
+        value={props.subValue ?? props.value}
+        className={clsx(
+          "bg-sky-300/20 border border-sky-300/50",
+          "dark:bg-orange-800/20 dark:border-orange-800/50"
+        )}
+        reversed={props.reversed}
+      />
+      <SkewedProgressBarItem
+        value={props.value}
+        className={clsx(
+          "bg-sky-500/20 border border-sky-500/20",
+          "dark:bg-orange-600/20 dark:border-orange-600/20"
+        )}
+        reversed={props.reversed}
+      />
+    </div>
+  );
+}
+function SkewedProgressBarItem(props: {
+  value: number;
+  className: string;
+  reversed?: boolean;
+}) {
+  return (
+    <div
+      className={clsx(
+        "absolute inset-y-0 rounded-full",
+        "transition-all duration-100",
+        props.value <= 0 && "opacity-0",
+        props.className
+      )}
+      style={{
+        // ∫[0→w] (1+h)/1.5 dh = (w + w^2/2)/1.5 = value → w^2 + 2w - 3v = 0
+        width:
+          ((-2 + Math.sqrt(4 + 12 * Math.min(1, props.value))) / 2) * 100 + "%",
+        right: props.reversed ? 0 : undefined,
+      }}
+    />
   );
 }
 
