@@ -332,27 +332,57 @@ export default function FallingWindow(props: Props) {
           canvasWidth.current * tailsCanvasDPR,
           canvasHeight.current * tailsCanvasDPR
         );
-        const dt = Math.max(0, now - lastNow.current);
-        lastNow.current = now;
-        // TODO: 加速度? 速度? に応じて追従速度を変えた方が良くなる気がしなくもない
-        const velDamp = Math.exp(-dt / 0.1);
         const headSize = noteSize * 1;
         const tailSize = noteSize * 0.85;
         const tailScaleFactor = 0.25;
+        const tailTau = 0.2;
+        const tailLambda = 0.15;
+        function norm(xy: Pos) {
+          return Math.sqrt(xy.x * xy.x + xy.y * xy.y);
+        }
         for (const dn of displayNotes.current) {
           if (!tailVels.current[dn.id]) {
             tailVels.current[dn.id] = { x: 0, y: 0 };
           } else {
-            tailVels.current[dn.id]!.x =
-              tailVels.current[dn.id]!.x * velDamp + dn.vel.x * (1 - velDamp);
-            tailVels.current[dn.id]!.y =
-              tailVels.current[dn.id]!.y * velDamp + dn.vel.y * (1 - velDamp);
-
             const n = notes[dn.id];
             const tailVel = tailVels.current[dn.id]!;
-            const log1pVelLength = Math.log1p(
-              Math.sqrt(tailVel.x * tailVel.x + tailVel.y * tailVel.y)
+
+            // 速度の変化が大きい場合に、細かく刻んで計算する
+            const dtSplitNum = Math.max(
+              1,
+              Math.min(
+                10,
+                Math.round(
+                  Math.abs(tailVels.current[dn.id]!.y - dn.vel.y) / 0.5
+                )
+              )
             );
+            const dt = Math.max(0, now - lastNow.current) / dtSplitNum;
+            function updateVelDamp(newVel: Pos) {
+              // dv(移動距離)は速度が反転する瞬間などは0(追従を遅くする)になってほしいので、
+              // x,yそれぞれ平均してから絶対値を取る
+              const dv =
+                norm({
+                  x: (tailVel.x + newVel.x) / 2,
+                  y: (tailVel.y + newVel.y) / 2,
+                }) * dt;
+              const velDamp = Math.exp(-dt / tailTau - dv / tailLambda);
+              tailVel.x = tailVel.x * velDamp + newVel.x * (1 - velDamp);
+              tailVel.y = tailVel.y * velDamp + newVel.y * (1 - velDamp);
+            }
+
+            for (let di = 1; di < dtSplitNum; di++) {
+              const t = lastNow.current + dt * di;
+              const newVel = (
+                n.ver === 6 ? displayNote6(n, t) : displayNote13(n, t)
+              )?.vel;
+              if (newVel) {
+                updateVelDamp(newVel);
+              }
+            }
+            updateVelDamp(dn.vel);
+
+            const log1pVelLength = Math.log1p(norm(tailVel));
             const tailLength =
               log1pVelLength *
               tailScaleFactor *
@@ -405,6 +435,7 @@ export default function FallingWindow(props: Props) {
             }
           }
         }
+        lastNow.current = now;
       }
     } else {
       if (!noClear) {
