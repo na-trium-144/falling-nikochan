@@ -1741,45 +1741,48 @@ function Page(props: Props) {
                   err={luaExecutor.err}
                 />
               </Box>
-              <div
-                className={clsx(
-                  "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm",
-                  "h-24 max-h-24 edit-wide:h-auto overflow-auto"
+              <Box
+                classNameOuter={clsx(
+                  "mt-2 rounded-lg",
+                  "bg-slate-200/50! dark:bg-stone-700/50!",
+                  !(
+                    luaExecutor.running ||
+                    luaExecutor.stdout.length > 0 ||
+                    luaExecutor.err.length > 0
+                  ) && "hidden"
                 )}
+                classNameInner="p-2 h-24 max-h-24 edit-wide:h-auto overflow-auto"
               >
                 {luaExecutor.running ? (
-                  <div className="m-1">
+                  <>
                     <span className="inline-block ">
                       <SlimeSVG />
                       {t("running")}
                     </span>
                     <Button
-                      className="ml-2"
+                      className="ml-2 h-8! py-0!"
                       onClick={luaExecutor.abortExec}
                       text={t("cancel")}
                     />
-                  </div>
+                  </>
                 ) : (
-                  (luaExecutor.stdout.length > 0 ||
-                    luaExecutor.err.length > 0) && (
-                    <div className="m-1">
-                      {luaExecutor.stdout.map((s, i) => (
-                        <p className="text-sm" key={i}>
-                          {s}
-                        </p>
-                      ))}
-                      {luaExecutor.err.map((e, i) => (
-                        <p
-                          className="text-sm text-red-600 dark:text-red-400 "
-                          key={i}
-                        >
-                          {e}
-                        </p>
-                      ))}
-                    </div>
-                  )
+                  <>
+                    {luaExecutor.stdout.map((s, i) => (
+                      <p className="text-sm" key={i}>
+                        {s}
+                      </p>
+                    ))}
+                    {luaExecutor.err.map((e, i) => (
+                      <p
+                        className="text-sm text-red-600 dark:text-red-400 "
+                        key={i}
+                      >
+                        {e}
+                      </p>
+                    ))}
+                  </>
                 )}
-              </div>
+              </Box>
             </div>
           </div>
         </LuaTabProvider>

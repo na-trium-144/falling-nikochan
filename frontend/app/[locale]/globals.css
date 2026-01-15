@@ -23,6 +23,23 @@ body {
   font-family: "Merriweather", "Kaisei Opti", serif;
 }
 
+/* Aceの背景色などを上書き */
+.ace_editor:not(.ace_autocomplete) {
+  @apply bg-transparent! rounded-[inherit];
+}
+.ace_editor * {
+  @apply rounded-[unset];
+}
+.ace-tomorrow .ace_gutter {
+  @apply bg-slate-400/25!;
+}
+.ace-tomorrow-night .ace_gutter {
+  @apply bg-black/25!;
+}
+.ace_gutter-active-line {
+  @apply bg-transparent!;
+}
+
 /* tailwind css の user-select: none だけでは足りなかった */
 .select-none {
   /*//選択制御*/
