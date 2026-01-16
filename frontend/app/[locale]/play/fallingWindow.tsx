@@ -94,7 +94,7 @@ export default function FallingWindow(props: Props) {
     let prevRerender = performance.now();
     const updateLoop = () => {
       animFrame = requestAnimationFrame(updateLoop);
-      performance.mark("updateLoop")
+      performance.mark("updateLoop");
 
       if (
         runExecutedIndex.current >= runTriggeredIndex.current &&
@@ -119,23 +119,30 @@ export default function FallingWindow(props: Props) {
 
       // フレームレートがrunFps程度になるように抑えつつ一定の間隔でrerenderを呼び出すようにする
       const realMs = 1000 / realFpsRef.current;
-      const runFrameCount = realFpsRef.current / Math.max(runFps.current, 20);
+      let runFrameCount = 1;
+      while (
+        // 例: realFps=120の場合、90fps以上->120, 51.5fps以上->60, 36.0fps以上->40...
+        realFpsRef.current / (runFrameCount + 0.33) >
+        Math.max(runFps.current, 20)
+      ) {
+        runFrameCount++;
+      }
       const nowMs = performance.now() - prevRerender;
       if (
         runTriggeredTimeStamp.current === null &&
-        Math.round(nowMs / realMs) >= Math.round(runFrameCount)
+        Math.round(nowMs / realMs) >= runFrameCount
       ) {
         setRerenderIndex((r) => {
           runTriggeredIndex.current = r + 1;
           return r + 1;
         });
         runTriggeredTimeStamp.current = performance.now();
-        if (Math.round(nowMs / realMs) >= 3 * Math.round(runFrameCount)) {
+        if (Math.round(nowMs / realMs) >= 3 * runFrameCount) {
           // 大幅に遅延している場合
           console.log("large delay:", nowMs);
           prevRerender = performance.now();
         } else {
-          prevRerender += realMs * Math.round(runFrameCount);
+          prevRerender += realMs * runFrameCount;
         }
       }
     };
