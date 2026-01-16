@@ -34,6 +34,7 @@ export default {
       auto: "Auto Play",
       score: "Score",
       chain: "{chain, plural, =1 {chain} other {chains}}",
+      chainLong: "chains",
       playbackRate: "Speed",
     },
     status: {

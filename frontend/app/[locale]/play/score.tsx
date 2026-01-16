@@ -125,10 +125,7 @@ export function ChainDisp(props: ChainProps) {
   const t = useTranslations("play.score");
   const lch = useColorWithLerp(props.fc ? props.chain / 100 : 0);
   return (
-    <Cloud
-      className="flex flex-col"
-      left
-    >
+    <Cloud className="flex flex-col" left>
       <div
         className="relative flex flex-row items-baseline justify-center origin-bottom"
         style={{
@@ -137,7 +134,8 @@ export function ChainDisp(props: ChainProps) {
           transform: `rotate(1.5deg)`,
         }}
       >
-        <span style={{ width: 112, marginRight: 8 }}>
+        <span className="flex-3" />
+        <span>
           <NumDisp
             num={props.chain}
             fontSize1={40}
@@ -146,11 +144,16 @@ export function ChainDisp(props: ChainProps) {
             alignAt2nd
           />
         </span>
+        <span className="flex-2" />
         <span
-          className="text-left w-18 overflow-visible "
+          className="relative text-center w-max overflow-visible "
           style={{ fontSize: 20 }}
         >
-          {t("chain", { chain: props.chain })}
+          {/* 幅が変わる可能性がある場合、一番長いもの(chainLong)にあわせる */}
+          <span className="invisible">{t("chainLong")}</span>
+          <span className="absolute inset-0">
+            {t("chain", { chain: props.chain })}
+          </span>
         </span>
       </div>
       <SkewedProgressBar
@@ -311,25 +314,26 @@ function NumDisp(props: NumProps) {
   }, [num, anim]);
   return (
     <>
-      <div className="text-right">
-        {[1000, 100, 10, 1].map((a, i) => (
-          <span
-            key={i}
-            ref={numRefs.current[i]}
-            className="inline-block overflow-visible text-left "
-            style={{
-              width:
-                a === 1 && props.alignAt2nd
-                  ? (32 / 48) * props.fontSize1
-                  : undefined,
-              fontSize: props.fontSize1,
-              lineHeight: 1,
-            }}
-          >
-            {(a == 1 || num >= a) && Math.floor(num / a) % 10}
-          </span>
-        ))}
-      </div>
+      {[1000, 100, 10, 1].map((a, i) => (
+        <span
+          key={i}
+          ref={numRefs.current[i]}
+          className={clsx(
+            "inline-block overflow-visible",
+            num >= 10 ? "text-left" : "text-center"
+          )}
+          style={{
+            width:
+              a === 1 && props.alignAt2nd
+                ? (32 / 48) * props.fontSize1
+                : undefined,
+            fontSize: props.fontSize1,
+            lineHeight: 1,
+          }}
+        >
+          {(a == 1 || num >= a) && Math.floor(num / a) % 10}
+        </span>
+      ))}
       {props.fontSize2 && (
         <>
           <span
