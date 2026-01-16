@@ -888,7 +888,7 @@ function Play(props: Props) {
       >
         <div
           className={clsx(
-            isMobile || "w-1/3 overflow-x-visible",
+            isMobile || "w-1/3 h-screen overflow-x-visible",
             "flex-none flex flex-col items-stretch"
           )}
         >
@@ -920,10 +920,10 @@ function Play(props: Props) {
           />
           {!isMobile && (
             <>
-              <div className="flex-1 basis-0" ref={statusSpace.ref} />
+              <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "z-10 flex-none m-3 mb-6 self-end",
+                  "z-10 flex-none m-3 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -954,6 +954,14 @@ function Play(props: Props) {
                   showResult &&
                   !showReady
                 }
+              />
+              <div
+                className="grow-0 shrink-1"
+                style={{
+                  // 緑の部分の高さ (現在isMobileでないとき10vh) にあわせる
+                  flexBasis: `calc(10vh + 0.75rem)`,
+                }}
+                ref={statusSpace.ref}
               />
             </>
           )}
