@@ -31,9 +31,8 @@ interface Props {
   best: number;
   bestCount: number[] | null;
   showBestScore: boolean;
-  showBestCount: boolean;
-  showRemaining: boolean;
-  showResult: boolean;
+  countMode: "bestCount" | "grayZero" | "judge";
+  showResultDiff: boolean;
 }
 export default function StatusBox(props: Props) {
   const t = useTranslations("play.status");
@@ -59,82 +58,83 @@ export default function StatusBox(props: Props) {
         padding: isMobile ? "0.75em" : "1rem",
       }}
     >
-      {props.showBestScore &&
-        (!isMobile || (isMobile && !props.showRemaining)) && (
-          <div
+      {props.showBestScore && (
+        <div
+          className={clsx(
+            isMobile
+              ? clsx("absolute left-[10%] top-[-2em]")
+              : clsx("relative"),
+            "flex flex-row items-baseline",
+            "w-max m-auto px-2 py-0.5 mb-1 rounded-lg",
+            "shadow-xs z-3",
+            props.bestCount
+              ? clsx(
+                  // invertedFlatButtonStyle,
+                  "backdrop-blur-xs",
+                  "bg-orange-200/50 dark:bg-sky-800/50",
+                  "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
+                )
+              : clsx(boxStyle, "text-slate-500/75 dark:text-stone-400/75")
+          )}
+          style={{
+            fontSize: isMobile ? "0.8em" : undefined,
+          }}
+        >
+          <span
             className={clsx(
-              isMobile
-                ? clsx("absolute left-[10%] top-[-2em]")
-                : clsx("relative"),
-              "flex flex-row items-baseline",
-              "w-max m-auto px-2 py-0.5 mb-1 rounded-lg",
-              "shadow-xs z-3",
               props.bestCount
-                ? clsx(
-                    // invertedFlatButtonStyle,
-                    "backdrop-blur-xs",
-                    "bg-orange-200/50 dark:bg-sky-800/50",
-                    "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
-                  )
-                : clsx(boxStyle, "text-slate-500/75 dark:text-stone-400/75")
+                ? invertedFlatButtonBorderStyle1
+                : boxBorderStyle1,
+              "opacity-100!"
             )}
+          />
+          <span
+            className={clsx(
+              props.bestCount
+                ? invertedFlatButtonBorderStyle2
+                : boxBorderStyle2,
+              "opacity-100!"
+            )}
+          />
+          <span>{t("bestScore")}:</span>
+          <span
+            className="inline-block text-right"
             style={{
-              fontSize: isMobile ? "0.8em" : undefined,
+              width: "2.2em",
+              fontSize: "1.8em",
+              lineHeight: 1,
             }}
           >
-            <span
-              className={clsx(
-                props.bestCount
-                  ? invertedFlatButtonBorderStyle1
-                  : boxBorderStyle1,
-                "opacity-100!"
-              )}
-            />
-            <span
-              className={clsx(
-                props.bestCount
-                  ? invertedFlatButtonBorderStyle2
-                  : boxBorderStyle2,
-                "opacity-100!"
-              )}
-            />
-            <span>{t("bestScore")}:</span>
-            <span
-              className="inline-block text-right"
-              style={{
-                width: "2.2em",
-                fontSize: "1.8em",
-                lineHeight: 1,
-              }}
-            >
-              {Math.floor(props.best)}
-            </span>
-            <span
-              className="inline-block"
-              style={{ width: "1.6em", fontSize: "1.2em" }}
-            >
-              .
-              {(Math.floor(props.best * 100) % 100).toString().padStart(2, "0")}
-            </span>
-          </div>
-        )}
+            {Math.floor(props.best)}
+          </span>
+          <span
+            className="inline-block"
+            style={{ width: "1.6em", fontSize: "1.2em" }}
+          >
+            .{(Math.floor(props.best * 100) % 100).toString().padStart(2, "0")}
+          </span>
+        </div>
+      )}
       {["good", "ok", "bad", "miss"].map((name, ji) => (
         <StatusItem
-          wide={!isMobile && props.showResult && !!props.bestCount}
+          wide={!isMobile && props.showResultDiff && !!props.bestCount}
           key={ji}
         >
           <StatusName>
             <StatusIcon index={ji} />
             {t(name)}
           </StatusName>
-          {props.showBestCount && props.bestCount ? (
+          {props.countMode === "bestCount" && props.bestCount ? (
             <StatusValue color="inverted">{props.bestCount[ji]}</StatusValue>
-          ) : !props.showRemaining ? (
+          ) : props.countMode === "bestCount" ||
+            props.countMode === "grayZero" ? (
             <StatusValue color="gray">{0}</StatusValue>
-          ) : (
+          ) : props.countMode === "judge" ? (
             <StatusValue>{props.judgeCount[ji]}</StatusValue>
+          ) : (
+            (props.countMode satisfies never)
           )}
-          {!isMobile && props.showResult && props.bestCount && (
+          {!isMobile && props.showResultDiff && props.bestCount && (
             <span
               className={clsx(
                 "inline-block w-12 pl-1 text-center",
@@ -158,15 +158,24 @@ export default function StatusBox(props: Props) {
       ))}
       <StatusItem wide disabled={props.bigTotal === 0}>
         <StatusName>{t("big")}</StatusName>
-        {props.showBestCount && props.bestCount ? (
-          <StatusValue color="inverted">{props.bestCount[4]}</StatusValue>
-        ) : !props.showRemaining ? (
-          <StatusValue color="gray">{0}</StatusValue>
+        {props.countMode === "bestCount" && props.bestCount ? (
+          <StatusValue disabled={props.bigTotal === 0} color="inverted">
+            {props.bestCount[4]}
+          </StatusValue>
+        ) : props.countMode === "bestCount" ||
+          props.countMode === "grayZero" ? (
+          <StatusValue disabled={props.bigTotal === 0} color="gray">
+            {0}
+          </StatusValue>
+        ) : props.countMode === "judge" ? (
+          <StatusValue disabled={props.bigTotal === 0}>
+            {props.bigCount}
+          </StatusValue>
         ) : (
-          <StatusValue>{props.bigCount}</StatusValue>
+          (props.countMode satisfies never)
         )}
         {!props.isMobile &&
-          (props.showResult && props.bestCount ? (
+          (props.showResultDiff && props.bestCount && props.bigTotal !== 0 ? (
             <span
               className={clsx(
                 "inline-block w-12 pl-1 text-center",
@@ -203,7 +212,7 @@ export default function StatusBox(props: Props) {
       )}
       <StatusItem wide>
         <StatusName>{t("remains")}</StatusName>
-        {!props.showRemaining ? (
+        {props.countMode !== "judge" ? (
           <StatusValue color="gray">-</StatusValue>
         ) : (
           <StatusValue>
@@ -240,7 +249,7 @@ function StatusItem(props: {
         isMobile
           ? "flex-1 basis-1 flex flex-col"
           : clsx("flex flex-row items-baseline", props.wide || "mr-12"),
-        props.disabled && "text-slate-400 dark:text-stone-600"
+        props.disabled && "text-slate-400/75 dark:text-stone-600/75"
       )}
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
@@ -294,6 +303,7 @@ function StatusName(props: { children: ReactNode }) {
 function StatusValue(props: {
   color?: null | "inverted" | "gray";
   children: number | string;
+  disabled?: boolean;
 }) {
   const { screenWidth, screenHeight } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
@@ -302,11 +312,13 @@ function StatusValue(props: {
       <span
         className={clsx(
           "mt-1 w-full text-center",
-          props.color === "inverted"
-            ? "text-orange-400/75 dark:text-sky-500/75"
-            : props.color === "gray"
-              ? "text-slate-500 dark:text-stone-400"
-              : null
+          props.disabled
+            ? "text-slate-400/75 dark:text-stone-600/75"
+            : props.color === "inverted"
+              ? "text-orange-400/75 dark:text-sky-500/75"
+              : props.color === "gray"
+                ? "text-slate-500/75 dark:text-stone-400/75"
+                : null
         )}
         style={{
           fontSize: "2em",
@@ -321,11 +333,13 @@ function StatusValue(props: {
       <span
         className={clsx(
           "inline-flex mt-1 w-4 justify-center items-baseline",
-          props.color === "inverted"
-            ? "text-orange-400/75 dark:text-sky-500/75"
-            : props.color === "gray"
-              ? "text-slate-500/75 dark:text-stone-400/75"
-              : null
+          props.disabled
+            ? "text-slate-400/75 dark:text-stone-600/75"
+            : props.color === "inverted"
+              ? "text-orange-400/75 dark:text-sky-500/75"
+              : props.color === "gray"
+                ? "text-slate-500/75 dark:text-stone-400/75"
+                : null
         )}
         style={{
           fontSize: "2em",

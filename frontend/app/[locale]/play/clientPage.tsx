@@ -947,9 +947,14 @@ function Play(props: Props) {
                     : bestScoreCounts
                 }
                 showBestScore={!auto && playbackRate === 1}
-                showBestCount={!auto && playbackRate === 1 && showReady}
-                showRemaining={!showReady}
-                showResult={
+                countMode={
+                  showReady
+                    ? !auto && playbackRate === 1
+                      ? "bestCount"
+                      : "grayZero"
+                    : "judge"
+                }
+                showResultDiff={
                   !wasAutoPlay &&
                   oldPlaybackRate === 1 &&
                   showResult &&
@@ -990,7 +995,13 @@ function Play(props: Props) {
           >
             <ScoreDisp
               score={score}
-              best={auto ? 0 : bestScoreState}
+              best={
+                auto
+                  ? 0
+                  : chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreState
+                    : bestScoreState
+              }
               auto={auto}
               playbackRate={playbackRate}
               pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
@@ -1207,10 +1218,17 @@ function Play(props: Props) {
                   ? oldBestScoreCounts
                   : bestScoreCounts
               }
-              showBestScore={!auto && playbackRate === 1}
-              showBestCount={!auto && playbackRate === 1 && showReady}
-              showRemaining={!showReady}
-              showResult={
+              showBestScore={
+                !auto && playbackRate === 1 && !!bestScoreCounts && showReady
+              }
+              countMode={
+                showReady
+                  ? !auto && playbackRate === 1
+                    ? "bestCount"
+                    : "grayZero"
+                  : "judge"
+              }
+              showResultDiff={
                 !wasAutoPlay &&
                 oldPlaybackRate === 1 &&
                 showResult &&
@@ -1255,22 +1273,11 @@ function Play(props: Props) {
             notesTotal={notesAll.length}
             isMobile={false}
             isTouch={isTouch}
-            best={
-              chartPlaying || (showResult && !showReady)
-                ? oldBestScoreState
-                : bestScoreState
-            }
-            bestCount={
-              chartPlaying || (showResult && !showReady)
-                ? oldBestScoreCounts
-                : bestScoreCounts
-            }
-            showBestScore={!auto && playbackRate === 1}
-            showBestCount={!auto && playbackRate === 1 && showReady}
-            showRemaining={!showReady}
-            showResult={
-              !wasAutoPlay && oldPlaybackRate === 1 && showResult && !showReady
-            }
+            best={oldBestScoreState}
+            bestCount={oldBestScoreCounts}
+            showBestScore={!wasAutoPlay && oldPlaybackRate === 1}
+            countMode={"judge"}
+            showResultDiff={!wasAutoPlay && oldPlaybackRate === 1}
           />
         </div>
       )}
