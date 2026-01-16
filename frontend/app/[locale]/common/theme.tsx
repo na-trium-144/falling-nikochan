@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useMemo,
 } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { useTranslations } from "next-intl";
@@ -125,11 +126,14 @@ export function ThemeSwitcher(props: { children: ReactNode }) {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("footer");
 
-  const options: DropDownOption<string>[] = [
-    { value: "dark", label: t("dark") },
-    { value: "light", label: t("light") },
-    { value: "null", label: t("default") },
-  ];
+  const options: DropDownOption<string>[] = useMemo(
+    () => [
+      { value: "dark", label: t("dark") },
+      { value: "light", label: t("light") },
+      { value: "null", label: t("default") },
+    ],
+    [t]
+  );
 
   return (
     <DropDown

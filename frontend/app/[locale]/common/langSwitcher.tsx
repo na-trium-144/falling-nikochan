@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import DropDown, { DropDownOption } from "./dropdown";
 
 export const langNames: { [key: string]: string } = {
@@ -15,10 +15,14 @@ interface LangProps {
 export function LangSwitcher(props: LangProps) {
   const router = useRouter();
   
-  const options: DropDownOption<string>[] = Object.keys(langNames).map((lang) => ({
-    value: lang,
-    label: langNames[lang],
-  }));
+  const options: DropDownOption<string>[] = useMemo(
+    () =>
+      Object.keys(langNames).map((lang) => ({
+        value: lang,
+        label: langNames[lang],
+      })),
+    []
+  );
 
   return (
     <DropDown
