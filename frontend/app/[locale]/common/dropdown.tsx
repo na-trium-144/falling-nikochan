@@ -50,6 +50,7 @@ export default function DropDown<T = unknown>(props: Props<T>) {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
+        event.target &&
         !containerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
