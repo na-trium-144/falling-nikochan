@@ -207,6 +207,7 @@ export function LuaTabProvider(props: PProps) {
           fontSize={1 * rem}
           highlightActiveLine={false}
           value={code}
+          setOptions={{ useWorker: false }}
           annotations={[
             ...barLines.map((bl) => ({
               row: bl.luaLine,
