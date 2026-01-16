@@ -70,6 +70,7 @@ import {
   updatePlayCountForReview,
 } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
+import { useRealFPS } from "@/common/fpsCalculator.jsx";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -513,7 +514,7 @@ function Play(props: Props) {
     flash
   );
 
-  const [cbFps, setCbFps] = useState<number>(0);
+  const realFps = useRealFPS();
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
 
@@ -972,7 +973,6 @@ function Play(props: Props) {
             notes={notesAll}
             getCurrentTimeSec={getCurrentTimeSec}
             playing={chartPlaying}
-            setCbFPS={setCbFps}
             setRunFPS={setRunFps}
             setRenderFPS={setRenderFps}
             barFlash={barFlash}
@@ -1219,7 +1219,7 @@ function Play(props: Props) {
             />
             {showFps && (
               <span className="absolute left-3 bottom-full">
-                [{renderFps} / {runFps} / {cbFps} FPS]
+                [{renderFps} / {runFps} / {Math.round(realFps)} FPS]
               </span>
             )}
           </>
@@ -1233,7 +1233,7 @@ function Play(props: Props) {
             </span>
             {showFps && (
               <span className="inline-block ml-3">
-                [{renderFps} / {runFps} / {cbFps} FPS]
+                [{renderFps} / {runFps} / {Math.round(realFps)} FPS]
               </span>
             )}
           </div>

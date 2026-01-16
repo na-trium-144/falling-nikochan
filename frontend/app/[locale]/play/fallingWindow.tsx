@@ -9,6 +9,7 @@ import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme";
+import { useRealFPS } from "@/common/fpsCalculator";
 
 interface Props {
   className?: string;
@@ -16,7 +17,6 @@ interface Props {
   notes: Note6[] | Note13[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
-  setCbFPS: (fps: number) => void;
   setRunFPS: (fps: number) => void;
   setRenderFPS: (fps: number) => void;
   barFlash: FlashPos;
@@ -29,7 +29,6 @@ export default function FallingWindow(props: Props) {
     notes,
     playing,
     getCurrentTimeSec,
-    setCbFPS,
     setRenderFPS,
     setRunFPS,
     noClear,
@@ -77,9 +76,9 @@ export default function FallingWindow(props: Props) {
   });
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
-  // requestAnimationFrame() のコールバックの呼び出される間隔から測定する端末FPS
-  const cbDeltas = useRef<DOMHighResTimeStamp[]>([]);
-  const cbFps = useRef<number>(60);
+  const realFps = useRealFPS();
+  const realFpsRef = useRef<number>(20);
+  realFpsRef.current = realFps;
   // レンダリング等nikochanの1フレームの処理にかかる時間の測定
   // triggered: requestAnimationFrame() でセット
   // executedIndex: render関数が実行されたらセット
@@ -92,10 +91,10 @@ export default function FallingWindow(props: Props) {
   const renderFpsCounter = useRef<DOMHighResTimeStamp[]>([]);
   useEffect(() => {
     let animFrame: ReturnType<typeof requestAnimationFrame>;
-    let prevTimeStamp = performance.now();
     let prevRerender = performance.now();
     const updateLoop = () => {
       animFrame = requestAnimationFrame(updateLoop);
+      performance.mark("updateLoop")
 
       if (
         runExecutedIndex.current >= runTriggeredIndex.current &&
@@ -110,20 +109,6 @@ export default function FallingWindow(props: Props) {
         runTriggeredTimeStamp.current = null;
       }
 
-      // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
-      if (performance.now() - prevTimeStamp < 100) {
-        cbDeltas.current.push(performance.now() - prevTimeStamp);
-      }
-      prevTimeStamp = performance.now();
-
-      if (cbDeltas.current.length > Math.max(cbFps.current, 20)) {
-        const sortedDeltas = [...cbDeltas.current].sort((a, b) => a - b);
-        const medianDelta = sortedDeltas[Math.floor(sortedDeltas.length / 2)];
-        cbFps.current = Math.round(1000 / medianDelta);
-        setCbFPS(cbFps.current);
-        cbDeltas.current = [];
-      }
-
       if (runDeltas.current.length > Math.max(runFps.current, 20)) {
         const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
         const avgRunDelta = runDeltaSum / runDeltas.current.length;
@@ -133,36 +118,30 @@ export default function FallingWindow(props: Props) {
       }
 
       // フレームレートがrunFps程度になるように抑えつつ一定の間隔でrerenderを呼び出すようにする
+      const realMs = 1000 / realFpsRef.current;
+      const runFrameCount = realFpsRef.current / Math.max(runFps.current, 20);
+      const nowMs = performance.now() - prevRerender;
       if (
         runTriggeredTimeStamp.current === null &&
-        Math.round(
-          (performance.now() - prevRerender) / (1000 / cbFps.current)
-        ) >= Math.round(cbFps.current / Math.max(runFps.current, 20))
+        Math.round(nowMs / realMs) >= Math.round(runFrameCount)
       ) {
         setRerenderIndex((r) => {
           runTriggeredIndex.current = r + 1;
           return r + 1;
         });
         runTriggeredTimeStamp.current = performance.now();
-        if (
-          Math.round(
-            (performance.now() - prevRerender) / (1000 / cbFps.current)
-          ) >=
-          3 * Math.round(cbFps.current / Math.max(runFps.current, 20))
-        ) {
+        if (Math.round(nowMs / realMs) >= 3 * Math.round(runFrameCount)) {
           // 大幅に遅延している場合
-          console.log("large delay:", performance.now() - prevRerender);
+          console.log("large delay:", nowMs);
           prevRerender = performance.now();
         } else {
-          prevRerender +=
-            (1000 / cbFps.current) *
-            Math.round(cbFps.current / Math.max(runFps.current, 20));
+          prevRerender += realMs * Math.round(runFrameCount);
         }
       }
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
-  }, [setCbFPS, setRunFPS]);
+  }, [setRunFPS]);
   useEffect(() => {
     const i = setInterval(() => {
       while (
@@ -251,7 +230,7 @@ export default function FallingWindow(props: Props) {
   }, [playing, notes]);
   const lastNow = useRef<number>(0);
   if (runExecutedIndex.current !== rerenderIndex) {
-    performance.mark("nikochan-rerender");
+    // performance.mark("nikochan-rerender");
     runExecutedIndex.current = rerenderIndex;
     renderFpsCounter.current.push(performance.now());
     const now = getCurrentTimeSec();

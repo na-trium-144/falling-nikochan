@@ -11,6 +11,7 @@ import { PWAInstallProvider } from "./common/pwaInstall.jsx";
 import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
 import { ChangeLogProvider } from "./common/changeLog.jsx";
 import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
+import { FPSCalculatorProvider } from "./common/fpsCalculator.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -38,7 +39,9 @@ export default async function RootLayout({
           <ThemeProvider>
             <ChangeLogProvider changeLog={<ChangeLog />}>
               <PWAInstallProvider>
-                <ShareImageModalProvider>{children}</ShareImageModalProvider>
+                <ShareImageModalProvider>
+                  <FPSCalculatorProvider>{children}</FPSCalculatorProvider>
+                </ShareImageModalProvider>
               </PWAInstallProvider>
             </ChangeLogProvider>
           </ThemeProvider>
