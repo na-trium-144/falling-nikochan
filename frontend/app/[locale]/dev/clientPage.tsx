@@ -214,6 +214,7 @@ function StorageEditor(props: EProps) {
             tabSize={2}
             fontSize={1 * rem}
             highlightActiveLine={false}
+            setOptions={{ useWorker: false }}
             value={code}
             onChange={(value) => {
               setCode(value);
