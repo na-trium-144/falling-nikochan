@@ -126,21 +126,18 @@ export function ThemeSwitcher(props: { children: ReactNode }) {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("footer");
 
-  const options: DropDownOption<string>[] = useMemo(
-    () => [
-      { value: "dark", label: t("dark") },
-      { value: "light", label: t("light") },
-      { value: "null", label: t("default") },
-    ],
-    [t]
-  );
-
   return (
     <DropDown
-      options={options}
+      classNameInner={linkStyle1}
+      value={theme}
+      options={[
+        { value: "dark" as const, label: t("dark") },
+        { value: "light" as const, label: t("light") },
+        { value: null, label: t("default") },
+      ]}
       onSelect={(value) => {
         if (value === "dark" || value === "light") {
-          setTheme(value as "dark" | "light");
+          setTheme(value);
         } else {
           setTheme(null);
         }

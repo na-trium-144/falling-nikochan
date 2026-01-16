@@ -5,17 +5,19 @@ import { ReactNode, useState, useRef, useEffect } from "react";
 import { Box } from "./box";
 import { ButtonHighlight } from "./button";
 import { skyFlatButtonStyle } from "./flatButton";
+import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
 
-export interface DropDownOption<T = unknown> {
+export interface DropDownOption<T> {
   value: T;
   className?: string;
   style?: object;
   label: ReactNode;
 }
 
-interface Props<T = unknown> {
-  children: ReactNode;
+export interface DropDownProps<T> {
+  children?: ReactNode;
   options: DropDownOption<T>[];
+  value?: T;
   onSelect: (value: T, index: number) => void;
   classNameOuter?: string;
   classNameInner?: string;
@@ -24,7 +26,7 @@ interface Props<T = unknown> {
   disabled?: boolean;
 }
 
-export default function DropDown<T = unknown>(props: Props<T>) {
+export default function DropDown<T = unknown>(props: DropDownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [dropdownPosition, setDropdownPosition] = useState<"below" | "above">(
@@ -93,7 +95,7 @@ export default function DropDown<T = unknown>(props: Props<T>) {
       style={props.styleOuter}
     >
       <button
-        className={props.classNameInner}
+        className={clsx("cursor-pointer", props.classNameInner)}
         style={props.styleInner}
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
@@ -118,8 +120,11 @@ export default function DropDown<T = unknown>(props: Props<T>) {
                 "relative cursor-pointer group",
                 skyFlatButtonStyle,
                 "hover:bg-sky-200/75! hover:dark:bg-orange-950/75!",
-                highlightedIndex === index && "bg-sky-200/75 dark:bg-orange-950/75",
-                option.className,
+                highlightedIndex === index &&
+                  "bg-sky-200/75 dark:bg-orange-950/75",
+                props.value !== undefined ? "pl-7" : "pl-4",
+                "pr-4 py-1 flex flex-row items-center justify-center",
+                option.className
               )}
               style={option.style}
               onClick={() => {
@@ -130,6 +135,11 @@ export default function DropDown<T = unknown>(props: Props<T>) {
               onPointerEnter={() => setHighlightedIndex(index)}
             >
               <ButtonHighlight />
+              {option.value === props.value ? (
+                <CheckSmall className="absolute left-2 inset-y-0 h-max m-auto" />
+              ) : props.value !== undefined ? (
+                <span className="absolute left-2 inset-y-0 h-max m-auto" />
+              ) : null}
               {option.label}
             </button>
           ))}

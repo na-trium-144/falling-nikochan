@@ -232,10 +232,22 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           <li>
             <span className="mr-2">{t("playbackRate")}</span>
             <Select
-              options={["✕0.5", "✕0.75", "✕1", "✕1.25", "✕1.5", "✕1.75", "✕2"]}
-              values={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"]}
+              options={["0.5", "0.75", "1", "1,25", "1.5", "1.75", "2"].map(
+                (s) => ({
+                  label: (
+                    <>
+                      ×
+                      <span className="inline-block text-left ml-1 w-9">
+                        {s}
+                      </span>
+                    </>
+                  ),
+                  value: s,
+                })
+              )}
               value={props.playbackRate.toString()}
-              onChange={(s: string) => props.setPlaybackRate(Number(s))}
+              onSelect={(s: string) => props.setPlaybackRate(Number(s))}
+              showValue
             />
           </li>
           <li>

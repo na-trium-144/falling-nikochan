@@ -17,8 +17,8 @@ import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { useOSDetector } from "./pwaInstall";
-import DropDown, { DropDownOption } from "./dropdown";
 import Pic from "@icon-park/react/lib/icons/Pic";
+import Select from "./select";
 
 export function useShareLink(
   cid: string | undefined,
@@ -149,14 +149,13 @@ export function useShareLink(
           // placeholder dummy button
           <Button className="mx-0.5" text={t("share")} />
         ) : detectedOS === null ? (
-          // ドロップダウンメニュー
-          <DropDown
+          <Select
             classNameOuter="mx-0.5"
             options={[
               { value: "copyForShare", label: t("copyForShare") },
               { value: "xPost", label: t("xPost") },
             ]}
-            onSelect={(value) => {
+            onSelect={(value: "copyForShare" | "xPost") => {
               if (value === "copyForShare" && hasClipboard) {
                 toClipboard(true);
               } else if (value === "xPost") {
@@ -164,8 +163,8 @@ export function useShareLink(
               }
             }}
           >
-            <Button className="min-w-0! w-18" text={t("share")} />
-          </DropDown>
+            {t("share")}
+          </Select>
         ) : (
           // native share API on mobile
           <Button

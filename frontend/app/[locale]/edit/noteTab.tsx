@@ -10,6 +10,7 @@ import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { LevelEdit } from "@falling-nikochan/chart";
+import { DropDownOption } from "@/common/dropdown";
 
 interface Props {
   currentNoteIndex: number;
@@ -286,11 +287,14 @@ function NoteEdit(props: Props) {
           <span>{t("fallMode")}</span>
           <HelpIcon>{t.rich("fallModeHelp", { br: () => <br /> })}</HelpIcon>
           <Select
-            value={n.fall ? "1" : "0"}
-            values={["1", "0"]}
-            options={[t("fallModeTrue"), t("fallModeFalse")]}
-            onChange={(v) => props.updateNote({ ...n, fall: !!Number(v) })}
+            value={n.fall}
+            options={[
+              { label: t("fallModeTrue"), value: true },
+              { label: t("fallModeFalse"), value: false },
+            ]}
+            onSelect={(v: boolean) => props.updateNote({ ...n, fall: v })}
             disabled={!noteEditable}
+            showValue
           />
         </div>
         {props.currentLevel?.notes[props.currentNoteIndex] && !noteEditable && (
