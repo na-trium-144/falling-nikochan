@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ReactNode, useMemo } from "react";
 import DropDown, { DropDownOption } from "./dropdown";
 import { linkStyle1 } from "./linkStyle";
+import clsx from "clsx/lite";
 
 export const langNames: { [key: string]: string } = {
   ja: "日本語",
@@ -12,13 +13,14 @@ export const langNames: { [key: string]: string } = {
 interface LangProps {
   locale: string;
   children: ReactNode;
+  classNameInner?: string
 }
 export function LangSwitcher(props: LangProps) {
   const router = useRouter();
 
   return (
     <DropDown
-      classNameInner={linkStyle1}
+      classNameInner={clsx(linkStyle1, props.classNameInner)}
       value={props.locale}
       options={Object.keys(langNames).map((lang) => ({
         value: lang,

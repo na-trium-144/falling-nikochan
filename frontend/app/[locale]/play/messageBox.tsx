@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
-import Input from "@/common/input";
+import Input, { inputStyle } from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
@@ -24,6 +24,8 @@ import { detectOS } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import Range from "@/common/range";
+import DropDown from "@/common/dropdown";
+import DownOne from "@icon-park/react/lib/icons/DownOne";
 
 interface MessageProps {
   isTouch: boolean;
@@ -230,9 +232,9 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </CheckBox>
         </li>*/}
           <li>
-            <span className="mr-2">{t("playbackRate")}</span>
-            <Select
-              options={["0.5", "0.75", "1", "1,25", "1.5", "1.75", "2"].map(
+            <span className="mr-1">{t("playbackRate")}:</span>
+            <DropDown
+              options={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].map(
                 (s) => ({
                   label: (
                     <>
@@ -247,8 +249,23 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               )}
               value={props.playbackRate.toString()}
               onSelect={(s: string) => props.setPlaybackRate(Number(s))}
-              showValue
-            />
+              classNameInner={clsx(
+                "relative inline-block pr-6 text-center",
+                linkStyle1,
+                inputStyle
+              )}
+            >
+              <div>
+                ×
+                <span className="inline-block text-left ml-1 w-9">
+                  {props.playbackRate}
+                </span>
+              </div>
+              <DownOne
+                className="absolute right-1 inset-y-0 h-max m-auto"
+                theme="filled"
+              />
+            </DropDown>
           </li>
           <li>
             <CheckBox

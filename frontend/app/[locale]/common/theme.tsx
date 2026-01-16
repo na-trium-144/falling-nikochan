@@ -122,13 +122,16 @@ export function ThemeProvider(props: { children: ReactNode }) {
   );
 }
 
-export function ThemeSwitcher(props: { children: ReactNode }) {
+export function ThemeSwitcher(props: {
+  children: ReactNode;
+  classNameInner?: string;
+}) {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("footer");
 
   return (
     <DropDown
-      classNameInner={linkStyle1}
+      classNameInner={clsx(linkStyle1, props.classNameInner)}
       value={theme}
       options={[
         { value: "dark" as const, label: t("dark") },
