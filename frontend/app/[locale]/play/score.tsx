@@ -81,6 +81,7 @@ export function ScoreDisp(props: Props) {
         value={score / 120}
         invertedValue={best / 120}
         borderValues={[70 / 120, 100 / 120]}
+        skewedValue={true}
       />
       {props.auto && (
         <div
@@ -160,6 +161,7 @@ export function ChainDisp(props: ChainProps) {
         reversed
         value={props.chain / props.notesTotal}
         subValue={props.maxChain / props.notesTotal}
+        skewedValue={false}
       />
     </Cloud>
   );
@@ -171,6 +173,7 @@ interface PProps {
   invertedValue?: number;
   subValue?: number;
   reversed?: boolean;
+  skewedValue: boolean;
 }
 function SkewedProgressBar(props: PProps) {
   const width = 180;
@@ -182,9 +185,14 @@ function SkewedProgressBar(props: PProps) {
   const zNear = perspective - zOffset;
   const ratio = zFar / zNear;
   function getPerspectiveLeft(visualLeft: number) {
-    return (visualLeft * ratio) / (visualLeft * ratio + (1 - visualLeft));
+    if (props.skewedValue) {
+      // 意図的に補正せず生の値を渡す
+      return visualLeft;
+    } else {
+      return (visualLeft * ratio) / (visualLeft * ratio + (1 - visualLeft));
+    }
   }
-  const hFar = 1 / zFar;
+  /*const hFar = 1 / zFar;
   const hNear = 1 / zNear;
   function getWidthFromArea(a: number) {
     // ∫[0→w] (hFar+h*(hNear-hFar)) dh = hFar*w + (hNear-hFar)/2*w^2 = area * (hNear+hFar)/2
@@ -192,7 +200,7 @@ function SkewedProgressBar(props: PProps) {
       (-hFar + Math.sqrt(hFar * hFar + (hNear - hFar) * (hNear + hFar) * a)) /
       (hNear - hFar)
     );
-  }
+  }*/
   return (
     <div
       className={clsx(
@@ -222,14 +230,14 @@ function SkewedProgressBar(props: PProps) {
       {props.borderValues?.map((bv, i) => (
         <SkewedProgressBarItem
           key={i}
-          width={getPerspectiveLeft(getWidthFromArea(bv))}
+          width={getPerspectiveLeft(bv)}
           className={clsx("border border-slate-300 dark:border-stone-500")}
           reversed={props.reversed}
         />
       ))}
       {props.invertedValue !== undefined && (
         <SkewedProgressBarItem
-          width={getPerspectiveLeft(getWidthFromArea(props.invertedValue))}
+          width={getPerspectiveLeft(props.invertedValue)}
           className={clsx(
             "bg-orange-400/20 border border-orange-400/50",
             "dark:bg-sky-600/20 dark:border-sky-600/50"
@@ -238,9 +246,7 @@ function SkewedProgressBar(props: PProps) {
         />
       )}
       <SkewedProgressBarItem
-        width={getPerspectiveLeft(
-          getWidthFromArea(props.subValue ?? props.value)
-        )}
+        width={getPerspectiveLeft(props.subValue ?? props.value)}
         className={clsx(
           "bg-sky-400/20 border border-sky-400/50",
           "dark:bg-orange-600/20 dark:border-orange-600/50"
@@ -248,7 +254,7 @@ function SkewedProgressBar(props: PProps) {
         reversed={props.reversed}
       />
       <SkewedProgressBarItem
-        width={getPerspectiveLeft(getWidthFromArea(props.value))}
+        width={getPerspectiveLeft(props.value)}
         className={clsx(
           "bg-sky-500/35 border border-sky-500/35",
           "dark:bg-orange-500/35 dark:border-orange-500/35"
