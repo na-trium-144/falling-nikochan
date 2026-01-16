@@ -32,6 +32,7 @@ export default {
       auto: "オートプレイ",
       score: "スコア",
       chain: "コンボ",
+      chainLong: "コンボ",
       playbackRate: "再生速度",
     },
     status: {
