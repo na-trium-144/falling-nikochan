@@ -1,9 +1,8 @@
 "use client";
 
-import clsx from "clsx/lite";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { linkStyle1 } from "./linkStyle";
+import DropDown, { DropDownOption } from "./dropdown";
 
 export const langNames: { [key: string]: string } = {
   ja: "日本語",
@@ -15,34 +14,32 @@ interface LangProps {
 }
 export function LangSwitcher(props: LangProps) {
   const router = useRouter();
+  
+  const options: DropDownOption<string>[] = Object.keys(langNames).map((lang) => ({
+    value: lang,
+    label: langNames[lang],
+  }));
+
   return (
-    <span className={clsx("inline-block relative", linkStyle1)}>
-      <select
-        className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
-        value={props.locale}
-        onChange={(e) => {
-          document.cookie = `language=${e.target.value};path=/;max-age=31536000`;
-          if (window.location.pathname.startsWith(`/${props.locale}`)) {
-            router.replace(
-              window.location.pathname.replace(
-                `/${props.locale}`,
-                `/${e.target.value}`
-              ),
-              { scroll: false }
-            );
-          } else {
-            // /share/cid など
-            router.refresh();
-          }
-        }}
-      >
-        {Object.keys(langNames).map((lang) => (
-          <option key={lang} value={lang}>
-            {langNames[lang]}
-          </option>
-        ))}
-      </select>
+    <DropDown
+      options={options}
+      onSelect={(value) => {
+        document.cookie = `language=${value};path=/;max-age=31536000`;
+        if (window.location.pathname.startsWith(`/${props.locale}`)) {
+          router.replace(
+            window.location.pathname.replace(
+              `/${props.locale}`,
+              `/${value}`
+            ),
+            { scroll: false }
+          );
+        } else {
+          // /share/cid など
+          router.refresh();
+        }
+      }}
+    >
       {props.children}
-    </span>
+    </DropDown>
   );
 }
