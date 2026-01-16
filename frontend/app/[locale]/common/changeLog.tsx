@@ -51,7 +51,7 @@ export function ChangeLogPopup(props: PopupProps) {
         />
         <div
           className={clsx(
-            "absolute bottom-full left-1/2 w-0 z-30",
+            "absolute bottom-full mb-1 left-1/2 w-0 z-30",
             "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
           )}
         >

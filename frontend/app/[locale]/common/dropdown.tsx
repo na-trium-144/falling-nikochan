@@ -6,6 +6,7 @@ import { Box } from "./box";
 import { ButtonHighlight } from "./button";
 import { skyFlatButtonStyle } from "./flatButton";
 import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
+import { useDelayedDisplayState } from "./delayedDisplayState";
 
 export interface DropDownOption<T> {
   value: T;
@@ -27,7 +28,7 @@ export interface DropDownProps<T> {
 }
 
 export default function DropDown<T = unknown>(props: DropDownProps<T>) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, popupAppearing, setIsOpen] = useDelayedDisplayState(200);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [dropdownPosition, setDropdownPosition] = useState<"below" | "above">(
     "below"
@@ -107,8 +108,15 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
       {isOpen && (
         <Box
           classNameOuter={clsx(
-            "absolute! z-50 w-full min-w-max shadow-modal overflow-hidden",
-            dropdownPosition === "below" ? "mt-1" : "mb-1 bottom-full"
+            "absolute! left-1/2 -translate-x-1/2 z-50",
+            "w-full min-w-max shadow-modal overflow-hidden",
+            "transition-all duration-150",
+            popupAppearing
+              ? "ease-in scale-100 opacity-100"
+              : "ease-out scale-0 opacity-0",
+            dropdownPosition === "below"
+              ? "mt-1 origin-top"
+              : "mb-1 bottom-full origin-bottom"
           )}
           classNameInner={clsx("flex flex-col")}
           onPointerLeave={() => setHighlightedIndex(-1)}
