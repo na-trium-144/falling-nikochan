@@ -157,7 +157,7 @@ export function useShareLink(
             options={[t("share"), t("copyForShare"), t("xPost")]}
             values={["", "copyForShare", "xPost"]}
             value={""}
-            disableFirstOption
+            // disableFirstOption
             onChange={(s: string) => {
               if (s === "copyForShare" && hasClipboard) {
                 toClipboard(true);
