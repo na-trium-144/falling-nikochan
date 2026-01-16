@@ -511,7 +511,7 @@ export default function FallingWindow(props: Props) {
           width: canvasWidth.current,
           height: canvasHeight.current,
           pointerEvents: "none",
-          opacity: isDark ? 0.4 : 0.6,
+          opacity: isDark ? 0.5 : 0.5,
         }}
         width={canvasWidth.current * tailsCanvasDPR}
         height={canvasHeight.current * tailsCanvasDPR}
@@ -527,6 +527,7 @@ export default function FallingWindow(props: Props) {
           width: canvasWidth.current,
           height: canvasHeight.current,
           pointerEvents: "none",
+          opacity: isDark ? 0.7 : 0.9,
         }}
         width={canvasWidth.current * nikochanCanvasDPR.current}
         height={canvasHeight.current * nikochanCanvasDPR.current}
@@ -628,7 +629,7 @@ function Nikochan(props: NProps) {
           displayNote.done === 0
             ? "opacity-0"
             : !fadeoutStarted
-              ? "opacity-100"
+              ? "dark:opacity-70 opacity-90"
               : clsx(
                   displayNote.done === 1 &&
                     "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125",
@@ -750,7 +751,7 @@ function Ripple(props: RProps) {
   }, [noteSize]);
   return (
     <div
-      className="absolute -z-20 "
+      className="absolute -z-20 dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,
@@ -841,7 +842,7 @@ function Particle(props: PProps) {
 
   return (
     <div
-      className="absolute -z-10 "
+      className="absolute -z-10 dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,

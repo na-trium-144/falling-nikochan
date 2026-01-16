@@ -14,13 +14,13 @@
      id="defs1">
     <linearGradient
        id="linearGradient1">
-       <!-- stroke: stone-500/80: #79716b -> stone-900/80: #1c1917 -->
+       <!-- stroke: stone-300/80: #d6d3d1 stone-500/80: #79716b -> stone-900/80: #1c1917 -->
       <stop
-         style="stop-color:#000000;stop-opacity:0.8;"
+         style="stop-color:#79716b;stop-opacity:0.8;"
          offset="0"
          id="stop1" />
       <stop
-         style="stop-color:#79716b;stop-opacity:0.8;"
+         style="stop-color:#d6d3d1;stop-opacity:0.8;"
          offset="1"
          id="stop2" />
     </linearGradient>
