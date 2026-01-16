@@ -173,10 +173,30 @@ interface PProps {
   reversed?: boolean;
 }
 function SkewedProgressBar(props: PProps) {
+  const width = 180;
+  const perspective = 100;
+  const angleDeg = 15;
+  const angleRad = angleDeg * (Math.PI / 180);
+  const zOffset = (width / 2) * Math.sin(angleRad);
+  const zFar = perspective + zOffset;
+  const zNear = perspective - zOffset;
+  const ratio = zFar / zNear;
+  function getPerspectiveLeft(visualLeft: number) {
+    return (visualLeft * ratio) / (visualLeft * ratio + (1 - visualLeft));
+  }
+  const hFar = 1 / zFar;
+  const hNear = 1 / zNear;
+  function getWidthFromArea(a: number) {
+    // ∫[0→w] (hFar+h*(hNear-hFar)) dh = hFar*w + (hNear-hFar)/2*w^2 = area * (hNear+hFar)/2
+    return (
+      (-hFar + Math.sqrt(hFar * hFar + (hNear - hFar) * (hNear + hFar) * a)) /
+      (hNear - hFar)
+    );
+  }
   return (
     <div
       className={clsx(
-        "absolute rounded-full bg-slate-300/15 shadow-[0_0_0.1em] shadow-slate-300/25",
+        "absolute overflow-hidden rounded-full bg-slate-300/15 shadow-[0_0_0.1em] shadow-slate-300/25",
         "dark:bg-stone-500/15 shadow-stone-500/25",
         "m-auto origin-bottom perspective-origin-bottom"
       )}
@@ -186,30 +206,30 @@ function SkewedProgressBar(props: PProps) {
         left: 0,
         right: 0,
         height: 12,
-        width: 180,
+        width: width,
         transform:
-          `perspective(100px) ` +
-          `rotateY(${props.reversed ? 15 : -15}deg) ` +
+          `perspective(${perspective}px) ` +
+          `rotateY(${props.reversed ? angleDeg : -angleDeg}deg) ` +
           `translateX(${props.reversed ? 11 : -11}%) ` +
           `translateZ(10px)`,
       }}
     >
       <SkewedProgressBarItem
-        value={1}
+        width={1}
         className={clsx("border border-slate-300 dark:border-stone-500")}
         reversed={props.reversed}
       />
       {props.borderValues?.map((bv, i) => (
         <SkewedProgressBarItem
           key={i}
-          value={bv}
+          width={getPerspectiveLeft(getWidthFromArea(bv))}
           className={clsx("border border-slate-300 dark:border-stone-500")}
           reversed={props.reversed}
         />
       ))}
       {props.invertedValue !== undefined && (
         <SkewedProgressBarItem
-          value={props.invertedValue}
+          width={getPerspectiveLeft(getWidthFromArea(props.invertedValue))}
           className={clsx(
             "bg-orange-400/20 border border-orange-400/50",
             "dark:bg-sky-600/20 dark:border-sky-600/50"
@@ -218,7 +238,9 @@ function SkewedProgressBar(props: PProps) {
         />
       )}
       <SkewedProgressBarItem
-        value={props.subValue ?? props.value}
+        width={getPerspectiveLeft(
+          getWidthFromArea(props.subValue ?? props.value)
+        )}
         className={clsx(
           "bg-sky-400/20 border border-sky-400/50",
           "dark:bg-orange-600/20 dark:border-orange-600/50"
@@ -226,7 +248,7 @@ function SkewedProgressBar(props: PProps) {
         reversed={props.reversed}
       />
       <SkewedProgressBarItem
-        value={props.value}
+        width={getPerspectiveLeft(getWidthFromArea(props.value))}
         className={clsx(
           "bg-sky-500/35 border border-sky-500/35",
           "dark:bg-orange-500/35 dark:border-orange-500/35"
@@ -237,7 +259,7 @@ function SkewedProgressBar(props: PProps) {
   );
 }
 function SkewedProgressBarItem(props: {
-  value: number;
+  width: number;
   className: string;
   reversed?: boolean;
 }) {
@@ -245,14 +267,11 @@ function SkewedProgressBarItem(props: {
     <div
       className={clsx(
         "absolute inset-y-0 rounded-full",
-        "transition-all duration-100",
-        props.value <= 0 && "opacity-0",
+        props.width <= 0 && "opacity-0",
         props.className
       )}
       style={{
-        // ∫[0→w] (1+h)/1.5 dh = (w + w^2/2)/1.5 = value → w^2 + 2w - 3v = 0
-        width:
-          ((-2 + Math.sqrt(4 + 12 * Math.min(1, props.value))) / 2) * 100 + "%",
+        width: Math.min(1, props.width) * 100 + "%",
         right: props.reversed ? 0 : undefined,
       }}
     />
