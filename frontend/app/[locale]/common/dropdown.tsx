@@ -2,6 +2,7 @@
 
 import clsx from "clsx/lite";
 import { ReactNode, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Box } from "./box";
 import { ButtonHighlight } from "./button";
 import { skyFlatButtonStyle } from "./flatButton";
@@ -30,10 +31,31 @@ export interface DropDownProps<T> {
 export default function DropDown<T = unknown>(props: DropDownProps<T>) {
   const [isOpen, popupAppearing, setIsOpen] = useDelayedDisplayState(200);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [dropdownPosition, setDropdownPosition] = useState<"below" | "above">(
-    "below"
-  );
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+  }>({ left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Calculate dropdown position
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const isInBottomHalf = rect.bottom > viewportHeight / 2;
+
+      setDropdownPosition({
+        [isInBottomHalf ? "bottom" : "top"]: isInBottomHalf
+          ? viewportHeight - rect.top + 4
+          : rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,8 +63,10 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
+        dropdownRef.current &&
         event.target &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
         setHighlightedIndex(-1);
@@ -80,79 +104,84 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
     };
   }, [isOpen, highlightedIndex, props.options, props.onSelect]);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const isInBottomHalf = rect.bottom > viewportHeight / 2;
-      setDropdownPosition(isInBottomHalf ? "above" : "below");
-    }
-  }, []);
+  const dropdownContent = isOpen ? (
+    <div
+      ref={dropdownRef}
+      className="fixed z-50"
+      style={{
+        top: dropdownPosition.top,
+        bottom: dropdownPosition.bottom,
+        left: dropdownPosition.left,
+        width: dropdownPosition.width,
+        minWidth: "max-content",
+      }}
+    >
+      <Box
+        classNameOuter={clsx(
+          "shadow-modal overflow-hidden",
+          "transition-all duration-150",
+          popupAppearing
+            ? "ease-in scale-100 opacity-100"
+            : "ease-out scale-0 opacity-0",
+          dropdownPosition.top !== undefined
+            ? "origin-top"
+            : "origin-bottom"
+        )}
+        classNameInner={clsx("flex flex-col")}
+        onPointerLeave={() => setHighlightedIndex(-1)}
+      >
+        {props.options.map((option, index) => (
+          <button
+            key={index}
+            className={clsx(
+              "relative cursor-pointer group",
+              skyFlatButtonStyle,
+              "hover:bg-sky-200/75! hover:dark:bg-orange-950/75!",
+              highlightedIndex === index &&
+                "bg-sky-200/75 dark:bg-orange-950/75",
+              props.value !== undefined ? "pl-7" : "pl-4",
+              "pr-4 py-1 flex flex-row items-center justify-center",
+              option.className
+            )}
+            style={option.style}
+            onClick={() => {
+              props.onSelect(option.value, index);
+              setIsOpen(false);
+              setHighlightedIndex(-1);
+            }}
+            onPointerEnter={() => setHighlightedIndex(index)}
+          >
+            <ButtonHighlight />
+            {option.value === props.value ? (
+              <CheckSmall className="absolute left-2 inset-y-0 h-max m-auto" />
+            ) : props.value !== undefined ? (
+              <span className="absolute left-2 inset-y-0 h-max m-auto" />
+            ) : null}
+            {option.label}
+          </button>
+        ))}
+      </Box>
+    </div>
+  ) : null;
 
   return (
-    <div
-      ref={containerRef}
-      className={clsx("inline-block relative", props.classNameOuter)}
-      style={props.styleOuter}
-    >
-      <button
-        className={clsx("cursor-pointer", props.classNameInner)}
-        style={props.styleInner}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
+    <>
+      <div
+        ref={containerRef}
+        className={clsx("inline-block relative", props.classNameOuter)}
+        style={props.styleOuter}
       >
-        {props.children}
-      </button>
-
-      {isOpen && (
-        <Box
-          classNameOuter={clsx(
-            "absolute! left-1/2 -translate-x-1/2 z-50",
-            "w-full min-w-max shadow-modal overflow-hidden",
-            "transition-all duration-150",
-            popupAppearing
-              ? "ease-in scale-100 opacity-100"
-              : "ease-out scale-0 opacity-0",
-            dropdownPosition === "below"
-              ? "mt-1 origin-top"
-              : "mb-1 bottom-full origin-bottom"
-          )}
-          classNameInner={clsx("flex flex-col")}
-          onPointerLeave={() => setHighlightedIndex(-1)}
+        <button
+          className={clsx("cursor-pointer", props.classNameInner)}
+          style={props.styleInner}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
         >
-          {props.options.map((option, index) => (
-            <button
-              key={index}
-              className={clsx(
-                "relative cursor-pointer group",
-                skyFlatButtonStyle,
-                "hover:bg-sky-200/75! hover:dark:bg-orange-950/75!",
-                highlightedIndex === index &&
-                  "bg-sky-200/75 dark:bg-orange-950/75",
-                props.value !== undefined ? "pl-7" : "pl-4",
-                "pr-4 py-1 flex flex-row items-center justify-center",
-                option.className
-              )}
-              style={option.style}
-              onClick={() => {
-                props.onSelect(option.value, index);
-                setIsOpen(false);
-                setHighlightedIndex(-1);
-              }}
-              onPointerEnter={() => setHighlightedIndex(index)}
-            >
-              <ButtonHighlight />
-              {option.value === props.value ? (
-                <CheckSmall className="absolute left-2 inset-y-0 h-max m-auto" />
-              ) : props.value !== undefined ? (
-                <span className="absolute left-2 inset-y-0 h-max m-auto" />
-              ) : null}
-              {option.label}
-            </button>
-          ))}
-        </Box>
-      )}
-    </div>
+          {props.children}
+        </button>
+      </div>
+      {typeof document !== "undefined" && createPortal(dropdownContent, document.body)}
+    </>
   );
 }
