@@ -112,18 +112,15 @@ export default function FallingWindow(props: Props) {
 
       if (cbDeltas.current.length > Math.max(cbFps.current, 20)) {
         const sortedDeltas = [...cbDeltas.current].sort((a, b) => a - b);
-        const medianDelta = sortedDeltas[Math.floor(sortedDeltas.length / 4)]; // medianというより四分位数
+        const medianDelta = sortedDeltas[Math.floor(sortedDeltas.length / 4)];
         cbFps.current = Math.round(1000 / medianDelta);
         setCbFPS(cbFps.current);
         cbDeltas.current = [];
       }
 
       if (runDeltas.current.length > Math.max(runFps.current, 20)) {
-        const sortedDeltas = [...runDeltas.current].sort((a, b) => a - b);
-        const runDeltaSlowerHalfSum = sortedDeltas
-          .slice(sortedDeltas.length / 2)
-          .reduce((a, b) => a + b, 0);
-        const avgRunDelta = runDeltaSlowerHalfSum / (sortedDeltas.length / 2);
+        const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
+        const avgRunDelta = runDeltaSum / runDeltas.current.length;
         runFps.current = Math.round(1000 / avgRunDelta);
         setRunFPS(runFps.current);
         runDeltas.current = [];
