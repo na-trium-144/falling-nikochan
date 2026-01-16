@@ -37,8 +37,13 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
     left: number;
     width: number;
   }>({ left: 0, width: 0 });
+  const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Calculate dropdown position
   useEffect(() => {
@@ -181,7 +186,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
           {props.children}
         </button>
       </div>
-      {typeof document !== "undefined" && createPortal(dropdownContent, document.body)}
+      {typeof document !== "undefined" && isMounted && createPortal(dropdownContent, document.body)}
     </>
   );
 }
