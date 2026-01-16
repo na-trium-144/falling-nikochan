@@ -3,7 +3,7 @@
 import clsx from "clsx/lite";
 import Down from "@icon-park/react/lib/icons/Down";
 import { useState, useRef, useEffect, PointerEvent } from "react";
-import { boxBorderStyle1, boxBorderStyle2 } from "./box.jsx";
+import { boxBorderStyle1, boxBorderStyle2 } from "./box";
 
 const buttonStyleDisabled = clsx(
   "appearance-none",
@@ -77,10 +77,26 @@ export default function Select(props: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentIndex = props.values.indexOf(props.value);
-  const currentOption = props.options[currentIndex];
+  const currentOption = props.options[currentIndex] ?? props.options[0];
+
+  const findNextValidIndex = (
+    currentIndex: number,
+    direction: number,
+    disableFirstOption: boolean
+  ): number => {
+    let next = currentIndex + direction;
+    const length = props.options.length;
+
+    while (next >= 0 && next < length) {
+      if (!(disableFirstOption && next === 0)) {
+        return next;
+      }
+      next += direction;
+    }
+    return currentIndex;
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -104,28 +120,14 @@ export default function Select(props: Props) {
 
       if (event.key === "ArrowDown") {
         event.preventDefault();
-        setHighlightedIndex((prev) => {
-          let next = prev + 1;
-          while (next < props.options.length) {
-            if (!(props.disableFirstOption && next === 0)) {
-              return next;
-            }
-            next++;
-          }
-          return prev;
-        });
+        setHighlightedIndex((prev) =>
+          findNextValidIndex(prev, 1, props.disableFirstOption ?? false)
+        );
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
-        setHighlightedIndex((prev) => {
-          let next = prev - 1;
-          while (next >= 0) {
-            if (!(props.disableFirstOption && next === 0)) {
-              return next;
-            }
-            next--;
-          }
-          return prev;
-        });
+        setHighlightedIndex((prev) =>
+          findNextValidIndex(prev, -1, props.disableFirstOption ?? false)
+        );
       } else if (event.key === "Enter" && highlightedIndex >= 0) {
         event.preventDefault();
         if (!(props.disableFirstOption && highlightedIndex === 0)) {
@@ -143,7 +145,14 @@ export default function Select(props: Props) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, highlightedIndex, props]);
+  }, [
+    isOpen,
+    highlightedIndex,
+    props.disableFirstOption,
+    props.onChange,
+    props.values,
+    props.options,
+  ]);
 
   const handleToggle = () => {
     if (props.disabled) return;
@@ -193,7 +202,6 @@ export default function Select(props: Props) {
 
       {isOpen && (
         <div
-          ref={dropdownRef}
           role="listbox"
           className={clsx(
             "absolute z-50 mt-1 w-full min-w-max",
