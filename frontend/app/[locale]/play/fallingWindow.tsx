@@ -101,18 +101,24 @@ export default function FallingWindow(props: Props) {
         runExecutedIndex.current >= runTriggeredIndex.current &&
         runTriggeredTimeStamp.current !== null
       ) {
-        runDeltas.current.push(
-          performance.now() - runTriggeredTimeStamp.current
-        );
+        // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
+        if (performance.now() - runTriggeredTimeStamp.current < 100) {
+          runDeltas.current.push(
+            performance.now() - runTriggeredTimeStamp.current
+          );
+        }
         runTriggeredTimeStamp.current = null;
       }
 
-      cbDeltas.current.push(performance.now() - prevTimeStamp);
+      // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
+      if (performance.now() - prevTimeStamp < 100) {
+        cbDeltas.current.push(performance.now() - prevTimeStamp);
+      }
       prevTimeStamp = performance.now();
 
       if (cbDeltas.current.length > Math.max(cbFps.current, 20)) {
         const sortedDeltas = [...cbDeltas.current].sort((a, b) => a - b);
-        const medianDelta = sortedDeltas[Math.floor(sortedDeltas.length / 4)];
+        const medianDelta = sortedDeltas[Math.floor(sortedDeltas.length / 2)];
         cbFps.current = Math.round(1000 / medianDelta);
         setCbFPS(cbFps.current);
         cbDeltas.current = [];
@@ -145,9 +151,8 @@ export default function FallingWindow(props: Props) {
           3 * Math.round(cbFps.current / Math.max(runFps.current, 20))
         ) {
           // 大幅に遅延している場合
+          console.log("large delay:", performance.now() - prevRerender);
           prevRerender = performance.now();
-          cbDeltas.current = [];
-          runDeltas.current = [];
         } else {
           prevRerender +=
             (1000 / cbFps.current) *
