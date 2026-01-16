@@ -173,7 +173,8 @@ function SkewedProgressBar(props: PProps) {
   return (
     <div
       className={clsx(
-        "absolute rounded-full bg-current/5 shadow-[0_0_0.1em] shadow-current/10",
+        "absolute rounded-full bg-slate-300/15 shadow-[0_0_0.1em] shadow-slate-300/25",
+        "dark:bg-stone-500/15 shadow-stone-500/25",
         "m-auto origin-bottom perspective-origin-bottom"
       )}
       style={{
@@ -192,14 +193,14 @@ function SkewedProgressBar(props: PProps) {
     >
       <SkewedProgressBarItem
         value={1}
-        className={clsx("border border-slate-300 dark:border-stone-700")}
+        className={clsx("border border-slate-300 dark:border-stone-500")}
         reversed={props.reversed}
       />
       {props.borderValues?.map((bv, i) => (
         <SkewedProgressBarItem
           key={i}
           value={bv}
-          className={clsx("border border-slate-300 dark:border-stone-700")}
+          className={clsx("border border-slate-300 dark:border-stone-500")}
           reversed={props.reversed}
         />
       ))}
@@ -207,8 +208,8 @@ function SkewedProgressBar(props: PProps) {
         <SkewedProgressBarItem
           value={props.invertedValue}
           className={clsx(
-            "bg-orange-300/20 border border-orange-300/50",
-            "dark:bg-sky-800/20 dark:border-sky-800/50"
+            "bg-orange-400/20 border border-orange-400/50",
+            "dark:bg-sky-600/20 dark:border-sky-600/50"
           )}
           reversed={props.reversed}
         />
@@ -216,16 +217,16 @@ function SkewedProgressBar(props: PProps) {
       <SkewedProgressBarItem
         value={props.subValue ?? props.value}
         className={clsx(
-          "bg-sky-300/20 border border-sky-300/50",
-          "dark:bg-orange-800/20 dark:border-orange-800/50"
+          "bg-sky-400/20 border border-sky-400/50",
+          "dark:bg-orange-600/20 dark:border-orange-600/50"
         )}
         reversed={props.reversed}
       />
       <SkewedProgressBarItem
         value={props.value}
         className={clsx(
-          "bg-sky-500/20 border border-sky-500/20",
-          "dark:bg-orange-600/20 dark:border-orange-600/20"
+          "bg-sky-500/35 border border-sky-500/35",
+          "dark:bg-orange-500/35 dark:border-orange-500/35"
         )}
         reversed={props.reversed}
       />
