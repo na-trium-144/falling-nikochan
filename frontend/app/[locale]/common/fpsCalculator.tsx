@@ -8,16 +8,39 @@ import {
   useState,
 } from "react";
 
-const FPSContext = createContext<number>(20);
+const FPSContext = createContext<{ realFps: number; stable: boolean }>({
+  realFps: 20,
+  stable: false,
+});
 
 export const useRealFPS = () => useContext(FPSContext);
 
 export function FPSCalculatorProvider(props: { children: ReactNode }) {
   const [fps, setFPS] = useState(20);
+  const [hasStableValue, setHasStableValue] = useState(false);
   useEffect(() => {
-    const fps = Number(localStorage.getItem("fpsCalculator") ?? "20");
-    setFPS(fps);
-    let deltas = new Float64Array(fps * 5);
+    let fps = 20;
+    let hasStableValue = false;
+    try {
+      const parsed = JSON.parse(localStorage.getItem("fpsCalculator")!) as {
+        fps?: number;
+        hasStableValue?: boolean;
+      };
+      if ("fps" in parsed && typeof parsed.fps === "number") {
+        fps = parsed.fps;
+        setFPS(fps);
+      }
+      if (
+        "hasStableValue" in parsed &&
+        typeof parsed.hasStableValue === "boolean"
+      ) {
+        hasStableValue = parsed.hasStableValue;
+        setHasStableValue(hasStableValue);
+      }
+    } catch {
+      // ignore error
+    }
+    let deltas = new Float64Array(Math.max(100, Math.min(1000, fps * 5)));
     let i = 0;
     let lastTimeStamp = performance.now();
     let req: ReturnType<typeof requestAnimationFrame>;
@@ -27,18 +50,23 @@ export function FPSCalculatorProvider(props: { children: ReactNode }) {
         deltas[i++] = performance.now() - lastTimeStamp;
         if (i === deltas.length) {
           deltas.sort();
-          if (
+          const isStable =
             deltas[Math.round((deltas.length * 3) / 4)] /
-              deltas[Math.round(deltas.length / 4)] >
-            1.5
-          ) {
+              deltas[Math.round(deltas.length / 4)] <
+            1.5;
+          if (!isStable && hasStableValue) {
             console.log("FPSCalculator: variation too large.");
           } else {
-            const fps = 1000 / deltas[Math.round(deltas.length / 2)];
-            console.log("FPSCalculator:", fps);
+            fps = 1000 / deltas[Math.round(deltas.length / 2)];
             setFPS(fps);
-            localStorage.setItem("fpsCalculator", fps.toString());
-            deltas = new Float64Array(fps * 5);
+            console.log("FPSCalculator:", fps);
+            hasStableValue = isStable;
+            setHasStableValue(isStable);
+            localStorage.setItem(
+              "fpsCalculator",
+              JSON.stringify({ fps, hasStableValue })
+            );
+            deltas = new Float64Array(Math.max(100, Math.min(1000, fps * 5)));
           }
           i = 0;
         }
@@ -51,6 +79,8 @@ export function FPSCalculatorProvider(props: { children: ReactNode }) {
   }, []);
 
   return (
-    <FPSContext.Provider value={fps}>{props.children}</FPSContext.Provider>
+    <FPSContext.Provider value={{ realFps: fps, stable: hasStableValue }}>
+      {props.children}
+    </FPSContext.Provider>
   );
 }

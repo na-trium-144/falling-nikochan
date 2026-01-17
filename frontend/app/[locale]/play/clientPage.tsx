@@ -516,7 +516,7 @@ function Play(props: Props) {
     flash
   );
 
-  const realFps = useRealFPS();
+  const { realFps, stable: realFpsStable } = useRealFPS();
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
 
@@ -583,6 +583,9 @@ function Play(props: Props) {
   const [errorMsg, setErrorMsg] = useState<string>();
   const [showLoading, setShowLoading] = useState<boolean>(false);
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
+  const giveUpFpsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isReadyAll = ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
   useEffect(() => {
     if (errorMsg) {
       if (showLoadingTimeout.current !== null) {
@@ -592,7 +595,7 @@ function Play(props: Props) {
       setShowReady(false);
       setInitDone(false);
       setExitable(performance.now());
-    } else if (ytReady && chartSeq && !initDone) {
+    } else if (isReadyAll && !initDone) {
       if (showLoadingTimeout.current !== null) {
         clearTimeout(showLoadingTimeout.current);
       }
@@ -608,8 +611,26 @@ function Play(props: Props) {
           1500
         );
       }
+      if (
+        !giveUpWaitingFps &&
+        !realFpsStable &&
+        giveUpFpsTimeout.current === null
+      ) {
+        giveUpFpsTimeout.current = setTimeout(
+          () => setGiveUpWaitingFps(true),
+          11000
+        );
+      }
     }
-  }, [ytReady, chartSeq, initDone, errorMsg, resetNotesAll]);
+  }, [
+    chartSeq,
+    realFpsStable,
+    giveUpWaitingFps,
+    isReadyAll,
+    initDone,
+    errorMsg,
+    resetNotesAll,
+  ]);
   useEffect(() => {
     if (!errorMsg) {
       if (apiErrorMsg) {
@@ -842,7 +863,7 @@ function Play(props: Props) {
           stop();
         } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
           exit();
-        } else if (!(chartPlaying && auto)) {
+        } else if (isReadyAll && !(chartPlaying && auto)) {
           const candidate = hit(inputTypes.keyboard);
           if (candidate) {
             flash({ targetX: candidate.note.targetX });
@@ -852,7 +873,7 @@ function Play(props: Props) {
         }
       }}
       onPointerDown={(e) => {
-        if (!(chartPlaying && auto)) {
+        if (isReadyAll && !(chartPlaying && auto)) {
           flash({ clientX: e.clientX });
           switch (e.pointerType) {
             case "mouse":
@@ -874,6 +895,7 @@ function Play(props: Props) {
       }}
       onPointerUp={(e) => {
         if (
+          isReadyAll &&
           e.pointerType === "touch" &&
           detectOS() === "ios" &&
           enableIOSThru
@@ -975,17 +997,19 @@ function Play(props: Props) {
           )}
         </div>
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
-          <FallingWindow
-            className="absolute inset-0"
-            notes={notesAll}
-            getCurrentTimeSec={getCurrentTimeSec}
-            playing={chartPlaying}
-            setRunFPS={setRunFps}
-            setRenderFPS={setRenderFps}
-            barFlash={barFlash}
-            noClear={props.noClear}
-            playbackRate={playbackRate}
-          />
+          {isReadyAll && (
+            <FallingWindow
+              className="absolute inset-0"
+              notes={notesAll}
+              getCurrentTimeSec={getCurrentTimeSec}
+              playing={chartPlaying}
+              setRunFPS={setRunFps}
+              setRenderFPS={setRenderFps}
+              barFlash={barFlash}
+              noClear={props.noClear}
+              playbackRate={playbackRate}
+            />
+          )}
           <div
             className={clsx(
               "absoulte inset-0",
@@ -1243,7 +1267,8 @@ function Play(props: Props) {
             />
             {showFps && (
               <span className="absolute left-3 bottom-full">
-                [{renderFps} / {runFps} / {Math.round(realFps)} FPS]
+                [{renderFps} / {runFps} / {Math.round(realFps)}
+                {!realFpsStable && "?"} FPS]
               </span>
             )}
           </>
@@ -1257,7 +1282,8 @@ function Play(props: Props) {
             </span>
             {showFps && (
               <span className="inline-block ml-3">
-                [{renderFps} / {runFps} / {Math.round(realFps)} FPS]
+                [{renderFps} / {runFps} / {Math.round(realFps)}
+                {!realFpsStable && "?"} FPS]
               </span>
             )}
           </div>
