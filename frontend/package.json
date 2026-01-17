@@ -3,9 +3,10 @@
   "version": "13.22.0",
   "private": true,
   "type": "module",
+  "_comment": "backdrop-blur does not work until chrome 118 (but worked in 119), related issue https://github.com/tailwindlabs/tailwindcss/issues/18923",
   "browserslist": [
-    "chrome 111",
-    "edge 111",
+    "chrome 119",
+    "edge 119",
     "safari 16.4",
     "firefox 128"
   ],

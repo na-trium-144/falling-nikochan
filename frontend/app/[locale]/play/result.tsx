@@ -318,7 +318,7 @@ function ResultRow(props: RowProps) {
         props.className
       )}
     >
-      <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">
+      <span className="flex-1 text-left min-w-0 overflow-visible whitespace-nowrap">
         {props.name}:
       </span>
       <span className="text-3xl text-right " style={props.scoreStyle}>

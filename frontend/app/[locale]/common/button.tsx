@@ -121,7 +121,7 @@ export function ButtonStyledLabel(props: LabelProps) {
     <label
       className={clsx(
         buttonStyle,
-        "inline-block align-bottom",
+        "inline-flex items-center align-bottom",
         props.className
       )}
       htmlFor={props.htmlFor}

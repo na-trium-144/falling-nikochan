@@ -1349,9 +1349,9 @@ function Page(props: Props) {
           >
             <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
               <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
-                <span className="text-nowrap ">{t("titleShort")}</span>
-                <span className="grow-1 text-nowrap ">ID: {cid}</span>
-                <span className="min-w-0 overflow-clip shrink-1 text-nowrap text-slate-500 dark:text-stone-400 ">
+                <span className="whitespace-nowrap ">{t("titleShort")}</span>
+                <span className="grow-1 whitespace-nowrap ">ID: {cid}</span>
+                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-slate-500 dark:text-stone-400 ">
                   <span className="">ver.</span>
                   <span className="ml-1">{process.env.buildVersion}</span>
                 </span>

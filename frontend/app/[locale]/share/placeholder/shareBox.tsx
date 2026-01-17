@@ -139,7 +139,7 @@ export function ShareBox(props: Props) {
                 <ExternalLink
                   className={clsx(
                     "max-w-full text-sm main-wide:text-base font-title",
-                    "overflow-hidden text-nowrap text-ellipsis"
+                    "overflow-hidden whitespace-nowrap text-ellipsis"
                   )}
                   href={`https://www.youtube.com/watch?v=${brief?.ytId}`}
                 >
@@ -148,7 +148,7 @@ export function ShareBox(props: Props) {
                 <p
                   className={clsx(
                     "font-title text-xs main-wide:text-sm",
-                    "overflow-hidden text-nowrap text-ellipsis",
+                    "overflow-hidden whitespace-nowrap text-ellipsis",
                     defaultThemeStyle
                   )}
                 >
