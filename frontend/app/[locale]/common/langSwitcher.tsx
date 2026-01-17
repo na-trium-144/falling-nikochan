@@ -13,14 +13,14 @@ export const langNames: { [key: string]: string } = {
 interface LangProps {
   locale: string;
   children: ReactNode;
-  classNameInner?: string
+  className?: string
 }
 export function LangSwitcher(props: LangProps) {
   const router = useRouter();
 
   return (
     <DropDown
-      classNameInner={clsx(linkStyle1, props.classNameInner)}
+      className={clsx(linkStyle1, props.className)}
       value={props.locale}
       options={Object.keys(langNames).map((lang) => ({
         value: lang,

@@ -150,7 +150,7 @@ export function useShareLink(
           <Button className="mx-0.5" text={t("share")} />
         ) : detectedOS === null ? (
           <Select
-            classNameOuter="mx-0.5"
+            className="mx-0.5"
             options={[
               { value: "copyForShare", label: t("copyForShare") },
               { value: "xPost", label: t("xPost") },

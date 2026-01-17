@@ -21,10 +21,8 @@ export interface DropDownProps<T> {
   options: DropDownOption<T>[];
   value?: T;
   onSelect: (value: T, index: number) => void;
-  classNameOuter?: string;
-  classNameInner?: string;
-  styleOuter?: object;
-  styleInner?: object;
+  className?: string;
+  style?: object;
   disabled?: boolean;
 }
 
@@ -38,7 +36,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
     width: number;
   }>({ left: 0, width: 0 });
   const [isMounted, setIsMounted] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,9 +52,9 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
 
       setDropdownPosition({
         [isInBottomHalf ? "bottom" : "top"]: isInBottomHalf
-          ? viewportHeight - rect.top + 4
-          : rect.bottom + 4,
-        left: rect.left,
+          ? viewportHeight - rect.top
+          : rect.bottom,
+        left: rect.left + rect.width / 2,
         width: rect.width,
       });
     }
@@ -109,84 +107,75 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
     };
   }, [isOpen, highlightedIndex, props.options, props.onSelect]);
 
-  const dropdownContent = isOpen ? (
-    <div
-      ref={dropdownRef}
-      className="fixed z-50"
-      style={{
-        top: dropdownPosition.top,
-        bottom: dropdownPosition.bottom,
-        left: dropdownPosition.left,
-        width: dropdownPosition.width,
+  const dropdownContent = (
+    <Box
+      refOuter={dropdownRef}
+      styleOuter={{
+        ...dropdownPosition,
         minWidth: "max-content",
       }}
+      classNameOuter={clsx(
+        "fixed! z-50 -translate-x-1/2",
+        "shadow-modal overflow-hidden",
+        "transition-[scale,opacity] duration-150",
+        popupAppearing
+          ? "ease-in scale-100 opacity-100"
+          : "ease-out scale-0 opacity-0",
+        dropdownPosition.top !== undefined
+          ? "mt-1 origin-top"
+          : "mb-1 origin-bottom"
+      )}
+      classNameInner={clsx("flex flex-col")}
+      onPointerLeave={() => setHighlightedIndex(-1)}
     >
-      <Box
-        classNameOuter={clsx(
-          "shadow-modal overflow-hidden",
-          "transition-all duration-150",
-          popupAppearing
-            ? "ease-in scale-100 opacity-100"
-            : "ease-out scale-0 opacity-0",
-          dropdownPosition.top !== undefined
-            ? "origin-top"
-            : "origin-bottom"
-        )}
-        classNameInner={clsx("flex flex-col")}
-        onPointerLeave={() => setHighlightedIndex(-1)}
-      >
-        {props.options.map((option, index) => (
-          <button
-            key={index}
-            className={clsx(
-              "relative cursor-pointer group",
-              skyFlatButtonStyle,
-              "hover:bg-sky-200/75! hover:dark:bg-orange-950/75!",
-              highlightedIndex === index &&
-                "bg-sky-200/75 dark:bg-orange-950/75",
-              props.value !== undefined ? "pl-7" : "pl-4",
-              "pr-4 py-1 flex flex-row items-center justify-center",
-              option.className
-            )}
-            style={option.style}
-            onClick={() => {
-              props.onSelect(option.value, index);
-              setIsOpen(false);
-              setHighlightedIndex(-1);
-            }}
-            onPointerEnter={() => setHighlightedIndex(index)}
-          >
-            <ButtonHighlight />
-            {option.value === props.value ? (
-              <CheckSmall className="absolute left-2 inset-y-0 h-max m-auto" />
-            ) : props.value !== undefined ? (
-              <span className="absolute left-2 inset-y-0 h-max m-auto" />
-            ) : null}
-            {option.label}
-          </button>
-        ))}
-      </Box>
-    </div>
-  ) : null;
+      {props.options.map((option, index) => (
+        <button
+          key={index}
+          className={clsx(
+            "relative cursor-pointer group",
+            skyFlatButtonStyle,
+            "hover:bg-sky-200/75! hover:dark:bg-orange-950/75!",
+            highlightedIndex === index && "bg-sky-200/75 dark:bg-orange-950/75",
+            props.value !== undefined ? "pl-7" : "pl-4",
+            "pr-4 py-1 flex flex-row items-center justify-center",
+            option.className
+          )}
+          style={option.style}
+          onClick={() => {
+            props.onSelect(option.value, index);
+            setIsOpen(false);
+            setHighlightedIndex(-1);
+          }}
+          onPointerEnter={() => setHighlightedIndex(index)}
+        >
+          <ButtonHighlight />
+          {option.value === props.value ? (
+            <CheckSmall className="absolute left-2 inset-y-0 h-max m-auto" />
+          ) : props.value !== undefined ? (
+            <span className="absolute left-2 inset-y-0 h-max m-auto" />
+          ) : null}
+          {option.label}
+        </button>
+      ))}
+    </Box>
+  );
 
   return (
     <>
-      <div
+      <button
         ref={containerRef}
-        className={clsx("inline-block relative", props.classNameOuter)}
-        style={props.styleOuter}
+        className={clsx("relative cursor-pointer", props.className)}
+        style={props.style}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
       >
-        <button
-          className={clsx("cursor-pointer", props.classNameInner)}
-          style={props.styleInner}
-          onClick={() => setIsOpen(!isOpen)}
-          aria-haspopup="listbox"
-          aria-expanded={isOpen}
-        >
-          {props.children}
-        </button>
-      </div>
-      {typeof document !== "undefined" && isMounted && createPortal(dropdownContent, document.body)}
+        {props.children}
+      </button>
+      {typeof document !== "undefined" &&
+        isMounted &&
+        isOpen &&
+        createPortal(dropdownContent, document.body)}
     </>
   );
 }

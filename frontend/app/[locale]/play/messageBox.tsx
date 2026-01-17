@@ -249,7 +249,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               )}
               value={props.playbackRate.toString()}
               onSelect={(s: string) => props.setPlaybackRate(Number(s))}
-              classNameInner={clsx(
+              className={clsx(
                 "relative inline-block pr-6 text-center",
                 linkStyle1,
                 inputStyle

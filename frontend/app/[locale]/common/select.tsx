@@ -20,10 +20,10 @@ export default function Select<T = unknown>(props: Props<T>) {
   return (
     <DropDown
       {...props}
-      classNameInner={clsx(
+      className={clsx(
         props.disabled ? buttonStyleDisabled : buttonStyle,
         "pr-6",
-        props.classNameInner
+        props.className
       )}
     >
       {!props.disabled && (

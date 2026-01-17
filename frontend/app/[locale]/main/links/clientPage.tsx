@@ -49,7 +49,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             <span className="ml-1">Language:</span>
             <LangSwitcher
               locale={locale}
-              classNameInner={clsx(
+              className={clsx(
                 "relative inline-block align-top pr-6 text-center",
                 linkStyle1,
                 inputStyle
@@ -76,7 +76,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             )}
             <span className="ml-1 ">{t("theme")}:</span>
             <ThemeSwitcher
-              classNameInner={clsx(
+              className={clsx(
                 "relative inline-block align-top pr-6 text-center",
                 linkStyle1,
                 inputStyle
