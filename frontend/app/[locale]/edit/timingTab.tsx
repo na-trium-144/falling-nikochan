@@ -158,17 +158,17 @@ export default function TimingTab(props: Props) {
           onChange={() => props.setYTEnd(props.currentLevel?.ytEndSec || 0)}
         >
           {t("ytEndAt")}
-          <Input
-            className="w-16"
-            actualValue={(
-              Math.round((props.currentLevel?.ytEndSec || 0) * 10) / 10
-            ).toString()}
-            updateValue={(v: string) => props.setYTEnd(Number(v))}
-            isValid={ytEndValid}
-            disabled={typeof props.currentLevel?.ytEnd !== "number"}
-          />
-          <span>{t("offsetSecond")}</span>
         </CheckBox>
+        <Input
+          className="w-16"
+          actualValue={(
+            Math.round((props.currentLevel?.ytEndSec || 0) * 10) / 10
+          ).toString()}
+          updateValue={(v: string) => props.setYTEnd(Number(v))}
+          isValid={ytEndValid}
+          disabled={typeof props.currentLevel?.ytEnd !== "number"}
+        />
+        <span>{t("offsetSecond")}</span>
       </div>
       <div className="">
         <CheckBox
