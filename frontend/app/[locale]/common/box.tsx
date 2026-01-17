@@ -32,6 +32,7 @@ interface Props {
   onClick?: (e: MouseEvent) => void;
   onPointerDown?: (e: MouseEvent) => void;
   onPointerUp?: (e: MouseEvent) => void;
+  onPointerLeave?: (e: MouseEvent) => void;
 }
 export function Box(props: Props) {
   return (
@@ -58,6 +59,7 @@ export function Box(props: Props) {
       onClick={props.onClick}
       onPointerDown={props.onPointerDown}
       onPointerUp={props.onPointerUp}
+      onPointerLeave={props.onPointerLeave}
     >
       <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
       <span className={clsx(boxBorderStyle2, props.classNameBorder)} />

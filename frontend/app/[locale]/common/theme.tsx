@@ -7,10 +7,12 @@ import {
   useContext,
   useEffect,
   useState,
+  useMemo,
 } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { useTranslations } from "next-intl";
 import { themeColorDark, themeColorLight } from "@/metadata.js";
+import DropDown, { DropDownOption } from "./dropdown";
 
 export interface ThemeState {
   theme: "dark" | "light" | null;
@@ -120,28 +122,31 @@ export function ThemeProvider(props: { children: ReactNode }) {
   );
 }
 
-export function ThemeSwitcher(props: { children: ReactNode }) {
+export function ThemeSwitcher(props: {
+  children: ReactNode;
+  className?: string;
+}) {
   const { theme, setTheme } = useTheme();
   const t = useTranslations("footer");
 
   return (
-    <span className={clsx("inline-block relative", linkStyle1)}>
-      <select
-        className="absolute text-center inset-0 opacity-0 z-10 cursor-pointer appearance-none "
-        value={String(theme)}
-        onChange={(e) => {
-          if (e.target.value === "dark" || e.target.value === "light") {
-            setTheme(e.target.value as "dark" | "light");
-          } else {
-            setTheme(null);
-          }
-        }}
-      >
-        <option value="dark">{t("dark")}</option>
-        <option value="light">{t("light")}</option>
-        <option value="null">{t("default")}</option>
-      </select>
+    <DropDown
+      className={clsx(linkStyle1, props.className)}
+      value={theme}
+      options={[
+        { value: "dark" as const, label: t("dark") },
+        { value: "light" as const, label: t("light") },
+        { value: null, label: t("default") },
+      ]}
+      onSelect={(value) => {
+        if (value === "dark" || value === "light") {
+          setTheme(value);
+        } else {
+          setTheme(null);
+        }
+      }}
+    >
       {props.children}
-    </span>
+    </DropDown>
   );
 }

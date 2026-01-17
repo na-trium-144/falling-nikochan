@@ -4,14 +4,14 @@ import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 import { boxBorderStyle1, boxBorderStyle2 } from "./box.jsx";
 
-const buttonStyleDisabled = clsx(
+export const buttonStyleDisabled = clsx(
   "appearance-none",
   "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-default",
   "border border-blue-300/50 dark:border-amber-800/30 rounded-xl",
   "bg-slate-300/50 dark:bg-stone-700/50"
 );
 export const buttonShadowStyle = "shadow-slate-500/50 dark:shadow-stone-950/50";
-const buttonStyle = clsx(
+export const buttonStyle = clsx(
   "appearance-none",
   "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer",
   "rounded-xl",
@@ -24,13 +24,13 @@ const buttonStyle = clsx(
   "shadow-sm",
   buttonShadowStyle
 );
-const buttonBorderStyle1 = clsx(
+export const buttonBorderStyle1 = clsx(
   boxBorderStyle1,
   "border-white/80! dark:border-stone-300/50!",
   "mask-linear-to-75%!",
   "opacity-100 group-active:opacity-0"
 );
-const buttonBorderStyle2 = clsx(
+export const buttonBorderStyle2 = clsx(
   boxBorderStyle2,
   "border-blue-300/80! dark:border-amber-800/50!",
   "mask-linear-to-75%!",
