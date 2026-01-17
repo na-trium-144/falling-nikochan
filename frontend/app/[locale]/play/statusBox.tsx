@@ -293,7 +293,7 @@ function StatusName(props: { children: ReactNode }) {
   return (
     <span
       className={clsx(
-        isMobile ? "h-max w-full text-center text-nowrap" : "flex-1"
+        isMobile ? "h-max w-full text-center whitespace-nowrap" : "flex-1"
       )}
     >
       {props.children}

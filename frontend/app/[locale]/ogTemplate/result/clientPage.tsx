@@ -56,7 +56,7 @@ export default function OGTemplate() {
         <div
           className={clsx(
             "ml-20 mt-6 flex flex-row items-baseline",
-            "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+            "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
             showDummyData || "invisible"
           )}
         >
@@ -67,7 +67,7 @@ export default function OGTemplate() {
         <div
           className={clsx(
             "pl-20 mt-4 font-title text-4xl",
-            "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+            "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
             showDummyData || "invisible"
           )}
         >

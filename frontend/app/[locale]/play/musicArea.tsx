@@ -187,7 +187,7 @@ export function MusicArea(props: Props) {
                       ? "text-2xl/6"
                       : "text-lg/5",
                   "overflow-x-clip overflow-y-visible",
-                  "max-w-full text-ellipsis text-nowrap"
+                  "max-w-full text-ellipsis whitespace-nowrap"
                 )}
               >
                 {props.chartBrief?.title}
@@ -202,7 +202,7 @@ export function MusicArea(props: Props) {
                         ? "text-lg/5"
                         : "text-sm/3.5",
                     "overflow-x-clip overflow-y-visible",
-                    "max-w-full text-ellipsis text-nowrap"
+                    "max-w-full text-ellipsis whitespace-nowrap"
                   )}
                 >
                   <span className="mx-1">/</span>
@@ -225,7 +225,7 @@ export function MusicArea(props: Props) {
                     className={clsx(
                       "inline-block align-bottom",
                       "overflow-x-clip overflow-y-visible",
-                      "max-w-full text-ellipsis text-nowrap",
+                      "max-w-full text-ellipsis whitespace-nowrap",
                       veryLargeTitle
                         ? "leading-6"
                         : largeTitle
@@ -281,7 +281,7 @@ export function MusicArea(props: Props) {
                 className={clsx(
                   "inline-block align-bottom",
                   "overflow-x-clip overflow-y-visible",
-                  "max-w-full text-ellipsis text-nowrap",
+                  "max-w-full text-ellipsis whitespace-nowrap",
                   veryLargeTitle
                     ? "leading-6"
                     : largeTitle

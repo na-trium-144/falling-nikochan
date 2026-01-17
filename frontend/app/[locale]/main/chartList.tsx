@@ -556,7 +556,7 @@ function ChartListItemChildren(props: CProps) {
           <span className="ml-1 text-sm/3">{props.cid}</span>
           {props.dateDiff && (
             <DateDiff
-              className="ml-2 text-xs/3 text-nowrap text-slate-500 dark:text-stone-400"
+              className="ml-2 text-xs/3 whitespace-nowrap text-slate-500 dark:text-stone-400"
               date={props.brief?.updatedAt || 0}
             />
           )}
@@ -567,7 +567,7 @@ function ChartListItemChildren(props: CProps) {
             <span
               className={clsx(
                 "inline-block leading-3 max-w-full",
-                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis"
+                "overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis"
               )}
             >
               <span className="ml-2 text-xs/3">by</span>
@@ -577,7 +577,7 @@ function ChartListItemChildren(props: CProps) {
             </span>
           )}
         </div>
-        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 ">
+        <div className="overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis leading-4 ">
           <span className="font-title text-base/4 ">{props.brief?.title}</span>
           {!props.original && props.brief?.composer && (
             <>

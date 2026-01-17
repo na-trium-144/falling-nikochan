@@ -84,7 +84,7 @@ export function ScoreDisp(props: Props) {
           transform: `rotate(-1.5deg)`,
         }}
       >
-        <span className="flex-1 min-w-0 overflow-visible text-nowrap ">
+        <span className="flex-1 min-w-0 overflow-visible whitespace-nowrap ">
           {t("score")}
         </span>
         <NumDisp num={score} fontSize1={40} fontSize2={24} anim alignAt2nd />
@@ -97,7 +97,7 @@ export function ScoreDisp(props: Props) {
       />
       {props.auto && (
         <div
-          className="flex justify-center text-nowrap"
+          className="flex justify-center whitespace-nowrap"
           style={{ fontSize: 20, marginTop: 4 }}
         >
           <span className="inline-block">- {t("auto")} -</span>
