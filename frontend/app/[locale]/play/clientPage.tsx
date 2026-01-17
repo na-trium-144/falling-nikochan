@@ -494,6 +494,7 @@ function Play(props: Props) {
     maxChain,
     notesAll,
     resetNotesAll,
+    notesDone,
     hit,
     iosRelease,
     judgeCount,
@@ -1006,6 +1007,7 @@ function Play(props: Props) {
               playbackRate={playbackRate}
               pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
               baseScore={baseScore}
+              notesDone={notesDone}
             />
             <ChainDisp
               chain={chain}

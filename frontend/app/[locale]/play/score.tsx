@@ -56,6 +56,18 @@ interface Props {
   baseScore: number;
   pc: boolean;
   playbackRate: number;
+  notesDone: NoteDone[][];
+}
+export interface NoteDone {
+  id: number;
+  indexInStep: number;
+  hitTimeSec: number;
+  bigDone: boolean;
+  done: number;
+  baseScore: number;
+  chainBonus: number;
+  bigBonus: number;
+  chain: number;
 }
 export function ScoreDisp(props: Props) {
   const t = useTranslations("play.score");
@@ -91,7 +103,62 @@ export function ScoreDisp(props: Props) {
           <span className="inline-block">- {t("auto")} -</span>
         </div>
       )}
+      {props.notesDone.map((row) =>
+        row.map((nd) => (
+          <ScoreDiffAnim key={`${nd.id}-${nd.bigDone}`} nd={nd} />
+        ))
+      )}
     </Cloud>
+  );
+}
+function ScoreDiffAnim({ nd }: { nd: NoteDone }) {
+  const ref = useRef<HTMLDivElement>(null!);
+  useEffect(() => {
+    ref.current.animate(
+      [
+        { transform: "translateX(-2.5em) scale(1)", opacity: 0 },
+        { transform: "translateX(0) scale(1)", opacity: 1, offset: 0.3 },
+        { transform: "translateX(0) scale(1)", opacity: 0.5, offset: 0.8 },
+        { transform: "translateX(0) scale(0)", opacity: 0 },
+      ],
+      { duration: 500, fill: "forwards", easing: "linear" }
+    );
+  }, []);
+
+  const lch = useColorWithLerp(nd.chain / 100);
+
+  return (
+    <div
+      ref={ref}
+      className={clsx(
+        "absolute w-max rounded-full",
+        // "backdrop-blur-2xs",
+        // "shadow-[0_0_2px_2px]",
+        "bg-amber-200/75 shadow-amber-200/75",
+        "dark:bg-amber-700/75 dark:shadow-amber-700/75"
+      )}
+      style={{
+        zIndex: 5 - nd.indexInStep,
+        top:
+          58 + (nd.bigDone ? 0 : 2) + 50 * (Math.sqrt(1 + nd.indexInStep) - 1),
+        right: -22 + (nd.bigDone ? 0 : 4 * 2.1),
+        fontSize: nd.bigDone ? 24 : 20,
+        lineHeight: 1,
+        padding: "3px 7px 3px 0.5em",
+        transform: "translateX(-3em) scale(1)",
+        color: `oklch(${lch[0]} ${lch[1]} ${lch[2]})`,
+        opacity: 0,
+      }}
+    >
+      +{Math.floor(nd.baseScore + nd.chainBonus + nd.bigBonus)}.
+      <span className="inline-block text-left" style={{ width: "2.1em" }}>
+        {(
+          Math.floor((nd.baseScore + nd.chainBonus + nd.bigBonus) * 1000) % 1000
+        )
+          .toString()
+          .padStart(3, "0")}
+      </span>
+    </div>
   );
 }
 
