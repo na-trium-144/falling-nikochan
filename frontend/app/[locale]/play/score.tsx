@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale.js";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 interface CProps {
   className?: string;
@@ -195,24 +195,27 @@ export function ChainDisp(props: ChainProps) {
   return (
     <Cloud className="flex flex-col" left>
       <div
-        className="relative flex flex-row items-baseline justify-center origin-bottom"
+        className="relative flex flex-row items-baseline origin-bottom"
         style={{
           marginTop: 14,
           color: `oklch(${lch[0]} ${lch[1]} ${lch[2]})`,
           transform: `rotate(1.5deg)`,
         }}
       >
-        <span className="flex-3" />
-        <span>
-          <NumDisp
-            num={props.chain}
-            fontSize1={40}
-            fontSize2={null}
-            anim
-            alignAt2nd
-          />
-        </span>
-        <span className="flex-2" />
+        <div className="relative flex-1 flex flex-row items-baseline">
+          <span className="flex-3" />
+          <span>
+            <NumDisp
+              num={props.chain}
+              fontSize1={40}
+              fontSize2={null}
+              anim
+              alignAt2nd
+            />
+          </span>
+          <span className="flex-2" />
+          <ChainBigAnim chain={props.chain} />
+        </div>
         <span
           className="relative text-center w-max overflow-visible "
           style={{ fontSize: 20 }}
@@ -231,6 +234,36 @@ export function ChainDisp(props: ChainProps) {
         skewedValue={false}
       />
     </Cloud>
+  );
+}
+function ChainBigAnim(props: { chain: number }) {
+  const [animChain, setAnimChain] = useState<number>(0);
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const anim = useRef<Animation | undefined>(undefined);
+  useEffect(() => {
+    if (props.chain < animChain) {
+      setAnimChain(0);
+      anim.current?.cancel();
+    } else if (Math.floor(props.chain / 50) * 50 > animChain) {
+      setAnimChain(Math.floor(props.chain / 50) * 50);
+      anim.current?.cancel();
+      anim.current = ref.current?.animate(
+        [
+          { transform: "rotate(0) scale(1)", opacity: 1 },
+          { transform: "rotate(-3.0deg) scale(4)", opacity: 0 },
+        ],
+        { duration: 500, fill: "forwards", easing: "ease-out" }
+      );
+    }
+  }, [props.chain, animChain]);
+  return (
+    <div className="absolute inset-0 flex flex-row z-1">
+      <span className="flex-3" />
+      <span ref={ref} style={{ fontSize: 40, lineHeight: 1, transformOrigin: "40% 40%" }}>
+        {animChain > 0 ? animChain : ""}
+      </span>
+      <span className="flex-2" />
+    </div>
   );
 }
 
