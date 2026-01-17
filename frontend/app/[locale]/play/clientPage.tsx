@@ -71,6 +71,7 @@ import {
 } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
+import { IrasutoyaLikeGrass } from "./irasutoyaLikeGrass.jsx";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -925,7 +926,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "z-10 flex-none m-3 self-end",
+                  "z-10 flex-none m-3 mb-0 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -966,7 +967,7 @@ function Play(props: Props) {
                 className="grow-0 shrink-1"
                 style={{
                   // 緑の部分の高さ (現在isMobileでないとき10vh) にあわせる
-                  flexBasis: `calc(10vh + 0.75rem)`,
+                  flexBasis: "10vh",
                 }}
                 ref={statusSpace.ref}
               />
@@ -1157,20 +1158,23 @@ function Play(props: Props) {
         className={clsx(
           "relative w-full",
           "transition-transform duration-200 ease-out",
-          initAnim ? "translate-y-0" : "translate-y-[30vh]"
+          initAnim
+            ? "translate-y-0 opacity-100"
+            : "translate-y-[30vh] opacity-0"
         )}
         style={{
           height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
           maxHeight: "15vh",
         }}
       >
-        <div
-          className={clsx(
-            "-z-30 absolute inset-x-0 bottom-0",
-            "bg-lime-500 bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
-            "dark:bg-lime-800 dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
-          )}
-          style={{ top: "-1rem" }}
+        <IrasutoyaLikeGrass
+          className="-z-30"
+          height={
+            (isMobile
+              ? Math.min(6 * rem * mobileStatusScale, 0.15 * screenHeight)
+              : 0.1 * screenHeight) +
+            1 * rem
+          }
         />
         {chartSeq && (
           <RhythmicalSlime
