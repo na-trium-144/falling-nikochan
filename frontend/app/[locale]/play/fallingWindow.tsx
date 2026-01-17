@@ -76,7 +76,7 @@ export default function FallingWindow(props: Props) {
   });
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
-  const realFps = useRealFPS();
+  const { realFps } = useRealFPS();
   const realFpsRef = useRef<number>(20);
   realFpsRef.current = realFps;
   // レンダリング等nikochanの1フレームの処理にかかる時間の測定
