@@ -17,8 +17,8 @@ import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { useOSDetector } from "./pwaInstall";
-import Select from "./select";
 import Pic from "@icon-park/react/lib/icons/Pic";
+import Select from "./select";
 
 export function useShareLink(
   cid: string | undefined,
@@ -149,23 +149,22 @@ export function useShareLink(
           // placeholder dummy button
           <Button className="mx-0.5" text={t("share")} />
         ) : detectedOS === null ? (
-          // ドロップダウンメニューのふりをしたselect
-          // TODO: better UI
           <Select
-            classNameOuter="mx-0.5"
-            classNameInner="min-w-0! w-18"
-            options={[t("share"), t("copyForShare"), t("xPost")]}
-            values={["", "copyForShare", "xPost"]}
-            value={""}
-            disableFirstOption
-            onChange={(s: string) => {
-              if (s === "copyForShare" && hasClipboard) {
+            className="mx-0.5"
+            options={[
+              { value: "copyForShare", label: t("copyForShare") },
+              { value: "xPost", label: t("xPost") },
+            ]}
+            onSelect={(value: "copyForShare" | "xPost") => {
+              if (value === "copyForShare" && hasClipboard) {
                 toClipboard(true);
-              } else if (s === "xPost") {
+              } else if (value === "xPost") {
                 window.open(xPostIntent, "_blank")?.focus();
               }
             }}
-          />
+          >
+            {t("share")}
+          </Select>
         ) : (
           // native share API on mobile
           <Button

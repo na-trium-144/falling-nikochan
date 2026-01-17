@@ -1457,10 +1457,19 @@ function Page(props: Props) {
               <div>
                 <span className="mr-1">{t("playerControl")}:</span>
                 <Select
-                  options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
-                  values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
+                  options={["0.25", "0.5", "0.75", "1", "1.5", "2"].map((s) => ({
+                    label:<>
+                      ×
+                      <span className="inline-block text-left ml-1 w-9">
+                        {s}
+                      </span>
+                    </>,
+                    value: s,
+                  }
+                  ))}
                   value={playbackRate.toString()}
-                  onChange={(s: string) => changePlaybackRate(Number(s))}
+                  onSelect={(s: string) => changePlaybackRate(Number(s))}
+                  showValue
                 />
                 <Button
                   onClick={() => {

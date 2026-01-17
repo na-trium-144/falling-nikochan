@@ -1,47 +1,47 @@
+"use client";
+
 import clsx from "clsx/lite";
 import Down from "@icon-park/react/lib/icons/Down";
-// import { buttonStyle, buttonStyleDisabled } from "./button.js";
+import {
+  buttonStyle,
+  buttonStyleDisabled,
+  buttonBorderStyle1,
+  buttonBorderStyle2,
+  ButtonHighlight,
+} from "./button";
+import DropDown, { DropDownProps } from "./dropdown";
 
-interface Props {
-  options: string[];
-  values: string[];
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-  disableFirstOption?: boolean;
-  classNameOuter?: string;
-  classNameInner?: string;
+// Buttonと同じ見た目で矢印を追加したSelectの外観をしたDropDown。
+// 使い方がselectである必要はなく、valueは必須でない
+interface Props<T = unknown> extends DropDownProps<T> {
+  showValue?: boolean;
 }
-export default function Select(props: Props) {
+export default function Select<T = unknown>(props: Props<T>) {
   return (
-    <span className={clsx("inline-block relative", props.classNameOuter)}>
-      <select
-        className={clsx(
-          // props.disabled ? buttonStyleDisabled : buttonStyle,
-          "pr-6",
-          props.classNameInner
-        )}
-        value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
-        disabled={props.disabled}
-      >
-        {props.options.map((option, i) => {
-          return (
-            <option
-              key={i}
-              value={props.values[i]}
-              hidden={props.disableFirstOption && i === 0}
-              disabled={props.disableFirstOption && i === 0}
-            >
-              {option}
-            </option>
-          );
-        })}
-      </select>
+    <DropDown
+      {...props}
+      className={clsx(
+        props.disabled ? buttonStyleDisabled : buttonStyle,
+        "pr-6",
+        props.className
+      )}
+    >
+      {!props.disabled && (
+        <>
+          <span className={buttonBorderStyle1} />
+          <span className={buttonBorderStyle2} />
+          <ButtonHighlight />
+        </>
+      )}
+      <span className="relative flex flex-row items-center justify-center">
+        {props.showValue
+          ? props.options.find((o) => o.value === props.value)?.label
+          : props.children}
+      </span>
       <Down
-        className="absolute inset-y-0 my-auto h-max right-2 cursor-pointer pointer-events-none "
+        className="absolute inset-y-0 my-auto h-max right-2 pointer-events-none"
         theme="filled"
       />
-    </span>
+    </DropDown>
   );
 }
