@@ -28,6 +28,7 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 
 interface MessageProps {
+  className?: string;
   isTouch: boolean;
   maxHeight: number;
   back?: () => void;
@@ -74,6 +75,7 @@ export function ReadyMessage(props: MessageProps) {
 
   return (
     <CenterBox
+      classNameOuter={props.className}
       classNameInner="overflow-clip"
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
@@ -412,6 +414,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
 }
 
 interface MessageProps2 {
+  className?: string;
   hidden: boolean;
   isTouch: boolean;
   reset: () => void;
@@ -422,6 +425,7 @@ export function StopMessage(props: MessageProps2) {
 
   return (
     <CenterBox
+      classNameOuter={props.className}
       hidden={props.hidden}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
@@ -446,6 +450,7 @@ export function StopMessage(props: MessageProps2) {
 }
 
 interface MessageProps3 {
+  className?: string;
   isTouch: boolean;
   exit: () => void;
   msg: string;
@@ -455,6 +460,7 @@ export function InitErrorMessage(props: MessageProps3) {
 
   return (
     <CenterBox
+      classNameOuter={props.className}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >

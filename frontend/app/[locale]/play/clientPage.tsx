@@ -520,6 +520,8 @@ function Play(props: Props) {
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
 
+  const [shouldHideBPMSign, setShouldHideBPMSign] = useState<boolean>(false);
+
   useEffect(() => {
     if (ref.current) {
       ref.current.focus();
@@ -585,7 +587,8 @@ function Play(props: Props) {
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
   const giveUpFpsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isReadyAll = ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
+  const isReadyAll =
+    ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
   useEffect(() => {
     if (errorMsg) {
       if (showLoadingTimeout.current !== null) {
@@ -919,7 +922,7 @@ function Play(props: Props) {
         >
           <MusicArea
             className={clsx(
-              "z-20 transition-transform duration-500 ease-in-out",
+              "isolate z-19 transition-transform duration-500 ease-in-out",
               musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
             )}
             ready={musicAreaOk}
@@ -948,7 +951,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "z-10 flex-none m-3 mb-0 self-end",
+                  "isolate z-15 flex-none m-3 mb-0 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -999,7 +1002,7 @@ function Play(props: Props) {
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
           {isReadyAll && (
             <FallingWindow
-              className="absolute inset-0"
+              className="absolute inset-0 isolate z-0"
               notes={notesAll}
               getCurrentTimeSec={getCurrentTimeSec}
               playing={chartPlaying}
@@ -1008,11 +1011,13 @@ function Play(props: Props) {
               barFlash={barFlash}
               noClear={props.noClear}
               playbackRate={playbackRate}
+              shouldHideBPMSign={shouldHideBPMSign}
+              setShouldHideBPMSign={setShouldHideBPMSign}
             />
           )}
           <div
             className={clsx(
-              "absoulte inset-0",
+              "absolute inset-0 isolate z-10",
               "transition-all duration-200",
               cloudsOk
                 ? "opacity-100 translate-y-0"
@@ -1063,6 +1068,7 @@ function Play(props: Props) {
           {!initDone && (
             <CenterBox
               classNameOuter={clsx(
+                "isolate z-20",
                 "transition-opacity duration-200 ease-out",
                 showLoading ? "opacity-100" : "opacity-0"
               )}
@@ -1076,10 +1082,16 @@ function Play(props: Props) {
             </CenterBox>
           )}
           {errorMsg && (
-            <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
+            <InitErrorMessage
+              className="isolate z-20"
+              msg={errorMsg}
+              isTouch={isTouch}
+              exit={exit}
+            />
           )}
           {showReady && (
             <ReadyMessage
+              className="isolate z-20"
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
               start={start}
@@ -1108,6 +1120,7 @@ function Play(props: Props) {
           )}
           {showResult && (
             <Result
+              className="isolate z-21"
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
               auto={wasAutoPlay}
@@ -1170,6 +1183,7 @@ function Play(props: Props) {
           )}
           {showStopped && (
             <StopMessage
+              className="isolate z-20"
               hidden={showReady || showResult}
               isTouch={isTouch}
               reset={reset}
@@ -1182,9 +1196,7 @@ function Play(props: Props) {
         className={clsx(
           "relative w-full",
           "transition-transform duration-200 ease-out",
-          initAnim
-            ? "translate-y-0 opacity-100"
-            : "translate-y-[30vh] opacity-0"
+          initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
           height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
@@ -1192,7 +1204,8 @@ function Play(props: Props) {
         }}
       >
         <IrasutoyaLikeGrass
-          className="-z-30"
+          classNameNear="isolate z-10"
+          classNameFar="isolate -z-10"
           height={
             (isMobile
               ? Math.min(6 * rem * mobileStatusScale, 0.15 * screenHeight)
@@ -1202,7 +1215,7 @@ function Play(props: Props) {
         />
         {chartSeq && (
           <RhythmicalSlime
-            className="-z-10 absolute "
+            className="isolate z-14 absolute"
             style={{
               bottom: "100%",
               right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
@@ -1216,8 +1229,13 @@ function Play(props: Props) {
         )}
         <BPMSign
           className={clsx(
-            "transition-opacity duration-200 ease-out",
-            initAnim && chartSeq ? "opacity-100" : "opacity-0"
+            "isolate z-13",
+            "transition-opacity duration-500 ease-out",
+            initAnim && chartSeq
+              ? shouldHideBPMSign
+                ? "opacity-25"
+                : "opacity-100"
+              : "opacity-0"
           )}
           chartPlaying={chartPlaying}
           chartSeq={chartSeq || null}
@@ -1228,7 +1246,7 @@ function Play(props: Props) {
         {isMobile && (
           <>
             <StatusBox
-              className="absolute inset-0 z-10"
+              className="absolute inset-0 isolate z-15"
               style={{
                 margin: 1 * rem * mobileStatusScale,
               }}
@@ -1266,7 +1284,7 @@ function Play(props: Props) {
               }
             />
             {showFps && (
-              <span className="absolute left-3 bottom-full">
+              <span className="absolute left-3 bottom-full isolate z-16">
                 [{renderFps} / {runFps} / {Math.round(realFps)}
                 {!realFpsStable && "?"} FPS]
               </span>
@@ -1274,7 +1292,7 @@ function Play(props: Props) {
           </>
         )}
         {!isMobile && (
-          <div className="absolute bottom-2 left-3 opacity-50">
+          <div className="absolute bottom-2 left-3 opacity-50 isolate z-16">
             <span className="inline-block">Falling Nikochan</span>
             <span className="inline-block">
               <span className="ml-2">ver.</span>
@@ -1292,7 +1310,7 @@ function Play(props: Props) {
       {!isMobile && statusHide && showResult && !showReady && (
         <div
           className={clsx(
-            "z-20 absolute inset-y-0 my-auto",
+            "isolate z-20 absolute inset-y-0 my-auto",
             "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
           )}
           style={{ right: "0.75rem" }}
