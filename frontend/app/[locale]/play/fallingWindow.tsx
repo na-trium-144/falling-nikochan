@@ -401,7 +401,20 @@ export default function FallingWindow(props: Props) {
               // ctx.shadowColor = "#facd0080";
               ctx.globalAlpha = tailOpacity;
               ctx.fill();
+              ctx.restore();
+            }
 
+            if (
+              n.done === 0 ||
+              (tailLength > noteSize / 2 && tailOpacity > 0.5)
+            ) {
+              ctx.save();
+              ctx.scale(tailsCanvasDPR, tailsCanvasDPR);
+              ctx.translate(
+                dn.pos.x * boxSize + canvasMarginX,
+                canvasMarginY + boxSize - targetY * boxSize - dn.pos.y * boxSize
+              );
+              ctx.globalAlpha = n.done === 0 ? 1 : tailOpacity;
               ctx.beginPath();
               const headRadius = (headSize * bigScale(n.big)) / 2;
               ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
@@ -418,7 +431,6 @@ export default function FallingWindow(props: Props) {
               headGrad.addColorStop(1, "#ffe89d00");
               ctx.fillStyle = headGrad;
               ctx.fill();
-
               ctx.restore();
             }
           }
