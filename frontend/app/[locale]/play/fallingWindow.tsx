@@ -22,6 +22,8 @@ interface Props {
   barFlash: FlashPos;
   noClear: boolean;
   playbackRate: number;
+  setShouldHideBPMSign: (hide: boolean) => void;
+  shouldHideBPMSign: boolean;
 }
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
@@ -250,6 +252,8 @@ export default function FallingWindow(props: Props) {
       boxSize &&
       now !== undefined
     ) {
+      let shouldHideBPMSign = false;
+
       displayNotes.current = notes
         .map((n) =>
           n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
@@ -266,12 +270,23 @@ export default function FallingWindow(props: Props) {
         );
         for (const dn of displayNotes.current) {
           const n = notes[dn.id];
+
+          const size = noteSize * bigScale(n.big);
+          const left = dn.pos.x * boxSize + canvasMarginX - size / 2;
+          const targetLeft = n.targetX * boxSize + canvasMarginX - size / 2;
+          shouldHideBPMSign ||=
+            // 実際のBPMSignのサイズ + 0.5rem くらい
+            marginY + targetY * boxSize - size / 2 < 5 * rem &&
+            (targetLeft < 8 * rem ||
+              ("vy" in n && n.vy <= 0 && left < 8 * rem)) &&
+            n.hitTimeSec - now < 0.5 * playbackRate &&
+            now - n.hitTimeSec < 0.5 * playbackRate;
+
           if (n.done > 0) {
             // 判定後のエフェクトについてはNikochanコンポーネント内のimgタグで描画する
             continue;
           }
-          const size = noteSize * bigScale(n.big);
-          const left = dn.pos.x * boxSize + canvasMarginX - size / 2;
+
           const top =
             canvasMarginY +
             boxSize -
@@ -436,6 +451,10 @@ export default function FallingWindow(props: Props) {
           }
         }
         lastNow.current = now;
+
+        if (props.shouldHideBPMSign !== shouldHideBPMSign) {
+          setTimeout(() => props.setShouldHideBPMSign(shouldHideBPMSign));
+        }
       }
     } else {
       if (!noClear) {
@@ -459,6 +478,9 @@ export default function FallingWindow(props: Props) {
       }
       tailVels.current = [];
       noteFadeInStart.current = [];
+      if (props.shouldHideBPMSign !== false) {
+        setTimeout(() => props.setShouldHideBPMSign(false));
+      }
     }
   }
 

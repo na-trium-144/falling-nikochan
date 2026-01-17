@@ -23,6 +23,7 @@ import { RecordHistogram } from "@/common/recordHistogram";
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
 interface Props extends ResultParams {
+  className?: string;
   mainWindowHeight: number;
   hidden: boolean;
   lang: string;
@@ -140,6 +141,7 @@ export default function Result(props: Props) {
   return (
     <>
       <CenterBox
+        classNameOuter={props.className}
         refInner={ref}
         classNameInner={clsx(
           "overflow-y-auto overflow-x-clip",
