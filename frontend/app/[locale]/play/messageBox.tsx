@@ -277,27 +277,26 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
             >
               {t("userBegin")}
-              {props.userBegin !== null && (
-                <>
-                  <span className="">:</span>
-                  <span className="inline-block text-right w-6">
-                    {Math.floor(Math.round(props.userBegin) / 60)}
-                  </span>
-                  <span className="">:</span>
-                  <span className="inline-block text-left">
-                    {(Math.round(props.userBegin) % 60)
-                      .toString()
-                      .padStart(2, "0")}
-                  </span>
-                  {/*<span className="mr-1">{t("offsetSecond")}</span>*/}
-                  {/*<span className="mr-1">〜</span>
-                  <span className="mr-1 inline-block text-right w-7">
-                    {Math.round(props.ytEnd)}
-                  </span>
-                  <span className="">{t("offsetSecond")}</span>*/}
-                </>
-              )}
             </CheckBox>
+            {props.userBegin !== null && (
+              <>
+                <span className="inline-block text-right w-6">
+                  {Math.floor(Math.round(props.userBegin) / 60)}
+                </span>
+                <span className="mx-0.5">:</span>
+                <span className="inline-block text-left">
+                  {(Math.round(props.userBegin) % 60)
+                    .toString()
+                    .padStart(2, "0")}
+                </span>
+                {/*<span className="mr-1">{t("offsetSecond")}</span>*/}
+                {/*<span className="mr-1">〜</span>
+                <span className="mr-1 inline-block text-right w-7">
+                  {Math.round(props.ytEnd)}
+                </span>
+                <span className="">{t("offsetSecond")}</span>*/}
+              </>
+            )}
             <Range
               className="block! w-full!"
               min={props.ytBegin}
