@@ -5,9 +5,10 @@
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "_comment": "backdrop-blur does not work until chrome 118 (but worked in 119), related issue https://github.com/tailwindlabs/tailwindcss/issues/18923",
+  "_comment2": "mask-image requires chrome 120",
   "browserslist": [
-    "chrome 119",
-    "edge 119",
+    "chrome 120",
+    "edge 120",
     "safari 16.4",
     "firefox 128"
   ],

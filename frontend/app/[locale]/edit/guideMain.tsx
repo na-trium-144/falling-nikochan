@@ -22,7 +22,9 @@ export function GuideMain(props: Props) {
     <div className={clsx(modalBg)}>
       <Box
         classNameOuter="shadow-modal"
-        classNameInner="flex flex-col p-6 overflow-y-auto"
+        classNameInner="flex flex-col"
+        scrollable
+        padding={6}
         styleOuter={{
           width: "calc(100% - 3rem)",
           height: "calc(100% - 3rem)",

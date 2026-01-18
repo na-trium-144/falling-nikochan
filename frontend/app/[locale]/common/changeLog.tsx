@@ -68,9 +68,7 @@ export function ChangeLogPopup(props: PopupProps) {
             <div
               className={clsx(
                 "w-120 m-4 h-80 overflow-hidden",
-                "bg-gradient-to-t bg-clip-text text-transparent to-15% from-3%",
-                "from-slate-800/0 to-slate-800 dark:from-stone-300/0 dark:to-stone-300",
-                "**:bg-inherit"
+                "mask-b-from-85% mask-b-to-97%"
               )}
             >
               <p className="">

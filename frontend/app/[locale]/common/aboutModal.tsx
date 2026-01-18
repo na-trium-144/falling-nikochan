@@ -36,7 +36,9 @@ export function AboutModal(props: AProps) {
             "transition-transform duration-200 origin-center",
             props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
           )}
-          classNameInner={clsx("p-6 overflow-x-clip overflow-y-auto")}
+          classNameInner={clsx("overflow-x-clip")}
+          scrollable
+          padding={6}
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">

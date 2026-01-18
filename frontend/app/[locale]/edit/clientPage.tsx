@@ -1287,7 +1287,9 @@ function Page(props: Props) {
                 "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
-              classNameInner={clsx("p-6 overflow-x-clip overflow-y-auto")}
+              classNameInner={clsx("overflow-x-clip")}
+              scrollable
+              padding={6}
             >
               {props.modal}
             </Box>
@@ -1632,7 +1634,9 @@ function Page(props: Props) {
                 "min-h-96",
                 "edit-wide:flex-1 edit-wide:min-h-0"
               )}
-              classNameInner={clsx("p-3 overflow-auto relative")}
+              classNameInner={clsx("relative")}
+              scrollable
+              padding={3}
             >
               {tab === 0 ? (
                 <MetaTab
@@ -1752,7 +1756,9 @@ function Page(props: Props) {
                   luaExecutor.err.length > 0
                 ) && "hidden"
               )}
-              classNameInner="p-2 h-24 max-h-24 edit-wide:h-auto overflow-auto"
+              classNameInner="h-24 max-h-24 edit-wide:h-auto"
+              scrollable
+              padding={2}
             >
               {luaExecutor.running ? (
                 <>
