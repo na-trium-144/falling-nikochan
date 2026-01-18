@@ -7,6 +7,8 @@
   --color-orange-975: #20100a; /* この色ってどうやって作ったの? 記憶にない */
   --color-amber-975: #20180a;
   --color-sky-975: #091823;
+  --color-default: var(--color-slate-800);
+  --color-default-dark: var(--color-stone-300);
   --blur-2xs: 2px;
   --radius-box: 1.25rem;
   --shadow-modal: var(--shadow-md);
@@ -21,6 +23,37 @@
 .font-main-ui,
 body {
   font-family: "Merriweather", "Kaisei Opti", serif;
+}
+
+body {
+  --scrollbar-color-thumb: color-mix(
+    in oklab,
+    var(--color-default) 65%,
+    transparent
+  );
+  &:where(.dark, .dark *) {
+    --scrollbar-color-thumb: color-mix(
+      in oklab,
+      var(--color-default-dark) 65%,
+      transparent
+    );
+  }
+  --scrollbar-color-track: transparent;
+
+  scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+}
+/* Legacy browsers with `::-webkit-scrollbar-*` support */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color-thumb);
+    @apply rounded-full;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-color-track);
+  }
 }
 
 /* Aceの背景色などを上書き */

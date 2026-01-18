@@ -42,7 +42,6 @@ function currentThemeIsDark() {
       );
   }
 }
-export const defaultThemeStyle = "text-slate-800 dark:text-stone-300";
 const applyTheme = () => {
   if (typeof document !== "undefined") {
     document.body.classList.add(
@@ -53,7 +52,8 @@ const applyTheme = () => {
       "dark:bg-orange-950",
       "dark:from-orange-950",
       "dark:to-orange-975",
-      ...defaultThemeStyle.split(" ")
+      "text-default",
+      "dark:text-default-dark",
     );
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */
