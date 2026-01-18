@@ -1,5 +1,6 @@
 import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
+import { Scrollable } from "./scrollable";
 
 export const modalBg =
   "fixed inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
@@ -22,6 +23,8 @@ export const boxBorderStyle2 = clsx(
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
   refInner?: { current: HTMLDivElement | null };
+  scrollable?: boolean;
+  padding?: number; // * spacing
   children: ReactNode | ReactNode[];
   hidden?: boolean;
   classNameOuter?: string;
@@ -63,13 +66,34 @@ export function Box(props: Props) {
     >
       <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
       <span className={clsx(boxBorderStyle2, props.classNameBorder)} />
-      <div
-        ref={props.refInner}
-        className={clsx("w-full h-full", props.classNameInner)}
-        style={props.styleInner}
-      >
-        {props.children}
-      </div>
+      {props.scrollable ? (
+        <Scrollable
+          ref={props.refInner}
+          className={clsx("w-full h-full", props.classNameInner)}
+          style={{
+            ...props.styleInner,
+            padding: props.padding
+              ? `calc(var(--spacing) * ${props.padding})`
+              : undefined,
+          }}
+          padding={(props.padding ?? 0) / 2}
+        >
+          {props.children}
+        </Scrollable>
+      ) : (
+        <div
+          ref={props.refInner}
+          className={clsx("w-full h-full", props.classNameInner)}
+          style={{
+            ...props.styleInner,
+            padding: props.padding
+              ? `calc(var(--spacing) * ${props.padding})`
+              : undefined,
+          }}
+        >
+          {props.children}
+        </div>
+      )}
     </div>
   );
 }
@@ -87,9 +111,11 @@ export function CenterBox(props: Props) {
       <Box
         refInner={props.refInner}
         classNameOuter={clsx("w-max h-max max-w-full text-center")}
-        classNameInner={clsx("p-6", props.classNameInner)}
+        classNameInner={clsx(props.classNameInner)}
         styleOuter={props.styleOuter}
         styleInner={props.styleInner}
+        scrollable={props.scrollable}
+        padding={props.padding ?? 6}
         onClick={props.onClick}
         onPointerDown={props.onPointerDown}
         onPointerUp={props.onPointerUp}

@@ -26,6 +26,7 @@ import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import Range from "@/common/range";
 import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
+import { Scrollable } from "@/common/scrollable";
 
 interface MessageProps {
   className?: string;
@@ -174,7 +175,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   return (
     <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <div className="flex-1 max-w-full w-fit overflow-y-auto overflow-x-visible">
+      <Scrollable className="flex-1 max-w-full w-fit overflow-x-visible">
         <ul
           className={clsx(
             "h-full flex flex-col justify-center text-left list-disc-as-text",
@@ -342,7 +343,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             </div>
           </li>
         </ul>
-      </div>
+      </Scrollable>
       <TimeAdjustBar userOffset={props.userOffset} times={props.lateTimes} />
     </div>
   );

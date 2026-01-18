@@ -144,9 +144,10 @@ export default function Result(props: Props) {
         classNameOuter={props.className}
         refInner={ref}
         classNameInner={clsx(
-          "overflow-y-auto overflow-x-clip",
+          "overflow-x-clip",
           showing >= resultAnimDelays.length ? "touch-pan-y" : "touch-none"
         )}
+        scrollable
         hidden={props.hidden}
         styleOuter={{ maxHeight: props.mainWindowHeight - 3 * rem }}
         styleInner={{ maxHeight: props.mainWindowHeight - 3 * rem }}

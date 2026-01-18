@@ -20,6 +20,7 @@ import {
 } from "@/common/pwaInstall";
 import Button from "@/common/button";
 import dynamic from "next/dynamic";
+import { Scrollable } from "@/common/scrollable";
 const AceEditor = dynamic(
   async () => {
     const ace = await import("react-ace");
@@ -55,7 +56,9 @@ export function DevPage(props: { locale: string }) {
         >
           <Box
             classNameOuter="w-max h-max max-w-full max-h-full"
-            classNameInner="p-6 overflow-y-auto space-y-3"
+            classNameInner="space-y-3"
+            scrollable
+            padding={6}
           >
             <div className="hidden mb-3 main-wide:flex flex-row items-center">
               <button
@@ -221,18 +224,19 @@ function StorageEditor(props: EProps) {
             }}
           />
         </div>
-        <div
+        <Scrollable
           className={clsx(
-            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-box p-1 text-sm break-all",
+            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-box text-sm break-all",
             "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
-            "h-18 max-h-18 overflow-auto",
+            "h-18 max-h-18",
             isError && "text-red-600 dark:text-red-400"
           )}
+          padding={1}
         >
           {message.map((m, i) => (
             <p key={i}>{m}</p>
           ))}
-        </div>
+        </Scrollable>
       </Box>
     </div>
   );

@@ -16,6 +16,7 @@ import { levelColors } from "@/common/levelColors";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Scrollable } from "@/common/scrollable";
 
 interface Props {
   chart?: ChartEdit;
@@ -137,7 +138,7 @@ export default function LevelTab(props: Props) {
           </>
         )}
       </p>
-      <ul className="ml-2 mt-2 mb-2 space-y-1 max-h-32 overflow-y-auto">
+      <Scrollable as="ul" className="ml-2 mt-2 mb-2 space-y-1 max-h-32">
         {props.chart?.levels.map((level, i) => (
           <li key={i}>
             <button
@@ -182,7 +183,7 @@ export default function LevelTab(props: Props) {
             </button>
           </li>
         ))}
-      </ul>
+      </Scrollable>
       <hr className="mb-3 " />
       {currentLevel && (
         <>
