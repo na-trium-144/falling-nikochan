@@ -1,0 +1,3 @@
+@utility grid-centering {
+  @apply grid place-content-center place-items-center grid-rows-1 grid-cols-1
+}

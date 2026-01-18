@@ -3,10 +3,6 @@
 import clsx from "clsx/lite";
 import Down from "@icon-park/react/lib/icons/Down";
 import {
-  buttonStyle,
-  buttonStyleDisabled,
-  buttonBorderStyle1,
-  buttonBorderStyle2,
   ButtonHighlight,
 } from "./button";
 import DropDown, { DropDownProps } from "./dropdown";
@@ -21,15 +17,15 @@ export default function Select<T = unknown>(props: Props<T>) {
     <DropDown
       {...props}
       className={clsx(
-        props.disabled ? buttonStyleDisabled : buttonStyle,
+        props.disabled ? "fn-button-disabled" : "fn-button",
         "pr-6",
         props.className
       )}
     >
       {!props.disabled && (
         <>
-          <span className={buttonBorderStyle1} />
-          <span className={buttonBorderStyle2} />
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
           <ButtonHighlight />
         </>
       )}

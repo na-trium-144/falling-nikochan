@@ -353,7 +353,7 @@ export function ChartList(props: Props) {
                 key={i}
                 className={clsx(
                   "w-full max-w-108 mx-auto h-10",
-                  "fn-chart-list-bg-style"
+                  "fn-chart-list"
                 )}
               />
             )
@@ -453,7 +453,7 @@ export function ChartListItem(props: CProps) {
           <a
             href={props.href}
             className={clsx(
-              "fn-chart-list-style group",
+              "fn-flat-button fn-sky fn-chart-list",
               props.onClickMobile && "hidden main-wide:block"
             )}
             target={props.newTab ? "_blank" : undefined}
@@ -466,15 +466,15 @@ export function ChartListItem(props: CProps) {
                 : undefined
             }
           >
-            <span className={skyFlatButtonBorderStyle1} />
-            <span className={skyFlatButtonBorderStyle2} />
+            <span className="fn-glass-1" />
+            <span className="fn-glass-2" />
             <ButtonHighlight />
             <ChartListItemChildren {...props} />
           </a>
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx("fn-chart-list-style group", "main-wide:hidden")}
+              className={clsx("fn-flat-button fn-sky fn-chart-list", "main-wide:hidden")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
@@ -490,7 +490,7 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={clsx("fn-chart-list-style group")}
+          className={clsx("fn-flat-button fn-sky fn-chart-list")}
           prefetch={!process.env.NO_PREFETCH}
         >
           <span className={skyFlatButtonBorderStyle1} />

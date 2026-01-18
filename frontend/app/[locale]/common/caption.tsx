@@ -28,9 +28,7 @@ function Caption({ top, left, content }: CaptionProps) {
         className={clsx(
           "absolute inline-block bottom-0 left-0 -translate-x-2/4 -translate-y-2",
           "text-center rounded-xl min-w-max py-2 px-3 z-1",
-          "backdrop-blur-xs",
-          "bg-sky-200/50 dark:bg-orange-950/50",
-          "inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15"
+          "fn-sky fn-caption",
         )}
       >
         <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />

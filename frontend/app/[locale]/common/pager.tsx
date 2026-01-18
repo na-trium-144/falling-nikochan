@@ -2,7 +2,7 @@ import clsx from "clsx/lite";
 import Link from "next/link";
 
 // Export CSS class name for compatibility
-export const pagerButtonClass = "fn-pager-button-class";
+export const pagerButtonClass = "fn-pager-button";
 interface Props {
   index: number;
   maxIndex: number;

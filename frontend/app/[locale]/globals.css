@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./styles/utilities.css";
+@import "./styles/glass.css";
 @import "./styles/box.css";
 @import "./styles/button.css";
 @import "./styles/flat-button.css";

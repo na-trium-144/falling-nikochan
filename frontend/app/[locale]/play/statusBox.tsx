@@ -3,8 +3,6 @@
 import clsx from "clsx/lite";
 import {
   Box,
-  boxBorderStyle1,
-  boxBorderStyle2,
 } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
@@ -73,7 +71,7 @@ export default function StatusBox(props: Props) {
                   "bg-orange-200/50 dark:bg-sky-800/50",
                   "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
                 )
-              : clsx("fn-box-style", "text-slate-500/75 dark:text-stone-400/75")
+              : clsx("fn-box", "text-slate-500/75 dark:text-stone-400/75")
           )}
           style={{
             fontSize: isMobile ? "0.8em" : undefined,
@@ -83,7 +81,7 @@ export default function StatusBox(props: Props) {
             className={clsx(
               props.bestCount
                 ? invertedFlatButtonBorderStyle1
-                : boxBorderStyle1,
+                : "fn-glass-1",
               "opacity-100!"
             )}
           />
@@ -91,7 +89,7 @@ export default function StatusBox(props: Props) {
             className={clsx(
               props.bestCount
                 ? invertedFlatButtonBorderStyle2
-                : boxBorderStyle2,
+                : "fn-glass-2",
               "opacity-100!"
             )}
           />

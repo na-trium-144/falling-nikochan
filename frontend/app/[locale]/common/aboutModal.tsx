@@ -43,7 +43,7 @@ export function AboutModal(props: AProps) {
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
             <button
-              className={clsx(pagerButtonClass, "absolute left-0 inset-y-0")}
+              className={clsx("fn-pager-button", "absolute left-0 inset-y-0")}
               onClick={close}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
