@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 import { fetchBrief } from "@/common/briefCache";
-import { Box, modalBg } from "@/common/box";
+import { Box } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
@@ -120,7 +120,7 @@ export function SharePageModalProvider(props: {
       {modalOpened && (
         <div
           className={clsx(
-            modalBg,
+            "fn-modal-bg",
             "transition-opacity duration-200",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}

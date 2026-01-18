@@ -1,10 +1,5 @@
 import clsx from "clsx/lite";
 import Link from "next/link";
-
-export const pagerButtonClass =
-  "text-center inline-block w-7 h-7 rounded-full cursor-pointer " +
-  "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 " +
-  "hover:dark:bg-stone-700 active:dark:bg-stone-600 ";
 interface Props {
   index: number;
   maxIndex: number;
@@ -26,7 +21,7 @@ export function Pager(props: Props) {
         {props.index > 1 ? (
           props.hrefBefore ? (
             <Link
-              className={clsx(pagerButtonClass)}
+              className={clsx("fn-pager-button-class")}
               href={props.hrefBefore}
               scroll={false}
               replace
@@ -36,7 +31,7 @@ export function Pager(props: Props) {
             </Link>
           ) : (
             <button
-              className={clsx(pagerButtonClass)}
+              className={clsx("fn-pager-button-class")}
               onClick={props.onClickBefore}
             >
               &lt;
@@ -53,7 +48,7 @@ export function Pager(props: Props) {
         {props.index < props.maxIndex ? (
           props.hrefAfter ? (
             <Link
-              className={clsx(pagerButtonClass)}
+              className={clsx("fn-pager-button-class")}
               href={props.hrefAfter}
               scroll={false}
               replace
@@ -63,7 +58,7 @@ export function Pager(props: Props) {
             </Link>
           ) : (
             <button
-              className={clsx(pagerButtonClass)}
+              className={clsx("fn-pager-button-class")}
               onClick={props.onClickAfter}
             >
               &gt;

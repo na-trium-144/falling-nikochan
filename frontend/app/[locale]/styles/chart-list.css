@@ -1,0 +1,17 @@
+@layer components {
+  .fn-chart-list-bg-style {
+    @apply rounded-md bg-sky-200/50 dark:bg-orange-950/50;
+  }
+
+  .fn-chart-list-style {
+    @apply block w-full text-left cursor-pointer;
+    @apply pl-1.5 py-0.5;
+    @apply rounded-md bg-sky-200/50 dark:bg-orange-950/50;
+    @apply relative group cursor-pointer;
+    @apply hover:bg-sky-200 hover:dark:bg-orange-950;
+    @apply active:bg-sky-200 active:dark:bg-orange-950;
+    @apply active:inset-shadow-button inset-shadow-sky-300/50 dark:inset-shadow-orange-975/75;
+    @apply hover:shadow-sm;
+    @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+  }
+}

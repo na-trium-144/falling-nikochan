@@ -20,9 +20,8 @@ import { useDisplayMode } from "@/scale.jsx";
 import {
   skyFlatButtonBorderStyle1,
   skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
 } from "@/common/flatButton.jsx";
-import { ButtonHighlight, buttonShadowStyle } from "@/common/button.jsx";
+import { ButtonHighlight } from "@/common/button.jsx";
 
 interface PProps {
   locale: string;
@@ -354,7 +353,7 @@ export function ChartList(props: Props) {
                 key={i}
                 className={clsx(
                   "w-full max-w-108 mx-auto h-10",
-                  chartListBgStyle
+                  "fn-chart-list-bg-style"
                 )}
               />
             )
@@ -429,17 +428,6 @@ export function ChartList(props: Props) {
   );
 }
 
-const chartListBgStyle = "rounded-md bg-sky-200/50 dark:bg-orange-950/50";
-const chartListStyle = clsx(
-  "block w-full text-left cursor-pointer",
-  // "hover:shadow active:shadow-inner",
-  "pl-1.5 py-0.5",
-  // "hover:-translate-y-0.5 active:translate-y-0",
-  chartListBgStyle,
-  skyFlatButtonStyle,
-  "hover:shadow-sm",
-  buttonShadowStyle
-);
 interface CProps {
   cid: string;
   brief?: ChartBrief;
@@ -465,7 +453,7 @@ export function ChartListItem(props: CProps) {
           <a
             href={props.href}
             className={clsx(
-              chartListStyle,
+              "fn-chart-list-style",
               props.onClickMobile && "hidden main-wide:block"
             )}
             target={props.newTab ? "_blank" : undefined}
@@ -486,7 +474,7 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx(chartListStyle, "main-wide:hidden")}
+              className={clsx("fn-chart-list-style", "main-wide:hidden")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
@@ -502,7 +490,7 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={clsx(chartListStyle)}
+          className={clsx("fn-chart-list-style")}
           prefetch={!process.env.NO_PREFETCH}
         >
           <span className={skyFlatButtonBorderStyle1} />

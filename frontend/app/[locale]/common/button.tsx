@@ -4,26 +4,8 @@ import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 import { boxBorderStyle1, boxBorderStyle2 } from "./box.jsx";
 
-export const buttonStyleDisabled = clsx(
-  "appearance-none",
-  "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-default",
-  "border border-blue-300/50 dark:border-amber-800/30 rounded-xl",
-  "bg-slate-300/50 dark:bg-stone-700/50"
-);
+// These class strings are kept for dynamic composition in flatButton.tsx
 export const buttonShadowStyle = "shadow-slate-500/50 dark:shadow-stone-950/50";
-export const buttonStyle = clsx(
-  "appearance-none",
-  "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer",
-  "rounded-xl",
-  "group",
-  "bg-blue-50/75 bg-gradient-to-t from-blue-200/75 to-blue-50/75",
-  "active:bg-blue-200/75 active:from-blue-200/75 active:to-blue-200/75",
-  "dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75",
-  "active:dark:bg-amber-950/75 active:dark:from-amber-950/75 active:dark:to-amber-950/75",
-  "active:inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75",
-  "shadow-sm",
-  buttonShadowStyle
-);
 export const buttonBorderStyle1 = clsx(
   boxBorderStyle1,
   "border-white/80! dark:border-stone-300/50!",
@@ -73,7 +55,7 @@ export default function Button(props: Props) {
   return (
     <button
       className={clsx(
-        props.disabled || props.loading ? buttonStyleDisabled : buttonStyle,
+        props.disabled || props.loading ? "fn-button-style-disabled" : "fn-button-style",
         props.loading && "cursor-wait",
         props.className
       )}
@@ -86,8 +68,8 @@ export default function Button(props: Props) {
     >
       {props.disabled || props.loading ? null : (
         <>
-          <span className={buttonBorderStyle1} />
-          <span className={buttonBorderStyle2} />
+          <span className={"fn-button-border-style-1"} />
+          <span className={"fn-button-border-style-2"} />
           <ButtonHighlight />
         </>
       )}
@@ -120,14 +102,14 @@ export function ButtonStyledLabel(props: LabelProps) {
   return (
     <label
       className={clsx(
-        buttonStyle,
+        "fn-button-style",
         "inline-flex items-center align-bottom",
         props.className
       )}
       htmlFor={props.htmlFor}
     >
-      <span className={buttonBorderStyle1} />
-      <span className={buttonBorderStyle2} />
+      <span className={"fn-button-border-style-1"} />
+      <span className={"fn-button-border-style-2"} />
       <ButtonHighlight />
       {props.children}
     </label>

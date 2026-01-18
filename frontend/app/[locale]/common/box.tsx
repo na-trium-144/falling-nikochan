@@ -2,13 +2,7 @@ import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
 import { Scrollable } from "./scrollable";
 
-export const modalBg =
-  "fixed inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
-
-export const boxStyle = clsx(
-  "bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs",
-  "inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25"
-);
+// These class strings are kept for dynamic composition in colorThief.ts
 export const boxBorderStyle1 = clsx(
   "absolute inset-0 z-2 rounded-[inherit] pointer-events-none",
   "border border-white/100 dark:border-stone-400/50",
@@ -54,7 +48,7 @@ export function Box(props: Props) {
         "relative",
         "rounded-box",
         "grid grid-cols-1 grid-rows-1",
-        boxStyle,
+        "fn-box-style",
         props.hidden && "hidden",
         props.classNameOuter
       )}
@@ -64,8 +58,8 @@ export function Box(props: Props) {
       onPointerUp={props.onPointerUp}
       onPointerLeave={props.onPointerLeave}
     >
-      <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
-      <span className={clsx(boxBorderStyle2, props.classNameBorder)} />
+      <span className={clsx("fn-box-border-style-1", props.classNameBorder)} />
+      <span className={clsx("fn-box-border-style-2", props.classNameBorder)} />
       {props.scrollable ? (
         <Scrollable
           ref={props.refInner}

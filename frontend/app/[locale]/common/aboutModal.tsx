@@ -1,8 +1,8 @@
-import { Box, modalBg } from "./box";
+import { Box } from "./box";
 import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
-import { Pager, pagerButtonClass } from "./pager";
+import { Pager } from "./pager";
 import {
   AboutContent,
   maxAboutPageIndex,
@@ -22,7 +22,7 @@ export function AboutModal(props: AProps) {
   return (
     <div
       className={clsx(
-        modalBg,
+        "fn-modal-bg",
         "transition-opacity duration-200",
         props.aboutAnim ? "ease-in opacity-100" : "ease-out opacity-0"
       )}
@@ -43,7 +43,7 @@ export function AboutModal(props: AProps) {
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
             <button
-              className={clsx(pagerButtonClass, "absolute left-0 inset-y-0")}
+              className={clsx("fn-pager-button-class", "absolute left-0 inset-y-0")}
               onClick={close}
             >
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />

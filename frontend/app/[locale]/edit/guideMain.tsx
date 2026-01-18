@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { Box, modalBg } from "@/common/box.js";
+import { Box } from "@/common/box.js";
 import { Pager } from "@/common/pager.js";
 import Button from "@/common/button.js";
 import { useTranslations } from "next-intl";
@@ -19,7 +19,7 @@ interface Props {
 export function GuideMain(props: Props) {
   const t = useTranslations("edit.guide");
   return (
-    <div className={clsx(modalBg)}>
+    <div className={clsx("fn-modal-bg")}>
       <Box
         classNameOuter="shadow-modal"
         classNameInner="flex flex-col"
