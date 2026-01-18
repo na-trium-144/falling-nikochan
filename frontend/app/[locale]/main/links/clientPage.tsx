@@ -144,7 +144,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       </div>
       <div className="mb-3">
         <h3 className="mb-2 text-xl font-bold font-title">{t("title")}</h3>
-        <ul className="list-disc-as-text ml-6 space-y-1 ">
+        <ul className="list-disc ml-6 space-y-1 ">
           <li>
             <FormOne className="inline-block align-middle mr-1" />
             <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">

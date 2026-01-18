@@ -27,7 +27,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
           {props.children}
         </Link>
       ),
-    ul: (props) => <ul className="list-disc-as-text ml-6 " {...props} />,
+    ul: (props) => <ul className="list-disc ml-6 " {...props} />,
     code: (props) => (
       <code
         className={clsx(
