@@ -3,6 +3,9 @@
 import clsx from "clsx/lite";
 import { useEffect, useState, RefObject } from "react";
 
+// Export CSS class name for compatibility
+export const inputStyle = "fn-input-style";
+
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)
 // updatevalue: 値を更新 isValidがtrueの場合にのみ呼ばれる
 // updateinvalidvalue: isValidがfalseだった場合呼ばれる
