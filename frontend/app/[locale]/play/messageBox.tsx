@@ -175,10 +175,10 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   return (
     <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <Scrollable className="flex-1 max-w-full w-fit overflow-x-visible">
+      <Scrollable className="flex-1 w-full overflow-x-visible">
         <ul
           className={clsx(
-            "h-full flex flex-col justify-center text-left list-disc",
+            "m-auto w-fit h-full flex flex-col justify-center text-left list-disc",
             "pl-6 pr-2 space-y-1 overflow-visible"
           )}
         >
