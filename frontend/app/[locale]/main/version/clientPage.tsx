@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation.js";
 
 export default function ChangelogPage(props: {
   locale: string;
-  changeLog: ReactNode;
+  changeLogAll: ReactNode;
 }) {
   const t = useTranslations("main.version");
   useEffect(() => updateLastVisited(), []);
@@ -54,7 +54,7 @@ export default function ChangelogPage(props: {
         </p>
       </div>
       <h3 className="text-xl font-bold font-title">{t("changelog")}</h3>
-      {props.changeLog}
+      {props.changeLogAll}
     </IndexMain>
   );
 }
