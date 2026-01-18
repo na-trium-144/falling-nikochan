@@ -68,8 +68,12 @@ export function useColorThief() {
     boxStyle: clsx(
       "inset-shadow-button",
       "inset-shadow-slate-300/15 dark:inset-shadow-stone-950/15",
-      "bg-[color-mix(in_oklab,currentColor_50%,var(--color-white))]",
-      "dark:bg-[color-mix(in_oklab,currentColor_50%,var(--color-stone-700))]"
+      colorAdjusted
+        ? clsx(
+            "bg-[color-mix(in_oklab,currentColor_50%,var(--color-white))]",
+            "dark:bg-[color-mix(in_oklab,currentColor_50%,var(--color-stone-700))]"
+          )
+        : "bg-white/50 dark:bg-stone-700/50"
     ),
     currentColor: colorAdjusted
       ? `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`
