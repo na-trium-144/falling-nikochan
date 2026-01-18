@@ -178,7 +178,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
       <Scrollable className="flex-1 max-w-full w-fit overflow-x-visible">
         <ul
           className={clsx(
-            "h-full flex flex-col justify-center text-left list-disc-as-text",
+            "h-full flex flex-col justify-center text-left list-disc",
             "pl-6 pr-2 space-y-1 overflow-visible"
           )}
         >
