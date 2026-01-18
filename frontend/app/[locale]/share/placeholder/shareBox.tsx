@@ -18,7 +18,6 @@ import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
 import { pagerButtonClass } from "@/common/pager.jsx";
 import { useColorThief } from "@/common/colorThief.js";
-import { defaultThemeStyle } from "@/common/theme.jsx";
 import { ExternalLink } from "@/common/extLink.jsx";
 
 interface Props {
@@ -149,7 +148,7 @@ export function ShareBox(props: Props) {
                   className={clsx(
                     "font-title text-xs main-wide:text-sm",
                     "overflow-hidden whitespace-nowrap text-ellipsis",
-                    defaultThemeStyle
+                    "text-default dark:text-default-dark"
                   )}
                 >
                   {ytMeta?.channelTitle}

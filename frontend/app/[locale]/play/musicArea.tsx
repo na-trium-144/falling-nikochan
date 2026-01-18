@@ -14,7 +14,6 @@ import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
-import { defaultThemeStyle } from "@/common/theme";
 import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box";
 
 interface Props {
@@ -167,7 +166,7 @@ export function MusicArea(props: Props) {
         <div
           className={clsx(
             "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
-            defaultThemeStyle,
+            "text-default dark:text-default-dark",
             props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
           )}
         >
@@ -345,7 +344,7 @@ export function MusicArea(props: Props) {
       <button
         className={clsx(
           "absolute rounded-full cursor-pointer leading-1",
-          defaultThemeStyle,
+          "text-default dark:text-default-dark",
           props.isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
@@ -368,7 +367,7 @@ export function MusicArea(props: Props) {
       </button>
       <div
         className={clsx(
-          defaultThemeStyle,
+          "text-default dark:text-default-dark",
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
