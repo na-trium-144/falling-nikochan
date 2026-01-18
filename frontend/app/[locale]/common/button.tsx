@@ -4,6 +4,10 @@ import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 import { boxBorderStyle1, boxBorderStyle2 } from "./box.jsx";
 
+// Export CSS class names for compatibility
+export const buttonStyle = "fn-button-style group";
+export const buttonStyleDisabled = "fn-button-style-disabled";
+
 // These class strings are kept for dynamic composition in flatButton.tsx
 export const buttonShadowStyle = "shadow-slate-500/50 dark:shadow-stone-950/50";
 export const buttonBorderStyle1 = clsx(
@@ -55,7 +59,7 @@ export default function Button(props: Props) {
   return (
     <button
       className={clsx(
-        props.disabled || props.loading ? "fn-button-style-disabled" : "fn-button-style",
+        props.disabled || props.loading ? buttonStyleDisabled : buttonStyle,
         props.loading && "cursor-wait",
         props.className
       )}
@@ -68,8 +72,8 @@ export default function Button(props: Props) {
     >
       {props.disabled || props.loading ? null : (
         <>
-          <span className={"fn-button-border-style-1"} />
-          <span className={"fn-button-border-style-2"} />
+          <span className={buttonBorderStyle1} />
+          <span className={buttonBorderStyle2} />
           <ButtonHighlight />
         </>
       )}
@@ -102,14 +106,14 @@ export function ButtonStyledLabel(props: LabelProps) {
   return (
     <label
       className={clsx(
-        "fn-button-style",
+        buttonStyle,
         "inline-flex items-center align-bottom",
         props.className
       )}
       htmlFor={props.htmlFor}
     >
-      <span className={"fn-button-border-style-1"} />
-      <span className={"fn-button-border-style-2"} />
+      <span className={buttonBorderStyle1} />
+      <span className={buttonBorderStyle2} />
       <ButtonHighlight />
       {props.children}
     </label>

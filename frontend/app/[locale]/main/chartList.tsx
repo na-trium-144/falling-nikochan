@@ -453,7 +453,7 @@ export function ChartListItem(props: CProps) {
           <a
             href={props.href}
             className={clsx(
-              "fn-chart-list-style",
+              "fn-chart-list-style group",
               props.onClickMobile && "hidden main-wide:block"
             )}
             target={props.newTab ? "_blank" : undefined}
@@ -474,7 +474,7 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx("fn-chart-list-style", "main-wide:hidden")}
+              className={clsx("fn-chart-list-style group", "main-wide:hidden")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
@@ -490,7 +490,7 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={clsx("fn-chart-list-style")}
+          className={clsx("fn-chart-list-style group")}
           prefetch={!process.env.NO_PREFETCH}
         >
           <span className={skyFlatButtonBorderStyle1} />

@@ -14,31 +14,27 @@
     @apply appearance-none;
     @apply relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer;
     @apply rounded-xl;
-    @apply group;
     @apply bg-blue-50/75 bg-gradient-to-t from-blue-200/75 to-blue-50/75;
-    @apply active:bg-blue-200/75 active:from-blue-200/75 active:to-blue-200/75;
     @apply dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75;
-    @apply active:dark:bg-amber-950/75 active:dark:from-amber-950/75 active:dark:to-amber-950/75;
-    @apply active:inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75;
     @apply shadow-sm;
     @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+    &:active {
+      @apply bg-blue-200/75 from-blue-200/75 to-blue-200/75;
+      @apply dark:bg-amber-950/75 dark:from-amber-950/75 dark:to-amber-950/75;
+      @apply inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75;
+    }
   }
 
   .fn-button-border-style-1 {
     @apply absolute inset-0 z-2 rounded-[inherit] pointer-events-none;
-    @apply border border-white/100 dark:border-stone-400/50;
-    @apply mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%;
-    @apply border-white/80! dark:border-stone-300/50!;
-    @apply mask-linear-to-75%!;
-    @apply opacity-100 group-active:opacity-0;
+    @apply border border-white/80! dark:border-stone-300/50!;
+    @apply mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-75%;
+    @apply opacity-100;
   }
 
   .fn-button-border-style-2 {
     @apply absolute inset-0 z-1 rounded-[inherit] pointer-events-none;
-    @apply border border-slate-300/80 dark:border-stone-900/30;
-    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%;
-    @apply border-blue-300/80! dark:border-amber-800/50!;
-    @apply mask-linear-to-75%!;
-    @apply group-active:mask-none!;
+    @apply border border-blue-300/80! dark:border-amber-800/50!;
+    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-75%;
   }
 }

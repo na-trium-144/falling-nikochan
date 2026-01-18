@@ -39,7 +39,7 @@ export default function Input(props: Props) {
       className={clsx(
         "font-main-ui text-base",
         !props.left && "text-right",
-        "fn-input-style",
+        inputStyle,
         props.isValid && !props.isValid(value) && "text-red-500",
         props.disabled &&
           "text-slate-400 border-slate-200 dark:text-stone-600 dark:border-stone-700",

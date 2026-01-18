@@ -1,6 +1,11 @@
 import clsx from "clsx/lite";
 import { boxBorderStyle1, boxBorderStyle2 } from "./box";
 
+// Export CSS class names for compatibility
+export const skyFlatButtonStyle = "fn-sky-flat-button-style group";
+export const invertedFlatButtonStyle = "fn-inverted-flat-button-style group";
+export const boxButtonStyle = "fn-box-button-style group";
+
 // skyFlatButtonBorderStyle1 is kept for export as it's used in chartList.tsx
 export const skyFlatButtonBorderStyle1 = clsx(
   boxBorderStyle1,
@@ -26,4 +31,13 @@ export const invertedFlatButtonBorderStyle2 = clsx(
   "mask-linear-to-75%!",
   "opacity-0 group-hover:opacity-100",
   "group-active:mask-none!"
+);
+
+export const boxButtonBorderStyle1 = clsx(
+  boxBorderStyle1,
+  "opacity-100 group-active:opacity-0"
+);
+export const boxButtonBorderStyle2 = clsx(
+  boxBorderStyle2,
+  "group-active:mask-none"
 );

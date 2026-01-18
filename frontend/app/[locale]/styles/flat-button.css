@@ -1,74 +1,73 @@
 @layer components {
   .fn-sky-flat-button-style {
-    @apply relative group cursor-pointer;
-    @apply hover:bg-sky-200 hover:dark:bg-orange-950;
-    @apply active:bg-sky-200 active:dark:bg-orange-950;
-    @apply active:inset-shadow-button inset-shadow-sky-300/50 dark:inset-shadow-orange-975/75;
+    @apply relative cursor-pointer;
+    &:hover {
+      @apply bg-sky-200 dark:bg-orange-950;
+    }
+    &:active {
+      @apply bg-sky-200 dark:bg-orange-950;
+      @apply inset-shadow-button inset-shadow-sky-300/50 dark:inset-shadow-orange-975/75;
+    }
   }
 
   .fn-sky-flat-button-border-style-1 {
     @apply absolute inset-0 z-2 rounded-[inherit] pointer-events-none;
-    @apply border border-white/100 dark:border-stone-400/50;
+    @apply border border-white/80! dark:border-stone-300/50!;
     @apply mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%;
-    @apply border-white/80! dark:border-stone-300/50!;
-    @apply mask-linear-to-50%!;
-    @apply opacity-0 group-hover:opacity-100 group-active:opacity-0;
+    @apply opacity-0;
   }
 
   .fn-sky-flat-button-border-style-2 {
     @apply absolute inset-0 z-1 rounded-[inherit] pointer-events-none;
-    @apply border border-slate-300/80 dark:border-stone-900/30;
-    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%;
-    @apply border-sky-300/80! dark:border-orange-800/50!;
-    @apply mask-linear-to-75%!;
-    @apply opacity-0 group-hover:opacity-100;
-    @apply group-active:mask-none!;
+    @apply border border-sky-300/80! dark:border-orange-800/50!;
+    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-75%;
+    @apply opacity-0;
   }
 
   .fn-inverted-flat-button-style {
-    @apply relative group cursor-pointer;
-    @apply hover:bg-orange-200 hover:dark:bg-sky-950;
-    @apply active:bg-orange-200 active:dark:bg-sky-950;
-    @apply active:inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75;
+    @apply relative cursor-pointer;
+    &:hover {
+      @apply bg-orange-200 dark:bg-sky-950;
+    }
+    &:active {
+      @apply bg-orange-200 dark:bg-sky-950;
+      @apply inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75;
+    }
   }
 
   .fn-inverted-flat-button-border-style-1 {
     @apply absolute inset-0 z-2 rounded-[inherit] pointer-events-none;
-    @apply border border-white/100 dark:border-stone-400/50;
+    @apply border border-white/80! dark:border-stone-300/50!;
     @apply mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%;
-    @apply border-white/80! dark:border-stone-300/50!;
-    @apply mask-linear-to-50%!;
-    @apply opacity-0 group-hover:opacity-100 group-active:opacity-0;
+    @apply opacity-0;
   }
 
   .fn-inverted-flat-button-border-style-2 {
     @apply absolute inset-0 z-1 rounded-[inherit] pointer-events-none;
-    @apply border border-slate-300/80 dark:border-stone-900/30;
-    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%;
-    @apply border-orange-300/80! dark:border-sky-800/50!;
-    @apply mask-linear-to-75%!;
-    @apply opacity-0 group-hover:opacity-100;
-    @apply group-active:mask-none!;
+    @apply border border-orange-300/80! dark:border-sky-800/50!;
+    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-75%;
+    @apply opacity-0;
   }
 
   .fn-box-button-style {
-    @apply relative group cursor-pointer;
+    @apply relative cursor-pointer;
     @apply bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs;
     @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
-    @apply active:inset-shadow-button active:inset-shadow-slate-300/50 active:dark:inset-shadow-stone-950/50;
+    &:active {
+      @apply inset-shadow-button inset-shadow-slate-300/50 dark:inset-shadow-stone-950/50;
+    }
   }
 
   .fn-box-button-border-style-1 {
     @apply absolute inset-0 z-2 rounded-[inherit] pointer-events-none;
     @apply border border-white/100 dark:border-stone-400/50;
     @apply mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%;
-    @apply opacity-100 group-active:opacity-0;
+    @apply opacity-100;
   }
 
   .fn-box-button-border-style-2 {
     @apply absolute inset-0 z-1 rounded-[inherit] pointer-events-none;
     @apply border border-slate-300/80 dark:border-stone-900/30;
     @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%;
-    @apply group-active:mask-none;
   }
 }
