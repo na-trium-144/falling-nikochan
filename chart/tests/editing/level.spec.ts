@@ -1,4 +1,5 @@
-import { expect, test, describe } from "vitest";
+import { test, describe } from "node:test";
+import { expect } from "chai";
 import { EventType, LevelEditing } from "@falling-nikochan/chart";
 import { dummyChartData, dummyLuaExecutor } from "./dummy";
 
@@ -17,9 +18,9 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.emit("rerender");
-      expect(rerendered).toBe(true);
+      expect(rerendered).to.equal(true);
       level.emit("change");
-      expect(changed).toBe(true);
+      expect(changed).to.equal(true);
     });
     test("should initialize properties not in level data", () => {
       const level = new LevelEditing(
@@ -31,10 +32,10 @@ describe("LevelEditing", () => {
       expect(level.seqNotes).to.have.lengthOf(
         dummyChartData.levels[0].notes.length
       );
-      expect(level.difficulty).toBeGreaterThanOrEqual(1);
-      expect(level.maxHitNum).toBe(2);
-      expect(level.lengthSec).toBe(dummyChartData.offset + 2);
-      expect(level.ytDuration).toBe(0);
+      expect(level.difficulty).to.be.at.least(1);
+      expect(level.maxHitNum).to.equal(2);
+      expect(level.lengthSec).to.equal(dummyChartData.offset + 2);
+      expect(level.ytDuration).to.equal(0);
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(level.barLines).to.not.be.empty;
     });
@@ -45,7 +46,7 @@ describe("LevelEditing", () => {
         () => dummyChartData.offset,
         dummyLuaExecutor()
       );
-      expect(level.current.timeSec).toBe(-dummyChartData.offset);
+      expect(level.current.timeSec).to.equal(-dummyChartData.offset);
     });
   });
 
@@ -57,8 +58,8 @@ describe("LevelEditing", () => {
       dummyLuaExecutor()
     );
     const obj = level.toObject();
-    expect(obj.name).toBe("level1");
-    expect(obj.notes).toEqual(dummyChartData.levels[0].notes);
+    expect(obj.name).to.equal("level1");
+    expect(obj.notes).to.deep.equal(dummyChartData.levels[0].notes);
   });
 
   describe("updateMeta", () => {
@@ -70,7 +71,7 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.updateMeta({ name: "new name" });
-      expect(level.meta.name).toBe("new name");
+      expect(level.meta.name).to.equal("new name");
     });
     test("should trigger rerender and change events", () => {
       const level = new LevelEditing(
@@ -88,8 +89,8 @@ describe("LevelEditing", () => {
         changed = true;
       });
       level.updateMeta({ name: "new title" });
-      expect(rerendered).toBe(true);
-      expect(changed).toBe(true);
+      expect(rerendered).to.equal(true);
+      expect(changed).to.equal(true);
     });
     test("should reset ytEndSec when ytEnd is changed", () => {
       const level = new LevelEditing(
@@ -99,11 +100,11 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.updateMeta({ ytEnd: "note" });
-      expect(level.meta.ytEndSec).toBe(level.lengthSec);
+      expect(level.meta.ytEndSec).to.equal(level.lengthSec);
       level.updateMeta({ ytEnd: "yt" });
-      expect(level.meta.ytEndSec).toBe(level.ytDuration);
+      expect(level.meta.ytEndSec).to.equal(level.ytDuration);
       level.updateMeta({ ytEnd: 15 });
-      expect(level.meta.ytEndSec).toBe(15);
+      expect(level.meta.ytEndSec).to.equal(15);
     });
   });
   describe("updateFreeze", () => {
@@ -123,8 +124,8 @@ describe("LevelEditing", () => {
         changed = true;
       });
       level.updateFreeze({ ...level.freeze });
-      expect(rerendered).toBe(true);
-      expect(changed).toBe(true);
+      expect(rerendered).to.equal(true);
+      expect(changed).to.equal(true);
     });
     test("should update freeze data", () => {
       const level = new LevelEditing(
@@ -146,8 +147,8 @@ describe("LevelEditing", () => {
         },
       ];
       level.updateFreeze({ notes: newNotes });
-      expect(level.freeze.notes).toEqual(newNotes);
-      expect(level.freeze.notes.at(-1)).toEqual({
+      expect(level.freeze.notes).to.deep.equal(newNotes);
+      expect(level.freeze.notes.at(-1)).to.deep.equal({
         step: { fourth: 5, numerator: 0, denominator: 1 },
         big: false,
         hitX: -1,
@@ -181,10 +182,10 @@ describe("LevelEditing", () => {
       expect(level.seqNotes).to.have.lengthOf(
         dummyChartData.levels[0].notes.length + 5
       );
-      expect(level.difficulty).toBeGreaterThanOrEqual(10);
-      expect(level.maxHitNum).toBe(5);
-      expect(level.lengthSec).toBe(3 + dummyChartData.offset);
-      expect(level.ytDuration).toBe(0);
+      expect(level.difficulty).to.be.at.least(10);
+      expect(level.maxHitNum).to.equal(5);
+      expect(level.lengthSec).to.equal(3 + dummyChartData.offset);
+      expect(level.ytDuration).to.equal(0);
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(level.barLines).to.not.be.empty;
     });
@@ -196,8 +197,8 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(3 + dummyChartData.offset);
-      expect(level.current.timeSec).toBe(3);
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.timeSec).to.equal(3);
+      expect(level.current.noteIndex).to.be.undefined;
       level.updateFreeze({
         notes: [
           ...dummyChartData.levels[0].notes,
@@ -212,8 +213,8 @@ describe("LevelEditing", () => {
           },
         ],
       });
-      expect(level.current.timeSec).toBe(3);
-      expect(level.current.noteIndex).toBe(
+      expect(level.current.timeSec).to.equal(3);
+      expect(level.current.noteIndex).to.equal(
         dummyChartData.levels[0].notes.length
       );
     });
@@ -233,7 +234,7 @@ describe("LevelEditing", () => {
         )
       );
       level.updateLua([...level.lua, "print('new line')"]);
-      expect(aborted).toBe(true);
+      expect(aborted).to.equal(true);
     });
     test("should try to execute new lua", async () => {
       let executedCode = "";
@@ -247,7 +248,7 @@ describe("LevelEditing", () => {
         })
       );
       await level.updateLua(["print('new line')", "print('new line 2')"]);
-      expect(executedCode).toBe("print('new line')\nprint('new line 2')");
+      expect(executedCode).to.equal("print('new line')\nprint('new line 2')");
     });
     test("should update lua and freeze data", async () => {
       const level = new LevelEditing(
@@ -275,7 +276,7 @@ describe("LevelEditing", () => {
       );
       const newLua = [...level.lua, "print('new line')"];
       await level.updateLua(newLua);
-      expect(level.lua).toEqual(newLua);
+      expect(level.lua).to.deep.equal(newLua);
       expect(level.freeze.notes).to.have.lengthOf(
         dummyChartData.levels[0].notes.length + 1
       );
@@ -289,7 +290,7 @@ describe("LevelEditing", () => {
       );
       const newLua = [...level.lua, "print('new line')"];
       await level.updateLua(newLua);
-      expect(level.lua).toEqual(dummyChartData.levels[0].lua);
+      expect(level.lua).to.deep.equal(dummyChartData.levels[0].lua);
       expect(level.freeze.notes).to.have.lengthOf(
         dummyChartData.levels[0].notes.length
       );
@@ -306,8 +307,8 @@ describe("LevelEditing", () => {
       );
       level.updateMeta({ ytEnd: "yt" });
       level.setYTDuration(20);
-      expect(level.ytDuration).toBe(20);
-      expect(level.meta.ytEndSec).toBe(20);
+      expect(level.ytDuration).to.equal(20);
+      expect(level.meta.ytEndSec).to.equal(20);
     });
     test("should update ytDuration but not ytEndSec if ytEnd is 'note'", () => {
       const level = new LevelEditing(
@@ -318,8 +319,8 @@ describe("LevelEditing", () => {
       );
       level.updateMeta({ ytEnd: "note" });
       level.setYTDuration(20);
-      expect(level.ytDuration).toBe(20);
-      expect(level.meta.ytEndSec).toBe(level.lengthSec);
+      expect(level.ytDuration).to.equal(20);
+      expect(level.meta.ytEndSec).to.equal(level.lengthSec);
     });
     test("should update ytDuration but not ytEndSec if ytEnd is a number", () => {
       const level = new LevelEditing(
@@ -330,8 +331,8 @@ describe("LevelEditing", () => {
       );
       level.updateMeta({ ytEnd: 30 });
       level.setYTDuration(20);
-      expect(level.ytDuration).toBe(20);
-      expect(level.meta.ytEndSec).toBe(30);
+      expect(level.ytDuration).to.equal(20);
+      expect(level.meta.ytEndSec).to.equal(30);
     });
   });
   describe("setSnapDivider", () => {
@@ -343,10 +344,10 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
-      expect(level.current.timeSec).toBe(1);
+      expect(level.current.timeSec).to.equal(1);
       level.setSnapDivider(4);
-      expect(level.current.snapDivider).toBe(4);
-      expect(level.current.timeSec).toBe(1);
+      expect(level.current.snapDivider).to.equal(4);
+      expect(level.current.timeSec).to.equal(1);
     });
   });
 
@@ -359,7 +360,7 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 2);
-      expect(level.current.timeSec).toBe(2);
+      expect(level.current.timeSec).to.equal(2);
     });
     test("should update snapDivider if provided", () => {
       const level = new LevelEditing(
@@ -369,8 +370,8 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 2, 8);
-      expect(level.current.timeSec).toBe(2);
-      expect(level.current.snapDivider).toBe(8);
+      expect(level.current.timeSec).to.equal(2);
+      expect(level.current.snapDivider).to.equal(8);
     });
     test("should not update if time and snapDivider are the same", () => {
       const level = new LevelEditing(
@@ -384,7 +385,7 @@ describe("LevelEditing", () => {
         dummyChartData.offset - level.current.timeSec,
         level.current.snapDivider
       );
-      expect(level.current).toBe(currentBefore);
+      expect(level.current).to.equal(currentBefore);
     });
   });
 
@@ -398,9 +399,9 @@ describe("LevelEditing", () => {
       );
       // At offset + 1, there are 2 notes (indices 1 and 2) at the same step
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
-      expect(level.current.noteIndex).toBe(1);
+      expect(level.current.noteIndex).to.equal(1);
       level.selectNextNote();
-      expect(level.current.noteIndex).toBe(2);
+      expect(level.current.noteIndex).to.equal(2);
     });
     test("should not select if noteIndex is at the last note of the step", () => {
       const level = new LevelEditing(
@@ -410,9 +411,9 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 2);
-      expect(level.current.noteIndex).toBe(3);
+      expect(level.current.noteIndex).to.equal(3);
       level.selectNextNote();
-      expect(level.current.noteIndex).toBe(3);
+      expect(level.current.noteIndex).to.equal(3);
     });
     test("should not select if noteIndex is undefined", () => {
       const level = new LevelEditing(
@@ -422,9 +423,9 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.noteIndex).to.be.undefined;
       level.selectNextNote();
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.noteIndex).to.be.undefined;
     });
   });
 
@@ -438,11 +439,11 @@ describe("LevelEditing", () => {
       );
       // At offset + 1, there are 2 notes (indices 1 and 2) at the same step
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
-      expect(level.current.noteIndex).toBe(1);
+      expect(level.current.noteIndex).to.equal(1);
       level.selectNextNote();
-      expect(level.current.noteIndex).toBe(2);
+      expect(level.current.noteIndex).to.equal(2);
       level.selectPrevNote();
-      expect(level.current.noteIndex).toBe(1);
+      expect(level.current.noteIndex).to.equal(1);
     });
     test("should not select if noteIndex is at the first note of the step", () => {
       const level = new LevelEditing(
@@ -452,9 +453,9 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
-      expect(level.current.noteIndex).toBe(1);
+      expect(level.current.noteIndex).to.equal(1);
       level.selectPrevNote();
-      expect(level.current.noteIndex).toBe(1);
+      expect(level.current.noteIndex).to.equal(1);
     });
     test("should not select if noteIndex is undefined", () => {
       const level = new LevelEditing(
@@ -464,9 +465,9 @@ describe("LevelEditing", () => {
         dummyLuaExecutor()
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.noteIndex).to.be.undefined;
       level.selectPrevNote();
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.noteIndex).to.be.undefined;
     });
   });
 
@@ -483,8 +484,7 @@ describe("LevelEditing", () => {
         numerator: 0,
         denominator: 1,
       });
-      expect(bpmChange).toBeDefined();
-      expect(bpmChange?.bpm).toBe(120);
+      expect(bpmChange?.bpm).to.equal(120);
     });
     test("should find bpm change before the given step", () => {
       const level = new LevelEditing(
@@ -498,8 +498,7 @@ describe("LevelEditing", () => {
         numerator: 0,
         denominator: 1,
       });
-      expect(bpmChange).toBeDefined();
-      expect(bpmChange?.bpm).toBe(120);
+      expect(bpmChange?.bpm).to.equal(120);
     });
     test("should find bpm change for large step values", () => {
       const level = new LevelEditing(
@@ -514,8 +513,7 @@ describe("LevelEditing", () => {
         denominator: 1,
       });
       // Should return the last bpm change (at fourth: 3)
-      expect(bpmChange).toBeDefined();
-      expect(bpmChange?.step.fourth).toBe(3);
+      expect(bpmChange?.step.fourth).to.equal(3);
     });
   });
 
@@ -532,9 +530,8 @@ describe("LevelEditing", () => {
         numerator: 0,
         denominator: 1,
       });
-      expect(speedChange).toBeDefined();
-      expect(speedChange?.bpm).toBe(60);
-      expect(speedChange?.interp).toBe(false);
+      expect(speedChange?.bpm).to.equal(60);
+      expect(speedChange?.interp).to.equal(false);
     });
     test("should find speed change before the given step", () => {
       const level = new LevelEditing(
@@ -548,9 +545,8 @@ describe("LevelEditing", () => {
         numerator: 0,
         denominator: 1,
       });
-      expect(speedChange).toBeDefined();
-      expect(speedChange?.bpm).toBe(60);
-      expect(speedChange?.interp).toBe(false);
+      expect(speedChange?.bpm).to.equal(60);
+      expect(speedChange?.interp).to.equal(false);
     });
     test("should find speed change for large step values", () => {
       const level = new LevelEditing(
@@ -565,8 +561,7 @@ describe("LevelEditing", () => {
         denominator: 1,
       });
       // Should return the last speed change (at fourth: 3)
-      expect(speedChange).toBeDefined();
-      expect(speedChange?.step.fourth).toBe(3);
+      expect(speedChange?.step.fourth).to.equal(3);
     });
   });
 
@@ -583,8 +578,7 @@ describe("LevelEditing", () => {
         numerator: 0,
         denominator: 1,
       });
-      expect(signature).toBeDefined();
-      expect(signature?.bars).toEqual([[4, 4]]);
+      expect(signature?.bars).to.deep.equal([[4, 4]]);
     });
     test("should find signature for large step values", () => {
       const level = new LevelEditing(
@@ -599,8 +593,7 @@ describe("LevelEditing", () => {
         denominator: 1,
       });
       // Should return the last signature (at fourth: 1)
-      expect(signature).toBeDefined();
-      expect(signature?.step.fourth).toBe(1);
+      expect(signature?.step.fourth).to.equal(1);
     });
   });
 
@@ -620,7 +613,7 @@ describe("LevelEditing", () => {
       level.changeBpm(180, null, false);
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("BPM(180)");
+      expect(executedCode).to.include("BPM(180)");
     });
     test("should update speed and call updateLua with expected code", async () => {
       let executedCode = "";
@@ -637,7 +630,7 @@ describe("LevelEditing", () => {
       level.changeBpm(null, 90, false);
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("Accel(90)");
+      expect(executedCode).to.include("Accel(90)");
     });
     test("should update both bpm and speed when both are provided", async () => {
       let executedCode = "";
@@ -655,9 +648,11 @@ describe("LevelEditing", () => {
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
       // TODO: dummyデータのluaLineが正しく設定されていないので正しいluaコードが出てこない
-      // expect(executedCode).toContain("BPM(180)");
-      // expect(executedCode).toContain("Accel(90)");
-      expect(executedCode.includes("90") || executedCode.includes("180")).toBe(true);
+      // expect(executedCode).to.include("BPM(180)");
+      // expect(executedCode).to.include("Accel(90)");
+      expect(
+        executedCode.includes("90") || executedCode.includes("180")
+      ).to.equal(true);
     });
   });
 
@@ -683,7 +678,7 @@ describe("LevelEditing", () => {
       });
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("Beat({{3}})");
+      expect(executedCode).to.include("Beat({{3}})");
     });
   });
 
@@ -701,11 +696,11 @@ describe("LevelEditing", () => {
       );
       // Set to a position between bpm changes
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1.5);
-      expect(level.bpmChangeHere).toBe(false);
+      expect(level.bpmChangeHere).to.equal(false);
       level.toggleBpmChangeHere(true, null);
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("BPM(120)");
+      expect(executedCode).to.include("BPM(120)");
     });
     test("should delete bpm change when toggled off", async () => {
       let executedCode = "";
@@ -719,7 +714,7 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
-      expect(level.bpmChangeHere).toBe(true);
+      expect(level.bpmChangeHere).to.equal(true);
       level.toggleBpmChangeHere(false, null);
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -739,11 +734,11 @@ describe("LevelEditing", () => {
       );
       // Set to a position between speed changes
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1.5);
-      expect(level.speedChangeHere).toBe(false);
+      expect(level.speedChangeHere).to.equal(false);
       level.toggleBpmChangeHere(null, true);
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("Accel(60)");
+      expect(executedCode).to.include("Accel(60)");
     });
     test("should delete speed change when toggled off", async () => {
       let executedCode = "";
@@ -757,7 +752,7 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
-      expect(level.speedChangeHere).toBe(true);
+      expect(level.speedChangeHere).to.equal(true);
       level.toggleBpmChangeHere(null, false);
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -780,7 +775,7 @@ describe("LevelEditing", () => {
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
       // Should not execute because step is zero
-      expect(executedCode).toBe("");
+      expect(executedCode).to.equal("");
     });
   });
 
@@ -798,11 +793,11 @@ describe("LevelEditing", () => {
       );
       // Set to a position between signature changes
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1.5);
-      expect(level.signatureChangeHere).toBe(false);
+      expect(level.signatureChangeHere).to.equal(false);
       level.toggleSignatureChangeHere();
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("Beat");
+      expect(executedCode).to.include("Beat");
     });
     test("should delete signature change when present", async () => {
       let executedCode = "";
@@ -816,7 +811,7 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
-      expect(level.signatureChangeHere).toBe(true);
+      expect(level.signatureChangeHere).to.equal(true);
       level.toggleSignatureChangeHere();
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -839,7 +834,7 @@ describe("LevelEditing", () => {
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
       // Should not execute because step is zero
-      expect(executedCode).toBe("");
+      expect(executedCode).to.equal("");
     });
   });
 
@@ -867,7 +862,7 @@ describe("LevelEditing", () => {
       });
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("Note(-2, 1, 3, false, true)");
+      expect(executedCode).to.include("Note(-2, 1, 3, false, true)");
     });
   });
 
@@ -884,7 +879,7 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
-      expect(level.current.noteIndex).toBe(0);
+      expect(level.current.noteIndex).to.equal(0);
       level.deleteNote();
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -903,12 +898,12 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.noteIndex).to.be.undefined;
       level.deleteNote();
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
       // updateLua should not have been called
-      expect(executedCode).toBe("");
+      expect(executedCode).to.equal("");
     });
   });
 
@@ -925,7 +920,7 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset);
-      expect(level.current.noteIndex).toBe(0);
+      expect(level.current.noteIndex).to.equal(0);
       level.updateNote({
         step: { fourth: 0, numerator: 0, denominator: 1 },
         big: true,
@@ -937,7 +932,7 @@ describe("LevelEditing", () => {
       });
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(executedCode).toContain("Note(5, 2, 4, true, false)");
+      expect(executedCode).to.include("Note(5, 2, 4, true, false)");
     });
     test("should not update if noteIndex is undefined", async () => {
       let executedCode = "";
@@ -951,7 +946,7 @@ describe("LevelEditing", () => {
         })
       );
       level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
-      expect(level.current.noteIndex).toBeUndefined();
+      expect(level.current.noteIndex).to.be.undefined;
       level.updateNote({
         step: { fourth: 0, numerator: 0, denominator: 1 },
         big: true,
@@ -964,7 +959,7 @@ describe("LevelEditing", () => {
       // Wait for async updateLua to execute
       await new Promise((resolve) => setTimeout(resolve, 10));
       // updateLua should not have been called
-      expect(executedCode).toBe("");
+      expect(executedCode).to.equal("");
     });
   });
 });

@@ -1,53 +1,39 @@
-import { expect, test, describe } from "vitest";
-import {
-  app,
-  dummyChart,
-  dummyChart10,
-  dummyChart11,
-  dummyChart6,
-  dummyChart7,
-  dummyChart8,
-  dummyChart9,
-  initDb,
-} from "./init";
-import {
-  Chart11Edit,
-  Chart4,
-  Chart5,
-  Chart6,
-  Chart7,
-  Chart8Edit,
-  Chart9Edit,
-  hash,
-} from "@falling-nikochan/chart";
-import msgpack from "@ygoe/msgpack";
+import { test, describe } from "node:test";
+import { expect } from "chai";
+import { app, initDb } from "./init";
+import { hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 describe("DELETE /api/chartFile/:cid", () => {
-  test.skipIf(
-    process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT
-  )("should return 429 for too many requests", async () => {
-    await initDb();
-    const res1 = await app.request("/api/chartFile/100000?p=p");
-    expect(res1.status).toBe(200);
+  test(
+    "should return 429 for too many requests",
+    {
+      skip:
+        process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT,
+    },
+    async () => {
+      await initDb();
+      const res1 = await app.request("/api/chartFile/100000?p=p");
+      expect(res1.status).to.equal(200);
 
-    const res2 = await app.request("/api/chartFile/100000?p=p", {
-      method: "delete",
-    });
-    expect(res2.status).toBe(429);
-    const body = await res2.json();
-    expect(body).toStrictEqual({ message: "tooManyRequest" });
-  });
+      const res2 = await app.request("/api/chartFile/100000?p=p", {
+        method: "delete",
+      });
+      expect(res2.status).to.equal(429);
+      const body = await res2.json();
+      expect(body).to.deep.equal({ message: "tooManyRequest" });
+    }
+  );
 
   test("should delete ChartEdit if password hash matches", async () => {
     await initDb();
-    expect((await app.request("/api/brief/100000")).status).toBe(200);
+    expect((await app.request("/api/brief/100000")).status).to.equal(200);
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "delete",
     });
-    expect(res.status).toBe(204);
-    expect((await app.request("/api/brief/100000")).status).toBe(404);
+    expect(res.status).to.equal(204);
+    expect((await app.request("/api/brief/100000")).status).to.equal(404);
   });
   test("should delete ChartEdit if password hash with pUserSalt matches", async () => {
     await initDb();
@@ -62,7 +48,7 @@ describe("DELETE /api/chartFile/:cid", () => {
       client.close();
     }
 
-    expect((await app.request("/api/brief/100000")).status).toBe(200);
+    expect((await app.request("/api/brief/100000")).status).to.equal(200);
     const res = await app.request(
       "/api/chartFile/100000?ph=" + (await hash(pServerHash + "def")),
       {
@@ -70,35 +56,35 @@ describe("DELETE /api/chartFile/:cid", () => {
         method: "delete",
       }
     );
-    expect(res.status).toBe(204);
-    expect((await app.request("/api/brief/100000")).status).toBe(404);
+    expect(res.status).to.equal(204);
+    expect((await app.request("/api/brief/100000")).status).to.equal(404);
   });
   test("should return 400 for invalid cid", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100000a?p=p", {
       method: "delete",
     });
-    expect(res.status).toBe(400);
+    expect(res.status).to.equal(400);
   });
   test("should return 401 for wrong password", async () => {
     await initDb();
-    expect((await app.request("/api/brief/100000")).status).toBe(200);
+    expect((await app.request("/api/brief/100000")).status).to.equal(200);
     const res = await app.request(
       "/api/chartFile/100000?p=wrong&ph=" + (await hash("wrong")),
       { method: "delete" }
     );
-    expect(res.status).toBe(401);
+    expect(res.status).to.equal(401);
     const body = await res.json();
-    expect(body).toStrictEqual({ message: "badPassword" });
-    expect((await app.request("/api/brief/100000")).status).toBe(200);
+    expect(body).to.deep.equal({ message: "badPassword" });
+    expect((await app.request("/api/brief/100000")).status).to.equal(200);
   });
   test("should return 404 for nonexistent cid", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100001?p=p", {
       method: "delete",
     });
-    expect(res.status).toBe(404);
+    expect(res.status).to.equal(404);
     const body = await res.json();
-    expect(body).toStrictEqual({ message: "chartIdNotFound" });
+    expect(body).to.deep.equal({ message: "chartIdNotFound" });
   });
 });

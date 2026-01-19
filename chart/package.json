@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint src/",
     "t": "tsc",
-    "test": "tsc && vitest run"
+    "test": "tsc && tsx --test tests/**/*.spec.ts"
   },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",

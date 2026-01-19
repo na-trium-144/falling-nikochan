@@ -1,4 +1,5 @@
-import { expect, test, describe } from "vitest";
+import { test, describe } from "node:test";
+import { expect } from "chai";
 import { hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -8,14 +9,14 @@ describe("GET /api/hashPasswd/:cid", () => {
   test("should return hashed password and random pUserSalt", async () => {
     await initDb();
     const res = await app.request("/api/hashPasswd/100000?p=p");
-    expect(res.status).toBe(200);
+    expect(res.status).to.equal(200);
     const resHash = await res.text();
     const pUserSalt = res.headers
       .get("Set-Cookie")
       ?.split(";")[0]
       .split("=")[1];
     console.log(pUserSalt);
-    expect(pUserSalt).toBeTypeOf("string");
+    expect(pUserSalt).to.be.a("string");
     expect(pUserSalt).not.to.be.empty;
 
     let pServerHash: string;
@@ -28,20 +29,20 @@ describe("GET /api/hashPasswd/:cid", () => {
     } finally {
       client.close();
     }
-    expect(resHash).toBe(await hash(pServerHash + pUserSalt));
+    expect(resHash).to.equal(await hash(pServerHash + pUserSalt));
   });
   test("should use same pUserSalt if it is set in the cookie", async () => {
     await initDb();
     const res = await app.request("/api/hashPasswd/100000?p=p", {
       headers: { Cookie: "pUserSalt=def" },
     });
-    expect(res.status).toBe(200);
+    expect(res.status).to.equal(200);
     const resHash = await res.text();
     const pUserSalt = res.headers
       .get("Set-Cookie")
       ?.split(";")[0]
       .split("=")[1];
-    expect(pUserSalt).toBe("def");
+    expect(pUserSalt).to.equal("def");
 
     let pServerHash: string;
     const client = new MongoClient(process.env.MONGODB_URI!);
@@ -53,18 +54,18 @@ describe("GET /api/hashPasswd/:cid", () => {
     } finally {
       client.close();
     }
-    expect(resHash).toBe(await hash(pServerHash + pUserSalt));
+    expect(resHash).to.equal(await hash(pServerHash + pUserSalt));
   });
   test("should return 400 for invalid cid", async () => {
     const res = await app.request("/api/hashPasswd/invalid?p=p");
-    expect(res.status).toBe(400);
+    expect(res.status).to.equal(400);
   });
   test("should return 404 for nonexistent cid", async () => {
     const res = await app.request("/api/hashPasswd/100002?p=p");
-    expect(res.status).toBe(404);
+    expect(res.status).to.equal(404);
   });
   test("should return 404 for deleted cid", async () => {
     const res = await app.request("/api/hashPasswd/100001?p=p");
-    expect(res.status).toBe(404);
+    expect(res.status).to.equal(404);
   });
 });
