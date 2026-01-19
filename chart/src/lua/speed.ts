@@ -1,10 +1,13 @@
-import { LevelEdit } from "../chart.js";
 import { BPMChange, SpeedChange } from "../bpm.js";
 import { stepCmp } from "../step.js";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
-import { Chart3 } from "../legacy/chart3.js";
+import {
+  deleteLua,
+  findInsertLine,
+  insertLua,
+  LevelForLuaEdit,
+  replaceLua,
+} from "./edit.js";
 import { BPMChange1 } from "../legacy/chart1.js";
-import { Level11Edit } from "../legacy/chart11.js";
 
 function accelLuaCommand(bpm: number, interp: boolean) {
   if (interp) {
@@ -13,7 +16,7 @@ function accelLuaCommand(bpm: number, interp: boolean) {
     return `Accel(${bpm})`;
   }
 }
-export function luaAddSpeedChange<L extends LevelEdit | Level11Edit | Chart3>(
+export function luaAddSpeedChange<L extends LevelForLuaEdit>(
   chart: L,
   change: SpeedChange | BPMChange | BPMChange1
 ): L | null {
@@ -28,7 +31,7 @@ export function luaAddSpeedChange<L extends LevelEdit | Level11Edit | Chart3>(
     insert.luaLine,
     accelLuaCommand(change.bpm, "interp" in change && change.interp)
   );
-  (chart.speedChanges as Array<SpeedChange | BPMChange | BPMChange1>).push({
+  (chart.speedChanges as Array<(typeof chart.speedChanges)[number]>).push({
     ...change,
     luaLine: insert.luaLine,
   });
@@ -37,8 +40,8 @@ export function luaAddSpeedChange<L extends LevelEdit | Level11Edit | Chart3>(
   );
   return chart;
 }
-export function luaUpdateSpeedChange(
-  chart: LevelEdit,
+export function luaUpdateSpeedChange<L extends LevelForLuaEdit>(
+  chart: L,
   index: number,
   bpm: number,
   interp: boolean
@@ -55,7 +58,10 @@ export function luaUpdateSpeedChange(
   // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   return chart;
 }
-export function luaDeleteSpeedChange(chart: LevelEdit, index: number) {
+export function luaDeleteSpeedChange<L extends LevelForLuaEdit>(
+  chart: L,
+  index: number
+) {
   if (chart.speedChanges[index].luaLine === null) {
     return null;
   }

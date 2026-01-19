@@ -259,7 +259,10 @@ function ChainBigAnim(props: { chain: number }) {
   return (
     <div className="absolute inset-0 flex flex-row z-1">
       <span className="flex-3" />
-      <span ref={ref} style={{ fontSize: 40, lineHeight: 1, transformOrigin: "40% 40%" }}>
+      <span
+        ref={ref}
+        style={{ fontSize: 40, lineHeight: 1, transformOrigin: "40% 40%" }}
+      >
         {animChain > 0 ? animChain : ""}
       </span>
       <span className="flex-2" />

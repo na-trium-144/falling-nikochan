@@ -1,9 +1,9 @@
 import Button, { ButtonStyledLabel } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import {
-  ChartEdit,
+  ChartEditing,
   lastHashChangeVer,
   lastIncompatibleVer,
 } from "@falling-nikochan/chart";
@@ -18,16 +18,14 @@ import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
-import { useChartFile } from "./file";
 import { useDisplayMode } from "@/scale.js";
+import { downloadExtension, LocalLoadState, SaveState } from "./chartState";
+import { APIError } from "@/common/apiError";
 
 interface Props {
-  chart?: ChartEdit;
-  setChart: (chart: ChartEdit) => void;
+  chart?: ChartEditing;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
-  newPasswd: string;
-  setNewPasswd: (pw: string) => void;
 }
 export function MetaEdit(props: Props) {
   const t = useTranslations("edit.meta");
@@ -40,15 +38,11 @@ export function MetaEdit(props: Props) {
         <HelpIcon>{t.rich("youtubeIdHelp", { br: () => <br /> })}</HelpIcon>
         <Input
           className=""
-          actualValue={props.chart?.ytId || ""}
+          actualValue={props.chart?.meta.ytId || ""}
           updateValue={(v: string) => {
             if (props.chart) {
               const ytId = getYouTubeId(v);
-              props.setChart({
-                ...props.chart,
-                ytId,
-                published: ytId ? props.chart.published : false,
-              });
+              props.chart?.updateMeta({ ytId });
             }
           }}
           isValid={checkYouTubeId}
@@ -60,10 +54,8 @@ export function MetaEdit(props: Props) {
         <span className="inline-block w-max">{t("musicTitle")}</span>
         <Input
           className="font-title shrink w-80 max-w-full "
-          actualValue={props.chart?.title || ""}
-          updateValue={(v: string) =>
-            props.chart && props.setChart({ ...props.chart, title: v })
-          }
+          actualValue={props.chart?.meta.title || ""}
+          updateValue={(v: string) => props.chart?.updateMeta({ title: v })}
           left
         />
       </p>
@@ -71,10 +63,8 @@ export function MetaEdit(props: Props) {
         <span className="inline-block w-max">{t("musicComposer")}</span>
         <Input
           className="text-sm font-title shrink w-80 max-w-full"
-          actualValue={props.chart?.composer || ""}
-          updateValue={(v: string) =>
-            props.chart && props.setChart({ ...props.chart, composer: v })
-          }
+          actualValue={props.chart?.meta.composer || ""}
+          updateValue={(v: string) => props.chart?.updateMeta({ composer: v })}
           left
         />
       </p>
@@ -82,9 +72,9 @@ export function MetaEdit(props: Props) {
         <span className="inline-block w-max">{t("chartCreator")}</span>
         <Input
           className="font-title shrink w-40 max-w-full"
-          actualValue={props.chart?.chartCreator || ""}
+          actualValue={props.chart?.meta.chartCreator || ""}
           updateValue={(v: string) =>
-            props.chart && props.setChart({ ...props.chart, chartCreator: v })
+            props.chart?.updateMeta({ chartCreator: v })
           }
           left
         />
@@ -95,8 +85,8 @@ export function MetaEdit(props: Props) {
         <span className="inline-flex flex-row items-baseline">
           <Input
             className="font-title shrink w-40 "
-            actualValue={props.newPasswd}
-            updateValue={props.setNewPasswd}
+            actualValue={props.chart?.changePasswd || ""}
+            updateValue={(pw) => props.chart?.setChangePasswd(pw)}
             left
             passwd={hidePasswd}
           />
@@ -122,117 +112,47 @@ interface Props2 {
   saveEditSession: () => void;
   sessionId?: number;
   sessionData?: SessionData;
-  chartNumEvent: number;
-  chart?: ChartEdit;
-  setChart: (chart: ChartEdit) => void;
-  convertedFrom: number;
-  setConvertedFrom: (c: number) => void;
-  cid: string | undefined;
-  setCid: (cid: string) => void;
-  hasChange: boolean;
-  setHasChange: (h: boolean) => void;
-  currentLevelIndex: number;
+  chart?: ChartEditing;
   locale: string;
   savePasswd: boolean;
   setSavePasswd: (b: boolean) => void;
-  currentPasswd: { current: string | null };
-  newPasswd: string;
-  setNewPasswd: (pw: string) => void;
+
+  remoteSave: () => Promise<void>;
+  saveState: SaveState;
+  remoteDelete: () => Promise<void>;
+  localSave: () => void;
+  localSaveState: SaveState;
+  localLoad: (buffer: ArrayBuffer) => Promise<void>;
+  localLoadState: LocalLoadState;
 }
 export function MetaTab(props: Props2) {
   const t = useTranslations("edit.meta");
+  const te = useTranslations("error");
   const router = useRouter();
-  const [errorMsg, setErrorMsg] = useState<string>("");
-  const [saveMsg, setSaveMsg] = useState<string>("");
-  const [saving, setSaving] = useState<boolean>(false);
-  const [uploadMsg, setUploadMsg] = useState<string>("");
-  const shareLink = useShareLink(props.cid, props.chart, props.locale);
-  useEffect(() => {
-    setErrorMsg("");
-    setSaveMsg("");
-  }, [props.chart]);
+  const shareLink = useShareLink(
+    props.chart?.cid,
+    props.chart?.toMin(),
+    props.locale
+  );
   const hasLevelData =
     props.chart?.levels &&
     props.chart.levels.length > 0 &&
-    props.chart.levels.some((l) => l.notes.length > 0 && !l.unlisted);
+    props.chart.levels.some(
+      (l) => l.freeze.notes.length > 0 && !l.meta.unlisted
+    );
   const { isTouch } = useDisplayMode();
-
-  const { remoteSave, remoteDelete, downloadExtension, localSave, load } =
-    useChartFile({
-      cid: props.cid,
-      chart: props.chart,
-      savePasswd: props.savePasswd,
-      currentPasswd: props.currentPasswd,
-      locale: props.locale,
-    });
-  const save = async () => {
-    setSaving(true);
-    props.chart!.changePasswd =
-      props.newPasswd.length > 0 ? props.newPasswd : null;
-    const result = await remoteSave();
-    if (result.isError) {
-      setErrorMsg(result.message || "");
-    } else {
-      setErrorMsg(result.message || "");
-      props.setCid(result.cid!);
-      history.replaceState(
-        null,
-        "",
-        `/${props.locale}/edit?cid=${result.cid!}`
-      );
-      props.setHasChange(false);
-      props.setConvertedFrom(props.chart!.ver);
-      if (props.chart!.changePasswd) {
-        props.currentPasswd.current = props.chart!.changePasswd;
-      }
-    }
-    props.chart!.changePasswd = null;
-    setSaving(false);
-  };
-  const deleteChart = async () => {
-    while (true) {
-      const m = window.prompt(t("confirmDelete", { cid: props.cid! }));
-      if (m === null) {
-        return;
-      }
-      if (m === props.cid) {
-        break;
-      }
-    }
-    await remoteDelete();
-  };
-  const download = () => {
-    const result = localSave();
-    setSaveMsg(result.message || "");
-  };
-  const upload = async (e: ChangeEvent) => {
-    const target = e.target as HTMLInputElement;
-    if (target.files && target.files.length >= 1) {
-      const f = target.files[0];
-      const buffer = await f.arrayBuffer();
-      target.value = "";
-      setUploadMsg("");
-      const result = await load(buffer);
-      if (result.isError) {
-        setUploadMsg(result.message || "");
-      } else {
-        props.setChart(result.chart!);
-        props.setConvertedFrom(result.originalVer!);
-      }
-    }
-  };
 
   return (
     <>
       <div className="mb-2">
         <span className="">{t("eventNum")}:</span>
         <span className="inline-block">
-          <span className="ml-1">{props.chartNumEvent}</span>
+          <span className="ml-1">{props.chart?.numEvents}</span>
           <span className="ml-1 text-sm ">/</span>
           <span className="ml-1 text-sm ">{chartMaxEvent}</span>
         </span>
         <HelpIcon>{t.rich("eventNumHelp", { br: () => <br /> })}</HelpIcon>
-        <ProgressBar value={props.chartNumEvent / chartMaxEvent} />
+        <ProgressBar value={(props.chart?.numEvents || 0) / chartMaxEvent} />
       </div>
       <div className="mb-1">
         <ExternalLink
@@ -260,47 +180,52 @@ export function MetaTab(props: Props2) {
       <div className="">
         <span className="inline-block">
           {t("chartId")}:
-          <span className="ml-1 mr-2 ">{props.cid || t("unsaved")}</span>
+          <span className="ml-1 mr-2 ">{props.chart?.cid || t("unsaved")}</span>
         </span>
         <HelpIcon>{t.rich("saveToServerHelp", { br: () => <br /> })}</HelpIcon>
         <Button
           text={t("saveToServer")}
-          onClick={save}
-          loading={saving}
-          disabled={!props.chart?.ytId || (!props.cid && !props.newPasswd)}
+          onClick={props.remoteSave}
+          loading={props.saveState === "saving"}
+          disabled={
+            !props.chart?.meta.ytId ||
+            (!props.chart?.cid && !props.chart?.changePasswd)
+          }
         />
         <span className="inline-block ml-1 ">
-          {errorMsg
-            ? errorMsg
-            : !props.chart?.ytId
-              ? t("saveFail.noId")
-              : !props.cid && !props.newPasswd
-                ? t("saveFail.noPasswd")
-                : null}
+          {props.saveState === "ok"
+            ? t("saveDone")
+            : props.saveState instanceof APIError
+              ? props.saveState.format(te)
+              : !props.chart?.meta.ytId
+                ? t("saveFail.noId")
+                : !props.chart?.cid && !props.chart?.changePasswd
+                  ? t("saveFail.noPasswd")
+                  : null}
         </span>
-        {props.hasChange && (
+        {props.chart?.hasChange && (
           <span className="inline-block ml-1 text-amber-600 ">
             {t("hasUnsaved")}
           </span>
         )}
-        {
-          /*props.convertedFrom < currentChartVer*/
-          props.convertedFrom <= lastIncompatibleVer ? (
+        {props.chart &&
+        /*props.convertedFrom < currentChartVer*/
+        props.chart.convertedFrom <= lastIncompatibleVer ? (
+          <span className="inline-block ml-1 text-amber-600 text-sm ">
+            <Caution className="inline-block mr-1 translate-y-0.5 " />
+            {t("convertingIncompatible", { ver: props.chart.convertedFrom })}
+          </span>
+        ) : (
+          props.chart &&
+          props.chart.convertedFrom <= lastHashChangeVer && (
             <span className="inline-block ml-1 text-amber-600 text-sm ">
               <Caution className="inline-block mr-1 translate-y-0.5 " />
-              {t("convertingIncompatible", { ver: props.convertedFrom })}
+              {t("convertingHashChange", { ver: props.chart.convertedFrom })}
             </span>
-          ) : (
-            props.convertedFrom <= lastHashChangeVer && (
-              <span className="inline-block ml-1 text-amber-600 text-sm ">
-                <Caution className="inline-block mr-1 translate-y-0.5 " />
-                {t("convertingHashChange", { ver: props.convertedFrom })}
-              </span>
-            )
           )
-        }
+        )}
       </div>
-      {props.cid && (
+      {props.chart?.cid && (
         <>
           <div className="ml-2">
             <span className="hidden edit-wide:inline-block mr-2">
@@ -319,17 +244,15 @@ export function MetaTab(props: Props2) {
       <p className="mb-2 ml-2 ">
         <CheckBox
           className="ml-0 "
-          value={props.chart?.published || false}
-          onChange={(v: boolean) =>
-            props.chart && props.setChart({ ...props.chart, published: v })
-          }
-          disabled={!hasLevelData || !props.chart?.ytId}
+          value={props.chart?.meta.published || false}
+          onChange={(v: boolean) => props.chart?.updateMeta({ published: v })}
+          disabled={!hasLevelData || !props.chart?.meta.ytId}
         >
           {t("publish")}
         </CheckBox>
         <HelpIcon>{t.rich("publishHelp", { br: () => <br /> })}</HelpIcon>
         <span className="inline-block ml-2 text-sm">
-          {!props.chart?.ytId
+          {!props.chart?.meta.ytId
             ? t("publishFail.noId")
             : !hasLevelData
               ? t("publishFail.empty")
@@ -339,8 +262,8 @@ export function MetaTab(props: Props2) {
       <p>
         <Button
           text={t("deleteFromServer")}
-          onClick={deleteChart}
-          disabled={!props.cid}
+          onClick={props.remoteDelete}
+          disabled={!props.chart?.cid}
         />
       </p>
 
@@ -354,17 +277,33 @@ export function MetaTab(props: Props2) {
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
-            <Button text={t("saveToLocal")} onClick={download} />
+            <Button text={t("saveToLocal")} onClick={props.localSave} />
             <ButtonStyledLabel htmlFor="upload-bin">
               {t("loadFromLocal")}
             </ButtonStyledLabel>
-            <span className="inline-block ml-1">{saveMsg || uploadMsg}</span>
+            <span className="inline-block ml-1">
+              {props.localSaveState === "ok"
+                ? t("saveDone")
+                : props.localLoadState === "ok"
+                  ? null
+                  : props.localLoadState === "loadFail"
+                    ? t("loadFail")
+                    : null}
+            </span>
             <input
               type="file"
               className="hidden"
               id="upload-bin"
               name="upload-bin"
-              onChange={upload}
+              onChange={async (e: ChangeEvent) => {
+                const target = e.target as HTMLInputElement;
+                if (target.files && target.files.length >= 1) {
+                  const f = target.files[0];
+                  const buffer = await f.arrayBuffer();
+                  target.value = "";
+                  await props.localLoad(buffer);
+                }
+              }}
             />
           </span>
         </div>

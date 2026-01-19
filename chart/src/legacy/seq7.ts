@@ -48,7 +48,7 @@ export interface DisplayParam7 {
  * 画面上でその瞬間に表示する音符の管理
  * (画面の状態をstateにするため)
  * 時刻の情報を持たない
- * 
+ *
  * ver14でvelを追加
  */
 export interface DisplayNote7 {

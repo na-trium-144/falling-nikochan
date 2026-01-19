@@ -32,12 +32,11 @@ route/ 内の定義
 import * as v from "valibot";
 import { difficulty } from "./difficulty.js";
 import { hashLevel7 } from "./legacy/chart7.js";
-import { Level9Min } from "./legacy/chart9.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero } from "./step.js";
-import { ChartUntil11, ChartUntil11Min } from "./legacy/chart11.js";
+import { ChartUntil11, ChartUntil11Min, Level11Min } from "./legacy/chart11.js";
 import { defaultCopyBuffer } from "./command.js";
 import {
   Chart13Edit,
@@ -109,7 +108,7 @@ export const currentChartVer = 13;
 export const lastIncompatibleVer = 6;
 export const lastHashChangeVer = 12;
 export type ChartMin = Chart13Min;
-export type LevelMin = Level9Min;
+export type LevelMin = Level11Min;
 export type ChartEdit = Chart13Edit;
 export type LevelFreeze = Level13Freeze;
 export type LevelEdit = Level13Edit;
@@ -206,20 +205,17 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
-      luaLine: null,
     })!;
     level = luaAddSpeedChange(level, {
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
-      luaLine: null,
     })!;
     level = luaAddBeatChange(level, {
       step: stepZero(),
       offset: stepZero(),
       barNum: 0,
       bars: [[4, 4, 4, 4]],
-      luaLine: null,
     })!;
   }
   return level;

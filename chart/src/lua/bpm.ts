@@ -1,14 +1,18 @@
-import { LevelEdit } from "../chart.js";
 import { BPMChange, updateBpmTimeSec } from "../bpm.js";
 import { stepCmp } from "../step.js";
-import { deleteLua, findInsertLine, insertLua, replaceLua } from "./edit.js";
-import { Chart3 } from "../legacy/chart3.js";
+import {
+  deleteLua,
+  findInsertLine,
+  insertLua,
+  LevelForLuaEdit,
+  replaceLua,
+} from "./edit.js";
 import { BPMChange1 } from "../legacy/chart1.js";
 
 function bpmLuaCommand(bpm: number) {
   return `BPM(${bpm})`;
 }
-export function luaAddBpmChange<L extends LevelEdit | Chart3>(
+export function luaAddBpmChange<L extends LevelForLuaEdit>(
   chart: L,
   change: BPMChange | BPMChange1
 ): L | null {
@@ -22,8 +26,8 @@ export function luaAddBpmChange<L extends LevelEdit | Chart3>(
   chart.bpmChanges = chart.bpmChanges.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }
-export function luaUpdateBpmChange(
-  chart: LevelEdit,
+export function luaUpdateBpmChange<L extends LevelForLuaEdit>(
+  chart: L,
   index: number,
   bpm: number
 ) {
@@ -35,7 +39,10 @@ export function luaUpdateBpmChange(
   updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   return chart;
 }
-export function luaDeleteBpmChange(chart: LevelEdit, index: number) {
+export function luaDeleteBpmChange<L extends LevelForLuaEdit>(
+  chart: L,
+  index: number
+) {
   if (chart.bpmChanges[index].luaLine === null) {
     return null;
   }

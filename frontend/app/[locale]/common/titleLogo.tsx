@@ -41,7 +41,12 @@ export default function Title(props: Props) {
     <div
       className={clsx("leading-none text-center mx-auto w-96", props.className)}
     >
-      <TargetLine barFlash={barFlash ? "100% - 1.75rem" : undefined} left={0} right={0} bottom="2.2rem" />
+      <TargetLine
+        barFlash={barFlash ? "100% - 1.75rem" : undefined}
+        left={0}
+        right={0}
+        bottom="2.2rem"
+      />
       <span className="text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7 ">
         Falling Nikochan
       </span>
