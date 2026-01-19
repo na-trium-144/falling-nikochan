@@ -1,4 +1,5 @@
-import { expect, test, describe } from "vitest";
+import { test, describe } from "node:test";
+import { expect } from "chai";
 import { app, initDb } from "./init";
 import { RecordPost, hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
@@ -20,7 +21,7 @@ describe("POST /api/record/:cid", () => {
         editing: false,
       } satisfies RecordPost),
     });
-    expect(res.status).toBe(204);
+    expect(res.status).to.equal(204);
 
     let client = new MongoClient(process.env.MONGODB_URI!);
     try {
@@ -31,8 +32,8 @@ describe("POST /api/record/:cid", () => {
         .collection<PlayRecordEntry>("playRecord")
         .find({ $and: [{ cid: "100000" }, { lvHash: await hash("dummy") }] })
         .toArray();
-      expect(record.length).toBe(1);
-      expect(record[0]).toMatchObject({
+      expect(record.length).to.equal(1);
+      expect(record[0]).to.include({
         lvHash: await hash("dummy"),
         auto: false,
         score: 100,
@@ -58,7 +59,7 @@ describe("POST /api/record/:cid", () => {
         editing: false,
       } as RecordPost),
     });
-    expect(res.status).toBe(204);
+    expect(res.status).to.equal(204);
 
     client = new MongoClient(process.env.MONGODB_URI!);
     try {
@@ -69,7 +70,7 @@ describe("POST /api/record/:cid", () => {
         .collection<PlayRecordEntry>("playRecord")
         .find({ $and: [{ cid: "100000" }, { lvHash: await hash("dummy") }] })
         .toArray();
-      expect(record.length).toBe(2);
+      expect(record.length).to.equal(2);
     } finally {
       client.close();
     }
