@@ -13,7 +13,6 @@ import Input from "@/common/input.js";
 import { levelColors } from "@/common/levelColors";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { Scrollable } from "@/common/scrollable";
 
 interface Props {

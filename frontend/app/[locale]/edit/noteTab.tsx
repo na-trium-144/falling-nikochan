@@ -6,8 +6,6 @@ import CheckBox from "@/common/checkBox.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
-import { LevelEdit } from "@falling-nikochan/chart";
-import { DropDownOption } from "@/common/dropdown";
 import { ChartEditing } from "@falling-nikochan/chart";
 
 interface Props {

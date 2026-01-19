@@ -224,7 +224,7 @@ export function LuaTabProvider(props: Props & PProps) {
               type: "fullLine" as const,
               className: "absolute z-5 bg-red-200 dark:bg-red-900 ",
             },
-            ...barLines.map((bl) => ({
+            ...(currentLevel?.barLines.map((bl) => ({
               startRow: bl.luaLine,
               endRow: bl.luaLine,
               startCol: 0,
@@ -234,10 +234,10 @@ export function LuaTabProvider(props: Props & PProps) {
                 "absolute h-[1px]! bg-gray-500",
                 "shadow-[0_0_2px] shadow-gray-500/75"
               ),
-            })),
+            })) ?? []),
             {
-              startRow: currentLine === null ? -1 : currentLine,
-              endRow: currentLine === null ? -1 : currentLine,
+              startRow: cur?.line == null ? -1 : cur?.line,
+              endRow: cur?.line == null ? -1 : cur?.line,
               startCol: 0,
               endCol: 1,
               type: "fullLine" as const,

@@ -17,17 +17,7 @@ import NoteTab from "./noteTab.js";
 import { Box, modalBg } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
-import {
-  convertToPlay,
-  createBrief,
-  levelTypes,
-  currentChartVer,
-  emptyChart,
-  LevelEdit,
-  LevelMin,
-  numEvents,
-  validateChart,
-} from "@falling-nikochan/chart";
+import { convertToPlay, createBrief } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
 import { MobileHeader } from "@/common/header.js";
 import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
@@ -39,12 +29,6 @@ import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { GuideMain } from "./guideMain.js";
-import { levelBgColors } from "@/common/levelColors.js";
-import { Signature } from "@falling-nikochan/chart";
-import { Chart5 } from "@falling-nikochan/chart";
-import { Chart6 } from "@falling-nikochan/chart";
-import { Chart7 } from "@falling-nikochan/chart";
-import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
@@ -53,7 +37,6 @@ import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
-import { useChartFile } from "./file";
 import {
   skyFlatButtonBorderStyle1,
   skyFlatButtonBorderStyle2,
@@ -582,7 +565,9 @@ export default function Edit(props: {
             <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
               <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
                 <span className="whitespace-nowrap ">{t("titleShort")}</span>
-                <span className="grow-1 whitespace-nowrap ">ID: {cid}</span>
+                <span className="grow-1 whitespace-nowrap ">
+                  ID: {chart?.cid}
+                </span>
                 <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-slate-500 dark:text-stone-400 ">
                   <span className="">ver.</span>
                   <span className="ml-1">{process.env.buildVersion}</span>
@@ -616,11 +601,11 @@ export default function Edit(props: {
                 onStop={onStop}
                 onPlaybackRateChange={setPlaybackRate}
               />
-              {chart?.ytId && (
+              {chart?.meta.ytId && (
                 <img
                   ref={colorThief.imgRef}
                   className="hidden"
-                  src={`https://i.ytimg.com/vi/${chart?.ytId}/mqdefault.jpg`}
+                  src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
                   crossOrigin="anonymous"
                 />
               )}
@@ -729,8 +714,8 @@ export default function Edit(props: {
                 <Button
                   onClick={() => {
                     if (ready && cur) {
-                        seekStepRel(cur?.snapDivider * 4);
-                      }
+                      seekStepRel(cur?.snapDivider * 4);
+                    }
                   }}
                   text={t("playerControls.moveStep", {
                     step: (cur?.snapDivider || 1) * 4,
@@ -780,17 +765,7 @@ export default function Edit(props: {
               </span>
             </div>
             <div className="flex-none">
-              <TimeBar
-                currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
-                currentTimeSec={currentTimeSec}
-                currentNoteIndex={currentNoteIndex}
-                currentStep={currentStep}
-                chart={chart}
-                currentLevel={currentLevel}
-                notesAll={notesAll}
-                snapDivider={snapDivider}
-                timeBarPxPerSec={timeBarPxPerSec}
-              />
+              <TimeBar chart={chart} timeBarPxPerSec={timeBarPxPerSec} />
             </div>
             <div className="flex flex-row items-baseline">
               <span>{t("stepUnit")} =</span>
@@ -866,41 +841,37 @@ export default function Edit(props: {
             >
               {tab === 0 ? (
                 <MetaTab
-                    saveEditSession={saveEditSession}
-                    sessionId={sessionId}
-                    sessionData={sessionData}
-                    chart={chart}
-                    locale={locale}
-                    savePasswd={!!savePasswd}
-                    setSavePasswd={setSavePasswd}
-                    remoteSave={remoteSave}
-                    saveState={saveState}
-                    remoteDelete={remoteDelete}
-                    localSaveState={localSaveState}
-                    localSave={localSave}
-                    localLoadState={localLoadState}
-                    localLoad={localLoad}
+                  saveEditSession={saveEditSession}
+                  sessionId={sessionId}
+                  sessionData={sessionData}
+                  chart={chart}
+                  locale={locale}
+                  savePasswd={!!savePasswd}
+                  setSavePasswd={setSavePasswd}
+                  remoteSave={remoteSave}
+                  saveState={saveState}
+                  remoteDelete={remoteDelete}
+                  localSaveState={localSaveState}
+                  localSave={localSave}
+                  localLoadState={localLoadState}
+                  localLoad={localLoad}
                 />
               ) : tab === 1 ? (
                 <TimingTab
-                    chart={chart}
-                    enableHitSE={enableHitSE}
-                    setEnableHitSE={setEnableHitSE}
-                    hitVolume={hitVolume}
-                    setHitVolume={setHitVolume}
-                    enableBeatSE={enableBeatSE}
-                    setEnableBeatSE={setEnableBeatSE}
-                    beatVolume={beatVolume}
-                    setBeatVolume={setBeatVolume}
+                  chart={chart}
+                  enableHitSE={enableHitSE}
+                  setEnableHitSE={setEnableHitSE}
+                  hitVolume={hitVolume}
+                  setHitVolume={setHitVolume}
+                  enableBeatSE={enableBeatSE}
+                  setEnableBeatSE={setEnableBeatSE}
+                  beatVolume={beatVolume}
+                  setBeatVolume={setBeatVolume}
                 />
               ) : tab === 2 ? (
-                <LevelTab
-                  chart={chart}
-                />
+                <LevelTab chart={chart} />
               ) : tab === 3 ? (
-                <NoteTab
-                  chart={chart}
-                />
+                <NoteTab chart={chart} />
               ) : null}
               <LuaTabPlaceholder parentContainer={ref.current} />
             </Box>

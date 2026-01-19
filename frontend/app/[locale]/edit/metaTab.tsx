@@ -277,7 +277,7 @@ export function MetaTab(props: Props2) {
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
-            <Button text={t("saveToLocal")} onClick={download} />
+            <Button text={t("saveToLocal")} onClick={props.localSave} />
             <ButtonStyledLabel htmlFor="upload-bin">
               {t("loadFromLocal")}
             </ButtonStyledLabel>

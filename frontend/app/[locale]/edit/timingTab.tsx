@@ -130,13 +130,13 @@ export default function TimingTab(props: Props) {
         <Input
           className="w-16"
           actualValue={(
-            Math.round((props.currentLevel?.meta.ytEndSec || 0) * 10) / 10
+            Math.round((currentLevel?.meta.ytEndSec || 0) * 10) / 10
           ).toString()}
           updateValue={(v: string) =>
-              currentLevel?.updateMeta({ ytEnd: Number(v) })
-            }
+            currentLevel?.updateMeta({ ytEnd: Number(v) })
+          }
           isValid={ytEndValid}
-          disabled={typeof props.currentLevel?.meta.ytEnd !== "number"}
+          disabled={typeof currentLevel?.meta.ytEnd !== "number"}
         />
         <span>{t("offsetSecond")}</span>
       </div>

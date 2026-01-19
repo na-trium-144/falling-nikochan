@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ReactNode, useMemo } from "react";
-import DropDown, { DropDownOption } from "./dropdown";
+import { ReactNode } from "react";
+import DropDown from "./dropdown";
 import { linkStyle1 } from "./linkStyle";
 import clsx from "clsx/lite";
 
