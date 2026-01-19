@@ -307,7 +307,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
   }
   selectPrevNote() {
-    if (this.#current.noteIndex !== undefined && this.#current.noteIndex >= 1) {
+    if (this.#current.noteIndex !== undefined) {
       this.#current.setNoteIndex(this.#current.noteIndex - 1);
     }
   }
@@ -364,13 +364,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     return this.prevBpmChange?.bpm;
   }
   findBpmChangeFromStep(s: Step) {
-    if (stepCmp(s, stepZero()) > 0) {
-      const i = findBpmIndexFromStep(this.#freeze.bpmChanges, s);
-      if (i !== undefined) {
-        return this.#freeze.bpmChanges.at(i);
-      }
-    }
-    return undefined;
+    const i = findBpmIndexFromStep(this.#freeze.bpmChanges, s);
+    return this.#freeze.bpmChanges.at(i);
   }
   get currentSpeedChange() {
     return this.#freeze.speedChanges.at(this.#current.speedIndex);
@@ -404,13 +399,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     return this.nextSpeedChange?.interp;
   }
   findSpeedChangeFromStep(s: Step) {
-    if (stepCmp(s, stepZero()) > 0) {
-      const i = findBpmIndexFromStep(this.#freeze.speedChanges, s);
-      if (i !== undefined) {
-        return this.#freeze.speedChanges.at(i);
-      }
-    }
-    return undefined;
+    const i = findBpmIndexFromStep(this.#freeze.speedChanges, s);
+    return this.#freeze.speedChanges.at(i);
   }
   get currentSignature() {
     return this.#freeze.signature.at(this.#current.signatureIndex);
@@ -424,13 +414,10 @@ export class LevelEditing extends EventEmitter<EventType> {
       : undefined;
   }
   findSignatureFromStep(s: Step) {
-    if (stepCmp(s, stepZero()) > 0) {
-      const i = findBpmIndexFromStep(this.#freeze.signature, s);
-      if (i !== undefined) {
-        return this.#freeze.signature.at(i);
-      }
+    const i = findBpmIndexFromStep(this.#freeze.signature, s);
+    if (i !== undefined) {
+      return this.#freeze.signature.at(i);
     }
-    return undefined;
   }
   get bpmChangeHere() {
     const currentBpmStep = this.#freeze.bpmChanges.at(
@@ -501,7 +488,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         newLevel =
           luaAddSpeedChange(newLevel, {
             step: this.#current.step,
-            bpm: this.currentBpm || 120,
+            bpm: this.currentSpeed || 120,
             timeSec: this.#current.timeSec,
           }) ?? newLevel;
       } else if (!speed && this.speedChangeHere) {
