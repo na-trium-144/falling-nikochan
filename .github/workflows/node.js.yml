@@ -1,5 +1,7 @@
 name: Node.js CI
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 permissions:
@@ -49,7 +51,8 @@ jobs:
 
   vercel-build:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    # 外部コントリビューターでないPRの場合のみ
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -93,3 +96,17 @@ jobs:
         path: .vercel/output
     - name: Deploy Project Artifacts to Vercel
       run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+
+  notify-failure:
+    # lint, test, format のいずれかが失敗した場合に実行
+    needs: [lint, test, format]
+    if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.ACTION_FAILURE_DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d "{\"content\": \"**mainブランチにテストが通らないコードがpushされているよ！ばかやろう！**\nCommit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}\"}" \
+               $DISCORD_WEBHOOK
