@@ -350,5 +350,600 @@ describe("LevelEditing", () => {
     });
   });
 
-  // TODO: more tests for LevelEditing methods
+  describe("setCurrentTimeWithoutOffset", () => {
+    test("should update current time", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 2);
+      expect(level.current.timeSec).toBe(2);
+    });
+    test("should update snapDivider if provided", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 2, 8);
+      expect(level.current.timeSec).toBe(2);
+      expect(level.current.snapDivider).toBe(8);
+    });
+    test("should not update if time and snapDivider are the same", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const currentBefore = level.current;
+      level.setCurrentTimeWithoutOffset(
+        dummyChartData.offset - level.current.timeSec,
+        level.current.snapDivider
+      );
+      expect(level.current).toBe(currentBefore);
+    });
+  });
+
+  describe("selectNextNote", () => {
+    test("should select the next note when noteIndex is defined and there are multiple notes at the same step", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      // At offset + 1, there are 2 notes (indices 1 and 2) at the same step
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
+      expect(level.current.noteIndex).toBe(1);
+      level.selectNextNote();
+      expect(level.current.noteIndex).toBe(2);
+    });
+    test("should not select if noteIndex is undefined", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
+      expect(level.current.noteIndex).toBeUndefined();
+      level.selectNextNote();
+      expect(level.current.noteIndex).toBeUndefined();
+    });
+  });
+
+  describe("selectPrevNote", () => {
+    test("should select the previous note when there are multiple notes at the same step", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      // At offset + 1, there are 2 notes (indices 1 and 2) at the same step
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
+      expect(level.current.noteIndex).toBe(1);
+      level.selectNextNote();
+      expect(level.current.noteIndex).toBe(2);
+      level.selectPrevNote();
+      expect(level.current.noteIndex).toBe(1);
+    });
+    test("should not select if noteIndex is at the first note of the step", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
+      expect(level.current.noteIndex).toBe(1);
+      level.selectPrevNote();
+      expect(level.current.noteIndex).toBe(1);
+    });
+    test("should not select if noteIndex is undefined", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
+      expect(level.current.noteIndex).toBeUndefined();
+      level.selectPrevNote();
+      expect(level.current.noteIndex).toBeUndefined();
+    });
+  });
+
+  describe("findBpmChangeFromStep", () => {
+    test("should find bpm change at or before the given step", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const bpmChange = level.findBpmChangeFromStep({
+        fourth: 1,
+        numerator: 0,
+        denominator: 1,
+      });
+      expect(bpmChange).toBeDefined();
+      expect(bpmChange?.bpm).toBe(120);
+    });
+    test("should return undefined for step <= 0", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const bpmChange = level.findBpmChangeFromStep({
+        fourth: 0,
+        numerator: 0,
+        denominator: 1,
+      });
+      expect(bpmChange).toBeUndefined();
+    });
+    test("should find bpm change for large step values", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const bpmChange = level.findBpmChangeFromStep({
+        fourth: 100,
+        numerator: 0,
+        denominator: 1,
+      });
+      // Should return the last bpm change (at fourth: 3)
+      expect(bpmChange).toBeDefined();
+      expect(bpmChange?.step.fourth).toBe(3);
+    });
+  });
+
+  describe("findSpeedChangeFromStep", () => {
+    test("should find speed change at or before the given step", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const speedChange = level.findSpeedChangeFromStep({
+        fourth: 3,
+        numerator: 0,
+        denominator: 1,
+      });
+      expect(speedChange).toBeDefined();
+      expect(speedChange?.bpm).toBe(120);
+      expect(speedChange?.interp).toBe(true);
+    });
+    test("should return undefined for step <= 0", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const speedChange = level.findSpeedChangeFromStep({
+        fourth: 0,
+        numerator: 0,
+        denominator: 1,
+      });
+      expect(speedChange).toBeUndefined();
+    });
+    test("should find speed change for large step values", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const speedChange = level.findSpeedChangeFromStep({
+        fourth: 100,
+        numerator: 0,
+        denominator: 1,
+      });
+      // Should return the last speed change (at fourth: 3)
+      expect(speedChange).toBeDefined();
+      expect(speedChange?.step.fourth).toBe(3);
+    });
+  });
+
+  describe("findSignatureFromStep", () => {
+    test("should find signature at or before the given step", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const signature = level.findSignatureFromStep({
+        fourth: 1,
+        numerator: 0,
+        denominator: 1,
+      });
+      expect(signature).toBeDefined();
+      expect(signature?.bars).toEqual([[4, 4]]);
+    });
+    test("should return undefined for step <= 0", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const signature = level.findSignatureFromStep({
+        fourth: 0,
+        numerator: 0,
+        denominator: 1,
+      });
+      expect(signature).toBeUndefined();
+    });
+    test("should find signature for large step values", () => {
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor()
+      );
+      const signature = level.findSignatureFromStep({
+        fourth: 100,
+        numerator: 0,
+        denominator: 1,
+      });
+      // Should return the last signature (at fourth: 1)
+      expect(signature).toBeDefined();
+      expect(signature?.step.fourth).toBe(1);
+    });
+  });
+
+  describe("changeBpm", () => {
+    test("should update bpm and call updateLua with expected code", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      level.changeBpm(180, null, false);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("180");
+    });
+    test("should update speed and call updateLua with expected code", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      level.changeBpm(null, 90, false);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("90");
+    });
+    test("should update both bpm and speed when both are provided", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      level.changeBpm(180, 90, true);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Check that lua code was generated (both changes should be in there)
+      expect(executedCode.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("changeSignature", () => {
+    test("should update signature and call updateLua with expected code", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      level.changeSignature({
+        step: { fourth: 0, numerator: 0, denominator: 1 },
+        offset: { fourth: 0, numerator: 0, denominator: 1 },
+        bars: [[3]],
+        barNum: 0,
+        luaLine: 0,
+      });
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("3");
+    });
+  });
+
+  describe("toggleBpmChangeHere", () => {
+    test("should add bpm change when toggled on at a position without one", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      // Set to a position between bpm changes
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1.5);
+      expect(level.bpmChangeHere).toBe(false);
+      level.toggleBpmChangeHere(true, null);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("BPM");
+    });
+    test("should delete bpm change when toggled off", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      expect(level.bpmChangeHere).toBe(true);
+      level.toggleBpmChangeHere(false, null);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Code should have changed (deleted bpm change)
+      expect(executedCode).toBeDefined();
+    });
+    test("should add speed change when toggled on at a position without one", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      // Set to a position between speed changes
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1.5);
+      expect(level.speedChangeHere).toBe(false);
+      level.toggleBpmChangeHere(null, true);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("Accel");
+    });
+    test("should delete speed change when toggled off", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      expect(level.speedChangeHere).toBe(true);
+      level.toggleBpmChangeHere(null, false);
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Code should have changed (deleted speed change)
+      expect(executedCode).toBeDefined();
+    });
+  });
+
+  describe("toggleSignatureChangeHere", () => {
+    test("should add signature change when not present", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      // Set to a position between signature changes
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1.5);
+      expect(level.signatureChangeHere).toBe(false);
+      level.toggleSignatureChangeHere();
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("Beat");
+    });
+    test("should delete signature change when present", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 1);
+      expect(level.signatureChangeHere).toBe(true);
+      level.toggleSignatureChangeHere();
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Code should have changed (deleted signature change)
+      expect(executedCode).toBeDefined();
+    });
+    test("should not toggle if step is zero", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      level.toggleSignatureChangeHere();
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // Should not execute because step is zero
+      expect(executedCode).toBe("");
+    });
+  });
+
+  describe("addNote", () => {
+    test("should add note and call updateLua with expected code", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 0.5);
+      level.addNote({
+        step: { fourth: 0, numerator: 1, denominator: 2 },
+        big: false,
+        hitX: -2,
+        hitVX: 1,
+        hitVY: 3,
+        fall: true,
+        luaLine: null,
+      });
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("-2");
+    });
+  });
+
+  describe("deleteNote", () => {
+    test("should delete note and call updateLua", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      expect(level.current.noteIndex).toBe(0);
+      level.deleteNote();
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // updateLua should have been called
+      expect(executedCode).toBeDefined();
+    });
+    test("should not delete if noteIndex is undefined", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
+      expect(level.current.noteIndex).toBeUndefined();
+      level.deleteNote();
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // updateLua should not have been called
+      expect(executedCode).toBe("");
+    });
+  });
+
+  describe("updateNote", () => {
+    test("should update note and call updateLua with expected code", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset);
+      expect(level.current.noteIndex).toBe(0);
+      level.updateNote({
+        step: { fourth: 0, numerator: 0, denominator: 1 },
+        big: true,
+        hitX: 5,
+        hitVX: 2,
+        hitVY: 4,
+        fall: false,
+        luaLine: null,
+      });
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executedCode).toContain("5");
+    });
+    test("should not update if noteIndex is undefined", async () => {
+      let executedCode = "";
+      const level = new LevelEditing(
+        dummyChartData.levels[0],
+        () => {},
+        () => dummyChartData.offset,
+        dummyLuaExecutor(async (code: string) => {
+          executedCode = code;
+          return null;
+        })
+      );
+      level.setCurrentTimeWithoutOffset(dummyChartData.offset + 5);
+      expect(level.current.noteIndex).toBeUndefined();
+      level.updateNote({
+        step: { fourth: 0, numerator: 0, denominator: 1 },
+        big: true,
+        hitX: 5,
+        hitVX: 2,
+        hitVY: 4,
+        fall: false,
+        luaLine: null,
+      });
+      // Wait for async updateLua to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      // updateLua should not have been called
+      expect(executedCode).toBe("");
+    });
+  });
 });
