@@ -213,7 +213,7 @@ describe("ChartEditing", () => {
       expect(ce.levels[1].meta.name).to.equal("New Level");
       expect(ce.currentLevelIndex).to.equal(1);
     });
-    test("should trigger rerender and change events", () => {
+    test("should trigger rerender, change and levelIndex events", () => {
       const ce = new ChartEditing(dummyChartData, {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
@@ -223,15 +223,20 @@ describe("ChartEditing", () => {
       });
       let rerendered = false;
       let changed = false;
+      let levelIndexChanged = false;
       ce.on("rerender", () => {
         rerendered = true;
       });
       ce.on("change", () => {
         changed = true;
       });
+      ce.on("levelIndex", () => {
+        levelIndexChanged = true;
+      });
       ce.addLevel(emptyLevel());
       expect(rerendered).to.equal(true);
       expect(changed).to.equal(true);
+      expect(levelIndexChanged).to.equal(true);
     });
     test("should update hasChange and numEvents", () => {
       const ce = new ChartEditing(dummyChartData, {
@@ -261,7 +266,7 @@ describe("ChartEditing", () => {
       expect(ce.currentLevelIndex).to.equal(0);
       expect(ce.levels[0].meta.name).to.equal("level1");
     });
-    test("should trigger rerender and change events", () => {
+    test("should trigger rerender, change and levelIndex events", () => {
       const ce = new ChartEditing(dummyChartData, {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
@@ -271,15 +276,20 @@ describe("ChartEditing", () => {
       });
       let rerendered = false;
       let changed = false;
+      let levelIndexChanged = false;
       ce.on("rerender", () => {
         rerendered = true;
       });
       ce.on("change", () => {
         changed = true;
       });
+      ce.on("levelIndex", () => {
+        levelIndexChanged = true;
+      });
       ce.deleteLevel();
       expect(rerendered).to.equal(true);
       expect(changed).to.equal(true);
+      expect(levelIndexChanged).to.equal(true);
     });
     test("should update hasChange and numEvents", () => {
       const ce = new ChartEditing(dummyChartData, {
@@ -309,7 +319,7 @@ describe("ChartEditing", () => {
       expect(ce.levels[1].meta.name).to.equal("level1");
       expect(ce.currentLevelIndex).to.equal(0);
     });
-    test("should trigger rerender and change events", () => {
+    test("should trigger rerender, change and levelIndex events", () => {
       const ce = new ChartEditing(dummyChartData, {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
@@ -319,15 +329,20 @@ describe("ChartEditing", () => {
       });
       let rerendered = false;
       let changed = false;
+      let levelIndexChanged = false;
       ce.on("rerender", () => {
         rerendered = true;
       });
       ce.on("change", () => {
         changed = true;
       });
+      ce.on("levelIndex", () => {
+        levelIndexChanged = true;
+      });
       ce.moveLevelUp();
       expect(rerendered).to.equal(true);
       expect(changed).to.equal(true);
+      expect(levelIndexChanged).to.equal(true);
     });
     test("should update hasChange", () => {
       const ce = new ChartEditing(dummyChartData, {
@@ -356,7 +371,7 @@ describe("ChartEditing", () => {
       expect(ce.levels[1].meta.name).to.equal("level1");
       expect(ce.currentLevelIndex).to.equal(1);
     });
-    test("should trigger rerender and change events", () => {
+    test("should trigger rerender, change and levelIndex events", () => {
       const ce = new ChartEditing(dummyChartData, {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
@@ -366,15 +381,20 @@ describe("ChartEditing", () => {
       });
       let rerendered = false;
       let changed = false;
+      let levelIndexChanged = false;
       ce.on("rerender", () => {
         rerendered = true;
       });
       ce.on("change", () => {
         changed = true;
       });
+      ce.on("levelIndex", () => {
+        levelIndexChanged = true;
+      });
       ce.moveLevelDown();
       expect(rerendered).to.equal(true);
       expect(changed).to.equal(true);
+      expect(levelIndexChanged).to.equal(true);
     });
     test("should update hasChange", () => {
       const ce = new ChartEditing(dummyChartData, {
@@ -414,7 +434,7 @@ describe("ChartEditing", () => {
       ce.setCurrentLevelIndex(2);
       expect(ce.currentLevelIndex).to.equal(0);
     });
-    test("should trigger rerender event", () => {
+    test("should trigger rerender and levelIndex event", () => {
       const ce = new ChartEditing(dummyChartData, {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
@@ -423,11 +443,16 @@ describe("ChartEditing", () => {
         currentLevelIndex: 0,
       });
       let rerendered = false;
+      let levelIndexChanged = false;
       ce.on("rerender", () => {
         rerendered = true;
       });
+      ce.on("levelIndex", () => {
+        levelIndexChanged = true;
+      });
       ce.setCurrentLevelIndex(1);
       expect(rerendered).to.equal(true);
+      expect(levelIndexChanged).to.equal(true);
     });
   });
   describe("setChangePasswd", () => {

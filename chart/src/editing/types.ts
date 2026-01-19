@@ -3,6 +3,7 @@ import { LevelFreeze } from "../chart.js";
 export const eventTypes = [
   "rerender", // 再render用
   "change", // toObject()で出力するデータに変化があるとき (session管理 & hasChange で使う)
+  "levelIndex", // currentLevelIndexが変化したとき
 ] as const;
 export type EventType = (typeof eventTypes)[number];
 
