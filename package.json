@@ -2,6 +2,9 @@
   "name": "falling-nikochan",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=23.6"
+  },
   "scripts": {
     "lint": "tsc && npm run lint --ws --if-present",
     "format": "prettier --write .",
