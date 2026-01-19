@@ -163,6 +163,7 @@ export class ChartEditing extends EventEmitter<EventType> {
     );
     this.emit("rerender");
     this.emit("change");
+    this.emit("levelIndex");
   }
   deleteLevel() {
     if (this.#currentLevelIndex !== undefined && this.#levels.length > 0) {
@@ -174,6 +175,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       }
       this.emit("rerender");
       this.emit("change");
+      this.emit("levelIndex");
     }
   }
   moveLevelUp() {
@@ -185,6 +187,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#currentLevelIndex = idx - 1;
       this.emit("rerender");
       this.emit("change");
+      this.emit("levelIndex");
     }
   }
   moveLevelDown() {
@@ -199,6 +202,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#currentLevelIndex = idx + 1;
       this.emit("rerender");
       this.emit("change");
+      this.emit("levelIndex");
     }
   }
   get currentLevelIndex() {
@@ -208,6 +212,7 @@ export class ChartEditing extends EventEmitter<EventType> {
     if (index >= 0 && index < this.#levels.length) {
       this.#currentLevelIndex = index;
       this.emit("rerender");
+      this.emit("levelIndex");
     }
   }
   get offset() {

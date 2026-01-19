@@ -99,26 +99,33 @@ export default function Edit(props: {
   useEffect(() => {
     if (sessionId === undefined) {
       setSessionId(initSession(null));
+    } else {
+      const updateSession = async () => {
+        if (chart) {
+          const data = {
+            cid: chart.cid,
+            lvIndex: chart.currentLevelIndex || 0,
+            brief: await createBrief(chart.toObject(), new Date().getTime()),
+            level: convertToPlay(
+              chart.toObject(),
+              chart.currentLevelIndex || 0
+            ),
+            editing: true,
+          };
+          setSessionData(data);
+          initSession(data, sessionId);
+          // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
+          // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
+        }
+      };
+      updateSession();
+      chart?.on("change", updateSession);
+      chart?.on("levelIndex", updateSession);
+      return () => {
+        chart?.off("change", updateSession);
+        chart?.off("levelIndex", updateSession);
+      };
     }
-    const updateSession = async () => {
-      if (chart) {
-        const data = {
-          cid: chart.cid,
-          lvIndex: chart.currentLevelIndex || 0,
-          brief: await createBrief(chart.toObject(), new Date().getTime()),
-          level: convertToPlay(chart.toObject(), chart.currentLevelIndex || 0),
-          editing: true,
-        };
-        setSessionData(data);
-        initSession(data, sessionId);
-        // 譜面の編集時に毎回sessionに書き込む (テストプレイタブのリロードだけで読めるように)
-        // 念の為metaTabでテストプレイボタンが押された時にも書き込んでいる
-      }
-    };
-    chart?.on("change", updateSession);
-    return () => {
-      chart?.off("change", updateSession);
-    };
   }, [sessionId, chart]);
 
   useEffect(() => {
