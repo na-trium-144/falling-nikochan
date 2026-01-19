@@ -204,7 +204,7 @@ export default function useGameLogic(
             chain: c.note.chain || 0,
           });
 
-          console.log(notesDone)
+          console.log(notesDone);
 
           // 各indexにつき最大3個 or アニメーションが完了するまで のみを表示
           return notesDone.map((row) =>

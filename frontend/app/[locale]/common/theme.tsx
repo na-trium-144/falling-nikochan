@@ -7,12 +7,11 @@ import {
   useContext,
   useEffect,
   useState,
-  useMemo,
 } from "react";
 import { linkStyle1 } from "./linkStyle.js";
 import { useTranslations } from "next-intl";
 import { themeColorDark, themeColorLight } from "@/metadata.js";
-import DropDown, { DropDownOption } from "./dropdown";
+import DropDown from "./dropdown";
 
 export interface ThemeState {
   theme: "dark" | "light" | null;
@@ -53,7 +52,7 @@ const applyTheme = () => {
       "dark:from-orange-950",
       "dark:to-orange-975",
       "text-default",
-      "dark:text-default-dark",
+      "dark:text-default-dark"
     );
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */

@@ -19,7 +19,6 @@ import {
   goodSec,
   okSec,
 } from "@falling-nikochan/chart";
-import Select from "@/common/select";
 import { detectOS } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";

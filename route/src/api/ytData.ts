@@ -91,11 +91,9 @@ export async function getYTDataEntry(
         localizations: data.items[0].localizations || {},
         lastFetched: Date.now(),
       };
-      await db.collection<YTDataEntry>("ytData").updateOne(
-        { ytId },
-        { $set: entry },
-        { upsert: true }
-      );
+      await db
+        .collection<YTDataEntry>("ytData")
+        .updateOne({ ytId }, { $set: entry }, { upsert: true });
       return entry;
     } catch (e) {
       console.error("Failed to parse YT data", e);
