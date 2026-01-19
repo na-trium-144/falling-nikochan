@@ -72,7 +72,12 @@ export function AboutContent2() {
             "main-wide:basis-3/12 main-wide:w-auto main-wide:min-h-full"
           )}
         >
-          <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
+          <TargetLine
+            barFlash={barFlash ? "30% + 10px" : undefined}
+            left={0}
+            right={0}
+            bottom={30}
+          />
           <div
             className={clsx(
               "absolute",
@@ -94,7 +99,7 @@ export function AboutContent2() {
                 process.env.ASSET_PREFIX +
                 `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
               }
-              className="w-full h-full "
+              className="w-full h-full opacity-70"
             />
           </div>
         </div>
@@ -121,7 +126,12 @@ export function AboutContent2() {
             <span className="inline-block text-lg w-6 text-right">{chain}</span>
             <span className="text-xs ml-1">{t("chain", { chain })}</span>
           </div>
-          <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
+          <TargetLine
+            barFlash={barFlash ? "30% + 15px" : undefined}
+            left={0}
+            right={0}
+            bottom={30}
+          />
           <div
             className={clsx(
               "absolute",
@@ -143,7 +153,7 @@ export function AboutContent2() {
                 process.env.ASSET_PREFIX +
                 `/assets/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg`
               }
-              className="w-full h-full "
+              className="w-full h-full opacity-70"
             />
           </div>
         </div>
@@ -153,7 +163,7 @@ export function AboutContent2() {
           <Caution className="inline-block mr-1 translate-y-0.5 " />
           {t("contentIOS")}
         </p>
-        <ul className="list-inside list-disc-as-text">
+        <ul className="list-inside list-disc">
           <li>{t("contentIOS2")}</li>
           <li>{t("contentIOS3")}</li>
         </ul>

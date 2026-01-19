@@ -170,6 +170,14 @@ export function detectOS(): "android" | "ios" | null {
   }
   return null;
 }
+export function useOSDetector() {
+  // undefined: 未検出、null: PCなど、"android" | "ios": 各OS
+  const [os, setOS] = useState<"android" | "ios" | null | undefined>(undefined);
+  useEffect(() => {
+    setOS(detectOS());
+  }, []);
+  return os;
+}
 
 interface InitAssetsState {
   type?: "initAssets";
@@ -331,8 +339,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     >
       {props.children}
       <Box
-        className={clsx(
-          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg",
+        classNameOuter={clsx(
+          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-modal",
           "transition-all duration-200 origin-bottom",
           workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
             ? "ease-in scale-100 opacity-100"

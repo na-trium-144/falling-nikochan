@@ -85,6 +85,7 @@ export default function FallingWindow(props: Props) {
           }
         }
       }
+      displayNotes.reverse();
       setDisplayNotes(displayNotes);
     };
     updateDisplayNotes();

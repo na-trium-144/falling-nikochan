@@ -1,7 +1,7 @@
 name: Node.js CI
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main", "staging"]
 permissions:
   contents: read
 jobs:
@@ -63,6 +63,8 @@ jobs:
     - name: Build Project Artifacts
       env:
         MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
+        VERSION_SUFFIX: "+#${{ github.event.number }}"
+        TITLE_SUFFIX: "Preview #${{ github.event.number }}"
       run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4

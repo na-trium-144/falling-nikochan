@@ -1,6 +1,14 @@
+## ver. 14 (staging)
+
+* stagingブランチとデプロイ環境を追加
+    * `VERSION_SUFFIX` でビルドバージョンに文字列を追加できるようにした
+* offset自動調整・フレームレート自動調整機能 [#879](https://github.com/na-trium-144/falling-nikochan/pull/879)
+* コピー・共有ボタンの仕様を変更 [#902](https://github.com/na-trium-144/falling-nikochan/pull/902)
+* ver13.22をRevert
+
 ## ver. 13.22 - 2026/01/09 [#900](https://github.com/na-trium-144/falling-nikochan/pull/900)
 
-* list-discをbefore要素として自前実装したlist-disc-as-textに置き換え
+* <del>list-discをbefore要素として自前実装したlist-disc-as-textに置き換え</del>
 
 ## ver. 13.21 - 2026/01/07 [#897](https://github.com/na-trium-144/falling-nikochan/pull/897)
 

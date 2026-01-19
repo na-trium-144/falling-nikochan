@@ -126,43 +126,49 @@ export default function TimingTab(props: Props) {
           }
         >
           {t("ytEndAt")}
-          <Input
-            className="w-16"
-            actualValue={(
-              Math.round((currentLevel?.meta.ytEndSec || 0) * 10) / 10
-            ).toString()}
-            updateValue={(v: string) =>
+        </CheckBox>
+        <Input
+          className="w-16"
+          actualValue={(
+            Math.round((props.currentLevel?.meta.ytEndSec || 0) * 10) / 10
+          ).toString()}
+          updateValue={(v: string) =>
               currentLevel?.updateMeta({ ytEnd: Number(v) })
             }
-            isValid={ytEndValid}
-            disabled={typeof currentLevel?.meta.ytEnd !== "number"}
-          />
-          <span>{t("offsetSecond")}</span>
-        </CheckBox>
+          isValid={ytEndValid}
+          disabled={typeof props.currentLevel?.meta.ytEnd !== "number"}
+        />
+        <span>{t("offsetSecond")}</span>
       </div>
-      <div className="">
+      <div className="relative">
         <CheckBox
           value={props.enableHitSE}
           onChange={(v) => props.setEnableHitSE(v)}
         >
-          <SmilingFace className={clsx("inline-block align-middle mr-1")} />
+          {/* ここにiconを置くとpretty-checkboxが色を変えてしまうので、placeholder */}
+          <span className="inline-block w-5" />
           {t("se")}
-          <VolumeNotice
-            theme="filled"
-            className={clsx(
-              "inline-block align-middle ml-2",
-              props.enableHitSE || "text-slate-400 dark:text-stone-600"
-            )}
-          />
-          <span
-            className={clsx(
-              "inline-block text-sm w-8 text-center",
-              props.enableHitSE || "text-slate-400 dark:text-stone-600"
-            )}
-          >
-            {props.hitVolume}
-          </span>
         </CheckBox>
+        <SmilingFace
+          className={clsx(
+            "absolute left-6 inline-block inset-y-0 h-max m-auto"
+          )}
+        />
+        <VolumeNotice
+          theme="filled"
+          className={clsx(
+            "inline-block align-middle ml-2",
+            props.enableHitSE || "text-slate-400 dark:text-stone-600"
+          )}
+        />
+        <span
+          className={clsx(
+            "inline-block text-sm w-8 text-center",
+            props.enableHitSE || "text-slate-400 dark:text-stone-600"
+          )}
+        >
+          {props.hitVolume}
+        </span>
         <Range
           className="align-middle "
           min={0}
@@ -178,22 +184,22 @@ export default function TimingTab(props: Props) {
           onChange={(v) => props.setEnableBeatSE(v)}
         >
           {t("beatSE")}
-          <VolumeNotice
-            theme="filled"
-            className={clsx(
-              "inline-block align-middle ml-2",
-              props.enableBeatSE || "text-slate-400 dark:text-stone-600"
-            )}
-          />
-          <span
-            className={clsx(
-              "inline-block text-sm w-8 text-center",
-              props.enableBeatSE || "text-slate-400 dark:text-stone-600"
-            )}
-          >
-            {props.beatVolume}
-          </span>
         </CheckBox>
+        <VolumeNotice
+          theme="filled"
+          className={clsx(
+            "inline-block align-middle ml-2",
+            props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+          )}
+        />
+        <span
+          className={clsx(
+            "inline-block text-sm w-8 text-center",
+            props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+          )}
+        >
+          {props.beatVolume}
+        </span>
         <Range
           className="align-middle "
           min={0}
@@ -477,7 +483,7 @@ export default function TimingTab(props: Props) {
           </>
         )}
       </div>
-      <ul className="list-disc-as-text ml-2">
+      <ul className="list-disc ml-2">
         {currentLevel?.currentSignature?.bars.map((bar, i) => (
           <li className="flex flex-row w-full items-baseline" key={i}>
             <InputSig

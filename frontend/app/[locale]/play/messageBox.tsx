@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
-import Input from "@/common/input";
+import Input, { inputStyle } from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
 import { pagerButtonClass } from "@/common/pager";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
@@ -24,8 +24,12 @@ import { detectOS } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import Range from "@/common/range";
+import DropDown from "@/common/dropdown";
+import DownOne from "@icon-park/react/lib/icons/DownOne";
+import { Scrollable } from "@/common/scrollable";
 
 interface MessageProps {
+  className?: string;
   isTouch: boolean;
   maxHeight: number;
   back?: () => void;
@@ -35,13 +39,13 @@ interface MessageProps {
   setAuto: (a: boolean) => void;
   userOffset: number;
   setUserOffset: (o: number) => void;
+  autoOffset: boolean;
+  setAutoOffset: (a: boolean) => void;
   enableSE: boolean;
   setEnableSE: (s: boolean) => void;
   enableIOSThru: boolean;
   setEnableIOSThru: (s: boolean) => void;
   audioLatency: number | null | undefined;
-  limitMaxFPS: number;
-  setLimitMaxFPS: (f: number) => void;
   userBegin: number | null;
   setUserBegin: (b: number | null) => void;
   ytBegin: number;
@@ -57,8 +61,11 @@ interface MessageProps {
 export function ReadyMessage(props: MessageProps) {
   const t = useTranslations("play.message");
   const { rem } = useDisplayMode();
-  const small = props.maxHeight < 22 * rem;
-  const optionMinHeight = 12 * rem;
+  // 開発者ツールで実測し、p-6分を除外 (言語やOSで表示内容若干変わるので、常にこの高さになるわけではない)
+  const optionHeight = 18.75 * rem - 3 * rem;
+  const fullHeight = 26.8 * rem - 3 * rem;
+  const optionMinHeight = optionHeight * 0.6;
+  const small = props.maxHeight < fullHeight - optionHeight + optionMinHeight;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, slideIn, setSlideIn] = useDelayedDisplayState(200, {
@@ -69,7 +76,8 @@ export function ReadyMessage(props: MessageProps) {
 
   return (
     <CenterBox
-      className="overflow-clip "
+      classNameOuter={props.className}
+      classNameInner="overflow-clip"
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
@@ -167,11 +175,11 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   return (
     <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <div className="flex-1 w-full min-w-fit overflow-y-auto overflow-x-visible">
+      <Scrollable className="flex-1 w-full overflow-x-visible">
         <ul
           className={clsx(
-            "h-full flex flex-col w-fit justify-center text-left list-disc-as-text",
-            "m-auto pl-6 pr-2 space-y-1 overflow-visible"
+            "m-auto w-fit h-full flex flex-col justify-center text-left list-disc",
+            "pl-6 pr-2 space-y-1 overflow-visible"
           )}
         >
           <li className="">
@@ -183,32 +191,10 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               {t("auto")}
             </CheckBox>
           </li>
-          <li className="">
-            <CheckBox
-              className=""
-              value={props.enableSE}
-              onChange={(v) => props.setEnableSE(v)}
-              disabled={isIOS && props.enableIOSThru}
-            >
-              {t("enableSE")}
-            </CheckBox>
-            {props.enableSE && !(isIOS && props.enableIOSThru) && (
-              <p className="ml-2 text-sm max-w-64 text-justify ">
-                <Caution className="inline-block align-middle mr-1" />
-                {props.audioLatency === undefined
-                  ? null
-                  : props.audioLatency === null
-                    ? t("unknownSELatency")
-                    : t("enableSELatency", {
-                        latency: props.audioLatency.toFixed(3),
-                      })}
-              </p>
-            )}
-          </li>
           {isIOS && (
             <li className="">
               <CheckBox
-                className="align-top " // 2行になる場合があるため
+                className="align-text-top" // 2行になる場合があるため todo:ちょっとずれてる
                 value={props.enableIOSThru}
                 onChange={(v) => props.setEnableIOSThru(v)}
               >
@@ -216,6 +202,28 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               </CheckBox>
             </li>
           )}
+          <li className="">
+            <CheckBox
+              className=""
+              value={!(isIOS && props.enableIOSThru) && props.enableSE}
+              onChange={(v) => props.setEnableSE(v)}
+              disabled={isIOS && props.enableIOSThru}
+            >
+              {t("enableSE")}
+            </CheckBox>
+            {props.enableSE &&
+              !(isIOS && props.enableIOSThru) &&
+              props.audioLatency !== undefined && (
+                <p className="text-sm max-w-80 text-justify ">
+                  <Caution className="inline-block align-middle mr-1" />
+                  {props.audioLatency === null
+                    ? t("unknownSELatency")
+                    : t("enableSELatency", {
+                        latency: props.audioLatency.toFixed(3),
+                      })}
+                </p>
+              )}
+          </li>
           {/* <li className="">
           <CheckBox
             className=""
@@ -226,9 +234,91 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             {t("displaySpeed")}
           </CheckBox>
         </li>*/}
+          <li>
+            <span className="mr-1">{t("playbackRate")}:</span>
+            <DropDown
+              options={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].map(
+                (s) => ({
+                  label: (
+                    <>
+                      ×
+                      <span className="inline-block text-left ml-1 w-9">
+                        {s}
+                      </span>
+                    </>
+                  ),
+                  value: s,
+                })
+              )}
+              value={props.playbackRate.toString()}
+              onSelect={(s: string) => props.setPlaybackRate(Number(s))}
+              className={clsx(
+                "relative inline-block pr-6 text-center",
+                linkStyle1,
+                inputStyle
+              )}
+            >
+              <div>
+                ×
+                <span className="inline-block text-left ml-1 w-9">
+                  {props.playbackRate}
+                </span>
+              </div>
+              <DownOne
+                className="absolute right-1 inset-y-0 h-max m-auto"
+                theme="filled"
+              />
+            </DropDown>
+          </li>
+          <li>
+            <CheckBox
+              className=""
+              value={props.userBegin !== null}
+              onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
+            >
+              {t("userBegin")}
+            </CheckBox>
+            {props.userBegin !== null && (
+              <>
+                <span className="inline-block text-right w-6">
+                  {Math.floor(Math.round(props.userBegin) / 60)}
+                </span>
+                <span className="mx-0.5">:</span>
+                <span className="inline-block text-left">
+                  {(Math.round(props.userBegin) % 60)
+                    .toString()
+                    .padStart(2, "0")}
+                </span>
+                {/*<span className="mr-1">{t("offsetSecond")}</span>*/}
+                {/*<span className="mr-1">〜</span>
+                <span className="mr-1 inline-block text-right w-7">
+                  {Math.round(props.ytEnd)}
+                </span>
+                <span className="">{t("offsetSecond")}</span>*/}
+              </>
+            )}
+            <Range
+              className="block! w-full!"
+              min={props.ytBegin}
+              max={props.ytEnd}
+              disabled={props.userBegin === null}
+              value={props.userBegin ?? props.ytBegin}
+              onChange={props.setUserBegin}
+            />
+          </li>
           <li className="">
-            {t("offset")}
-            <div>
+            <div className="inline-block">
+              {t("offset")}
+              <CheckBox
+                className="ml-2"
+                value={props.autoOffset && !props.auto}
+                onChange={(v) => props.setAutoOffset(v)}
+                disabled={props.auto}
+              >
+                {t("autoOffset")}
+              </CheckBox>
+            </div>
+            <div className="ml-4">
               <Input
                 className="w-16"
                 actualValue={
@@ -240,66 +330,19 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               />
               <span className="mr-1 ">{t("offsetSecond")}</span>
               <Button
+                className="h-8! py-0!"
                 text="-"
                 onClick={() => props.setUserOffset(props.userOffset - 0.01)}
               />
               <Button
+                className="h-8! py-0!"
                 text="+"
                 onClick={() => props.setUserOffset(props.userOffset + 0.01)}
               />
             </div>
           </li>
-          <li>
-            <span className="mr-2">{t("playbackRate")}</span>
-            <Select
-              options={["✕0.5", "✕0.75", "✕1", "✕1.25", "✕1.5", "✕1.75", "✕2"]}
-              values={["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"]}
-              value={props.playbackRate.toString()}
-              onChange={(s: string) => props.setPlaybackRate(Number(s))}
-            />
-          </li>
-          <li>
-            <CheckBox
-              className=""
-              value={props.userBegin !== null}
-              onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
-            >
-              {t("userBegin")}
-              {props.userBegin !== null && (
-                <>
-                  <span className="mr-2">:</span>
-                  <span className="mr-1 inline-block text-right w-7">
-                    {Math.round(props.userBegin)}
-                  </span>
-                  <span className="mr-1">{t("offsetSecond")}</span>
-                  {/*<span className="mr-1">〜</span>
-                  <span className="mr-1 inline-block text-right w-7">
-                    {Math.round(props.ytEnd)}
-                  </span>
-                  <span className="">{t("offsetSecond")}</span>*/}
-                </>
-              )}
-            </CheckBox>
-            <Range
-              className="block! w-full!"
-              min={props.ytBegin}
-              max={props.ytEnd}
-              disabled={props.userBegin === null}
-              value={props.userBegin ?? props.ytBegin}
-              onChange={props.setUserBegin}
-            />
-          </li>
-          <li>
-            <span className="mr-2">{t("limitFPS")}</span>
-            <Select
-              options={[t("noLimit"), "60", "40", "30", "20"]}
-              values={["0", "60", "40", "30", "20"]}
-              value={String(props.limitMaxFPS)}
-              onChange={(v) => props.setLimitMaxFPS(Number(v))}
-            />
-          </li>
         </ul>
-      </div>
+      </Scrollable>
       <TimeAdjustBar userOffset={props.userOffset} times={props.lateTimes} />
     </div>
   );
@@ -371,6 +414,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
 }
 
 interface MessageProps2 {
+  className?: string;
   hidden: boolean;
   isTouch: boolean;
   reset: () => void;
@@ -381,7 +425,8 @@ export function StopMessage(props: MessageProps2) {
 
   return (
     <CenterBox
-      className={clsx(props.hidden && "hidden")}
+      classNameOuter={props.className}
+      hidden={props.hidden}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
@@ -405,6 +450,7 @@ export function StopMessage(props: MessageProps2) {
 }
 
 interface MessageProps3 {
+  className?: string;
   isTouch: boolean;
   exit: () => void;
   msg: string;
@@ -414,6 +460,7 @@ export function InitErrorMessage(props: MessageProps3) {
 
   return (
     <CenterBox
+      classNameOuter={props.className}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >

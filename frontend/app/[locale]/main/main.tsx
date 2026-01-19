@@ -21,6 +21,15 @@ import { historyBackWithReview, LinkWithReview } from "@/common/pwaInstall";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import { AboutModal } from "@/common/aboutModal";
+import { ButtonHighlight } from "@/common/button";
+import {
+  boxButtonBorderStyle1,
+  boxButtonBorderStyle2,
+  boxButtonStyle,
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -108,11 +117,13 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs",
-                    "text-center rounded-r-none py-3 pl-2 pr-2",
-                    "hover:bg-white hover:dark:bg-stone-800 active:shadow-inner"
+                    "rounded-l-box py-3 pl-2 pr-2 text-center",
+                    boxButtonStyle
                   )}
                 >
+                  <span className={clsx(boxButtonBorderStyle1, "border-r-0")} />
+                  <span className={clsx(boxButtonBorderStyle2, "border-r-0")} />
+                  <ButtonHighlight />
                   {t(key + ".title")}
                 </LinkWithReview>
               ) : (
@@ -120,10 +131,17 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
-                    "rounded-l-lg py-3 pl-2 pr-2"
+                    "rounded-l-box py-3 pl-2 pr-2 text-center",
+                    skyFlatButtonStyle
                   )}
                 >
+                  <span
+                    className={clsx(skyFlatButtonBorderStyle1, "border-r-0")}
+                  />
+                  <span
+                    className={clsx(skyFlatButtonBorderStyle2, "border-r-0")}
+                  />
+                  <ButtonHighlight />
                   {t(key + ".title")}
                 </LinkWithReview>
               )
@@ -131,8 +149,11 @@ export function IndexMain(props: Props) {
           </nav>
         )}
         <Box
-          ref={props.boxRef}
-          className={clsx("flex flex-col p-6 overflow-y-auto min-h-0 flex-1")}
+          refInner={props.boxRef}
+          classNameOuter={clsx("min-h-0 flex-1 min-w-0")}
+          classNameInner={clsx("flex flex-col")}
+          scrollable
+          padding={6}
         >
           {!props.noBackButtonPC && (
             <button

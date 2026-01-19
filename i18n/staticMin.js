@@ -6,7 +6,7 @@ import jaError from "./ja/error.js";
 
 export const locales = ["en", "ja"];
 
-export async function getMessages(locale) {
+export function getMessages(locale) {
   switch (locale) {
     case "en":
       return enError;
@@ -21,7 +21,7 @@ export async function getTranslations(params, namespace) {
   const locale = typeof params === "string" ? params : (await params).locale;
   const translator = createTranslator({
     locale,
-    messages: await getMessages(locale),
+    messages: getMessages(locale),
     namespace,
   });
   return translator;

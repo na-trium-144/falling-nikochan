@@ -55,7 +55,7 @@ export function AboutContent3({ locale }: { locale: string }) {
         </div>
         {screenWidth >= 25 * rem && (
           <Box
-            className={clsx(
+            classNameOuter={clsx(
               "rounded-none! relative",
               "basis-1/3 shrink max-w-32 h-48",
               "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24"
@@ -87,7 +87,7 @@ export function AboutContent3({ locale }: { locale: string }) {
             >
               <img
                 src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg`}
-                className="w-full h-full "
+                className="w-full h-full opacity-70"
               />
             </div>
             <div
@@ -101,7 +101,7 @@ export function AboutContent3({ locale }: { locale: string }) {
             >
               <img
                 src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg`}
-                className="w-full h-full "
+                className="w-full h-full opacity-70"
               />
             </div>
           </Box>

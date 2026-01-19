@@ -10,7 +10,7 @@ export default function ProgressBar(props: Props) {
   return (
     <div
       className={clsx(
-        "relative h-1 rounded-full shadow bg-black/25 dark:bg-white/25",
+        "relative h-1 overflow-hidden rounded-full shadow bg-black/25 dark:bg-white/25",
         props.className
       )}
     >

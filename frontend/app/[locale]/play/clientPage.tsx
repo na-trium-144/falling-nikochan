@@ -9,6 +9,7 @@
 * result=1 でリザルト表示
 * auto=1 でオートプレイをデフォルトにする
 * judgeauto=1 でオートプレイ時にもユーザーのプレイと同じ判定を適用する (ver12.21〜13.20の動作)
+* noclear=1 で停止時に音符を消さない
 
 */
 
@@ -23,7 +24,7 @@ const exampleResult = {
 
 import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow from "./fallingWindow.js";
+import FallingWindow, { FlashPos } from "./fallingWindow.js";
 import {
   bigScoreRate,
   chainScoreRate,
@@ -69,6 +70,8 @@ import {
   updatePlayCountForReview,
 } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
+import { useRealFPS } from "@/common/fpsCalculator.jsx";
+import { IrasutoyaLikeGrass } from "./irasutoyaLikeGrass.jsx";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -78,6 +81,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [goResult, setGoResult] = useState<boolean>(false);
   const [autoDefault, setAutoDefault] = useState<boolean>(false);
   const [judgeForAuto, setJudgeForAuto] = useState<boolean>(false);
+  const [noClear, setNoClear] = useState<boolean>(false);
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -97,6 +101,7 @@ export function InitPlay({ locale }: { locale: string }) {
     setGoResult(searchParams.get("result") !== null);
     setAutoDefault(searchParams.get("auto") !== null);
     setJudgeForAuto(searchParams.get("judgeauto") !== null);
+    setNoClear(searchParams.get("noclear") !== null);
 
     const session = getSession(sid);
     // history.replaceState(null, "", location.pathname);
@@ -205,6 +210,7 @@ export function InitPlay({ locale }: { locale: string }) {
       goResult={goResult}
       autoDefault={autoDefault}
       judgeForAuto={judgeForAuto}
+      noClear={noClear}
       locale={locale}
     />
   );
@@ -222,6 +228,7 @@ interface Props {
   goResult: boolean;
   autoDefault: boolean;
   judgeForAuto: boolean;
+  noClear: boolean;
   locale: string;
 }
 function Play(props: Props) {
@@ -263,6 +270,18 @@ function Play(props: Props) {
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
   const [auto, setAuto] = useState<boolean>(props.autoDefault);
+  const [autoOffset, setAutoOffset_] = useState<boolean>(false);
+  useEffect(() => {
+    // デフォルトでtrue
+    setAutoOffset_(
+      localStorage.getItem("autoOffset") === "1" ||
+        localStorage.getItem("autoOffset") === null
+    );
+  }, []);
+  const setAutoOffset = useCallback((v: boolean) => {
+    setAutoOffset_(v);
+    localStorage.setItem("autoOffset", v ? "1" : "0");
+  }, []);
   const [userOffset, setUserOffset_] = useState<number>(0);
   useEffect(() => {
     if (cid) {
@@ -285,7 +304,6 @@ function Play(props: Props) {
     screenWidth,
     screenHeight,
     rem,
-    playUIScale,
     mobileStatusScale,
     largeResult,
   } = useDisplayMode();
@@ -296,22 +314,38 @@ function Play(props: Props) {
   const statusOverlaps =
     !isMobile &&
     statusSpace.height &&
-    statusSpace.height < 30 * playUIScale &&
+    // statusSpace.height < 30 * playUIScale &&
     !statusHide;
   const mainWindowSpace = useResizeDetector();
 
   const [bestScoreState, setBestScoreState] = useState<number>(0);
+  const [bestScoreCounts, setBestScoreCounts] = useState<number[] | null>(null);
+  // result表示の際に参照する過去のベストスコア
+  const [oldBestScoreState, setOldBestScoreState] = useState<number>(0);
+  const [oldBestScoreCounts, setOldBestScoreCounts] = useState<number[] | null>(
+    null
+  );
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
       const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
       if (data) {
         setBestScoreState(data.baseScore + data.chainScore + data.bigScore);
+        setBestScoreCounts([...data.judgeCount, data.bigCount ?? 0]);
+      } else {
+        setBestScoreState(0);
+        setBestScoreCounts(null);
       }
     }
   }, [cid, lvIndex, chartBrief]);
+  const initOldBestScore = useCallback(() => {
+    setOldBestScoreState(bestScoreState);
+    setOldBestScoreCounts(bestScoreCounts);
+  }, [bestScoreState, bestScoreCounts]);
   useEffect(reloadBestScore, [reloadBestScore]);
 
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
+  const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
+  const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
   const exitableNow = () => exitable && exitable < performance.now();
@@ -422,14 +456,46 @@ function Play(props: Props) {
       return now;
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
+
+  // キーを押したとき一定時間光らせる
+  // ここではnoteのx座標の値そのままを扱う
+  const [barFlash, setBarFlash] = useState<FlashPos>(undefined);
+  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashAnimationFrame = useRef<ReturnType<
+    typeof requestAnimationFrame
+  > | null>(null);
+  const flash = useCallback((x: FlashPos) => {
+    if (flashAnimationFrame.current !== null) {
+      cancelAnimationFrame(flashAnimationFrame.current);
+      flashAnimationFrame.current = null;
+    }
+    if (flashTimeout.current !== null) {
+      clearTimeout(flashTimeout.current);
+      flashTimeout.current = null;
+      setBarFlash(undefined);
+      flashAnimationFrame.current = requestAnimationFrame(() => {
+        flashAnimationFrame.current = null;
+        flash(x);
+      });
+    } else {
+      setBarFlash(x);
+      flashTimeout.current = setTimeout(() => {
+        flashTimeout.current = null;
+        setBarFlash(undefined);
+      }, 100);
+    }
+  }, []);
+
   const {
     baseScore,
     chainScore,
     bigScore,
     score,
     chain,
+    maxChain,
     notesAll,
     resetNotesAll,
+    notesDone,
     hit,
     iosRelease,
     judgeCount,
@@ -443,21 +509,18 @@ function Play(props: Props) {
     auto,
     props.judgeForAuto,
     userOffset,
+    autoOffset,
+    setUserOffset,
     playbackRate,
-    playSE
+    playSE,
+    flash
   );
 
-  const [fps, setFps] = useState<number>(0);
-  // フレームレートが60を超える端末の場合に、60を超えないように制限する
-  // 0=制限なし
-  const [limitMaxFPS, setLimitMaxFPS_] = useState<number>(60);
-  useEffect(() => {
-    setLimitMaxFPS_(Number(localStorage.getItem("limitMaxFPS") || 60));
-  }, []);
-  const setLimitMaxFPS = useCallback((v: number) => {
-    setLimitMaxFPS_(v);
-    localStorage.setItem("limitMaxFPS", v.toString());
-  }, []);
+  const { realFps, stable: realFpsStable } = useRealFPS();
+  const [runFps, setRunFps] = useState<number>(0);
+  const [renderFps, setRenderFps] = useState<number>(0);
+
+  const [shouldHideBPMSign, setShouldHideBPMSign] = useState<boolean>(false);
 
   useEffect(() => {
     if (ref.current) {
@@ -522,6 +585,10 @@ function Play(props: Props) {
   const [errorMsg, setErrorMsg] = useState<string>();
   const [showLoading, setShowLoading] = useState<boolean>(false);
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
+  const giveUpFpsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isReadyAll =
+    ytReady && !!chartSeq && (realFpsStable || giveUpWaitingFps);
   useEffect(() => {
     if (errorMsg) {
       if (showLoadingTimeout.current !== null) {
@@ -531,7 +598,7 @@ function Play(props: Props) {
       setShowReady(false);
       setInitDone(false);
       setExitable(performance.now());
-    } else if (ytReady && chartSeq && !initDone) {
+    } else if (isReadyAll && !initDone) {
       if (showLoadingTimeout.current !== null) {
         clearTimeout(showLoadingTimeout.current);
       }
@@ -547,8 +614,26 @@ function Play(props: Props) {
           1500
         );
       }
+      if (
+        !giveUpWaitingFps &&
+        !realFpsStable &&
+        giveUpFpsTimeout.current === null
+      ) {
+        giveUpFpsTimeout.current = setTimeout(
+          () => setGiveUpWaitingFps(true),
+          11000
+        );
+      }
     }
-  }, [ytReady, chartSeq, initDone, errorMsg, resetNotesAll]);
+  }, [
+    chartSeq,
+    realFpsStable,
+    giveUpWaitingFps,
+    isReadyAll,
+    initDone,
+    errorMsg,
+    resetNotesAll,
+  ]);
   useEffect(() => {
     if (!errorMsg) {
       if (apiErrorMsg) {
@@ -606,6 +691,7 @@ function Play(props: Props) {
               bigCount: bigCount,
               inputType: hitType,
             });
+            reloadBestScore();
           }
           void (async () => {
             try {
@@ -691,6 +777,7 @@ function Play(props: Props) {
     bigCount,
     hitType,
     editing,
+    reloadBestScore,
   ]);
 
   const onReady = useCallback(() => {
@@ -701,20 +788,31 @@ function Play(props: Props) {
   const onStart = useCallback(() => {
     console.log("start ->", ytPlayer.current?.getPlayerState());
     if (chartSeq) {
+      initOldBestScore();
       setShowStopped(false);
       setShowReady(false);
       setShowResult(false);
       setChartPlaying(true);
+      setWasAutoPlay(auto);
+      setOldPlaybackRate(playbackRate);
       // setChartStarted(true);
       setExitable(null);
-      reloadBestScore();
       resetNotesAll(chartSeq.notes);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
     ytStartTimeStamp.current = null;
-  }, [chartSeq, lateTimes, resetNotesAll, ytVolume, ref, reloadBestScore]);
+  }, [
+    chartSeq,
+    lateTimes,
+    resetNotesAll,
+    ytVolume,
+    ref,
+    initOldBestScore,
+    auto,
+    playbackRate,
+  ]);
   const onStop = useCallback(() => {
     console.log("stop ->", ytPlayer.current?.getPlayerState());
     switch (ytPlayer.current?.getPlayerState()) {
@@ -737,13 +835,6 @@ function Play(props: Props) {
   const onError = useCallback((ec: number) => {
     setYtError(ec);
   }, []);
-
-  // キーを押したとき一定時間光らせる
-  const [barFlash, setBarFlash] = useState<boolean>(false);
-  const flash = () => {
-    setBarFlash(true);
-    setTimeout(() => setBarFlash(false), 100);
-  };
 
   useEffect(() => {
     const disableMenu = (e: Event) => {
@@ -775,14 +866,18 @@ function Play(props: Props) {
           stop();
         } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
           exit();
-        } else if (!(chartPlaying && auto)) {
-          flash();
-          hit(inputTypes.keyboard);
+        } else if (isReadyAll && !(chartPlaying && auto)) {
+          const candidate = hit(inputTypes.keyboard);
+          if (candidate) {
+            flash({ targetX: candidate.note.targetX });
+          } else {
+            flash({ targetX: 0.5 });
+          }
         }
       }}
       onPointerDown={(e) => {
-        if (!(chartPlaying && auto)) {
-          flash();
+        if (isReadyAll && !(chartPlaying && auto)) {
+          flash({ clientX: e.clientX });
           switch (e.pointerType) {
             case "mouse":
               hit(inputTypes.mouse);
@@ -803,6 +898,7 @@ function Play(props: Props) {
       }}
       onPointerUp={(e) => {
         if (
+          isReadyAll &&
           e.pointerType === "touch" &&
           detectOS() === "ios" &&
           enableIOSThru
@@ -812,29 +908,6 @@ function Play(props: Props) {
         e.preventDefault();
       }}
     >
-      {musicAreaOk && (
-        <>
-          {/* play中に使用する画像を先に読み込んでキャッシュさせる */}
-          {[0, 1, 2, 3].map((i) => (
-            <img
-              src={process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`}
-              className="hidden"
-              decoding="async"
-              fetchPriority="low"
-              key={i}
-            />
-          ))}
-          {[4, 6, 8, 10, 12].map((i) => (
-            <img
-              src={process.env.ASSET_PREFIX + `/assets/particle${i}.svg`}
-              className="hidden"
-              decoding="async"
-              fetchPriority="low"
-              key={i}
-            />
-          ))}
-        </>
-      )}
       <div
         className={clsx(
           "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch",
@@ -843,13 +916,13 @@ function Play(props: Props) {
       >
         <div
           className={clsx(
-            isMobile || "w-1/3 overflow-x-visible",
+            isMobile || "w-1/3 h-screen overflow-x-visible",
             "flex-none flex flex-col items-stretch"
           )}
         >
           <MusicArea
             className={clsx(
-              "z-20 transition-transform duration-500 ease-in-out",
+              "isolate z-19 transition-transform duration-500 ease-in-out",
               musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
             )}
             ready={musicAreaOk}
@@ -875,9 +948,10 @@ function Play(props: Props) {
           />
           {!isMobile && (
             <>
+              <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "z-10 flex-none m-3 self-end",
+                  "isolate z-15 flex-none m-3 mb-0 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -889,24 +963,61 @@ function Play(props: Props) {
                 notesTotal={notesAll.length}
                 isMobile={false}
                 isTouch={isTouch}
+                best={
+                  chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreState
+                    : bestScoreState
+                }
+                bestCount={
+                  chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreCounts
+                    : bestScoreCounts
+                }
+                showBestScore={!auto && playbackRate === 1}
+                countMode={
+                  showReady
+                    ? !auto && playbackRate === 1
+                      ? "bestCount"
+                      : "grayZero"
+                    : "judge"
+                }
+                showResultDiff={
+                  !wasAutoPlay &&
+                  oldPlaybackRate === 1 &&
+                  showResult &&
+                  !showReady
+                }
               />
-              <div className="flex-1 basis-0" ref={statusSpace.ref} />
+              <div
+                className="grow-0 shrink-1"
+                style={{
+                  // 緑の部分の高さ (現在isMobileでないとき10vh) にあわせる
+                  flexBasis: "10vh",
+                }}
+                ref={statusSpace.ref}
+              />
             </>
           )}
         </div>
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
-          <FallingWindow
-            limitMaxFPS={limitMaxFPS}
-            className="absolute inset-0"
-            notes={notesAll}
-            getCurrentTimeSec={getCurrentTimeSec}
-            playing={chartPlaying}
-            setFPS={setFps}
-            barFlash={barFlash}
-          />
+          {isReadyAll && (
+            <FallingWindow
+              className="absolute inset-0 isolate z-0"
+              notes={notesAll}
+              getCurrentTimeSec={getCurrentTimeSec}
+              playing={chartPlaying}
+              setRunFPS={setRunFps}
+              setRenderFPS={setRenderFps}
+              barFlash={barFlash}
+              noClear={props.noClear}
+              playbackRate={playbackRate}
+              shouldHideBPMSign={shouldHideBPMSign}
+              setShouldHideBPMSign={setShouldHideBPMSign}
+            />
+          )}
           <div
             className={clsx(
-              "absoulte inset-0",
+              "absolute inset-0 isolate z-10",
               "transition-all duration-200",
               cloudsOk
                 ? "opacity-100 translate-y-0"
@@ -915,11 +1026,25 @@ function Play(props: Props) {
           >
             <ScoreDisp
               score={score}
-              best={bestScoreState}
+              best={
+                auto
+                  ? 0
+                  : chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreState
+                    : bestScoreState
+              }
               auto={auto}
               playbackRate={playbackRate}
+              pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
+              baseScore={baseScore}
+              notesDone={notesDone}
             />
-            <ChainDisp chain={chain} fc={judgeCount[2] + judgeCount[3] === 0} />
+            <ChainDisp
+              chain={chain}
+              maxChain={maxChain}
+              fc={judgeCount[2] + judgeCount[3] === 0}
+              notesTotal={notesAll.length}
+            />
             <button
               className={clsx(
                 "absolute rounded-full cursor-pointer leading-1",
@@ -942,7 +1067,8 @@ function Play(props: Props) {
           </div>
           {!initDone && (
             <CenterBox
-              className={clsx(
+              classNameOuter={clsx(
+                "isolate z-20",
                 "transition-opacity duration-200 ease-out",
                 showLoading ? "opacity-100" : "opacity-0"
               )}
@@ -956,10 +1082,16 @@ function Play(props: Props) {
             </CenterBox>
           )}
           {errorMsg && (
-            <InitErrorMessage msg={errorMsg} isTouch={isTouch} exit={exit} />
+            <InitErrorMessage
+              className="isolate z-20"
+              msg={errorMsg}
+              isTouch={isTouch}
+              exit={exit}
+            />
           )}
           {showReady && (
             <ReadyMessage
+              className="isolate z-20"
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
               start={start}
@@ -968,13 +1100,13 @@ function Play(props: Props) {
               setAuto={setAuto}
               userOffset={userOffset}
               setUserOffset={setUserOffset}
+              autoOffset={autoOffset}
+              setAutoOffset={setAutoOffset}
               enableSE={enableHitSE}
               setEnableSE={setEnableHitSE}
               enableIOSThru={enableIOSThru}
               setEnableIOSThru={setEnableIOSThru}
               audioLatency={audioLatency}
-              limitMaxFPS={limitMaxFPS}
-              setLimitMaxFPS={setLimitMaxFPS}
               userBegin={userBegin}
               setUserBegin={setUserBegin}
               ytBegin={ytBegin}
@@ -983,14 +1115,15 @@ function Play(props: Props) {
               setPlaybackRate={changePlaybackRate}
               editing={editing}
               lateTimes={lateTimes.current}
-              maxHeight={(mainWindowSpace.height || 0) - 12 * rem}
+              maxHeight={(mainWindowSpace.height || 0) - 10 * rem}
             />
           )}
           {showResult && (
             <Result
+              className="isolate z-21"
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
-              auto={auto}
+              auto={wasAutoPlay}
               optionChanged={
                 userBegin !== null &&
                 Math.round(userBegin) > Math.round(ytBegin)
@@ -1034,22 +1167,23 @@ function Play(props: Props) {
               exit={exit}
               isTouch={isTouch}
               newRecord={
-                score > bestScoreState &&
-                !auto &&
-                playbackRate === 1 &&
+                score > oldBestScoreState &&
+                !wasAutoPlay &&
+                oldPlaybackRate === 1 &&
                 lvIndex !== undefined &&
                 chartBrief?.levels[lvIndex] !== undefined
-                  ? score - bestScoreState
+                  ? score - oldBestScoreState
                   : 0
               }
               largeResult={largeResult}
               record={record}
               inputType={hitType}
-              playbackRate4={playbackRate * 4}
+              playbackRate4={oldPlaybackRate * 4}
             />
           )}
           {showStopped && (
             <StopMessage
+              className="isolate z-20"
               hidden={showReady || showResult}
               isTouch={isTouch}
               reset={reset}
@@ -1062,24 +1196,26 @@ function Play(props: Props) {
         className={clsx(
           "relative w-full",
           "transition-transform duration-200 ease-out",
-          initAnim ? "translate-y-0" : "translate-y-[30vh]"
+          initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
           height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
           maxHeight: "15vh",
         }}
       >
-        <div
-          className={clsx(
-            "-z-30 absolute inset-x-0 bottom-0",
-            "bg-lime-500 bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
-            "dark:bg-lime-800 dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
-          )}
-          style={{ top: "-1rem" }}
+        <IrasutoyaLikeGrass
+          classNameNear="isolate z-10"
+          classNameFar="isolate -z-10"
+          height={
+            (isMobile
+              ? Math.min(6 * rem * mobileStatusScale, 0.15 * screenHeight)
+              : 0.1 * screenHeight) +
+            1 * rem
+          }
         />
         {chartSeq && (
           <RhythmicalSlime
-            className="-z-10 absolute "
+            className="isolate z-14 absolute"
             style={{
               bottom: "100%",
               right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
@@ -1093,8 +1229,13 @@ function Play(props: Props) {
         )}
         <BPMSign
           className={clsx(
-            "transition-opacity duration-200 ease-out",
-            initAnim && chartSeq ? "opacity-100" : "opacity-0"
+            "isolate z-13",
+            "transition-opacity duration-500 ease-out",
+            initAnim && chartSeq
+              ? shouldHideBPMSign
+                ? "opacity-25"
+                : "opacity-100"
+              : "opacity-0"
           )}
           chartPlaying={chartPlaying}
           chartSeq={chartSeq || null}
@@ -1105,7 +1246,7 @@ function Play(props: Props) {
         {isMobile && (
           <>
             <StatusBox
-              className="absolute inset-0 z-10"
+              className="absolute inset-0 isolate z-15"
               style={{
                 margin: 1 * rem * mobileStatusScale,
               }}
@@ -1115,34 +1256,80 @@ function Play(props: Props) {
               notesTotal={notesAll.length}
               isMobile={true}
               isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
+              best={
+                chartPlaying || (showResult && !showReady)
+                  ? oldBestScoreState
+                  : bestScoreState
+              }
+              bestCount={
+                chartPlaying || (showResult && !showReady)
+                  ? oldBestScoreCounts
+                  : bestScoreCounts
+              }
+              showBestScore={
+                !auto && playbackRate === 1 && !!bestScoreCounts && showReady
+              }
+              countMode={
+                showReady
+                  ? !auto && playbackRate === 1
+                    ? "bestCount"
+                    : "grayZero"
+                  : "judge"
+              }
+              showResultDiff={
+                !wasAutoPlay &&
+                oldPlaybackRate === 1 &&
+                showResult &&
+                !showReady
+              }
             />
             {showFps && (
-              <span className="absolute left-3 bottom-full">[{fps} FPS]</span>
+              <span className="absolute left-3 bottom-full isolate z-16">
+                [{renderFps} / {runFps} / {Math.round(realFps)}
+                {!realFpsStable && "?"} FPS]
+              </span>
             )}
           </>
         )}
         {!isMobile && (
-          <div className="absolute bottom-2 left-3 opacity-50">
+          <div className="absolute bottom-2 left-3 opacity-50 isolate z-16">
             <span className="inline-block">Falling Nikochan</span>
             <span className="inline-block">
               <span className="ml-2">ver.</span>
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
-            {showFps && <span className="inline-block ml-3">[{fps} FPS]</span>}
+            {showFps && (
+              <span className="inline-block ml-3">
+                [{renderFps} / {runFps} / {Math.round(realFps)}
+                {!realFpsStable && "?"} FPS]
+              </span>
+            )}
           </div>
         )}
       </div>
-      {!isMobile && statusHide && showResult && (
-        <StatusBox
-          className="z-20 absolute my-auto h-max inset-y-0"
+      {!isMobile && statusHide && showResult && !showReady && (
+        <div
+          className={clsx(
+            "isolate z-20 absolute inset-y-0 my-auto",
+            "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
+          )}
           style={{ right: "0.75rem" }}
-          judgeCount={judgeCount}
-          bigCount={bigCount || 0}
-          bigTotal={bigTotal}
-          notesTotal={notesAll.length}
-          isMobile={false}
-          isTouch={isTouch}
-        />
+        >
+          <StatusBox
+            className="h-max"
+            judgeCount={judgeCount}
+            bigCount={bigCount || 0}
+            bigTotal={bigTotal}
+            notesTotal={notesAll.length}
+            isMobile={false}
+            isTouch={isTouch}
+            best={oldBestScoreState}
+            bestCount={oldBestScoreCounts}
+            showBestScore={!wasAutoPlay && oldPlaybackRate === 1}
+            countMode={"judge"}
+            showResultDiff={!wasAutoPlay && oldPlaybackRate === 1}
+          />
+        </div>
       )}
     </main>
   );

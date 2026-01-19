@@ -5,12 +5,6 @@ import { MobileFooter, PCFooter } from "@/common/footer";
 import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
-import AceEditor from "react-ace";
-import "ace-builds/src-min-noconflict/ext-language_tools";
-import "ace-builds/src-min-noconflict/theme-github";
-import "ace-builds/src-min-noconflict/theme-monokai";
-import "ace-builds/src-min-noconflict/mode-yaml";
-import "ace-builds/src-min-noconflict/ext-searchbox";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
@@ -25,6 +19,20 @@ import {
   useAndroidTWADetector,
 } from "@/common/pwaInstall";
 import Button from "@/common/button";
+import dynamic from "next/dynamic";
+import { Scrollable } from "@/common/scrollable";
+const AceEditor = dynamic(
+  async () => {
+    const ace = await import("react-ace");
+    await import("ace-builds/src-min-noconflict/ext-language_tools");
+    await import("ace-builds/src-min-noconflict/theme-tomorrow");
+    await import("ace-builds/src-min-noconflict/theme-tomorrow_night");
+    await import("ace-builds/src-min-noconflict/mode-yaml");
+    await import("ace-builds/src-min-noconflict/ext-searchbox");
+    return ace;
+  },
+  { ssr: false }
+);
 
 export function DevPage(props: { locale: string }) {
   const t = useTranslations("dev");
@@ -46,7 +54,12 @@ export function DevPage(props: { locale: string }) {
             "flex items-center justify-center"
           )}
         >
-          <Box className="w-max h-max max-w-full max-h-full p-6 overflow-y-auto space-y-3">
+          <Box
+            classNameOuter="w-max h-max max-w-full max-h-full"
+            classNameInner="space-y-3"
+            scrollable
+            padding={6}
+          >
             <div className="hidden mb-3 main-wide:flex flex-row items-center">
               <button
                 className={clsx("block w-max", linkStyle1)}
@@ -191,33 +204,40 @@ function StorageEditor(props: EProps) {
           )}
         </button>
       </div>
-      {showEditor && (
-        <div className="mt-2">
+      <Box
+        classNameOuter={clsx("mt-2", !showEditor && "hidden")}
+        classNameInner="overflow-hidden"
+      >
+        <div className="rounded-t-box">
           <AceEditor
             mode="yaml"
-            theme={themeState.isDark ? "monokai" : "github"}
+            theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
             width="calc(100dvw - 6rem)"
             height="calc(100dvh - 16rem)" // てきとう
             tabSize={2}
             fontSize={1 * rem}
+            highlightActiveLine={false}
+            setOptions={{ useWorker: false }}
             value={code}
             onChange={(value) => {
               setCode(value);
             }}
           />
-          <div
-            className={clsx(
-              "bg-slate-200 dark:bg-stone-700 mt-2 p-1 text-sm rounded-sm break-all",
-              "h-18 max-h-18 overflow-auto",
-              isError && "text-red-600 dark:text-red-400"
-            )}
-          >
-            {message.map((m, i) => (
-              <p key={i}>{m}</p>
-            ))}
-          </div>
         </div>
-      )}
+        <Scrollable
+          className={clsx(
+            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-box text-sm break-all",
+            "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
+            "h-18 max-h-18",
+            isError && "text-red-600 dark:text-red-400"
+          )}
+          padding={1}
+        >
+          {message.map((m, i) => (
+            <p key={i}>{m}</p>
+          ))}
+        </Scrollable>
+      </Box>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
   getStep,
   getTimeSec,
 } from "@falling-nikochan/chart";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
@@ -21,6 +21,12 @@ import {
   convertToPlay,
   createBrief,
   levelTypes,
+  currentChartVer,
+  emptyChart,
+  LevelEdit,
+  LevelMin,
+  numEvents,
+  validateChart,
 } from "@falling-nikochan/chart";
 import { Step, stepAdd, stepCmp, stepZero } from "@falling-nikochan/chart";
 import { MobileHeader } from "@/common/header.js";
@@ -34,14 +40,26 @@ import Move from "@icon-park/react/lib/icons/Move";
 import { linkStyle1 } from "@/common/linkStyle.js";
 import { GuideMain } from "./guideMain.js";
 import { levelBgColors } from "@/common/levelColors.js";
+import { Signature } from "@falling-nikochan/chart";
+import { Chart5 } from "@falling-nikochan/chart";
+import { Chart6 } from "@falling-nikochan/chart";
+import { Chart7 } from "@falling-nikochan/chart";
+import CheckBox from "@/common/checkBox";
 import { useTranslations } from "next-intl";
-import { CaptionProvider, HelpIcon } from "@/common/caption.js";
+import { HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { SlimeSVG } from "@/common/slime.js";
 import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
+import { useChartFile } from "./file";
+import {
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton.jsx";
+import { useColorThief } from "@/common/colorThief.js";
 
 export default function Edit(props: {
   locale: string;
@@ -403,6 +421,8 @@ export default function Edit(props: {
 
   const [dragOver, setDragOver] = useState<boolean>(false);
 
+  const colorThief = useColorThief();
+
   return (
     <main
       className={clsx(
@@ -487,13 +507,15 @@ export default function Edit(props: {
       <div className="w-0 h-13 edit-wide:hidden" />
       {chart === undefined ? (
         <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
-          <div className="absolute inset-6">
+          <div className="absolute inset-6 grid place-content-center">
             <Box
-              className={clsx(
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
-                "p-6 overflow-x-clip overflow-y-auto",
-                "shadow-lg"
+              classNameOuter={clsx(
+                "w-max h-max max-w-full max-h-full",
+                "shadow-modal"
               )}
+              classNameInner={clsx("overflow-x-clip")}
+              scrollable
+              padding={6}
             >
               <PasswdPrompt
                 loadStatus={loadStatus}
@@ -531,275 +553,319 @@ export default function Edit(props: {
             }
           }}
         >
-          <Box className="absolute inset-6 m-auto w-max h-max p-6 shadow-md">
+          <Box classNameOuter="w-max h-max p-6 shadow-modal">
             <p>{t("dragOver")}</p>
           </Box>
         </div>
       )}
 
-      <CaptionProvider>
-        <LuaTabProvider
-          visible={tab === 4}
-          chart={chart}
-          currentStepStr={cur?.currentStepStr || null}
-          seekStepAbs={seekStepAbs}
-          errLine={luaExecutor.running ? null : luaExecutor.errLine}
-          err={luaExecutor.err}
+      <LuaTabProvider
+        visible={tab === 4}
+        chart={chart}
+        currentStepStr={cur?.currentStepStr || null}
+        seekStepAbs={seekStepAbs}
+        errLine={luaExecutor.running ? null : luaExecutor.errLine}
+        err={luaExecutor.err}
+      >
+        <div
+          className={clsx(
+            "w-full",
+            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row"
+          )}
         >
           <div
             className={clsx(
-              "w-full",
-              "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row"
+              "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
+              "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
             )}
           >
+            <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
+              <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
+                <span className="whitespace-nowrap ">{t("titleShort")}</span>
+                <span className="grow-1 whitespace-nowrap ">ID: {cid}</span>
+                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-slate-500 dark:text-stone-400 ">
+                  <span className="">ver.</span>
+                  <span className="ml-1">{process.env.buildVersion}</span>
+                </span>
+              </span>
+              <Button text={t("help")} onClick={openGuide} />
+            </div>
             <div
               className={clsx(
-                "edit-wide:basis-4/12 edit-wide:h-full edit-wide:p-3",
-                "min-w-0 grow-0 shrink-0 flex flex-col items-stretch"
+                "relative grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
+                // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
+                //   levelBgColors[1],
+                chart || "invisible",
+                colorThief.boxStyle
               )}
+              style={{ color: colorThief.currentColor }}
             >
-              <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
-                <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
-                  <span className="text-nowrap ">{t("titleShort")}</span>
-                  <span className="grow-1 text-nowrap ">ID: {chart?.cid}</span>
-                  <span className="min-w-0 overflow-clip shrink-1 text-nowrap text-slate-500 dark:text-stone-400 ">
-                    <span className="">ver.</span>
-                    <span className="ml-1">{process.env.buildVersion}</span>
-                  </span>
-                </span>
-                <Button text={t("help")} onClick={openGuide} />
-              </div>
-              <div
+              <span className={clsx(colorThief.boxBorderStyle1)} />
+              <span className={clsx(colorThief.boxBorderStyle2)} />
+              <FlexYouTube
+                fixedSide="width"
                 className={clsx(
-                  "grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
-                  levelBgColors[
-                    levelTypes.indexOf(currentLevel?.meta.type || "")
-                  ] || levelBgColors[1],
-                  chart || "invisible "
+                  "w-full h-max",
+                  "edit-wide:w-full edit-wide:h-auto"
                 )}
-              >
-                <FlexYouTube
-                  fixedSide="width"
-                  className={clsx(
-                    "w-full h-max",
-                    "edit-wide:w-full edit-wide:h-auto"
-                  )}
-                  control={true}
-                  id={chart?.meta.ytId}
-                  ytPlayer={ytPlayer}
-                  onReady={onReady}
-                  onStart={onStart}
-                  onStop={onStop}
-                  onPlaybackRateChange={setPlaybackRate}
+                control={true}
+                id={chart?.meta.ytId}
+                ytPlayer={ytPlayer}
+                onReady={onReady}
+                onStart={onStart}
+                onStop={onStop}
+                onPlaybackRateChange={setPlaybackRate}
+              />
+              {chart?.ytId && (
+                <img
+                  ref={colorThief.imgRef}
+                  className="hidden"
+                  src={`https://i.ytimg.com/vi/${chart?.ytId}/mqdefault.jpg`}
+                  crossOrigin="anonymous"
                 />
-              </div>
-              <div
-                className={clsx(
-                  "relative",
-                  "w-full aspect-square",
-                  "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
-                )}
-              >
-                <FallingWindow
-                  inCodeTab={isCodeTab}
-                  className="absolute inset-0"
-                  chart={chart}
-                  dragMode={dragMode}
-                  setDragMode={setDragMode}
-                />
-              </div>
-              {chart && isTouch && (
-                <button
-                  className={clsx(
-                    "self-start flex flex-row items-center",
-                    linkStyle1
-                  )}
-                  onClick={() => {
-                    setDragMode(
-                      dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
-                    );
-                  }}
-                >
-                  <span className="relative inline-block w-8 h-8 ">
-                    {dragMode === null ? (
-                      <>
-                        <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
-                        <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
-                      </>
-                    ) : (
-                      <>
-                        <Move
-                          className="absolute text-xl inset-0 w-max h-max m-auto "
-                          theme="two-tone"
-                          fill={["#333", "#fc5"]}
-                        />
-                      </>
-                    )}
-                  </span>
-                  <span className="">
-                    {t("touchMode", { mode: dragMode || "null" })}
-                  </span>
-                </button>
               )}
             </div>
             <div
               className={clsx(
-                "p-3 flex flex-col items-stretch",
-                "h-5/6",
-                "edit-wide:h-full edit-wide:flex-1"
+                "relative",
+                "w-full aspect-square",
+                "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
               )}
             >
-              <div>
-                <span className="mr-1">{t("playerControl")}:</span>
-                <Select
-                  options={["✕0.25", "✕0.5", "✕0.75", "✕1", "✕1.5", "✕2"]}
-                  values={["0.25", "0.5", "0.75", "1", "1.5", "2"]}
-                  value={playbackRate.toString()}
-                  onChange={(s: string) => changePlaybackRate(Number(s))}
+              <FallingWindow
+                inCodeTab={isCodeTab}
+                className="absolute inset-0"
+                chart={chart}
+                dragMode={dragMode}
+                setDragMode={setDragMode}
+              />
+            </div>
+            {chart && isTouch && (
+              <button
+                className={clsx(
+                  "self-start flex flex-row items-center",
+                  linkStyle1
+                )}
+                onClick={() => {
+                  setDragMode(
+                    dragMode === "p" ? "v" : dragMode === "v" ? null : "p"
+                  );
+                }}
+              >
+                <span className="relative inline-block w-8 h-8 ">
+                  {dragMode === null ? (
+                    <>
+                      <Move className="absolute text-xl inset-0 w-max h-max m-auto " />
+                      <Forbid className="absolute text-3xl inset-0 w-max h-max m-auto " />
+                    </>
+                  ) : (
+                    <>
+                      <Move
+                        className="absolute text-xl inset-0 w-max h-max m-auto "
+                        theme="two-tone"
+                        fill={["#333", "#fc5"]}
+                      />
+                    </>
+                  )}
+                </span>
+                <span className="">
+                  {t("touchMode", { mode: dragMode || "null" })}
+                </span>
+              </button>
+            )}
+          </div>
+          <div
+            className={clsx(
+              "p-3 flex flex-col items-stretch",
+              "h-5/6",
+              "edit-wide:h-full edit-wide:flex-1"
+            )}
+          >
+            <div>
+              <span className="mr-1">{t("playerControl")}:</span>
+              <Select
+                options={["0.25", "0.5", "0.75", "1", "1.5", "2"].map((s) => ({
+                  label: (
+                    <>
+                      ×
+                      <span className="inline-block text-left ml-1 w-9">
+                        {s}
+                      </span>
+                    </>
+                  ),
+                  value: s,
+                }))}
+                value={playbackRate.toString()}
+                onSelect={(s: string) => changePlaybackRate(Number(s))}
+                showValue
+              />
+              <Button
+                onClick={() => {
+                  if (ready) {
+                    if (!playing) {
+                      start();
+                    } else {
+                      stop();
+                    }
+                  }
+                }}
+                text={
+                  playing ? t("playerControls.pause") : t("playerControls.play")
+                }
+                keyName="Space"
+              />
+              <span className="inline-block">
+                <Button
+                  onClick={() => {
+                    if (ready && cur) {
+                      seekStepRel(-cur?.snapDivider * 4);
+                    }
+                  }}
+                  text={t("playerControls.moveStep", {
+                    step: -(cur?.snapDivider || 1) * 4,
+                  })}
+                  keyName="PageUp"
+                />
+                <Button
+                  onClick={() => {
+                    if (ready && cur) {
+                        seekStepRel(cur?.snapDivider * 4);
+                      }
+                  }}
+                  text={t("playerControls.moveStep", {
+                    step: (cur?.snapDivider || 1) * 4,
+                  })}
+                  keyName="PageDn"
+                />
+              </span>
+              <span className="inline-block">
+                <Button
+                  onClick={() => {
+                    if (ready) {
+                      seekLeft1();
+                    }
+                  }}
+                  text={t("playerControls.moveStep", { step: -1 })}
+                  keyName="←"
                 />
                 <Button
                   onClick={() => {
                     if (ready) {
-                      if (!playing) {
-                        start();
-                      } else {
-                        stop();
-                      }
+                      seekRight1();
                     }
                   }}
-                  text={
-                    playing
-                      ? t("playerControls.pause")
-                      : t("playerControls.play")
-                  }
-                  keyName="Space"
+                  text={t("playerControls.moveStep", { step: 1 })}
+                  keyName="→"
                 />
-                <span className="inline-block">
-                  <Button
-                    onClick={() => {
-                      if (ready && cur) {
-                        seekStepRel(-cur?.snapDivider * 4);
-                      }
-                    }}
-                    text={t("playerControls.moveStep", {
-                      step: -(cur?.snapDivider || 1) * 4,
-                    })}
-                    keyName="PageUp"
-                  />
-                  <Button
-                    onClick={() => {
-                      if (ready && cur) {
-                        seekStepRel(cur?.snapDivider * 4);
-                      }
-                    }}
-                    text={t("playerControls.moveStep", {
-                      step: (cur?.snapDivider || 1) * 4,
-                    })}
-                    keyName="PageDn"
-                  />
-                </span>
-                <span className="inline-block">
-                  <Button
-                    onClick={() => {
-                      if (ready) {
-                        seekLeft1();
-                      }
-                    }}
-                    text={t("playerControls.moveStep", { step: -1 })}
-                    keyName="←"
-                  />
-                  <Button
-                    onClick={() => {
-                      if (ready) {
-                        seekRight1();
-                      }
-                    }}
-                    text={t("playerControls.moveStep", { step: 1 })}
-                    keyName="→"
-                  />
-                </span>
-                <span className="inline-block">
-                  <Button
-                    onClick={() => {
-                      if (ready) {
-                        seekSec(-1 / 30);
-                      }
-                    }}
-                    text={t("playerControls.moveMinus1F")}
-                    keyName=","
-                  />
-                  <Button
-                    onClick={() => {
-                      if (ready) {
-                        seekSec(1 / 30);
-                      }
-                    }}
-                    text={t("playerControls.movePlus1F")}
-                    keyName="."
-                  />
-                </span>
-              </div>
-              <div className="flex-none">
-                <TimeBar chart={chart} timeBarPxPerSec={timeBarPxPerSec} />
-              </div>
-              <div className="flex flex-row items-baseline">
-                <span>{t("stepUnit")} =</span>
-                <span className="ml-2">1</span>
-                <span className="ml-1">/</span>
-                <Input
-                  className="w-12"
-                  actualValue={String((cur?.snapDivider ?? 1) * 4)}
-                  updateValue={(v: string) => {
-                    currentLevel?.setSnapDivider(Number(v) / 4);
+              </span>
+              <span className="inline-block">
+                <Button
+                  onClick={() => {
+                    if (ready) {
+                      seekSec(-1 / 30);
+                    }
                   }}
-                  isValid={(v) =>
-                    !isNaN(Number(v)) &&
-                    String(Math.floor(Number(v) / 4) * 4) === v
-                  }
-                />
-                <HelpIcon className="self-center">
-                  {t.rich("stepUnitHelp", { br: () => <br /> })}
-                </HelpIcon>
-                <div className="flex-1" />
-                <span className="mr-1">{t("zoom")}</span>
-                <Button
-                  text="-"
-                  onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
+                  text={t("playerControls.moveMinus1F")}
+                  keyName=","
                 />
                 <Button
-                  text="+"
-                  onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
+                  onClick={() => {
+                    if (ready) {
+                      seekSec(1 / 30);
+                    }
+                  }}
+                  text={t("playerControls.movePlus1F")}
+                  keyName="."
                 />
-              </div>
-              <div className="flex flex-row ml-3 mt-3">
-                {tabNameKeys.map((key, i) =>
-                  i === tab ? (
-                    <Box key={i} className="rounded-b-none px-3 pt-2 pb-1">
-                      {t(`${key}.title`)}
-                    </Box>
-                  ) : (
-                    <button
-                      key={i}
-                      className="rounded-t-lg px-3 pt-2 pb-1 hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner "
-                      onClick={() => {
-                        setTab(i);
-                        ref.current?.focus();
-                      }}
-                    >
-                      {t(`${key}.title`)}
-                    </button>
-                  )
-                )}
-              </div>
-              <Box
-                className={clsx(
-                  "p-3 overflow-auto",
-                  "min-h-96 relative",
-                  "edit-wide:flex-1 edit-wide:min-h-0"
-                )}
-              >
-                {tab === 0 ? (
-                  <MetaTab
+              </span>
+            </div>
+            <div className="flex-none">
+              <TimeBar
+                currentTimeSecWithoutOffset={currentTimeSecWithoutOffset}
+                currentTimeSec={currentTimeSec}
+                currentNoteIndex={currentNoteIndex}
+                currentStep={currentStep}
+                chart={chart}
+                currentLevel={currentLevel}
+                notesAll={notesAll}
+                snapDivider={snapDivider}
+                timeBarPxPerSec={timeBarPxPerSec}
+              />
+            </div>
+            <div className="flex flex-row items-baseline">
+              <span>{t("stepUnit")} =</span>
+              <span className="ml-2">1</span>
+              <span className="ml-1">/</span>
+              <Input
+                className="w-12"
+                actualValue={String((cur?.snapDivider ?? 1) * 4)}
+                updateValue={(v: string) => {
+                  currentLevel?.setSnapDivider(Number(v) / 4);
+                }}
+                isValid={(v) =>
+                  !isNaN(Number(v)) &&
+                  String(Math.floor(Number(v) / 4) * 4) === v
+                }
+              />
+              <HelpIcon className="self-center">
+                {t.rich("stepUnitHelp", { br: () => <br /> })}
+              </HelpIcon>
+              <div className="flex-1" />
+              <span className="mr-1">{t("zoom")}</span>
+              <Button
+                text="-"
+                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
+              />
+              <Button
+                text="+"
+                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
+              />
+            </div>
+            <div className="flex flex-row ml-6 mt-3">
+              {tabNameKeys.map((key, i) =>
+                i === tab ? (
+                  <Box
+                    key={i}
+                    classNameOuter="rounded-b-none px-3 pt-2 pb-1"
+                    classNameBorder="border-b-0!"
+                  >
+                    {t(`${key}.title`)}
+                  </Box>
+                ) : (
+                  <button
+                    key={i}
+                    className={clsx(
+                      "rounded-t-box px-3 pt-2 pb-1",
+                      skyFlatButtonStyle
+                    )}
+                    onClick={() => {
+                      setTab(i);
+                      ref.current?.focus();
+                    }}
+                  >
+                    <span
+                      className={clsx(skyFlatButtonBorderStyle1, "border-b-0")}
+                    />
+                    <span
+                      className={clsx(skyFlatButtonBorderStyle2, "border-b-0")}
+                    />
+                    <ButtonHighlight />
+                    {t(`${key}.title`)}
+                  </button>
+                )
+              )}
+            </div>
+            <Box
+              classNameOuter={clsx(
+                "min-h-96",
+                "edit-wide:flex-1 edit-wide:min-h-0"
+              )}
+              classNameInner={clsx("relative")}
+              scrollable
+              padding={3}
+            >
+              {tab === 0 ? (
+                <MetaTab
                     saveEditSession={saveEditSession}
                     sessionId={sessionId}
                     sessionData={sessionData}
@@ -814,9 +880,9 @@ export default function Edit(props: {
                     localSave={localSave}
                     localLoadState={localLoadState}
                     localLoad={localLoad}
-                  />
-                ) : tab === 1 ? (
-                  <TimingTab
+                />
+              ) : tab === 1 ? (
+                <TimingTab
                     chart={chart}
                     enableHitSE={enableHitSE}
                     setEnableHitSE={setEnableHitSE}
@@ -826,57 +892,65 @@ export default function Edit(props: {
                     setEnableBeatSE={setEnableBeatSE}
                     beatVolume={beatVolume}
                     setBeatVolume={setBeatVolume}
+                />
+              ) : tab === 2 ? (
+                <LevelTab
+                  chart={chart}
+                />
+              ) : tab === 3 ? (
+                <NoteTab
+                  chart={chart}
+                />
+              ) : null}
+              <LuaTabPlaceholder parentContainer={ref.current} />
+            </Box>
+            <Box
+              classNameOuter={clsx(
+                "mt-2 rounded-lg",
+                "bg-slate-200/50! dark:bg-stone-700/50!",
+                !(
+                  luaExecutor.running ||
+                  luaExecutor.stdout.length > 0 ||
+                  luaExecutor.err.length > 0
+                ) && "hidden"
+              )}
+              classNameInner="h-24 max-h-24 edit-wide:h-auto"
+              scrollable
+              padding={2}
+            >
+              {luaExecutor.running ? (
+                <>
+                  <span className="inline-block ">
+                    <SlimeSVG />
+                    {t("running")}
+                  </span>
+                  <Button
+                    className="ml-2 h-8! py-0!"
+                    onClick={luaExecutor.abortExec}
+                    text={t("cancel")}
                   />
-                ) : tab === 2 ? (
-                  <LevelTab chart={chart} />
-                ) : tab === 3 ? (
-                  <NoteTab chart={chart} />
-                ) : null}
-                <LuaTabPlaceholder parentContainer={ref.current} />
-              </Box>
-              <div
-                className={clsx(
-                  "bg-slate-200 dark:bg-stone-700 mt-2 rounded-sm",
-                  "h-24 max-h-24 edit-wide:h-auto overflow-auto"
-                )}
-              >
-                {luaExecutor.running ? (
-                  <div className="m-1">
-                    <span className="inline-block ">
-                      <SlimeSVG />
-                      {t("running")}
-                    </span>
-                    <Button
-                      className="ml-2"
-                      onClick={luaExecutor.abortExec}
-                      text={t("cancel")}
-                    />
-                  </div>
-                ) : (
-                  (luaExecutor.stdout.length > 0 ||
-                    luaExecutor.err.length > 0) && (
-                    <div className="m-1">
-                      {luaExecutor.stdout.map((s, i) => (
-                        <p className="text-sm" key={i}>
-                          {s}
-                        </p>
-                      ))}
-                      {luaExecutor.err.map((e, i) => (
-                        <p
-                          className="text-sm text-red-600 dark:text-red-400 "
-                          key={i}
-                        >
-                          {e}
-                        </p>
-                      ))}
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
+                </>
+              ) : (
+                <>
+                  {luaExecutor.stdout.map((s, i) => (
+                    <p className="text-sm" key={i}>
+                      {s}
+                    </p>
+                  ))}
+                  {luaExecutor.err.map((e, i) => (
+                    <p
+                      className="text-sm text-red-600 dark:text-red-400 "
+                      key={i}
+                    >
+                      {e}
+                    </p>
+                  ))}
+                </>
+              )}
+            </Box>
           </div>
-        </LuaTabProvider>
-      </CaptionProvider>
+        </div>
+      </LuaTabProvider>
     </main>
   );
 }

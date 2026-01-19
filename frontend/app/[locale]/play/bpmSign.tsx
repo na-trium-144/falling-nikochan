@@ -165,10 +165,11 @@ export default function BPMSign(props: Props) {
 
   return (
     <div
-      className={clsx("-z-20 absolute origin-bottom-left", props.className)}
+      className={clsx("absolute origin-bottom-left", props.className)}
       style={{
         bottom: "100%",
         left: "0.8rem",
+        marginBottom: "0.25rem",
         transform: playUIScale !== 1 ? `scale(${playUIScale})` : undefined,
       }}
     >

@@ -4,9 +4,15 @@
   --breakpoint-share-wide2: 35rem; /* sharedResultのrankとjudgeを横並びにする */
   --breakpoint-edit-wide: 50rem; /* editのPC表示 */
   --breakpoint-share-yt-wide: 60rem; /* shareでYouTubeを表示する場所が変わる */
-  --color-orange-975: #20100a;
+  --color-orange-975: #20100a; /* この色ってどうやって作ったの? 記憶にない */
   --color-amber-975: #20180a;
+  --color-sky-975: #091823;
+  --color-default: var(--color-slate-800);
+  --color-default-dark: var(--color-stone-300);
   --blur-2xs: 2px;
+  --radius-box: 1.25rem;
+  --shadow-modal: var(--shadow-md);
+  --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -17,6 +23,54 @@
 .font-main-ui,
 body {
   font-family: "Merriweather", "Kaisei Opti", serif;
+}
+
+body {
+  --scrollbar-color-thumb: color-mix(
+    in oklab,
+    var(--color-default) 65%,
+    transparent
+  );
+  &:where(.dark, .dark *) {
+    --scrollbar-color-thumb: color-mix(
+      in oklab,
+      var(--color-default-dark) 65%,
+      transparent
+    );
+  }
+  --scrollbar-color-track: transparent;
+
+  scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+}
+/* Legacy browsers with `::-webkit-scrollbar-*` support */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color-thumb);
+    @apply rounded-full;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-color-track);
+  }
+}
+
+/* Aceの背景色などを上書き */
+.ace_editor:not(.ace_autocomplete) {
+  @apply bg-transparent! rounded-[inherit];
+}
+.ace_editor * {
+  @apply rounded-[unset];
+}
+.ace-tomorrow .ace_gutter {
+  @apply bg-slate-400/25!;
+}
+.ace-tomorrow-night .ace_gutter {
+  @apply bg-black/25!;
+}
+.ace_gutter-active-line {
+  @apply bg-transparent!;
 }
 
 /* tailwind css の user-select: none だけでは足りなかった */
@@ -35,27 +89,4 @@ body {
 .appearance-none {
   appearance: none;
   -webkit-appearance: none;
-}
-
-.list-disc-as-text {
-  list-style: none !important;
-  /*list-style-type: disc;*/
-}
-.list-disc-as-text.list-inside li {
-  margin-left: 1.2em;
-}
-.list-disc-as-text li::before {
-  /* 擬似要素でマーカーを作成 */
-  content: "・";
-  font-size: 1em; /* マーカーのサイズ微調整 */
-  width: 1em;
-  display: inline-block;
-  margin-right: 0.2em;
-  text-indent: 0;
-}
-.list-disc-as-text li {
-  text-indent: -1.2em !important;
-}
-.list-disc-as-text li * {
-  text-indent: 0;
 }

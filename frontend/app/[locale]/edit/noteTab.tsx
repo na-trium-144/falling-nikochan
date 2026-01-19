@@ -6,6 +6,8 @@ import CheckBox from "@/common/checkBox.js";
 import Select from "@/common/select";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
+import { LevelEdit } from "@falling-nikochan/chart";
+import { DropDownOption } from "@/common/dropdown";
 import { ChartEditing } from "@falling-nikochan/chart";
 
 interface Props {
@@ -275,13 +277,14 @@ function NoteEdit(props: Props) {
           <span>{t("fallMode")}</span>
           <HelpIcon>{t.rich("fallModeHelp", { br: () => <br /> })}</HelpIcon>
           <Select
-            value={n.fall ? "1" : "0"}
-            values={["1", "0"]}
-            options={[t("fallModeTrue"), t("fallModeFalse")]}
-            onChange={(v) =>
-              currentLevel?.updateNote({ ...n, fall: !!Number(v) })
-            }
+            value={n.fall}
+            options={[
+              { label: t("fallModeTrue"), value: true },
+              { label: t("fallModeFalse"), value: false },
+            ]}
+            onSelect={(v: boolean) => currentLevel?.updateNote({ ...n, fall: !!Number(v) })}
             disabled={!currentLevel?.currentNoteEditable}
+            showValue
           />
         </div>
         {currentLevel?.currentNote && !currentLevel?.currentNoteEditable && (

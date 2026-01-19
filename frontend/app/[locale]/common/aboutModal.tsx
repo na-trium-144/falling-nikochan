@@ -28,15 +28,17 @@ export function AboutModal(props: AProps) {
       )}
       onClick={close}
     >
-      <div className="absolute inset-12">
+      <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
         <Box
-          className={clsx(
-            "absolute inset-0 m-auto w-180 h-max max-w-full max-h-full",
-            "p-6 overflow-x-clip overflow-y-auto",
-            "shadow-lg",
+          classNameOuter={clsx(
+            "w-180 h-max max-w-full max-h-full",
+            "shadow-modal",
             "transition-transform duration-200 origin-center",
             props.aboutAnim ? "ease-in scale-100" : "ease-out scale-0"
           )}
+          classNameInner={clsx("overflow-x-clip")}
+          scrollable
+          padding={6}
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="mb-3 relative px-10 text-xl font-bold font-title">

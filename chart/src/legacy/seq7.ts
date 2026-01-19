@@ -48,10 +48,13 @@ export interface DisplayParam7 {
  * 画面上でその瞬間に表示する音符の管理
  * (画面の状態をstateにするため)
  * 時刻の情報を持たない
+ * 
+ * ver14でvelを追加
  */
 export interface DisplayNote7 {
   id: number;
   pos: Pos;
+  vel: Pos;
   done: number;
   bigDone: boolean;
   baseScore?: number;
@@ -70,6 +73,7 @@ export function displayNote7(
     return {
       id: note.id,
       pos: note.hitPos || { x: -1, y: -1 },
+      vel: { x: 0, y: 0 },
       done: note.done,
       bigDone: note.bigDone,
       chain: note.chain,
@@ -95,6 +99,10 @@ export function displayNote7(
       pos: {
         x: note.targetX + note.vx * u,
         y: note.vy * u - (note.ay * u * u) / 2,
+      },
+      vel: {
+        x: note.vx * du,
+        y: note.vy * du - note.ay * u * du,
       },
       done: note.done,
       bigDone: note.bigDone,

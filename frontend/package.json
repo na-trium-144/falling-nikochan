@@ -1,11 +1,13 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "13.22.0",
+  "version": "13.21.0",
   "private": true,
   "type": "module",
+  "_comment": "backdrop-blur does not work until chrome 118 (but worked in 119), related issue https://github.com/tailwindlabs/tailwindcss/issues/18923",
+  "_comment2": "mask-image requires chrome 120",
   "browserslist": [
-    "chrome 111",
-    "edge 111",
+    "chrome 120",
+    "edge 120",
     "safari 16.4",
     "firefox 128"
   ],
@@ -26,7 +28,10 @@
     "@ygoe/msgpack": "^1.0.3",
     "ace-builds": "^1.43.5",
     "clsx": "^2.1.1",
+    "colorthief": "^2.6.0",
     "file-saver": "^2.0.5",
+    "pretty-checkbox": "^3.0.3",
+    "pretty-checkbox-react": "^3.2.0",
     "react-ace": "^14.0.1",
     "react-range": "^1.10.0",
     "react-resize-detector": "^12.3.0",
@@ -35,10 +40,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.18",
+    "@types/colorthief": "^2.6.0",
     "@types/file-saver": "^2.0.7",
     "@types/mdx": "^2.0.13",
     "dotenv": "^16.6.1",
     "postcss": "^8.5.6",
+    "sass": "^1.97.2",
     "svgo": "^4.0.0",
     "tailwindcss": "4.1.18",
     "woff2sfnt-sfnt2woff": "^1.0.0"

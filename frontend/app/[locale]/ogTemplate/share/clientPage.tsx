@@ -51,7 +51,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "pl-20 mt-12 text-7xl font-title",
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
@@ -60,7 +60,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "pl-20 mt-4 text-5xl font-title",
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
@@ -69,7 +69,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "pl-20 mt-4 font-title text-5xl",
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
