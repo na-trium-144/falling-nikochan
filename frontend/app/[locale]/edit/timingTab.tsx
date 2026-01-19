@@ -95,6 +95,7 @@ export default function TimingTab(props: Props) {
         <span>{t("ytEnd")}</span>
         <HelpIcon>{t.rich("ytEndHelp", { br: () => <br /> })}</HelpIcon>
         <CheckBox
+          id="ytEndAuto"
           value={currentLevel?.meta.ytEnd === "note"}
           className={clsx("ml-2")}
           onChange={() => currentLevel?.updateMeta({ ytEnd: "note" })}
@@ -106,6 +107,7 @@ export default function TimingTab(props: Props) {
           </span>
         </CheckBox>
         <CheckBox
+          id="ytEndFull"
           value={currentLevel?.meta.ytEnd === "yt"}
           className={clsx("ml-2")}
           onChange={() => currentLevel?.updateMeta({ ytEnd: "yt" })}
@@ -117,6 +119,7 @@ export default function TimingTab(props: Props) {
           </span>
         </CheckBox>
         <CheckBox
+          id="ytEndManual"
           value={typeof currentLevel?.meta.ytEnd === "number"}
           className={clsx("ml-2")}
           onChange={() =>
@@ -142,6 +145,7 @@ export default function TimingTab(props: Props) {
       </div>
       <div className="relative">
         <CheckBox
+          id="enableHitSE"
           value={props.enableHitSE}
           onChange={(v) => props.setEnableHitSE(v)}
         >
@@ -180,6 +184,7 @@ export default function TimingTab(props: Props) {
       </div>
       <div className="mb-3">
         <CheckBox
+          id="enableBeatSE"
           value={props.enableBeatSE}
           onChange={(v) => props.setEnableBeatSE(v)}
         >
@@ -264,6 +269,7 @@ export default function TimingTab(props: Props) {
         <span className="inline-block ml-1">
           <span>→</span>
           <CheckBox
+            id="bpmChangeHere"
             className="ml-4 mr-1"
             value={!!currentLevel?.bpmChangeHere}
             onChange={() => {
@@ -340,6 +346,7 @@ export default function TimingTab(props: Props) {
         <span className="inline-block ml-1">
           <span>→</span>
           <CheckBox
+            id="speedChangeHere"
             className="ml-4 mr-1"
             value={!!currentLevel?.speedChangeHere}
             onChange={() =>
@@ -353,6 +360,7 @@ export default function TimingTab(props: Props) {
             {t("changeHere")}
           </CheckBox>
           <CheckBox
+            id="speedInterp"
             className="mr-1"
             value={
               !!currentLevel?.speedChangeHere &&
@@ -436,6 +444,7 @@ export default function TimingTab(props: Props) {
         <span className="inline-block ml-1">
           <span>→</span>
           <CheckBox
+            id="beatChangeHere"
             className="ml-4 mr-1"
             value={!!currentLevel?.signatureChangeHere}
             onChange={() => {

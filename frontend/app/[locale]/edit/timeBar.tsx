@@ -12,7 +12,7 @@ import {
   stepImproper,
   stepZero,
 } from "@falling-nikochan/chart";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
@@ -236,12 +236,12 @@ export default function TimeBar(props: Props) {
       <div className="absolute" style={{ bottom: -5 * rem, left: 0 }}>
         <span className="mr-1">{t("beat")}:</span>
         {beginBarLength?.map((len, i) => (
-          <>
+          <Fragment key={i}>
             {i >= 1 && <span className="mx-0.5">+</span>}
             <span>{stepImproper(len)}</span>
             <span>/</span>
             <span>{len.denominator * 4}</span>
-          </>
+          </Fragment>
         ))}
       </div>
       {chart &&

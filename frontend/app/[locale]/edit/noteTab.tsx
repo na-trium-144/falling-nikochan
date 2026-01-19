@@ -262,6 +262,7 @@ function NoteEdit(props: Props) {
         </table>
         <div>
           <CheckBox
+            id="note-big"
             className="ml-2 mr-1"
             value={n.big}
             onChange={(v) => currentLevel?.updateNote({ ...n, big: v })}

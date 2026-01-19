@@ -33,7 +33,7 @@ export function MetaEdit(props: Props) {
 
   return (
     <>
-      <p className="mb-2">
+      <div className="mb-2">
         <span className="w-max">{t("youtubeId")}</span>
         <HelpIcon>{t.rich("youtubeIdHelp", { br: () => <br /> })}</HelpIcon>
         <Input
@@ -48,9 +48,9 @@ export function MetaEdit(props: Props) {
           isValid={checkYouTubeId}
           left
         />
-      </p>
-      <p>{t("musicInfo")}</p>
-      <p className="ml-2">
+      </div>
+      <div>{t("musicInfo")}</div>
+      <div className="ml-2">
         <span className="inline-block w-max">{t("musicTitle")}</span>
         <Input
           className="font-title shrink w-80 max-w-full "
@@ -58,8 +58,8 @@ export function MetaEdit(props: Props) {
           updateValue={(v: string) => props.chart?.updateMeta({ title: v })}
           left
         />
-      </p>
-      <p className="ml-2 ">
+      </div>
+      <div className="ml-2 ">
         <span className="inline-block w-max">{t("musicComposer")}</span>
         <Input
           className="text-sm font-title shrink w-80 max-w-full"
@@ -67,8 +67,8 @@ export function MetaEdit(props: Props) {
           updateValue={(v: string) => props.chart?.updateMeta({ composer: v })}
           left
         />
-      </p>
-      <p className="ml-2 mb-2">
+      </div>
+      <div className="ml-2 mb-2">
         <span className="inline-block w-max">{t("chartCreator")}</span>
         <Input
           className="font-title shrink w-40 max-w-full"
@@ -78,8 +78,8 @@ export function MetaEdit(props: Props) {
           }
           left
         />
-      </p>
-      <p className="">
+      </div>
+      <div className="">
         <span className="inline-block w-max">{t("passwd")}</span>
         <HelpIcon>{t.rich("passwdHelp", { br: () => <br /> })}</HelpIcon>
         <span className="inline-flex flex-row items-baseline">
@@ -96,6 +96,7 @@ export function MetaEdit(props: Props) {
           />
         </span>
         <CheckBox
+          id="save-passwd"
           value={props.savePasswd}
           onChange={props.setSavePasswd}
           className="ml-2"
@@ -103,7 +104,7 @@ export function MetaEdit(props: Props) {
           {t("savePasswd")}
         </CheckBox>
         <HelpIcon>{t.rich("savePasswdHelp", { br: () => <br /> })}</HelpIcon>
-      </p>
+      </div>
     </>
   );
 }
@@ -241,8 +242,9 @@ export function MetaTab(props: Props2) {
           </div>
         </>
       )}
-      <p className="mb-2 ml-2 ">
+      <div className="mb-2 ml-2 ">
         <CheckBox
+          id="publish-chart"
           className="ml-0 "
           value={props.chart?.meta.published || false}
           onChange={(v: boolean) => props.chart?.updateMeta({ published: v })}
@@ -258,14 +260,14 @@ export function MetaTab(props: Props2) {
               ? t("publishFail.empty")
               : null}
         </span>
-      </p>
-      <p>
+      </div>
+      <div>
         <Button
           text={t("deleteFromServer")}
           onClick={props.remoteDelete}
           disabled={!props.chart?.cid}
         />
-      </p>
+      </div>
 
       <div className="mb-4">
         <div>
