@@ -7,9 +7,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint src/",
+    "lint": "eslint src/ tests/",
     "t": "tsc",
-    "test": "tsc && vitest run"
+    "test": "tsc && tsx --test tests/**/*.spec.ts"
   },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
