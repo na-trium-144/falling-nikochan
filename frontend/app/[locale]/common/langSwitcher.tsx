@@ -13,7 +13,7 @@ export const langNames: { [key: string]: string } = {
 interface LangProps {
   locale: string;
   children: ReactNode;
-  className?: string
+  className?: string;
 }
 export function LangSwitcher(props: LangProps) {
   const router = useRouter();

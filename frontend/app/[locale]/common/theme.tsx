@@ -52,7 +52,7 @@ const applyTheme = () => {
       "dark:from-orange-950",
       "dark:to-orange-975",
       "text-default",
-      "dark:text-default-dark",
+      "dark:text-default-dark"
     );
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */

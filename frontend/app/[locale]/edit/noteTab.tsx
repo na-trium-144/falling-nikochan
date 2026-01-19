@@ -280,7 +280,9 @@ function NoteEdit(props: Props) {
               { label: t("fallModeTrue"), value: true },
               { label: t("fallModeFalse"), value: false },
             ]}
-            onSelect={(v: boolean) => currentLevel?.updateNote({ ...n, fall: !!Number(v) })}
+            onSelect={(v: boolean) =>
+              currentLevel?.updateNote({ ...n, fall: !!Number(v) })
+            }
             disabled={!currentLevel?.currentNoteEditable}
             showValue
           />
