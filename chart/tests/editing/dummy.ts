@@ -7,15 +7,18 @@ import {
 } from "@falling-nikochan/chart";
 
 export function dummyLuaExecutor(
-  exec: (code: string) => Promise<LevelFreeze | null> = async () => null
-): LuaExecutor {
+  exec: (code: string) => Promise<LevelFreeze | null> = async () => null,
+  abortExec: () => void = () => undefined
+): { current: LuaExecutor } {
   return {
-    stdout: [],
-    err: [],
-    errLine: null,
-    running: false,
-    exec,
-    abortExec: () => undefined,
+    current: {
+      stdout: [],
+      err: [],
+      errLine: null,
+      running: false,
+      exec,
+      abortExec,
+    },
   };
 }
 export const dummyChartData: ChartEdit = {

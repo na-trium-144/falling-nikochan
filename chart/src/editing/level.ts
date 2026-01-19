@@ -82,7 +82,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#lengthSec = 0;
     this.#ytDuration = 0;
     this.#barLines = [];
-    this.#current = new CursorState((type) => this.emit(type));
+    
+    this.#current = new CursorState(-offset(), this.#freeze, this.#lua, (type) => this.emit(type));
 
     this.#resetYTEnd();
     this.updateMeta({});
@@ -203,7 +204,7 @@ export class LevelEditing extends EventEmitter<EventType> {
 
   #lengthSec: number;
   #resetLengthSec() {
-    this.#lengthSec = 0;
+    this.#lengthSec = this.#offset();
     if (this.#freeze.notes.length > 0) {
       this.#lengthSec =
         getTimeSec(this.#freeze.bpmChanges, this.#freeze.notes.at(-1)!.step) +

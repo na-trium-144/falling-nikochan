@@ -1,6 +1,6 @@
 import { EventEmitter } from "eventemitter3";
 import { EventType, eventTypes } from "./types.js";
-import { Step, stepZero } from "../step.js";
+import { Step, stepCmp, stepZero } from "../step.js";
 import {
   findBpmIndexFromStep,
   getSignatureState,
@@ -25,11 +25,17 @@ export class CursorState extends EventEmitter<EventType> {
   #bpmIndex: number = 0;
   #speedIndex: number = 0;
   #signatureIndex: number = 0;
-  constructor(parentEmit: (type: EventType) => void) {
+  constructor(
+    timeSec: number,
+    freeze: LevelFreeze,
+    lua: string[],
+    parentEmit: (type: EventType) => void
+  ) {
     super();
     for (const type of eventTypes) {
       this.on(type, () => parentEmit(type));
     }
+    this.reset(timeSec, 1, freeze, lua);
   }
   reset(
     timeSec: number,
@@ -42,24 +48,17 @@ export class CursorState extends EventEmitter<EventType> {
     this.#step = step;
 
     this.#notesIndexBegin = freeze.notes.findIndex(
-      (n) =>
-        n.step.fourth === step.fourth &&
-        n.step.numerator === step.numerator &&
-        n.step.denominator === step.denominator
+      (n) => stepCmp(n.step, step) === 0
     );
     this.#notesIndexEnd =
-      freeze.notes.findLastIndex(
-        (n) =>
-          n.step.fourth === step.fourth &&
-          n.step.numerator === step.numerator &&
-          n.step.denominator === step.denominator
-      ) + 1;
+      freeze.notes.findLastIndex((n) => stepCmp(n.step, step) === 0) + 1;
     if (this.#notesIndexBegin === -1) {
       this.#notesIndexBegin = undefined;
       this.#notesIndexEnd = undefined;
     }
     if (timeSec < this.#timeSec) {
-      this.#noteIndex = this.#notesIndexEnd;
+      this.#noteIndex =
+        this.#notesIndexEnd !== undefined ? this.#notesIndexEnd - 1 : undefined;
     } else {
       this.#noteIndex = this.#notesIndexBegin;
     }

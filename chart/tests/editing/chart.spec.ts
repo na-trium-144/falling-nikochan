@@ -12,7 +12,7 @@ describe("ChartEditing", () => {
   describe("constructor", () => {
     test("should set options from parameters", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: "123456",
         currentPasswd: "passwd",
@@ -29,7 +29,7 @@ describe("ChartEditing", () => {
     });
     test("default values for options", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -40,7 +40,7 @@ describe("ChartEditing", () => {
     });
     test("should calculate numEvents", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -49,7 +49,7 @@ describe("ChartEditing", () => {
     });
     test("should propagate rerender and change event from levels", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -71,7 +71,7 @@ describe("ChartEditing", () => {
   describe("resetOnSave", () => {
     test("should reset convertedFrom", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -83,7 +83,7 @@ describe("ChartEditing", () => {
     });
     test("should reset hasChange", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -95,7 +95,7 @@ describe("ChartEditing", () => {
     });
     test("should move changePasswd to currentPasswd", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: "oldpass",
@@ -109,7 +109,7 @@ describe("ChartEditing", () => {
     });
     test("should keep currentPasswd if changePasswd is null", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: "oldpass",
@@ -122,7 +122,7 @@ describe("ChartEditing", () => {
     });
     test("should set cid", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -133,7 +133,7 @@ describe("ChartEditing", () => {
     });
     test("should emit rerender event", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -148,7 +148,7 @@ describe("ChartEditing", () => {
   });
   test("toObject", () => {
     const ce = new ChartEditing(dummyChartData, {
-      luaExecutorRef: { current: dummyLuaExecutor() },
+      luaExecutorRef: dummyLuaExecutor(),
       locale: "en",
       cid: undefined,
       currentPasswd: null,
@@ -158,7 +158,7 @@ describe("ChartEditing", () => {
   });
   test("toMin", () => {
     const ce = new ChartEditing(dummyChartData, {
-      luaExecutorRef: { current: dummyLuaExecutor() },
+      luaExecutorRef: dummyLuaExecutor(),
       locale: "en",
       cid: undefined,
       currentPasswd: null,
@@ -199,7 +199,7 @@ describe("ChartEditing", () => {
   describe("addLevel", () => {
     test("should add a new level", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -214,7 +214,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -234,7 +234,7 @@ describe("ChartEditing", () => {
     });
     test("should update hasChange and numEvents", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -249,7 +249,7 @@ describe("ChartEditing", () => {
   describe("deleteLevel", () => {
     test("should delete the current level", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -262,7 +262,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -282,7 +282,7 @@ describe("ChartEditing", () => {
     });
     test("should update hasChange and numEvents", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -297,7 +297,7 @@ describe("ChartEditing", () => {
   describe("moveLevelUp", () => {
     test("should move the current level up", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -310,7 +310,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -330,7 +330,7 @@ describe("ChartEditing", () => {
     });
     test("should update hasChange", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -344,7 +344,7 @@ describe("ChartEditing", () => {
   describe("moveLevelDown", () => {
     test("should move the current level down", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -357,7 +357,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -377,7 +377,7 @@ describe("ChartEditing", () => {
     });
     test("should update hasChange", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -391,7 +391,7 @@ describe("ChartEditing", () => {
   describe("setCurrentLevelIndex", () => {
     test("should set current level index", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -402,7 +402,7 @@ describe("ChartEditing", () => {
     });
     test("should not set invalid index", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -415,7 +415,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender event", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -432,7 +432,7 @@ describe("ChartEditing", () => {
   describe("setChangePasswd", () => {
     test("should set changePasswd", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -442,7 +442,7 @@ describe("ChartEditing", () => {
     });
     test("should set changePasswd to null if empty string is given", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -452,7 +452,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -473,18 +473,19 @@ describe("ChartEditing", () => {
   describe("setOffset", () => {
     test("should set offset and update level's current time", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
       });
+      expect(ce.currentLevel!.current.timeSec).toBe(-10);
       ce.setOffset(0);
       expect(ce.offset).toBe(0); // 10 -> 0
-      expect(ce.currentLevel!.current.timeSec).toBe(10); // 0 -> 10
+      expect(ce.currentLevel!.current.timeSec).toBe(0); // -10 -> 0
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -505,7 +506,7 @@ describe("ChartEditing", () => {
   describe("setCurrentTimeWithoutOffset", () => {
     test("should set current time for all levels", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -518,7 +519,7 @@ describe("ChartEditing", () => {
     });
     test("should keep old snapDivider if not given", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -533,7 +534,7 @@ describe("ChartEditing", () => {
   describe("setYTDuration", () => {
     test("should set yt duration for all levels", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -547,7 +548,7 @@ describe("ChartEditing", () => {
   describe("copyNote, pasteNote, hasCopyBuf", () => {
     test("should copy, paste and check buffer", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -575,7 +576,7 @@ describe("ChartEditing", () => {
   describe("updateMeta", () => {
     test("should update meta", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
@@ -586,7 +587,7 @@ describe("ChartEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: { current: dummyLuaExecutor() },
+        luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
         currentPasswd: null,
