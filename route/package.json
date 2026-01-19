@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint src/",
     "t": "tsc",
-    "test": "vitest run --no-file-parallelism",
+    "test": "tsc && vitest run --no-file-parallelism",
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
