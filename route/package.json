@@ -6,7 +6,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
-    "lint": "eslint src/",
+    "lint": "eslint src/ tests/",
     "t": "tsc",
     "test": "tsc && tsx --test --test-isolation=none tests/**/*.spec.ts",
     "dev": "tsx watch serve-local.ts"

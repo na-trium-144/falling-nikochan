@@ -36,7 +36,6 @@ describe("LevelEditing", () => {
       expect(level.maxHitNum).to.equal(2);
       expect(level.lengthSec).to.equal(dummyChartData.offset + 2);
       expect(level.ytDuration).to.equal(0);
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(level.barLines).to.not.be.empty;
     });
     test("should initialize cursor object", () => {
@@ -186,7 +185,6 @@ describe("LevelEditing", () => {
       expect(level.maxHitNum).to.equal(5);
       expect(level.lengthSec).to.equal(3 + dummyChartData.offset);
       expect(level.ytDuration).to.equal(0);
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(level.barLines).to.not.be.empty;
     });
     test("should initialize cursor object", () => {
