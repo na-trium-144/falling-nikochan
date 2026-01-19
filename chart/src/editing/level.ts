@@ -82,8 +82,13 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#lengthSec = 0;
     this.#ytDuration = 0;
     this.#barLines = [];
-    
-    this.#current = new CursorState(-offset(), this.#freeze, this.#lua, (type) => this.emit(type));
+
+    this.#current = new CursorState(
+      -offset(),
+      this.#freeze,
+      this.#lua,
+      (type) => this.emit(type)
+    );
 
     this.#resetYTEnd();
     this.updateMeta({});
@@ -466,7 +471,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         ) ?? newLevel;
     }
     this.updateFreeze(newLevel);
-    this.updateLua(newLevel.lua);
+    void this.updateLua(newLevel.lua);
   }
   changeSignature(s: Signature) {
     let newLevel = this.#luaEditData();
@@ -474,7 +479,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       luaUpdateBeatChange(newLevel, this.#current.signatureIndex, s) ??
       newLevel;
     this.updateFreeze(newLevel);
-    this.updateLua(newLevel.lua);
+    void this.updateLua(newLevel.lua);
   }
   toggleBpmChangeHere(bpm: boolean | null, speed: boolean | null) {
     let newLevel = this.#luaEditData();
@@ -505,7 +510,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       }
     }
     this.updateFreeze(newLevel);
-    this.updateLua(newLevel.lua);
+    void this.updateLua(newLevel.lua);
   }
   toggleSignatureChangeHere() {
     if (stepCmp(this.#current.step, stepZero()) > 0 && this.currentSignature) {
@@ -524,7 +529,7 @@ export class LevelEditing extends EventEmitter<EventType> {
           }) ?? newLevel;
       }
       this.updateFreeze(newLevel);
-      this.updateLua(newLevel.lua);
+      void this.updateLua(newLevel.lua);
     }
   }
 
@@ -544,6 +549,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       // 追加したnoteは同じ時刻の音符の中でも最後
       this.updateFreeze(newLevel);
       this.#current.setNoteIndex(this.#current.notesIndexEnd! - 1);
+      void this.updateLua(newLevel.lua);
     }
   }
   deleteNote() {
@@ -552,6 +558,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       newLevel = luaDeleteNote(newLevel, this.#current.noteIndex);
       if (newLevel !== null) {
         this.updateFreeze(newLevel);
+        void this.updateLua(newLevel.lua);
       }
     }
   }
@@ -561,6 +568,7 @@ export class LevelEditing extends EventEmitter<EventType> {
       newLevel = luaUpdateNote(newLevel, this.#current.noteIndex, n);
       if (newLevel !== null) {
         this.updateFreeze(newLevel);
+        void this.updateLua(newLevel.lua);
       }
     }
   }
