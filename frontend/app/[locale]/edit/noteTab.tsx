@@ -60,7 +60,7 @@ export default function NoteTab(props: Props) {
           {currentLevel?.currentNote && (
             <Button
               text={t("noteDelete")}
-              onClick={currentLevel?.deleteNote}
+              onClick={() => currentLevel?.deleteNote()}
               disabled={!currentLevel?.currentNoteEditable}
             />
           )}
