@@ -30,23 +30,31 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       const redraw = () => {
         // Safariでmask-image書き換え時に描画されなくなるバグがあるため、opacityを書き換えて強制的に再描画させる
         if (redrawing) return;
-        const childOpacities: [HTMLElement, string][] = [];
+        const childOpacities: [HTMLElement, string, string][] = [];
         for (const child of refCurrent.children) {
           if ("style" in child) {
-            const originalOpacity = (child as HTMLElement).style.opacity;
-            childOpacities.push([child as HTMLElement, originalOpacity]);
+            const originalOpacity = (child as HTMLElement).style.opacity || "";
+            const computedOpacity = getComputedStyle(
+              child as HTMLElement
+            ).opacity;
+            childOpacities.push([
+              child as HTMLElement,
+              computedOpacity,
+              originalOpacity,
+            ]);
           }
         }
         redrawing = true;
         requestAnimationFrame(() => {
-          for (const [child, originalOpacity] of childOpacities) {
+          for (const [child, computedOpacity] of childOpacities) {
             child.style.opacity = String(
-              Number(originalOpacity || "1") * 0.999
+              Number(computedOpacity || "1") * 0.999
             );
           }
           requestAnimationFrame(() => {
-            for (const [child, originalOpacity] of childOpacities) {
-              child.style.opacity = originalOpacity;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            for (const [child, _, originalOpacity] of childOpacities) {
+              child.style.opacity = originalOpacity; // Restore the original opacity
             }
             redrawing = false;
           });
