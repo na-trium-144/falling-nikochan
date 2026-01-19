@@ -31,7 +31,7 @@ export default function LevelTab(props: Props) {
 
   return (
     <>
-      <p>
+      <div>
         <span className="mr-1">{t("levelsList")}:</span>
         <Button
           text={t("levelAdd")}
@@ -67,7 +67,7 @@ export default function LevelTab(props: Props) {
             />
           </>
         )}
-      </p>
+      </div>
       <Scrollable as="ul" className="ml-2 mt-2 mb-2 space-y-1 max-h-32">
         {chart?.levels.map((level, i) => (
           <li key={i}>
@@ -118,7 +118,7 @@ export default function LevelTab(props: Props) {
       <hr className="mb-3 " />
       {currentLevel && (
         <>
-          <p className="flex flex-row items-baseline mb-1">
+          <div className="flex flex-row items-baseline mb-1">
             <span className="w-max">{t("levelName")}:</span>
             <Input
               className="font-title shrink"
@@ -128,11 +128,12 @@ export default function LevelTab(props: Props) {
               }}
               left
             />
-          </p>
-          <p className="mb-2">
+          </div>
+          <div className="mb-2">
             <span>{t("difficulty")}:</span>
             {levelTypesConst.map((t, i) => (
               <CheckBox
+                id={`level-type-${t}`}
                 key={t}
                 value={t === currentLevel?.meta.type}
                 className={clsx(
@@ -147,9 +148,10 @@ export default function LevelTab(props: Props) {
                 {t}
               </CheckBox>
             ))}
-          </p>
-          <p>
+          </div>
+          <div>
             <CheckBox
+              id="level-unlisted"
               value={currentLevel?.meta.unlisted}
               className="ml-0"
               onChange={() => {
@@ -161,7 +163,7 @@ export default function LevelTab(props: Props) {
               {t("unlistLevel")}
             </CheckBox>
             <HelpIcon>{t.rich("unlistHelp", { br: () => <br /> })}</HelpIcon>
-          </p>
+          </div>
         </>
       )}
     </>

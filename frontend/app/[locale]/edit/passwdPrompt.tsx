@@ -77,13 +77,17 @@ export function PasswdPrompt(props: PasswdProps) {
             props.fetchChart(cid, { editPasswd, savePasswd: props.savePasswd })
           }
         />
-        <p>
-          <CheckBox value={props.savePasswd} onChange={props.setSavePasswd}>
+        <div>
+          <CheckBox
+            id="save-passwd"
+            value={props.savePasswd}
+            onChange={props.setSavePasswd}
+          >
             {t("savePasswd")}
           </CheckBox>
-        </p>
+        </div>
         {process.env.NODE_ENV === "development" && (
-          <p className="mt-2 ">
+          <div className="mt-2 ">
             <button
               className={clsx(linkStyle1, "w-max m-auto")}
               onClick={() =>
@@ -96,7 +100,7 @@ export function PasswdPrompt(props: PasswdProps) {
             >
               {t("bypassPasswd")}
             </button>
-          </p>
+          </div>
         )}
       </div>
     );
