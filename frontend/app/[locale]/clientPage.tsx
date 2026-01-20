@@ -81,10 +81,11 @@ export default function TopPage(props: Props) {
         <Link
           href={`/${locale}`}
           className={clsx(
-            "w-full grow-3 shrink-0 basis-24 relative",
+            "grow-3 shrink-0 basis-24 relative",
             linkStyle1
           )}
           style={{
+            width: `calc(100% + 40rem)`,
             marginLeft: "-20rem",
             marginRight: "-20rem",
           }}
