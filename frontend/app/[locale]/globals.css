@@ -13,80 +13,15 @@
   --radius-box: 1.25rem;
   --shadow-modal: var(--shadow-md);
   --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
+  --font-main-ui: "Merriweather", "Kaisei Opti", serif;
+  --font-title: "Noto Sans", "Noto Sans JP", sans-serif;
+  --default-font-family: var(--font-main-ui);
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
-.font-title,
-.font-main-ui.font-title {
-  font-family: "Noto Sans", "Noto Sans JP", sans-serif;
-}
-.font-main-ui,
-body {
-  font-family: "Merriweather", "Kaisei Opti", serif;
-}
+@import "./styles/utilities.css";
 
-body {
-  --scrollbar-color-thumb: color-mix(
-    in oklab,
-    var(--color-default) 65%,
-    transparent
-  );
-  &:where(.dark, .dark *) {
-    --scrollbar-color-thumb: color-mix(
-      in oklab,
-      var(--color-default-dark) 65%,
-      transparent
-    );
-  }
-  --scrollbar-color-track: transparent;
-
-  scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
-}
-/* Legacy browsers with `::-webkit-scrollbar-*` support */
-@supports selector(::-webkit-scrollbar) {
-  ::-webkit-scrollbar {
-    @apply w-2;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-color-thumb);
-    @apply rounded-full;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--scrollbar-color-track);
-  }
-}
-
-/* Aceの背景色などを上書き */
-.ace_editor:not(.ace_autocomplete) {
-  @apply bg-transparent! rounded-[inherit];
-}
-.ace_editor * {
-  @apply rounded-[unset];
-}
-.ace-tomorrow .ace_gutter {
-  @apply bg-slate-400/25!;
-}
-.ace-tomorrow-night .ace_gutter {
-  @apply bg-black/25!;
-}
-.ace_gutter-active-line {
-  @apply bg-transparent!;
-}
-
-/* tailwind css の user-select: none だけでは足りなかった */
-.select-none {
-  /*//選択制御*/
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  /*//ポップアップメニュー表示制御*/
-  -webkit-touch-callout: none;
-
-  -webkit-text-size-adjust: none;
-}
-.appearance-none {
-  appearance: none;
-  -webkit-appearance: none;
-}
+@import "./styles/result.css";
+@import "./styles/scrollbar.css";
+@import "./styles/ace.css";
+/*@import "./styles/checkbox.scss";*/
