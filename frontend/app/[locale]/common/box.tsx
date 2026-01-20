@@ -23,7 +23,8 @@ export const boxBorderStyle2 = clsx(
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
   refInner?: { current: HTMLDivElement | null };
-  scrollable?: boolean;
+  scrollableX?: boolean;
+  scrollableY?: boolean;
   padding?: number; // * spacing
   children: ReactNode | ReactNode[];
   hidden?: boolean;
@@ -67,12 +68,14 @@ export function Box(props: Props) {
     >
       <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
       <span className={clsx(boxBorderStyle2, props.classNameBorder)} />
-      {props.scrollable ? (
+      {props.scrollableX || props.scrollableY ? (
         <Scrollable
           ref={props.refInner}
           className={clsx("w-full h-full", props.classNameInner)}
           style={props.styleInner}
           padding={props.padding ?? 0}
+          scrollableX={props.scrollableX}
+          scrollableY={props.scrollableY}
         >
           {props.children}
         </Scrollable>
@@ -110,7 +113,8 @@ export function CenterBox(props: Props) {
         classNameInner={clsx(props.classNameInner)}
         styleOuter={props.styleOuter}
         styleInner={props.styleInner}
-        scrollable={props.scrollable}
+        scrollableX={props.scrollableX}
+        scrollableY={props.scrollableY}
         padding={props.padding ?? 6}
         onClick={props.onClick}
         onPointerDown={props.onPointerDown}
