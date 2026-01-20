@@ -1,4 +1,4 @@
-@keyframes result-score-jumping {
+@keyframes fn-result-score-jumping {
   0% {
     transform: translateY(0%);
     opacity: 0;

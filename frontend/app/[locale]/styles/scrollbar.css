@@ -1,0 +1,30 @@
+body {
+  --scrollbar-color-thumb: color-mix(
+    in oklab,
+    var(--color-default) 65%,
+    transparent
+  );
+  &:where(.dark, .dark *) {
+    --scrollbar-color-thumb: color-mix(
+      in oklab,
+      var(--color-default-dark) 65%,
+      transparent
+    );
+  }
+  --scrollbar-color-track: transparent;
+
+  scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+}
+/* Legacy browsers with `::-webkit-scrollbar-*` support */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color-thumb);
+    @apply rounded-full;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-color-track);
+  }
+}

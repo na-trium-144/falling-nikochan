@@ -1,0 +1,15 @@
+@utility select-none {
+  /* tailwind css の user-select: none だけでは足りなかった */
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* ポップアップメニュー表示制御 */
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+}
+@utility appearance-none {
+  appearance: none;
+  -webkit-appearance: none;
+}

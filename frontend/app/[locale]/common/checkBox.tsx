@@ -3,7 +3,7 @@ import { Checkbox } from "pretty-checkbox-react";
 import { useTheme } from "./theme";
 // import "pretty-checkbox";
 // import "pretty-checkbox/src/pretty-checkbox.scss";
-import "./pretty-checkbox.scss";
+import "@/styles/checkbox.scss";
 
 interface Props {
   // idは使わないが、指定しないとpretty-checkboxがランダムなUUIDを割り当ててhydration errorしてしまうので、
