@@ -71,7 +71,7 @@ import {
 } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
-import { IrasutoyaLikeGrass } from "./irasutoyaLikeGrass.jsx";
+import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
