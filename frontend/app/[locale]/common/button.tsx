@@ -68,6 +68,7 @@ interface Props {
   keyName?: string | string[];
   disabled?: boolean;
   loading?: boolean;
+  small?: boolean;
 }
 export default function Button(props: Props) {
   return (
@@ -75,7 +76,8 @@ export default function Button(props: Props) {
       className={clsx(
         props.disabled || props.loading ? buttonStyleDisabled : buttonStyle,
         props.loading && "cursor-wait",
-        props.className
+        props.className,
+        props.small && "h-8! py-0!"
       )}
       onClick={() => props.onClick && props.onClick()}
       onPointerDown={(e) => e.stopPropagation()}
