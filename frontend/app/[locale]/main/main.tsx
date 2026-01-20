@@ -152,7 +152,7 @@ export function IndexMain(props: Props) {
           refInner={props.boxRef}
           classNameOuter={clsx("min-h-0 flex-1 min-w-0")}
           classNameInner={clsx("flex flex-col")}
-          scrollable
+          scrollableY
           padding={6}
         >
           {!props.noBackButtonPC && (

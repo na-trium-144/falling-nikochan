@@ -23,7 +23,7 @@ export function GuideMain(props: Props) {
       <Box
         classNameOuter="shadow-modal"
         classNameInner="flex flex-col"
-        scrollable
+        scrollableY
         padding={6}
         styleOuter={{
           width: "calc(100% - 3rem)",
