@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import { useEffect, useRef, useState } from "react";
-import "./result.css";
 import {
   baseScoreRate,
   bigScoreRate,
@@ -109,7 +108,7 @@ export default function Result(props: Props) {
 
   const jumpingAnimation = (index: number) =>
     ({
-      animationName: showing === index ? "result-score-jumping" : undefined,
+      animationName: showing === index ? "fn-result-score-jumping" : undefined,
       animationIterationCount: 1,
       animationDuration: "200ms",
       animationTimingFunction: "linear",
@@ -144,10 +143,9 @@ export default function Result(props: Props) {
         classNameOuter={props.className}
         refInner={ref}
         classNameInner={clsx(
-          "overflow-x-clip",
           showing >= resultAnimDelays.length ? "touch-pan-y" : "touch-none"
         )}
-        scrollable
+        scrollableY
         hidden={props.hidden}
         styleOuter={{ maxHeight: props.mainWindowHeight - 3 * rem }}
         styleInner={{ maxHeight: props.mainWindowHeight - 3 * rem }}

@@ -279,7 +279,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
                 modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
               )}
               classNameInner={clsx("flex flex-col items-center text-center")}
-              scrollable
+              scrollableY
               padding={6}
             >
               <p className="text-lg font-title font-bold mb-2">

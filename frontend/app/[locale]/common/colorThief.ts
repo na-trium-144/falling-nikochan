@@ -1,30 +1,28 @@
 "use client";
 
 import ColorThief, { RGBColor } from "colorthief";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTheme } from "./theme";
 import clsx from "clsx/lite";
 
 export function useColorThief() {
   const colorThiefRef = useRef<ColorThief>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
   const [color, setColor] = useState<RGBColor | null>(null);
   const { isDark } = useTheme();
 
-  useEffect(() => {
+  const imgRef = useCallback((node: HTMLImageElement | null) => {
     if (colorThiefRef.current === null) {
       colorThiefRef.current = new ColorThief();
     }
-    if (imgRef.current) {
-      if (imgRef.current.complete) {
-        setColor(colorThiefRef.current.getColor(imgRef.current));
-      } else {
-        imgRef.current.onload = () => {
-          setColor(colorThiefRef.current!.getColor(imgRef.current!));
-        };
+    if (node) {
+      if (node.complete) {
+        setColor(colorThiefRef.current.getColor(node));
       }
+      node.onload = () => {
+        setColor(colorThiefRef.current!.getColor(node));
+      };
     }
-  }, [imgRef.current?.src]);
+  }, []);
 
   let colorAdjusted: RGBColor | null = color;
   if (colorAdjusted) {

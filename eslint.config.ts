@@ -41,5 +41,12 @@ export default defineConfig(
       "prefer-const": "off",
       "@typescript-eslint/no-explicit-any": "warn",
     },
+  },
+  {
+    files: ["**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-expressions": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
   }
 );

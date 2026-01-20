@@ -57,7 +57,7 @@ export function DevPage(props: { locale: string }) {
           <Box
             classNameOuter="w-max h-max max-w-full max-h-full"
             classNameInner="space-y-3"
-            scrollable
+            scrollableY
             padding={6}
           >
             <div className="hidden mb-3 main-wide:flex flex-row items-center">
@@ -213,7 +213,7 @@ function StorageEditor(props: EProps) {
             mode="yaml"
             theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
             width="calc(100dvw - 6rem)"
-            height="calc(100dvh - 16rem)" // てきとう
+            height="calc(100dvh - 19rem)" // てきとう
             tabSize={2}
             fontSize={1 * rem}
             highlightActiveLine={false}
@@ -224,19 +224,27 @@ function StorageEditor(props: EProps) {
             }}
           />
         </div>
-        <Scrollable
+        <div
           className={clsx(
-            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-box text-sm break-all",
+            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-box",
             "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
-            "h-18 max-h-18",
-            isError && "text-red-600 dark:text-red-400"
+            "overflow-hidden"
           )}
-          padding={1}
         >
-          {message.map((m, i) => (
-            <p key={i}>{m}</p>
-          ))}
-        </Scrollable>
+          <Scrollable
+            className={clsx(
+              "text-sm break-all",
+              "h-24 max-h-24",
+              isError && "text-red-600 dark:text-red-400"
+            )}
+            padding={2}
+            scrollableY
+          >
+            {message.map((m, i) => (
+              <p key={i}>{m}</p>
+            ))}
+          </Scrollable>
+        </div>
       </Box>
     </div>
   );

@@ -3,9 +3,12 @@ import { Checkbox } from "pretty-checkbox-react";
 import { useTheme } from "./theme";
 // import "pretty-checkbox";
 // import "pretty-checkbox/src/pretty-checkbox.scss";
-import "./pretty-checkbox.scss";
+import "@/styles/checkbox.scss";
 
 interface Props {
+  // idは使わないが、指定しないとpretty-checkboxがランダムなUUIDを割り当ててhydration errorしてしまうので、
+  // 一意な何かを指定すること
+  id: string;
   children: React.ReactNode;
   value: boolean;
   onChange: (value: boolean) => void;
@@ -16,6 +19,7 @@ export default function CheckBox(props: Props) {
   const { isDark } = useTheme();
   return (
     <Checkbox
+      id={props.id}
       shape="curve"
       animation="smooth"
       color={isDark ? "danger-o" : "primary-o"}

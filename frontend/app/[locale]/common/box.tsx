@@ -5,7 +5,8 @@ import { Scrollable } from "./scrollable";
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
   refInner?: { current: HTMLDivElement | null };
-  scrollable?: boolean;
+  scrollableX?: boolean;
+  scrollableY?: boolean;
   padding?: number; // * spacing
   children: ReactNode | ReactNode[];
   hidden?: boolean;
@@ -35,6 +36,7 @@ export function Box(props: Props) {
         */
         "fn-box",
         "relative rounded-box grid grid-cols-1 grid-rows-1",
+        "overflow-hidden",
         props.hidden && "hidden",
         props.classNameOuter
       )}
@@ -46,17 +48,14 @@ export function Box(props: Props) {
     >
       <span className={clsx("fn-glass-1", props.classNameBorder)} />
       <span className={clsx("fn-glass-2", props.classNameBorder)} />
-      {props.scrollable ? (
+      {props.scrollableX || props.scrollableY ? (
         <Scrollable
           ref={props.refInner}
           className={clsx("w-full h-full", props.classNameInner)}
-          style={{
-            ...props.styleInner,
-            padding: props.padding
-              ? `calc(var(--spacing) * ${props.padding})`
-              : undefined,
-          }}
-          padding={(props.padding ?? 0) / 2}
+          style={props.styleInner}
+          padding={props.padding ?? 0}
+          scrollableX={props.scrollableX}
+          scrollableY={props.scrollableY}
         >
           {props.children}
         </Scrollable>
@@ -94,7 +93,8 @@ export function CenterBox(props: Props) {
         classNameInner={clsx(props.classNameInner)}
         styleOuter={props.styleOuter}
         styleInner={props.styleInner}
-        scrollable={props.scrollable}
+        scrollableX={props.scrollableX}
+        scrollableY={props.scrollableY}
         padding={props.padding ?? 6}
         onClick={props.onClick}
         onPointerDown={props.onPointerDown}

@@ -6,11 +6,13 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint src/",
-    "t": "tsc"
+    "lint": "eslint src/ tests/",
+    "t": "tsc",
+    "test": "tsc && tsx --test tests/**/*.spec.ts"
   },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
+    "eventemitter3": "^5.0.1",
     "valibot": "^1.0.0",
     "wasmoon": "^1.16.0"
   }

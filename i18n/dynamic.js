@@ -15,8 +15,8 @@ import jaShare from "./ja/share.js";
 export const locales = ["en", "ja"];
 
 /**
-* @returns {any}
-*/
+ * @returns {any}
+ */
 export function getMessages(locale) {
   switch (locale) {
     case "en":

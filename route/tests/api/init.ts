@@ -115,16 +115,23 @@ export function dummyChart(): Chart13Edit {
   };
 }
 export function dummyChart12(): Chart11Edit {
-  return { ...dummyChart(), ver: 12 };
+  const c: Chart11Edit = { ...dummyChart(), ver: 12 };
+  for (const level of c.levels) {
+    for (const s of level.speedChanges) {
+      // @ts-expect-error converting Chart13 to 11
+      delete s.interp;
+    }
+  }
+  return c;
 }
 export function dummyChart11(): Chart11Edit {
-  return { ...dummyChart(), ver: 11 };
+  return { ...dummyChart12(), ver: 11 };
 }
 export function dummyChart10(): Chart9Edit {
   const c: Chart9Edit = {
-    ...dummyChart(),
+    ...dummyChart11(),
     ver: 10,
-    levels: dummyChart().levels.map((l) => ({
+    levels: dummyChart11().levels.map((l) => ({
       name: l.name,
       type: l.type,
       unlisted: l.unlisted,
@@ -144,7 +151,7 @@ export function dummyChart9(): Chart9Edit {
   return { ...dummyChart10(), ver: 9 };
 }
 export function dummyChart8(): Chart8Edit {
-  const c: Chart8Edit = { ...dummyChart10(), ver: 8, editPasswd: "" };
+  const c: Chart8Edit = { ...dummyChart9(), ver: 8, editPasswd: "" };
   // @ts-expect-error converting Chart9 to 8
   delete c.changePasswd;
   return c;
@@ -156,6 +163,12 @@ export function dummyChart6(): Chart6 {
   const c: Chart6 = { ...dummyChart7(), ver: 6 };
   // @ts-expect-error converting Chart8 to 6
   delete c.locale;
+  for (const level of c.levels) {
+    for (const n of level.notes) {
+      // @ts-expect-error converting Chart8 to 6
+      delete n.fall;
+    }
+  }
   return c;
 }
 export function dummyChart5(): Chart5 {
@@ -163,7 +176,7 @@ export function dummyChart5(): Chart5 {
     ...dummyChart6(),
     ver: 5,
     updatedAt: dummyDate.getTime(),
-    levels: dummyChart().levels.map((l) => ({ ...l, hash: "" })),
+    levels: dummyChart6().levels.map((l) => ({ ...l, hash: "" })),
   };
   return c;
 }

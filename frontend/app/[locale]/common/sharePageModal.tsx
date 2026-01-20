@@ -137,8 +137,8 @@ export function SharePageModalProvider(props: {
                 "transition-transform duration-200 origin-center",
                 modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
               )}
-              classNameInner={clsx("flex flex-col", "overflow-x-clip")}
-              scrollable
+              classNameInner={clsx("flex flex-col")}
+              scrollableY
               padding={6}
             >
               <ShareBox

@@ -18,11 +18,14 @@ interface Props<T extends ElementType> {
   style?: object;
   children: ReactNode;
   ref?: RefObject<HTMLDivElement | null>;
+  scrollableX?: boolean;
+  scrollableY?: boolean;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const myRef = useRef<HTMLDivElement>(null);
   const ref = props.ref || myRef;
   const { rem } = useDisplayMode();
+  const { scrollableX, scrollableY, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
     if (refCurrent) {
@@ -30,23 +33,31 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       const redraw = () => {
         // Safariでmask-image書き換え時に描画されなくなるバグがあるため、opacityを書き換えて強制的に再描画させる
         if (redrawing) return;
-        const childOpacities: [HTMLElement, string][] = [];
+        const childOpacities: [HTMLElement, string, string][] = [];
         for (const child of refCurrent.children) {
           if ("style" in child) {
-            const originalOpacity = (child as HTMLElement).style.opacity;
-            childOpacities.push([child as HTMLElement, originalOpacity]);
+            const originalOpacity = (child as HTMLElement).style.opacity || "";
+            const computedOpacity = getComputedStyle(
+              child as HTMLElement
+            ).opacity;
+            childOpacities.push([
+              child as HTMLElement,
+              computedOpacity,
+              originalOpacity,
+            ]);
           }
         }
         redrawing = true;
         requestAnimationFrame(() => {
-          for (const [child, originalOpacity] of childOpacities) {
+          for (const [child, computedOpacity] of childOpacities) {
             child.style.opacity = String(
-              Number(originalOpacity || "1") * 0.999
+              Number(computedOpacity || "1") * 0.999
             );
           }
           requestAnimationFrame(() => {
-            for (const [child, originalOpacity] of childOpacities) {
-              child.style.opacity = originalOpacity;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            for (const [child, _, originalOpacity] of childOpacities) {
+              child.style.opacity = originalOpacity; // Restore the original opacity
             }
             redrawing = false;
           });
@@ -77,22 +88,41 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           prevFadeBottom = fadeBottom;
           prevFadeLeft = fadeLeft;
           prevFadeRight = fadeRight;
-          for (const [direction, fade] of [
-            ["bottom", fadeTop],
-            ["top", fadeBottom],
-            ["right", fadeLeft],
-            ["left", fadeRight],
-          ] as const) {
-            refCurrent.style.setProperty(
-              `--tw-mask-${direction}-to-position`,
-              `calc(var(--spacing) * ${props.padding ?? 0} + min(${refCurrent.clientHeight / 2}px, 4rem, ${fade * 3}px))`
-            );
-            refCurrent.style.setProperty(
-              `--tw-mask-${direction}-from-color`,
-              `rgb(0 0 0 / ${Math.max(0, 1 - fade / rem)})`
-            );
-            redraw();
+          const toPosition = (fade: number) =>
+            `calc(var(--spacing) * ${(padding ?? 0) / 2} + min(${refCurrent.clientWidth / 3}px, 4rem, ${fade * 3}px))`;
+          const fromColor = (fade: number) =>
+            `rgb(0 0 0 / ${Math.max(0, 1 - fade / rem)})`;
+          if (scrollableX) {
+            for (const [direction, fade] of [
+              ["right", fadeLeft],
+              ["left", fadeRight],
+            ] as const) {
+              refCurrent.style.setProperty(
+                `--tw-mask-${direction}-to-position`,
+                toPosition(fade)
+              );
+              refCurrent.style.setProperty(
+                `--tw-mask-${direction}-from-color`,
+                fromColor(fade)
+              );
+            }
           }
+          if (scrollableY) {
+            for (const [direction, fade] of [
+              ["bottom", fadeTop],
+              ["top", fadeBottom],
+            ] as const) {
+              refCurrent.style.setProperty(
+                `--tw-mask-${direction}-to-position`,
+                toPosition(fade)
+              );
+              refCurrent.style.setProperty(
+                `--tw-mask-${direction}-from-color`,
+                fromColor(fade)
+              );
+            }
+          }
+          redraw();
         }
       };
       onScroll();
@@ -103,6 +133,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
 
       let childMutationObservers: MutationObserver[] = [];
       const initChildObserver = () => {
+        onScroll();
         for (const observer of childMutationObservers) {
           observer.disconnect();
         }
@@ -133,28 +164,30 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, props.padding, rem]);
+  }, [ref, padding, rem, scrollableX, scrollableY]);
   const Component = props.as || "div";
   return (
     <Component
       ref={ref}
       className={clsx(
         props.className,
-        "overflow-auto",
+        scrollableX && "overflow-x-auto",
+        scrollableY && "overflow-y-auto",
         // jsがロードされるまでの間の初期値としてbottomのみ適当なサイズのフェードを有効化する
-        "mask-b-to-0 mask-b-from-black mask-b-to-black",
-        "mask-t-to-10 mask-t-from-transparent mask-t-to-black",
-        "mask-r-to-0 mask-r-from-black mask-r-to-black",
-        "mask-l-to-0 mask-l-from-black mask-l-to-black"
+        scrollableY && "mask-b-to-0 mask-b-from-black mask-b-to-black",
+        scrollableY && "mask-t-to-10 mask-t-from-transparent mask-t-to-black",
+        scrollableX && "mask-r-to-0 mask-r-from-black mask-r-to-black",
+        scrollableX && "mask-l-to-0 mask-l-from-black mask-l-to-black"
       )}
       style={
         {
           ...props.style,
           willChange: "mask-image",
-          "--tw-mask-bottom-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
-          "--tw-mask-top-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
-          "--tw-mask-right-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
-          "--tw-mask-left-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
+          padding: padding ? `calc(var(--spacing) * ${padding})` : undefined,
+          "--tw-mask-bottom-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
+          "--tw-mask-top-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
+          "--tw-mask-right-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
+          "--tw-mask-left-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
         } as CSSProperties
       }
     >

@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
     "target": "es2021",
-    "lib": ["es2021"],
+    "lib": ["es2021", "es2023.array"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"]
 }

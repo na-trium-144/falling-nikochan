@@ -19,7 +19,6 @@ import {
   goodSec,
   okSec,
 } from "@falling-nikochan/chart";
-import Select from "@/common/select";
 import { detectOS } from "@/common/pwaInstall";
 import { useDisplayMode } from "@/scale";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
@@ -175,7 +174,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
   return (
     <div className="relative pr-8 shrink min-h-0 max-w-full flex flex-col items-center ">
       {props.header && <p className="mb-2">{t("option")}</p>}
-      <Scrollable className="flex-1 w-full overflow-x-visible">
+      <Scrollable className="flex-1 w-full overflow-x-visible" scrollableY>
         <ul
           className={clsx(
             "m-auto w-fit h-full flex flex-col justify-center text-left list-disc",
@@ -184,6 +183,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
         >
           <li className="">
             <CheckBox
+              id="auto-play"
               className=""
               value={props.auto}
               onChange={(v) => props.setAuto(v)}
@@ -194,6 +194,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           {isIOS && (
             <li className="">
               <CheckBox
+                id="enable-ios-thru"
                 className="align-text-top" // 2行になる場合があるため todo:ちょっとずれてる
                 value={props.enableIOSThru}
                 onChange={(v) => props.setEnableIOSThru(v)}
@@ -204,6 +205,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           )}
           <li className="">
             <CheckBox
+              id="enable-se"
               className=""
               value={!(isIOS && props.enableIOSThru) && props.enableSE}
               onChange={(v) => props.setEnableSE(v)}
@@ -272,6 +274,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           </li>
           <li>
             <CheckBox
+              id="user-begin"
               className=""
               value={props.userBegin !== null}
               onChange={(v) => props.setUserBegin(v ? props.ytBegin : null)}
@@ -310,6 +313,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             <div className="inline-block">
               {t("offset")}
               <CheckBox
+                id="auto-offset"
                 className="ml-2"
                 value={props.autoOffset && !props.auto}
                 onChange={(v) => props.setAutoOffset(v)}
@@ -330,12 +334,12 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               />
               <span className="mr-1 ">{t("offsetSecond")}</span>
               <Button
-                className="h-8! py-0!"
+                small
                 text="-"
                 onClick={() => props.setUserOffset(props.userOffset - 0.01)}
               />
               <Button
-                className="h-8! py-0!"
+                small
                 text="+"
                 onClick={() => props.setUserOffset(props.userOffset + 0.01)}
               />
