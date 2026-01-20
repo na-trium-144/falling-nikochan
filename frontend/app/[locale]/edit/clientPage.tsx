@@ -884,15 +884,15 @@ export default function Edit(props: {
             </Box>
             <Box
               classNameOuter={clsx(
-                "mt-2 rounded-lg",
+                "mt-2 rounded-xl",
                 "bg-slate-200/50! dark:bg-stone-700/50!",
                 !(
                   luaExecutor.running ||
                   luaExecutor.stdout.length > 0 ||
                   luaExecutor.err.length > 0
-                ) && "hidden"
+                ) && "main-wide:hidden"
               )}
-              classNameInner="h-24 max-h-24 edit-wide:h-auto"
+              classNameInner="h-24! max-h-24 edit-wide:h-auto"
               scrollable
               padding={2}
             >

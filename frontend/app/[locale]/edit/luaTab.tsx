@@ -275,7 +275,7 @@ export function LuaTabProvider(props: Props & PProps) {
 export function LuaTabPlaceholder(props: {
   parentContainer: HTMLDivElement | null;
 }) {
-  const { ref } = useResizeDetector();
+  const { width, height, ref } = useResizeDetector();
   const { parentContainer } = props;
   const { setData } = useContext(LuaPositionContext);
   useEffect(() => {
@@ -297,6 +297,6 @@ export function LuaTabPlaceholder(props: {
       window.removeEventListener("resize", onScroll);
       parentContainer?.removeEventListener("scroll", onScroll);
     };
-  }, [ref, setData, parentContainer]);
+  }, [width, height, ref, setData, parentContainer]);
   return <div ref={ref} className="absolute inset-[1px] -z-10 " />;
 }

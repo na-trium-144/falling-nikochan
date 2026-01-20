@@ -54,6 +54,7 @@ export function Box(props: Props) {
         "relative",
         "rounded-box",
         "grid grid-cols-1 grid-rows-1",
+        "overflow-hidden",
         boxStyle,
         props.hidden && "hidden",
         props.classNameOuter
@@ -70,13 +71,8 @@ export function Box(props: Props) {
         <Scrollable
           ref={props.refInner}
           className={clsx("w-full h-full", props.classNameInner)}
-          style={{
-            ...props.styleInner,
-            padding: props.padding
-              ? `calc(var(--spacing) * ${props.padding})`
-              : undefined,
-          }}
-          padding={(props.padding ?? 0) / 2}
+          style={props.styleInner}
+          padding={props.padding ?? 0}
         >
           {props.children}
         </Scrollable>

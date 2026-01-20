@@ -93,7 +93,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           ] as const) {
             refCurrent.style.setProperty(
               `--tw-mask-${direction}-to-position`,
-              `calc(var(--spacing) * ${props.padding ?? 0} + min(${refCurrent.clientHeight / 2}px, 4rem, ${fade * 3}px))`
+              `calc(var(--spacing) * ${(props.padding ?? 0) / 2} + min(${refCurrent.clientHeight / 3}px, 4rem, ${fade * 3}px))`
             );
             refCurrent.style.setProperty(
               `--tw-mask-${direction}-from-color`,
@@ -159,10 +159,13 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         {
           ...props.style,
           willChange: "mask-image",
-          "--tw-mask-bottom-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
-          "--tw-mask-top-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
-          "--tw-mask-right-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
-          "--tw-mask-left-from-position": `calc(var(--spacing) * ${props.padding ?? 0})`,
+          padding: props.padding
+            ? `calc(var(--spacing) * ${props.padding})`
+            : undefined,
+          "--tw-mask-bottom-from-position": `calc(var(--spacing) * ${(props.padding ?? 0) / 2})`,
+          "--tw-mask-top-from-position": `calc(var(--spacing) * ${(props.padding ?? 0) / 2})`,
+          "--tw-mask-right-from-position": `calc(var(--spacing) * ${(props.padding ?? 0) / 2})`,
+          "--tw-mask-left-from-position": `calc(var(--spacing) * ${(props.padding ?? 0) / 2})`,
         } as CSSProperties
       }
     >
