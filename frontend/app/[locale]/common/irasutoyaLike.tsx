@@ -1,18 +1,15 @@
 "use client";
 
-import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
 import clsx from "clsx/lite";
 import { memo, useEffect, useState } from "react";
 
 export function IrasutoyaLikeBg() {
   const { screenWidth, screenHeight } = useDisplayMode();
-  const { isDark } = useTheme();
   return (
     <IrasutoyaLikeBgInner
       screenWidth={screenWidth}
       screenHeight={screenHeight}
-      isDark={isDark}
     />
   );
 }
@@ -20,9 +17,8 @@ const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
   // rem: number;
   screenWidth: number;
   screenHeight: number;
-  isDark: boolean;
 }) {
-  const { screenWidth, screenHeight, isDark } = props;
+  const { screenWidth, screenHeight } = props;
   const [paperTextureSeed, setPaperTextureSeed] = useState<number | null>(null);
   useEffect(() => {
     if (paperTextureSeed === null) {
@@ -34,7 +30,7 @@ const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
   return (
     <svg
       className={clsx(
-        "fixed -inset-0 -z-999999999 pointer-events-none",
+        "fn-irasutoya-like-bg",
         "transition-opacity duration-300",
         csrReady ? "opacity-100" : "opacity-0"
       )}
@@ -45,18 +41,8 @@ const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
         <>
           <defs>
             <linearGradient id="bgGradient" gradientTransform="rotate(90)">
-              <stop
-                offset="0%"
-                stopColor={
-                  isDark ? "var(--color-orange-975)" : "var(--color-sky-200)"
-                }
-              />
-              <stop
-                offset="100%"
-                stopColor={
-                  isDark ? "var(--color-orange-950)" : "var(--color-sky-50)"
-                }
-              />
+              <stop offset="0%" />
+              <stop offset="100%" />
             </linearGradient>
             <PaperTexture
               id="paperTextureBg"
@@ -91,14 +77,12 @@ interface GrassProps {
 }
 export function IrasutoyaLikeGrass(props: GrassProps) {
   const { rem, screenWidth, screenHeight } = useDisplayMode();
-  const { isDark } = useTheme();
   return (
     <IrasutoyaLikeGrassInner
       {...props}
       rem={rem}
       screenWidth={screenWidth}
       screenHeight={screenHeight}
-      isDark={isDark}
     />
   );
 }
@@ -107,10 +91,9 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
     rem: number;
     screenWidth: number;
     screenHeight: number;
-    isDark: boolean;
   }
 ) {
-  const { rem, screenWidth, screenHeight, isDark } = props;
+  const { rem, screenWidth, screenHeight } = props;
   const cellWidth = 3.5; // * rem;
   const cellHeight = 2.5; // * rem;
   const patternCols = 10;
@@ -185,7 +168,11 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   return (
     <>
       <svg
-        className={clsx(className, props.classNameFar)}
+        className={clsx(
+          "fn-irasutoya-like-grass-far",
+          className,
+          props.classNameFar
+        )}
         style={style}
         viewBox={viewBox}
       >
@@ -224,6 +211,7 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
                 y={screenHeight - props.height - 2.5 * rem}
                 width="100%"
                 height={5 * rem}
+                className="dummy"
                 fill="transparent"
               />
               <rect
@@ -231,16 +219,18 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
                 y={screenHeight - props.height}
                 width="100%"
                 height={2.5 * rem}
-                fill={
-                  isDark ? "var(--color-lime-900)" : "var(--color-lime-600)"
-                }
+                /*fill={in irasutoya-like.css}*/
               />
             </g>
           </g>
         </g>
       </svg>
       <svg
-        className={clsx(className, props.classNameNear)}
+        className={clsx(
+          "fn-irasutoya-like-grass-near",
+          className,
+          props.classNameNear
+        )}
         style={style}
         viewBox={viewBox}
       >
@@ -253,10 +243,7 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
             height={cellHeight * patternRows * rem}
             patternUnits="userSpaceOnUse"
           >
-            <g
-              fill={isDark ? "var(--color-lime-600)" : "var(--color-lime-200)"}
-              fillOpacity="0.3"
-            >
+            <g /*fill={in irasutoya-like.css}*/ fillOpacity="0.3">
               {p.grassTufts.map((tuft, index) => (
                 <rect
                   key={index}
@@ -295,24 +282,9 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
           />
 
           <linearGradient id="grassGradient" gradientTransform="rotate(90)">
-            <stop
-              offset="0%"
-              stopColor={
-                isDark ? "var(--color-lime-700)" : "var(--color-lime-300)"
-              }
-            />
-            <stop
-              offset="50%"
-              stopColor={
-                isDark ? "var(--color-lime-800)" : "var(--color-lime-500)"
-              }
-            />
-            <stop
-              offset="100%"
-              stopColor={
-                isDark ? "var(--color-lime-900)" : "var(--color-lime-600)"
-              }
-            />
+            <stop offset="0%" />
+            <stop offset="50%" />
+            <stop offset="100%" />
           </linearGradient>
         </defs>
 
@@ -324,6 +296,7 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
                 y={screenHeight - props.height - 2.5 * rem}
                 width="100%"
                 height={5 * rem}
+                className="dummy"
                 fill="transparent"
               />
               <rect
