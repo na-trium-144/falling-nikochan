@@ -334,12 +334,12 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               />
               <span className="mr-1 ">{t("offsetSecond")}</span>
               <Button
-                className="h-8! py-0!"
+                small
                 text="-"
                 onClick={() => props.setUserOffset(props.userOffset - 0.01)}
               />
               <Button
-                className="h-8! py-0!"
+                small
                 text="+"
                 onClick={() => props.setUserOffset(props.userOffset + 0.01)}
               />

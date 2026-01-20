@@ -795,10 +795,12 @@ export default function Edit(props: {
               <div className="flex-1" />
               <span className="mr-1">{t("zoom")}</span>
               <Button
+                small
                 text="-"
                 onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
               />
               <Button
+                small
                 text="+"
                 onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
               />
@@ -903,7 +905,8 @@ export default function Edit(props: {
                     {t("running")}
                   </span>
                   <Button
-                    className="ml-2 h-8! py-0!"
+                    className="ml-2"
+                    small
                     onClick={luaExecutor.abortExec}
                     text={t("cancel")}
                   />
