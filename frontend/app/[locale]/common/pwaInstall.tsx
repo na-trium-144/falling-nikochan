@@ -340,12 +340,13 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       {props.children}
       <Box
         classNameOuter={clsx(
-          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-modal",
+          "fixed bottom-12 inset-x-0 w-max max-w-full mx-auto shadow-modal",
           "transition-all duration-200 origin-bottom",
           workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
             ? "ease-in scale-100 opacity-100"
             : "ease-out scale-0 opacity-0"
         )}
+        padding={2}
       >
         {workerUpdate?.state === "updating" ? (
           <>
@@ -363,7 +364,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             )*/}
             {workerUpdate?.progressNum !== undefined && (
               <ProgressBar
-                className="absolute! bottom-0 inset-x-1 "
+                className="absolute! bottom-1 inset-x-2.5 "
                 fixedColor={levelBgColors[1]}
                 value={
                   (workerUpdate?.progressNum || 0) /
