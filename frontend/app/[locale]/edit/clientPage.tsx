@@ -503,8 +503,7 @@ export default function Edit(props: {
                 "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
-              classNameInner={clsx("overflow-x-clip")}
-              scrollable
+              scrollableY
               padding={6}
             >
               <PasswdPrompt
@@ -845,7 +844,8 @@ export default function Edit(props: {
                 "edit-wide:flex-1 edit-wide:min-h-0"
               )}
               classNameInner={clsx("relative")}
-              scrollable
+              scrollableX
+              scrollableY
               padding={3}
             >
               {tab === 0 ? (
@@ -895,7 +895,8 @@ export default function Edit(props: {
                 ) && "main-wide:hidden"
               )}
               classNameInner="h-24! max-h-24 edit-wide:h-auto"
-              scrollable
+              scrollableX
+              scrollableY
               padding={2}
             >
               {luaExecutor.running ? (

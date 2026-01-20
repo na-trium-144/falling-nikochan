@@ -57,7 +57,7 @@ export function DevPage(props: { locale: string }) {
           <Box
             classNameOuter="w-max h-max max-w-full max-h-full"
             classNameInner="space-y-3"
-            scrollable
+            scrollableY
             padding={6}
           >
             <div className="hidden mb-3 main-wide:flex flex-row items-center">
@@ -238,6 +238,7 @@ function StorageEditor(props: EProps) {
               isError && "text-red-600 dark:text-red-400"
             )}
             padding={2}
+            scrollableY
           >
             {message.map((m, i) => (
               <p key={i}>{m}</p>
