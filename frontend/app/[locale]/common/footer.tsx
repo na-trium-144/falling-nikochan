@@ -17,6 +17,15 @@ import { lastVisitedOld } from "./version.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
 import { ChangeLogPopup } from "./changeLog.jsx";
 import { LinkWithReview } from "./pwaInstall.jsx";
+import {
+  boxButtonBorderStyle1,
+  boxButtonBorderStyle2,
+  boxButtonStyle,
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "./flatButton.jsx";
+import { ButtonHighlight } from "./button.jsx";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
 export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
@@ -123,40 +132,62 @@ export function MobileFooter(props: MobileProps) {
   return (
     <footer
       className={clsx(
-        "pt-3 pb-1 z-10 w-full",
+        "pb-2 px-8 z-10 w-full",
         "main-wide:h-0 main-wide:p-0!",
-        "flex flex-row items-center justify-stretch relative"
+        "flex flex-row items-center justify-stretch gap-[2vw] relative"
       )}
     >
       {mobileTabTitleKeys.map((key, i) => (
         <LinkWithReview
           key={i}
           className={clsx(
-            "w-full text-xl space-y-1 flex flex-col items-center main-wide:hidden",
-            props.tabKey === key || "text-slate-500 dark:text-stone-400"
+            "w-full text-lg gap-0.5 flex flex-col items-center main-wide:hidden",
+            // props.tabKey === key || "text-slate-500 dark:text-stone-400",
+            props.tabKey !== "top" ? "rounded-b-2xl" : "rounded-2xl",
+            "pb-1 pt-1",
+            props.tabKey === key && props.tabKey !== "top"
+              ? boxButtonStyle
+              : skyFlatButtonStyle
           )}
           href={`/${props.locale}${tabURLs[key]}`}
         >
+          <span
+            className={clsx(
+              props.tabKey === key && key !== "top"
+                ? boxButtonBorderStyle1
+                : skyFlatButtonBorderStyle1,
+              props.tabKey !== "top" ? "border-t-0" : "",
+            )}
+          />
+          <span
+            className={clsx(
+              props.tabKey === key && key !== "top"
+                ? boxButtonBorderStyle2
+                : skyFlatButtonBorderStyle2,
+              props.tabKey !== "top" ? "border-t-0" : "",
+            )}
+          />
+          <ButtonHighlight />
           {i === 0 ? (
             <Home
               theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[1]}
+              fill={props.tabKey === key ? iconFill : iconFill[0]}
             />
           ) : i === 1 ? (
             <Search
               theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[1]}
+              fill={props.tabKey === key ? iconFill : iconFill[0]}
             />
           ) : i === 2 ? (
             <Edit
               theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[1]}
+              fill={props.tabKey === key ? iconFill : iconFill[0]}
             />
           ) : (
             <div className="relative">
               <More
                 theme={props.tabKey === key ? "two-tone" : "outline"}
-                fill={props.tabKey === key ? iconFill : iconFill[1]}
+                fill={props.tabKey === key ? iconFill : iconFill[0]}
               />
               <span
                 className={clsx(
@@ -167,7 +198,7 @@ export function MobileFooter(props: MobileProps) {
               />
             </div>
           )}
-          <span className="text-sm ">{tm(key + ".titleShort")}</span>
+          <span className="text-xs ">{tm(key + ".titleShort")}</span>
         </LinkWithReview>
       ))}
     </footer>
