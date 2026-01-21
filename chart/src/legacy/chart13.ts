@@ -147,11 +147,8 @@ export async function convertTo13(chart: ChartUntil11): Promise<Chart13Edit> {
     levels: chart.levels.map((level) => ({
       ...level,
       speedChanges: level.speedChanges.map((sc) => ({
-        step: sc.step,
-        timeSec: sc.timeSec,
-        bpm: sc.bpm,
+        ...sc,
         interp: false,
-        luaLine: sc.luaLine,
       })),
     })),
   };

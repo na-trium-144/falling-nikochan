@@ -38,6 +38,7 @@ import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero } from "./step.js";
 import { ChartUntil11, ChartUntil11Min, Level11Min } from "./legacy/chart11.js";
 import { defaultCopyBuffer } from "./command.js";
+import objectHash from "object-hash";
 import {
   Chart13Edit,
   Chart13Min,
@@ -142,7 +143,20 @@ export async function hash(text: string) {
     .join(""); // バイト列を 16 進文字列に変換する
   return hashHex;
 }
-export const hashLevel = hashLevel7;
+
+/**
+ * Calculates hash of a level using object-hash library.
+ * This ensures consistent hashing regardless of property order.
+ * @param level Level13Edit to hash
+ * @returns Promise<string> SHA-256 hash in hex format
+ */
+export async function hashLevel(level: Level13Edit): Promise<string> {
+  // Use object-hash with sort option to ensure consistent ordering
+  return objectHash(
+    [level.notes, level.bpmChanges, level.speedChanges, level.signature],
+    { algorithm: "sha256", encoding: "hex" }
+  );
+}
 
 export function numEvents(chart: ChartEdit): number {
   return chart.levels
