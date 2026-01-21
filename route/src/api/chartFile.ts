@@ -387,7 +387,7 @@ const chartFileApp = async (config: {
           case 4:
           case 5:
           case 6:
-            // For versions 6 and below, hash is incompatible, so use the stored hash
+            // For versions 4-6, hash is incompatible, so use the stored hash
             prevHashes = entry.levelBrief
               .filter((l) => !l.unlisted)
               .map((l) => l.hash);
@@ -398,7 +398,7 @@ const chartFileApp = async (config: {
           case 10:
           case 11:
           case 12:
-            // For versions 7+, upgrade to v13 and recalculate hash
+            // For versions 7-12, upgrade to v13 and recalculate hash
             const upgradedChart = await convertTo13(existingChart);
             prevHashes = await Promise.all(
               upgradedChart.levels
