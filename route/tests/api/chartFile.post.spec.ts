@@ -397,5 +397,27 @@ describe("POST /api/chartFile/:cid", () => {
         await client.close();
       }
     });
+    test("should not be updated when uploading same chart to ver7 chart", async () => {
+      await initDb();
+      const res = await app.request("/api/chartFile/100007?p=p", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.serialize(dummyChart()),
+      });
+      expect(res.status).to.equal(204);
+
+      const client = new MongoClient(process.env.MONGODB_URI!);
+      try {
+        await client.connect();
+        const db = client.db("nikochan");
+        const e = await db
+          .collection<ChartEntryCompressed>("chart")
+          .findOne({ cid: String(Number(dummyCid) + 7) });
+        expect(e).not.to.be.null;
+        expect(e!.updatedAt).to.equal(dummyDate.getTime());
+      } finally {
+        await client.close();
+      }
+    });
   });
 });

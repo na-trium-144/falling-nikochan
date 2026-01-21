@@ -12,6 +12,7 @@ import {
   HashSchema,
   ChartEditSchema13,
   rateLimit,
+  convertTo13,
 } from "@falling-nikochan/chart";
 import { Db, MongoClient } from "mongodb";
 import {
@@ -378,9 +379,45 @@ const chartFileApp = async (config: {
         }
 
         // update Time
-        const prevHashes = entry.levelBrief
-          .filter((l) => !l.unlisted)
-          .map((l) => l.hash);
+        // Convert existing chart to latest version before comparing hashes
+        // This allows preserving play records when overwriting with same content from older versions
+        const existingChart = c.get("chart");
+        let prevHashes: string[];
+        switch (existingChart.ver) {
+          case 4:
+          case 5:
+          case 6:
+            // For versions 6 and below, hash is incompatible, so use the stored hash
+            prevHashes = entry.levelBrief
+              .filter((l) => !l.unlisted)
+              .map((l) => l.hash);
+            break;
+          case 7:
+          case 8:
+          case 9:
+          case 10:
+          case 11:
+          case 12:
+            // For versions 7+, upgrade to v13 and recalculate hash
+            const upgradedChart = await convertTo13(existingChart);
+            prevHashes = await Promise.all(
+              upgradedChart.levels
+                .filter((l) => !l.unlisted)
+                .map((level) => hashLevel(level))
+            );
+            break;
+          case 13:
+            // Already at latest version
+            prevHashes = await Promise.all(
+              existingChart.levels
+                .filter((l) => !l.unlisted)
+                .map((level) => hashLevel(level))
+            );
+            break;
+          default:
+            existingChart satisfies never;
+            throw new HTTPException(500, { message: "unsupportedChartVersion" });
+        }
         const newHashes = await Promise.all(
           newChart.levels
             .filter((l) => !l.unlisted)

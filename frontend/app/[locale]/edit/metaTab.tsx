@@ -211,19 +211,11 @@ export function MetaTab(props: Props2) {
         )}
         {props.chart &&
         /*props.convertedFrom < currentChartVer*/
-        props.chart.convertedFrom <= lastIncompatibleVer ? (
+        props.chart.convertedFrom <= lastIncompatibleVer && (
           <span className="inline-block ml-1 text-amber-600 text-sm ">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
             {t("convertingIncompatible", { ver: props.chart.convertedFrom })}
           </span>
-        ) : (
-          props.chart &&
-          props.chart.convertedFrom <= lastHashChangeVer && (
-            <span className="inline-block ml-1 text-amber-600 text-sm ">
-              <Caution className="inline-block mr-1 translate-y-0.5 " />
-              {t("convertingHashChange", { ver: props.chart.convertedFrom })}
-            </span>
-          )
         )}
       </div>
       {props.chart?.cid && (
