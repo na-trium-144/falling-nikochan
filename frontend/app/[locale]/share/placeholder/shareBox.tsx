@@ -75,10 +75,10 @@ export function ShareBox(props: Props) {
         <div
           className={clsx(
             "w-full shrink-0 main-wide:basis-1/3 share-yt-wide:w-80",
-            "p-2 rounded-lg",
+            "p-2 rounded-sq-lg",
             ytMeta &&
               colorThief.ready &&
-              "rounded-br-none main-wide:rounded-br-lg main-wide:rounded-bl-none",
+              "rounded-br-none main-wide:rounded-br-sq-lg main-wide:rounded-bl-none",
             "relative",
             colorThief.boxStyle
           )}
@@ -114,7 +114,7 @@ export function ShareBox(props: Props) {
               <div
                 className={clsx(
                   "px-2 pb-1 main-wide:pt-1 w-max max-w-full",
-                  "rounded-b-lg main-wide:rounded-l-lg main-wide:rounded-r-none",
+                  "rounded-b-sq-xl main-wide:rounded-l-sq-xl main-wide:rounded-r-none",
                   "relative",
                   colorThief.boxStyle,
                   !(ytMeta && colorThief.ready) &&

@@ -10,12 +10,12 @@ export const boxStyle = clsx(
   "inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25"
 );
 export const boxBorderStyle1 = clsx(
-  "absolute inset-0 z-2 rounded-[inherit] pointer-events-none",
+  "absolute inset-0 z-2 rounded-[inherit] sq-inherit pointer-events-none",
   "border border-white/100 dark:border-stone-400/50",
   "mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%"
 );
 export const boxBorderStyle2 = clsx(
-  "absolute inset-0 z-1 rounded-[inherit] pointer-events-none",
+  "absolute inset-0 z-1 rounded-[inherit] sq-inherit pointer-events-none",
   "border border-slate-300/80 dark:border-stone-900/30",
   "-mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%"
 );
@@ -53,7 +53,7 @@ export function Box(props: Props) {
         内側の要素のサイズはgridとw-full,h-full指定により外側と同じになる (たぶん)
         */
         "relative",
-        "rounded-box",
+        "rounded-sq-box",
         "grid grid-cols-1 grid-rows-1",
         "overflow-hidden",
         boxStyle,

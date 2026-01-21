@@ -76,7 +76,7 @@ export function PlayOption(props: Props) {
     <div
       className={clsx(
         "mx-auto mt-4 p-3",
-        "w-max max-w-full rounded-xl",
+        "w-max max-w-full rounded-sq-2xl",
         // "border-sky-200 dark:border-orange-900",
         "bg-sky-200/25 dark:bg-orange-950/25",
         "relative",
@@ -136,7 +136,7 @@ export function PlayOption(props: Props) {
           <div
             className={clsx(
               "flex-none max-w-full px-4 py-2",
-              "text-center rounded-lg border",
+              "text-center rounded-sq-xl border",
               "border-slate-400 dark:border-stone-600",
               "bg-white dark:bg-stone-800",
               "main-wide:transition-all main-wide:duration-200 origin-left",
@@ -356,7 +356,7 @@ function SelectedLevelInfo(props: {
       )}
       <button
         className={clsx(
-          "w-full mt-2 px-2 rounded-lg",
+          "w-full mt-2 px-2 rounded-sq-xl",
           "flex flex-col items-center",
           selectedBestScore && invertedFlatButtonStyle
         )}

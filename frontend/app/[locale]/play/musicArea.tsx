@@ -105,9 +105,9 @@ export function MusicArea(props: Props) {
   return (
     <div
       className={clsx(
-        "z-10 grow-0 shrink-0 pb-1 flex",
+        "z-10 grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
-        props.isMobile ? "rounded-b-xl" : "rounded-bl-box pl-3",
+        props.isMobile ? "rounded-b-sq-xl pb-1" : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
         props.className,
         colorThief.boxStyle
@@ -339,7 +339,7 @@ export function MusicArea(props: Props) {
       <ProgressBar
         value={currentSec / levelLength}
         fixedColor="bg-red-500/75"
-        className={clsx(props.isMobile ? "mx-2" : "mr-1")}
+        className={clsx(props.isMobile ? "mx-2" : "ml-0.5 mr-1")}
       />
       <button
         className={clsx(
@@ -372,7 +372,7 @@ export function MusicArea(props: Props) {
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
             : "top-full left-3 right-1 mt-1 p-3",
-          "rounded-box",
+          "rounded-sq-box",
           boxStyle,
           "transition-all duration-200",
           volumeCtrlOpen

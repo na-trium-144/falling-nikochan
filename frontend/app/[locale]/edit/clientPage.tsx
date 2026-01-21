@@ -583,7 +583,7 @@ export default function Edit(props: {
             </div>
             <div
               className={clsx(
-                "relative grow-0 shrink-0 p-3 rounded-lg flex flex-col items-center",
+                "relative grow-0 shrink-0 p-3 rounded-sq-xl flex flex-col items-center",
                 // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
                 //   levelBgColors[1],
                 chart || "invisible",
@@ -809,7 +809,7 @@ export default function Edit(props: {
                 i === tab ? (
                   <Box
                     key={i}
-                    classNameOuter="rounded-b-none px-3 pt-2 pb-1"
+                    classNameOuter="sq-unset! rounded-t-2xl! rounded-b-none px-3 pt-2 pb-1"
                     classNameBorder="border-b-0!"
                   >
                     {t(`${key}.title`)}
@@ -818,7 +818,7 @@ export default function Edit(props: {
                   <button
                     key={i}
                     className={clsx(
-                      "rounded-t-box px-3 pt-2 pb-1",
+                      "rounded-t-2xl px-3 pt-2 pb-1",
                       skyFlatButtonStyle
                     )}
                     onClick={() => {
@@ -886,7 +886,7 @@ export default function Edit(props: {
             </Box>
             <Box
               classNameOuter={clsx(
-                "mt-2 rounded-xl",
+                "mt-2",
                 "bg-slate-200/50! dark:bg-stone-700/50!",
                 !(
                   luaExecutor.running ||
@@ -897,7 +897,7 @@ export default function Edit(props: {
               classNameInner="h-24! max-h-24 edit-wide:h-auto"
               scrollableX
               scrollableY
-              padding={2}
+              padding={3}
             >
               {luaExecutor.running ? (
                 <>
