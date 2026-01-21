@@ -494,7 +494,7 @@ export default function Edit(props: {
         </MobileHeader>
         <Button text={t("help")} onClick={openGuide} />
       </div>
-      <div className="w-0 h-13 edit-wide:hidden" />
+      <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
         <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-6 grid place-content-center">
@@ -559,7 +559,7 @@ export default function Edit(props: {
         <div
           className={clsx(
             "w-full",
-            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:flex-row"
+            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row"
           )}
         >
           <div
@@ -669,7 +669,7 @@ export default function Edit(props: {
             className={clsx(
               "p-3 flex flex-col items-stretch",
               "h-5/6",
-              "edit-wide:h-full edit-wide:flex-1"
+              "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
             )}
           >
             <div>

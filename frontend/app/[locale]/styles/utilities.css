@@ -13,3 +13,14 @@
   appearance: none;
   -webkit-appearance: none;
 }
+
+/* widthやbasisにはあるが、heightにはない (containerって横方向の長さ用だし) */
+@utility h-* {
+  height: --value(--container-*);
+}
+@utility max-h-* {
+  max-height: --value(--container-*);
+}
+@utility min-h-* {
+  min-height: --value(--container-*);
+}

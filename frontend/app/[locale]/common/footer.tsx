@@ -204,3 +204,17 @@ export function MobileFooter(props: MobileProps) {
     </footer>
   );
 }
+
+export function MobileFooterWithGradient(props: MobileProps) {
+  return (
+    <div
+      className={clsx(
+        "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
+        "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
+        "dark:from-orange-950 dark:to-orange-950/0"
+      )}
+    >
+      <MobileFooter {...props} />
+    </div>
+  );
+}
