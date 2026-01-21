@@ -19,6 +19,14 @@ export const boxBorderStyle2 = clsx(
   "border border-slate-300/80 dark:border-stone-900/30",
   "-mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%"
 );
+export const warningBoxBorderStyle1 = clsx(
+  boxBorderStyle1,
+  "border-white/80! dark:border-stone-300/50!"
+);
+export const warningBoxBorderStyle2 = clsx(
+  boxBorderStyle2,
+  "border-amber-600/25!"
+);
 
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
@@ -134,8 +142,10 @@ export function WarningBox(props: Props) {
   return (
     <div
       className={clsx(
-        "text-center text-sm mx-6 my-2 px-3 py-2 h-max",
-        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 backdrop-blur-2xs",
+        "relative",
+        "text-center text-sm mx-6 my-2 p-3 h-max",
+        "rounded-sq-2xl bg-amber-400/25 backdrop-blur-xs",
+        "inset-shadow-button inset-shadow-amber-800/10",
         props.hidden && "hidden"
       )}
       ref={props.refOuter}
@@ -144,6 +154,8 @@ export function WarningBox(props: Props) {
       onPointerDown={props.onPointerDown}
       onPointerUp={props.onPointerUp}
     >
+      <span className={clsx(warningBoxBorderStyle1, props.classNameBorder)} />
+      <span className={clsx(warningBoxBorderStyle2, props.classNameBorder)} />
       {props.children}
     </div>
   );

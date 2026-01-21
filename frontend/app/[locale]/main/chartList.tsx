@@ -429,7 +429,7 @@ export function ChartList(props: Props) {
   );
 }
 
-const chartListBgStyle = "rounded-md bg-sky-200/50 dark:bg-orange-950/50";
+const chartListBgStyle = "rounded-md bg-sky-400/15 dark:bg-orange-700/10";
 const chartListStyle = clsx(
   "block w-full text-left cursor-pointer",
   // "hover:shadow active:shadow-inner",
