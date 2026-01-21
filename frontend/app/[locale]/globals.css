@@ -10,7 +10,7 @@
   --color-default: var(--color-slate-800);
   --color-default-dark: var(--color-stone-300);
   --blur-2xs: 2px;
-  --radius-box: 1.25rem;
+  --radius-box: 1.5rem;
   --shadow-modal: var(--shadow-md);
   --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
   --font-main-ui: "Merriweather", "Kaisei Opti", serif;
@@ -20,6 +20,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @import "./styles/utilities.css";
+@import "./styles/squircle.css";
 
 @import "./styles/result.css";
 @import "./styles/irasutoya-like.css";

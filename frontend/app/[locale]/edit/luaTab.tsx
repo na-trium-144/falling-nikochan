@@ -182,7 +182,7 @@ export function LuaTabProvider(props: Props & PProps) {
     <LuaPositionContext.Provider value={{ data, setData }}>
       {props.children}
       <div
-        className={clsx("absolute rounded-box", visible || "hidden")}
+        className={clsx("absolute rounded-sq-box", visible || "hidden")}
         style={{ top, left, width, height }}
       >
         <AceEditor

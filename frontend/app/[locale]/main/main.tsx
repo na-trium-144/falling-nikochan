@@ -117,7 +117,7 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-l-box py-3 pl-2 pr-2 text-center",
+                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
                     boxButtonStyle
                   )}
                 >
@@ -131,7 +131,7 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-l-box py-3 pl-2 pr-2 text-center",
+                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
                     skyFlatButtonStyle
                   )}
                 >

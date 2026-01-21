@@ -40,7 +40,7 @@ export function ButtonHighlight(props: { className?: string }) {
   return (
     <span
       className={clsx(
-        "absolute inset-0 z-3 rounded-[inherit]",
+        "absolute inset-0 z-3 rounded-[inherit] sq-inherit",
         "bg-radial-[circle_3rem_at_var(--hl-x)_var(--hl-y)]",
         "from-white/50 to-white/25",
         "dark:from-stone-300/20 dark:to-stone-300/10",

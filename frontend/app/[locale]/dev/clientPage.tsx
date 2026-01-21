@@ -208,7 +208,7 @@ function StorageEditor(props: EProps) {
         classNameOuter={clsx("mt-2", !showEditor && "hidden")}
         classNameInner="overflow-hidden"
       >
-        <div className="rounded-t-box">
+        <div className="rounded-t-sq-box">
           <AceEditor
             mode="yaml"
             theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
@@ -226,7 +226,7 @@ function StorageEditor(props: EProps) {
         </div>
         <div
           className={clsx(
-            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-box",
+            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-sq-box",
             "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
             "overflow-hidden"
           )}

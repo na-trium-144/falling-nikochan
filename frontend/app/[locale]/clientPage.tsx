@@ -190,7 +190,7 @@ export default function TopPage(props: Props) {
               key={i}
               href={`/${locale}${tabURLs[key]}`}
               className={clsx(
-                "text-center rounded-box py-3 pl-2 pr-2",
+                "text-center rounded-2xl py-3 pl-2 pr-2",
                 skyFlatButtonStyle
               )}
               prefetch={!process.env.NO_PREFETCH}
