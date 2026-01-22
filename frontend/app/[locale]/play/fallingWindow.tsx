@@ -10,6 +10,7 @@ import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme";
 import { useRealFPS } from "@/common/fpsCalculator";
+import { DisplayNikochan } from "./displayNikochan";
 
 interface Props {
   className?: string;
@@ -229,15 +230,11 @@ export default function FallingWindow(props: Props) {
   }, [noteSize, nikochanCanvasDPR.current]);
 
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
-  const noteFadeInStart = useRef<(DOMHighResTimeStamp | null)[]>([]);
-  const tailVels = useRef<(Pos | null)[]>([]);
+  const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
   useEffect(() => {
     if (playing) {
-      while (notes.length >= tailVels.current.length) {
-        tailVels.current.push(null);
-      }
-      while (notes.length >= noteFadeInStart.current.length) {
-        noteFadeInStart.current.push(null);
+      while (notes.length >= displayNikochan.current.length) {
+        displayNikochan.current.push(null);
       }
     }
   }, [playing, notes]);
@@ -254,9 +251,25 @@ export default function FallingWindow(props: Props) {
       canvasMarginX !== undefined &&
       canvasMarginY !== undefined &&
       boxSize &&
-      now !== undefined
+      now !== undefined &&
+      nikochanBitmap.current
     ) {
       let shouldHideBPMSign = false;
+
+      const c = {
+        noteSize,
+        boxSize,
+        canvasMarginX,
+        canvasMarginY,
+        marginY,
+        playbackRate,
+        rem,
+        now,
+        tailsCanvasDPR,
+        nikochanCanvasDPR: nikochanCanvasDPR.current,
+        nikochanBitmap: nikochanBitmap.current,
+        lastNow: lastNow.current,
+      };
 
       displayNotes.current = notes
         .map((n) =>
@@ -265,194 +278,32 @@ export default function FallingWindow(props: Props) {
         .filter((n) => n !== null);
       displayNotes.current.reverse(); // 奥に表示されるものが最初
 
-      if (nctx) {
+      if (nctx && ctx) {
         nctx.clearRect(
           0,
           0,
           canvasWidth.current * nikochanCanvasDPR.current,
           canvasHeight.current * nikochanCanvasDPR.current
         );
-        for (const dn of displayNotes.current) {
-          const n = notes[dn.id];
-
-          const size = noteSize * bigScale(n.big);
-          const left = dn.pos.x * boxSize + canvasMarginX - size / 2;
-          const targetLeft = n.targetX * boxSize + canvasMarginX - size / 2;
-          shouldHideBPMSign ||=
-            // 実際のBPMSignのサイズ + 0.5rem くらい
-            marginY + targetY * boxSize - size / 2 < 5 * rem &&
-            (targetLeft < 8 * rem ||
-              ("vy" in n && n.vy <= 0 && left < 8 * rem)) &&
-            n.hitTimeSec - now < 0.5 * playbackRate &&
-            now - n.hitTimeSec < 0.5 * playbackRate;
-
-          if (n.done > 0) {
-            // 判定後のエフェクトについてはNikochanコンポーネント内のimgタグで描画する
-            continue;
-          }
-
-          const top =
-            canvasMarginY +
-            boxSize -
-            targetY * boxSize -
-            dn.pos.y * boxSize -
-            size / 2;
-          const isOffScreen =
-            left + size < 0 ||
-            left - size > window.innerWidth ||
-            top - size > canvasMarginY + boxSize ||
-            top + size < 0;
-          // 出現直後は100msのフェードインをする。
-          // ただし最初から画面外にいるものについてはフェードインしない(開始時刻を-Infinityにすることで完了状態にする)
-          if (noteFadeInStart.current[dn.id] === null) {
-            if (isOffScreen) {
-              noteFadeInStart.current[dn.id] = -Infinity;
-            } else {
-              noteFadeInStart.current[dn.id] = performance.now();
-            }
-          }
-          nctx.globalAlpha =
-            0.7 *
-            Math.min(
-              1,
-              (performance.now() - noteFadeInStart.current[dn.id]!) / 100
-            );
-          if (n.big) {
-            nctx.drawImage(
-              nikochanBitmap.current![0][1],
-              left * nikochanCanvasDPR.current,
-              top * nikochanCanvasDPR.current
-            );
-          } else {
-            nctx.drawImage(
-              nikochanBitmap.current![0][0],
-              left * nikochanCanvasDPR.current,
-              top * nikochanCanvasDPR.current
-            );
-          }
-        }
-      }
-      if (ctx) {
         ctx.clearRect(
           0,
           0,
           canvasWidth.current * tailsCanvasDPR,
           canvasHeight.current * tailsCanvasDPR
         );
-        const headSize = noteSize * 1;
-        const tailSize = noteSize * 0.85;
-        const tailScaleFactor = 0.25;
-        const tailTau = 0.2;
-        const tailLambda = 0.15;
-        function norm(xy: Pos) {
-          return Math.sqrt(xy.x * xy.x + xy.y * xy.y);
-        }
         for (const dn of displayNotes.current) {
-          if (!tailVels.current[dn.id]) {
-            tailVels.current[dn.id] = { x: 0, y: 0 };
-          } else {
-            const n = notes[dn.id];
-            const tailVel = tailVels.current[dn.id]!;
-
-            // 速度の変化が大きい場合に、細かく刻んで計算する
-            const dtSplitNum = Math.max(
-              1,
-              Math.min(
-                10,
-                Math.round(
-                  Math.abs(tailVels.current[dn.id]!.y - dn.vel.y) / 0.5
-                )
-              )
+          if (displayNikochan.current[dn.id] === null) {
+            displayNikochan.current[dn.id] = new DisplayNikochan(
+              notes[dn.id],
+              dn,
+              c
             );
-            const dt = Math.max(0, now - lastNow.current) / dtSplitNum;
-            function updateVelDamp(newVel: Pos) {
-              // dv(移動距離)は速度が反転する瞬間などは0(追従を遅くする)になってほしいので、
-              // x,yそれぞれ平均してから絶対値を取る
-              const dv =
-                norm({
-                  x: (tailVel.x + newVel.x) / 2,
-                  y: (tailVel.y + newVel.y) / 2,
-                }) * dt;
-              const velDamp = Math.exp(-dt / tailTau - dv / tailLambda);
-              tailVel.x = tailVel.x * velDamp + newVel.x * (1 - velDamp);
-              tailVel.y = tailVel.y * velDamp + newVel.y * (1 - velDamp);
-            }
-
-            for (let di = 1; di < dtSplitNum; di++) {
-              const t = lastNow.current + dt * di;
-              const newVel = (
-                n.ver === 6 ? displayNote6(n, t) : displayNote13(n, t)
-              )?.vel;
-              if (newVel) {
-                updateVelDamp(newVel);
-              }
-            }
-            updateVelDamp(dn.vel);
-
-            const log1pVelLength = Math.log1p(norm(tailVel));
-            const tailLength =
-              log1pVelLength *
-              tailScaleFactor *
-              boxSize *
-              Math.sqrt(bigScale(n.big));
-            const tailWidth = tailSize * bigScale(n.big);
-            const tailOpacity = Math.min(1, log1pVelLength * 2);
-            const velAngle = Math.atan2(-tailVel.y, tailVel.x);
-
-            if (tailLength > noteSize / 2 && tailOpacity > 0.5) {
-              ctx.save();
-              ctx.scale(tailsCanvasDPR, tailsCanvasDPR);
-              ctx.translate(
-                dn.pos.x * boxSize + canvasMarginX,
-                canvasMarginY + boxSize - targetY * boxSize - dn.pos.y * boxSize
-              );
-              ctx.rotate(velAngle);
-              const tailGrad = ctx.createLinearGradient(tailLength, 0, 0, 0);
-              tailGrad.addColorStop(0, "#facd0000");
-              tailGrad.addColorStop(1, "#facd00cc");
-              ctx.beginPath();
-              ctx.moveTo(tailLength, 0);
-              ctx.lineTo(0, -tailWidth / 2);
-              ctx.lineTo(0, tailWidth / 2);
-              ctx.closePath();
-              ctx.fillStyle = tailGrad;
-              // ctx.shadowBlur = 10;
-              // ctx.shadowColor = "#facd0080";
-              ctx.globalAlpha = tailOpacity;
-              ctx.fill();
-              ctx.restore();
-            }
-
-            if (
-              n.done === 0 ||
-              (tailLength > noteSize / 2 && tailOpacity > 0.5)
-            ) {
-              ctx.save();
-              ctx.scale(tailsCanvasDPR, tailsCanvasDPR);
-              ctx.translate(
-                dn.pos.x * boxSize + canvasMarginX,
-                canvasMarginY + boxSize - targetY * boxSize - dn.pos.y * boxSize
-              );
-              ctx.globalAlpha = n.done === 0 ? 1 : tailOpacity;
-              ctx.beginPath();
-              const headRadius = (headSize * bigScale(n.big)) / 2;
-              ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
-              const headGrad = ctx.createRadialGradient(
-                0,
-                0,
-                0,
-                0,
-                0,
-                headRadius
-              );
-              headGrad.addColorStop(0, "#ffe89dff");
-              headGrad.addColorStop(0.5, "#ffe89dcc");
-              headGrad.addColorStop(1, "#ffe89d00");
-              ctx.fillStyle = headGrad;
-              ctx.fill();
-              ctx.restore();
-            }
           }
+          const dns = displayNikochan.current[dn.id]!;
+          dns.update(dn, c);
+          shouldHideBPMSign ||= dns.shouldHideBPMSign;
+          dns.drawNikochan(nctx);
+          dns.drawTail(ctx);
         }
         lastNow.current = now;
 
@@ -480,8 +331,7 @@ export default function FallingWindow(props: Props) {
           );
         }
       }
-      tailVels.current = [];
-      noteFadeInStart.current = [];
+      displayNikochan.current = [];
       if (props.shouldHideBPMSign !== false) {
         setTimeout(() => props.setShouldHideBPMSign(false));
       }
