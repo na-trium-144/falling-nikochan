@@ -13,18 +13,19 @@ export function IrasutoyaLikeBg() {
     />
   );
 }
-const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
+export const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
   // rem: number;
   screenWidth: number;
   screenHeight: number;
+  fixedSeed?: boolean;
 }) {
-  const { screenWidth, screenHeight } = props;
+  const { screenWidth, screenHeight, fixedSeed } = props;
   const [paperTextureSeed, setPaperTextureSeed] = useState<number | null>(null);
   useEffect(() => {
     if (paperTextureSeed === null) {
-      setPaperTextureSeed(Math.floor(Math.random() * 1000));
+      setPaperTextureSeed(fixedSeed ? 5 : Math.floor(Math.random() * 1000));
     }
-  }, [paperTextureSeed]);
+  }, [fixedSeed, paperTextureSeed]);
   const csrReady =
     paperTextureSeed !== null && screenWidth >= 2 && screenHeight >= 2;
   return (
@@ -86,14 +87,15 @@ export function IrasutoyaLikeGrass(props: GrassProps) {
     />
   );
 }
-const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
+export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   props: GrassProps & {
     rem: number;
     screenWidth: number;
     screenHeight: number;
+    fixedSeed?: boolean;
   }
 ) {
-  const { rem, screenWidth, screenHeight } = props;
+  const { rem, screenWidth, screenHeight, fixedSeed } = props;
   const cellWidth = 3.5; // * rem;
   const cellHeight = 2.5; // * rem;
   const patternCols = 10;
@@ -115,24 +117,36 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   }
   const [p, setP] = useState<Params | null>(null);
   useEffect(() => {
+    let seed = 0;
+    function random() {
+      if(fixedSeed){
+        let t = (seed += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }else{
+        return Math.random();
+      }
+    };
+
     // 草のパターン生成（グリッド・ジッター法）
     const grassTufts = [];
 
     for (let r = 0; r < patternRows; r++) {
       for (let c = 0; c < patternCols; c++) {
         // 基本的な草のサイズ
-        const baseW = cellWidth * 0.15 * (1 + Math.random() * 0.25);
-        const baseH = cellWidth * 0.2 * (1 + Math.random() * 0.75);
+        const baseW = cellWidth * 0.15 * (1 + random() * 0.25);
+        const baseH = cellWidth * 0.2 * (1 + random() * 0.75);
         // セル内のランダムな位置（はみ出し防止のマージンを考慮）
         const margin = cellWidth * 0.05;
         const x =
           c * cellWidth +
           margin +
-          Math.random() * (cellWidth - baseW - margin * 2);
+          random() * (cellWidth - baseW - margin * 2);
         const y =
           r * cellHeight +
           margin +
-          Math.random() * (cellHeight - baseH - margin * 2);
+          random() * (cellHeight - baseH - margin * 2);
         grassTufts.push({
           x,
           y,
@@ -144,14 +158,15 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
       }
     }
     setP({
-      roughEdgeSeed1: Math.floor(Math.random() * 1000),
-      roughEdgeSeed2: Math.floor(Math.random() * 1000),
-      randomCurveSeed1: Math.floor(Math.random() * 1000),
-      randomCurveSeed2: Math.floor(Math.random() * 1000),
-      paperTextureSeed: Math.floor(Math.random() * 1000),
+      roughEdgeSeed1: fixedSeed ? 0 : Math.floor(Math.random() * 1000),
+      roughEdgeSeed2: fixedSeed ? 1 : Math.floor(Math.random() * 1000),
+      // Number(new URLSearchParams(location.search).get("s"))
+      randomCurveSeed1: fixedSeed ? 18 : Math.floor(Math.random() * 1000),
+      randomCurveSeed2: fixedSeed ? 61 : Math.floor(Math.random() * 1000),
+      paperTextureSeed: fixedSeed ? 1 : Math.floor(Math.random() * 1000),
       grassTufts,
     });
-  }, []);
+  }, [fixedSeed]);
 
   if (!p || !(screenWidth >= 2 && screenHeight >= 2)) {
     return null;
@@ -162,7 +177,7 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
     left: "-2.5rem",
     right: "-2.5rem",
     bottom: "-2.5rem",
-    height: "calc(100vh + 2.5rem)",
+    height: `calc(${screenHeight}px + 2.5rem)`,
   };
   const viewBox = `0 0 ${screenWidth + 5 * rem} ${screenHeight + 2.5 * rem}`;
   return (
@@ -179,21 +194,21 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
         <defs>
           <RoughEdge
             id="roughEdge2"
-            seed={p.roughEdgeSeed2 ?? 1}
+            seed={p.roughEdgeSeed2}
             baseFrequency={0.05}
             numOctaves={1}
             scale={3}
           />
           <RandomCurve
             id="randomCurve2"
-            seed={p.randomCurveSeed2 ?? 3}
+            seed={p.randomCurveSeed2}
             baseFrequency={0.08 / rem}
             numOctaves={1}
             scale={5 * rem}
           />
           <PaperTexture
             id="paperTexture2"
-            seed={p.paperTextureSeed ?? 5}
+            seed={p.paperTextureSeed}
             alphaLight={0.15}
             alphaDark={0.03}
             baseFrequency={0.5}
@@ -260,21 +275,21 @@ const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
 
           <RoughEdge
             id="roughEdge"
-            seed={p.roughEdgeSeed1 ?? 0}
+            seed={p.roughEdgeSeed1}
             baseFrequency={0.1}
             numOctaves={3}
             scale={5}
           />
           <RandomCurve
             id="randomCurve"
-            seed={p.randomCurveSeed1 ?? 1}
+            seed={p.randomCurveSeed1}
             baseFrequency={0.05 / rem}
             numOctaves={1}
             scale={2 * rem}
           />
           <PaperTexture
             id="paperTexture"
-            seed={p.paperTextureSeed ?? 5}
+            seed={p.paperTextureSeed}
             alphaLight={0.2}
             alphaDark={0.05}
             baseFrequency={0.5}
