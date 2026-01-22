@@ -253,7 +253,8 @@ const ogApp = (config: {
       ).then(async (imgRes) => {
         const imgBuf = await imgRes.arrayBuffer();
         const color = await ((ColorThief as any).getColor(
-          imgBuf
+          imgBuf,
+          1
         ) as Promise<RGBColor>);
         const colorAdjusted = adjustColor(color);
         return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
