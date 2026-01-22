@@ -19,6 +19,7 @@ import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box";
 interface Props {
   ready: boolean;
   playing: boolean;
+  playbackRate: number;
   className?: string;
   lvType: string;
   lvIndex?: number;
@@ -43,7 +44,7 @@ export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
-  const largeTitle = props.isMobile ? height && height > 7.5 * rem : true;
+  const largeTitle = props.isMobile ? height && height > 8.5 * rem : true;
   const veryLargeTitle = props.isMobile ? height && height > 11.5 * rem : false;
 
   const t = useTranslations("play.message");
@@ -107,7 +108,9 @@ export function MusicArea(props: Props) {
       className={clsx(
         "z-10 grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
-        props.isMobile ? "rounded-b-sq-xl pb-1" : "rounded-bl-sq-box pl-3 pb-1.5",
+        props.isMobile
+          ? "rounded-b-sq-xl pb-1"
+          : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
         props.className,
         colorThief.boxStyle
@@ -315,24 +318,48 @@ export function MusicArea(props: Props) {
               </span>
             </p>
           </div>
-          <p className="leading-0 mt-1 text-black/40 dark:text-white/40">
-            <span className="inline-flex flex-row justify-end w-3 overflow-visible ">
-              <span className="text-right text-base/4 ">
-                {Math.floor(currentSec / 60)}
+          <p
+            className={clsx(
+              "leading-4 mt-1.5",
+              props.isMobile
+                ? veryLargeTitle
+                  ? "flex flex-row justify-between text-lg mr-1.5"
+                  : "flex flex-col-reverse text-base"
+                : "flex flex-row gap-2 text-base",
+              props.playbackRate > 1
+                ? "text-rose-600/75 dark:text-rose-400/75"
+                : props.playbackRate < 1
+                  ? "text-emerald-600/75 dark:text-emerald-400/75"
+                  : "text-black/40 dark:text-white/40"
+            )}
+          >
+            <span className="flex-none w-max">
+              <span className="inline-flex flex-row justify-end w-3 overflow-visible">
+                <span className="text-right">
+                  {Math.floor(currentSec / 60)}
+                </span>
               </span>
-            </span>
-            <span>:</span>
-            <span className="inline-block w-6 text-base/4 ">
-              {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
-            </span>
-            <span className="text-sm/4 ">
-              <span>/</span>
-              <span className="ml-1 ">{Math.floor(levelLength / 60)}</span>
               <span>:</span>
-              <span className="">
-                {(Math.floor(levelLength) % 60).toString().padStart(2, "0")}
+              <span className="inline-block w-6">
+                {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
+              </span>
+              <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
+                <span>/</span>
+                <span className="ml-1 ">{Math.floor(levelLength / 60)}</span>
+                <span>:</span>
+                <span className="">
+                  {(Math.floor(levelLength) % 60).toString().padStart(2, "0")}
+                </span>
               </span>
             </span>
+            {props.playbackRate !== 1 && (
+              <span className="flex-none w-max">
+                <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
+                  {t("playbackRateDisplay")}:
+                </span>
+                <span className="ml-1">{props.playbackRate}</span>
+              </span>
+            )}
           </p>
         </div>
       </div>

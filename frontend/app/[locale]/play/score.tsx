@@ -55,7 +55,6 @@ interface Props {
   auto: boolean;
   baseScore: number;
   pc: boolean;
-  playbackRate: number;
   notesDone: NoteDone[][];
 }
 export interface NoteDone {

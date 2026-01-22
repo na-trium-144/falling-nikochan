@@ -27,13 +27,13 @@ export default {
       off: "オフ",
       playbackRate: "再生速度を変える",
       userBegin: "途中から練習",
+      playbackRateDisplay: "再生速度",
     },
     score: {
       auto: "オートプレイ",
       score: "スコア",
       chain: "コンボ",
       chainLong: "コンボ",
-      playbackRate: "再生速度",
     },
     status: {
       bestScore: "ベストスコア",

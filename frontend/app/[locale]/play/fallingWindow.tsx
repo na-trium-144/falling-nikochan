@@ -292,7 +292,7 @@ export default function FallingWindow(props: Props) {
           canvasHeight.current * tailsCanvasDPR
         );
         for (const dn of displayNotes.current) {
-          if (displayNikochan.current[dn.id] === null) {
+          if (!displayNikochan.current[dn.id]) {
             displayNikochan.current[dn.id] = new DisplayNikochan(
               notes[dn.id],
               dn,
