@@ -184,6 +184,7 @@ interface ChainProps {
   style?: object;
   chain: number;
   maxChain: number;
+  playing: boolean;
   notesTotal: number;
   fc: boolean;
 }
@@ -204,7 +205,7 @@ export function ChainDisp(props: ChainProps) {
       >
         <div className="relative flex-1 flex flex-row items-baseline">
           <span className="flex-3" />
-          <span>
+          <span className="z-10">
             <NumDisp
               num={props.chain}
               fontSize1={40}
@@ -214,7 +215,12 @@ export function ChainDisp(props: ChainProps) {
             />
           </span>
           <span className="flex-2" />
-          <ChainBigAnim chain={props.chain} />
+          <ChainDropAnim
+            className="z-5"
+            chain={props.chain}
+            playing={props.playing}
+          />
+          <ChainBigAnim className="z-20" chain={props.chain} />
         </div>
         <span
           className="relative text-center w-max overflow-visible "
@@ -236,7 +242,7 @@ export function ChainDisp(props: ChainProps) {
     </Cloud>
   );
 }
-function ChainBigAnim(props: { chain: number }) {
+function ChainBigAnim(props: { className: string; chain: number }) {
   const [animChain, setAnimChain] = useState<number>(0);
   const ref = useRef<HTMLSpanElement | null>(null);
   const anim = useRef<Animation | undefined>(undefined);
@@ -247,17 +253,74 @@ function ChainBigAnim(props: { chain: number }) {
     } else if (Math.floor(props.chain / 50) * 50 > animChain) {
       setAnimChain(Math.floor(props.chain / 50) * 50);
       anim.current?.cancel();
-      anim.current = ref.current?.animate(
-        [
-          { transform: "rotate(0) scale(1)", opacity: 1 },
-          { transform: "rotate(-3.0deg) scale(4)", opacity: 0 },
-        ],
-        { duration: 500, fill: "forwards", easing: "ease-out" }
-      );
+      requestAnimationFrame(() => {
+        anim.current = ref.current?.animate(
+          [
+            { transform: "rotate(0) scale(1)", opacity: 1 },
+            { transform: "rotate(-3.0deg) scale(4)", opacity: 0 },
+          ],
+          { duration: 500, fill: "forwards", easing: "ease-out" }
+        );
+      });
     }
   }, [props.chain, animChain]);
   return (
-    <div className="absolute inset-0 flex flex-row z-1">
+    <div className={clsx("absolute inset-0 flex flex-row", props.className)}>
+      <span className="flex-3" />
+      <span
+        ref={ref}
+        style={{ fontSize: 40, lineHeight: 1, transformOrigin: "40% 40%" }}
+      >
+        {animChain > 0 ? animChain : ""}
+      </span>
+      <span className="flex-2" />
+    </div>
+  );
+}
+function ChainDropAnim(props: {
+  className: string;
+  chain: number;
+  playing: boolean;
+}) {
+  const prevChain = useRef<number>(0);
+  const prevPlaying = useRef<boolean>(false);
+  const [animChain, setAnimChain] = useState<number>(0);
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const anim = useRef<Animation | undefined>(undefined);
+  useEffect(() => {
+    if (
+      props.chain < prevChain.current &&
+      prevPlaying.current &&
+      props.playing &&
+      prevChain.current >= 10
+    ) {
+      setAnimChain(prevChain.current);
+      anim.current?.cancel();
+      requestAnimationFrame(() => {
+        anim.current = ref.current?.animate(
+          [
+            { transform: "translateY(0) rotate(0)", opacity: 1 },
+            {
+              transform: "translateY(1.2em) rotate(-10.0deg)",
+              opacity: 0.8,
+              offset: 0.8,
+            },
+            { transform: "translateY(1.5em) rotate(-12.5deg)", opacity: 0 },
+          ],
+          { duration: 500, fill: "forwards", easing: "ease-out" }
+        );
+      });
+    }
+    prevChain.current = props.chain;
+    prevPlaying.current = props.playing;
+  }, [props.chain, props.playing, animChain]);
+  return (
+    <div
+      className={clsx(
+        "absolute inset-0 flex flex-row opacity-50",
+        props.className
+      )}
+    >
       <span className="flex-3" />
       <span
         ref={ref}

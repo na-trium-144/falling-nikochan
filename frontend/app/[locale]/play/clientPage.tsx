@@ -1042,6 +1042,7 @@ function Play(props: Props) {
             <ChainDisp
               chain={chain}
               maxChain={maxChain}
+              playing={chartPlaying}
               fc={judgeCount[2] + judgeCount[3] === 0}
               notesTotal={notesAll.length}
             />
