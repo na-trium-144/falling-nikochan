@@ -19,7 +19,8 @@ export async function OGShare(
   cid: string,
   lang: string,
   brief: ChartBriefMin,
-  bgImageBin: Promise<string>
+  bgImageBin: Promise<string>,
+  color: Promise<string>,
 ) {
   const t = await getTranslations(lang, "share");
   return (
@@ -47,10 +48,7 @@ export async function OGShare(
           width: (120 + 4) * 4,
           height: ((120 * 9) / 16 + 4) * 4,
           borderBottomLeftRadius: 12,
-          backgroundColor:
-            brief.lvType !== undefined
-              ? [emerald500, amber500, rose400][brief.lvType]
-              : amber500,
+          backgroundColor: await color,
         }}
       />
       <img

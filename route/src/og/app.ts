@@ -15,6 +15,8 @@ import { env } from "hono/adapter";
 import msgpack from "@ygoe/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
 import { cors } from "hono/cors";
+import ColorThief, { RGBColor } from "colorthief";
+import { adjustColor } from "./style.js";
 
 export interface ChartBriefMin {
   ytId: string;
@@ -246,10 +248,19 @@ const ogApp = (config: {
         }
       }
 
+      const pColorThief = fetch(
+        `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
+      ).then(async (imgRes) => {
+        const imgBuf = await imgRes.arrayBuffer();
+        const color = await ColorThief.getColor(imgBuf);
+        const colorAdjusted = adjustColor(color);
+        return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
+      });
+
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
         case "share":
-          Image = OGShare(cid, lang, brief, pBgImageBin);
+          Image = OGShare(cid, lang, brief, pBgImageBin, pColorThief);
           break;
         case "result":
           if (!resultParams) {
@@ -261,7 +272,8 @@ const ogApp = (config: {
             brief,
             pBgImageBin,
             resultParams,
-            pInputTypeImageBin
+            pInputTypeImageBin,
+            pColorThief
           );
           break;
       }
