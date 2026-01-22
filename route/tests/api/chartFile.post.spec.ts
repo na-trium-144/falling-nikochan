@@ -397,19 +397,28 @@ describe("POST /api/chartFile/:cid", () => {
         await client.close();
       }
     });
-    test("should not be updated when uploading same chart to ver7 chart", async () => {
+    test("should not be updated when re-calculated hash matches regardless of hash on db", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100007?p=p", {
-        method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize(dummyChart()),
-      });
-      expect(res.status).to.equal(204);
-
       const client = new MongoClient(process.env.MONGODB_URI!);
       try {
         await client.connect();
         const db = client.db("nikochan");
+
+        await db.collection<ChartEntryCompressed>("chart").updateOne(
+          { cid: "100007" },
+          {
+            $set: {
+              "levelBrief.0.hash": "aaaaa",
+            },
+          }
+        );
+        const res = await app.request("/api/chartFile/100007?p=p", {
+          method: "POST",
+          headers: { "Content-Type": "application/vnd.msgpack" },
+          body: msgpack.serialize(dummyChart()),
+        });
+        expect(res.status).to.equal(204);
+
         const e = await db
           .collection<ChartEntryCompressed>("chart")
           .findOne({ cid: String(Number(dummyCid) + 7) });
