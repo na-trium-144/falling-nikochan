@@ -1,5 +1,5 @@
 .fn-irasutoya-like-bg {
-  @apply fixed -inset-0 -z-999999999 pointer-events-none;
+  @apply absolute -inset-0 -z-999999999 pointer-events-none;
   
   #bgGradient > stop {
     &:nth-child(1) {
