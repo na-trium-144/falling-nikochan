@@ -252,7 +252,7 @@ const ogApp = (config: {
         `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
       ).then(async (imgRes) => {
         const imgBuf = await imgRes.arrayBuffer();
-        const color = await ColorThief.getColor(imgBuf);
+        const color = await ColorThief.getColor(imgBuf, 1);
         const colorAdjusted = adjustColor(color);
         return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
       });
