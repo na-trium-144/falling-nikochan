@@ -1028,11 +1028,11 @@ function Play(props: Props) {
             <ScoreDisp
               score={score}
               best={
-                auto
-                  ? 0
-                  : chartPlaying || (showResult && !showReady)
+                !auto && playbackRate === 1
+                  ? chartPlaying || (showResult && !showReady)
                     ? oldBestScoreState
                     : bestScoreState
+                  : 0
               }
               auto={auto}
               pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
