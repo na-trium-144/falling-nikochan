@@ -37,6 +37,7 @@ export class DisplayNikochan {
   #dn: DisplayNote6 | DisplayNote7;
   #c: Context;
   #fadeinStart: DOMHighResTimeStamp;
+  #fadeoutStart: DOMHighResTimeStamp | null;
   #tailVel: Pos;
 
   constructor(n: Note6 | Note13, dn: DisplayNote6 | DisplayNote7, c: Context) {
@@ -51,7 +52,7 @@ export class DisplayNikochan {
     } else {
       this.#fadeinStart = performance.now();
     }
-
+    this.#fadeoutStart = null;
     this.#tailVel = { x: 0, y: 0 };
   }
   update(dn: DisplayNote6 | DisplayNote7, c: Context) {
@@ -60,24 +61,43 @@ export class DisplayNikochan {
   }
 
   drawNikochan(nctx: CanvasRenderingContext2D) {
-    if (this.#n.done > 0) {
-      return;
-    }
-    nctx.globalAlpha =
-      0.7 * Math.min(1, (performance.now() - this.#fadeinStart) / 100);
-    if (this.#n.big) {
-      nctx.drawImage(
-        this.#c.nikochanBitmap[0][1],
-        this.left * this.#c.nikochanCanvasDPR,
-        this.top * this.#c.nikochanCanvasDPR
+    let dx = 0;
+    let dy = 0;
+    let scale = 1;
+    if (this.#n.done === 0) {
+      const fadeinFactor = Math.min(
+        1,
+        (performance.now() - this.#fadeinStart) / 100
       );
+      nctx.globalAlpha = 0.7 * fadeinFactor;
     } else {
-      nctx.drawImage(
-        this.#c.nikochanBitmap[0][0],
-        this.left * this.#c.nikochanCanvasDPR,
-        this.top * this.#c.nikochanCanvasDPR
-      );
+      if (this.#fadeoutStart === null) {
+        this.#fadeoutStart = performance.now();
+      }
+      const fadeoutFactor = (performance.now() - this.#fadeoutStart) / 300;
+      if (fadeoutFactor >= 1) {
+        return;
+      }
+      nctx.globalAlpha = 0.7 * (1 - fadeoutFactor);
+      if (this.#n.done === 1) {
+        dy = -1 * this.#c.rem * fadeoutFactor;
+        scale = 1 + 0.25 * fadeoutFactor;
+      }
+      if (this.#n.done === 2) {
+        dy = -0.5 * this.#c.rem * fadeoutFactor;
+      }
     }
+    dx -= (this.size * (scale - 1)) / 2;
+    dy -= (this.size * (scale - 1)) / 2;
+    nctx.drawImage(
+      this.#c.nikochanBitmap[this.#n.done <= 3 ? this.#n.done : 0][
+        this.#n.big ? 1 : 0
+      ],
+      (this.left + dx) * this.#c.nikochanCanvasDPR,
+      (this.top + dy) * this.#c.nikochanCanvasDPR,
+      this.size * this.#c.nikochanCanvasDPR * scale,
+      this.size * this.#c.nikochanCanvasDPR * scale
+    );
   }
 
   drawTail(ctx: CanvasRenderingContext2D) {

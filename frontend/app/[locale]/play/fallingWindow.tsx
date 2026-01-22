@@ -338,18 +338,8 @@ export default function FallingWindow(props: Props) {
     }
   }
 
-  const nikochanAssets = useRef<string[]>([]);
   const particleAssets = useRef<string[]>([]);
   useEffect(() => {
-    Promise.all(
-      [0, 1, 2, 3].map((i) =>
-        fetch(process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`)
-          .then((res) => res.text())
-          .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
-      )
-    ).then((urls) => {
-      nikochanAssets.current = urls;
-    });
     Promise.all(
       Array.from(new Array(13)).map((_, i) =>
         [4, 6, 8, 10, 12].includes(i)
@@ -425,7 +415,6 @@ export default function FallingWindow(props: Props) {
           boxSize={boxSize}
           marginX={marginX}
           marginY={marginY}
-          nikochanAssets={nikochanAssets}
           particleAssets={particleAssets}
         />
       )}
@@ -440,7 +429,6 @@ interface MProps {
   boxSize: number;
   marginX: number;
   marginY: number;
-  nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
@@ -453,7 +441,6 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       marginX={props.marginX}
       marginY={props.marginY}
       boxSize={props.boxSize}
-      nikochanAssets={props.nikochanAssets}
       particleAssets={props.particleAssets}
     />
   ));
@@ -466,7 +453,6 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
-  nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
 }
 function Nikochan(props: NProps) {
@@ -477,86 +463,8 @@ function Nikochan(props: NProps) {
   4: miss は画像が0と同じ
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
-  const [fadeoutStarted, setFadeoutStarted] = useState<boolean>(false);
-  useEffect(() => {
-    if (displayNote.done === 0) {
-      setFadeoutStarted(false);
-    }
-    if (displayNote.done >= 1 && !fadeoutStarted) {
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          setFadeoutStarted(true);
-        });
-      });
-    }
-  }, [displayNote.done, fadeoutStarted]);
   return (
     <>
-      <div
-        className={clsx(
-          "absolute",
-          displayNote.done === 0
-            ? "opacity-0"
-            : !fadeoutStarted
-              ? "dark:opacity-70 opacity-90"
-              : clsx(
-                  displayNote.done === 1 &&
-                    "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125",
-                  displayNote.done === 2 &&
-                    "transition ease-linear duration-300 -translate-y-2 opacity-0",
-                  displayNote.done === 3 &&
-                    "transition ease-linear duration-300 opacity-0",
-                  displayNote.done === 4 &&
-                    "transition ease-linear duration-200 opacity-0"
-                )
-        )}
-        style={{
-          /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-          width: noteSize * bigScale(note.big),
-          height: noteSize * bigScale(note.big),
-          fontSize: noteSize * bigScale(note.big), // 1em で参照できるように
-          left:
-            (displayNote.done === 0 ? note.targetX : displayNote.pos.x) *
-              boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginX,
-          bottom:
-            (displayNote.done === 0 ? targetY : displayNote.pos.y) * boxSize +
-            targetY * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginY,
-          willChange: "transform, opacity, left, bottom",
-        }}
-      >
-        <img
-          decoding="async"
-          src={
-            props.nikochanAssets.current[
-              displayNote.done <= 3 ? displayNote.done : 0
-            ]
-          }
-          className="absolute inset-0 w-full h-full opacity-70"
-        />
-        {/* chainBonusをにこちゃんの右上に表示する */}
-        {/*{displayNote.baseScore !== undefined &&
-          displayNote.chainBonus !== undefined &&
-          displayNote.chain && (
-            <span
-              className={clsx(
-               "absolute w-12 text-xs",
-                (displayNote.chain >= 100 || displayNote.bigDone) && "text-orange-500"
-              )}
-              style={{ bottom: "100%", left: "100%" }}
-            >
-              ×{" "}
-              {(
-                displayNote.baseScore +
-                displayNote.chainBonus +
-                (displayNote.bigBonus || 0)
-              ).toFixed(2)}
-            </span>
-          )}*/}
-      </div>
       {[1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
