@@ -21,10 +21,9 @@ import {
   text3xl,
   bold,
   slate500,
-  amber500,
   slate400,
-  emerald500,
-  rose400,
+  rose600,
+  emerald600,
 } from "./style.js";
 import { ChartBriefMin } from "./app.js";
 
@@ -34,7 +33,8 @@ export async function OGResult(
   brief: ChartBriefMin,
   bgImageBin: Promise<string>,
   params: ResultParams,
-  inputTypeImageBin: Promise<string> | null
+  inputTypeImageBin: Promise<string> | null,
+  color: Promise<string>
 ) {
   const th = await getTranslations(lang, "share");
   const t = await getTranslations(lang, "play.result");
@@ -258,7 +258,13 @@ export async function OGResult(
               }}
             >
               {params.playbackRate4 !== 4 && (
-                <div style={{ ...flexRow, marginBottom: 4 * 4 }}>
+                <div
+                  style={{
+                    ...flexRow,
+                    marginBottom: 4 * 4,
+                    color: params.playbackRate4 > 4 ? rose600 : emerald600,
+                  }}
+                >
                   <span style={{ ...text3xl }}>(</span>
                   <span style={{ marginRight: 2 * 4, ...text2xl }}>
                     {t("playbackRate")}:
@@ -366,7 +372,7 @@ export async function OGResult(
           width: (120 + 4) * 4,
           height: ((120 * 9) / 16 + 4) * 4,
           borderBottomLeftRadius: 12,
-          backgroundColor: [emerald500, amber500, rose400][params.lvType],
+          backgroundColor: await color,
         }}
       />
       <img
