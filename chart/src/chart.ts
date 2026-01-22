@@ -116,9 +116,13 @@ export type LevelPlay = Level13Play;
 export const convertToMin = convertToMin13;
 export const convertToPlay = convertToPlay13;
 
+export async function convertToLatest(chart: ChartUntil13): Promise<ChartEdit> {
+  if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
+  return chart;
+}
 export async function validateChart(chart: ChartUntil13): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
+  chart = await convertToLatest(chart);
   chart satisfies Chart13Edit;
   v.parse(ChartEditSchema13(), chart);
   return { ...chart, ver: 13 };
