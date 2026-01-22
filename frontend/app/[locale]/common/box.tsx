@@ -115,13 +115,17 @@ export function CenterBox(props: Props) {
       ref={props.refOuter}
       className={clsx(
         "absolute inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1",
+        "pointer-events-none",
         props.classNameOuter,
         props.hidden && "hidden"
       )}
     >
       <Box
         refInner={props.refInner}
-        classNameOuter={clsx("w-max h-max max-w-full text-center")}
+        classNameOuter={clsx(
+          "w-max h-max max-w-full text-center",
+          "pointer-events-auto"
+        )}
         classNameInner={clsx(props.classNameInner)}
         styleOuter={props.styleOuter}
         styleInner={props.styleInner}
