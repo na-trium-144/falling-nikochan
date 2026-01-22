@@ -54,5 +54,8 @@
     "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1",
     "webpack-license-plugin": "^4.5.1"
+  },
+  "overrides": {
+    "sharp": "^0.34"
   }
 }
