@@ -35,7 +35,7 @@ import { hashLevel7 } from "./legacy/chart7.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
-import { stepZero } from "./step.js";
+import { stepZero, stepSimplify } from "./step.js";
 import { ChartUntil11, ChartUntil11Min, Level11Min } from "./legacy/chart11.js";
 import { defaultCopyBuffer } from "./command.js";
 import objectHash from "object-hash";
@@ -150,13 +150,48 @@ export async function hash(text: string) {
 /**
  * Calculates hash of a level using object-hash library.
  * This ensures consistent hashing regardless of property order.
+ * Normalizes all Step types to ensure fractions are in simplest form.
  * @param level Level13Edit to hash
  * @returns Promise<string> SHA-256 hash in hex format
  */
 export async function hashLevel(level: Level13Edit): Promise<string> {
+  // Normalize all Step types by simplifying fractions
+  const normalizedNotes = level.notes.map((note) => ({
+    ...note,
+    step: stepSimplify({ ...note.step }),
+  }));
+
+  const normalizedRest = level.rest.map((rest) => ({
+    ...rest,
+    begin: stepSimplify({ ...rest.begin }),
+    duration: stepSimplify({ ...rest.duration }),
+  }));
+
+  const normalizedBpmChanges = level.bpmChanges.map((bpm) => ({
+    ...bpm,
+    step: stepSimplify({ ...bpm.step }),
+  }));
+
+  const normalizedSpeedChanges = level.speedChanges.map((speed) => ({
+    ...speed,
+    step: stepSimplify({ ...speed.step }),
+  }));
+
+  const normalizedSignature = level.signature.map((sig) => ({
+    ...sig,
+    step: stepSimplify({ ...sig.step }),
+    offset: stepSimplify({ ...sig.offset }),
+  }));
+
   // Use object-hash with sort option to ensure consistent ordering
   return objectHash(
-    [level.notes, level.bpmChanges, level.speedChanges, level.signature],
+    [
+      normalizedNotes,
+      normalizedRest,
+      normalizedBpmChanges,
+      normalizedSpeedChanges,
+      normalizedSignature,
+    ],
     { algorithm: "sha256", encoding: "hex" }
   );
 }
