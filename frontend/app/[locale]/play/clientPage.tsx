@@ -927,6 +927,7 @@ function Play(props: Props) {
             )}
             ready={musicAreaOk}
             playing={chartPlaying}
+            playbackRate={playbackRate}
             ytBeginSec={ytBegin}
             offset={(chartSeq?.offset || 0) + offsetPlusLatency}
             lvType={lvType}
@@ -1034,7 +1035,6 @@ function Play(props: Props) {
                     : bestScoreState
               }
               auto={auto}
-              playbackRate={playbackRate}
               pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
               baseScore={baseScore}
               notesDone={notesDone}
