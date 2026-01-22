@@ -292,9 +292,15 @@ export async function chartToEntry(
   addIp: string | null,
   ytData: YTDataEntry | undefined,
   pSecretSalt: string,
-  prevEntry: ChartEntry | null
+  prevEntry: ChartEntry | null,
+  newHashes: string[] | null = null
 ): Promise<ChartEntry> {
   const chartBrief = await createBrief(chart, updatedAt);
+  if(newHashes){
+    chartBrief.levels.forEach((levelBrief, index) => {
+      levelBrief.hash = newHashes[index];
+    });
+  }
   const pRandomSalt =
     prevEntry?.pRandomSalt || randomBytes(16).toString("base64");
   let pServerHash: string;

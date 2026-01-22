@@ -387,6 +387,9 @@ const chartFileApp = async (config: {
             .filter((l) => !l.unlisted)
             .map((level) => hashLevel(level))
         );
+        const savedHashes = entry.levelBrief
+          .filter((l) => !l.unlisted)
+          .map((l) => l.hash);
         const newHashes = await Promise.all(
           newChart.levels
             .filter((l) => !l.unlisted)
@@ -400,6 +403,13 @@ const chartFileApp = async (config: {
         ) {
           updatedAt = new Date().getTime();
         }
+        const newSaveHashes = newHashes.map((newHash, i) => {
+          if (newHash === prevHashes.at(i) && savedHashes.at(i)) {
+            return savedHashes.at(i)!;
+          } else {
+            return newHash;
+          }
+        });
 
         await db.collection<ChartEntryCompressed>("chart").updateOne(
           { cid },
@@ -412,7 +422,8 @@ const chartFileApp = async (config: {
                 ip,
                 await getYTDataEntry(env(c), db, newChart.ytId),
                 pSecretSalt,
-                entry
+                entry,
+                newSaveHashes
               )
             ),
           }

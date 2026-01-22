@@ -8,7 +8,12 @@ import {
   dummyDate,
   initDb,
 } from "./init";
-import { chartMaxEvent, fileMaxSize, hash } from "@falling-nikochan/chart";
+import {
+  chartMaxEvent,
+  fileMaxSize,
+  hash,
+  hashLevel,
+} from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -360,6 +365,9 @@ describe("POST /api/chartFile/:cid", () => {
         expect(e).not.to.be.null;
         expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
         expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
+        expect(e!.levelBrief[0].hash).to.not.equal(
+          await hashLevel(dummyChart().levels[0])
+        );
       } finally {
         await client.close();
       }
@@ -424,6 +432,7 @@ describe("POST /api/chartFile/:cid", () => {
           .findOne({ cid: String(Number(dummyCid) + 7) });
         expect(e).not.to.be.null;
         expect(e!.updatedAt).to.equal(dummyDate.getTime());
+        expect(e!.levelBrief[0].hash).to.equal("aaaaa");
       } finally {
         await client.close();
       }
