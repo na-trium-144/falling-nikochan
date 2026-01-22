@@ -174,53 +174,57 @@ export default function FallingWindow(props: Props) {
     desynchronized: true,
   });
 
-  const nikochan0Bitmap = useRef<ImageBitmap | null>(null);
-  const nikochan0BitmapBig = useRef<ImageBitmap | null>(null);
+  const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
   useEffect(() => {
-    (async () => {
-      const res = await fetch(
-        process.env.ASSET_PREFIX + `/assets/nikochan0.svg`
-      );
-      const svg = await res.text();
-      // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
-      // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
-      const svgResized = svg
-        .replace(
-          /width="(\d+)(\w*)"/,
-          `width="${noteSize * nikochanCanvasDPR.current}"`
-        )
-        .replace(
-          /height="(\d+)(\w*)"/,
-          `height="${noteSize * nikochanCanvasDPR.current}"`
+    Promise.all(
+      [0, 1, 2, 3].map(async (i) => {
+        const res = await fetch(
+          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`
         );
-      const img = new Image();
-      img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
-      img.decode().then(async () => {
-        nikochan0Bitmap.current = await createImageBitmap(img, {
-          resizeWidth: noteSize * nikochanCanvasDPR.current,
-          resizeHeight: noteSize * nikochanCanvasDPR.current,
-          resizeQuality: "high",
-        });
-      });
-      const svgResizedBig = svg
-        .replace(
-          /width="(\d+)(\w*)"/,
-          `width="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
-        )
-        .replace(
-          /height="(\d+)(\w*)"/,
-          `height="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+        const svg = await res.text();
+        // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
+        // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
+        const svgResized = svg
+          .replace(
+            /width="(\d+)(\w*)"/,
+            `width="${noteSize * nikochanCanvasDPR.current}"`
+          )
+          .replace(
+            /height="(\d+)(\w*)"/,
+            `height="${noteSize * nikochanCanvasDPR.current}"`
+          );
+        const img = new Image();
+        img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
+        const pBitmap = img.decode().then(() =>
+          createImageBitmap(img, {
+            resizeWidth: noteSize * nikochanCanvasDPR.current,
+            resizeHeight: noteSize * nikochanCanvasDPR.current,
+            resizeQuality: "high",
+          })
         );
-      const imgBig = new Image();
-      imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
-      imgBig.decode().then(async () => {
-        nikochan0BitmapBig.current = await createImageBitmap(imgBig, {
-          resizeWidth: noteSize * bigScale(true) * nikochanCanvasDPR.current,
-          resizeHeight: noteSize * bigScale(true) * nikochanCanvasDPR.current,
-          resizeQuality: "high",
-        });
-      });
-    })();
+        const svgResizedBig = svg
+          .replace(
+            /width="(\d+)(\w*)"/,
+            `width="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+          )
+          .replace(
+            /height="(\d+)(\w*)"/,
+            `height="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+          );
+        const imgBig = new Image();
+        imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
+        const pBitmapBig = imgBig.decode().then(() =>
+          createImageBitmap(imgBig, {
+            resizeWidth: noteSize * bigScale(true) * nikochanCanvasDPR.current,
+            resizeHeight: noteSize * bigScale(true) * nikochanCanvasDPR.current,
+            resizeQuality: "high",
+          })
+        );
+        return Promise.all([pBitmap, pBitmapBig]);
+      })
+    ).then((bitmaps) => {
+      nikochanBitmap.current = bitmaps;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteSize, nikochanCanvasDPR.current]);
 
@@ -315,13 +319,13 @@ export default function FallingWindow(props: Props) {
             );
           if (n.big) {
             nctx.drawImage(
-              nikochan0BitmapBig.current!,
+              nikochanBitmap.current![0][1],
               left * nikochanCanvasDPR.current,
               top * nikochanCanvasDPR.current
             );
           } else {
             nctx.drawImage(
-              nikochan0Bitmap.current!,
+              nikochanBitmap.current![0][0],
               left * nikochanCanvasDPR.current,
               top * nikochanCanvasDPR.current
             );
