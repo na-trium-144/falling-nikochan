@@ -15,26 +15,35 @@ export default {
         "Changes made in the editing screen will be " +
         "reflected here after reloading the page.",
       option: "Options",
+      // auto play or manual play
       auto: "Auto Play",
       enableSE: "Enable Key/Tap Sounds",
       enableSELatency: "There may be a delay of {latency} seconds.",
       unknownSELatency: "There may be a delay in sound output.",
       enableIOSThru: "Predict and correct unresponsive taps (iOS)",
+      // unused option
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",
+      // adjust offset automatically or not
       autoOffset: "Auto",
       offsetSecond: "sec",
       offsetFast: "Fast",
       offsetLate: "Late",
       off: "Off",
+      // Ja:"再生速度を変える"(Change Playback Speed)
       playbackRate: "Playback Speed",
+      // Ja:"途中から練習"(Practice from Middle)
       userBegin: "Practice from",
+      // shorter version of playbackRate to fit on mobile screen
       playbackRateDisplay: "Speed",
     },
     score: {
       auto: "Auto Play",
       score: "Score",
+      // for some reason I picked "chain" for En while "コンボ"(combo) for Ja
       chain: "{chain, plural, =1 {chain} other {chains}}",
+      // write the longest singular, plural, or whatever form of "chain" above
+      // (needed for layout adjustments)
       chainLong: "chains",
     },
     status: {
@@ -53,8 +62,11 @@ export default {
       bigNoteBonus: "Big Notes Bonus",
       totalScore: "Total Score",
       rank: "Rank",
+      // Ja:"パーフェクト"(Perfect) only
       perfect: "Perfect Chain",
+      // Ja:"フルコンボ"(Full Combo)
       full: "Full Chain",
+      // Ja:"ベストスコア更新！"(Best score updated!)
       newRecord: "New Record!",
       message: {
         A: {

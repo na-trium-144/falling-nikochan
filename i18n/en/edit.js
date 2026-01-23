@@ -99,13 +99,10 @@ export default {
       hasUnsaved: "(There are unsaved changes)",
       deleteFromServer: "Delete this chart from server",
       confirmDelete:
-        // \n for confirm() dialog
+        // \n for break line in confirm() dialog
         "Are you sure you want to delete this chart? \n" +
         "This action cannot be undone.\n\n" +
         "Type {cid} to confirm deletion.",
-      // converting:
-      //   "This chart has been converted from the old format (ver.{ver}), " +
-      //   "and saving will overwrite the previous chart data with the converted data.",
       convertingIncompatible:
         "This chart has been converted from the old format (ver.{ver}), " +
         "and some notes may behave differently. " +

@@ -30,8 +30,6 @@ export default {
       "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
     inputIdDesc2:
       "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
-    inputDirect: "譜面IDを指定し直接プレイ画面に飛ぶ",
-    inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
     aboutNikochan: "Falling Nikochan について詳しく",
     about: {
       title: "Falling Nikochan について",
