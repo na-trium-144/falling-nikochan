@@ -535,7 +535,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <div className="relative flex flex-row items-center gap-2 ">
       <LevelBadge
-        className="absolute top-0 -right-1"
+        className="absolute z-10 top-0 -right-1"
         status={status}
         levels={levelColors}
         showDot
