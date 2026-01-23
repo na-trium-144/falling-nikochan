@@ -1,16 +1,59 @@
 @layer components {
   .fn-chart-list {
-    /* 背景 */
-    @apply rounded-md bg-sky-400/15 dark:bg-orange-700/10;
+    --item-min-width: 18rem;
+    @apply grid w-full mx-auto justify-items-start items-center gap-1 mb-1;
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(var(--item-min-width), 100%), 1fr)
+    );
+    /*max 3 columns*/
+    max-width: calc(4 * var(--item-min-width) - 0.1rem);
+    
+    /*
+    ~36rem: 1列 -> 18~36rem -> max-width:27rem
+    ~54rem: 2列 -> 18~27rem
+    ~72rem: 3列 -> 18~24rem
+    */
+    .fn-cl-item {
+      @apply rounded-md bg-sky-400/15 dark:bg-orange-700/10;
+      @apply w-full mx-auto h-max min-h-10;
+      max-width: 27rem;
 
-    /* 選択可能な chart-list item は、 .fn-flat-button.fn-sky.fn-chart-list */
-    &.fn-flat-button {
-      @apply block w-full text-left cursor-pointer;
-      @apply pl-1.5 py-0.5;
-      @apply relative;
-      @variant hover {
-        @apply shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50;
+      /* 選択可能な chart-list item は、.fn-cl-item > .fn-flat-button.fn-sky */
+      > .fn-flat-button {
+        @apply rounded-[inherit] sq-inherit;
+        @apply block w-full text-left cursor-pointer;
+        @apply pl-1.5 py-0.5;
+        @apply relative;
+        @apply flex flex-row items-center gap-2;
+
+        @variant hover {
+          @apply shadow-xs shadow-slate-500/50 dark:shadow-stone-950/50;
+        }
+
+        > .fn-thumbnail {
+          @apply flex-none;
+          @apply h-9 w-16 object-cover object-center;
+        }
+
+        > .fn-cl-content {
+          @apply flex-1 min-w-0 flex flex-col items-start justify-center space-y-0.5;
+
+          .fn-cl-clip {
+            /* 上の行はchartCreator部分のみ、下の行は全体にclipとellipsisを適用する */
+            @apply max-w-full overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis;
+          }
+        }
       }
     }
+
+    .fn-cl-message {
+      @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2;
+      /* 下に移動する場合はinlineスタイルで top: を指定 */
+    }
+    .fn-cl-more {
+      @apply block w-max mx-auto h-6 mt-2;
+    }
   }
+
 }

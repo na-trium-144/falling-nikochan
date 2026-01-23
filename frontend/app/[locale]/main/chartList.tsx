@@ -1,7 +1,6 @@
 "use client";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
 import clsx from "clsx/lite";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -17,10 +16,6 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-} from "@/common/flatButton.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
 
 interface PProps {
@@ -305,15 +300,7 @@ export function ChartList(props: Props) {
 
   return (
     <div className="relative w-full h-max ">
-      <ul
-        ref={ulSize.ref}
-        className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
-        style={{
-          gridTemplateColumns: `repeat(auto-fill, minmax(min(${itemMinWidth}rem, 100%), 1fr))`,
-          // max 3 columns
-          maxWidth: 4 * itemMinWidth - 0.1 + "rem",
-        }}
-      >
+      <ul ref={ulSize.ref} className="fn-chart-list">
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
             Array.isArray(filteredBriefs) &&
@@ -349,38 +336,30 @@ export function ChartList(props: Props) {
                 badge={props.badge}
               />
             ) : (
-              <li
-                key={i}
-                className={clsx(
-                  "w-full max-w-108 mx-auto h-10",
-                  "fn-chart-list"
-                )}
-              />
+              <li key={i} className="fn-cl-item" />
             )
         )}
       </ul>
       {firstFetchingIndex >= 0 && props.showLoading ? (
         <div
-          className="absolute inset-x-0 w-max mx-auto "
+          className="fn-cl-message"
           style={{
             top:
-              0.5 +
-              itemMinHeight * Math.round(firstFetchingIndex / ulCols) +
-              "rem",
+              itemMinHeight * Math.round(firstFetchingIndex / ulCols) + "rem",
           }}
         >
           <SlimeSVG />
           Loading...
         </div>
       ) : briefs && "message" in briefs ? (
-        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+        <div className="fn-cl-message">
           {briefs.status ? `${briefs.status}: ` : ""}
           {te.has(`api.${briefs.message}`)
             ? te(`api.${briefs.message}`)
             : te("unknownApiError")}
         </div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
-        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+        <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}
         </div>
       ) : null}
@@ -389,37 +368,35 @@ export function ChartList(props: Props) {
         props.onMoreClick ? (
           <button
             className={clsx(
-              "block w-max mx-auto mt-2",
-              firstFetchingIndex >= 0 && "invisible",
-              linkStyle1
+              "fn-cl-more fn-link-1",
+              firstFetchingIndex >= 0 && "invisible"
             )}
             onClick={props.onMoreClick}
           >
             {t("showAll")}
             <ArrowRight
-              className="inline-block align-middle ml-2 "
+              className="inline-block align-middle ml-2"
               theme="filled"
             />
           </button>
         ) : props.moreHref ? (
           <Link
             className={clsx(
-              "block w-max mx-auto mt-2",
-              firstFetchingIndex >= 0 && "invisible",
-              linkStyle1
+              "fn-cl-more fn-link-1",
+              firstFetchingIndex >= 0 && "invisible"
             )}
             href={props.moreHref}
             prefetch={!process.env.NO_PREFETCH}
           >
             {t("showAll")}
             <ArrowRight
-              className="inline-block align-middle ml-2 "
+              className="inline-block align-middle ml-2"
               theme="filled"
             />
           </Link>
         ) : null
       ) : props.moreHref || props.onMoreClick ? (
-        <div className="w-0 h-6 mt-2 " />
+        <div className="fn-cl-more" />
       ) : null}
       {padHeightForScroll > 0 && (
         <div className="w-0" style={{ height: padHeightForScroll }} />
@@ -443,17 +420,14 @@ interface CProps {
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
 
-  // ~36rem: 1列 -> 18~36rem -> max-width:27rem
-  // ~54rem: 2列 -> 18~27rem
-  // ~72rem: 3列 -> 18~24rem
   return (
-    <li className={clsx("w-full max-w-108 mx-auto h-max")}>
+    <li className="fn-cl-item">
       {props.onClick || (props.newTab && !isStandalone) ? (
         <>
           <a
             href={props.href}
             className={clsx(
-              "fn-flat-button fn-sky fn-chart-list",
+              "fn-flat-button fn-sky",
               props.onClickMobile && "no-mobile"
             )}
             target={props.newTab ? "_blank" : undefined}
@@ -474,14 +448,14 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx("fn-flat-button fn-sky fn-chart-list", "no-pc")}
+              className={clsx("fn-flat-button fn-sky", "no-pc")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
               }}
             >
-              <span className={skyFlatButtonBorderStyle1} />
-              <span className={skyFlatButtonBorderStyle2} />
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
               <ButtonHighlight />
               <ChartListItemChildren {...props} />
             </a>
@@ -490,11 +464,11 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={clsx("fn-flat-button fn-sky fn-chart-list")}
+          className={clsx("fn-flat-button fn-sky")}
           prefetch={!process.env.NO_PREFETCH}
         >
-          <span className={skyFlatButtonBorderStyle1} />
-          <span className={skyFlatButtonBorderStyle2} />
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
           <ButtonHighlight />
           <ChartListItemChildren {...props} />
         </Link>
@@ -521,43 +495,36 @@ function ChartListItemChildren(props: CProps) {
   }, [props.cid, props.brief, props.badge]);
 
   return (
-    <div className="relative flex flex-row items-center gap-2 ">
+    <>
       <LevelBadge
         className="absolute top-0 -right-1"
         status={status}
         levels={levelColors}
         showDot
       />
-      <div className="flex-none ">
-        {props.brief?.ytId ? (
-          <img
-            className="h-9 w-16 object-cover object-center "
-            src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
-          />
-        ) : (
-          <div className="h-9 w-16 " />
-        )}
-      </div>
-      <div className="flex-1 min-w-0 flex flex-col items-begin justify-center space-y-0.5">
-        <div className="leading-4 overflow-x-clip overflow-y-visible ">
+      {props.brief?.ytId ? (
+        <img
+          className="fn-thumbnail"
+          src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
+        />
+      ) : (
+        <div className="fn-thumbnail" />
+      )}
+      <div className="fn-cl-content">
+        <div className="leading-4 max-w-full">
           <span className="text-xs/3">ID:</span>
           <span className="ml-1 text-sm/3">{props.cid}</span>
           {props.dateDiff && (
             <DateDiff
-              className="ml-2 text-xs/3 whitespace-nowrap text-slate-500 dark:text-stone-400"
+              className="ml-2 text-xs/3 text-slate-500 dark:text-stone-400"
               date={props.brief?.updatedAt || 0}
             />
           )}
           {props.original && (
             <span className="ml-2 text-xs/3">(オリジナル曲)</span>
           )}
-          {props.creator && (
-            <span
-              className={clsx(
-                "inline-block leading-3 max-w-full",
-                "overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis"
-              )}
-            >
+          {props.chartCreator && (
+            <span className="inline-block leading-3 fn-cl-clip">
               <span className="ml-2 text-xs/3">by</span>
               <span className="ml-1 font-title text-sm/3">
                 {props.brief?.chartCreator}
@@ -565,8 +532,8 @@ function ChartListItemChildren(props: CProps) {
             </span>
           )}
         </div>
-        <div className="overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis leading-4 ">
-          <span className="font-title text-base/4 ">{props.brief?.title}</span>
+        <div className="leading-4 fn-cl-clip">
+          <span className="font-title text-base/4">{props.brief?.title}</span>
           {!props.original && props.brief?.composer && (
             <>
               <span className="ml-1 text-sm/4">/</span>
@@ -577,7 +544,7 @@ function ChartListItemChildren(props: CProps) {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
