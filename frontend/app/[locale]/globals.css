@@ -33,6 +33,7 @@
 @import "./styles/input.css";
 @import "./styles/link.css";
 @import "./styles/pager.css";
+@import "./styles/scrollable.css";
 
 @import "./styles/main.css";
 @import "./styles/chart-list.css";
