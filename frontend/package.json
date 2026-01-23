@@ -18,6 +18,9 @@
     "postbuild": "node ./listStaticFiles.js"
   },
   "dependencies": {
+    "@falling-nikochan/chart": "workspace:*",
+    "@falling-nikochan/i18n": "workspace:*",
+    "@falling-nikochan/route": "workspace:*",
     "@fontsource-variable/noto-sans": "=5.2.5",
     "@fontsource-variable/noto-sans-jp": "=5.2.5",
     "@fontsource/kaisei-opti": "=5.2.5",
@@ -32,12 +35,14 @@
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
     "keyboard-css": "^1.2.4",
+    "next-intl": "^4.7.0",
     "pretty-checkbox": "^3.0.3",
     "pretty-checkbox-react": "^3.2.0",
     "react-ace": "^14.0.1",
     "react-range": "^1.10.0",
     "react-resize-detector": "^12.3.0",
     "remote-web-worker": "^0.0.9",
+    "valibot": "^1.0.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {

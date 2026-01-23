@@ -1,0 +1,6 @@
+packages:
+  - 'chart'
+  - 'i18n'
+  - 'frontend'
+  - 'route'
+  - 'worker'

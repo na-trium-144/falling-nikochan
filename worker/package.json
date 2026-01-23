@@ -12,5 +12,10 @@
     "edge 111",
     "safari 16.4",
     "firefox 128"
-  ]
+  ],
+  "dependencies": {
+    "@falling-nikochan/i18n": "workspace:*",
+    "@falling-nikochan/route": "workspace:*",
+    "hono": "^4.11.4"
+  }
 }
