@@ -43,6 +43,7 @@
     "react-resize-detector": "^12.3.0",
     "remote-web-worker": "^0.0.9",
     "valibot": "^1.0.0",
+    "wasmoon": "^1.16.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {

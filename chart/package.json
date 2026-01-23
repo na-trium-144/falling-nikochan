@@ -15,5 +15,8 @@
     "eventemitter3": "^5.0.1",
     "valibot": "^1.0.0",
     "wasmoon": "^1.16.0"
+  },
+  "devDependencies": {
+    "@falling-nikochan/chart": "workspace:*"
   }
 }
