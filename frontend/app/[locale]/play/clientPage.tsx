@@ -1061,9 +1061,7 @@ function Play(props: Props) {
               onPointerUp={(e) => e.stopPropagation()}
             >
               <Pause className="inline-block align-middle " />
-              {!isTouch && (
-                <Key className="text-xs p-0.5 mx-1 align-middle ">Esc</Key>
-              )}
+              {!isTouch && <Key>Esc</Key>}
             </button>
           </div>
           {!initDone && (

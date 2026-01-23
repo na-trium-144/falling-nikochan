@@ -31,6 +31,7 @@
     "ace-builds": "^1.43.5",
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
+    "keyboard-css": "^1.2.4",
     "pretty-checkbox": "^3.0.3",
     "pretty-checkbox-react": "^3.2.0",
     "react-ace": "^14.0.1",

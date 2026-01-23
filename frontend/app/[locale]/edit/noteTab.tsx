@@ -171,7 +171,7 @@ function NoteEdit(props: Props) {
               <td className="pr-2">
                 <span>{t("velocity")}</span>
                 <span className="inline-block ml-1">
-                  (<Key className="px-1 py-0.5 mx-0.5 text-sm">Shift</Key>+
+                  (<Key handleKeyDown>Shift</Key>+
                   <span className="inline-block">
                     <Mouse className="" />
                   </span>
@@ -269,8 +269,8 @@ function NoteEdit(props: Props) {
             disabled={!currentLevel?.currentNoteEditable}
           >
             <span>{t("big")}</span>
-            <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </CheckBox>
+          <Key handleKeyDown>B</Key>
         </div>
         <div className="mt-2 ml-2">
           <span>{t("fallMode")}</span>
