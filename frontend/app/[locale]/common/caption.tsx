@@ -27,7 +27,7 @@ function Caption({ top, left, content }: CaptionProps) {
       <div
         className={clsx(
           "absolute inline-block bottom-0 left-0 -translate-x-2/4 -translate-y-2",
-          "text-center rounded-xl min-w-max py-2 px-3 z-1",
+          "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1",
           "fn-sky fn-caption",
         )}
       >

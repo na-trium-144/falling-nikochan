@@ -1,9 +1,9 @@
 /* Aceの背景色などを上書き */
 .ace_editor:not(.ace_autocomplete) {
-  @apply bg-transparent! rounded-[inherit];
+  @apply bg-transparent! rounded-[inherit] sq-inherit;
 }
 .ace_editor * {
-  @apply rounded-[unset];
+  @apply rounded-[unset] sq-unset;
 }
 .ace-tomorrow .ace_gutter {
   @apply bg-slate-400/25!;

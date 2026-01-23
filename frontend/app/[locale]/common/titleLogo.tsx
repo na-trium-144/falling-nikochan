@@ -3,6 +3,8 @@
 import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 import TargetLine from "./targetLine.js";
+import Link from "next/link.js";
+import { linkStyle1 } from "./linkStyle.js";
 
 interface Props {
   anim?: boolean;
@@ -83,5 +85,22 @@ export default function Title(props: Props) {
         }}
       />
     </div>
+  );
+}
+
+export function TitleAsLink(props: { className: string; locale: string }) {
+  return (
+    <Link
+      href={`/${props.locale}`}
+      className={clsx("basis-24 relative", linkStyle1, props.className)}
+      style={{
+        width: `calc(100% + 40rem)`,
+        marginLeft: "-20rem",
+        marginRight: "-20rem",
+      }}
+      prefetch={!process.env.NO_PREFETCH}
+    >
+      <Title className="absolute inset-0 " anim />
+    </Link>
   );
 }

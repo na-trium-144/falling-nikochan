@@ -29,13 +29,13 @@ export default {
       off: "Off",
       playbackRate: "Playback Speed",
       userBegin: "Practice from",
+      playbackRateDisplay: "Speed",
     },
     score: {
       auto: "Auto Play",
       score: "Score",
       chain: "{chain, plural, =1 {chain} other {chains}}",
       chainLong: "chains",
-      playbackRate: "Speed",
     },
     status: {
       bestScore: "Best Score",

@@ -16,10 +16,10 @@ export function useColorThief() {
     }
     if (node) {
       if (node.complete) {
-        setColor(colorThiefRef.current.getColor(node));
+        setColor(colorThiefRef.current.getColor(node, 1));
       }
       node.onload = () => {
-        setColor(colorThiefRef.current!.getColor(node));
+        setColor(colorThiefRef.current!.getColor(node, 1));
       };
     }
   }, []);

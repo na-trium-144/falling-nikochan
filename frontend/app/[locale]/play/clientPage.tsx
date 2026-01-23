@@ -71,7 +71,7 @@ import {
 } from "@/common/pwaInstall.js";
 import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
-import { IrasutoyaLikeGrass } from "./irasutoyaLikeGrass.jsx";
+import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -927,6 +927,7 @@ function Play(props: Props) {
             )}
             ready={musicAreaOk}
             playing={chartPlaying}
+            playbackRate={playbackRate}
             ytBeginSec={ytBegin}
             offset={(chartSeq?.offset || 0) + offsetPlusLatency}
             lvType={lvType}
@@ -1027,14 +1028,13 @@ function Play(props: Props) {
             <ScoreDisp
               score={score}
               best={
-                auto
-                  ? 0
-                  : chartPlaying || (showResult && !showReady)
+                !auto && playbackRate === 1
+                  ? chartPlaying || (showResult && !showReady)
                     ? oldBestScoreState
                     : bestScoreState
+                  : 0
               }
               auto={auto}
-              playbackRate={playbackRate}
               pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
               baseScore={baseScore}
               notesDone={notesDone}
@@ -1042,6 +1042,7 @@ function Play(props: Props) {
             <ChainDisp
               chain={chain}
               maxChain={maxChain}
+              playing={chartPlaying}
               fc={judgeCount[2] + judgeCount[3] === 0}
               notesTotal={notesAll.length}
             />

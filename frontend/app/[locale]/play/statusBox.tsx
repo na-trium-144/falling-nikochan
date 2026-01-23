@@ -42,6 +42,7 @@ export default function StatusBox(props: Props) {
     <Box
       classNameOuter={clsx(
         props.className,
+        "overflow-visible!",
         isMobile ? "origin-top-right" : "w-54"
       )}
       classNameInner={clsx(

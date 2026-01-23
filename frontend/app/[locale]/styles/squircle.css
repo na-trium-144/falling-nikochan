@@ -1,0 +1,76 @@
+@utility sq-inherit {
+  @supports (corner-shape: squircle) {
+    corner-shape: inherit;
+  }
+}
+@utility sq-unset {
+  @supports (corner-shape: squircle) {
+    corner-shape: unset;
+  }
+}
+
+@utility rounded-sq-* {
+  border-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-radius: calc(2 * --value(--radius-*));
+  }
+}
+@utility rounded-t-sq-* {
+  border-top-left-radius: --value(--radius-*);
+  border-top-right-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-top-left-radius: calc(2 * --value(--radius-*));
+    /* prettier-ignore */
+    border-top-right-radius: calc(2 * --value(--radius-*));
+  }
+}
+@utility rounded-b-sq-* {
+  border-bottom-left-radius: --value(--radius-*);
+  border-bottom-right-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-bottom-left-radius: calc(2 * --value(--radius-*));
+    /* prettier-ignore */
+    border-bottom-right-radius: calc(2 * --value(--radius-*));
+  }
+}
+@utility rounded-l-sq-* {
+  border-top-left-radius: --value(--radius-*);
+  border-bottom-left-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-top-left-radius: calc(2 * --value(--radius-*));
+    /* prettier-ignore */
+    border-bottom-left-radius: calc(2 * --value(--radius-*));
+  }
+}
+@utility rounded-bl-sq-* {
+  border-bottom-left-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-bottom-left-radius: calc(2 * --value(--radius-*));
+  }
+}
+@utility rounded-tr-sq-* {
+  border-top-right-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-top-right-radius: calc(2 * --value(--radius-*));
+  }
+}
+@utility rounded-br-sq-* {
+  border-bottom-right-radius: --value(--radius-*);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    /* prettier-ignore */
+    border-bottom-right-radius: calc(2 * --value(--radius-*));
+  }
+}

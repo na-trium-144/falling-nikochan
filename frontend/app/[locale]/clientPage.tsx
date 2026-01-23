@@ -2,17 +2,15 @@
 
 import clsx from "clsx/lite";
 import Link from "next/link";
-import { linkStyle1, linkStyle3 } from "./common/linkStyle.js";
-import Title from "./common/titleLogo.js";
+import { TitleAsLink } from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
-  MobileFooter,
+  MobileFooterWithGradient,
   PCFooter,
   pcTabTitleKeys,
   tabURLs,
 } from "./common/footer.js";
-import { useDisplayMode } from "./scale.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
@@ -26,7 +24,6 @@ import { ChartList } from "./main/chartList.jsx";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
-import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 import { AboutModal } from "./common/aboutModal.jsx";
 import {
   skyFlatButtonBorderStyle1,
@@ -34,12 +31,12 @@ import {
   skyFlatButtonStyle,
 } from "./common/flatButton.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
+import { AboutDescription } from "./main/main.jsx";
 
 interface Props {
   locale: string;
 }
 export default function TopPage(props: Props) {
-  const { screenWidth, rem } = useDisplayMode();
   const router = useRouter();
   const t = useTranslations("main");
   const [menuMove, menuMoveAnim, setMenuMove] = useDelayedDisplayState(200);
@@ -78,53 +75,13 @@ export default function TopPage(props: Props) {
             )
         )}
       >
-        <Link
-          href={`/${locale}`}
-          className={clsx(
-            "grow-3 shrink-0 basis-24 relative",
-            linkStyle1
-          )}
-          style={{
-            width: `calc(100% + 40rem)`,
-            marginLeft: "-20rem",
-            marginRight: "-20rem",
-          }}
-          prefetch={!process.env.NO_PREFETCH}
-        >
-          <Title className="absolute inset-0 " anim />
-        </Link>
+        <TitleAsLink className="grow-3 shrink-0" locale={locale} />
         <div className="basis-0 flex-1 " />
-        <div className="grow-0 my-2 text-center px-6">
-          {t("description")}
-          <Link
-            href={`/${locale}/main/about/1`}
-            className={clsx(
-              "main-wide:hidden inline-block",
-              "ml-2",
-              linkStyle3
-            )}
-          >
-            {t("aboutNikochan")}
-            <ArrowRight
-              className="inline-block align-middle ml-2 "
-              theme="filled"
-            />
-          </Link>
-          <button
-            className={clsx(
-              "hidden main-wide:inline-block",
-              "ml-2",
-              linkStyle3
-            )}
-            onClick={() => setAboutPageIndex(1)}
-          >
-            {t("aboutNikochan")}
-            <ArrowRight
-              className="inline-block align-middle ml-2 "
-              theme="filled"
-            />
-          </button>
-        </div>
+        <AboutDescription
+          className="my-2"
+          locale={locale}
+          onClickAbout={() => setAboutPageIndex(1)}
+        />
         <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
         <div className={clsx("basis-auto grow-2", menuMoveAnimClass)}>
           <RedirectedWarning />
@@ -174,14 +131,13 @@ export default function TopPage(props: Props) {
           className={clsx(
             "shrink-0 basis-auto grow-3",
             "hidden main-wide:flex",
-            "flex-col justify-center w-64",
+            "flex-col justify-center w-main-nav",
             "transition ease-out duration-200"
           )}
           style={{
             transform: menuMove
-              ? `translateX(-${
-                  (screenWidth - (64 / 4) * rem - (12 / 4) * rem) / 2
-                }px)`
+              ? // 挿入されるBoxのサイズは (w-main) or (100% - w-main-nav - p-6)
+                "translateX(max(calc(var(--container-main) / -2), calc((100vw - var(--container-main-nav) - var(--spacing) * 12) / -2)))"
               : undefined,
           }}
         >
@@ -190,7 +146,7 @@ export default function TopPage(props: Props) {
               key={i}
               href={`/${locale}${tabURLs[key]}`}
               className={clsx(
-                "text-center rounded-box py-3 pl-2 pr-2",
+                "text-center rounded-2xl py-3 pl-2 pr-2",
                 skyFlatButtonStyle
               )}
               prefetch={!process.env.NO_PREFETCH}
@@ -218,17 +174,9 @@ export default function TopPage(props: Props) {
         />
 
         <PCFooter locale={locale} />
-        <div className="flex-none basis-15 main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer main-wide:hidden " />
       </div>
-      <div
-        className={clsx(
-          "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
-          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
-          "dark:from-orange-950 dark:to-orange-950/0"
-        )}
-      >
-        <MobileFooter locale={locale} tabKey="top" />
-      </div>
+      <MobileFooterWithGradient locale={locale} tabKey="top" />
     </main>
   );
 }

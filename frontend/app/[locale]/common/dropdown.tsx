@@ -116,7 +116,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
       }}
       classNameOuter={clsx(
         "fixed! z-50 -translate-x-1/2",
-        "shadow-modal overflow-hidden",
+        "rounded-sq-2xl! shadow-modal overflow-hidden",
         "transition-[scale,opacity] duration-150",
         popupAppearing
           ? "ease-in scale-100 opacity-100"

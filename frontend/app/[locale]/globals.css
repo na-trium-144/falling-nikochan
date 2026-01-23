@@ -9,8 +9,12 @@
   --color-sky-975: #091823;
   --color-default: var(--color-slate-800);
   --color-default-dark: var(--color-stone-300);
+  --container-main-nav: 16rem;
+  --container-main: 88rem;
+  --container-mobile-header: 3.25rem; /* MobileHeader を編集したら変えること */
+  --container-mobile-footer: 3.25rem; /* MobileFooter を編集したら変えること */
   --blur-2xs: 2px;
-  --radius-box: 1.25rem;
+  --radius-box: 1.5rem;
   --shadow-modal: var(--shadow-md);
   --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
   --font-main-ui: "Merriweather", "Kaisei Opti", serif;
@@ -20,6 +24,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @import "./styles/utilities.css";
+@import "./styles/squircle.css";
 
 @import "./styles/glass.css";
 @import "./styles/box.css";
@@ -31,6 +36,7 @@
 @import "./styles/chart-list.css";
 
 @import "./styles/result.css";
+@import "./styles/irasutoya-like.css";
 @import "./styles/scrollbar.css";
 @import "./styles/ace.css";
 /*@import "./styles/checkbox.scss";*/

@@ -89,7 +89,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           prevFadeLeft = fadeLeft;
           prevFadeRight = fadeRight;
           const toPosition = (fade: number) =>
-            `calc(var(--spacing) * ${(padding ?? 0) / 2} + min(${refCurrent.clientWidth / 3}px, 4rem, ${fade * 3}px))`;
+            `calc(var(--spacing) * ${(padding ?? 0) / 2} + min(${refCurrent.clientWidth / 3}px, ${refCurrent.clientHeight / 3}px, 4rem, ${fade * 3}px))`;
           const fromColor = (fade: number) =>
             `rgb(0 0 0 / ${Math.max(0, 1 - fade / rem)})`;
           if (scrollableX) {

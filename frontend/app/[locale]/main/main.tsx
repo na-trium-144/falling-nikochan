@@ -12,7 +12,7 @@ import {
 } from "@/common/footer.js";
 import { ReactNode, RefObject, useCallback, useState } from "react";
 import Link from "next/link";
-import Title from "@/common/titleLogo.js";
+import { TitleAsLink } from "@/common/titleLogo.js";
 import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
@@ -67,34 +67,15 @@ export function IndexMain(props: Props) {
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
-      <Link
-        href={`/${locale}`}
-        className={clsx(
-          "hidden main-wide:block w-full",
-          "shrink-0 basis-24 relative",
-          linkStyle1
-        )}
-        style={{
-          marginLeft: "-20rem",
-          marginRight: "-20rem",
-        }}
-        prefetch={!process.env.NO_PREFETCH}
-      >
-        <Title className="absolute inset-0 " />
-      </Link>
-      <div className="my-2 text-center px-6 hidden main-wide:block">
-        {t("description")}
-        <button
-          className={clsx("hidden main-wide:inline-block", "ml-2", linkStyle3)}
-          onClick={() => setAboutPageIndex(1)}
-        >
-          {t("aboutNikochan")}
-          <ArrowRight
-            className="inline-block align-middle ml-2 "
-            theme="filled"
-          />
-        </button>
-      </div>
+      <TitleAsLink
+        className="hidden main-wide:block shrink-0"
+        locale={locale}
+      />
+      <AboutDescription
+        className="my-2 hidden main-wide:block"
+        locale={locale}
+        onClickAbout={() => setAboutPageIndex(1)}
+      />
       <RedirectedWarning />
       <div
         className={clsx(
@@ -107,7 +88,7 @@ export function IndexMain(props: Props) {
           <nav
             className={clsx(
               "hidden main-wide:flex",
-              "flex-col h-max w-64 shrink-0 my-auto",
+              "flex-col h-max w-main-nav shrink-0 my-auto",
               "transition ease-out duration-200"
             )}
           >
@@ -117,7 +98,7 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-l-box py-3 pl-2 pr-2 text-center",
+                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
                     boxButtonStyle
                   )}
                 >
@@ -131,7 +112,7 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-l-box py-3 pl-2 pr-2 text-center",
+                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
                     skyFlatButtonStyle
                   )}
                 >
@@ -150,7 +131,7 @@ export function IndexMain(props: Props) {
         )}
         <Box
           refInner={props.boxRef}
-          classNameOuter={clsx("min-h-0 flex-1 min-w-0")}
+          classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
           classNameInner={clsx("flex flex-col")}
           scrollableY
           padding={6}
@@ -172,5 +153,38 @@ export function IndexMain(props: Props) {
       <PCFooter locale={locale} nav={props.tabKey === null} />
       <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
+  );
+}
+
+export function AboutDescription(props: {
+  className: string;
+  locale: string;
+  onClickAbout: () => void;
+}) {
+  const t = useTranslations("main");
+  return (
+    <div className={clsx("flex-none text-center px-6", props.className)}>
+      {t("description")}
+      <Link
+        href={`/${props.locale}/main/about/1`}
+        className={clsx("main-wide:hidden inline-block", "ml-2", linkStyle3)}
+      >
+        {t("aboutNikochan")}
+        <ArrowRight
+          className="inline-block align-middle ml-2 "
+          theme="filled"
+        />
+      </Link>
+      <button
+        className={clsx("hidden main-wide:inline-block", "ml-2", linkStyle3)}
+        onClick={props.onClickAbout}
+      >
+        {t("aboutNikochan")}
+        <ArrowRight
+          className="inline-block align-middle ml-2 "
+          theme="filled"
+        />
+      </button>
+    </div>
   );
 }

@@ -2,6 +2,14 @@ import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
 import { Scrollable } from "./scrollable";
 
+export const warningBoxBorderStyle1 = clsx(
+  boxBorderStyle1,
+  "border-white/80! dark:border-stone-300/50!"
+);
+export const warningBoxBorderStyle2 = clsx(
+  boxBorderStyle2,
+  "border-amber-600/25!"
+);
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
   refInner?: { current: HTMLDivElement | null };
@@ -35,7 +43,7 @@ export function Box(props: Props) {
         内側の要素のサイズはgridとw-full,h-full指定により外側と同じになる (たぶん)
         */
         "fn-box",
-        "relative rounded-box grid grid-cols-1 grid-rows-1",
+        "relative rounded-sq-box grid grid-cols-1 grid-rows-1",
         "overflow-hidden",
         props.hidden && "hidden",
         props.classNameOuter
@@ -51,7 +59,11 @@ export function Box(props: Props) {
       {props.scrollableX || props.scrollableY ? (
         <Scrollable
           ref={props.refInner}
-          className={clsx("w-full h-full", props.classNameInner)}
+          className={clsx(
+            "w-full h-full",
+            "overflow-hidden",
+            props.classNameInner
+          )}
           style={props.styleInner}
           padding={props.padding ?? 0}
           scrollableX={props.scrollableX}
@@ -83,13 +95,17 @@ export function CenterBox(props: Props) {
       ref={props.refOuter}
       className={clsx(
         "absolute inset-0 grid-centering",
+        "pointer-events-none",
         props.classNameOuter,
         props.hidden && "hidden"
       )}
     >
       <Box
         refInner={props.refInner}
-        classNameOuter={clsx("w-max h-max max-w-full text-center")}
+        classNameOuter={clsx(
+          "w-max h-max max-w-full text-center",
+          "pointer-events-auto"
+        )}
         classNameInner={clsx(props.classNameInner)}
         styleOuter={props.styleOuter}
         styleInner={props.styleInner}
@@ -110,8 +126,10 @@ export function WarningBox(props: Props) {
   return (
     <div
       className={clsx(
-        "text-center text-sm mx-6 my-2 px-3 py-2 h-max",
-        "rounded-lg bg-amber-200/75 dark:bg-amber-800/75 backdrop-blur-2xs",
+        "relative",
+        "text-center text-sm mx-6 my-2 p-3 h-max",
+        "rounded-sq-2xl bg-amber-400/25 backdrop-blur-xs",
+        "inset-shadow-button inset-shadow-amber-800/10",
         props.hidden && "hidden"
       )}
       ref={props.refOuter}
@@ -120,6 +138,8 @@ export function WarningBox(props: Props) {
       onPointerDown={props.onPointerDown}
       onPointerUp={props.onPointerUp}
     >
+      <span className={clsx(warningBoxBorderStyle1, props.classNameBorder)} />
+      <span className={clsx(warningBoxBorderStyle2, props.classNameBorder)} />
       {props.children}
     </div>
   );
