@@ -7,5 +7,7 @@
 */public/LICENSE
 */dist/
 /node_modules/
+*/node_modules/
 /.vercel*
 .vite
+pnpm-lock.yaml

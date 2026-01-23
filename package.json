@@ -7,16 +7,16 @@
     "node": ">=23.6"
   },
   "scripts": {
-    "lint": "tsc && npm run lint --ws --if-present",
+    "lint": "tsc && pnpm run -r --if-present lint",
     "format": "prettier --write .",
-    "t": "npm run t --ws --if-present",
-    "prepare": "npm run t --ws --if-present",
-    "test": "npm run test --ws --if-present",
+    "t": "pnpm run -r --if-present t",
+    "prepare-disabled": "pnpm run -r --if-present t",
+    "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
-    "ndev": "npm run dev -w frontend",
-    "nbuild": "npm run build -w frontend && npm run postbuild -w frontend",
-    "swbuild": "npm run build -w worker && npm run postbuild -w frontend",
-    "ldev": "npm run dev -w route"
+    "ndev": "pnpm run --filter frontend dev",
+    "nbuild": "pnpm run --filter frontend build && pnpm run --filter frontend postbuild",
+    "swbuild": "pnpm run --filter worker build && pnpm run --filter frontend postbuild",
+    "ldev": "pnpm run --filter route dev"
   },
   "workspaces": [
     "chart",
