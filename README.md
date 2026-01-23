@@ -20,12 +20,16 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
 
 * Install [Node.js](https://nodejs.org/ja/download).
     * Node.js >=23.6 is required for `npm run test`, but development and build can run on >=20.x.
+* Install [pnpm](https://pnpm.io/installation)
+    ```sh
+    npm install -g pnpm
+    ```
 * Install [MongoDB](https://www.mongodb.com/docs/manual/installation/) and run on `localhost:27017`
     * If you have Docker installed, it is easy to run and recommended
         ```sh
         docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest
         ```
-        * or `npm run mongo-docker` does the same.
+        * or `pnpm run mongo-docker` does the same.
     * Falling Nikochan creates and uses a database named `nikochan` in it
 * Create a `.env` file with the following contents
     ```sh
@@ -53,20 +57,19 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         * `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`,`GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` (for cronjob)
 * Install dependencies
     ```sh
-    npm ci
+    pnpm install
     ```
-    * [GitHub Action ensures](.github/workflows/sync-lock.yaml) the two lockfiles synchronized with package.json.
 * Common files (chart/)
     * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
         ```sh
-        npm run t
+        pnpm run t
         ```
 * Backend
     * Serves /api, /share, /og, and / (redirect).
     * Built with Hono, so it can be run with many runtimes.
     * For a local development environment, server can be run with Node.js (`http://localhost:8787`)
         ```sh
-        npm run ldev
+        pnpm run ldev
         ```
     * For the deployment, currently using Cloudflare Worker and Vercel
 * Frontend
@@ -74,17 +77,17 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
         * Instead, `/ja/share/placeholder` shows the placeholder page.
         ```sh
-        npm run ndev
+        pnpm run ndev
         ```
     * Or, SSR with exported html files
         * All pages should work by accessing the backend (`http://localhost:8787`) after building frontend, but there is no hot-reload.
         ```sh
-        npm run nbuild && npm run swbuild
+        pnpm run nbuild && pnpm run swbuild
         ```
 * Service Worker
     * Build frontend and service worker
     ```sh
-    npm run nbuild && npm run swbuild
+    pnpm run nbuild && pnpm run swbuild
     ```
     * Access the backend (`http://localhost:8787`) to see the service worker in action
     * The service worker ([worker/entry.ts](worker/entry.ts) bundled into /sw.js) fetches and stores all the assets and the pages, except for /api and /og.
@@ -111,6 +114,6 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 ## Versioning
 
 * major version follows the Chart data format version.
-* minor version is increased by `npm version -ws minor` command for each PR
+* minor version is increased by `pnpm version -ws minor` command for each PR
     * Changes that do not affect app/ such as dependabot or update README.md are not counted.
 * ChangeLogs are written in [i18n/[locale]/changelog.mdx](i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation.

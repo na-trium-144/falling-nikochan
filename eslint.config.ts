@@ -26,9 +26,10 @@ const eslintPluginNext = compat.config({
 export default defineConfig(
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
+  // @ts-expect-error https://github.com/typescript-eslint/typescript-eslint/issues/10899
+  tseslint.configs.recommended,
   eslintConfigPrettier,
-  ...eslintPluginNext.map((config: any) => ({ ...config, files: ["frontend/**/*"] })),
+  { files: ["frontend/**/*"], extends: eslintPluginNext },
   {
     files: ["i18n/**/*"],
     rules: {

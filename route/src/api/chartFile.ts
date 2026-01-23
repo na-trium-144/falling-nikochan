@@ -192,7 +192,7 @@ const chartFileApp = async (config: {
       }),
       (c) => {
         const chart = c.get("chart");
-        return c.body(new Blob([new Uint8Array(msgpack.serialize(chart))]).stream(), 200, {
+        return c.body(new Blob([msgpack.serialize(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
         });
       }
