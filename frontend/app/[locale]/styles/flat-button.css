@@ -83,7 +83,7 @@
     }
   }
 
-  .fn-box {
-    /* .fn-flat-button.fn-box is completely same color as .fn-box in box.css */
+  .fn-plain {
+    /* .fn-flat-button.fn-plain is completely same color as .fn-plain in box.css */
   }
 }

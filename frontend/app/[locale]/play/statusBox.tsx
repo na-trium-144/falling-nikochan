@@ -72,7 +72,7 @@ export default function StatusBox(props: Props) {
                   "bg-orange-200/50 dark:bg-sky-800/50",
                   "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
                 )
-              : clsx("fn-box", "text-slate-500/75 dark:text-stone-400/75")
+              : clsx("fn-plain", "text-slate-500/75 dark:text-stone-400/75")
           )}
           style={{
             fontSize: isMobile ? "0.8em" : undefined,

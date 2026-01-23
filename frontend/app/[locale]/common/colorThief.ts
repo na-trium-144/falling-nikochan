@@ -65,7 +65,7 @@ export function useColorThief() {
     boxStyle: clsx(
       colorAdjusted
         ? "fn-color-thief"
-        : "fn-box"
+        : "fn-plain"
     ),
     currentColor: colorAdjusted
       ? `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`

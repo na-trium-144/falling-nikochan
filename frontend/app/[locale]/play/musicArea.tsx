@@ -399,7 +399,7 @@ export function MusicArea(props: Props) {
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
             : "top-full left-3 right-1 mt-1 p-3",
           "rounded-sq-box",
-          "fn-box",
+          "fn-plain",
           "transition-all duration-200",
           volumeCtrlOpen
             ? "ease-out scale-100 opacity-100"
@@ -422,8 +422,8 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <span className={"fn-border fn-box"} />
-        <span className={"fn-border fn-box"} />
+        <span className={"fn-border fn-plain"} />
+        <span className={"fn-border fn-plain"} />
         {/*{!props.isMobile && (
           <span
             className={clsx(

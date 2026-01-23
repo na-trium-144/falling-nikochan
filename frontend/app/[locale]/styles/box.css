@@ -3,7 +3,7 @@
     @apply fixed inset-0 grid-centering bg-slate-100/70 dark:bg-stone-900/50 z-20;
   }
 
-  .fn-box {
+  .fn-plain {
     @apply bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs;
     @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
 
@@ -14,6 +14,26 @@
     > .fn-glass-2 {
       @apply border-slate-300/80 dark:border-stone-900/30;
       @apply mask-linear-to-100%;
+    }
+  }
+
+  .fn-box {
+    @apply rounded-sq-box grid grid-cols-1 grid-rows-1;
+    @apply overflow-hidden;
+
+    > .fn-box-inner {
+      @apply w-full h-full;
+      @apply overflow-hidden;
+    }
+  }
+
+  .fn-centered-box-bg {
+    @apply absolute inset-0 grid-centering;
+    @apply pointer-events-none;
+
+    > .fn-box {
+      @apply w-max h-max max-w-full text-center;
+      @apply pointer-events-auto;
     }
   }
 
@@ -44,7 +64,7 @@
     }
 
     > .fn-glass-1 {
-      /* same as box */
+      /* same as plain */
       @apply border-white/100 dark:border-stone-400/50;
       @apply mask-linear-to-50%;
     }

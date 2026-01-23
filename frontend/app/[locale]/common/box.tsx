@@ -35,8 +35,8 @@ export function Box(props: Props) {
         内側の要素のサイズはgridとw-full,h-full指定により外側と同じになる (たぶん)
         */
         "fn-box",
-        "relative rounded-sq-box grid grid-cols-1 grid-rows-1",
-        "overflow-hidden",
+        "fn-plain",
+        "relative",
         props.hidden && "hidden",
         props.classNameOuter
       )}
@@ -51,11 +51,7 @@ export function Box(props: Props) {
       {props.scrollableX || props.scrollableY ? (
         <Scrollable
           ref={props.refInner}
-          className={clsx(
-            "w-full h-full",
-            "overflow-hidden",
-            props.classNameInner
-          )}
+          className={clsx("fn-box-inner", props.classNameInner)}
           style={props.styleInner}
           padding={props.padding ?? 0}
           scrollableX={props.scrollableX}
@@ -66,7 +62,7 @@ export function Box(props: Props) {
       ) : (
         <div
           ref={props.refInner}
-          className={clsx("w-full h-full", props.classNameInner)}
+          className={clsx("fn-box-inner", props.classNameInner)}
           style={{
             ...props.styleInner,
             padding: props.padding
@@ -86,18 +82,14 @@ export function CenterBox(props: Props) {
     <div
       ref={props.refOuter}
       className={clsx(
-        "absolute inset-0 grid-centering",
-        "pointer-events-none",
+        "fn-centered-box-bg",
         props.classNameOuter,
         props.hidden && "hidden"
       )}
     >
       <Box
         refInner={props.refInner}
-        classNameOuter={clsx(
-          "w-max h-max max-w-full text-center",
-          "pointer-events-auto"
-        )}
+        classNameOuter=""
         classNameInner={clsx(props.classNameInner)}
         styleOuter={props.styleOuter}
         styleInner={props.styleInner}
