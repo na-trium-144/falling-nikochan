@@ -348,7 +348,10 @@ function Play(props: Props) {
   const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
-  const exitableNow = () => exitable && exitable < performance.now();
+  const exitableNow = useCallback(
+    () => exitable && exitable < performance.now(),
+    [exitable]
+  );
 
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [ytVolume, setYtVolume_] = useState<number>(100);
@@ -844,6 +847,48 @@ function Play(props: Props) {
     return () => document.removeEventListener("contextmenu", disableMenu);
   }, []);
 
+  useEffect(() => {
+    const keydown = (e: KeyboardEvent) => {
+      if (e.repeat) {
+        return;
+      }
+      if (e.key === " " && showReady && !chartPlaying) {
+        start();
+      } else if (
+        e.key === " " &&
+        ((showStopped && !showResult) || (showResult && exitableNow()))
+      ) {
+        setShowReady(true);
+      } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
+        stop();
+      } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
+        exit();
+      } else if (isReadyAll && !(chartPlaying && auto)) {
+        const candidate = hit(inputTypes.keyboard);
+        if (candidate) {
+          flash({ targetX: candidate.note.targetX });
+        } else {
+          flash({ targetX: 0.5 });
+        }
+      }
+    };
+    document.addEventListener("keydown", keydown);
+    return () => document.removeEventListener("keydown", keydown);
+  }, [
+    auto,
+    chartPlaying,
+    exit,
+    flash,
+    isReadyAll,
+    showReady,
+    showResult,
+    showStopped,
+    stop,
+    hit,
+    start,
+    exitableNow,
+  ]);
+
   return (
     <main
       className={clsx(
@@ -851,30 +896,6 @@ function Play(props: Props) {
       )}
       tabIndex={0}
       ref={ref}
-      onKeyDown={(e) => {
-        if (e.repeat) {
-          return;
-        }
-        if (e.key === " " && showReady && !chartPlaying) {
-          start();
-        } else if (
-          e.key === " " &&
-          ((showStopped && !showResult) || (showResult && exitableNow()))
-        ) {
-          setShowReady(true);
-        } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
-          stop();
-        } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
-          exit();
-        } else if (isReadyAll && !(chartPlaying && auto)) {
-          const candidate = hit(inputTypes.keyboard);
-          if (candidate) {
-            flash({ targetX: candidate.note.targetX });
-          } else {
-            flash({ targetX: 0.5 });
-          }
-        }
-      }}
       onPointerDown={(e) => {
         if (isReadyAll && !(chartPlaying && auto)) {
           flash({ clientX: e.clientX });
@@ -1061,7 +1082,7 @@ function Play(props: Props) {
               onPointerUp={(e) => e.stopPropagation()}
             >
               <Pause className="inline-block align-middle " />
-              {!isTouch && <Key>Esc</Key>}
+              {!isTouch && <Key handleKeyDown>Esc</Key>}
             </button>
           </div>
           {!initDone && (
