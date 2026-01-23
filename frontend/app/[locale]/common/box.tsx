@@ -2,23 +2,6 @@ import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
 import { Scrollable } from "./scrollable";
 
-export const modalBg =
-  "fixed inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1 bg-slate-100/70 dark:bg-stone-900/50 z-20 ";
-
-export const boxStyle = clsx(
-  "bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs",
-  "inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25"
-);
-export const boxBorderStyle1 = clsx(
-  "absolute inset-0 z-2 rounded-[inherit] sq-inherit pointer-events-none",
-  "border border-white/100 dark:border-stone-400/50",
-  "mask-linear-160 mask-linear-from-black mask-linear-to-transparent mask-linear-to-50%"
-);
-export const boxBorderStyle2 = clsx(
-  "absolute inset-0 z-1 rounded-[inherit] sq-inherit pointer-events-none",
-  "border border-slate-300/80 dark:border-stone-900/30",
-  "-mask-linear-20 mask-linear-from-black mask-linear-to-transparent mask-linear-to-100%"
-);
 export const warningBoxBorderStyle1 = clsx(
   boxBorderStyle1,
   "border-white/80! dark:border-stone-300/50!"
@@ -27,7 +10,6 @@ export const warningBoxBorderStyle2 = clsx(
   boxBorderStyle2,
   "border-amber-600/25!"
 );
-
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
   refInner?: { current: HTMLDivElement | null };
@@ -60,11 +42,9 @@ export function Box(props: Props) {
         width, height, max-width, max-height はclassNameOuterに指定すること。
         内側の要素のサイズはgridとw-full,h-full指定により外側と同じになる (たぶん)
         */
-        "relative",
-        "rounded-sq-box",
-        "grid grid-cols-1 grid-rows-1",
+        "fn-box",
+        "relative rounded-sq-box grid grid-cols-1 grid-rows-1",
         "overflow-hidden",
-        boxStyle,
         props.hidden && "hidden",
         props.classNameOuter
       )}
@@ -74,8 +54,8 @@ export function Box(props: Props) {
       onPointerUp={props.onPointerUp}
       onPointerLeave={props.onPointerLeave}
     >
-      <span className={clsx(boxBorderStyle1, props.classNameBorder)} />
-      <span className={clsx(boxBorderStyle2, props.classNameBorder)} />
+      <span className={clsx("fn-glass-1", props.classNameBorder)} />
+      <span className={clsx("fn-glass-2", props.classNameBorder)} />
       {props.scrollableX || props.scrollableY ? (
         <Scrollable
           ref={props.refInner}
@@ -114,7 +94,7 @@ export function CenterBox(props: Props) {
     <div
       ref={props.refOuter}
       className={clsx(
-        "absolute inset-0 grid place-content-center place-items-center grid-rows-1 grid-cols-1",
+        "absolute inset-0 grid-centering",
         "pointer-events-none",
         props.classNameOuter,
         props.hidden && "hidden"

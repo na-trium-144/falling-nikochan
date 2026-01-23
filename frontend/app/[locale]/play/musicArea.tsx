@@ -14,7 +14,6 @@ import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
-import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box";
 
 interface Props {
   ready: boolean;
@@ -400,7 +399,7 @@ export function MusicArea(props: Props) {
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
             : "top-full left-3 right-1 mt-1 p-3",
           "rounded-sq-box",
-          boxStyle,
+          "fn-box",
           "transition-all duration-200",
           volumeCtrlOpen
             ? "ease-out scale-100 opacity-100"
@@ -423,8 +422,8 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <span className={boxBorderStyle1} />
-        <span className={boxBorderStyle2} />
+        <span className={"fn-border fn-box"} />
+        <span className={"fn-border fn-box"} />
         {/*{!props.isMobile && (
           <span
             className={clsx(

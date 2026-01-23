@@ -1,0 +1,12 @@
+@layer components {
+  .fn-glass-1 {
+    @apply absolute inset-0 z-2 rounded-[inherit] pointer-events-none;
+    @apply border;
+    @apply mask-linear-160 mask-linear-from-black mask-linear-to-transparent;
+  }
+  .fn-glass-2 {
+    @apply absolute inset-0 z-1 rounded-[inherit] pointer-events-none;
+    @apply border;
+    @apply -mask-linear-20 mask-linear-from-black mask-linear-to-transparent;
+  }
+}

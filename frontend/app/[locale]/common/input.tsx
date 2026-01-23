@@ -3,11 +3,8 @@
 import clsx from "clsx/lite";
 import { useEffect, useState, RefObject } from "react";
 
-export const inputStyle = clsx(
-  "mx-1 px-1",
-  "border-0 border-b border-slate-400 dark:border-stone-600",
-  "bg-transparent appearance-none rounded-none"
-);
+// Export CSS class name for compatibility
+export const inputStyle = "fn-input";
 
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)
 // updatevalue: 値を更新 isValidがtrueの場合にのみ呼ばれる

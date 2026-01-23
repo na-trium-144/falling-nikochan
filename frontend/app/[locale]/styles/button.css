@@ -1,0 +1,56 @@
+@layer components {
+  .fn-button-disabled {
+    @apply appearance-none;
+    @apply relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-default;
+    @apply border border-blue-300/50 dark:border-amber-800/30 rounded-xl;
+    @apply bg-slate-300/50 dark:bg-stone-700/50;
+  }
+
+  .fn-button {
+    @apply appearance-none;
+    @apply relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer;
+    @apply rounded-xl;
+    @apply bg-blue-50/75 bg-gradient-to-t from-blue-200/75 to-blue-50/75;
+    @apply dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75;
+    @apply shadow-sm;
+    @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+
+    > .fn-glass-1 {
+      @apply border-white/80 dark:border-stone-300/50;
+      @apply mask-linear-to-75%;
+      @apply opacity-100;
+    }
+    > .fn-glass-2 {
+      @apply border-blue-300/80! dark:border-amber-800/50!;
+      @apply mask-linear-to-75%;
+    }
+
+    @variant active {
+      @apply bg-blue-200/75 from-blue-200/75 to-blue-200/75;
+      @apply dark:bg-amber-950/75 dark:from-amber-950/75 dark:to-amber-950/75;
+      @apply inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75;
+
+      > .fn-glass-1 {
+        @apply opacity-0;
+      }
+      > .fn-glass-2 {
+        @apply mask-none;
+      }
+    }
+  }
+
+  .fn-highlight {
+    @apply absolute inset-0 z-3 rounded-[inherit];
+    @apply bg-radial-[circle_3rem_at_var(--hl-x)_var(--hl-y)];
+    @apply from-white/50 to-white/25;
+    @apply dark:from-stone-300/20 dark:to-stone-300/10;
+    @apply opacity-0;
+    @apply transition-opacity duration-100;
+  }
+  *:hover > .fn-highlight {
+    @apply opacity-100;
+  }
+  *:active > .fn-highlight {
+    @apply opacity-25;
+  }
+}

@@ -1,3 +1,6 @@
+@utility grid-centering {
+  @apply grid place-content-center place-items-center grid-rows-1 grid-cols-1
+}
 @utility select-none {
   /* tailwind css の user-select: none だけでは足りなかった */
   -moz-user-select: none;

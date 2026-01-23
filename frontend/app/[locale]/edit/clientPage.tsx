@@ -14,7 +14,7 @@ import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
 import NoteTab from "./noteTab.js";
-import { Box, modalBg } from "@/common/box.js";
+import { Box } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
 import { convertToPlay, createBrief } from "@falling-nikochan/chart";
@@ -496,7 +496,7 @@ export default function Edit(props: {
       </div>
       <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
-        <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
+        <div className={clsx("fn-modal-bg")} onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-6 grid place-content-center">
             <Box
               classNameOuter={clsx(
@@ -527,7 +527,7 @@ export default function Edit(props: {
 
       {dragOver && (
         <div
-          className={clsx(modalBg, "z-30!")}
+          className={clsx("fn-modal-bg", "z-30!")}
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => {
             e.preventDefault();

@@ -1,0 +1,41 @@
+@layer components {
+  .fn-modal-bg {
+    @apply fixed inset-0 grid-centering bg-slate-100/70 dark:bg-stone-900/50 z-20;
+  }
+
+  .fn-box {
+    @apply bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs;
+    @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
+
+    > .fn-glass-1 {
+      @apply border-white/100 dark:border-stone-400/50;
+      @apply mask-linear-to-50%;
+    }
+    > .fn-glass-2 {
+      @apply border-slate-300/80 dark:border-stone-900/30;
+      @apply mask-linear-to-100%;
+    }
+  }
+
+  .fn-color-thief {
+    @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
+    background-color: color-mix(in oklab, currentColor 50%, var(--color-white));
+    @variant dark {
+      background-color: color-mix(
+        in oklab,
+        currentColor 50%,
+        var(--color-stone-700)
+      );
+    }
+
+    > .fn-glass-1 {
+      /* same as box */
+      @apply border-white/100 dark:border-stone-400/50;
+      @apply mask-linear-to-50%;
+    }
+    > .fn-glass-2 {
+      @apply border-current/75;
+      @apply mask-linear-to-100%;
+    }
+  }
+}

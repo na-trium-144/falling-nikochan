@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
-import { Box, modalBg } from "./box";
+import { Box } from "./box";
 import Button from "./button";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
@@ -261,7 +261,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
       {modalOpened && (
         <div
           className={clsx(
-            modalBg,
+            "fn-modal-bg",
             "transition-opacity duration-200 z-30!",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
