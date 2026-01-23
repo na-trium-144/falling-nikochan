@@ -2,18 +2,22 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Install pnpm
+RUN npm install -g pnpm@10
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY chart/package.json ./chart/
 COPY frontend/package.json ./frontend/
 COPY i18n/package.json ./i18n/
 COPY route/package.json ./route/
 COPY worker/package.json ./worker/
 
-RUN npm ci --ignore-scripts
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
 
-RUN npm run t && npm prune --production
+RUN pnpm run t && pnpm prune --prod
 
 FROM oven/bun:1-slim AS production
 

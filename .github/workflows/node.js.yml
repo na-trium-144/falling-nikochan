@@ -14,13 +14,16 @@ jobs:
         node-version: [20.x, 22.x, 24.x]
     steps:
     - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run lint
-    - run: npm run nbuild
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm run lint
+    - run: pnpm run nbuild
       env:
         ALLOW_FETCH_ERROR: "1"
 
@@ -32,12 +35,16 @@ jobs:
       # API_NO_RATELIMIT: "1"
     steps:
     - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
-    - run: npm ci
-    - run: npm run mongo-docker
-    - run: npm run test
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm run mongo-docker
+    - run: pnpm run test
 
   test-bun:
     runs-on: ubuntu-latest
@@ -62,11 +69,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
-    - run: npm ci
-    - run: npx prettier --check .
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm exec prettier --check .
 
   vercel-build:
     runs-on: ubuntu-latest
@@ -104,19 +115,23 @@ jobs:
     steps:
     # .vercel/output と、それとは別に node_modules も必要
     - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
-    - run: npm ci
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
     - name: Pull Vercel Environment Information
-      run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm exec vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Download .vercel/output
       uses: actions/download-artifact@v4
       with:
         name: vercel-output
         path: .vercel/output
     - name: Deploy Project Artifacts to Vercel
-      run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm exec vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
 
   notify-failure:
     # lint, test, format のいずれかが失敗した場合に実行

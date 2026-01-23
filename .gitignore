@@ -10,4 +10,3 @@
 */node_modules/
 /.vercel*
 .vite
-pnpm-lock.yaml

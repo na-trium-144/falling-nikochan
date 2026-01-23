@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm ci",
-  "buildCommand": "npm run nbuild && npm run swbuild",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run nbuild && pnpm run swbuild",
   "outputDirectory": "frontend/out",
   "devCommand": null,
   "framework": null,
