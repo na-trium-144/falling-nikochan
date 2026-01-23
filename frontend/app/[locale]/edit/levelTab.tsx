@@ -68,7 +68,11 @@ export default function LevelTab(props: Props) {
           </>
         )}
       </div>
-      <Scrollable as="ul" className="ml-2 mt-2 mb-2 space-y-1 max-h-32" scrollableY>
+      <Scrollable
+        as="ul"
+        className="ml-2 mt-2 mb-2 space-y-1 max-h-32"
+        scrollableY
+      >
         {chart?.levels.map((level, i) => (
           <li key={i}>
             <button

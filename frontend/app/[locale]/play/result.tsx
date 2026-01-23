@@ -152,7 +152,9 @@ export default function Result(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <p className="text-lg font-title font-semibold">&lt; {t("result")} &gt;</p>
+        <p className="text-lg font-title font-semibold">
+          &lt; {t("result")} &gt;
+        </p>
         <div
           className={clsx(
             "my-2 flex justify-center items-center",

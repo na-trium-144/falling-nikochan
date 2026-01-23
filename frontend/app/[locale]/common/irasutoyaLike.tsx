@@ -119,15 +119,15 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   useEffect(() => {
     let seed = 0;
     function random() {
-      if(fixedSeed){
-        let t = (seed += 0x6D2B79F5);
+      if (fixedSeed) {
+        let t = (seed += 0x6d2b79f5);
         t = Math.imul(t ^ (t >>> 15), t | 1);
         t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      }else{
+      } else {
         return Math.random();
       }
-    };
+    }
 
     // 草のパターン生成（グリッド・ジッター法）
     const grassTufts = [];
@@ -140,9 +140,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
         // セル内のランダムな位置（はみ出し防止のマージンを考慮）
         const margin = cellWidth * 0.05;
         const x =
-          c * cellWidth +
-          margin +
-          random() * (cellWidth - baseW - margin * 2);
+          c * cellWidth + margin + random() * (cellWidth - baseW - margin * 2);
         const y =
           r * cellHeight +
           margin +

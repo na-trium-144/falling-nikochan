@@ -264,7 +264,12 @@ function ChainBigAnim(props: { className: string; chain: number }) {
     }
   }, [props.chain, animChain]);
   return (
-    <div className={clsx("absolute inset-0 flex flex-row bold-by-stroke", props.className)}>
+    <div
+      className={clsx(
+        "absolute inset-0 flex flex-row bold-by-stroke",
+        props.className
+      )}
+    >
       <span className="flex-3" />
       <span
         ref={ref}

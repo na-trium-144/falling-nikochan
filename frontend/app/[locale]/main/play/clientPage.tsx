@@ -174,7 +174,9 @@ export default function PlayTab(props: Props) {
         className="flex-none mb-3 "
         hidden={searching || !!searchResult}
       >
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("popular")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">
+          {t("popular")}
+        </h3>
         <p className="pl-2 mb-1 text-justify ">
           {t("popularDesc", { popularDays })}
         </p>

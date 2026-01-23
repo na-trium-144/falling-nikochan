@@ -60,7 +60,7 @@ export function AboutContent2() {
           <p>
             {/*優先的に改行してほしい位置にinlineBlockを入れる*/}
             {t.rich("content2", {
-              key: (c) => <Key>{c}</Key>,
+              key: (c) => <Key>{String(c)}</Key>,
               inlineBlock: (c) => <span className="inline-block">{c}</span>,
             })}
           </p>
