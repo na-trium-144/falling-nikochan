@@ -223,7 +223,7 @@ export function useChartState(props: Props) {
             process.env.BACKEND_PREFIX + `/api/newChartFile`,
             {
               method: "POST",
-              body: msgpack.serialize(chartState.chart.toObject()),
+              body: new Uint8Array(msgpack.serialize(chartState.chart.toObject())),
               cache: "no-store",
               credentials:
                 process.env.NODE_ENV === "development"
@@ -271,7 +271,7 @@ export function useChartState(props: Props) {
               q.toString(),
             {
               method: "POST",
-              body: msgpack.serialize(chartState.chart.toObject()),
+              body: new Uint8Array(msgpack.serialize(chartState.chart.toObject())),
               cache: "no-store",
               credentials:
                 process.env.NODE_ENV === "development"

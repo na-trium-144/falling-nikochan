@@ -25,13 +25,13 @@ for (const [name, file] of [
   ["noto-sans-jp", "noto-sans-jp-japanese-400-normal.woff"],
 ]) {
   var woff = Buffer.from(
-    readFileSync(`../node_modules/@fontsource/${name}/files/${file}`)
+    readFileSync(`./node_modules/@fontsource/${name}/files/${file}`)
   );
   writeFileSync(`public/og-fonts/${parse(file).name}.ttf`, toSfnt(woff));
 }
 
 copyFileSync(
-  "../node_modules/wasmoon/dist/glue.wasm",
+  "./node_modules/wasmoon/dist/glue.wasm",
   "public/wasmoon_glue.wasm"
 );
 
