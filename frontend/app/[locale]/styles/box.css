@@ -3,21 +3,8 @@
     @apply fixed inset-0 grid-centering bg-slate-100/70 dark:bg-stone-900/50 z-20;
   }
 
-  .fn-plain {
-    @apply bg-white/50 dark:bg-stone-700/50 backdrop-blur-xs;
-    @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
-
-    > .fn-glass-1 {
-      @apply border-white/100 dark:border-stone-400/50;
-      @apply mask-linear-to-50%;
-    }
-    > .fn-glass-2 {
-      @apply border-slate-300/80 dark:border-stone-900/30;
-      @apply mask-linear-to-100%;
-    }
-  }
-
   .fn-box {
+    /* for Box component */
     @apply rounded-sq-box grid grid-cols-1 grid-rows-1;
     @apply overflow-hidden;
     @apply relative;
@@ -29,6 +16,7 @@
   }
 
   .fn-centered-box-bg {
+    /* for CenterBox component */
     @apply absolute inset-0 grid-centering;
     @apply pointer-events-none;
 
@@ -39,40 +27,9 @@
   }
 
   .fn-warning-box {
+    /* for WarningBox component */
     @apply text-center text-sm mx-6 my-2 p-3 h-max;
-    @apply rounded-sq-2xl bg-amber-400/25 backdrop-blur-xs;
-    @apply inset-shadow-button inset-shadow-amber-800/10;
+    @apply rounded-sq-2xl;
     @apply relative;
-
-    > .fn-glass-1 {
-      @apply border-white/80 dark:border-stone-300/50;
-      @apply mask-linear-to-50%;
-    }
-    > .fn-glass-2 {
-      @apply border-amber-600/25;
-      @apply mask-linear-to-100%;
-    }
-  }
-
-  .fn-color-thief {
-    @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
-    background-color: color-mix(in oklab, currentColor 50%, var(--color-white));
-    @variant dark {
-      background-color: color-mix(
-        in oklab,
-        currentColor 50%,
-        var(--color-stone-700)
-      );
-    }
-
-    > .fn-glass-1 {
-      /* same as plain */
-      @apply border-white/100 dark:border-stone-400/50;
-      @apply mask-linear-to-50%;
-    }
-    > .fn-glass-2 {
-      @apply border-current/75;
-      @apply mask-linear-to-100%;
-    }
   }
 }
