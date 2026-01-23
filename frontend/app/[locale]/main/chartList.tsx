@@ -46,7 +46,7 @@ export default function ChartListPage(props: PProps) {
     >
       <h3
         className={clsx(
-          "flex-none mb-2 text-xl font-bold font-title",
+          "flex-none mb-2 text-xl font-semibold font-title",
           "hidden main-wide:block"
         )}
       >

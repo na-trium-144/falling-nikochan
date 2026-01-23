@@ -312,7 +312,7 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "mt-1 w-full text-center",
+          "mt-1 w-full text-center bold-by-stroke",
           props.disabled
             ? "text-slate-400/75 dark:text-stone-600/75"
             : props.color === "inverted"
@@ -333,7 +333,7 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "inline-flex mt-1 w-4 justify-center items-baseline",
+          "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
           props.disabled
             ? "text-slate-400/75 dark:text-stone-600/75"
             : props.color === "inverted"

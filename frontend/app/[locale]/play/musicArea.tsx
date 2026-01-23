@@ -176,7 +176,8 @@ export function MusicArea(props: Props) {
           <div className={clsx(props.isMobile && "h-0 overflow-visible")}>
             <p
               className={clsx(
-                veryLargeTitle ? "" : largeTitle ? "leading-5" : "leading-3.5"
+                veryLargeTitle ? "" : largeTitle ? "leading-5" : "leading-3.5",
+                "font-medium"
               )}
             >
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}

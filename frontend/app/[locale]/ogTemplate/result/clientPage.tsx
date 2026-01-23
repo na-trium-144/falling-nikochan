@@ -105,7 +105,7 @@ export default function OGTemplate() {
             (2025/01/01)
           </div>
 
-          {/*<p className="text-3xl font-title font-bold">
+          {/*<p className="text-3xl font-title font-semibold">
             &lt; {t("result")} &gt;
           </p>*/}
           <div className="flex-1 w-full flex flex-row">
