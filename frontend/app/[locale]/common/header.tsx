@@ -15,7 +15,7 @@ export function MobileHeader(props: MProps) {
   return (
     <header
       className={clsx(
-        "p-3 w-full relative text-center text-xl font-bold font-title main-wide:hidden",
+        "p-3 w-full relative text-center text-xl font-semibold font-title main-wide:hidden",
         props.className
       )}
     >

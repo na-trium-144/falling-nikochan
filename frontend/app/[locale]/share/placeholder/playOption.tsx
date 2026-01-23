@@ -380,6 +380,7 @@ function SelectedLevelInfo(props: {
         <div className="flex flex-row items-center ">
           <span
             className={clsx(
+              "bold-by-stroke",
               selectedBestScore || "text-slate-400 dark:text-stone-600"
             )}
           >

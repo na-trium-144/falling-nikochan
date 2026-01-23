@@ -173,8 +173,8 @@ export function ShareBox(props: Props) {
                 )}
                 <span>{cid && `ID: ${cid}`}</span>
               </div>
-              <p className="font-title text-2xl">{brief?.title}</p>
-              <p className="font-title text-lg">{brief?.composer}</p>
+              <p className="font-title text-2xl font-semibold">{brief?.title}</p>
+              <p className="font-title text-lg font-medium">{brief?.composer}</p>
               <p className="mt-1">
                 <span className="inline-block">
                   <span className="text-sm">

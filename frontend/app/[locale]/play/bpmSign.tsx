@@ -191,7 +191,7 @@ export default function BPMSign(props: Props) {
       >
         <div
           className={clsx(
-            "flex flex-row items-baseline w-22 overflow-hidden",
+            "flex flex-row items-baseline w-22 overflow-hidden bold-by-stroke",
             chartSeq === null && "invisible"
           )}
         >

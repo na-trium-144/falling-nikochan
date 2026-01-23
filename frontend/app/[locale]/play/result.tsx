@@ -152,7 +152,7 @@ export default function Result(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
+        <p className="text-lg font-title font-semibold">&lt; {t("result")} &gt;</p>
         <div
           className={clsx(
             "my-2 flex justify-center items-center",
@@ -322,13 +322,19 @@ function ResultRow(props: RowProps) {
       <span className="flex-1 text-left min-w-0 overflow-visible whitespace-nowrap">
         {props.name}:
       </span>
-      <span className="text-3xl text-right " style={props.scoreStyle}>
+      <span
+        className="text-3xl text-right bold-by-stroke"
+        style={props.scoreStyle}
+      >
         {Math.floor(props.score100 / 100)}
       </span>
-      <span className="text-xl" style={props.scoreStyle}>
+      <span className="text-xl bold-by-stroke" style={props.scoreStyle}>
         .
       </span>
-      <span className="text-xl text-left w-7 " style={props.scoreStyle}>
+      <span
+        className="text-xl text-left bold-by-stroke w-7 "
+        style={props.scoreStyle}
+      >
         {(props.score100 % 100).toString().padStart(2, "0")}
       </span>
     </p>

@@ -42,7 +42,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       locale={locale}
     >
       <div className="mb-3 main-wide:hidden">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("settings")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("settings")}</h3>
         <div className="ml-2 space-y-2">
           <p>
             <Translate className="inline-block align-middle" />
@@ -103,7 +103,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       </div>
       <PWAInstallDesc block className="mb-3 hidden main-wide:block" />
       <div className="mb-3 ">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("about")}</h3>
         <div className="ml-2 space-y-1">
           <p>
             <span>{t("version")}:</span>
@@ -143,7 +143,7 @@ export default function LinksPage({ locale }: { locale: string }) {
         </div>
       </div>
       <div className="mb-3">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("title")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("title")}</h3>
         <ul className="list-disc ml-6 space-y-1 ">
           <li>
             <FormOne className="inline-block align-middle mr-1" />

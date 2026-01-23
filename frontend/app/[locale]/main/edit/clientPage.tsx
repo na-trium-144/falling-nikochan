@@ -90,7 +90,7 @@ export default function EditTab({ locale }: { locale: string }) {
       </p>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">{t("inputId")}:</span>
+          <span className="text-xl font-semibold font-title ">{t("inputId")}:</span>
           <Input
             className="ml-4 w-20"
             actualValue={inputCId}
@@ -115,7 +115,7 @@ export default function EditTab({ locale }: { locale: string }) {
       </div>
       <div className="mb-3">
         <h3 className="mb-2">
-          <span className="text-xl font-bold font-title ">{t("new")}:</span>
+          <span className="text-xl font-semibold font-title ">{t("new")}:</span>
           <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
             {t("newButton")}
           </ExternalLink>
@@ -125,7 +125,7 @@ export default function EditTab({ locale }: { locale: string }) {
         </p>
       </div>
       <div className="mb-3">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("recentEdit")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("recentEdit")}</h3>
         {isSafari && (
           <p className="pl-2 mb-1 text-justify">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
