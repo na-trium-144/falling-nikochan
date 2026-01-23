@@ -22,7 +22,7 @@ export function getSample(cid: string): ChartEdit {
       592994: {
         ytId: "9QLT1Aw_45s",
         title: "フォニイ",
-        composer: "ツキミ (feat. 可不)",
+        composer: "ツミキ (feat. 可不)",
       },
       488006: {
         ytId: "wDgQdr8ZkTw",

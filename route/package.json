@@ -12,7 +12,7 @@
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
-    "@google/genai": "^1.30.0",
+    "@google/genai": "^1.38.0",
     "@hono/node-server": "^1.19.7",
     "@hono/standard-validator": "^0.2.1",
     "@hono/swagger-ui": "^0.5.3",
@@ -22,7 +22,7 @@
     "@ygoe/msgpack": "^1.0.3",
     "discord.js": "^14.25.1",
     "dotenv": "^16.6.1",
-    "hono": "^4.11.3",
+    "hono": "^4.11.4",
     "hono-openapi": "^1.1.2",
     "isbot": "^5.1.32",
     "moji": "^0.5.1",
