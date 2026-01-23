@@ -1,5 +1,13 @@
+@utility no-pc {
+  @apply main-wide:hidden;
+}
+@utility no-mobile {
+  /* max- var(--breakpoint-main-wide) */
+  @apply max-[48rem]:hidden;
+}
+
 @utility grid-centering {
-  @apply grid place-content-center place-items-center grid-rows-1 grid-cols-1
+  @apply grid place-content-center place-items-center grid-rows-1 grid-cols-1;
 }
 @utility select-none {
   /* tailwind css の user-select: none だけでは足りなかった */

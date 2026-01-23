@@ -41,7 +41,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       noBackButtonPC
       locale={locale}
     >
-      <div className="mb-3 main-wide:hidden">
+      <div className="mb-3 no-pc">
         <h3 className="mb-2 text-xl font-bold font-title">{t("settings")}</h3>
         <div className="ml-2 space-y-2">
           <p>
@@ -101,7 +101,7 @@ export default function LinksPage({ locale }: { locale: string }) {
           <PWAInstallDesc block />
         </div>
       </div>
-      <PWAInstallDesc block className="mb-3 hidden main-wide:block" />
+      <PWAInstallDesc block className="mb-3 no-mobile" />
       <div className="mb-3 ">
         <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
         <div className="ml-2 space-y-1">
@@ -131,7 +131,7 @@ export default function LinksPage({ locale }: { locale: string }) {
               browserslist: process.env.browserslist!,
             })}
           </p>
-          <p className="main-wide:hidden ">
+          <p className="no-pc">
             <Link
               className={clsx(linkStyle3)}
               href={`/${locale}/main/policies`}
@@ -170,40 +170,30 @@ export default function LinksPage({ locale }: { locale: string }) {
               theme="filled"
             />
             <ExternalLink href="https://www.youtube.com/@nikochan144">
-              <span className="hidden main-wide:inline">
-                {t("officialChannel")}
-              </span>
-              <span className="main-wide:hidden">
-                {t("officialChannelShort")}
-              </span>
+              <span className="no-mobile">{t("officialChannel")}</span>
+              <span className="no-pc">{t("officialChannelShort")}</span>
             </ExternalLink>
           </li>
           <li>
             <span className="text-lg/6 px-0.5 mr-1">𝕏</span>
             <ExternalLink href="https://twitter.com/@nikochan144">
-              <span className="hidden main-wide:inline">
-                {t("officialAccount")}
-              </span>
-              <span className="main-wide:hidden">
-                {t("officialAccountShort")}
-              </span>
+              <span className="no-mobile">{t("officialAccount")}</span>
+              <span className="no-pc">{t("officialAccountShort")}</span>
             </ExternalLink>
           </li>
           <li>
             <Github className="inline-block align-middle mr-1" />
             <span className="mr-1">GitHub:</span>
             <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
-              <span className="hidden main-wide:inline">na-trium-144/</span>
+              <span className="no-mobile">na-trium-144/</span>
               <span>falling-nikochan</span>
             </ExternalLink>
           </li>
           <li>
             <Code className="inline-block align-middle mr-1" />
             <ExternalLink href="/api" forceColor>
-              <span className="hidden main-wide:inline">
-                {t("apiReference")}
-              </span>
-              <span className="main-wide:hidden">{t("apiReferenceShort")}</span>
+              <span className="no-mobile">{t("apiReference")}</span>
+              <span className="no-pc">{t("apiReferenceShort")}</span>
             </ExternalLink>
           </li>
           <li>

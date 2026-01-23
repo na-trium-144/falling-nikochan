@@ -157,12 +157,7 @@ export function ShareBox(props: Props) {
             </div>
             <div className="flex-1" />
             <div>
-              <div
-                className={clsx(
-                  "mb-2",
-                  props.forceShowCId || "hidden main-wide:block"
-                )}
-              >
+              <div className={clsx("mb-2", props.forceShowCId || "no-mobile")}>
                 {props.backButton && (
                   <button
                     className={clsx(pagerButtonClass, "mr-4")}
@@ -224,18 +219,14 @@ export function ShareBox(props: Props) {
       {sharedResult && <SharedResultBox result={sharedResult} />}
       {brief && (
         <p className="mt-2">
-          <span className="hidden main-wide:inline-block mr-2">
-            {t("shareLink")}:
-          </span>
+          <span className="no-mobile mr-2">{t("shareLink")}:</span>
           <a
             className={clsx("inline-block py-2", linkStyle1)}
             href={shareLink.path}
             onClick={(e) => e.preventDefault()}
           >
-            <span className="main-wide:hidden">{t("shareLink")}</span>
-            <span className="hidden main-wide:inline-block">
-              {shareLink.url}
-            </span>
+            <span className="no-pc">{t("shareLink")}</span>
+            <span className="no-mobile">{shareLink.url}</span>
           </a>
           <span className="inline-block ml-2">{shareLink.buttons}</span>
         </p>

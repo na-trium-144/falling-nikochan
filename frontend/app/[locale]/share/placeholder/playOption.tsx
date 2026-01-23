@@ -114,8 +114,9 @@ export function PlayOption(props: Props) {
                       "rotate-45 origin-center",
                       "border-slate-400 dark:border-stone-600",
                       "bg-white dark:bg-stone-800",
+                      "no-mobile",
                       "invisible",
-                      selectedLevel === i && "main-wide:visible"
+                      selectedLevel === i && "visible"
                     )}
                   />
                 </li>
@@ -307,7 +308,7 @@ function SelectedLevelInfo(props: {
             </>
           )}
         </div>
-        <span className="mx-3 hidden main-wide:block">/</span>
+        <span className="mx-3 no-mobile">/</span>
         <div>
           <span className="inline-block w-5 translate-y-0.5">
             <Timer />
@@ -324,7 +325,7 @@ function SelectedLevelInfo(props: {
               .padStart(2, "0")}
           </span>
         </div>
-        <span className="mx-3 hidden main-wide:block">/</span>
+        <span className="mx-3 no-mobile">/</span>
         <div>
           <span className="inline-block w-5 translate-y-0.5">
             <SmilingFace />

@@ -25,11 +25,6 @@ import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
 import { AboutModal } from "./common/aboutModal.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "./common/flatButton.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
 import { AboutDescription } from "./main/main.jsx";
 
@@ -56,7 +51,7 @@ export default function TopPage(props: Props) {
   const fes = useFestival();
 
   return (
-    <main className="w-full h-full overflow-x-clip overflow-y-auto ">
+    <main className="w-full h-full overflow-x-clip overflow-y-auto">
       {aboutPageIndex !== null && aboutOpen ? (
         <AboutModal
           aboutAnim={aboutAnim}
@@ -78,7 +73,7 @@ export default function TopPage(props: Props) {
         <TitleAsLink className="grow-3 shrink-0" locale={locale} />
         <div className="basis-0 flex-1 " />
         <AboutDescription
-          className="my-2"
+          className="my-2 px-6"
           locale={locale}
           onClickAbout={() => setAboutPageIndex(1)}
         />
@@ -130,7 +125,7 @@ export default function TopPage(props: Props) {
         <nav
           className={clsx(
             "shrink-0 basis-auto grow-3",
-            "hidden main-wide:flex",
+            "no-mobile flex",
             "flex-col justify-center w-main-nav",
             "transition ease-out duration-200"
           )}
@@ -145,10 +140,7 @@ export default function TopPage(props: Props) {
             <Link
               key={i}
               href={`/${locale}${tabURLs[key]}`}
-              className={clsx(
-                "text-center rounded-2xl py-3 pl-2 pr-2",
-                skyFlatButtonStyle
-              )}
+              className={clsx("fn-main-nav-item fn-flat-button fn-sky")}
               prefetch={!process.env.NO_PREFETCH}
               onClick={(e) => {
                 requestReview();
@@ -159,8 +151,8 @@ export default function TopPage(props: Props) {
                 e.preventDefault();
               }}
             >
-              <span className={skyFlatButtonBorderStyle1} />
-              <span className={skyFlatButtonBorderStyle2} />
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
               <ButtonHighlight />
               {t(key + ".title")}
             </Link>
@@ -174,7 +166,7 @@ export default function TopPage(props: Props) {
         />
 
         <PCFooter locale={locale} />
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
       </div>
       <MobileFooterWithGradient locale={locale} tabKey="top" />
     </main>
@@ -214,14 +206,14 @@ function InputCId(props: {
       <h3 className="mb-2 ">
         <span className="text-xl font-bold font-title">{t("inputId")}:</span>
         <Input
-          className="ml-4 w-20 hidden main-wide:inline-block "
+          className="ml-4 w-20 no-mobile"
           actualValue=""
           updateValue={(cid: string) => gotoCId(cid, false)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
         <Input
-          className="ml-4 w-20 main-wide:hidden"
+          className="ml-4 w-20 no-pc"
           actualValue=""
           updateValue={(cid: string) => gotoCId(cid, true)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}

@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 import TargetLine from "./targetLine.js";
 import Link from "next/link.js";
-import { linkStyle1 } from "./linkStyle.js";
 
 interface Props {
   anim?: boolean;
@@ -40,50 +39,26 @@ export default function Title(props: Props) {
   }, [nikochanPhase]);
 
   return (
-    <div
-      className={clsx("leading-none text-center mx-auto w-96", props.className)}
-    >
+    <div className={clsx("fn-title", props.className)}>
       <TargetLine
         barFlash={barFlash ? "100% - 1.75rem" : undefined}
         left={0}
         right={0}
         bottom="2.2rem"
       />
-      <span className="text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7 ">
-        Falling Nikochan
-      </span>
-      <div
+      <h1>Falling Nikochan</h1>
+      <img
         className={clsx(
-          "absolute",
-          nikochanPhase === 0 && "-translate-y-28 translate-x-14 opacity-0",
-          nikochanPhase === 1 && "transition-transform ease-linear duration-300"
+          nikochanPhase === 0 && "phase-0",
+          nikochanPhase === 1 && "phase-1",
+          nikochanPhase === 2 && "phase-2"
         )}
-        style={{
-          /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-          width: "1.5rem",
-          height: "1.5rem",
-          right: "1rem",
-          bottom: "1.55rem",
-        }}
-      >
-        <img
-          src={
-            process.env.ASSET_PREFIX +
-            `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
-          }
-          // ここだけopacity-70でない
-          className="w-full h-full opacity-100"
-        />
-      </div>
-      <span
-        className="absolute border-b origin-bottom-right border-gray-300 -z-10 "
-        style={{
-          width: "12rem",
-          right: 1 + 1.5 / 2 + 1 + "rem",
-          bottom: 1.55 + 1.5 / 2 - 2 + "rem",
-          transform: `rotate(${Math.atan2(2, -1)}rad)`,
-        }}
+        src={
+          process.env.ASSET_PREFIX +
+          `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+        }
       />
+      <span className="fn-title-diag" />
     </div>
   );
 }
@@ -92,15 +67,10 @@ export function TitleAsLink(props: { className: string; locale: string }) {
   return (
     <Link
       href={`/${props.locale}`}
-      className={clsx("basis-24 relative", linkStyle1, props.className)}
-      style={{
-        width: `calc(100% + 40rem)`,
-        marginLeft: "-20rem",
-        marginRight: "-20rem",
-      }}
+      className={clsx("fn-title-main fn-link-1", props.className)}
       prefetch={!process.env.NO_PREFETCH}
     >
-      <Title className="absolute inset-0 " anim />
+      <Title anim />
     </Link>
   );
 }

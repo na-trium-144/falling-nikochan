@@ -51,7 +51,7 @@ export function PCFooter(props: Props) {
   const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
 
   return (
-    <footer className="py-3 hidden main-wide:block relative text-center ">
+    <footer className="py-3 no-mobile relative text-center ">
       {props.nav && (
         <div
           className={clsx(
@@ -141,7 +141,7 @@ export function MobileFooter(props: MobileProps) {
         <LinkWithReview
           key={i}
           className={clsx(
-            "w-full text-lg gap-0.5 flex flex-col items-center main-wide:hidden",
+            "w-full text-lg gap-0.5 flex flex-col items-center no-pc",
             // props.tabKey === key || "text-slate-500 dark:text-stone-400",
             props.tabKey !== "top" ? "rounded-b-2xl" : "rounded-2xl",
             "pb-1 pt-1",

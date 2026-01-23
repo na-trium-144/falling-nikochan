@@ -1,0 +1,55 @@
+@layer components {
+  .fn-mobile-header {
+    @apply p-3 w-full relative text-center text-xl font-bold font-title;
+
+    > .fn-back {
+      @apply absolute left-3 inset-y-3;
+    }
+  }
+
+  .fn-title {
+    @apply absolute leading-none text-center mx-auto w-96;
+
+    > h1 {
+      @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
+    }
+    > img {
+      /* 他のnikochanはopacity-70だが、ここだけちがう */
+      @apply absolute;
+      width: 1.5rem;
+      height: 1.5rem;
+      right: 1rem;
+      bottom: 1.55rem;
+
+      &.phase-0 {
+        @apply -translate-y-28 translate-x-14 opacity-0;
+      }
+      &.phase-1 {
+        @apply transition-transform ease-linear duration-300;
+      }
+      &.phase-2 {
+      }
+    }
+    > .fn-title-diag {
+      @apply absolute border-b origin-bottom-right border-gray-300 -z-10;
+      width: 12rem;
+      right: calc(1rem + 1.5rem / 2 + 1rem);
+      bottom: calc(1.55rem + 1.5rem / 2 - 2rem);
+      transform: rotate(atan2(2rem, -1rem));
+    }
+  }
+  .fn-title-main {
+    @apply basis-24 relative;
+    width: calc(100% + 40rem);
+    marginleft: -20rem;
+    marginright: -20rem;
+
+    > .fn-title {
+      @apply absolute inset-0;
+    }
+  }
+
+  .fn-main-nav-item {
+    @apply text-center rounded-2xl py-3 pl-2 pr-2;
+  }
+}

@@ -60,7 +60,7 @@ export function DevPage(props: { locale: string }) {
             scrollableY
             padding={6}
           >
-            <div className="hidden mb-3 main-wide:flex flex-row items-center">
+            <div className="no-mobile mb-3 flex flex-row items-center">
               <button
                 className={clsx("block w-max", linkStyle1)}
                 onClick={() => history.back()}
@@ -84,7 +84,7 @@ export function DevPage(props: { locale: string }) {
             )}
           </Box>
         </div>
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
         <PCFooter locale={props.locale} />
       </div>
       <MobileFooterWithGradient locale={props.locale} tabKey={null} />

@@ -118,7 +118,7 @@ export default function ShareChart(props: Props) {
         <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
         <div className="basis-0 flex-1" />
         <AboutDescription
-          className="mb-3"
+          className="mb-3 px-6"
           locale={locale}
           onClickAbout={() => setAboutPageIndex(1)}
         />
@@ -140,7 +140,7 @@ export default function ShareChart(props: Props) {
             />
           </Box>
         </div>
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
         <PCFooter locale={locale} nav />
       </div>
       <MobileFooterWithGradient locale={locale} tabKey={null} />

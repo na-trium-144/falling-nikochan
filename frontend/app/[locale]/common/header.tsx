@@ -15,13 +15,13 @@ export function MobileHeader(props: MProps) {
   return (
     <header
       className={clsx(
-        "p-3 w-full relative text-center text-xl font-bold font-title main-wide:hidden",
+        "fn-mobile-header no-pc",
         props.className
       )}
     >
       {!props.noBackButton && (
         <button
-          className={clsx(pagerButtonClass, "absolute left-3 inset-y-3")}
+          className="fn-back-button fn-pager-button"
           onClick={() => {
             historyBackWithReview();
           }}

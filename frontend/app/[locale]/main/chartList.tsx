@@ -46,7 +46,7 @@ export default function ChartListPage(props: PProps) {
       <h3
         className={clsx(
           "flex-none mb-2 text-xl font-bold font-title",
-          "hidden main-wide:block"
+          "no-mobile"
         )}
       >
         {props.title}
@@ -454,7 +454,7 @@ export function ChartListItem(props: CProps) {
             href={props.href}
             className={clsx(
               "fn-flat-button fn-sky fn-chart-list",
-              props.onClickMobile && "hidden main-wide:block"
+              props.onClickMobile && "no-mobile"
             )}
             target={props.newTab ? "_blank" : undefined}
             onClick={
@@ -474,7 +474,7 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx("fn-flat-button fn-sky fn-chart-list", "main-wide:hidden")}
+              className={clsx("fn-flat-button fn-sky fn-chart-list", "no-pc")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();

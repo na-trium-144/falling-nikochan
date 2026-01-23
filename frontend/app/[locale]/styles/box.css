@@ -20,6 +20,7 @@
   .fn-box {
     @apply rounded-sq-box grid grid-cols-1 grid-rows-1;
     @apply overflow-hidden;
+    @apply relative;
 
     > .fn-box-inner {
       @apply w-full h-full;
@@ -41,6 +42,7 @@
     @apply text-center text-sm mx-6 my-2 p-3 h-max;
     @apply rounded-sq-2xl bg-amber-400/25 backdrop-blur-xs;
     @apply inset-shadow-button inset-shadow-amber-800/10;
+    @apply relative;
 
     > .fn-glass-1 {
       @apply border-white/80 dark:border-stone-300/50;
