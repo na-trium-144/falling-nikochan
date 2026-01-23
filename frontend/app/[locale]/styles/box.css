@@ -17,6 +17,21 @@
     }
   }
 
+  .fn-warning-box {
+    @apply text-center text-sm mx-6 my-2 p-3 h-max;
+    @apply rounded-sq-2xl bg-amber-400/25 backdrop-blur-xs;
+    @apply inset-shadow-button inset-shadow-amber-800/10;
+
+    > .fn-glass-1 {
+      @apply border-white/80 dark:border-stone-300/50;
+      @apply mask-linear-to-50%;
+    }
+    > .fn-glass-2 {
+      @apply border-amber-600/25;
+      @apply mask-linear-to-100%;
+    }
+  }
+
   .fn-color-thief {
     @apply inset-shadow-button inset-shadow-slate-300/25 dark:inset-shadow-stone-950/25;
     background-color: color-mix(in oklab, currentColor 50%, var(--color-white));

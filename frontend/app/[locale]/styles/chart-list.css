@@ -1,7 +1,7 @@
 @layer components {
   .fn-chart-list {
     /* 背景 */
-    @apply rounded-md bg-sky-200/50 dark:bg-orange-950/50;
+    @apply rounded-md bg-sky-400/15 dark:bg-orange-700/10;
 
     /* 選択可能な chart-list item は、 .fn-flat-button.fn-sky.fn-chart-list */
   }

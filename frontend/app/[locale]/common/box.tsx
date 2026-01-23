@@ -2,14 +2,6 @@ import clsx from "clsx/lite";
 import { ReactNode, MouseEvent } from "react";
 import { Scrollable } from "./scrollable";
 
-export const warningBoxBorderStyle1 = clsx(
-  boxBorderStyle1,
-  "border-white/80! dark:border-stone-300/50!"
-);
-export const warningBoxBorderStyle2 = clsx(
-  boxBorderStyle2,
-  "border-amber-600/25!"
-);
 interface Props {
   refOuter?: { current: HTMLDivElement | null };
   refInner?: { current: HTMLDivElement | null };
@@ -125,21 +117,15 @@ export function CenterBox(props: Props) {
 export function WarningBox(props: Props) {
   return (
     <div
-      className={clsx(
-        "relative",
-        "text-center text-sm mx-6 my-2 p-3 h-max",
-        "rounded-sq-2xl bg-amber-400/25 backdrop-blur-xs",
-        "inset-shadow-button inset-shadow-amber-800/10",
-        props.hidden && "hidden"
-      )}
+      className={clsx("fn-warning-box", "relative", props.hidden && "hidden")}
       ref={props.refOuter}
       style={props.styleOuter}
       onClick={props.onClick}
       onPointerDown={props.onPointerDown}
       onPointerUp={props.onPointerUp}
     >
-      <span className={clsx(warningBoxBorderStyle1, props.classNameBorder)} />
-      <span className={clsx(warningBoxBorderStyle2, props.classNameBorder)} />
+      <span className={clsx("fn-glass-1", props.classNameBorder)} />
+      <span className={clsx("fn-glass-2", props.classNameBorder)} />
       {props.children}
     </div>
   );

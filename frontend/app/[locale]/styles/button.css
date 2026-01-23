@@ -40,7 +40,7 @@
   }
 
   .fn-highlight {
-    @apply absolute inset-0 z-3 rounded-[inherit];
+    @apply absolute inset-0 z-3 rounded-[inherit] sq-inherit;
     @apply bg-radial-[circle_3rem_at_var(--hl-x)_var(--hl-y)];
     @apply from-white/50 to-white/25;
     @apply dark:from-stone-300/20 dark:to-stone-300/10;
