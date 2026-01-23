@@ -1,0 +1,6 @@
+// define variables first
+$kbc-light: #f8fafc; // slate-50
+$kbc-dark: #44403b; // stone-700
+$kbc-btn-depth-xxs: 1;
+// and then import
+@import "keyboard-css/dist/scss/main";

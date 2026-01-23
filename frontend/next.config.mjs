@@ -84,12 +84,13 @@ const nextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   env,
   sassOptions: {
-    // pretty-checkbox が出すwarning
+    // pretty-checkbox と keyboard-css が出すwarning
     silenceDeprecations: [
       "import",
       "legacy-js-api",
       "global-builtin",
       "color-functions",
+      "slash-div",
     ],
   },
   webpack: (config, options) => {
