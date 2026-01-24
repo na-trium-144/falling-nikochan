@@ -14,7 +14,14 @@ import {
   MouseOne,
   Write,
 } from "@icon-park/svg";
-
+let nodeModulesDir;
+if (existsSync("./node_modules/@fontsource")) {
+  nodeModulesDir = "./node_modules";
+} else if (existsSync("../node_modules/@fontsource")) {
+  nodeModulesDir = "../node_modules";
+} else {
+  throw new Error("node_modules directory not found");
+}
 if (!existsSync("public/og-fonts")) {
   mkdirSync("public/og-fonts");
 }
@@ -25,13 +32,13 @@ for (const [name, file] of [
   ["noto-sans-jp", "noto-sans-jp-japanese-400-normal.woff"],
 ]) {
   var woff = Buffer.from(
-    readFileSync(`./node_modules/@fontsource/${name}/files/${file}`)
+    readFileSync(`${nodeModulesDir}/@fontsource/${name}/files/${file}`)
   );
   writeFileSync(`public/og-fonts/${parse(file).name}.ttf`, toSfnt(woff));
 }
 
 copyFileSync(
-  "./node_modules/wasmoon/dist/glue.wasm",
+  `${nodeModulesDir}/wasmoon/dist/glue.wasm`,
   "public/wasmoon_glue.wasm"
 );
 

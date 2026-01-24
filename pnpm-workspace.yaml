@@ -1,6 +1,9 @@
 packages:
-  - 'chart'
-  - 'i18n'
-  - 'frontend'
-  - 'route'
-  - 'worker'
+  - chart
+  - i18n
+  - frontend
+  - route
+  - worker
+
+# change this to hoisted only when deploying to vercel
+nodeLinker: isolated
