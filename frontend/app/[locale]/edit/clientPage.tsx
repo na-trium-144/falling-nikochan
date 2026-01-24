@@ -451,6 +451,8 @@ export default function Edit(props: {
             chart.pasteNote(Number(e.key));
           } else if (e.key === "n") {
             chart.pasteNote(0, true);
+          } else if (e.key === "Backspace" || e.key === "Delete") {
+            currentLevel?.deleteNote();
           } else if (e.key === "b") {
             if (currentLevel?.currentNote) {
               const n = currentLevel.currentNote;

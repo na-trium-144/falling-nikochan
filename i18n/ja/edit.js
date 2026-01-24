@@ -219,6 +219,12 @@ export default {
       noteNum: "音符数",
       noteAdd: "追加",
       noteDelete: "削除",
+      noteAddHelp: {
+        single: "Single レベルでは、音符は同時に1つしか置けません。",
+        double: "Double レベルでは、音符は同時に2つまで置くことができます。",
+        maniac: "Maniac レベルでは、同時に置ける音符の個数に制限はありません。",
+        common: "レベルの種類の変更は レベル タブからできます。",
+      },
       totalNotes: "全体の音符数",
       copy: "コピー",
       paste: "貼り付け",

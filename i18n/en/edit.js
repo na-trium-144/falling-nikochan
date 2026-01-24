@@ -235,6 +235,18 @@ export default {
       noteNum: "Note",
       noteAdd: "Add",
       noteDelete: "Delete",
+      noteAddHelp: {
+        single:
+          "In Single level, only one note can be placed <br></br>" +
+          "at the same time.",
+        double:
+          "In Double level, up to two notes can be placed <br></br>" +
+          "at the same time.",
+        maniac:
+          "In Maniac level, there is no limit to the number of <br></br>" +
+          "notes that can be placed at the same time.",
+        common: "You can change the level type from the Levels tab.",
+      },
       totalNotes: "Total Notes",
       copy: "Copy",
       paste: "Paste",

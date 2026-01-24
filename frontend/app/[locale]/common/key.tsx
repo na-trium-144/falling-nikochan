@@ -19,6 +19,9 @@ export function Key(props: KeyProps) {
         case "space":
           targetKey = [" "];
           break;
+        case "del/bs":
+          targetKey = ["delete", "backspace"];
+          break;
         case "esc":
           targetKey = ["escape", "esc"];
           break;

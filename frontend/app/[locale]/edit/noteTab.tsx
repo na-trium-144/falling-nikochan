@@ -51,19 +51,29 @@ export default function NoteTab(props: Props) {
           <span className="inline-block ml-1">{cur?.notesCountInStep}</span>
         </div>
         <div className="inline-block">
+          <HelpIcon>
+            {currentLevel?.meta.type === "Maniac"
+              ? t.rich("noteAddHelp.maniac", { br: () => <br /> })
+              : currentLevel?.meta.type === "Double"
+                ? t.rich("noteAddHelp.double", { br: () => <br /> })
+                : t.rich("noteAddHelp.single", { br: () => <br /> })}
+            <br />
+            {t.rich("noteAddHelp.common", { br: () => <br /> })}
+          </HelpIcon>
           <Button
             keyName="N"
             text={t("noteAdd")}
             onClick={() => chart?.pasteNote(0)}
             disabled={!currentLevel?.canAddNote}
           />
-          {currentLevel?.currentNote && (
-            <Button
-              text={t("noteDelete")}
-              onClick={() => currentLevel?.deleteNote()}
-              disabled={!currentLevel?.currentNoteEditable}
-            />
-          )}
+          <Button
+            keyName="Del/BS"
+            text={t("noteDelete")}
+            onClick={() => currentLevel?.deleteNote()}
+            disabled={
+              !currentLevel?.currentNote || !currentLevel?.currentNoteEditable
+            }
+          />
         </div>
       </div>
       <div className="mb-1">
