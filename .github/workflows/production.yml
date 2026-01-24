@@ -20,16 +20,17 @@ jobs:
         with:
           node-version: 24.x
           cache: 'pnpm'
-      # - run: pnpm install --frozen-lockfile
+      - name: Force pnpm hoisting all packages
+        run: pnpm config set shamefully-hoist true --local
       - name: Pull Vercel Environment Information
-        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
         env:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
           BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
-        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
         with:
@@ -112,9 +113,10 @@ jobs:
         with:
           node-version: 24.x
           cache: 'pnpm'
+      - run: pnpm config set shamefully-hoist true --local
       - run: pnpm install --frozen-lockfile
       - name: Pull Vercel Environment Information
-        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Download .vercel/output
         uses: actions/download-artifact@v4
         with:
@@ -122,7 +124,7 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - name: Deploy Project Artifacts to Vercel
-        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   deploy-cf:
     needs: [docker-push-manifest]

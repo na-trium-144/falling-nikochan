@@ -76,15 +76,15 @@ jobs:
       with:
         node-version: 24.x
         cache: 'pnpm'
-    # - run: pnpm install --frozen-lockfile
+    - run: pnpm config set shamefully-hoist true --local
     - name: Pull Vercel Environment Information
-      run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
       env:
         MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
         VERSION_SUFFIX: "+#${{ github.event.number }}"
         TITLE_SUFFIX: "Preview #${{ github.event.number }}"
-      run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:
@@ -99,7 +99,10 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-    # .vercel/output と、それとは別に node_modules も必要
+    # .vercel/output と、なぜかそれとは別に node_modules も必要。
+    # Error: Please ensure project dependencies have been installed:
+    # File does not exist: "node_modules/hono"
+    # というエラーが出る。
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
       with:
@@ -108,16 +111,17 @@ jobs:
       with:
         node-version: 24.x
         cache: 'pnpm'
+    - run: pnpm config set shamefully-hoist true --local
     - run: pnpm install --frozen-lockfile
     - name: Pull Vercel Environment Information
-      run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Download .vercel/output
       uses: actions/download-artifact@v4
       with:
         name: vercel-output
         path: .vercel/output
     - name: Deploy Project Artifacts to Vercel
-      run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      run: pnpm dlx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
 
   notify-failure:
     # lint, test, format のいずれかが失敗した場合に実行
