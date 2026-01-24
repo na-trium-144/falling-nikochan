@@ -10,7 +10,7 @@
     "lint": "tsc && pnpm run -r --if-present lint",
     "format": "prettier --write .",
     "t": "pnpm run -r --if-present t",
-    "prepare-disabled": "pnpm run -r --if-present t",
+    "prepare": "pnpm run -r --if-present t",
     "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "ndev": "pnpm run --filter frontend dev",
