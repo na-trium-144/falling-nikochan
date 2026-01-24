@@ -21,9 +21,6 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
 * Install [Node.js](https://nodejs.org/ja/download).
     * Node.js >=23.6 is required for `npm run test`, but development and build can run on >=20.x.
 * Install [pnpm](https://pnpm.io/installation) >=10.
-    ```sh
-    npm install -g pnpm
-    ```
 * Install [MongoDB](https://www.mongodb.com/docs/manual/installation/) and run on `localhost:27017`
     * If you have Docker installed, it is easy to run and recommended
         ```sh
