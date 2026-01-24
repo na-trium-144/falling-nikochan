@@ -15,8 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
-      with:
-        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
@@ -36,8 +34,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
-      with:
-        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -70,8 +66,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
-      with:
-        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -89,8 +83,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
-      with:
-        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
@@ -121,8 +113,6 @@ jobs:
     # .vercel/output と、それとは別に node_modules も必要
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
-      with:
-        version: 10
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x

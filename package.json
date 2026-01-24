@@ -4,8 +4,10 @@
   "private": true,
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": ">=23.6"
+    "node": ">=23.6",
+    "pnpm": ">=10"
   },
+  "packageManager": "pnpm@10.28.1",
   "scripts": {
     "lint": "tsc && pnpm run -r --if-present lint",
     "format": "prettier --write .",
