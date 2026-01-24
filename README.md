@@ -60,10 +60,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
     pnpm install
     ```
 * Common files (chart/)
-    * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
-        ```sh
-        pnpm run t
-        ```
+    * Since ver14, it will be imported directly as typescript from frontend and backend. You don't need to run transpiler (`npm run t`).
 * Backend
     * Serves /api, /share, /og, and / (redirect).
     * Built with Hono, so it can be run with many runtimes.
@@ -85,6 +82,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         pnpm run nbuild && pnpm run swbuild
         ```
 * Service Worker
+    * Usually you should not do this when developing frontend or backend. It is complicated to remove service worker from your browser once installed.
     * Build frontend and service worker
     ```sh
     pnpm run nbuild && pnpm run swbuild
