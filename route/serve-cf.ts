@@ -10,12 +10,13 @@ import {
   reportPopularCharts,
   checkNewCharts,
   reportToDiscord,
+  Bindings,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import { getConnInfo } from "hono/cloudflare-workers";
 
-const fetchStatic = (e, url) => e.ASSETS.fetch(url);
+const fetchStatic = (e: Bindings, url: URL) => e.ASSETS.fetch(url);
 
 const app = new Hono({ strict: false })
   .route("/api", await apiApp({ getConnInfo }))

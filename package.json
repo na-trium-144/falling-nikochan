@@ -8,8 +8,6 @@
   "scripts": {
     "lint": "tsc && pnpm run -r --if-present lint",
     "format": "prettier --write .",
-    "t": "pnpm run -r --if-present t",
-    "prepare-disabled": "pnpm run -r --if-present t",
     "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "ndev": "pnpm run --filter frontend dev",
@@ -25,8 +23,11 @@
     "worker"
   ],
   "dependencies": {
+    "@falling-nikochan/route": "workspace:*",
     "@next/mdx": "15.5.9",
+    "@vercel/og": "^0.8.6",
     "colorthief": "^2.6.0",
+    "hono": "^4.11.4",
     "next": "15.5.9",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"

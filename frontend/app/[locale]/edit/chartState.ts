@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { APIError } from "@/common/apiError";
 import saveAs from "file-saver";
 import YAML from "yaml";
-import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
+import { luaExec } from "@falling-nikochan/chart/src/luaExec";
 import { isStandalone } from "@/common/pwaInstall";
 
 interface Props {

@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { useDisplayMode } from "@/scale.js";
-import { LuaExecResult } from "@falling-nikochan/chart/dist/luaExec";
+import { LuaExecResult } from "@falling-nikochan/chart/src/luaExec";
 import {
   ChartEditing,
   LevelFreeze,

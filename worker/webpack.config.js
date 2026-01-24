@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const config = {
-  entry: "./dist/entry.js",
+  entry: "./entry.ts",
   target: "browserslist",
   mode: process.env.API_ENV === "development" ? "development" : "production",
   module: {
@@ -17,6 +17,11 @@ const config = {
         use: {
           loader: "babel-loader",
         },
+      },
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
       },
     ],
   },
@@ -43,6 +48,9 @@ const config = {
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    extensionAlias: {
+      ".js": [".ts", ".js"],
+    },
     alias: {
       "@vercel/og": false,
       dotenv: false,

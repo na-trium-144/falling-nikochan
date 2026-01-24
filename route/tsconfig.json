@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2021",
-    "lib": ["es2021"],
+    "lib": ["es2021", "es2023"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "declaration": true,

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "lint": "tsc && eslint ./entry.ts",
-    "build": "tsc && webpack"
+    "build": "webpack"
   },
   "browserslist": [
     "chrome 111",
@@ -19,6 +19,8 @@
     "hono": "^4.11.4"
   },
   "devDependencies": {
-    "dotenv": "^16.6.1"
+    "dotenv": "^16.6.1",
+    "ts-loader": "^9.5.4",
+    "typescript": "5.8.3"
   }
 }
