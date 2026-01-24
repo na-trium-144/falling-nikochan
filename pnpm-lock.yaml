@@ -14,27 +14,12 @@ importers:
       '@falling-nikochan/route':
         specifier: workspace:*
         version: link:route
-      '@next/mdx':
-        specifier: 15.5.9
-        version: 15.5.9(@mdx-js/loader@3.1.1(webpack@5.104.1))(@mdx-js/react@3.1.1(@types/react@19.2.9)(react@19.2.3))
       '@vercel/og':
         specifier: ^0.8.6
         version: 0.8.6
-      colorthief:
-        specifier: ^2.6.0
-        version: 2.6.0
       hono:
         specifier: ^4.11.4
         version: 4.11.5
-      next:
-        specifier: 15.5.9
-        version: 15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3)
-      react:
-        specifier: ^19.2.3
-        version: 19.2.3
-      react-dom:
-        specifier: ^19.2.3
-        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.28.5
@@ -45,27 +30,9 @@ importers:
       '@eslint/js':
         specifier: ^9.39.1
         version: 9.39.2
-      '@types/chai':
-        specifier: ^5.2.3
-        version: 5.2.3
-      '@types/colorthief':
-        specifier: ^2.6.0
-        version: 2.6.0
       '@types/node':
         specifier: 22.15.19
         version: 22.15.19
-      '@types/react':
-        specifier: ^19.2.7
-        version: 19.2.9
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.9)
-      babel-loader:
-        specifier: ^10.0.0
-        version: 10.0.0(@babel/core@7.28.6)(webpack@5.104.1)
-      chai:
-        specifier: ^6.2.2
-        version: 6.2.2
       core-js:
         specifier: ^3.42.0
         version: 3.48.0
@@ -81,6 +48,9 @@ importers:
       globals:
         specifier: ^17.0.0
         version: 17.1.0
+      next:
+        specifier: 15.5.9
+        version: 15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3)
       prettier:
         specifier: ^3.7.4
         version: 3.8.1
@@ -113,7 +83,7 @@ importers:
         version: 5.0.4
       valibot:
         specifier: ^1.0.0
-        version: 1.2.0(typescript@5.9.3)
+        version: 1.2.0(typescript@5.8.3)
       wasmoon:
         specifier: ^1.16.0
         version: 1.16.0
@@ -121,6 +91,12 @@ importers:
       '@falling-nikochan/chart':
         specifier: workspace:*
         version: 'link:'
+      '@types/chai':
+        specifier: ^5.2.3
+        version: 5.2.3
+      chai:
+        specifier: ^6.2.2
+        version: 6.2.2
 
   frontend:
     dependencies:
@@ -160,6 +136,9 @@ importers:
       '@mdx-js/react':
         specifier: ^3.1.1
         version: 3.1.1(@types/react@19.2.9)(react@19.2.3)
+      '@next/mdx':
+        specifier: 15.5.9
+        version: 15.5.9(@mdx-js/loader@3.1.1(webpack@5.104.1(webpack-cli@6.0.1)))(@mdx-js/react@3.1.1(@types/react@19.2.9)(react@19.2.3))
       '@ygoe/msgpack':
         specifier: ^1.0.3
         version: 1.0.3
@@ -169,24 +148,36 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      colorthief:
+        specifier: ^2.6.0
+        version: 2.6.0
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
       keyboard-css:
         specifier: ^1.2.4
         version: 1.2.4
+      next:
+        specifier: 15.5.9
+        version: 15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3)
       next-intl:
         specifier: ^4.7.0
-        version: 4.7.0(next@15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3))(react@19.2.3)(typescript@5.9.3)
+        version: 4.7.0(next@15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3))(react@19.2.3)(typescript@5.8.3)
       pretty-checkbox:
         specifier: ^3.0.3
         version: 3.0.3
       pretty-checkbox-react:
         specifier: ^3.2.0
         version: 3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
       react-ace:
         specifier: ^14.0.1
         version: 14.0.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
       react-range:
         specifier: ^1.10.0
         version: 1.10.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -198,7 +189,7 @@ importers:
         version: 0.0.9
       valibot:
         specifier: ^1.0.0
-        version: 1.2.0(typescript@5.9.3)
+        version: 1.2.0(typescript@5.8.3)
       wasmoon:
         specifier: ^1.16.0
         version: 1.16.0
@@ -209,12 +200,21 @@ importers:
       '@tailwindcss/postcss':
         specifier: 4.1.18
         version: 4.1.18
+      '@types/colorthief':
+        specifier: ^2.6.0
+        version: 2.6.0
       '@types/file-saver':
         specifier: ^2.0.7
         version: 2.0.7
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
+      '@types/react':
+        specifier: ^19.2.9
+        version: 19.2.9
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.9)
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -230,6 +230,9 @@ importers:
       tailwindcss:
         specifier: 4.1.18
         version: 4.1.18
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
       woff2sfnt-sfnt2woff:
         specifier: ^1.0.0
         version: 1.0.0
@@ -238,7 +241,7 @@ importers:
     dependencies:
       next-intl:
         specifier: ^4.7.0
-        version: 4.7.0(next@15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3))(react@19.2.3)(typescript@5.9.3)
+        version: 4.7.0(next@15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3))(react@19.2.3)(typescript@5.8.3)
 
   route:
     dependencies:
@@ -265,13 +268,16 @@ importers:
         version: 0.9.35(hono@4.11.5)
       '@valibot/to-json-schema':
         specifier: ^1.5.0
-        version: 1.5.0(valibot@1.2.0(typescript@5.9.3))
+        version: 1.5.0(valibot@1.2.0(typescript@5.8.3))
       '@vercel/og':
         specifier: ^0.8.6
         version: 0.8.6
       '@ygoe/msgpack':
         specifier: ^1.0.3
         version: 1.0.3
+      colorthief:
+        specifier: ^2.6.0
+        version: 2.6.0
       discord.js:
         specifier: ^14.25.1
         version: 14.25.1
@@ -283,7 +289,7 @@ importers:
         version: 4.11.5
       hono-openapi:
         specifier: ^1.1.2
-        version: 1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.5))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.5)(openapi-types@12.1.3)
+        version: 1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.5))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.5)(openapi-types@12.1.3)
       isbot:
         specifier: ^5.1.32
         version: 5.1.33
@@ -296,6 +302,9 @@ importers:
       oauth-1.0a:
         specifier: ^2.2.6
         version: 2.2.6
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
       sitemap:
         specifier: ^9.0.0
         version: 9.0.0
@@ -304,17 +313,29 @@ importers:
         version: 3.1.0
       valibot:
         specifier: ^1.0.0
-        version: 1.2.0(typescript@5.9.3)
+        version: 1.2.0(typescript@5.8.3)
     devDependencies:
       '@falling-nikochan/route':
         specifier: workspace:*
         version: 'link:'
+      '@types/chai':
+        specifier: ^5.2.3
+        version: 5.2.3
+      '@types/colorthief':
+        specifier: ^2.6.0
+        version: 2.6.0
       '@types/moji':
         specifier: ^0.5.3
         version: 0.5.3
+      '@types/react':
+        specifier: ^19.2.9
+        version: 19.2.9
       '@types/twitter-text':
         specifier: ^3.1.10
         version: 3.1.10
+      chai:
+        specifier: ^6.2.2
+        version: 6.2.2
 
   worker:
     dependencies:
@@ -328,15 +349,15 @@ importers:
         specifier: ^4.11.4
         version: 4.11.5
     devDependencies:
+      babel-loader:
+        specifier: ^10.0.0
+        version: 10.0.0(@babel/core@7.28.6)(webpack@5.104.1(webpack-cli@6.0.1))
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
       ts-loader:
         specifier: ^9.5.4
         version: 9.5.4(typescript@5.8.3)(webpack@5.104.1(webpack-cli@6.0.1))
-      typescript:
-        specifier: 5.8.3
-        version: 5.8.3
 
 packages:
 
@@ -4584,11 +4605,6 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
@@ -5930,7 +5946,7 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/mdx@15.5.9(@mdx-js/loader@3.1.1(webpack@5.104.1))(@mdx-js/react@3.1.1(@types/react@19.2.9)(react@19.2.3))':
+  '@next/mdx@15.5.9(@mdx-js/loader@3.1.1(webpack@5.104.1(webpack-cli@6.0.1)))(@mdx-js/react@3.1.1(@types/react@19.2.9)(react@19.2.3))':
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
@@ -6101,23 +6117,23 @@ snapshots:
       fflate: 0.7.4
       string.prototype.codepointat: 0.2.1
 
-  '@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)':
+  '@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@types/json-schema': 7.0.15
       quansync: 0.2.11
     optionalDependencies:
-      '@valibot/to-json-schema': 1.5.0(valibot@1.2.0(typescript@5.9.3))
-      valibot: 1.2.0(typescript@5.9.3)
+      '@valibot/to-json-schema': 1.5.0(valibot@1.2.0(typescript@5.8.3))
+      valibot: 1.2.0(typescript@5.8.3)
       zod: 4.3.6
 
-  '@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)':
+  '@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6)':
     dependencies:
-      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
+      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6)
       '@standard-schema/spec': 1.1.0
       openapi-types: 12.1.3
     optionalDependencies:
-      valibot: 1.2.0(typescript@5.9.3)
+      valibot: 1.2.0(typescript@5.8.3)
       zod: 4.3.6
 
   '@standard-schema/spec@1.1.0': {}
@@ -6588,9 +6604,9 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3))':
+  '@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3))':
     dependencies:
-      valibot: 1.2.0(typescript@5.9.3)
+      valibot: 1.2.0(typescript@5.8.3)
 
   '@vercel/og@0.8.6':
     dependencies:
@@ -6836,7 +6852,7 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.0.0(@babel/core@7.28.6)(webpack@5.104.1):
+  babel-loader@10.0.0(@babel/core@7.28.6)(webpack@5.104.1(webpack-cli@6.0.1)):
     dependencies:
       '@babel/core': 7.28.6
       find-up: 5.0.0
@@ -7872,10 +7888,10 @@ snapshots:
 
   hex-rgb@4.3.0: {}
 
-  hono-openapi@1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.5))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.5)(openapi-types@12.1.3):
+  hono-openapi@1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.5))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.5)(openapi-types@12.1.3):
     dependencies:
-      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
-      '@standard-community/standard-openapi': 0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
+      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6)
+      '@standard-community/standard-openapi': 0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.8.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.8.3))(zod@4.3.6)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
@@ -8653,7 +8669,7 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.7.0: {}
 
-  next-intl@4.7.0(next@15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3))(react@19.2.3)(typescript@5.9.3):
+  next-intl@4.7.0(next@15.5.9(@babel/core@7.28.6)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.3))(react@19.2.3)(typescript@5.8.3):
     dependencies:
       '@formatjs/intl-localematcher': 0.5.10
       '@parcel/watcher': 2.5.6
@@ -8665,7 +8681,7 @@ snapshots:
       react: 19.2.3
       use-intl: 4.7.0(react@19.2.3)
     optionalDependencies:
-      typescript: 5.9.3
+      typescript: 5.8.3
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -9562,9 +9578,6 @@ snapshots:
 
   typescript@5.8.3: {}
 
-  typescript@5.9.3:
-    optional: true
-
   unbox-primitive@1.1.0:
     dependencies:
       call-bound: 1.0.4
@@ -9674,9 +9687,9 @@ snapshots:
       intl-messageformat: 10.7.18
       react: 19.2.3
 
-  valibot@1.2.0(typescript@5.9.3):
+  valibot@1.2.0(typescript@5.8.3):
     optionalDependencies:
-      typescript: 5.9.3
+      typescript: 5.8.3
 
   vfile-message@4.0.3:
     dependencies:

@@ -20,6 +20,8 @@
     "wasmoon": "^1.16.0"
   },
   "devDependencies": {
-    "@falling-nikochan/chart": "workspace:*"
+    "@falling-nikochan/chart": "workspace:*",
+    "@types/chai": "^5.2.3",
+    "chai": "^6.2.2"
   }
 }
