@@ -20,13 +20,6 @@
     "swbuild": "pnpm run --filter worker build && pnpm run --filter frontend postbuild",
     "ldev": "pnpm run --filter route dev"
   },
-  "workspaces": [
-    "chart",
-    "i18n",
-    "frontend",
-    "route",
-    "worker"
-  ],
   "dependencies": {
     "@falling-nikochan/route": "workspace:*",
     "@vercel/og": "^0.8.6",
