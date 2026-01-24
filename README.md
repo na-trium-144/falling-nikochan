@@ -94,7 +94,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
 * Vercel
     * Set `NODEJS_HELPERS=0`. https://github.com/honojs/hono/issues/1256
     * Set `ENABLE_EXPERIMENTAL_COREPACK=1`. https://vercel.com/docs/builds/configure-a-build#corepack
-    * Run `pnpm config set shamefully-hoist true --local` before installing dependencies. (Otherwise Vercel cannot find packages in workspaces)
+    * Run `pnpm config set node-linker hoisted --local` before installing dependencies. (Otherwise Vercel cannot find packages in workspaces)
 
 ## API
 

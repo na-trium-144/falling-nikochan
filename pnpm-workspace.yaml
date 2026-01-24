@@ -5,5 +5,5 @@ packages:
   - route
   - worker
 
-# change this to true only when deploying to vercel
-shamefullyHoist: false
+# change this to hoisted only when deploying to vercel
+nodeLinker: isolated
