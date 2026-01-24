@@ -108,5 +108,5 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.ACTION_FAILURE_DISCORD_WEBHOOK }}
         run: |
           curl -H "Content-Type: application/json" \
-               -d "{\"content\": \"**mainブランチにテストが通らないコードがpushされているよ！ばかやろう！**\nCommit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}\"}" \
+               -d "{\"content\": \"**mainブランチにテストが通らないコードがpushされているよ！ 😠 **\nCommit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}\"}" \
                $DISCORD_WEBHOOK

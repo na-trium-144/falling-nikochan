@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: prod-vercel-build
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v4
@@ -153,6 +156,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: deploy-selfhosting
+      cancel-in-progress: false
     steps:
       - uses: appleboy/ssh-action@v1
         with:
@@ -161,9 +167,26 @@ jobs:
           key: ${{ secrets.SELFHOST_KEY }}
           port: ${{ secrets.SELFHOST_PORT }}
           script: |
+            #!/usr/bin/env bash
+            set -e
             cd ~/falling-nikochan
             git fetch origin main
             git reset --hard origin/main
             docker compose pull
             docker compose up -d
             docker system prune -f
+
+  notify-failure:
+    needs: [vercel-build, docker-build, docker-push-manifest, deploy-vercel, deploy-cf, deploy-selfhosting]
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.ACTION_FAILURE_DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d "{\"content\": \"**deployに失敗したよ！ 😰 **\nCommit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}\"}" \
+               $DISCORD_WEBHOOK
