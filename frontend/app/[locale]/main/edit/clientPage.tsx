@@ -83,8 +83,8 @@ export default function EditTab({ locale }: { locale: string }) {
         <ExternalLink
           className="mx-1"
           href="https://www.youtube.com/watch?v=hi9TY_78ETY"
-          icon={<Youtube className="absolute left-0 bottom-1" theme="filled" />}
         >
+          <Youtube className="inline-block mr-1 align-middle" theme="filled" />
           <span className="text-sm">{t("howToVideo")}</span>
         </ExternalLink>
       </p>

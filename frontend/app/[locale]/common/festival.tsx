@@ -46,8 +46,7 @@ export function FestivalLink(props: Props) {
   if (props.num && props.kind) {
     return (
       <span className={clsx(props.className)}>
-        <ExternalLink href="https://festival.utcode.net" className="inline!">
-          {/* テキストが長く、iOSで収まらない & アイコンがあるわけでもない のでinline */}
+        <ExternalLink href="https://festival.utcode.net">
           {t("festival", { kind: props.kind, num: props.num })}
         </ExternalLink>
       </span>
