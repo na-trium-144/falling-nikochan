@@ -3,6 +3,7 @@ Dockerfile
 docker-compose.yml
 .env
 */public/og-fonts/
+*/public/og-icons/
 */public/wasmoon_glue.wasm
 */public/buildVer.json
 */public/oss-licenses/
