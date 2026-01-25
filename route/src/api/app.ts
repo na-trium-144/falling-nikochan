@@ -71,6 +71,11 @@ const apiApp = async (config: {
             "API for Falling Nikochan, " +
             "a simple and cute rhythm game " +
             "where anyone can create and share charts.",
+          license: {
+            name: "MIT",
+            identifier: "MIT",
+            url: "https://opensource.org/licenses/MIT",
+          },
         },
         servers: [
           ...(process.env.API_ENV === "development"
