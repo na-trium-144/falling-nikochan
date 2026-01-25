@@ -53,22 +53,22 @@ export function OSSLicensesList() {
 
   if (open) {
     return (
-      <Box classNameOuter="ml-6 p-4">
-        <p className="mb-4">
+      <Box classNameOuter="mt-1 p-4">
+        <p className="mb-2 text-sm">
           <button className={clsx(linkStyle1)} onClick={() => setOpen(false)}>
             <Close className="inline-block align-middle mr-2" />
             {t("closeDetail")}
           </button>
         </p>
-        {licenses?.map((lic) => (
-          <LicenseDetail key={lic.name} license={lic} />
+        {licenses?.map((lic, i) => (
+          <LicenseDetail key={i} license={lic} />
         ))}
       </Box>
     );
   } else {
     return (
       <button
-        className={clsx("ml-6 mt-2", linkStyle1)}
+        className={clsx("block w-full text-left ml-2 my-1 text-sm", linkStyle1)}
         onClick={() => setOpen(true)}
       >
         {t("showDetail")}
@@ -114,11 +114,11 @@ function LicenseDetail(props: { license: LicenseOutput }) {
   }
 
   return (
-    <div className="mb-2">
-      <button
-        className={clsx("text-left break-all", linkStyle1)}
-        onClick={() => setOpen(!open)}
-      >
+    <details
+      className="mb-2 text-sm"
+      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+    >
+      <summary className={clsx("text-left break-all list-none", linkStyle1)}>
         <span className="font-bold">{props.license.name}</span>
         <span className="inline-block font-bold text-sm ml-1">
           {props.license.version}
@@ -132,35 +132,34 @@ function LicenseDetail(props: { license: LicenseOutput }) {
         ) : (
           <RightOne theme="filled" className="inline-block align-middle ml-2" />
         )}
-      </button>
-      {open && (
-        <>
-          <p className="ml-4 mt-1 text-left">
-            <span className="text-sm mr-1">{t("source")}:</span>
-            <ExternalLink
-              className="text-sm max-w-full break-all"
-              href={repositoryURL}
-            >
-              {repositoryURL}
-            </ExternalLink>
-          </p>
-          <pre
-            className={clsx(
-              "ml-4 mt-1 p-2 rounded-md",
-              "overflow-x-auto text-xs",
-              "bg-sky-200/25 dark:bg-orange-800/10"
-            )}
-          >
-            {props.license.licenseText}
-            {props.license.noticeText && (
-              <>
-                {"\n\n"}
-                {props.license.noticeText}
-              </>
-            )}
-          </pre>
-        </>
+      </summary>
+      <div className="pl-4">
+        <p className="mt-1 text-left">
+          <span className="mr-1">{t("source")}:</span>
+          <ExternalLink className="max-w-full break-all" href={repositoryURL}>
+            {repositoryURL}
+          </ExternalLink>
+        </p>
+        <LicenseTextBox>
+          {props.license.licenseText +
+            "\n\n" +
+            (props.license.noticeText ?? "")}
+        </LicenseTextBox>
+      </div>
+    </details>
+  );
+}
+
+function LicenseTextBox(props: { children: string }) {
+  return (
+    <pre
+      className={clsx(
+        "mt-1 p-2 rounded-md",
+        "overflow-x-auto text-xs",
+        "bg-sky-200/25 dark:bg-orange-800/10"
       )}
-    </div>
+    >
+      {props.children.trim()}
+    </pre>
   );
 }
