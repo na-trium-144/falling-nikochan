@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
-import { writeFileSync, readFileSync, copyFileSync } from "node:fs";
+import { writeFileSync, readFileSync, copyFileSync, existsSync } from "node:fs";
 import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
@@ -133,6 +133,30 @@ const nextConfig = {
                 excludedPackageTest: (packageName /*, version*/) => {
                   return packageName.startsWith("@falling-nikochan");
                 },
+                includePackages: () =>
+                  ["tailwindcss", "pretty-checkbox", "keyboard-css"].map(
+                    (pkg) => {
+                      const currentDirPkg = join(
+                        process.cwd(),
+                        "node_modules",
+                        pkg
+                      );
+                      const parentDirPkg = join(
+                        dirname(process.cwd()),
+                        "node_modules",
+                        pkg
+                      );
+                      if (existsSync(currentDirPkg)) {
+                        return currentDirPkg;
+                      } else if (existsSync(parentDirPkg)) {
+                        return parentDirPkg;
+                      } else {
+                        throw new Error(
+                          `Cannot find package ${pkg} to include in OSS licenses`
+                        );
+                      }
+                    }
+                  ),
               }),
             ]
           : []),
