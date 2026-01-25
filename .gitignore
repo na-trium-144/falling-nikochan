@@ -1,8 +1,8 @@
 .env
-*/public/assets/*.ttf
-*/public/assets/wasmoon_glue.wasm
-*/public/assets/buildVer.json
-*/public/assets/oss-licenses/
+*/public/og-fonts/
+*/public/wasmoon_glue.wasm
+*/public/buildVer.json
+*/public/oss-licenses/
 */public/LICENSE
 */dist/
 /node_modules/

@@ -50,7 +50,7 @@ const env = {
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
 writeFileSync(
-  join(process.cwd(), "public/assets/buildVer.json"),
+  join(process.cwd(), "public/buildVer.json"),
   JSON.stringify({ date, commit, version: env.buildVersion }),
   "utf-8"
 );
@@ -112,7 +112,7 @@ const nextConfig = {
         ...(process.env.NODE_ENV !== "development"
           ? [
               new LicensePlugin({
-                outputFilename: "../public/assets/oss-licenses/frontend.json",
+                outputFilename: "../public/oss-licenses/frontend.json",
                 includeNoticeText: true,
                 excludedPackageTest: (packageName /*, version*/) => {
                   return packageName.startsWith("@falling-nikochan");

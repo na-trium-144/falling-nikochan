@@ -1,6 +1,16 @@
-import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { parse } from "node:path";
 import { toSfnt } from "woff2sfnt-sfnt2woff";
+
+if (!existsSync("public/og-fonts")) {
+  mkdirSync("public/og-fonts");
+}
 for (const [name, file] of [
   ["kaisei-opti", "kaisei-opti-japanese-400-normal.woff"],
   ["merriweather", "merriweather-latin-400-normal.woff"],
@@ -10,10 +20,10 @@ for (const [name, file] of [
   var woff = Buffer.from(
     readFileSync(`../node_modules/@fontsource/${name}/files/${file}`)
   );
-  writeFileSync(`public/assets/${parse(file).name}.ttf`, toSfnt(woff));
+  writeFileSync(`public/og-fonts/${parse(file).name}.ttf`, toSfnt(woff));
 }
 
 copyFileSync(
   "../node_modules/wasmoon/dist/glue.wasm",
-  "public/assets/wasmoon_glue.wasm"
+  "public/wasmoon_glue.wasm"
 );

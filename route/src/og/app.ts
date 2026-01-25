@@ -157,7 +157,7 @@ const ogApp = (config: {
         pData: config.fetchStatic(
           env(c),
           new URL(
-            `/assets/${f.file}`,
+            `/og-fonts/${f.file}`,
             env(c).BACKEND_PREFIX || new URL(c.req.url).origin
           )
         ),

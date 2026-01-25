@@ -122,7 +122,7 @@ async function initAssetsCache(config: {
   try {
     let remoteVer: BuildVer;
     const remoteRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
       { cache: "no-store" }
     );
     if (!remoteRes.ok) {
@@ -152,7 +152,7 @@ async function initAssetsCache(config: {
         { cache: "no-store" }
       );
       remoteVerRes = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+        (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
         { cache: "no-store" }
       );
     } catch (e) {
