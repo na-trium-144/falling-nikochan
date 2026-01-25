@@ -305,7 +305,7 @@ export function ChartList(props: Props) {
   ]);
 
   return (
-    <div className="relative w-full h-max ">
+    <div className="relative w-full h-max isolate">
       <ul
         ref={ulSize.ref}
         className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
