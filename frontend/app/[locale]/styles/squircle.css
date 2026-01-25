@@ -11,10 +11,12 @@
 
 @utility rounded-sq-* {
   border-radius: --value(--radius-*);
+  border-radius: --value([length]);
   @supports (corner-shape: squircle) {
     corner-shape: squircle;
     /* prettier-ignore */
     border-radius: calc(2 * --value(--radius-*));
+    border-radius: calc(2 * --value([length]));
   }
 }
 @utility rounded-t-sq-* {
