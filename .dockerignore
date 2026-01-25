@@ -6,6 +6,7 @@ docker-compose.yml
 */public/assets/wasmoon_glue.wasm
 */public/assets/buildVer.json
 */public/assets/oss-licenses/
+*/public/LICENSE
 */dist/
 /node_modules/
 .vite
