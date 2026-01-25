@@ -124,3 +124,5 @@ The assets in `frontend/public/assets/` (including images, sounds, etc.) are lic
 The full text of the CC-BY-4.0 license for assets can be found in the [frontend/public/assets/LICENSE](frontend/public/assets/LICENSE) file.
 
 Copyright (c) 2024-2026 [@na-trium-144](https://github.com/na-trium-144) (and contributors)
+
+Note: [ver13.22](https://github.com/na-trium-144/falling-nikochan/tree/v13) is the last version licensed under MIT License.
