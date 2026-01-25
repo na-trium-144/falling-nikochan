@@ -111,3 +111,15 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 * minor version is increased by `npm version -ws minor` command for each PR
     * Changes that do not affect app/ such as dependabot or update README.md are not counted.
 * ChangeLogs are written in [i18n/[locale]/changelog.mdx](i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation.
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later), with the exception of the assets located in the `frontend/public/assets/` directory.
+The full text of the AGPL-3.0 license can be found in the [LICENSE](LICENSE) file.
+
+The use of Falling Nikochan's API and embedding it in an iframe are exempt from AGPL-3.0-or-later and can be done freely.
+
+The assets in `frontend/public/assets/` (including images, sounds, etc.) are licensed under the Creative Commons Attribution 4.0 International (CC-BY-4.0) license.
+The full text of the CC-BY-4.0 license for assets can be found in the [frontend/public/assets/LICENSE](frontend/public/assets/LICENSE) file.
+
+Copyright (c) 2024-2026 [@na-trium-144](https://github.com/na-trium-144) (and contributors)

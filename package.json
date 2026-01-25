@@ -1,7 +1,8 @@
 {
   "name": "falling-nikochan",
-  "private": true,
   "type": "module",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "lint": "tsc && npm run lint --ws --if-present",
     "format": "prettier --write .",
