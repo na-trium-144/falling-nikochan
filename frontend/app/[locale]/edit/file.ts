@@ -255,7 +255,7 @@ export function useChartFile(props: Props) {
               ...l,
               ...(
                 await luaExec(
-                  process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                  process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
                   l.lua.join("\n"),
                   false
                 )
@@ -280,7 +280,7 @@ export function useChartFile(props: Props) {
                 ...l,
                 ...(
                   await luaExec(
-                    process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+                    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
                     l.lua.join("\n"),
                     false
                   )

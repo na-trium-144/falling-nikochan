@@ -11,7 +11,7 @@ worker.addEventListener(
   "message",
   async ({ data }: MessageEvent<WorkerInput>) => {
     const result = await luaExec(
-      process.env.ASSET_PREFIX + "/assets/wasmoon_glue.wasm",
+      process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
       data.code,
       data.catchError
     );

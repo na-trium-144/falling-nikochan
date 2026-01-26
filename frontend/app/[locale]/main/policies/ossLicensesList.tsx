@@ -30,12 +30,12 @@ export function OSSLicensesList() {
     if (open && licenses === null) {
       (async () => {
         const pFrontendLicenses = fetch(
-          process.env.ASSET_PREFIX + "/assets/oss-licenses/frontend.json"
+          process.env.ASSET_PREFIX + "/oss-licenses/frontend.json"
         )
           .then((res) => res.json())
           .catch(() => []);
         const pWorkerLicenses = fetch(
-          process.env.ASSET_PREFIX + "/assets/oss-licenses/worker.json"
+          process.env.ASSET_PREFIX + "/oss-licenses/worker.json"
         )
           .then((res) => res.json())
           .catch(() => []);

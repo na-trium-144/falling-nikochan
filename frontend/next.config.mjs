@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
-import { writeFileSync, readFileSync } from "node:fs";
+import { writeFileSync, readFileSync, copyFileSync } from "node:fs";
 import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
@@ -56,9 +56,14 @@ const env = {
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
 writeFileSync(
-  join(process.cwd(), "public/assets/buildVer.json"),
+  join(process.cwd(), "public/buildVer.json"),
   JSON.stringify({ date, commit, version: env.buildVersion }),
   "utf-8"
+);
+
+copyFileSync(
+  join(dirname(process.cwd()), "LICENSE"),
+  join(process.cwd(), "public/LICENSE")
 );
 
 const nextConfig = {
@@ -113,7 +118,7 @@ const nextConfig = {
         ...(process.env.NODE_ENV !== "development"
           ? [
               new LicensePlugin({
-                outputFilename: "../public/assets/oss-licenses/frontend.json",
+                outputFilename: "../public/oss-licenses/frontend.json",
                 includeNoticeText: true,
                 excludedPackageTest: (packageName /*, version*/) => {
                   return packageName.startsWith("@falling-nikochan");

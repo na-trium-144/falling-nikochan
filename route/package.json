@@ -2,6 +2,7 @@
   "name": "@falling-nikochan/route",
   "version": "13.22.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
