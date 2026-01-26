@@ -26,11 +26,11 @@ import dynamic from "next/dynamic";
 const AceEditor = dynamic(
   async () => {
     const ace = await import("react-ace");
-    await import("ace-builds/src-min-noconflict/ext-language_tools");
+    // await import("ace-builds/src-min-noconflict/ext-language_tools");
     await import("ace-builds/src-min-noconflict/theme-tomorrow");
     await import("ace-builds/src-min-noconflict/theme-tomorrow_night");
     await import("ace-builds/src-min-noconflict/mode-lua");
-    await import("ace-builds/src-min-noconflict/snippets/lua");
+    // await import("ace-builds/src-min-noconflict/snippets/lua");
     await import("ace-builds/src-min-noconflict/ext-searchbox");
     return ace;
   },
@@ -174,8 +174,14 @@ export function LuaTabProvider(props: Props & PProps) {
     }
     changeCodeTimeout.current = setTimeout(() => {
       changeCodeTimeout.current = null;
-      setCodeChanged(false);
-      currentLevel?.updateLua(code.split("\n"));
+      currentLevel
+        ?.updateLua(code.split("\n"))
+        .then(() => {
+          setCodeChanged(false);
+        })
+        .catch(() => {
+          setCodeChanged(false);
+        });
     }, 500);
   };
 
@@ -248,9 +254,9 @@ export function LuaTabProvider(props: Props & PProps) {
               ),
             },
           ]}
-          enableBasicAutocompletion={true}
-          enableLiveAutocompletion={true}
-          enableSnippets={true}
+          enableBasicAutocompletion={false}
+          enableLiveAutocompletion={false}
+          enableSnippets={false}
           onChange={(value) => {
             if (visible) {
               changeCode(value);
