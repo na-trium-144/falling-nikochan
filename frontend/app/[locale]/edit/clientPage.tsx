@@ -493,7 +493,7 @@ export default function Edit(props: {
         }
       }}
       onDragOver={(e) => {
-        if (chart !== undefined) {
+        if (chart !== undefined && tab !== 4) {
           // エディタの読み込みが完了するまでは無効
           e.preventDefault();
           setDragOver(true);

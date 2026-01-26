@@ -38,6 +38,7 @@ const AceEditor = dynamic(
 );
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
+import { Selection } from "ace-builds-internal/selection";
 
 export function useLuaExecutor(): LuaExecutor {
   const [stdout, setStdout] = useState<string[]>([]);
@@ -255,8 +256,8 @@ export function LuaTabProvider(props: Props & PProps) {
               changeCode(value);
             }
           }}
-          onCursorChange={(sel) => {
-            if (currentLevel && visible) {
+          onCursorChange={(sel: Selection) => {
+            if (currentLevel && visible && !sel.isMultiLine()) {
               const step = findStepFromLua(
                 currentLevel.toObject(),
                 sel.cursor.row
