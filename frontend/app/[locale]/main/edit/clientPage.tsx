@@ -101,7 +101,8 @@ export default function EditTab({ locale }: { locale: string }) {
           />
           <ExternalLink
             className={clsx("ml-1", inputCId !== "" || "hidden!")}
-            href={`/${locale}/edit?cid=${inputCId}`}
+            // use encodeURIComponent to silence CodeQL false positive alert
+            href={`/${locale}/edit?cid=${encodeURIComponent(inputCId)}`}
           >
             {t("newTab")}
           </ExternalLink>
