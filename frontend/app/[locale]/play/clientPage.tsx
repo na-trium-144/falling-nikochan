@@ -325,6 +325,8 @@ function Play(props: Props) {
   const [oldBestScoreCounts, setOldBestScoreCounts] = useState<number[] | null>(
     null
   );
+  const bestScoreAvailable =
+    cid && lvIndex !== undefined && chartBrief?.levels[lvIndex];
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
       const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
@@ -999,9 +1001,11 @@ function Play(props: Props) {
                 isMobile={false}
                 isTouch={isTouch}
                 best={
-                  chartPlaying || (showResult && !showReady)
-                    ? oldBestScoreState
-                    : bestScoreState
+                  bestScoreAvailable
+                    ? chartPlaying || (showResult && !showReady)
+                      ? oldBestScoreState
+                      : bestScoreState
+                    : null
                 }
                 bestCount={
                   chartPlaying || (showResult && !showReady)
@@ -1294,9 +1298,11 @@ function Play(props: Props) {
               isMobile={true}
               isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
               best={
-                chartPlaying || (showResult && !showReady)
-                  ? oldBestScoreState
-                  : bestScoreState
+                bestScoreAvailable
+                  ? chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreState
+                    : bestScoreState
+                  : null
               }
               bestCount={
                 chartPlaying || (showResult && !showReady)
@@ -1360,7 +1366,7 @@ function Play(props: Props) {
             notesTotal={notesAll.length}
             isMobile={false}
             isTouch={isTouch}
-            best={oldBestScoreState}
+            best={bestScoreAvailable ? oldBestScoreState : null}
             bestCount={oldBestScoreCounts}
             showBestScore={!wasAutoPlay && oldPlaybackRate === 1}
             countMode={"judge"}

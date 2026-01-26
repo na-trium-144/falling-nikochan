@@ -28,7 +28,8 @@ interface Props {
   notesTotal: number;
   isMobile: boolean;
   isTouch: boolean;
-  best: number;
+  // テストプレイ時などidがなくスコアを保存できない時nullで、スコアを -.-- 表記にする
+  best: number | null;
   bestCount: number[] | null;
   showBestScore: boolean;
   countMode: "bestCount" | "grayZero" | "judge";
@@ -106,13 +107,18 @@ export default function StatusBox(props: Props) {
               lineHeight: 1,
             }}
           >
-            {Math.floor(props.best)}
+            {props.best === null ? "-" : Math.floor(props.best)}
           </span>
           <span
             className="inline-block"
             style={{ width: "1.6em", fontSize: "1.2em" }}
           >
-            .{(Math.floor(props.best * 100) % 100).toString().padStart(2, "0")}
+            .
+            {props.best === null
+              ? "--"
+              : (Math.floor(props.best * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
           </span>
         </div>
       )}
