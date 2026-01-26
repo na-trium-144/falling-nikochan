@@ -533,6 +533,10 @@ function Play(props: Props) {
 
   // 準備完了画面を表示する (showStoppedとshowResultに優先する)
   const [showReady, setShowReady] = useState<boolean>(false);
+  // スタートボタンを押し、準備完了画面を隠すアニメーションをする
+  const [closeReadyAnim, setCloseReadyAnim] = useState<boolean>(false);
+  const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [loadingAfterReady, setLoadingAfterReady] = useState<boolean>(false);
   // 譜面を中断した
   const [showStopped, setShowStopped] = useState<boolean>(false);
   // result画面を表示する
@@ -551,6 +555,9 @@ function Play(props: Props) {
         ytPlayer.current?.seekTo(begin, true);
         break;
     }
+    // startボタンを押して数秒経っても始まらなかったらloadingを表示
+    setCloseReadyAnim(true);
+    readyTimeout.current = setTimeout(() => setLoadingAfterReady(true), 1500);
     // 再生中に呼んでもなにもしない
     playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
     // 譜面のリセットと開始はonStart()で処理
@@ -794,6 +801,12 @@ function Play(props: Props) {
       initOldBestScore();
       setShowStopped(false);
       setShowReady(false);
+      setCloseReadyAnim(false);
+      if (readyTimeout.current !== null) {
+        clearTimeout(readyTimeout.current);
+        readyTimeout.current = null;
+      }
+      setLoadingAfterReady(false);
       setShowResult(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
@@ -1085,12 +1098,12 @@ function Play(props: Props) {
               {!isTouch && <Key handleKeyDown>Esc</Key>}
             </button>
           </div>
-          {!initDone && (
+          {(!initDone || closeReadyAnim) && (
             <CenterBox
               classNameOuter={clsx(
                 "isolate z-20",
                 "transition-opacity duration-200 ease-out",
-                showLoading ? "opacity-100" : "opacity-0"
+                showLoading || loadingAfterReady ? "opacity-100" : "opacity-0"
               )}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
@@ -1111,7 +1124,11 @@ function Play(props: Props) {
           )}
           {showReady && (
             <ReadyMessage
-              className="isolate z-20"
+              className={clsx(
+                "isolate z-20",
+                closeReadyAnim &&
+                  "transition-[scale,opacity] duration-200 ease-out opacity-0 scale-0"
+              )}
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
               start={start}
