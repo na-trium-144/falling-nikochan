@@ -25,6 +25,10 @@ interface Props {
   playbackRate: number;
   setShouldHideBPMSign: (hide: boolean) => void;
   shouldHideBPMSign: boolean;
+  showTSOffset: boolean;
+  ytStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  userOffset: number;
+  audioLatency: number | null | undefined;
 }
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
@@ -353,6 +357,16 @@ export default function FallingWindow(props: Props) {
     });
   }, []);
 
+  const ytStartTimeStampSampled = useRef<number | null>(null);
+  useEffect(() => {
+    if (props.showTSOffset) {
+      const i = setInterval(() => {
+        ytStartTimeStampSampled.current = props.ytStartTimeStamp.current;
+      }, 50);
+      return () => clearInterval(i);
+    }
+  }, [props.showTSOffset, props.ytStartTimeStamp]);
+
   return (
     <div
       className={clsx(props.className, "overflow-visible")}
@@ -417,6 +431,59 @@ export default function FallingWindow(props: Props) {
           marginY={marginY}
           particleAssets={particleAssets}
         />
+      )}
+      {boxSize && marginY !== undefined && props.showTSOffset && (
+        <table
+          className="absolute text-sm"
+          style={{ bottom: targetY * boxSize + marginY, right: 0 }}
+        >
+          <tbody>
+            <tr>
+              <td className="flex-1">User</td>
+              <td className="w-9 text-right">
+                {props.userOffset < 0 ? "-" : "+"}
+                {Math.floor(Math.abs(props.userOffset) * 1000)}
+              </td>
+              <td>.</td>
+              <td className="w-6">
+                {(Math.floor(Math.abs(props.userOffset) * 1000 * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Audio</td>
+              <td className="text-right">
+                {typeof props.audioLatency === "number" &&
+                  "-" + Math.floor(props.audioLatency * 1000)}
+              </td>
+              <td>.</td>
+              <td>
+                {typeof props.audioLatency === "number" &&
+                  (Math.floor(props.audioLatency * 1000 * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Final%1s</td>
+              <td className="text-right">
+                {ytStartTimeStampSampled.current !== null &&
+                  Math.floor(ytStartTimeStampSampled.current) % 1000}
+              </td>
+              <td>.</td>
+              <td>
+                {ytStartTimeStampSampled.current !== null &&
+                  (Math.floor(ytStartTimeStampSampled.current * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+          </tbody>
+        </table>
       )}
     </div>
   );
