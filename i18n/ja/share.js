@@ -20,8 +20,6 @@ export default {
     otherPlayers: "みんなのプレイ記録",
     bestScore: "あなたのベストスコア",
     detail: "詳細",
-    copyScoreLink: "リンクをコピー",
-    shareScoreLink: "共有",
     start: "ゲーム開始！",
     unavailable: "公開されている譜面がまだありません。",
     titleWithResult: "{date} のプレイ記録 - {title}",

@@ -413,6 +413,71 @@ export default function Edit(props: {
 
   const colorThief = useColorThief();
 
+  useEffect(() => {
+    const keydown = (e: KeyboardEvent) => {
+      if (chart && !isCodeTab) {
+        if (e.key === " " && !playing) {
+          start();
+        } else if (
+          (e.key === "Escape" || e.key === "Esc" || e.key === " ") &&
+          playing
+        ) {
+          stop();
+        } else if (e.key === "Left" || e.key === "ArrowLeft") {
+          seekLeft1();
+        } else if (e.key === "Right" || e.key === "ArrowRight") {
+          seekRight1();
+        } else if (e.key === "PageUp" && cur) {
+          seekStepRel(-cur?.snapDivider * 4);
+        } else if (e.key === "PageDown" && cur) {
+          seekStepRel(cur?.snapDivider * 4);
+        } else if (e.key === ",") {
+          seekSec(-1 / 30);
+        } else if (e.key === ".") {
+          seekSec(1 / 30);
+        } else if (e.key === "c") {
+          chart.copyNote(0);
+        } else if (e.key === "v") {
+          chart.pasteNote(0);
+        } else if (Number(e.key) >= 1) {
+          chart.pasteNote(Number(e.key));
+        } else if (e.key === "n") {
+          chart.pasteNote(0, true);
+        } else if (e.key === "Backspace" || e.key === "Delete") {
+          currentLevel?.deleteNote();
+        } else if (e.key === "b") {
+          if (currentLevel?.currentNote) {
+            const n = currentLevel.currentNote;
+            currentLevel.updateNote({ ...n, big: !n.big });
+          }
+        } else if (e.key === "m") {
+          if (currentLevel?.currentNote) {
+            const n = currentLevel.currentNote;
+            currentLevel.updateNote({ ...n, hitX: -n.hitX, hitVX: -n.hitVX });
+          }
+        } else if (e.key === "Shift") {
+          setDragMode("v");
+        } else {
+          //
+        }
+      }
+    };
+    document.addEventListener("keydown", keydown);
+    return () => document.removeEventListener("keydown", keydown);
+  }, [
+    chart,
+    ready,
+    isCodeTab,
+    playing,
+    start,
+    stop,
+    seekLeft1,
+    seekRight1,
+    cur,
+    seekStepRel,
+    seekSec,
+    currentLevel,
+  ]);
   return (
     <main
       className={clsx(
@@ -422,47 +487,6 @@ export default function Edit(props: {
       )}
       tabIndex={0}
       ref={ref}
-      onKeyDown={(e) => {
-        if (chart && ready && !isCodeTab) {
-          if (e.key === " " && !playing) {
-            start();
-          } else if (
-            (e.key === "Escape" || e.key === "Esc" || e.key === " ") &&
-            playing
-          ) {
-            stop();
-          } else if (e.key === "Left" || e.key === "ArrowLeft") {
-            seekLeft1();
-          } else if (e.key === "Right" || e.key === "ArrowRight") {
-            seekRight1();
-          } else if (e.key === "PageUp" && cur) {
-            seekStepRel(-cur?.snapDivider * 4);
-          } else if (e.key === "PageDown" && cur) {
-            seekStepRel(cur?.snapDivider * 4);
-          } else if (e.key === ",") {
-            seekSec(-1 / 30);
-          } else if (e.key === ".") {
-            seekSec(1 / 30);
-          } else if (e.key === "c") {
-            chart.copyNote(0);
-          } else if (e.key === "v") {
-            chart.pasteNote(0);
-          } else if (Number(e.key) >= 1) {
-            chart.pasteNote(Number(e.key));
-          } else if (e.key === "n") {
-            chart.pasteNote(0, true);
-          } else if (e.key === "b") {
-            if (currentLevel?.currentNote) {
-              const n = currentLevel.currentNote;
-              currentLevel.updateNote({ ...n, big: !n.big });
-            }
-          } else if (e.key === "Shift") {
-            setDragMode("v");
-          } else {
-            //
-          }
-        }
-      }}
       onKeyUp={(e) => {
         if (
           chart &&
@@ -474,7 +498,7 @@ export default function Edit(props: {
         }
       }}
       onDragOver={(e) => {
-        if (chart !== undefined) {
+        if (chart !== undefined && tab !== 4) {
           // エディタの読み込みが完了するまでは無効
           e.preventDefault();
           setDragOver(true);

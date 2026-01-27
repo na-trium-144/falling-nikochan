@@ -25,7 +25,8 @@ interface Props {
   notesTotal: number;
   isMobile: boolean;
   isTouch: boolean;
-  best: number;
+  // テストプレイ時などidがなくスコアを保存できない時nullで、スコアを -.-- 表記にする
+  best: number | null;
   bestCount: number[] | null;
   showBestScore: boolean;
   countMode: "bestCount" | "grayZero" | "judge";
@@ -43,7 +44,7 @@ export default function StatusBox(props: Props) {
       classNameOuter={clsx(
         props.className,
         "overflow-visible!",
-        isMobile ? "origin-top-right" : "w-54"
+        isMobile ? "rounded-sq-[1.5em]!" : "w-54"
       )}
       classNameInner={clsx(
         props.isMobile
@@ -103,13 +104,18 @@ export default function StatusBox(props: Props) {
               lineHeight: 1,
             }}
           >
-            {Math.floor(props.best)}
+            {props.best === null ? "-" : Math.floor(props.best)}
           </span>
           <span
             className="inline-block"
             style={{ width: "1.6em", fontSize: "1.2em" }}
           >
-            .{(Math.floor(props.best * 100) % 100).toString().padStart(2, "0")}
+            .
+            {props.best === null
+              ? "--"
+              : (Math.floor(props.best * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
           </span>
         </div>
       )}
@@ -309,7 +315,7 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "mt-1 w-full text-center",
+          "mt-1 w-full text-center bold-by-stroke",
           props.disabled
             ? "text-slate-400/75 dark:text-stone-600/75"
             : props.color === "inverted"
@@ -330,7 +336,7 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "inline-flex mt-1 w-4 justify-center items-baseline",
+          "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
           props.disabled
             ? "text-slate-400/75 dark:text-stone-600/75"
             : props.color === "inverted"

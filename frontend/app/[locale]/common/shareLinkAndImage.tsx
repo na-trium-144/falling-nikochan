@@ -34,13 +34,14 @@ export function useShareLink(
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
   if (resultParam) searchParams.set("result", resultParam);
-  const sharePath = `/share/${cid}`;
+  // use encodeURIComponent to silence CodeQL false positive alert
+  const sharePath = `/share/${encodeURIComponent(cid || "")}`;
   const shareParams = searchParams.toString();
 
   searchParams.set("v", packageJson.version);
   const ogPath = resultParam
-    ? `/og/result/${cid}?${searchParams.toString()}`
-    : `/og/share/${cid}?${searchParams.toString()}`;
+    ? `/og/result/${encodeURIComponent(cid || "")}?${searchParams.toString()}`
+    : `/og/share/${encodeURIComponent(cid || "")}?${searchParams.toString()}`;
 
   // /route/src/share.ts 内で指定しているタイトルとおなじ
   let newTitle: string = brief?.composer
@@ -282,7 +283,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               scrollableY
               padding={6}
             >
-              <p className="text-lg font-title font-bold mb-2">
+              <p className="text-lg font-title font-semibold mb-2">
                 &lt; {t("shareImage")} &gt;
               </p>
               <div

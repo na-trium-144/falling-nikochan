@@ -3,17 +3,21 @@ import { OSSLicensesList } from "@/main/policies/ossLicensesList.js";
 
 # ソフトウェアとして
 
-- Falling Nikochan はオープンソースのソフトウェアであり、
-  [GitHub 上に](https://github.com/na-trium-144/falling-nikochan)ソースコードを公開しています。
-- ソースコードは [AGPL-3.0-or-later](https://www.gnu.org/licenses/agpl-3.0.html) で公開しています。
-  複製、改変、再配布などは自由に行うことができますが、改変したソースコードは AGPL-3.0-or-later の条件に従って公開する必要があります。
-  - Falling Nikochan のAPIの利用、およびiframeで埋め込む形での利用については、AGPLの適用外で自由に行うことができます。
-  - API仕様 ([/api/openapi.json](/api/openapi.json)) については [MIT License](https://opensource.org/licenses/MIT) のもとで自由に使用可能です。
-- 画像、音声等のアセットファイルについては、[CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) で公開しています。
-  著作権およびライセンスの表示を行う限り、これらのファイルの複製、改変、再配布などは自由に行うことができます。
+- Falling Nikochan はオープンソースのソフトウェアであり、GitHub 上にソースコードを公開しています。
+  <br />→
+  [https://<wbr />github.com/<wbr />na-trium-144/<wbr />falling-nikochan](https://github.com/na-trium-144/falling-nikochan)
+- ソースコードは AGPL-3.0-or-later のもとで公開しています。
+  - Falling Nikochan のプログラムを改変や再配布する場合にはAGPLの規約が適用されます。<Small>([AGPL-3.0のライセンス本文はこちら](https://www.gnu.org/licenses/agpl-3.0.html))</Small>
+  - ただし、Falling Nikochan
+    のAPIの利用、およびiframeで埋め込む形での利用については、AGPLの適用外で自由に行うことができます。
+  - また、OpenAPI仕様 <Small>([/api/<wbr />openapi.<wbr />json](/api/openapi.json))</Small>
+    については MIT License のもとで自由に使用可能です。
+- 使用されている画像、音声等については、CC-BY-4.0 で公開しています。
+  (具体的には、[assets ディレクトリ以下のファイル](https://github.com/na-trium-144/falling-nikochan/tree/main/frontend/public/assets)が対象です。)
+  - 著作権およびライセンスの表示を行う限り、これらの二次利用は自由に行うことができます。
+    <Small>([CCライセンスとは?](https://creativecommons.jp/licenses/))</Small>
 - Falling Nikochan が使用しているサードパーティーのOSSライブラリとそれぞれのライセンスについては、以下で確認できます。
-
-<OSSLicensesList />
+  <OSSLicensesList />
 
 # サービスとして
 
@@ -32,7 +36,7 @@ import { OSSLicensesList } from "@/main/policies/ossLicensesList.js";
 
 - 本サービスは [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference) を利用しています。
   - YouTube IFrame Player API は YouTube が公式に提供している動画埋め込み機能であり、YouTube の利用規約に準拠した形で YouTube 上の動画を直接再生しています。
-  非公式のツールなどによる動画のダウンロードや保存とは異なります。
+    非公式のツールなどによる動画のダウンロードや保存とは異なります。
 - 本サービスに埋め込まれた動画の権利は元の動画の投稿者 (またはその動画で使用しているコンテンツの著作権者) にあります。
   動画の再生等により本サービスが収益を得ることはありません。
 - Fallling Nikochan は YouTube とは無関係なサービスです。本サービスについて YouTube に問い合わせないでください。

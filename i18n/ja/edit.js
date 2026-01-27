@@ -104,9 +104,6 @@ export default {
         "サーバーからこの譜面データを削除します。本当によろしいですか?\n" +
         "この操作は取り消せません。\n\n" +
         "削除するには半角で {cid} と入力してください。",
-      // converting:
-      //   "この譜面は旧バージョンのフォーマット (ver.{ver}) から変換されており、" +
-      //   "保存すると変換後の譜面データで上書きされます。",
       convertingIncompatible:
         "この譜面は旧バージョンのフォーマット (ver.{ver}) から変換されており、" +
         "一部の音符の挙動が変わっている可能性があります。" +
@@ -222,7 +219,14 @@ export default {
       noteNum: "音符数",
       noteAdd: "追加",
       noteDelete: "削除",
+      noteAddHelp: {
+        single: "Single レベルでは、音符は同時に1つしか置けません。",
+        double: "Double レベルでは、音符は同時に2つまで置くことができます。",
+        maniac: "Maniac レベルでは、同時に置ける音符の個数に制限はありません。",
+        common: "レベルの種類の変更は レベル タブからできます。",
+      },
       totalNotes: "全体の音符数",
+      noteMirror: "反転",
       copy: "コピー",
       paste: "貼り付け",
       position: "位置",

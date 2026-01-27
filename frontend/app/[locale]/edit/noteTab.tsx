@@ -51,19 +51,29 @@ export default function NoteTab(props: Props) {
           <span className="inline-block ml-1">{cur?.notesCountInStep}</span>
         </div>
         <div className="inline-block">
+          <HelpIcon>
+            {currentLevel?.meta.type === "Maniac"
+              ? t.rich("noteAddHelp.maniac", { br: () => <br /> })
+              : currentLevel?.meta.type === "Double"
+                ? t.rich("noteAddHelp.double", { br: () => <br /> })
+                : t.rich("noteAddHelp.single", { br: () => <br /> })}
+            <br />
+            {t.rich("noteAddHelp.common", { br: () => <br /> })}
+          </HelpIcon>
           <Button
             keyName="N"
             text={t("noteAdd")}
             onClick={() => chart?.pasteNote(0)}
             disabled={!currentLevel?.canAddNote}
           />
-          {currentLevel?.currentNote && (
-            <Button
-              text={t("noteDelete")}
-              onClick={() => currentLevel?.deleteNote()}
-              disabled={!currentLevel?.currentNoteEditable}
-            />
-          )}
+          <Button
+            keyName="Del/BS"
+            text={t("noteDelete")}
+            onClick={() => currentLevel?.deleteNote()}
+            disabled={
+              !currentLevel?.currentNote || !currentLevel?.currentNoteEditable
+            }
+          />
         </div>
       </div>
       <div className="mb-1">
@@ -165,13 +175,28 @@ function NoteEdit(props: Props) {
               </td>
               <td />
               <td />
-              <td />
+              <td>
+                <div className="w-0 overflow-x-visible">
+                  <Button
+                    keyName="M"
+                    text={t("noteMirror")}
+                    onClick={() =>
+                      currentLevel?.updateNote({
+                        ...n,
+                        hitX: -n.hitX,
+                        hitVX: -n.hitVX,
+                      })
+                    }
+                    disabled={!currentLevel?.currentNoteEditable}
+                  />
+                </div>
+              </td>
             </tr>
             <tr>
               <td className="pr-2">
                 <span>{t("velocity")}</span>
                 <span className="inline-block ml-1">
-                  (<Key className="px-1 py-0.5 mx-0.5 text-sm">Shift</Key>+
+                  (<Key handleKeyDown>Shift</Key>+
                   <span className="inline-block">
                     <Mouse className="" />
                   </span>
@@ -269,8 +294,8 @@ function NoteEdit(props: Props) {
             disabled={!currentLevel?.currentNoteEditable}
           >
             <span>{t("big")}</span>
-            <Key className="text-xs p-0.5 ml-1 ">B</Key>
           </CheckBox>
+          <Key handleKeyDown>B</Key>
         </div>
         <div className="mt-2 ml-2">
           <span>{t("fallMode")}</span>

@@ -264,7 +264,7 @@ function ChainBigAnim(props: { className: string; chain: number }) {
     }
   }, [props.chain, animChain]);
   return (
-    <div className={clsx("absolute inset-0 flex flex-row", props.className)}>
+    <div className={clsx("absolute inset-0 flex flex-row bold-by-stroke", props.className)}>
       <span className="flex-3" />
       <span
         ref={ref}
@@ -316,7 +316,7 @@ function ChainDropAnim(props: {
   return (
     <div
       className={clsx(
-        "absolute inset-0 flex flex-row opacity-50",
+        "absolute inset-0 flex flex-row opacity-50 bold-by-stroke",
         props.className
       )}
     >
@@ -509,7 +509,7 @@ function NumDisp(props: NumProps) {
           key={i}
           ref={numRefs.current[i]}
           className={clsx(
-            "inline-block overflow-visible",
+            "inline-block overflow-visible bold-by-stroke",
             num >= 10 ? "text-left" : "text-center"
           )}
           style={{
@@ -527,13 +527,13 @@ function NumDisp(props: NumProps) {
       {props.fontSize2 && (
         <>
           <span
-            className="inline-block"
+            className="inline-block bold-by-stroke"
             style={{ fontSize: props.fontSize2, lineHeight: 1 }}
           >
             .
           </span>
           <div
-            className="flex flex-row "
+            className="flex flex-row bold-by-stroke"
             style={{ width: 1.4 * props.fontSize2 }}
           >
             {[10, 100].map((a, i) => (

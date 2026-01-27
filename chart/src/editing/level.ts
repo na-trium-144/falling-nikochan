@@ -259,13 +259,23 @@ export class LevelEditing extends EventEmitter<EventType> {
     while (lastRest !== undefined && stepCmp(step, lastRest) <= 0) {
       const ss = getSignatureState(this.#freeze.signature, step);
       if (stepCmp(ss.offset, stepZero()) === 0) {
-        const line = findInsertLine(
-          { ...this.#freeze, lua: this.#lua },
-          step,
-          false
-        ).luaLine;
-        if (line !== null) {
-          barLines.push({ barNum: ss.barNum + 1, luaLine: line });
+        const luaLine = Math.min(
+          this.#freeze.notes.find((n) => stepCmp(n.step, step) >= 0)?.luaLine ??
+            Infinity,
+          this.#freeze.bpmChanges.find((b) => stepCmp(b.step, step) >= 0)
+            ?.luaLine ?? Infinity,
+          this.#freeze.speedChanges.find((s) => stepCmp(s.step, step) >= 0)
+            ?.luaLine ?? Infinity,
+          this.#freeze.signature.find((s) => stepCmp(s.step, step) >= 0)
+            ?.luaLine ?? Infinity,
+          this.#freeze.rest.find((r) => stepCmp(r.begin, step) >= 0)?.luaLine ??
+            Infinity,
+        );
+        if (Number.isFinite(luaLine)) {
+          barLines.push({
+            barNum: ss.barNum + 1,
+            luaLine,
+          });
         }
       }
       step = stepAdd(step, { fourth: 0, numerator: 1, denominator: 4 });

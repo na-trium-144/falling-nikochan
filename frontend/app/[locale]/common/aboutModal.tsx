@@ -40,7 +40,7 @@ export function AboutModal(props: AProps) {
           padding={6}
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="mb-3 relative px-10 text-xl font-bold font-title">
+          <h3 className="mb-3 relative px-10 text-xl font-semibold font-title">
             <button
               className={clsx("fn-pager-button", "absolute left-0 inset-y-0")}
               onClick={close}

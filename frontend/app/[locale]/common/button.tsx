@@ -56,21 +56,21 @@ export default function Button(props: Props) {
         </>
       )}
       {props.loading && <SlimeSVG />}
-      <span className={clsx(props.keyName && "mr-1")}>
+      <span
+        className={clsx(
+          props.keyName && (props.text ?? props.children) && "mr-1"
+        )}
+      >
         {props.text ?? props.children}
       </span>
       {Array.isArray(props.keyName)
         ? props.keyName.map((k, i) => (
             <>
               {i > 0 && <span className="">+</span>}
-              <Key key={i} className="text-xs p-0.5 ">
-                {k}
-              </Key>
+              <Key key={i} handleKeyDown>{k}</Key>
             </>
           ))
-        : props.keyName && (
-            <Key className="text-xs p-0.5 ">{props.keyName}</Key>
-          )}
+        : props.keyName && <Key handleKeyDown>{props.keyName}</Key>}
     </button>
   );
 }

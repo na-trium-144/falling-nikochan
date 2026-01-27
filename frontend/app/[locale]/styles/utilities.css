@@ -24,6 +24,9 @@
   appearance: none;
   -webkit-appearance: none;
 }
+@utility bold-by-stroke {
+  -webkit-text-stroke: 0.03em currentColor;
+}
 
 /* widthやbasisにはあるが、heightにはない (containerって横方向の長さ用だし) */
 @utility h-* {

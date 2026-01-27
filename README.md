@@ -56,6 +56,11 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
     npm ci
     ```
     * [GitHub Action ensures](.github/workflows/sync-lock.yaml) the two lockfiles synchronized with package.json.
+* Seeding the database with initial data
+    ```sh
+    npm run seed
+    ```
+    * This inserts a sample chart at cid:602399 ("Get Started!").
 * Common files (chart/)
     * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
         ```sh

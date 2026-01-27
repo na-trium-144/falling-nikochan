@@ -9,8 +9,8 @@
     "build": "tsc && webpack"
   },
   "browserslist": [
-    "chrome 111",
-    "edge 111",
+    "chrome 120",
+    "edge 120",
     "safari 16.4",
     "firefox 128"
   ]

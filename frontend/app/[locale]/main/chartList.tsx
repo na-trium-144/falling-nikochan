@@ -40,7 +40,7 @@ export default function ChartListPage(props: PProps) {
     >
       <h3
         className={clsx(
-          "flex-none mb-2 text-xl font-bold font-title",
+          "flex-none mb-2 text-xl font-semibold font-title",
           "no-mobile"
         )}
       >
@@ -299,7 +299,7 @@ export function ChartList(props: Props) {
   ]);
 
   return (
-    <div className="relative w-full h-max ">
+    <div className="relative w-full h-max isolate">
       <ul ref={ulSize.ref} className="fn-chart-list">
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
@@ -497,7 +497,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <>
       <LevelBadge
-        className="absolute top-0 -right-1"
+        className="absolute z-10 top-0 -right-1"
         status={status}
         levels={levelColors}
         showDot

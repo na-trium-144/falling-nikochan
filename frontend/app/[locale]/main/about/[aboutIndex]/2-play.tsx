@@ -60,7 +60,7 @@ export function AboutContent2() {
           <p>
             {/*優先的に改行してほしい位置にinlineBlockを入れる*/}
             {t.rich("content2", {
-              key: (c) => <Key className="px-0.5 mx-0.5">{c}</Key>,
+              key: (c) => <Key>{c}</Key>,
               inlineBlock: (c) => <span className="inline-block">{c}</span>,
             })}
           </p>
@@ -157,16 +157,6 @@ export function AboutContent2() {
             />
           </div>
         </div>
-      </div>
-      <div className="mb-4 text-sm space-y-2">
-        <p className="">
-          <Caution className="inline-block mr-1 translate-y-0.5 " />
-          {t("contentIOS")}
-        </p>
-        <ul className="list-inside list-disc">
-          <li>{t("contentIOS2")}</li>
-          <li>{t("contentIOS3")}</li>
-        </ul>
       </div>
     </>
   );

@@ -100,7 +100,7 @@ export default function TopPage(props: Props) {
             menuMoveAnimClass
           )}
         >
-          <h3 className="mb-2 text-xl font-bold font-title">
+          <h3 className="mb-2 text-xl font-semibold font-title">
             {t("play.recent")}
           </h3>
           <ChartList
@@ -204,7 +204,7 @@ function InputCId(props: {
   return (
     <>
       <h3 className="mb-2 ">
-        <span className="text-xl font-bold font-title">{t("inputId")}:</span>
+        <span className="text-xl font-semibold font-title">{t("inputId")}:</span>
         <Input
           className="ml-4 w-20 no-mobile"
           actualValue=""

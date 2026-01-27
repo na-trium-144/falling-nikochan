@@ -26,6 +26,7 @@ import Range from "@/common/range";
 import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
+import { HelpIcon } from "@/common/caption";
 
 interface MessageProps {
   className?: string;
@@ -91,7 +92,7 @@ export function ReadyMessage(props: MessageProps) {
           )}
           style={{ maxHeight: Math.max(optionMinHeight, props.maxHeight) }}
         >
-          <p className="text-lg font-title font-bold mb-1">
+          <p className="text-lg font-title font-semibold mb-1">
             <button
               className={clsx(pagerButtonClass, "mr-4 align-bottom")}
               onClick={() => setOptionOpen(false)}
@@ -114,7 +115,7 @@ export function ReadyMessage(props: MessageProps) {
         )}
         style={{ maxHeight: small ? undefined : props.maxHeight }}
       >
-        <p className="text-lg font-title font-bold mb-2">
+        <p className="text-lg font-title font-semibold mb-2">
           {props.back && (
             <button
               className={clsx(pagerButtonClass, "mr-4 align-bottom")}
@@ -192,15 +193,19 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             </CheckBox>
           </li>
           {isIOS && (
-            <li className="">
+            <li>
+              <div className="flex items-center">
               <CheckBox
                 id="enable-ios-thru"
-                className="align-text-top" // 2行になる場合があるため todo:ちょっとずれてる
                 value={props.enableIOSThru}
                 onChange={(v) => props.setEnableIOSThru(v)}
               >
                 {t("enableIOSThru")}
               </CheckBox>
+              <HelpIcon className="-m-2">
+                {t.rich("iOSThruHelp", {br: () => <br />,})}
+              </HelpIcon>
+            </div>
             </li>
           )}
           <li className="">
@@ -434,7 +439,7 @@ export function StopMessage(props: MessageProps2) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      <p className="text-lg font-title font-bold mb-2">
+      <p className="text-lg font-title font-semibold mb-2">
         &lt; {t("stopped")} &gt;
       </p>
       <p>

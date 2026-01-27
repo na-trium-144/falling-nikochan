@@ -12,6 +12,7 @@ export default {
     isPublished: "Published",
     shareLink: "Share Link",
     copyURL: "Copy URL",
+    // Share dropdown menu button
     share: "Share",
     copyForShare: "Copy Title and URL",
     xPost: "𝕏 Post",
@@ -19,9 +20,8 @@ export default {
     chartInfo: "Chart Information",
     otherPlayers: "Others' Play Records",
     bestScore: "Best Score",
+    // "Details →" button below best score
     detail: "Details",
-    copyScoreLink: "Copy Link",
-    shareScoreLink: "Share",
     start: "Start Game!",
     unavailable: "No levels have been published yet.",
     titleWithResult: "Play record on {date} - {title}",

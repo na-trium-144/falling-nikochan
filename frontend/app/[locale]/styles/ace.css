@@ -14,3 +14,6 @@
 .ace_gutter-active-line {
   @apply bg-transparent!;
 }
+.ace_selection {
+  @apply bg-current/25!;
+}

@@ -19,6 +19,8 @@
     "postbuild": "node ./listStaticFiles.js && node ./insertBanner.js"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans": "=5.2.5",
+    "@fontsource-variable/noto-sans-jp": "=5.2.5",
     "@fontsource/kaisei-opti": "=5.2.5",
     "@fontsource/merriweather": "=5.2.5",
     "@fontsource/noto-sans": "=5.2.5",
@@ -30,6 +32,7 @@
     "ace-builds": "^1.43.5",
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
+    "keyboard-css": "^1.2.4",
     "pretty-checkbox": "^3.0.3",
     "pretty-checkbox-react": "^3.2.0",
     "react-ace": "^14.0.1",

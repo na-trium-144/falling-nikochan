@@ -99,13 +99,10 @@ export default {
       hasUnsaved: "(There are unsaved changes)",
       deleteFromServer: "Delete this chart from server",
       confirmDelete:
-        // \n for confirm() dialog
+        // \n for break line in confirm() dialog
         "Are you sure you want to delete this chart? \n" +
         "This action cannot be undone.\n\n" +
         "Type {cid} to confirm deletion.",
-      // converting:
-      //   "This chart has been converted from the old format (ver.{ver}), " +
-      //   "and saving will overwrite the previous chart data with the converted data.",
       convertingIncompatible:
         "This chart has been converted from the old format (ver.{ver}), " +
         "and some notes may behave differently. " +
@@ -238,7 +235,20 @@ export default {
       noteNum: "Note",
       noteAdd: "Add",
       noteDelete: "Delete",
+      noteAddHelp: {
+        single:
+          "In Single level, only one note can be placed <br></br>" +
+          "at the same time.",
+        double:
+          "In Double level, up to two notes can be placed <br></br>" +
+          "at the same time.",
+        maniac:
+          "In Maniac level, there is no limit to the number of <br></br>" +
+          "notes that can be placed at the same time.",
+        common: "You can change the level type from the Levels tab.",
+      },
       totalNotes: "Total Notes",
+      noteMirror: "Mirror",
       copy: "Copy",
       paste: "Paste",
       position: "Position",

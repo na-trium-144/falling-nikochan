@@ -18,7 +18,7 @@
   --shadow-modal: var(--shadow-md);
   --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
   --font-main-ui: "Merriweather", "Kaisei Opti", serif;
-  --font-title: "Noto Sans", "Noto Sans JP", sans-serif;
+  --font-title: "Noto Sans", "Noto Sans Variable", "Noto Sans JP", "Noto Sans JP Variable", sans-serif;
   --default-font-family: var(--font-main-ui);
 }
 @custom-variant dark (&:where(.dark, .dark *));
