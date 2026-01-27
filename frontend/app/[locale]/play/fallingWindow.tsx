@@ -26,7 +26,8 @@ interface Props {
   setShouldHideBPMSign: (hide: boolean) => void;
   shouldHideBPMSign: boolean;
   showTSOffset: boolean;
-  ytStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  rawStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  filteredStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
   userOffset: number;
   audioLatency: number | null | undefined;
 }
@@ -357,15 +358,31 @@ export default function FallingWindow(props: Props) {
     });
   }, []);
 
-  const ytStartTimeStampSampled = useRef<number | null>(null);
+  const filteredStartTimeStampSample = useRef<number | null>(null);
+  const rawStartTimeStampSample = useRef<number | null>(null);
   useEffect(() => {
     if (props.showTSOffset) {
       const i = setInterval(() => {
-        ytStartTimeStampSampled.current = props.ytStartTimeStamp.current;
+        rawStartTimeStampSample.current = props.rawStartTimeStamp.current;
+        filteredStartTimeStampSample.current =
+          props.filteredStartTimeStamp.current;
       }, 50);
       return () => clearInterval(i);
     }
-  }, [props.showTSOffset, props.ytStartTimeStamp]);
+  }, [
+    props.showTSOffset,
+    props.rawStartTimeStamp,
+    props.filteredStartTimeStamp,
+  ]);
+  // rawStartTimeStampからoffsetとaudioを引けば -ytPlayer.current?.getCurrentTime() の値が残る
+  const rawYTStartTimeStamp = rawStartTimeStampSample.current
+    ? (((rawStartTimeStampSample.current -
+        props.userOffset * 1000 +
+        (props.audioLatency || 0) * 1000) %
+        1000) +
+        1000) %
+      1000
+    : null;
 
   return (
     <div
@@ -468,15 +485,30 @@ export default function FallingWindow(props: Props) {
               <td>ms</td>
             </tr>
             <tr>
-              <td>Final%1s</td>
+              <td>Raw%1s</td>
               <td className="text-right">
-                {ytStartTimeStampSampled.current !== null &&
-                  Math.floor(ytStartTimeStampSampled.current) % 1000}
+                {rawYTStartTimeStamp !== null &&
+                  Math.floor(rawYTStartTimeStamp)}
               </td>
               <td>.</td>
               <td>
-                {ytStartTimeStampSampled.current !== null &&
-                  (Math.floor(ytStartTimeStampSampled.current * 100) % 100)
+                {rawYTStartTimeStamp !== null &&
+                  (Math.floor(rawYTStartTimeStamp * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Filtered%1s</td>
+              <td className="text-right">
+                {filteredStartTimeStampSample.current !== null &&
+                  Math.floor(filteredStartTimeStampSample.current) % 1000}
+              </td>
+              <td>.</td>
+              <td>
+                {filteredStartTimeStampSample.current !== null &&
+                  (Math.floor(filteredStartTimeStampSample.current * 100) % 100)
                     .toString()
                     .padStart(2, "0")}
               </td>

@@ -402,29 +402,28 @@ function Play(props: Props) {
   // ytPlayerから現在時刻を取得
   // 動画基準なのでplaybackRateが1でない場合現実の秒単位とは異なる
   // offsetを引いた後の値
-  const ytStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
-  const timeStampCumulatedDiff = useRef<number>(0);
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       const ytNow =
         ytPlayer.current?.getCurrentTime() -
         chartSeq.offset -
         offsetPlusLatency * playbackRate;
-      if (ytStartTimeStamp.current === null) {
-        ytStartTimeStamp.current =
-          performance.now() - (ytNow * 1000) / playbackRate;
-        timeStampCumulatedDiff.current = 0;
+      rawStartTimeStamp.current =
+        performance.now() - (ytNow * 1000) / playbackRate;
+      if (filteredStartTimeStamp.current === null) {
+        filteredStartTimeStamp.current = rawStartTimeStamp.current;
       }
       const now =
-        ((performance.now() - ytStartTimeStamp.current) / 1000) * playbackRate;
+        ((performance.now() - filteredStartTimeStamp.current) / 1000) *
+        playbackRate;
       const dt = (performance.now() - timeStampLastAdjusted.current) / 1000;
-      const diff = ((ytNow - now) * 1000) / playbackRate;
-      timeStampCumulatedDiff.current += diff * dt;
-      // ずれを少しずつ補正する (PI制御)
-      ytStartTimeStamp.current -=
-        (1 * diff + 1 * timeStampCumulatedDiff.current) * (1 - Math.exp(-dt));
-      timeStampCumulatedDiff.current *= Math.exp(-dt);
+      // ずれを少しずつ補正する (ローパスフィルタ)
+      filteredStartTimeStamp.current =
+        filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
+        rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
       timeStampLastAdjusted.current = performance.now();
       return now;
     }
@@ -788,7 +787,7 @@ function Play(props: Props) {
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
-    ytStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = null;
   }, [
     chartSeq,
     lateTimes,
@@ -816,7 +815,7 @@ function Play(props: Props) {
         break;
     }
     ref.current?.focus();
-    ytStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = null;
   }, [chartPlaying, ref]);
   const onError = useCallback((ec: number) => {
     setYtError(ec);
@@ -1021,7 +1020,8 @@ function Play(props: Props) {
               shouldHideBPMSign={shouldHideBPMSign}
               setShouldHideBPMSign={setShouldHideBPMSign}
               showTSOffset={!!queryOptions.tsOffset}
-              ytStartTimeStamp={ytStartTimeStamp}
+              rawStartTimeStamp={rawStartTimeStamp}
+              filteredStartTimeStamp={filteredStartTimeStamp}
               userOffset={userOffset}
               audioLatency={enableHitSE ? audioLatency : null}
             />
