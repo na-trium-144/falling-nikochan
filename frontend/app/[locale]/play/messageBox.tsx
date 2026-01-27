@@ -26,6 +26,7 @@ import Range from "@/common/range";
 import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
+import { HelpIcon } from "@/common/caption";
 
 interface MessageProps {
   className?: string;
@@ -192,15 +193,19 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
             </CheckBox>
           </li>
           {isIOS && (
-            <li className="">
+            <li>
+              <div className="flex items-center">
               <CheckBox
                 id="enable-ios-thru"
-                className="align-text-top" // 2行になる場合があるため todo:ちょっとずれてる
                 value={props.enableIOSThru}
                 onChange={(v) => props.setEnableIOSThru(v)}
               >
                 {t("enableIOSThru")}
               </CheckBox>
+              <HelpIcon className="-m-2">
+                {t.rich("iOSThruHelp", {br: () => <br />,})}
+              </HelpIcon>
+            </div>
             </li>
           )}
           <li className="">

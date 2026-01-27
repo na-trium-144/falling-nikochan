@@ -17,7 +17,12 @@ export default {
       enableSE: "キー/タップ音を鳴らす",
       enableSELatency: "{latency} 秒の遅延が生じます。",
       unknownSELatency: "サウンドの出力に遅延が生じます。",
-      enableIOSThru: "無反応を予測して補正(iOS)",
+      enableIOSThru: "無反応を予測して補正",
+      iOSThruHelp:
+        "Safariのバグにより2本以上の指でのタップが<br></br>" +
+        "無反応になる場合がありますが、<br></br>" +
+        "特定の条件でこれを予測して補正し<br></br>" +
+        "コンボを継続します。",
       displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
       autoOffset: "自動調整",
