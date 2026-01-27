@@ -26,11 +26,11 @@ import dynamic from "next/dynamic";
 const AceEditor = dynamic(
   async () => {
     const ace = await import("react-ace");
-    await import("ace-builds/src-min-noconflict/ext-language_tools");
+    // await import("ace-builds/src-min-noconflict/ext-language_tools");
     await import("ace-builds/src-min-noconflict/theme-tomorrow");
     await import("ace-builds/src-min-noconflict/theme-tomorrow_night");
     await import("ace-builds/src-min-noconflict/mode-lua");
-    await import("ace-builds/src-min-noconflict/snippets/lua");
+    // await import("ace-builds/src-min-noconflict/snippets/lua");
     await import("ace-builds/src-min-noconflict/ext-searchbox");
     return ace;
   },
@@ -38,6 +38,7 @@ const AceEditor = dynamic(
 );
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
+import { Selection } from "ace-builds-internal/selection";
 
 export function useLuaExecutor(): LuaExecutor {
   const [stdout, setStdout] = useState<string[]>([]);
@@ -173,8 +174,14 @@ export function LuaTabProvider(props: Props & PProps) {
     }
     changeCodeTimeout.current = setTimeout(() => {
       changeCodeTimeout.current = null;
-      setCodeChanged(false);
-      currentLevel?.updateLua(code.split("\n"));
+      currentLevel
+        ?.updateLua(code.split("\n"))
+        .then(() => {
+          setCodeChanged(false);
+        })
+        .catch(() => {
+          setCodeChanged(false);
+        });
     }, 500);
   };
 
@@ -247,16 +254,16 @@ export function LuaTabProvider(props: Props & PProps) {
               ),
             },
           ]}
-          enableBasicAutocompletion={true}
-          enableLiveAutocompletion={true}
-          enableSnippets={true}
+          enableBasicAutocompletion={false}
+          enableLiveAutocompletion={false}
+          enableSnippets={false}
           onChange={(value) => {
             if (visible) {
               changeCode(value);
             }
           }}
-          onCursorChange={(sel) => {
-            if (currentLevel && visible) {
+          onCursorChange={(sel: Selection) => {
+            if (currentLevel && visible && !sel.isMultiLine()) {
               const step = findStepFromLua(
                 currentLevel.toObject(),
                 sel.cursor.row

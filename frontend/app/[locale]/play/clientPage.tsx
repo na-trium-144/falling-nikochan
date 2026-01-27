@@ -1,16 +1,7 @@
 "use client";
 
 /*
-クエリパラメーター
-
-* sid=セッションID または cid=譜面ID&lvIndex=インデックス で譜面を指定
-* fps=1 でFPS表示
-* speed=1 で音符の速度変化を表示
-* result=1 でリザルト表示
-* auto=1 でオートプレイをデフォルトにする
-* judgeauto=1 でオートプレイ時にもユーザーのプレイと同じ判定を適用する (ver12.21〜13.20の動作)
-* noclear=1 で停止時に音符を消さない
-
+playページの隠しオプションとしてのクエリパラメーターはqueryOptions.tsを参照
 */
 
 const exampleResult = {
@@ -72,16 +63,12 @@ import {
 import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
+import { getQueryOptions, QueryOptions } from "./queryOption.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
 
-  const [showFps, setShowFps] = useState<boolean>(false);
-  const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
-  const [goResult, setGoResult] = useState<boolean>(false);
-  const [autoDefault, setAutoDefault] = useState<boolean>(false);
-  const [judgeForAuto, setJudgeForAuto] = useState<boolean>(false);
-  const [noClear, setNoClear] = useState<boolean>(false);
+  const [queryOptions, setQueryOptions] = useState<QueryOptions>({});
 
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
@@ -92,18 +79,10 @@ export function InitPlay({ locale }: { locale: string }) {
   const [errorStatus, setErrorStatus] = useState<number>();
   const [errorMsg, setErrorMsg] = useState<string>();
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const sid = Number(searchParams.get("sid"));
-    const cidFromParam = searchParams.get("cid");
-    const lvIndexFromParam = Number(searchParams.get("lvIndex"));
-    setShowFps(searchParams.get("fps") !== null);
-    setDisplaySpeed(searchParams.get("speed") !== null);
-    setGoResult(searchParams.get("result") !== null);
-    setAutoDefault(searchParams.get("auto") !== null);
-    setJudgeForAuto(searchParams.get("judgeauto") !== null);
-    setNoClear(searchParams.get("noclear") !== null);
+    const q = getQueryOptions();
+    setQueryOptions(q);
 
-    const session = getSession(sid);
+    const session = getSession(q.sid);
     // history.replaceState(null, "", location.pathname);
     if (session !== null) {
       setCid(session.cid);
@@ -111,11 +90,10 @@ export function InitPlay({ locale }: { locale: string }) {
       setChartBrief(session.brief);
       setEditing(!!session.editing);
     } else {
-      if (cidFromParam) {
-        setCid(cidFromParam);
-        setLvIndex(lvIndexFromParam);
-        void (async () =>
-          setChartBrief((await fetchBrief(cidFromParam)).brief))();
+      if (q.cid) {
+        setCid(q.cid);
+        setLvIndex(q.lvIndex);
+        void (async () => setChartBrief((await fetchBrief(q.cid!)).brief))();
         setEditing(false);
       } else {
         setErrorMsg(te("noSession"));
@@ -136,8 +114,8 @@ export function InitPlay({ locale }: { locale: string }) {
         try {
           const res = await fetch(
             process.env.BACKEND_PREFIX +
-              `/api/playFile/${session?.cid || cidFromParam}` +
-              `/${session?.lvIndex || lvIndexFromParam}`,
+              `/api/playFile/${session?.cid ?? q.cid}` +
+              `/${session?.lvIndex ?? q.lvIndex}`,
             { cache: "no-store" }
           );
           if (res.ok) {
@@ -157,7 +135,7 @@ export function InitPlay({ locale }: { locale: string }) {
                 }
                 setErrorStatus(undefined);
                 setErrorMsg(undefined);
-                addRecent("play", session?.cid || cidFromParam || "");
+                addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
                 setChartSeq(undefined);
@@ -205,12 +183,7 @@ export function InitPlay({ locale }: { locale: string }) {
       chartBrief={chartBrief}
       chartSeq={chartSeq}
       editing={editing}
-      showFps={showFps}
-      displaySpeed={displaySpeed}
-      goResult={goResult}
-      autoDefault={autoDefault}
-      judgeForAuto={judgeForAuto}
-      noClear={noClear}
+      queryOptions={queryOptions}
       locale={locale}
     />
   );
@@ -223,12 +196,7 @@ interface Props {
   chartBrief?: ChartBrief;
   chartSeq?: ChartSeqData6 | ChartSeqData13;
   editing: boolean;
-  showFps: boolean;
-  displaySpeed: boolean;
-  goResult: boolean;
-  autoDefault: boolean;
-  judgeForAuto: boolean;
-  noClear: boolean;
+  queryOptions: QueryOptions;
   locale: string;
 }
 function Play(props: Props) {
@@ -239,8 +207,7 @@ function Play(props: Props) {
     chartBrief,
     chartSeq,
     editing,
-    showFps,
-    displaySpeed,
+    queryOptions,
   } = props;
   const te = useTranslations("error");
 
@@ -269,7 +236,8 @@ function Play(props: Props) {
         (s, i) => s.bpm !== chartSeq.bpmChanges[i].bpm
       ));
   // const [displaySpeed, setDisplaySpeed] = useState<boolean>(false);
-  const [auto, setAuto] = useState<boolean>(props.autoDefault);
+  const [auto, setAuto] = useState<boolean>(false);
+  useEffect(() => setAuto(!!queryOptions.auto), [queryOptions]);
   const [autoOffset, setAutoOffset_] = useState<boolean>(false);
   useEffect(() => {
     // デフォルトでtrue
@@ -325,6 +293,8 @@ function Play(props: Props) {
   const [oldBestScoreCounts, setOldBestScoreCounts] = useState<number[] | null>(
     null
   );
+  const bestScoreAvailable =
+    cid && lvIndex !== undefined && chartBrief?.levels[lvIndex];
   const reloadBestScore = useCallback(() => {
     if (cid && lvIndex !== undefined && chartBrief?.levels[lvIndex]) {
       const data = getBestScore(cid, chartBrief.levels[lvIndex].hash);
@@ -381,7 +351,7 @@ function Play(props: Props) {
     chartSeq && "ytEndSec" in chartSeq
       ? chartSeq.ytEndSec
       : chartBrief?.levels.at(lvIndex)?.length ||
-        ytPlayer.current?.getDuration() ||
+        ytPlayer.current?.getDuration?.() ||
         1;
   const [userBegin, setUserBegin_] = useState<number | null>(null);
   const setUserBegin = useCallback(
@@ -432,29 +402,28 @@ function Play(props: Props) {
   // ytPlayerから現在時刻を取得
   // 動画基準なのでplaybackRateが1でない場合現実の秒単位とは異なる
   // offsetを引いた後の値
-  const ytStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const rawStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const filteredStartTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   const timeStampLastAdjusted = useRef<DOMHighResTimeStamp>(0);
-  const timeStampCumulatedDiff = useRef<number>(0);
   const getCurrentTimeSec = useCallback(() => {
     if (ytPlayer.current?.getCurrentTime && chartSeq && chartPlaying) {
       const ytNow =
         ytPlayer.current?.getCurrentTime() -
         chartSeq.offset -
         offsetPlusLatency * playbackRate;
-      if (ytStartTimeStamp.current === null) {
-        ytStartTimeStamp.current =
-          performance.now() - (ytNow * 1000) / playbackRate;
-        timeStampCumulatedDiff.current = 0;
+      rawStartTimeStamp.current =
+        performance.now() - (ytNow * 1000) / playbackRate;
+      if (filteredStartTimeStamp.current === null) {
+        filteredStartTimeStamp.current = rawStartTimeStamp.current;
       }
       const now =
-        ((performance.now() - ytStartTimeStamp.current) / 1000) * playbackRate;
+        ((performance.now() - filteredStartTimeStamp.current) / 1000) *
+        playbackRate;
       const dt = (performance.now() - timeStampLastAdjusted.current) / 1000;
-      const diff = ((ytNow - now) * 1000) / playbackRate;
-      timeStampCumulatedDiff.current += diff * dt;
-      // ずれを少しずつ補正する (PI制御)
-      ytStartTimeStamp.current -=
-        (1 * diff + 1 * timeStampCumulatedDiff.current) * (1 - Math.exp(-dt));
-      timeStampCumulatedDiff.current *= Math.exp(-dt);
+      // ずれを少しずつ補正する (ローパスフィルタ)
+      filteredStartTimeStamp.current =
+        filteredStartTimeStamp.current * Math.exp(-dt / 1.0) +
+        rawStartTimeStamp.current * (1 - Math.exp(-dt / 1.0));
       timeStampLastAdjusted.current = performance.now();
       return now;
     }
@@ -510,7 +479,7 @@ function Play(props: Props) {
   } = useGameLogic(
     getCurrentTimeSec,
     auto,
-    props.judgeForAuto,
+    !!queryOptions.judgeAuto,
     userOffset,
     autoOffset,
     setUserOffset,
@@ -533,10 +502,14 @@ function Play(props: Props) {
 
   // 準備完了画面を表示する (showStoppedとshowResultに優先する)
   const [showReady, setShowReady] = useState<boolean>(false);
+  // スタートボタンを押し、準備完了画面を隠すアニメーションをする
+  const [closeReadyAnim, setCloseReadyAnim] = useState<boolean>(false);
+  const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [loadingAfterReady, setLoadingAfterReady] = useState<boolean>(false);
   // 譜面を中断した
   const [showStopped, setShowStopped] = useState<boolean>(false);
   // result画面を表示する
-  const [showResult, setShowResult] = useState<boolean>(props.goResult);
+  const [showResult, setShowResult] = useState<boolean>(false);
   const [resultDate, setResultDate] = useState<Date>();
 
   const reset = useCallback(() => setShowReady(true), []);
@@ -551,6 +524,9 @@ function Play(props: Props) {
         ytPlayer.current?.seekTo(begin, true);
         break;
     }
+    // startボタンを押して数秒経っても始まらなかったらloadingを表示
+    setCloseReadyAnim(true);
+    readyTimeout.current = setTimeout(() => setLoadingAfterReady(true), 1500);
     // 再生中に呼んでもなにもしない
     playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
     // 譜面のリセットと開始はonStart()で処理
@@ -754,7 +730,7 @@ function Play(props: Props) {
         }, 1000);
         return () => clearTimeout(t);
       }
-    } else if (props.goResult) {
+    } else if (queryOptions.result) {
       setShowResult(true);
     }
   }, [
@@ -776,7 +752,7 @@ function Play(props: Props) {
     bigScore,
     judgeCount,
     stop,
-    props.goResult,
+    queryOptions,
     bigCount,
     hitType,
     editing,
@@ -794,6 +770,12 @@ function Play(props: Props) {
       initOldBestScore();
       setShowStopped(false);
       setShowReady(false);
+      setCloseReadyAnim(false);
+      if (readyTimeout.current !== null) {
+        clearTimeout(readyTimeout.current);
+        readyTimeout.current = null;
+      }
+      setLoadingAfterReady(false);
       setShowResult(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
@@ -805,7 +787,7 @@ function Play(props: Props) {
       ytPlayer.current?.setVolume(ytVolume);
     }
     ref.current?.focus();
-    ytStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = null;
   }, [
     chartSeq,
     lateTimes,
@@ -833,7 +815,7 @@ function Play(props: Props) {
         break;
     }
     ref.current?.focus();
-    ytStartTimeStamp.current = null;
+    filteredStartTimeStamp.current = null;
   }, [chartPlaying, ref]);
   const onError = useCallback((ec: number) => {
     setYtError(ec);
@@ -986,9 +968,11 @@ function Play(props: Props) {
                 isMobile={false}
                 isTouch={isTouch}
                 best={
-                  chartPlaying || (showResult && !showReady)
-                    ? oldBestScoreState
-                    : bestScoreState
+                  bestScoreAvailable
+                    ? chartPlaying || (showResult && !showReady)
+                      ? oldBestScoreState
+                      : bestScoreState
+                    : null
                 }
                 bestCount={
                   chartPlaying || (showResult && !showReady)
@@ -1031,10 +1015,15 @@ function Play(props: Props) {
               setRunFPS={setRunFps}
               setRenderFPS={setRenderFps}
               barFlash={barFlash}
-              noClear={props.noClear}
+              noClear={!!queryOptions.noClear}
               playbackRate={playbackRate}
               shouldHideBPMSign={shouldHideBPMSign}
               setShouldHideBPMSign={setShouldHideBPMSign}
+              showTSOffset={!!queryOptions.tsOffset}
+              rawStartTimeStamp={rawStartTimeStamp}
+              filteredStartTimeStamp={filteredStartTimeStamp}
+              userOffset={userOffset}
+              audioLatency={enableHitSE ? audioLatency : null}
             />
           )}
           <div
@@ -1085,12 +1074,12 @@ function Play(props: Props) {
               {!isTouch && <Key handleKeyDown>Esc</Key>}
             </button>
           </div>
-          {!initDone && (
+          {(!initDone || closeReadyAnim) && (
             <CenterBox
               classNameOuter={clsx(
                 "isolate z-20",
                 "transition-opacity duration-200 ease-out",
-                showLoading ? "opacity-100" : "opacity-0"
+                showLoading || loadingAfterReady ? "opacity-100" : "opacity-0"
               )}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
@@ -1111,7 +1100,11 @@ function Play(props: Props) {
           )}
           {showReady && (
             <ReadyMessage
-              className="isolate z-20"
+              className={clsx(
+                "isolate z-20",
+                closeReadyAnim &&
+                  "transition-[scale,opacity] duration-200 ease-out opacity-0 scale-0"
+              )}
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
               start={start}
@@ -1160,29 +1153,29 @@ function Play(props: Props) {
                 chartBrief?.levels.at(lvIndex || 0)?.difficulty || 0
               }
               baseScore100={
-                props.goResult
+                queryOptions.result
                   ? exampleResult.baseScore100
                   : Math.floor(baseScore * 100)
               }
               chainScore100={
-                props.goResult
+                queryOptions.result
                   ? exampleResult.chainScore100
                   : Math.floor(chainScore * 100)
               }
               bigScore100={
-                props.goResult
+                queryOptions.result
                   ? exampleResult.bigScore100
                   : Math.floor(bigScore * 100)
               }
               score100={
-                props.goResult
+                queryOptions.result
                   ? exampleResult.score100
                   : Math.floor(score * 100)
               }
               judgeCount={
-                props.goResult ? exampleResult.judgeCount : judgeCount
+                queryOptions.result ? exampleResult.judgeCount : judgeCount
               }
-              bigCount={props.goResult ? exampleResult.bigCount : bigCount}
+              bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
               reset={reset}
               exit={exit}
               isTouch={isTouch}
@@ -1260,7 +1253,9 @@ function Play(props: Props) {
           chartPlaying={chartPlaying}
           chartSeq={chartSeq || null}
           getCurrentTimeSec={getCurrentTimeSec}
-          hasExplicitSpeedChange={hasExplicitSpeedChange && displaySpeed}
+          hasExplicitSpeedChange={
+            hasExplicitSpeedChange && !!queryOptions.speed
+          }
           playbackRate={playbackRate}
         />
         {isMobile && (
@@ -1277,9 +1272,11 @@ function Play(props: Props) {
               isMobile={true}
               isTouch={true /* isTouch がfalseの場合の表示は調整してない */}
               best={
-                chartPlaying || (showResult && !showReady)
-                  ? oldBestScoreState
-                  : bestScoreState
+                bestScoreAvailable
+                  ? chartPlaying || (showResult && !showReady)
+                    ? oldBestScoreState
+                    : bestScoreState
+                  : null
               }
               bestCount={
                 chartPlaying || (showResult && !showReady)
@@ -1303,7 +1300,7 @@ function Play(props: Props) {
                 !showReady
               }
             />
-            {showFps && (
+            {queryOptions.fps && (
               <span className="absolute left-3 bottom-full isolate z-16">
                 [{renderFps} / {runFps} / {Math.round(realFps)}
                 {!realFpsStable && "?"} FPS]
@@ -1318,7 +1315,7 @@ function Play(props: Props) {
               <span className="ml-2">ver.</span>
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
-            {showFps && (
+            {queryOptions.fps && (
               <span className="inline-block ml-3">
                 [{renderFps} / {runFps} / {Math.round(realFps)}
                 {!realFpsStable && "?"} FPS]
@@ -1343,7 +1340,7 @@ function Play(props: Props) {
             notesTotal={notesAll.length}
             isMobile={false}
             isTouch={isTouch}
-            best={oldBestScoreState}
+            best={bestScoreAvailable ? oldBestScoreState : null}
             bestCount={oldBestScoreCounts}
             showBestScore={!wasAutoPlay && oldPlaybackRate === 1}
             countMode={"judge"}

@@ -158,16 +158,6 @@ export function AboutContent2() {
           </div>
         </div>
       </div>
-      <div className="mb-4 text-sm space-y-2">
-        <p className="">
-          <Caution className="inline-block mr-1 translate-y-0.5 " />
-          {t("contentIOS")}
-        </p>
-        <ul className="list-inside list-disc">
-          <li>{t("contentIOS2")}</li>
-          <li>{t("contentIOS3")}</li>
-        </ul>
-      </div>
     </>
   );
 }

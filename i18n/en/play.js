@@ -20,7 +20,12 @@ export default {
       enableSE: "Enable Key/Tap Sounds",
       enableSELatency: "There may be a delay of {latency} seconds.",
       unknownSELatency: "There may be a delay in sound output.",
-      enableIOSThru: "Predict and correct unresponsive taps (iOS)",
+      enableIOSThru: "Predict and correct unresponsive taps",
+      iOSThruHelp:
+        "Due to a bug in Safari, taps with two or more <br></br>" +
+        "fingers may become unresponsive. <br></br>" +
+        "Predict and correct this under certain <br></br>" +
+        "conditions and maintain your chain.",
       // unused option
       displaySpeed: "Show Note Speed",
       offset: "Offset Adjustment",

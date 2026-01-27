@@ -16,3 +16,4 @@ docker-compose.yml
 */out/
 *.tsbuildinfo
 next-env.d.ts
+/frontend/.babelrc
