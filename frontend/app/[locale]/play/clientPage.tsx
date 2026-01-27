@@ -351,7 +351,7 @@ function Play(props: Props) {
     chartSeq && "ytEndSec" in chartSeq
       ? chartSeq.ytEndSec
       : chartBrief?.levels.at(lvIndex)?.length ||
-        ytPlayer.current?.getDuration() ||
+        ytPlayer.current?.getDuration?.() ||
         1;
   const [userBegin, setUserBegin_] = useState<number | null>(null);
   const setUserBegin = useCallback(
