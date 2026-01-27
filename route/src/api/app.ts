@@ -9,7 +9,6 @@ import playFileApp from "./playFile.js";
 import seqFileApp from "./seqFile.js";
 import hashPasswdApp from "./hashPasswd.js";
 import recordApp from "./record.js";
-import { HTTPException } from "hono/http-exception";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import popularApp from "./popular.js";
