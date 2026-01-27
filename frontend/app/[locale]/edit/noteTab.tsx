@@ -175,7 +175,22 @@ function NoteEdit(props: Props) {
               </td>
               <td />
               <td />
-              <td />
+              <td>
+                <div className="w-0 overflow-x-visible">
+                  <Button
+                    keyName="M"
+                    text={t("noteMirror")}
+                    onClick={() =>
+                      currentLevel?.updateNote({
+                        ...n,
+                        hitX: -n.hitX,
+                        hitVX: -n.hitVX,
+                      })
+                    }
+                    disabled={!currentLevel?.currentNoteEditable}
+                  />
+                </div>
+              </td>
             </tr>
             <tr>
               <td className="pr-2">

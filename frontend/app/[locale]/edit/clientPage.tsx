@@ -415,7 +415,7 @@ export default function Edit(props: {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (chart && ready && !isCodeTab) {
+      if (chart && !isCodeTab) {
         if (e.key === " " && !playing) {
           start();
         } else if (
@@ -449,6 +449,11 @@ export default function Edit(props: {
           if (currentLevel?.currentNote) {
             const n = currentLevel.currentNote;
             currentLevel.updateNote({ ...n, big: !n.big });
+          }
+        } else if (e.key === "m") {
+          if (currentLevel?.currentNote) {
+            const n = currentLevel.currentNote;
+            currentLevel.updateNote({ ...n, hitX: -n.hitX, hitVX: -n.hitVX });
           }
         } else if (e.key === "Shift") {
           setDragMode("v");

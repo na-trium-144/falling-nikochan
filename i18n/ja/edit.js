@@ -226,6 +226,7 @@ export default {
         common: "レベルの種類の変更は レベル タブからできます。",
       },
       totalNotes: "全体の音符数",
+      noteMirror: "反転",
       copy: "コピー",
       paste: "貼り付け",
       position: "位置",
