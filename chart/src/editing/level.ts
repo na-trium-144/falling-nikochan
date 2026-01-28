@@ -92,14 +92,24 @@ export class LevelEditing extends EventEmitter<EventType> {
     if ("ytEnd" in newMeta) {
       this.#resetYTEnd();
     }
+    if ("snapDivider" in newMeta) {
+      this.#current.reset(
+        this.#current.timeSec,
+        this.#meta.snapDivider,
+        this.#freeze,
+        this.#lua
+      );
+    }
     this.emit("rerender");
-    this.emit("change");
+    if (Object.keys(newMeta).some((key) => key !== "snapDivider")) {
+      this.emit("change");
+    }
   }
   updateFreeze(newFreeze: Partial<LevelFreeze>) {
     this.#freeze = { ...this.#freeze, ...newFreeze };
     this.#current.reset(
       this.#current.timeSec,
-      this.#current.snapDivider,
+      this.#meta.snapDivider,
       this.#freeze,
       this.#lua
     );
@@ -260,24 +270,19 @@ export class LevelEditing extends EventEmitter<EventType> {
     snapDivider?: number
   ) {
     const timeSec = timeSecWithoutOffset - this.#offset();
-    if (snapDivider === undefined) {
-      snapDivider = this.#current.snapDivider;
+    if (snapDivider !== undefined) {
+      this.updateMeta({ snapDivider });
     }
-    if (
-      this.#current.timeSec != timeSec ||
-      this.#current.snapDivider != snapDivider
-    ) {
-      this.#current.reset(timeSec, snapDivider, this.#freeze, this.#lua);
+    if (this.#current.timeSec != timeSec) {
+      this.#current.reset(
+        timeSec,
+        this.#meta.snapDivider,
+        this.#freeze,
+        this.#lua
+      );
     }
   }
-  setSnapDivider(snapDivider: number) {
-    this.#current.reset(
-      this.#current.timeSec,
-      snapDivider,
-      this.#freeze,
-      this.#lua
-    );
-  }
+
   selectNextNote() {
     if (this.#current.noteIndex !== undefined) {
       this.#current.setNoteIndex(this.#current.noteIndex + 1);

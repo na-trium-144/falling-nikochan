@@ -29,6 +29,8 @@ export const LevelMinSchema14 = () =>
     ytBegin: YTBeginSchema11(),
     ytEnd: YTEndSchema11(),
     ytEndSec: v.number(),
+    // snapの刻み幅 を1stepの4n分の1にする
+    snapDivider: v.number(),
   });
 
 export const ChartMinSchema14 = () =>
@@ -43,7 +45,6 @@ export const ChartMinSchema14 = () =>
     locale: v.string(),
     levelsMin: v.array(LevelMinSchema14()),
     lua: v.array(v.array(v.string())),
-    snapDivider: v.number(),
     zoom: v.number(),
     copyBuffer: v.pipe(v.array(v.nullable(NoteCommandSchema9())), v.length(10)),
   });
@@ -92,7 +93,6 @@ export function convertToMin14(chart: Chart14Edit): Chart14Min {
     levelsMin: chart.levelsMin,
     lua: chart.lua,
     copyBuffer: chart.copyBuffer,
-    snapDivider: chart.snapDivider,
     zoom: chart.zoom,
   };
 }
@@ -112,6 +112,7 @@ export async function convertTo14(chart: ChartUntil13): Promise<Chart14Edit> {
       ytBegin: level.ytBegin,
       ytEnd: level.ytEnd,
       ytEndSec: level.ytEndSec,
+      snapDivider: 4,
     })),
     levelsFreeze: chart.levels.map((level) => ({
       notes: level.notes,
@@ -121,7 +122,6 @@ export async function convertTo14(chart: ChartUntil13): Promise<Chart14Edit> {
       signature: level.signature,
     })),
     lua: chart.levels.map((level) => level.lua),
-    snapDivider: 4,
     zoom: 1.0,
   };
 }
@@ -140,9 +140,9 @@ export async function convertTo14Min(
       ytBegin: level.ytBegin,
       ytEnd: level.ytEnd,
       ytEndSec: level.ytEndSec,
+      snapDivider: 4,
     })),
     lua: chart.levels.map((level) => level.lua),
-    snapDivider: 4,
     zoom: 1.0,
   };
 }

@@ -24,6 +24,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   #levels: LevelEditing[];
   #currentLevelIndex: number | undefined; // 範囲外にはせず、levelsが空の場合undefined
   #copyBuffer: (NoteCommand | null)[];
+  #zoom: number;
   readonly #locale: string;
   #convertedFrom: number;
   #hasChange: boolean;
@@ -77,6 +78,7 @@ export class ChartEditing extends EventEmitter<EventType> {
         )
     );
     this.#copyBuffer = obj.copyBuffer;
+    this.#zoom = obj.zoom;
     this.#currentLevelIndex =
       options.currentLevelIndex ?? (this.#levels.length >= 1 ? 0 : undefined);
 
@@ -109,6 +111,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       levelsFreeze: this.#levels.map((l) => l.freeze),
       copyBuffer: this.#copyBuffer,
       changePasswd: this.#changePasswd,
+      zoom: this.#zoom,
     };
   }
   toMin(): ChartMin {
@@ -124,6 +127,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       levelsMin: this.#levels.map((l) => l.meta),
       lua: this.#levels.map((l) => [...l.lua]),
       copyBuffer: this.#copyBuffer,
+      zoom: this.#zoom,
     };
   }
 
@@ -284,6 +288,15 @@ export class ChartEditing extends EventEmitter<EventType> {
   }
   hasCopyBuf(copyIndex: number) {
     return !!this.#copyBuffer.at(copyIndex);
+  }
+
+  get zoom() {
+    return this.#zoom;
+  }
+  setZoom(zoom: number) {
+    this.#zoom = zoom;
+    this.emit("rerender");
+    // dataに変化があるが、changeは呼ばない
   }
 
   updateMeta(

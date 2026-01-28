@@ -180,7 +180,6 @@ export function emptyChart(locale: string): ChartEdit {
     published: false,
     locale,
     copyBuffer: defaultCopyBuffer(),
-    snapDivider: 4,
     zoom: 1.0,
   };
   return chart;
@@ -198,6 +197,7 @@ export function emptyLevel(
     ytBegin: 0,
     ytEnd: "note",
     ytEndSec: 0,
+    snapDivider: 4,
   };
   let level: LevelForLuaEditLatest = {
     notes: [],

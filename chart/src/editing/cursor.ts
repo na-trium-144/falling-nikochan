@@ -14,8 +14,6 @@ export class CursorState extends EventEmitter<EventType> {
   // 現在のカーソル位置と、それに応じて変わる情報
   // timeSecはoffsetを引いたあとの時刻
   #timeSec: number = 0;
-  // snapの刻み幅 を1stepの4n分の1にする
-  #snapDivider: number = 1;
   #step: Step = stepZero();
   #noteIndex: number | undefined;
   #line: number | null = null;
@@ -43,7 +41,7 @@ export class CursorState extends EventEmitter<EventType> {
     freeze: LevelFreeze,
     lua: string[]
   ) {
-    this.#snapDivider = snapDivider;
+    // this.#snapDivider = snapDivider;
     const step = getStep(freeze.bpmChanges, timeSec, snapDivider);
     this.#step = step;
 
@@ -92,9 +90,6 @@ export class CursorState extends EventEmitter<EventType> {
   }
   get timeSec() {
     return this.#timeSec;
-  }
-  get snapDivider() {
-    return this.#snapDivider;
   }
   get step() {
     return this.#step;
