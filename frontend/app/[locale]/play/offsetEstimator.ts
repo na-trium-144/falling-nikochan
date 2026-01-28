@@ -1,20 +1,31 @@
 export class OffsetEstimator {
-  // 正規-逆ガンマ分布による推定器
-  mu: number; // 平均値の初期推定
-  nu = 15; // 初期推定への確信度（「何個分のデータの重みがあるか」）
-  alpha = 15 / 2; // ノイズ分散の形状パラメータ（通常は「想定データ数/2」）
-  beta = (0.08 ** 2 * 15) / 2; // ノイズ分散の尺度パラメータ（通常は「想定分散 * alpha」）
-  constructor(mu: number) {
+  mu: number;
+  nu: number;
+  alpha: number;
+  beta: number;
+  p: number; // 平均値の分散
+  r: number; // 観測ノイズの分散
+  constructor(mu: number, sqrt_p: number, sqrt_r: number, alpha: number) {
     this.mu = mu;
+    this.p = sqrt_p ** 2;
+    this.r = sqrt_r ** 2;
+    this.nu = this.r / this.p;
+    this.alpha = alpha;
+    this.beta = this.r * (alpha - 1);
   }
   update(ofs: number) {
-    const mu_old = this.mu;
-    const nu_old = this.nu;
+    const diff = ofs - this.mu;
+    const diff_threshold = 1.5 * Math.sqrt(this.p + this.r);
+    // this.r = (1 - 0.05) * this.r + 0.05 * diff * diff;
     this.nu += 1;
     this.alpha += 0.5;
-    this.mu = (nu_old * mu_old + ofs) / this.nu;
-    this.beta = this.beta + (nu_old / this.nu) * (ofs - mu_old) ** 2 * 0.5;
-    console.log("μ, ν, α, β =", this.mu, this.nu, this.alpha, this.beta);
+    this.beta += (((this.nu - 1) / this.nu) * diff * diff) / 2;
+    this.r = this.beta / (this.alpha - 1);
+    if (Math.abs(diff) < diff_threshold) {
+      const k = this.p / (this.p + this.r);
+      this.mu = this.mu + k * diff;
+      this.p = (1 - k) * this.p;
+    }
     return this.mu;
   }
 }

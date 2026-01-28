@@ -66,12 +66,15 @@ export default function useGameLogic(
   const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
-  const ofsEstimator = useRef<OffsetEstimator>(new OffsetEstimator(userOffset));
+  const timeOfsEstimator = useRef<OffsetEstimator | null>(null);
+  const initTimeOfsEstimator = useCallback(() => {
+    timeOfsEstimator.current = new OffsetEstimator(userOffset, 0.01, 0.1, 7.5); // * second
+  }, [userOffset]);
   useEffect(() => {
     if (getCurrentTimeSec() === undefined) {
-      ofsEstimator.current = new OffsetEstimator(userOffset);
+      initTimeOfsEstimator();
     }
-  }, [getCurrentTimeSec, userOffset]);
+  }, [getCurrentTimeSec, initTimeOfsEstimator]);
   const autoAdjustOffset = useCallback(
     (ofs: number, now: number, noteIndex: number) => {
       if (!auto && autoOffset) {
@@ -98,7 +101,9 @@ export default function useGameLogic(
             break;
           }
         }
-        setUserOffset(ofsEstimator.current.update(ofs));
+        if (timeOfsEstimator.current) {
+          setUserOffset(timeOfsEstimator.current.update(ofs));
+        }
       }
     },
     [auto, autoOffset, setUserOffset, notesAll]
@@ -121,9 +126,9 @@ export default function useGameLogic(
       setBigTotal(notesCopy.filter((n) => n.big).length);
       hitCountByType.current = {};
       setHitType(null);
-      ofsEstimator.current = new OffsetEstimator(userOffset);
+      initTimeOfsEstimator();
     },
-    [userOffset]
+    [initTimeOfsEstimator]
   );
 
   // Noteに判定を保存し、scoreとchainを更新
@@ -217,7 +222,7 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal, notesAll, playbackRate]
+    [bonusTotal, notesTotal, bigTotal, playbackRate]
   );
 
   const iosPrevRelease = useRef<number | null>(null);
