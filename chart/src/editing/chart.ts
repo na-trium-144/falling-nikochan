@@ -6,7 +6,8 @@ import {
   ChartEdit,
   ChartMin,
   currentChartVer,
-  LevelEdit,
+  LevelFreeze,
+  LevelMin,
   numEvents,
 } from "../chart.js";
 
@@ -64,10 +65,12 @@ export class ChartEditing extends EventEmitter<EventType> {
       composer: obj.composer,
       chartCreator: obj.chartCreator,
     };
-    this.#levels = obj.levels.map(
-      (l) =>
+    this.#levels = obj.levelsMin.map(
+      (_, i) =>
         new LevelEditing(
-          l,
+          obj.levelsMin[i],
+          obj.levelsFreeze[i],
+          obj.lua[i],
           (type) => this.emit(type),
           () => this.#offset,
           this.#luaExecutorRef
@@ -101,7 +104,9 @@ export class ChartEditing extends EventEmitter<EventType> {
       offset: this.#offset,
       locale: this.#locale,
       ...this.#meta,
-      levels: this.#levels.map((l) => l.toObject()),
+      levelsMin: this.#levels.map((l) => l.meta),
+      lua: this.#levels.map((l) => [...l.lua]),
+      levelsFreeze: this.#levels.map((l) => l.freeze),
       copyBuffer: this.#copyBuffer,
       changePasswd: this.#changePasswd,
     };
@@ -116,15 +121,8 @@ export class ChartEditing extends EventEmitter<EventType> {
       title: this.#meta.title,
       composer: this.#meta.composer,
       chartCreator: this.#meta.chartCreator,
-      levels: this.#levels.map((l) => ({
-        name: l.meta.name,
-        type: l.meta.type,
-        unlisted: l.meta.unlisted,
-        lua: [...l.lua],
-        ytBegin: l.meta.ytBegin,
-        ytEnd: l.meta.ytEnd,
-        ytEndSec: l.meta.ytEndSec,
-      })),
+      levelsMin: this.#levels.map((l) => l.meta),
+      lua: this.#levels.map((l) => [...l.lua]),
       copyBuffer: this.#copyBuffer,
     };
   }
@@ -145,7 +143,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       return undefined;
     }
   }
-  addLevel(level: LevelEdit) {
+  addLevel(level: { min: LevelMin; lua: string[]; freeze: LevelFreeze }) {
     if (this.#currentLevelIndex === undefined) {
       this.#currentLevelIndex = this.#levels.length;
     } else {
@@ -155,7 +153,9 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#currentLevelIndex,
       0,
       new LevelEditing(
-        level,
+        level.min,
+        level.freeze,
+        level.lua,
         (type) => this.emit(type),
         () => this.#offset,
         this.#luaExecutorRef

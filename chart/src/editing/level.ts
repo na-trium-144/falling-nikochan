@@ -1,14 +1,8 @@
 import { EventEmitter } from "eventemitter3";
 import { EventType, eventTypes, LuaExecutorRef } from "./types.js";
 import { CursorState } from "./cursor.js";
-import {
-  currentChartVer,
-  LevelEdit,
-  LevelFreeze,
-  LevelMin,
-  LevelPlay,
-} from "../chart.js";
-import { findInsertLine, LevelForLuaEditLatest } from "../lua/edit.js";
+import { currentChartVer, LevelFreeze, LevelMin, LevelPlay } from "../chart.js";
+import { LevelForLuaEditLatest } from "../lua/edit.js";
 import {
   findBpmIndexFromStep,
   getSignatureState,
@@ -42,12 +36,14 @@ export class LevelEditing extends EventEmitter<EventType> {
   #offset: () => number;
   #luaExecutorRef: LuaExecutorRef;
   // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
-  #meta: Omit<LevelMin, "lua">;
+  #meta: LevelMin;
   #lua: string[];
   #freeze: LevelFreeze;
 
   constructor(
-    level: LevelEdit,
+    min: LevelMin,
+    freeze: LevelFreeze,
+    lua: string[],
     parentEmit: (type: EventType) => void,
     offset: () => number,
     luaExecutorRef: LuaExecutorRef
@@ -59,22 +55,9 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#offset = offset;
     this.#luaExecutorRef = luaExecutorRef;
 
-    this.#meta = {
-      name: level.name,
-      type: level.type,
-      unlisted: level.unlisted,
-      ytBegin: level.ytBegin,
-      ytEnd: level.ytEnd,
-      ytEndSec: level.ytEndSec,
-    };
-    this.#lua = level.lua;
-    this.#freeze = {
-      notes: level.notes,
-      rest: level.rest,
-      bpmChanges: level.bpmChanges,
-      speedChanges: level.speedChanges,
-      signature: level.signature,
-    };
+    this.#meta = { ...min };
+    this.#lua = lua;
+    this.#freeze = { ...freeze };
     // 以下はupdateFreeze()内で初期化される
     this.#seqNotes = [];
     this.#difficulty = 0;
@@ -93,22 +76,6 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#resetYTEnd();
     this.updateMeta({});
     this.updateFreeze({});
-  }
-  toObject(): LevelEdit {
-    return {
-      name: this.#meta.name,
-      type: this.#meta.type,
-      unlisted: this.#meta.unlisted,
-      ytBegin: this.#meta.ytBegin,
-      ytEnd: this.#meta.ytEnd,
-      ytEndSec: this.#meta.ytEndSec,
-      notes: this.#freeze.notes,
-      rest: this.#freeze.rest,
-      bpmChanges: this.#freeze.bpmChanges,
-      speedChanges: this.#freeze.speedChanges,
-      signature: this.#freeze.signature,
-      lua: this.#lua,
-    };
   }
 
   #luaEditData(): LevelForLuaEditLatest {
@@ -180,7 +147,7 @@ export class LevelEditing extends EventEmitter<EventType> {
 
   #difficulty: number;
   #resetDifficulty() {
-    this.#difficulty = difficulty(this.toObject(), this.#meta.type);
+    this.#difficulty = difficulty(this.freeze, this.#meta.type);
   }
   get difficulty() {
     return this.#difficulty;
@@ -269,7 +236,7 @@ export class LevelEditing extends EventEmitter<EventType> {
           this.#freeze.signature.find((s) => stepCmp(s.step, step) >= 0)
             ?.luaLine ?? Infinity,
           this.#freeze.rest.find((r) => stepCmp(r.begin, step) >= 0)?.luaLine ??
-            Infinity,
+            Infinity
         );
         if (Number.isFinite(luaLine)) {
           barLines.push({
