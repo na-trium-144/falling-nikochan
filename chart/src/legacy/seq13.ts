@@ -5,7 +5,7 @@ import { Signature5 } from "./chart5.js";
 import { DisplayNote7 } from "./seq7.js";
 
 export interface ChartSeqData13 {
-  ver: 14;
+  ver: 13;
   notes: Note13[];
   bpmChanges: BPMChange1[];
   speedChanges: SpeedChange13[];
@@ -23,7 +23,7 @@ export interface DisplayParam13 {
   ddu: number;
 }
 export interface Note13 {
-  ver: 14;
+  ver: 13;
   id: number;
   big: boolean;
   bigDone: boolean;
@@ -222,7 +222,7 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
       appearTimeSec = -Infinity;
     }
     notes.push({
-      ver: 14,
+      ver: 13,
       id,
       big: c.big,
       hitTimeSec,
@@ -237,7 +237,7 @@ export function loadChart13(level: Level13Play): ChartSeqData13 {
     });
   }
   return {
-    ver: 14,
+    ver: 13,
     offset: level.offset,
     signature: level.signature,
     bpmChanges: level.bpmChanges,

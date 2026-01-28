@@ -39,8 +39,11 @@ import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero } from "./step.js";
 import { defaultCopyBuffer } from "./command.js";
 import {
+  Chart13Edit,
+  ChartEditSchema13,
   ChartUntil13,
   ChartUntil13Min,
+  convertTo13,
   Level13Freeze,
   Level13Play,
 } from "./legacy/chart13.js";
@@ -60,6 +63,7 @@ import {
 import { LevelForLuaEditLatest } from "./lua/edit.js";
 import { BPMChangeWithLua, SpeedChangeWithLua } from "./bpm.js";
 import { SignatureWithLua } from "./signature.js";
+import { ChartUntil11 } from "./legacy/chart11.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -129,6 +133,15 @@ export async function validateChart(chart: ChartUntil14): Promise<ChartEdit> {
   v.parse(ChartEditSchema14(), chart);
   return { ...chart, ver: 14 };
 }
+export async function validateChart13(
+  chart: ChartUntil13
+): Promise<Chart13Edit> {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
+  chart satisfies Chart13Edit;
+  v.parse(ChartEditSchema13(), chart);
+  return { ...chart, ver: 13 };
+}
 export async function validateChartMin(
   chart: ChartUntil14Min
 ): Promise<ChartEdit | ChartMin> {
@@ -150,17 +163,30 @@ export async function hash(text: string) {
 }
 export const hashLevel = hashLevel7;
 
-export function numEvents(chart: ChartEdit): number {
-  return chart.levelsFreeze
-    .map(
-      (l) =>
-        l.notes.length +
-        l.rest.length +
-        l.bpmChanges.length +
-        l.speedChanges.length +
-        l.signature.length
-    )
-    .reduce((a, b) => a + b);
+export function numEvents(chart: Chart13Edit | ChartEdit): number {
+  if (chart.ver === 13) {
+    return chart.levels
+      .map(
+        (l) =>
+          l.notes.length +
+          l.rest.length +
+          l.bpmChanges.length +
+          l.speedChanges.length +
+          l.signature.length
+      )
+      .reduce((a, b) => a + b);
+  } else {
+    return chart.levelsFreeze
+      .map(
+        (l) =>
+          l.notes.length +
+          l.rest.length +
+          l.bpmChanges.length +
+          l.speedChanges.length +
+          l.signature.length
+      )
+      .reduce((a, b) => a + b);
+  }
 }
 
 export function emptyChart(locale: string): ChartEdit {
@@ -249,7 +275,8 @@ export function emptyLevel(
 }
 
 export async function createBrief(
-  chart: ChartEdit,
+  // API用に過去2バージョンサポート
+  chart: Chart13Edit | Chart14Edit,
   updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
@@ -261,17 +288,19 @@ export async function createBrief(
   } catch {
     //
   }
-  const levelBrief = chart.levelsMin.map((level, i) => ({
+  const levelsMin = chart.ver === 13 ? chart.levels : chart.levelsMin;
+  const levelsFreeze = chart.ver === 13 ? chart.levels : chart.levelsFreeze;
+  const levelBrief = levelsMin.map((level, i) => ({
     name: level.name,
     type: level.type,
     unlisted: level.unlisted,
     hash: levelHashes[i],
-    noteCount: chart.levelsFreeze[i].notes.length,
-    difficulty: difficulty(chart.levelsFreeze[i], level.type),
-    bpmMin: chart.levelsFreeze[i].bpmChanges
+    noteCount: levelsFreeze[i].notes.length,
+    difficulty: difficulty(levelsFreeze[i], level.type),
+    bpmMin: levelsFreeze[i].bpmChanges
       .map((b) => b.bpm)
       .reduce((a, b) => Math.min(a, b)),
-    bpmMax: chart.levelsFreeze[i].bpmChanges
+    bpmMax: levelsFreeze[i].bpmChanges
       .map((b) => b.bpm)
       .reduce((a, b) => Math.max(a, b)),
     length: level.ytEndSec - level.ytBegin,
