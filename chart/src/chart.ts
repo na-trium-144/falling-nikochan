@@ -346,7 +346,7 @@ export async function createBrief(
     name: level.name,
     type: level.type,
     unlisted: level.unlisted,
-    hash: levelHashes[i],
+    hash: levelHashes.at(i) ?? "",
     noteCount: levelsFreeze[i].notes.length,
     difficulty: difficulty(levelsFreeze[i], level.type),
     bpmMin: levelsFreeze[i].bpmChanges
