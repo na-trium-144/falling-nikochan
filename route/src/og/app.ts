@@ -202,19 +202,19 @@ const ogApp = (config: {
         let imagePath: string | null;
         switch (resultParams.inputType) {
           case inputTypes.keyboard:
-            imagePath = "/og-icons/icon-slate500-keyboard-one.svg";
+            imagePath = "/og-icons/keyboard-one.svg";
             break;
           case inputTypes.mouse:
-            imagePath = "/og-icons/icon-slate500-mouse-one.svg";
+            imagePath = "/og-icons/mouse-one.svg";
             break;
           case inputTypes.touch:
-            imagePath = "/og-icons/icon-slate500-click-tap.svg";
+            imagePath = "/og-icons/click-tap.svg";
             break;
           case inputTypes.pen:
-            imagePath = "/og-icons/icon-slate500-write.svg";
+            imagePath = "/og-icons/write.svg";
             break;
           case inputTypes.gamepad:
-            imagePath = "/og-icons/icon-slate500-game-three.svg";
+            imagePath = "/og-icons/game-three.svg";
             break;
           case null:
             imagePath = null;
