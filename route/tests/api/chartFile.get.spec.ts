@@ -5,6 +5,8 @@ import {
   dummyChart,
   dummyChart10,
   dummyChart11,
+  dummyChart12,
+  dummyChart13,
   dummyChart6,
   dummyChart7,
   dummyChart8,
@@ -20,6 +22,7 @@ import {
   Chart7,
   Chart8Edit,
   Chart9Edit,
+  currentChartVer,
   hash,
 } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
@@ -74,6 +77,21 @@ describe("GET /api/chartFile/:cid", () => {
     expect(res.status).to.equal(200);
     const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
     expect(chart).to.deep.equal({ ...dummyChart(), published: true });
+  });
+  currentChartVer satisfies 14; // edit tests below when chart version is bumped
+  test("should return Chart13 if chart version is 13", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100013?p=p");
+    expect(res.status).to.equal(200);
+    const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
+    expect(chart).to.deep.equal(dummyChart13());
+  });
+  test("should return Chart12 if chart version is 12", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100012?p=p");
+    expect(res.status).to.equal(200);
+    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
+    expect(chart).to.deep.equal(dummyChart12());
   });
   test("should return Chart11 if chart version is 11", async () => {
     await initDb();

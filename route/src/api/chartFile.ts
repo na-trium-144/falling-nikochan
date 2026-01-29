@@ -399,7 +399,7 @@ const chartFileApp = async (config: {
             : await Promise.all(
                 newChart.levelsMin
                   .filter((l) => !l.unlisted)
-                  // @ts-expect-error #914マージ時に直す
+                  // @ts-ignore #914マージ時に直す
                   .map((_, i) => hashLevel(newChart.levelsFreeze[i]))
               );
         let updatedAt = entry.updatedAt;

@@ -27,6 +27,7 @@ import {
   inputTypes,
   emptyBrief,
   Level13Play,
+  currentChartVer,
 } from "@falling-nikochan/chart";
 import { ChartSeqData13, loadChart13 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
@@ -120,24 +121,29 @@ export function InitPlay({ locale }: { locale: string }) {
           );
           if (res.ok) {
             try {
+              currentChartVer satisfies 14; // update the code below when chart version is bumped
               const seq: Level6Play | Level13Play = msgpack.deserialize(
                 await res.arrayBuffer()
               );
               console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 13) {
+              if (seq.ver === 6 || seq.ver === 13 || seq.ver === 14) {
                 switch (seq.ver) {
                   case 6:
                     setChartSeq(loadChart6(seq));
                     break;
                   case 13:
+                  case 14:
                     setChartSeq(loadChart13(seq));
                     break;
+                  default:
+                    seq satisfies never;
                 }
                 setErrorStatus(undefined);
                 setErrorMsg(undefined);
                 addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
+                seq.ver satisfies never;
                 setChartSeq(undefined);
                 setErrorStatus(undefined);
                 setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));

@@ -5,6 +5,8 @@ import {
   LuaExecutor,
   stepZero,
 } from "@falling-nikochan/chart";
+import { inspect } from 'node:util';
+inspect.defaultOptions.depth = null;
 
 export function dummyLuaExecutor(
   exec: (code: string) => Promise<LevelFreeze | null> = async () => null,

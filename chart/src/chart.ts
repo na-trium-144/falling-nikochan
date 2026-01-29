@@ -282,8 +282,12 @@ export async function createBrief(
   let levelHashes: string[] = [];
   try {
     levelHashes = await Promise.all(
-      // @ts-expect-error #914マージ時に直す
-      chart.levelsMin.map((level) => hashLevel(level))
+      chart.ver === 13
+        ? chart.levels.map((level) => hashLevel(level))
+        : chart.levelsFreeze.map((level) =>
+            // @ts-ignore #914マージ時に直す
+            hashLevel(level)
+          )
     );
   } catch {
     //

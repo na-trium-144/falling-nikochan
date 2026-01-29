@@ -70,7 +70,7 @@ export function convertToPlay14(
   const levelMin = chart.levelsMin.at(lvIndex);
   const levelFreeze = chart.levelsFreeze.at(lvIndex);
   return {
-    ver: 14,
+    ver: 13,
     offset: chart.offset,
     notes: levelFreeze?.notes || [],
     bpmChanges: levelFreeze?.bpmChanges || [],
