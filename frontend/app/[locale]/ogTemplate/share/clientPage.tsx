@@ -8,7 +8,10 @@ import { useTranslations } from "next-intl";
 import { stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { levelBgColors } from "@/common/levelColors";
-import { IrasutoyaLikeBgInner, IrasutoyaLikeGrassInner } from "@/common/irasutoyaLike";
+import {
+  IrasutoyaLikeBgInner,
+  IrasutoyaLikeGrassInner,
+} from "@/common/irasutoyaLike";
 
 export default function OGTemplate() {
   const t = useTranslations("share");

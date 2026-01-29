@@ -156,7 +156,7 @@ export function MobileFooter(props: MobileProps) {
               props.tabKey === key && key !== "top"
                 ? boxButtonBorderStyle1
                 : skyFlatButtonBorderStyle1,
-              props.tabKey !== "top" ? "border-t-0" : "",
+              props.tabKey !== "top" ? "border-t-0" : ""
             )}
           />
           <span
@@ -164,7 +164,7 @@ export function MobileFooter(props: MobileProps) {
               props.tabKey === key && key !== "top"
                 ? boxButtonBorderStyle2
                 : skyFlatButtonBorderStyle2,
-              props.tabKey !== "top" ? "border-t-0" : "",
+              props.tabKey !== "top" ? "border-t-0" : ""
             )}
           />
           <ButtonHighlight />

@@ -15,7 +15,7 @@ import { env } from "hono/adapter";
 import msgpack from "@ygoe/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
 import { cors } from "hono/cors";
-import ColorThief, { RGBColor } from "colorthief";
+import ColorThief from "colorthief";
 import { adjustColor } from "./style.js";
 
 export interface ChartBriefMin {

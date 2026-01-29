@@ -1,6 +1,5 @@
 import {
   ChartBrief,
-  ChartEdit,
   createBrief,
   hash,
   BPMChangeWithLua3,
@@ -314,7 +313,7 @@ export async function chartToEntry(
   newHashes: string[] | null = null
 ): Promise<ChartEntry> {
   const chartBrief = await createBrief(chart, updatedAt);
-  if(newHashes){
+  if (newHashes) {
     chartBrief.levels.forEach((levelBrief, index) => {
       levelBrief.hash = newHashes[index];
     });

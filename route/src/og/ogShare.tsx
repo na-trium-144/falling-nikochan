@@ -1,13 +1,10 @@
 import React from "react";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
-  amber500,
-  emerald500,
   flexCol,
   flexRow,
   fontMainUi,
   fontTitle,
-  rose400,
   slate800,
   text4xl,
   text5xl,
@@ -20,7 +17,7 @@ export async function OGShare(
   lang: string,
   brief: ChartBriefMin,
   bgImageBin: Promise<string>,
-  color: Promise<string>,
+  color: Promise<string>
 ) {
   const t = await getTranslations(lang, "share");
   return (

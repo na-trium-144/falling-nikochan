@@ -195,17 +195,17 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
           {isIOS && (
             <li>
               <div className="flex items-center">
-              <CheckBox
-                id="enable-ios-thru"
-                value={props.enableIOSThru}
-                onChange={(v) => props.setEnableIOSThru(v)}
-              >
-                {t("enableIOSThru")}
-              </CheckBox>
-              <HelpIcon className="-m-2">
-                {t.rich("iOSThruHelp", {br: () => <br />,})}
-              </HelpIcon>
-            </div>
+                <CheckBox
+                  id="enable-ios-thru"
+                  value={props.enableIOSThru}
+                  onChange={(v) => props.setEnableIOSThru(v)}
+                >
+                  {t("enableIOSThru")}
+                </CheckBox>
+                <HelpIcon className="-m-2">
+                  {t.rich("iOSThruHelp", { br: () => <br /> })}
+                </HelpIcon>
+              </div>
             </li>
           )}
           <li className="">

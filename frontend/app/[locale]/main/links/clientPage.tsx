@@ -42,7 +42,9 @@ export default function LinksPage({ locale }: { locale: string }) {
       locale={locale}
     >
       <div className="mb-3 main-wide:hidden">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("settings")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">
+          {t("settings")}
+        </h3>
         <div className="ml-2 space-y-2">
           <p>
             <Translate className="inline-block align-middle" />

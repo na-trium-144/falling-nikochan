@@ -83,7 +83,9 @@ export function ChangeLogPopup(props: PopupProps) {
                 )*/}
                 </span>
               </p>
-              <h3 className="text-xl font-semibold font-title">{t("changelog")}</h3>
+              <h3 className="text-xl font-semibold font-title">
+                {t("changelog")}
+              </h3>
               <div className="text-left ">{changeLog}</div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>

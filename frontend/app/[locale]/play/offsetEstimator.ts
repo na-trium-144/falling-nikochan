@@ -13,7 +13,7 @@ export class OffsetEstimator {
     this.alpha = alpha;
     this.beta = this.r * (alpha - 1);
   }
-  get diff_threshold(){
+  get diff_threshold() {
     return 1.5 * Math.sqrt(this.p + this.r);
   }
   update(ofs: number) {

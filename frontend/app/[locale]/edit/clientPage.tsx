@@ -243,14 +243,17 @@ export default function Edit(props: {
     }
     ref.current?.focus();
   }, [cur, currentLevel, seekStepRel]);
-  const seekSec = (moveSec: number, focus = true) => {
-    if (chart && cur) {
-      setAndSeekCurrentTimeWithoutOffset(
-        cur?.timeSec + chart.offset + moveSec,
-        focus
-      );
-    }
-  };
+  const seekSec = useCallback(
+    (moveSec: number, focus = true) => {
+      if (chart && cur) {
+        setAndSeekCurrentTimeWithoutOffset(
+          cur?.timeSec + chart.offset + moveSec,
+          focus
+        );
+      }
+    },
+    [chart, cur, setAndSeekCurrentTimeWithoutOffset]
+  );
 
   useEffect(() => {
     if (playing) {

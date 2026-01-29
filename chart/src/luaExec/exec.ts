@@ -40,7 +40,7 @@ export async function luaExec(
     step: stepZero(),
   };
   try {
-    lua.global.set("print", (...args: any[]) => {
+    lua.global.set("print", (...args: unknown[]) => {
       result.stdout.push(args.map((a) => String(a)).join("\t"));
     });
 
@@ -64,8 +64,8 @@ export async function luaExec(
         ["AccelEnd", luaAccelEnd],
       ] as const
     ).forEach(([name, func]) => {
-      lua.global.set(name, (...args: any[]) => func(result, null, ...args));
-      lua.global.set(`${name}Static`, (...args: any[]) =>
+      lua.global.set(name, (...args: unknown[]) => func(result, null, ...args));
+      lua.global.set(`${name}Static`, (...args: unknown[]) =>
         func(result, ...args)
       );
     });

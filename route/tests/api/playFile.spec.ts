@@ -1,7 +1,11 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, dummyLevel13, dummyLevel6, initDb } from "./init";
-import { currentChartVer, Level13Play, Level6Play } from "@falling-nikochan/chart";
+import {
+  currentChartVer,
+  Level13Play,
+  Level6Play,
+} from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 
 describe("GET /api/playFile/:cid/:lvIndex", () => {

@@ -2,7 +2,7 @@
 
 import clsx from "clsx/lite";
 import { memo, RefObject, useEffect, useRef, useState } from "react";
-import { targetY, bigScale, bonusMax, Pos } from "@falling-nikochan/chart";
+import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
