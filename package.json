@@ -7,7 +7,7 @@
     "node": ">=23.6"
   },
   "scripts": {
-    "lint": "tsc && npm run lint --ws --if-present",
+    "lint": "tsc && npm run t --ws --if-present && npm run lint --ws --if-present",
     "format": "prettier --write .",
     "t": "npm run t --ws --if-present",
     "cdev": "npm run cdev -w chart",

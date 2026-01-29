@@ -54,6 +54,7 @@ jobs:
       with:
         bun-version: latest
     - run: npm ci
+    - run: npm run t
     - run: npm run mongo-docker
     - run: bun ./replaceForBun.js
     - run: bun test
