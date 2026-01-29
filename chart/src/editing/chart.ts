@@ -147,7 +147,11 @@ export class ChartEditing extends EventEmitter<EventType> {
       return undefined;
     }
   }
-  addLevel(level: { min: LevelMin; lua: string[]; freeze: LevelFreeze }) {
+  addLevel(level: {
+    min: Readonly<LevelMin>;
+    lua: readonly string[];
+    freeze: Readonly<LevelFreeze>;
+  }) {
     if (this.#currentLevelIndex === undefined) {
       this.#currentLevelIndex = this.#levels.length;
     } else {

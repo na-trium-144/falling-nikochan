@@ -41,9 +41,9 @@ export class LevelEditing extends EventEmitter<EventType> {
   #freeze: LevelFreeze;
 
   constructor(
-    min: LevelMin,
-    freeze: LevelFreeze,
-    lua: string[],
+    min: Readonly<LevelMin>,
+    freeze: Readonly<LevelFreeze>,
+    lua: readonly string[],
     parentEmit: (type: EventType) => void,
     offset: () => number,
     luaExecutorRef: LuaExecutorRef
@@ -55,9 +55,9 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#offset = offset;
     this.#luaExecutorRef = luaExecutorRef;
 
-    this.#meta = { ...min };
-    this.#lua = lua;
-    this.#freeze = { ...freeze };
+    this.#meta = JSON.parse(JSON.stringify(min));
+    this.#lua = [...lua];
+    this.#freeze = JSON.parse(JSON.stringify(freeze));
     // 以下はupdateFreeze()内で初期化される
     this.#seqNotes = [];
     this.#difficulty = 0;
