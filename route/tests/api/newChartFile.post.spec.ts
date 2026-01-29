@@ -1,7 +1,11 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, dummyChart, dummyChart11, dummyChart13, initDb } from "./init";
-import { chartMaxEvent, currentChartVer, fileMaxSize } from "@falling-nikochan/chart";
+import {
+  chartMaxEvent,
+  currentChartVer,
+  fileMaxSize,
+} from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -137,6 +141,7 @@ describe("POST /api/newChartFile", () => {
   });
   test("should return 409 for chart version older than 13", async () => {
     currentChartVer satisfies 14; // edit this test when chart version is bumped
+    await initDb();
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
