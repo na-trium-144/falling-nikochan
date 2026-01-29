@@ -25,6 +25,7 @@ import {
   Chart11Edit,
   SpeedChangeWithLua13,
   Chart13Edit,
+  Chart14Edit,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { gzip, gunzip } from "node:zlib";
@@ -117,7 +118,8 @@ export async function getChartEntry(
     | Chart8Edit
     | Chart9Edit
     | Chart11Edit
-    | Chart13Edit;
+    | Chart13Edit
+    | Chart14Edit;
 }> {
   const entryCompressed = await getChartEntryCompressed(db, cid, p);
 
@@ -151,7 +153,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
   offset: number;
   ytId: string;
   title: string;
@@ -165,6 +167,7 @@ export interface ChartEntryCompressed {
   ip: string[];
   locale: string;
   copyBuffer?: (NoteCommand9 | null)[];
+  zoom?: number;
   levelBrief: ChartLevelBrief[];
 }
 export interface ChartLevelBrief {
@@ -231,6 +234,18 @@ export interface ChartLevelCore13 {
   ytEndSec: number;
   ytEnd: "note" | "yt" | number;
 }
+export interface ChartLevelCore14 {
+  notes: NoteCommand9[];
+  rest: Rest9[];
+  bpmChanges: BPMChange9[];
+  speedChanges: SpeedChangeWithLua13[];
+  signature: Signature9[];
+  lua: string[];
+  ytBegin: number;
+  ytEndSec: number;
+  ytEnd: "note" | "yt" | number;
+  snapDivider: number;
+}
 export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
@@ -239,6 +254,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 9 | 10; levels: ChartLevelCore9[] }
     | { ver: 11 | 12; levels: ChartLevelCore11[] }
     | { ver: 13; levels: ChartLevelCore13[] }
+    | { ver: 14; levels: ChartLevelCore14[] }
   );
 
 export async function unzipEntry(
@@ -280,13 +296,15 @@ export async function zipEntry(
     ip: entry.ip,
     locale: entry.locale,
     copyBuffer: entry.copyBuffer, // ver11〜
+    zoom: entry.zoom, // ver14〜
     levelBrief: entry.levelBrief,
     levelsCompressed: new Binary(levelsCompressed),
   };
 }
 
 export async function chartToEntry(
-  chart: ChartEdit,
+  // 過去2バージョンまで
+  chart: Chart13Edit | Chart14Edit,
   cid: string,
   updatedAt: number,
   addIp: string | null,
@@ -319,20 +337,24 @@ export async function chartToEntry(
   if (addIp !== null && !ip.includes(addIp)) {
     ip.push(addIp);
   }
+  const levelsMin = chart.ver === 13 ? chart.levels : chart.levelsMin;
+  const levelsFreeze = chart.ver === 13 ? chart.levels : chart.levelsFreeze;
+  const lua = chart.ver === 13 ? chart.levels.map((l) => l.lua) : chart.lua;
   return {
     cid,
     deleted: prevEntry?.deleted || false,
     levelsCompressed: null,
-    levels: chart.levels.map((level) => ({
-      notes: level.notes,
-      rest: level.rest,
-      bpmChanges: level.bpmChanges,
-      speedChanges: level.speedChanges,
-      signature: level.signature,
-      lua: level.lua,
-      ytBegin: level.ytBegin,
-      ytEndSec: level.ytEndSec,
-      ytEnd: level.ytEnd,
+    levels: levelsMin.map((_, i) => ({
+      notes: levelsFreeze[i].notes,
+      rest: levelsFreeze[i].rest,
+      bpmChanges: levelsFreeze[i].bpmChanges,
+      speedChanges: levelsFreeze[i].speedChanges,
+      signature: levelsFreeze[i].signature,
+      lua: lua[i],
+      ytBegin: levelsMin[i].ytBegin,
+      ytEndSec: levelsMin[i].ytEndSec,
+      ytEnd: levelsMin[i].ytEnd,
+      snapDivider: chart.ver === 13 ? 4 : chart.levelsMin[i].snapDivider,
     })),
     ver: chart.ver,
     published: chart.published,
@@ -349,6 +371,7 @@ export async function chartToEntry(
     ip,
     locale: chartBrief.locale,
     copyBuffer: chart.copyBuffer,
+    zoom: chart.ver === 13 ? undefined : chart.zoom,
   };
 }
 export function entryToBrief(entry: ChartEntryCompressed): ChartBrief {
@@ -374,7 +397,8 @@ export function entryToChart(
   | Chart8Edit
   | Chart9Edit
   | Chart11Edit
-  | Chart13Edit {
+  | Chart13Edit
+  | Chart14Edit {
   switch (entry.ver) {
     case 4:
       return {
@@ -549,6 +573,38 @@ export function entryToChart(
         locale: entry.locale,
         copyBuffer: entry.copyBuffer!,
       } as Chart11Edit | Chart13Edit;
+    case 14:
+      return {
+        falling: "nikochan",
+        ver: entry.ver,
+        published: entry.published,
+        levelsMin: entry.levels.map((level, i) => ({
+          name: entry.levelBrief.at(i)?.name || "",
+          type: entry.levelBrief.at(i)?.type || "Maniac",
+          unlisted: entry.levelBrief.at(i)?.unlisted || false,
+          ytBegin: level.ytBegin,
+          ytEndSec: level.ytEndSec,
+          ytEnd: level.ytEnd,
+          snapDivider: level.snapDivider || 4,
+        })),
+        levelsFreeze: entry.levels.map((level) => ({
+          notes: level.notes,
+          rest: level.rest,
+          bpmChanges: level.bpmChanges,
+          speedChanges: level.speedChanges,
+          signature: level.signature,
+        })),
+        lua: entry.levels.map((level) => level.lua),
+        offset: entry.offset,
+        ytId: entry.ytId,
+        title: entry.title,
+        composer: entry.composer,
+        chartCreator: entry.chartCreator,
+        changePasswd: null,
+        locale: entry.locale,
+        copyBuffer: entry.copyBuffer!,
+        zoom: entry.zoom || 0,
+      } as Chart14Edit;
     default:
       entry satisfies never;
       throw new HTTPException(500, { message: "unsupportedChartVersion" });

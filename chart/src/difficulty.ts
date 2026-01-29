@@ -1,4 +1,4 @@
-import { LevelEdit } from "./chart.js";
+import { LevelFreeze } from "./chart.js";
 import {
   baseScoreRate,
   bonusMax,
@@ -36,7 +36,7 @@ function lvToNps(lv: number, multiHit: number) {
   return Math.exp((lv + 2) / 5) / multiHit;
 }
 
-export function difficulty(level: LevelEdit, type: string): number {
+export function difficulty(level: LevelFreeze, type: string): number {
   const maxLv = 20;
   const minLv = 1;
   if (level.notes.length === 0) {
@@ -108,7 +108,7 @@ export function difficulty(level: LevelEdit, type: string): number {
 }
 
 function agentsPlay(
-  level: LevelEdit,
+  level: LevelFreeze,
   multiHit: number,
   notesHitSec: number[],
   targetNPS: number

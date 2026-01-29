@@ -13,6 +13,8 @@ import {
   convertTo13,
   LevelPlaySchema13,
   currentChartVer,
+  convertToPlay14,
+  convertTo14,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -71,14 +73,13 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       let { chart } = await getChartEntry(db, cid, null);
 
-      if (!chart.levels.at(lvIndex)) {
-        throw new HTTPException(404, { message: "levelNotFound" });
-      }
-
       let level: Level6Play | Level13Play;
       switch (chart.ver) {
         case 4:
         case 5:
+          if (!chart.levels.at(lvIndex)) {
+            throw new HTTPException(404, { message: "levelNotFound" });
+          }
           level = {
             ...(await convertTo6(chart)).levels.at(lvIndex)!,
             ver: 6,
@@ -86,6 +87,9 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           };
           break;
         case 6:
+          if (!chart.levels.at(lvIndex)) {
+            throw new HTTPException(404, { message: "levelNotFound" });
+          }
           level = {
             ...chart.levels.at(lvIndex)!,
             ver: 6,
@@ -98,10 +102,17 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         case 10:
         case 11:
         case 12:
-          level = convertToPlay13(await convertTo13(chart), lvIndex);
-          break;
         case 13:
-          level = convertToPlay13(chart, lvIndex);
+          if (!chart.levels.at(lvIndex)) {
+            throw new HTTPException(404, { message: "levelNotFound" });
+          }
+          level = convertToPlay14(await convertTo14(chart), lvIndex);
+          break;
+        case 14:
+          if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+            throw new HTTPException(404, { message: "levelNotFound" });
+          }
+          level = convertToPlay14(chart, lvIndex);
           break;
         default:
           chart satisfies never;

@@ -173,7 +173,7 @@ describe("ChartEditing", () => {
       title: "title",
       composer: "composer",
       chartCreator: "chartCreator",
-      levels: [
+      levelsMin: [
         {
           name: "level1",
           type: "Single",
@@ -181,7 +181,7 @@ describe("ChartEditing", () => {
           ytBegin: 10,
           ytEnd: 20,
           ytEndSec: 20,
-          lua: [],
+          snapDivider: 2,
         },
         {
           name: "level2",
@@ -190,10 +190,12 @@ describe("ChartEditing", () => {
           ytBegin: 30,
           ytEnd: 40,
           ytEndSec: 40,
-          lua: [],
+          snapDivider: 2,
         },
       ],
+      lua: [[], []],
       locale: "en",
+      zoom: 1,
       copyBuffer: dummyChartData.copyBuffer,
     } satisfies ChartMin);
   });
@@ -207,7 +209,7 @@ describe("ChartEditing", () => {
         currentLevelIndex: 0,
       });
       const newLevel = emptyLevel();
-      newLevel.name = "New Level";
+      newLevel.min.name = "New Level";
       ce.addLevel(newLevel);
       expect(ce.levels.length).to.equal(3);
       expect(ce.levels[1].meta.name).to.equal("New Level");
@@ -537,10 +539,10 @@ describe("ChartEditing", () => {
         cid: undefined,
         currentPasswd: null,
       });
-      ce.setCurrentTimeWithoutOffset(30, 2);
+      ce.setCurrentTimeWithoutOffset(30, 4);
       for (const level of ce.levels) {
         expect(level.current.timeSec).to.equal(30 - ce.offset);
-        expect(level.current.snapDivider).to.equal(2);
+        expect(level.meta.snapDivider).to.equal(4);
       }
     });
     test("should keep old snapDivider if not given", () => {
@@ -551,10 +553,10 @@ describe("ChartEditing", () => {
         currentPasswd: null,
       });
       ce.levels[0].setCurrentTimeWithoutOffset(0, 4);
-      ce.levels[1].setCurrentTimeWithoutOffset(0, 8);
+      expect(ce.levels[1].meta.snapDivider).to.equal(2);
       ce.setCurrentTimeWithoutOffset(30);
-      expect(ce.levels[0].current.snapDivider).to.equal(4);
-      expect(ce.levels[1].current.snapDivider).to.equal(8);
+      expect(ce.levels[0].meta.snapDivider).to.equal(4);
+      expect(ce.levels[1].meta.snapDivider).to.equal(2);
     });
   });
   describe("setYTDuration", () => {
@@ -590,13 +592,44 @@ describe("ChartEditing", () => {
       ce.currentLevel?.setCurrentTimeWithoutOffset(1 + ce.offset);
       expect(ce.currentLevel?.current.noteIndex).to.equal(1);
       expect(ce.currentLevel?.currentNote?.hitX).to.deep.equal(
-        dummyChartData.levels[0].notes[1].hitX
+        dummyChartData.levelsFreeze[0].notes[1].hitX
       );
       ce.pasteNote(1);
       expect(ce.currentLevel?.current.noteIndex).to.equal(1);
       expect(ce.currentLevel?.currentNote?.hitX).to.deep.equal(
-        dummyChartData.levels[0].notes[0].hitX
+        dummyChartData.levelsFreeze[0].notes[0].hitX
       );
+    });
+  });
+  describe("setZoom", () => {
+    test("should set zoom", () => {
+      const ce = new ChartEditing(dummyChartData, {
+        luaExecutorRef: dummyLuaExecutor(),
+        locale: "en",
+        cid: undefined,
+        currentPasswd: null,
+      });
+      ce.setZoom(2);
+      expect(ce.zoom).to.equal(2);
+    });
+    test("should trigger rerender events", () => {
+      const ce = new ChartEditing(dummyChartData, {
+        luaExecutorRef: dummyLuaExecutor(),
+        locale: "en",
+        cid: undefined,
+        currentPasswd: null,
+      });
+      let rerendered = false;
+      let changed = false;
+      ce.on("rerender", () => {
+        rerendered = true;
+      });
+      ce.on("change", () => {
+        changed = true;
+      });
+      ce.setZoom(2);
+      expect(rerendered).to.equal(true);
+      expect(changed).to.equal(false);
     });
   });
   describe("updateMeta", () => {
