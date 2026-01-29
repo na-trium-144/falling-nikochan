@@ -32,15 +32,28 @@ export const dummyChartData: ChartEdit = {
   locale: "ja",
   changePasswd: null,
   published: false,
-  levels: [
+  levelsMin: [
     {
       name: "level1",
       type: "Single",
       unlisted: false,
-      lua: [],
       ytBegin: 10,
       ytEnd: 20,
       ytEndSec: 20,
+      snapDivider: 2,
+    },
+    {
+      name: "level2",
+      type: "Double",
+      unlisted: true,
+      ytBegin: 30,
+      ytEnd: 40,
+      ytEndSec: 40,
+      snapDivider: 2,
+    },
+  ],
+  levelsFreeze: [
+    {
       notes: [
         {
           step: stepZero(),
@@ -141,13 +154,6 @@ export const dummyChartData: ChartEdit = {
       ],
     },
     {
-      name: "level2",
-      type: "Double",
-      unlisted: true,
-      ytBegin: 30,
-      ytEnd: 40,
-      ytEndSec: 40,
-      lua: [],
       notes: [],
       rest: [],
       bpmChanges: [{ step: stepZero(), bpm: 60, timeSec: 0, luaLine: 0 }],
@@ -165,5 +171,7 @@ export const dummyChartData: ChartEdit = {
       ],
     },
   ],
+  lua: [[], []],
+  zoom: 1,
   copyBuffer: Array.from(new Array(10)).map(() => null),
 };
