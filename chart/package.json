@@ -9,6 +9,7 @@
   "scripts": {
     "lint": "eslint src/ tests/",
     "t": "tsc",
+    "cdev": "tsc --watch",
     "test": "tsc && tsx --test tests/**/*.spec.ts"
   },
   "dependencies": {
