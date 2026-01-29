@@ -55,7 +55,7 @@
   "devDependencies": {
     "@icon-park/svg": "^1.4.2",
     "@tailwindcss/postcss": "4.1.18",
-    "@types/colorthief": "^2.6.0",
+    "@types/colorthief": "^2.6.1",
     "@types/file-saver": "^2.0.7",
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.2.9",

@@ -9,11 +9,10 @@
   },
   "packageManager": "pnpm@10.28.1",
   "scripts": {
-    "lint": "tsc && pnpm run -r --if-present lint",
+    "lint": "tsc && pnpm run -r --if-present t && pnpm run -r --if-present lint",
     "format": "prettier --write .",
     "t": "pnpm run -r --if-present t",
     "cdev": "pnpm run --filter chart cdev",
-    "prepare": "pnpm run -r --if-present t",
     "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "seed": "pnpm run --filter route seed",

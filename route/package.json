@@ -41,7 +41,7 @@
   "devDependencies": {
     "@falling-nikochan/route": "workspace:*",
     "@types/chai": "^5.2.3",
-    "@types/colorthief": "^2.6.0",
+    "@types/colorthief": "^2.6.1",
     "@types/moji": "^0.5.3",
     "@types/react": "^19.2.9",
     "@types/twitter-text": "^3.1.10",
