@@ -526,9 +526,11 @@ function Play(props: Props) {
     // Space(スタートボタン)が押されたとき
     switch (ytPlayer.current?.getPlayerState()) {
       case 2:
+      case 0:
         ytPlayer.current?.seekTo(begin, true);
         ytPlayer.current?.playVideo();
         break;
+      case 5:
       default:
         ytPlayer.current?.seekTo(begin, true);
         break;
