@@ -8,10 +8,11 @@ chartFormat/ 内の定義
 * ChartBrief: /share 内や /api/brief などで情報表示に使われる
   * Edit -> Brief: createBrief(chart)
   * EntryCompressed -> Brief: entryToBrief(chart)
-* ChartMin, LevelMin: ローカル保存に使われる、情報量を失わない最小サイズの形式
-  * Edit -> Min: convertToMin9(chart)
-* ChartEdit, LevelEdit: 譜面の編集時と、 /api/chartFile の送受信に使われる
-  * 旧バージョンからの変換: convertTo9(chart)
+* ChartMin: ローカル保存に使われる、情報量を失わない最小サイズの形式
+  * 旧バージョンからの変換: convertTo14Min(chart)
+  * Edit -> Min: convertToMin14(chart)
+* ChartEdit: 譜面の編集時と、 /api/chartFile の送受信に使われる
+  * 旧バージョンからの変換: convertTo14(chart)
   * Min -> Edit: (await luaExec(level.lua.join("\n"))).levelFreezed
   * Entry -> Edit: entryToChart(chart)
 * LevelPlay: /api/playFile で使われる、プレイ時の譜面データ
@@ -31,28 +32,38 @@ route/ 内の定義
 
 import * as v from "valibot";
 import { difficulty } from "./difficulty.js";
-import { hashLevel7 } from "./legacy/chart7.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
-import { stepZero } from "./step.js";
-import { ChartUntil11, ChartUntil11Min, Level11Min } from "./legacy/chart11.js";
+import { stepZero, stepSimplify } from "./step.js";
 import { defaultCopyBuffer } from "./command.js";
+import objectHash from "object-hash";
 import {
   Chart13Edit,
-  Chart13Min,
   ChartEditSchema13,
-  ChartMinSchema13,
   ChartUntil13,
   ChartUntil13Min,
   convertTo13,
-  convertTo13Min,
-  convertToMin13,
-  convertToPlay13,
-  Level13Edit,
   Level13Freeze,
   Level13Play,
 } from "./legacy/chart13.js";
+import {
+  Chart14Edit,
+  Chart14Min,
+  ChartEditSchema14,
+  ChartMinSchema14,
+  ChartUntil14,
+  ChartUntil14Min,
+  convertTo14,
+  convertTo14Min,
+  convertToMin14,
+  convertToPlay14,
+  Level14Min,
+} from "./legacy/chart14.js";
+import { LevelForLuaEditLatest } from "./lua/edit.js";
+import { BPMChangeWithLua, SpeedChangeWithLua } from "./bpm.js";
+import { SignatureWithLua } from "./signature.js";
+import { ChartUntil11 } from "./legacy/chart11.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -104,19 +115,30 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 13;
+export const currentChartVer = 14;
 export const lastIncompatibleVer = 6;
-export const lastHashChangeVer = 12;
-export type ChartMin = Chart13Min;
-export type LevelMin = Level11Min;
-export type ChartEdit = Chart13Edit;
+export type ChartMin = Chart14Min;
+export type LevelMin = Level14Min;
+export type ChartEdit = Chart14Edit;
 export type LevelFreeze = Level13Freeze;
-export type LevelEdit = Level13Edit;
 export type LevelPlay = Level13Play;
-export const convertToMin = convertToMin13;
-export const convertToPlay = convertToPlay13;
+export const convertToMin = convertToMin14;
+export const convertToPlay = convertToPlay14;
 
-export async function validateChart(chart: ChartUntil13): Promise<ChartEdit> {
+export async function convertToLatest(chart: ChartUntil14): Promise<ChartEdit> {
+  if (chart.ver !== 14) chart = await convertTo14(chart as ChartUntil13);
+  return chart;
+}
+export async function validateChart(chart: ChartUntil14): Promise<ChartEdit> {
+  if (chart.falling !== "nikochan") throw "not a falling nikochan data";
+  chart = await convertToLatest(chart);
+  chart satisfies Chart14Edit;
+  v.parse(ChartEditSchema14(), chart);
+  return { ...chart, ver: 14 };
+}
+export async function validateChart13(
+  chart: ChartUntil13
+): Promise<Chart13Edit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
   chart satisfies Chart13Edit;
@@ -124,13 +146,13 @@ export async function validateChart(chart: ChartUntil13): Promise<ChartEdit> {
   return { ...chart, ver: 13 };
 }
 export async function validateChartMin(
-  chart: ChartUntil13Min
+  chart: ChartUntil14Min
 ): Promise<ChartEdit | ChartMin> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 13) chart = await convertTo13Min(chart as ChartUntil11Min);
-  chart satisfies Chart13Min;
-  v.parse(ChartMinSchema13(), chart);
-  return { ...chart, ver: 13 };
+  if (chart.ver !== 14) chart = await convertTo14Min(chart as ChartUntil13Min);
+  chart satisfies Chart14Min;
+  v.parse(ChartMinSchema14(), chart);
+  return { ...chart, ver: 14 };
 }
 
 export async function hash(text: string) {
@@ -142,26 +164,90 @@ export async function hash(text: string) {
     .join(""); // バイト列を 16 進文字列に変換する
   return hashHex;
 }
-export const hashLevel = hashLevel7;
 
-export function numEvents(chart: ChartEdit): number {
-  return chart.levels
-    .map(
-      (l) =>
-        l.notes.length +
-        l.rest.length +
-        l.bpmChanges.length +
-        l.speedChanges.length +
-        l.signature.length
-    )
-    .reduce((a, b) => a + b);
+/**
+ * Calculates hash of a level using object-hash library.
+ * This ensures consistent hashing regardless of property order.
+ * Normalizes all Step types to ensure fractions are in simplest form.
+ * @param level Level13Edit to hash
+ * @returns Promise<string> SHA-256 hash in hex format
+ */
+export async function hashLevel(level: LevelFreeze): Promise<string> {
+  // Normalize all Step types by simplifying fractions
+  const normalizedNotes = level.notes.map((note) => ({
+    ...note,
+    step: stepSimplify({ ...note.step }),
+  }));
+
+  const normalizedRest = level.rest.map((rest) => ({
+    ...rest,
+    begin: stepSimplify({ ...rest.begin }),
+    duration: stepSimplify({ ...rest.duration }),
+  }));
+
+  const normalizedBpmChanges = level.bpmChanges.map((bpm) => ({
+    ...bpm,
+    step: stepSimplify({ ...bpm.step }),
+  }));
+
+  const normalizedSpeedChanges = level.speedChanges.map((speed) => ({
+    ...speed,
+    step: stepSimplify({ ...speed.step }),
+  }));
+
+  const normalizedSignature = level.signature.map((sig) => ({
+    ...sig,
+    step: stepSimplify({ ...sig.step }),
+    offset: stepSimplify({ ...sig.offset }),
+  }));
+
+  // Use object-hash with sort option to ensure consistent ordering
+  return objectHash(
+    [
+      normalizedNotes,
+      normalizedRest,
+      normalizedBpmChanges,
+      normalizedSpeedChanges,
+      normalizedSignature,
+    ],
+    { algorithm: "sha256", encoding: "hex" }
+  );
+}
+
+export function numEvents(chart: Chart13Edit | ChartEdit): number {
+  if (chart.ver === 13) {
+    return chart.levels
+      .map(
+        (l) =>
+          l.notes.length +
+          l.rest.length +
+          l.bpmChanges.length +
+          l.speedChanges.length +
+          l.signature.length
+      )
+      .reduce((a, b) => a + b);
+  } else {
+    return chart.levelsFreeze
+      .map(
+        (l) =>
+          l.notes.length +
+          l.rest.length +
+          l.bpmChanges.length +
+          l.speedChanges.length +
+          l.signature.length
+      )
+      .reduce((a, b) => a + b);
+  }
 }
 
 export function emptyChart(locale: string): ChartEdit {
+  const { min, freeze, lua } = emptyLevel();
   let chart: ChartEdit = {
     falling: "nikochan",
     ver: currentChartVer,
-    levels: [emptyLevel()],
+    levelsMin: [min],
+    lua: [lua],
+    levelsFreeze: [freeze],
     offset: 0,
     ytId: "",
     title: "",
@@ -171,33 +257,41 @@ export function emptyChart(locale: string): ChartEdit {
     published: false,
     locale,
     copyBuffer: defaultCopyBuffer(),
+    zoom: 0,
   };
   return chart;
 }
 // prevLevelからbpmとspeedだけはコピー
-export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
-  let level: LevelEdit = {
+export function emptyLevel(
+  prevBPM?: BPMChangeWithLua[],
+  prevSpeed?: SpeedChangeWithLua[],
+  prevSignature?: SignatureWithLua[]
+) {
+  let levelMin: LevelMin = {
     name: "",
     type: levelTypesConst[0],
-    lua: [],
     unlisted: false,
+    ytBegin: 0,
+    ytEnd: "note",
+    ytEndSec: 0,
+    snapDivider: 4,
+  };
+  let level: LevelForLuaEditLatest = {
     notes: [],
     rest: [],
     bpmChanges: [],
     speedChanges: [],
     signature: [],
-    ytBegin: 0,
-    ytEnd: "note",
-    ytEndSec: 0,
+    lua: [],
   };
-  if (prevLevel) {
-    for (const change of prevLevel.bpmChanges) {
+  if (prevBPM && prevSpeed && prevSignature) {
+    for (const change of prevBPM) {
       level = luaAddBpmChange(level, change)!;
     }
-    for (const change of prevLevel.speedChanges) {
+    for (const change of prevSpeed) {
       level = luaAddSpeedChange(level, change)!;
     }
-    for (const s of prevLevel.signature) {
+    for (const s of prevSignature) {
       level = luaAddBeatChange(level, s)!;
     }
   } else {
@@ -218,46 +312,49 @@ export function emptyLevel(prevLevel?: LevelEdit): LevelEdit {
       bars: [[4, 4, 4, 4]],
     })!;
   }
-  return level;
-}
-export function copyLevel(level: LevelEdit): LevelEdit {
   return {
-    name: level.name,
-    type: level.type,
-    lua: level.lua.slice(),
-    unlisted: level.unlisted,
-    notes: level.notes.map((n) => ({ ...n })),
-    rest: level.rest.map((n) => ({ ...n })),
-    bpmChanges: level.bpmChanges.map((n) => ({ ...n })),
-    speedChanges: level.speedChanges.map((n) => ({ ...n })),
-    signature: level.signature.map((n) => ({ ...n })),
-    ytBegin: level.ytBegin,
-    ytEnd: level.ytEnd,
-    ytEndSec: level.ytEndSec,
+    min: levelMin,
+    freeze: {
+      notes: level.notes,
+      rest: level.rest,
+      bpmChanges: level.bpmChanges,
+      speedChanges: level.speedChanges,
+      signature: level.signature,
+    } satisfies LevelFreeze,
+    lua: level.lua,
   };
 }
 
 export async function createBrief(
-  chart: ChartEdit,
+  // API用に過去2バージョンサポート
+  chart: Chart13Edit | Chart14Edit,
   updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
   try {
     levelHashes = await Promise.all(
-      chart.levels.map((level) => hashLevel(level))
+      chart.ver === 13
+        ? chart.levels.map((level) => hashLevel(level))
+        : chart.levelsFreeze.map((level) => hashLevel(level))
     );
   } catch {
     //
   }
-  const levelBrief = chart.levels.map((level, i) => ({
+  const levelsMin = chart.ver === 13 ? chart.levels : chart.levelsMin;
+  const levelsFreeze = chart.ver === 13 ? chart.levels : chart.levelsFreeze;
+  const levelBrief = levelsMin.map((level, i) => ({
     name: level.name,
     type: level.type,
     unlisted: level.unlisted,
-    hash: levelHashes[i],
-    noteCount: level.notes.length,
-    difficulty: difficulty(level, level.type),
-    bpmMin: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.min(a, b)),
-    bpmMax: level.bpmChanges.map((b) => b.bpm).reduce((a, b) => Math.max(a, b)),
+    hash: levelHashes.at(i) ?? "",
+    noteCount: levelsFreeze[i].notes.length,
+    difficulty: difficulty(levelsFreeze[i], level.type),
+    bpmMin: levelsFreeze[i].bpmChanges
+      .map((b) => b.bpm)
+      .reduce((a, b) => Math.min(a, b)),
+    bpmMax: levelsFreeze[i].bpmChanges
+      .map((b) => b.bpm)
+      .reduce((a, b) => Math.max(a, b)),
     length: level.ytEndSec - level.ytBegin,
   }));
   return {

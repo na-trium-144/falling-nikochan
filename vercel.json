@@ -1,6 +1,6 @@
 {
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm run nbuild && pnpm run swbuild",
+  "buildCommand": "pnpm run allbuild",
   "outputDirectory": "frontend/out",
   "devCommand": null,
   "framework": null,

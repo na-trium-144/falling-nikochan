@@ -113,6 +113,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm config set node-linker hoisted --local
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run t
       - name: Pull Vercel Environment Information
         run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Download .vercel/output
@@ -137,6 +138,7 @@ jobs:
           node-version: 24.x
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run t
       - name: Download .vercel/output
         uses: actions/download-artifact@v4
         with:

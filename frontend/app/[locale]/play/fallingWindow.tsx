@@ -2,7 +2,7 @@
 
 import clsx from "clsx/lite";
 import { memo, RefObject, useEffect, useRef, useState } from "react";
-import { targetY, bigScale, bonusMax, Pos } from "@falling-nikochan/chart";
+import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
@@ -11,6 +11,7 @@ import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme";
 import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
+import { OffsetEstimator } from "./offsetEstimator";
 
 interface Props {
   className?: string;
@@ -30,6 +31,8 @@ interface Props {
   filteredStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
   userOffset: number;
   audioLatency: number | null | undefined;
+  posOfs: RefObject<number>;
+  timeOfsEstimator: RefObject<OffsetEstimator | null>;
 }
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
@@ -237,12 +240,12 @@ export default function FallingWindow(props: Props) {
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
   const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
   useEffect(() => {
-    if (playing) {
-      while (notes.length >= displayNikochan.current.length) {
-        displayNikochan.current.push(null);
-      }
+    displayNotes.current = [];
+    displayNikochan.current = [];
+    while (notes.length >= displayNikochan.current.length) {
+      displayNikochan.current.push(null);
     }
-  }, [playing, notes]);
+  }, [notes]);
   const lastNow = useRef<number>(0);
   if (runExecutedIndex.current !== rerenderIndex) {
     // performance.mark("nikochan-rerender");
@@ -456,13 +459,40 @@ export default function FallingWindow(props: Props) {
         >
           <tbody>
             <tr>
+              <td className="flex-1">PosEst</td>
+              <td colSpan={1} className="text-right">
+                {(props.posOfs.current * 100).toFixed(2)}%
+              </td>
+              <td>/</td>
+              <td colSpan={2} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (Math.sqrt(props.timeOfsEstimator.current.p) * 1000).toFixed(
+                    2
+                  )}
+              </td>
+            </tr>
+            <tr>
+              <td className="flex-1">TimeEst</td>
+              <td colSpan={1} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (props.timeOfsEstimator.current.mu * 1000).toFixed(2)}
+              </td>
+              <td>/</td>
+              <td colSpan={2} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (Math.sqrt(props.timeOfsEstimator.current.r) * 1000).toFixed(
+                    2
+                  )}
+              </td>
+            </tr>
+            <tr>
               <td className="flex-1">User</td>
-              <td className="w-9 text-right">
+              <td className="min-w-14 text-right">
                 {props.userOffset < 0 ? "-" : "+"}
                 {Math.floor(Math.abs(props.userOffset) * 1000)}
               </td>
               <td>.</td>
-              <td className="w-6">
+              <td className="min-w-6">
                 {(Math.floor(Math.abs(props.userOffset) * 1000 * 100) % 100)
                   .toString()
                   .padStart(2, "0")}

@@ -4,11 +4,18 @@ import {
   app,
   dummyChart,
   dummyChart11,
+  dummyChart13,
   dummyCid,
   dummyDate,
   initDb,
 } from "./init";
-import { chartMaxEvent, fileMaxSize, hash } from "@falling-nikochan/chart";
+import {
+  chartMaxEvent,
+  currentChartVer,
+  fileMaxSize,
+  hash,
+  hashLevel,
+} from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -209,8 +216,8 @@ describe("POST /api/chartFile/:cid", () => {
   test("should return 413 for chart containing too many events", async () => {
     await initDb();
     const chart = dummyChart();
-    chart.levels[0].rest = new Array(chartMaxEvent + 1).fill(
-      chart.levels[0].rest[0]
+    chart.levelsFreeze[0].rest = new Array(chartMaxEvent + 1).fill(
+      chart.levelsFreeze[0].rest[0]
     );
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
@@ -221,7 +228,8 @@ describe("POST /api/chartFile/:cid", () => {
     const body = await res.json();
     expect(body).to.deep.equal({ message: "tooManyEvent" });
   });
-  test("should return 409 for old chart version", async () => {
+  test("should return 409 for chart version older than 13", async () => {
+    currentChartVer satisfies 14; // edit this test when chart version is bumped
     await initDb();
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
@@ -231,6 +239,29 @@ describe("POST /api/chartFile/:cid", () => {
     expect(res.status).to.equal(409);
     const body = await res.json();
     expect(body).to.deep.equal({ message: "oldChartVersion" });
+  });
+  test("should update chart for chart version 13", async () => {
+    currentChartVer satisfies 14; // edit this test when chart version is bumped
+    await initDb();
+    const res = await app.request("/api/chartFile/100000?p=p", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({ ...dummyChart13(), title: "updated" }),
+    });
+    expect(res.status).to.equal(204);
+
+    const client = new MongoClient(process.env.MONGODB_URI!);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.to.be.null;
+      expect(e!.title).to.equal("updated");
+    } finally {
+      await client.close();
+    }
   });
   test("should return 415 for invalid chart", async () => {
     await initDb();
@@ -340,7 +371,9 @@ describe("POST /api/chartFile/:cid", () => {
     test("should be updated with level change", async () => {
       await initDb();
       const chart = dummyChart();
-      chart.levels[0].notes = new Array(10).fill(chart.levels[0].notes[0]);
+      chart.levelsFreeze[0].notes = new Array(10).fill(
+        chart.levelsFreeze[0].notes[0]
+      );
       const dateBefore = new Date();
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
@@ -360,6 +393,9 @@ describe("POST /api/chartFile/:cid", () => {
         expect(e).not.to.be.null;
         expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
         expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
+        expect(e!.levelBrief[0].hash).to.not.equal(
+          await hashLevel(dummyChart().levelsFreeze[0])
+        );
       } finally {
         await client.close();
       }
@@ -393,6 +429,38 @@ describe("POST /api/chartFile/:cid", () => {
         expect(e).not.to.be.null;
         expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
         expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
+      } finally {
+        await client.close();
+      }
+    });
+    test("should not be updated when re-calculated hash matches regardless of hash on db", async () => {
+      await initDb();
+      const client = new MongoClient(process.env.MONGODB_URI!);
+      try {
+        await client.connect();
+        const db = client.db("nikochan");
+
+        await db.collection<ChartEntryCompressed>("chart").updateOne(
+          { cid: "100007" },
+          {
+            $set: {
+              "levelBrief.0.hash": "aaaaa",
+            },
+          }
+        );
+        const res = await app.request("/api/chartFile/100007?p=p", {
+          method: "POST",
+          headers: { "Content-Type": "application/vnd.msgpack" },
+          body: msgpack.serialize(dummyChart()),
+        });
+        expect(res.status).to.equal(204);
+
+        const e = await db
+          .collection<ChartEntryCompressed>("chart")
+          .findOne({ cid: String(Number(dummyCid) + 7) });
+        expect(e).not.to.be.null;
+        expect(e!.updatedAt).to.equal(dummyDate.getTime());
+        expect(e!.levelBrief[0].hash).to.equal("aaaaa");
       } finally {
         await client.close();
       }

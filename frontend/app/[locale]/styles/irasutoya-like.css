@@ -1,6 +1,6 @@
 .fn-irasutoya-like-bg {
   @apply absolute -inset-0 -z-999999999 pointer-events-none;
-  
+
   #bgGradient > stop {
     &:nth-child(1) {
       stop-color: var(--color-sky-200);

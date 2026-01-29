@@ -5,7 +5,6 @@ import { Key } from "@/common/key.js";
 import TargetLine from "@/common/targetLine.js";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
-import Caution from "@icon-park/react/lib/icons/Caution.js";
 
 export function AboutContent2() {
   const t = useTranslations("about.2");
@@ -60,7 +59,7 @@ export function AboutContent2() {
           <p>
             {/*優先的に改行してほしい位置にinlineBlockを入れる*/}
             {t.rich("content2", {
-              key: (c) => <Key>{c}</Key>,
+              key: (c) => <Key>{String(c)}</Key>,
               inlineBlock: (c) => <span className="inline-block">{c}</span>,
             })}
           </p>

@@ -12,13 +12,15 @@
     "lint": "tsc && pnpm run -r --if-present lint",
     "format": "prettier --write .",
     "t": "pnpm run -r --if-present t",
+    "cdev": "pnpm run --filter chart cdev",
     "prepare": "pnpm run -r --if-present t",
     "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
     "seed": "pnpm run --filter route seed",
     "ndev": "pnpm run --filter frontend dev",
-    "nbuild": "pnpm run --filter frontend build && pnpm run --filter frontend postbuild",
-    "swbuild": "pnpm run --filter worker build && pnpm run --filter frontend postbuild",
+    "nbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter frontend postbuild",
+    "swbuild": "pnpm run -r --if-present t && pnpm run --filter worker build && pnpm run --filter frontend postbuild",
+    "allbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter worker build && pnpm run --filter frontend postbuild",
     "ldev": "pnpm run --filter route dev"
   },
   "dependencies": {

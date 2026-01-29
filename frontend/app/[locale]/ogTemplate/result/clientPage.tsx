@@ -10,7 +10,10 @@ import { useEffect, useState } from "react";
 import { Box } from "@/common/box";
 import { JudgeIcon } from "@/play/statusBox";
 import { levelBgColors, levelColors } from "@/common/levelColors";
-import { IrasutoyaLikeBgInner, IrasutoyaLikeGrassInner } from "@/common/irasutoyaLike";
+import {
+  IrasutoyaLikeBgInner,
+  IrasutoyaLikeGrassInner,
+} from "@/common/irasutoyaLike";
 
 export default function OGTemplate() {
   const th = useTranslations("share");

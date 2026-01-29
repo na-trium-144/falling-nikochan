@@ -62,10 +62,12 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
     ```
     * This inserts a sample chart at cid:602399 ("Get Started!").
 * Common files (chart/)
-    * When you make any changes, you need to run tsc to re-compile them into js files so that they can be imported correctly in the frontend and backend:
+    * Frontend code does not import ts files directly, but the compiled js files instead.
+    * During development, watch changes and compile to js files automatically:
         ```sh
-        pnpm run t
+        pnpm run cdev
         ```
+    * When building frontend or before running tests, it automatically runs tsc.
 * Backend
     * Serves /api, /share, /og, and / (redirect).
     * Built with Hono, so it can be run with many runtimes.
@@ -73,7 +75,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
         ```sh
         pnpm run ldev
         ```
-    * For the deployment, currently using Cloudflare Worker and Vercel
+    * For the deployment, currently using Cloudflare Worker (./route/serve-cf.js), Vercel (./api/index.js) and Bun (./route/serve-bun-prod.ts)
 * Frontend
     * development environment of Next.js (`http://localhost:3000/ja` or `/en`)
         * Doing SSR for the path `/share/[cid]` by the backend modifying the exported html file, so this page does not work in the development environment.
@@ -84,7 +86,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
     * Or, SSR with exported html files
         * All pages should work by accessing the backend (`http://localhost:8787`) after building frontend, but there is no hot-reload.
         ```sh
-        pnpm run nbuild && pnpm run swbuild
+        pnpm run nbuild
         ```
 * Service Worker
     * Build frontend and service worker

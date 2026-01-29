@@ -27,6 +27,7 @@ import {
   inputTypes,
   emptyBrief,
   Level13Play,
+  currentChartVer,
 } from "@falling-nikochan/chart";
 import { ChartSeqData13, loadChart13 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
@@ -120,24 +121,29 @@ export function InitPlay({ locale }: { locale: string }) {
           );
           if (res.ok) {
             try {
+              currentChartVer satisfies 14; // update the code below when chart version is bumped
               const seq: Level6Play | Level13Play = msgpack.deserialize(
                 await res.arrayBuffer()
               );
               console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 13) {
+              if (seq.ver === 6 || seq.ver === 13 || seq.ver === 14) {
                 switch (seq.ver) {
                   case 6:
                     setChartSeq(loadChart6(seq));
                     break;
                   case 13:
+                  case 14:
                     setChartSeq(loadChart13(seq));
                     break;
+                  default:
+                    seq satisfies never;
                 }
                 setErrorStatus(undefined);
                 setErrorMsg(undefined);
                 addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
+                seq.ver satisfies never;
                 setChartSeq(undefined);
                 setErrorStatus(undefined);
                 setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
@@ -316,6 +322,7 @@ function Play(props: Props) {
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
   const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
   const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
+  const [oldUserBegin, setOldUserBegin] = useState<number | null>(null);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
   const exitableNow = useCallback(
@@ -476,6 +483,8 @@ function Play(props: Props) {
     lateTimes,
     chartEnd,
     hitType,
+    posOfs,
+    timeOfsEstimator,
   } = useGameLogic(
     getCurrentTimeSec,
     auto,
@@ -517,9 +526,11 @@ function Play(props: Props) {
     // Space(スタートボタン)が押されたとき
     switch (ytPlayer.current?.getPlayerState()) {
       case 2:
+      case 0:
         ytPlayer.current?.seekTo(begin, true);
         ytPlayer.current?.playVideo();
         break;
+      case 5:
       default:
         ytPlayer.current?.seekTo(begin, true);
         break;
@@ -555,6 +566,16 @@ function Play(props: Props) {
       window.close();
     }
   }, []);
+  const seekBack = useCallback(() => {
+    if (chartPlaying && auto && queryOptions.seek) {
+      ytPlayer.current?.seekTo(ytPlayer.current?.getCurrentTime() - 5, true);
+    }
+  }, [chartPlaying, auto, queryOptions]);
+  const seekForward = useCallback(() => {
+    if (chartPlaying && auto && queryOptions.seek) {
+      ytPlayer.current?.seekTo(ytPlayer.current?.getCurrentTime() + 5, true);
+    }
+  }, [chartPlaying, auto, queryOptions]);
 
   // youtube側のreadyイベント & chartSeqが読み込まれる の両方を満たしたら
   // resetを1回呼び、loadingを閉じ、初期化完了となる
@@ -583,7 +604,7 @@ function Play(props: Props) {
       }
       setShowLoading(false);
       setShowReady(true);
-      resetNotesAll(chartSeq.notes);
+      resetNotesAll(chartSeq.notes, -Infinity);
       ref.current?.focus();
       setInitDone(true);
     } else {
@@ -666,7 +687,12 @@ function Play(props: Props) {
               baseScore,
               chainScore,
               bigScore,
-              judgeCount,
+              judgeCount: judgeCount.slice(0, 4) as [
+                number,
+                number,
+                number,
+                number,
+              ],
               bigCount: bigCount,
               inputType: hitType,
             });
@@ -780,9 +806,14 @@ function Play(props: Props) {
       setChartPlaying(true);
       setWasAutoPlay(auto);
       setOldPlaybackRate(playbackRate);
+      setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
-      resetNotesAll(chartSeq.notes);
+      const now =
+        (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
+        chartSeq.offset -
+        offsetPlusLatency * playbackRate;
+      resetNotesAll(chartSeq.notes, now);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }
@@ -797,6 +828,8 @@ function Play(props: Props) {
     initOldBestScore,
     auto,
     playbackRate,
+    userBegin,
+    offsetPlusLatency,
   ]);
   const onStop = useCallback(() => {
     console.log("stop ->", ytPlayer.current?.getPlayerState());
@@ -845,6 +878,10 @@ function Play(props: Props) {
         stop();
       } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
         exit();
+      } else if (e.key === "Left" || e.key === "ArrowLeft") {
+        seekBack();
+      } else if (e.key === "Right" || e.key === "ArrowRight") {
+        seekForward();
       } else if (isReadyAll && !(chartPlaying && auto)) {
         const candidate = hit(inputTypes.keyboard);
         if (candidate) {
@@ -854,8 +891,8 @@ function Play(props: Props) {
         }
       }
     };
-    document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
   }, [
     auto,
     chartPlaying,
@@ -869,6 +906,8 @@ function Play(props: Props) {
     hit,
     start,
     exitableNow,
+    seekBack,
+    seekForward,
   ]);
 
   return (
@@ -979,16 +1018,19 @@ function Play(props: Props) {
                     ? oldBestScoreCounts
                     : bestScoreCounts
                 }
-                showBestScore={!auto && playbackRate === 1}
+                showBestScore={
+                  !auto && userBegin === null && playbackRate === 1
+                }
                 countMode={
                   showReady
-                    ? !auto && playbackRate === 1
+                    ? !auto && userBegin === null && playbackRate === 1
                       ? "bestCount"
                       : "grayZero"
                     : "judge"
                 }
                 showResultDiff={
                   !wasAutoPlay &&
+                  oldUserBegin === null &&
                   oldPlaybackRate === 1 &&
                   showResult &&
                   !showReady
@@ -1024,6 +1066,8 @@ function Play(props: Props) {
               filteredStartTimeStamp={filteredStartTimeStamp}
               userOffset={userOffset}
               audioLatency={enableHitSE ? audioLatency : null}
+              posOfs={posOfs}
+              timeOfsEstimator={timeOfsEstimator}
             />
           )}
           <div
@@ -1038,14 +1082,20 @@ function Play(props: Props) {
             <ScoreDisp
               score={score}
               best={
-                !auto && playbackRate === 1
+                !auto && userBegin === null && playbackRate === 1
                   ? chartPlaying || (showResult && !showReady)
                     ? oldBestScoreState
                     : bestScoreState
                   : 0
               }
               auto={auto}
-              pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
+              pc={
+                judgeCount[1] +
+                  judgeCount[2] +
+                  judgeCount[3] +
+                  judgeCount[4] ===
+                0
+              }
               baseScore={baseScore}
               notesDone={notesDone}
             />
@@ -1053,26 +1103,68 @@ function Play(props: Props) {
               chain={chain}
               maxChain={maxChain}
               playing={chartPlaying}
-              fc={judgeCount[2] + judgeCount[3] === 0}
+              fc={judgeCount[2] + judgeCount[3] + judgeCount[4] === 0}
               notesTotal={notesAll.length}
             />
-            <button
+            <div
               className={clsx(
-                "absolute rounded-full cursor-pointer leading-1",
-                "top-0 inset-x-0 mx-auto w-max text-xl",
-                isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2" : "py-2 px-1",
-                isMobile && "mt-10",
-                "hover:bg-slate-200/50 active:bg-slate-300/50",
-                "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
-                linkStyle1
+                "absolute inset-x-0",
+                "flex justify-center items-center gap-1",
+                isMobile ? "top-10" : "top-0"
               )}
-              onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
             >
-              <Pause className="inline-block align-middle " />
-              {!isTouch && <Key handleKeyDown>Esc</Key>}
-            </button>
+              <button
+                className={clsx(
+                  "rounded-full cursor-pointer",
+                  isTouch
+                    ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                    : "py-2 px-1",
+                  "hover:bg-slate-200/50 active:bg-slate-300/50",
+                  "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                  linkStyle1
+                )}
+                onClick={stop}
+              >
+                <Pause className="inline-block align-middle text-xl leading-1" />
+                {!isTouch && <Key handleKeyDown>Esc</Key>}
+              </button>
+              {auto && !isMobile && !isTouch && queryOptions.seek && (
+                <>
+                  <button
+                    className={clsx(
+                      "rounded-full cursor-pointer",
+                      isTouch
+                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        : "py-2 px-1",
+                      "hover:bg-slate-200/50 active:bg-slate-300/50",
+                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      linkStyle1
+                    )}
+                    onClick={seekBack}
+                  >
+                    {!isTouch && <Key handleKeyDown>←</Key>}
+                    <span className="ml-1">5s</span>
+                  </button>
+                  <button
+                    className={clsx(
+                      "rounded-full cursor-pointer",
+                      isTouch
+                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        : "py-2 px-1",
+                      "hover:bg-slate-200/50 active:bg-slate-300/50",
+                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      linkStyle1
+                    )}
+                    onClick={seekForward}
+                  >
+                    <span className="mr-1">5s</span>
+                    {!isTouch && <Key handleKeyDown>→</Key>}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
           {(!initDone || closeReadyAnim) && (
             <CenterBox
@@ -1137,10 +1229,6 @@ function Play(props: Props) {
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
               auto={wasAutoPlay}
-              optionChanged={
-                userBegin !== null &&
-                Math.round(userBegin) > Math.round(ytBegin)
-              }
               lang={props.locale}
               date={resultDate || new Date(2025, 6, 1)}
               cid={cid || ""}
@@ -1173,15 +1261,22 @@ function Play(props: Props) {
                   : Math.floor(score * 100)
               }
               judgeCount={
-                queryOptions.result ? exampleResult.judgeCount : judgeCount
+                queryOptions.result
+                  ? exampleResult.judgeCount
+                  : (judgeCount.slice(0, 4) as [number, number, number, number])
               }
               bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
               reset={reset}
               exit={exit}
               isTouch={isTouch}
+              showShareButton={!wasAutoPlay && oldUserBegin === null}
+              showRecord={
+                !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+              }
               newRecord={
                 score > oldBestScoreState &&
                 !wasAutoPlay &&
+                oldUserBegin === null &&
                 oldPlaybackRate === 1 &&
                 lvIndex !== undefined &&
                 chartBrief?.levels[lvIndex] !== undefined
@@ -1284,17 +1379,22 @@ function Play(props: Props) {
                   : bestScoreCounts
               }
               showBestScore={
-                !auto && playbackRate === 1 && !!bestScoreCounts && showReady
+                !auto &&
+                userBegin === null &&
+                playbackRate === 1 &&
+                !!bestScoreCounts &&
+                showReady
               }
               countMode={
                 showReady
-                  ? !auto && playbackRate === 1
+                  ? !auto && userBegin === null && playbackRate === 1
                     ? "bestCount"
                     : "grayZero"
                   : "judge"
               }
               showResultDiff={
                 !wasAutoPlay &&
+                oldUserBegin === null &&
                 oldPlaybackRate === 1 &&
                 showResult &&
                 !showReady
@@ -1342,9 +1442,13 @@ function Play(props: Props) {
             isTouch={isTouch}
             best={bestScoreAvailable ? oldBestScoreState : null}
             bestCount={oldBestScoreCounts}
-            showBestScore={!wasAutoPlay && oldPlaybackRate === 1}
+            showBestScore={
+              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+            }
             countMode={"judge"}
-            showResultDiff={!wasAutoPlay && oldPlaybackRate === 1}
+            showResultDiff={
+              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+            }
           />
         </div>
       )}
