@@ -1,12 +1,16 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
-import { writeFileSync, readFileSync, copyFileSync, existsSync } from "node:fs";
+import {
+  writeFileSync,
+  readFileSync,
+  copyFileSync,
+  existsSync,
+  unlinkSync,
+} from "node:fs";
 import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
-// import babelRc from "./.babelrc" with { type: "json" };
-const babelRc = JSON.parse(readFileSync("./.babelrc", "utf-8"));
 import LicensePlugin from "webpack-license-plugin";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
@@ -17,12 +21,37 @@ const coreJsVersion = parentPackageJson.devDependencies["core-js"]
   .split(".")
   .slice(0, 2)
   .join(".");
-const babelCoreJsVersion = babelRc.presets[0][1]["preset-env"].corejs;
-if (coreJsVersion !== babelCoreJsVersion) {
+const workerBabelRc = JSON.parse(
+  readFileSync(join(dirname(process.cwd()), "worker", ".babelrc"), "utf-8")
+);
+const workerBabelCoreJsVersion = workerBabelRc.presets[0][1].corejs;
+if (coreJsVersion !== workerBabelCoreJsVersion) {
   // https://github.com/babel/babel/issues/15412
   throw new Error(
-    `core-js version in .babelrc (${babelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`
+    `core-js version in worker/.babelrc (${workerBabelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`
   );
+}
+
+// development時にはswcを使い、productionではcore-jsを設定したbabelを使う
+if (process.env.NODE_ENV === "development") {
+  if (existsSync(".babelrc")) {
+    unlinkSync(".babelrc");
+  }
+} else {
+  const babelRc = {
+    "presets": [
+      [
+        "next/babel",
+        {
+          "preset-env": {
+            "useBuiltIns": "usage",
+            "corejs": workerBabelCoreJsVersion,
+          },
+        },
+      ],
+    ],
+  };
+  writeFileSync(".babelrc", JSON.stringify(babelRc), "utf8");
 }
 
 const date = new Date().toUTCString();

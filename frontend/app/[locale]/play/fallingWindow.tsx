@@ -11,6 +11,7 @@ import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useTheme } from "@/common/theme";
 import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
+import { OffsetEstimator } from "./offsetEstimator";
 
 interface Props {
   className?: string;
@@ -25,6 +26,13 @@ interface Props {
   playbackRate: number;
   setShouldHideBPMSign: (hide: boolean) => void;
   shouldHideBPMSign: boolean;
+  showTSOffset: boolean;
+  rawStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  filteredStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  userOffset: number;
+  audioLatency: number | null | undefined;
+  posOfs: RefObject<number>;
+  timeOfsEstimator: RefObject<OffsetEstimator | null>;
 }
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
@@ -353,6 +361,32 @@ export default function FallingWindow(props: Props) {
     });
   }, []);
 
+  const filteredStartTimeStampSample = useRef<number | null>(null);
+  const rawStartTimeStampSample = useRef<number | null>(null);
+  useEffect(() => {
+    if (props.showTSOffset) {
+      const i = setInterval(() => {
+        rawStartTimeStampSample.current = props.rawStartTimeStamp.current;
+        filteredStartTimeStampSample.current =
+          props.filteredStartTimeStamp.current;
+      }, 50);
+      return () => clearInterval(i);
+    }
+  }, [
+    props.showTSOffset,
+    props.rawStartTimeStamp,
+    props.filteredStartTimeStamp,
+  ]);
+  // rawStartTimeStampからoffsetとaudioを引けば -ytPlayer.current?.getCurrentTime() の値が残る
+  const rawYTStartTimeStamp = rawStartTimeStampSample.current
+    ? (((rawStartTimeStampSample.current -
+        props.userOffset * 1000 +
+        (props.audioLatency || 0) * 1000) %
+        1000) +
+        1000) %
+      1000
+    : null;
+
   return (
     <div
       className={clsx(props.className, "overflow-visible")}
@@ -417,6 +451,101 @@ export default function FallingWindow(props: Props) {
           marginY={marginY}
           particleAssets={particleAssets}
         />
+      )}
+      {boxSize && marginY !== undefined && props.showTSOffset && (
+        <table
+          className="absolute text-sm"
+          style={{ bottom: targetY * boxSize + marginY, right: 0 }}
+        >
+          <tbody>
+            <tr>
+              <td className="flex-1">PosEst</td>
+              <td colSpan={1} className="text-right">
+                {(props.posOfs.current * 100).toFixed(2)}%
+              </td>
+              <td>/</td>
+              <td colSpan={2} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (Math.sqrt(props.timeOfsEstimator.current.p) * 1000).toFixed(
+                    2
+                  )}
+              </td>
+            </tr>
+            <tr>
+              <td className="flex-1">TimeEst</td>
+              <td colSpan={1} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (props.timeOfsEstimator.current.mu * 1000).toFixed(2)}
+              </td>
+              <td>/</td>
+              <td colSpan={2} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (Math.sqrt(props.timeOfsEstimator.current.r) * 1000).toFixed(
+                    2
+                  )}
+              </td>
+            </tr>
+            <tr>
+              <td className="flex-1">User</td>
+              <td className="min-w-14 text-right">
+                {props.userOffset < 0 ? "-" : "+"}
+                {Math.floor(Math.abs(props.userOffset) * 1000)}
+              </td>
+              <td>.</td>
+              <td className="min-w-6">
+                {(Math.floor(Math.abs(props.userOffset) * 1000 * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Audio</td>
+              <td className="text-right">
+                {typeof props.audioLatency === "number" &&
+                  "-" + Math.floor(props.audioLatency * 1000)}
+              </td>
+              <td>.</td>
+              <td>
+                {typeof props.audioLatency === "number" &&
+                  (Math.floor(props.audioLatency * 1000 * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Raw%1s</td>
+              <td className="text-right">
+                {rawYTStartTimeStamp !== null &&
+                  Math.floor(rawYTStartTimeStamp)}
+              </td>
+              <td>.</td>
+              <td>
+                {rawYTStartTimeStamp !== null &&
+                  (Math.floor(rawYTStartTimeStamp * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Filtered%1s</td>
+              <td className="text-right">
+                {filteredStartTimeStampSample.current !== null &&
+                  Math.floor(filteredStartTimeStampSample.current) % 1000}
+              </td>
+              <td>.</td>
+              <td>
+                {filteredStartTimeStampSample.current !== null &&
+                  (Math.floor(filteredStartTimeStampSample.current * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+          </tbody>
+        </table>
       )}
     </div>
   );

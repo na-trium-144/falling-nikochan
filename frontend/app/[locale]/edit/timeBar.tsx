@@ -12,7 +12,7 @@ import {
   stepImproper,
   stepZero,
 } from "@falling-nikochan/chart";
-import { Fragment, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
@@ -21,11 +21,10 @@ import { useTranslations } from "next-intl";
 
 interface Props {
   chart?: ChartEditing;
-  timeBarPxPerSec: number;
 }
 export default function TimeBar(props: Props) {
   const t = useTranslations("edit.timeBar");
-  const { chart, timeBarPxPerSec } = props;
+  const { chart } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
   const { rem } = useDisplayMode();
@@ -35,46 +34,57 @@ export default function TimeBar(props: Props) {
   const timeBarRef = timeBarResize.ref;
   // timebar左端の時刻
   const timeBarBeginSec = useRef<number>(-1);
-  const timeBarPxPerSecPrev = useRef<number>(timeBarPxPerSec);
+  const zoomPrev = useRef<number>(1);
+  const zoomPxPerSec = () => 300 * Math.pow(1.5, chart?.zoom ?? 0);
 
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
-    (timeSec - timeBarBeginSec.current) * timeBarPxPerSec;
+    (timeSec - timeBarBeginSec.current) * zoomPxPerSec();
   const marginPxLeft = 4 * rem;
 
-  if (currentLevel && cur) {
+  useEffect(() => {
+    const handleZoom = () => {
+      if (chart && cur && zoomPrev.current !== chart.zoom) {
+        // 現在のカーソル位置中心に拡大縮小
+        timeBarBeginSec.current =
+          cur.timeSec +
+          chart.offset -
+          (cur.timeSec + chart.offset - timeBarBeginSec.current) /
+            Math.pow(1.5, chart.zoom - zoomPrev.current);
+        zoomPrev.current = chart.zoom;
+      }
+    };
+    handleZoom();
+    chart?.on("rerender", handleZoom);
+    return () => {
+      chart?.off("rerender", handleZoom);
+    };
+  }, [chart, cur]);
+
+  if (chart && currentLevel && cur) {
     const marginPxRight = timeBarWidth / 2;
-    // 現在のカーソル位置中心に拡大縮小
-    if (timeBarPxPerSecPrev.current !== timeBarPxPerSec) {
-      timeBarBeginSec.current =
-        cur.timeSec +
-        chart.offset -
-        (cur.timeSec + chart.offset - timeBarBeginSec.current) /
-          (timeBarPxPerSec / timeBarPxPerSecPrev.current);
-      timeBarPxPerSecPrev.current = timeBarPxPerSec;
-    }
     if (
       cur.timeSec + chart.offset - timeBarBeginSec.current <
-      marginPxLeft / timeBarPxPerSec
+      marginPxLeft / zoomPxPerSec()
     ) {
       timeBarBeginSec.current =
-        cur.timeSec + chart.offset - marginPxLeft / timeBarPxPerSec;
+        cur.timeSec + chart.offset - marginPxLeft / zoomPxPerSec();
     } else if (
       cur.timeSec + chart.offset - timeBarBeginSec.current >
-      (timeBarWidth - marginPxRight) / timeBarPxPerSec
+      (timeBarWidth - marginPxRight) / zoomPxPerSec()
     ) {
       timeBarBeginSec.current =
         cur.timeSec +
         chart.offset -
-        (timeBarWidth - marginPxRight) / timeBarPxPerSec;
+        (timeBarWidth - marginPxRight) / zoomPxPerSec();
     }
   }
   const timeBarBeginStep =
-    chart && currentLevel && cur
+    chart && currentLevel
       ? getStep(
           currentLevel.freeze.bpmChanges,
           timeBarBeginSec.current - chart.offset,
-          cur.snapDivider
+          currentLevel.meta.snapDivider
         )
       : stepZero();
 
@@ -89,10 +99,10 @@ export default function TimeBar(props: Props) {
       const s = stepAdd(timeBarSteps[timeBarSteps.length - 1].step, {
         fourth: 0,
         numerator: 1,
-        denominator: cur.snapDivider,
+        denominator: currentLevel.meta.snapDivider,
       });
       const t = getTimeSec(currentLevel.freeze.bpmChanges, s) + chart.offset;
-      if (t - timeBarBeginSec.current < timeBarWidth / timeBarPxPerSec) {
+      if (t - timeBarBeginSec.current < timeBarWidth / zoomPxPerSec()) {
         timeBarSteps.push({ step: s, timeSec: t });
       } else {
         break;
@@ -115,7 +125,7 @@ export default function TimeBar(props: Props) {
       ref={timeBarRef}
     >
       {/* 秒数目盛り */}
-      {Array.from(new Array(Math.ceil(timeBarWidth / timeBarPxPerSec))).map(
+      {Array.from(new Array(Math.ceil(timeBarWidth / zoomPxPerSec()))).map(
         (_, dt) => (
           <span
             key={dt}
@@ -171,7 +181,7 @@ export default function TimeBar(props: Props) {
           (ch, i) =>
             ch.timeSec + chart.offset >= timeBarBeginSec.current &&
             ch.timeSec + chart.offset <
-              timeBarBeginSec.current + timeBarWidth / timeBarPxPerSec && (
+              timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() && (
               <span
                 key={i}
                 className="absolute "
@@ -194,7 +204,7 @@ export default function TimeBar(props: Props) {
           (ch, i) =>
             ch.timeSec + chart.offset >= timeBarBeginSec.current &&
             ch.timeSec + chart.offset <
-              timeBarBeginSec.current + timeBarWidth / timeBarPxPerSec && (
+              timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() && (
               <span
                 key={i}
                 className="absolute "
@@ -255,7 +265,7 @@ export default function TimeBar(props: Props) {
             ({ len, sec }, i) =>
               sec + chart.offset >= timeBarBeginSec.current &&
               sec + chart.offset <
-                timeBarBeginSec.current + timeBarWidth / timeBarPxPerSec && (
+                timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() && (
                 <span
                   key={i}
                   className="absolute border-l-2 border-slate-600 dark:border-stone-400 "
@@ -345,7 +355,7 @@ export default function TimeBar(props: Props) {
           (n) =>
             n.hitTimeSec + chart.offset > timeBarBeginSec.current &&
             n.hitTimeSec + chart.offset <
-              timeBarBeginSec.current + timeBarWidth / timeBarPxPerSec &&
+              timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() &&
             // 同じ位置に2つ以上の音符を重ねない
             n.hitTimeSec !==
               currentLevel?.seqNotes.at(n.id + 1)?.hitTimeSec && (

@@ -13,6 +13,9 @@ import {
   ChartEditSchema13,
   rateLimit,
   convertToLatest,
+  validateChart13,
+  Chart13Edit,
+  Level8Edit,
 } from "@falling-nikochan/chart";
 import { Db, MongoClient } from "mongodb";
 import {
@@ -261,7 +264,7 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Update a chart file with new data in MessagePack format. " +
-          `The chart data format must be the latest format, Chart${currentChartVer}Edit. ` +
+          `The chart data format must be the latest format (Chart${currentChartVer}Edit) or one version earlier. ` +
           "The previous password is required (either p or ph). If the posted chart data has a different password, it will be used next time.",
         requestBody: {
           description:
@@ -303,7 +306,7 @@ const chartFileApp = async (config: {
             },
           },
           409: {
-            description: `chart version is older than ${currentChartVer}`,
+            description: `chart version is older than ${currentChartVer - 1}`,
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("oldChartVersion")),
@@ -356,14 +359,19 @@ const chartFileApp = async (config: {
         const newChartObj = msgpack.deserialize(chartBuf);
         if (
           typeof newChartObj.ver === "number" &&
-          newChartObj.ver < currentChartVer
+          newChartObj.ver < currentChartVer - 1
+          // 過去2バージョンまでサポート
         ) {
           throw new HTTPException(409, { message: "oldChartVersion" });
         }
 
-        let newChart: ChartEdit;
+        let newChart: Chart13Edit | ChartEdit;
         try {
-          newChart = await validateChart(newChartObj);
+          if (newChartObj.ver === currentChartVer - 1) {
+            newChart = await validateChart13(newChartObj);
+          } else {
+            newChart = await validateChart(newChartObj);
+          }
         } catch (e) {
           console.error(e);
           throw new HTTPException(415, { message: (e as Error).toString() });
@@ -390,11 +398,19 @@ const chartFileApp = async (config: {
         const savedHashes = entry.levelBrief
           .filter((l) => !l.unlisted)
           .map((l) => l.hash);
-        const newHashes = await Promise.all(
-          newChart.levels
-            .filter((l) => !l.unlisted)
-            .map((level) => hashLevel(level))
-        );
+        const newHashes =
+          newChart.ver === 13
+            ? await Promise.all(
+                newChart.levels
+                  .filter((l) => !l.unlisted)
+                  .map((level) => hashLevel(level))
+              )
+            : await Promise.all(
+                newChart.levelsMin
+                  .filter((l) => !l.unlisted)
+                  // @ts-ignore #914マージ時に直す
+                  .map((_, i) => hashLevel(newChart.levelsFreeze[i]))
+              );
         let updatedAt = entry.updatedAt;
         if (
           prevHashes.length !== newHashes.length ||

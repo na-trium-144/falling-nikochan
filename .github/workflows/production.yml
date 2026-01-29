@@ -19,7 +19,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
-      - run: npm ci
       - name: Pull Vercel Environment Information
         run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
@@ -108,6 +107,7 @@ jobs:
         with:
           node-version: 24.x
       - run: npm ci
+      - run: npm run t
       - name: Pull Vercel Environment Information
         run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Download .vercel/output
@@ -130,6 +130,7 @@ jobs:
         with:
           node-version: 24.x
       - run: npm ci
+      - run: npm run t
       - name: Download .vercel/output
         uses: actions/download-artifact@v4
         with:

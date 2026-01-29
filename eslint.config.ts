@@ -18,8 +18,9 @@ const eslintPluginNext = compat.config({
   },
   rules: {
     "@next/next/no-html-link-for-pages": "warn",
-    "@next/next/no-img-element": "warn",
-    "jsx-a11y/alt-text": "warn",
+    "@next/next/no-img-element": "off",
+    "jsx-a11y/alt-text": "off",
+    "react-hooks/exhaustive-deps": "error",
   },
 });
 
@@ -46,7 +47,7 @@ export default defineConfig(
     files: ["**/*.spec.ts"],
     rules: {
       "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": "off",
     },
   }
 );

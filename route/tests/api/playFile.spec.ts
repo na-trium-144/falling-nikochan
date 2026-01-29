@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, dummyLevel13, dummyLevel6, initDb } from "./init";
-import { Level13Play, Level6Play } from "@falling-nikochan/chart";
+import { currentChartVer, Level13Play, Level6Play } from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 
 describe("GET /api/playFile/:cid/:lvIndex", () => {
@@ -11,6 +11,21 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     expect(res.status).to.equal(200);
     const level: Level13Play = msgpack.deserialize(await res.arrayBuffer());
     expect(level).to.deep.equal(dummyLevel13());
+  });
+  currentChartVer satisfies 14; // edit tests below when chart version is bumped
+  test("should return Level13Play if chart version is 13", async () => {
+    await initDb();
+    const res = await app.request("/api/playFile/100013/0");
+    expect(res.status).to.equal(200);
+    const level: Level13Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).to.deep.include(dummyLevel13());
+  });
+  test("should return Level13Play if chart version is 12", async () => {
+    await initDb();
+    const res = await app.request("/api/playFile/100012/0");
+    expect(res.status).to.equal(200);
+    const level: Level13Play = msgpack.deserialize(await res.arrayBuffer());
+    expect(level).to.deep.include(dummyLevel13());
   });
   test("should return Level13Play if chart version is 11", async () => {
     await initDb();

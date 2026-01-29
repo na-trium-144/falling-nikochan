@@ -245,6 +245,7 @@ export default {
         common: "You can change the level type from the Levels tab.",
       },
       totalNotes: "Total Notes",
+      noteMirror: "Mirror",
       copy: "Copy",
       paste: "Paste",
       position: "Position",
