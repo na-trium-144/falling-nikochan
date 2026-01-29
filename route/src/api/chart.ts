@@ -582,7 +582,6 @@ export function entryToChart(
           name: entry.levelBrief.at(i)?.name || "",
           type: entry.levelBrief.at(i)?.type || "Maniac",
           unlisted: entry.levelBrief.at(i)?.unlisted || false,
-          lua: level.lua,
           ytBegin: level.ytBegin,
           ytEndSec: level.ytEndSec,
           ytEnd: level.ytEnd,
