@@ -122,6 +122,8 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.emit("change");
   }
   async updateLua(lua: string[]) {
+    const prevLua = this.#lua;
+    this.#lua = lua;
     this.#luaExecutorRef.current.abortExec();
     const levelFreezed = await this.#luaExecutorRef.current.exec(
       lua.join("\n")
@@ -129,6 +131,13 @@ export class LevelEditing extends EventEmitter<EventType> {
     if (levelFreezed) {
       this.#lua = lua;
       this.updateFreeze(levelFreezed);
+    } else {
+      if (this.#lua === lua) {
+        // 変更をrevert
+        this.#lua = prevLua;
+      } else {
+        // すでに別のコードでupdateLuaが呼ばれているので、気にしなくて良い
+      }
     }
   }
 
