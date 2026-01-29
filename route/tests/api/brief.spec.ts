@@ -20,7 +20,6 @@ describe("GET /api/brief/:cid", () => {
       levels: [
         {
           name: "e",
-          // @ts-ignore #914マージ時に直す
           hash: await hashLevel(dummyChart().levelsFreeze[0]),
           type: "Single",
           difficulty: 1,

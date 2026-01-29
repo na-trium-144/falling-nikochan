@@ -15,7 +15,11 @@
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
     "eventemitter3": "^5.0.1",
+    "object-hash": "^3.0.0",
     "valibot": "^1.0.0",
     "wasmoon": "^1.16.0"
+  },
+  "devDependencies": {
+    "@types/object-hash": "^3.0.6"
   }
 }

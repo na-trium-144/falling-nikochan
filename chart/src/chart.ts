@@ -36,14 +36,16 @@ import { hashLevel7 } from "./legacy/chart7.js";
 import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
-import { stepZero } from "./step.js";
+import { stepZero, stepSimplify } from "./step.js";
 import { defaultCopyBuffer } from "./command.js";
+import objectHash from "object-hash";
 import {
   Chart13Edit,
   ChartEditSchema13,
   ChartUntil13,
   ChartUntil13Min,
   convertTo13,
+  Level13Edit,
   Level13Freeze,
   Level13Play,
 } from "./legacy/chart13.js";
@@ -117,7 +119,6 @@ export function emptyBrief(): ChartBrief {
 }
 export const currentChartVer = 14;
 export const lastIncompatibleVer = 6;
-export const lastHashChangeVer = 12;
 export type ChartMin = Chart14Min;
 export type LevelMin = Level14Min;
 export type ChartEdit = Chart14Edit;
@@ -126,9 +127,13 @@ export type LevelPlay = Level13Play;
 export const convertToMin = convertToMin14;
 export const convertToPlay = convertToPlay14;
 
+export async function convertToLatest(chart: ChartUntil14): Promise<ChartEdit> {
+  if (chart.ver !== 14) chart = await convertTo14(chart as ChartUntil13);
+  return chart;
+}
 export async function validateChart(chart: ChartUntil14): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 14) chart = await convertTo14(chart as ChartUntil13);
+  chart = await convertToLatest(chart);
   chart satisfies Chart14Edit;
   v.parse(ChartEditSchema14(), chart);
   return { ...chart, ver: 14 };
@@ -161,7 +166,55 @@ export async function hash(text: string) {
     .join(""); // バイト列を 16 進文字列に変換する
   return hashHex;
 }
-export const hashLevel = hashLevel7;
+
+/**
+ * Calculates hash of a level using object-hash library.
+ * This ensures consistent hashing regardless of property order.
+ * Normalizes all Step types to ensure fractions are in simplest form.
+ * @param level Level13Edit to hash
+ * @returns Promise<string> SHA-256 hash in hex format
+ */
+export async function hashLevel(level: LevelFreeze): Promise<string> {
+  // Normalize all Step types by simplifying fractions
+  const normalizedNotes = level.notes.map((note) => ({
+    ...note,
+    step: stepSimplify({ ...note.step }),
+  }));
+
+  const normalizedRest = level.rest.map((rest) => ({
+    ...rest,
+    begin: stepSimplify({ ...rest.begin }),
+    duration: stepSimplify({ ...rest.duration }),
+  }));
+
+  const normalizedBpmChanges = level.bpmChanges.map((bpm) => ({
+    ...bpm,
+    step: stepSimplify({ ...bpm.step }),
+  }));
+
+  const normalizedSpeedChanges = level.speedChanges.map((speed) => ({
+    ...speed,
+    step: stepSimplify({ ...speed.step }),
+  }));
+
+  const normalizedSignature = level.signature.map((sig) => ({
+    ...sig,
+    step: stepSimplify({ ...sig.step }),
+    offset: stepSimplify({ ...sig.offset }),
+  }));
+
+  // Use object-hash with sort option to ensure consistent ordering
+  return objectHash(
+    [
+      normalizedNotes,
+      normalizedRest,
+      normalizedBpmChanges,
+      normalizedSpeedChanges,
+      normalizedSignature,
+    ],
+    { algorithm: "sha256", encoding: "hex" }
+  );
+}
 
 export function numEvents(chart: Chart13Edit | ChartEdit): number {
   if (chart.ver === 13) {
@@ -284,10 +337,7 @@ export async function createBrief(
     levelHashes = await Promise.all(
       chart.ver === 13
         ? chart.levels.map((level) => hashLevel(level))
-        : chart.levelsFreeze.map((level) =>
-            // @ts-ignore #914マージ時に直す
-            hashLevel(level)
-          )
+        : chart.levelsFreeze.map((level) => hashLevel(level))
     );
   } catch {
     //
