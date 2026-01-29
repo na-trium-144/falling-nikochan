@@ -45,7 +45,8 @@ export const ChartMinSchema14 = () =>
     locale: v.string(),
     levelsMin: v.array(LevelMinSchema14()),
     lua: v.array(v.array(v.string())),
-    zoom: v.number(),
+    // エディターの拡大率、 1.5^x 倍にする
+    zoom: v.pipe(v.number(), v.integer()),
     copyBuffer: v.pipe(v.array(v.nullable(NoteCommandSchema9())), v.length(10)),
   });
 export const ChartEditSchema14 = () =>
@@ -122,7 +123,7 @@ export async function convertTo14(chart: ChartUntil13): Promise<Chart14Edit> {
       signature: level.signature,
     })),
     lua: chart.levels.map((level) => level.lua),
-    zoom: 1.0,
+    zoom: 0,
   };
 }
 export async function convertTo14Min(
@@ -143,6 +144,6 @@ export async function convertTo14Min(
       snapDivider: 4,
     })),
     lua: chart.levels.map((level) => level.lua),
-    zoom: 1.0,
+    zoom: 0,
   };
 }

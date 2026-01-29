@@ -35,11 +35,11 @@ export default function TimeBar(props: Props) {
   // timebar左端の時刻
   const timeBarBeginSec = useRef<number>(-1);
   const zoomPrev = useRef<number>(1);
-  const defaultPxPerSec = 300;
+  const zoomPxPerSec = () => 300 * Math.pow(1.5, chart?.zoom ?? 0);
 
   // timebar上の位置を計算
   const timeBarPos = (timeSec: number) =>
-    (timeSec - timeBarBeginSec.current) * (chart?.zoom ?? 1) * defaultPxPerSec;
+    (timeSec - timeBarBeginSec.current) * zoomPxPerSec();
   const marginPxLeft = 4 * rem;
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function TimeBar(props: Props) {
           cur.timeSec +
           chart.offset -
           (cur.timeSec + chart.offset - timeBarBeginSec.current) /
-            (chart.zoom / zoomPrev.current);
+            Math.pow(1.5, chart.zoom - zoomPrev.current);
         zoomPrev.current = chart.zoom;
       }
     };
@@ -65,20 +65,18 @@ export default function TimeBar(props: Props) {
     const marginPxRight = timeBarWidth / 2;
     if (
       cur.timeSec + chart.offset - timeBarBeginSec.current <
-      marginPxLeft / (chart.zoom * defaultPxPerSec)
+      marginPxLeft / zoomPxPerSec()
     ) {
       timeBarBeginSec.current =
-        cur.timeSec +
-        chart.offset -
-        marginPxLeft / (chart.zoom * defaultPxPerSec);
+        cur.timeSec + chart.offset - marginPxLeft / zoomPxPerSec();
     } else if (
       cur.timeSec + chart.offset - timeBarBeginSec.current >
-      (timeBarWidth - marginPxRight) / (chart.zoom * defaultPxPerSec)
+      (timeBarWidth - marginPxRight) / zoomPxPerSec()
     ) {
       timeBarBeginSec.current =
         cur.timeSec +
         chart.offset -
-        (timeBarWidth - marginPxRight) / (chart.zoom * defaultPxPerSec);
+        (timeBarWidth - marginPxRight) / zoomPxPerSec();
     }
   }
   const timeBarBeginStep =
@@ -104,10 +102,7 @@ export default function TimeBar(props: Props) {
         denominator: currentLevel.meta.snapDivider,
       });
       const t = getTimeSec(currentLevel.freeze.bpmChanges, s) + chart.offset;
-      if (
-        t - timeBarBeginSec.current <
-        timeBarWidth / (chart.zoom * defaultPxPerSec)
-      ) {
+      if (t - timeBarBeginSec.current < timeBarWidth / zoomPxPerSec()) {
         timeBarSteps.push({ step: s, timeSec: t });
       } else {
         break;
@@ -130,23 +125,21 @@ export default function TimeBar(props: Props) {
       ref={timeBarRef}
     >
       {/* 秒数目盛り */}
-      {Array.from(
-        new Array(
-          Math.ceil(timeBarWidth / ((chart?.zoom ?? 1) * defaultPxPerSec))
+      {Array.from(new Array(Math.ceil(timeBarWidth / zoomPxPerSec()))).map(
+        (_, dt) => (
+          <span
+            key={dt}
+            className="absolute border-l border-gray-400 dark:border-gray-600 "
+            style={{
+              top: -1.25 * rem,
+              bottom: -4,
+              left: timeBarPos(Math.ceil(timeBarBeginSec.current) + dt),
+            }}
+          >
+            {timeSecStr(Math.ceil(timeBarBeginSec.current) + dt)}
+          </span>
         )
-      ).map((_, dt) => (
-        <span
-          key={dt}
-          className="absolute border-l border-gray-400 dark:border-gray-600 "
-          style={{
-            top: -1.25 * rem,
-            bottom: -4,
-            left: timeBarPos(Math.ceil(timeBarBeginSec.current) + dt),
-          }}
-        >
-          {timeSecStr(Math.ceil(timeBarBeginSec.current) + dt)}
-        </span>
-      ))}
+      )}
       {/* step目盛り 目盛りのリストは別で計算してある */}
       {currentLevel &&
         timeBarSteps
@@ -188,8 +181,7 @@ export default function TimeBar(props: Props) {
           (ch, i) =>
             ch.timeSec + chart.offset >= timeBarBeginSec.current &&
             ch.timeSec + chart.offset <
-              timeBarBeginSec.current +
-                timeBarWidth / (chart.zoom * defaultPxPerSec) && (
+              timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() && (
               <span
                 key={i}
                 className="absolute "
@@ -212,8 +204,7 @@ export default function TimeBar(props: Props) {
           (ch, i) =>
             ch.timeSec + chart.offset >= timeBarBeginSec.current &&
             ch.timeSec + chart.offset <
-              timeBarBeginSec.current +
-                timeBarWidth / (chart.zoom * defaultPxPerSec) && (
+              timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() && (
               <span
                 key={i}
                 className="absolute "
@@ -274,8 +265,7 @@ export default function TimeBar(props: Props) {
             ({ len, sec }, i) =>
               sec + chart.offset >= timeBarBeginSec.current &&
               sec + chart.offset <
-                timeBarBeginSec.current +
-                  timeBarWidth / (chart.zoom * defaultPxPerSec) && (
+                timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() && (
                 <span
                   key={i}
                   className="absolute border-l-2 border-slate-600 dark:border-stone-400 "
@@ -365,8 +355,7 @@ export default function TimeBar(props: Props) {
           (n) =>
             n.hitTimeSec + chart.offset > timeBarBeginSec.current &&
             n.hitTimeSec + chart.offset <
-              timeBarBeginSec.current +
-                timeBarWidth / (chart.zoom * defaultPxPerSec) &&
+              timeBarBeginSec.current + timeBarWidth / zoomPxPerSec() &&
             // 同じ位置に2つ以上の音符を重ねない
             n.hitTimeSec !==
               currentLevel?.seqNotes.at(n.id + 1)?.hitTimeSec && (

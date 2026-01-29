@@ -603,7 +603,7 @@ export function entryToChart(
         changePasswd: null,
         locale: entry.locale,
         copyBuffer: entry.copyBuffer!,
-        zoom: entry.zoom || 1.0,
+        zoom: entry.zoom || 0,
       } as Chart14Edit;
     default:
       entry satisfies never;

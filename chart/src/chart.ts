@@ -206,7 +206,7 @@ export function emptyChart(locale: string): ChartEdit {
     published: false,
     locale,
     copyBuffer: defaultCopyBuffer(),
-    zoom: 1.0,
+    zoom: 0,
   };
   return chart;
 }

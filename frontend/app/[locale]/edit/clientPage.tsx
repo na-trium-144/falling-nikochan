@@ -818,12 +818,12 @@ export default function Edit(props: {
               <Button
                 small
                 text="-"
-                onClick={() => chart?.setZoom(chart.zoom / 1.5)}
+                onClick={() => chart?.setZoom(chart.zoom - 1)}
               />
               <Button
                 small
                 text="+"
-                onClick={() => chart?.setZoom(chart.zoom * 1.5)}
+                onClick={() => chart?.setZoom(chart.zoom + 1)}
               />
             </div>
             <div className="flex flex-row ml-6 mt-3">
