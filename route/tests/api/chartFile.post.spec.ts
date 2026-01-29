@@ -394,7 +394,7 @@ describe("POST /api/chartFile/:cid", () => {
         expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
         expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
         expect(e!.levelBrief[0].hash).to.not.equal(
-          await hashLevel(dummyChart().levels[0])
+          await hashLevel(dummyChart().levelsFreeze[0])
         );
       } finally {
         await client.close();

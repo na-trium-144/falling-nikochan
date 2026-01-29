@@ -391,9 +391,9 @@ const chartFileApp = async (config: {
         // This allows preserving play records when overwriting with same content from older versions
         const upgradedChart = await convertToLatest(c.get("chart"));
         const prevHashes = await Promise.all(
-          upgradedChart.levels
+          upgradedChart.levelsMin
             .filter((l) => !l.unlisted)
-            .map((level) => hashLevel(level))
+            .map((_, i) => hashLevel(upgradedChart.levelsFreeze[i]))
         );
         const savedHashes = entry.levelBrief
           .filter((l) => !l.unlisted)
@@ -408,7 +408,6 @@ const chartFileApp = async (config: {
             : await Promise.all(
                 newChart.levelsMin
                   .filter((l) => !l.unlisted)
-                  // @ts-ignore #914マージ時に直す
                   .map((_, i) => hashLevel(newChart.levelsFreeze[i]))
               );
         let updatedAt = entry.updatedAt;

@@ -45,6 +45,7 @@ import {
   ChartUntil13,
   ChartUntil13Min,
   convertTo13,
+  Level13Edit,
   Level13Freeze,
   Level13Play,
 } from "./legacy/chart13.js";
@@ -173,7 +174,7 @@ export async function hash(text: string) {
  * @param level Level13Edit to hash
  * @returns Promise<string> SHA-256 hash in hex format
  */
-export async function hashLevel(level: Level13Edit): Promise<string> {
+export async function hashLevel(level: LevelFreeze): Promise<string> {
   // Normalize all Step types by simplifying fractions
   const normalizedNotes = level.notes.map((note) => ({
     ...note,
@@ -336,10 +337,7 @@ export async function createBrief(
     levelHashes = await Promise.all(
       chart.ver === 13
         ? chart.levels.map((level) => hashLevel(level))
-        : chart.levelsFreeze.map((level) =>
-            // @ts-ignore #914マージ時に直す
-            hashLevel(level)
-          )
+        : chart.levelsFreeze.map((level) => hashLevel(level))
     );
   } catch {
     //
