@@ -1,6 +1,6 @@
-import { glob } from "glob";
-import fs from "fs/promises";
-import path from "path";
+import { Glob } from "bun";
+import Bun from "bun";
+import path from "node:path";
 
 const directories = ["./chart/tests", "./route/tests"];
 const patterns = ["**/*.spec.ts"];
@@ -9,12 +9,15 @@ async function run() {
   console.log("Starting replacement for bun:test compatibility...");
 
   const files = [];
+
   for (const dir of directories) {
     for (const pattern of patterns) {
-      const found = await glob(path.join(dir, pattern), {
-        ignore: "**/node_modules/**",
-      });
-      files.push(...found);
+      const glob = new Glob(pattern);
+
+      for await (const file of glob.scan({ cwd: dir })) {
+        // glob.scanはcwdからの相対パスを返すため、dirと結合する
+        files.push(path.join(dir, file));
+      }
     }
   }
 
@@ -29,27 +32,25 @@ async function run() {
 
   for (const file of files) {
     try {
-      let content = await fs.readFile(file, "utf-8");
+      const fileRef = Bun.file(file);
+      let content = await fileRef.text();
       const originalContent = content;
 
       // 1. Replace "node:test" with "bun:test"
       content = content.replace(/"node:test"/g, '"bun:test"');
 
       // 2. Replace test("name", {skip: ...}, ...) with test.skipIf(...)("name", ...)
-      // This regex is simple and might not cover all edge cases.
-      // It assumes the `skip` condition does not contain commas or curly braces.
       const skipRegex = /test\(([^,]+),\s*\{[^}]*skip:\s*([^,}]+)[^}]*\},\s*/g;
       content = content.replace(skipRegex, "test.skipIf($2)($1, ");
 
       if (content !== originalContent) {
-        await fs.writeFile(file, content, "utf-8");
+        await Bun.write(file, content); // Bun.writeを使用
         console.log(`Updated ${file}`);
       }
     } catch (error) {
       console.error(`Error processing file ${file}:`, error);
     }
   }
-
   console.log("Replacement process finished.");
 }
 
