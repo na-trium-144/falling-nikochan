@@ -322,6 +322,7 @@ function Play(props: Props) {
   const [chartPlaying, setChartPlaying] = useState<boolean>(false);
   const [wasAutoPlay, setWasAutoPlay] = useState<boolean>(false); // start時点でautoだったかどうか
   const [oldPlaybackRate, setOldPlaybackRate] = useState<number>(1);
+  const [oldUserBegin, setOldUserBegin] = useState<number | null>(null);
   // 終了ボタンが押せるようになる時刻をセット
   const [exitable, setExitable] = useState<DOMHighResTimeStamp | null>(null);
   const exitableNow = useCallback(
@@ -788,6 +789,7 @@ function Play(props: Props) {
       setChartPlaying(true);
       setWasAutoPlay(auto);
       setOldPlaybackRate(playbackRate);
+      setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
       resetNotesAll(chartSeq.notes);
@@ -805,6 +807,7 @@ function Play(props: Props) {
     initOldBestScore,
     auto,
     playbackRate,
+    userBegin,
   ]);
   const onStop = useCallback(() => {
     console.log("stop ->", ytPlayer.current?.getPlayerState());
@@ -987,16 +990,19 @@ function Play(props: Props) {
                     ? oldBestScoreCounts
                     : bestScoreCounts
                 }
-                showBestScore={!auto && playbackRate === 1}
+                showBestScore={
+                  !auto && userBegin === null && playbackRate === 1
+                }
                 countMode={
                   showReady
-                    ? !auto && playbackRate === 1
+                    ? !auto && userBegin === null && playbackRate === 1
                       ? "bestCount"
                       : "grayZero"
                     : "judge"
                 }
                 showResultDiff={
                   !wasAutoPlay &&
+                  oldUserBegin === null &&
                   oldPlaybackRate === 1 &&
                   showResult &&
                   !showReady
@@ -1048,7 +1054,7 @@ function Play(props: Props) {
             <ScoreDisp
               score={score}
               best={
-                !auto && playbackRate === 1
+                !auto && userBegin === null && playbackRate === 1
                   ? chartPlaying || (showResult && !showReady)
                     ? oldBestScoreState
                     : bestScoreState
@@ -1147,10 +1153,6 @@ function Play(props: Props) {
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
               auto={wasAutoPlay}
-              optionChanged={
-                userBegin !== null &&
-                Math.round(userBegin) > Math.round(ytBegin)
-              }
               lang={props.locale}
               date={resultDate || new Date(2025, 6, 1)}
               cid={cid || ""}
@@ -1189,9 +1191,14 @@ function Play(props: Props) {
               reset={reset}
               exit={exit}
               isTouch={isTouch}
+              showShareButton={!wasAutoPlay && oldUserBegin === null}
+              showRecord={
+                !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+              }
               newRecord={
                 score > oldBestScoreState &&
                 !wasAutoPlay &&
+                oldUserBegin === null &&
                 oldPlaybackRate === 1 &&
                 lvIndex !== undefined &&
                 chartBrief?.levels[lvIndex] !== undefined
@@ -1294,17 +1301,22 @@ function Play(props: Props) {
                   : bestScoreCounts
               }
               showBestScore={
-                !auto && playbackRate === 1 && !!bestScoreCounts && showReady
+                !auto &&
+                userBegin === null &&
+                playbackRate === 1 &&
+                !!bestScoreCounts &&
+                showReady
               }
               countMode={
                 showReady
-                  ? !auto && playbackRate === 1
+                  ? !auto && userBegin === null && playbackRate === 1
                     ? "bestCount"
                     : "grayZero"
                   : "judge"
               }
               showResultDiff={
                 !wasAutoPlay &&
+                oldUserBegin === null &&
                 oldPlaybackRate === 1 &&
                 showResult &&
                 !showReady
@@ -1352,9 +1364,13 @@ function Play(props: Props) {
             isTouch={isTouch}
             best={bestScoreAvailable ? oldBestScoreState : null}
             bestCount={oldBestScoreCounts}
-            showBestScore={!wasAutoPlay && oldPlaybackRate === 1}
+            showBestScore={
+              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+            }
             countMode={"judge"}
-            showResultDiff={!wasAutoPlay && oldPlaybackRate === 1}
+            showResultDiff={
+              !wasAutoPlay && oldUserBegin === null && oldPlaybackRate === 1
+            }
           />
         </div>
       )}
