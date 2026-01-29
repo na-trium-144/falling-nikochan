@@ -33,7 +33,7 @@ import {
   fetchStatic,
   fetchBrief,
 } from "@falling-nikochan/route";
-import { inspect } from 'node:util';
+import { inspect } from "node:util";
 inspect.defaultOptions.depth = null;
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -47,7 +47,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(onError({ fetchStatic, isTest: true }))
   .notFound(notFound);
 
 export const dummyCid = "100000";

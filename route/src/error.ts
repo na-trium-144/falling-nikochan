@@ -12,12 +12,19 @@ export function notFound(): Response {
 export const onError =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+    isTest?: boolean;
   }) =>
-  async (err: any, c: Context) => {
+  async (err: unknown, c: Context) => {
     if (err instanceof Error) {
-      console.error(`Error in ${c.req.path}: ${err.message}\n${err.stack}`);
+      if (config.isTest) {
+        console.log(`Error handler triggered in ${c.req.path}: ${err.message}`);
+      } else {
+        console.error(
+          `Error handler triggered in ${c.req.path}: ${err.message}\n${err.stack}`
+        );
+      }
     } else {
-      console.error(`Error in ${c.req.path}: ${err}`);
+      console.error(`Error handler triggered in ${c.req.path}: ${err}`);
     }
     try {
       const lang = c.get("language") || "en";
