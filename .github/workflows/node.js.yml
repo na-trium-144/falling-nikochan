@@ -50,15 +50,17 @@ jobs:
       # API_NO_RATELIMIT: "1"
     steps:
     - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
         node-version: 24.x
+        cache: 'pnpm'
     - uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
-    - run: npm ci
-    - run: npm run t
-    - run: npm run mongo-docker
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm run t
+    - run: pnpm run mongo-docker
     - run: bun ./replaceForBun.js
     - run: bun test
 
