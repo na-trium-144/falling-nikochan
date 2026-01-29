@@ -463,8 +463,9 @@ export default function Edit(props: {
         }
       }
     };
-    document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
+    // document.addEventListener() はreactのイベントのstopPropagation()で止まらないので使わない
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
   }, [
     chart,
     ready,

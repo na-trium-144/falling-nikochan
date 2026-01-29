@@ -891,8 +891,8 @@ function Play(props: Props) {
         }
       }
     };
-    document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
   }, [
     auto,
     chartPlaying,
