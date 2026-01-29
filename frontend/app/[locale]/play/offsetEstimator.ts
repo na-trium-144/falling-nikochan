@@ -13,15 +13,17 @@ export class OffsetEstimator {
     this.alpha = alpha;
     this.beta = this.r * (alpha - 1);
   }
+  get diff_threshold(){
+    return 1.5 * Math.sqrt(this.p + this.r);
+  }
   update(ofs: number) {
+    // 正規-逆ガンマ分布による分散の推定 + 閾値つきkalman filter
     const diff = ofs - this.mu;
-    const diff_threshold = 1.5 * Math.sqrt(this.p + this.r);
-    // this.r = (1 - 0.05) * this.r + 0.05 * diff * diff;
     this.nu += 1;
     this.alpha += 0.5;
     this.beta += (((this.nu - 1) / this.nu) * diff * diff) / 2;
     this.r = this.beta / (this.alpha - 1);
-    if (Math.abs(diff) < diff_threshold) {
+    if (Math.abs(diff) < this.diff_threshold) {
       const k = this.p / (this.p + this.r);
       this.mu = this.mu + k * diff;
       this.p = (1 - k) * this.p;

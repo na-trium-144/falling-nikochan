@@ -67,6 +67,9 @@ export default function useGameLogic(
 
   const lateTimes = useRef<number[]>([]);
   const timeOfsEstimator = useRef<OffsetEstimator | null>(null);
+  const posOfs = useRef<number>(
+    0 // * boxSize
+  );
   const initTimeOfsEstimator = useCallback(() => {
     timeOfsEstimator.current = new OffsetEstimator(userOffset, 0.01, 0.1, 7.5); // * second
   }, [userOffset]);
@@ -101,8 +104,29 @@ export default function useGameLogic(
             break;
           }
         }
-        if (timeOfsEstimator.current) {
-          setUserOffset(timeOfsEstimator.current.update(ofs));
+
+        // doneを0にすることで判定後であってもvelを計算させる
+        const n = { ...notesAll[noteIndex], done: 0 };
+        const dn = n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now);
+        if (timeOfsEstimator.current && dn) {
+          const nPosOfs = dn ? -dn.pos.y : 0;
+          // ユーザーが認識している判定線位置のずれの予測 (=入力遅延によらず一定になる)
+          // timeOfsのkalmanfilterがシフトしていく場合にあとからそれを抑えるため、
+          // kalman filterではなく移動平均で更新する
+          // TODO: 実際に判定をposOfs分ずらしてあげたほうがよいのではないか?
+          if (
+            Math.abs(ofs - timeOfsEstimator.current.mu) <
+            timeOfsEstimator.current.diff_threshold
+          ) {
+            const k =
+              1 / (1 + Math.max(25, timeOfsEstimator.current.p / 0.0005 ** 2));
+            posOfs.current = (1 - k) * posOfs.current + k * nPosOfs;
+          }
+          // ユーザーの入力の遅延の予測
+          const timeOfs = timeOfsEstimator.current.update(
+            ofs - posOfs.current / dn.vel.y
+          );
+          setUserOffset(timeOfs);
         }
       }
     },
@@ -632,5 +656,7 @@ export default function useGameLogic(
     chartEnd,
     lateTimes,
     hitType,
+    posOfs,
+    timeOfsEstimator,
   };
 }

@@ -476,6 +476,8 @@ function Play(props: Props) {
     lateTimes,
     chartEnd,
     hitType,
+    posOfs,
+    timeOfsEstimator,
   } = useGameLogic(
     getCurrentTimeSec,
     auto,
@@ -1024,6 +1026,8 @@ function Play(props: Props) {
               filteredStartTimeStamp={filteredStartTimeStamp}
               userOffset={userOffset}
               audioLatency={enableHitSE ? audioLatency : null}
+              posOfs={posOfs}
+              timeOfsEstimator={timeOfsEstimator}
             />
           )}
           <div
