@@ -442,9 +442,13 @@ export default function Edit(props: {
           chart.pasteNote(0);
         } else if (Number(e.key) >= 1) {
           chart.pasteNote(Number(e.key));
-        } else if (e.key === "n") {
+        } else if (e.key === "n" && currentLevel?.canAddNote) {
           chart.pasteNote(0, true);
-        } else if (e.key === "Backspace" || e.key === "Delete") {
+        } else if (
+          (e.key === "Backspace" || e.key === "Delete") &&
+          currentLevel?.currentNote &&
+          currentLevel?.currentNoteEditable
+        ) {
           currentLevel?.deleteNote();
         } else if (e.key === "b") {
           if (currentLevel?.currentNote) {
