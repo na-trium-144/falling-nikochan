@@ -566,6 +566,16 @@ function Play(props: Props) {
       window.close();
     }
   }, []);
+  const seekBack = useCallback(() => {
+    if (chartPlaying && auto && queryOptions.seek) {
+      ytPlayer.current?.seekTo(ytPlayer.current?.getCurrentTime() - 5, true);
+    }
+  }, [chartPlaying, auto, queryOptions]);
+  const seekForward = useCallback(() => {
+    if (chartPlaying && auto && queryOptions.seek) {
+      ytPlayer.current?.seekTo(ytPlayer.current?.getCurrentTime() + 5, true);
+    }
+  }, [chartPlaying, auto, queryOptions]);
 
   // youtube側のreadyイベント & chartSeqが読み込まれる の両方を満たしたら
   // resetを1回呼び、loadingを閉じ、初期化完了となる
@@ -594,7 +604,7 @@ function Play(props: Props) {
       }
       setShowLoading(false);
       setShowReady(true);
-      resetNotesAll(chartSeq.notes);
+      resetNotesAll(chartSeq.notes, -Infinity);
       ref.current?.focus();
       setInitDone(true);
     } else {
@@ -677,7 +687,12 @@ function Play(props: Props) {
               baseScore,
               chainScore,
               bigScore,
-              judgeCount,
+              judgeCount: judgeCount.slice(0, 4) as [
+                number,
+                number,
+                number,
+                number,
+              ],
               bigCount: bigCount,
               inputType: hitType,
             });
@@ -794,7 +809,11 @@ function Play(props: Props) {
       setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
-      resetNotesAll(chartSeq.notes);
+      const now =
+        (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
+        chartSeq.offset -
+        offsetPlusLatency * playbackRate;
+      resetNotesAll(chartSeq.notes, now);
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }
@@ -810,6 +829,7 @@ function Play(props: Props) {
     auto,
     playbackRate,
     userBegin,
+    offsetPlusLatency,
   ]);
   const onStop = useCallback(() => {
     console.log("stop ->", ytPlayer.current?.getPlayerState());
@@ -858,6 +878,10 @@ function Play(props: Props) {
         stop();
       } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
         exit();
+      } else if (e.key === "Left" || e.key === "ArrowLeft") {
+        seekBack();
+      } else if (e.key === "Right" || e.key === "ArrowRight") {
+        seekForward();
       } else if (isReadyAll && !(chartPlaying && auto)) {
         const candidate = hit(inputTypes.keyboard);
         if (candidate) {
@@ -882,6 +906,8 @@ function Play(props: Props) {
     hit,
     start,
     exitableNow,
+    seekBack,
+    seekForward,
   ]);
 
   return (
@@ -1063,7 +1089,13 @@ function Play(props: Props) {
                   : 0
               }
               auto={auto}
-              pc={judgeCount[1] + judgeCount[2] + judgeCount[3] === 0}
+              pc={
+                judgeCount[1] +
+                  judgeCount[2] +
+                  judgeCount[3] +
+                  judgeCount[4] ===
+                0
+              }
               baseScore={baseScore}
               notesDone={notesDone}
             />
@@ -1071,26 +1103,68 @@ function Play(props: Props) {
               chain={chain}
               maxChain={maxChain}
               playing={chartPlaying}
-              fc={judgeCount[2] + judgeCount[3] === 0}
+              fc={judgeCount[2] + judgeCount[3] + judgeCount[4] === 0}
               notesTotal={notesAll.length}
             />
-            <button
+            <div
               className={clsx(
-                "absolute rounded-full cursor-pointer leading-1",
-                "top-0 inset-x-0 mx-auto w-max text-xl",
-                isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2" : "py-2 px-1",
-                isMobile && "mt-10",
-                "hover:bg-slate-200/50 active:bg-slate-300/50",
-                "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
-                linkStyle1
+                "absolute inset-x-0",
+                "flex justify-center items-center gap-1",
+                isMobile ? "top-10" : "top-0"
               )}
-              onClick={stop}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
             >
-              <Pause className="inline-block align-middle " />
-              {!isTouch && <Key handleKeyDown>Esc</Key>}
-            </button>
+              <button
+                className={clsx(
+                  "rounded-full cursor-pointer",
+                  isTouch
+                    ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                    : "py-2 px-1",
+                  "hover:bg-slate-200/50 active:bg-slate-300/50",
+                  "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                  linkStyle1
+                )}
+                onClick={stop}
+              >
+                <Pause className="inline-block align-middle text-xl leading-1" />
+                {!isTouch && <Key handleKeyDown>Esc</Key>}
+              </button>
+              {auto && !isMobile && !isTouch && queryOptions.seek && (
+                <>
+                  <button
+                    className={clsx(
+                      "rounded-full cursor-pointer",
+                      isTouch
+                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        : "py-2 px-1",
+                      "hover:bg-slate-200/50 active:bg-slate-300/50",
+                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      linkStyle1
+                    )}
+                    onClick={seekBack}
+                  >
+                    {!isTouch && <Key handleKeyDown>←</Key>}
+                    <span className="ml-1">5s</span>
+                  </button>
+                  <button
+                    className={clsx(
+                      "rounded-full cursor-pointer",
+                      isTouch
+                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        : "py-2 px-1",
+                      "hover:bg-slate-200/50 active:bg-slate-300/50",
+                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      linkStyle1
+                    )}
+                    onClick={seekForward}
+                  >
+                    <span className="mr-1">5s</span>
+                    {!isTouch && <Key handleKeyDown>→</Key>}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
           {(!initDone || closeReadyAnim) && (
             <CenterBox
@@ -1187,7 +1261,9 @@ function Play(props: Props) {
                   : Math.floor(score * 100)
               }
               judgeCount={
-                queryOptions.result ? exampleResult.judgeCount : judgeCount
+                queryOptions.result
+                  ? exampleResult.judgeCount
+                  : (judgeCount.slice(0, 4) as [number, number, number, number])
               }
               bigCount={queryOptions.result ? exampleResult.bigCount : bigCount}
               reset={reset}

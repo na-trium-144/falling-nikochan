@@ -240,12 +240,12 @@ export default function FallingWindow(props: Props) {
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
   const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
   useEffect(() => {
-    if (playing) {
-      while (notes.length >= displayNikochan.current.length) {
-        displayNikochan.current.push(null);
-      }
+    displayNotes.current = [];
+    displayNikochan.current = [];
+    while (notes.length >= displayNikochan.current.length) {
+      displayNikochan.current.push(null);
     }
-  }, [playing, notes]);
+  }, [notes]);
   const lastNow = useRef<number>(0);
   if (runExecutedIndex.current !== rerenderIndex) {
     // performance.mark("nikochan-rerender");
