@@ -36,7 +36,12 @@ export default function OGTemplate() {
       className="absolute isolate flex flex-col overflow-clip "
       style={{ width: 1200, height: 630 }}
     >
-      <IrasutoyaLikeBgInner screenWidth={1200} screenHeight={630} fixedSeed />
+      <IrasutoyaLikeBgInner
+        screenWidth={1200}
+        screenHeight={630}
+        fixedSeed
+        className="absolute"
+      />
       <Title
         className="absolute top-0 inset-x-0 h-34 scale-320 origin-top "
         anim={false}
@@ -48,6 +53,8 @@ export default function OGTemplate() {
           screenHeight={630}
           height={2.5 * 16}
           fixedSeed
+          classNameFar="absolute"
+          classNameNear="absolute"
         />
         <RhythmicalSlime
           className="z-14 absolute scale-150 origin-bottom-right "
