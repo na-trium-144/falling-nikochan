@@ -221,7 +221,13 @@ function Play(props: Props) {
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
-    requestAnimationFrame(() => setInitAnim(true));
+    setTimeout(
+      () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => setInitAnim(true))
+        ),
+      100
+    );
   }, []);
 
   const lvType: string =
@@ -511,6 +517,7 @@ function Play(props: Props) {
 
   // 準備完了画面を表示する (showStoppedとshowResultに優先する)
   const [showReady, setShowReady] = useState<boolean>(false);
+  const [openReadyAnim, setOpenReadyAnim] = useState<boolean>(false);
   // スタートボタンを押し、準備完了画面を隠すアニメーションをする
   const [closeReadyAnim, setCloseReadyAnim] = useState<boolean>(false);
   const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -604,6 +611,7 @@ function Play(props: Props) {
       }
       setShowLoading(false);
       setShowReady(true);
+      setTimeout(() => requestAnimationFrame(() => setOpenReadyAnim(true)));
       resetNotesAll(chartSeq.notes, -Infinity);
       ref.current?.focus();
       setInitDone(true);
@@ -1073,7 +1081,7 @@ function Play(props: Props) {
           <div
             className={clsx(
               "absolute inset-0 isolate z-10",
-              "transition-all duration-200",
+              "transition-all duration-300",
               cloudsOk
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-[-300px]"
@@ -1194,8 +1202,9 @@ function Play(props: Props) {
             <ReadyMessage
               className={clsx(
                 "isolate z-20",
-                closeReadyAnim &&
-                  "transition-[scale,opacity] duration-200 ease-out opacity-0 scale-0"
+                "transition-[scale,opacity] duration-200 ease-out",
+                !openReadyAnim && "opacity-0",
+                closeReadyAnim && "opacity-0 scale-0"
               )}
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
@@ -1303,7 +1312,7 @@ function Play(props: Props) {
       <div
         className={clsx(
           "relative w-full",
-          "transition-transform duration-200 ease-out",
+          "transition-transform duration-500 ease-out",
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
