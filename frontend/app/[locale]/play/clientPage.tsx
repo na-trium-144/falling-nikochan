@@ -871,15 +871,19 @@ function Play(props: Props) {
       }
       if (e.key === " " && showReady && !chartPlaying) {
         start();
+        e.preventDefault();
       } else if (
         e.key === " " &&
         ((showStopped && !showResult) || (showResult && exitableNow()))
       ) {
         setShowReady(true);
+        e.preventDefault();
       } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
         stop();
+        e.preventDefault();
       } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
         exit();
+        e.preventDefault();
       } else if (e.key === "Left" || e.key === "ArrowLeft") {
         seekBack();
       } else if (e.key === "Right" || e.key === "ArrowRight") {
