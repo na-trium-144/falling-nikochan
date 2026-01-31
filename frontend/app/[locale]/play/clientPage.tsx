@@ -1127,10 +1127,10 @@ function Play(props: Props) {
                 className={clsx(
                   "rounded-full cursor-pointer leading-0",
                   isTouch
-                    ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                    ? "bg-white/50 dark:bg-stone-700/50 p-2"
                     : "py-2 px-1",
                   "hover:bg-slate-200/50 active:bg-slate-300/50",
-                  "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                  "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
                   linkStyle1
                 )}
                 onClick={stop}
@@ -1144,10 +1144,10 @@ function Play(props: Props) {
                     className={clsx(
                       "rounded-full cursor-pointer",
                       isTouch
-                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
                         : "py-2 px-1",
                       "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
                       linkStyle1
                     )}
                     onClick={seekBack}
@@ -1159,10 +1159,10 @@ function Play(props: Props) {
                     className={clsx(
                       "rounded-full cursor-pointer",
                       isTouch
-                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
                         : "py-2 px-1",
                       "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
                       linkStyle1
                     )}
                     onClick={seekForward}

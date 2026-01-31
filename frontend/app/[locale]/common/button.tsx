@@ -8,7 +8,7 @@ export const buttonStyleDisabled = clsx(
   "appearance-none",
   "relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-default",
   "border border-blue-300/50 dark:border-amber-800/30 rounded-xl",
-  "bg-slate-300/50 dark:bg-stone-700/50"
+  "bg-slate-300/50 dark:bg-stone-600/50"
 );
 export const buttonShadowStyle = "shadow-slate-500/50 dark:shadow-stone-950/50";
 export const buttonStyle = clsx(

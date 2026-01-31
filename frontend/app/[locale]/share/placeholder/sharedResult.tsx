@@ -101,7 +101,7 @@ export function SharedResultBox(props: Props) {
                   "flex flex-row w-full items-baseline",
                   name === "bigNoteBonus" &&
                     props.result.bigCount === null &&
-                    "text-slate-400 dark:text-stone-600"
+                    "text-slate-400 dark:text-stone-500"
                 )}
               >
                 <span className="flex-1 text-sm ">{t(name)}:</span>
@@ -166,7 +166,7 @@ export function SharedResultBox(props: Props) {
               className={clsx(
                 "flex flex-row items-baseline",
                 props.result.bigCount === null &&
-                  "text-slate-400 dark:text-stone-600"
+                  "text-slate-400 dark:text-stone-500"
               )}
             >
               <span className="flex-1 text-xs ">{ts("big")}</span>

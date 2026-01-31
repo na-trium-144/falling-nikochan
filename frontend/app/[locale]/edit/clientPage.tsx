@@ -917,7 +917,7 @@ export default function Edit(props: {
             <Box
               classNameOuter={clsx(
                 "mt-2",
-                "bg-slate-200/50! dark:bg-stone-700/50!",
+                "bg-slate-200/50! dark:bg-stone-600/50!",
                 !(
                   luaExecutor.running ||
                   luaExecutor.stdout.length > 0 ||

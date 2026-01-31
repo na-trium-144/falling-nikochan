@@ -210,7 +210,7 @@ export default function StatusBox(props: Props) {
         <span
           className={clsx(
             "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2",
-            props.bigTotal === 0 && "text-slate-400 dark:text-stone-600"
+            props.bigTotal === 0 && "text-slate-400 dark:text-stone-500"
           )}
         >
           <span className="flex-1">/</span>
@@ -256,7 +256,7 @@ function StatusItem(props: {
         isMobile
           ? "flex-1 basis-1 flex flex-col"
           : clsx("flex flex-row items-baseline", props.wide || "mr-12"),
-        props.disabled && "text-slate-400/75 dark:text-stone-600/75"
+        props.disabled && "text-slate-400/75 dark:text-stone-500/75"
       )}
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
@@ -320,7 +320,7 @@ function StatusValue(props: {
         className={clsx(
           "mt-1 w-full text-center bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-600/75"
+            ? "text-slate-400/75 dark:text-stone-500/75"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"
@@ -341,7 +341,7 @@ function StatusValue(props: {
         className={clsx(
           "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-600/75"
+            ? "text-slate-400/75 dark:text-stone-500/75"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"

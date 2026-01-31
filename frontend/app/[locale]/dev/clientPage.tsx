@@ -183,7 +183,7 @@ function StorageEditor(props: EProps) {
           className={clsx(
             "rounded-full cursor-pointer px-2 py-1",
             "hover:bg-slate-200/50 active:bg-slate-300/50",
-            "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+            "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
             linkStyle1
           )}
           onClick={() => setShowEditor(!showEditor)}
@@ -218,7 +218,7 @@ function StorageEditor(props: EProps) {
         </div>
         <div
           className={clsx(
-            "bg-slate-200/50 dark:bg-stone-700/50 rounded-b-sq-box",
+            "bg-slate-200/50 dark:bg-stone-600/50 rounded-b-sq-box",
             "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
             "overflow-hidden"
           )}

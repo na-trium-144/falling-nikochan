@@ -376,11 +376,11 @@ export function MusicArea(props: Props) {
           props.isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
-                props.isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2" : "p-2"
+                props.isTouch ? "bg-white/50 dark:bg-stone-700/50 p-2" : "p-2"
               )
             : "bottom-0 right-1 p-2",
           "hover:bg-slate-200/50 active:bg-slate-300/50",
-          "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+          "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
           linkStyle1,
           props.isMobile &&
             (initialVolumeCtrlOpenDone.current
@@ -433,7 +433,7 @@ export function MusicArea(props: Props) {
               "border-l border-b rounded-tr-full",
               "rotate-135 origin-center",
               "border-slate-400 dark:border-stone-600",
-              "bg-white dark:bg-stone-800"
+              "bg-white dark:bg-stone-700"
             )}
           />
         )}*/}
@@ -453,13 +453,13 @@ export function MusicArea(props: Props) {
           <SmilingFace
             className={clsx(
               "text-xl",
-              props.enableSE || "text-slate-400 dark:text-stone-600"
+              props.enableSE || "text-slate-400 dark:text-stone-500"
             )}
           />
           <span
             className={clsx(
               "text-sm w-8 text-center",
-              props.enableSE || "text-slate-400 dark:text-stone-600"
+              props.enableSE || "text-slate-400 dark:text-stone-500"
             )}
           >
             {props.enableSE ? props.seVolume : t("off")}
