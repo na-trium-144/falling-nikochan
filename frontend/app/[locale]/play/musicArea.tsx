@@ -178,19 +178,24 @@ export function MusicArea(props: Props) {
           <div className={clsx(props.isMobile && "h-0 overflow-visible")}>
             <p
               className={clsx(
-                veryLargeTitle ? "" : largeTitle ? "leading-5" : "leading-3.5",
-                "font-medium"
+                "flex flex-wrap items-baseline",
+                "font-medium font-title",
+                veryLargeTitle
+                  ? "*:h-8 **:leading-8"
+                  : largeTitle
+                    ? "*:h-6.5 **:leading-6.5"
+                    : "*:h-4.5 **:leading-4.5"
               )}
             >
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
               <span
                 className={clsx(
-                  "inline-block font-title align-bottom",
+                  "font-title",
                   veryLargeTitle
                     ? "text-3xl"
                     : largeTitle
-                      ? "text-2xl/6"
-                      : "text-lg/5",
+                      ? "text-2xl"
+                      : "text-lg",
                   "overflow-x-clip overflow-y-visible",
                   "max-w-full text-ellipsis whitespace-nowrap"
                 )}
@@ -200,53 +205,48 @@ export function MusicArea(props: Props) {
               {props.chartBrief?.composer && (
                 <span
                   className={clsx(
-                    "inline-block font-title align-bottom",
+                    "font-title",
                     veryLargeTitle
                       ? "text-2xl"
                       : largeTitle
-                        ? "text-lg/5"
-                        : "text-sm/3.5",
+                        ? "text-lg"
+                        : "text-sm",
                     "overflow-x-clip overflow-y-visible",
                     "max-w-full text-ellipsis whitespace-nowrap"
                   )}
                 >
-                  <span className="mx-1">/</span>
+                  <span className="mx-[0.25em]">/</span>
                   {props.chartBrief?.composer}
                 </span>
               )}
             </p>
             <p
               className={clsx(
+                "flex flex-wrap items-baseline",
                 veryLargeTitle
-                  ? "leading-6"
+                  ? "*:h-7 **:leading-7"
                   : largeTitle
-                    ? "leading-4.5"
-                    : "leading-4"
+                    ? "*:h-5 **:leading-5"
+                    : "*:h-4 **:leading-4"
               )}
             >
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
                     className={clsx(
-                      "inline-block align-bottom",
                       "overflow-x-clip overflow-y-visible",
-                      "max-w-full text-ellipsis whitespace-nowrap",
-                      veryLargeTitle
-                        ? "leading-6"
-                        : largeTitle
-                          ? "leading-4.5"
-                          : "leading-4"
+                      "max-w-full text-ellipsis whitespace-nowrap"
                     )}
                   >
                     {props.chartBrief?.levels[props.lvIndex].name && (
                       <span
                         className={clsx(
-                          "font-title mr-1 align-bottom",
+                          "font-title mr-[0.25em]",
                           veryLargeTitle
                             ? "text-2xl"
                             : largeTitle
-                              ? "text-lg/4"
-                              : "text-sm/3.5"
+                              ? "text-lg"
+                              : "text-sm"
                         )}
                       >
                         {props.chartBrief?.levels[props.lvIndex].name}
@@ -256,12 +256,11 @@ export function MusicArea(props: Props) {
                       className={clsx(
                         levelColors.at(levelTypes.indexOf(props.lvType)) ||
                           levelColors[1],
-                        "align-bottom",
                         veryLargeTitle
                           ? "text-1_5xl"
                           : largeTitle
-                            ? "text-base/3"
-                            : "text-xs/2.5"
+                            ? "text-base"
+                            : "text-xs"
                       )}
                     >
                       {props.lvType}-
@@ -270,12 +269,11 @@ export function MusicArea(props: Props) {
                       className={clsx(
                         levelColors.at(levelTypes.indexOf(props.lvType)) ||
                           levelColors[1],
-                        "align-bottom",
                         veryLargeTitle
                           ? "text-2_5xl"
                           : largeTitle
-                            ? "text-xl/4"
-                            : "text-lg/3.5"
+                            ? "text-xl"
+                            : "text-lg"
                       )}
                     >
                       {props.chartBrief?.levels[props.lvIndex]?.difficulty}
@@ -284,36 +282,30 @@ export function MusicArea(props: Props) {
                 )}
               <span
                 className={clsx(
-                  "inline-block align-bottom",
                   "overflow-x-clip overflow-y-visible",
-                  "max-w-full text-ellipsis whitespace-nowrap",
-                  veryLargeTitle
-                    ? "leading-6"
-                    : largeTitle
-                      ? "leading-4.5"
-                      : "leading-4"
+                  "max-w-full text-ellipsis whitespace-nowrap"
                 )}
               >
                 <span
                   className={clsx(
-                    "ml-2 align-bottom",
+                    "ml-[0.5em]",
                     veryLargeTitle
                       ? "text-lg"
                       : largeTitle
-                        ? "text-sm/3.5"
-                        : "text-xs/2.5"
+                        ? "text-sm"
+                        : "text-xs"
                   )}
                 >
                   by
                 </span>
                 <span
                   className={clsx(
-                    "ml-1.5 font-title align-bottom",
+                    "ml-[0.2em] font-title",
                     veryLargeTitle
                       ? "text-2xl"
                       : largeTitle
-                        ? "text-lg/4"
-                        : "text-sm/3.5"
+                        ? "text-lg"
+                        : "text-sm"
                   )}
                 >
                   {props.chartBrief?.chartCreator}
@@ -329,7 +321,7 @@ export function MusicArea(props: Props) {
                   ? "flex flex-row justify-between mr-1.5"
                   : "flex flex-col-reverse"
                 : "flex flex-row gap-[0.5em]",
-              veryLargeTitle ? "text-xl" : "text-base",
+              veryLargeTitle ? "text-xl" : largeTitle ? "text-base" : "text-sm",
               props.playbackRate > 1
                 ? "text-rose-600/75 dark:text-rose-400/75"
                 : props.playbackRate < 1
