@@ -38,6 +38,8 @@ jobs:
     - run: npm ci
     - run: npm run mongo-docker
     - run: npm run test
+    # seedスクリプトが動作するかどうかもチェックする
+    - run: npm run seed
 
   test-bun:
     runs-on: ubuntu-latest

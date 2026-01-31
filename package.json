@@ -13,7 +13,7 @@
     "cdev": "npm run cdev -w chart",
     "test": "npm run test --ws --if-present",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
-    "seed": "npm run seed -w route",
+    "seed": "npm run t --ws --if-present && npm run seed -w route",
     "ndev": "npm run dev -w frontend",
     "nbuild": "npm run t --ws --if-present && npm run build -w frontend && npm run postbuild -w frontend",
     "swbuild": "npm run t --ws --if-present && npm run build -w worker && npm run postbuild -w frontend",

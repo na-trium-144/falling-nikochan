@@ -63,7 +63,13 @@ import {
 import { LevelForLuaEditLatest } from "./lua/edit.js";
 import { BPMChangeWithLua, SpeedChangeWithLua } from "./bpm.js";
 import { SignatureWithLua } from "./signature.js";
-import { ChartUntil11 } from "./legacy/chart11.js";
+import { ChartUntil11, Level11Freeze } from "./legacy/chart11.js";
+import { Chart5, Level5 } from "./legacy/chart5.js";
+import { Level9Freeze } from "./legacy/chart9.js";
+import { Level8Freeze } from "./legacy/chart8.js";
+import { Level7 } from "./legacy/chart7.js";
+import { Level6 } from "./legacy/chart6.js";
+import { Level4 } from "./legacy/chart4.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -172,7 +178,17 @@ export async function hash(text: string) {
  * @param level Level13Edit to hash
  * @returns Promise<string> SHA-256 hash in hex format
  */
-export async function hashLevel(level: LevelFreeze): Promise<string> {
+export async function hashLevel(
+  level:
+    | LevelFreeze
+    | Level11Freeze
+    | Level9Freeze
+    | Level8Freeze
+    | Level7
+    | Level6
+    | Level5
+    | Level4
+): Promise<string> {
   // Normalize all Step types by simplifying fractions
   const normalizedNotes = level.notes.map((note) => ({
     ...note,
@@ -195,11 +211,14 @@ export async function hashLevel(level: LevelFreeze): Promise<string> {
     step: stepSimplify({ ...speed.step }),
   }));
 
-  const normalizedSignature = level.signature.map((sig) => ({
-    ...sig,
-    step: stepSimplify({ ...sig.step }),
-    offset: stepSimplify({ ...sig.offset }),
-  }));
+  const normalizedSignature =
+    "signature" in level
+      ? level.signature.map((sig) => ({
+          ...sig,
+          step: stepSimplify({ ...sig.step }),
+          offset: stepSimplify({ ...sig.offset }),
+        }))
+      : undefined;
 
   // Use object-hash with sort option to ensure consistent ordering
   return objectHash(
@@ -327,36 +346,40 @@ export function emptyLevel(
 
 export async function createBrief(
   // API用に過去2バージョンサポート
-  chart: Chart13Edit | Chart14Edit,
+  // seedでChart5を使う
+  chart: Chart5 | Chart13Edit | Chart14Edit,
   updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
   try {
     levelHashes = await Promise.all(
-      chart.ver === 13
+      "levels" in chart
         ? chart.levels.map((level) => hashLevel(level))
         : chart.levelsFreeze.map((level) => hashLevel(level))
     );
   } catch {
     //
   }
-  const levelsMin = chart.ver === 13 ? chart.levels : chart.levelsMin;
-  const levelsFreeze = chart.ver === 13 ? chart.levels : chart.levelsFreeze;
-  const levelBrief = levelsMin.map((level, i) => ({
-    name: level.name,
-    type: level.type,
-    unlisted: level.unlisted,
-    hash: levelHashes.at(i) ?? "",
-    noteCount: levelsFreeze[i].notes.length,
-    difficulty: difficulty(levelsFreeze[i], level.type),
-    bpmMin: levelsFreeze[i].bpmChanges
-      .map((b) => b.bpm)
-      .reduce((a, b) => Math.min(a, b)),
-    bpmMax: levelsFreeze[i].bpmChanges
-      .map((b) => b.bpm)
-      .reduce((a, b) => Math.max(a, b)),
-    length: level.ytEndSec - level.ytBegin,
-  }));
+  const levelsMin = "levels" in chart ? chart.levels : chart.levelsMin;
+  const levelsFreeze = "levels" in chart ? chart.levels : chart.levelsFreeze;
+  const levelBrief = levelsMin.map(
+    (level, i) =>
+      ({
+        name: level.name,
+        type: level.type as "Single" | "Double" | "Maniac",
+        unlisted: !!level.unlisted,
+        hash: levelHashes.at(i) ?? "",
+        noteCount: levelsFreeze[i].notes.length,
+        difficulty: difficulty(levelsFreeze[i], level.type),
+        bpmMin: levelsFreeze[i].bpmChanges
+          .map((b) => b.bpm)
+          .reduce((a, b) => Math.min(a, b)),
+        bpmMax: levelsFreeze[i].bpmChanges
+          .map((b) => b.bpm)
+          .reduce((a, b) => Math.max(a, b)),
+        length: "ytBegin" in level ? level.ytEndSec - level.ytBegin : 0,
+      }) satisfies ChartBrief["levels"][number]
+  );
   return {
     ytId: chart.ytId,
     title: chart.title,
@@ -364,7 +387,7 @@ export async function createBrief(
     chartCreator: chart.chartCreator,
     levels: levelBrief,
     updatedAt: updatedAt,
-    published: chart.published,
-    locale: chart.locale,
+    published: "published" in chart ? chart.published : false,
+    locale: "locale" in chart ? chart.locale : "ja",
   };
 }

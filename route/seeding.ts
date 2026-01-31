@@ -1,4 +1,3 @@
-import { Chart5 } from "@falling-nikochan/chart/dist/legacy/chart5";
 import { ChartEntryCompressed, chartToEntry, zipEntry } from "./src/api/chart";
 // import YAML from "yaml";
 import msgpack from "@ygoe/msgpack";
@@ -11,6 +10,7 @@ import {
   levelTypesConst,
   NoteCommand,
   SpeedChangeWithLua,
+  Chart5,
 } from "@falling-nikochan/chart";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
