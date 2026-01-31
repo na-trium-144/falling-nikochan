@@ -188,7 +188,7 @@ export default function FallingWindow(props: Props) {
     Promise.all(
       [0, 1, 2, 3].map(async (i) => {
         const res = await fetch(
-          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`
+          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg?v=2`
         );
         const svg = await res.text();
         // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
