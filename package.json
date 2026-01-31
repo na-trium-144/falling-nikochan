@@ -4,7 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": ">=23.6"
+    "node": "^23.6 || ^24"
   },
   "scripts": {
     "lint": "tsc && npm run t --ws --if-present && npm run lint --ws --if-present",
