@@ -60,7 +60,7 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
     ```sh
     npm run seed
     ```
-    * This inserts a sample chart at cid:602399 ("Get Started!").
+    * This inserts a sample chart at cid:102399 ("Get Started!").
 * Common files (chart/)
     * Frontend code does not import ts files directly, but the compiled js files instead.
     * During development, watch changes and compile to js files automatically:
