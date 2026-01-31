@@ -246,6 +246,9 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       process.env.NODE_ENV !== "development" &&
       "serviceWorker" in navigator
     ) {
+      navigator.serviceWorker.addEventListener("message", (e) => {
+        console.warn("sw:", e.data);
+      });
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
         updateFetching = setTimeout(
           () => void fetch("/worker/checkUpdate"),
