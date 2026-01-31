@@ -996,7 +996,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "isolate z-15 flex-none m-3 mb-0 self-end",
+                  "isolate z-15 flex-none m-3 mt-4.5 mb-0 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"

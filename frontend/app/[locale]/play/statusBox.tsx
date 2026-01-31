@@ -63,9 +63,9 @@ export default function StatusBox(props: Props) {
           className={clsx(
             isMobile
               ? clsx("absolute left-[10%] top-[-2em]")
-              : clsx("relative"),
+              : clsx("absolute inset-x-0 top-[-1em]"),
             "flex flex-row items-baseline",
-            "w-max m-auto px-[0.5em] py-[0.2em] mb-[0.25em] rounded-lg",
+            "w-max m-auto px-[0.5em] py-[0.2em] rounded-[0.75em]",
             "shadow-xs z-3",
             props.bestCount
               ? clsx(
