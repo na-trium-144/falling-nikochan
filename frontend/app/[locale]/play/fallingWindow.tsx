@@ -76,7 +76,7 @@ export default function FallingWindow(props: Props) {
     marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
   const { isDark } = useTheme();
-  const { rem } = useDisplayMode();
+  const { rem, playUIScale } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
@@ -267,6 +267,7 @@ export default function FallingWindow(props: Props) {
       const c = {
         noteSize,
         boxSize,
+        playUIScale,
         canvasMarginX,
         canvasMarginY,
         marginY,

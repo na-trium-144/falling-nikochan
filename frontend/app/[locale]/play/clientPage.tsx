@@ -279,14 +279,8 @@ function Play(props: Props) {
   );
 
   const ref = useRef<HTMLDivElement>(null!);
-  const {
-    isTouch,
-    screenWidth,
-    screenHeight,
-    rem,
-    mobileStatusScale,
-    largeResult,
-  } = useDisplayMode();
+  const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
+    useDisplayMode();
   const isMobile = screenWidth < screenHeight;
 
   const statusSpace = useResizeDetector();
@@ -1316,7 +1310,7 @@ function Play(props: Props) {
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
-          height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
+          height: isMobile ? 6 * statusScale * rem : "10vh",
           maxHeight: "15vh",
         }}
       >
@@ -1325,7 +1319,7 @@ function Play(props: Props) {
           classNameFar="isolate -z-10"
           height={
             (isMobile
-              ? Math.min(6 * rem * mobileStatusScale, 0.15 * screenHeight)
+              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
               : 0.1 * screenHeight) +
             1 * rem
           }
@@ -1335,7 +1329,11 @@ function Play(props: Props) {
             className="isolate z-14 absolute"
             style={{
               bottom: "100%",
-              right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
+              right: isMobile
+                ? "1rem"
+                : statusOverlaps
+                  ? 18 * statusScale * rem
+                  : "1rem",
             }}
             signature={chartSeq.signature}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -1367,7 +1365,7 @@ function Play(props: Props) {
             <StatusBox
               className="absolute inset-0 isolate z-15"
               style={{
-                margin: 1 * rem * mobileStatusScale,
+                margin: 1 * statusScale * rem,
               }}
               judgeCount={judgeCount}
               bigCount={bigCount || 0}

@@ -45,7 +45,9 @@ export function MusicArea(props: Props) {
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
   const largeTitle = props.isMobile ? height && height > 8.5 * rem : true;
-  const veryLargeTitle = props.isMobile ? height && height > 11.5 * rem : false;
+  const veryLargeTitle = props.isMobile
+    ? height && height > 11.5 * rem
+    : width && width > 30 * rem;
 
   const t = useTranslations("play.message");
 
@@ -185,7 +187,7 @@ export function MusicArea(props: Props) {
                 className={clsx(
                   "inline-block font-title align-bottom",
                   veryLargeTitle
-                    ? "block! text-3xl"
+                    ? "text-3xl"
                     : largeTitle
                       ? "text-2xl/6"
                       : "text-lg/5",
@@ -200,7 +202,7 @@ export function MusicArea(props: Props) {
                   className={clsx(
                     "inline-block font-title align-bottom",
                     veryLargeTitle
-                      ? "block! text-2xl"
+                      ? "text-2xl"
                       : largeTitle
                         ? "text-lg/5"
                         : "text-sm/3.5",
@@ -256,7 +258,7 @@ export function MusicArea(props: Props) {
                           levelColors[1],
                         "align-bottom",
                         veryLargeTitle
-                          ? "text-xl"
+                          ? "text-1_5xl"
                           : largeTitle
                             ? "text-base/3"
                             : "text-xs/2.5"
@@ -270,7 +272,7 @@ export function MusicArea(props: Props) {
                           levelColors[1],
                         "align-bottom",
                         veryLargeTitle
-                          ? "text-3xl"
+                          ? "text-2_5xl"
                           : largeTitle
                             ? "text-xl/4"
                             : "text-lg/3.5"
@@ -321,12 +323,13 @@ export function MusicArea(props: Props) {
           </div>
           <p
             className={clsx(
-              "leading-4 mt-1.5",
+              "leading-[1em] mt-1.5",
               props.isMobile
                 ? veryLargeTitle
-                  ? "flex flex-row justify-between text-lg mr-1.5"
-                  : "flex flex-col-reverse text-base"
-                : "flex flex-row gap-2 text-base",
+                  ? "flex flex-row justify-between mr-1.5"
+                  : "flex flex-col-reverse"
+                : "flex flex-row gap-[0.5em]",
+              veryLargeTitle ? "text-xl" : "text-base",
               props.playbackRate > 1
                 ? "text-rose-600/75 dark:text-rose-400/75"
                 : props.playbackRate < 1
@@ -335,18 +338,20 @@ export function MusicArea(props: Props) {
             )}
           >
             <span className="flex-none w-max">
-              <span className="inline-flex flex-row justify-end w-3 overflow-visible">
+              <span className="inline-flex flex-row justify-end w-[0.75em] overflow-visible">
                 <span className="text-right">
                   {Math.floor(currentSec / 60)}
                 </span>
               </span>
               <span>:</span>
-              <span className="inline-block w-6">
+              <span className="inline-block w-[1.5em]">
                 {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
               </span>
               <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
                 <span>/</span>
-                <span className="ml-1 ">{Math.floor(levelLength / 60)}</span>
+                <span className="ml-[0.25em] ">
+                  {Math.floor(levelLength / 60)}
+                </span>
                 <span>:</span>
                 <span className="">
                   {(Math.floor(levelLength) % 60).toString().padStart(2, "0")}
@@ -358,7 +363,7 @@ export function MusicArea(props: Props) {
                 <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
                   {t("playbackRateDisplay")}:
                 </span>
-                <span className="ml-1">{props.playbackRate}</span>
+                <span className="ml-[0.25em]">{props.playbackRate}</span>
               </span>
             )}
           </p>
@@ -399,7 +404,7 @@ export function MusicArea(props: Props) {
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
-            : "top-full left-3 right-1 mt-1 p-3",
+            : "top-full left-3 ml-auto max-w-100 right-1 mt-1 p-3",
           "rounded-sq-box",
           boxStyle,
           "transition-all duration-200",
