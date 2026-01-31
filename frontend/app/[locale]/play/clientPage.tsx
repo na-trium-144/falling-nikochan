@@ -1117,7 +1117,7 @@ function Play(props: Props) {
             >
               <button
                 className={clsx(
-                  "rounded-full cursor-pointer",
+                  "rounded-full cursor-pointer leading-0",
                   isTouch
                     ? "bg-white/50 dark:bg-stone-800/50 p-2"
                     : "py-2 px-1",
@@ -1127,7 +1127,7 @@ function Play(props: Props) {
                 )}
                 onClick={stop}
               >
-                <Pause className="inline-block align-middle text-xl leading-1" />
+                <Pause className="inline-block align-middle text-xl" />
                 {!isTouch && <Key handleKeyDown>Esc</Key>}
               </button>
               {auto && !isMobile && !isTouch && queryOptions.seek && (
