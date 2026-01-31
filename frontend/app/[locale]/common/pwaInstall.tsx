@@ -340,7 +340,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       {props.children}
       <Box
         classNameOuter={clsx(
-          "fixed z-15 bottom-12 inset-x-0 w-max max-w-full mx-auto shadow-modal",
+          "fixed! z-15 bottom-(--container-mobile-footer) translate-y-1 inset-x-0",
+          "w-max max-w-full mx-auto shadow-modal",
           "transition-all duration-200 origin-bottom",
           "rounded-sq-xl!",
           workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
