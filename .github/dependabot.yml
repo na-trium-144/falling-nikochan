@@ -19,6 +19,12 @@ updates:
           - "next"
           - "@next/*"
           - "eslint-config-next"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
       tailwindcss:
         patterns:
           - "tailwindcss"
