@@ -6,10 +6,12 @@ import semver from "semver";
 const updateType = process.argv[2];
 
 // 有効な引数かチェック
-const VALID_TYPES = ['major', 'minor', 'patch'];
+const VALID_TYPES = ["major", "minor", "patch"];
 if (!VALID_TYPES.includes(updateType)) {
-  console.error(`❌ エラー: 引数には ${VALID_TYPES.join(', ')} のいずれかを指定してください。`);
-  console.error('例: node update-version.js minor');
+  console.error(
+    `❌ エラー: 引数には ${VALID_TYPES.join(", ")} のいずれかを指定してください。`
+  );
+  console.error("例: node update-version.js minor");
   process.exit(1);
 }
 
