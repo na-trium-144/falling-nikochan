@@ -21,7 +21,7 @@ RUN pnpm install --frozen-lockfile --ignore-scripts \
 
 COPY . .
 
-RUN pnpm run prepare
+RUN pnpm run t
 # RUN pnpm prune --prod --ignore-scripts
 RUN rm -rf node_modules */node_modules && \
     pnpm install --prod --frozen-lockfile --ignore-scripts \
