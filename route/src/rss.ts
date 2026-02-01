@@ -30,15 +30,13 @@ const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             composer: string;
             chartCreator: string;
             updatedAt: number;
-            ytId: string;
           }>({ 
             _id: 0, 
             cid: 1, 
             title: 1, 
             composer: 1, 
             chartCreator: 1, 
-            updatedAt: 1, 
-            ytId: 1 
+            updatedAt: 1 
           })
           .toArray()
       ).filter((e) => !isSample(e.cid));
