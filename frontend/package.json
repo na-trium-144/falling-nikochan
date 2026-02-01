@@ -22,7 +22,7 @@
     "@falling-nikochan/chart": "workspace:*",
     "@falling-nikochan/i18n": "workspace:*",
     "@falling-nikochan/route": "workspace:*",
-    "@fontsource-variable/noto-sans": "=5.2.5",
+    "@fontsource-variable/noto-sans": "=5.2.10",
     "@fontsource-variable/noto-sans-jp": "=5.2.5",
     "@fontsource/kaisei-opti": "=5.2.5",
     "@fontsource/merriweather": "=5.2.5",
