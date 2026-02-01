@@ -539,24 +539,10 @@ describe("ChartEditing", () => {
         cid: undefined,
         currentPasswd: null,
       });
-      ce.setCurrentTimeWithoutOffset(30, 4);
+      ce.setCurrentTimeWithoutOffset(30);
       for (const level of ce.levels) {
         expect(level.current.timeSec).to.equal(30 - ce.offset);
-        expect(level.meta.snapDivider).to.equal(4);
       }
-    });
-    test("should keep old snapDivider if not given", () => {
-      const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: dummyLuaExecutor(),
-        locale: "en",
-        cid: undefined,
-        currentPasswd: null,
-      });
-      ce.levels[0].setCurrentTimeWithoutOffset(0, 4);
-      expect(ce.levels[1].meta.snapDivider).to.equal(2);
-      ce.setCurrentTimeWithoutOffset(30);
-      expect(ce.levels[0].meta.snapDivider).to.equal(4);
-      expect(ce.levels[1].meta.snapDivider).to.equal(2);
     });
   });
   describe("setYTDuration", () => {

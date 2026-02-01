@@ -18,6 +18,7 @@ export const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
   screenWidth: number;
   screenHeight: number;
   fixedSeed?: boolean;
+  className?: string;
 }) {
   const { screenWidth, screenHeight, fixedSeed } = props;
   const [paperTextureSeed, setPaperTextureSeed] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
     <svg
       className={clsx(
         "fn-irasutoya-like-bg",
+        props.className,
         "transition-opacity duration-300",
         csrReady ? "opacity-100" : "opacity-0"
       )}
@@ -170,7 +172,6 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
     return null;
   }
 
-  const className = "absolute pointer-events-none";
   const style = {
     left: "-2.5rem",
     right: "-2.5rem",
@@ -181,11 +182,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   return (
     <>
       <svg
-        className={clsx(
-          "fn-irasutoya-like-grass-far",
-          className,
-          props.classNameFar
-        )}
+        className={clsx("fn-irasutoya-like-grass-far", props.classNameFar)}
         style={style}
         viewBox={viewBox}
       >
@@ -239,11 +236,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
         </g>
       </svg>
       <svg
-        className={clsx(
-          "fn-irasutoya-like-grass-near",
-          className,
-          props.classNameNear
-        )}
+        className={clsx("fn-irasutoya-like-grass-near", props.classNameNear)}
         style={style}
         viewBox={viewBox}
       >

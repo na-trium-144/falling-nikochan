@@ -96,7 +96,7 @@ export function AboutContent2() {
             <img
               src={
                 process.env.ASSET_PREFIX +
-                `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+                `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg?v=2`
               }
               className="w-full h-full opacity-70"
             />
@@ -150,7 +150,7 @@ export function AboutContent2() {
             <img
               src={
                 process.env.ASSET_PREFIX +
-                `/assets/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg`
+                `/assets/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg?v=2`
               }
               className="w-full h-full opacity-70"
             />

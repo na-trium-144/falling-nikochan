@@ -91,7 +91,7 @@ export default function LevelTab(props: Props) {
                 i === chart?.currentLevelIndex
                   ? "text-blue-600 dark:text-blue-400"
                   : "hover:text-slate-500 hover:dark:text-stone-400",
-                level.meta.unlisted && "text-slate-400 dark:text-stone-600"
+                level.meta.unlisted && "text-slate-400 dark:text-stone-500"
               )}
               onClick={() => chart?.setCurrentLevelIndex(i)}
             >
@@ -121,7 +121,7 @@ export default function LevelTab(props: Props) {
                 className={clsx(
                   "inline-block",
                   level.freeze.notes.length ||
-                    "text-slate-400 dark:text-stone-600"
+                    "text-slate-400 dark:text-stone-500"
                 )}
               >
                 ({level.freeze.notes.length} notes)

@@ -41,6 +41,8 @@ jobs:
     - run: pnpm install --frozen-lockfile
     - run: pnpm run mongo-docker
     - run: pnpm run test
+    # seedスクリプトが動作するかどうかもチェックする
+    - run: pnpm run seed
 
   test-bun:
     runs-on: ubuntu-latest

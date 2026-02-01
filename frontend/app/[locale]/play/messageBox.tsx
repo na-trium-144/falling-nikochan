@@ -361,7 +361,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
   const diffMaxSec = -badFastSec;
   return (
     <div className="absolute inset-y-0 right-1.5 w-4 overflow-visible ">
-      <div className="absolute inset-y-0 inset-x-0.5 rounded-xs bg-slate-200 dark:bg-stone-700 " />
+      <div className="absolute inset-y-0 inset-x-0.5 rounded-xs bg-slate-200 dark:bg-stone-600 " />
       <div className="absolute top-1/2 inset-x-0 h-0 border-b border-slate-300 dark:border-stone-600" />
       <div
         className="absolute inset-x-0 h-full "

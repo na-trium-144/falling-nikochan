@@ -221,7 +221,13 @@ function Play(props: Props) {
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
-    requestAnimationFrame(() => setInitAnim(true));
+    setTimeout(
+      () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => setInitAnim(true))
+        ),
+      100
+    );
   }, []);
 
   const lvType: string =
@@ -273,14 +279,8 @@ function Play(props: Props) {
   );
 
   const ref = useRef<HTMLDivElement>(null!);
-  const {
-    isTouch,
-    screenWidth,
-    screenHeight,
-    rem,
-    mobileStatusScale,
-    largeResult,
-  } = useDisplayMode();
+  const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
+    useDisplayMode();
   const isMobile = screenWidth < screenHeight;
 
   const statusSpace = useResizeDetector();
@@ -511,6 +511,7 @@ function Play(props: Props) {
 
   // 準備完了画面を表示する (showStoppedとshowResultに優先する)
   const [showReady, setShowReady] = useState<boolean>(false);
+  const [openReadyAnim, setOpenReadyAnim] = useState<boolean>(false);
   // スタートボタンを押し、準備完了画面を隠すアニメーションをする
   const [closeReadyAnim, setCloseReadyAnim] = useState<boolean>(false);
   const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -604,6 +605,7 @@ function Play(props: Props) {
       }
       setShowLoading(false);
       setShowReady(true);
+      setTimeout(() => requestAnimationFrame(() => setOpenReadyAnim(true)));
       resetNotesAll(chartSeq.notes, -Infinity);
       ref.current?.focus();
       setInitDone(true);
@@ -869,15 +871,19 @@ function Play(props: Props) {
       }
       if (e.key === " " && showReady && !chartPlaying) {
         start();
+        e.preventDefault();
       } else if (
         e.key === " " &&
         ((showStopped && !showResult) || (showResult && exitableNow()))
       ) {
         setShowReady(true);
+        e.preventDefault();
       } else if ((e.key === "Escape" || e.key === "Esc") && chartPlaying) {
         stop();
+        e.preventDefault();
       } else if ((e.key === "Escape" || e.key === "Esc") && exitableNow()) {
         exit();
+        e.preventDefault();
       } else if (e.key === "Left" || e.key === "ArrowLeft") {
         seekBack();
       } else if (e.key === "Right" || e.key === "ArrowRight") {
@@ -994,7 +1000,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "isolate z-15 flex-none m-3 mb-0 self-end",
+                  "isolate z-15 flex-none m-3 mt-4.5 mb-0 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -1073,7 +1079,7 @@ function Play(props: Props) {
           <div
             className={clsx(
               "absolute inset-0 isolate z-10",
-              "transition-all duration-200",
+              "transition-all duration-300",
               cloudsOk
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-[-300px]"
@@ -1117,17 +1123,17 @@ function Play(props: Props) {
             >
               <button
                 className={clsx(
-                  "rounded-full cursor-pointer",
+                  "rounded-full cursor-pointer leading-0",
                   isTouch
-                    ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                    ? "bg-white/50 dark:bg-stone-700/50 p-2"
                     : "py-2 px-1",
                   "hover:bg-slate-200/50 active:bg-slate-300/50",
-                  "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                  "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
                   linkStyle1
                 )}
                 onClick={stop}
               >
-                <Pause className="inline-block align-middle text-xl leading-1" />
+                <Pause className="inline-block align-middle text-xl" />
                 {!isTouch && <Key handleKeyDown>Esc</Key>}
               </button>
               {auto && !isMobile && !isTouch && queryOptions.seek && (
@@ -1136,10 +1142,10 @@ function Play(props: Props) {
                     className={clsx(
                       "rounded-full cursor-pointer",
                       isTouch
-                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
                         : "py-2 px-1",
                       "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
                       linkStyle1
                     )}
                     onClick={seekBack}
@@ -1151,10 +1157,10 @@ function Play(props: Props) {
                     className={clsx(
                       "rounded-full cursor-pointer",
                       isTouch
-                        ? "bg-white/50 dark:bg-stone-800/50 p-2"
+                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
                         : "py-2 px-1",
                       "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
                       linkStyle1
                     )}
                     onClick={seekForward}
@@ -1194,8 +1200,9 @@ function Play(props: Props) {
             <ReadyMessage
               className={clsx(
                 "isolate z-20",
-                closeReadyAnim &&
-                  "transition-[scale,opacity] duration-200 ease-out opacity-0 scale-0"
+                "transition-[scale,opacity] duration-200 ease-out",
+                !openReadyAnim && "opacity-0",
+                closeReadyAnim && "opacity-0 scale-0"
               )}
               isTouch={isTouch}
               back={showResult ? () => setShowReady(false) : undefined}
@@ -1303,11 +1310,11 @@ function Play(props: Props) {
       <div
         className={clsx(
           "relative w-full",
-          "transition-transform duration-200 ease-out",
+          "transition-transform duration-500 ease-out",
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
         style={{
-          height: isMobile ? 6 * rem * mobileStatusScale : "10vh",
+          height: isMobile ? 6 * statusScale * rem : "10vh",
           maxHeight: "15vh",
         }}
       >
@@ -1316,7 +1323,7 @@ function Play(props: Props) {
           classNameFar="isolate -z-10"
           height={
             (isMobile
-              ? Math.min(6 * rem * mobileStatusScale, 0.15 * screenHeight)
+              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
               : 0.1 * screenHeight) +
             1 * rem
           }
@@ -1326,7 +1333,11 @@ function Play(props: Props) {
             className="isolate z-14 absolute"
             style={{
               bottom: "100%",
-              right: isMobile ? "1rem" : statusOverlaps ? 15 * rem : "1rem",
+              right: isMobile
+                ? "1rem"
+                : statusOverlaps
+                  ? 18 * statusScale * rem
+                  : "1rem",
             }}
             signature={chartSeq.signature}
             getCurrentTimeSec={getCurrentTimeSec}
@@ -1358,7 +1369,7 @@ function Play(props: Props) {
             <StatusBox
               className="absolute inset-0 isolate z-15"
               style={{
-                margin: 1 * rem * mobileStatusScale,
+                margin: 1 * statusScale * rem,
               }}
               judgeCount={judgeCount}
               bigCount={bigCount || 0}

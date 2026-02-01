@@ -12,7 +12,9 @@
   --container-main-nav: 16rem;
   --container-main: 88rem;
   --container-mobile-header: 3.25rem; /* MobileHeader を編集したら変えること */
-  --container-mobile-footer: 3.25rem; /* MobileFooter を編集したら変えること */
+  --container-mobile-footer: 3.75rem; /* MobileFooter を編集したら変えること */
+  --text-1_5xl: 1.375rem; /* 22px */
+  --text-2_5xl: 1.6875rem; /* 27px */
   --blur-2xs: 2px;
   --radius-box: 1.5rem;
   --shadow-modal: var(--shadow-md);

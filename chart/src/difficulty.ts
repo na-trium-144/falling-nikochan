@@ -1,4 +1,5 @@
-import { LevelFreeze } from "./chart.js";
+import { BPMChange } from "./bpm.js";
+import { NoteCommand } from "./command.js";
 import {
   baseScoreRate,
   bonusMax,
@@ -7,6 +8,7 @@ import {
   okBaseScore,
   okSec,
 } from "./gameConstant.js";
+import { NoteCommand3 } from "./legacy/chart3.js";
 import { getTimeSec } from "./seq.js";
 
 /*
@@ -36,7 +38,10 @@ function lvToNps(lv: number, multiHit: number) {
   return Math.exp((lv + 2) / 5) / multiHit;
 }
 
-export function difficulty(level: LevelFreeze, type: string): number {
+export function difficulty(
+  level: { notes: NoteCommand[] | NoteCommand3[]; bpmChanges: BPMChange[] },
+  type: string
+): number {
   const maxLv = 20;
   const minLv = 1;
   if (level.notes.length === 0) {
@@ -108,7 +113,7 @@ export function difficulty(level: LevelFreeze, type: string): number {
 }
 
 function agentsPlay(
-  level: LevelFreeze,
+  level: { notes: NoteCommand[] | NoteCommand3[]; bpmChanges: BPMChange[] },
   multiHit: number,
   notesHitSec: number[],
   targetNPS: number

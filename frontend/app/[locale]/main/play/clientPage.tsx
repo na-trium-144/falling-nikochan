@@ -22,6 +22,7 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
+import { XLogo } from "@/common/x.jsx";
 
 interface Props {
   locale: string;
@@ -199,7 +200,7 @@ export default function PlayTab(props: Props) {
         <h3 className="mb-2 text-xl font-semibold font-title">{t("latest")}</h3>
         <p className="pl-2 text-justify ">
           {t.rich("latestDesc", {
-            unicodeX: () => <span className="text-lg/6">𝕏</span>,
+            xlogo: () => <XLogo />,
             twitter: (c) => (
               <ExternalLink className="" href="https://twitter.com/nikochan144">
                 <span className="text-sm">{c}</span>

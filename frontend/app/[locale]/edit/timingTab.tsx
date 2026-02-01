@@ -162,13 +162,13 @@ export default function TimingTab(props: Props) {
           theme="filled"
           className={clsx(
             "inline-block align-middle ml-2",
-            props.enableHitSE || "text-slate-400 dark:text-stone-600"
+            props.enableHitSE || "text-slate-400 dark:text-stone-500"
           )}
         />
         <span
           className={clsx(
             "inline-block text-sm w-8 text-center",
-            props.enableHitSE || "text-slate-400 dark:text-stone-600"
+            props.enableHitSE || "text-slate-400 dark:text-stone-500"
           )}
         >
           {props.hitVolume}
@@ -194,13 +194,13 @@ export default function TimingTab(props: Props) {
           theme="filled"
           className={clsx(
             "inline-block align-middle ml-2",
-            props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+            props.enableBeatSE || "text-slate-400 dark:text-stone-500"
           )}
         />
         <span
           className={clsx(
             "inline-block text-sm w-8 text-center",
-            props.enableBeatSE || "text-slate-400 dark:text-stone-600"
+            props.enableBeatSE || "text-slate-400 dark:text-stone-500"
           )}
         >
           {props.beatVolume}

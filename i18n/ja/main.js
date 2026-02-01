@@ -51,7 +51,7 @@ export default {
       latest: "新着譜面・すべての譜面",
       latestDesc:
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。" +
-        "<unicodeX></unicodeX> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
+        "<xlogo></xlogo> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
       latestDescText:
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
       latestDesc2:

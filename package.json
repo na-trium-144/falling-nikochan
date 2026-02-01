@@ -4,7 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": ">=23.6",
+    "node": "^23.6 || ^24",
     "pnpm": ">=10"
   },
   "packageManager": "pnpm@10.28.1",
@@ -15,7 +15,7 @@
     "cdev": "pnpm run --filter chart cdev",
     "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
-    "seed": "pnpm run --filter route seed",
+    "seed": "pnpm run -r --if-present t && pnpm run --filter route seed",
     "ndev": "pnpm run --filter frontend dev",
     "nbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter frontend postbuild",
     "swbuild": "pnpm run -r --if-present t && pnpm run --filter worker build && pnpm run --filter frontend postbuild",

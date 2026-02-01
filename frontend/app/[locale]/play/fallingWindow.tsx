@@ -76,7 +76,7 @@ export default function FallingWindow(props: Props) {
     marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
   const { isDark } = useTheme();
-  const { rem } = useDisplayMode();
+  const { rem, playUIScale } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
   // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
@@ -188,7 +188,7 @@ export default function FallingWindow(props: Props) {
     Promise.all(
       [0, 1, 2, 3].map(async (i) => {
         const res = await fetch(
-          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`
+          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg?v=2`
         );
         const svg = await res.text();
         // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
@@ -267,6 +267,7 @@ export default function FallingWindow(props: Props) {
       const c = {
         noteSize,
         boxSize,
+        playUIScale,
         canvasMarginX,
         canvasMarginY,
         marginY,

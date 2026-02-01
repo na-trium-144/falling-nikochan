@@ -120,7 +120,7 @@ export default function TimeBar(props: Props) {
   return (
     <div
       className={clsx(
-        "h-6 bg-slate-200 dark:bg-stone-700 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
+        "h-6 bg-slate-200 dark:bg-stone-600 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
       )}
       ref={timeBarRef}
     >
@@ -337,7 +337,7 @@ export default function TimeBar(props: Props) {
                   timeBarPos(currentLevel.currentSpeedChange!.timeSec),
               }}
             />
-            <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-800/15 backdrop-blur-2xs">
+            <span className="inline-block -translate-x-1/2 px-1 rounded-md bg-white/25 dark:bg-stone-700/15 backdrop-blur-2xs">
               {(
                 currentLevel.currentSpeed! +
                 ((currentLevel.nextSpeed! - currentLevel.currentSpeed!) /

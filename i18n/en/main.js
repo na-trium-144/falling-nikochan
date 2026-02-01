@@ -59,7 +59,7 @@ export default {
       latest: "Latest Charts / All Charts",
       latestDesc:
         "List of published charts. Sorted by the most recently created or updated. " +
-        "Updates are also announced on the official account of <unicodeX></unicodeX> <twitter>@nikochan144</twitter>.",
+        "Updates are also announced on the official account of <xlogo></xlogo> <twitter>@nikochan144</twitter>.",
       latestDescText:
         "List of published charts. Sorted by the most recently created or updated. ",
       latestDesc2:

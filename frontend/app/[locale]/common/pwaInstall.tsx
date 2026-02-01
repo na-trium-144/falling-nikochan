@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
@@ -240,14 +241,20 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         break;
     }
   }, []);
+  const updateFetching = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    let updateFetching: ReturnType<typeof setTimeout> | null = null;
     if (
       process.env.NODE_ENV !== "development" &&
       "serviceWorker" in navigator
     ) {
+      navigator.serviceWorker.addEventListener("message", (e) => {
+        console.warn("sw:", e.data);
+      });
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
-        updateFetching = setTimeout(
+        if (updateFetching.current !== null) {
+          clearTimeout(updateFetching.current);
+        }
+        updateFetching.current = setTimeout(
           () => void fetch("/worker/checkUpdate"),
           1000
         );
@@ -255,21 +262,28 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
           if (isStandalone()) {
             setWorkerUpdate({ state: "updating" });
           }
-          if (updateFetching !== null) clearTimeout(updateFetching);
+          if (updateFetching.current !== null) {
+            clearTimeout(updateFetching.current);
+          }
           const newWorker = reg.installing;
           newWorker?.addEventListener("statechange", () => {
-            if (newWorker?.state === "installed" && isStandalone()) {
+            console.log("sw statechange:", newWorker?.state);
+            if (newWorker?.state === "activated") {
               // setWorkerUpdate({ state: "done" });
-              updateFetching = setTimeout(() => {
+              updateFetching.current = setTimeout(() => {
                 fetch("/worker/checkUpdate")
                   .then((res) => {
                     // okの場合、messageイベントで受け取るのでここでは何もしない
                     if (!res.ok) {
-                      setWorkerUpdate({ state: "failed" });
+                      if (isStandalone()) {
+                        setWorkerUpdate({ state: "failed" });
+                      }
                     }
                   })
                   .catch(() => {
-                    setWorkerUpdate({ state: "failed" });
+                    if (isStandalone()) {
+                      setWorkerUpdate({ state: "failed" });
+                    }
                   });
               }, 1000);
             }
@@ -278,7 +292,11 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       });
       navigator.serviceWorker.addEventListener("message", (event) => {
         // console.log("Service Worker message:", event.data);
-        if (event.data.type === "initAssets" && isStandalone()) {
+        if (
+          typeof event.data === "object" &&
+          event.data.type === "initAssets" &&
+          isStandalone()
+        ) {
           switch ((event.data as InitAssetsState).state) {
             case "done":
             case "failed":
@@ -304,9 +322,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         }
       });
     }
-    return () => {
-      if (updateFetching !== null) clearTimeout(updateFetching);
-    };
   }, []);
   useEffect(() => {
     if (workerUpdate?.state === "done" || workerUpdate?.state === "failed") {
@@ -340,7 +355,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       {props.children}
       <Box
         classNameOuter={clsx(
-          "fixed z-15 bottom-12 inset-x-0 w-max max-w-full mx-auto shadow-modal",
+          "fixed! z-15 bottom-(--container-mobile-footer) translate-y-1 inset-x-0",
+          "w-max max-w-full mx-auto shadow-modal",
           "transition-all duration-200 origin-bottom",
           "rounded-sq-xl!",
           workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)

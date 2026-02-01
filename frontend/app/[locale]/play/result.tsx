@@ -317,7 +317,7 @@ function ResultRow(props: RowProps) {
       className={clsx(
         "flex flex-row items-baseline",
         props.visible || "opacity-0",
-        props.disabled && "text-slate-400 dark:text-stone-600",
+        props.disabled && "text-slate-400 dark:text-stone-500",
         props.className
       )}
     >

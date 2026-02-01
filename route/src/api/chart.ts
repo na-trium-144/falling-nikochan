@@ -342,9 +342,9 @@ export async function chartToEntry(
   if (addIp !== null && !ip.includes(addIp)) {
     ip.push(addIp);
   }
-  const levelsMin = chart.ver === 13 ? chart.levels : chart.levelsMin;
-  const levelsFreeze = chart.ver === 13 ? chart.levels : chart.levelsFreeze;
-  const lua = chart.ver === 13 ? chart.levels.map((l) => l.lua) : chart.lua;
+  const levelsMin = "levels" in chart ? chart.levels : chart.levelsMin;
+  const levelsFreeze = "levels" in chart ? chart.levels : chart.levelsFreeze;
+  const lua = "levels" in chart ? chart.levels.map((l) => l.lua) : chart.lua;
   return {
     cid,
     deleted: prevEntry?.deleted || false,
@@ -359,7 +359,7 @@ export async function chartToEntry(
       ytBegin: levelsMin[i].ytBegin,
       ytEndSec: levelsMin[i].ytEndSec,
       ytEnd: levelsMin[i].ytEnd,
-      snapDivider: chart.ver === 13 ? 4 : chart.levelsMin[i].snapDivider,
+      snapDivider: "snapDivider" in levelsMin[i] ? levelsMin[i].snapDivider : 4,
     })),
     ver: chart.ver,
     published: chart.published,

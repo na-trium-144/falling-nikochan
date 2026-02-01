@@ -128,7 +128,7 @@ export function SharePageModalProvider(props: {
             historyBackWithReview();
           }}
         >
-          <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+          <div className="absolute inset-x-24 inset-y-16 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
             <Box
               onClick={(e) => e.stopPropagation()}
               classNameOuter={clsx(
@@ -137,7 +137,7 @@ export function SharePageModalProvider(props: {
                 "transition-transform duration-200 origin-center",
                 modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
               )}
-              classNameInner={clsx("flex flex-col")}
+              classNameInner={clsx("flex flex-col max-w-main")}
               scrollableY
               padding={6}
             >

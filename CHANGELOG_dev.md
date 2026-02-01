@@ -1,4 +1,8 @@
-## ver. 14.0 - 2026/01/31 [#901](https://github.com/na-trium-144/falling-nikochan/pull/901)
+## ver. 14.1 - 2026/02/01
+
+* standaloneでないときも新しいserviceWorkerのactivate直後にassetsを更新するよう修正
+
+## ver. 14.0 - 2026/02/01 [#901](https://github.com/na-trium-144/falling-nikochan/pull/901)
 
 * プロジェクトのライセンスをAGPL-3.0に変更
 * stagingブランチとデプロイ環境を追加
@@ -31,6 +35,7 @@
     * 音符ごとのスコアの表示を追加
     * 50chainごとにchain表示にアニメーションを追加
     * ミス時にchain表示にアニメーションを追加
+  * 画面サイズが大きい時UIも拡大する
   * BPMSignに音符が重なる場合BPMSignが一時的に半透明になるようにした
   * スタートボタンを押してからYouTubeの再生が始まるまでにラグがあるときloadingを表示するようにした
 * プレイオプションの表示・並び順を変更
@@ -59,6 +64,8 @@
 * eslintのexaustive-depsをerrorにする。
 * `npm run cdev`スクリプトを追加、install時に自動的にtscが実行されるのをやめる
 * プレイ中のseekを実装(`seek=1`)、途中から再生した際にそれまでの音符は判定せず消すようにした
+* serviceWorkerのメッセージをメインスレッドに送信、forceUpdateを追加
+* 𝕏のロゴをsvgに置き換え
 * API
   * ver7〜12の譜面を上書きする際に内容に変更がなければハッシュが変わらないようにする
   * /api/chartFileとnewChartFileが過去2バージョンまでサポートするよう変更

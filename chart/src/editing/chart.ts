@@ -260,12 +260,9 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.emit("rerender");
     this.emit("change");
   }
-  setCurrentTimeWithoutOffset(
-    timeSecWithoutOffset: number,
-    snapDivider?: number
-  ) {
+  setCurrentTimeWithoutOffset(timeSecWithoutOffset: number) {
     for (const level of this.#levels) {
-      level.setCurrentTimeWithoutOffset(timeSecWithoutOffset, snapDivider);
+      level.setCurrentTimeWithoutOffset(timeSecWithoutOffset);
     }
   }
   setYTDuration(duration: number) {
