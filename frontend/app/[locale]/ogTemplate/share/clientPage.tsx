@@ -8,7 +8,10 @@ import { useTranslations } from "next-intl";
 import { stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { levelBgColors } from "@/common/levelColors";
-import { IrasutoyaLikeBgInner, IrasutoyaLikeGrassInner } from "@/common/irasutoyaLike";
+import {
+  IrasutoyaLikeBgInner,
+  IrasutoyaLikeGrassInner,
+} from "@/common/irasutoyaLike";
 
 export default function OGTemplate() {
   const t = useTranslations("share");
@@ -25,7 +28,12 @@ export default function OGTemplate() {
       className="absolute flex flex-col "
       style={{ width: 1200, height: 630 }}
     >
-      <IrasutoyaLikeBgInner screenWidth={1200} screenHeight={630} fixedSeed />
+      <IrasutoyaLikeBgInner
+        screenWidth={1200}
+        screenHeight={630}
+        fixedSeed
+        className="absolute"
+      />
       <Title
         className="absolute top-0 left-0 h-25 scale-190 origin-top-left "
         anim={false}
@@ -89,6 +97,8 @@ export default function OGTemplate() {
           screenHeight={630}
           height={2.5 * 16}
           fixedSeed
+          classNameFar="absolute"
+          classNameNear="absolute"
         />
         <RhythmicalSlime
           className="z-14 absolute scale-165 origin-bottom-right "

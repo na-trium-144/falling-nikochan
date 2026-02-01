@@ -32,7 +32,9 @@ function Cloud(props: CProps) {
       <img
         src={
           process.env.ASSET_PREFIX +
-          (themeState.isDark ? "/assets/cloud-black.svg" : "/assets/cloud.svg")
+          (themeState.isDark
+            ? "/assets/cloud-black.svg?v=2"
+            : "/assets/cloud.svg?v=2")
         }
         className="absolute inset-0 -z-10 "
       />
@@ -256,7 +258,7 @@ function ChainBigAnim(props: { className: string; chain: number }) {
         anim.current = ref.current?.animate(
           [
             { transform: "rotate(0) scale(1)", opacity: 1 },
-            { transform: "rotate(-3.0deg) scale(4)", opacity: 0 },
+            { transform: "rotate(-3.0deg) scale(5)", opacity: 0 },
           ],
           { duration: 500, fill: "forwards", easing: "ease-out" }
         );
@@ -264,11 +266,16 @@ function ChainBigAnim(props: { className: string; chain: number }) {
     }
   }, [props.chain, animChain]);
   return (
-    <div className={clsx("absolute inset-0 flex flex-row bold-by-stroke", props.className)}>
+    <div
+      className={clsx(
+        "absolute inset-0 flex flex-row bold-by-stroke",
+        props.className
+      )}
+    >
       <span className="flex-3" />
       <span
         ref={ref}
-        style={{ fontSize: 40, lineHeight: 1, transformOrigin: "40% 40%" }}
+        style={{ fontSize: 40, lineHeight: 1, transformOrigin: "35% 30%" }}
       >
         {animChain > 0 ? animChain : ""}
       </span>
@@ -316,14 +323,14 @@ function ChainDropAnim(props: {
   return (
     <div
       className={clsx(
-        "absolute inset-0 flex flex-row opacity-50 bold-by-stroke",
+        "absolute inset-0 flex flex-row opacity-80 bold-by-stroke",
         props.className
       )}
     >
       <span className="flex-3" />
       <span
         ref={ref}
-        style={{ fontSize: 40, lineHeight: 1, transformOrigin: "40% 40%" }}
+        style={{ fontSize: 40, lineHeight: 1, transformOrigin: "50% 50%" }}
       >
         {animChain > 0 ? animChain : ""}
       </span>

@@ -1,7 +1,6 @@
 import clsx from "clsx/lite";
 import {
   emptyLevel,
-  copyLevel,
   levelTypes,
   levelTypesConst,
   ChartEditing,
@@ -35,7 +34,15 @@ export default function LevelTab(props: Props) {
         <span className="mr-1">{t("levelsList")}:</span>
         <Button
           text={t("levelAdd")}
-          onClick={() => chart?.addLevel(emptyLevel(currentLevel?.toObject()))}
+          onClick={() =>
+            chart?.addLevel(
+              emptyLevel(
+                currentLevel?.freeze.bpmChanges,
+                currentLevel?.freeze.speedChanges,
+                currentLevel?.freeze.signature
+              )
+            )
+          }
         />
         {currentLevel && (
           <>
@@ -43,7 +50,11 @@ export default function LevelTab(props: Props) {
               text={t("levelDuplicate")}
               onClick={() =>
                 currentLevel &&
-                chart?.addLevel(copyLevel(currentLevel?.toObject()))
+                chart?.addLevel({
+                  min: currentLevel.meta,
+                  lua: currentLevel.lua,
+                  freeze: currentLevel.freeze,
+                })
               }
             />
             <Button
@@ -68,7 +79,11 @@ export default function LevelTab(props: Props) {
           </>
         )}
       </div>
-      <Scrollable as="ul" className="ml-2 mt-2 mb-2 space-y-1 max-h-32" scrollableY>
+      <Scrollable
+        as="ul"
+        className="ml-2 mt-2 mb-2 space-y-1 max-h-32"
+        scrollableY
+      >
         {chart?.levels.map((level, i) => (
           <li key={i}>
             <button
@@ -76,7 +91,7 @@ export default function LevelTab(props: Props) {
                 i === chart?.currentLevelIndex
                   ? "text-blue-600 dark:text-blue-400"
                   : "hover:text-slate-500 hover:dark:text-stone-400",
-                level.meta.unlisted && "text-slate-400 dark:text-stone-600"
+                level.meta.unlisted && "text-slate-400 dark:text-stone-500"
               )}
               onClick={() => chart?.setCurrentLevelIndex(i)}
             >
@@ -106,7 +121,7 @@ export default function LevelTab(props: Props) {
                 className={clsx(
                   "inline-block",
                   level.freeze.notes.length ||
-                    "text-slate-400 dark:text-stone-600"
+                    "text-slate-400 dark:text-stone-500"
                 )}
               >
                 ({level.freeze.notes.length} notes)

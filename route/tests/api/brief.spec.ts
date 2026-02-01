@@ -20,7 +20,7 @@ describe("GET /api/brief/:cid", () => {
       levels: [
         {
           name: "e",
-          hash: await hashLevel(dummyChart().levels[0]),
+          hash: await hashLevel(dummyChart().levelsFreeze[0]),
           type: "Single",
           difficulty: 1,
           noteCount: 1,

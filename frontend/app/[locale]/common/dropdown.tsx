@@ -27,6 +27,7 @@ export interface DropDownProps<T> {
 }
 
 export default function DropDown<T = unknown>(props: DropDownProps<T>) {
+  const { options, onSelect } = props;
   const [isOpen, popupAppearing, setIsOpen] = useDelayedDisplayState(200);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [dropdownPosition, setDropdownPosition] = useState<{
@@ -84,15 +85,15 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
       }
       if (event.key === "ArrowDown") {
         event.preventDefault();
-        setHighlightedIndex((prev) => (prev + 1) % props.options.length);
+        setHighlightedIndex((prev) => (prev + 1) % options.length);
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
         setHighlightedIndex(
-          (prev) => (prev - 1 + props.options.length) % props.options.length
+          (prev) => (prev - 1 + options.length) % options.length
         );
       } else if (event.key === "Enter" && highlightedIndex >= 0) {
         event.preventDefault();
-        props.onSelect(props.options[highlightedIndex].value, highlightedIndex);
+        onSelect(options[highlightedIndex].value, highlightedIndex);
         setIsOpen(false);
         setHighlightedIndex(-1);
       }
@@ -105,7 +106,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, highlightedIndex, props.options, props.onSelect]);
+  }, [isOpen, highlightedIndex, options, onSelect, setIsOpen]);
 
   const dropdownContent = (
     <Box
@@ -128,7 +129,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
       classNameInner={clsx("flex flex-col")}
       onPointerLeave={() => setHighlightedIndex(-1)}
     >
-      {props.options.map((option, index) => (
+      {options.map((option, index) => (
         <button
           key={index}
           className={clsx(
@@ -142,7 +143,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
           )}
           style={option.style}
           onClick={() => {
-            props.onSelect(option.value, index);
+            onSelect(option.value, index);
             setIsOpen(false);
             setHighlightedIndex(-1);
           }}

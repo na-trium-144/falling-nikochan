@@ -1,7 +1,7 @@
 import { Step, stepAdd, stepSimplify } from "../step.js";
 import { LuaExecResult } from "./exec.js";
 
-export function luaNote(state: LuaExecResult, ...args: any[]) {
+export function luaNote(state: LuaExecResult, ...args: unknown[]) {
   if (args.length === 5) {
     args.push(false);
   }
@@ -27,7 +27,7 @@ export function luaNote(state: LuaExecResult, ...args: any[]) {
     throw "invalid argument for Note()";
   }
 }
-export function luaStep(state: LuaExecResult, ...args: any[]) {
+export function luaStep(state: LuaExecResult, ...args: unknown[]) {
   if (
     args.length === 3 &&
     (typeof args[0] === "number" || args[0] === null) &&
@@ -54,7 +54,7 @@ export function luaStep(state: LuaExecResult, ...args: any[]) {
   }
 }
 
-export function luaBeat(state: LuaExecResult, ...args: any[]) {
+export function luaBeat(state: LuaExecResult, ...args: unknown[]) {
   if (args.length === 2) {
     args.push(0);
     args.push(1);
@@ -64,7 +64,7 @@ export function luaBeat(state: LuaExecResult, ...args: any[]) {
     (typeof args[0] === "number" || args[0] === null) &&
     Array.isArray(args[1]) &&
     args[1].every(
-      (x: any) =>
+      (x: unknown) =>
         Array.isArray(x) && x.every((b) => b === 4 || b === 8 || b === 16)
     ) &&
     typeof args[2] === "number" &&
@@ -87,7 +87,7 @@ export function luaBeat(state: LuaExecResult, ...args: any[]) {
     throw "invalid argument for Beat()";
   }
 }
-export function luaBPM(state: LuaExecResult, ...args: any[]) {
+export function luaBPM(state: LuaExecResult, ...args: unknown[]) {
   if (
     args.length === 2 &&
     (typeof args[0] === "number" || args[0] === null) &&
@@ -105,7 +105,7 @@ export function luaBPM(state: LuaExecResult, ...args: any[]) {
   }
 }
 
-export function luaAccel(state: LuaExecResult, ...args: any[]) {
+export function luaAccel(state: LuaExecResult, ...args: unknown[]) {
   if (
     args.length === 2 &&
     (typeof args[0] === "number" || args[0] === null) &&
@@ -122,7 +122,7 @@ export function luaAccel(state: LuaExecResult, ...args: any[]) {
     throw "invalid argument for Accel()";
   }
 }
-export function luaAccelEnd(state: LuaExecResult, ...args: any[]) {
+export function luaAccelEnd(state: LuaExecResult, ...args: unknown[]) {
   if (
     args.length === 2 &&
     (typeof args[0] === "number" || args[0] === null) &&

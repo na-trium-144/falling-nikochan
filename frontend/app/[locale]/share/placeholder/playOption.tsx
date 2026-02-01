@@ -112,8 +112,8 @@ export function PlayOption(props: Props) {
                       "w-4 h-4 translate-x-1/2 z-10",
                       "border-l border-b rounded-tr-full",
                       "rotate-45 origin-center",
-                      "border-slate-400 dark:border-stone-600",
-                      "bg-white dark:bg-stone-800",
+                      "border-slate-400 dark:border-stone-500",
+                      "bg-white dark:bg-stone-700",
                       "no-mobile",
                       "invisible",
                       selectedLevel === i && "visible"
@@ -136,8 +136,8 @@ export function PlayOption(props: Props) {
             className={clsx(
               "flex-none max-w-full px-4 py-2",
               "text-center rounded-sq-xl border",
-              "border-slate-400 dark:border-stone-600",
-              "bg-white dark:bg-stone-800",
+              "border-slate-400 dark:border-stone-500",
+              "bg-white dark:bg-stone-700",
               "main-wide:transition-all main-wide:duration-200 origin-left",
               selectedLevel !== null && selectedLevel >= 0
                 ? "scale-100"
@@ -380,7 +380,7 @@ function SelectedLevelInfo(props: {
           <span
             className={clsx(
               "bold-by-stroke",
-              selectedBestScore || "text-slate-400 dark:text-stone-600"
+              selectedBestScore || "text-slate-400 dark:text-stone-500"
             )}
           >
             <span className="inline-block text-2xl">

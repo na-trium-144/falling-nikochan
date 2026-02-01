@@ -143,8 +143,6 @@ export default function Edit(props: {
 
   const ref = useRef<HTMLDivElement | null>(null);
 
-  const [timeBarPxPerSec, setTimeBarPxPerSec] = useState<number>(300);
-
   const ytPlayer = useRef<YouTubePlayer | undefined>(undefined);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const changePlaybackRate = useCallback((rate: number) => {
@@ -208,16 +206,16 @@ export default function Edit(props: {
   );
   const seekStepRel = useCallback(
     (move: number) => {
-      if (cur?.step) {
-        let newStep = stepAdd(cur?.step, {
+      if (cur?.step && currentLevel) {
+        let newStep = stepAdd(cur.step, {
           fourth: 0,
           numerator: move,
-          denominator: cur?.snapDivider,
+          denominator: currentLevel.meta.snapDivider,
         });
         seekStepAbs(newStep, true);
       }
     },
-    [cur, seekStepAbs]
+    [cur, currentLevel, seekStepAbs]
   );
   const seekRight1 = useCallback(() => {
     if (currentLevel && cur) {
@@ -245,14 +243,17 @@ export default function Edit(props: {
     }
     ref.current?.focus();
   }, [cur, currentLevel, seekStepRel]);
-  const seekSec = (moveSec: number, focus = true) => {
-    if (chart && cur) {
-      setAndSeekCurrentTimeWithoutOffset(
-        cur?.timeSec + chart.offset + moveSec,
-        focus
-      );
-    }
-  };
+  const seekSec = useCallback(
+    (moveSec: number, focus = true) => {
+      if (chart && cur) {
+        setAndSeekCurrentTimeWithoutOffset(
+          cur?.timeSec + chart.offset + moveSec,
+          focus
+        );
+      }
+    },
+    [chart, cur, setAndSeekCurrentTimeWithoutOffset]
+  );
 
   useEffect(() => {
     if (playing) {
@@ -428,9 +429,9 @@ export default function Edit(props: {
         } else if (e.key === "Right" || e.key === "ArrowRight") {
           seekRight1();
         } else if (e.key === "PageUp" && cur) {
-          seekStepRel(-cur?.snapDivider * 4);
+          seekStepRel(-currentLevel.meta.snapDivider * 4);
         } else if (e.key === "PageDown" && cur) {
-          seekStepRel(cur?.snapDivider * 4);
+          seekStepRel(currentLevel.meta.snapDivider * 4);
         } else if (e.key === ",") {
           seekSec(-1 / 30);
         } else if (e.key === ".") {
@@ -441,9 +442,13 @@ export default function Edit(props: {
           chart.pasteNote(0);
         } else if (Number(e.key) >= 1) {
           chart.pasteNote(Number(e.key));
-        } else if (e.key === "n") {
+        } else if (e.key === "n" && currentLevel?.canAddNote) {
           chart.pasteNote(0, true);
-        } else if (e.key === "Backspace" || e.key === "Delete") {
+        } else if (
+          (e.key === "Backspace" || e.key === "Delete") &&
+          currentLevel?.currentNote &&
+          currentLevel?.currentNoteEditable
+        ) {
           currentLevel?.deleteNote();
         } else if (e.key === "b") {
           if (currentLevel?.currentNote) {
@@ -462,8 +467,9 @@ export default function Edit(props: {
         }
       }
     };
-    document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
+    // document.addEventListener() はreactのイベントのstopPropagation()で止まらないので使わない
+    window.addEventListener("keydown", keydown);
+    return () => window.removeEventListener("keydown", keydown);
   }, [
     chart,
     ready,
@@ -732,23 +738,23 @@ export default function Edit(props: {
               <span className="inline-block">
                 <Button
                   onClick={() => {
-                    if (ready && cur) {
-                      seekStepRel(-cur?.snapDivider * 4);
+                    if (ready && currentLevel) {
+                      seekStepRel(-currentLevel.meta.snapDivider * 4);
                     }
                   }}
                   text={t("playerControls.moveStep", {
-                    step: -(cur?.snapDivider || 1) * 4,
+                    step: -(currentLevel?.meta.snapDivider || 1) * 4,
                   })}
                   keyName="PageUp"
                 />
                 <Button
                   onClick={() => {
-                    if (ready && cur) {
-                      seekStepRel(cur?.snapDivider * 4);
+                    if (ready && currentLevel) {
+                      seekStepRel(currentLevel.meta.snapDivider * 4);
                     }
                   }}
                   text={t("playerControls.moveStep", {
-                    step: (cur?.snapDivider || 1) * 4,
+                    step: (currentLevel?.meta.snapDivider || 1) * 4,
                   })}
                   keyName="PageDn"
                 />
@@ -795,7 +801,7 @@ export default function Edit(props: {
               </span>
             </div>
             <div className="flex-none">
-              <TimeBar chart={chart} timeBarPxPerSec={timeBarPxPerSec} />
+              <TimeBar chart={chart} />
             </div>
             <div className="flex flex-row items-baseline">
               <span>{t("stepUnit")} =</span>
@@ -803,9 +809,9 @@ export default function Edit(props: {
               <span className="ml-1">/</span>
               <Input
                 className="w-12"
-                actualValue={String((cur?.snapDivider ?? 1) * 4)}
+                actualValue={String((currentLevel?.meta.snapDivider ?? 1) * 4)}
                 updateValue={(v: string) => {
-                  currentLevel?.setSnapDivider(Number(v) / 4);
+                  currentLevel?.updateMeta({ snapDivider: Number(v) / 4 });
                 }}
                 isValid={(v) =>
                   !isNaN(Number(v)) &&
@@ -820,12 +826,12 @@ export default function Edit(props: {
               <Button
                 small
                 text="-"
-                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec / 1.5)}
+                onClick={() => chart?.setZoom(chart.zoom - 1)}
               />
               <Button
                 small
                 text="+"
-                onClick={() => setTimeBarPxPerSec(timeBarPxPerSec * 1.5)}
+                onClick={() => chart?.setZoom(chart.zoom + 1)}
               />
             </div>
             <div className="flex flex-row ml-6 mt-3">
@@ -911,7 +917,7 @@ export default function Edit(props: {
             <Box
               classNameOuter={clsx(
                 "mt-2",
-                "bg-slate-200/50! dark:bg-stone-700/50!",
+                "bg-slate-200/50! dark:bg-stone-600/50!",
                 !(
                   luaExecutor.running ||
                   luaExecutor.stdout.length > 0 ||

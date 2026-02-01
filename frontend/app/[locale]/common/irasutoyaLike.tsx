@@ -18,6 +18,7 @@ export const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
   screenWidth: number;
   screenHeight: number;
   fixedSeed?: boolean;
+  className?: string;
 }) {
   const { screenWidth, screenHeight, fixedSeed } = props;
   const [paperTextureSeed, setPaperTextureSeed] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
     <svg
       className={clsx(
         "fn-irasutoya-like-bg",
+        props.className,
         "transition-opacity duration-300",
         csrReady ? "opacity-100" : "opacity-0"
       )}
@@ -119,15 +121,15 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   useEffect(() => {
     let seed = 0;
     function random() {
-      if(fixedSeed){
-        let t = (seed += 0x6D2B79F5);
+      if (fixedSeed) {
+        let t = (seed += 0x6d2b79f5);
         t = Math.imul(t ^ (t >>> 15), t | 1);
         t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      }else{
+      } else {
         return Math.random();
       }
-    };
+    }
 
     // 草のパターン生成（グリッド・ジッター法）
     const grassTufts = [];
@@ -140,9 +142,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
         // セル内のランダムな位置（はみ出し防止のマージンを考慮）
         const margin = cellWidth * 0.05;
         const x =
-          c * cellWidth +
-          margin +
-          random() * (cellWidth - baseW - margin * 2);
+          c * cellWidth + margin + random() * (cellWidth - baseW - margin * 2);
         const y =
           r * cellHeight +
           margin +
@@ -172,7 +172,6 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
     return null;
   }
 
-  const className = "absolute pointer-events-none";
   const style = {
     left: "-2.5rem",
     right: "-2.5rem",
@@ -183,11 +182,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   return (
     <>
       <svg
-        className={clsx(
-          "fn-irasutoya-like-grass-far",
-          className,
-          props.classNameFar
-        )}
+        className={clsx("fn-irasutoya-like-grass-far", props.classNameFar)}
         style={style}
         viewBox={viewBox}
       >
@@ -241,11 +236,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
         </g>
       </svg>
       <svg
-        className={clsx(
-          "fn-irasutoya-like-grass-near",
-          className,
-          props.classNameNear
-        )}
+        className={clsx("fn-irasutoya-like-grass-near", props.classNameNear)}
         style={style}
         viewBox={viewBox}
       >

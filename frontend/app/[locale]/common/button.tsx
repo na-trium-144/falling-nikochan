@@ -67,7 +67,9 @@ export default function Button(props: Props) {
         ? props.keyName.map((k, i) => (
             <>
               {i > 0 && <span className="">+</span>}
-              <Key key={i} handleKeyDown>{k}</Key>
+              <Key key={i} handleKeyDown>
+                {k}
+              </Key>
             </>
           ))
         : props.keyName && <Key handleKeyDown>{props.keyName}</Key>}

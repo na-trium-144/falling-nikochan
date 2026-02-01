@@ -1,53 +1,60 @@
-.fn-irasutoya-like-bg {
-  @apply absolute -inset-0 -z-999999999 pointer-events-none;
-  
-  #bgGradient > stop {
-    &:nth-child(1) {
-      stop-color: var(--color-sky-200);
-      @variant dark {
-        stop-color: var(--color-orange-975);
+@layer components {
+  .fn-irasutoya-like-bg {
+    /* absoluteにするとなぜかSafariでパフォーマンスが大幅に低下する。 */
+    @apply fixed -inset-0 -z-999999999 pointer-events-none;
+
+    #bgGradient > stop {
+      &:nth-child(1) {
+        stop-color: var(--color-sky-200);
+        @variant dark {
+          stop-color: var(--color-orange-975);
+        }
       }
-    }
-    &:nth-child(2) {
-      stop-color: var(--color-sky-50);
-      @variant dark {
-        stop-color: var(--color-orange-950);
+      &:nth-child(2) {
+        stop-color: var(--color-sky-50);
+        @variant dark {
+          stop-color: var(--color-orange-950);
+        }
       }
     }
   }
-}
-.fn-irasutoya-like-grass-far {
-  rect:not(.dummy) {
-    fill: var(--color-lime-600);
-    @variant dark {
-      fill: var(--color-lime-900);
-    }
-  }
-}
-.fn-irasutoya-like-grass-near {
-  #grassPattern > g {
-    fill: var(--color-lime-200);
-    @variant dark {
+  .fn-irasutoya-like-grass-far {
+    @apply fixed pointer-events-none;
+
+    rect:not(.dummy) {
       fill: var(--color-lime-600);
+      @variant dark {
+        fill: var(--color-lime-900);
+      }
     }
   }
-  #grassGradient > stop {
-    &:nth-child(1) {
-      stop-color: var(--color-lime-300);
+  .fn-irasutoya-like-grass-near {
+    @apply fixed pointer-events-none;
+
+    #grassPattern > g {
+      fill: var(--color-lime-200);
       @variant dark {
-        stop-color: var(--color-lime-700);
+        fill: var(--color-lime-600);
       }
     }
-    &:nth-child(2) {
-      stop-color: var(--color-lime-500);
-      @variant dark {
-        stop-color: var(--color-lime-800);
+    #grassGradient > stop {
+      &:nth-child(1) {
+        stop-color: var(--color-lime-300);
+        @variant dark {
+          stop-color: var(--color-lime-700);
+        }
       }
-    }
-    &:nth-child(3) {
-      stop-color: var(--color-lime-600);
-      @variant dark {
-        stop-color: var(--color-lime-900);
+      &:nth-child(2) {
+        stop-color: var(--color-lime-500);
+        @variant dark {
+          stop-color: var(--color-lime-800);
+        }
+      }
+      &:nth-child(3) {
+        stop-color: var(--color-lime-600);
+        @variant dark {
+          stop-color: var(--color-lime-900);
+        }
       }
     }
   }

@@ -204,7 +204,9 @@ function InputCId(props: {
   return (
     <>
       <h3 className="mb-2 ">
-        <span className="text-xl font-semibold font-title">{t("inputId")}:</span>
+        <span className="text-xl font-semibold font-title">
+          {t("inputId")}:
+        </span>
         <Input
           className="ml-4 w-20 no-mobile"
           actualValue=""

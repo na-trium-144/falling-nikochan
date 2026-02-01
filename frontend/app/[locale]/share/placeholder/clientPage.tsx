@@ -47,7 +47,6 @@ interface Props {
 }
 export default function ShareChart(props: Props) {
   const t = useTranslations("share");
-  const tm = useTranslations("main");
   const { locale } = props;
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);

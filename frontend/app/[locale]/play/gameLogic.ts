@@ -41,8 +41,8 @@ export default function useGameLogic(
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
-    [number, number, number, number]
-  >([0, 0, 0, 0]);
+    [number, number, number, number, number]
+  >([0, 0, 0, 0, 0]);
   const notesTotal = notesAll.length;
   const judgeScore = judgeCount[0] * 1 + judgeCount[1] * okBaseScore;
   const [bonus, setBonus] = useState<number>(0); // 1 + 2 + ... + 100 + 100 + ...
@@ -66,12 +66,18 @@ export default function useGameLogic(
   const chainRef = useRef<number>(0);
 
   const lateTimes = useRef<number[]>([]);
-  const ofsEstimator = useRef<OffsetEstimator>(new OffsetEstimator(userOffset));
+  const timeOfsEstimator = useRef<OffsetEstimator | null>(null);
+  const posOfs = useRef<number>(
+    0 // * boxSize
+  );
+  const initTimeOfsEstimator = useCallback(() => {
+    timeOfsEstimator.current = new OffsetEstimator(userOffset, 0.01, 0.1, 7.5); // * second
+  }, [userOffset]);
   useEffect(() => {
     if (getCurrentTimeSec() === undefined) {
-      ofsEstimator.current = new OffsetEstimator(userOffset);
+      initTimeOfsEstimator();
     }
-  }, [getCurrentTimeSec, userOffset]);
+  }, [getCurrentTimeSec, initTimeOfsEstimator]);
   const autoAdjustOffset = useCallback(
     (ofs: number, now: number, noteIndex: number) => {
       if (!auto && autoOffset) {
@@ -98,32 +104,33 @@ export default function useGameLogic(
             break;
           }
         }
-        setUserOffset(ofsEstimator.current.update(ofs));
+
+        // doneを0にすることで判定後であってもvelを計算させる
+        const n = { ...notesAll[noteIndex], done: 0 };
+        const dn = n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now);
+        if (timeOfsEstimator.current && dn) {
+          const nPosOfs = dn ? -dn.pos.y : 0;
+          // ユーザーが認識している判定線位置のずれの予測 (=入力遅延によらず一定になる)
+          // timeOfsのkalmanfilterがシフトしていく場合にあとからそれを抑えるため、
+          // kalman filterではなく移動平均で更新する
+          // TODO: 実際に判定をposOfs分ずらしてあげたほうがよいのではないか?
+          if (
+            Math.abs(ofs - timeOfsEstimator.current.mu) <
+            timeOfsEstimator.current.diff_threshold
+          ) {
+            const k =
+              1 / (1 + Math.max(25, timeOfsEstimator.current.p / 0.0005 ** 2));
+            posOfs.current = (1 - k) * posOfs.current + k * nPosOfs;
+          }
+          // ユーザーの入力の遅延の予測
+          const timeOfs = timeOfsEstimator.current.update(
+            ofs - posOfs.current / dn.vel.y
+          );
+          setUserOffset(timeOfs);
+        }
       }
     },
     [auto, autoOffset, setUserOffset, notesAll]
-  );
-
-  const resetNotesAll = useCallback(
-    (notes: Note6[] | Note13[]) => {
-      // note.done などを書き換えるため、元データを壊さないようdeepcopy
-      const notesCopy = notes.map((n) => ({ ...n })) as Note6[] | Note13[];
-      setNotesAll(notesCopy.slice());
-      setNotesDone([]);
-      notesYetDone.current = notesCopy;
-      notesBigYetDone.current = [];
-      setJudgeCount([0, 0, 0, 0]);
-      setChain(0);
-      setMaxChain(0);
-      chainRef.current = 0;
-      setBonus(0);
-      setBigCount(0);
-      setBigTotal(notesCopy.filter((n) => n.big).length);
-      hitCountByType.current = {};
-      setHitType(null);
-      ofsEstimator.current = new OffsetEstimator(userOffset);
-    },
-    [userOffset]
   );
 
   // Noteに判定を保存し、scoreとchainを更新
@@ -166,7 +173,13 @@ export default function useGameLogic(
         setChain(thisChain);
         setMaxChain((max) => Math.max(max, thisChain));
         setJudgeCount((judgeCount) => {
-          judgeCount = judgeCount.slice() as [number, number, number, number];
+          judgeCount = judgeCount.slice() as [
+            number,
+            number,
+            number,
+            number,
+            number,
+          ];
           judgeCount[c.judge - 1]++;
           return judgeCount;
         });
@@ -217,7 +230,41 @@ export default function useGameLogic(
         });
       }
     },
-    [bonusTotal, notesTotal, bigTotal, notesAll, playbackRate]
+    [bonusTotal, notesTotal, bigTotal, playbackRate]
+  );
+
+  const resetNotesAll = useCallback(
+    (notes: Note6[] | Note13[], now: number) => {
+      // note.done などを書き換えるため、元データを壊さないようdeepcopy
+      const notesCopy = notes.map((n) => ({ ...n })).slice() as
+        | Note6[]
+        | Note13[];
+      setNotesAll(notesCopy.slice());
+      setNotesDone([]);
+      notesYetDone.current = notesCopy.slice();
+      notesBigYetDone.current = [];
+      setJudgeCount([0, 0, 0, 0, 0]);
+      setChain(0);
+      setMaxChain(0);
+      chainRef.current = 0;
+      setBonus(0);
+      setBigCount(0);
+      setBigTotal(notesCopy.filter((n) => n.big).length);
+      hitCountByType.current = {};
+      setHitType(null);
+      initTimeOfsEstimator();
+      // 開始時よりも前の音符を消す
+      // const now = getCurrentTimeSec?.() ?? 0;
+      for (const n of notesCopy) {
+        if (n.hitTimeSec < now) {
+          judge({ note: n, judge: 5, late: 0 }, now);
+          notesYetDone.current.shift();
+        } else {
+          break;
+        }
+      }
+    },
+    [initTimeOfsEstimator, judge]
   );
 
   const iosPrevRelease = useRef<number | null>(null);
@@ -229,7 +276,7 @@ export default function useGameLogic(
   }, [getCurrentTimeSec]);
   interface HitCandidate {
     note: Note6 | Note13;
-    judge: 1 | 2 | 3 | 4;
+    judge: 1 | 2 | 3 | 4 | 5;
     late: number;
   }
   // キーを押したときの判定
@@ -627,5 +674,9 @@ export default function useGameLogic(
     chartEnd,
     lateTimes,
     hitType,
+    posOfs,
+    timeOfsEstimator,
+    judge,
+    notesYetDone,
   };
 }

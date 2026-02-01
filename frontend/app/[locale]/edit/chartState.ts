@@ -379,17 +379,17 @@ export function useChartState(props: Props) {
           ...newChartMin,
           changePasswd: null,
           published: false,
-          levels: await Promise.all(
-            newChartMin.levels.map(async (l) => ({
-              ...l,
-              ...(
-                await luaExec(
-                  process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-                  l.lua.join("\n"),
-                  false
-                )
-              ).levelFreezed,
-            }))
+          levelsFreeze: await Promise.all(
+            newChartMin.lua.map(
+              async (l) =>
+                (
+                  await luaExec(
+                    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+                    l.join("\n"),
+                    false
+                  )
+                ).levelFreezed
+            )
           ),
         };
       } catch (e1) {
@@ -404,17 +404,17 @@ export function useChartState(props: Props) {
             ...newChartMin,
             changePasswd: null,
             published: false,
-            levels: await Promise.all(
-              newChartMin.levels.map(async (l) => ({
-                ...l,
-                ...(
-                  await luaExec(
-                    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-                    l.lua.join("\n"),
-                    false
-                  )
-                ).levelFreezed,
-              }))
+            levelsFreeze: await Promise.all(
+              newChartMin.lua.map(
+                async (l) =>
+                  (
+                    await luaExec(
+                      process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+                      l.join("\n"),
+                      false
+                    )
+                  ).levelFreezed
+              )
             ),
           };
         } catch (e2) {

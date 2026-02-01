@@ -265,7 +265,7 @@ export function LuaTabProvider(props: Props & PProps) {
           onCursorChange={(sel: Selection) => {
             if (currentLevel && visible && !sel.isMultiLine()) {
               const step = findStepFromLua(
-                currentLevel.toObject(),
+                { ...currentLevel.freeze, lua: [...currentLevel.lua] },
                 sel.cursor.row
               );
               if (step !== null) {

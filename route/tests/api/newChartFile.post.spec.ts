@@ -1,7 +1,11 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyChart, dummyChart11, initDb } from "./init";
-import { chartMaxEvent, fileMaxSize } from "@falling-nikochan/chart";
+import { app, dummyChart, dummyChart11, dummyChart13, initDb } from "./init";
+import {
+  chartMaxEvent,
+  currentChartVer,
+  fileMaxSize,
+} from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
@@ -123,8 +127,8 @@ describe("POST /api/newChartFile", () => {
   test("should return 413 for chart containing too many events", async () => {
     await initDb();
     const chart = dummyChart();
-    chart.levels[0].rest = new Array(chartMaxEvent + 1).fill(
-      chart.levels[0].rest[0]
+    chart.levelsFreeze[0].rest = new Array(chartMaxEvent + 1).fill(
+      chart.levelsFreeze[0].rest[0]
     );
     const res = await app.request("/api/newChartFile", {
       method: "POST",
@@ -135,7 +139,8 @@ describe("POST /api/newChartFile", () => {
     const body = await res.json();
     expect(body).to.deep.equal({ message: "tooManyEvent" });
   });
-  test("should return 409 for old chart version", async () => {
+  test("should return 409 for chart version older than 13", async () => {
+    currentChartVer satisfies 14; // edit this test when chart version is bumped
     await initDb();
     const res = await app.request("/api/newChartFile", {
       method: "POST",
@@ -146,6 +151,39 @@ describe("POST /api/newChartFile", () => {
     const body = await res.json();
     expect(body).to.deep.equal({ message: "oldChartVersion" });
   });
+  test("should create chart for chart version 13", async () => {
+    currentChartVer satisfies 14; // edit this test when chart version is bumped
+    await initDb();
+    const dateBefore = new Date();
+    const res = await app.request("/api/newChartFile", {
+      method: "POST",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.serialize({
+        ...dummyChart13(),
+        changePasswd: "p",
+      }),
+    });
+    const dateAfter = new Date();
+    expect(res.status).to.equal(200);
+    const body = await res.json();
+    expect(body.cid).to.be.a("string");
+
+    const client = new MongoClient(process.env.MONGODB_URI!);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: body.cid });
+      expect(e).not.to.be.null;
+      expect(e!.title).to.equal(dummyChart().title);
+      expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
+      expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
+    } finally {
+      await client.close();
+    }
+  });
+
   test("should return 415 for invalid chart", async () => {
     await initDb();
     const res = await app.request("/api/newChartFile", {

@@ -9,7 +9,7 @@ interface DisplayMode {
   isMobileMain: boolean;
   rem: number;
   playUIScale: number;
-  mobileStatusScale: number;
+  statusScale: number;
   largeResult: boolean;
 }
 export function useDisplayMode(): DisplayMode {
@@ -29,9 +29,19 @@ export function useDisplayMode(): DisplayMode {
 
   const isMobileMain = width < 48 * rem; // global.css と合わせる
   const isMobileGame = width < height;
-  const scalingWidthThreshold = 400 * (isMobileGame ? 1.1 : 1.6);
-  const playUIScale = Math.min(width / scalingWidthThreshold, 1);
-  const mobileStatusScale = Math.min(width / (31 * rem), 1);
+  const scalingWidthThreshold1 = 400 * (isMobileGame ? 1.1 : 1.6);
+  const scalingWidthThreshold2 = 600 * (isMobileGame ? 1.1 : 1.6);
+  const playUIScale =
+    width > scalingWidthThreshold2
+      ? (width / scalingWidthThreshold2) ** 0.5
+      : width > scalingWidthThreshold1
+        ? 1
+        : width / scalingWidthThreshold1;
+  const statusScale = isMobileGame
+    ? Math.min(width / (31 * rem), 1)
+    : (width > scalingWidthThreshold2
+        ? (width / scalingWidthThreshold2) ** 0.5
+        : 1) * 0.8;
   const largeResultThreshold = 32 * rem * (isMobileGame ? 1 : 1.5);
   const largeResult = width >= largeResultThreshold;
 
@@ -48,7 +58,7 @@ export function useDisplayMode(): DisplayMode {
     isMobileMain,
     rem,
     playUIScale,
-    mobileStatusScale,
+    statusScale,
     largeResult,
   };
 }

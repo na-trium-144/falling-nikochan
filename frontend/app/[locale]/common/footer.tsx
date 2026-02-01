@@ -134,8 +134,12 @@ export function MobileFooter(props: MobileProps) {
       className={clsx(
         "pb-2 px-8 z-10 w-full",
         "main-wide:h-0 main-wide:p-0!",
-        "flex flex-row items-center justify-stretch gap-[2vw] relative"
+        "flex flex-row items-center justify-stretch relative"
       )}
+      style={{
+        // 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素)
+        gap: `max(0px, calc((100vw - 4rem - ${5 * 4}rem) / 7))`,
+      }}
     >
       {mobileTabTitleKeys.map((key, i) => (
         <LinkWithReview
@@ -144,7 +148,7 @@ export function MobileFooter(props: MobileProps) {
             "w-full text-lg gap-0.5 flex flex-col items-center no-pc",
             // props.tabKey === key || "text-slate-500 dark:text-stone-400",
             props.tabKey !== "top" ? "rounded-b-2xl" : "rounded-2xl",
-            "pb-1 pt-1",
+            "pb-2 pt-2",
             props.tabKey === key && props.tabKey !== "top"
               ? boxButtonStyle
               : skyFlatButtonStyle
@@ -156,7 +160,7 @@ export function MobileFooter(props: MobileProps) {
               props.tabKey === key && key !== "top"
                 ? boxButtonBorderStyle1
                 : skyFlatButtonBorderStyle1,
-              props.tabKey !== "top" ? "border-t-0" : "",
+              props.tabKey !== "top" ? "border-t-0" : ""
             )}
           />
           <span
@@ -164,7 +168,7 @@ export function MobileFooter(props: MobileProps) {
               props.tabKey === key && key !== "top"
                 ? boxButtonBorderStyle2
                 : skyFlatButtonBorderStyle2,
-              props.tabKey !== "top" ? "border-t-0" : "",
+              props.tabKey !== "top" ? "border-t-0" : ""
             )}
           />
           <ButtonHighlight />

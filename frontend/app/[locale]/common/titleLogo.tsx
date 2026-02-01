@@ -55,7 +55,7 @@ export default function Title(props: Props) {
         )}
         src={
           process.env.ASSET_PREFIX +
-          `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+          `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg?v=2`
         }
       />
       <span className="fn-title-diag" />

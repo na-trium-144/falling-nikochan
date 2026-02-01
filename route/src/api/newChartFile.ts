@@ -9,6 +9,8 @@ import {
   rateLimit,
   CidSchema,
   ChartEditSchema13,
+  Chart13Edit,
+  validateChart13,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
@@ -37,7 +39,7 @@ const newChartFileApp = async (config: {
         description:
           "Create a new chart. " +
           "The chart data should be in MessagePack format, and " +
-          `must be the latest format, Chart${currentChartVer}Edit. ` +
+          `must be the latest format (Chart${currentChartVer}Edit) or one version earlier. ` +
           "Returns the chart ID (cid) of the newly created chart. " +
           `This endpoint is rate limited to one request per ${rateLimit.newChartFile / 60} minutes. `,
         requestBody: {
@@ -60,7 +62,7 @@ const newChartFileApp = async (config: {
             },
           },
           409: {
-            description: `chart version is older than ${currentChartVer}`,
+            description: `chart version is older than ${currentChartVer - 1}`,
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("oldChartVersion")),
@@ -132,14 +134,18 @@ const newChartFileApp = async (config: {
           const newChartObj = msgpack.deserialize(chartBuf);
           if (
             typeof newChartObj.ver === "number" &&
-            newChartObj.ver < currentChartVer
+            newChartObj.ver < currentChartVer - 1
           ) {
             throw new HTTPException(409, { message: "oldChartVersion" });
           }
 
-          let newChart: ChartEdit;
+          let newChart: Chart13Edit | ChartEdit;
           try {
-            newChart = await validateChart(newChartObj);
+            if (newChartObj.ver === currentChartVer - 1) {
+              newChart = await validateChart13(newChartObj);
+            } else {
+              newChart = await validateChart(newChartObj);
+            }
           } catch (e) {
             console.error(e);
             throw new HTTPException(415, { message: (e as Error).toString() });

@@ -19,6 +19,7 @@ import { useDelayedDisplayState } from "./delayedDisplayState";
 import { useOSDetector } from "./pwaInstall";
 import Pic from "@icon-park/react/lib/icons/Pic";
 import Select from "./select";
+import { XLogo } from "./x";
 
 export function useShareLink(
   cid: string | undefined,
@@ -154,7 +155,12 @@ export function useShareLink(
             className="mx-0.5"
             options={[
               { value: "copyForShare", label: t("copyForShare") },
-              { value: "xPost", label: t("xPost") },
+              {
+                value: "xPost",
+                label: t.rich("xPost", {
+                  xlogo: () => <XLogo className="mr-1.5" />,
+                }),
+              },
             ]}
             onSelect={(value: "copyForShare" | "xPost") => {
               if (value === "copyForShare" && hasClipboard) {

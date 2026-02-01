@@ -1,10 +1,78 @@
-## ver. 14 (staging)
+## ver. 14.1 - 2026/02/01
 
+* standaloneでないときも新しいserviceWorkerのactivate直後にassetsを更新するよう修正
+
+## ver. 14.0 - 2026/02/01 [#901](https://github.com/na-trium-144/falling-nikochan/pull/901)
+
+* プロジェクトのライセンスをAGPL-3.0に変更
 * stagingブランチとデプロイ環境を追加
-    * `VERSION_SUFFIX` でビルドバージョンに文字列を追加できるようにした
-* offset自動調整・フレームレート自動調整機能 [#879](https://github.com/na-trium-144/falling-nikochan/pull/879)
-* コピー・共有ボタンの仕様を変更 [#902](https://github.com/na-trium-144/falling-nikochan/pull/902)
-* ver13.22をRevert
+    * `VERSION_SUFFIX` でビルドバージョンに、`TITLE_SUFFIX`でタイトルに文字列を追加できるようにした
+    * dev環境では自動的にdevが、vercelプレビューでは自動的にPR番号が追加されるようにした
+* offset自動調整・フレームレート自動調整機能
+* youtubeの再生位置オフセットの補正をシンプルなローパスフィルタに変更
+  * `tsoffset=1` でオフセット補正状況をリアルタイムに表示
+* 各コンポーネントのデザインの変更
+  * スクロール可能な要素にgradientのmaskをかける
+    * ChengeLogPopupもbg-clipではなくmaskで対応、ver13.22をrevert
+  * Checkboxはpretty-checkboxを使用
+  * Buttonを使用せず背景色がついているボタンをすべてFlatButtonテーマとして統一
+  * Selectを独自実装
+  * captionが画面外にはみ出さないようにする
+  * Keyはkeyboard-cssを使用
+  * スクロールバーの色と背景を指定
+  * 背景をsvgに変更 (irasutoya-like bg)
+* コピー・共有ボタンの仕様を変更
+* YouTube動画からテーマカラーを抽出、動画埋め込みにテーマカラーの枠を表示
+* 動画タイトル・チャンネル名の表示を追加、/api/ytMeta のAPIを追加
+* プレイ画面のデザイン変更
+  * DisplayNoteにvelの情報を追加
+  * にこちゃんを半透明に、軌跡(tail)とborderを追加
+  * プレイ画面のにこちゃんの描画をimgタグからcanvasに移行
+  * オートプレイでもtargetLineが光るように & targetLineにshadowが広がるアニメーションを追加
+  * play画面のスコア・音符数表示のレイアウトと仕様を変更
+    * ベストスコアをstatusBoxに移動、再生速度をmusicAreaに移動
+    * スコアゲージ追加、パーフェクトでスコアの色が変わるようにした
+    * 音符ごとのスコアの表示を追加
+    * 50chainごとにchain表示にアニメーションを追加
+    * ミス時にchain表示にアニメーションを追加
+  * 画面サイズが大きい時UIも拡大する
+  * BPMSignに音符が重なる場合BPMSignが一時的に半透明になるようにした
+  * スタートボタンを押してからYouTubeの再生が始まるまでにラグがあるときloadingを表示するようにした
+* プレイオプションの表示・並び順を変更
+  * 途中から練習: の再生位置を秒数だけの表示から 分:秒 に変更
+  * iosthruの説明をabout/2からオプションのhelpiconに移動
+* `noclear=1`で停止時に音符を消さない
+* playとeditのFallingWindowで音符が重なる場合の描画順序を逆にする
+* AceEditorをdynamic importに & テーマ変更、カーソルと小節線位置の表示を改善
+  * barLinesが休符の前だけでなく音符や速度変化の前に表示できるようにする
+  * 範囲選択をした時にファイルをドラッグする表示になったりカーソル移動で範囲選択が解除されるのを修正
+  * liveCompletionを無効化、編集中にコードが上書きされるのを改善
+* Delete/BackSpaceで音符を削除
+* 音符を左右反転する機能の追加
+* 音符追加ボタンの横に音符の個数に関するヘルプアイコンを追加
+* 古いchromeで動作していないcssを一部修正、対応最低バージョンをchrome120に変更
+* ChangeLogPopupに表示されるmdxを一部だけにする
+* i18nデータをクライアントサイドでimportするように変更
+* slimeをSSRしない
+* editページの状態管理をChartEditingクラスとしてリファクタリング
+* vitestからnode:testに移行
+* cssをstylesディレクトリに統一、フォントをtailwindのtheme変数としての指定に変更したり`@utility`を使ったり
+* 太字のフォントをimportしfont-weightを正確に指定、スコア表示はstroke-widthで太くする
+* extLinkのinline-blockをやめる
+* `npm run seed` で602399の譜面を開発環境のデータベースに追加する
+* next.jsのdev環境でbabelではなくswcを使う
+* eslintのexaustive-depsをerrorにする。
+* `npm run cdev`スクリプトを追加、install時に自動的にtscが実行されるのをやめる
+* プレイ中のseekを実装(`seek=1`)、途中から再生した際にそれまでの音符は判定せず消すようにした
+* serviceWorkerのメッセージをメインスレッドに送信、forceUpdateを追加
+* 𝕏のロゴをsvgに置き換え
+* API
+  * ver7〜12の譜面を上書きする際に内容に変更がなければハッシュが変わらないようにする
+  * /api/chartFileとnewChartFileが過去2バージョンまでサポートするよう変更
+  * test時にエラーハンドラのスタックトレースを表示しない
+* chart14
+  * 譜面編集ページのsnapDividerとzoomの状態をchartデータに含める
+  * levelsをlevelsMin,levelsFreeze,luaに分ける
 
 ## ver. 13.22 - 2026/01/09 [#900](https://github.com/na-trium-144/falling-nikochan/pull/900)
 

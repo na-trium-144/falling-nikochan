@@ -34,17 +34,15 @@ interface Props {
 }
 export default function StatusBox(props: Props) {
   const t = useTranslations("play.status");
-  const { screenWidth, screenHeight, rem, mobileStatusScale } =
-    useDisplayMode();
+  const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
   const isMobile = screenWidth < screenHeight;
-  const textScale = isMobile ? mobileStatusScale : 0.8;
 
   return (
     <Box
       classNameOuter={clsx(
         props.className,
         "overflow-visible!",
-        isMobile ? "rounded-sq-[1.5em]!" : "w-54"
+        isMobile ? "rounded-sq-[1.5em]!" : "w-[17em]"
       )}
       classNameInner={clsx(
         props.isMobile
@@ -53,8 +51,8 @@ export default function StatusBox(props: Props) {
       )}
       styleOuter={{
         ...props.style,
-        fontSize: textScale * rem,
-        padding: isMobile ? "0.75em" : "1rem",
+        fontSize: statusScale * rem,
+        padding: isMobile ? "0.75em" : "1.25em",
       }}
     >
       {props.showBestScore && (
@@ -62,9 +60,9 @@ export default function StatusBox(props: Props) {
           className={clsx(
             isMobile
               ? clsx("absolute left-[10%] top-[-2em]")
-              : clsx("relative"),
+              : clsx("absolute inset-x-0 top-[-1em]"),
             "flex flex-row items-baseline",
-            "w-max m-auto px-2 py-0.5 mb-1 rounded-lg",
+            "w-max m-auto px-[0.5em] py-[0.2em] rounded-[0.75em]",
             "shadow-xs z-3",
             props.bestCount
               ? clsx(
@@ -141,7 +139,7 @@ export default function StatusBox(props: Props) {
           {!isMobile && props.showResultDiff && props.bestCount && (
             <span
               className={clsx(
-                "inline-block w-12 pl-1 text-center",
+                "inline-block w-[3.75em] pl-[0.5em] text-center",
                 "text-orange-400/75 dark:text-sky-500/75"
               )}
               style={{ fontSize: "1.2em", lineHeight: 1 }}
@@ -182,7 +180,7 @@ export default function StatusBox(props: Props) {
           (props.showResultDiff && props.bestCount && props.bigTotal !== 0 ? (
             <span
               className={clsx(
-                "inline-block w-12 pl-1 text-center",
+                "inline-block w-[3.75em] pl-[0.5em] text-center",
                 "text-orange-400/75 dark:text-sky-500/75"
               )}
               style={{ fontSize: "1.2em", lineHeight: 1 }}
@@ -197,7 +195,7 @@ export default function StatusBox(props: Props) {
               )}
             </span>
           ) : (
-            <span className="w-12 pl-1 flex flex-row items-baseline">
+            <span className="w-[3.75em] pl-[0.5em] flex flex-row items-baseline">
               <span className="flex-1">/</span>
               <span>{props.bigTotal}</span>
             </span>
@@ -206,8 +204,8 @@ export default function StatusBox(props: Props) {
       {props.isMobile && screenWidth >= 39 * rem && (
         <span
           className={clsx(
-            "flex-none w-12 self-end translate-y-1 flex flex-row items-baseline mr-2",
-            props.bigTotal === 0 && "text-slate-400 dark:text-stone-600"
+            "flex-none w-[3.75em] self-end translate-y-1 flex flex-row items-baseline mr-2",
+            props.bigTotal === 0 && "text-slate-400 dark:text-stone-500"
           )}
         >
           <span className="flex-1">/</span>
@@ -224,14 +222,14 @@ export default function StatusBox(props: Props) {
           </StatusValue>
         )}
         {!props.isMobile && (
-          <span className="w-12 pl-1 flex flex-row items-baseline">
+          <span className="w-[3.75em] pl-[0.5em] flex flex-row items-baseline">
             <span className="flex-1">/</span>
             <span>{props.notesTotal}</span>
           </span>
         )}
       </StatusItem>
       {props.isMobile && screenWidth >= 35 * rem && (
-        <span className="flex-none w-12 self-end translate-y-1 flex flex-row items-baseline">
+        <span className="flex-none w-[3.75em] self-end translate-y-1 flex flex-row items-baseline">
           <span className="flex-1">/</span>
           <span>{props.notesTotal}</span>
         </span>
@@ -252,8 +250,8 @@ function StatusItem(props: {
       className={clsx(
         isMobile
           ? "flex-1 basis-1 flex flex-col"
-          : clsx("flex flex-row items-baseline", props.wide || "mr-12"),
-        props.disabled && "text-slate-400/75 dark:text-stone-600/75"
+          : clsx("flex flex-row items-baseline", props.wide || "mr-[3.75em]"),
+        props.disabled && "text-slate-400/75 dark:text-stone-500/75"
       )}
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
@@ -317,7 +315,7 @@ function StatusValue(props: {
         className={clsx(
           "mt-1 w-full text-center bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-600/75"
+            ? "text-slate-400/75 dark:text-stone-500/75"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"
@@ -338,7 +336,7 @@ function StatusValue(props: {
         className={clsx(
           "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-600/75"
+            ? "text-slate-400/75 dark:text-stone-500/75"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"

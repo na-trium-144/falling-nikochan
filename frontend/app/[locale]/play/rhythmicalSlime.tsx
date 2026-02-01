@@ -177,7 +177,7 @@ export default function RhythmicalSlime(props: Props) {
     }
   }, [bpmChanges, playing, getCurrentTimeSec, props.signature, playbackRate]);
 
-  const { playUIScale } = useDisplayMode();
+  const { playUIScale, rem } = useDisplayMode();
 
   return (
     <div
@@ -192,6 +192,7 @@ export default function RhythmicalSlime(props: Props) {
           state={slimeStates.at(i)?.at(0)}
           getCurrentTimeSec={getCurrentTimeSec}
           playUIScale={playUIScale}
+          rem={rem}
           playbackRate={playbackRate}
         />
       ))}
@@ -205,6 +206,7 @@ interface PropsS {
   exists: boolean;
   state?: SlimeState;
   playUIScale: number;
+  rem: number;
   playbackRate: number;
 }
 function Slime(props: PropsS) {
@@ -243,7 +245,10 @@ function Slime(props: PropsS) {
       className="relative transition-all ease-in-out duration-150 "
       style={{
         width:
-          (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) * 54 * props.playUIScale,
+          (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) *
+          3.5 *
+          props.rem *
+          props.playUIScale,
         marginLeft: 0 * props.playUIScale,
       }}
     >
