@@ -108,9 +108,6 @@ export default {
         "and some notes may behave differently. " +
         "Saving will overwrite the previous chart data with the converted data. " +
         "(For details, please check the update history at the bottom of the top page.)",
-      convertingHashChange:
-        "This chart has been converted from an old format (ver.{ver}), " +
-        "and saving this will reset all users' play history for this chart.",
       shareLink: "Share link",
       localSaveLoad: "Save/load locally",
       localSaveLoadHelp:
@@ -248,6 +245,7 @@ export default {
         common: "You can change the level type from the Levels tab.",
       },
       totalNotes: "Total Notes",
+      noteMirror: "Mirror",
       copy: "Copy",
       paste: "Paste",
       position: "Position",

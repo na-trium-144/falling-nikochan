@@ -21,6 +21,7 @@ import Code from "@icon-park/react/lib/icons/Code";
 import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { lastVisitedOld } from "@/common/version";
 import { inputStyle } from "@/common/input";
+import { XLogo } from "@/common/x";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
@@ -42,7 +43,9 @@ export default function LinksPage({ locale }: { locale: string }) {
       locale={locale}
     >
       <div className="mb-3 main-wide:hidden">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("settings")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">
+          {t("settings")}
+        </h3>
         <div className="ml-2 space-y-2">
           <p>
             <Translate className="inline-block align-middle" />
@@ -179,7 +182,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             </ExternalLink>
           </li>
           <li>
-            <span className="text-lg/6 px-0.5 mr-1">𝕏</span>
+            <XLogo className="mr-1" />
             <ExternalLink href="https://twitter.com/@nikochan144">
               <span className="hidden main-wide:inline">
                 {t("officialAccount")}

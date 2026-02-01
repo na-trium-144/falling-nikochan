@@ -23,6 +23,7 @@ export * from "./legacy/chart8.js";
 export * from "./legacy/chart9.js";
 export * from "./legacy/chart11.js";
 export * from "./legacy/chart13.js";
+export * from "./legacy/chart14.js";
 export * from "./legacy/seq6.js";
 export * from "./legacy/seq7.js";
 export * from "./legacy/seq11.js";

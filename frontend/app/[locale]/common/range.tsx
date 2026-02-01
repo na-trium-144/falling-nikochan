@@ -36,7 +36,7 @@ export default function Range(rangeProps: Props) {
           <div
             className={clsx(
               "absolute inset-y-1.5 inset-x-0 rounded-full -z-10",
-              "bg-slate-400/50 dark:bg-stone-600/50"
+              "bg-slate-400/50 dark:bg-stone-500/50"
             )}
           >
             <div
@@ -65,7 +65,7 @@ export default function Range(rangeProps: Props) {
           className={clsx(
             "rounded-full w-5 h-5 shadow-sm",
             rangeProps.disabled
-              ? "bg-slate-400 dark:bg-stone-600"
+              ? "bg-slate-400 dark:bg-stone-500"
               : active
                 ? "bg-blue-400 dark:bg-amber-800"
                 : hovered

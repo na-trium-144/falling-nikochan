@@ -33,7 +33,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         className={clsx(
           "font-mono text-sm px-1 py-0.5 rounded border",
           "bg-white border-slate-300",
-          "dark:bg-stone-800 dark:border-slate-600"
+          "dark:bg-stone-700 dark:border-stone-500"
         )}
         {...props}
       />

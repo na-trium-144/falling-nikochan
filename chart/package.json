@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/chart",
-  "version": "13.21.0",
+  "version": "14.2.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -9,12 +9,20 @@
   "scripts": {
     "lint": "eslint src/ tests/",
     "t": "tsc",
+    "cdev": "tsc --watch",
     "test": "tsc && tsx --test tests/**/*.spec.ts"
   },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
     "eventemitter3": "^5.0.1",
+    "object-hash": "^3.0.0",
     "valibot": "^1.0.0",
     "wasmoon": "^1.16.0"
+  },
+  "devDependencies": {
+    "@falling-nikochan/chart": "workspace:*",
+    "@types/chai": "^5.2.3",
+    "@types/object-hash": "^3.0.6",
+    "chai": "^6.2.2"
   }
 }

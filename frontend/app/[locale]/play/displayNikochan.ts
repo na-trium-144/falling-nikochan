@@ -21,6 +21,7 @@ function norm(xy: Pos) {
 interface Context {
   noteSize: number;
   boxSize: number;
+  playUIScale: number;
   canvasMarginX: number;
   canvasMarginY: number;
   marginY: number;
@@ -235,9 +236,11 @@ export class DisplayNikochan {
     // 実際のBPMSignのサイズ + 0.5rem くらい
     return (
       this.#c.marginY + targetY * this.#c.boxSize - this.size / 2 <
-        5 * this.#c.rem &&
-      (this.targetLeft < 8 * this.#c.rem ||
-        ("vy" in this.#n && this.#n.vy <= 0 && this.left < 8 * this.#c.rem)) &&
+        5 * this.#c.rem * this.#c.playUIScale &&
+      (this.targetLeft < 8 * this.#c.rem * this.#c.playUIScale ||
+        ("vy" in this.#n &&
+          this.#n.vy <= 0 &&
+          this.left < 8 * this.#c.rem * this.#c.playUIScale)) &&
       this.#n.hitTimeSec - this.#c.now < 0.5 * this.#c.playbackRate &&
       this.#c.now - this.#n.hitTimeSec < 0.5 * this.#c.playbackRate
     );

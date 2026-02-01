@@ -31,7 +31,8 @@ interface Props extends ResultParams {
   isTouch: boolean;
   newRecord: number;
   auto: boolean;
-  optionChanged: boolean;
+  showShareButton: boolean;
+  showRecord: boolean;
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
@@ -152,7 +153,9 @@ export default function Result(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <p className="text-lg font-title font-semibold">&lt; {t("result")} &gt;</p>
+        <p className="text-lg font-title font-semibold">
+          &lt; {t("result")} &gt;
+        </p>
         <div
           className={clsx(
             "my-2 flex justify-center items-center",
@@ -255,7 +258,7 @@ export default function Result(props: Props) {
             )}
           </div>
         </div>
-        {!props.auto && !props.optionChanged && (
+        {props.showShareButton && (
           <div
             className={clsx(
               "mb-2",
@@ -272,8 +275,7 @@ export default function Result(props: Props) {
             </span>
           </div>
         )}
-        {!props.auto &&
-          !props.optionChanged &&
+        {props.showRecord &&
           props.record?.histogram &&
           props.record.count >= 5 && (
             <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
@@ -315,7 +317,7 @@ function ResultRow(props: RowProps) {
       className={clsx(
         "flex flex-row items-baseline",
         props.visible || "opacity-0",
-        props.disabled && "text-slate-400 dark:text-stone-600",
+        props.disabled && "text-slate-400 dark:text-stone-500",
         props.className
       )}
     >

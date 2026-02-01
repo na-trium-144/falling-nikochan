@@ -109,9 +109,6 @@ export default {
         "一部の音符の挙動が変わっている可能性があります。" +
         "保存すると変換後の譜面データで上書きされます。" +
         "(詳細はトップページ下部の更新履歴を確認してください。)",
-      convertingHashChange:
-        "この譜面は旧バージョンのフォーマット (ver.{ver}) から変換されており、" +
-        "保存すると全ユーザーのこの譜面のプレイ記録がリセットされます。",
       shareLink: "共有用リンク",
       localSaveLoad: "ローカルに保存/読み込み",
       localSaveLoadHelp:
@@ -226,6 +223,7 @@ export default {
         common: "レベルの種類の変更は レベル タブからできます。",
       },
       totalNotes: "全体の音符数",
+      noteMirror: "反転",
       copy: "コピー",
       paste: "貼り付け",
       position: "位置",
