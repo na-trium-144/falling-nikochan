@@ -17,14 +17,6 @@ import { lastVisitedOld } from "./version.js";
 import { LangSwitcher } from "./langSwitcher.jsx";
 import { ChangeLogPopup } from "./changeLog.jsx";
 import { LinkWithReview } from "./pwaInstall.jsx";
-import {
-  boxButtonBorderStyle1,
-  boxButtonBorderStyle2,
-  boxButtonStyle,
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "./flatButton.jsx";
 import { ButtonHighlight } from "./button.jsx";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
@@ -51,13 +43,12 @@ export function PCFooter(props: Props) {
   const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
 
   return (
-    <footer className="py-3 no-mobile relative text-center ">
+    <footer className="no-mobile w-full py-3 space-y-2">
       {props.nav && (
         <div
           className={clsx(
-            "text-center mb-2 divide-solid divide-slate-800 dark:divide-stone-300",
-            "flex items-stretch w-max mx-auto",
-            "divide-x flex-row"
+            "divide-x divide-solid divide-slate-800 dark:divide-stone-300",
+            "flex flex-row items-stretch justify-center"
           )}
         >
           {pcTabTitleKeys.map((key, i) => (
@@ -71,8 +62,10 @@ export function PCFooter(props: Props) {
           ))}
         </div>
       )}
-      <div className={clsx("flex-row items-baseline space-x-3")}>
-        <div className="inline-block relative">
+      <div
+        className={clsx("flex flex-row items-baseline justify-center gap-3")}
+      >
+        <div className="relative">
           <button
             className={clsx("inline-block relative", linkStyle1)}
             onClick={() => {
@@ -81,14 +74,13 @@ export function PCFooter(props: Props) {
           >
             <span>ver.</span>
             <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
-            <Comment className="inline-block translate-y-0.5 " />
-            <span
-              className={clsx(
-                "absolute w-3 h-3 rounded-full bg-red-500",
-                isLastVisitedOld ? "inline-block" : "hidden"
-              )}
-              style={{ top: "-0.1rem", right: "-0.25rem" }}
-            />
+            <Comment className="inline-block align-middle" />
+            {isLastVisitedOld && (
+              <span
+                className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
+                style={{ top: "-0.1rem", right: "-0.25rem" }}
+              />
+            )}
           </button>
           <ChangeLogPopup
             locale={props.locale}
@@ -113,6 +105,8 @@ export function PCFooter(props: Props) {
   );
 }
 interface MobileProps {
+  className?: string;
+  blurBg?: boolean;
   locale: string;
   tabKey: TabKeys;
 }
@@ -132,43 +126,33 @@ export function MobileFooter(props: MobileProps) {
   return (
     <footer
       className={clsx(
-        "pb-2 px-8 z-10 w-full",
-        "main-wide:h-0 main-wide:p-0!",
-        "flex flex-row items-center justify-stretch relative"
+        "fn-mobile-footer no-pc",
+        props.blurBg && "fn-mf-blur",
+        props.className
       )}
-      style={{
-        // 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素)
-        gap: `max(0px, calc((100vw - 4rem - ${5 * 4}rem) / 7))`,
-      }}
     >
       {mobileTabTitleKeys.map((key, i) => (
         <LinkWithReview
           key={i}
           className={clsx(
-            "w-full text-lg gap-0.5 flex flex-col items-center no-pc",
-            // props.tabKey === key || "text-slate-500 dark:text-stone-400",
-            props.tabKey !== "top" ? "rounded-b-2xl" : "rounded-2xl",
-            "pb-2 pt-2",
+            "fn-mf-item",
+            props.tabKey !== "top" && "rounded-t-none",
             props.tabKey === key && props.tabKey !== "top"
-              ? boxButtonStyle
-              : skyFlatButtonStyle
+              ? "fn-flat-button fn-plain fn-selected"
+              : "fn-flat-button fn-sky"
           )}
           href={`/${props.locale}${tabURLs[key]}`}
         >
           <span
             className={clsx(
-              props.tabKey === key && key !== "top"
-                ? boxButtonBorderStyle1
-                : skyFlatButtonBorderStyle1,
-              props.tabKey !== "top" ? "border-t-0" : ""
+              "fn-glass-1",
+              props.tabKey !== "top" && "border-t-0"
             )}
           />
           <span
             className={clsx(
-              props.tabKey === key && key !== "top"
-                ? boxButtonBorderStyle2
-                : skyFlatButtonBorderStyle2,
-              props.tabKey !== "top" ? "border-t-0" : ""
+              "fn-glass-2",
+              props.tabKey !== "top" && "border-t-0"
             )}
           />
           <ButtonHighlight />
@@ -193,32 +177,17 @@ export function MobileFooter(props: MobileProps) {
                 theme={props.tabKey === key ? "two-tone" : "outline"}
                 fill={props.tabKey === key ? iconFill : iconFill[0]}
               />
-              <span
-                className={clsx(
-                  "absolute w-3 h-3 rounded-full bg-red-500",
-                  isLastVisitedOld ? "inline-block" : "hidden"
-                )}
-                style={{ top: "-0.1rem", right: "-0.5rem" }}
-              />
+              {isLastVisitedOld && (
+                <span
+                  className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
+                  style={{ top: "-0.1rem", right: "-0.5rem" }}
+                />
+              )}
             </div>
           )}
-          <span className="text-xs ">{tm(key + ".titleShort")}</span>
+          <span className="text-xs">{tm(key + ".titleShort")}</span>
         </LinkWithReview>
       ))}
     </footer>
-  );
-}
-
-export function MobileFooterWithGradient(props: MobileProps) {
-  return (
-    <div
-      className={clsx(
-        "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
-        "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
-        "dark:from-orange-950 dark:to-orange-950/0"
-      )}
-    >
-      <MobileFooter {...props} />
-    </div>
   );
 }

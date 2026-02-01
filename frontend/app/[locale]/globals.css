@@ -27,9 +27,11 @@
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* utilities */
 @import "./styles/utilities.css";
 @import "./styles/squircle.css";
 
+/* components in ./common/ */
 @import "./styles/glass.css";
 @import "./styles/box.css";
 @import "./styles/button.css";
@@ -38,12 +40,13 @@
 @import "./styles/link.css";
 @import "./styles/pager.css";
 @import "./styles/scrollable.css";
+@import "./styles/irasutoya-like.css";
 
+/* other components */
 @import "./styles/main.css";
 @import "./styles/chart-list.css";
 
+/* other */
 @import "./styles/result.css";
-@import "./styles/irasutoya-like.css";
 @import "./styles/scrollbar.css";
 @import "./styles/ace.css";
-/*@import "./styles/checkbox.scss";*/

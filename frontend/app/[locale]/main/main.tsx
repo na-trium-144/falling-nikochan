@@ -75,8 +75,7 @@ export function IndexMain(props: Props) {
         {props.tabKey !== null && (
           <nav
             className={clsx(
-              "no-mobile flex flex-col w-main-nav shrink-0 h-max my-auto",
-              "transition ease-out duration-200"
+              "no-mobile flex flex-col w-main-nav shrink-0 h-max my-auto"
             )}
           >
             {pcTabTitleKeys.map((key, i) =>

@@ -7,6 +7,32 @@
     }
   }
 
+  .fn-mobile-footer {
+    @apply pb-2 px-8 z-10 w-full;
+    @apply flex flex-row items-center justify-stretch relative;
+
+    /* 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素) */
+    gap: max(0px, calc((100vw - 4rem - 5rem * 4) / 7));
+
+    .fn-mf-item {
+      @apply w-full text-lg gap-0.5 flex flex-col items-center;
+      @apply pb-2 pt-2;
+      @apply rounded-2xl;
+    }
+
+    &.fn-mf-blur {
+      @apply backdrop-blur-2xs;
+      @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
+      @apply dark:from-orange-950 dark:to-orange-950/0;
+    }
+  }
+
+  .fn-pwa-install.fn-box {
+    @apply fixed z-15 bottom-(--container-mobile-footer) translate-y-1 inset-x-0;
+    @apply w-max max-w-full mx-auto shadow-modal;
+    @apply rounded-sq-xl;
+  }
+
   .fn-title {
     @apply absolute leading-none text-center mx-auto w-96;
 

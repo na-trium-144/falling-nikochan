@@ -6,7 +6,7 @@ import { TitleAsLink } from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
-  MobileFooterWithGradient,
+  MobileFooter,
   PCFooter,
   pcTabTitleKeys,
   tabURLs,
@@ -168,7 +168,12 @@ export default function TopPage(props: Props) {
         <PCFooter locale={locale} />
         <div className="flex-none basis-mobile-footer no-pc" />
       </div>
-      <MobileFooterWithGradient locale={locale} tabKey="top" />
+      <MobileFooter
+        className="fixed bottom-0"
+        blurBg
+        locale={locale}
+        tabKey="top"
+      />
     </main>
   );
 }

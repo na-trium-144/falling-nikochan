@@ -355,10 +355,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       {props.children}
       <Box
         classNameOuter={clsx(
-          "fixed! z-15 bottom-(--container-mobile-footer) translate-y-1 inset-x-0",
-          "w-max max-w-full mx-auto shadow-modal",
+          "fn-pwa-install",
           "transition-all duration-200 origin-bottom",
-          "rounded-sq-xl!",
           workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
             ? "ease-in scale-100 opacity-100"
             : "ease-out scale-0 opacity-0"

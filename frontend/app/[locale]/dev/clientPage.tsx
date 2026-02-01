@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@/common/box";
-import { MobileFooterWithGradient, PCFooter } from "@/common/footer";
+import { MobileFooter, PCFooter } from "@/common/footer";
 import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
@@ -87,7 +87,12 @@ export function DevPage(props: { locale: string }) {
         <div className="flex-none basis-mobile-footer no-pc" />
         <PCFooter locale={props.locale} />
       </div>
-      <MobileFooterWithGradient locale={props.locale} tabKey={null} />
+      <MobileFooter
+        className="fixed bottom-0"
+        blurBg
+        locale={props.locale}
+        tabKey={null}
+      />
     </main>
   );
 }
