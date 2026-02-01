@@ -1,7 +1,11 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { app, dummyLevel13, dummyLevel6, initDb } from "./init";
-import { ChartSeqData13, ChartSeqData6 } from "@falling-nikochan/chart";
+import {
+  ChartSeqData13,
+  ChartSeqData6,
+  currentChartVer,
+} from "@falling-nikochan/chart";
 import msgpack from "@ygoe/msgpack";
 
 describe("GET /api/seqFile/:cid/:lvIndex", () => {
@@ -21,6 +25,16 @@ describe("GET /api/seqFile/:cid/:lvIndex", () => {
     expect(seqData).to.have.property("ytBegin");
     expect(seqData).to.have.property("ytEndSec");
   });
+  test("should return ChartSeqData13 if chart version is 13", async () => {
+    await initDb();
+    const res = await app.request("/api/seqFile/100013/0");
+    expect(res.status).to.equal(200);
+    const seqData: ChartSeqData13 = msgpack.deserialize(
+      await res.arrayBuffer()
+    );
+    expect(seqData.ver).to.equal(13);
+  });
+  currentChartVer satisfies 14; // edit tests below when chart version is bumped
   test("should return ChartSeqData13 if chart version is 12", async () => {
     await initDb();
     const res = await app.request("/api/seqFile/100012/0");
