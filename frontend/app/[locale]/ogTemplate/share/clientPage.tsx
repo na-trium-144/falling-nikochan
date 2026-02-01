@@ -8,6 +8,10 @@ import { useTranslations } from "next-intl";
 import { stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { levelBgColors } from "@/common/levelColors";
+import {
+  IrasutoyaLikeBgInner,
+  IrasutoyaLikeGrassInner,
+} from "@/common/irasutoyaLike";
 
 export default function OGTemplate() {
   const t = useTranslations("share");
@@ -24,6 +28,12 @@ export default function OGTemplate() {
       className="absolute flex flex-col "
       style={{ width: 1200, height: 630 }}
     >
+      <IrasutoyaLikeBgInner
+        screenWidth={1200}
+        screenHeight={630}
+        fixedSeed
+        className="absolute"
+      />
       <Title
         className="absolute top-0 left-0 h-25 scale-190 origin-top-left "
         anim={false}
@@ -51,7 +61,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "pl-20 mt-12 text-7xl font-title",
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
@@ -60,7 +70,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "pl-20 mt-4 text-5xl font-title",
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
@@ -69,7 +79,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "pl-20 mt-4 font-title text-5xl",
-          "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+          "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
           showDummyData || "invisible"
         )}
       >
@@ -81,16 +91,17 @@ export default function OGTemplate() {
         </span>
       </div>
       <div className="absolute bottom-0 w-full h-6">
-        <div
-          className={clsx(
-            "-z-30 absolute inset-x-0 bottom-0",
-            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
-            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
-          )}
-          style={{ top: "-1rem" }}
+        <IrasutoyaLikeGrassInner
+          rem={16}
+          screenWidth={1200}
+          screenHeight={630}
+          height={2.5 * 16}
+          fixedSeed
+          classNameFar="absolute"
+          classNameNear="absolute"
         />
         <RhythmicalSlime
-          className="-z-10 absolute scale-165 origin-bottom-right "
+          className="z-14 absolute scale-165 origin-bottom-right "
           style={{
             bottom: "100%",
             right: "1rem",
@@ -108,7 +119,7 @@ export default function OGTemplate() {
           bpmChanges={[]}
           playbackRate={1}
         />
-        <div className="scale-150 absolute w-full h-full bottom-0 left-0 origin-bottom-left">
+        <div className="z-13 scale-150 absolute w-full h-full bottom-0 left-0 translate-y-4 origin-bottom-left">
           <BPMSign
             chartPlaying={false}
             chartSeq={null}

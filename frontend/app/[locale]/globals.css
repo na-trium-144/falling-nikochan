@@ -4,58 +4,34 @@
   --breakpoint-share-wide2: 35rem; /* sharedResultのrankとjudgeを横並びにする */
   --breakpoint-edit-wide: 50rem; /* editのPC表示 */
   --breakpoint-share-yt-wide: 60rem; /* shareでYouTubeを表示する場所が変わる */
-  --color-orange-975: #20100a;
+  --color-orange-975: #20100a; /* この色ってどうやって作ったの? 記憶にない */
   --color-amber-975: #20180a;
+  --color-sky-975: #091823;
+  --color-default: var(--color-slate-800);
+  --color-default-dark: var(--color-stone-300);
+  --container-main-nav: 16rem;
+  --container-main: 88rem;
+  --container-mobile-header: 3.25rem; /* MobileHeader を編集したら変えること */
+  --container-mobile-footer: 3.75rem; /* MobileFooter を編集したら変えること */
+  --text-1_5xl: 1.375rem; /* 22px */
+  --text-2_5xl: 1.6875rem; /* 27px */
   --blur-2xs: 2px;
+  --radius-box: 1.5rem;
+  --shadow-modal: var(--shadow-md);
+  --inset-shadow-button: inset 0.25rem 0.5rem 1rem;
+  --font-main-ui: "Merriweather", "Kaisei Opti", serif;
+  --font-title:
+    "Noto Sans", "Noto Sans Variable", "Noto Sans JP", "Noto Sans JP Variable",
+    sans-serif;
+  --default-font-family: var(--font-main-ui);
 }
 @custom-variant dark (&:where(.dark, .dark *));
 
-.font-title,
-.font-main-ui.font-title {
-  font-family: "Noto Sans", "Noto Sans JP", sans-serif;
-}
-.font-main-ui,
-body {
-  font-family: "Merriweather", "Kaisei Opti", serif;
-}
+@import "./styles/utilities.css";
+@import "./styles/squircle.css";
 
-/* tailwind css の user-select: none だけでは足りなかった */
-.select-none {
-  /*//選択制御*/
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  /*//ポップアップメニュー表示制御*/
-  -webkit-touch-callout: none;
-
-  -webkit-text-size-adjust: none;
-}
-.appearance-none {
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.list-disc-as-text {
-  list-style: none !important;
-  /*list-style-type: disc;*/
-}
-.list-disc-as-text.list-inside li {
-  margin-left: 1.2em;
-}
-.list-disc-as-text li::before {
-  /* 擬似要素でマーカーを作成 */
-  content: "・";
-  font-size: 1em; /* マーカーのサイズ微調整 */
-  width: 1em;
-  display: inline-block;
-  margin-right: 0.2em;
-  text-indent: 0;
-}
-.list-disc-as-text li {
-  text-indent: -1.2em !important;
-}
-.list-disc-as-text li * {
-  text-indent: 0;
-}
+@import "./styles/result.css";
+@import "./styles/irasutoya-like.css";
+@import "./styles/scrollbar.css";
+@import "./styles/ace.css";
+/*@import "./styles/checkbox.scss";*/

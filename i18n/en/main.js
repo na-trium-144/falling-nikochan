@@ -3,24 +3,30 @@ export default {
     description:
       "Simple and cute rhythm game, " +
       "where anyone can create and share charts.",
+    // just adding "Falling Nikochan is,"
     descriptionVerbose:
       "Falling Nikochan is a simple and cute rhythm game, " +
       "where anyone can create and share charts.",
     redirected:
       "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
+    // "← Back" button
     back: "Back",
     pwa: {
+      // Android Chrome
       installWithPrompt:
         "For a more comfortable full-screen experience, " +
         "add Falling Nikochan to your home screen and launch it as an app.",
       install: "Add to Home Screen",
+      // Android Firefox and others
       installWithoutPrompt:
         "For a more comfortable full-screen experience, " +
         'select "Add to home screen" from your browser\'s menu and launch it as an app.',
+      // iOS Safari
       installIOS:
         "For a more comfortable full-screen experience, " +
         'select "Add to home screen" from Safari\'s share menu and launch it as an app.',
       dismiss: "Not now",
+      // Only used on PWA
       updating: "Downloading update...",
       updateDone: "Update completed!",
       updateFailed: "Update failed...",
@@ -28,17 +34,19 @@ export default {
     inputId: "Enter Chart ID",
     inputIdDesc: "Enter the ID of the chart you want to play.",
     inputIdDesc2: "You can also play by accessing the chart URL (<url></url>).",
-    inputDirect: "Enter Chart ID and go to play screen directly",
-    inputDirectDevonly: "dev environment only, instead of /share/cid path",
+    // concatenated after description, in the top page
     aboutNikochan: "Learn more about Falling Nikochan",
     about: {
       title: "About Falling Nikochan",
     },
     top: {
+      // used in mobile navigation
       titleShort: "Home",
     },
     play: {
+      // pc
       title: "Play with Public Charts",
+      // mobile navigation
       titleShort: "Play",
       description:
         "You can find songs from popular charts / latest charts / sample charts.",
@@ -51,7 +59,7 @@ export default {
       latest: "Latest Charts / All Charts",
       latestDesc:
         "List of published charts. Sorted by the most recently created or updated. " +
-        "Updates are also announced on the official account of <unicodeX></unicodeX> <twitter>@nikochan144</twitter>.",
+        "Updates are also announced on the official account of <xlogo></xlogo> <twitter>@nikochan144</twitter>.",
       latestDescText:
         "List of published charts. Sorted by the most recently created or updated. ",
       latestDesc2:
@@ -93,15 +101,19 @@ export default {
         "all data saved in the browser, such as the list of edited charts and passwords, will be deleted.",
     },
     chartList: {
+      // "Show More →" button
       showAll: "Show More",
       empty: "No charts yet",
       notFound: "No charts found",
     },
     policies: {
+      // Ja:"利用規約っぽいもの" (Something like terms of use)
       title: "(Kind of) Terms of Use",
       license: {
         showDetail: "Show Details",
+        // "× Close" button
         closeDetail: "Close",
+        // "Source: https://github.com/username/repo↗︎"
         source: "Source",
       },
     },
@@ -133,6 +145,7 @@ export default {
       dark: "Dark",
       default: "System Default",
       contactForm: "Contact Form",
+      // long version for pc, short version for mobile
       officialChannel: "Falling Nikochan Official Channel (@nikochan144)",
       officialChannelShort: "Official Channel",
       officialAccount: "Falling Nikochan Official Account (@nikochan144)",
@@ -141,6 +154,7 @@ export default {
       apiReferenceShort: "API Reference",
       aboutUTCode: "About ut.code();",
     },
+    // previously used in a school festival in the university of tokyo
     festival:
       "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
       "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",

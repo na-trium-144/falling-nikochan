@@ -170,6 +170,14 @@ export function detectOS(): "android" | "ios" | null {
   }
   return null;
 }
+export function useOSDetector() {
+  // undefined: 未検出、null: PCなど、"android" | "ios": 各OS
+  const [os, setOS] = useState<"android" | "ios" | null | undefined>(undefined);
+  useEffect(() => {
+    setOS(detectOS());
+  }, []);
+  return os;
+}
 
 interface InitAssetsState {
   type?: "initAssets";
@@ -238,6 +246,9 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       process.env.NODE_ENV !== "development" &&
       "serviceWorker" in navigator
     ) {
+      navigator.serviceWorker.addEventListener("message", (e) => {
+        console.warn("sw:", e.data);
+      });
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
         updateFetching = setTimeout(
           () => void fetch("/worker/checkUpdate"),
@@ -331,13 +342,16 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     >
       {props.children}
       <Box
-        className={clsx(
-          "fixed bottom-12 inset-x-0 p-2 w-max max-w-full mx-auto shadow-lg",
+        classNameOuter={clsx(
+          "fixed! z-15 bottom-(--container-mobile-footer) translate-y-1 inset-x-0",
+          "w-max max-w-full mx-auto shadow-modal",
           "transition-all duration-200 origin-bottom",
+          "rounded-sq-xl!",
           workerUpdate !== null && !pathname.match(/^\/[a-zA-Z-]*\/(play|edit)/)
             ? "ease-in scale-100 opacity-100"
             : "ease-out scale-0 opacity-0"
         )}
+        padding={2}
       >
         {workerUpdate?.state === "updating" ? (
           <>
@@ -355,7 +369,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             )*/}
             {workerUpdate?.progressNum !== undefined && (
               <ProgressBar
-                className="absolute! bottom-0 inset-x-1 "
+                className="absolute! bottom-1 inset-x-2.5 "
                 fixedColor={levelBgColors[1]}
                 value={
                   (workerUpdate?.progressNum || 0) /

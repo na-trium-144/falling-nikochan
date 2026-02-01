@@ -1,6 +1,6 @@
 import clsx from "clsx/lite";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
-import { levelBgColors } from "@/common/levelColors";
+import { levelColors } from "@/common/levelColors";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
@@ -13,10 +13,13 @@ import { linkStyle1 } from "@/common/linkStyle";
 import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
+import { useColorThief } from "@/common/colorThief";
+import { boxBorderStyle1, boxBorderStyle2, boxStyle } from "@/common/box";
 
 interface Props {
   ready: boolean;
   playing: boolean;
+  playbackRate: number;
   className?: string;
   lvType: string;
   lvIndex?: number;
@@ -41,8 +44,10 @@ export function MusicArea(props: Props) {
   const { width, height, ref } = useResizeDetector();
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
-  const largeTitle = props.isMobile ? height && height > 7.5 * rem : true;
-  const veryLargeTitle = props.isMobile ? height && height > 11.5 * rem : false;
+  const largeTitle = props.isMobile ? height && height > 8.5 * rem : true;
+  const veryLargeTitle = props.isMobile
+    ? height && height > 11.5 * rem
+    : width && width > 30 * rem;
 
   const t = useTranslations("play.message");
 
@@ -98,19 +103,39 @@ export function MusicArea(props: Props) {
     return () => clearInterval(id);
   }, [props.ytPlayer, props.ytBeginSec, levelLength]);
 
+  const colorThief = useColorThief();
+
   return (
     <div
       className={clsx(
-        "z-10 grow-0 shrink-0 pb-1 flex",
-        levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
-        props.isMobile ? "rounded-b-lg" : "rounded-bl-xl pl-3",
+        "z-10 grow-0 shrink-0 flex",
+        // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
+        props.isMobile
+          ? "rounded-b-sq-xl pb-1"
+          : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
-        props.className
+        props.className,
+        colorThief.boxStyle
       )}
+      style={{ color: colorThief.currentColor }}
       onPointerEnter={() => setPointerInVolumeCtrl(true)}
       onPointerLeave={() => setPointerInVolumeCtrl(false)}
       ref={ref}
     >
+      <span
+        className={clsx(
+          colorThief.boxBorderStyle1,
+          "border-t-0 border-r-0",
+          props.isMobile && "border-l-0"
+        )}
+      />
+      <span
+        className={clsx(
+          colorThief.boxBorderStyle2,
+          "border-t-0 border-r-0",
+          props.isMobile && "border-l-0"
+        )}
+      />
       <div
         className={clsx(
           "flex",
@@ -135,29 +160,44 @@ export function MusicArea(props: Props) {
             onPlaybackRateChange={props.onPlaybackRateChange}
           />
         )}
+        {props.chartBrief?.ytId && (
+          <img
+            ref={colorThief.imgRef}
+            className="hidden"
+            src={`https://i.ytimg.com/vi/${props.chartBrief?.ytId}/mqdefault.jpg`}
+            crossOrigin="anonymous"
+          />
+        )}
         <div
           className={clsx(
             "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
+            "text-default dark:text-default-dark",
             props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
           )}
         >
           <div className={clsx(props.isMobile && "h-0 overflow-visible")}>
             <p
               className={clsx(
-                veryLargeTitle ? "" : largeTitle ? "leading-5" : "leading-3.5"
+                "flex flex-wrap items-baseline",
+                "font-medium font-title",
+                veryLargeTitle
+                  ? "*:h-8 **:leading-8"
+                  : largeTitle
+                    ? "*:h-6.5 **:leading-6.5"
+                    : "*:h-4.5 **:leading-4.5"
               )}
             >
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
               <span
                 className={clsx(
-                  "inline-block font-title align-bottom",
+                  "font-title",
                   veryLargeTitle
-                    ? "block! text-3xl"
+                    ? "text-3xl"
                     : largeTitle
-                      ? "text-2xl/6"
-                      : "text-lg/5",
+                      ? "text-2xl"
+                      : "text-lg",
                   "overflow-x-clip overflow-y-visible",
-                  "max-w-full text-ellipsis text-nowrap"
+                  "max-w-full text-ellipsis whitespace-nowrap"
                 )}
               >
                 {props.chartBrief?.title}
@@ -165,53 +205,48 @@ export function MusicArea(props: Props) {
               {props.chartBrief?.composer && (
                 <span
                   className={clsx(
-                    "inline-block font-title align-bottom",
+                    "font-title",
                     veryLargeTitle
-                      ? "block! text-2xl"
+                      ? "text-2xl"
                       : largeTitle
-                        ? "text-lg/5"
-                        : "text-sm/3.5",
+                        ? "text-lg"
+                        : "text-sm",
                     "overflow-x-clip overflow-y-visible",
-                    "max-w-full text-ellipsis text-nowrap"
+                    "max-w-full text-ellipsis whitespace-nowrap"
                   )}
                 >
-                  <span className="mx-1">/</span>
+                  <span className="mx-[0.25em]">/</span>
                   {props.chartBrief?.composer}
                 </span>
               )}
             </p>
             <p
               className={clsx(
+                "flex flex-wrap items-baseline",
                 veryLargeTitle
-                  ? "leading-6"
+                  ? "*:h-7 **:leading-7"
                   : largeTitle
-                    ? "leading-4.5"
-                    : "leading-4"
+                    ? "*:h-5 **:leading-5"
+                    : "*:h-4 **:leading-4"
               )}
             >
               {props.lvIndex !== undefined &&
                 props.chartBrief?.levels[props.lvIndex] && (
                   <span
                     className={clsx(
-                      "inline-block align-bottom",
                       "overflow-x-clip overflow-y-visible",
-                      "max-w-full text-ellipsis text-nowrap",
-                      veryLargeTitle
-                        ? "leading-6"
-                        : largeTitle
-                          ? "leading-4.5"
-                          : "leading-4"
+                      "max-w-full text-ellipsis whitespace-nowrap"
                     )}
                   >
                     {props.chartBrief?.levels[props.lvIndex].name && (
                       <span
                         className={clsx(
-                          "font-title mr-1 align-bottom",
+                          "font-title mr-[0.25em]",
                           veryLargeTitle
                             ? "text-2xl"
                             : largeTitle
-                              ? "text-lg/4"
-                              : "text-sm/3.5"
+                              ? "text-lg"
+                              : "text-sm"
                         )}
                       >
                         {props.chartBrief?.levels[props.lvIndex].name}
@@ -219,24 +254,26 @@ export function MusicArea(props: Props) {
                     )}
                     <span
                       className={clsx(
-                        "align-bottom",
+                        levelColors.at(levelTypes.indexOf(props.lvType)) ||
+                          levelColors[1],
                         veryLargeTitle
-                          ? "text-xl"
+                          ? "text-1_5xl"
                           : largeTitle
-                            ? "text-base/3"
-                            : "text-xs/2.5"
+                            ? "text-base"
+                            : "text-xs"
                       )}
                     >
                       {props.lvType}-
                     </span>
                     <span
                       className={clsx(
-                        "align-bottom",
+                        levelColors.at(levelTypes.indexOf(props.lvType)) ||
+                          levelColors[1],
                         veryLargeTitle
-                          ? "text-3xl"
+                          ? "text-2_5xl"
                           : largeTitle
-                            ? "text-xl/4"
-                            : "text-lg/3.5"
+                            ? "text-xl"
+                            : "text-lg"
                       )}
                     >
                       {props.chartBrief?.levels[props.lvIndex]?.difficulty}
@@ -245,36 +282,30 @@ export function MusicArea(props: Props) {
                 )}
               <span
                 className={clsx(
-                  "inline-block align-bottom",
                   "overflow-x-clip overflow-y-visible",
-                  "max-w-full text-ellipsis text-nowrap",
-                  veryLargeTitle
-                    ? "leading-6"
-                    : largeTitle
-                      ? "leading-4.5"
-                      : "leading-4"
+                  "max-w-full text-ellipsis whitespace-nowrap"
                 )}
               >
                 <span
                   className={clsx(
-                    "ml-2 align-bottom",
+                    "ml-[0.5em]",
                     veryLargeTitle
                       ? "text-lg"
                       : largeTitle
-                        ? "text-sm/3.5"
-                        : "text-xs/2.5"
+                        ? "text-sm"
+                        : "text-xs"
                   )}
                 >
                   by
                 </span>
                 <span
                   className={clsx(
-                    "ml-1.5 font-title align-bottom",
+                    "ml-[0.2em] font-title",
                     veryLargeTitle
                       ? "text-2xl"
                       : largeTitle
-                        ? "text-lg/4"
-                        : "text-sm/3.5"
+                        ? "text-lg"
+                        : "text-sm"
                   )}
                 >
                   {props.chartBrief?.chartCreator}
@@ -282,43 +313,71 @@ export function MusicArea(props: Props) {
               </span>
             </p>
           </div>
-          <p className="leading-0 mt-1 ">
-            <span className="inline-flex flex-row justify-end w-3 overflow-visible ">
-              <span className="text-right text-base/4 ">
-                {Math.floor(currentSec / 60)}
+          <p
+            className={clsx(
+              "leading-[1em] mt-1.5",
+              props.isMobile
+                ? veryLargeTitle
+                  ? "flex flex-row justify-between mr-1.5"
+                  : "flex flex-col-reverse"
+                : "flex flex-row gap-[0.5em]",
+              veryLargeTitle ? "text-xl" : largeTitle ? "text-base" : "text-sm",
+              props.playbackRate > 1
+                ? "text-rose-600/75 dark:text-rose-400/75"
+                : props.playbackRate < 1
+                  ? "text-emerald-600/75 dark:text-emerald-400/75"
+                  : "text-black/40 dark:text-white/40"
+            )}
+          >
+            <span className="flex-none w-max">
+              <span className="inline-flex flex-row justify-end w-[0.75em] overflow-visible">
+                <span className="text-right">
+                  {Math.floor(currentSec / 60)}
+                </span>
               </span>
-            </span>
-            <span>:</span>
-            <span className="inline-block w-6 text-base/4 ">
-              {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
-            </span>
-            <span className="text-sm/4 ">
-              <span>/</span>
-              <span className="ml-1 ">{Math.floor(levelLength / 60)}</span>
               <span>:</span>
-              <span className="">
-                {(Math.floor(levelLength) % 60).toString().padStart(2, "0")}
+              <span className="inline-block w-[1.5em]">
+                {(Math.floor(currentSec) % 60).toString().padStart(2, "0")}
+              </span>
+              <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
+                <span>/</span>
+                <span className="ml-[0.25em] ">
+                  {Math.floor(levelLength / 60)}
+                </span>
+                <span>:</span>
+                <span className="">
+                  {(Math.floor(levelLength) % 60).toString().padStart(2, "0")}
+                </span>
               </span>
             </span>
+            {props.playbackRate !== 1 && (
+              <span className="flex-none w-max">
+                <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
+                  {t("playbackRateDisplay")}:
+                </span>
+                <span className="ml-[0.25em]">{props.playbackRate}</span>
+              </span>
+            )}
           </p>
         </div>
       </div>
       <ProgressBar
         value={currentSec / levelLength}
-        fixedColor="bg-red-600"
-        className={clsx(props.isMobile ? "mx-2" : "mr-1")}
+        fixedColor="bg-red-500/75"
+        className={clsx(props.isMobile ? "mx-2" : "ml-0.5 mr-1")}
       />
       <button
         className={clsx(
           "absolute rounded-full cursor-pointer leading-1",
+          "text-default dark:text-default-dark",
           props.isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
-                props.isTouch ? "bg-white/50 dark:bg-stone-800/50 p-2" : "p-2"
+                props.isTouch ? "bg-white/50 dark:bg-stone-700/50 p-2" : "p-2"
               )
             : "bottom-0 right-1 p-2",
           "hover:bg-slate-200/50 active:bg-slate-300/50",
-          "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+          "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
           linkStyle1,
           props.isMobile &&
             (initialVolumeCtrlOpenDone.current
@@ -333,12 +392,13 @@ export function MusicArea(props: Props) {
       </button>
       <div
         className={clsx(
+          "text-default dark:text-default-dark",
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
-            : "top-full inset-x-0 mt-2 mr-1 p-3",
-          "rounded-lg border border-slate-400 dark:border-stone-600",
-          "bg-white/75 dark:bg-stone-800/75",
+            : "top-full left-3 ml-auto max-w-100 right-1 mt-1 p-3",
+          "rounded-sq-box",
+          boxStyle,
           "transition-all duration-200",
           volumeCtrlOpen
             ? "ease-out scale-100 opacity-100"
@@ -361,17 +421,19 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        {!props.isMobile && (
+        <span className={boxBorderStyle1} />
+        <span className={boxBorderStyle2} />
+        {/*{!props.isMobile && (
           <span
             className={clsx(
               "absolute inline-block right-2 top-0 w-4 h-4 -translate-y-1/2",
               "border-l border-b rounded-tr-full",
               "rotate-135 origin-center",
               "border-slate-400 dark:border-stone-600",
-              "bg-white dark:bg-stone-800"
+              "bg-white dark:bg-stone-700"
             )}
           />
-        )}
+        )}*/}
         <div className="flex flex-row items-center ">
           <Youtube className="text-xl " />
           <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
@@ -388,13 +450,13 @@ export function MusicArea(props: Props) {
           <SmilingFace
             className={clsx(
               "text-xl",
-              props.enableSE || "text-slate-400 dark:text-stone-600"
+              props.enableSE || "text-slate-400 dark:text-stone-500"
             )}
           />
           <span
             className={clsx(
               "text-sm w-8 text-center",
-              props.enableSE || "text-slate-400 dark:text-stone-600"
+              props.enableSE || "text-slate-400 dark:text-stone-500"
             )}
           >
             {props.enableSE ? props.seVolume : t("off")}

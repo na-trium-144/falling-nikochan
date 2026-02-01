@@ -1,20 +1,71 @@
+"use client";
+
 import clsx from "clsx/lite";
-import { ReactNode } from "react";
+import { useEffect, useState } from "react";
+import "@/styles/key.scss";
+import { useTheme } from "./theme";
 
 interface KeyProps {
-  children: ReactNode;
-  className?: string;
+  children: string;
+  handleKeyDown?: boolean;
 }
 export function Key(props: KeyProps) {
+  const { isDark } = useTheme();
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    if (props.handleKeyDown) {
+      let targetKey: string[];
+      switch (props.children.toLowerCase()) {
+        case "space":
+          targetKey = [" "];
+          break;
+        case "del/bs":
+          targetKey = ["delete", "backspace"];
+          break;
+        case "esc":
+          targetKey = ["escape", "esc"];
+          break;
+        case "pagedn":
+          targetKey = ["pagedown"];
+          break;
+        case "←":
+          targetKey = ["arrowleft", "left"];
+          break;
+        case "→":
+          targetKey = ["arrowright", "right"];
+          break;
+        default:
+          targetKey = [props.children.toLowerCase()];
+          break;
+      }
+      const keydown = (e: KeyboardEvent) => {
+        if (targetKey.includes(e.key.toLowerCase())) {
+          setActive(true);
+        }
+      };
+      const keyup = (e: KeyboardEvent) => {
+        if (targetKey.includes(e.key.toLowerCase())) {
+          setActive(false);
+        }
+      };
+      window.addEventListener("keydown", keydown);
+      window.addEventListener("keyup", keyup);
+      return () => {
+        window.removeEventListener("keydown", keydown);
+        window.removeEventListener("keyup", keyup);
+      };
+    }
+  }, [props.children, props.handleKeyDown]);
   return (
-    <span
+    <a
       className={clsx(
-        "border-2 border-slate-800 dark:border-stone-300 rounded shadow shadow-slate-400 dark:shadow-stone-700",
-        "bg-white/75 dark:bg-stone-800/75",
-        props.className
+        "kbc-button no-container kbc-button-xxs",
+        isDark ? "kbc-button-dark" : "kbc-button-light",
+        active ? "active" : "disabled",
+        "align-top m-0!"
       )}
     >
-      {props.children}
-    </span>
+      <kbd>{props.children}</kbd>
+    </a>
   );
 }

@@ -1,9 +1,12 @@
 import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
 
 export const titleWithSiteName = (title: string) =>
-  title ? `${title} | Falling Nikochan` : "Falling Nikochan";
+  (title ? `${title} | Falling Nikochan` : "Falling Nikochan") +
+  (process.env.TITLE_SUFFIX ? ` ${process.env.TITLE_SUFFIX}` : "");
 export const titleWithoutSiteName = (title: string) =>
-  title || "Falling Nikochan";
+  title ||
+  "Falling Nikochan" +
+    (process.env.TITLE_SUFFIX ? ` ${process.env.TITLE_SUFFIX}` : "");
 
 export function titleShare(
   t: any,

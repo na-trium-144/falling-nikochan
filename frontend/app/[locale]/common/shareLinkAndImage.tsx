@@ -16,6 +16,10 @@ import Button from "./button";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
 import { useDelayedDisplayState } from "./delayedDisplayState";
+import { useOSDetector } from "./pwaInstall";
+import Pic from "@icon-park/react/lib/icons/Pic";
+import Select from "./select";
+import { XLogo } from "./x";
 
 export function useShareLink(
   cid: string | undefined,
@@ -31,13 +35,14 @@ export function useShareLink(
   // /route/src/share.ts 内で指定しているクエリパラメータと順番をあわせる
   searchParams.set("lang", lang || "en");
   if (resultParam) searchParams.set("result", resultParam);
-  const sharePath = `/share/${cid}`;
+  // use encodeURIComponent to silence CodeQL false positive alert
+  const sharePath = `/share/${encodeURIComponent(cid || "")}`;
   const shareParams = searchParams.toString();
 
   searchParams.set("v", packageJson.version);
   const ogPath = resultParam
-    ? `/og/result/${cid}?${searchParams.toString()}`
-    : `/og/share/${cid}?${searchParams.toString()}`;
+    ? `/og/result/${encodeURIComponent(cid || "")}?${searchParams.toString()}`
+    : `/og/share/${encodeURIComponent(cid || "")}?${searchParams.toString()}`;
 
   // /route/src/share.ts 内で指定しているタイトルとおなじ
   let newTitle: string = brief?.composer
@@ -62,18 +67,29 @@ export function useShareLink(
       });
     }
   }
-  newTitle += " #fallingnikochan";
 
   const [hasClipboard, setHasClipboard] = useState<boolean>(false);
-  const toClipboard = useCallback(() => {
-    // og画像の生成は時間がかかるので、
-    // 共有される前にogを1回fetchしておくことにより、
-    // cloudflareにキャッシュさせる
-    void fetch(process.env.BACKEND_PREFIX + ogPath);
-    navigator.clipboard.writeText(
-      newTitle + "\n" + origin + sharePath + "?" + shareParams
-    );
-  }, [ogPath, newTitle, origin, sharePath, shareParams]);
+  const toClipboard = useCallback(
+    (withTitle: boolean = false) => {
+      // og画像の生成は時間がかかるので、
+      // 共有される前にogを1回fetchしておくことにより、
+      // cloudflareにキャッシュさせる
+      void fetch(process.env.BACKEND_PREFIX + ogPath);
+      if (withTitle) {
+        navigator.clipboard.writeText(
+          newTitle +
+            " #fallingnikochan\n" +
+            origin +
+            sharePath +
+            "?" +
+            shareParams
+        );
+      } else {
+        navigator.clipboard.writeText(origin + sharePath + "?" + shareParams);
+      }
+    },
+    [ogPath, newTitle, origin, sharePath, shareParams]
+  );
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
     void fetch(process.env.BACKEND_PREFIX + ogPath);
@@ -85,8 +101,8 @@ export function useShareLink(
   }, []);
   useEffect(() => {
     const shareData = {
-      title: newTitle,
-      text: newTitle,
+      title: newTitle + " #fallingnikochan",
+      text: newTitle + " #fallingnikochan",
       url: origin + sharePath + "?" + shareParams,
     };
     if (
@@ -97,12 +113,21 @@ export function useShareLink(
       setShareData(shareData);
     }
   }, [origin, newTitle, sharePath, shareParams]);
+  const xPostIntentParams = new URLSearchParams();
+  xPostIntentParams.set("hashtags", "fallingnikochan");
+  xPostIntentParams.set("related", "nikochan144");
+  xPostIntentParams.set("text", newTitle);
+  xPostIntentParams.set("url", origin + sharePath + "?" + shareParams);
+  const xPostIntent =
+    "https://twitter.com/intent/tweet?" + xPostIntentParams.toString();
 
   const shareImageCtx = useShareImageModalContext();
   const openModal = useCallback(
     () => shareImageCtx.openModal(ogPath, cid || "undefined"),
     [shareImageCtx, ogPath, cid]
   );
+
+  const detectedOS = useOSDetector();
 
   return {
     url: (
@@ -115,9 +140,54 @@ export function useShareLink(
       </>
     ),
     path: sharePath + "?" + shareParams,
-    toClipboard: hasClipboard ? toClipboard : null,
-    toAPI: shareData ? toAPI : null,
-    openModal,
+    buttons: (
+      <>
+        <Button
+          className="mx-0.5"
+          text={t("copyURL")}
+          onClick={hasClipboard ? toClipboard : undefined}
+        />
+        {detectedOS === undefined ? (
+          // placeholder dummy button
+          <Button className="mx-0.5" text={t("share")} />
+        ) : detectedOS === null ? (
+          <Select
+            className="mx-0.5"
+            options={[
+              { value: "copyForShare", label: t("copyForShare") },
+              {
+                value: "xPost",
+                label: t.rich("xPost", {
+                  xlogo: () => <XLogo className="mr-1.5" />,
+                }),
+              },
+            ]}
+            onSelect={(value: "copyForShare" | "xPost") => {
+              if (value === "copyForShare" && hasClipboard) {
+                toClipboard(true);
+              } else if (value === "xPost") {
+                window.open(xPostIntent, "_blank")?.focus();
+              }
+            }}
+          >
+            {t("share")}
+          </Select>
+        ) : (
+          // native share API on mobile
+          <Button
+            className="mx-0.5"
+            text={t("share")}
+            onClick={toAPI}
+            disabled={!shareData}
+          />
+        )}
+      </>
+    ),
+    modalButton: (
+      <Button className="mx-0.5" onClick={openModal}>
+        <Pic className="inline-block align-middle " />
+      </Button>
+    ),
   };
 }
 
@@ -190,6 +260,8 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
     }
   }, [cid, imageBlob]);
 
+  const detectedOS = useOSDetector();
+
   return (
     <ShareImageModalContext.Provider value={{ openModal }}>
       {props.children}
@@ -204,20 +276,20 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
         >
-          <div className="absolute inset-12">
+          <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
             <Box
               onClick={(e) => e.stopPropagation()}
-              className={clsx(
-                "absolute inset-0 m-auto w-max h-max max-w-full max-h-full",
-                "flex flex-col items-center text-center",
-                "p-6",
-                "shadow-lg",
-                "overflow-y-auto",
+              classNameOuter={clsx(
+                "w-max h-max max-w-full max-h-full",
+                "shadow-modal",
                 "transition-transform duration-200 origin-center",
                 modalAppearing ? "ease-in scale-100" : "ease-out scale-0"
               )}
+              classNameInner={clsx("flex flex-col items-center text-center")}
+              scrollableY
+              padding={6}
             >
-              <p className="text-lg font-title font-bold mb-2">
+              <p className="text-lg font-title font-semibold mb-2">
                 &lt; {t("shareImage")} &gt;
               </p>
               <div
@@ -248,15 +320,27 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               {imageBlob && (
                 <p className="mb-1">
                   <Button
+                    className="mx-0.5"
                     text={t("download")}
                     onClick={() => saveAs(imageBlob, `${cid}.png`)}
                   />
-                  <span className="inline-block">
-                    {hasClipboard && (
-                      <Button text={t("copy")} onClick={toClipboard} />
+                  <>
+                    <Button
+                      className="mx-0.5"
+                      text={t("copyImage")}
+                      onClick={hasClipboard ? toClipboard : undefined}
+                    />
+                    {detectedOS === undefined ? null : detectedOS ===
+                      null ? null : (
+                      // native share API on mobile
+                      <Button
+                        className="mx-0.5"
+                        text={t("share")}
+                        onClick={toAPI}
+                        disabled={!shareData}
+                      />
                     )}
-                    {shareData && <Button text={t("share")} onClick={toAPI} />}
-                  </span>
+                  </>{" "}
                 </p>
               )}
               <Button text={t("close")} onClick={closeModal} />

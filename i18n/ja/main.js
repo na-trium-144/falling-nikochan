@@ -30,8 +30,6 @@ export default {
       "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
     inputIdDesc2:
       "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
-    inputDirect: "譜面IDを指定し直接プレイ画面に飛ぶ",
-    inputDirectDevonly: "dev環境限定、 /share/cid のパスが使えない代わり",
     aboutNikochan: "Falling Nikochan について詳しく",
     about: {
       title: "Falling Nikochan について",
@@ -53,7 +51,7 @@ export default {
       latest: "新着譜面・すべての譜面",
       latestDesc:
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。" +
-        "<unicodeX></unicodeX> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
+        "<xlogo></xlogo> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
       latestDescText:
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
       latestDesc2:

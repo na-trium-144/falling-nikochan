@@ -49,7 +49,10 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
           return path;
         } else if (path.endsWith("/")) {
           return path.slice(0, -1) + ".html";
+        } else if (path.endsWith("LICENSE")) {
+          return path;
         } else {
+          // access to html file without extension
           return path + ".html";
         }
       },

@@ -1,12 +1,16 @@
 /** @type {import('next').NextConfig} */
 
 import { execFileSync } from "node:child_process";
-import { writeFileSync, readFileSync } from "node:fs";
+import {
+  writeFileSync,
+  readFileSync,
+  copyFileSync,
+  existsSync,
+  unlinkSync,
+} from "node:fs";
 import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
-// import babelRc from "./.babelrc" with { type: "json" };
-const babelRc = JSON.parse(readFileSync("./.babelrc", "utf-8"));
 import LicensePlugin from "webpack-license-plugin";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
@@ -17,12 +21,37 @@ const coreJsVersion = parentPackageJson.devDependencies["core-js"]
   .split(".")
   .slice(0, 2)
   .join(".");
-const babelCoreJsVersion = babelRc.presets[0][1]["preset-env"].corejs;
-if (coreJsVersion !== babelCoreJsVersion) {
+const workerBabelRc = JSON.parse(
+  readFileSync(join(dirname(process.cwd()), "worker", ".babelrc"), "utf-8")
+);
+const workerBabelCoreJsVersion = workerBabelRc.presets[0][1].corejs;
+if (coreJsVersion !== workerBabelCoreJsVersion) {
   // https://github.com/babel/babel/issues/15412
   throw new Error(
-    `core-js version in .babelrc (${babelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`
+    `core-js version in worker/.babelrc (${workerBabelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`
   );
+}
+
+// development時にはswcを使い、productionではcore-jsを設定したbabelを使う
+if (process.env.NODE_ENV === "development") {
+  if (existsSync(".babelrc")) {
+    unlinkSync(".babelrc");
+  }
+} else {
+  const babelRc = {
+    "presets": [
+      [
+        "next/babel",
+        {
+          "preset-env": {
+            "useBuiltIns": "usage",
+            "corejs": workerBabelCoreJsVersion,
+          },
+        },
+      ],
+    ],
+  };
+  writeFileSync(".babelrc", JSON.stringify(babelRc), "utf8");
 }
 
 const date = new Date().toUTCString();
@@ -38,8 +67,14 @@ try {
 const env = {
   buildDate: date,
   buildCommit: commit,
-  buildVersion: packageJson.version.split(".").slice(0, 2).join("."),
+  buildVersion:
+    packageJson.version.split(".").slice(0, 2).join(".") +
+    (process.env.VERSION_SUFFIX ||
+      (process.env.NODE_ENV === "development" ? "+dev" : "")),
   browserslist: packageJson.browserslist.join(", "),
+  TITLE_SUFFIX:
+    process.env.TITLE_SUFFIX ||
+    (process.env.NODE_ENV === "development" ? "Development" : ""),
   // prefix for every asset URL
   ASSET_PREFIX: process.env.ASSET_PREFIX || "",
   // prefix for every API call URL
@@ -50,9 +85,14 @@ const env = {
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
 writeFileSync(
-  join(process.cwd(), "public/assets/buildVer.json"),
+  join(process.cwd(), "public/buildVer.json"),
   JSON.stringify({ date, commit, version: env.buildVersion }),
   "utf-8"
+);
+
+copyFileSync(
+  join(dirname(process.cwd()), "LICENSE"),
+  join(process.cwd(), "public/LICENSE")
 );
 
 const nextConfig = {
@@ -72,6 +112,16 @@ const nextConfig = {
   output: "export",
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   env,
+  sassOptions: {
+    // pretty-checkbox と keyboard-css が出すwarning
+    silenceDeprecations: [
+      "import",
+      "legacy-js-api",
+      "global-builtin",
+      "color-functions",
+      "slash-div",
+    ],
+  },
   webpack: (config, options) => {
     return {
       ...config,
@@ -107,11 +157,35 @@ const nextConfig = {
         ...(process.env.NODE_ENV !== "development"
           ? [
               new LicensePlugin({
-                outputFilename: "../public/assets/oss-licenses/frontend.json",
+                outputFilename: "../public/oss-licenses/frontend.json",
                 includeNoticeText: true,
                 excludedPackageTest: (packageName /*, version*/) => {
                   return packageName.startsWith("@falling-nikochan");
                 },
+                includePackages: () =>
+                  ["tailwindcss", "pretty-checkbox", "keyboard-css"].map(
+                    (pkg) => {
+                      const currentDirPkg = join(
+                        process.cwd(),
+                        "node_modules",
+                        pkg
+                      );
+                      const parentDirPkg = join(
+                        dirname(process.cwd()),
+                        "node_modules",
+                        pkg
+                      );
+                      if (existsSync(currentDirPkg)) {
+                        return currentDirPkg;
+                      } else if (existsSync(parentDirPkg)) {
+                        return parentDirPkg;
+                      } else {
+                        throw new Error(
+                          `Cannot find package ${pkg} to include in OSS licenses`
+                        );
+                      }
+                    }
+                  ),
               }),
             ]
           : []),

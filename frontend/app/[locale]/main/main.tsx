@@ -12,7 +12,7 @@ import {
 } from "@/common/footer.js";
 import { ReactNode, RefObject, useCallback, useState } from "react";
 import Link from "next/link";
-import Title from "@/common/titleLogo.js";
+import { TitleAsLink } from "@/common/titleLogo.js";
 import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
@@ -21,6 +21,15 @@ import { historyBackWithReview, LinkWithReview } from "@/common/pwaInstall";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import { AboutModal } from "@/common/aboutModal";
+import { ButtonHighlight } from "@/common/button";
+import {
+  boxButtonBorderStyle1,
+  boxButtonBorderStyle2,
+  boxButtonStyle,
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -58,34 +67,15 @@ export function IndexMain(props: Props) {
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
-      <Link
-        href={`/${locale}`}
-        className={clsx(
-          "hidden main-wide:block w-full",
-          "shrink-0 basis-24 relative",
-          linkStyle1
-        )}
-        style={{
-          marginLeft: "-20rem",
-          marginRight: "-20rem",
-        }}
-        prefetch={!process.env.NO_PREFETCH}
-      >
-        <Title className="absolute inset-0 " />
-      </Link>
-      <div className="my-2 text-center px-6 hidden main-wide:block">
-        {t("description")}
-        <button
-          className={clsx("hidden main-wide:inline-block", "ml-2", linkStyle3)}
-          onClick={() => setAboutPageIndex(1)}
-        >
-          {t("aboutNikochan")}
-          <ArrowRight
-            className="inline-block align-middle ml-2 "
-            theme="filled"
-          />
-        </button>
-      </div>
+      <TitleAsLink
+        className="hidden main-wide:block shrink-0"
+        locale={locale}
+      />
+      <AboutDescription
+        className="my-2 hidden main-wide:block"
+        locale={locale}
+        onClickAbout={() => setAboutPageIndex(1)}
+      />
       <RedirectedWarning />
       <div
         className={clsx(
@@ -98,7 +88,7 @@ export function IndexMain(props: Props) {
           <nav
             className={clsx(
               "hidden main-wide:flex",
-              "flex-col h-max w-64 shrink-0 my-auto",
+              "flex-col h-max w-main-nav shrink-0 my-auto",
               "transition ease-out duration-200"
             )}
           >
@@ -108,11 +98,13 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-lg bg-white/75 dark:bg-stone-800/75 backdrop-blur-2xs",
-                    "text-center rounded-r-none py-3 pl-2 pr-2",
-                    "hover:bg-white hover:dark:bg-stone-800 active:shadow-inner"
+                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
+                    boxButtonStyle
                   )}
                 >
+                  <span className={clsx(boxButtonBorderStyle1, "border-r-0")} />
+                  <span className={clsx(boxButtonBorderStyle2, "border-r-0")} />
+                  <ButtonHighlight />
                   {t(key + ".title")}
                 </LinkWithReview>
               ) : (
@@ -120,10 +112,17 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    " text-center hover:bg-sky-200 hover:dark:bg-orange-950 active:shadow-inner",
-                    "rounded-l-lg py-3 pl-2 pr-2"
+                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
+                    skyFlatButtonStyle
                   )}
                 >
+                  <span
+                    className={clsx(skyFlatButtonBorderStyle1, "border-r-0")}
+                  />
+                  <span
+                    className={clsx(skyFlatButtonBorderStyle2, "border-r-0")}
+                  />
+                  <ButtonHighlight />
                   {t(key + ".title")}
                 </LinkWithReview>
               )
@@ -131,8 +130,11 @@ export function IndexMain(props: Props) {
           </nav>
         )}
         <Box
-          ref={props.boxRef}
-          className={clsx("flex flex-col p-6 overflow-y-auto min-h-0 flex-1")}
+          refInner={props.boxRef}
+          classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
+          classNameInner={clsx("flex flex-col")}
+          scrollableY
+          padding={6}
         >
           {!props.noBackButtonPC && (
             <button
@@ -151,5 +153,38 @@ export function IndexMain(props: Props) {
       <PCFooter locale={locale} nav={props.tabKey === null} />
       <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
+  );
+}
+
+export function AboutDescription(props: {
+  className: string;
+  locale: string;
+  onClickAbout: () => void;
+}) {
+  const t = useTranslations("main");
+  return (
+    <div className={clsx("flex-none text-center px-6", props.className)}>
+      {t("description")}
+      <Link
+        href={`/${props.locale}/main/about/1`}
+        className={clsx("main-wide:hidden inline-block", "ml-2", linkStyle3)}
+      >
+        {t("aboutNikochan")}
+        <ArrowRight
+          className="inline-block align-middle ml-2 "
+          theme="filled"
+        />
+      </Link>
+      <button
+        className={clsx("hidden main-wide:inline-block", "ml-2", linkStyle3)}
+        onClick={props.onClickAbout}
+      >
+        {t("aboutNikochan")}
+        <ArrowRight
+          className="inline-block align-middle ml-2 "
+          theme="filled"
+        />
+      </button>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
-import { expect, test, describe } from "vitest";
+import { test, describe } from "node:test";
+import { expect } from "chai";
 import { app, dummyChart, dummyDate, initDb } from "./init";
 import { ChartBrief, hashLevel } from "@falling-nikochan/chart";
 
@@ -6,9 +7,9 @@ describe("GET /api/brief/:cid", () => {
   test("should return a brief entry", async () => {
     await initDb();
     const res = await app.request("/api/brief/100000");
-    expect(res.status).toBe(200);
+    expect(res.status).to.equal(200);
     const entry: ChartBrief = await res.json();
-    expect(entry).toStrictEqual({
+    expect(entry).to.deep.equal({
       ytId: dummyChart().ytId,
       title: dummyChart().title,
       composer: dummyChart().composer,
@@ -19,7 +20,7 @@ describe("GET /api/brief/:cid", () => {
       levels: [
         {
           name: "e",
-          hash: await hashLevel(dummyChart().levels[0]),
+          hash: await hashLevel(dummyChart().levelsFreeze[0]),
           type: "Single",
           difficulty: 1,
           noteCount: 1,
@@ -34,20 +35,20 @@ describe("GET /api/brief/:cid", () => {
   test("should return 404 for nonexistent cid", async () => {
     await initDb();
     const res = await app.request("/api/brief/100002");
-    expect(res.status).toBe(404);
+    expect(res.status).to.equal(404);
     const body = await res.json();
-    expect(body).toStrictEqual({ message: "chartIdNotFound" });
+    expect(body).to.deep.equal({ message: "chartIdNotFound" });
   });
   test("should return 404 for deleted cid", async () => {
     await initDb();
     const res = await app.request("/api/brief/100001");
-    expect(res.status).toBe(404);
+    expect(res.status).to.equal(404);
     const body = await res.json();
-    expect(body).toStrictEqual({ message: "chartIdNotFound" });
+    expect(body).to.deep.equal({ message: "chartIdNotFound" });
   });
   test("should return 400 for invalid cid", async () => {
     await initDb();
     const res = await app.request("/api/brief/invalid");
-    expect(res.status).toBe(400);
+    expect(res.status).to.equal(400);
   });
 });

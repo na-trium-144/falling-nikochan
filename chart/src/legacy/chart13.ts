@@ -48,7 +48,7 @@ export const LevelEditSchema13 = () =>
   });
 export const LevelPlaySchema13 = () =>
   v.object({
-    ver: v.union([v.literal(13)]),
+    ver: v.union([v.literal(13), v.literal(14)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     notes: v.array(NoteCommandSchema9()),
     bpmChanges: v.array(BPMChangeSchema9()),

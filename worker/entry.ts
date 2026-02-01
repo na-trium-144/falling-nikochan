@@ -8,7 +8,45 @@ import {
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 
-declare const self: ServiceWorkerGlobalScope;
+// なぜconsoleが無い?
+declare const self: ServiceWorkerGlobalScope & { console: Console };
+
+const originalConsole = self.console;
+self.console = {
+  ...originalConsole,
+  log: (...args: unknown[]) => {
+    originalConsole.log(...args);
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage(args.map((a) => String(a)).join(" "));
+      });
+    });
+  },
+  error: (...args: unknown[]) => {
+    originalConsole.error(...args);
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage(args.map((a) => String(a)).join(" "));
+      });
+    });
+  },
+  warn: (...args: unknown[]) => {
+    originalConsole.warn(...args);
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage(args.map((a) => String(a)).join(" "));
+      });
+    });
+  },
+  info: (...args: unknown[]) => {
+    originalConsole.info(...args);
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage(args.map((a) => String(a)).join(" "));
+      });
+    });
+  },
+};
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
@@ -122,7 +160,7 @@ async function initAssetsCache(config: {
   try {
     let remoteVer: BuildVer;
     const remoteRes = await fetch(
-      (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+      (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
       { cache: "no-store" }
     );
     if (!remoteRes.ok) {
@@ -152,7 +190,7 @@ async function initAssetsCache(config: {
         { cache: "no-store" }
       );
       remoteVerRes = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + "/assets/buildVer.json",
+        (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
         { cache: "no-store" }
       );
     } catch (e) {
@@ -343,7 +381,8 @@ const app = new Hono({ strict: false })
     });
   })
   .get("/worker/checkUpdate", async (c) => {
-    switch (await initAssetsCache({ clearOld: false })) {
+    const result = await initAssetsCache({ clearOld: false });
+    switch (result) {
       case "done":
         return c.body(null, 200);
       case "noUpdate":
@@ -353,6 +392,25 @@ const app = new Hono({ strict: false })
         return c.body(null, 202);
       case "failed":
         return c.body(null, 502);
+      default:
+        result satisfies never;
+    }
+  })
+  .get("/worker/forceUpdate", async (c) => {
+    await configCache().then((cache) => cache.delete("/buildVer"));
+    const result = await initAssetsCache({ clearOld: false });
+    switch (result) {
+      case "done":
+        return c.body(null, 200);
+      case "noUpdate":
+        return c.body(null, 204);
+      case "updating":
+      case "inProgress":
+        return c.body(null, 202);
+      case "failed":
+        return c.body(null, 502);
+      default:
+        result satisfies never;
     }
   })
   .get("/*", async (c) => {

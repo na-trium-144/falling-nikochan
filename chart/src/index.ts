@@ -23,6 +23,7 @@ export * from "./legacy/chart8.js";
 export * from "./legacy/chart9.js";
 export * from "./legacy/chart11.js";
 export * from "./legacy/chart13.js";
+export * from "./legacy/chart14.js";
 export * from "./legacy/seq6.js";
 export * from "./legacy/seq7.js";
 export * from "./legacy/seq11.js";
@@ -33,3 +34,8 @@ export * from "./lua/edit.js";
 export * from "./lua/note.js";
 export * from "./lua/signature.js";
 export * from "./lua/speed.js";
+
+export * from "./editing/chart.js";
+export * from "./editing/level.js";
+export * from "./editing/cursor.js";
+export * from "./editing/types.js";

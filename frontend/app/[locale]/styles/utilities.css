@@ -1,0 +1,29 @@
+@utility select-none {
+  /* tailwind css の user-select: none だけでは足りなかった */
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* ポップアップメニュー表示制御 */
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+}
+@utility appearance-none {
+  appearance: none;
+  -webkit-appearance: none;
+}
+@utility bold-by-stroke {
+  -webkit-text-stroke: 0.03em currentColor;
+}
+
+/* widthやbasisにはあるが、heightにはない (containerって横方向の長さ用だし) */
+@utility h-* {
+  height: --value(--container-*);
+}
+@utility max-h-* {
+  max-height: --value(--container-*);
+}
+@utility min-h-* {
+  min-height: --value(--container-*);
+}

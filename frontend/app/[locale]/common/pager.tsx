@@ -4,7 +4,7 @@ import Link from "next/link";
 export const pagerButtonClass =
   "text-center inline-block w-7 h-7 rounded-full cursor-pointer " +
   "text-lg text-bold hover:bg-slate-200 active:bg-slate-300 " +
-  "hover:dark:bg-stone-700 active:dark:bg-stone-600 ";
+  "hover:dark:bg-stone-600 active:dark:bg-stone-500 ";
 interface Props {
   index: number;
   maxIndex: number;
@@ -74,7 +74,7 @@ export function Pager(props: Props) {
         )}
       </div>
       <div className="flex-1">
-        <span className="inline-block text-xl font-bold font-title ">
+        <span className="inline-block text-xl font-semibold font-title ">
           {props.title}
         </span>
       </div>

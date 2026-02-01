@@ -13,7 +13,7 @@ import {
   ResultData,
   toResultParams,
 } from "@/common/bestScore.js";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight, buttonShadowStyle } from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
 import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
@@ -29,7 +29,17 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import Pic from "@icon-park/react/lib/icons/Pic";
+import {
+  boxButtonBorderStyle1,
+  boxButtonBorderStyle2,
+  boxButtonStyle,
+  invertedFlatButtonBorderStyle1,
+  invertedFlatButtonBorderStyle2,
+  invertedFlatButtonStyle,
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton";
 
 interface Props {
   locale: string;
@@ -65,12 +75,16 @@ export function PlayOption(props: Props) {
   return (
     <div
       className={clsx(
-        "mx-auto mt-4 p-2",
-        "w-max max-w-full rounded-lg border",
-        "border-sky-200 dark:border-orange-900",
-        "bg-sky-100/50 dark:bg-orange-950/50"
+        "mx-auto mt-4 p-3",
+        "w-max max-w-full rounded-sq-2xl",
+        // "border-sky-200 dark:border-orange-900",
+        "bg-sky-200/25 dark:bg-orange-950/25",
+        "relative",
+        "inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15"
       )}
     >
+      <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />
+      <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
       <div className="flex flex-col main-wide:flex-row">
         <p className="flex-none w-max self-begin main-wide:self-center ">
           {t("selectLevel")}:
@@ -100,8 +114,8 @@ export function PlayOption(props: Props) {
                       "w-4 h-4 translate-x-1/2 z-10",
                       "border-l border-b rounded-tr-full",
                       "rotate-45 origin-center",
-                      "border-slate-400 dark:border-stone-600",
-                      "bg-white dark:bg-stone-800",
+                      "border-slate-400 dark:border-stone-500",
+                      "bg-white dark:bg-stone-700",
                       "invisible",
                       selectedLevel === i && "main-wide:visible"
                     )}
@@ -122,9 +136,9 @@ export function PlayOption(props: Props) {
           <div
             className={clsx(
               "flex-none max-w-full px-4 py-2",
-              "text-center rounded-lg border",
-              "border-slate-400 dark:border-stone-600",
-              "bg-white dark:bg-stone-800",
+              "text-center rounded-sq-xl border",
+              "border-slate-400 dark:border-stone-500",
+              "bg-white dark:bg-stone-700",
               "main-wide:transition-all main-wide:duration-200 origin-left",
               selectedLevel !== null && selectedLevel >= 0
                 ? "scale-100"
@@ -180,18 +194,24 @@ function LevelButton(props: {
     <button
       className={clsx(
         "cursor-pointer w-full",
-        "relative rounded px-2 py-0.5 my-0.5",
-        props.selected
-          ? "shadow-inner bg-sky-300/50 dark:bg-orange-900/50"
-          : clsx(
-              "hover:shadow hover:mt-0 hover:mb-1",
-              "hover:bg-sky-200/50 dark:hover:bg-orange-800/50",
-              "active:mt-0.5 active:mb-0.5",
-              "active:shadow-inner active:bg-sky-300/50 dark:active:bg-orange-900/50"
-            )
+        "relative rounded-lg px-2 py-0.5 my-0.5",
+        props.selected ? boxButtonStyle : skyFlatButtonStyle,
+        props.selected ? "shadow-2xs" : "hover:shadow-2xs",
+        buttonShadowStyle
       )}
       onClick={props.onClick}
     >
+      <span
+        className={clsx(
+          props.selected ? boxButtonBorderStyle1 : skyFlatButtonBorderStyle1
+        )}
+      />
+      <span
+        className={clsx(
+          props.selected ? boxButtonBorderStyle2 : skyFlatButtonBorderStyle2
+        )}
+      />
+      <ButtonHighlight />
       <LevelBadge
         className="absolute top-0.5 -right-3 "
         status={[props.status]}
@@ -336,18 +356,21 @@ function SelectedLevelInfo(props: {
       )}
       <button
         className={clsx(
-          "w-full mt-2 px-2 rounded-lg",
+          "w-full mt-2 px-2 rounded-sq-xl",
           "flex flex-col items-center",
-          selectedBestScore &&
-            clsx(
-              "cursor-pointer active:shadow-inner active:bg-orange-300 dark:active:bg-sky-800/60",
-              "hover:shadow hover:bg-orange-300/50 dark:hover:bg-sky-800"
-            )
+          selectedBestScore && invertedFlatButtonStyle
         )}
         onClick={() =>
           setShowBestDetail(!!selectedBestScore && !showBestDetail)
         }
       >
+        {selectedBestScore && (
+          <>
+            <span className={invertedFlatButtonBorderStyle1} />
+            <span className={invertedFlatButtonBorderStyle2} />
+            <ButtonHighlight />
+          </>
+        )}
         <p className="">{t("bestScore")}</p>
         {showBestDetail && selectedBestScore?.date && (
           <span className="text-sm text-slate-500 dark:text-stone-400">
@@ -357,7 +380,8 @@ function SelectedLevelInfo(props: {
         <div className="flex flex-row items-center ">
           <span
             className={clsx(
-              selectedBestScore || "text-slate-400 dark:text-stone-600"
+              "bold-by-stroke",
+              selectedBestScore || "text-slate-400 dark:text-stone-500"
             )}
           >
             <span className="inline-block text-2xl">
@@ -427,15 +451,8 @@ function SelectedLevelInfo(props: {
       </button>
       {showBestDetail && selectedBestScore && (
         <span className="inline-block space-x-1 mt-1 ">
-          {shareLink.toClipboard && (
-            <Button text={t("copyScoreLink")} onClick={shareLink.toClipboard} />
-          )}
-          {shareLink.toAPI && (
-            <Button text={t("shareScoreLink")} onClick={shareLink.toAPI} />
-          )}
-          <Button onClick={shareLink.openModal}>
-            <Pic className="inline-block align-middle " />
-          </Button>
+          {shareLink.buttons}
+          {shareLink.modalButton}
         </span>
       )}
     </>

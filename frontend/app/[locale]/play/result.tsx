@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
 import Button from "@/common/button.js";
 import { useEffect, useRef, useState } from "react";
-import "./result.css";
 import {
   baseScoreRate,
   bigScoreRate,
@@ -19,11 +18,11 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
-import Pic from "@icon-park/react/lib/icons/Pic";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
 interface Props extends ResultParams {
+  className?: string;
   mainWindowHeight: number;
   hidden: boolean;
   lang: string;
@@ -32,7 +31,8 @@ interface Props extends ResultParams {
   isTouch: boolean;
   newRecord: number;
   auto: boolean;
-  optionChanged: boolean;
+  showShareButton: boolean;
+  showRecord: boolean;
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
@@ -109,7 +109,7 @@ export default function Result(props: Props) {
 
   const jumpingAnimation = (index: number) =>
     ({
-      animationName: showing === index ? "result-score-jumping" : undefined,
+      animationName: showing === index ? "fn-result-score-jumping" : undefined,
       animationIterationCount: 1,
       animationDuration: "200ms",
       animationTimingFunction: "linear",
@@ -141,17 +141,21 @@ export default function Result(props: Props) {
   return (
     <>
       <CenterBox
-        ref={ref}
-        className={clsx(
-          "overflow-y-auto overflow-x-clip",
-          props.hidden && "hidden",
+        classNameOuter={props.className}
+        refInner={ref}
+        classNameInner={clsx(
           showing >= resultAnimDelays.length ? "touch-pan-y" : "touch-none"
         )}
-        style={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+        scrollableY
+        hidden={props.hidden}
+        styleOuter={{ maxHeight: props.mainWindowHeight - 3 * rem }}
+        styleInner={{ maxHeight: props.mainWindowHeight - 3 * rem }}
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <p className="text-lg font-title font-bold">&lt; {t("result")} &gt;</p>
+        <p className="text-lg font-title font-semibold">
+          &lt; {t("result")} &gt;
+        </p>
         <div
           className={clsx(
             "my-2 flex justify-center items-center",
@@ -254,37 +258,24 @@ export default function Result(props: Props) {
             )}
           </div>
         </div>
-        {!props.auto &&
-          !props.optionChanged &&
-          (shareLink.toClipboard || shareLink.toAPI) && (
-            <div
-              className={clsx(
-                "mb-2",
-                props.largeResult
-                  ? "flex flex-row items-baseline justify-center space-x-2"
-                  : "flex flex-col items-center"
-              )}
-              style={{ ...appearingAnimation3(7) }}
-            >
-              <span>{t("shareResult")}</span>
-              <span className="inline-block space-x-1">
-                {shareLink.toClipboard && (
-                  <Button
-                    text={t("copyLink")}
-                    onClick={shareLink.toClipboard}
-                  />
-                )}
-                {shareLink.toAPI && (
-                  <Button text={t("shareLink")} onClick={shareLink.toAPI} />
-                )}
-                <Button onClick={shareLink.openModal}>
-                  <Pic className="inline-block align-middle " />
-                </Button>
-              </span>
-            </div>
-          )}
-        {!props.auto &&
-          !props.optionChanged &&
+        {props.showShareButton && (
+          <div
+            className={clsx(
+              "mb-2",
+              props.largeResult
+                ? "flex flex-row items-baseline justify-center space-x-2"
+                : "flex flex-col items-center"
+            )}
+            style={{ ...appearingAnimation3(7) }}
+          >
+            <span>{t("shareResult")}</span>
+            <span className="inline-block">
+              {shareLink.buttons}
+              {shareLink.modalButton}
+            </span>
+          </div>
+        )}
+        {props.showRecord &&
           props.record?.histogram &&
           props.record.count >= 5 && (
             <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
@@ -326,20 +317,26 @@ function ResultRow(props: RowProps) {
       className={clsx(
         "flex flex-row items-baseline",
         props.visible || "opacity-0",
-        props.disabled && "text-slate-400 dark:text-stone-600",
+        props.disabled && "text-slate-400 dark:text-stone-500",
         props.className
       )}
     >
-      <span className="flex-1 text-left min-w-0 overflow-visible text-nowrap">
+      <span className="flex-1 text-left min-w-0 overflow-visible whitespace-nowrap">
         {props.name}:
       </span>
-      <span className="text-3xl text-right " style={props.scoreStyle}>
+      <span
+        className="text-3xl text-right bold-by-stroke"
+        style={props.scoreStyle}
+      >
         {Math.floor(props.score100 / 100)}
       </span>
-      <span className="text-xl" style={props.scoreStyle}>
+      <span className="text-xl bold-by-stroke" style={props.scoreStyle}>
         .
       </span>
-      <span className="text-xl text-left w-7 " style={props.scoreStyle}>
+      <span
+        className="text-xl text-left bold-by-stroke w-7 "
+        style={props.scoreStyle}
+      >
         {(props.score100 % 100).toString().padStart(2, "0")}
       </span>
     </p>

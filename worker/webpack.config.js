@@ -34,7 +34,7 @@ const config = {
       process: "{cwd:()=>''}",
     }),
     new LicensePlugin({
-      outputFilename: "assets/oss-licenses/worker.json",
+      outputFilename: "oss-licenses/worker.json",
       includeNoticeText: true,
       excludedPackageTest: (packageName /*, version*/) => {
         return packageName.startsWith("@falling-nikochan");

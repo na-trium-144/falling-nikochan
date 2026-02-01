@@ -1,0 +1,58 @@
+name: Staging Deployment
+on:
+  push:
+    branches:
+      - staging
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID }}
+jobs:
+  vercel-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Pull Vercel Environment Information
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        env:
+          MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
+          # ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
+          NO_PREFETCH: 1
+          # BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
+          VERSION_SUFFIX: +stg
+          TITLE_SUFFIX: Staging
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Upload .vercel/output
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+
+  deploy-vercel:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - run: npm run t
+      - name: Pull Vercel Environment Information
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Download .vercel/output
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          include-hidden-files: true
+      - name: Deploy Project Artifacts to Vercel
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

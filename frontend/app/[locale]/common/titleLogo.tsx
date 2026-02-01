@@ -3,6 +3,8 @@
 import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 import TargetLine from "./targetLine.js";
+import Link from "next/link.js";
+import { linkStyle1 } from "./linkStyle.js";
 
 interface Props {
   anim?: boolean;
@@ -41,7 +43,12 @@ export default function Title(props: Props) {
     <div
       className={clsx("leading-none text-center mx-auto w-96", props.className)}
     >
-      <TargetLine barFlash={barFlash} left={0} right={0} bottom="2.2rem" />
+      <TargetLine
+        barFlash={barFlash ? "100% - 1.75rem" : undefined}
+        left={0}
+        right={0}
+        bottom="2.2rem"
+      />
       <span className="text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7 ">
         Falling Nikochan
       </span>
@@ -62,9 +69,10 @@ export default function Title(props: Props) {
         <img
           src={
             process.env.ASSET_PREFIX +
-            `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+            `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg?v=2`
           }
-          className="w-full h-full "
+          // ここだけopacity-70でない
+          className="w-full h-full opacity-100"
         />
       </div>
       <span
@@ -77,5 +85,22 @@ export default function Title(props: Props) {
         }}
       />
     </div>
+  );
+}
+
+export function TitleAsLink(props: { className: string; locale: string }) {
+  return (
+    <Link
+      href={`/${props.locale}`}
+      className={clsx("basis-24 relative", linkStyle1, props.className)}
+      style={{
+        width: `calc(100% + 40rem)`,
+        marginLeft: "-20rem",
+        marginRight: "-20rem",
+      }}
+      prefetch={!process.env.NO_PREFETCH}
+    >
+      <Title className="absolute inset-0 " anim />
+    </Link>
   );
 }

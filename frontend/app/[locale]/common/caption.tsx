@@ -1,61 +1,62 @@
 import clsx from "clsx/lite";
 import Help from "@icon-park/react/lib/icons/Help";
-import { createContext, ReactNode, useContext, useRef, useState } from "react";
+import { ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+} from "./flatButton";
 
-interface CaptionData {
+interface CaptionProps {
   top: number;
   left: number;
   content: ReactNode;
 }
-interface ICaptionContext {
-  data: CaptionData | null;
-  setData: (data: CaptionData | null) => void;
-}
-const CaptionContext = createContext<ICaptionContext>(null!);
+function Caption({ top, left, content }: CaptionProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [translateX, setTranslateX] = useState("-50%"); // 基本は中央
 
-export function CaptionProvider(props: { children: ReactNode }) {
-  const [data, setData] = useState<CaptionData | null>(null);
-  return (
-    <CaptionContext.Provider value={{ data, setData }}>
-      {props.children}
-      <Caption
-        className={clsx("fixed", data || "hidden")}
-        style={{ top: data?.top, left: data?.left }}
-      >
-        {data?.content}
-      </Caption>
-    </CaptionContext.Provider>
-  );
-}
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      const rect = contentRef.current.getBoundingClientRect();
+      const padding = 0;
+      let offset = 0;
 
-interface CProps {
-  className?: string;
-  style?: object;
-  children: ReactNode;
-}
-export function Caption(props: CProps) {
+      if (rect.left < padding) {
+        offset = padding - rect.left;
+      } else if (rect.right > window.innerWidth - padding) {
+        offset = window.innerWidth - padding - rect.right;
+      }
+
+      setTranslateX(`calc(-50% + ${offset}px)`);
+    }
+  }, [left, content]);
+
   return (
     <div
-      className={clsx(
-        "opacity-90 pointer-events-none text-sm",
-        props.className
-      )}
-      style={{ ...props.style }}
+      className={clsx("pointer-events-none text-sm fixed z-50")}
+      style={{ top, left }}
     >
       <span
         className={clsx(
           "absolute inline-block bottom-0 left-0 -translate-x-2/4 translate-y-4.5",
-          "border-[1rem] border-transparent border-t-sky-950 dark:border-t-orange-950"
+          "border-[0.9rem] border-transparent border-t-sky-300/50 dark:border-t-orange-800/30"
         )}
       />
       <div
+        ref={contentRef}
         className={clsx(
-          "absolute inline-block bottom-0 left-0 -translate-x-2/4 -translate-y-2",
-          "text-center rounded-lg min-w-max py-1 px-2 z-1",
-          "bg-sky-950 text-slate-300 dark:bg-orange-950"
+          "absolute inline-block bottom-0 left-0",
+          "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1",
+          "backdrop-blur-xs",
+          "bg-sky-200/50 dark:bg-orange-950/50",
+          "inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15"
         )}
+        style={{ translate: `${translateX} -0.5rem` }}
       >
-        {props.children}
+        <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />
+        <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
+        {content}
       </div>
     </div>
   );
@@ -66,31 +67,33 @@ interface Props {
   children: ReactNode;
 }
 export function HelpIcon(props: Props) {
-  const { setData } = useContext(CaptionContext);
+  const [captionData, setCaptionData] = useState<CaptionProps | null>(null);
   const ref = useRef<HTMLDivElement>(null!);
+
   return (
-    <span
-      className={clsx(
-        "inline-block align-middle",
-        "rounded-full p-2 cursor-help text-xl",
-        "hover:bg-sky-100 text-sky-300 hover:text-sky-700",
-        "dark:hover:bg-stone-800 dark:text-orange-900 dark:hover:text-orange-500",
-        props.className
-      )}
-      ref={ref}
-      onPointerEnter={() => {
-        const rect = ref.current.getBoundingClientRect();
-        setData({
-          top: rect.top,
-          left: rect.left + rect.width / 2,
-          content: props.children,
-        });
-        // setTop(rect.top);
-        // setLeft(rect.left + ref.current.clientWidth / 2);
-      }}
-      onPointerLeave={() => setData(null)}
-    >
-      <Help />
-    </span>
+    <>
+      <span
+        className={clsx(
+          "inline-block align-middle",
+          "rounded-full p-2 cursor-help text-xl",
+          "hover:bg-sky-100/50 text-sky-300 hover:text-sky-700",
+          "dark:hover:bg-stone-800/50 dark:text-orange-900 dark:hover:text-orange-500",
+          props.className
+        )}
+        ref={ref}
+        onPointerEnter={() => {
+          const rect = ref.current.getBoundingClientRect();
+          setCaptionData({
+            top: rect.top,
+            left: rect.left + rect.width / 2,
+            content: props.children,
+          });
+        }}
+        onPointerLeave={() => setCaptionData(null)}
+      >
+        <Help />
+      </span>
+      {captionData && createPortal(<Caption {...captionData} />, document.body)}
+    </>
   );
 }

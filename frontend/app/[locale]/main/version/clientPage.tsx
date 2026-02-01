@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation.js";
 
 export default function ChangelogPage(props: {
   locale: string;
-  changeLog: ReactNode;
+  changeLogAll: ReactNode;
 }) {
   const t = useTranslations("main.version");
   useEffect(() => updateLastVisited(), []);
@@ -35,7 +35,7 @@ export default function ChangelogPage(props: {
       locale={props.locale}
     >
       <div onClick={versionClick}>
-        <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("about")}</h3>
         <p className="mb-2">
           <span className="inline-block">Falling Nikochan</span>
           <span className="inline-block">
@@ -53,8 +53,8 @@ export default function ChangelogPage(props: {
           {t("supportedBrowsers", { browserslist: process.env.browserslist! })}
         </p>
       </div>
-      <h3 className="text-xl font-bold font-title">{t("changelog")}</h3>
-      {props.changeLog}
+      <h3 className="text-xl font-semibold font-title">{t("changelog")}</h3>
+      {props.changeLogAll}
     </IndexMain>
   );
 }

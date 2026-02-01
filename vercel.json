@@ -1,6 +1,6 @@
 {
   "installCommand": "npm ci",
-  "buildCommand": "npm run nbuild && npm run swbuild",
+  "buildCommand": "npm run allbuild",
   "outputDirectory": "frontend/out",
   "devCommand": null,
   "framework": null,

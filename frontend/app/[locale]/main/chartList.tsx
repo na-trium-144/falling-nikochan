@@ -17,6 +17,12 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
+import {
+  skyFlatButtonBorderStyle1,
+  skyFlatButtonBorderStyle2,
+  skyFlatButtonStyle,
+} from "@/common/flatButton.jsx";
+import { ButtonHighlight, buttonShadowStyle } from "@/common/button.jsx";
 
 interface PProps {
   locale: string;
@@ -40,7 +46,7 @@ export default function ChartListPage(props: PProps) {
     >
       <h3
         className={clsx(
-          "flex-none mb-2 text-xl font-bold font-title",
+          "flex-none mb-2 text-xl font-semibold font-title",
           "hidden main-wide:block"
         )}
       >
@@ -299,7 +305,7 @@ export function ChartList(props: Props) {
   ]);
 
   return (
-    <div className="relative w-full h-max ">
+    <div className="relative w-full h-max isolate">
       <ul
         ref={ulSize.ref}
         className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
@@ -347,8 +353,8 @@ export function ChartList(props: Props) {
               <li
                 key={i}
                 className={clsx(
-                  "w-full max-w-108 mx-auto h-10 rounded",
-                  "bg-sky-200/25 dark:bg-orange-800/10"
+                  "w-full max-w-108 mx-auto h-10",
+                  chartListBgStyle
                 )}
               />
             )
@@ -423,13 +429,17 @@ export function ChartList(props: Props) {
   );
 }
 
-const chartListStyle =
-  "block w-full text-left cursor-pointer " +
-  "hover:shadow active:shadow-inner rounded px-1 py-0.5 " +
-  "hover:-translate-y-0.5 active:translate-y-0 " +
-  "hover:bg-sky-200/50 active:bg-sky-300/50 " +
-  "dark:hover:bg-orange-800/50 dark:active:bg-orange-900/50 " +
-  "bg-sky-200/25 dark:bg-orange-800/10 ";
+const chartListBgStyle = "rounded-md bg-sky-400/15 dark:bg-orange-700/10";
+const chartListStyle = clsx(
+  "block w-full text-left cursor-pointer",
+  // "hover:shadow active:shadow-inner",
+  "pl-1.5 py-0.5",
+  // "hover:-translate-y-0.5 active:translate-y-0",
+  chartListBgStyle,
+  skyFlatButtonStyle,
+  "hover:shadow-sm",
+  buttonShadowStyle
+);
 interface CProps {
   cid: string;
   brief?: ChartBrief;
@@ -468,6 +478,9 @@ export function ChartListItem(props: CProps) {
                 : undefined
             }
           >
+            <span className={skyFlatButtonBorderStyle1} />
+            <span className={skyFlatButtonBorderStyle2} />
+            <ButtonHighlight />
             <ChartListItemChildren {...props} />
           </a>
           {props.onClickMobile && (
@@ -479,6 +492,9 @@ export function ChartListItem(props: CProps) {
                 e.preventDefault();
               }}
             >
+              <span className={skyFlatButtonBorderStyle1} />
+              <span className={skyFlatButtonBorderStyle2} />
+              <ButtonHighlight />
               <ChartListItemChildren {...props} />
             </a>
           )}
@@ -489,6 +505,9 @@ export function ChartListItem(props: CProps) {
           className={clsx(chartListStyle)}
           prefetch={!process.env.NO_PREFETCH}
         >
+          <span className={skyFlatButtonBorderStyle1} />
+          <span className={skyFlatButtonBorderStyle2} />
+          <ButtonHighlight />
           <ChartListItemChildren {...props} />
         </Link>
       )}
@@ -516,7 +535,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <div className="relative flex flex-row items-center gap-2 ">
       <LevelBadge
-        className="absolute top-0 -right-1"
+        className="absolute z-10 top-0 -right-1"
         status={status}
         levels={levelColors}
         showDot
@@ -537,7 +556,7 @@ function ChartListItemChildren(props: CProps) {
           <span className="ml-1 text-sm/3">{props.cid}</span>
           {props.dateDiff && (
             <DateDiff
-              className="ml-2 text-xs/3 text-nowrap text-slate-500 dark:text-stone-400"
+              className="ml-2 text-xs/3 whitespace-nowrap text-slate-500 dark:text-stone-400"
               date={props.brief?.updatedAt || 0}
             />
           )}
@@ -548,7 +567,7 @@ function ChartListItemChildren(props: CProps) {
             <span
               className={clsx(
                 "inline-block leading-3 max-w-full",
-                "overflow-x-clip overflow-y-visible text-nowrap text-ellipsis"
+                "overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis"
               )}
             >
               <span className="ml-2 text-xs/3">by</span>
@@ -558,7 +577,7 @@ function ChartListItemChildren(props: CProps) {
             </span>
           )}
         </div>
-        <div className="overflow-x-clip overflow-y-visible text-nowrap text-ellipsis leading-4 ">
+        <div className="overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis leading-4 ">
           <span className="font-title text-base/4 ">{props.brief?.title}</span>
           {!props.original && props.brief?.composer && (
             <>

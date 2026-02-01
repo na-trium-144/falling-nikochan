@@ -15,30 +15,33 @@ export default {
       option: "オプション",
       auto: "オートプレイ",
       enableSE: "キー/タップ音を鳴らす",
-      enableSELatency:
-        "サウンドの遅延分 (この環境では {latency} 秒) だけ判定が補正されます。",
-      unknownSELatency:
-        "サウンドの出力に遅延が生じる可能性があります。手動で判定タイミングを調整してください。",
-      enableIOSThru: "無反応を予測して補正(iOS)",
+      enableSELatency: "{latency} 秒の遅延が生じます。",
+      unknownSELatency: "サウンドの出力に遅延が生じます。",
+      enableIOSThru: "無反応を予測して補正",
+      iOSThruHelp:
+        "Safariのバグにより2本以上の指でのタップが<br></br>" +
+        "無反応になる場合がありますが、<br></br>" +
+        "特定の条件でこれを予測して補正し<br></br>" +
+        "コンボを継続します。",
       displaySpeed: "音符速度を表示",
       offset: "オフセット調整",
+      autoOffset: "自動調整",
       offsetSecond: "秒",
       offsetFast: "早",
       offsetLate: "遅",
-      limitFPS: "フレームレート",
-      noLimit: "制限なし",
       off: "オフ",
       playbackRate: "再生速度を変える",
       userBegin: "途中から練習",
+      playbackRateDisplay: "再生速度",
     },
     score: {
       auto: "オートプレイ",
       score: "スコア",
-      bestScore: "ベストスコア",
       chain: "コンボ",
-      playbackRate: "再生速度",
+      chainLong: "コンボ",
     },
     status: {
+      bestScore: "ベストスコア",
       good: "よい",
       ok: "まあまあ",
       bad: "だめ",
@@ -77,8 +80,6 @@ export default {
       exit: "やめる",
       shareResult: "プレイ結果をシェアしよう！",
       otherPlayers: "みんなのプレイ記録",
-      copyLink: "リンクをコピー",
-      shareLink: "共有",
       playbackRate: "再生速度",
     },
   },

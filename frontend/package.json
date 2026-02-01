@@ -1,11 +1,14 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "13.22.0",
+  "version": "14.0.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
+  "_comment": "backdrop-blur does not work until chrome 118 (but worked in 119), related issue https://github.com/tailwindlabs/tailwindcss/issues/18923",
+  "_comment2": "mask-image requires chrome 120",
   "browserslist": [
-    "chrome 111",
-    "edge 111",
+    "chrome 120",
+    "edge 120",
     "safari 16.4",
     "firefox 128"
   ],
@@ -13,9 +16,11 @@
     "lint": "tsc --noEmit && eslint app/",
     "dev": "node ./initAssets.js && next dev -H 0.0.0.0",
     "build": "node ./initAssets.js && next build && svgo -f ./public/assets/ -o ./out/assets/",
-    "postbuild": "node ./listStaticFiles.js"
+    "postbuild": "node ./listStaticFiles.js && node ./insertBanner.js"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans": "=5.2.5",
+    "@fontsource-variable/noto-sans-jp": "=5.2.5",
     "@fontsource/kaisei-opti": "=5.2.5",
     "@fontsource/merriweather": "=5.2.5",
     "@fontsource/noto-sans": "=5.2.5",
@@ -27,6 +32,9 @@
     "ace-builds": "^1.43.5",
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
+    "keyboard-css": "^1.2.4",
+    "pretty-checkbox": "^3.0.3",
+    "pretty-checkbox-react": "^3.2.0",
     "react-ace": "^14.0.1",
     "react-range": "^1.10.0",
     "react-resize-detector": "^12.3.0",
@@ -34,11 +42,13 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
+    "@icon-park/svg": "^1.4.2",
     "@tailwindcss/postcss": "4.1.18",
     "@types/file-saver": "^2.0.7",
     "@types/mdx": "^2.0.13",
     "dotenv": "^16.6.1",
     "postcss": "^8.5.6",
+    "sass": "^1.97.2",
     "svgo": "^4.0.0",
     "tailwindcss": "4.1.18",
     "woff2sfnt-sfnt2woff": "^1.0.0"

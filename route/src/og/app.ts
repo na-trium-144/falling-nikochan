@@ -15,6 +15,8 @@ import { env } from "hono/adapter";
 import msgpack from "@ygoe/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
 import { cors } from "hono/cors";
+import ColorThief from "colorthief";
+import { adjustColor } from "./style.js";
 
 export interface ChartBriefMin {
   ytId: string;
@@ -157,7 +159,7 @@ const ogApp = (config: {
         pData: config.fetchStatic(
           env(c),
           new URL(
-            `/assets/${f.file}`,
+            `/og-fonts/${f.file}`,
             env(c).BACKEND_PREFIX || new URL(c.req.url).origin
           )
         ),
@@ -200,19 +202,19 @@ const ogApp = (config: {
         let imagePath: string | null;
         switch (resultParams.inputType) {
           case inputTypes.keyboard:
-            imagePath = "/assets/icon-slate500-keyboard-one.svg";
+            imagePath = "/og-icons/keyboard-one.svg";
             break;
           case inputTypes.mouse:
-            imagePath = "/assets/icon-slate500-mouse-one.svg";
+            imagePath = "/og-icons/mouse-one.svg";
             break;
           case inputTypes.touch:
-            imagePath = "/assets/icon-slate500-click-tap.svg";
+            imagePath = "/og-icons/click-tap.svg";
             break;
           case inputTypes.pen:
-            imagePath = "/assets/icon-slate500-write.svg";
+            imagePath = "/og-icons/write.svg";
             break;
           case inputTypes.gamepad:
-            imagePath = "/assets/icon-slate500-game-three.svg";
+            imagePath = "/og-icons/game-three.svg";
             break;
           case null:
             imagePath = null;
@@ -246,10 +248,19 @@ const ogApp = (config: {
         }
       }
 
+      const pColorThief = fetch(
+        `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
+      ).then(async (imgRes) => {
+        const imgBuf = await imgRes.arrayBuffer();
+        const color = await ColorThief.getColor(imgBuf, 1);
+        const colorAdjusted = adjustColor(color);
+        return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
+      });
+
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
         case "share":
-          Image = OGShare(cid, lang, brief, pBgImageBin);
+          Image = OGShare(cid, lang, brief, pBgImageBin, pColorThief);
           break;
         case "result":
           if (!resultParams) {
@@ -261,7 +272,8 @@ const ogApp = (config: {
             brief,
             pBgImageBin,
             resultParams,
-            pInputTypeImageBin
+            pInputTypeImageBin,
+            pColorThief
           );
           break;
       }

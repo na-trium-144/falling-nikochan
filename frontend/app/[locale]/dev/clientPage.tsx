@@ -1,16 +1,10 @@
 "use client";
 
 import { Box } from "@/common/box";
-import { MobileFooter, PCFooter } from "@/common/footer";
+import { MobileFooterWithGradient, PCFooter } from "@/common/footer";
 import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
-import AceEditor from "react-ace";
-import "ace-builds/src-min-noconflict/ext-language_tools";
-import "ace-builds/src-min-noconflict/theme-github";
-import "ace-builds/src-min-noconflict/theme-monokai";
-import "ace-builds/src-min-noconflict/mode-yaml";
-import "ace-builds/src-min-noconflict/ext-searchbox";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
@@ -25,6 +19,20 @@ import {
   useAndroidTWADetector,
 } from "@/common/pwaInstall";
 import Button from "@/common/button";
+import dynamic from "next/dynamic";
+import { Scrollable } from "@/common/scrollable";
+const AceEditor = dynamic(
+  async () => {
+    const ace = await import("react-ace");
+    await import("ace-builds/src-min-noconflict/ext-language_tools");
+    await import("ace-builds/src-min-noconflict/theme-tomorrow");
+    await import("ace-builds/src-min-noconflict/theme-tomorrow_night");
+    await import("ace-builds/src-min-noconflict/mode-yaml");
+    await import("ace-builds/src-min-noconflict/ext-searchbox");
+    return ace;
+  },
+  { ssr: false }
+);
 
 export function DevPage(props: { locale: string }) {
   const t = useTranslations("dev");
@@ -46,7 +54,12 @@ export function DevPage(props: { locale: string }) {
             "flex items-center justify-center"
           )}
         >
-          <Box className="w-max h-max max-w-full max-h-full p-6 overflow-y-auto space-y-3">
+          <Box
+            classNameOuter="w-max h-max max-w-full max-h-full"
+            classNameInner="space-y-3"
+            scrollableY
+            padding={6}
+          >
             <div className="hidden mb-3 main-wide:flex flex-row items-center">
               <button
                 className={clsx("block w-max", linkStyle1)}
@@ -55,7 +68,7 @@ export function DevPage(props: { locale: string }) {
                 <ArrowLeft className="inline-block align-middle mr-2 " />
                 {t("back")}
               </button>
-              <span className="flex-1 text-center text-xl font-bold font-title">
+              <span className="flex-1 text-center text-xl font-semibold font-title">
                 {t("title")}
               </span>
             </div>
@@ -71,18 +84,10 @@ export function DevPage(props: { locale: string }) {
             )}
           </Box>
         </div>
-        <div className="flex-none basis-15 main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer main-wide:hidden " />
         <PCFooter locale={props.locale} />
       </div>
-      <div
-        className={clsx(
-          "fixed bottom-0 inset-x-0 backdrop-blur-2xs",
-          "bg-gradient-to-t from-30% from-sky-50 to-sky-50/0",
-          "dark:from-orange-950 dark:to-orange-950/0"
-        )}
-      >
-        <MobileFooter locale={props.locale} tabKey={null} />
-      </div>
+      <MobileFooterWithGradient locale={props.locale} tabKey={null} />
     </main>
   );
 }
@@ -173,12 +178,12 @@ function StorageEditor(props: EProps) {
 
   return (
     <div className="">
-      <div className="text-center text-lg font-bold font-title">
+      <div className="text-center text-lg font-semibold font-title">
         <button
           className={clsx(
             "rounded-full cursor-pointer px-2 py-1",
             "hover:bg-slate-200/50 active:bg-slate-300/50",
-            "hover:dark:bg-stone-700/50 active:dark:bg-stone-600/50",
+            "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
             linkStyle1
           )}
           onClick={() => setShowEditor(!showEditor)}
@@ -191,33 +196,48 @@ function StorageEditor(props: EProps) {
           )}
         </button>
       </div>
-      {showEditor && (
-        <div className="mt-2">
+      <Box
+        classNameOuter={clsx("mt-2", !showEditor && "hidden")}
+        classNameInner="overflow-hidden"
+      >
+        <div className="rounded-t-sq-box">
           <AceEditor
             mode="yaml"
-            theme={themeState.isDark ? "monokai" : "github"}
+            theme={themeState.isDark ? "tomorrow_night" : "tomorrow"}
             width="calc(100dvw - 6rem)"
-            height="calc(100dvh - 16rem)" // てきとう
+            height="calc(100dvh - 19rem)" // てきとう
             tabSize={2}
             fontSize={1 * rem}
+            highlightActiveLine={false}
+            setOptions={{ useWorker: false }}
             value={code}
             onChange={(value) => {
               setCode(value);
             }}
           />
-          <div
+        </div>
+        <div
+          className={clsx(
+            "bg-slate-200/50 dark:bg-stone-600/50 rounded-b-sq-box",
+            "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
+            "overflow-hidden"
+          )}
+        >
+          <Scrollable
             className={clsx(
-              "bg-slate-200 dark:bg-stone-700 mt-2 p-1 text-sm rounded-sm break-all",
-              "h-18 max-h-18 overflow-auto",
+              "text-sm break-all",
+              "h-24 max-h-24",
               isError && "text-red-600 dark:text-red-400"
             )}
+            padding={2}
+            scrollableY
           >
             {message.map((m, i) => (
               <p key={i}>{m}</p>
             ))}
-          </div>
+          </Scrollable>
         </div>
-      )}
+      </Box>
     </div>
   );
 }

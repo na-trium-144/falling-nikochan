@@ -20,6 +20,8 @@ import { FestivalLink, useFestival } from "@/common/festival";
 import Code from "@icon-park/react/lib/icons/Code";
 import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { lastVisitedOld } from "@/common/version";
+import { inputStyle } from "@/common/input";
+import { XLogo } from "@/common/x";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
@@ -41,32 +43,32 @@ export default function LinksPage({ locale }: { locale: string }) {
       locale={locale}
     >
       <div className="mb-3 main-wide:hidden">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("settings")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">
+          {t("settings")}
+        </h3>
         <div className="ml-2 space-y-2">
           <p>
             <Translate className="inline-block align-middle" />
             <span className="ml-1">Language:</span>
-            <LangSwitcher locale={locale}>
-              <span
-                className={clsx(
-                  "inline-block align-top mx-1 px-1",
-                  linkStyle1,
-                  "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
-                )}
-              >
-                <span className="flex flex-row items-center ">
-                  <span className="flex-1 text-center ">
-                    {langNames[locale]}
-                  </span>
-                  <DownOne className="w-max h-max" theme="filled" />
+            <LangSwitcher
+              locale={locale}
+              className={clsx(
+                "relative inline-block align-top pr-6 text-center",
+                linkStyle1,
+                inputStyle
+              )}
+            >
+              <div>{langNames[locale]}</div>
+              <DownOne
+                className="absolute right-1 inset-y-0 h-max m-auto"
+                theme="filled"
+              />
+              {Object.values(langNames).map((l) => (
+                // 最大幅を取得するため
+                <span key={l} className="block h-0 overflow-hidden">
+                  {l}
                 </span>
-                {Object.values(langNames).map((l) => (
-                  // 最大幅を取得するため
-                  <span key={l} className="block h-0 overflow-hidden pr-6 ">
-                    {l}
-                  </span>
-                ))}
-              </span>
+              ))}
             </LangSwitcher>
           </p>
           <p>
@@ -76,34 +78,27 @@ export default function LinksPage({ locale }: { locale: string }) {
               <Sun className="inline-block align-middle " />
             )}
             <span className="ml-1 ">{t("theme")}:</span>
-            <ThemeSwitcher>
-              <span
-                className={clsx(
-                  "inline-block align-top mx-1 px-1",
-                  linkStyle1,
-                  "border-0 border-b border-slate-400 dark:border-stone-600 bg-transparent appearance-none rounded-none"
-                )}
-              >
-                <span className="flex flex-row items-center ">
-                  <span className="flex-1 text-center">
-                    {themeState.theme === "dark"
-                      ? t("dark")
-                      : themeState.theme === "light"
-                        ? t("light")
-                        : t("default")}
-                  </span>
-                  <DownOne className="w-max h-max " theme="filled" />
-                </span>
-                <span className="block h-0 overflow-hidden pr-6 ">
-                  {t("dark")}
-                </span>
-                <span className="block h-0 overflow-hidden pr-6 ">
-                  {t("light")}
-                </span>
-                <span className="block h-0 overflow-hidden pr-6 ">
-                  {t("default")}
-                </span>
-              </span>
+            <ThemeSwitcher
+              className={clsx(
+                "relative inline-block align-top pr-6 text-center",
+                linkStyle1,
+                inputStyle
+              )}
+            >
+              <div>
+                {themeState.theme === "dark"
+                  ? t("dark")
+                  : themeState.theme === "light"
+                    ? t("light")
+                    : t("default")}
+              </div>
+              <DownOne
+                className="absolute right-1 inset-y-0 h-max m-auto"
+                theme="filled"
+              />
+              <span className="block h-0 overflow-hidden">{t("dark")}</span>
+              <span className="block h-0 overflow-hidden">{t("light")}</span>
+              <span className="block h-0 overflow-hidden">{t("default")}</span>
             </ThemeSwitcher>
           </p>
           <PWAInstallDesc block />
@@ -111,7 +106,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       </div>
       <PWAInstallDesc block className="mb-3 hidden main-wide:block" />
       <div className="mb-3 ">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("about")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("about")}</h3>
         <div className="ml-2 space-y-1">
           <p>
             <span>{t("version")}:</span>
@@ -151,8 +146,8 @@ export default function LinksPage({ locale }: { locale: string }) {
         </div>
       </div>
       <div className="mb-3">
-        <h3 className="mb-2 text-xl font-bold font-title">{t("title")}</h3>
-        <ul className="list-disc-as-text ml-6 space-y-1 ">
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("title")}</h3>
+        <ul className="list-disc ml-6 space-y-1 ">
           <li>
             <FormOne className="inline-block align-middle mr-1" />
             <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
@@ -187,7 +182,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             </ExternalLink>
           </li>
           <li>
-            <span className="text-lg/6 px-0.5 mr-1">𝕏</span>
+            <XLogo className="mr-1" />
             <ExternalLink href="https://twitter.com/@nikochan144">
               <span className="hidden main-wide:inline">
                 {t("officialAccount")}

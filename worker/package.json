@@ -1,15 +1,16 @@
 {
   "name": "@falling-nikochan/worker",
-  "version": "13.22.0",
+  "version": "14.0.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "lint": "tsc && eslint ./entry.ts",
     "build": "tsc && webpack"
   },
   "browserslist": [
-    "chrome 111",
-    "edge 111",
+    "chrome 120",
+    "edge 120",
     "safari 16.4",
     "firefox 128"
   ]

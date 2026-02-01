@@ -22,6 +22,7 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
+import { XLogo } from "@/common/x.jsx";
 
 interface Props {
   locale: string;
@@ -142,7 +143,7 @@ export default function PlayTab(props: Props) {
     >
       <div className="flex-none mb-3 ">
         <h3 className="mb-2 flex items-baseline ">
-          <span className="mr-2 text-xl font-bold font-title ">
+          <span className="mr-2 text-xl font-semibold font-title ">
             {t("search")}:
           </span>
           <Input
@@ -174,7 +175,9 @@ export default function PlayTab(props: Props) {
         className="flex-none mb-3 "
         hidden={searching || !!searchResult}
       >
-        <h3 className="mb-2 text-xl font-bold font-title">{t("popular")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">
+          {t("popular")}
+        </h3>
         <p className="pl-2 mb-1 text-justify ">
           {t("popularDesc", { popularDays })}
         </p>
@@ -194,10 +197,10 @@ export default function PlayTab(props: Props) {
         className="flex-none mb-3 "
         hidden={searching || !!searchResult}
       >
-        <h3 className="mb-2 text-xl font-bold font-title">{t("latest")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("latest")}</h3>
         <p className="pl-2 text-justify ">
           {t.rich("latestDesc", {
-            unicodeX: () => <span className="text-lg/6">𝕏</span>,
+            xlogo: () => <XLogo />,
             twitter: (c) => (
               <ExternalLink className="" href="https://twitter.com/nikochan144">
                 <span className="text-sm">{c}</span>
@@ -224,7 +227,7 @@ export default function PlayTab(props: Props) {
         className="flex-none mb-3 "
         hidden={searching || !!searchResult}
       >
-        <h3 className="mb-2 text-xl font-bold font-title">{t("sample")}</h3>
+        <h3 className="mb-2 text-xl font-semibold font-title">{t("sample")}</h3>
         <p className="pl-2 mb-1 text-justify ">
           {t.rich("sampleDesc", {
             small: (c) => <span className="text-sm mx-0.5">{c}</span>,
@@ -234,13 +237,11 @@ export default function PlayTab(props: Props) {
               <ExternalLink
                 className="mx-1"
                 href="https://www.youtube.com/@nikochan144"
-                icon={
-                  <Youtube
-                    className="absolute left-0 bottom-1"
-                    theme="filled"
-                  />
-                }
               >
+                <Youtube
+                  className="inline-block mr-1 align-middle"
+                  theme="filled"
+                />
                 <span className="text-sm">{c}</span>
               </ExternalLink>
             ),

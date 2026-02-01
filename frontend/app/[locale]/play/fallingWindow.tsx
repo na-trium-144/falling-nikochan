@@ -8,7 +8,10 @@ import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
-import { useDelayedDisplayState } from "@/common/delayedDisplayState";
+import { useTheme } from "@/common/theme";
+import { useRealFPS } from "@/common/fpsCalculator";
+import { DisplayNikochan } from "./displayNikochan";
+import { OffsetEstimator } from "./offsetEstimator";
 
 interface Props {
   className?: string;
@@ -16,102 +19,336 @@ interface Props {
   notes: Note6[] | Note13[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
-  setFPS?: (fps: number) => void;
-  limitMaxFPS: number;
-  barFlash: boolean;
+  setRunFPS: (fps: number) => void;
+  setRenderFPS: (fps: number) => void;
+  barFlash: FlashPos;
+  noClear: boolean;
+  playbackRate: number;
+  setShouldHideBPMSign: (hide: boolean) => void;
+  shouldHideBPMSign: boolean;
+  showTSOffset: boolean;
+  rawStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  filteredStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+  userOffset: number;
+  audioLatency: number | null | undefined;
+  posOfs: RefObject<number>;
+  timeOfsEstimator: RefObject<OffsetEstimator | null>;
 }
-
+export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
-  const { notes, playing, getCurrentTimeSec, setFPS, limitMaxFPS } = props;
+  const {
+    notes,
+    playing,
+    getCurrentTimeSec,
+    setRenderFPS,
+    setRunFPS,
+    noClear,
+    playbackRate,
+  } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
     width && height && Math.min(width, height);
+  // nikochanの座標系で(0, 0)を指す位置がFallingWindowの座標系で(marginX, marginY)
   const marginX: number | undefined = width && boxSize && (width - boxSize) / 2;
   const marginY: number | undefined =
     height && boxSize && (height - boxSize) / 2;
+  const tailsCanvasRef = useRef<HTMLCanvasElement>(null);
+  const nikochanCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasLeft = useRef<number>(0);
+  const canvasTop = useRef<number>(0);
+  const canvasWidth = useRef<number>(0);
+  const canvasHeight = useRef<number>(0);
+  useEffect(() => {
+    if (ref.current && marginX !== undefined && marginY !== undefined) {
+      canvasLeft.current = -(
+        ref.current as HTMLDivElement
+      ).getBoundingClientRect().left;
+      canvasTop.current = -(
+        ref.current as HTMLDivElement
+      ).getBoundingClientRect().top;
+      canvasWidth.current = window.innerWidth;
+      canvasHeight.current = window.innerHeight;
+    }
+  }, [ref, marginX, marginY]);
+  const canvasMarginX =
+    marginX !== undefined ? -canvasLeft.current + marginX : undefined;
+  const canvasMarginY =
+    marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
-  const { rem } = useDisplayMode();
+  const { isDark } = useTheme();
+  const { rem, playUIScale } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
-  const [rerenderIndex, setRerenderIndex] = useState<number>(0);
-  const fpsCounter = useRef<DOMHighResTimeStamp[]>([]);
+  // devicePixelRatioを無視するどころか、あえて小さくすることで、ぼかす
+  const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
+  const nikochanCanvasDPR = useRef<number>(1);
   useEffect(() => {
-    let animFrame: number;
+    nikochanCanvasDPR.current = window.devicePixelRatio;
+  });
+
+  const [rerenderIndex, setRerenderIndex] = useState<number>(0);
+  const { realFps } = useRealFPS();
+  const realFpsRef = useRef<number>(20);
+  realFpsRef.current = realFps;
+  // レンダリング等nikochanの1フレームの処理にかかる時間の測定
+  // triggered: requestAnimationFrame() でセット
+  // executedIndex: render関数が実行されたらセット
+  const runTriggeredTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
+  const runTriggeredIndex = useRef<number>(0);
+  const runExecutedIndex = useRef<number>(0);
+  const runDeltas = useRef<DOMHighResTimeStamp[]>([]);
+  const runFps = useRef<number>(60);
+  // 最終的なFPS
+  const renderFpsCounter = useRef<DOMHighResTimeStamp[]>([]);
+  useEffect(() => {
+    let animFrame: ReturnType<typeof requestAnimationFrame>;
+    let prevRerender = performance.now();
     const updateLoop = () => {
-      setRerenderIndex((r) => r + 1);
       animFrame = requestAnimationFrame(updateLoop);
+      performance.mark("updateLoop");
+
+      if (
+        runExecutedIndex.current >= runTriggeredIndex.current &&
+        runTriggeredTimeStamp.current !== null
+      ) {
+        // 別タブ・別ウィンドウに切り替えた時など、一時的に時間が飛んだ場合をスキップ
+        if (performance.now() - runTriggeredTimeStamp.current < 100) {
+          runDeltas.current.push(
+            performance.now() - runTriggeredTimeStamp.current
+          );
+        }
+        runTriggeredTimeStamp.current = null;
+      }
+
+      if (runDeltas.current.length > Math.max(runFps.current, 20)) {
+        const runDeltaSum = runDeltas.current.reduce((a, b) => a + b, 0);
+        const avgRunDelta = runDeltaSum / runDeltas.current.length;
+        runFps.current = Math.round(1000 / avgRunDelta);
+        setRunFPS(runFps.current);
+        runDeltas.current = [];
+      }
+
+      // フレームレートがrunFps程度になるように抑えつつ一定の間隔でrerenderを呼び出すようにする
+      const realMs = 1000 / realFpsRef.current;
+      let runFrameCount = 1;
+      while (
+        // 例: realFps=120の場合、90fps以上->120, 51.5fps以上->60, 36.0fps以上->40...
+        realFpsRef.current / (runFrameCount + 0.33) >
+        Math.max(runFps.current, 20)
+      ) {
+        runFrameCount++;
+      }
+      const nowMs = performance.now() - prevRerender;
+      if (
+        runTriggeredTimeStamp.current === null &&
+        Math.round(nowMs / realMs) >= runFrameCount
+      ) {
+        setRerenderIndex((r) => {
+          runTriggeredIndex.current = r + 1;
+          return r + 1;
+        });
+        runTriggeredTimeStamp.current = performance.now();
+        if (Math.round(nowMs / realMs) >= 3 * runFrameCount) {
+          // 大幅に遅延している場合
+          console.log("large delay:", nowMs);
+          prevRerender = performance.now();
+        } else {
+          prevRerender += realMs * runFrameCount;
+        }
+      }
     };
     animFrame = requestAnimationFrame(updateLoop);
     return () => cancelAnimationFrame(animFrame);
-  }, []);
+  }, [setRunFPS]);
   useEffect(() => {
-    if (setFPS) {
-      const i = setInterval(() => {
-        while (
-          fpsCounter.current.at(0) &&
-          fpsCounter.current.at(-1)! - fpsCounter.current.at(0)! > 1000
-        ) {
-          fpsCounter.current.shift();
-        }
-        setFPS!(fpsCounter.current.length);
-      }, 100);
-      return () => clearInterval(i);
-    }
-  }, [setFPS]);
+    const i = setInterval(() => {
+      while (
+        renderFpsCounter.current.at(0) &&
+        renderFpsCounter.current.at(-1)! - renderFpsCounter.current.at(0)! >
+          1000
+      ) {
+        renderFpsCounter.current.shift();
+      }
+      setRenderFPS(renderFpsCounter.current.length);
+    }, 100);
+    return () => clearInterval(i);
+  }, [setRenderFPS]);
+
+  const ctx = tailsCanvasRef.current?.getContext("2d", {
+    alpha: true,
+    desynchronized: true,
+  });
+  const nctx = nikochanCanvasRef.current?.getContext("2d", {
+    alpha: true,
+    desynchronized: true,
+  });
+
+  const nikochanBitmap = useRef<ImageBitmap[][] | null>(null); // nikochanBitmap.current[0-3][big:0|1]
+  useEffect(() => {
+    Promise.all(
+      [0, 1, 2, 3].map(async (i) => {
+        const res = await fetch(
+          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg?v=2`
+        );
+        const svg = await res.text();
+        // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
+        // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
+        const svgResized = svg
+          .replace(
+            /width="(\d+)(\w*)"/,
+            `width="${noteSize * nikochanCanvasDPR.current}"`
+          )
+          .replace(
+            /height="(\d+)(\w*)"/,
+            `height="${noteSize * nikochanCanvasDPR.current}"`
+          );
+        const img = new Image();
+        img.src = `data:image/svg+xml;base64,${btoa(svgResized)}`;
+        const pBitmap = img.decode().then(() =>
+          createImageBitmap(img, {
+            resizeWidth: noteSize * nikochanCanvasDPR.current,
+            resizeHeight: noteSize * nikochanCanvasDPR.current,
+            resizeQuality: "high",
+          })
+        );
+        const svgResizedBig = svg
+          .replace(
+            /width="(\d+)(\w*)"/,
+            `width="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+          )
+          .replace(
+            /height="(\d+)(\w*)"/,
+            `height="${noteSize * bigScale(true) * nikochanCanvasDPR.current}"`
+          );
+        const imgBig = new Image();
+        imgBig.src = `data:image/svg+xml;base64,${btoa(svgResizedBig)}`;
+        const pBitmapBig = imgBig.decode().then(() =>
+          createImageBitmap(imgBig, {
+            resizeWidth: noteSize * bigScale(true) * nikochanCanvasDPR.current,
+            resizeHeight: noteSize * bigScale(true) * nikochanCanvasDPR.current,
+            resizeQuality: "high",
+          })
+        );
+        return Promise.all([pBitmap, pBitmapBig]);
+      })
+    ).then((bitmaps) => {
+      nikochanBitmap.current = bitmaps;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noteSize, nikochanCanvasDPR.current]);
 
   const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
-  const prevRerenderIndex = useRef<number>(-1);
-  const prevRerender = useRef<DOMHighResTimeStamp | null>(null);
-  if (
-    prevRerenderIndex.current !== rerenderIndex &&
-    (prevRerender.current === null ||
-      limitMaxFPS === 0 ||
-      performance.now() - prevRerender.current > 1000 / (limitMaxFPS * 1.1))
-  ) {
-    performance.mark("nikochan-rerender");
-    const nowDate = performance.now();
-    fpsCounter.current.push(nowDate);
-    if (
-      prevRerender.current === null ||
-      limitMaxFPS === 0 ||
-      // reset clock if rendering is too late
-      performance.now() - prevRerender.current > (1000 / limitMaxFPS) * 3
-    ) {
-      prevRerender.current = nowDate;
-    } else {
-      prevRerender.current += 1000 / limitMaxFPS;
+  const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
+  useEffect(() => {
+    displayNotes.current = [];
+    displayNikochan.current = [];
+    while (notes.length >= displayNikochan.current.length) {
+      displayNikochan.current.push(null);
     }
-    prevRerenderIndex.current = rerenderIndex;
+  }, [notes]);
+  const lastNow = useRef<number>(0);
+  if (runExecutedIndex.current !== rerenderIndex) {
+    // performance.mark("nikochan-rerender");
+    runExecutedIndex.current = rerenderIndex;
+    renderFpsCounter.current.push(performance.now());
     const now = getCurrentTimeSec();
     if (
       playing &&
       marginX !== undefined &&
       marginY !== undefined &&
+      canvasMarginX !== undefined &&
+      canvasMarginY !== undefined &&
       boxSize &&
-      now !== undefined
+      now !== undefined &&
+      nikochanBitmap.current
     ) {
+      let shouldHideBPMSign = false;
+
+      const c = {
+        noteSize,
+        boxSize,
+        playUIScale,
+        canvasMarginX,
+        canvasMarginY,
+        marginY,
+        playbackRate,
+        rem,
+        now,
+        tailsCanvasDPR,
+        nikochanCanvasDPR: nikochanCanvasDPR.current,
+        nikochanBitmap: nikochanBitmap.current,
+        lastNow: lastNow.current,
+      };
+
       displayNotes.current = notes
         .map((n) =>
           n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
         )
         .filter((n) => n !== null);
+      displayNotes.current.reverse(); // 奥に表示されるものが最初
+
+      if (nctx && ctx) {
+        nctx.clearRect(
+          0,
+          0,
+          canvasWidth.current * nikochanCanvasDPR.current,
+          canvasHeight.current * nikochanCanvasDPR.current
+        );
+        ctx.clearRect(
+          0,
+          0,
+          canvasWidth.current * tailsCanvasDPR,
+          canvasHeight.current * tailsCanvasDPR
+        );
+        for (const dn of displayNotes.current) {
+          if (!displayNikochan.current[dn.id]) {
+            displayNikochan.current[dn.id] = new DisplayNikochan(
+              notes[dn.id],
+              dn,
+              c
+            );
+          }
+          const dns = displayNikochan.current[dn.id]!;
+          dns.update(dn, c);
+          shouldHideBPMSign ||= dns.shouldHideBPMSign;
+          dns.drawNikochan(nctx);
+          dns.drawTail(ctx);
+        }
+        lastNow.current = now;
+
+        if (props.shouldHideBPMSign !== shouldHideBPMSign) {
+          setTimeout(() => props.setShouldHideBPMSign(shouldHideBPMSign));
+        }
+      }
     } else {
-      displayNotes.current = [];
+      if (!noClear) {
+        displayNotes.current = [];
+        if (ctx) {
+          ctx.clearRect(
+            0,
+            0,
+            canvasWidth.current * tailsCanvasDPR,
+            canvasHeight.current * tailsCanvasDPR
+          );
+        }
+        if (nctx) {
+          nctx.clearRect(
+            0,
+            0,
+            canvasWidth.current * nikochanCanvasDPR.current,
+            canvasHeight.current * nikochanCanvasDPR.current
+          );
+        }
+      }
+      displayNikochan.current = [];
+      if (props.shouldHideBPMSign !== false) {
+        setTimeout(() => props.setShouldHideBPMSign(false));
+      }
     }
   }
 
-  const nikochanAssets = useRef<string[]>([]);
   const particleAssets = useRef<string[]>([]);
   useEffect(() => {
-    Promise.all(
-      [0, 1, 2, 3].map((i) =>
-        fetch(process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg`)
-          .then((res) => res.text())
-          .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
-      )
-    ).then((urls) => {
-      nikochanAssets.current = urls;
-    });
     Promise.all(
       Array.from(new Array(13)).map((_, i) =>
         [4, 6, 8, 10, 12].includes(i)
@@ -125,31 +362,192 @@ export default function FallingWindow(props: Props) {
     });
   }, []);
 
+  const filteredStartTimeStampSample = useRef<number | null>(null);
+  const rawStartTimeStampSample = useRef<number | null>(null);
+  useEffect(() => {
+    if (props.showTSOffset) {
+      const i = setInterval(() => {
+        rawStartTimeStampSample.current = props.rawStartTimeStamp.current;
+        filteredStartTimeStampSample.current =
+          props.filteredStartTimeStamp.current;
+      }, 50);
+      return () => clearInterval(i);
+    }
+  }, [
+    props.showTSOffset,
+    props.rawStartTimeStamp,
+    props.filteredStartTimeStamp,
+  ]);
+  // rawStartTimeStampからoffsetとaudioを引けば -ytPlayer.current?.getCurrentTime() の値が残る
+  const rawYTStartTimeStamp = rawStartTimeStampSample.current
+    ? (((rawStartTimeStampSample.current -
+        props.userOffset * 1000 +
+        (props.audioLatency || 0) * 1000) %
+        1000) +
+        1000) %
+      1000
+    : null;
+
   return (
-    <div className={clsx(props.className)} style={props.style} ref={ref}>
-      <div className="relative w-full h-full overflow-visible">
-        {/* 判定線 */}
-        {boxSize && marginY !== undefined && (
-          <TargetLine
-            barFlash={props.barFlash}
-            left={0}
-            right="-100%"
-            bottom={targetY * boxSize + marginY}
-          />
-        )}
-        {boxSize && marginX !== undefined && marginY !== undefined && (
-          <NikochansMemo
-            displayNotes={displayNotes.current}
-            notes={notes}
-            noteSize={noteSize}
-            boxSize={boxSize}
-            marginX={marginX}
-            marginY={marginY}
-            nikochanAssets={nikochanAssets}
-            particleAssets={particleAssets}
-          />
-        )}
-      </div>
+    <div
+      className={clsx(props.className, "overflow-visible")}
+      style={props.style}
+      ref={ref}
+    >
+      {/* For nikochans tail */}
+      <canvas
+        ref={tailsCanvasRef}
+        style={{
+          zIndex: -7,
+          position: "absolute",
+          left: canvasLeft.current,
+          top: canvasTop.current,
+          width: canvasWidth.current,
+          height: canvasHeight.current,
+          pointerEvents: "none",
+          opacity: isDark ? 0.5 : 0.5,
+        }}
+        width={canvasWidth.current * tailsCanvasDPR}
+        height={canvasHeight.current * tailsCanvasDPR}
+      />
+      {/* For nikochan */}
+      <canvas
+        ref={nikochanCanvasRef}
+        style={{
+          zIndex: 0,
+          position: "absolute",
+          left: canvasLeft.current,
+          top: canvasTop.current,
+          width: canvasWidth.current,
+          height: canvasHeight.current,
+          pointerEvents: "none",
+          opacity: isDark ? 0.7 : 0.9,
+        }}
+        width={canvasWidth.current * nikochanCanvasDPR.current}
+        height={canvasHeight.current * nikochanCanvasDPR.current}
+      />
+      {/* 判定線 */}
+      {boxSize && marginY !== undefined && (
+        <TargetLine
+          className="-z-3"
+          barFlash={
+            props.barFlash === undefined || marginX === undefined
+              ? undefined
+              : "targetX" in props.barFlash
+                ? props.barFlash.targetX * boxSize + marginX
+                : props.barFlash.clientX
+          }
+          left={0}
+          right="-100%"
+          bottom={targetY * boxSize + marginY}
+        />
+      )}
+      {boxSize && marginX !== undefined && marginY !== undefined && (
+        <NikochansMemo
+          displayNotes={displayNotes.current}
+          notes={notes}
+          noteSize={noteSize}
+          boxSize={boxSize}
+          marginX={marginX}
+          marginY={marginY}
+          particleAssets={particleAssets}
+        />
+      )}
+      {boxSize && marginY !== undefined && props.showTSOffset && (
+        <table
+          className="absolute text-sm"
+          style={{ bottom: targetY * boxSize + marginY, right: 0 }}
+        >
+          <tbody>
+            <tr>
+              <td className="flex-1">PosEst</td>
+              <td colSpan={1} className="text-right">
+                {(props.posOfs.current * 100).toFixed(2)}%
+              </td>
+              <td>/</td>
+              <td colSpan={2} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (Math.sqrt(props.timeOfsEstimator.current.p) * 1000).toFixed(
+                    2
+                  )}
+              </td>
+            </tr>
+            <tr>
+              <td className="flex-1">TimeEst</td>
+              <td colSpan={1} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (props.timeOfsEstimator.current.mu * 1000).toFixed(2)}
+              </td>
+              <td>/</td>
+              <td colSpan={2} className="text-right">
+                {props.timeOfsEstimator.current &&
+                  (Math.sqrt(props.timeOfsEstimator.current.r) * 1000).toFixed(
+                    2
+                  )}
+              </td>
+            </tr>
+            <tr>
+              <td className="flex-1">User</td>
+              <td className="min-w-14 text-right">
+                {props.userOffset < 0 ? "-" : "+"}
+                {Math.floor(Math.abs(props.userOffset) * 1000)}
+              </td>
+              <td>.</td>
+              <td className="min-w-6">
+                {(Math.floor(Math.abs(props.userOffset) * 1000 * 100) % 100)
+                  .toString()
+                  .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Audio</td>
+              <td className="text-right">
+                {typeof props.audioLatency === "number" &&
+                  "-" + Math.floor(props.audioLatency * 1000)}
+              </td>
+              <td>.</td>
+              <td>
+                {typeof props.audioLatency === "number" &&
+                  (Math.floor(props.audioLatency * 1000 * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Raw%1s</td>
+              <td className="text-right">
+                {rawYTStartTimeStamp !== null &&
+                  Math.floor(rawYTStartTimeStamp)}
+              </td>
+              <td>.</td>
+              <td>
+                {rawYTStartTimeStamp !== null &&
+                  (Math.floor(rawYTStartTimeStamp * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+            <tr>
+              <td>Filtered%1s</td>
+              <td className="text-right">
+                {filteredStartTimeStampSample.current !== null &&
+                  Math.floor(filteredStartTimeStampSample.current) % 1000}
+              </td>
+              <td>.</td>
+              <td>
+                {filteredStartTimeStampSample.current !== null &&
+                  (Math.floor(filteredStartTimeStampSample.current * 100) % 100)
+                    .toString()
+                    .padStart(2, "0")}
+              </td>
+              <td>ms</td>
+            </tr>
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
@@ -161,7 +559,6 @@ interface MProps {
   boxSize: number;
   marginX: number;
   marginY: number;
-  nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
@@ -174,7 +571,6 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       marginX={props.marginX}
       marginY={props.marginY}
       boxSize={props.boxSize}
-      nikochanAssets={props.nikochanAssets}
       particleAssets={props.particleAssets}
     />
   ));
@@ -187,7 +583,6 @@ interface NProps {
   marginX: number;
   marginY: number;
   boxSize: number;
-  nikochanAssets: RefObject<string[]>;
   particleAssets: RefObject<string[]>;
 }
 function Nikochan(props: NProps) {
@@ -198,83 +593,8 @@ function Nikochan(props: NProps) {
   4: miss は画像が0と同じ
   */
   const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
-
-  const x = displayNote.pos.x * boxSize + marginX;
-  const y = displayNote.pos.y * boxSize + targetY * boxSize + marginY;
-  const size = noteSize * bigScale(note.big);
-  const isOffScreen =
-    x + size / 2 < 0 ||
-    x - size / 2 > window.innerWidth ||
-    y - size / 2 > boxSize ||
-    y + size / 2 < 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [enableFadeIn, appeared, setEnableFadeIn] = useDelayedDisplayState(0, {
-    delayed: !isOffScreen,
-  });
   return (
     <>
-      <div
-        className={clsx(
-          "absolute",
-          displayNote.done === 0 &&
-            (enableFadeIn
-              ? appeared
-                ? "transition ease-linear duration-100 opacity-100"
-                : "opacity-0"
-              : "opacity-100"),
-          displayNote.done === 1 &&
-            "transition ease-linear duration-300 -translate-y-4 opacity-0 scale-125",
-          displayNote.done === 2 &&
-            "transition ease-linear duration-300 -translate-y-2 opacity-0",
-          displayNote.done === 3 &&
-            "transition ease-linear duration-300 opacity-0",
-          displayNote.done === 4 &&
-            "transition ease-linear duration-200 opacity-0"
-        )}
-        style={{
-          /* noteSize: にこちゃんのサイズ(boxSizeに対する比率), boxSize: 画面のサイズ */
-          width: noteSize * bigScale(note.big),
-          height: noteSize * bigScale(note.big),
-          left:
-            displayNote.pos.x * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginX,
-          bottom:
-            displayNote.pos.y * boxSize +
-            targetY * boxSize -
-            (noteSize * bigScale(note.big)) / 2 +
-            marginY,
-        }}
-      >
-        <img
-          decoding="async"
-          src={
-            props.nikochanAssets.current[
-              displayNote.done <= 3 ? displayNote.done : 0
-            ]
-          }
-          className="w-full h-full "
-        />
-        {/* chainBonusをにこちゃんの右上に表示する */}
-        {/*{displayNote.baseScore !== undefined &&
-          displayNote.chainBonus !== undefined &&
-          displayNote.chain && (
-            <span
-              className={clsx(
-               "absolute w-12 text-xs",
-                (displayNote.chain >= 100 || displayNote.bigDone) && "text-orange-500"
-              )}
-              style={{ bottom: "100%", left: "100%" }}
-            >
-              ×{" "}
-              {(
-                displayNote.baseScore +
-                displayNote.chainBonus +
-                (displayNote.bigBonus || 0)
-              ).toFixed(2)}
-            </span>
-          )}*/}
-      </div>
       {[1].includes(displayNote.done) && (
         <Ripple
           noteSize={noteSize}
@@ -314,7 +634,7 @@ function Ripple(props: RProps) {
   const ref2 = useRef<HTMLDivElement>(null!);
   const animateDone = useRef<boolean>(false);
   const { noteSize } = props;
-  const rippleWidth = noteSize * 2 * (props.big ? 1.5 : 1);
+  const rippleWidth = noteSize * 2.5 * (props.big ? 1.5 : 1);
   const rippleHeight = rippleWidth * 0.7;
   useEffect(() => {
     if (!animateDone.current) {
@@ -338,7 +658,7 @@ function Ripple(props: RProps) {
   }, [noteSize]);
   return (
     <div
-      className="absolute -z-20 "
+      className="absolute -z-20 dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,
@@ -385,8 +705,8 @@ function Particle(props: PProps) {
   const animateDone = useRef<boolean>(false);
   const bigAnimateDone = useRef<boolean>(false);
   const { noteSize, particleNum } = props;
-  const maxSize = noteSize * 1.8;
-  const bigSize = noteSize * 3;
+  const maxSize = noteSize * 2;
+  const bigSize = noteSize * 3.5;
   useEffect(() => {
     if (!animateDone.current) {
       const angle = Math.random() * 360;
@@ -429,7 +749,7 @@ function Particle(props: PProps) {
 
   return (
     <div
-      className="absolute -z-10 "
+      className="absolute -z-10 dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,

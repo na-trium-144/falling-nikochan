@@ -1,6 +1,7 @@
 import { CenterBox } from "@/common/box";
 import { ThemeProvider } from "@/common/theme";
 import { initMetadata, MetadataProps } from "@/metadata.js";
+import { IrasutoyaLikeBg } from "@/common/irasutoyaLike";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
 
 export async function generateMetadata({ params }: MetadataProps) {
@@ -14,6 +15,7 @@ export default async function NotFoundPage() {
     <html>
       <body className="w-full h-dvh overflow-hidden touch-none ">
         <ThemeProvider>
+          <IrasutoyaLikeBg />
           <CenterBox>404: {t("api.notFound")}</CenterBox>
         </ThemeProvider>
       </body>

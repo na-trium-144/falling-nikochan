@@ -33,8 +33,8 @@ export function SharedResultBox(props: Props) {
     }
   }, [props.result.date]);
   return (
-    <Box className="w-max max-w-full mx-auto py-4 px-6 mt-4">
-      <p className="text-lg font-title font-bold text-center ">
+    <Box classNameOuter="w-max max-w-full mx-auto py-4 px-6 mt-4">
+      <p className="text-lg font-title font-semibold text-center ">
         &lt; {th("sharedResult")} &gt;
       </p>
       <p className="text-center ">
@@ -101,7 +101,7 @@ export function SharedResultBox(props: Props) {
                   "flex flex-row w-full items-baseline",
                   name === "bigNoteBonus" &&
                     props.result.bigCount === null &&
-                    "text-slate-400 dark:text-stone-600"
+                    "text-slate-400 dark:text-stone-500"
                 )}
               >
                 <span className="flex-1 text-sm ">{t(name)}:</span>
@@ -166,7 +166,7 @@ export function SharedResultBox(props: Props) {
               className={clsx(
                 "flex flex-row items-baseline",
                 props.result.bigCount === null &&
-                  "text-slate-400 dark:text-stone-600"
+                  "text-slate-400 dark:text-stone-500"
               )}
             >
               <span className="flex-1 text-xs ">{ts("big")}</span>

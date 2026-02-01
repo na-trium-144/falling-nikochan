@@ -19,6 +19,7 @@ import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
 import { ConnInfo } from "hono/conninfo";
+import ytMetaApp from "./ytMeta.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = async (config: {
@@ -43,6 +44,7 @@ const apiApp = async (config: {
       })
     )
     .route("/brief", briefApp)
+    .route("/ytMeta", ytMetaApp)
     .route(
       "/chartFile",
       await chartFileApp({ getConnInfo: config.getConnInfo })
@@ -71,6 +73,11 @@ const apiApp = async (config: {
             "API for Falling Nikochan, " +
             "a simple and cute rhythm game " +
             "where anyone can create and share charts.",
+          license: {
+            name: "MIT",
+            identifier: "MIT",
+            url: "https://opensource.org/licenses/MIT",
+          },
         },
         servers: [
           ...(process.env.API_ENV === "development"

@@ -5,7 +5,6 @@ import { Key } from "@/common/key.js";
 import TargetLine from "@/common/targetLine.js";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
-import Caution from "@icon-park/react/lib/icons/Caution.js";
 
 export function AboutContent2() {
   const t = useTranslations("about.2");
@@ -60,7 +59,7 @@ export function AboutContent2() {
           <p>
             {/*優先的に改行してほしい位置にinlineBlockを入れる*/}
             {t.rich("content2", {
-              key: (c) => <Key className="px-0.5 mx-0.5">{c}</Key>,
+              key: (c) => <Key>{String(c)}</Key>,
               inlineBlock: (c) => <span className="inline-block">{c}</span>,
             })}
           </p>
@@ -72,7 +71,12 @@ export function AboutContent2() {
             "main-wide:basis-3/12 main-wide:w-auto main-wide:min-h-full"
           )}
         >
-          <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
+          <TargetLine
+            barFlash={barFlash ? "30% + 10px" : undefined}
+            left={0}
+            right={0}
+            bottom={30}
+          />
           <div
             className={clsx(
               "absolute",
@@ -92,9 +96,9 @@ export function AboutContent2() {
             <img
               src={
                 process.env.ASSET_PREFIX +
-                `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg`
+                `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg?v=2`
               }
-              className="w-full h-full "
+              className="w-full h-full opacity-70"
             />
           </div>
         </div>
@@ -121,7 +125,12 @@ export function AboutContent2() {
             <span className="inline-block text-lg w-6 text-right">{chain}</span>
             <span className="text-xs ml-1">{t("chain", { chain })}</span>
           </div>
-          <TargetLine barFlash={barFlash} left={0} right={0} bottom={30} />
+          <TargetLine
+            barFlash={barFlash ? "30% + 15px" : undefined}
+            left={0}
+            right={0}
+            bottom={30}
+          />
           <div
             className={clsx(
               "absolute",
@@ -141,22 +150,12 @@ export function AboutContent2() {
             <img
               src={
                 process.env.ASSET_PREFIX +
-                `/assets/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg`
+                `/assets/nikochan${[0, 0, fail ? 3 : 1][nikochanPhase]}.svg?v=2`
               }
-              className="w-full h-full "
+              className="w-full h-full opacity-70"
             />
           </div>
         </div>
-      </div>
-      <div className="mb-4 text-sm space-y-2">
-        <p className="">
-          <Caution className="inline-block mr-1 translate-y-0.5 " />
-          {t("contentIOS")}
-        </p>
-        <ul className="list-inside list-disc-as-text">
-          <li>{t("contentIOS2")}</li>
-          <li>{t("contentIOS3")}</li>
-        </ul>
       </div>
     </>
   );

@@ -165,10 +165,11 @@ export default function BPMSign(props: Props) {
 
   return (
     <div
-      className={clsx("-z-20 absolute origin-bottom-left", props.className)}
+      className={clsx("absolute origin-bottom-left", props.className)}
       style={{
         bottom: "100%",
         left: "0.8rem",
+        marginBottom: "0.25rem",
         transform: playUIScale !== 1 ? `scale(${playUIScale})` : undefined,
       }}
     >
@@ -183,12 +184,14 @@ export default function BPMSign(props: Props) {
           "dark:bg-amber-800 dark:from-amber-900 dark:to-amber-800",
           "border-b-2 border-r-2 border-amber-800 dark:border-amber-950",
           "transition-transform duration-100",
-          flip ? "scale-x-0" : "scale-x-100"
+          flip ? "scale-x-0" : "scale-x-100",
+          playbackRate > 1 && "text-rose-700/100 dark:text-rose-400/75",
+          playbackRate < 1 && "text-emerald-700/100 dark:text-emerald-400/75"
         )}
       >
         <div
           className={clsx(
-            "flex flex-row items-baseline w-22 overflow-hidden",
+            "flex flex-row items-baseline w-22 overflow-hidden bold-by-stroke",
             chartSeq === null && "invisible"
           )}
         >

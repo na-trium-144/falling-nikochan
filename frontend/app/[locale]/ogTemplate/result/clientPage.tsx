@@ -10,6 +10,10 @@ import { useEffect, useState } from "react";
 import { Box } from "@/common/box";
 import { JudgeIcon } from "@/play/statusBox";
 import { levelBgColors, levelColors } from "@/common/levelColors";
+import {
+  IrasutoyaLikeBgInner,
+  IrasutoyaLikeGrassInner,
+} from "@/common/irasutoyaLike";
 
 export default function OGTemplate() {
   const th = useTranslations("share");
@@ -28,6 +32,12 @@ export default function OGTemplate() {
       className="absolute flex flex-row w-full "
       style={{ width: 1200, height: 630 }}
     >
+      <IrasutoyaLikeBgInner
+        screenWidth={1200}
+        screenHeight={630}
+        fixedSeed
+        className="absolute"
+      />
       <Title
         className="absolute top-0 left-8 h-26 scale-120 origin-top-left "
         anim={false}
@@ -56,7 +66,7 @@ export default function OGTemplate() {
         <div
           className={clsx(
             "ml-20 mt-6 flex flex-row items-baseline",
-            "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+            "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
             showDummyData || "invisible"
           )}
         >
@@ -67,7 +77,7 @@ export default function OGTemplate() {
         <div
           className={clsx(
             "pl-20 mt-4 font-title text-4xl",
-            "w-full text-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
+            "w-full whitespace-nowrap text-ellipsis overflow-x-clip overflow-y-visible",
             showDummyData || "invisible"
           )}
         >
@@ -91,10 +101,8 @@ export default function OGTemplate() {
           <span className={clsx("text-5xl", levelColors[0])}>44</span>
         </div>
         <Box
-          className={clsx(
-            "flex-1 ml-20 mt-6 h-max p-6 flex flex-col items-center",
-            "relative"
-          )}
+          classNameOuter={clsx("flex-1 ml-20 mt-6 h-max")}
+          classNameInner={clsx("p-6 flex flex-col items-center", "relative")}
         >
           <div
             className={clsx(
@@ -105,7 +113,7 @@ export default function OGTemplate() {
             (2025/01/01)
           </div>
 
-          {/*<p className="text-3xl font-title font-bold">
+          {/*<p className="text-3xl font-title font-semibold">
             &lt; {t("result")} &gt;
           </p>*/}
           <div className="flex-1 w-full flex flex-row">
@@ -184,16 +192,17 @@ export default function OGTemplate() {
         </div>
       </div>
       <div className="absolute bottom-0 w-full h-6 -z-10">
-        <div
-          className={clsx(
-            "-z-30 absolute inset-x-0 bottom-0",
-            "bg-gradient-to-t from-lime-600 via-lime-500 to-lime-200",
-            "dark:from-lime-900 dark:via-lime-800 dark:to-lime-700"
-          )}
-          style={{ top: "-1rem" }}
+        <IrasutoyaLikeGrassInner
+          rem={16}
+          screenWidth={1200}
+          screenHeight={630}
+          height={2.5 * 16}
+          fixedSeed
+          classNameFar="absolute"
+          classNameNear="absolute"
         />
         <RhythmicalSlime
-          className="-z-10 absolute scale-165 origin-bottom-right "
+          className="z-14 absolute scale-165 origin-bottom-right "
           style={{
             bottom: "100%",
             right: "1rem",
@@ -211,7 +220,7 @@ export default function OGTemplate() {
           bpmChanges={[]}
           playbackRate={1}
         />
-        <div className="scale-150 absolute w-full h-full bottom-0 left-0 origin-bottom-left">
+        <div className="z-13 scale-150 absolute w-full h-full bottom-0 left-0 translate-y-4 origin-bottom-left">
           <BPMSign
             chartPlaying={false}
             chartSeq={null}

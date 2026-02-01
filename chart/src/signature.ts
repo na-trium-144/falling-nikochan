@@ -22,7 +22,7 @@ import {
  * barNum: このSignatureが始まる時点の小節番号
  *
  */
-export type Signature = Signature9;
+export type Signature = Omit<Signature9, "luaLine">;
 export type SignatureWithLua = Signature9;
 
 export function getBarLength(s: Signature | Signature5): Step[] {

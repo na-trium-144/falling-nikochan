@@ -1,17 +1,25 @@
 {
   "name": "@falling-nikochan/chart",
-  "version": "13.22.0",
+  "version": "14.0.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint src/",
-    "t": "tsc"
+    "lint": "eslint src/ tests/",
+    "t": "tsc",
+    "cdev": "tsc --watch",
+    "test": "tsc && tsx --test tests/**/*.spec.ts"
   },
   "dependencies": {
     "@ygoe/msgpack": "^1.0.3",
+    "eventemitter3": "^5.0.1",
+    "object-hash": "^3.0.0",
     "valibot": "^1.0.0",
     "wasmoon": "^1.16.0"
+  },
+  "devDependencies": {
+    "@types/object-hash": "^3.0.6"
   }
 }
