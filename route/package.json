@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/route",
-  "version": "14.1.0",
+  "version": "14.2.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -14,6 +14,8 @@
     "dev": "tsx watch serve-local.ts"
   },
   "dependencies": {
+    "@falling-nikochan/chart": "workspace:*",
+    "@falling-nikochan/i18n": "workspace:*",
     "@google/genai": "^1.38.0",
     "@hono/node-server": "^1.19.7",
     "@hono/standard-validator": "^0.2.1",
@@ -22,6 +24,7 @@
     "@valibot/to-json-schema": "^1.5.0",
     "@vercel/og": "^0.8.6",
     "@ygoe/msgpack": "^1.0.3",
+    "colorthief": "^2.6.0",
     "discord.js": "^14.25.1",
     "dotenv": "^16.6.1",
     "hono": "^4.11.4",
@@ -30,11 +33,18 @@
     "moji": "^0.5.1",
     "mongodb": "^7.0.0",
     "oauth-1.0a": "^2.2.6",
+    "react": "^19.2.3",
     "sitemap": "^9.0.0",
-    "twitter-text": "^3.1.0"
+    "twitter-text": "^3.1.0",
+    "valibot": "^1.0.0"
   },
   "devDependencies": {
+    "@falling-nikochan/route": "workspace:*",
+    "@types/chai": "^5.2.3",
+    "@types/colorthief": "^2.6.1",
     "@types/moji": "^0.5.3",
-    "@types/twitter-text": "^3.1.10"
+    "@types/react": "^19.2.9",
+    "@types/twitter-text": "^3.1.10",
+    "chai": "^6.2.2"
   }
 }

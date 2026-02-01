@@ -1,14 +1,13 @@
-import { levelTypes } from "@falling-nikochan/chart";
 import { levelColors } from "@/common/levelColors";
 
 - You can create multiple chart data (levels) for one song.
 - You can give a name to the level. It is not necessary to give a name.
 - You can choose the level type from
-"<span className={levelColors[0]}>{levelTypes[0]}</span>"
-"<span className={levelColors[1]}>{levelTypes[1]}</span>"
-"<span className={levelColors[2]}>{levelTypes[2]}</span>".
-  - <span className={levelColors[0]}>{levelTypes[0]}</span> limits the number of notes that can be placed at the same time to one.
-  - Similarly, <span className={levelColors[1]}>{levelTypes[1]}</span> limits the number of notes that can be placed at the same time to two.
-  - There are no restrictions on <span className={levelColors[2]}>{levelTypes[2]}</span>.
+"<span className={levelColors[0]}>Single</span>"
+"<span className={levelColors[1]}>Double</span>"
+"<span className={levelColors[2]}>Maniac</span>".
+  - <span className={levelColors[0]}>Single</span> limits the number of notes that can be placed at the same time to one.
+  - Similarly, <span className={levelColors[1]}>Double</span> limits the number of notes that can be placed at the same time to two.
+  - There are no restrictions on <span className={levelColors[2]}>Maniac</span>.
 - The level is automatically assigned a number (1 to 20) that indicates the difficulty of the chart.
   - This is automatically calculated based on the amount (density) of notes in the chart.

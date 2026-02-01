@@ -3,7 +3,7 @@ import { locales } from "./dynamic.js";
 import { getMessages as staticGetMessages } from "./staticMin.js";
 import { basename } from "node:path";
 const actualLocales = (await readdir(".", { withFileTypes: true }))
-  .filter((file) => file.isDirectory())
+  .filter((file) => file.isDirectory() && file.name !== "node_modules")
   .map((dir) => dir.name);
 if (actualLocales.length !== locales.length) {
   throw new Error(

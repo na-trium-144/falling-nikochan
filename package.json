@@ -1,64 +1,57 @@
 {
   "name": "falling-nikochan",
+  "version": "14.2.0",
   "type": "module",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": "^23.6 || ^24"
+    "node": "^23.6 || ^24",
+    "pnpm": ">=10"
   },
+  "packageManager": "pnpm@10.28.1",
   "scripts": {
-    "lint": "tsc && npm run t --ws --if-present && npm run lint --ws --if-present",
+    "lint": "tsc && pnpm run -r --if-present t && pnpm run -r --if-present lint",
     "format": "prettier --write .",
-    "t": "npm run t --ws --if-present",
-    "cdev": "npm run cdev -w chart",
-    "test": "npm run test --ws --if-present",
+    "t": "pnpm run -r --if-present t",
+    "cdev": "pnpm run --filter chart cdev",
+    "test": "pnpm run -r --if-present test",
     "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
-    "seed": "npm run t --ws --if-present && npm run seed -w route",
-    "ndev": "npm run dev -w frontend",
-    "nbuild": "npm run t --ws --if-present && npm run build -w frontend && npm run postbuild -w frontend",
-    "swbuild": "npm run t --ws --if-present && npm run build -w worker && npm run postbuild -w frontend",
-    "allbuild": "npm run t --ws --if-present && npm run build -w frontend && npm run build -w worker && npm run postbuild -w frontend",
-    "ldev": "npm run dev -w route"
+    "seed": "pnpm run -r --if-present t && pnpm run --filter route seed",
+    "ndev": "pnpm run --filter frontend dev",
+    "nbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter frontend postbuild",
+    "swbuild": "pnpm run -r --if-present t && pnpm run --filter worker build && pnpm run --filter frontend postbuild",
+    "allbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter worker build && pnpm run --filter frontend postbuild",
+    "ldev": "pnpm run --filter route dev"
   },
-  "workspaces": [
-    "chart",
-    "i18n",
-    "frontend",
-    "route",
-    "worker"
-  ],
   "dependencies": {
-    "@next/mdx": "15.5.9",
-    "colorthief": "^2.6.0",
-    "next": "15.5.9",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "@falling-nikochan/route": "workspace:*",
+    "@vercel/og": "^0.8.6",
+    "hono": "^4.11.4"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.28.5",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.1",
-    "@types/chai": "^5.2.3",
-    "@types/colorthief": "^2.6.1",
-    "@types/node": "^22.15.19",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "babel-loader": "^10.0.0",
-    "chai": "^6.2.2",
+    "@types/node": "22.15.19",
     "core-js": "^3.42.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "15.5.9",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.0.0",
+    "next": "15.5.9",
     "prettier": "^3.7.4",
+    "semver": "^7.7.3",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.38.0",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.38.0",
     "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1",
-    "webpack-license-plugin": "^4.5.1"
+    "webpack-license-plugin": "^4.5.1",
+    "yaml": "^2.8.2"
   },
-  "overrides": {
-    "sharp": "^0.34"
+  "pnpm": {
+    "overrides": {
+      "sharp": "^0.34"
+    }
   }
 }

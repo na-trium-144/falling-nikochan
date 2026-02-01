@@ -16,18 +16,21 @@ jobs:
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
+          cache: 'pnpm'
+      - run: pnpm config set node-linker hoisted --local
       - name: Pull Vercel Environment Information
-        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
         env:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
           BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
-        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
         with:
@@ -103,13 +106,16 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
-      - run: npm ci
-      - run: npm run t
+          cache: 'pnpm'
+      - run: pnpm config set node-linker hoisted --local
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run t
       - name: Pull Vercel Environment Information
-        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Download .vercel/output
         uses: actions/download-artifact@v4
         with:
@@ -117,7 +123,7 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - name: Deploy Project Artifacts to Vercel
-        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   deploy-cf:
     needs: [docker-push-manifest]
@@ -126,11 +132,13 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
-      - run: npm ci
-      - run: npm run t
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run t
       - name: Download .vercel/output
         uses: actions/download-artifact@v4
         with:
@@ -138,7 +146,7 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
       - run: rm -rf .git
-      - run: npm i -g wrangler@latest
+      - run: pnpm i -g wrangler@latest
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
