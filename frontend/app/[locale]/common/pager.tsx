@@ -72,7 +72,7 @@ export function Pager(props: Props) {
         )}
       </div>
       <div className="flex-1">
-        <span className="inline-block text-xl font-semibold font-title ">
+        <span className="inline-block fn-heading-sect">
           {props.title}
         </span>
       </div>

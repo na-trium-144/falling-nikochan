@@ -153,7 +153,7 @@ export default function Result(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <p className="text-lg font-title font-semibold">
+        <p className="fn-heading-box">
           &lt; {t("result")} &gt;
         </p>
         <div

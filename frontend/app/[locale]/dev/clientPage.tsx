@@ -68,7 +68,7 @@ export function DevPage(props: { locale: string }) {
                 <ArrowLeft className="inline-block align-middle mr-2 " />
                 {t("back")}
               </button>
-              <span className="flex-1 text-center text-xl font-semibold font-title">
+              <span className="flex-1 text-center fn-heading-sect">
                 {t("title")}
               </span>
             </div>
@@ -183,7 +183,7 @@ function StorageEditor(props: EProps) {
 
   return (
     <div className="">
-      <div className="text-center text-lg font-semibold font-title">
+      <div className="fn-heading-box">
         <button
           className={clsx(
             "rounded-full cursor-pointer px-2 py-1",

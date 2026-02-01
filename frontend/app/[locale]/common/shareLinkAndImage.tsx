@@ -289,7 +289,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               scrollableY
               padding={6}
             >
-              <p className="text-lg font-title font-semibold mb-2">
+              <p className="fn-heading-box">
                 &lt; {t("shareImage")} &gt;
               </p>
               <div

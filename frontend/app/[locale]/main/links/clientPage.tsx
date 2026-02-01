@@ -42,9 +42,9 @@ export default function LinksPage({ locale }: { locale: string }) {
       noBackButtonPC
       locale={locale}
     >
-      <div className="mb-3 no-pc">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("settings")}</h3>
-        <div className="ml-2 space-y-2">
+      <section className="fn-sect no-pc">
+        <h3 className="fn-heading-sect">{t("settings")}</h3>
+        <div className="space-y-2">
           <p>
             <Translate className="inline-block align-middle" />
             <span className="ml-1">Language:</span>
@@ -101,12 +101,12 @@ export default function LinksPage({ locale }: { locale: string }) {
           </p>
           <PWAInstallDesc block />
         </div>
-      </div>
-      <PWAInstallDesc block className="mb-3 no-mobile" />
-      <div className="mb-3 ">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("about")}</h3>
-        <div className="ml-2 space-y-1">
-          <p>
+      </section>
+      <PWAInstallDesc block className="fn-sect no-mobile" />
+      <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("about")}</h3>
+        <div className="space-y-1">
+          <p className="text-left">
             <span>{t("version")}:</span>
             <span className="inline-block">
               <span className="ml-2">ver.</span>
@@ -127,7 +127,7 @@ export default function LinksPage({ locale }: { locale: string }) {
               />
             </Link>
           </p>
-          <p className="text-justify">
+          <p>
             {t("supportedBrowsers", {
               browserslist: process.env.browserslist!,
             })}
@@ -142,10 +142,10 @@ export default function LinksPage({ locale }: { locale: string }) {
             </Link>
           </p>
         </div>
-      </div>
-      <div className="mb-3">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("title")}</h3>
-        <ul className="list-disc ml-6 space-y-1 ">
+      </section>
+      <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("title")}</h3>
+        <ul className="list-disc ml-6 space-y-1 text-left">
           <li>
             <FormOne className="inline-block align-middle mr-1" />
             <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
@@ -208,7 +208,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             </li>
           )}
         </ul>
-      </div>
+      </section>
     </IndexMain>
   );
 }

@@ -52,7 +52,7 @@ export function ChangeLogPopup(props: PopupProps) {
         <div
           className={clsx(
             "absolute bottom-full mb-1 left-1/2 w-0 z-30",
-            "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
+            "grid-centering"
           )}
         >
           <Box
@@ -71,22 +71,18 @@ export function ChangeLogPopup(props: PopupProps) {
                 "mask-b-from-85% mask-b-to-97%"
               )}
             >
-              <p className="">
-                <span className="inline-block">Falling Nikochan</span>
-                <span className="inline-block">
-                  <span className="ml-2">ver.</span>
-                  <span className="ml-1">{process.env.buildVersion}</span>
-                  {/*process.env.buildCommit && (
+              <p className="text-center">
+                <span>Falling Nikochan</span>
+                <span className="ml-2">ver.</span>
+                <span className="ml-1">{process.env.buildVersion}</span>
+                {/*process.env.buildCommit && (
                   <span className="ml-1 text-sm">
                     ({process.env.buildCommit})
                   </span>
                 )*/}
-                </span>
               </p>
-              <h3 className="text-xl font-semibold font-title">
-                {t("changelog")}
-              </h3>
-              <div className="text-left ">{changeLog}</div>
+              <h3 className="fn-heading-sect text-center mb-2">{t("changelog")}</h3>
+              <div className="fn-mdx-changelog">{changeLog}</div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>
               <Link

@@ -47,13 +47,13 @@
       }
     }
 
-    .fn-cl-message {
-      @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2;
-      /* 下に移動する場合はinlineスタイルで top: を指定 */
-    }
-    .fn-cl-more {
-      @apply block w-max mx-auto h-6 mt-2;
-    }
+  }
+  .fn-cl-message {
+    @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2;
+    /* 下に移動する場合はinlineスタイルで top: を指定 */
+  }
+  .fn-cl-more {
+    @apply block w-max mx-auto h-6 mt-2;
   }
 
 }

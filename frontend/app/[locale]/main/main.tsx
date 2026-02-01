@@ -23,6 +23,7 @@ import { AboutModal } from "@/common/aboutModal";
 import { ButtonHighlight } from "@/common/button";
 
 interface Props {
+  classNameInner?: string;
   children?: ReactNode | ReactNode[];
   title: string;
   tabKey: TabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
@@ -114,7 +115,7 @@ export function IndexMain(props: Props) {
         <Box
           refInner={props.boxRef}
           classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
-          classNameInner={clsx("flex flex-col")}
+          classNameInner={clsx("flex flex-col", props.classNameInner)}
           scrollableY
           padding={6}
         >

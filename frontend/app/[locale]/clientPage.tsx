@@ -82,9 +82,10 @@ export default function TopPage(props: Props) {
           <RedirectedWarning />
           <PWAInstallMain />
         </div>
-        <div
+        <section
           className={clsx(
-            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6",
+            "fn-sect text-center",
+            "basis-auto grow-1 px-6",
             menuMoveAnimClass
           )}
         >
@@ -92,15 +93,16 @@ export default function TopPage(props: Props) {
             openModal={openModal}
             openShareInternal={openShareInternal}
           />
-        </div>
+        </section>
 
-        <div
+        <section
           className={clsx(
-            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6",
+            "fn-sect text-center",
+            "basis-auto grow-1 px-6",
             menuMoveAnimClass
           )}
         >
-          <h3 className="mb-2 text-xl font-semibold font-title">
+          <h3 className="fn-heading-sect">
             {t("play.recent")}
           </h3>
           <ChartList
@@ -114,7 +116,7 @@ export default function TopPage(props: Props) {
             badge
             fixedRows
           />
-        </div>
+        </section>
 
         <div
           className={clsx(
@@ -208,8 +210,8 @@ function InputCId(props: {
   };
   return (
     <>
-      <h3 className="mb-2 ">
-        <span className="text-xl font-semibold font-title">
+      <h3>
+        <span className="fn-heading-sect">
           {t("inputId")}:
         </span>
         <Input

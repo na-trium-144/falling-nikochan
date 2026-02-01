@@ -34,27 +34,29 @@ export default function ChangelogPage(props: {
       mobileTabKey="links"
       locale={props.locale}
     >
-      <div onClick={versionClick}>
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("about")}</h3>
-        <p className="mb-2">
-          <span className="inline-block">Falling Nikochan</span>
-          <span className="inline-block">
-            <span className="ml-2">ver.</span>
+      <section className="fn-sect" onClick={versionClick}>
+        <h3 className="fn-heading-sect">{t("about")}</h3>
+        <p className="mb-2 text-left flex flex-wrap items-baseline">
+          <span>Falling Nikochan</span>
+          <span className="ml-2">
+            <span>ver.</span>
             <span className="ml-1">{process.env.buildVersion}</span>
             {process.env.buildCommit && (
               <span className="ml-1 text-sm">({process.env.buildCommit})</span>
             )}
           </span>
-          <span className="ml-2 text-sm inline-block">
+          <span className="ml-2 text-sm">
             Build at {process.env.buildDate}.
           </span>
         </p>
-        <p className="mb-3 text-justify">
+        <p className="">
           {t("supportedBrowsers", { browserslist: process.env.browserslist! })}
         </p>
-      </div>
-      <h3 className="text-xl font-semibold font-title">{t("changelog")}</h3>
-      {props.changeLogAll}
+      </section>
+      <section className="fn-sect fn-mdx-changelog">
+        <h3 className="fn-heading-sect">{t("changelog")}</h3>
+        {props.changeLogAll}
+      </section>
     </IndexMain>
   );
 }

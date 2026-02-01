@@ -2,7 +2,6 @@
 
 import clsx from "clsx/lite";
 import { ReactNode } from "react";
-import { pagerButtonClass } from "./pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { historyBackWithReview } from "./pwaInstall.jsx";
 
@@ -21,15 +20,17 @@ export function MobileHeader(props: MProps) {
     >
       {!props.noBackButton && (
         <button
-          className="fn-back-button fn-pager-button"
+          className="fn-back fn-pager-button"
           onClick={() => {
             historyBackWithReview();
           }}
         >
-          <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+          <ArrowLeft className="inline-block w-max align-middle m-auto " />
         </button>
       )}
-      {props.children}
+      <span className="fn-heading-sect">
+        {props.children}
+    </span>
     </header>
   );
 }

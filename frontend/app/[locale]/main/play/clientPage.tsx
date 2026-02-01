@@ -141,11 +141,9 @@ export default function PlayTab(props: Props) {
       locale={locale}
       boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
-      <div className="flex-none mb-3 ">
-        <h3 className="mb-2 flex items-baseline ">
-          <span className="mr-2 text-xl font-semibold font-title ">
-            {t("search")}:
-          </span>
+      <section className="fn-sect">
+        <h3 className="flex items-baseline">
+          <span className="mr-2 fn-heading-sect">{t("search")}:</span>
           <Input
             actualValue={searchText}
             updateValue={setSearchText}
@@ -153,7 +151,7 @@ export default function PlayTab(props: Props) {
             className="flex-1 font-title "
           />
         </h3>
-        <p className="pl-2 mb-1 text-justify ">{t("searchDesc")}</p>
+        <p className="mb-1">{t("searchDesc")}</p>
         {(searchResult || searching) && (
           <ChartList
             briefs={searchResult}
@@ -170,17 +168,10 @@ export default function PlayTab(props: Props) {
             }
           />
         )}
-      </div>
-      <AccordionLike
-        className="flex-none mb-3 "
-        hidden={searching || !!searchResult}
-      >
-        <h3 className="mb-2 text-xl font-semibold font-title">
-          {t("popular")}
-        </h3>
-        <p className="pl-2 mb-1 text-justify ">
-          {t("popularDesc", { popularDays })}
-        </p>
+      </section>
+      <AccordionLike className="fn-sect" hidden={searching || !!searchResult}>
+        <h3 className="fn-heading-sect">{t("popular")}</h3>
+        <p className="mb-1">{t("popularDesc", { popularDays })}</p>
         <ChartList
           type="popular"
           creator
@@ -193,12 +184,9 @@ export default function PlayTab(props: Props) {
           fixedRows
         />
       </AccordionLike>
-      <AccordionLike
-        className="flex-none mb-3 "
-        hidden={searching || !!searchResult}
-      >
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("latest")}</h3>
-        <p className="pl-2 text-justify ">
+      <AccordionLike className="fn-sect" hidden={searching || !!searchResult}>
+        <h3 className="fn-heading-sect">{t("latest")}</h3>
+        <p>
           {t.rich("latestDesc", {
             xlogo: () => <XLogo />,
             twitter: (c) => (
@@ -209,7 +197,7 @@ export default function PlayTab(props: Props) {
           })}
           {/*<span className="text-sm ">(最新の{numLatest}件まで)</span>*/}
         </p>
-        <p className="pl-2 mb-1 text-justify text-sm ">({t("latestDesc2")})</p>
+        <p className="mb-1 text-sm ">({t("latestDesc2")})</p>
         <ChartList
           type="latest"
           creator
@@ -223,12 +211,9 @@ export default function PlayTab(props: Props) {
           fixedRows
         />
       </AccordionLike>
-      <AccordionLike
-        className="flex-none mb-3 "
-        hidden={searching || !!searchResult}
-      >
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("sample")}</h3>
-        <p className="pl-2 mb-1 text-justify ">
+      <AccordionLike className="fn-sect" hidden={searching || !!searchResult}>
+        <h3 className="fn-heading-sect">{t("sample")}</h3>
+        <p className="mb-1">
           {t.rich("sampleDesc", {
             small: (c) => <span className="text-sm mx-0.5">{c}</span>,
           })}
@@ -248,9 +233,7 @@ export default function PlayTab(props: Props) {
           })}
         </p>
         {process.env.NODE_ENV === "development" && (
-          <p className="pl-2 mb-1 text-justify text-sm ">
-            ({t("sampleDevonly")})
-          </p>
+          <p className="mb-1 text-sm">({t("sampleDevonly")})</p>
         )}
         <ChartList
           briefs={props.originalBriefs}
@@ -294,13 +277,13 @@ export function AccordionLike(props: {
   return (
     <div
       className={clsx(
+        props.className,
         // main-wide:
         "transition-all duration-500",
         !opened && "hidden",
         !anim
           ? "m-0! ease-out opacity-0 max-h-0 pointer-events-none"
-          : "ease-in opacity-100 max-h-200",
-        props.className
+          : "ease-in opacity-100 max-h-200"
       )}
     >
       {props.children}

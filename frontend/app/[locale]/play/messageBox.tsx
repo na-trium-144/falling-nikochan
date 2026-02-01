@@ -92,7 +92,7 @@ export function ReadyMessage(props: MessageProps) {
           )}
           style={{ maxHeight: Math.max(optionMinHeight, props.maxHeight) }}
         >
-          <p className="text-lg font-title font-semibold mb-1">
+          <p className="fn-heading-box">
             <button
               className={clsx(pagerButtonClass, "mr-4 align-bottom")}
               onClick={() => setOptionOpen(false)}
@@ -115,7 +115,7 @@ export function ReadyMessage(props: MessageProps) {
         )}
         style={{ maxHeight: small ? undefined : props.maxHeight }}
       >
-        <p className="text-lg font-title font-semibold mb-2">
+        <p className="fn-heading-box">
           {props.back && (
             <button
               className={clsx(pagerButtonClass, "mr-4 align-bottom")}
@@ -439,7 +439,7 @@ export function StopMessage(props: MessageProps2) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      <p className="text-lg font-title font-semibold mb-2">
+      <p className="fn-heading-box">
         &lt; {t("stopped")} &gt;
       </p>
       <p>

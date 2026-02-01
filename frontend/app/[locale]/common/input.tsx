@@ -40,7 +40,7 @@ export default function Input(props: Props) {
       ref={props.ref}
       type={props.passwd ? "password" : "text"}
       className={clsx(
-        "font-main-ui text-base",
+        "font-main-ui",
         !props.left && "text-right",
         inputStyle,
         props.isValid && !props.isValid(value) && "text-red-500",

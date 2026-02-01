@@ -34,7 +34,7 @@ export function SharedResultBox(props: Props) {
   }, [props.result.date]);
   return (
     <Box classNameOuter="w-max max-w-full mx-auto py-4 px-6 mt-4">
-      <p className="text-lg font-title font-semibold text-center ">
+      <p className="fn-heading-box">
         &lt; {th("sharedResult")} &gt;
       </p>
       <p className="text-center ">

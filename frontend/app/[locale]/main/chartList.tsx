@@ -38,27 +38,22 @@ export default function ChartListPage(props: PProps) {
       locale={props.locale}
       boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
-      <h3
-        className={clsx(
-          "flex-none mb-2 text-xl font-semibold font-title",
-          "no-mobile"
-        )}
-      >
-        {props.title}
-      </h3>
-      <ChartList
-        type={props.type}
-        creator
-        href={(cid) => `/share/${cid}`}
-        onClick={openModal}
-        onClickMobile={openShareInternal}
-        showLoading
-        dateDiff={props.dateDiff}
-        moreHref={null}
-        badge={props.badge}
-        containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-        containerHeight={boxSize.height} // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
-      />
+      <section className="fn-sect">
+        <h3 className={clsx("fn-heading-sect", "no-mobile")}>{props.title}</h3>
+        <ChartList
+          type={props.type}
+          creator
+          href={(cid) => `/share/${cid}`}
+          onClick={openModal}
+          onClickMobile={openShareInternal}
+          showLoading
+          dateDiff={props.dateDiff}
+          moreHref={null}
+          badge={props.badge}
+          containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
+          containerHeight={boxSize.height} // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
+        />
+      </section>
     </IndexMain>
   );
 }
