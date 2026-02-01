@@ -61,6 +61,7 @@
 * `npm run cdev`スクリプトを追加、install時に自動的にtscが実行されるのをやめる
 * プレイ中のseekを実装(`seek=1`)、途中から再生した際にそれまでの音符は判定せず消すようにした
 * serviceWorkerのメッセージをメインスレッドに送信、forceUpdateを追加
+* 𝕏のロゴをsvgに置き換え
 * API
   * ver7〜12の譜面を上書きする際に内容に変更がなければハッシュが変わらないようにする
   * /api/chartFileとnewChartFileが過去2バージョンまでサポートするよう変更

@@ -14,7 +14,7 @@ export default {
     copyURL: "URLをコピー",
     share: "共有",
     copyForShare: "タイトルとURLをコピー",
-    xPost: "𝕏 ポスト",
+    xPost: "<xlogo></xlogo> ポスト",
     selectLevel: "レベルを選択",
     chartInfo: "譜面情報",
     otherPlayers: "みんなのプレイ記録",

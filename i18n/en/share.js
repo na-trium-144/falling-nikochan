@@ -15,7 +15,7 @@ export default {
     // Share dropdown menu button
     share: "Share",
     copyForShare: "Copy Title and URL",
-    xPost: "𝕏 Post",
+    xPost: "<xlogo></xlogo> Post",
     selectLevel: "Select Level",
     chartInfo: "Chart Information",
     otherPlayers: "Others' Play Records",
