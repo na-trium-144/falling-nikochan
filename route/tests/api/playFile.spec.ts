@@ -6,7 +6,7 @@ import {
   Level13Play,
   Level6Play,
 } from "@falling-nikochan/chart";
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 
 describe("GET /api/playFile/:cid/:lvIndex", () => {
   test("should return LevelPlay", async () => {

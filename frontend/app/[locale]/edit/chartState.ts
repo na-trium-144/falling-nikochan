@@ -18,7 +18,7 @@ import {
   ChartUntil14Min,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { APIError } from "@/common/apiError";

@@ -1,4 +1,4 @@
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import * as v from "valibot";
 
 const dateBase = new Date(2025, 2, 1);

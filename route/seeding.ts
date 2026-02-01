@@ -1,6 +1,6 @@
 import { ChartEntryCompressed, chartToEntry, zipEntry } from "./src/api/chart";
 // import YAML from "yaml";
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { readdir, readFile } from "node:fs/promises";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";

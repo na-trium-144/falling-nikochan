@@ -16,7 +16,7 @@ import {
   hash,
   hashLevel,
 } from "@falling-nikochan/chart";
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 

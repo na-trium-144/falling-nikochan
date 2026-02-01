@@ -12,7 +12,7 @@ import {
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
 import { env } from "hono/adapter";
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
 import { cors } from "hono/cors";
 import ColorThief from "colorthief";

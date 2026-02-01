@@ -38,7 +38,7 @@ import { InitErrorMessage, ReadyMessage, StopMessage } from "./messageBox.js";
 import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { CenterBox } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";

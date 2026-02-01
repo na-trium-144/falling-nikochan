@@ -1,4 +1,4 @@
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import {
   ChartEdit,
   currentChartVer,

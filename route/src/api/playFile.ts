@@ -1,4 +1,4 @@
-import msgpack from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";
