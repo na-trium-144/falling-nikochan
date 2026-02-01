@@ -33,7 +33,7 @@
     "moji": "^0.5.1",
     "mongodb": "^7.0.0",
     "oauth-1.0a": "^2.2.6",
-    "react": "^19.2.3",
+    "react": "^19.2.4",
     "sitemap": "^9.0.0",
     "twitter-text": "^3.1.0",
     "valibot": "^1.0.0"
@@ -43,7 +43,7 @@
     "@types/chai": "^5.2.3",
     "@types/colorthief": "^2.6.1",
     "@types/moji": "^0.5.3",
-    "@types/react": "^19.2.9",
+    "@types/react": "^19.2.10",
     "@types/twitter-text": "^3.1.10",
     "chai": "^6.2.2"
   }
