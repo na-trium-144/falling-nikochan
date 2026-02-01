@@ -356,17 +356,10 @@ const chartFileApp = async (config: {
           });
         }
 
-        const newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
-        if (
-          typeof newChartObj.ver === "number" &&
-          newChartObj.ver < currentChartVer - 1
-          // 過去2バージョンまでサポート
-        ) {
-          throw new HTTPException(409, { message: "oldChartVersion" });
-        }
-
+        let newChartObj: ChartUntil14;
         let newChart: Chart13Edit | ChartEdit;
         try {
+          newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
           if (newChartObj.ver === currentChartVer - 1) {
             newChart = await validateChart13(newChartObj as Chart13Edit);
           } else {
@@ -375,6 +368,10 @@ const chartFileApp = async (config: {
         } catch (e) {
           console.error(e);
           throw new HTTPException(415, { message: (e as Error).toString() });
+        }
+        if (newChartObj.ver < currentChartVer - 1) {
+          // 過去2バージョンまでサポート
+          throw new HTTPException(409, { message: "oldChartVersion" });
         }
 
         if (numEvents(newChart) > chartMaxEvent) {
