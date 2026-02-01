@@ -12,11 +12,12 @@ import {
 import { OGShare } from "./ogShare.js";
 import { OGResult } from "./ogResult.js";
 import { env } from "hono/adapter";
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
 import { cors } from "hono/cors";
 import ColorThief from "colorthief";
 import { adjustColor } from "./style.js";
+import * as v from "valibot";
 
 export interface ChartBriefMin {
   ytId: string;
@@ -25,6 +26,14 @@ export interface ChartBriefMin {
   chartCreator: string;
   lvType?: number; // 0, 1, 2
 }
+
+const ChartBriefMinArraySchema = v.tuple([
+  v.string(), // ytId
+  v.string(), // title
+  v.string(), // composer
+  v.string(), // chartCreator,
+  v.undefinedable(v.picklist([0, 1, 2])), // lvType
+]);
 
 const ogApp = (config: {
   ImageResponse: any;
@@ -67,13 +76,13 @@ const ogApp = (config: {
         const lvType = levelTypes.indexOf(
           brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
         );
-        const sBrief = msgpack.serialize([
+        const sBrief = msgpack.encode([
           brief.ytId,
           brief.title,
           brief.composer,
           brief.chartCreator,
-          lvType >= 0 ? lvType : undefined,
-        ]);
+          lvType >= 0 ? (lvType as 0 | 1 | 2) : undefined,
+        ] satisfies v.InferOutput<typeof ChartBriefMinArraySchema>);
         let sBriefBin = "";
         for (let i = 0; i < sBrief.length; i++) {
           sBriefBin += String.fromCharCode(sBrief[i]);
@@ -107,7 +116,10 @@ const ogApp = (config: {
       for (let i = 0; i < sBriefBin.length; i++) {
         sBriefArr[i] = sBriefBin.charCodeAt(i);
       }
-      const briefArr = msgpack.deserialize(sBriefArr);
+      const briefArr = v.parse(
+        ChartBriefMinArraySchema,
+        msgpack.decode(sBriefArr)
+      );
       const brief: ChartBriefMin = {
         ytId: briefArr[0],
         title: briefArr[1],

@@ -84,9 +84,9 @@ importers:
 
   chart:
     dependencies:
-      '@ygoe/msgpack':
-        specifier: ^1.0.3
-        version: 1.0.3
+      '@msgpack/msgpack':
+        specifier: ^3.1.3
+        version: 3.1.3
       eventemitter3:
         specifier: ^5.0.1
         version: 5.0.4
@@ -151,12 +151,12 @@ importers:
       '@mdx-js/react':
         specifier: ^3.1.1
         version: 3.1.1(@types/react@19.2.10)(react@19.2.4)
+      '@msgpack/msgpack':
+        specifier: ^3.1.3
+        version: 3.1.3
       '@next/mdx':
         specifier: ~15.5.11
         version: 15.5.11(@mdx-js/loader@3.1.1(webpack@5.104.1(webpack-cli@6.0.1(webpack@5.104.1))))(@mdx-js/react@3.1.1(@types/react@19.2.10)(react@19.2.4))
-      '@ygoe/msgpack':
-        specifier: ^1.0.3
-        version: 1.0.3
       ace-builds:
         specifier: ^1.43.5
         version: 1.43.6
@@ -281,6 +281,9 @@ importers:
       '@hono/swagger-ui':
         specifier: ^0.5.3
         version: 0.5.3(hono@4.11.7)
+      '@msgpack/msgpack':
+        specifier: ^3.1.3
+        version: 3.1.3
       '@scalar/hono-api-reference':
         specifier: ^0.9.39
         version: 0.9.39(hono@4.11.7)
@@ -290,9 +293,6 @@ importers:
       '@vercel/og':
         specifier: ^0.8.6
         version: 0.8.6
-      '@ygoe/msgpack':
-        specifier: ^1.0.3
-        version: 1.0.3
       colorthief:
         specifier: ^2.6.0
         version: 2.6.0
@@ -1382,6 +1382,10 @@ packages:
   '@mongodb-js/saslprep@1.4.5':
     resolution: {integrity: sha512-k64Lbyb7ycCSXHSLzxVdb2xsKGPMvYZfCICXvDsI8Z65CeWQzTEKS4YmGbnqw+U9RBvLPTsB6UCmwkgsDTGWIw==}
 
+  '@msgpack/msgpack@3.1.3':
+    resolution: {integrity: sha512-47XIizs9XZXvuJgoaJUIE2lFoID8ugvc0jzSHP+Ptfk8nTbnR8g788wv48N03Kx0UkAv559HWRQ3yzOgzlRNUA==}
+    engines: {node: '>= 18'}
+
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
 
@@ -2203,9 +2207,6 @@ packages:
 
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
-
-  '@ygoe/msgpack@1.0.3':
-    resolution: {integrity: sha512-Sjp0O/sNgOJxTOO1c2Zuu7nsHRIGu2iGPYyhUedKKbcHyUl73jbCaomEFJZHNb/6i94B+ZNZHVnFgpo0ENSXxQ==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -5893,6 +5894,8 @@ snapshots:
     dependencies:
       sparse-bitfield: 3.0.3
 
+  '@msgpack/msgpack@3.1.3': {}
+
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:
       '@emnapi/core': 1.8.1
@@ -6580,8 +6583,6 @@ snapshots:
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
-
-  '@ygoe/msgpack@1.0.3': {}
 
   abort-controller@3.0.0:
     dependencies:

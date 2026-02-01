@@ -5,11 +5,6 @@ import {
   unsetPasswd,
 } from "@/common/passwdCache";
 import {
-  Chart5,
-  Chart6,
-  Chart7,
-  Chart8Edit,
-  Chart9Edit,
   ChartEdit,
   ChartMin,
   convertToMin,
@@ -19,9 +14,11 @@ import {
   validateChartMin,
   ChartEditing,
   LuaExecutor,
+  ChartUntil14,
+  ChartUntil14Min,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { APIError } from "@/common/apiError";
@@ -128,8 +125,9 @@ export function useChartState(props: Props) {
         );
         if (res.ok) {
           try {
-            const chartRes: Chart5 | Chart6 | Chart7 | Chart8Edit | Chart9Edit =
-              msgpack.deserialize(await res.arrayBuffer());
+            const chartRes = msgpack.decode(
+              await res.arrayBuffer()
+            ) as ChartUntil14;
             if (options.savePasswd) {
               if (options.editPasswd) {
                 try {
@@ -223,7 +221,7 @@ export function useChartState(props: Props) {
             process.env.BACKEND_PREFIX + `/api/newChartFile`,
             {
               method: "POST",
-              body: msgpack.serialize(chartState.chart.toObject()),
+              body: msgpack.encode(chartState.chart.toObject()),
               cache: "no-store",
               credentials:
                 process.env.NODE_ENV === "development"
@@ -271,7 +269,7 @@ export function useChartState(props: Props) {
               q.toString(),
             {
               method: "POST",
-              body: msgpack.serialize(chartState.chart.toObject()),
+              body: msgpack.encode(chartState.chart.toObject()),
               cache: "no-store",
               credentials:
                 process.env.NODE_ENV === "development"
@@ -395,7 +393,7 @@ export function useChartState(props: Props) {
       } catch (e1) {
         console.warn("fallback to msgpack deserialize");
         try {
-          const content: ChartMin = msgpack.deserialize(buffer);
+          const content = msgpack.decode(buffer) as ChartUntil14Min;
           if (typeof content.ver === "number") {
             originalVer = content.ver;
           }

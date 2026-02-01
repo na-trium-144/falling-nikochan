@@ -1,4 +1,4 @@
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import * as v from "valibot";
 
 const dateBase = new Date(2025, 2, 1);
@@ -106,7 +106,7 @@ export type ResultSerialized = v.InferOutput<
   ReturnType<typeof ResultSerializedSchema>
 >;
 export function serializeResultParams(params: ResultParams): string {
-  const serialized = msgpack.serialize([
+  const serialized = msgpack.encode([
     3,
     // params.date !== null ? params.date.getTime() - dateBase.getTime() : null,
     params.date !== null ? serializeDate3(params.date) : null,
@@ -141,7 +141,7 @@ export function deserializeResultParams(serialized: string): ResultParams {
   }
   const deserialized = v.parse(
     ResultSerializedSchema(),
-    msgpack.deserialize(serializedArr)
+    msgpack.decode(serializedArr)
   );
   switch (deserialized[0]) {
     case 1:

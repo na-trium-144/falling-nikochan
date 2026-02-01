@@ -1,4 +1,4 @@
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import {
   ChartEdit,
   currentChartVer,
@@ -11,6 +11,7 @@ import {
   ChartEditSchema13,
   Chart13Edit,
   validateChart13,
+  ChartUntil14,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
@@ -131,7 +132,7 @@ const newChartFileApp = async (config: {
             });
           }
 
-          const newChartObj = msgpack.deserialize(chartBuf);
+          const newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
           if (
             typeof newChartObj.ver === "number" &&
             newChartObj.ver < currentChartVer - 1
@@ -142,7 +143,7 @@ const newChartFileApp = async (config: {
           let newChart: Chart13Edit | ChartEdit;
           try {
             if (newChartObj.ver === currentChartVer - 1) {
-              newChart = await validateChart13(newChartObj);
+              newChart = await validateChart13(newChartObj as Chart13Edit);
             } else {
               newChart = await validateChart(newChartObj);
             }

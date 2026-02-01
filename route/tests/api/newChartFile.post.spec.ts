@@ -6,7 +6,7 @@ import {
   currentChartVer,
   fileMaxSize,
 } from "@falling-nikochan/chart";
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
@@ -22,7 +22,7 @@ describe("POST /api/newChartFile", () => {
       const res1 = await app.request("/api/newChartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({
+        body: msgpack.encode({
           ...dummyChart(),
           changePasswd: "p",
         }),
@@ -32,7 +32,7 @@ describe("POST /api/newChartFile", () => {
       const res2 = await app.request("/api/newChartFile", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({
+        body: msgpack.encode({
           ...dummyChart(),
           changePasswd: "p",
         }),
@@ -48,7 +48,7 @@ describe("POST /api/newChartFile", () => {
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({
+      body: msgpack.encode({
         ...dummyChart(),
         changePasswd: "p",
       }),
@@ -81,7 +81,7 @@ describe("POST /api/newChartFile", () => {
         "Content-Type": "application/vnd.msgpack",
         "x-forwarded-for": "123",
       },
-      body: msgpack.serialize({
+      body: msgpack.encode({
         ...dummyChart(),
         changePasswd: "p",
       }),
@@ -107,7 +107,7 @@ describe("POST /api/newChartFile", () => {
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize(dummyChart()),
+      body: msgpack.encode(dummyChart()),
     });
     expect(res.status).to.equal(400);
     const body = await res.json();
@@ -133,7 +133,7 @@ describe("POST /api/newChartFile", () => {
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize(chart),
+      body: msgpack.encode(chart),
     });
     expect(res.status).to.equal(413);
     const body = await res.json();
@@ -145,7 +145,7 @@ describe("POST /api/newChartFile", () => {
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart11() }),
+      body: msgpack.encode({ ...dummyChart11() }),
     });
     expect(res.status).to.equal(409);
     const body = await res.json();
@@ -158,7 +158,7 @@ describe("POST /api/newChartFile", () => {
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({
+      body: msgpack.encode({
         ...dummyChart13(),
         changePasswd: "p",
       }),

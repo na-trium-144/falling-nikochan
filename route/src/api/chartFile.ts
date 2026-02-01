@@ -1,5 +1,5 @@
 import { Context, Hono } from "hono";
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import {
   ChartEdit,
   currentChartVer,
@@ -15,6 +15,7 @@ import {
   convertToLatest,
   validateChart13,
   Chart13Edit,
+  ChartUntil14,
 } from "@falling-nikochan/chart";
 import { Db, MongoClient } from "mongodb";
 import {
@@ -195,7 +196,7 @@ const chartFileApp = async (config: {
       }),
       (c) => {
         const chart = c.get("chart");
-        return c.body(new Blob([msgpack.serialize(chart)]).stream(), 200, {
+        return c.body(new Blob([msgpack.encode(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
         });
       }
@@ -355,7 +356,7 @@ const chartFileApp = async (config: {
           });
         }
 
-        const newChartObj = msgpack.deserialize(chartBuf);
+        const newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
         if (
           typeof newChartObj.ver === "number" &&
           newChartObj.ver < currentChartVer - 1
@@ -367,7 +368,7 @@ const chartFileApp = async (config: {
         let newChart: Chart13Edit | ChartEdit;
         try {
           if (newChartObj.ver === currentChartVer - 1) {
-            newChart = await validateChart13(newChartObj);
+            newChart = await validateChart13(newChartObj as Chart13Edit);
           } else {
             newChart = await validateChart(newChartObj);
           }

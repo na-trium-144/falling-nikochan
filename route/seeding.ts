@@ -1,6 +1,6 @@
 import { ChartEntryCompressed, chartToEntry, zipEntry } from "./src/api/chart";
 // import YAML from "yaml";
-import msgpack from "@ygoe/msgpack";
+import msgpack from "@msgpack/msgpack";
 import { readdir, readFile } from "node:fs/promises";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
@@ -28,9 +28,7 @@ try {
   const db = client.db("nikochan");
   for (const file of await readdir("./samples")) {
     const cid = file.split(".")[0];
-    const content: Chart5 = msgpack.deserialize(
-      await readFile("./samples/" + file)
-    );
+    const content: Chart5 = msgpack.decode(await readFile("./samples/" + file));
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid },
       {
