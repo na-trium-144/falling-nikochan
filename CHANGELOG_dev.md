@@ -1,3 +1,7 @@
+## ver. 14.1 - 2026/02/01
+
+* standaloneでないときも新しいserviceWorkerのactivate直後にassetsを更新するよう修正
+
 ## ver. 14.0 - 2026/02/01 [#901](https://github.com/na-trium-144/falling-nikochan/pull/901)
 
 * プロジェクトのライセンスをAGPL-3.0に変更
