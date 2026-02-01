@@ -5,6 +5,7 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
+import Rss from "@icon-park/react/lib/icons/Rss";
 import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
@@ -178,7 +179,18 @@ export default function PlayTab(props: Props) {
         />
       </AccordionLike>
       <AccordionLike className="fn-sect" hidden={searching || !!searchResult}>
-        <h3 className="fn-heading-sect">{t("latest")}</h3>
+        <h3>
+          <span className="fn-heading-sect">{t("latest")}</span>
+          <a 
+            href={process.env.BACKEND_PREFIX + "/rss.xml"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200"
+            title="RSS Feed"
+          >
+            <Rss size={20} />
+          </a>
+        </h3>
         <p>
           {t.rich("latestDesc", {
             xlogo: () => <XLogo />,

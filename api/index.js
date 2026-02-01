@@ -6,6 +6,7 @@ import {
   apiApp,
   ogApp,
   sitemapApp,
+  rssApp,
   shareApp,
   redirectApp,
   languageDetector,
@@ -33,6 +34,7 @@ const app = new Hono({ strict: false })
     })
   )
   .route("/sitemap.xml", sitemapApp)
+  .route("/rss.xml", rssApp)
   .route(
     "/share",
     shareApp({
