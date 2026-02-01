@@ -5,6 +5,7 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
+import Rss from "@icon-park/react/lib/icons/Rss";
 import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
@@ -197,9 +198,19 @@ export default function PlayTab(props: Props) {
         className="flex-none mb-3 "
         hidden={searching || !!searchResult}
       >
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("latest")}</h3>
-        <p className="pl-2 text-justify ">
-          {t.rich("latestDesc", {
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-xl font-semibold font-title">{t("latest")}</h3>
+          <a 
+            href={process.env.BACKEND_PREFIX + "/rss.xml"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200"
+            title="RSS Feed"
+          >
+            <Rss size={20} />
+          </a>
+        </div>
+        <p className="pl-2 text-justify ">{t.rich("latestDesc", {
             xlogo: () => <XLogo />,
             twitter: (c) => (
               <ExternalLink className="" href="https://twitter.com/nikochan144">

@@ -370,6 +370,7 @@ const app = new Hono({ strict: false })
   )
   .all("/api/*", (c) => fetchAPI(c.req.raw))
   .all("/api", (c) => fetchAPI(c.req.raw))
+  .get("/rss.xml", (c) => fetchAPI(c.req.raw))
   .get("/og/*", async (c) => {
     // return fetch(...) だと、30xリダイレクトを含む場合エラー
     const res = await fetchAPI(c.req.url, {
