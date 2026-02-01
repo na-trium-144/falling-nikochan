@@ -38,7 +38,7 @@ import { InitErrorMessage, ReadyMessage, StopMessage } from "./messageBox.js";
 import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
-import msgpack from "@ygoe/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { CenterBox } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
@@ -122,9 +122,9 @@ export function InitPlay({ locale }: { locale: string }) {
           if (res.ok) {
             try {
               currentChartVer satisfies 14; // update the code below when chart version is bumped
-              const seq: Level6Play | Level13Play = msgpack.deserialize(
-                await res.arrayBuffer()
-              );
+              const seq = msgpack.decode(await res.arrayBuffer()) as
+                | Level6Play
+                | Level13Play;
               console.log("seq.ver", seq.ver);
               if (seq.ver === 6 || seq.ver === 13 || seq.ver === 14) {
                 switch (seq.ver) {

@@ -49,7 +49,7 @@ const config = {
       mongodb: false,
       "node:path": false,
       react: false,
-      "@ygoe/msgpack": false,
+      "@msgpack/msgpack": false,
       wasmoon: false,
       "@falling-nikochan/chart": false,
       "@falling-nikochan/i18n/dynamic.js":

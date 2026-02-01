@@ -16,7 +16,7 @@ import {
   hash,
   hashLevel,
 } from "@falling-nikochan/chart";
-import msgpack from "@ygoe/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
@@ -32,14 +32,14 @@ describe("POST /api/chartFile/:cid", () => {
       const res1 = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
       });
       expect(res1.status).to.equal(204);
 
       const res2 = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
       });
       expect(res2.status).to.equal(429);
       const body = await res2.json();
@@ -52,7 +52,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart(), title: "updated" }),
     });
     expect(res.status).to.equal(204);
 
@@ -91,7 +91,7 @@ describe("POST /api/chartFile/:cid", () => {
           "Content-Type": "application/vnd.msgpack",
           Cookie: "pUserSalt=def",
         },
-        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
       }
     );
     expect(res.status).to.equal(204);
@@ -117,7 +117,7 @@ describe("POST /api/chartFile/:cid", () => {
         "Content-Type": "application/vnd.msgpack",
         "x-forwarded-for": "123",
       },
-      body: msgpack.serialize(dummyChart()),
+      body: msgpack.encode(dummyChart()),
     });
     expect(res.status).to.equal(204);
 
@@ -140,7 +140,7 @@ describe("POST /api/chartFile/:cid", () => {
         "Content-Type": "application/vnd.msgpack",
         "x-forwarded-for": "456",
       },
-      body: msgpack.serialize(dummyChart()),
+      body: msgpack.encode(dummyChart()),
     });
     expect(res.status).to.equal(204);
 
@@ -162,7 +162,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000a?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart(), title: "updated" }),
     });
     expect(res.status).to.equal(400);
   });
@@ -173,7 +173,7 @@ describe("POST /api/chartFile/:cid", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
       }
     );
     expect(res.status).to.equal(401);
@@ -185,7 +185,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100002?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart(), title: "updated" }),
     });
     expect(res.status).to.equal(404);
     const body = await res.json();
@@ -196,7 +196,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100001?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart(), title: "updated" }),
     });
     expect(res.status).to.equal(404);
     const body = await res.json();
@@ -222,7 +222,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize(chart),
+      body: msgpack.encode(chart),
     });
     expect(res.status).to.equal(413);
     const body = await res.json();
@@ -234,7 +234,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart11() }),
+      body: msgpack.encode({ ...dummyChart11() }),
     });
     expect(res.status).to.equal(409);
     const body = await res.json();
@@ -246,7 +246,7 @@ describe("POST /api/chartFile/:cid", () => {
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.serialize({ ...dummyChart13(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart13(), title: "updated" }),
     });
     expect(res.status).to.equal(204);
 
@@ -277,7 +277,7 @@ describe("POST /api/chartFile/:cid", () => {
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize(dummyChart()),
+        body: msgpack.encode(dummyChart()),
       });
       expect(res.status).to.equal(204);
 
@@ -296,7 +296,7 @@ describe("POST /api/chartFile/:cid", () => {
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({
+        body: msgpack.encode({
           ...dummyChart(),
           changePasswd: "newPasswd",
         }),
@@ -329,7 +329,7 @@ describe("POST /api/chartFile/:cid", () => {
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize(dummyChart()),
+        body: msgpack.encode(dummyChart()),
       });
       expect(res.status).to.equal(204);
 
@@ -351,7 +351,7 @@ describe("POST /api/chartFile/:cid", () => {
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart(), title: "updated" }),
+        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
       });
       expect(res.status).to.equal(204);
 
@@ -378,7 +378,7 @@ describe("POST /api/chartFile/:cid", () => {
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize(chart),
+        body: msgpack.encode(chart),
       });
       const dateAfter = new Date();
       expect(res.status).to.equal(204);
@@ -406,7 +406,7 @@ describe("POST /api/chartFile/:cid", () => {
       await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.serialize({ ...dummyChart(), published: false }),
+        body: msgpack.encode({ ...dummyChart(), published: false }),
       });
       const res = await app.request("/api/chartFile/100000?p=p", {
         method: "POST",
@@ -414,7 +414,7 @@ describe("POST /api/chartFile/:cid", () => {
           "Content-Type": "application/vnd.msgpack",
           "x-forwarded-for": "123",
         },
-        body: msgpack.serialize({ ...dummyChart(), published: true }),
+        body: msgpack.encode({ ...dummyChart(), published: true }),
       });
       const dateAfter = new Date();
       expect(res.status).to.equal(204);
@@ -451,7 +451,7 @@ describe("POST /api/chartFile/:cid", () => {
         const res = await app.request("/api/chartFile/100007?p=p", {
           method: "POST",
           headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.serialize(dummyChart()),
+          body: msgpack.encode(dummyChart()),
         });
         expect(res.status).to.equal(204);
 

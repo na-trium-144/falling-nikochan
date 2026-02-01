@@ -1,4 +1,4 @@
-import msgpack from "@ygoe/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import {
   ChartEdit,
   currentChartVer,
@@ -11,6 +11,7 @@ import {
   ChartEditSchema13,
   Chart13Edit,
   validateChart13,
+  ChartUntil14,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
@@ -131,24 +132,21 @@ const newChartFileApp = async (config: {
             });
           }
 
-          const newChartObj = msgpack.deserialize(chartBuf);
-          if (
-            typeof newChartObj.ver === "number" &&
-            newChartObj.ver < currentChartVer - 1
-          ) {
-            throw new HTTPException(409, { message: "oldChartVersion" });
-          }
-
+          let newChartObj: ChartUntil14;
           let newChart: Chart13Edit | ChartEdit;
           try {
+            newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
             if (newChartObj.ver === currentChartVer - 1) {
-              newChart = await validateChart13(newChartObj);
+              newChart = await validateChart13(newChartObj as Chart13Edit);
             } else {
               newChart = await validateChart(newChartObj);
             }
           } catch (e) {
             console.error(e);
             throw new HTTPException(415, { message: (e as Error).toString() });
+          }
+          if (newChartObj.ver < currentChartVer - 1) {
+            throw new HTTPException(409, { message: "oldChartVersion" });
           }
 
           if (numEvents(newChart) > chartMaxEvent) {
