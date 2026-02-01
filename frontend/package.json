@@ -65,7 +65,6 @@
     "sass": "^1.97.2",
     "svgo": "^4.0.0",
     "tailwindcss": "4.1.18",
-    "typescript": "5.8.3",
     "woff2sfnt-sfnt2woff": "^1.0.0"
   }
 }
