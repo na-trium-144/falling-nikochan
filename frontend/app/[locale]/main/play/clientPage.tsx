@@ -210,7 +210,8 @@ export default function PlayTab(props: Props) {
             <Rss size={20} />
           </a>
         </div>
-        <p className="pl-2 text-justify ">{t.rich("latestDesc", {
+        <p className="pl-2 text-justify ">
+          {t.rich("latestDesc", {
             xlogo: () => <XLogo />,
             twitter: (c) => (
               <ExternalLink className="" href="https://twitter.com/nikochan144">
