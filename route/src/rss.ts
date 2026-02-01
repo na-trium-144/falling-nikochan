@@ -55,8 +55,8 @@ ${charts
   .map(
     (chart) => `    <item>
       <title>${escapeXml(chart.title)} - ${escapeXml(chart.composer)} (Chart by ${escapeXml(chart.chartCreator)})</title>
-      <link>${baseUrl}/share/${chart.cid}</link>
-      <guid isPermaLink="true">${baseUrl}/share/${chart.cid}</guid>
+      <link>${baseUrl}/share/${escapeXml(chart.cid)}</link>
+      <guid isPermaLink="true">${baseUrl}/share/${escapeXml(chart.cid)}</guid>
       <pubDate>${new Date(chart.updatedAt).toUTCString()}</pubDate>
       <description>${escapeXml(`${chart.title} by ${chart.composer} - Chart created by ${chart.chartCreator}`)}</description>
     </item>`
