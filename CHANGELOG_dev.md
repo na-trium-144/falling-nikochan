@@ -1,3 +1,8 @@
+## ver. 14.5 - 2026/02/02 [#951](https://github.com/na-trium-144/falling-nikochan/pull/951)
+
+* levelHashの計算がブラウザで動作していなかったのを修正 (sha256→sha1に変更)
+    * ver14.0以降ハッシュの仕様を変更しても内容が変わっていない場合は以前のハッシュを維持するようにしたので既存のデータに問題なし
+
 ## ver. 14.2 - 2026/02/01 [#919](https://github.com/na-trium-144/falling-nikochan/pull/919)
 
 * Migrate from npm to pnpm
