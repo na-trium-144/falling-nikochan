@@ -83,7 +83,11 @@ async function errorResponse(
       "PLACEHOLDER_MESSAGE",
       t.has("api." + message)
         ? t("api." + message)
-        : message || t("unknownApiError")
+        : status === 400
+          ? t("api.generic400")
+          : status === 404
+            ? t("api.notFound")
+            : message || t("unknownApiError")
     )
     .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう

@@ -2,9 +2,10 @@ export default {
   error: {
     api: {
       // 400
+      generic400: "パラメータが正しくありません",
       noPasswd: "パスワードが指定されていません",
-      invalidChartId: "譜面 ID が不正です",
-      invalidResultParam: "result パラメータが不正です",
+      invalidChartId: "譜面 ID が正しくありません",
+      invalidResultParam: "result パラメータが正しくありません",
       missingResultParam: "result パラメータが指定されていません",
       // 401
       badPassword: "パスワードが違います",
@@ -36,5 +37,9 @@ export default {
     ytError: "YouTube 動画再生のエラー ({code})",
     noYtId: "再生する YouTube 動画が指定されていません",
     seqEmpty: "譜面データが空です",
+    errorPage: {
+      title: "エラーが発生しました 😢",
+      goHome: "トップへ戻る",
+    },
   },
 };

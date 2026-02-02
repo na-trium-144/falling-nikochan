@@ -2,6 +2,7 @@ export default {
   error: {
     api: {
       // 400
+      generic400: "The parameter is invalid",
       noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
@@ -36,5 +37,9 @@ export default {
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",
+    errorPage: {
+      title: "An error has occurred 😢",
+      goHome: "Return to top page",
+    },
   },
 };
