@@ -13,6 +13,7 @@ import { ExternalLink } from "@/common/extLink";
 import { XLogo } from "@/common/x";
 import Github from "@icon-park/react/lib/icons/Github";
 import { Box } from "./box";
+import { useEffect, useState } from "react";
 
 // IntlProvider内の場合はuseTranslationsで取得する。
 // IntlProvider外で使う場合はサーバーサイドでerror.errorPage.goHomeに相当するメッセージを取得してpropsに渡す。
@@ -35,8 +36,19 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
   );
 }
 
-export function LinksOnError() {
+export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
   const tl = useTranslations("main.links");
+  const [isServerSideError, setIsServerSideError] = useState(false);
+
+  useEffect(() => {
+    setIsServerSideError(
+      Number(dependOnStatus) === 403 || Number(dependOnStatus) >= 500
+    );
+  }, [dependOnStatus]);
+
+  if (dependOnStatus !== undefined && !isServerSideError) {
+    return null;
+  }
 
   return (
     <Box classNameOuter="mb-3" padding={3}>

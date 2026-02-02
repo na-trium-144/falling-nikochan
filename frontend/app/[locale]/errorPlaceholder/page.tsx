@@ -18,7 +18,8 @@ export default async function NotFoundPage() {
         Error PLACEHOLDER_STATUS
       </h4>
       <p className="mb-3">PLACEHOLDER_MESSAGE</p>
-      <LinksOnError />
+      {/*placeholder_statusが403または500番台に置き換えられた場合にのみクライアントサイドでlinksがレンダリングされる*/}
+      <LinksOnError dependOnStatus="PLACEHOLDER_STATUS" />
       <GoHomeButton />
     </CenterBox>
   );
