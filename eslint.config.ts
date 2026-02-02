@@ -1,4 +1,6 @@
 import { defineConfig } from "eslint/config";
+// https://stackoverflow.com/questions/79841715/typescript-error-pluginflatconfig-is-not-assignable-to-configwithextends-when-u
+import { ConfigWithExtends } from "@eslint/config-helpers";
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -27,10 +29,9 @@ const eslintPluginNext = compat.config({
 export default defineConfig(
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
-  // @ts-expect-error https://github.com/typescript-eslint/typescript-eslint/issues/10899
   tseslint.configs.recommended,
   eslintConfigPrettier,
-  { files: ["frontend/**/*"], extends: eslintPluginNext },
+  { files: ["frontend/**/*"], extends: eslintPluginNext } as ConfigWithExtends,
   {
     files: ["i18n/**/*"],
     rules: {

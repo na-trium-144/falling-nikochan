@@ -1,5 +1,5 @@
 import { Context, Hono } from "hono";
-import msgpack from "@ygoe/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import {
   ChartEdit,
   currentChartVer,
@@ -15,6 +15,7 @@ import {
   convertToLatest,
   validateChart13,
   Chart13Edit,
+  ChartUntil14,
 } from "@falling-nikochan/chart";
 import { Db, MongoClient } from "mongodb";
 import {
@@ -195,7 +196,7 @@ const chartFileApp = async (config: {
       }),
       (c) => {
         const chart = c.get("chart");
-        return c.body(new Blob([msgpack.serialize(chart)]).stream(), 200, {
+        return c.body(new Blob([msgpack.encode(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
         });
       }
@@ -355,25 +356,22 @@ const chartFileApp = async (config: {
           });
         }
 
-        const newChartObj = msgpack.deserialize(chartBuf);
-        if (
-          typeof newChartObj.ver === "number" &&
-          newChartObj.ver < currentChartVer - 1
-          // 過去2バージョンまでサポート
-        ) {
-          throw new HTTPException(409, { message: "oldChartVersion" });
-        }
-
+        let newChartObj: ChartUntil14;
         let newChart: Chart13Edit | ChartEdit;
         try {
+          newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
           if (newChartObj.ver === currentChartVer - 1) {
-            newChart = await validateChart13(newChartObj);
+            newChart = await validateChart13(newChartObj as Chart13Edit);
           } else {
             newChart = await validateChart(newChartObj);
           }
         } catch (e) {
           console.error(e);
           throw new HTTPException(415, { message: (e as Error).toString() });
+        }
+        if (newChartObj.ver < currentChartVer - 1) {
+          // 過去2バージョンまでサポート
+          throw new HTTPException(409, { message: "oldChartVersion" });
         }
 
         if (numEvents(newChart) > chartMaxEvent) {

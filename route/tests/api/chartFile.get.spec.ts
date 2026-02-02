@@ -25,7 +25,7 @@ import {
   currentChartVer,
   hash,
 } from "@falling-nikochan/chart";
-import msgpack from "@ygoe/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
@@ -52,7 +52,7 @@ describe("GET /api/chartFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/chartFile/100000?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart13Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal({ ...dummyChart(), published: true });
   });
   test("should return ChartEdit if password hash with pUserSalt matches", async () => {
@@ -75,7 +75,7 @@ describe("GET /api/chartFile/:cid", () => {
       }
     );
     expect(res.status).to.equal(200);
-    const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart13Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal({ ...dummyChart(), published: true });
   });
   currentChartVer satisfies 14; // edit tests below when chart version is bumped
@@ -83,63 +83,63 @@ describe("GET /api/chartFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/chartFile/100013?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart13Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart13Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart13());
   });
   test("should return Chart12 if chart version is 12", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100012?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart11Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart12());
   });
   test("should return Chart11 if chart version is 11", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100011?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart11Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart11Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart11());
   });
   test("should return Chart10 if chart version is 10", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100010?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart9Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart10());
   });
   test("should return Chart9 if chart version is 9", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100009?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart9Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart9Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart9());
   });
   test("should return Chart8 if chart version is 8", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100008?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart8Edit = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart8Edit = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart8());
   });
   test("should return Chart7 if chart version is 7", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100007?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart7 = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart7 = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart7());
   });
   test("should return Chart6 if chart version is 6", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100006?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart6 = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart6 = msgpack.decode(await res.arrayBuffer());
     expect(chart).to.deep.equal(dummyChart6());
   });
   test("should return Chart5 if chart version is 5", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100005?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart5 = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart5 = msgpack.decode(await res.arrayBuffer());
     // expect(chart).to.deep.equal(dummyChart5());
     expect(chart.ver).to.equal(5);
   });
@@ -147,7 +147,7 @@ describe("GET /api/chartFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/chartFile/100004?p=p");
     expect(res.status).to.equal(200);
-    const chart: Chart4 = msgpack.deserialize(await res.arrayBuffer());
+    const chart: Chart4 = msgpack.decode(await res.arrayBuffer());
     // expect(chart).to.deep.equal(dummyChart4());
     expect(chart.ver).to.equal(4);
   });
