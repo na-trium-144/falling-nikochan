@@ -102,9 +102,7 @@ export default function TopPage(props: Props) {
             menuMoveAnimClass
           )}
         >
-          <h3 className="fn-heading-sect">
-            {t("play.recent")}
-          </h3>
+          <h3 className="fn-heading-sect">{t("play.recent")}</h3>
           <ChartList
             type="recent"
             creator
@@ -211,9 +209,7 @@ function InputCId(props: {
   return (
     <>
       <h3>
-        <span className="fn-heading-sect">
-          {t("inputId")}:
-        </span>
+        <span className="fn-heading-sect">{t("inputId")}:</span>
         <Input
           className="ml-4 w-20 no-mobile"
           actualValue=""

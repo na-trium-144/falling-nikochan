@@ -62,11 +62,7 @@ export function useColorThief() {
   return {
     imgRef,
     ready: color !== null,
-    boxStyle: clsx(
-      colorAdjusted
-        ? "fn-color-thief"
-        : "fn-plain"
-    ),
+    boxStyle: clsx(colorAdjusted ? "fn-color-thief" : "fn-plain"),
     currentColor: colorAdjusted
       ? `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`
       : isDark

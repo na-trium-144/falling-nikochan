@@ -1123,10 +1123,7 @@ function Play(props: Props) {
               onPointerUp={(e) => e.stopPropagation()}
             >
               <button
-                className={clsx(
-                  "fn-icon-button",
-                  isTouch ? "fn-with-bg" : ""
-                )}
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
                 onClick={stop}
               >
                 <ButtonHighlight />
@@ -1138,7 +1135,7 @@ function Play(props: Props) {
                   <button
                     className={clsx(
                       "fn-icon-button",
-                  isTouch ? "fn-with-bg" : ""
+                      isTouch ? "fn-with-bg" : ""
                     )}
                     onClick={seekBack}
                   >
@@ -1149,7 +1146,7 @@ function Play(props: Props) {
                   <button
                     className={clsx(
                       "fn-icon-button",
-                  isTouch ? "fn-with-bg" : ""
+                      isTouch ? "fn-with-bg" : ""
                     )}
                     onClick={seekForward}
                   >

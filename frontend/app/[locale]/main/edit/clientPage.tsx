@@ -131,9 +131,7 @@ export default function EditTab({ locale }: { locale: string }) {
         <p>{t("newDesc", { rateLimitMin: rateLimit.newChartFile / 60 })}</p>
       </section>
       <section className="fn-sect">
-        <h3 className="fn-heading-sect">
-          {t("recentEdit")}
-        </h3>
+        <h3 className="fn-heading-sect">{t("recentEdit")}</h3>
         {isSafari && (
           <p className="mb-1">
             <Caution className="inline-block mr-1 translate-y-0.5 " />

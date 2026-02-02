@@ -1,9 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import {
-  Box,
-} from "@/common/box.js";
+import { Box } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
 import DistraughtFace from "@icon-park/react/lib/icons/DistraughtFace";
@@ -79,17 +77,13 @@ export default function StatusBox(props: Props) {
         >
           <span
             className={clsx(
-              props.bestCount
-                ? invertedFlatButtonBorderStyle1
-                : "fn-glass-1",
+              props.bestCount ? invertedFlatButtonBorderStyle1 : "fn-glass-1",
               "opacity-100!"
             )}
           />
           <span
             className={clsx(
-              props.bestCount
-                ? invertedFlatButtonBorderStyle2
-                : "fn-glass-2",
+              props.bestCount ? invertedFlatButtonBorderStyle2 : "fn-glass-2",
               "opacity-100!"
             )}
           />

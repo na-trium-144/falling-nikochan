@@ -289,9 +289,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               scrollableY
               padding={6}
             >
-              <p className="fn-heading-box">
-                &lt; {t("shareImage")} &gt;
-              </p>
+              <p className="fn-heading-box">&lt; {t("shareImage")} &gt;</p>
               <div
                 className="max-w-full relative aspect-1200/630 bg-slate-300 mb-2 isolate "
                 style={{

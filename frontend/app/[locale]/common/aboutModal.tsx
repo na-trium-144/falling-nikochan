@@ -42,10 +42,7 @@ export function AboutModal(props: AProps) {
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="mb-3 flex items-center">
-            <button
-              className={clsx("fn-icon-button", "")}
-              onClick={close}
-            >
+            <button className={clsx("fn-icon-button", "")} onClick={close}>
               <ButtonHighlight />
               <ArrowLeft className="inline-block" />
             </button>

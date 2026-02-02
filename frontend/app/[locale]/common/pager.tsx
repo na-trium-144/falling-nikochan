@@ -52,7 +52,7 @@ export function Pager(props: Props) {
         {props.index < props.maxIndex ? (
           props.hrefAfter ? (
             <Link
-                            className={clsx("fn-icon-button fn-pager-arrow")}
+              className={clsx("fn-icon-button fn-pager-arrow")}
               href={props.hrefAfter}
               scroll={false}
               replace
@@ -63,7 +63,7 @@ export function Pager(props: Props) {
             </Link>
           ) : (
             <button
-                            className={clsx("fn-icon-button fn-pager-arrow")}
+              className={clsx("fn-icon-button fn-pager-arrow")}
               onClick={props.onClickAfter}
             >
               <ButtonHighlight />
@@ -75,9 +75,7 @@ export function Pager(props: Props) {
         )}
       </div>
       <div className="flex-1">
-        <span className="inline-block fn-heading-sect">
-          {props.title}
-        </span>
+        <span className="inline-block fn-heading-sect">{props.title}</span>
       </div>
     </div>
   );

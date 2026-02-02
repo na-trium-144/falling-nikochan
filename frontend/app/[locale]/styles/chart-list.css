@@ -8,7 +8,7 @@
     );
     /*max 3 columns*/
     max-width: calc(4 * var(--item-min-width) - 0.1rem);
-    
+
     /*
     ~36rem: 1列 -> 18~36rem -> max-width:27rem
     ~54rem: 2列 -> 18~27rem
@@ -46,7 +46,6 @@
         }
       }
     }
-
   }
   .fn-cl-message {
     @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2;
@@ -55,5 +54,4 @@
   .fn-cl-more {
     @apply block w-max mx-auto h-6 mt-2;
   }
-
 }

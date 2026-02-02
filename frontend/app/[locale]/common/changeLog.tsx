@@ -81,7 +81,9 @@ export function ChangeLogPopup(props: PopupProps) {
                   </span>
                 )*/}
               </p>
-              <h3 className="fn-heading-sect text-center mb-2">{t("changelog")}</h3>
+              <h3 className="fn-heading-sect text-center mb-2">
+                {t("changelog")}
+              </h3>
               <div className="fn-mdx-changelog">{changeLog}</div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>

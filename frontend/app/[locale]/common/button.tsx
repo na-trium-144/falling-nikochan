@@ -1,3 +1,5 @@
+"use client";
+
 import clsx from "clsx/lite";
 import { ReactNode, PointerEvent } from "react";
 import { Key } from "./key.js";

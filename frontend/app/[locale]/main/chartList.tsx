@@ -518,7 +518,7 @@ function ChartListItemChildren(props: CProps) {
           {props.original && (
             <span className="ml-2 text-xs/3">(オリジナル曲)</span>
           )}
-          {props.chartCreator && (
+          {props.creator && (
             <span className="inline-block leading-3 fn-cl-clip">
               <span className="ml-2 text-xs/3">by</span>
               <span className="ml-1 font-title text-sm/3">
