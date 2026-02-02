@@ -229,7 +229,7 @@ export async function hashLevel(
       normalizedSpeedChanges,
       normalizedSignature,
     ],
-    { algorithm: "sha256", encoding: "hex" }
+    { algorithm: "sha1", encoding: "hex" }
   );
 }
 
@@ -357,8 +357,8 @@ export async function createBrief(
         ? chart.levels.map((level) => hashLevel(level))
         : chart.levelsFreeze.map((level) => hashLevel(level))
     );
-  } catch {
-    //
+  } catch (e) {
+    console.error(e);
   }
   const levelsMin = "levels" in chart ? chart.levels : chart.levelsMin;
   const levelsFreeze = "levels" in chart ? chart.levels : chart.levelsFreeze;
