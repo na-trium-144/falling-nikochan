@@ -387,41 +387,51 @@ const chartFileApp = async (config: {
         // Convert existing chart to latest version before comparing hashes
         // This allows preserving play records when overwriting with same content from older versions
         const upgradedChart = await convertToLatest(c.get("chart"));
-        const prevHashes = await Promise.all(
-          upgradedChart.levelsMin
-            .filter((l) => !l.unlisted)
-            .map((_, i) => hashLevel(upgradedChart.levelsFreeze[i]))
+        interface LevelHash {
+          hash: string;
+          unlisted: boolean;
+        }
+        const prevHashes: LevelHash[] = await Promise.all(
+          upgradedChart.levelsMin.map(async (min, i) => ({
+            unlisted: min.unlisted,
+            hash: await hashLevel(upgradedChart.levelsFreeze[i]),
+          }))
         );
-        const savedHashes = entry.levelBrief
-          .filter((l) => !l.unlisted)
-          .map((l) => l.hash);
-        const newHashes =
+        const savedHashesMap: Record<string, string> = {};
+        for (let i = 0; i < prevHashes.length; i++) {
+          savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
+        }
+        const newHashes: LevelHash[] =
           newChart.ver === 13
             ? await Promise.all(
-                newChart.levels
-                  .filter((l) => !l.unlisted)
-                  .map((level) => hashLevel(level))
+                newChart.levels.map(async (level) => ({
+                  unlisted: level.unlisted,
+                  hash: await hashLevel(level),
+                }))
               )
             : await Promise.all(
-                newChart.levelsMin
-                  .filter((l) => !l.unlisted)
-                  .map((_, i) => hashLevel(newChart.levelsFreeze[i]))
+                newChart.levelsMin.map(async (min, i) => ({
+                  unlisted: min.unlisted,
+                  hash: await hashLevel(newChart.levelsFreeze[i]),
+                }))
               );
+        const prevHashesFiltered = prevHashes.filter((l) => !l.unlisted);
+        const newHashesFiltered = newHashes.filter((l) => !l.unlisted);
         let updatedAt = entry.updatedAt;
+        // unlistedでない譜面のハッシュまたはunlistedフラグそのものが1つでも変わっている場合更新日時を更新
         if (
-          prevHashes.length !== newHashes.length ||
-          !newHashes.every((h, i) => h === prevHashes.at(i)) ||
+          prevHashesFiltered.length !== newHashesFiltered.length ||
+          !newHashesFiltered.every(
+            (l, i) => l.hash === prevHashesFiltered[i].hash
+          ) ||
           (!entry.published && newChart.published)
         ) {
           updatedAt = new Date().getTime();
         }
-        const newSaveHashes = newHashes.map((newHash, i) => {
-          if (newHash === prevHashes.at(i) && savedHashes.at(i)) {
-            return savedHashes.at(i)!;
-          } else {
-            return newHash;
-          }
-        });
+        // 既存のハッシュに一致するものがあるならそれを再利用し、なければ新しいハッシュで保存
+        const newSaveHashes = newHashes.map(
+          (l) => savedHashesMap[l.hash] ?? l.hash
+        );
 
         await db.collection<ChartEntryCompressed>("chart").updateOne(
           { cid },
