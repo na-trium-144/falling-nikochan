@@ -9,7 +9,6 @@ import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import { linkStyle1 } from "@/common/linkStyle";
 import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
