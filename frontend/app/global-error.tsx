@@ -1,5 +1,6 @@
 "use client";
 import { CenterBox } from "@/common/box";
+import { ErrorMessage } from "@/common/errorPageComponent";
 import clsx from "clsx/lite";
 
 // Error boundaries must be Client Components
@@ -33,19 +34,7 @@ export default function Error(props: ErrorProps) {
           <h4 className="mb-2 text-lg font-semibold font-title">
             An error has occurred 😢
           </h4>
-          {props.error ? (
-            <pre
-              className={clsx(
-                "p-2 rounded-md",
-                "overflow-x-auto text-xs",
-                "bg-sky-200/25 dark:bg-orange-800/10"
-              )}
-            >
-              {String(props.error)}
-            </pre>
-          ) : (
-            <div>See the browser console for more information.</div>
-          )}
+          <ErrorMessage error={props.error} />
         </CenterBox>
       </body>
     </html>

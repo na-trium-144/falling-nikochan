@@ -72,3 +72,29 @@ export function LinksOnError() {
     </Box>
   );
 }
+
+export function ErrorMessage({
+  className,
+  error,
+}: {
+  className?: string;
+  error: unknown;
+}) {
+  if (error) {
+    return (
+      <pre
+        className={clsx(
+          className,
+          "p-2 rounded-md",
+          "text-xs",
+          "bg-sky-200/25 dark:bg-orange-800/10",
+          "whitespace-pre-wrap"
+        )}
+      >
+        {String(error)}
+      </pre>
+    );
+  } else {
+    return <div>See the browser console for more information.</div>;
+  }
+}
