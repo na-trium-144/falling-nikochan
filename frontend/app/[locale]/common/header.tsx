@@ -4,6 +4,7 @@ import clsx from "clsx/lite";
 import { ReactNode } from "react";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { historyBackWithReview } from "./pwaInstall.jsx";
+import { ButtonHighlight } from "./button.jsx";
 
 interface MProps {
   className?: string;
@@ -20,11 +21,12 @@ export function MobileHeader(props: MProps) {
     >
       {!props.noBackButton && (
         <button
-          className="fn-back fn-pager-button"
+          className="fn-back fn-icon-button h-max m-auto"
           onClick={() => {
             historyBackWithReview();
           }}
         >
+          <ButtonHighlight/>
           <ArrowLeft className="inline-block w-max align-middle m-auto " />
         </button>
       )}

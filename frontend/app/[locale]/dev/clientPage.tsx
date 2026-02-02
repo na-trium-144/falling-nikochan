@@ -18,7 +18,7 @@ import {
   historyBackWithForceReview,
   useAndroidTWADetector,
 } from "@/common/pwaInstall";
-import Button from "@/common/button";
+import Button, { ButtonHighlight } from "@/common/button";
 import dynamic from "next/dynamic";
 import { Scrollable } from "@/common/scrollable";
 const AceEditor = dynamic(
@@ -185,14 +185,10 @@ function StorageEditor(props: EProps) {
     <div className="">
       <div className="fn-heading-box">
         <button
-          className={clsx(
-            "rounded-full cursor-pointer px-2 py-1",
-            "hover:bg-slate-200/50 active:bg-slate-300/50",
-            "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-            linkStyle1
-          )}
+          className={clsx("fn-icon-button px-2 py-1")}
           onClick={() => setShowEditor(!showEditor)}
         >
+          <ButtonHighlight />
           {props.name} ({props.storage?.length})
           {showEditor ? (
             <Down className="inline-block align-middle " />

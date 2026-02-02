@@ -1,11 +1,4 @@
 @layer components {
-  .fn-button-disabled {
-    @apply appearance-none;
-    @apply relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-default;
-    @apply border border-blue-300/50 dark:border-amber-800/30 rounded-xl;
-    @apply bg-slate-300/50 dark:bg-stone-600/50;
-  }
-
   .fn-button {
     @apply appearance-none;
     @apply relative m-0.5 h-10 py-1.5 px-2.5 min-w-max text-center content-center cursor-pointer;
@@ -14,6 +7,21 @@
     @apply dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75;
     @apply shadow-sm;
     @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+
+    @variant disabled {
+      @apply cursor-default;
+      @apply border border-blue-300/50 dark:border-amber-800/30;
+      @apply bg-slate-300/50 dark:bg-stone-600/50;
+      @apply bg-none;
+      @apply shadow-none;
+
+      > .fn-glass-1 {
+        @apply hidden;
+      }
+      > .fn-glass-2 {
+        @apply hidden;
+      }
+    }
 
     > .fn-glass-1 {
       @apply border-white/80 dark:border-stone-300/50;
@@ -25,7 +33,7 @@
       @apply mask-linear-to-75%;
     }
 
-    @variant active {
+    &:active:not(:disabled) {
       @apply bg-blue-200/75 from-blue-200/75 to-blue-200/75;
       @apply dark:bg-amber-950/75 dark:from-amber-950/75 dark:to-amber-950/75;
       @apply inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75;
@@ -41,11 +49,14 @@
 
   .fn-highlight {
     @apply absolute inset-0 z-3 rounded-[inherit] sq-inherit;
-    @apply bg-radial-[circle_3rem_at_var(--hl-x)_var(--hl-y)];
+    @apply bg-radial-[circle_3rem_at_var(--hl-x,50%)_var(--hl-y,50%)];
     @apply from-white/50 to-white/25;
     @apply dark:from-stone-300/20 dark:to-stone-300/10;
     @apply opacity-0;
     @apply transition-opacity duration-100;
+  }
+  *:disabled > .fn-highlight {
+    @apply hidden;
   }
   *:hover > .fn-highlight {
     @apply opacity-100;

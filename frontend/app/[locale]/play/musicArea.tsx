@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { detectOS } from "@/common/pwaInstall";
 import Range from "@/common/range";
 import { useColorThief } from "@/common/colorThief";
+import { ButtonHighlight } from "@/common/button";
 
 interface Props {
   ready: boolean;
@@ -367,17 +368,14 @@ export function MusicArea(props: Props) {
       />
       <button
         className={clsx(
-          "absolute rounded-full cursor-pointer leading-1",
+          "fn-icon-button absolute",
           "text-default dark:text-default-dark",
           props.isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
-                props.isTouch ? "bg-white/50 dark:bg-stone-700/50 p-2" : "p-2"
+                props.isTouch ? "fn-with-bg" : ""
               )
-            : "bottom-0 right-1 p-2",
-          "hover:bg-slate-200/50 active:bg-slate-300/50",
-          "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-          linkStyle1,
+            : "bottom-0 right-1",
           props.isMobile &&
             (initialVolumeCtrlOpenDone.current
               ? "transition-all ease-out duration-300 opacity-100 "
@@ -387,6 +385,7 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
+        <ButtonHighlight />
         <VolumeNotice theme="filled" className="inline-block align-middle" />
       </button>
       <div

@@ -128,7 +128,7 @@ export function SharePageModalProvider(props: {
             historyBackWithReview();
           }}
         >
-          <div className="absolute inset-x-24 inset-y-16 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+          <div className="absolute inset-x-24 inset-y-16 grid-centering">
             <Box
               onClick={(e) => e.stopPropagation()}
               classNameOuter={clsx(

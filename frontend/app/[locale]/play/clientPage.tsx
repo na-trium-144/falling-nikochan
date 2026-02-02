@@ -65,6 +65,7 @@ import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
+import { ButtonHighlight } from "@/common/button.jsx";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -1123,16 +1124,12 @@ function Play(props: Props) {
             >
               <button
                 className={clsx(
-                  "rounded-full cursor-pointer leading-0",
-                  isTouch
-                    ? "bg-white/50 dark:bg-stone-700/50 p-2"
-                    : "py-2 px-1",
-                  "hover:bg-slate-200/50 active:bg-slate-300/50",
-                  "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-                  linkStyle1
+                  "fn-icon-button",
+                  isTouch ? "fn-with-bg" : ""
                 )}
                 onClick={stop}
               >
+                <ButtonHighlight />
                 <Pause className="inline-block align-middle text-xl" />
                 {!isTouch && <Key handleKeyDown>Esc</Key>}
               </button>
@@ -1140,32 +1137,24 @@ function Play(props: Props) {
                 <>
                   <button
                     className={clsx(
-                      "rounded-full cursor-pointer",
-                      isTouch
-                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
-                        : "py-2 px-1",
-                      "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-                      linkStyle1
+                      "fn-icon-button",
+                  isTouch ? "fn-with-bg" : ""
                     )}
                     onClick={seekBack}
                   >
+                    <ButtonHighlight />
                     {!isTouch && <Key handleKeyDown>←</Key>}
-                    <span className="ml-1">5s</span>
+                    <span className="ml-1 text-base">5s</span>
                   </button>
                   <button
                     className={clsx(
-                      "rounded-full cursor-pointer",
-                      isTouch
-                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
-                        : "py-2 px-1",
-                      "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-                      linkStyle1
+                      "fn-icon-button",
+                  isTouch ? "fn-with-bg" : ""
                     )}
                     onClick={seekForward}
                   >
-                    <span className="mr-1">5s</span>
+                    <ButtonHighlight />
+                    <span className="mr-1 text-base">5s</span>
                     {!isTouch && <Key handleKeyDown>→</Key>}
                   </button>
                 </>
@@ -1439,7 +1428,7 @@ function Play(props: Props) {
         <div
           className={clsx(
             "isolate z-20 absolute inset-y-0 my-auto",
-            "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
+            "grid-centering"
           )}
           style={{ right: "0.75rem" }}
         >

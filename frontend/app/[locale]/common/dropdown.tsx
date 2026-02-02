@@ -170,6 +170,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        disabled={props.disabled}
       >
         {props.children}
       </button>

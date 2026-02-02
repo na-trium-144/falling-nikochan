@@ -2,11 +2,10 @@
 
 import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
 import Input, { inputStyle } from "@/common/input";
 import { linkStyle1 } from "@/common/linkStyle";
-import { pagerButtonClass } from "@/common/pager";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Caution from "@icon-park/react/lib/icons/Caution";
 import Pause from "@icon-park/react/lib/icons/Pause";
@@ -94,9 +93,10 @@ export function ReadyMessage(props: MessageProps) {
         >
           <p className="fn-heading-box">
             <button
-              className={clsx(pagerButtonClass, "mr-4 align-bottom")}
+              className={clsx("fn-icon-button", "mr-4 align-bottom")}
               onClick={() => setOptionOpen(false)}
             >
+              <ButtonHighlight />
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
             </button>
             {t("option")}
@@ -118,9 +118,10 @@ export function ReadyMessage(props: MessageProps) {
         <p className="fn-heading-box">
           {props.back && (
             <button
-              className={clsx(pagerButtonClass, "mr-4 align-bottom")}
+              className={clsx("fn-icon-button", "mr-4 align-bottom")}
               onClick={() => setSlideIn(false, props.back!)}
             >
+              <ButtonHighlight />
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
             </button>
           )}
@@ -439,9 +440,7 @@ export function StopMessage(props: MessageProps2) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      <p className="fn-heading-box">
-        &lt; {t("stopped")} &gt;
-      </p>
+      <p className="fn-heading-box">&lt; {t("stopped")} &gt;</p>
       <p>
         <Button
           text={t("reset")}

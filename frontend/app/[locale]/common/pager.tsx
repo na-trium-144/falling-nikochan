@@ -1,8 +1,7 @@
 import clsx from "clsx/lite";
 import Link from "next/link";
+import { ButtonHighlight } from "./button";
 
-// Export CSS class name for compatibility
-export const pagerButtonClass = "fn-pager-button";
 interface Props {
   index: number;
   maxIndex: number;
@@ -24,19 +23,21 @@ export function Pager(props: Props) {
         {props.index > 1 ? (
           props.hrefBefore ? (
             <Link
-              className={clsx(pagerButtonClass)}
+              className={clsx("fn-icon-button fn-pager-arrow")}
               href={props.hrefBefore}
               scroll={false}
               replace
               prefetch={!process.env.NO_PREFETCH}
             >
+              <ButtonHighlight />
               &lt;
             </Link>
           ) : (
             <button
-              className={clsx(pagerButtonClass)}
+              className={clsx("fn-icon-button fn-pager-arrow")}
               onClick={props.onClickBefore}
             >
+              <ButtonHighlight />
               &lt;
             </button>
           )
@@ -51,19 +52,21 @@ export function Pager(props: Props) {
         {props.index < props.maxIndex ? (
           props.hrefAfter ? (
             <Link
-              className={clsx(pagerButtonClass)}
+                            className={clsx("fn-icon-button fn-pager-arrow")}
               href={props.hrefAfter}
               scroll={false}
               replace
               prefetch={!process.env.NO_PREFETCH}
             >
+              <ButtonHighlight />
               &gt;
             </Link>
           ) : (
             <button
-              className={clsx(pagerButtonClass)}
+                            className={clsx("fn-icon-button fn-pager-arrow")}
               onClick={props.onClickAfter}
             >
+              <ButtonHighlight />
               &gt;
             </button>
           )

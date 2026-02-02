@@ -7,6 +7,7 @@ import {
   AboutContent,
   maxAboutPageIndex,
 } from "@/main/about/[aboutIndex]/aboutContents";
+import { ButtonHighlight } from "./button";
 
 interface AProps {
   aboutAnim: boolean;
@@ -28,7 +29,7 @@ export function AboutModal(props: AProps) {
       )}
       onClick={close}
     >
-      <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+      <div className="absolute inset-12 grid-centering">
         <Box
           classNameOuter={clsx(
             "w-180 h-max max-w-full max-h-full",
@@ -40,14 +41,15 @@ export function AboutModal(props: AProps) {
           padding={6}
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="mb-3 relative px-10 fn-heading-sect">
+          <h3 className="mb-3 flex items-center">
             <button
-              className={clsx("fn-pager-button", "absolute left-0 inset-y-0")}
+              className={clsx("fn-icon-button", "")}
               onClick={close}
             >
-              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+              <ButtonHighlight />
+              <ArrowLeft className="inline-block" />
             </button>
-            {tm("title")}
+            <span className="ml-2 fn-heading-sect">{tm("title")}</span>
           </h3>
           <Pager
             index={props.aboutPageIndex}

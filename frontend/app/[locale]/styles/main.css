@@ -3,7 +3,7 @@
     @apply p-3 w-full relative text-center;
 
     > .fn-back {
-      @apply absolute left-3 inset-y-3;
+      @apply absolute left-3 inset-y-0;
     }
   }
 

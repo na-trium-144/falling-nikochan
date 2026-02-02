@@ -16,9 +16,9 @@ import International from "@icon-park/react/lib/icons/International.js";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
-import { pagerButtonClass } from "@/common/pager.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import { ExternalLink } from "@/common/extLink.jsx";
+import { ButtonHighlight } from "@/common/button.jsx";
 
 interface Props {
   cid: string | undefined;
@@ -160,9 +160,10 @@ export function ShareBox(props: Props) {
               <div className={clsx("mb-2", props.forceShowCId || "no-mobile")}>
                 {props.backButton && (
                   <button
-                    className={clsx(pagerButtonClass, "mr-4")}
+                    className={clsx("fn-icon-button", "mr-4")}
                     onClick={props.backButton}
                   >
+                    <ButtonHighlight />
                     <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
                   </button>
                 )}

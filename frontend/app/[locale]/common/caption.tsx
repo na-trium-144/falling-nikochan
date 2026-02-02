@@ -6,6 +6,7 @@ import {
   skyFlatButtonBorderStyle1,
   skyFlatButtonBorderStyle2,
 } from "./flatButton";
+import { ButtonHighlight } from "./button";
 
 interface CaptionProps {
   top: number;
@@ -48,7 +49,7 @@ function Caption({ top, left, content }: CaptionProps) {
         className={clsx(
           "absolute inline-block bottom-0 left-0",
           "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1",
-          "fn-sky fn-caption",
+          "fn-sky fn-caption"
         )}
         style={{ translate: `${translateX} -0.5rem` }}
       >
@@ -71,13 +72,7 @@ export function HelpIcon(props: Props) {
   return (
     <>
       <span
-        className={clsx(
-          "inline-block align-middle",
-          "rounded-full p-2 cursor-help text-xl",
-          "hover:bg-sky-100/50 text-sky-300 hover:text-sky-700",
-          "dark:hover:bg-stone-800/50 dark:text-orange-900 dark:hover:text-orange-500",
-          props.className
-        )}
+        className={clsx("fn-help-icon", props.className)}
         ref={ref}
         onPointerEnter={() => {
           const rect = ref.current.getBoundingClientRect();
@@ -89,7 +84,8 @@ export function HelpIcon(props: Props) {
         }}
         onPointerLeave={() => setCaptionData(null)}
       >
-        <Help />
+        <ButtonHighlight />
+        <Help className="inline-block align-middle text-xl" />
       </span>
       {captionData && createPortal(<Caption {...captionData} />, document.body)}
     </>

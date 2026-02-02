@@ -276,7 +276,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
         >
-          <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+          <div className="absolute inset-12 grid-centering">
             <Box
               onClick={(e) => e.stopPropagation()}
               classNameOuter={clsx(

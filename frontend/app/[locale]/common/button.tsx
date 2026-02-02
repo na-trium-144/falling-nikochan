@@ -6,10 +6,7 @@ import { SlimeSVG } from "./slime.js";
 export function ButtonHighlight(props: { className?: string }) {
   return (
     <span
-      className={clsx(
-        "fn-highlight",
-        props.className
-      )}
+      className={clsx("fn-highlight", props.className)}
       onPointerMove={(e: PointerEvent) => {
         const button = e.currentTarget as HTMLButtonElement;
         const rect = button.getBoundingClientRect();
@@ -36,7 +33,7 @@ export default function Button(props: Props) {
   return (
     <button
       className={clsx(
-        props.disabled || props.loading ? "fn-button-disabled" : "fn-button",
+        "fn-button",
         props.loading && "cursor-wait",
         props.className,
         props.small && "h-8! py-0!"
@@ -48,13 +45,9 @@ export default function Button(props: Props) {
       onKeyUp={(e) => e.stopPropagation()}
       disabled={props.disabled || props.loading}
     >
-      {props.disabled || props.loading ? null : (
-        <>
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
-          <ButtonHighlight />
-        </>
-      )}
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
+      <ButtonHighlight />
       {props.loading && <SlimeSVG />}
       <span
         className={clsx(
@@ -93,7 +86,7 @@ export function ButtonStyledLabel(props: LabelProps) {
       htmlFor={props.htmlFor}
     >
       <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
+      <span className="fn-glass-2" />
       <ButtonHighlight />
       {props.children}
     </label>

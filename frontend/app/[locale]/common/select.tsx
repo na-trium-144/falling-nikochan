@@ -17,18 +17,14 @@ export default function Select<T = unknown>(props: Props<T>) {
     <DropDown
       {...props}
       className={clsx(
-        props.disabled ? "fn-button-disabled" : "fn-button",
+        "fn-button",
         "pr-6",
         props.className
       )}
     >
-      {!props.disabled && (
-        <>
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
-          <ButtonHighlight />
-        </>
-      )}
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
+      <ButtonHighlight />
       <span className="relative flex flex-row items-center justify-center">
         {props.showValue
           ? props.options.find((o) => o.value === props.value)?.label

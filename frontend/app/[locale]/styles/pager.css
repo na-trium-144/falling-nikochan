@@ -1,7 +1,0 @@
-@layer components {
-  .fn-pager-button {
-    @apply text-center inline-block w-7 h-7 rounded-full cursor-pointer;
-    @apply text-lg font-bold hover:bg-slate-200 active:bg-slate-300;
-    @apply hover:dark:bg-stone-600 active:dark:bg-stone-500;
-  }
-}
