@@ -1,3 +1,7 @@
+## ver. 14.2 - 2026/02/01 [#919](https://github.com/na-trium-144/falling-nikochan/pull/919)
+
+* Migrate from npm to pnpm
+
 ## ver. 14.1 - 2026/02/01
 
 * standaloneでないときも新しいserviceWorkerのactivate直後にassetsを更新するよう修正
