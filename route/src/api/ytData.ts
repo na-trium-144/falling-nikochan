@@ -1,6 +1,7 @@
 import { Db } from "mongodb";
 import { Bindings } from "../env.js";
 import moji from "moji";
+import { fetchError } from "../error.js";
 
 export interface YTDataEntry {
   ytId: string;
@@ -68,10 +69,10 @@ export async function getYTDataEntry(
           id: ytId,
           key: e.GOOGLE_API_KEY,
         })
-    );
-    if (!res.ok) {
+    ).catch(() => null);
+    if (!res || !res.ok) {
       console.error(
-        `Failed to fetch YT data for ${ytId}: ${res.status} ${await res.text()}`
+        `Failed to fetch YT data for ${ytId}: ${res?.status} ${await res?.text()}`
       );
       return undefined;
     }

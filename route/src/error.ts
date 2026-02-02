@@ -9,6 +9,16 @@ import * as v from "valibot";
 export function notFound(): Response {
   throw new HTTPException(404);
 }
+export function fetchError(e: Bindings) {
+  return () => {
+    if (e.IS_SERVICE_WORKER) {
+      // @ts-expect-error 499 is not standard HTTP status code
+      throw new HTTPException(499, { message: "fetchError" });
+    } else {
+      throw new HTTPException(502);
+    }
+  };
+}
 export const onError =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
@@ -28,9 +38,7 @@ export const onError =
     }
     try {
       const lang = c.get("language") || "en";
-      if (err instanceof TypeError) {
-        err = new HTTPException(502, { message: "fetchError" });
-      } else if (err instanceof ValiError) {
+      if (err instanceof ValiError) {
         err = new HTTPException(400, { message: err.message });
       } else if (!(err instanceof HTTPException)) {
         err = new HTTPException(500);

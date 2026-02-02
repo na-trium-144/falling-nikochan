@@ -27,8 +27,8 @@ export default {
       // 500
       imageGenerationFailed: "画像生成に失敗しました",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
-      // 502
-      fetchError: "サーバーへの接続に失敗しました",
+      // 499
+      fetchError: "サーバーへ接続できません (オフライン?)",
     },
     unknownApiError: "サーバーで何らかのエラーが発生しました",
     noSession: "セッションデータを読み込めません",

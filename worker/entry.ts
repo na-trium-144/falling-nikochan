@@ -1,12 +1,19 @@
 import { Context, Hono } from "hono";
 import { handle } from "hono/service-worker";
 import {
+  Bindings,
+  fetchError,
   notFound,
   onError,
   redirectApp,
   shareApp,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
+
+const e: Bindings = {
+  MONGODB_URI: "",
+  IS_SERVICE_WORKER: "1",
+};
 
 // なぜconsoleが無い?
 declare const self: ServiceWorkerGlobalScope & { console: Console };
@@ -90,7 +97,7 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     console.warn(`${url} is not in cache`);
     const res = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + url.pathname
-    );
+    ).catch(fetchError(e));
     if (res.ok) {
       const returnRes = returnBody(res.body, res.headers);
       await (await mainCache()).put(url.pathname, returnRes.clone());
@@ -162,7 +169,7 @@ async function initAssetsCache(config: {
     const remoteRes = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
       { cache: "no-store" }
-    );
+    ).catch(fetchError(e));
     if (!remoteRes.ok) {
       return sendInitState("failed");
     }
@@ -188,11 +195,11 @@ async function initAssetsCache(config: {
       filesRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
         { cache: "no-store" }
-      );
+      ).catch(fetchError(e));
       remoteVerRes = await fetch(
         (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
         { cache: "no-store" }
-      );
+      ).catch(fetchError(e));
     } catch (e) {
       console.error(e);
       return sendInitState("failed");
@@ -232,7 +239,7 @@ async function initAssetsCache(config: {
           const res = await fetch(
             (process.env.ASSET_PREFIX || self.origin) + pathname,
             { cache: "no-cache" }
-          );
+          ).catch(fetchError(e));
           if (res.ok) {
             tmp.put(pathname, returnBody(res.clone().body, res.headers));
             progressNum++;
@@ -314,7 +321,7 @@ const languageDetector = async (c: Context, next: () => Promise<void>) => {
 async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   const inputReq = input instanceof Request ? input : new Request(input, init);
   const inputUrl = new URL(inputReq.url);
-  const res = await fetch(inputReq.clone());
+  const res = await fetch(inputReq.clone()).catch(fetchError(e));
   // メインのバックエンドがダウンしていた場合(500番台のエラー or 403(cloudflareが返す) で、通信エラーでないとき)に、代替バックエンドを試す
   // ただし別サーバーでcookieは使えないため、編集関係のAPIは除外
   if (
@@ -342,7 +349,7 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
         signal: inputReq.signal,
       }
     );
-    const resAlt = await fetch(altReq);
+    const resAlt = await fetch(altReq).catch(fetchError(e));
     if (resAlt.ok) {
       return resAlt;
     }
@@ -424,7 +431,7 @@ const app = new Hono({ strict: false })
         const remoteRes = await fetch(
           (process.env.ASSET_PREFIX || self.origin) + c.req.path,
           { cache: "no-cache", signal: abortController.signal }
-        );
+        ).catch(fetchError(e));
         clearTimeout(timeout);
         if (remoteRes.ok) {
           return returnBody(remoteRes.body, remoteRes.headers);

@@ -27,8 +27,8 @@ export default {
       // 500
       imageGenerationFailed: "Failed to generate the image",
       unsupportedChartVersion: "Unsupported chart data version",
-      // 502
-      fetchError: "Failed to connect to the server",
+      // 499
+      fetchError: "Failed to connect to the server (offline?)",
     },
     unknownApiError: "An error occurred on the server",
     noSession: "Failed to load session data",
