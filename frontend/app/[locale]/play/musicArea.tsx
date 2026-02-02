@@ -418,8 +418,8 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <span className={"fn-border fn-plain"} />
-        <span className={"fn-border fn-plain"} />
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
         {/*{!props.isMobile && (
           <span
             className={clsx(
