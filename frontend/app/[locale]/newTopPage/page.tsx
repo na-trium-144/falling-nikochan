@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: MetadataProps) {
 
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
-  
+
   // Fetch popular charts for showcase
   let popularBriefs: ChartLineBrief[] = [];
   try {
