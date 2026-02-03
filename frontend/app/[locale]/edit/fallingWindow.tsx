@@ -8,9 +8,9 @@ import {
   bigScale,
   displayNote,
   ChartEditing,
+  NoteCommandWithLua,
 } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
-import { NoteCommand } from "@falling-nikochan/chart";
 import Arrow from "./arrow.js";
 import DragHandle from "./dragHandle.js";
 import { useDisplayMode } from "@/scale.js";
@@ -96,8 +96,8 @@ export default function FallingWindow(props: Props) {
   }, [boxSize, marginX, marginY, cur, currentLevel, chart]);
 
   const [pendingNoteUpdate, setPendingNoteUpdate] =
-    useState<NoteCommand | null>(null);
-  const currentNote: NoteCommand | undefined =
+    useState<NoteCommandWithLua | null>(null);
+  const currentNote: NoteCommandWithLua | undefined =
     pendingNoteUpdate || currentLevel?.currentNote;
 
   return (

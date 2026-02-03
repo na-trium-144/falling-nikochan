@@ -1,5 +1,5 @@
 import { BPMChangeWithLua, SpeedChangeWithLua } from "../bpm.js";
-import { NoteCommand, RestStep } from "../command.js";
+import { NoteCommandWithLua, RestStep } from "../command.js";
 import { SpeedChangeWithLua13 } from "../legacy/chart13.js";
 import {
   BPMChangeWithLua3,
@@ -30,7 +30,7 @@ import {
  * 書き換えられたくないレベルデータは呼び出し元でディープコピーしよう
  */
 export interface LevelForLuaEditLatest {
-  notes: NoteCommand[];
+  notes: NoteCommandWithLua[];
   rest: RestStep[];
   bpmChanges: BPMChangeWithLua[];
   speedChanges: SpeedChangeWithLua[];
