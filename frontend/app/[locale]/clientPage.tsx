@@ -50,7 +50,7 @@ export default function TopPage(props: Props) {
         {/* Hero Section with larger centered title and video placeholder */}
         <section className="relative w-full flex flex-col items-center pt-8 pb-12 px-6">
           {/* Background video placeholder */}
-          <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
             <div className="w-full h-full bg-gradient-to-b from-sky-100/30 to-transparent dark:from-sky-900/20 dark:to-transparent">
               {/* Placeholder for future gameplay video */}
               <div className="w-full h-full flex items-center justify-center opacity-20">
@@ -257,7 +257,7 @@ function InputCId(props: {
   const te = useTranslations("error");
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
-  
+
   const gotoCId = async (cid: string, isMobile: boolean) => {
     setCIdErrorMsg("");
     setCidFetching(true);
@@ -277,7 +277,7 @@ function InputCId(props: {
     }
     setCidFetching(false);
   };
-  
+
   const inputProps = {
     actualValue: "",
     isValid: (t: string) => v.safeParse(CidSchema(), t).success,
