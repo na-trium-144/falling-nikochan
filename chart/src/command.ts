@@ -13,12 +13,12 @@ import { Step, stepZero } from "./step.js";
  * timeScale: { 時刻(判定時刻 - step数), VX,VY,accelYの倍率 } のリスト
  * fall: 音符出現位置を画面上にする(true) or 下にする(false)
  */
-export type NoteCommand = NoteCommand9;
+export type NoteCommand = Omit<NoteCommand9, "luaLine">;
 export type NoteCommandWithLua = NoteCommand9;
 
 export function defaultNoteCommand(
   currentStep: Step = stepZero()
-): NoteCommand {
+): NoteCommandWithLua {
   return {
     step: currentStep,
     big: false,
@@ -33,7 +33,7 @@ export function defaultNoteCommand(
 export type RestStep = Rest9;
 
 export function defaultCopyBuffer() {
-  return ([defaultNoteCommand()] as (NoteCommand | null)[]).concat(
+  return ([defaultNoteCommand()] as (NoteCommandWithLua | null)[]).concat(
     Array.from(new Array(9)).map(() => null)
   );
 }

@@ -36,8 +36,7 @@ import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero, stepSimplify } from "./step.js";
-import { defaultCopyBuffer } from "./command.js";
-import objectHash from "object-hash";
+import { defaultCopyBuffer, NoteCommand } from "./command.js";
 import {
   Chart13Edit,
   ChartEditSchema13,
@@ -61,8 +60,13 @@ import {
   Level14Min,
 } from "./legacy/chart14.js";
 import { LevelForLuaEditLatest } from "./lua/edit.js";
-import { BPMChangeWithLua, SpeedChangeWithLua } from "./bpm.js";
-import { SignatureWithLua } from "./signature.js";
+import {
+  BPMChange,
+  BPMChangeWithLua,
+  SpeedChange,
+  SpeedChangeWithLua,
+} from "./bpm.js";
+import { Signature, SignatureWithLua } from "./signature.js";
 import { ChartUntil11, Level11Freeze } from "./legacy/chart11.js";
 import { Chart5, Level5 } from "./legacy/chart5.js";
 import { Level9Freeze } from "./legacy/chart9.js";
@@ -190,46 +194,57 @@ export async function hashLevel(
     | Level4
 ): Promise<string> {
   // Normalize all Step types by simplifying fractions
-  const normalizedNotes = level.notes.map((note) => ({
-    ...note,
-    step: stepSimplify({ ...note.step }),
-  }));
+  const normalizedNotes = level.notes.map(
+    (note) =>
+      ({
+        step: stepSimplify({ ...note.step }),
+        big: note.big,
+        hitX: note.hitX,
+        hitVX: note.hitVX,
+        hitVY: note.hitVY,
+        fall: "fall" in note ? note.fall : false,
+      }) satisfies NoteCommand
+  );
 
-  const normalizedRest = level.rest.map((rest) => ({
-    ...rest,
-    begin: stepSimplify({ ...rest.begin }),
-    duration: stepSimplify({ ...rest.duration }),
-  }));
+  const normalizedBpmChanges = level.bpmChanges.map(
+    (bpm) =>
+      ({
+        step: stepSimplify({ ...bpm.step }),
+        bpm: bpm.bpm,
+        timeSec: bpm.timeSec,
+      }) satisfies BPMChange
+  );
 
-  const normalizedBpmChanges = level.bpmChanges.map((bpm) => ({
-    ...bpm,
-    step: stepSimplify({ ...bpm.step }),
-  }));
-
-  const normalizedSpeedChanges = level.speedChanges.map((speed) => ({
-    ...speed,
-    step: stepSimplify({ ...speed.step }),
-  }));
+  const normalizedSpeedChanges = level.speedChanges.map(
+    (speed) =>
+      ({
+        step: stepSimplify({ ...speed.step }),
+        bpm: speed.bpm,
+        timeSec: speed.timeSec,
+        interp: "interp" in speed ? speed.interp : false,
+      }) satisfies SpeedChange
+  );
 
   const normalizedSignature =
     "signature" in level
-      ? level.signature.map((sig) => ({
-          ...sig,
-          step: stepSimplify({ ...sig.step }),
-          offset: stepSimplify({ ...sig.offset }),
-        }))
+      ? level.signature.map(
+          (sig) =>
+            ({
+              step: stepSimplify({ ...sig.step }),
+              offset: stepSimplify({ ...sig.offset }),
+              barNum: sig.barNum,
+              bars: sig.bars,
+            }) satisfies Signature
+        )
       : undefined;
 
-  // Use object-hash with sort option to ensure consistent ordering
-  return objectHash(
-    [
+  return await hash(
+    JSON.stringify([
       normalizedNotes,
-      normalizedRest,
       normalizedBpmChanges,
       normalizedSpeedChanges,
       normalizedSignature,
-    ],
-    { algorithm: "sha1", encoding: "hex" }
+    ])
   );
 }
 
