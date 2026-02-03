@@ -143,6 +143,31 @@ export default {
     },
     festival:
       "ut.code(); 第{num}回{kind, select, mf {五月祭} kf {駒場祭} other {other}}ウェブサイトに戻る",
+    newTopPage: {
+      title: "Falling Nikochan - 新しいトップページ",
+      description:
+        "誰でも譜面を作成し共有することができる、" +
+        "シンプルでかわいい音ゲーです。",
+      playNow: "今すぐ遊ぶ",
+      whatIs: "Falling Nikochan とは？",
+      whatIsDesc:
+        "ダウンロード不要でブラウザーからすぐに遊べる、シンプルでかわいいリズムゲーム (音ゲー) です。PCだけでなくタブレットやスマートフォンなどでも手軽に遊べます。",
+      features: "遊ぶだけじゃない！",
+      featuresDesc:
+        "Falling Nikochan では遊ぶだけでなく、アカウント登録やログイン不要で誰でも譜面を作成することができます。作成した譜面はサーバーに保存され、SNS などで簡単に共有して他の人に遊んでもらうこともできます。",
+      howToPlay: "遊び方",
+      howToPlayDesc:
+        "ニコチャンが線に重なったときに音符を叩くだけの簡単なルールです。PC ならどれかのキーを押して、タブレット・スマホなら画面のどこかをタップすることで音符を叩くことができます。",
+      createChart: "譜面を作ろう",
+      createChartDesc:
+        "好きな楽曲を使って譜面を作ることができます。YouTube にアップロードされている楽曲であればなんでも使用できます。譜面を作って共有して、みんなに遊んでもらいましょう！",
+      popularCharts: "人気の譜面",
+      searchPlaceholder: "曲名・作者・IDで検索",
+      communityStats: "コミュニティ統計",
+      totalPlays: "総プレイ回数",
+      totalCharts: "公開中の譜面数",
+      recentCharts: "最近プレイした譜面",
+    },
   },
   dev: {
     title: "デバッグ用",
