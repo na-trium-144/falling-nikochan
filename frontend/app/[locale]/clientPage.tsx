@@ -60,7 +60,7 @@ export default function TopPage(props: Props) {
           </div>
 
           {/* Larger centered title logo */}
-          <div className="relative mb-8" style={{ transform: "scale(1.5)" }}>
+          <div className="relative mb-8 scale-150">
             <Title anim />
           </div>
 
@@ -257,6 +257,7 @@ function InputCId(props: {
   const te = useTranslations("error");
   const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
+  
   const gotoCId = async (cid: string, isMobile: boolean) => {
     setCIdErrorMsg("");
     setCidFetching(true);
@@ -276,22 +277,25 @@ function InputCId(props: {
     }
     setCidFetching(false);
   };
+  
+  const inputProps = {
+    actualValue: "",
+    isValid: (t: string) => v.safeParse(CidSchema(), t).success,
+    left: true,
+  };
+  
   return (
     <div className="max-w-xl mx-auto">
       <div className="flex items-center gap-4 mb-2">
         <Input
+          {...inputProps}
           className="flex-1 min-w-0 hidden main-wide:inline-block"
-          actualValue=""
           updateValue={(cid: string) => gotoCId(cid, false)}
-          isValid={(t) => v.safeParse(CidSchema(), t).success}
-          left
         />
         <Input
+          {...inputProps}
           className="flex-1 min-w-0 main-wide:hidden"
-          actualValue=""
           updateValue={(cid: string) => gotoCId(cid, true)}
-          isValid={(t) => v.safeParse(CidSchema(), t).success}
-          left
         />
         {cidFetching && (
           <span className="flex items-center gap-2">
