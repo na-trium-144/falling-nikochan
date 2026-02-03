@@ -132,6 +132,9 @@ export default function NewTopPage(props: Props) {
               1,000,000+
             </div>
             <p className="text-gray-600 dark:text-gray-400">{t("totalPlays")}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+              {locale === "ja" ? "※ イメージ数値" : "* Illustrative numbers"}
+            </p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center">
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
@@ -141,6 +144,9 @@ export default function NewTopPage(props: Props) {
               10,000+
             </div>
             <p className="text-gray-600 dark:text-gray-400">{t("totalCharts")}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+              {locale === "ja" ? "※ イメージ数値" : "* Illustrative numbers"}
+            </p>
           </div>
         </div>
       </section>
@@ -233,17 +239,9 @@ export default function NewTopPage(props: Props) {
           </h2>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
             <p>{ta("3.content1")}</p>
-            <p>
-              {locale === "ja"
-                ? "Falling Nikochan では音源をダウンロードする必要はなく、YouTubeを埋め込んで音源を再生するので、YouTube にアップロードされている楽曲であればなんでも使用できます。"
-                : "In Falling Nikochan, you don't need to download audio files - it embeds and plays audio from YouTube, so you can use any song uploaded to YouTube."}
-            </p>
+            <p>{t("createChartDesc2")}</p>
             <p>{ta("3.content4")}</p>
-            <p>
-              {locale === "ja"
-                ? "その譜面IDまたは譜面のURL (nikochan.f5.si/share/000000)をSNSなどで共有することで、遊んでもらうことができます。"
-                : "By sharing the chart ID or chart URL (nikochan.f5.si/share/000000) on social media, you can let others play it."}
-            </p>
+            <p>{t("createChartDesc3")}</p>
           </div>
           <div className="text-center mt-8">
             <Link

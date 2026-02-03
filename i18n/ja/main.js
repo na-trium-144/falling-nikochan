@@ -161,6 +161,10 @@ export default {
       createChart: "譜面を作ろう",
       createChartDesc:
         "好きな楽曲を使って譜面を作ることができます。YouTube にアップロードされている楽曲であればなんでも使用できます。譜面を作って共有して、みんなに遊んでもらいましょう！",
+      createChartDesc2:
+        "Falling Nikochan では音源をダウンロードする必要はなく、YouTubeを埋め込んで音源を再生するので、YouTube にアップロードされている楽曲であればなんでも使用できます。",
+      createChartDesc3:
+        "その譜面IDまたは譜面のURL (nikochan.f5.si/share/000000)をSNSなどで共有することで、遊んでもらうことができます。",
       popularCharts: "人気の譜面",
       searchPlaceholder: "曲名・作者・IDで検索",
       communityStats: "コミュニティ統計",

@@ -176,6 +176,10 @@ export default {
       createChart: "Create Your Own Chart",
       createChartDesc:
         "You can create charts using your favorite songs. Any song uploaded to YouTube can be used. Create and share your charts for everyone to enjoy!",
+      createChartDesc2:
+        "In Falling Nikochan, you don't need to download audio files - it embeds and plays audio from YouTube, so you can use any song uploaded to YouTube.",
+      createChartDesc3:
+        "By sharing the chart ID or chart URL (nikochan.f5.si/share/000000) on social media, you can let others play it.",
       popularCharts: "Popular Charts",
       searchPlaceholder: "Search by song, author, or ID",
       communityStats: "Community Stats",
