@@ -175,6 +175,8 @@ export default {
       videoPlaceholder: "[背景動画プレースホルダー]",
       loading: "読み込み中...",
       illustrativeNote: "※ イメージ数値",
+      policies: "利用規約っぽいもの",
+      links: "お問い合わせ先・その他リンク",
     },
   },
   dev: {

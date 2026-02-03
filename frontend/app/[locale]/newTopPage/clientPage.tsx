@@ -10,11 +10,11 @@ import * as v from "valibot";
 import { SlimeSVG } from "../common/slime.jsx";
 import { fetchBrief } from "../common/briefCache.js";
 import { useSharePageModal } from "../common/sharePageModal.jsx";
-import { ChartList, ChartLineBrief } from "../main/chartList.jsx";
+import { ChartList } from "../main/chartList.jsx";
+import { Box } from "../common/box.jsx";
 
 interface Props {
   locale: string;
-  popularBriefs: ChartLineBrief[];
 }
 
 export default function NewTopPage(props: Props) {
@@ -162,13 +162,14 @@ export default function NewTopPage(props: Props) {
             {t("popularCharts")}
           </h2>
           <ChartList
-            briefs={props.popularBriefs}
+            type="popular"
             creator
             href={(cid) => `/share/${cid}`}
             onClick={openModal}
             onClickMobile={openShareInternal}
             showLoading
             badge
+            fixedRows
           />
           <div className="text-center mt-8">
             <Link
@@ -205,48 +206,41 @@ export default function NewTopPage(props: Props) {
         </div>
       </section>
 
-      {/* What is Falling Nikochan? Section */}
-      <section className="px-6 py-16 bg-gradient-to-b from-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold font-title text-center mb-12">
-            {t("whatIs")}
-          </h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
-            <p>{ta("1.content1")}</p>
-            <p>{ta("1.content2")}</p>
-            <p>{ta("1.content3")}</p>
-            <p>{ta("1.content4")}</p>
-          </div>
-        </div>
-      </section>
-
       {/* How to Play Section */}
-      <section className="px-6 py-16 bg-white dark:bg-slate-700">
+      <section className="px-6 py-16 bg-gradient-to-b from-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold font-title text-center mb-12">
             {t("howToPlay")}
           </h2>
-          <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
-            <p>{ta("2.content1")}</p>
-            <p>{ta("2.description")}</p>
-            <p>{ta("2.content3")}</p>
-            <p>{ta("2.content4")}</p>
-          </div>
+          <Box classNameOuter="mb-8" padding={6}>
+            <div className="space-y-4 text-lg">
+              <p>{ta("1.content1")}</p>
+              <p>{ta("1.content2")}</p>
+              <p>{ta("2.content1")}</p>
+              <p>{ta("2.description")}</p>
+              <p>{ta("2.content3")}</p>
+              <p>{ta("2.content4")}</p>
+            </div>
+          </Box>
         </div>
       </section>
 
       {/* Create Chart Section */}
-      <section className="px-6 py-16 bg-gradient-to-b from-purple-50 to-pink-50 dark:from-slate-800 dark:to-slate-900">
+      <section className="px-6 py-16 bg-white dark:bg-slate-700">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold font-title text-center mb-12">
             {t("createChart")}
           </h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
-            <p>{ta("3.content1")}</p>
-            <p>{t("createChartDesc2")}</p>
-            <p>{ta("3.content4")}</p>
-            <p>{t("createChartDesc3")}</p>
-          </div>
+          <Box classNameOuter="mb-8" padding={6}>
+            <div className="space-y-4 text-lg">
+              <p>{ta("1.content3")}</p>
+              <p>{ta("1.content4")}</p>
+              <p>{ta("3.content1")}</p>
+              <p>{t("createChartDesc2")}</p>
+              <p>{ta("3.content4")}</p>
+              <p>{t("createChartDesc3")}</p>
+            </div>
+          </Box>
           <div className="text-center mt-8">
             <Link
               href={`/${locale}/main/edit`}
@@ -264,14 +258,32 @@ export default function NewTopPage(props: Props) {
         </div>
       </section>
 
-      {/* Footer with link back to original top page */}
-      <footer className="px-6 py-12 bg-gray-100 dark:bg-slate-900 text-center">
-        <Link
-          href={`/${locale}`}
-          className="text-blue-500 hover:text-blue-600 underline"
-        >
-          {t("backToOriginal")}
-        </Link>
+      {/* Footer with links */}
+      <footer className="px-6 py-12 bg-gray-100 dark:bg-slate-900">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
+            <Link
+              href={`/${locale}/main/policies`}
+              className="text-blue-500 hover:text-blue-600 underline"
+            >
+              {t("policies")}
+            </Link>
+            <span className="hidden md:inline text-gray-400">•</span>
+            <Link
+              href={`/${locale}/main/links`}
+              className="text-blue-500 hover:text-blue-600 underline"
+            >
+              {t("links")}
+            </Link>
+            <span className="hidden md:inline text-gray-400">•</span>
+            <Link
+              href={`/${locale}`}
+              className="text-blue-500 hover:text-blue-600 underline"
+            >
+              {t("backToOriginal")}
+            </Link>
+          </div>
+        </div>
       </footer>
     </main>
   );

@@ -190,6 +190,8 @@ export default {
       videoPlaceholder: "[Background Video Placeholder]",
       loading: "Loading...",
       illustrativeNote: "* Illustrative numbers",
+      policies: "Terms and Policies",
+      links: "Contact & Other Links",
     },
   },
   dev: {
