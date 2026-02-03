@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import Input from "./common/input.jsx";
-import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
+import { ChartBrief, CidSchema, popularDays } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
 import { SmallDomainShare } from "./common/small.jsx";
 import { fetchBrief } from "./common/briefCache.js";
@@ -40,72 +40,140 @@ export default function TopPage(props: Props) {
   const router = useRouter();
   const t = useTranslations("main");
   const [menuMove, menuMoveAnim, setMenuMove] = useDelayedDisplayState(200);
-  const menuMoveAnimClass =
-    "min-h-0 shrink-2 transition-opacity duration-200 ease-linear " +
-    (menuMoveAnim ? "opacity-0 " : "opacity-100 ");
   const { locale } = props;
   const { openModal, openShareInternal } = useSharePageModal();
-  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
-  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
-  const setAboutPageIndex = useCallback(
-    (i: number | null) => {
-      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
-    },
-    [setAboutOpen_]
-  );
   const fes = useFestival();
 
   return (
     <main className="w-full h-full overflow-x-clip overflow-y-auto ">
-      {aboutPageIndex !== null && aboutOpen ? (
-        <AboutModal
-          aboutAnim={aboutAnim}
-          aboutPageIndex={aboutPageIndex}
-          setAboutPageIndex={setAboutPageIndex}
-          locale={props.locale}
-        />
-      ) : null}
-      <div
-        className={clsx(
-          "flex flex-col w-full min-h-full h-max items-center",
-          menuMove &&
-            clsx(
-              "transition-[max-height] duration-200 ease-out",
-              menuMoveAnim ? "max-h-full" : "max-h-max"
-            )
-        )}
-      >
-        <TitleAsLink className="grow-3 shrink-0" locale={locale} />
-        <div className="basis-0 flex-1 " />
-        <AboutDescription
-          className="my-2"
-          locale={locale}
-          onClickAbout={() => setAboutPageIndex(1)}
-        />
-        <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
-        <div className={clsx("basis-auto grow-2", menuMoveAnimClass)}>
+      <div className="flex flex-col w-full min-h-full h-max items-center">
+        {/* Hero Section with larger centered title and video placeholder */}
+        <section className="relative w-full flex flex-col items-center pt-8 pb-12 px-6">
+          {/* Background video placeholder */}
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="w-full h-full bg-gradient-to-b from-sky-100/30 to-transparent dark:from-sky-900/20 dark:to-transparent">
+              {/* Placeholder for future gameplay video */}
+              <div className="w-full h-full flex items-center justify-center opacity-20">
+                <span className="text-sm text-gray-500">Background Video Placeholder</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Larger centered title logo */}
+          <div className="relative mb-8" style={{ transform: "scale(1.5)" }}>
+            <Title anim />
+          </div>
+
+          {/* Site description */}
+          <p className="text-center text-lg mb-6 max-w-2xl">
+            {t("description")}
+          </p>
+
+          {/* Primary CTA Button - "Play Now" */}
+          <Link
+            href={`/${locale}/main/play`}
+            className={clsx(
+              "relative px-8 py-4 text-xl font-bold font-title rounded-2xl",
+              "shadow-lg hover:shadow-xl transition-all duration-200",
+              skyFlatButtonStyle,
+              "mb-4"
+            )}
+            prefetch={!process.env.NO_PREFETCH}
+            onClick={() => requestReview()}
+          >
+            <span className={skyFlatButtonBorderStyle1} />
+            <span className={skyFlatButtonBorderStyle2} />
+            <ButtonHighlight />
+            {t("play.title")}
+          </Link>
+
+          <FestivalLink {...fes} className="mt-2" />
+        </section>
+
+        {/* Warnings and PWA install */}
+        <div className="w-full px-6 max-w-4xl">
           <RedirectedWarning />
           <PWAInstallMain />
         </div>
-        <div
-          className={clsx(
-            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6",
-            menuMoveAnimClass
-          )}
-        >
+
+        {/* Popular Charts Showcase */}
+        <section className="w-full px-6 py-8 max-w-6xl">
+          <h2 className="text-2xl font-bold font-title text-center mb-2">
+            {t("play.popular")}
+          </h2>
+          <p className="text-center text-sm mb-4 opacity-80">
+            {t("play.popularDesc", { popularDays })}
+          </p>
+          <ChartList
+            type="popular"
+            creator
+            href={(cid) => `/share/${cid}`}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+            showLoading
+            badge
+            fixedRows
+          />
+          <div className="text-center mt-4">
+            <Link
+              href={`/${locale}/main/play`}
+              className={clsx("inline-flex items-center gap-2", "text-sky-600 dark:text-sky-400 hover:underline")}
+            >
+              {t("chartList.showAll")}
+              <ArrowRight className="inline-block" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Scroll-based "What is Falling Nikochan?" Section */}
+        <section className="w-full px-6 py-12 bg-sky-50/50 dark:bg-sky-950/20">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold font-title text-center mb-8">
+              {t("aboutNikochan")}
+            </h2>
+            
+            {/* About Content 1 - Overview */}
+            <div className="mb-8 p-6 bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow">
+              <AboutContent index={1} locale={locale} />
+            </div>
+
+            {/* About Content 2 - How to Play */}
+            <div className="mb-8 p-6 bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow">
+              <AboutContent index={2} locale={locale} />
+            </div>
+
+            {/* About Content 3 - Create Charts */}
+            <div className="mb-8 p-6 bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow">
+              <AboutContent index={3} locale={locale} />
+            </div>
+
+            {/* Link to full about pages */}
+            <div className="text-center">
+              <Link
+                href={`/${locale}/main/about/1`}
+                className={clsx("inline-flex items-center gap-2", "text-sky-600 dark:text-sky-400 hover:underline")}
+              >
+                {t("about.title")}
+                <ArrowRight className="inline-block" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Search/ID Input Section */}
+        <section className="w-full px-6 py-8 max-w-4xl">
+          <h3 className="text-xl font-semibold font-title text-center mb-4">
+            {t("inputId")}
+          </h3>
           <InputCId
             openModal={openModal}
             openShareInternal={openShareInternal}
           />
-        </div>
+        </section>
 
-        <div
-          className={clsx(
-            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6",
-            menuMoveAnimClass
-          )}
-        >
-          <h3 className="mb-2 text-xl font-semibold font-title">
+        {/* Recently Played Charts */}
+        <section className="w-full px-6 py-8 max-w-6xl">
+          <h3 className="text-2xl font-bold font-title text-center mb-4">
             {t("play.recent")}
           </h3>
           <ChartList
@@ -119,8 +187,9 @@ export default function TopPage(props: Props) {
             badge
             fixedRows
           />
-        </div>
+        </section>
 
+        {/* Navigation for PC (animated slide-in) */}
         <div
           className={clsx(
             "shrink-1 h-dvh transition-all duration-200 ease-in",
@@ -136,8 +205,7 @@ export default function TopPage(props: Props) {
           )}
           style={{
             transform: menuMove
-              ? // 挿入されるBoxのサイズは (w-main) or (100% - w-main-nav - p-6)
-                "translateX(max(calc(var(--container-main) / -2), calc((100vw - var(--container-main-nav) - var(--spacing) * 12) / -2)))"
+              ? "translateX(max(calc(var(--container-main) / -2), calc((100vw - var(--container-main-nav) - var(--spacing) * 12) / -2)))"
               : undefined,
           }}
         >
@@ -194,7 +262,6 @@ function InputCId(props: {
     setCidFetching(true);
     const res = await fetchBrief(cid, true);
     if (res.ok) {
-      // router.push(`/share/${cid}`);
       if (isMobile) {
         props.openShareInternal(cid, res.brief);
       } else {
@@ -210,37 +277,38 @@ function InputCId(props: {
     setCidFetching(false);
   };
   return (
-    <>
-      <h3 className="mb-2 ">
-        <span className="text-xl font-semibold font-title">
-          {t("inputId")}:
-        </span>
+    <div className="max-w-xl mx-auto">
+      <div className="flex items-center gap-4 mb-2">
         <Input
-          className="ml-4 w-20 hidden main-wide:inline-block "
+          className="flex-1 min-w-0 hidden main-wide:inline-block"
           actualValue=""
           updateValue={(cid: string) => gotoCId(cid, false)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
         <Input
-          className="ml-4 w-20 main-wide:hidden"
+          className="flex-1 min-w-0 main-wide:hidden"
           actualValue=""
           updateValue={(cid: string) => gotoCId(cid, true)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
-        <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
-          <SlimeSVG />
-          Loading...
-        </span>
-        <span className="ml-1 inline-block">{cidErrorMsg}</span>
-      </h3>
-      <p className="">
+        {cidFetching && (
+          <span className="flex items-center gap-2">
+            <SlimeSVG />
+            <span className="text-sm">Loading...</span>
+          </span>
+        )}
+      </div>
+      {cidErrorMsg && (
+        <p className="text-sm text-red-600 dark:text-red-400 mb-2">{cidErrorMsg}</p>
+      )}
+      <p className="text-sm text-center opacity-80">
         {t("inputIdDesc")}
         {t.rich("inputIdDesc2", {
           url: () => <SmallDomainShare />,
         })}
       </p>
-    </>
+    </div>
   );
 }
