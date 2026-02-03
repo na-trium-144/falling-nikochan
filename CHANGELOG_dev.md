@@ -1,6 +1,10 @@
+## ver. 14.6 - 2026/02/03 [#952](https://github.com/na-trium-144/falling-nikochan/pull/952)
+
+* ハッシュの計算をWebCryptoAPIを使った自前実装にもどす
+
 ## ver. 14.5 - 2026/02/02 [#951](https://github.com/na-trium-144/falling-nikochan/pull/951)
 
-* levelHashの計算がブラウザで動作していなかったのを修正 (sha256→sha1に変更)
+* <del>levelHashの計算がブラウザで動作していなかったのを修正 (sha256→sha1に変更)</del>
     * ver14.0以降ハッシュの仕様を変更しても内容が変わっていない場合は以前のハッシュを維持するようにしたので既存のデータに問題なし
 
 ## ver. 14.2 - 2026/02/01 [#919](https://github.com/na-trium-144/falling-nikochan/pull/919)
