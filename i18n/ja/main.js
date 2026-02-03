@@ -173,6 +173,8 @@ export default {
       recentCharts: "最近プレイした譜面",
       backToOriginal: "← 元のトップページに戻る",
       videoPlaceholder: "[背景動画プレースホルダー]",
+      loading: "読み込み中...",
+      illustrativeNote: "※ イメージ数値",
     },
   },
   dev: {

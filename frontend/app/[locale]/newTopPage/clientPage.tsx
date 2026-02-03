@@ -113,7 +113,7 @@ export default function NewTopPage(props: Props) {
             {cidFetching && (
               <span className="flex items-center gap-2">
                 <SlimeSVG />
-                <span>Loading...</span>
+                <span>{t("loading")}</span>
               </span>
             )}
           </div>
@@ -133,7 +133,7 @@ export default function NewTopPage(props: Props) {
             </div>
             <p className="text-gray-600 dark:text-gray-400">{t("totalPlays")}</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              {locale === "ja" ? "※ イメージ数値" : "* Illustrative numbers"}
+              {t("illustrativeNote")}
             </p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center">
@@ -145,7 +145,7 @@ export default function NewTopPage(props: Props) {
             </div>
             <p className="text-gray-600 dark:text-gray-400">{t("totalCharts")}</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              {locale === "ja" ? "※ イメージ数値" : "* Illustrative numbers"}
+              {t("illustrativeNote")}
             </p>
           </div>
         </div>

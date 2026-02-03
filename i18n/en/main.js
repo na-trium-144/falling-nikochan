@@ -188,6 +188,8 @@ export default {
       recentCharts: "Recently Played",
       backToOriginal: "← Back to Original Top Page",
       videoPlaceholder: "[Background Video Placeholder]",
+      loading: "Loading...",
+      illustrativeNote: "* Illustrative numbers",
     },
   },
   dev: {
