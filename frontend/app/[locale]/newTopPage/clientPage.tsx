@@ -37,7 +37,7 @@ export default function NewTopPage(props: Props) {
       setCidFetching(true);
       const res = await fetchBrief(value, true);
       if (res.ok) {
-        setCidErrorMsg(""); // Clear any previous error
+        setCidErrorMsg("");
         if (isMobile) {
           openShareInternal(value, res.brief);
         } else {
@@ -64,10 +64,13 @@ export default function NewTopPage(props: Props) {
         {/* Video Placeholder Background */}
         <div className="absolute inset-0 -z-10 opacity-20">
           <div className="w-full h-full bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 animate-pulse">
-            {/* Placeholder for actual play video */}
-            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+            <figure
+              className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600"
+              role="img"
+              aria-label={t("videoPlaceholder")}
+            >
               <p className="text-2xl font-bold opacity-50">{t("videoPlaceholder")}</p>
-            </div>
+            </figure>
           </div>
         </div>
 
