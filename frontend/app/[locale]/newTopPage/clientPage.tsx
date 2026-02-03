@@ -37,6 +37,7 @@ export default function NewTopPage(props: Props) {
       setCidFetching(true);
       const res = await fetchBrief(value, true);
       if (res.ok) {
+        setCidErrorMsg(""); // Clear any previous error
         if (isMobile) {
           openShareInternal(value, res.brief);
         } else {
