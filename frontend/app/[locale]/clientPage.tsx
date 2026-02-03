@@ -2,7 +2,7 @@
 
 import clsx from "clsx/lite";
 import Link from "next/link";
-import { TitleAsLink } from "./common/titleLogo.js";
+import Title from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
@@ -24,14 +24,14 @@ import { ChartList } from "./main/chartList.jsx";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
-import { AboutModal } from "./common/aboutModal.jsx";
 import {
   skyFlatButtonBorderStyle1,
   skyFlatButtonBorderStyle2,
   skyFlatButtonStyle,
 } from "./common/flatButton.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
-import { AboutDescription } from "./main/main.jsx";
+import { AboutContent } from "./main/about/[aboutIndex]/aboutContents.js";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 
 interface Props {
   locale: string;
