@@ -7,15 +7,10 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
-import Input from "../common/input.jsx";
 import { SlimeSVG } from "../common/slime.jsx";
 import { fetchBrief } from "../common/briefCache.js";
 import { useSharePageModal } from "../common/sharePageModal.jsx";
 import { ChartList, ChartLineBrief } from "../main/chartList.jsx";
-import { PWAInstallDesc } from "../common/pwaInstall.jsx";
-import { AboutContent1 } from "../main/about/[aboutIndex]/1-about";
-import { AboutContent2 } from "../main/about/[aboutIndex]/2-play";
-import { AboutContent3 } from "../main/about/[aboutIndex]/3-edit";
 
 interface Props {
   locale: string;
@@ -25,6 +20,7 @@ interface Props {
 export default function NewTopPage(props: Props) {
   const t = useTranslations("main.newTopPage");
   const te = useTranslations("error");
+  const ta = useTranslations("about");
   const router = useRouter();
   const { locale } = props;
   const { openModal, openShareInternal } = useSharePageModal();
@@ -102,14 +98,16 @@ export default function NewTopPage(props: Props) {
         {/* Search Bar */}
         <div className="w-full max-w-2xl mb-8">
           <div className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-full shadow-lg px-6 py-4">
-            <Input
-              className="flex-1 font-title text-lg border-none"
-              actualValue={searchText}
-              updateValue={(v) => {
-                setSearchText(v);
-                handleSearch(v, false);
+            <input
+              type="text"
+              className="flex-1 font-title text-lg border-none bg-transparent outline-none text-gray-800 dark:text-gray-200"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && searchText) {
+                  handleSearch(searchText, false);
+                }
               }}
-              left
               placeholder={t("searchPlaceholder")}
             />
             {cidFetching && (
@@ -203,8 +201,11 @@ export default function NewTopPage(props: Props) {
           <h2 className="text-4xl font-bold font-title text-center mb-12">
             {t("whatIs")}
           </h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8">
-            <AboutContent1 />
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
+            <p>{ta("1.content1")}</p>
+            <p>{ta("1.content2")}</p>
+            <p>{ta("1.content3")}</p>
+            <p>{ta("1.content4")}</p>
           </div>
         </div>
       </section>
@@ -215,8 +216,11 @@ export default function NewTopPage(props: Props) {
           <h2 className="text-4xl font-bold font-title text-center mb-12">
             {t("howToPlay")}
           </h2>
-          <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8">
-            <AboutContent2 />
+          <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
+            <p>{ta("2.content1")}</p>
+            <p>{ta("2.description")}</p>
+            <p>{ta("2.content3")}</p>
+            <p>{ta("2.content4")}</p>
           </div>
         </div>
       </section>
@@ -227,8 +231,11 @@ export default function NewTopPage(props: Props) {
           <h2 className="text-4xl font-bold font-title text-center mb-12">
             {t("createChart")}
           </h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8">
-            <AboutContent3 locale={locale} />
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
+            <p>{ta("3.content1")}</p>
+            <p>{ta("3.description")}</p>
+            <p>{ta("3.content4")}</p>
+            <p>{ta("3.content5")}</p>
           </div>
           <div className="text-center mt-8">
             <Link
