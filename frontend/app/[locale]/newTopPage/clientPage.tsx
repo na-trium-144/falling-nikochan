@@ -26,11 +26,11 @@ export default function NewTopPage(props: Props) {
   const { openModal, openShareInternal } = useSharePageModal();
 
   const [searchText, setSearchText] = useState<string>("");
-  const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
+  const [cidErrorMsg, setCidErrorMsg] = useState<string>("");
   const [cidFetching, setCidFetching] = useState<boolean>(false);
 
   const handleSearch = async (value: string, isMobile: boolean) => {
-    setCIdErrorMsg("");
+    setCidErrorMsg("");
     
     // Check if it's a valid chart ID
     if (v.safeParse(CidSchema(), value).success) {
@@ -44,9 +44,9 @@ export default function NewTopPage(props: Props) {
         }
       } else {
         if (res.is404) {
-          setCIdErrorMsg(te("api.chartIdNotFound"));
+          setCidErrorMsg(te("api.chartIdNotFound"));
         } else {
-          setCIdErrorMsg(te("unknownApiError"));
+          setCidErrorMsg(te("unknownApiError"));
         }
       }
       setCidFetching(false);
