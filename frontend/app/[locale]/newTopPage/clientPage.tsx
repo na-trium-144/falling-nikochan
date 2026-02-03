@@ -233,9 +233,17 @@ export default function NewTopPage(props: Props) {
           </h2>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 space-y-4 text-lg">
             <p>{ta("3.content1")}</p>
-            <p>{ta("3.description")}</p>
+            <p>
+              {locale === "ja"
+                ? "Falling Nikochan では音源をダウンロードする必要はなく、YouTubeを埋め込んで音源を再生するので、YouTube にアップロードされている楽曲であればなんでも使用できます。"
+                : "In Falling Nikochan, you don't need to download audio files - it embeds and plays audio from YouTube, so you can use any song uploaded to YouTube."}
+            </p>
             <p>{ta("3.content4")}</p>
-            <p>{ta("3.content5")}</p>
+            <p>
+              {locale === "ja"
+                ? "その譜面IDまたは譜面のURL (nikochan.f5.si/share/000000)をSNSなどで共有することで、遊んでもらうことができます。"
+                : "By sharing the chart ID or chart URL (nikochan.f5.si/share/000000) on social media, you can let others play it."}
+            </p>
           </div>
           <div className="text-center mt-8">
             <Link
