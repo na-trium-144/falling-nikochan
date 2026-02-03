@@ -23,6 +23,7 @@ import {
   skyFlatButtonStyle,
 } from "@/common/flatButton.jsx";
 import { ButtonHighlight, buttonShadowStyle } from "@/common/button.jsx";
+import { APIError } from "@/common/apiError.js";
 
 interface PProps {
   locale: string;
@@ -78,13 +79,9 @@ export interface ChartLineBrief {
   brief?: ChartBrief;
   original?: boolean;
 }
-type ErrorMsg = { status: number | null; message: string };
 interface Props {
   type?: ChartListType;
-  briefs?:
-    | ChartLineBrief[]
-    | { status: number | null; message: string }
-    | undefined;
+  briefs?: ChartLineBrief[] | APIError | undefined;
   fetchAll?: boolean;
   fixedRows?: boolean; // 表示数を6個で固定する
   containerHeight?: number;
@@ -107,9 +104,9 @@ export function ChartList(props: Props) {
 
   // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    (ChartLineBrief | null)[] | ErrorMsg | undefined
+    (ChartLineBrief | null)[] | APIError | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | ErrorMsg | undefined>(
+  const prevPropBriefs = useRef<ChartLineBrief[] | APIError | undefined>(
     props.briefs
   );
   useEffect(() => {
@@ -147,18 +144,11 @@ export function ChartList(props: Props) {
               const latestCId = (await latestRes.json()) as { cid: string }[];
               setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
             } else {
-              try {
-                setBriefs({
-                  status: latestRes.status,
-                  message: (await latestRes.json()).message,
-                });
-              } catch {
-                setBriefs({ status: latestRes.status, message: "" });
-              }
+              setBriefs(await APIError.fromRes(latestRes));
             }
           } catch (e) {
             console.error(e);
-            setBriefs({ status: null, message: "fetchError" });
+            setBriefs(APIError.fetchError());
           }
         })();
     }
@@ -241,7 +231,7 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs: ChartLineBrief[] | ErrorMsg | undefined = Array.isArray(
+  const filteredBriefs: ChartLineBrief[] | APIError | undefined = Array.isArray(
     briefs
   )
     ? fetchAll
@@ -375,10 +365,7 @@ export function ChartList(props: Props) {
         </div>
       ) : briefs && "message" in briefs ? (
         <div className="absolute inset-x-0 top-2 w-max mx-auto ">
-          {briefs.status ? `${briefs.status}: ` : ""}
-          {te.has(`api.${briefs.message}`)
-            ? te(`api.${briefs.message}`)
-            : te("unknownApiError")}
+          {briefs.format(te)}
         </div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
         <div className="absolute inset-x-0 top-2 w-max mx-auto ">

@@ -1,9 +1,14 @@
+const fetchErrorStatus = 499;
+
 export class APIError {
   status: number | null;
   message: string;
   constructor(status: number | null, message: string) {
     this.status = status;
     this.message = message;
+  }
+  static fetchError() {
+    return new APIError(fetchErrorStatus, "fetchError");
   }
   static async fromRes(res: Response) {
     try {
@@ -22,10 +27,17 @@ export class APIError {
     } else {
       formattedMsg = t("unknownApiError");
     }
-    if (this.status) {
+    if (this.status && this.status !== fetchErrorStatus) {
       return `${this.status}: ${formattedMsg}`;
     } else {
       return formattedMsg;
     }
+  }
+
+  isServerSide() {
+    return (
+      (this.status !== null && (this.status === 403 || this.status >= 500)) ||
+      this.message === "badResponse"
+    );
   }
 }

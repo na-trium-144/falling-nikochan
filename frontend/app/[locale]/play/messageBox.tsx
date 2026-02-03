@@ -27,6 +27,7 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
+import { APIError } from "@/common/apiError";
 
 interface MessageProps {
   className?: string;
@@ -462,7 +463,7 @@ interface MessageProps3 {
   className?: string;
   isTouch: boolean;
   exit: () => void;
-  msg: string;
+  msg: string | APIError;
 }
 export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
@@ -475,7 +476,9 @@ export function InitErrorMessage(props: MessageProps3) {
     >
       <p className="mb-2">
         <Caution className="inline-block text-lg align-middle mr-1" />
-        {props.msg}
+        {props.msg instanceof APIError
+          ? props.msg.format(t)
+          : props.msg}
       </p>
       <p>
         <Button

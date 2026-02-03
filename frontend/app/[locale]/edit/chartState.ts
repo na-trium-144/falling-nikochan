@@ -179,7 +179,7 @@ export function useChartState(props: Props) {
         }
       } catch (e) {
         console.error(e);
-        setChartState({ state: new APIError(null, "fetchError") });
+        setChartState({ state: APIError.fetchError() });
       }
     },
     [locale]
@@ -252,7 +252,7 @@ export function useChartState(props: Props) {
           }
         } catch (e) {
           console.error(e);
-          setSaveState(new APIError(null, "fetchError"));
+          setSaveState(APIError.fetchError());
           return;
         }
       } else {
@@ -287,7 +287,7 @@ export function useChartState(props: Props) {
           }
         } catch (e) {
           console.error(e);
-          setSaveState(new APIError(null, "fetchError"));
+          setSaveState(APIError.fetchError());
           return;
         }
       }
