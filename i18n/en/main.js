@@ -186,6 +186,8 @@ export default {
       totalPlays: "Total Plays",
       totalCharts: "Public Charts",
       recentCharts: "Recently Played",
+      backToOriginal: "← Back to Original Top Page",
+      videoPlaceholder: "[Background Video Placeholder]",
     },
   },
   dev: {

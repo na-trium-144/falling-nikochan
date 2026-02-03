@@ -65,7 +65,7 @@ export default function NewTopPage(props: Props) {
           <div className="w-full h-full bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 animate-pulse">
             {/* Placeholder for actual play video */}
             <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
-              <p className="text-2xl font-bold opacity-50">[Background Video Placeholder]</p>
+              <p className="text-2xl font-bold opacity-50">{t("videoPlaceholder")}</p>
             </div>
           </div>
         </div>
@@ -266,7 +266,7 @@ export default function NewTopPage(props: Props) {
           href={`/${locale}`}
           className="text-blue-500 hover:text-blue-600 underline"
         >
-          ← Back to Original Top Page
+          {t("backToOriginal")}
         </Link>
       </footer>
     </main>

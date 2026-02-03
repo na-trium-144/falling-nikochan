@@ -171,6 +171,8 @@ export default {
       totalPlays: "総プレイ回数",
       totalCharts: "公開中の譜面数",
       recentCharts: "最近プレイした譜面",
+      backToOriginal: "← 元のトップページに戻る",
+      videoPlaceholder: "[背景動画プレースホルダー]",
     },
   },
   dev: {
