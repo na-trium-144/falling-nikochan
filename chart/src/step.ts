@@ -83,7 +83,12 @@ export function stepSimplify(s: Step) {
   if (s.numerator === 0) {
     s.denominator = 1;
   }
-  return s;
+  // キーの順序を保つために新しいオブジェクトを返す
+  return {
+    fourth: s.fourth,
+    numerator: s.numerator,
+    denominator: s.denominator,
+  };
 }
 export function stepImproper(s: Step) {
   return s.fourth * s.denominator + s.numerator;
