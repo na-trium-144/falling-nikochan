@@ -1,7 +1,6 @@
 import { Db } from "mongodb";
 import { Bindings } from "../env.js";
 import moji from "moji";
-import { fetchError } from "../error.js";
 
 export interface YTDataEntry {
   ytId: string;

@@ -23,6 +23,7 @@ import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
 import { XLogo } from "@/common/x.jsx";
+import { APIError } from "@/common/apiError.js";
 
 interface Props {
   locale: string;
@@ -40,7 +41,7 @@ export default function PlayTab(props: Props) {
   const abortSearching = useRef<AbortController | null>(null);
   const searchingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchResult, setSearchResult] = useState<
-    ChartLineBrief[] | { status: number | null; message: string } | undefined
+    ChartLineBrief[] | APIError | undefined
   >();
   const setSearchText = useCallback(
     (v: string, noDelay?: boolean) => {
@@ -87,20 +88,12 @@ export default function PlayTab(props: Props) {
                     );
                     setSearching(false);
                   } else {
-                    try {
-                      setSearchResult({
-                        status: res.status,
-                        message: (await res.json()).message,
-                      });
-                    } catch {
-                      setSearchResult({ status: res.status, message: "" });
-                    }
-                    setSearching(false);
+                    setSearchResult(await APIError.fromRes(res));
                   }
                 })
                 .catch((e) => {
                   console.error(e);
-                  setSearchResult({ status: null, message: "fetchError" });
+                  setSearchResult(APIError.fetchError());
                   setSearching(false);
                 });
             }
