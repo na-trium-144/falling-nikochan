@@ -33,7 +33,11 @@ import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption.js";
 import { titleWithSiteName } from "@/common/title.js";
 import { SlimeSVG } from "@/common/slime.js";
-import { updatePlayCountForReview } from "@/common/pwaInstall.jsx";
+import {
+  historyBackWithReview,
+  updatePlayCountForReview,
+  useStandaloneDetector,
+} from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
@@ -43,6 +47,7 @@ import {
   skyFlatButtonStyle,
 } from "@/common/flatButton.jsx";
 import { useColorThief } from "@/common/colorThief.js";
+import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 
 export default function Edit(props: {
   locale: string;
@@ -53,6 +58,7 @@ export default function Edit(props: {
 
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
+  const standalone = useStandaloneDetector();
 
   const luaExecutor = useLuaExecutor();
 
@@ -519,7 +525,7 @@ export default function Edit(props: {
           "dark:from-orange-975/0 dark:to-orange-975"
         )}
       >
-        <MobileHeader className="flex-1 ">
+        <MobileHeader className="flex-1 " noBackButton={!standalone}>
           {t("titleShort")} ID: {chart?.cid}
         </MobileHeader>
         <Button text={t("help")} onClick={openGuide} />
@@ -533,6 +539,7 @@ export default function Edit(props: {
                 "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
+              classNameInner="flex flex-col items-center *:[&:last-child]:mb-0!"
               scrollableY
               padding={6}
             >
@@ -599,6 +606,17 @@ export default function Edit(props: {
             )}
           >
             <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
+              {standalone && (
+                <button
+                  className={clsx(linkStyle1)}
+                  onClick={() => {
+                    historyBackWithReview();
+                  }}
+                >
+                  <ArrowLeft className="inline-block align-middle mr-2 " />
+                  {t("back")}
+                </button>
+              )}
               <span className="min-w-0 overflow-clip grow-1 flex flex-row items-baseline space-x-2">
                 <span className="whitespace-nowrap ">{t("titleShort")}</span>
                 <span className="grow-1 whitespace-nowrap ">

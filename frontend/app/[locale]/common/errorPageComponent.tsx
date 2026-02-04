@@ -52,7 +52,7 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
 
   return (
     <Box classNameOuter="mb-3" padding={3}>
-      <h4 className="mb-2 text-lg font-semibold font-title">{tl("title")}</h4>
+      <h4 className="mb-2 text-lg font-semibold font-title text-center">{tl("title")}</h4>
       <ul className="list-disc ml-6 space-y-1 text-left">
         {/* TODO: links/clientPage.tsx と共通化 */}
         <li>

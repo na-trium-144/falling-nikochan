@@ -6,6 +6,10 @@ export class APIError {
   constructor(status: number | null, message: string) {
     this.status = status;
     this.message = message;
+    if (this.status === fetchErrorStatus) {
+      // 499はユーザーに表示しない
+      this.status = null;
+    }
   }
   static fetchError() {
     return new APIError(fetchErrorStatus, "fetchError");
@@ -18,19 +22,23 @@ export class APIError {
     }
   }
 
-  format(t: { (key: string): string; has: (key: string) => boolean }): string {
-    let formattedMsg: string;
+  formatMsg(t: {
+    (key: string): string;
+    has: (key: string) => boolean;
+  }): string {
     if (t.has("api." + this.message)) {
-      formattedMsg = t("api." + this.message);
+      return t("api." + this.message);
     } else if (t.has(this.message)) {
-      formattedMsg = t(this.message);
+      return t(this.message);
     } else {
-      formattedMsg = t("unknownApiError");
+      return t("unknownApiError");
     }
-    if (this.status && this.status !== fetchErrorStatus) {
-      return `${this.status}: ${formattedMsg}`;
+  }
+  format(t: { (key: string): string; has: (key: string) => boolean }): string {
+    if (this.status) {
+      return `${this.status}: ${this.formatMsg(t)}`;
     } else {
-      return formattedMsg;
+      return this.formatMsg(t);
     }
   }
 
