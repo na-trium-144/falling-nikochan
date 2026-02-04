@@ -14,6 +14,9 @@ export class APIError {
   static fetchError() {
     return new APIError(fetchErrorStatus, "fetchError");
   }
+  static badResponse() {
+    return new APIError(null, "badResponse");
+  }
   static async fromRes(res: Response) {
     try {
       return new APIError(res.status, (await res.json()).message || "");

@@ -162,7 +162,7 @@ export function useChartState(props: Props) {
             onLoadRef.current(cid);
           } catch (e) {
             console.error(e);
-            setChartState({ state: new APIError(null, "badResponse") });
+            setChartState({ state: APIError.badResponse() });
           }
         } else {
           if (res.status === 401) {
@@ -244,7 +244,7 @@ export function useChartState(props: Props) {
             } catch {
               // pass through
             }
-            setSaveState(new APIError(null, "badResponse"));
+            setSaveState(APIError.badResponse());
             return;
           } else {
             setSaveState(await APIError.fromRes(res));

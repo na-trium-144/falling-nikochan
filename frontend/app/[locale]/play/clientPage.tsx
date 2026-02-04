@@ -148,7 +148,7 @@ export function InitPlay({ locale }: { locale: string }) {
             } catch (e) {
               setChartSeq(undefined);
               console.error(e);
-              setErrorMsg(new APIError(null, "badResponse"));
+              setErrorMsg(APIError.badResponse());
             }
           } else {
             setChartSeq(undefined);
@@ -199,7 +199,9 @@ function Play(props: Props) {
   } = props;
   const te = useTranslations("error");
 
-  const [record, setRecord] = useState<RecordGetSummary | undefined>(); // for showing in the result dialog
+  const [record, setRecord] = useState<
+    RecordGetSummary | APIError | undefined
+  >(); // for showing in the result dialog
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
@@ -682,21 +684,28 @@ function Play(props: Props) {
             });
             reloadBestScore();
           }
-          void (async () => {
+          (async () => {
             try {
               const res = await fetch(
                 process.env.BACKEND_PREFIX + `/api/record/${cid}`
               );
               if (res.ok) {
-                const records: RecordGetSummary[] = await res.json();
-                setRecord(
-                  records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
-                  )
-                );
+                try {
+                  const records: RecordGetSummary[] = await res.json();
+                  setRecord(
+                    records.find(
+                      (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
+                    )
+                  );
+                } catch (e) {
+                  console.error(e);
+                  setRecord(APIError.badResponse());
+                }
+              } else {
+                setRecord(await APIError.fromRes(res));
               }
-            } catch (e) {
-              console.error(e);
+            } catch {
+              setRecord(APIError.fetchError());
             }
           })();
         }

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "@/share/placeholder/shareBox.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
+import { APIError } from "@/common/apiError.js";
 
 export default function ShareInternal({ locale }: { locale: string }) {
   const t = useTranslations("share");
@@ -14,7 +15,9 @@ export default function ShareInternal({ locale }: { locale: string }) {
   const [cid, setCId] = useState<string | null>(null);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [fromPlay, setFromPlay] = useState<boolean | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | null>(null);
+  const [record, setRecord] = useState<RecordGetSummary[] | APIError | null>(
+    null
+  );
   const [sessionError, setSessionError] = useState<boolean>(false);
   useEffect(() => {
     const param = new URLSearchParams(window.location.search);
@@ -31,16 +34,25 @@ export default function ShareInternal({ locale }: { locale: string }) {
         }
       });
       setRecord(null);
-      fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-        .then((res) => {
+      (async () => {
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX + `/api/record/${cid}`
+          );
           if (res.ok) {
-            return res.json();
+            try {
+              setRecord(await res.json());
+            } catch (e) {
+              console.error(e);
+              setRecord(APIError.badResponse());
+            }
           } else {
-            throw new Error("failed to fetch record");
+            setRecord(await APIError.fromRes(res));
           }
-        })
-        .then((record) => setRecord(record))
-        .catch(() => setRecord([]));
+        } catch {
+          setRecord(APIError.fetchError());
+        }
+      })();
     } else {
       setSessionError(true);
     }
