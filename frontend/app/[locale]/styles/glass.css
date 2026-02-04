@@ -86,6 +86,10 @@
       @apply backdrop-blur-xs;
       @apply bg-sky-200/50 dark:bg-orange-950/50;
       @apply inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15;
+
+      & + .fn-caption-border {
+        @apply border-transparent border-t-sky-300/50 dark:border-t-orange-800/30;
+      }
     }
   }
 

@@ -38,18 +38,13 @@ function Caption({ top, left, content }: CaptionProps) {
       className={clsx("pointer-events-none text-sm fixed z-50")}
       style={{ top, left }}
     >
-      <span
-        className={clsx(
-          "absolute inline-block bottom-0 left-0 -translate-x-2/4 translate-y-4.5",
-          "border-[0.9rem] border-transparent border-t-sky-300/50 dark:border-t-orange-800/30"
-        )}
-      />
       <div
         ref={contentRef}
         className={clsx(
+          // 色だけcssで定義、他は直接utilityクラス
+          "fn-sky fn-caption",
           "absolute inline-block bottom-0 left-0",
-          "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1",
-          "fn-sky fn-caption"
+          "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1"
         )}
         style={{ translate: `${translateX} -0.5rem` }}
       >
@@ -57,6 +52,12 @@ function Caption({ top, left, content }: CaptionProps) {
         <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
         {content}
       </div>
+      <span
+        className={clsx(
+          "absolute inline-block bottom-0 left-0 -translate-x-2/4 translate-y-4.5",
+          "border-[0.9rem] fn-caption-border"
+        )}
+      />
     </div>
   );
 }
