@@ -73,9 +73,11 @@ export default function ShareChart(props: Props) {
     }
     setBrief(brief);
     document.title = titleShare(t, cid, brief);
-    const titleUpdate = setTimeout(() => {
+    const titleUpdate = setInterval(() => {
       // Next.jsが元のタイトルに戻してしまう場合があるので、再度上書き
-      document.title = titleShare(t, cid, brief);
+      if (document.title !== titleShare(t, cid, brief)) {
+        document.title = titleShare(t, cid, brief);
+      }
     }, 100);
     setRecord(null);
     (async () => {
@@ -104,7 +106,7 @@ export default function ShareChart(props: Props) {
         console.error(e);
       }
     }
-    return () => clearTimeout(titleUpdate);
+    return () => clearInterval(titleUpdate);
   }, [t]);
 
   const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);

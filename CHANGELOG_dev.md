@@ -1,3 +1,7 @@
+## ver. 14.8 - 2026/02/05
+
+* shareページでのページタイトルの書き換えをsetIntervalで繰り返し行う
+
 ## ver. 14.7 - 2026/02/04 [#950](https://github.com/na-trium-144/falling-nikochan/pull/950)
 
 * client error時に表示されるerror.tsxとglobal-error.tsxを作成
