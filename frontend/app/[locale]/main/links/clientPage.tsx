@@ -183,7 +183,7 @@ export default function LinksPage({ locale }: { locale: string }) {
           </li>
           <li>
             <XLogo className="mr-1" />
-            <ExternalLink href="https://twitter.com/@nikochan144">
+            <ExternalLink href="https://twitter.com/nikochan144">
               <span className="hidden main-wide:inline">
                 {t("officialAccount")}
               </span>
