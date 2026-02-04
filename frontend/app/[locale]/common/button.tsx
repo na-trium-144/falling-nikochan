@@ -36,9 +36,9 @@ export default function Button(props: Props) {
     <button
       className={clsx(
         "fn-button",
+        props.small && "fn-small",
         props.loading && "cursor-wait",
-        props.className,
-        props.small && "h-8! py-0!"
+        props.className
       )}
       onClick={() => props.onClick && props.onClick()}
       onPointerDown={(e) => e.stopPropagation()}

@@ -8,6 +8,10 @@
     @apply shadow-sm;
     @apply shadow-slate-500/50 dark:shadow-stone-950/50;
 
+    .fn-small {
+      @apply h-8 py-0;
+    }
+
     @variant disabled {
       @apply cursor-default;
       @apply border border-blue-300/50 dark:border-amber-800/30;
