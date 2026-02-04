@@ -1,3 +1,13 @@
+## ver. 14.7 - 2026/02/04 [#950](https://github.com/na-trium-144/falling-nikochan/pull/950)
+
+* client error時に表示されるerror.tsxとglobal-error.tsxを作成
+* サーバーエラー時のerrorPlaceholderと404時のnot-found.tsxにもトップに戻るボタンを追加
+* エラーダイアログに問い合わせリンクの表示を追加 (クライアントエラーのerror.tsxと、errorPlaceholderでエラーコードがサーバー側のものだった場合)
+* play, editページのエラー表示の内容をerrorPlaceholderと同じ仕様に統一
+* serviceworkerがネットワークエラー時に返すレスポンスを499(サーバーサイドのエラーではない)に変更、499コードはユーザーに表示しないようにする
+* standaloneモードのeditに戻るボタン追加
+* /api/recordのfetch時のエラー処理とエラーメッセージ表示を追加
+
 ## ver. 14.6 - 2026/02/03 [#952](https://github.com/na-trium-144/falling-nikochan/pull/952)
 
 * ハッシュの計算をWebCryptoAPIを使った自前実装にもどす
