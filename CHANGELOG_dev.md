@@ -1,3 +1,26 @@
+## ver. 14.7 - 2026/02/04 [#950](https://github.com/na-trium-144/falling-nikochan/pull/950)
+
+* client error時に表示されるerror.tsxとglobal-error.tsxを作成
+* サーバーエラー時のerrorPlaceholderと404時のnot-found.tsxにもトップに戻るボタンを追加
+* エラーダイアログに問い合わせリンクの表示を追加 (クライアントエラーのerror.tsxと、errorPlaceholderでエラーコードがサーバー側のものだった場合)
+* play, editページのエラー表示の内容をerrorPlaceholderと同じ仕様に統一
+* serviceworkerがネットワークエラー時に返すレスポンスを499(サーバーサイドのエラーではない)に変更、499コードはユーザーに表示しないようにする
+* standaloneモードのeditに戻るボタン追加
+* /api/recordのfetch時のエラー処理とエラーメッセージ表示を追加
+
+## ver. 14.6 - 2026/02/03 [#952](https://github.com/na-trium-144/falling-nikochan/pull/952)
+
+* ハッシュの計算をWebCryptoAPIを使った自前実装にもどす
+
+## ver. 14.5 - 2026/02/02 [#951](https://github.com/na-trium-144/falling-nikochan/pull/951)
+
+* <del>levelHashの計算がブラウザで動作していなかったのを修正 (sha256→sha1に変更)</del>
+    * ver14.0以降ハッシュの仕様を変更しても内容が変わっていない場合は以前のハッシュを維持するようにしたので既存のデータに問題なし
+
+## ver. 14.2 - 2026/02/01 [#919](https://github.com/na-trium-144/falling-nikochan/pull/919)
+
+* Migrate from npm to pnpm
+
 ## ver. 14.1 - 2026/02/01
 
 * standaloneでないときも新しいserviceWorkerのactivate直後にassetsを更新するよう修正

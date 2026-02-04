@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { dirname, join } from "node:path";
 import briefApp from "./api/brief.js";
 import { ExecutionContext, Hono } from "hono";
-import { onError } from "./error.js";
+import { fetchError, onError } from "./error.js";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -25,6 +25,7 @@ export interface Bindings {
   GEMINI_API_KEY?: string;
   DISCORD_WEBHOOK_ID?: string;
   DISCORD_WEBHOOK_TOKEN?: string;
+  IS_SERVICE_WORKER?: string;
 }
 
 export function secretSalt(e: Bindings) {
@@ -73,7 +74,7 @@ export function fetchStatic(e: Bindings, url: URL) {
           : {}),
       },
     }
-  );
+  ).catch(fetchError(e));
 }
 
 export function languageDetector() {

@@ -40,12 +40,13 @@ import {
   skyFlatButtonBorderStyle2,
   skyFlatButtonStyle,
 } from "@/common/flatButton";
+import { APIError } from "@/common/apiError";
 
 interface Props {
   locale: string;
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | null;
+  record: RecordGetSummary[] | APIError | null;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -235,19 +236,22 @@ function LevelButton(props: {
 function SelectedLevelInfo(props: {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | null;
+  record: RecordGetSummary[] | APIError | null;
   selectedLevel: number;
   locale: string;
 }) {
   const t = useTranslations("share");
+  const te = useTranslations("error");
   const [showBestDetail, setShowBestDetail] = useState(false);
 
-  const selectedRecord =
+  const selectedRecord: RecordGetSummary | APIError | undefined =
     props.selectedLevel === null
-      ? null
-      : props.record?.find(
-          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
-        );
+      ? undefined
+      : props.record instanceof APIError
+        ? props.record
+        : props.record?.find(
+            (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
+          );
 
   const [bestScoreState, setBestScoreState] = useState<(ResultData | null)[]>(
     []
@@ -339,19 +343,27 @@ function SelectedLevelInfo(props: {
       <p className="mt-2 min-w-65 ">
         {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
-        {props.record !== null && (
-          <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
-        )}
+        {selectedRecord !== undefined &&
+          !(selectedRecord instanceof APIError) && (
+            <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
+          )}
       </p>
       <span className={clsx(props.record === null ? "block" : "hidden")}>
         <SlimeSVG />
         Loading...
       </span>
-      {selectedRecord && selectedRecord.count >= 5 && (
-        <RecordHistogram
-          histogram={selectedRecord.histogram}
-          bestScoreTotal={selectedBestScore ? totalScore : null}
-        />
+      {selectedRecord !== undefined &&
+        !(selectedRecord instanceof APIError) &&
+        selectedRecord.count >= 5 && (
+          <RecordHistogram
+            histogram={selectedRecord.histogram}
+            bestScoreTotal={selectedBestScore ? totalScore : null}
+          />
+        )}
+      {selectedRecord instanceof APIError && (
+        <p className="text-slate-400 dark:text-slate-500">
+          {selectedRecord.format(te)}
+        </p>
       )}
       <button
         className={clsx(

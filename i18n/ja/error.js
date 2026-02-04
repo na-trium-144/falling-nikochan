@@ -2,9 +2,10 @@ export default {
   error: {
     api: {
       // 400
+      generic400: "パラメータが正しくありません",
       noPasswd: "パスワードが指定されていません",
-      invalidChartId: "譜面 ID が不正です",
-      invalidResultParam: "result パラメータが不正です",
+      invalidChartId: "譜面 ID が正しくありません",
+      invalidResultParam: "result パラメータが正しくありません",
       missingResultParam: "result パラメータが指定されていません",
       // 401
       badPassword: "パスワードが違います",
@@ -26,15 +27,19 @@ export default {
       // 500
       imageGenerationFailed: "画像生成に失敗しました",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
-      // 502
-      fetchError: "サーバーへの接続に失敗しました",
+      // 499
+      fetchError: "サーバーへ接続できません (オフライン?)",
     },
     unknownApiError: "サーバーで何らかのエラーが発生しました",
     noSession: "セッションデータを読み込めません",
-    chartVersion: "譜面データのバージョン (ver. {ver}) が異常です",
-    badResponse: "サーバーからの応答を解釈できません",
+    chartVersion: "譜面データのバージョン (ver. {ver}) が正しくありません",
+    badResponse: "サーバーからの応答を処理できませんでした",
     ytError: "YouTube 動画再生のエラー ({code})",
     noYtId: "再生する YouTube 動画が指定されていません",
     seqEmpty: "譜面データが空です",
+    errorPage: {
+      title: "エラーが発生しました 😢",
+      goHome: "トップへ戻る",
+    },
   },
 };

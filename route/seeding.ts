@@ -11,6 +11,7 @@ import {
   NoteCommand,
   SpeedChangeWithLua,
   Chart5,
+  NoteCommandWithLua,
 } from "@falling-nikochan/chart";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -39,7 +40,7 @@ try {
               ver: content.ver as 13,
               levels: content.levels.map((l) => ({
                 ...l,
-                notes: l.notes as NoteCommand[],
+                notes: l.notes as NoteCommandWithLua[],
                 speedChanges: l.speedChanges as SpeedChangeWithLua[],
                 type: l.type as (typeof levelTypesConst)[number],
                 unlisted: false,

@@ -19,11 +19,12 @@ import { SharedResultBox } from "./sharedResult.js";
 import { useColorThief } from "@/common/colorThief.js";
 import { ExternalLink } from "@/common/extLink.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
+import { APIError } from "@/common/apiError.js";
 
 interface Props {
   cid: string | undefined;
   brief: ChartBrief | null;
-  record: RecordGetSummary[] | null;
+  record: RecordGetSummary[] | APIError | null;
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;

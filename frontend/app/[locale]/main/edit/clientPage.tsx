@@ -14,6 +14,7 @@ import { detectOS, isStandalone } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
+import { APIError } from "@/common/apiError.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -25,11 +26,11 @@ export default function EditTab({ locale }: { locale: string }) {
     setIsSafari(detectOS() === "ios" || navigator.vendor.includes("Apple"));
   }, []);
 
-  const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
+  const [cidErrorMsg, setCIdErrorMsg] = useState<APIError>();
   const [cidFetching, setCidFetching] = useState<boolean>(false);
   const [inputCId, setInputCId] = useState<string>("");
   const gotoCId = async (cid: string) => {
-    setCIdErrorMsg("");
+    setCIdErrorMsg(undefined);
     setCidFetching(true);
     try {
       const res = await fetch(
@@ -45,25 +46,16 @@ export default function EditTab({ locale }: { locale: string }) {
         } else {
           window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
         }
-        setCIdErrorMsg("");
+        setCIdErrorMsg(undefined);
         setInputCId(cid);
       } else {
-        try {
-          const message = ((await res.json()) as { message?: string }).message;
-          if (te.has("api." + message)) {
-            setCIdErrorMsg(te("api." + message));
-          } else {
-            setCIdErrorMsg(message || te("unknownApiError"));
-          }
-        } catch {
-          setCIdErrorMsg(te("unknownApiError"));
-        }
+        setCIdErrorMsg(await APIError.fromRes(res));
         setInputCId("");
       }
     } catch (e) {
       console.error(e);
       setCidFetching(false);
-      setCIdErrorMsg(te("api.fetchError"));
+      setCIdErrorMsg(APIError.fetchError());
       setInputCId("");
     }
   };
@@ -117,7 +109,7 @@ export default function EditTab({ locale }: { locale: string }) {
             <SlimeSVG />
             Loading...
           </span>
-          <span className="ml-1 inline-block">{cidErrorMsg}</span>
+          <span className="ml-1 inline-block">{cidErrorMsg?.format(te)}</span>
         </h3>
         <p>{t("inputIdDesc")}</p>
       </section>

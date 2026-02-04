@@ -18,6 +18,7 @@ import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 import { historyBackWithReview } from "./pwaInstall";
+import { APIError } from "./apiError";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
@@ -39,9 +40,9 @@ export function SharePageModalProvider(props: {
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
   const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
-  const [modalRecord, setModalRecord] = useState<RecordGetSummary[] | null>(
-    null
-  );
+  const [modalRecord, setModalRecord] = useState<
+    RecordGetSummary[] | APIError | null
+  >(null);
   const [modalOpened, modalAppearing, setModalOpened] =
     useDelayedDisplayState(200);
   const router = useRouter();
@@ -61,16 +62,25 @@ export function SharePageModalProvider(props: {
         }
       });
       setModalRecord(null);
-      fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-        .then((res) => {
+      (async () => {
+        try {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX + `/api/record/${cid}`
+          );
           if (res.ok) {
-            return res.json();
+            try {
+              setModalRecord(await res.json());
+            } catch (e) {
+              console.error(e);
+              setModalRecord(APIError.badResponse());
+            }
           } else {
-            throw new Error("failed to fetch record");
+            setModalRecord(await APIError.fromRes(res));
           }
-        })
-        .then((record) => setModalRecord(record))
-        .catch(() => setModalRecord([]));
+        } catch {
+          setModalRecord(APIError.fetchError());
+        }
+      })();
       setModalOpened(true);
     },
     [th, setModalOpened]

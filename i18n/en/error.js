@@ -2,6 +2,7 @@ export default {
   error: {
     api: {
       // 400
+      generic400: "The parameter is invalid",
       noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
@@ -26,15 +27,19 @@ export default {
       // 500
       imageGenerationFailed: "Failed to generate the image",
       unsupportedChartVersion: "Unsupported chart data version",
-      // 502
-      fetchError: "Failed to connect to the server",
+      // 499
+      fetchError: "Failed to connect to the server (offline?)",
     },
     unknownApiError: "An error occurred on the server",
     noSession: "Failed to load session data",
-    chartVersion: "The version of the chart data (ver. {ver}) is abnormal",
-    badResponse: "Failed to interpret the response from the server",
+    chartVersion: "The version of the chart data (ver. {ver}) is invalid",
+    badResponse: "Failed to process the server response",
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",
+    errorPage: {
+      title: "An error has occurred 😢",
+      goHome: "Return to top page",
+    },
   },
 };

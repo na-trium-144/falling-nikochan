@@ -4,6 +4,7 @@ export default {
     titleShort: "譜面編集",
     description: "Falling Nikochan 譜面編集",
     help: "ヘルプ",
+    back: "戻る",
     chartId: "譜面ID",
     enterPasswd: "編集用パスワードを入力してください。",
     passwdFailed: "パスワードが違います。",

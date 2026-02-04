@@ -9,6 +9,11 @@ import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
 import { APIError } from "@/common/apiError";
+import { LinksOnError } from "@/common/errorPageComponent";
+import {
+  historyBackWithReview,
+  useStandaloneDetector,
+} from "@/common/pwaInstall";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -27,6 +32,7 @@ export function PasswdPrompt(props: PasswdProps) {
   }, []);
   const [editPasswd, setEditPasswd] = useState<string>("");
   const te = useTranslations("error");
+  const standalone = useStandaloneDetector();
 
   const [cid, setCId] = useState<string>("");
   useEffect(() => {
@@ -44,40 +50,65 @@ export function PasswdPrompt(props: PasswdProps) {
       </p>
     );
   } else if (props.loadStatus instanceof APIError) {
-    return <p>{props.loadStatus.format(te)}</p>;
+    return (
+      <>
+        {props.loadStatus.status && (
+          <h4 className="mb-2 text-lg font-semibold font-title">
+            Error {props.loadStatus.status}
+          </h4>
+        )}
+        <p className="mb-3">{props.loadStatus.formatMsg(te)}</p>
+        {props.loadStatus.isServerSide() && <LinksOnError />}
+        {standalone && (
+          <p>
+            <Button text={t("back")} onClick={historyBackWithReview} />
+          </p>
+        )}
+      </>
+    );
   } else {
     props.loadStatus satisfies
       | "passwdFailed"
       | "passwdFailedSilent"
       | "rateLimited";
     return (
-      <div className="text-center ">
-        <p className="mb-2 ">
+      <>
+        <h4 className="mb-2 text-lg font-semibold font-title">
           <span className="">{t("chartId")}:</span>
           <span className="ml-2 ">{cid}</span>
-        </p>
-        <p>{t("enterPasswd")}</p>
-        {props.loadStatus === "passwdFailed" && <p>{t("passwdFailed")}</p>}
-        {props.loadStatus === "rateLimited" && (
-          <p>{t("tooManyRequestWithSec", { sec: rateLimit.chartFile })}</p>
-        )}
-        <Input
-          ref={passwdRef}
-          actualValue={editPasswd}
-          updateValue={setEditPasswd}
-          left
-          passwd
-          onEnter={(editPasswd) =>
-            props.fetchChart(cid, { editPasswd, savePasswd: props.savePasswd })
-          }
-        />
-        <Button
-          text={t("submitPasswd")}
-          onClick={() =>
-            props.fetchChart(cid, { editPasswd, savePasswd: props.savePasswd })
-          }
-        />
-        <div>
+        </h4>
+        <div className="mb-3">
+          <p>{t("enterPasswd")}</p>
+          {props.loadStatus === "passwdFailed" && <p>{t("passwdFailed")}</p>}
+          {props.loadStatus === "rateLimited" && (
+            <p>{t("tooManyRequestWithSec", { sec: rateLimit.chartFile })}</p>
+          )}
+        </div>
+        <div className="mb-1">
+          <Input
+            ref={passwdRef}
+            actualValue={editPasswd}
+            updateValue={setEditPasswd}
+            left
+            passwd
+            onEnter={(editPasswd) =>
+              props.fetchChart(cid, {
+                editPasswd,
+                savePasswd: props.savePasswd,
+              })
+            }
+          />
+          <Button
+            text={t("submitPasswd")}
+            onClick={() =>
+              props.fetchChart(cid, {
+                editPasswd,
+                savePasswd: props.savePasswd,
+              })
+            }
+          />
+        </div>
+        <div className="mb-2">
           <CheckBox
             id="save-passwd"
             value={props.savePasswd}
@@ -87,7 +118,7 @@ export function PasswdPrompt(props: PasswdProps) {
           </CheckBox>
         </div>
         {process.env.NODE_ENV === "development" && (
-          <div className="mt-2 ">
+          <div className="mb-2">
             <button
               className={clsx(linkStyle1, "w-max m-auto")}
               onClick={() =>
@@ -102,7 +133,12 @@ export function PasswdPrompt(props: PasswdProps) {
             </button>
           </div>
         )}
-      </div>
+        {standalone && (
+          <p>
+            <Button text={t("back")} onClick={historyBackWithReview} />
+          </p>
+        )}
+      </>
     );
   }
 }

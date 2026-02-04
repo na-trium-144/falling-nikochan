@@ -21,7 +21,7 @@
     @apply pointer-events-none;
 
     > .fn-box {
-      @apply w-max h-max max-w-full text-center;
+      @apply w-max h-max max-w-full max-h-full text-center;
       @apply pointer-events-auto;
     }
   }

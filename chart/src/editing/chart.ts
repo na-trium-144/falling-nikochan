@@ -1,7 +1,7 @@
 import { EventEmitter } from "eventemitter3";
 import { EventType, LuaExecutorRef } from "./types.js";
 import { LevelEditing } from "./level.js";
-import { NoteCommand } from "../command.js";
+import { NoteCommandWithLua } from "../command.js";
 import {
   ChartEdit,
   ChartMin,
@@ -23,7 +23,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   };
   #levels: LevelEditing[];
   #currentLevelIndex: number | undefined; // 範囲外にはせず、levelsが空の場合undefined
-  #copyBuffer: (NoteCommand | null)[];
+  #copyBuffer: (NoteCommandWithLua | null)[];
   #zoom: number;
   readonly #locale: string;
   #convertedFrom: number;

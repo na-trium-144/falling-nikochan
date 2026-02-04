@@ -18,6 +18,7 @@ import { MobileFooter, PCFooter } from "@/common/footer.jsx";
 import { AboutModal } from "@/common/aboutModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import { AboutDescription } from "@/main/main.jsx";
+import { APIError } from "@/common/apiError.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -51,7 +52,9 @@ export default function ShareChart(props: Props) {
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | null>(null);
+  const [record, setRecord] = useState<RecordGetSummary[] | APIError | null>(
+    null
+  );
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
@@ -75,15 +78,25 @@ export default function ShareChart(props: Props) {
       document.title = titleShare(t, cid, brief);
     }, 100);
     setRecord(null);
-    fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-      .then((res) => {
+    (async () => {
+      try {
+        const res = await fetch(
+          process.env.BACKEND_PREFIX + `/api/record/${cid}`
+        );
         if (res.ok) {
-          res.json().then((record) => setRecord(record));
+          try {
+            setRecord(await res.json());
+          } catch (e) {
+            console.error(e);
+            setRecord(APIError.badResponse());
+          }
         } else {
-          throw new Error("failed to fetch record");
+          setRecord(await APIError.fromRes(res));
         }
-      })
-      .catch(() => setRecord([]));
+      } catch {
+        setRecord(APIError.fetchError());
+      }
+    })();
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
