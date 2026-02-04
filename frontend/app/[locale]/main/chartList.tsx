@@ -16,12 +16,7 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton.jsx";
-import { ButtonHighlight, buttonShadowStyle } from "@/common/button.jsx";
+import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
 
 interface PProps {
@@ -342,9 +337,7 @@ export function ChartList(props: Props) {
           Loading...
         </div>
       ) : briefs && "message" in briefs ? (
-        <div className="fn-cl-message">
-          {{briefs.format(te)}
-        </div>
+        <div className="fn-cl-message">{briefs.format(te)}</div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
         <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}

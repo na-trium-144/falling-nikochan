@@ -18,7 +18,7 @@ export default async function NotFoundPage() {
         <ThemeProvider>
           <IrasutoyaLikeBg />
           <CenterBox>
-            <h4 className="mb-2 text-lg font-semibold font-title">Error 404</h4>
+            <h4 className="fn-heading-box">Error 404</h4>
             <p className="mb-3">{t("api.notFound")}</p>
             <GoHomeButton goHome={t("errorPage.goHome")} />
           </CenterBox>

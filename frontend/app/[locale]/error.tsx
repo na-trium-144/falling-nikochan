@@ -16,8 +16,8 @@ export default function ClientErrorPage(props: ErrorProps) {
   const t = useTranslations("error.errorPage");
   return (
     <CenterBox scrollableY>
-      <h4 className="mb-2 text-lg font-semibold font-title">{t("title")}</h4>
-      <ErrorMessage className="mb-3" error={props.error} />
+      <h4 className="fn-heading-box">{t("title")}</h4>
+      <ErrorMessage error={props.error} />
       <LinksOnError />
       <GoHomeButton />
     </CenterBox>

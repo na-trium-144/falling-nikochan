@@ -53,9 +53,7 @@ export function PasswdPrompt(props: PasswdProps) {
     return (
       <>
         {props.loadStatus.status && (
-          <h4 className="mb-2 text-lg font-semibold font-title">
-            Error {props.loadStatus.status}
-          </h4>
+          <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
         )}
         <p className="mb-3">{props.loadStatus.formatMsg(te)}</p>
         {props.loadStatus.isServerSide() && <LinksOnError />}
@@ -73,7 +71,7 @@ export function PasswdPrompt(props: PasswdProps) {
       | "rateLimited";
     return (
       <>
-        <h4 className="mb-2 text-lg font-semibold font-title">
+        <h4 className="fn-heading-box">
           <span className="">{t("chartId")}:</span>
           <span className="ml-2 ">{cid}</span>
         </h4>

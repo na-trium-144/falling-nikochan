@@ -12,6 +12,10 @@
     > .fn-box-inner {
       @apply w-full h-full;
       @apply overflow-hidden;
+
+      > :last-child {
+        @apply mb-0;
+      }
     }
   }
 

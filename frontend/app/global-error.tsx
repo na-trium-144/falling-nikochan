@@ -31,9 +31,7 @@ export default function Error(props: ErrorProps) {
         )}
       >
         <CenterBox>
-          <h4 className="mb-2 text-lg font-semibold font-title">
-            An error has occurred 😢
-          </h4>
+          <h4 className="fn-heading-box">An error has occurred 😢</h4>
           <ErrorMessage error={props.error} />
         </CenterBox>
       </body>

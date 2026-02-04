@@ -479,11 +479,7 @@ export function InitErrorMessage(props: MessageProps3) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      {status && (
-        <h4 className="mb-2 text-lg font-semibold font-title">
-          Error {status}
-        </h4>
-      )}
+      {status && <h4 className="fn-heading-box">Error {status}</h4>}
       <p className="mb-3">{message}</p>
       {props.msg instanceof APIError && props.msg.isServerSide() && (
         <LinksOnError />

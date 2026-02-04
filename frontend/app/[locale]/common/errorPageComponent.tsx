@@ -2,12 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
-import {
-  buttonBorderStyle1,
-  buttonBorderStyle2,
-  ButtonHighlight,
-  buttonStyle,
-} from "@/common/button";
+import { ButtonHighlight } from "@/common/button";
 import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { ExternalLink } from "@/common/extLink";
 import { XLogo } from "@/common/x";
@@ -26,9 +21,9 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
 
   return (
     <div>
-      <a href="/" className={clsx("inline-block", buttonStyle)}>
-        <span className={buttonBorderStyle1} />
-        <span className={buttonBorderStyle2} />
+      <a href="/" className="inline-block fn-button">
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
         <ButtonHighlight />
         {goHome}
       </a>
@@ -52,9 +47,7 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
 
   return (
     <Box classNameOuter="mb-3" padding={3}>
-      <h4 className="mb-2 text-lg font-semibold font-title text-center">
-        {tl("title")}
-      </h4>
+      <h4 className="fn-heading-box">{tl("title")}</h4>
       <ul className="list-disc ml-6 space-y-1 text-left">
         {/* TODO: links/clientPage.tsx と共通化 */}
         <li>
@@ -66,19 +59,15 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
         <li>
           <XLogo className="mr-1" />
           <ExternalLink href="https://twitter.com/nikochan144">
-            <span className="hidden main-wide:inline">
-              {tl("officialAccount")}
-            </span>
-            <span className="main-wide:hidden">
-              {tl("officialAccountShort")}
-            </span>
+            <span className="no-mobile">{tl("officialAccount")}</span>
+            <span className="no-pc">{tl("officialAccountShort")}</span>
           </ExternalLink>
         </li>
         <li>
           <Github className="inline-block align-middle mr-1" />
           <span className="mr-1">GitHub:</span>
           <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
-            <span className="hidden main-wide:inline">na-trium-144/</span>
+            <span className="no-mobile">na-trium-144/</span>
             <span>falling-nikochan</span>
           </ExternalLink>
         </li>
@@ -87,18 +76,12 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
   );
 }
 
-export function ErrorMessage({
-  className,
-  error,
-}: {
-  className?: string;
-  error: unknown;
-}) {
+export function ErrorMessage({ error }: { error: unknown }) {
   if (error) {
     return (
       <pre
         className={clsx(
-          className,
+          "mb-3",
           "p-2 rounded-md",
           "text-xs",
           "bg-sky-200/25 dark:bg-orange-800/10",

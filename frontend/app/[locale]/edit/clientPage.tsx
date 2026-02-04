@@ -542,7 +542,7 @@ export default function Edit(props: {
                 "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
-              classNameInner="flex flex-col items-center *:[&:last-child]:mb-0!"
+              classNameInner="flex flex-col items-center"
               scrollableY
               padding={6}
             >
