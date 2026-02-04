@@ -65,6 +65,7 @@ import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
+import { APIError } from "@/common/apiError.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -77,8 +78,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData13>();
   const [editing, setEditing] = useState<boolean>(false);
 
-  const [errorStatus, setErrorStatus] = useState<number>();
-  const [errorMsg, setErrorMsg] = useState<string>();
+  const [errorMsg, setErrorMsg] = useState<string | APIError>();
   useEffect(() => {
     const q = getQueryOptions();
     setQueryOptions(q);
@@ -108,7 +108,6 @@ export function InitPlay({ locale }: { locale: string }) {
 
     if (session?.level) {
       setChartSeq(loadChart13(session.level));
-      setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
       void (async () => {
@@ -138,42 +137,27 @@ export function InitPlay({ locale }: { locale: string }) {
                   default:
                     seq satisfies never;
                 }
-                setErrorStatus(undefined);
                 setErrorMsg(undefined);
                 addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
                 seq.ver satisfies never;
                 setChartSeq(undefined);
-                setErrorStatus(undefined);
                 setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
               }
             } catch (e) {
               setChartSeq(undefined);
-              setErrorStatus(undefined);
               console.error(e);
-              setErrorMsg(te("badResponse"));
+              setErrorMsg(APIError.badResponse());
             }
           } else {
             setChartSeq(undefined);
-            setErrorStatus(res.status);
-            try {
-              const message = ((await res.json()) as { message?: string })
-                .message;
-              if (te.has("api." + message)) {
-                setErrorMsg(te("api." + message));
-              } else {
-                setErrorMsg(message || te("unknownApiError"));
-              }
-            } catch {
-              setErrorMsg(te("unknownApiError"));
-            }
+            setErrorMsg(await APIError.fromRes(res));
           }
         } catch (e) {
           setChartSeq(undefined);
-          setErrorStatus(undefined);
           console.error(e);
-          setErrorMsg(te("api.fetchError"));
+          setErrorMsg(APIError.fetchError());
         }
       })();
     }
@@ -181,9 +165,7 @@ export function InitPlay({ locale }: { locale: string }) {
 
   return (
     <Play
-      apiErrorMsg={
-        errorStatus && errorMsg ? `${errorStatus}: ${errorMsg}` : errorMsg
-      }
+      apiErrorMsg={errorMsg}
       cid={cid}
       lvIndex={lvIndex || 0}
       chartBrief={chartBrief}
@@ -196,7 +178,7 @@ export function InitPlay({ locale }: { locale: string }) {
 }
 
 interface Props {
-  apiErrorMsg?: string;
+  apiErrorMsg?: string | APIError;
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
@@ -217,7 +199,9 @@ function Play(props: Props) {
   } = props;
   const te = useTranslations("error");
 
-  const [record, setRecord] = useState<RecordGetSummary | undefined>(); // for showing in the result dialog
+  const [record, setRecord] = useState<
+    RecordGetSummary | APIError | undefined
+  >(); // for showing in the result dialog
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
@@ -583,7 +567,7 @@ function Play(props: Props) {
   const [ytReady, setYtReady] = useState<boolean>(false);
   const [ytError, setYtError] = useState<number | null>(null);
   const [initDone, setInitDone] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>();
+  const [errorMsg, setErrorMsg] = useState<string | APIError>();
   const [showLoading, setShowLoading] = useState<boolean>(false);
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
@@ -700,21 +684,28 @@ function Play(props: Props) {
             });
             reloadBestScore();
           }
-          void (async () => {
+          (async () => {
             try {
               const res = await fetch(
                 process.env.BACKEND_PREFIX + `/api/record/${cid}`
               );
               if (res.ok) {
-                const records: RecordGetSummary[] = await res.json();
-                setRecord(
-                  records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
-                  )
-                );
+                try {
+                  const records: RecordGetSummary[] = await res.json();
+                  setRecord(
+                    records.find(
+                      (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
+                    )
+                  );
+                } catch (e) {
+                  console.error(e);
+                  setRecord(APIError.badResponse());
+                }
+              } else {
+                setRecord(await APIError.fromRes(res));
               }
-            } catch (e) {
-              console.error(e);
+            } catch {
+              setRecord(APIError.fetchError());
             }
           })();
         }

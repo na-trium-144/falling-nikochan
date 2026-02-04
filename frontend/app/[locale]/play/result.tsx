@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
+import { APIError } from "@/common/apiError";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
@@ -36,7 +37,7 @@ interface Props extends ResultParams {
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
-  record: RecordGetSummary | undefined;
+  record: RecordGetSummary | APIError | undefined;
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
@@ -276,6 +277,7 @@ export default function Result(props: Props) {
           </div>
         )}
         {props.showRecord &&
+          !(props.record instanceof APIError) &&
           props.record?.histogram &&
           props.record.count >= 5 && (
             <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
@@ -286,6 +288,7 @@ export default function Result(props: Props) {
               />
             </div>
           )}
+        {/* props.recordがエラーだった場合のメッセージはわざわざ要らないか */}
         <div style={{ ...appearingAnimation3(7) }}>
           <Button
             text={t("reset")}

@@ -1,5 +1,6 @@
 import { CenterBox } from "@/common/box";
 import { initMetadata, MetadataProps } from "@/metadata.js";
+import { GoHomeButton, LinksOnError } from "@/common/errorPageComponent";
 
 export async function generateMetadata({ params }: MetadataProps) {
   return initMetadata(
@@ -10,10 +11,16 @@ export async function generateMetadata({ params }: MetadataProps) {
   );
 }
 
-export default function NotFoundPage() {
+export default async function NotFoundPage() {
   return (
-    <main className="w-full h-dvh">
-      <CenterBox>PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE</CenterBox>
-    </main>
+    <CenterBox scrollableY>
+      <h4 className="mb-2 text-lg font-semibold font-title">
+        Error PLACEHOLDER_STATUS
+      </h4>
+      <p className="mb-3">PLACEHOLDER_MESSAGE</p>
+      {/*placeholder_statusが403または500番台に置き換えられた場合にのみクライアントサイドでlinksがレンダリングされる*/}
+      <LinksOnError dependOnStatus="PLACEHOLDER_STATUS" />
+      <GoHomeButton />
+    </CenterBox>
   );
 }

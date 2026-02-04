@@ -27,6 +27,8 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
+import { APIError } from "@/common/apiError";
+import { LinksOnError } from "@/common/errorPageComponent";
 
 interface MessageProps {
   className?: string;
@@ -462,10 +464,15 @@ interface MessageProps3 {
   className?: string;
   isTouch: boolean;
   exit: () => void;
-  msg: string;
+  msg: string | APIError;
 }
 export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
+  const te = useTranslations("error");
+
+  const status = props.msg instanceof APIError ? props.msg.status : undefined;
+  const message =
+    props.msg instanceof APIError ? props.msg.formatMsg(te) : props.msg;
 
   return (
     <CenterBox
@@ -473,10 +480,15 @@ export function InitErrorMessage(props: MessageProps3) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      <p className="mb-2">
-        <Caution className="inline-block text-lg align-middle mr-1" />
-        {props.msg}
-      </p>
+      {status && (
+        <h4 className="mb-2 text-lg font-semibold font-title">
+          Error {status}
+        </h4>
+      )}
+      <p className="mb-3">{message}</p>
+      {props.msg instanceof APIError && props.msg.isServerSide() && (
+        <LinksOnError />
+      )}
       <p>
         <Button
           text={t("exit")}

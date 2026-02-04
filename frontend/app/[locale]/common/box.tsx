@@ -123,7 +123,7 @@ export function CenterBox(props: Props) {
       <Box
         refInner={props.refInner}
         classNameOuter={clsx(
-          "w-max h-max max-w-full text-center",
+          "w-max h-max max-w-full max-h-full text-center",
           "pointer-events-auto"
         )}
         classNameInner={clsx(props.classNameInner)}

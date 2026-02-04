@@ -18,6 +18,7 @@ import { cors } from "hono/cors";
 import ColorThief from "colorthief";
 import { adjustColor } from "./style.js";
 import * as v from "valibot";
+import { fetchError } from "../error.js";
 
 export interface ChartBriefMin {
   ytId: string;
@@ -262,12 +263,14 @@ const ogApp = (config: {
 
       const pColorThief = fetch(
         `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
-      ).then(async (imgRes) => {
-        const imgBuf = await imgRes.arrayBuffer();
-        const color = await ColorThief.getColor(imgBuf, 1);
-        const colorAdjusted = adjustColor(color);
-        return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
-      });
+      )
+        .catch(fetchError(env(c)))
+        .then(async (imgRes) => {
+          const imgBuf = await imgRes.arrayBuffer();
+          const color = await ColorThief.getColor(imgBuf, 1);
+          const colorAdjusted = adjustColor(color);
+          return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
+        });
 
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
