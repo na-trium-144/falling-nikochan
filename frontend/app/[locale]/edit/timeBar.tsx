@@ -315,7 +315,7 @@ export default function TimeBar(props: Props) {
       {currentLevel?.nextSpeedInterp && cur && chart && (
         <>
           <div
-            className="absolute z-10"
+            className="absolute z-edit-timebar-interp"
             style={{
               bottom: -3.75 * rem,
               left: timeBarPos(cur.timeSec + chart.offset),

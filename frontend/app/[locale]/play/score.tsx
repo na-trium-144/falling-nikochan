@@ -36,7 +36,7 @@ function Cloud(props: CProps) {
             ? "/assets/cloud-black.svg?v=2"
             : "/assets/cloud.svg?v=2")
         }
-        className="absolute inset-0 -z-10 "
+        className="absolute inset-0 z-disp-cloud"
       />
       <div
         className={clsx(props.className, "absolute")}
@@ -206,7 +206,7 @@ export function ChainDisp(props: ChainProps) {
       >
         <div className="relative flex-1 flex flex-row items-baseline">
           <span className="flex-3" />
-          <span className="z-10">
+          <span className="z-disp-chain">
             <NumDisp
               num={props.chain}
               fontSize1={40}
@@ -217,11 +217,11 @@ export function ChainDisp(props: ChainProps) {
           </span>
           <span className="flex-2" />
           <ChainDropAnim
-            className="z-5"
+            className="z-disp-chain-drop"
             chain={props.chain}
             playing={props.playing}
           />
-          <ChainBigAnim className="z-20" chain={props.chain} />
+          <ChainBigAnim className="z-disp-chain-big" chain={props.chain} />
         </div>
         <span
           className="relative text-center w-max overflow-visible "
@@ -377,11 +377,11 @@ function SkewedProgressBar(props: PProps) {
     <div
       className={clsx(
         "absolute overflow-hidden rounded-full bg-slate-300/15 shadow-[0_0_0.1em] shadow-slate-300/25",
+        "z-disp-pbar",
         "dark:bg-stone-500/15 shadow-stone-500/25",
         "m-auto origin-bottom perspective-origin-bottom"
       )}
       style={{
-        zIndex: -1,
         top: 54,
         left: 0,
         right: 0,

@@ -8,7 +8,7 @@
   }
 
   .fn-mobile-footer {
-    @apply pb-2 px-8 z-10 w-full;
+    @apply pb-2 px-8 z-mobile-footer w-full;
     @apply flex flex-row items-center justify-stretch relative;
 
     /* 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素) */
@@ -28,13 +28,13 @@
   }
 
   .fn-pwa-install.fn-box {
-    @apply fixed z-15 bottom-(--container-mobile-footer) translate-y-1 inset-x-0;
+    @apply fixed z-pwa-install bottom-(--container-mobile-footer) translate-y-1 inset-x-0;
     @apply w-max max-w-full mx-auto shadow-modal;
     @apply rounded-sq-xl;
   }
 
   .fn-title {
-    @apply absolute leading-none text-center mx-auto w-96;
+    @apply absolute isolate leading-none text-center mx-auto w-96;
 
     > h1 {
       @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
@@ -57,7 +57,7 @@
       }
     }
     > .fn-title-diag {
-      @apply absolute border-b origin-bottom-right border-gray-300 -z-10;
+      @apply absolute border-b origin-bottom-right border-gray-300 -z-1;
       width: 12rem;
       right: calc(1rem + 1.5rem / 2 + 1rem);
       bottom: calc(1.55rem + 1.5rem / 2 - 2rem);

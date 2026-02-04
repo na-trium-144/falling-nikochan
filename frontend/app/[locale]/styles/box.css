@@ -1,6 +1,6 @@
 @layer components {
   .fn-modal-bg {
-    @apply fixed inset-0 grid-centering bg-slate-100/70 dark:bg-stone-900/50 z-20;
+    @apply fixed inset-0 grid-centering bg-slate-100/70 dark:bg-stone-900/50 z-modal-bg;
   }
 
   .fn-box {

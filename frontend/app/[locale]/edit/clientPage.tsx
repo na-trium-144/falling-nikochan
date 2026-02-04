@@ -519,7 +519,7 @@ export default function Edit(props: {
     >
       <div
         className={clsx(
-          "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs",
+          "fixed z-edit-mobile-header top-0 inset-x-0 backdrop-blur-2xs",
           "flex edit-wide:hidden flex-row items-center",
           "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200",
           "dark:from-orange-975/0 dark:to-orange-975"
@@ -567,7 +567,7 @@ export default function Edit(props: {
 
       {dragOver && (
         <div
-          className={clsx("fn-modal-bg", "z-30!")}
+          className="fn-modal-bg z-edit-dragover-bg"
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => {
             e.preventDefault();

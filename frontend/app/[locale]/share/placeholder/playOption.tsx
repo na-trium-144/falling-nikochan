@@ -88,7 +88,7 @@ export function PlayOption(props: Props) {
         <p className="flex-none w-max self-begin main-wide:self-center ">
           {t("selectLevel")}:
         </p>
-        <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center ">
+        <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center">
           {props.brief.levels.map(
             (level, i) =>
               level.unlisted || (
@@ -213,7 +213,7 @@ function LevelButton(props: {
       />
       <ButtonHighlight />
       <LevelBadge
-        className="absolute top-0.5 -right-3 "
+        className="absolute top-0.5 -right-3 z-10"
         status={[props.status]}
         levels={[levelTypes.indexOf(props.level.type)]}
       />

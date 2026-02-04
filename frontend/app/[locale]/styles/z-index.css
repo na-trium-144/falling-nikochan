@@ -1,0 +1,144 @@
+/*
+すべてのグローバルなz-indexはここで管理する。
+ローカルなもの(明らかに親にisolateがあるとわかるもの)はz-1とか直接書く & ±1など小さい値にする。
+ただしfn-glass-1,2,fn-highlightがローカルなz-index:1〜3を使うので注意
+*/
+
+@utility z-dropdown {
+  z-index: 60;
+}
+@utility z-caption {
+  z-index: 50;
+}
+
+/*モーダル系*/
+@utility z-modal-bg {
+  z-index: 20;
+}
+@utility z-changelog-bg {
+  z-index: 20;
+}
+@utility z-changelog {
+  z-index: 30;
+}
+@utility z-share-image-bg {
+  z-index: 30;
+}
+@utility z-edit-dragover-bg {
+  /* captionが出ていようがdropdownが出ていようが受け付けるので */
+  z-index: 70;
+}
+
+@utility z-pwa-install {
+  z-index: 15;
+}
+@utility z-mobile-footer {
+  z-index: 10;
+}
+
+@utility z-irasutoya-like-bg {
+  z-index: -100;
+}
+
+/*play*/
+@utility z-play-result {
+  z-index: 21;
+}
+@utility z-play-loading {
+  z-index: 20;
+}
+@utility z-play-error {
+  z-index: 20;
+}
+@utility z-play-ready {
+  z-index: 20;
+}
+@utility z-play-stop {
+  z-index: 20;
+}
+@utility z-play-status-overlay {
+  z-index: 19;
+}
+@utility z-play-music-area {
+  z-index: 18;
+}
+@utility z-play-version {
+  z-index: 16;
+}
+@utility z-play-status {
+  z-index: 15;
+}
+@utility z-play-slime {
+  z-index: 14;
+}
+@utility z-play-bpm {
+  z-index: 13;
+}
+@utility z-play-disp {
+  z-index: 10;
+}
+@utility z-irasutoya-like-grass-near {
+  z-index: 10;
+}
+@utility z-play-fw {
+  z-index: 0;
+}
+@utility z-irasutoya-like-grass-far {
+  z-index: -10;
+}
+
+/*fallingwindowはisolateではある*/
+@utility z-fw-canvas-nikochan {
+  z-index: 0;
+}
+@utility z-fw-target-line {
+  z-index: -3;
+}
+@utility z-fw-canvas-tail {
+  z-index: -7;
+}
+@utility z-fw-particle {
+  z-index: -10;
+}
+@utility z-fw-ripple {
+  z-index: -20;
+}
+/*cloudもisolateではある*/
+@utility z-disp-chain-big {
+  z-index: 20;
+}
+@utility z-disp-chain {
+  z-index: 10;
+}
+@utility z-disp-chain-drop {
+  /*これがスコアゲージとか他の要素(デフォルトのz-0)よりも手前、chain数値より奥*/
+  z-index: 5;
+}
+/* ScoreDiffAnimが zIndex: 5 - nd.indexInStep */
+@utility z-disp-pbar {
+  z-index: -1;
+}
+@utility z-disp-cloud {
+  z-index: -10;
+}
+
+/*edit*/
+@utility z-edit-mobile-header {
+  z-index: 15;
+}
+@utility z-edit-ace-placeholder {
+  z-index: -10;
+}
+@utility z-edit-timebar-interp {
+  z-index: 10;
+}
+/* これはFallingWindowの中にあるので、FallingWindowにzを設定すればローカルになる */
+@utility z-edit-draghandle {
+  z-index: 10;
+}
+@utility z-edit-drag-overlay {
+  z-index: 10;
+}
+@utility z-edit-trace-current {
+  z-index: 10;
+}

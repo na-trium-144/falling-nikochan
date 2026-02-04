@@ -29,7 +29,7 @@ export default function Range(rangeProps: Props) {
         <div
           {...props}
           className={clsx(
-            "relative inline-block h-5 w-40 my-1 isolation",
+            "relative inline-block h-5 w-40 my-1 isolate",
             rangeProps.className
           )}
         >

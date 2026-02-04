@@ -107,7 +107,7 @@ export function MusicArea(props: Props) {
   return (
     <div
       className={clsx(
-        "z-10 grow-0 shrink-0 flex",
+        "grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
         props.isMobile
           ? "rounded-b-sq-xl pb-1"

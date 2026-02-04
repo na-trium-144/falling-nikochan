@@ -189,7 +189,7 @@ export function LuaTabProvider(props: Props & PProps) {
     <LuaPositionContext.Provider value={{ data, setData }}>
       {props.children}
       <div
-        className={clsx("absolute rounded-sq-box", visible || "hidden")}
+        className={clsx("absolute rounded-sq-box isolate", visible || "hidden")}
         style={{ top, left, width, height }}
       >
         <AceEditor
@@ -305,5 +305,7 @@ export function LuaTabPlaceholder(props: {
       parentContainer?.removeEventListener("scroll", onScroll);
     };
   }, [width, height, ref, setData, parentContainer]);
-  return <div ref={ref} className="absolute inset-[1px] -z-10 " />;
+  return (
+    <div ref={ref} className="absolute inset-[1px] z-edit-ace-placeholder " />
+  );
 }

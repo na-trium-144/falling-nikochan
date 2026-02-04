@@ -397,14 +397,12 @@ export default function FallingWindow(props: Props) {
       {/* For nikochans tail */}
       <canvas
         ref={tailsCanvasRef}
+        className="absolute z-fw-canvas-tail pointer-events-none"
         style={{
-          zIndex: -7,
-          position: "absolute",
           left: canvasLeft.current,
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          pointerEvents: "none",
           opacity: isDark ? 0.5 : 0.5,
         }}
         width={canvasWidth.current * tailsCanvasDPR}
@@ -413,14 +411,12 @@ export default function FallingWindow(props: Props) {
       {/* For nikochan */}
       <canvas
         ref={nikochanCanvasRef}
+        className="absolute z-fw-canvas-nikochan pointer-events-none"
         style={{
-          zIndex: 0,
-          position: "absolute",
           left: canvasLeft.current,
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          pointerEvents: "none",
           opacity: isDark ? 0.7 : 0.9,
         }}
         width={canvasWidth.current * nikochanCanvasDPR.current}
@@ -429,7 +425,7 @@ export default function FallingWindow(props: Props) {
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
         <TargetLine
-          className="-z-3"
+          className="z-fw-target-line"
           barFlash={
             props.barFlash === undefined || marginX === undefined
               ? undefined
@@ -658,7 +654,7 @@ function Ripple(props: RProps) {
   }, [noteSize]);
   return (
     <div
-      className="absolute -z-20 dark:opacity-70 opacity-90"
+      className="absolute z-fw-ripple dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,
@@ -749,7 +745,7 @@ function Particle(props: PProps) {
 
   return (
     <div
-      className="absolute -z-10 dark:opacity-70 opacity-90"
+      className="absolute z-fw-particle dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,

@@ -43,7 +43,7 @@ export function ChangeLogPopup(props: PopupProps) {
     popupOpened && (
       <>
         <div
-          className={clsx("fixed z-20 inset-0")}
+          className={clsx("fixed z-changelog-bg inset-0")}
           onClick={(e) => {
             props.onClose();
             e.stopPropagation();
@@ -51,7 +51,7 @@ export function ChangeLogPopup(props: PopupProps) {
         />
         <div
           className={clsx(
-            "absolute bottom-full mb-1 left-1/2 w-0 z-30",
+            "absolute bottom-full mb-1 left-1/2 w-0 z-changelog",
             "grid-centering"
           )}
         >

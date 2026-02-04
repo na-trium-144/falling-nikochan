@@ -35,7 +35,7 @@ function Caption({ top, left, content }: CaptionProps) {
 
   return (
     <div
-      className={clsx("pointer-events-none text-sm fixed z-50")}
+      className={clsx("pointer-events-none text-sm fixed z-caption isolate")}
       style={{ top, left }}
     >
       <div

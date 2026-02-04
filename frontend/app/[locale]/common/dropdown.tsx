@@ -116,7 +116,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
         minWidth: "max-content",
       }}
       classNameOuter={clsx(
-        "fixed! z-50 -translate-x-1/2",
+        "fixed! z-dropdown -translate-x-1/2",
         "rounded-sq-2xl! shadow-modal overflow-hidden",
         "transition-[scale,opacity] duration-150",
         popupAppearing

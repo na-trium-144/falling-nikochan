@@ -30,6 +30,7 @@
 /* utilities */
 @import "./styles/utilities.css";
 @import "./styles/squircle.css";
+@import "./styles/z-index.css";
 
 /* components in ./common/ */
 @import "./styles/glass.css";
