@@ -104,6 +104,11 @@ YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@ni
     * Set `NODEJS_HELPERS=0`. https://github.com/honojs/hono/issues/1256
     * Set `ENABLE_EXPERIMENTAL_COREPACK=1`. https://vercel.com/docs/builds/configure-a-build#corepack
     * Run `pnpm config set node-linker hoisted --local` before installing dependencies. (Otherwise Vercel cannot find packages in workspaces)
+* Cloudflare Worker
+    * Access to MongoDB from Cloudflare worker is unstable for some reason.
+    * Currently, API requests with a hostname that exactly matches `nikochan.utcode.net` are passed to the origin server before being processed by Cloudflare worker.
+* Reverse proxy
+    * Falling Nikochan uses the rightmost value of `x-forwarded-for` for the rate limit. Be careful not to add an IP address to `x-forwarded-for` multiple times in the process of going through two or more proxy servers.
 
 ## API
 
