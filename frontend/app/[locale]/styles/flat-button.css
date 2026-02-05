@@ -48,6 +48,18 @@
       @variant active {
         @apply bg-sky-200 dark:bg-orange-950;
       }
+
+      &.fn-dropdown-item {
+        &.fn-selected {
+          @apply bg-sky-200/75 dark:bg-orange-950/75;
+        }
+        @variant hover {
+          @apply bg-sky-200/75 dark:bg-orange-950/75;
+        }
+        @variant active {
+          @apply bg-sky-200/75 dark:bg-orange-950/75;
+        }
+      }
     }
 
     &.fn-inverted {

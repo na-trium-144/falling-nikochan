@@ -1,0 +1,22 @@
+@layer components {
+  .fn-dropdown.fn-box {
+    @apply z-dropdown rounded-sq-2xl shadow-modal;
+
+    > .fn-box-inner {
+      @apply flex flex-col;
+    }
+
+    .fn-dropdown-item {
+      /* bg色は.fn-flat-button.fn-sky.fn-dropdown-item で*/
+      @apply pl-4 pr-4 py-1 flex flex-row items-center justify-center;
+
+      &:has(.fn-check) {
+        @apply pl-7;
+      }
+
+      > .fn-check {
+        @apply absolute left-2 inset-y-0;
+      }
+    }
+  }
+}
