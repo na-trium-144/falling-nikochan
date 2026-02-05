@@ -1,0 +1,29 @@
+@layer components {
+  .fn-range {
+    @apply relative inline-block h-5 w-40 my-1 isolate;
+
+    > .fn-range-bg {
+      @apply absolute inset-y-1.5 inset-x-0 rounded-full -z-10;
+      @apply bg-slate-400/50 dark:bg-stone-500/5;
+
+      > .fn-range-fill {
+        @apply absolute inset-y-0 left-0 rounded-full;
+        @apply bg-blue-400 dark:bg-amber-800;
+      }
+    }
+
+    > .fn-range-thumb {
+      @apply rounded-full w-5 h-5 shadow-sm;
+      @apply bg-blue-300 dark:bg-amber-700;
+      &.fn-r-hover {
+        @apply bg-blue-200 dark:bg-amber-600;
+      }
+      &.fn-r-active {
+        @apply bg-blue-400 dark:bg-amber-800;
+      }
+      &.fn-r-disabled {
+        @apply bg-slate-400 dark:bg-stone-500;
+      }
+    }
+  }
+}
