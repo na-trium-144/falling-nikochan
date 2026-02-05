@@ -145,17 +145,16 @@ export default function StatusBox(props: Props) {
                 "inline-block w-[3.75em] pl-[0.5em] text-center",
                 "text-orange-400/75 dark:text-sky-500/75"
               )}
-              style={{ fontSize: "1.2em", lineHeight: 1 }}
             >
               {props.judgeCount[ji] !== props.bestCount[ji] && (
-                <>
+                <span style={{ fontSize: "1.2em", lineHeight: 1 }}>
                   <span className="mr-0.5">
                     {props.judgeCount[ji] > props.bestCount[ji] ? "+" : "-"}
                   </span>
                   <span>
                     {Math.abs(props.judgeCount[ji] - props.bestCount[ji])}
                   </span>
-                </>
+                </span>
               )}
             </span>
           )}
@@ -186,15 +185,14 @@ export default function StatusBox(props: Props) {
                 "inline-block w-[3.75em] pl-[0.5em] text-center",
                 "text-orange-400/75 dark:text-sky-500/75"
               )}
-              style={{ fontSize: "1.2em", lineHeight: 1 }}
             >
               {props.bigCount !== props.bestCount[4] && (
-                <>
+                <span style={{ fontSize: "1.2em", lineHeight: 1 }}>
                   <span className="mr-0.5">
                     {props.bigCount > props.bestCount[4] ? "+" : "-"}
                   </span>
                   <span>{Math.abs(props.bigCount - props.bestCount[4])}</span>
-                </>
+                </span>
               )}
             </span>
           ) : (
