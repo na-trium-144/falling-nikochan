@@ -9,7 +9,6 @@ import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import { linkStyle1, linkStyle3 } from "@/common/linkStyle";
 import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
@@ -20,7 +19,6 @@ import { FestivalLink, useFestival } from "@/common/festival";
 import Code from "@icon-park/react/lib/icons/Code";
 import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { lastVisitedOld } from "@/common/version";
-import { inputStyle } from "@/common/input";
 import { XLogo } from "@/common/x";
 
 export default function LinksPage({ locale }: { locale: string }) {
@@ -52,8 +50,8 @@ export default function LinksPage({ locale }: { locale: string }) {
               locale={locale}
               className={clsx(
                 "relative inline-block align-top pr-6 text-center",
-                linkStyle1,
-                inputStyle
+                "fn-link-1",
+                "fn-input"
               )}
             >
               <div>{langNames[locale]}</div>
@@ -79,8 +77,8 @@ export default function LinksPage({ locale }: { locale: string }) {
             <ThemeSwitcher
               className={clsx(
                 "relative inline-block align-top pr-6 text-center",
-                linkStyle1,
-                inputStyle
+                "fn-link-1",
+                "fn-input"
               )}
             >
               <div>
@@ -113,7 +111,7 @@ export default function LinksPage({ locale }: { locale: string }) {
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
             <Link
-              className={clsx(linkStyle3, "ml-2 inline-block relative")}
+              className={clsx("fn-link-3", "ml-2 inline-block relative")}
               href={`/${locale}/main/version`}
               prefetch={!process.env.NO_PREFETCH}
             >
@@ -134,7 +132,7 @@ export default function LinksPage({ locale }: { locale: string }) {
           </p>
           <p className="no-pc">
             <Link
-              className={clsx(linkStyle3)}
+              className={clsx("fn-link-3")}
               href={`/${locale}/main/policies`}
               prefetch={!process.env.NO_PREFETCH}
             >
@@ -231,7 +229,7 @@ function EMailImg() {
             style={{
               fill: theme.isDark
                 ? "var(--color-blue-500)"
-                : "var(--color-blue-800)", // linkStyle3
+                : "var(--color-blue-800)", // "fn-link-3"
             }}
           />
         </g>

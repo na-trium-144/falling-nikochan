@@ -4,8 +4,7 @@ import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
-import Input, { inputStyle } from "@/common/input";
-import { linkStyle1 } from "@/common/linkStyle";
+import Input from "@/common/input";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Caution from "@icon-park/react/lib/icons/Caution";
 import Pause from "@icon-park/react/lib/icons/Pause";
@@ -155,7 +154,7 @@ export function ReadyMessage(props: MessageProps) {
         )}
         {small ? (
           <button
-            className={clsx("block w-max relative mx-auto mt-2", linkStyle1)}
+            className={clsx("block w-max relative mx-auto mt-2", "fn-link-1")}
             onClick={() => setOptionOpen(!optionOpen)}
           >
             <RightOne className="absolute left-0 bottom-1 " theme="filled" />
@@ -264,8 +263,8 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               onSelect={(s: string) => props.setPlaybackRate(Number(s))}
               className={clsx(
                 "relative inline-block pr-6 text-center",
-                linkStyle1,
-                inputStyle
+                "fn-link-1",
+                "fn-input"
               )}
             >
               <div>

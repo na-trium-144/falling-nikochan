@@ -10,7 +10,6 @@ import {
   useLayoutEffect,
   useState,
 } from "react";
-import { linkStyle1 } from "./linkStyle.js";
 import { useTranslations } from "next-intl";
 import { themeColorDark, themeColorLight } from "@/metadata.js";
 import DropDown from "./dropdown";
@@ -124,7 +123,7 @@ export function ThemeSwitcher(props: {
 
   return (
     <DropDown
-      className={clsx(linkStyle1, props.className)}
+      className={clsx("fn-link-1", props.className)}
       value={theme}
       options={[
         { value: "dark" as const, label: t("dark") },

@@ -1,6 +1,5 @@
 import clsx from "clsx/lite";
 import { ExternalLink } from "@/common/extLink";
-import { linkStyle3 } from "@/common/linkStyle";
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 
@@ -13,7 +12,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         <ExternalLink href={props.href}>{props.children}</ExternalLink>
       ) : (
         <Link
-          className={clsx(linkStyle3)}
+          className={clsx("fn-link-3")}
           href={props.href}
           prefetch={!process.env.NO_PREFETCH}
         >

@@ -123,14 +123,14 @@ export function MusicArea(props: Props) {
     >
       <span
         className={clsx(
-          colorThief.boxBorderStyle1,
+          "fn-glass-1",
           "border-t-0 border-r-0",
           props.isMobile && "border-l-0"
         )}
       />
       <span
         className={clsx(
-          colorThief.boxBorderStyle2,
+          "fn-glass-2",
           "border-t-0 border-r-0",
           props.isMobile && "border-l-0"
         )}

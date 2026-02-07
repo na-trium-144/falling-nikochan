@@ -9,7 +9,6 @@ import {
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
@@ -85,8 +84,8 @@ export function ShareBox(props: Props) {
           )}
           style={{ color: colorThief.currentColor }}
         >
-          <span className={colorThief.boxBorderStyle1} />
-          <span className={colorThief.boxBorderStyle2} />
+          <span className={"fn-glass-1"} />
+          <span className={"fn-glass-2"} />
           <FlexYouTube
             fixedSide="width"
             className="w-full"
@@ -126,13 +125,13 @@ export function ShareBox(props: Props) {
               >
                 <span
                   className={clsx(
-                    colorThief.boxBorderStyle1,
+                    "fn-glass-1",
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
                 <span
                   className={clsx(
-                    colorThief.boxBorderStyle2,
+                    "fn-glass-2",
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
@@ -227,7 +226,7 @@ export function ShareBox(props: Props) {
         <p className="mt-2">
           <span className="no-mobile mr-2">{t("shareLink")}:</span>
           <a
-            className={clsx("inline-block py-2", linkStyle1)}
+            className={clsx("inline-block py-2", "fn-link-1")}
             href={shareLink.path}
             onClick={(e) => e.preventDefault()}
           >

@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
 import YAML from "yaml";
-import { linkStyle1 } from "@/common/linkStyle";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Right from "@icon-park/react/lib/icons/Right";
 import Down from "@icon-park/react/lib/icons/Down";
@@ -62,7 +61,7 @@ export function DevPage(props: { locale: string }) {
           >
             <div className="no-mobile mb-3 flex flex-row items-center">
               <button
-                className={clsx("block w-max", linkStyle1)}
+                className={clsx("block w-max", "fn-link-1")}
                 onClick={() => history.back()}
               >
                 <ArrowLeft className="inline-block align-middle mr-2 " />

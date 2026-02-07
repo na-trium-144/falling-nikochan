@@ -68,7 +68,5 @@ export function useColorThief() {
       : isDark
         ? "var(--color-stone-700)"
         : "var(--color-white)",
-    boxBorderStyle1: "fn-glass-1",
-    boxBorderStyle2: "fn-glass-2",
   };
 }

@@ -27,7 +27,6 @@ import { initSession, SessionData } from "@/play/session.js";
 import { useDisplayMode } from "@/scale.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import { GuideMain } from "./guideMain.js";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption.js";
@@ -41,11 +40,6 @@ import {
 import { useSE } from "@/common/se.js";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 
@@ -611,7 +605,7 @@ export default function Edit(props: {
             <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
               {standalone && (
                 <button
-                  className={clsx(linkStyle1)}
+                  className={clsx("fn-link-1")}
                   onClick={() => {
                     historyBackWithReview();
                   }}
@@ -642,8 +636,8 @@ export default function Edit(props: {
               )}
               style={{ color: colorThief.currentColor }}
             >
-              <span className={clsx(colorThief.boxBorderStyle1)} />
-              <span className={clsx(colorThief.boxBorderStyle2)} />
+              <span className={clsx("fn-glass-1")} />
+              <span className={clsx("fn-glass-2")} />
               <FlexYouTube
                 fixedSide="width"
                 className={clsx(
@@ -686,7 +680,7 @@ export default function Edit(props: {
               <button
                 className={clsx(
                   "self-start flex flex-row items-center",
-                  linkStyle1
+                  "fn-link-1"
                 )}
                 onClick={() => {
                   setDragMode(
@@ -870,7 +864,7 @@ export default function Edit(props: {
                     key={i}
                     className={clsx(
                       "rounded-t-2xl px-3 pt-2 pb-1",
-                      skyFlatButtonStyle
+                      "fn-flat-button fn-sky"
                     )}
                     onClick={() => {
                       setTab(i);
@@ -878,10 +872,10 @@ export default function Edit(props: {
                     }}
                   >
                     <span
-                      className={clsx(skyFlatButtonBorderStyle1, "border-b-0")}
+                      className={clsx("fn-glass-1", "border-b-0")}
                     />
                     <span
-                      className={clsx(skyFlatButtonBorderStyle2, "border-b-0")}
+                      className={clsx("fn-glass-2", "border-b-0")}
                     />
                     <ButtonHighlight />
                     {t(`${key}.title`)}

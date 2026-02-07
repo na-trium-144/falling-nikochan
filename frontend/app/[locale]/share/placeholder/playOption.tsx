@@ -29,17 +29,6 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import {
-  boxButtonBorderStyle1,
-  boxButtonBorderStyle2,
-  boxButtonStyle,
-  invertedFlatButtonBorderStyle1,
-  invertedFlatButtonBorderStyle2,
-  invertedFlatButtonStyle,
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton";
 import { APIError } from "@/common/apiError";
 
 interface Props {
@@ -195,7 +184,7 @@ function LevelButton(props: {
       className={clsx(
         "cursor-pointer w-full",
         "relative rounded-lg px-2 py-0.5 my-0.5",
-        props.selected ? boxButtonStyle : skyFlatButtonStyle,
+        props.selected ? "fn-flat-button fn-plain fn-selected" : "fn-flat-button fn-sky",
         props.selected ? "shadow-2xs" : "hover:shadow-2xs",
         "shadow-slate-500/50 dark:shadow-stone-950/50"
       )}
@@ -203,12 +192,12 @@ function LevelButton(props: {
     >
       <span
         className={clsx(
-          props.selected ? boxButtonBorderStyle1 : skyFlatButtonBorderStyle1
+          props.selected ? "fn-glass-1" : "fn-glass-1"
         )}
       />
       <span
         className={clsx(
-          props.selected ? boxButtonBorderStyle2 : skyFlatButtonBorderStyle2
+          props.selected ? "fn-glass-2" : "fn-glass-2"
         )}
       />
       <ButtonHighlight />
@@ -369,7 +358,7 @@ function SelectedLevelInfo(props: {
         className={clsx(
           "w-full mt-2 px-2 rounded-sq-xl",
           "flex flex-col items-center",
-          selectedBestScore && invertedFlatButtonStyle
+          selectedBestScore && "fn-flat-button fn-inverted"
         )}
         onClick={() =>
           setShowBestDetail(!!selectedBestScore && !showBestDetail)
@@ -377,8 +366,8 @@ function SelectedLevelInfo(props: {
       >
         {selectedBestScore && (
           <>
-            <span className={invertedFlatButtonBorderStyle1} />
-            <span className={invertedFlatButtonBorderStyle2} />
+            <span className={"fn-glass-1"} />
+            <span className={"fn-glass-2"} />
             <ButtonHighlight />
           </>
         )}

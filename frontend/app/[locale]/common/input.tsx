@@ -3,9 +3,6 @@
 import clsx from "clsx/lite";
 import { useEffect, useState, RefObject } from "react";
 
-// Export CSS class name for compatibility
-export const inputStyle = "fn-input";
-
 // actualvalue: 実際の値 (フォーカスが外れたらこの値に戻る)
 // updatevalue: 値を更新 isValidがtrueの場合にのみ呼ばれる
 // updateinvalidvalue: isValidがfalseだった場合呼ばれる
@@ -42,7 +39,7 @@ export default function Input(props: Props) {
       className={clsx(
         "font-main-ui",
         !props.left && "text-right",
-        inputStyle,
+        "fn-input",
         props.isValid && !props.isValid(value) && "text-red-500",
         props.disabled &&
           "text-slate-400 border-slate-200 dark:text-stone-600 dark:border-stone-700",

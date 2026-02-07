@@ -9,7 +9,6 @@ import More from "@icon-park/react/lib/icons/More";
 import Search from "@icon-park/react/lib/icons/Search";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
-import { linkStyle1 } from "./linkStyle.js";
 import { ThemeSwitcher, useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -54,7 +53,7 @@ export function PCFooter(props: Props) {
           {pcTabTitleKeys.map((key, i) => (
             <LinkWithReview
               key={i}
-              className={clsx("px-2", linkStyle1)}
+              className={clsx("px-2", "fn-link-1")}
               href={`/${props.locale}${tabURLs[key]}`}
             >
               {tm(key + ".title")}
@@ -67,7 +66,7 @@ export function PCFooter(props: Props) {
       >
         <div className="relative">
           <button
-            className={clsx("inline-block relative", linkStyle1)}
+            className={clsx("inline-block relative", "fn-link-1")}
             onClick={() => {
               setShowChangeLog(!showChangeLog);
             }}

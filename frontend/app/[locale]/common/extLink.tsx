@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { linkStyle1, linkStyle2, linkStyle3 } from "@/common/linkStyle.js";
 import { useStandaloneDetector } from "./pwaInstall";
 import Link from "next/link";
 import EfferentThree from "@icon-park/react/lib/icons/EfferentThree";
@@ -27,7 +26,7 @@ export function ExternalLink(props: Props) {
   if (props.onClick) {
     return (
       <button
-        className={clsx(linkStyle1, props.className)}
+        className={clsx("fn-link-1", props.className)}
         onClick={props.onClick}
       >
         <LinkChildren {...props} />
@@ -35,7 +34,7 @@ export function ExternalLink(props: Props) {
     );
   } else if (props.href?.startsWith("/") && isStandalone) {
     return (
-      <Link className={clsx(linkStyle1, props.className)} href={props.href}>
+      <Link className={clsx("fn-link-1", props.className)} href={props.href}>
         <LinkChildren {...props} />
       </Link>
     );
@@ -44,10 +43,10 @@ export function ExternalLink(props: Props) {
       <a
         className={clsx(
           props.href?.startsWith("/") && !props.forceColor
-            ? linkStyle1
+            ? "fn-link-1"
             : props.noColor
-              ? linkStyle2
-              : linkStyle3,
+              ? "fn-link-2"
+              : "fn-link-3",
           props.className
         )}
         href={props.href}

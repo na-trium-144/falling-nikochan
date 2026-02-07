@@ -9,10 +9,6 @@ import GrinningFaceWithTightlyClosedEyesOpenMouth from "@icon-park/react/lib/ico
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
-import {
-  invertedFlatButtonBorderStyle1,
-  invertedFlatButtonBorderStyle2,
-} from "@/common/flatButton";
 
 interface Props {
   className?: string;
@@ -65,7 +61,7 @@ export default function StatusBox(props: Props) {
             "shadow-xs z-3",
             props.bestCount
               ? clsx(
-                  // invertedFlatButtonStyle,
+                  // "fn-flat-button fn-inverted",
                   "backdrop-blur-xs",
                   "bg-orange-200/50 dark:bg-sky-800/50",
                   "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
@@ -78,13 +74,13 @@ export default function StatusBox(props: Props) {
         >
           <span
             className={clsx(
-              props.bestCount ? invertedFlatButtonBorderStyle1 : "fn-glass-1",
+              props.bestCount ? "fn-glass-1" : "fn-glass-1",
               "opacity-100!"
             )}
           />
           <span
             className={clsx(
-              props.bestCount ? invertedFlatButtonBorderStyle2 : "fn-glass-2",
+              props.bestCount ? "fn-glass-2" : "fn-glass-2",
               "opacity-100!"
             )}
           />

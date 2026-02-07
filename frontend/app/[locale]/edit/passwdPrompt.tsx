@@ -1,7 +1,6 @@
 import Button from "@/common/button";
 import CheckBox from "@/common/checkBox";
 import Input from "@/common/input";
-import { linkStyle1 } from "@/common/linkStyle";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -118,7 +117,7 @@ export function PasswdPrompt(props: PasswdProps) {
         {process.env.NODE_ENV === "development" && (
           <div className="mb-2">
             <button
-              className={clsx(linkStyle1, "w-max m-auto")}
+              className={clsx("fn-link-1", "w-max m-auto")}
               onClick={() =>
                 props.fetchChart(cid, {
                   bypass: true,

@@ -2,7 +2,6 @@
 
 import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
-import { linkStyle3 } from "@/common/linkStyle";
 import { SmallDomainShare } from "@/common/small";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
@@ -44,7 +43,7 @@ export function AboutContent3({ locale }: { locale: string }) {
               linkPolicies: (c) => (
                 <Link
                   href={`/${locale}/main/policies`}
-                  className={clsx(linkStyle3)}
+                  className={clsx("fn-link-3")}
                   prefetch={!process.env.NO_PREFETCH}
                 >
                   {c}

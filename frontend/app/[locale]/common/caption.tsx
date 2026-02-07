@@ -2,10 +2,6 @@ import clsx from "clsx/lite";
 import Help from "@icon-park/react/lib/icons/Help";
 import { ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-} from "./flatButton";
 import { ButtonHighlight } from "./button";
 
 interface CaptionProps {
@@ -48,8 +44,8 @@ function Caption({ top, left, content }: CaptionProps) {
         )}
         style={{ translate: `${translateX} -0.5rem` }}
       >
-        <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />
-        <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
+        <span className={clsx("fn-glass-1", "opacity-100!")} />
+        <span className={clsx("fn-glass-2", "opacity-100!")} />
         {content}
       </div>
       <span

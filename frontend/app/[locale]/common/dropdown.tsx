@@ -5,7 +5,6 @@ import { ReactNode, useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Box } from "./box";
 import { ButtonHighlight } from "./button";
-import { skyFlatButtonStyle } from "./flatButton";
 import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 

@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
-import { linkStyle1 } from "./linkStyle";
 import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { updateLastVisited } from "./version";
@@ -88,7 +87,7 @@ export function ChangeLogPopup(props: PopupProps) {
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>
               <Link
-                className={clsx("block w-max mx-auto mt-2", linkStyle1)}
+                className={clsx("block w-max mx-auto mt-2", "fn-link-1")}
                 href={`/${props.locale}/main/version`}
                 prefetch={!process.env.NO_PREFETCH}
               >
