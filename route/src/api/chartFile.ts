@@ -196,8 +196,10 @@ const chartFileApp = async (config: {
       }),
       (c) => {
         const chart = c.get("chart");
+        const filename = `${c.get("cid")}.fn${chart.ver}.mpk`;
         return c.body(new Blob([msgpack.encode(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
+          "Content-Disposition": `attachment; filename="${filename}"`,
         });
       }
     )

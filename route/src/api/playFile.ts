@@ -117,8 +117,10 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
+      const filename = `${cid}.${lvIndex}.fn${level.ver}p.mpk`;
       return c.body(new Blob([msgpack.encode(level)]).stream(), 200, {
         "Content-Type": "application/vnd.msgpack",
+        "Content-Disposition": `attachment; filename="${filename}"`,
       });
     } finally {
       await client.close();
