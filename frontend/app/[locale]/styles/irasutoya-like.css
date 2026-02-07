@@ -1,7 +1,18 @@
+body.fn-csr-ready {
+  @apply text-default dark:text-default-dark;
+
+  > .fn-fallback-bg {
+    @apply fixed inset-0 pointer-events-none z-fallback-bg;
+    @apply bg-gradient-to-t;
+    @apply bg-sky-50 from-sky-50 to-sky-200;
+    @apply dark:bg-orange-950 dark:from-orange-950 dark:to-orange-975;
+  }
+}
+
 @layer components {
   .fn-irasutoya-like-bg {
     /* absoluteにするとなぜかSafariでパフォーマンスが大幅に低下する。 */
-    @apply fixed -inset-0 pointer-events-none z-irasutoya-like-bg;
+    @apply fixed inset-0 pointer-events-none z-irasutoya-like-bg;
 
     #bgGradient > stop {
       &:nth-child(1) {

@@ -7,7 +7,6 @@ import { ShareImageModalProvider } from "./common/shareLinkAndImage.jsx";
 import { ChangeLogProvider } from "./common/changeLog.jsx";
 import { importChangeLogMDX } from "@falling-nikochan/i18n/mdx.js";
 import { FPSCalculatorProvider } from "./common/fpsCalculator.jsx";
-import { IrasutoyaLikeBg } from "./common/irasutoyaLike.jsx";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -32,7 +31,6 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className="w-full h-dvh overflow-hidden touch-none ">
         <ThemeProvider>
-          <IrasutoyaLikeBg />
           <IntlProvider locale={locale}>
             <ChangeLogProvider changeLog={<ChangeLog />}>
               <PWAInstallProvider>
