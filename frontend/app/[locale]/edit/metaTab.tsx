@@ -22,6 +22,7 @@ import { useDisplayMode } from "@/scale.js";
 import { LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
 import Select from "@/common/select";
+import clsx from "clsx/lite";
 
 interface Props {
   chart?: ChartEditing;
@@ -122,7 +123,7 @@ interface Props2 {
   remoteSave: () => Promise<void>;
   saveState: SaveState;
   remoteDelete: () => Promise<void>;
-  localSave: (format: "yml" | "lua") => void;
+  localSave: (format: "gz" | "yml" | "lua") => void;
   localSaveState: SaveState;
   localLoad: (buffer: ArrayBuffer) => Promise<void>;
   localLoadState: LocalLoadState;
@@ -268,12 +269,22 @@ export function MetaTab(props: Props2) {
           <HelpIcon>
             {t.rich("localSaveLoadHelp", {
               br: () => <br />,
-              extension: `.fn${currentChartVer}.yml`,
+              code: (c) => (
+                <code
+                  className={clsx(
+                    "font-mono text-xs px-1 py-0.5 rounded border",
+                    "bg-white/30 border-slate-300/75",
+                    "dark:bg-stone-700/30 dark:border-stone-500/75"
+                  )}
+                >
+                  {c}
+                </code>
+              ),
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
             <Select
-              options={(["yml", "lua"] as const).map((format) => ({
+              options={(["gz", "yml", "lua"] as const).map((format) => ({
                 value: format,
                 label: `.fn${currentChartVer}.${format}`,
               }))}

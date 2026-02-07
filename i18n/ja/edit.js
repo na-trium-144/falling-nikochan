@@ -114,8 +114,9 @@ export default {
       localSaveLoad: "ローカルに保存/読み込み",
       localSaveLoadHelp:
         "現在の譜面をあなたの端末上に保存・読み込みできます。<br></br>" +
-        "保存時のファイル形式は 〜.{extension} ですが、<br></br>" +
-        "旧バージョンのファイルの読み込みにも対応しています。<br></br>" +
+        "<code>.gz</code>はファイルサイズが小さく、<code>.yml</code>はテキストエディタ等で開けます。<br></br>" +
+        "外部で編集するなら<code>.lua</code>が便利ですが、<br></br>" +
+        "コピーした音符など保持されないデータがあります。<br></br>" +
         "保存したファイルにはパスワードはかかっていません。",
       saveToLocal: "保存",
       loadFromLocal: "ファイルを開く",
