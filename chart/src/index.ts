@@ -5,6 +5,7 @@ export * from "./command.js";
 export * from "./difficulty.js";
 export * from "./dummySamples.js";
 export * from "./gameConstant.js";
+export * from "./luaTable.js";
 export * from "./rank.js";
 export * from "./record.js";
 export * from "./resultParams.js";

@@ -34,30 +34,49 @@ export const LevelMinSchema14 = () =>
   });
 
 export const ChartMinSchema14 = () =>
-  v.object({
-    falling: v.literal("nikochan"),
-    ver: v.union([v.literal(14)]),
-    offset: v.pipe(v.number(), v.minValue(0)),
-    ytId: v.string(),
-    title: v.string(),
-    composer: v.string(),
-    chartCreator: v.string(),
-    locale: v.string(),
-    levelsMin: v.array(LevelMinSchema14()),
-    lua: v.array(v.array(v.string())),
-    // エディターの拡大率、 1.5^x 倍にする
-    zoom: v.pipe(v.number(), v.integer()),
-    copyBuffer: v.pipe(v.array(v.nullable(NoteCommandSchema9())), v.length(10)),
-  });
+  v.pipe(
+    v.object({
+      falling: v.literal("nikochan"),
+      ver: v.union([v.literal(14)]),
+      offset: v.pipe(v.number(), v.minValue(0)),
+      ytId: v.string(),
+      title: v.string(),
+      composer: v.string(),
+      chartCreator: v.string(),
+      locale: v.string(),
+      levelsMin: v.array(LevelMinSchema14()),
+      lua: v.array(v.array(v.string())),
+      // エディターの拡大率、 1.5^x 倍にする
+      zoom: v.pipe(v.number(), v.integer()),
+      copyBuffer: v.pipe(
+        v.array(v.nullable(NoteCommandSchema9())),
+        v.length(10)
+      ),
+    }),
+    v.check(
+      (min) => min.levelsMin.length === min.lua.length,
+      "levelsMin.length and lua.length does not match"
+    )
+  );
 export const ChartEditSchema14 = () =>
-  v.object({
-    ...ChartMinSchema14().entries,
-    levelsFreeze: v.array(LevelFreezeSchema13()),
-    changePasswd: v.nullable(
-      v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))
+  v.pipe(
+    v.object({
+      ...ChartMinSchema14().entries,
+      levelsFreeze: v.array(LevelFreezeSchema13()),
+      changePasswd: v.nullable(
+        v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))
+      ),
+      published: v.boolean(),
+    }),
+    v.check(
+      (min) => min.levelsMin.length === min.lua.length,
+      "levelsMin.length and lua.length does not match"
     ),
-    published: v.boolean(),
-  });
+    v.check(
+      (min) => min.levelsMin.length === min.levelsFreeze.length,
+      "levelsMin.length and levelsFreeze.length does not match"
+    )
+  );
 
 export type Level14Min = v.InferOutput<ReturnType<typeof LevelMinSchema14>>;
 export type Chart14Min = v.InferOutput<ReturnType<typeof ChartMinSchema14>>;

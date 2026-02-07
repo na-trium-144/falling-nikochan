@@ -17,12 +17,16 @@ export interface LuaExecResult {
   err: string[];
   errorLine: number | null;
   levelFreezed: LevelFreeze;
+  rawReturnValue: unknown;
   step: Step;
 }
 export async function luaExec(
   wasmPath: string,
   code: string,
-  catchError: boolean
+  options: {
+    catchError?: boolean;
+    needReturnValue?: boolean;
+  }
 ): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
   const lua = await factory.createEngine();
@@ -37,6 +41,7 @@ export async function luaExec(
       speedChanges: [],
       signature: [],
     },
+    rawReturnValue: undefined,
     step: stepZero(),
   };
   try {
@@ -99,9 +104,12 @@ export async function luaExec(
         )
     );
     // console.log(codeStatic);
-    await lua.doString(codeStatic.join("\n"));
+    const value = await lua.doString(codeStatic.join("\n"));
+    if (options.needReturnValue) {
+      result.rawReturnValue = value;
+    }
   } catch (e) {
-    if (!catchError) {
+    if (!options.catchError) {
       throw e;
     }
     result.err = String(e).split("\n");

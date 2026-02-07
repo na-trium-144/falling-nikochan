@@ -6,8 +6,6 @@ import {
 } from "@/common/passwdCache";
 import {
   ChartEdit,
-  ChartMin,
-  convertToMin,
   currentChartVer,
   emptyChart,
   validateChart,
@@ -16,6 +14,10 @@ import {
   LuaExecutor,
   ChartUntil14,
   ChartUntil14Min,
+  Chart14Min,
+  LuaTableSchema,
+  chartToLuaTableCode,
+  findLuaLevelCode,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -26,6 +28,7 @@ import saveAs from "file-saver";
 import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { isStandalone } from "@/common/pwaInstall";
+import * as v from "valibot";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -65,7 +68,6 @@ export interface FetchChartOptions {
   editPasswd: string;
   savePasswd: boolean;
 }
-export const downloadExtension = `fn${currentChartVer}.yml`;
 
 export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -346,100 +348,127 @@ export function useChartState(props: Props) {
   }, [chartState, t]);
 
   const [localSaveState, setLocalSaveState] = useState<SaveState>(undefined);
-  const localSave = useCallback<() => string>(() => {
-    if (chartState.state === "ok") {
-      setLocalSaveState("saving");
-      const yml = YAML.stringify(convertToMin(chartState.chart.toObject()), {
-        indentSeq: false,
-      });
-      const filename = `${chartState.chart.cid}_${chartState.chart.meta.title}.${downloadExtension}`;
-      saveAs(new Blob([yml]), filename);
-      setLocalSaveState("ok");
-      return filename;
-    } else {
-      return "";
-    }
-  }, [chartState]);
+  const localSave = useCallback(
+    (format: "yml" | "lua") => {
+      if (chartState.state === "ok") {
+        setLocalSaveState("saving");
+        let blob: Blob;
+        switch (format) {
+          case "yml":
+            blob = new Blob([
+              YAML.stringify(chartState.chart.toMin(), { indentSeq: false }),
+            ]);
+            break;
+          case "lua":
+            blob = new Blob([chartToLuaTableCode(chartState.chart.toMin())]);
+            break;
+          default:
+            format satisfies never;
+            throw new Error(`invalid format ${format}`);
+        }
+        const filename = `${chartState.chart.cid}_${chartState.chart.meta.title}.fn${currentChartVer}.${format}`;
+        saveAs(blob, filename);
+        setLocalSaveState("ok");
+        return filename;
+      } else {
+        return "";
+      }
+    },
+    [chartState]
+  );
   const [localLoadState, setLocalLoadState] =
     useState<LocalLoadState>(undefined);
-  const localLoad = useCallback<(buffer: ArrayBuffer) => Promise<void>>(
+  const localLoad = useCallback(
     async (buffer: ArrayBuffer) => {
       setLocalLoadState("loading");
-      let originalVer: number = 0;
-      let newChart: ChartEdit | null = null;
-      try {
-        const content: ChartMin = YAML.parse(new TextDecoder().decode(buffer));
-        if (typeof content.ver === "number") {
-          originalVer = content.ver;
+      const validateAndExec = async (newChartMin: unknown) => {
+        let originalVer: number = 0;
+        if (
+          typeof newChartMin === "object" &&
+          newChartMin &&
+          "ver" in newChartMin &&
+          typeof newChartMin.ver === "number"
+        ) {
+          originalVer = newChartMin.ver;
         }
-        const newChartMin = await validateChartMin(content);
-        newChart = {
-          ...newChartMin,
-          changePasswd: null,
-          published: false,
-          levelsFreeze: await Promise.all(
-            newChartMin.lua.map(
-              async (l) =>
-                (
-                  await luaExec(
-                    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-                    l.join("\n"),
-                    false
-                  )
-                ).levelFreezed
-            )
-          ),
-        };
-      } catch (e1) {
-        console.warn("fallback to msgpack deserialize");
-        try {
-          const content = msgpack.decode(buffer) as ChartUntil14Min;
-          if (typeof content.ver === "number") {
-            originalVer = content.ver;
-          }
-          const newChartMin = await validateChartMin(content);
-          newChart = {
-            ...newChartMin,
+        newChartMin = await validateChartMin(newChartMin as ChartUntil14Min);
+        return {
+          originalVer,
+          newChart: {
+            ...(newChartMin as Chart14Min),
             changePasswd: null,
             published: false,
             levelsFreeze: await Promise.all(
-              newChartMin.lua.map(
+              (newChartMin as Chart14Min).lua.map(
                 async (l) =>
                   (
                     await luaExec(
                       process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
                       l.join("\n"),
-                      false
+                      { catchError: false, needReturnValue: false }
                     )
                   ).levelFreezed
               )
             ),
-          };
+          } satisfies ChartEdit,
+        };
+      };
+      let result: Awaited<ReturnType<typeof validateAndExec>> | null = null;
+      try {
+        result = await validateAndExec(
+          YAML.parse(new TextDecoder().decode(buffer))
+        );
+      } catch (e1) {
+        console.warn("fallback to msgpack deserialize");
+        try {
+          result = await validateAndExec(msgpack.decode(buffer));
         } catch (e2) {
-          console.error(e1);
-          console.error(e2);
-          setLocalLoadState("loadFail");
-          return;
+          console.warn("fallback to lua execution");
+          try {
+            const rawCode = new TextDecoder().decode(buffer);
+            const luaResult = await luaExec(
+              process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+              rawCode,
+              { catchError: false, needReturnValue: true }
+            );
+            console.log("lua rawReturnValue:", luaResult.rawReturnValue);
+            const luaTable = v.parse(
+              LuaTableSchema(),
+              luaResult.rawReturnValue
+            );
+            result = await validateAndExec({
+              ...luaTable,
+              ver: luaTable.ver as 14,
+              locale,
+              lua: findLuaLevelCode(rawCode),
+              levelsMin: luaTable.levels,
+            } satisfies Chart14Min);
+          } catch (e3) {
+            console.error(e1);
+            console.error(e2);
+            console.error(e3);
+          }
         }
       }
-      if (newChart) {
-        if (confirm(t("meta.confirmLoad"))) {
-          setChartState({
-            chart: new ChartEditing(newChart, {
-              luaExecutorRef,
-              locale,
-              cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
-              currentPasswd:
-                chartState.state === "ok"
-                  ? chartState.chart.currentPasswd
-                  : null,
-              convertedFrom: originalVer,
-            }),
-            state: "ok",
-          });
-          setLocalLoadState("ok");
-          return;
-        }
+      if (!result) {
+        setLocalLoadState("loadFail");
+        return;
+      }
+
+      if (confirm(t("meta.confirmLoad"))) {
+        setChartState({
+          chart: new ChartEditing(result.newChart, {
+            luaExecutorRef,
+            locale,
+            cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
+            currentPasswd:
+              chartState.state === "ok" ? chartState.chart.currentPasswd : null,
+            convertedFrom: result.originalVer,
+          }),
+          state: "ok",
+        });
+        setLocalLoadState("ok");
+        return;
       }
       return setLocalLoadState(undefined);
     },

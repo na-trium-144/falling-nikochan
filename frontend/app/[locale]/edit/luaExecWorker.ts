@@ -13,7 +13,7 @@ worker.addEventListener(
     const result = await luaExec(
       process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
       data.code,
-      data.catchError
+      { catchError: data.catchError, needReturnValue: false }
     );
     worker.postMessage(result);
   }

@@ -2,7 +2,11 @@ import Button, { ButtonStyledLabel } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
 import { ChangeEvent, useState } from "react";
-import { ChartEditing, lastIncompatibleVer } from "@falling-nikochan/chart";
+import {
+  ChartEditing,
+  currentChartVer,
+  lastIncompatibleVer,
+} from "@falling-nikochan/chart";
 import { initSession, SessionData } from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
@@ -15,8 +19,9 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { useDisplayMode } from "@/scale.js";
-import { downloadExtension, LocalLoadState, SaveState } from "./chartState";
+import { LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
+import Select from "@/common/select";
 
 interface Props {
   chart?: ChartEditing;
@@ -117,7 +122,7 @@ interface Props2 {
   remoteSave: () => Promise<void>;
   saveState: SaveState;
   remoteDelete: () => Promise<void>;
-  localSave: () => void;
+  localSave: (format: "yml" | "lua") => void;
   localSaveState: SaveState;
   localLoad: (buffer: ArrayBuffer) => Promise<void>;
   localLoadState: LocalLoadState;
@@ -263,11 +268,19 @@ export function MetaTab(props: Props2) {
           <HelpIcon>
             {t.rich("localSaveLoadHelp", {
               br: () => <br />,
-              extension: downloadExtension,
+              extension: `.fn${currentChartVer}.yml`,
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
-            <Button text={t("saveToLocal")} onClick={props.localSave} />
+            <Select
+              options={(["yml", "lua"] as const).map((format) => ({
+                value: format,
+                label: `.fn${currentChartVer}.${format}`,
+              }))}
+              onSelect={(format) => props.localSave(format)}
+            >
+              {t("saveToLocal")}
+            </Select>
             <ButtonStyledLabel htmlFor="upload-bin">
               {t("loadFromLocal")}
             </ButtonStyledLabel>

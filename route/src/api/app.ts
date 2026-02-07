@@ -54,10 +54,7 @@ const apiApp = async (config: {
       "/newChartFile",
       await newChartFileApp({ getConnInfo: config.getConnInfo })
     )
-    .route(
-      "/minFile",
-      await minFileApp({ getConnInfo: config.getConnInfo })
-    )
+    .route("/minFile", await minFileApp({ getConnInfo: config.getConnInfo }))
     .route("/seqFile", seqFileApp)
     .route("/playFile", playFileApp)
     .route("/latest", latestApp)

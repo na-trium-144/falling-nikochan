@@ -27,6 +27,7 @@ import {
   Chart11Min,
   Chart13Min,
   Chart14Min,
+  chartToLuaOnlyFormat,
 } from "@falling-nikochan/chart";
 import { Bindings, secretSalt } from "../env.js";
 import { getChartEntry } from "./chart.js";
@@ -36,7 +37,7 @@ import { errorLiteral } from "../error.js";
 interface MinFileAppVars {
   cid: string;
   ip: string;
-  format: "yml" | "gz";
+  format: "yml" | "gz" | "lua";
   chart: ReturnType<typeof getChartEntry> extends Promise<{ chart: infer C }>
     ? C
     : never;
@@ -70,8 +71,10 @@ const minFileApp = async (config: {
           pbypass: v.optional(v.string()),
           format: v.optional(
             v.pipe(
-              v.picklist(["yml", "gz"]),
-              v.description("Output format: yml (default) or gz (gzip compressed YAML)")
+              v.picklist(["yml", "gz", "lua"]),
+              v.description(
+                "Output format: yml (default), gz (gzip compressed YAML) or lua"
+              )
             )
           ),
         })
@@ -113,7 +116,7 @@ const minFileApp = async (config: {
             v9UserSalt,
             pSecretSalt,
           });
-          
+
           c.set("cid", cid);
           c.set("ip", ip);
           c.set("format", format || "yml");
@@ -237,24 +240,32 @@ const minFileApp = async (config: {
         // matching the format used in the frontend editor
         const yml = YAML.stringify(chartMin, { indentSeq: false });
 
-        // Determine file extension and filename
-        const extension = format === "gz" ? "gz" : "yml";
-        const filename = `${cid}.fn${chart.ver}.${extension}`;
+        const filename = `${cid}.fn${chart.ver}.${format}`;
 
-        if (format === "gz") {
-          // Return gzip compressed YAML
-          const compressed = await promisify(gzip)(Buffer.from(yml, "utf-8"));
-          return c.body(compressed, 200, {
-            "Content-Type": "application/gzip",
-            "Content-Disposition": `attachment; filename="${filename}"`,
-            "Cache-Control": "no-transform",
-          });
-        } else {
-          // Return plain YAML
-          return c.body(yml, 200, {
-            "Content-Type": "text/yaml; charset=utf-8",
-            "Content-Disposition": `attachment; filename="${filename}"`,
-          });
+        switch (format) {
+          case "gz": {
+            // Return gzip compressed YAML
+            const compressed = await promisify(gzip)(Buffer.from(yml, "utf-8"));
+            return c.body(compressed, 200, {
+              "Content-Type": "application/gzip",
+              "Content-Disposition": `attachment; filename="${filename}"`,
+              "Cache-Control": "no-transform",
+            });
+          }
+          case "yml":
+            return c.body(yml, 200, {
+              "Content-Type": "text/yaml; charset=utf-8",
+              "Content-Disposition": `attachment; filename="${filename}"`,
+            });
+          case "lua":
+            return c.body(chartToLuaOnlyFormat(chartMin), 200, {
+              // text/x-lua というのもあるらしいが、Scalarが対応していない
+              "Content-Type": "text/plain; charset=utf-8",
+              "Content-Disposition": `attachment; filename="${filename}"`,
+            });
+          default:
+            format satisfies never;
+            throw new Error(`unhandled format ${format}`);
         }
       }
     );
