@@ -53,6 +53,7 @@ describe("GET /api/minFile/:cid", () => {
     const res = await app.request("/api/minFile/100000?p=p");
     expect(res.status).to.equal(200);
     expect(res.headers.get("content-type")).to.equal("text/yaml; charset=utf-8");
+    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100000.fn14.yml"');
     
     const text = await res.text();
     const chart: Chart14Min = YAML.parse(text);
@@ -66,6 +67,7 @@ describe("GET /api/minFile/:cid", () => {
     const res = await app.request("/api/minFile/100000?p=p&type=yml");
     expect(res.status).to.equal(200);
     expect(res.headers.get("content-type")).to.equal("text/yaml; charset=utf-8");
+    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100000.fn14.yml"');
     
     const text = await res.text();
     const chart: Chart14Min = YAML.parse(text);
@@ -77,6 +79,7 @@ describe("GET /api/minFile/:cid", () => {
     const res = await app.request("/api/minFile/100000?p=p&type=gz");
     expect(res.status).to.equal(200);
     expect(res.headers.get("content-type")).to.equal("application/gzip");
+    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100000.fn14.gz"');
     expect(res.headers.get("cache-control")).to.equal("no-transform");
     expect(res.headers.get("content-encoding")).to.be.null;
     
@@ -140,6 +143,7 @@ describe("GET /api/minFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/minFile/100008?p=p");
     expect(res.status).to.equal(200);
+    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100008.fn8.yml"');
     const text = await res.text();
     const chart: Chart8Min = YAML.parse(text);
     expect(chart.ver).to.equal(8);

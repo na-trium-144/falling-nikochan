@@ -181,6 +181,7 @@ const minFileApp = async (config: {
       async (c) => {
         const chart = c.get("chart");
         const type = c.get("type");
+        const cid = c.get("cid");
 
         let chartMin:
           | Chart4
@@ -236,17 +237,23 @@ const minFileApp = async (config: {
         // matching the format used in the frontend editor
         const yml = YAML.stringify(chartMin, { indentSeq: false });
 
+        // Determine file extension and filename
+        const extension = type === "gz" ? "gz" : "yml";
+        const filename = `${cid}.fn${chart.ver}.${extension}`;
+
         if (type === "gz") {
           // Return gzip compressed YAML
           const compressed = await promisify(gzip)(Buffer.from(yml, "utf-8"));
           return c.body(compressed, 200, {
             "Content-Type": "application/gzip",
+            "Content-Disposition": `attachment; filename="${filename}"`,
             "Cache-Control": "no-transform",
           });
         } else {
           // Return plain YAML
           return c.body(yml, 200, {
             "Content-Type": "text/yaml; charset=utf-8",
+            "Content-Disposition": `attachment; filename="${filename}"`,
           });
         }
       }
