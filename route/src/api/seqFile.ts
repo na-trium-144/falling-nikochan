@@ -1,4 +1,4 @@
-import msgpack from "@ygoe/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";
@@ -133,7 +133,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
-      return c.body(new Blob([msgpack.serialize(seqData)]).stream(), 200, {
+      return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
         "Content-Type": "application/vnd.msgpack",
       });
     } finally {
