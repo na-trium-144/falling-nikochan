@@ -77,7 +77,8 @@ describe("GET /api/minFile/:cid", () => {
     const res = await app.request("/api/minFile/100000?p=p&type=gz");
     expect(res.status).to.equal(200);
     expect(res.headers.get("content-type")).to.equal("application/gzip");
-    expect(res.headers.get("content-encoding")).to.equal("gzip");
+    expect(res.headers.get("cache-control")).to.equal("no-transform");
+    expect(res.headers.get("content-encoding")).to.be.null;
     
     const compressed = await res.arrayBuffer();
     const decompressed = await promisify(gunzip)(Buffer.from(compressed));

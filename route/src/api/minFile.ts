@@ -241,7 +241,7 @@ const minFileApp = async (config: {
           const compressed = await promisify(gzip)(Buffer.from(yml, "utf-8"));
           return c.body(compressed, 200, {
             "Content-Type": "application/gzip",
-            "Content-Encoding": "gzip",
+            "Cache-Control": "no-transform",
           });
         } else {
           // Return plain YAML
