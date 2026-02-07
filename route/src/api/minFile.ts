@@ -232,6 +232,8 @@ const minFileApp = async (config: {
         }
 
         // Convert to YAML
+        // indentSeq: false makes YAML more compact by not indenting sequences,
+        // matching the format used in the frontend editor
         const yml = YAML.stringify(chartMin, { indentSeq: false });
 
         if (type === "gz") {
