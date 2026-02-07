@@ -379,7 +379,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             )*/}
             {workerUpdate?.progressNum !== undefined && (
               <ProgressBar
-                className="absolute! bottom-1 inset-x-2.5 "
+                className="absolute bottom-1 inset-x-2.5 "
                 fixedColor={levelBgColors[1]}
                 value={
                   (workerUpdate?.progressNum || 0) /

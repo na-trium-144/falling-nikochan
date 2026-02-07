@@ -55,7 +55,7 @@ export function AboutContent3({ locale }: { locale: string }) {
         {screenWidth >= 25 * rem && (
           <Box
             classNameOuter={clsx(
-              "rounded-none! relative",
+              "rounded-none relative",
               "basis-1/3 shrink max-w-32 h-48",
               "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24"
             )}

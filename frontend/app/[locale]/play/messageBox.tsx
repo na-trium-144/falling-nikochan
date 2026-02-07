@@ -308,7 +308,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               </>
             )}
             <Range
-              className="block! w-full!"
+              className="block w-full"
               min={props.ytBegin}
               max={props.ytEnd}
               disabled={props.userBegin === null}

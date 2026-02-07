@@ -33,7 +33,7 @@
       @apply opacity-100;
     }
     > .fn-glass-2 {
-      @apply border-blue-300/80! dark:border-amber-800/50!;
+      @apply border-blue-300/80 dark:border-amber-800/50;
       @apply mask-linear-to-75%;
     }
 

@@ -36,7 +36,7 @@ export default function StatusBox(props: Props) {
       classNameOuter={clsx(
         props.className,
         "overflow-visible",
-        isMobile ? "rounded-sq-[1.5em]!" : "w-[17em]"
+        isMobile ? "rounded-sq-[1.5em]" : "w-[17em]"
       )}
       classNameInner={clsx(
         "overflow-visible",
@@ -60,30 +60,15 @@ export default function StatusBox(props: Props) {
             "w-max m-auto px-[0.5em] py-[0.2em] rounded-[0.75em]",
             "shadow-xs z-3",
             props.bestCount
-              ? clsx(
-                  // "fn-flat-button fn-inverted",
-                  "backdrop-blur-xs",
-                  "bg-orange-200/50 dark:bg-sky-800/50",
-                  "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
-                )
+              ? clsx("fn-status-best")
               : clsx("fn-plain", "text-slate-500/75 dark:text-stone-400/75")
           )}
           style={{
             fontSize: isMobile ? "0.8em" : undefined,
           }}
         >
-          <span
-            className={clsx(
-              props.bestCount ? "fn-glass-1" : "fn-glass-1",
-              "opacity-100!"
-            )}
-          />
-          <span
-            className={clsx(
-              props.bestCount ? "fn-glass-2" : "fn-glass-2",
-              "opacity-100!"
-            )}
-          />
+          <span className="fn-glass-1"/>
+          <span className="fn-glass-2"/>
           <span>{t("bestScore")}:</span>
           <span
             className="inline-block text-right"

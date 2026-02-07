@@ -73,7 +73,7 @@
       @apply mask-linear-to-50%;
     }
     > .fn-glass-2 {
-      @apply border-sky-300/80! dark:border-orange-800/50!;
+      @apply border-sky-300/80 dark:border-orange-800/50;
       @apply mask-linear-to-75%;
     }
 
@@ -103,8 +103,14 @@
       @apply mask-linear-to-50%;
     }
     > .fn-glass-2 {
-      @apply border-orange-300/80! dark:border-sky-800/50!;
+      @apply border-orange-300/80 dark:border-sky-800/50;
       @apply mask-linear-to-75%;
+    }
+
+    &.fn-status-best {
+      @apply backdrop-blur-xs;
+      @apply bg-orange-200/50 dark:bg-sky-800/50;
+      @apply inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75;
     }
   }
 }

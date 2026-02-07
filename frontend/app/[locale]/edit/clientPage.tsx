@@ -854,8 +854,8 @@ export default function Edit(props: {
                 i === tab ? (
                   <Box
                     key={i}
-                    classNameOuter="sq-unset! rounded-t-2xl! rounded-b-none px-3 pt-2 pb-1"
-                    classNameBorder="border-b-0!"
+                    classNameOuter="sq-unset rounded-t-2xl rounded-b-none px-3 pt-2 pb-1"
+                    classNameBorder="border-b-0"
                   >
                     {t(`${key}.title`)}
                   </Box>
@@ -932,14 +932,14 @@ export default function Edit(props: {
             <Box
               classNameOuter={clsx(
                 "mt-2",
-                "bg-slate-200/50! dark:bg-stone-600/50!",
+                "bg-slate-200/50 dark:bg-stone-600/50",
                 !(
                   luaExecutor.running ||
                   luaExecutor.stdout.length > 0 ||
                   luaExecutor.err.length > 0
                 ) && "main-wide:hidden"
               )}
-              classNameInner="h-24! max-h-24 edit-wide:h-auto"
+              classNameInner="h-24 max-h-24 edit-wide:h-auto"
               scrollableX
               scrollableY
               padding={3}
