@@ -36,7 +36,7 @@ import { errorLiteral } from "../error.js";
 interface MinFileAppVars {
   cid: string;
   ip: string;
-  type: "yml" | "gz";
+  format: "yml" | "gz";
   chart: ReturnType<typeof getChartEntry> extends Promise<{ chart: infer C }>
     ? C
     : never;
@@ -68,7 +68,7 @@ const minFileApp = async (config: {
             )
           ),
           pbypass: v.optional(v.string()),
-          type: v.optional(
+          format: v.optional(
             v.pipe(
               v.picklist(["yml", "gz"]),
               v.description("Output format: yml (default) or gz (gzip compressed YAML)")
@@ -84,7 +84,7 @@ const minFileApp = async (config: {
       ),
       async (c, next) => {
         const { cid } = c.req.valid("param");
-        const { p, ph, pbypass, type } = c.req.valid("query");
+        const { p, ph, pbypass, format } = c.req.valid("query");
         const ip = getIp(c, config.getConnInfo);
         const v9UserSalt =
           env(c).API_ENV === "development"
@@ -116,7 +116,7 @@ const minFileApp = async (config: {
           
           c.set("cid", cid);
           c.set("ip", ip);
-          c.set("type", type || "yml");
+          c.set("format", format || "yml");
           c.set("chart", chart);
           await next();
         } finally {
@@ -180,7 +180,7 @@ const minFileApp = async (config: {
       }),
       async (c) => {
         const chart = c.get("chart");
-        const type = c.get("type");
+        const format = c.get("format");
         const cid = c.get("cid");
 
         let chartMin:
@@ -238,10 +238,10 @@ const minFileApp = async (config: {
         const yml = YAML.stringify(chartMin, { indentSeq: false });
 
         // Determine file extension and filename
-        const extension = type === "gz" ? "gz" : "yml";
+        const extension = format === "gz" ? "gz" : "yml";
         const filename = `${cid}.fn${chart.ver}.${extension}`;
 
-        if (type === "gz") {
+        if (format === "gz") {
           // Return gzip compressed YAML
           const compressed = await promisify(gzip)(Buffer.from(yml, "utf-8"));
           return c.body(compressed, 200, {

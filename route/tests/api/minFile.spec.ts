@@ -48,13 +48,17 @@ describe("GET /api/minFile/:cid", () => {
     }
   );
 
-  test("should return YAML if password matches (default type=yml)", async () => {
+  test("should return YAML if password matches (default format=yml)", async () => {
     await initDb();
     const res = await app.request("/api/minFile/100000?p=p");
     expect(res.status).to.equal(200);
-    expect(res.headers.get("content-type")).to.equal("text/yaml; charset=utf-8");
-    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100000.fn14.yml"');
-    
+    expect(res.headers.get("content-type")).to.equal(
+      "text/yaml; charset=utf-8"
+    );
+    expect(res.headers.get("content-disposition")).to.equal(
+      'attachment; filename="100000.fn14.yml"'
+    );
+
     const text = await res.text();
     const chart: Chart14Min = YAML.parse(text);
     expect(chart.ver).to.equal(currentChartVer);
@@ -62,27 +66,33 @@ describe("GET /api/minFile/:cid", () => {
     expect(chart.title).to.equal(dummyChart().title);
   });
 
-  test("should return YAML when type=yml is specified", async () => {
+  test("should return YAML when format=yml is specified", async () => {
     await initDb();
-    const res = await app.request("/api/minFile/100000?p=p&type=yml");
+    const res = await app.request("/api/minFile/100000?p=p&format=yml");
     expect(res.status).to.equal(200);
-    expect(res.headers.get("content-type")).to.equal("text/yaml; charset=utf-8");
-    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100000.fn14.yml"');
-    
+    expect(res.headers.get("content-type")).to.equal(
+      "text/yaml; charset=utf-8"
+    );
+    expect(res.headers.get("content-disposition")).to.equal(
+      'attachment; filename="100000.fn14.yml"'
+    );
+
     const text = await res.text();
     const chart: Chart14Min = YAML.parse(text);
     expect(chart.ver).to.equal(currentChartVer);
   });
 
-  test("should return gzip compressed YAML when type=gz is specified", async () => {
+  test("should return gzip compressed YAML when format=gz is specified", async () => {
     await initDb();
-    const res = await app.request("/api/minFile/100000?p=p&type=gz");
+    const res = await app.request("/api/minFile/100000?p=p&format=gz");
     expect(res.status).to.equal(200);
     expect(res.headers.get("content-type")).to.equal("application/gzip");
-    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100000.fn14.gz"');
+    expect(res.headers.get("content-disposition")).to.equal(
+      'attachment; filename="100000.fn14.gz"'
+    );
     expect(res.headers.get("cache-control")).to.equal("no-transform");
     expect(res.headers.get("content-encoding")).to.be.null;
-    
+
     const compressed = await res.arrayBuffer();
     const decompressed = await promisify(gunzip)(Buffer.from(compressed));
     const text = decompressed.toString("utf-8");
@@ -92,7 +102,7 @@ describe("GET /api/minFile/:cid", () => {
   });
 
   currentChartVer satisfies 14; // edit tests below when chart version is bumped
-  
+
   test("should return Chart13Min if chart version is 13", async () => {
     await initDb();
     const res = await app.request("/api/minFile/100013?p=p");
@@ -143,7 +153,9 @@ describe("GET /api/minFile/:cid", () => {
     await initDb();
     const res = await app.request("/api/minFile/100008?p=p");
     expect(res.status).to.equal(200);
-    expect(res.headers.get("content-disposition")).to.equal('attachment; filename="100008.fn8.yml"');
+    expect(res.headers.get("content-disposition")).to.equal(
+      'attachment; filename="100008.fn8.yml"'
+    );
     const text = await res.text();
     const chart: Chart8Min = YAML.parse(text);
     expect(chart.ver).to.equal(8);
@@ -218,7 +230,7 @@ describe("GET /api/minFile/:cid", () => {
   test("should work with gzip for all chart versions", async () => {
     await initDb();
     // Test ver14
-    const res14 = await app.request("/api/minFile/100000?p=p&type=gz");
+    const res14 = await app.request("/api/minFile/100000?p=p&format=gz");
     expect(res14.status).to.equal(200);
     const compressed14 = await res14.arrayBuffer();
     const decompressed14 = await promisify(gunzip)(Buffer.from(compressed14));
@@ -226,7 +238,7 @@ describe("GET /api/minFile/:cid", () => {
     expect(chart14.ver).to.equal(14);
 
     // Test ver8
-    const res8 = await app.request("/api/minFile/100008?p=p&type=gz");
+    const res8 = await app.request("/api/minFile/100008?p=p&format=gz");
     expect(res8.status).to.equal(200);
     const compressed8 = await res8.arrayBuffer();
     const decompressed8 = await promisify(gunzip)(Buffer.from(compressed8));
