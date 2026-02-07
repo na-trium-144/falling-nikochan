@@ -39,10 +39,11 @@ export default function StatusBox(props: Props) {
     <Box
       classNameOuter={clsx(
         props.className,
-        "overflow-visible!",
+        "overflow-visible",
         isMobile ? "rounded-sq-[1.5em]!" : "w-[17em]"
       )}
       classNameInner={clsx(
+        "overflow-visible",
         props.isMobile
           ? "relative flex flex-row items-center justify-between"
           : ""
