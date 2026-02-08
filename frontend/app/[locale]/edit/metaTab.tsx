@@ -21,7 +21,6 @@ import { useRouter } from "next/navigation";
 import { useDisplayMode } from "@/scale.js";
 import { LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
-import Select from "@/common/select";
 
 interface Props {
   chart?: ChartEditing;
@@ -268,19 +267,14 @@ export function MetaTab(props: Props2) {
           <HelpIcon>
             {t.rich("localSaveLoadHelp", {
               br: () => <br />,
-              extension: `.fn${currentChartVer}.yml`,
+              extension: `fn${currentChartVer}.lua`,
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
-            <Select
-              options={(["yml", "lua"] as const).map((format) => ({
-                value: format,
-                label: `.fn${currentChartVer}.${format}`,
-              }))}
-              onSelect={(format) => props.localSave(format)}
-            >
-              {t("saveToLocal")}
-            </Select>
+            <Button
+              text={t("saveToLocal")}
+              onClick={() => props.localSave("lua")}
+            />
             <ButtonStyledLabel htmlFor="upload-bin">
               {t("loadFromLocal")}
             </ButtonStyledLabel>
