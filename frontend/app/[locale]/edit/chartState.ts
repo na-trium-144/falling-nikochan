@@ -349,21 +349,11 @@ export function useChartState(props: Props) {
 
   const [localSaveState, setLocalSaveState] = useState<SaveState>(undefined);
   const localSave = useCallback(
-    async (format: "gz" | "yml" | "lua") => {
+    (format: "yml" | "lua") => {
       if (chartState.state === "ok") {
         setLocalSaveState("saving");
         let blob: Blob;
         switch (format) {
-          case "gz": {
-            const stream = new Blob([
-              YAML.stringify(chartState.chart.toMin(), { indentSeq: false }),
-            ])
-              .stream()
-              .pipeThrough(new CompressionStream("gzip"));
-            const response = new Response(stream);
-            blob = await response.blob();
-            break;
-          }
           case "yml":
             blob = new Blob([
               YAML.stringify(chartState.chart.toMin(), { indentSeq: false }),
@@ -424,15 +414,6 @@ export function useChartState(props: Props) {
         };
       };
       let result: Awaited<ReturnType<typeof validateAndExec>> | null = null;
-      try {
-        const stream = new Blob([new Uint8Array(buffer)]).stream();
-        const decompressionStream = new DecompressionStream("gzip");
-        const decompressedStream = stream.pipeThrough(decompressionStream);
-        const response = new Response(decompressedStream);
-        buffer = await response.arrayBuffer();
-      } catch (e) {
-        console.warn("input is not gzip?:", e);
-      }
       try {
         result = await validateAndExec(
           YAML.parse(new TextDecoder().decode(buffer))

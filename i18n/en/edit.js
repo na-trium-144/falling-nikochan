@@ -113,10 +113,9 @@ export default {
       localSaveLoad: "Save/load locally",
       localSaveLoadHelp:
         "You can save/load the current chart on your device.<br></br>" +
-        "<code>.gz</code> is a small file, and <code>.yml</code> can be opened with a text editor.<br></br>" +
-        "<code>.lua</code> is convenient for external editing, <br></br>" +
-        "but some data, such as copied notes, will not be retained.<br></br>" +
-        "Saved files are not password protected.",
+        "The file format when saving is 〜.{extension}, <br></br>" +
+        "but it also supports loading old version files.<br></br>" +
+        "The saved file is not password protected.",
       saveToLocal: "Save",
       loadFromLocal: "Open file",
       dragDropPossible: "You can also drag & drop the file to load.",
