@@ -20,7 +20,6 @@ import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
 import { ConnInfo } from "hono/conninfo";
 import ytMetaApp from "./ytMeta.js";
-import minFileApp from "./minFile.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = async (config: {
@@ -54,7 +53,6 @@ const apiApp = async (config: {
       "/newChartFile",
       await newChartFileApp({ getConnInfo: config.getConnInfo })
     )
-    .route("/minFile", await minFileApp({ getConnInfo: config.getConnInfo }))
     .route("/seqFile", seqFileApp)
     .route("/playFile", playFileApp)
     .route("/latest", latestApp)

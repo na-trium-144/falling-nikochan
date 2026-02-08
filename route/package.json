@@ -36,8 +36,7 @@
     "react": "^19.2.4",
     "sitemap": "^9.0.0",
     "twitter-text": "^3.1.0",
-    "valibot": "^1.0.0",
-    "yaml": "^2.8.2"
+    "valibot": "^1.0.0"
   },
   "devDependencies": {
     "@falling-nikochan/route": "workspace:*",
