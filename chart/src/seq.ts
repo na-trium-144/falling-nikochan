@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import { getBarLength, Signature, toStepArray } from "./signature.js";
 import { BPMChange, BPMChangeWithLua } from "./bpm.js";
 import {
@@ -8,63 +9,103 @@ import {
   stepToFloat,
   stepZero,
 } from "./step.js";
-import { BPMChange1 } from "./legacy/chart1.js";
-import { Signature5 } from "./legacy/chart5.js";
-import { Level13Play, SpeedChange13 } from "./legacy/chart13.js";
+import { BPMChange1, BPMChange1Schema } from "./legacy/chart1.js";
+import { Signature5, Signature5Schema } from "./legacy/chart5.js";
+import {
+  Level13Play,
+  SpeedChange13SchemaWithoutLua,
+} from "./legacy/chart13.js";
 import { Chart6, Level6Play } from "./legacy/chart6.js";
 
+const PosSchema = () =>
+  v.object({
+    x: v.number(),
+    y: v.number(),
+  });
+
+export const DisplayParamSchema = () =>
+  v.object({
+    timeSecBefore: v.pipe(
+      v.number(),
+      v.description("hitTimeSec - (the time to start to apply this param)")
+    ),
+    u0: v.number(),
+    du: v.number(),
+    ddu: v.number(),
+  });
+export type DisplayParam = v.InferOutput<ReturnType<typeof DisplayParamSchema>>;
+
 /**
- * Note properties used in-game | ゲーム中で使用する音符の管理
- * --------------------------------------------------------
- * id: unique number | 通し番号
- * big: whether the note is big | 大音符
- * bigDone: whether the note has been judged | 判定済みかどうか
- * hitTimeSec: hit judgement time | 判定時刻
- * appearTimeSec: when note starts appearing | 画面に表示し始める時刻
- * targetX: 0.0 - 1.0  (1 / 10 of NoteCommand.x)
- * vx: 1 / 4 of NoteCommand.vx
- * vy: 1 / 4 of NoteCommand.vy
- * ay: ??
- * display: used for calculation of position | 画面上の位置の計算に使う
- * hitPos: position of the note when hit | 判定時の位置
- * done: judgement result | 判定結果
- *   0:NotYet 1:Good 2:OK 3:bad 4:miss
+ * Note properties used in-game
  */
-export interface Note {
-  id: number;
-  big: boolean;
-  bigDone: boolean;
-  hitTimeSec: number;
-  appearTimeSec: number;
-  targetX: number;
-  vx: number;
-  vy: number;
-  ay: number;
-  display: DisplayParam[];
-  hitPos?: Pos;
-  done: number;
-  baseScore?: number;
-  chainBonus?: number;
-  bigBonus?: number;
-  chain?: number;
-}
-export interface DisplayParam {
-  // 時刻(判定時刻 - 秒数)
-  timeSecBefore: number;
-  // u = u0 + du t + ddu t^2 / 2
-  u0: number;
-  du: number;
-  ddu: number;
-}
-export interface ChartSeqData {
-  notes: Note[];
-  bpmChanges: BPMChange1[];
-  speedChanges: SpeedChange13[];
-  signature: Signature5[];
-  offset: number;
-  ytBegin: number;
-  ytEndSec: number;
-}
+export const NoteSchema = () =>
+  v.object({
+    id: v.pipe(
+      v.number(),
+      v.description("unique number of note, always equals to index in array")
+    ),
+    big: v.pipe(v.boolean(), v.description("whether the note is big")),
+    bigDone: v.pipe(
+      v.boolean(),
+      v.description("whether the note has been judged, false by default")
+    ),
+    hitTimeSec: v.pipe(
+      v.number(),
+      v.description("hit judgement time, ignoring offset")
+    ),
+    appearTimeSec: v.pipe(
+      v.number(),
+      v.description("when note starts appearing")
+    ),
+    targetX: v.pipe(
+      v.number(),
+      v.description(
+        "left edge: 0.0 - right edge: 1.0  (1 / 10 of NoteCommand.x)"
+      )
+    ),
+    vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
+    vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
+    ay: v.pipe(v.number(), v.description("always 1 / 4")),
+    display: v.pipe(
+      v.array(DisplayParamSchema()),
+      v.description(
+        "Parameter u for each time.\n" +
+          "The note position between \n" +
+          "  display[i].timeSecBefore < (hitTimeSec - current time) < display[i+1].timeSecBefore \n" +
+          "is calculated as follows:\n" +
+          "t = hitTimeSec - current time - display[i].timeSecBefore,\n" +
+          "u = u0 + du * t + ddu * t^2 / 2,\n" +
+          "x = targetX + vx * u,\n" +
+          "y = vy * u - ay * u^2 / 2.\n" +
+          "(Exceptionally, if hitTimeSec - current time < 0, use display[0] with t = hitTimeSec - current time - 0.)"
+      )
+    ),
+    hitPos: v.pipe(
+      v.optional(PosSchema()),
+      v.description("position of the note when hit")
+    ),
+    done: v.pipe(
+      v.number(),
+      v.description("judgement result, 0:NotYet 1:Good 2:OK 3:bad 4:miss 5:")
+    ),
+    baseScore: v.optional(v.number()),
+    chainBonus: v.optional(v.number()),
+    bigBonus: v.optional(v.number()),
+    chain: v.optional(v.number()),
+  });
+export type Note = v.InferOutput<ReturnType<typeof NoteSchema>>;
+
+export const ChartSeqDataSchema = () =>
+  v.object({
+    notes: v.array(NoteSchema()),
+    bpmChanges: v.array(BPMChange1Schema()),
+    speedChanges: v.array(SpeedChange13SchemaWithoutLua()),
+    signature: v.array(Signature5Schema()),
+    offset: v.number(),
+    ytBegin: v.number(),
+    ytEndSec: v.number(),
+  });
+export type ChartSeqData = v.InferOutput<ReturnType<typeof ChartSeqDataSchema>>;
 
 /**
  * 画面上でその瞬間に表示する音符の管理

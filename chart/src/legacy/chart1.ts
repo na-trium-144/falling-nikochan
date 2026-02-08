@@ -1,4 +1,5 @@
-import { Step } from "../step.js";
+import { Step, StepSchema } from "../step.js";
+import * as v from "valibot";
 
 export interface Chart1 {
   falling: "nikochan"; // magic
@@ -26,3 +27,10 @@ export interface BPMChange1 {
   timeSec: number;
   bpm: number;
 }
+
+export const BPMChange1Schema = () =>
+  v.object({
+    step: StepSchema(),
+    timeSec: v.number(),
+    bpm: v.number(),
+  });

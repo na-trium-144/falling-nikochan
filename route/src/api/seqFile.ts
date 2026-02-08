@@ -7,36 +7,22 @@ import { env } from "hono/adapter";
 import {
   convertTo6,
   CidSchema,
-  currentChartVer,
   convertTo14,
   convertToPlay14,
   ChartSeqData,
   loadChart,
+  ChartSeqDataSchema,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
-// Define schema for ChartSeqData13 for OpenAPI documentation
-const ChartSeqDataSchema = () =>
-  v.object({
-    notes: v.array(v.any()),
-    bpmChanges: v.array(v.any()),
-    speedChanges: v.array(v.any()),
-    signature: v.array(v.any()),
-    offset: v.number(),
-    ytBegin: v.number(),
-    ytEndSec: v.number(),
-  });
-
 const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
   describeRoute({
     description:
-      "Gets chart sequence data in MessagePack format, which is used for playing the chart. " +
-      "Returns ChartSeqData6 for chart versions 6 and below, or ChartSeqData13 for chart versions 7-13. " +
-      `Note that this documentation only describes ChartSeqData${currentChartVer} format.`,
+      "Gets chart sequence data in MessagePack format, which is used for playing the chart.",
     responses: {
       200: {
         description: "chart sequence data in MessagePack format.",
