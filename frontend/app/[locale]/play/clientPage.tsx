@@ -19,17 +19,16 @@ import FallingWindow, { FlashPos } from "./fallingWindow.js";
 import {
   bigScoreRate,
   chainScoreRate,
-  ChartSeqData6,
   levelTypes,
-  loadChart6,
   RecordGetSummary,
   RecordPost,
   inputTypes,
   emptyBrief,
   Level13Play,
   currentChartVer,
+  loadChart,
+  ChartSeqData,
 } from "@falling-nikochan/chart";
-import { ChartSeqData13, loadChart13 } from "@falling-nikochan/chart";
 import { YouTubePlayer } from "@/common/youtube.js";
 import { ChainDisp, ScoreDisp } from "./score.js";
 import RhythmicalSlime from "./rhythmicalSlime.js";
@@ -75,7 +74,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [cid, setCid] = useState<string>();
   const [lvIndex, setLvIndex] = useState<number>();
   const [chartBrief, setChartBrief] = useState<ChartBrief>();
-  const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData13>();
+  const [chartSeq, setChartSeq] = useState<ChartSeqData>();
   const [editing, setEditing] = useState<boolean>(false);
 
   const [errorMsg, setErrorMsg] = useState<string | APIError>();
@@ -107,7 +106,7 @@ export function InitPlay({ locale }: { locale: string }) {
     //   " | Falling Nikochan";
 
     if (session?.level) {
-      setChartSeq(loadChart13(session.level));
+      setChartSeq(loadChart(session.level));
       setErrorMsg(undefined);
     } else {
       void (async () => {
@@ -128,11 +127,9 @@ export function InitPlay({ locale }: { locale: string }) {
               if (seq.ver === 6 || seq.ver === 13 || seq.ver === 14) {
                 switch (seq.ver) {
                   case 6:
-                    setChartSeq(loadChart6(seq));
-                    break;
                   case 13:
                   case 14:
-                    setChartSeq(loadChart13(seq));
+                    setChartSeq(loadChart(seq));
                     break;
                   default:
                     seq satisfies never;
@@ -182,7 +179,7 @@ interface Props {
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
-  chartSeq?: ChartSeqData6 | ChartSeqData13;
+  chartSeq?: ChartSeqData;
   editing: boolean;
   queryOptions: QueryOptions;
   locale: string;
@@ -337,13 +334,8 @@ function Play(props: Props) {
     ytPlayer.current?.setVolume(vol);
   }, [cid]);
 
-  const ytBegin = chartSeq && "ytBegin" in chartSeq ? chartSeq.ytBegin : 0;
-  const ytEnd =
-    chartSeq && "ytEndSec" in chartSeq
-      ? chartSeq.ytEndSec
-      : chartBrief?.levels.at(lvIndex)?.length ||
-        ytPlayer.current?.getDuration?.() ||
-        1;
+  const ytBegin = chartSeq?.ytBegin ?? 0;
+  const ytEnd = chartSeq?.ytEndSec ?? 0;
   const [userBegin, setUserBegin_] = useState<number | null>(null);
   const setUserBegin = useCallback(
     (v: number | null) => {
@@ -637,22 +629,16 @@ function Play(props: Props) {
   const [endSecPassed, setEndSecPassed] = useState<boolean>(false);
   useEffect(() => {
     if (chartPlaying && chartSeq) {
-      if ("ytEndSec" in chartSeq) {
-        const checkEnd = () => {
-          const ended =
-            ytPlayer.current?.getPlayerState() === 0 ||
-            (ytPlayer.current?.getCurrentTime() || 0) >= chartSeq.ytEndSec;
-          if (ended !== endSecPassed) {
-            setEndSecPassed(ended);
-          }
-        };
-        const t = setInterval(checkEnd, 100);
-        return () => clearInterval(t);
-      } else {
-        if (!endSecPassed) {
-          setEndSecPassed(true);
+      const checkEnd = () => {
+        const ended =
+          ytPlayer.current?.getPlayerState() === 0 ||
+          (ytPlayer.current?.getCurrentTime() || 0) >= chartSeq.ytEndSec;
+        if (ended !== endSecPassed) {
+          setEndSecPassed(ended);
         }
-      }
+      };
+      const t = setInterval(checkEnd, 100);
+      return () => clearInterval(t);
     }
   }, [chartPlaying, chartSeq, endSecPassed, getCurrentTimeSec]);
   useEffect(() => {

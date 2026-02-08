@@ -8,15 +8,406 @@ import {
   stepToFloat,
   stepZero,
 } from "./step.js";
-import { DisplayNote7 } from "./legacy/seq7.js";
 import { BPMChange1 } from "./legacy/chart1.js";
 import { Signature5 } from "./legacy/chart5.js";
-import { displayNote13, loadChart13, Note13 } from "./legacy/seq13.js";
+import { Level13Play, SpeedChange13 } from "./legacy/chart13.js";
+import { Chart6, Level6Play } from "./legacy/chart6.js";
 
-export type Note = Note13;
-export type DisplayNote = DisplayNote7;
-export const displayNote = displayNote13;
-export const loadChart = loadChart13;
+/**
+ * Note properties used in-game | ゲーム中で使用する音符の管理
+ * --------------------------------------------------------
+ * id: unique number | 通し番号
+ * big: whether the note is big | 大音符
+ * bigDone: whether the note has been judged | 判定済みかどうか
+ * hitTimeSec: hit judgement time | 判定時刻
+ * appearTimeSec: when note starts appearing | 画面に表示し始める時刻
+ * targetX: 0.0 - 1.0  (1 / 10 of NoteCommand.x)
+ * vx: 1 / 4 of NoteCommand.vx
+ * vy: 1 / 4 of NoteCommand.vy
+ * ay: ??
+ * display: used for calculation of position | 画面上の位置の計算に使う
+ * hitPos: position of the note when hit | 判定時の位置
+ * done: judgement result | 判定結果
+ *   0:NotYet 1:Good 2:OK 3:bad 4:miss
+ */
+export interface Note {
+  id: number;
+  big: boolean;
+  bigDone: boolean;
+  hitTimeSec: number;
+  appearTimeSec: number;
+  targetX: number;
+  vx: number;
+  vy: number;
+  ay: number;
+  display: DisplayParam[];
+  hitPos?: Pos;
+  done: number;
+  baseScore?: number;
+  chainBonus?: number;
+  bigBonus?: number;
+  chain?: number;
+}
+export interface DisplayParam {
+  // 時刻(判定時刻 - 秒数)
+  timeSecBefore: number;
+  // u = u0 + du t + ddu t^2 / 2
+  u0: number;
+  du: number;
+  ddu: number;
+}
+export interface ChartSeqData {
+  notes: Note[];
+  bpmChanges: BPMChange1[];
+  speedChanges: SpeedChange13[];
+  signature: Signature5[];
+  offset: number;
+  ytBegin: number;
+  ytEndSec: number;
+}
+
+/**
+ * 画面上でその瞬間に表示する音符の管理
+ * (画面の状態をstateにするため)
+ * 時刻の情報を持たない
+ *
+ * ver14でvelを追加
+ */
+export interface DisplayNote {
+  id: number;
+  pos: Pos;
+  vel: Pos;
+  done: number;
+  bigDone: boolean;
+  baseScore?: number;
+  chainBonus?: number;
+  bigBonus?: number;
+  chain?: number;
+}
+
+/**
+ * Solves a*x^2 + b*x + c = 0
+ * @returns An array of two roots [root1, root2], or null if there are no real roots.
+ * root1 is from `+ sqrt`, root2 is from `- sqrt`.
+ */
+function solveQuadEquation(
+  a: number,
+  b: number,
+  c: number
+): { plus: number; minus: number } | null {
+  if (a === 0) {
+    if (b === 0) {
+      return null;
+    }
+    const root = -c / b;
+    return { plus: root, minus: root };
+  }
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    return null;
+  }
+  const sqrtDiscriminant = Math.sqrt(discriminant);
+  const root1 = (-b + sqrtDiscriminant) / (2 * a);
+  const root2 = (-b - sqrtDiscriminant) / (2 * a);
+  return { plus: Math.max(root1, root2), minus: Math.min(root1, root2) };
+}
+
+/**
+ * chartを読み込む
+ */
+export function loadChart(
+  level: Level13Play | Level6Play | Chart6,
+  levelIndex?: number
+): ChartSeqData {
+  if ("levels" in level) {
+    if (levelIndex && level.levels.at(levelIndex)) {
+      level = {
+        ...level.levels.at(levelIndex)!,
+        ver: 6,
+        offset: level.offset,
+      } satisfies Level6Play;
+    } else {
+      return {
+        notes: [],
+        bpmChanges: [],
+        speedChanges: [],
+        signature: [],
+        offset: 0,
+        ytBegin: 0,
+        ytEndSec: 0,
+      };
+    }
+  }
+  const notes: Note[] = [];
+  for (let id = 0; id < level.notes.length; id++) {
+    const c = level.notes[id];
+
+    // hitの時刻
+    const hitTimeSec: number = getTimeSec(level.bpmChanges, c.step);
+
+    const display: DisplayParam[] = [];
+    let tBegin = hitTimeSec;
+    // noteCommandの座標系 (-5<=x<=5) から
+    //  displayの座標系に変換するのもここでやる
+    const targetX = (c.hitX + 5) / 10;
+    const targetY = 0;
+    const vx = c.hitVX / 4;
+    const vy = c.hitVY / 4;
+    const ay = 1 / 4;
+    let u = 0;
+    // u(t) = ∫t→tBegin, dt * speed(t) / 120
+    // x(t) = targetX + vx * u(t)
+    // y(t) = targetY + vy * u(t) - (ay * u(t)^2) / 2
+
+    let uRangeMin: number, uRangeMax: number;
+    if ("fall" in c && c.fall) {
+      // max: dy/du = 0 or y(u) = 1.5 or x(u) = 2 or x(u) = -0.5
+      // min: y(u) = -0.5 or x(u) = 2 or x(u) = -0.5
+      const uTop = vy / ay;
+      let uMaxY: number | null, uMinY: number | null;
+      const u_y15 = solveQuadEquation(ay / 2, -vy, 1.5 - targetY);
+      const u_y05 = solveQuadEquation(ay / 2, -vy, -0.5 - targetY);
+      if (vy > 0) {
+        uMaxY = u_y15 ? u_y15.minus : uTop;
+        uMinY = u_y05?.minus ?? -Infinity; // should not happen?
+      } else {
+        uMinY = u_y15?.plus ?? -Infinity;
+        uMaxY = u_y05 ? u_y05.plus : uTop;
+      }
+      const uMaxX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      const uMinX = Math.min((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      uRangeMax = Math.min(uMaxX, uMaxY);
+      uRangeMin = Math.max(uMinX, uMinY);
+    } else {
+      // y(t) = -0.5 or x(t) = 2 or x(t) = -0.5
+      const u_y05 = solveQuadEquation(ay / 2, -vy, -0.5 - targetY);
+      const uMaxY = u_y05?.plus ?? Infinity; // should not happen?
+      const uMinY = u_y05?.minus ?? -Infinity;
+      const uMaxX = Math.max((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      const uMinX = Math.min((2 - targetX) / vx, (-0.5 - targetX) / vx);
+      uRangeMax = Math.min(uMaxX, uMaxY);
+      uRangeMin = Math.max(uMinX, uMinY);
+    }
+
+    let xLegacy = (c.hitX + 5) / 10;
+    let yLegacy = 0;
+    let vxLegacy = c.hitVX;
+    let vyLegacy = c.hitVY;
+    const ayLegacy = 1;
+
+    let appearTimeSec: number | null = null;
+    for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
+      const ts = level.speedChanges[ti];
+      if (ts.timeSec >= hitTimeSec && ti >= 1) {
+        continue;
+      }
+      const tEnd = ts.timeSec;
+      // tEnd <= 時刻 <= tBegin の間、
+      //  t = tBegin - 時刻  > 0
+      //  u = u(tBegin) + du * t
+      let du: number;
+      let ddu: number;
+      const tsNext = level.speedChanges.at(ti + 1);
+      if (tsNext && "interp" in tsNext && tsNext.interp && tBegin !== tEnd) {
+        let nextBpm = tsNext.bpm;
+        if (tBegin < tsNext.timeSec) {
+          nextBpm =
+            ts.bpm +
+            ((tsNext.bpm - ts.bpm) / (tsNext.timeSec - tEnd)) * (tBegin - tEnd);
+        }
+        du = nextBpm / 120;
+        ddu = (ts.bpm - nextBpm) / 120 / (tBegin - tEnd);
+      } else {
+        du = ts.bpm / 120;
+        ddu = 0;
+      }
+      display.push({
+        timeSecBefore: hitTimeSec - tBegin,
+        u0: u,
+        du: du,
+        ddu: ddu,
+      });
+
+      const uEnd =
+        u +
+        du * (tBegin - tEnd) +
+        (ddu * (tBegin - tEnd) * (tBegin - tEnd)) / 2;
+
+      if (level.ver === 6) {
+        const vx_Legacy = (vxLegacy * ts.bpm) / 4 / 120;
+        const vy_Legacy = (vyLegacy * ts.bpm) / 4 / 120;
+        const ay_Legacy = (ayLegacy * ts.bpm * ts.bpm) / 4 / 120 / 120;
+        // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
+        for (let t = 0; t < tBegin - tEnd; t += 0.01) {
+          const xt = xLegacy + vx_Legacy * t;
+          const yt = yLegacy + vy_Legacy * t - (ay_Legacy * t * t) / 2;
+          if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
+            appearTimeSec = tBegin - t;
+          }
+        }
+        if (ti == 0) {
+          // tを少しずつ変えながら、x,yが画面内に入っているかをチェック
+          for (let t = 0; t < 999; t += 0.01) {
+            const xt = xLegacy + vx_Legacy * t;
+            const yt = yLegacy + vy_Legacy * t - (ay_Legacy * t * t) / 2;
+            if (xt >= -0.5 && xt < 1.5 && yt >= -0.5 && yt < 1.5) {
+              appearTimeSec = tBegin - t;
+            } else {
+              break;
+            }
+          }
+        }
+        const dt = tBegin - tEnd;
+        xLegacy += vx_Legacy * dt;
+        // y += ∫ (vy + ay * t) dt
+        yLegacy += vy_Legacy * dt - (ay_Legacy * dt * dt) / 2;
+        vyLegacy -= ((ayLegacy * ts.bpm) / 120) * dt;
+      } else {
+        if (ddu === 0) {
+          if (
+            (u <= uRangeMax && uRangeMax <= uEnd) ||
+            (u <= uRangeMax && ti === 0 && du > 0)
+          ) {
+            const tAppear = (uRangeMax - u) / du;
+            appearTimeSec = tBegin - tAppear;
+          } else if (
+            (u >= uRangeMin && uRangeMin >= uEnd) ||
+            (u >= uRangeMin && ti === 0 && du < 0)
+          ) {
+            const tAppear = (uRangeMin - u) / du;
+            appearTimeSec = tBegin - tAppear;
+          }
+        } else {
+          // u + du * dt + ddu * dt * dt / 2 == uRangeMax となるdt
+          const dt_uRangeMax = solveQuadEquation(ddu / 2, du, u - uRangeMax);
+          if (dt_uRangeMax) {
+            if (
+              dt_uRangeMax.plus >= 0 &&
+              (dt_uRangeMax.plus < tBegin - tEnd || ti === 0)
+            ) {
+              appearTimeSec = tBegin - dt_uRangeMax.plus;
+            } else if (
+              dt_uRangeMax.minus >= 0 &&
+              (dt_uRangeMax.minus < tBegin - tEnd || ti === 0)
+            ) {
+              appearTimeSec = tBegin - dt_uRangeMax.minus;
+            }
+          }
+          // u + du * dt + ddu * dt * dt / 2 == uRangeMin となるdt
+          const dt_uRangeMin = solveQuadEquation(ddu / 2, du, u - uRangeMin);
+          if (dt_uRangeMin) {
+            if (
+              dt_uRangeMin.plus >= 0 &&
+              (dt_uRangeMin.plus < tBegin - tEnd || ti === 0)
+            ) {
+              appearTimeSec = tBegin - dt_uRangeMin.plus;
+            } else if (
+              dt_uRangeMin.minus >= 0 &&
+              (dt_uRangeMin.minus < tBegin - tEnd || ti === 0)
+            ) {
+              appearTimeSec = tBegin - dt_uRangeMin.minus;
+            }
+          }
+        }
+      }
+      u = uEnd;
+      tBegin = tEnd;
+    }
+    // 判定時刻が速度変化中の場合に判定を過ぎた後の速度を安定化する
+    display.unshift({
+      timeSecBefore: 0,
+      u0: display[0].u0,
+      du: display[0].du,
+      ddu: 0,
+    });
+    if (appearTimeSec === null) {
+      // Speed=0から譜面が始まる場合
+      appearTimeSec = -Infinity;
+    }
+    notes.push({
+      id,
+      big: c.big,
+      hitTimeSec,
+      appearTimeSec,
+      done: 0,
+      bigDone: false,
+      display,
+      targetX,
+      vx,
+      vy,
+      ay,
+    });
+  }
+  return {
+    offset: level.offset,
+    signature: level.signature,
+    bpmChanges: level.bpmChanges,
+    speedChanges: level.speedChanges.map((s) => ({
+      ...s,
+      interp: "interp" in s ? s.interp : false,
+    })),
+    notes,
+    ytBegin: "ytBegin" in level ? level.ytBegin : 0,
+    ytEndSec:
+      "ytEndSec" in level
+        ? level.ytEndSec
+        : level.notes.length >= 1
+          ? getTimeSec(
+              level.bpmChanges,
+              level.notes[level.notes.length - 1].step
+            ) + level.offset
+          : 0,
+  };
+}
+
+export function displayNote(note: Note, timeSec: number): DisplayNote | null {
+  if (timeSec - note.hitTimeSec > 1.0) {
+    return null;
+  } else if (note.done >= 1 && note.done <= 3) {
+    return {
+      id: note.id,
+      pos: note.hitPos || { x: -1, y: -1 },
+      vel: { x: 0, y: 0 },
+      done: note.done,
+      bigDone: note.bigDone,
+      chain: note.chain,
+      baseScore: note.baseScore,
+      chainBonus: note.chainBonus,
+      bigBonus: note.bigBonus,
+    };
+  } else if (timeSec < note.appearTimeSec) {
+    return null;
+  } else {
+    let di = 0;
+    for (; di + 1 < note.display.length; di++) {
+      if (timeSec > note.hitTimeSec - note.display[di + 1].timeSecBefore) {
+        break;
+      }
+    }
+    const dispParam = note.display[di];
+    const { u0, du, ddu } = dispParam;
+    const t = note.hitTimeSec - dispParam.timeSecBefore - timeSec;
+    const u = u0 + du * t + (ddu * t * t) / 2;
+    const u_ = du + ddu * t;
+    return {
+      id: note.id,
+      pos: {
+        x: note.targetX + note.vx * u,
+        y: note.vy * u - (note.ay * u * u) / 2,
+      },
+      vel: {
+        x: note.vx * u_,
+        y: note.vy * u_ - note.ay * u * u_,
+      },
+      done: note.done,
+      bigDone: note.bigDone,
+      chain: note.chain,
+      baseScore: note.baseScore,
+      chainBonus: note.chainBonus,
+      bigBonus: note.bigBonus,
+    };
+  }
+}
 
 /**
  * 判定線の位置

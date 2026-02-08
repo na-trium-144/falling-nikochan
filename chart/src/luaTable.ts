@@ -58,7 +58,10 @@ export const LuaTableSchema = () =>
         ytEnd: YTEndSchema11(),
         ytEndSec: v.number(),
         snapDivider: v.number(),
-        content: v.pipe(v.optional(v.any()), v.transform(() => undefined)),
+        content: v.pipe(
+          v.optional(v.any()),
+          v.transform(() => undefined)
+        ),
       })
     ),
   });

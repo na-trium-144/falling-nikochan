@@ -7,13 +7,11 @@ import { env } from "hono/adapter";
 import {
   convertTo6,
   CidSchema,
-  loadChart6,
-  loadChart13,
-  ChartSeqData6,
-  ChartSeqData13,
   currentChartVer,
   convertTo14,
   convertToPlay14,
+  ChartSeqData,
+  loadChart,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -21,9 +19,8 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
 // Define schema for ChartSeqData13 for OpenAPI documentation
-const ChartSeqData13Schema = () =>
+const ChartSeqDataSchema = () =>
   v.object({
-    ver: v.literal(13),
     notes: v.array(v.any()),
     bpmChanges: v.array(v.any()),
     speedChanges: v.array(v.any()),
@@ -45,7 +42,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         description: "chart sequence data in MessagePack format.",
         content: {
           "application/vnd.msgpack": {
-            schema: resolver(ChartSeqData13Schema()),
+            schema: resolver(ChartSeqDataSchema()),
           },
         },
       },
@@ -85,14 +82,14 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       let { chart } = await getChartEntry(db, cid, null);
 
-      let seqData: ChartSeqData6 | ChartSeqData13;
+      let seqData: ChartSeqData;
       switch (chart.ver) {
         case 4:
         case 5:
           if (!chart.levels.at(lvIndex)) {
             throw new HTTPException(404, { message: "levelNotFound" });
           }
-          seqData = loadChart6({
+          seqData = loadChart({
             ...(await convertTo6(chart)).levels.at(lvIndex)!,
             ver: 6,
             offset: chart.offset,
@@ -102,7 +99,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           if (!chart.levels.at(lvIndex)) {
             throw new HTTPException(404, { message: "levelNotFound" });
           }
-          seqData = loadChart6({
+          seqData = loadChart({
             ...chart.levels.at(lvIndex)!,
             ver: 6,
             offset: chart.offset,
@@ -118,7 +115,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           if (!chart.levels.at(lvIndex)) {
             throw new HTTPException(404, { message: "levelNotFound" });
           }
-          seqData = loadChart13(
+          seqData = loadChart(
             convertToPlay14(await convertTo14(chart), lvIndex)
           );
           break;
@@ -126,14 +123,14 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
             throw new HTTPException(404, { message: "levelNotFound" });
           }
-          seqData = loadChart13(convertToPlay14(chart, lvIndex));
+          seqData = loadChart(convertToPlay14(chart, lvIndex));
           break;
         default:
           chart satisfies never;
           throw new HTTPException(500, { message: "unsupportedChartVersion" });
       }
 
-      const filename = `${cid}.${lvIndex}.fn${seqData.ver}seq.mpk`;
+      const filename = `${cid}.${lvIndex}.fnseq.mpk`;
       return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
         "Content-Type": "application/vnd.msgpack",
         "Content-Disposition": `attachment; filename="${filename}"`,
