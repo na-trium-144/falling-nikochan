@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { Bindings } from "./env.js";
+import { backendOrigin, Bindings } from "./env.js";
 import { ValiError } from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
@@ -54,7 +54,7 @@ export const onError =
           await errorResponse(
             config.fetchStatic,
             env(c),
-            new URL(c.req.url).origin,
+            backendOrigin(c),
             lang,
             status,
             message
@@ -80,10 +80,7 @@ async function errorResponse(
   const t = await getTranslations(lang, "error");
   return (
     await (
-      await fetchStatic(
-        e,
-        new URL(`/${lang}/errorPlaceholder`, e.BACKEND_PREFIX || origin)
-      )
+      await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin))
     ).text()
   )
     .replaceAll("PLACEHOLDER_STATUS", String(status))
