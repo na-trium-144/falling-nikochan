@@ -54,7 +54,15 @@ export class CursorState extends EventEmitter<EventType> {
       this.#notesIndexBegin = undefined;
       this.#notesIndexEnd = undefined;
     }
-    if (timeSec < this.#timeSec) {
+    if (
+      this.#noteIndex !== undefined &&
+      this.#notesIndexBegin !== undefined &&
+      this.#notesIndexEnd !== undefined &&
+      this.#noteIndex >= this.#notesIndexBegin &&
+      this.#noteIndex < this.#notesIndexEnd
+    ) {
+      // keep current note index
+    } else if (timeSec < this.#timeSec) {
       this.#noteIndex =
         this.#notesIndexEnd !== undefined ? this.#notesIndexEnd - 1 : undefined;
     } else {
