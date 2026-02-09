@@ -1,3 +1,11 @@
+## ver. 14.12 - 2026/02/09 [#958](https://github.com/na-trium-144/falling-nikochan/pull/958)
+
+* 音符の更新時にcursorのnoteIndexが毎回リセットされるのを修正
+
+## ver. 14.11 - 2026/02/08
+
+* 譜面の再生開始位置が再生終了位置と同じかそれより後になっていた場合のRangeErrorを修正
+
 ## ver. 14.10 - 2026/02/08
 
 * サーバーがリダイレクトなどでbackendのoriginを決定する際にx-forwarded-protoヘッダーがあればそれを使う
@@ -19,6 +27,7 @@
 ## ver. 14.6 - 2026/02/03 [#952](https://github.com/na-trium-144/falling-nikochan/pull/952)
 
 * ハッシュの計算をWebCryptoAPIを使った自前実装にもどす
+    * object-hashライブラリはWebCryptoAPIを使わず遅い実装になっていたため
 
 ## ver. 14.5 - 2026/02/02 [#951](https://github.com/na-trium-144/falling-nikochan/pull/951)
 
