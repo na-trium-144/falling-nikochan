@@ -8,7 +8,6 @@ import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
-import { useTheme } from "@/common/theme";
 import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
@@ -75,7 +74,6 @@ export default function FallingWindow(props: Props) {
   const canvasMarginY =
     marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
-  const { isDark } = useTheme();
   const { rem, playUIScale } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
@@ -403,7 +401,7 @@ export default function FallingWindow(props: Props) {
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          opacity: isDark ? 0.5 : 0.5,
+          opacity: 0.5,
         }}
         width={canvasWidth.current * tailsCanvasDPR}
         height={canvasHeight.current * tailsCanvasDPR}
@@ -417,7 +415,7 @@ export default function FallingWindow(props: Props) {
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          opacity: isDark ? 0.7 : 0.9,
+          opacity: 0.9,
         }}
         width={canvasWidth.current * nikochanCanvasDPR.current}
         height={canvasHeight.current * nikochanCanvasDPR.current}

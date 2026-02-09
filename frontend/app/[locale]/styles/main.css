@@ -41,7 +41,7 @@
       @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
     }
     > img {
-      /* 他のnikochanはopacity-70だが、ここだけちがう */
+      /* 他のnikochanはopacity-90だが、ここだけちがう */
       @apply absolute;
       width: 1.5rem;
       height: 1.5rem;

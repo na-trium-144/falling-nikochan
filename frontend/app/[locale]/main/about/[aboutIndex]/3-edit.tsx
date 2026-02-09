@@ -86,7 +86,7 @@ export function AboutContent3({ locale }: { locale: string }) {
             >
               <img
                 src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg?v=2`}
-                className="w-full h-full opacity-70"
+                className="w-full h-full opacity-90"
               />
             </div>
             <div
@@ -100,7 +100,7 @@ export function AboutContent3({ locale }: { locale: string }) {
             >
               <img
                 src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg?v=2`}
-                className="w-full h-full opacity-70"
+                className="w-full h-full opacity-90"
               />
             </div>
           </Box>
