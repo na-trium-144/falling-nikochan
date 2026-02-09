@@ -60,7 +60,7 @@ export default function StatusBox(props: Props) {
             "w-max m-auto px-[0.5em] py-[0.2em] rounded-[0.75em]",
             "shadow-xs z-3",
             props.bestCount
-              ? clsx("fn-status-best")
+              ? clsx("fn-inverted fn-status-best")
               : clsx("fn-plain", "text-slate-500/75 dark:text-stone-400/75")
           )}
           style={{
