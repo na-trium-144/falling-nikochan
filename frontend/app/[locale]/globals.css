@@ -7,8 +7,10 @@
   --color-orange-975: #20100a; /* この色ってどうやって作ったの? 記憶にない */
   --color-amber-975: #20180a;
   --color-sky-975: #091823;
-  --color-default: var(--color-slate-800);
-  --color-default-dark: var(--color-stone-300);
+  --color-fg-bright: var(--color-black);
+  --color-fg-base: var(--color-slate-800);
+  --color-fg-bright-dark: var(--color-stone-100);
+  --color-fg-base-dark: var(--color-stone-300);
   --container-main-nav: 16rem;
   --container-main: 88rem;
   --container-mobile-header: 3.25rem; /* MobileHeader を編集したら変えること */

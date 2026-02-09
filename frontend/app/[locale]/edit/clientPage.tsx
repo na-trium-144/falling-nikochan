@@ -871,12 +871,8 @@ export default function Edit(props: {
                       ref.current?.focus();
                     }}
                   >
-                    <span
-                      className={clsx("fn-glass-1", "border-b-0")}
-                    />
-                    <span
-                      className={clsx("fn-glass-2", "border-b-0")}
-                    />
+                    <span className={clsx("fn-glass-1", "border-b-0")} />
+                    <span className={clsx("fn-glass-2", "border-b-0")} />
                     <ButtonHighlight />
                     {t(`${key}.title`)}
                   </button>

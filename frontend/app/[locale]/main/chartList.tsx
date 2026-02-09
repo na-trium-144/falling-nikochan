@@ -146,7 +146,7 @@ export function ChartList(props: Props) {
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
   const itemMinWidth = 18; // * rem
-  const itemMinHeight = 11 / 4; // h-10 + gap-1
+  const itemMinHeight = 12 / 4; // h-11 + gap-1
   const ulCols = ulSize.width
     ? Math.floor(ulSize.width / (itemMinWidth * rem))
     : 1;
@@ -491,7 +491,7 @@ function ChartListItemChildren(props: CProps) {
         <div className="fn-thumbnail" />
       )}
       <div className="fn-cl-content">
-        <div className="leading-4 max-w-full">
+        <div className="flex flex-wrap items-baseline max-w-full">
           <span className="text-xs/3">ID:</span>
           <span className="ml-1 text-sm/3">{props.cid}</span>
           {props.dateDiff && (
@@ -504,20 +504,22 @@ function ChartListItemChildren(props: CProps) {
             <span className="ml-2 text-xs/3">(オリジナル曲)</span>
           )}
           {props.creator && (
-            <span className="inline-block leading-3 fn-cl-clip">
-              <span className="ml-2 text-xs/3">by</span>
-              <span className="ml-1 font-title text-sm/3">
+            <span className="inline-block h-4 leading-4 fn-cl-clip">
+              <span className="ml-2 text-xs/4">by</span>
+              <span className={clsx("ml-1 font-title text-sm/4")}>
                 {props.brief?.chartCreator}
               </span>
             </span>
           )}
         </div>
-        <div className="leading-4 fn-cl-clip">
-          <span className="font-title text-base/4">{props.brief?.title}</span>
+        <div className={clsx("h-5 **:leading-5 fn-cl-clip", "fg-bright")}>
+          <span className="font-title text-base font-medium">
+            {props.brief?.title}
+          </span>
           {!props.original && props.brief?.composer && (
             <>
-              <span className="ml-1 text-sm/4">/</span>
-              <span className="ml-1 font-title text-sm/4">
+              <span className="ml-1 text-sm">/</span>
+              <span className="ml-1 font-title text-base">
                 {props.brief.composer}
               </span>
             </>

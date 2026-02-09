@@ -326,16 +326,19 @@ function ResultRow(props: RowProps) {
         {props.name}:
       </span>
       <span
-        className="text-3xl text-right bold-by-stroke"
+        className="text-3xl text-right bold-by-stroke fg-bright"
         style={props.scoreStyle}
       >
         {Math.floor(props.score100 / 100)}
       </span>
-      <span className="text-xl bold-by-stroke" style={props.scoreStyle}>
+      <span
+        className="text-xl bold-by-stroke fg-bright"
+        style={props.scoreStyle}
+      >
         .
       </span>
       <span
-        className="text-xl text-left bold-by-stroke w-7 "
+        className="text-xl text-left bold-by-stroke fg-bright w-7 "
         style={props.scoreStyle}
       >
         {(props.score100 % 100).toString().padStart(2, "0")}

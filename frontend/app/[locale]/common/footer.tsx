@@ -136,6 +136,7 @@ export function MobileFooter(props: MobileProps) {
           className={clsx(
             "fn-mf-item",
             props.tabKey !== "top" && "rounded-t-none",
+            props.tabKey === key && "fg-bright",
             props.tabKey === key && props.tabKey !== "top"
               ? "fn-flat-button fn-plain fn-selected"
               : "fn-flat-button fn-sky"

@@ -16,14 +16,14 @@
     */
     .fn-cl-item {
       @apply rounded-md bg-sky-400/15 dark:bg-orange-700/10;
-      @apply w-full mx-auto h-max min-h-10;
+      @apply w-full mx-auto h-max min-h-11;
       max-width: 27rem;
 
       /* 選択可能な chart-list item は、.fn-cl-item > .fn-flat-button.fn-sky */
       > .fn-flat-button {
         @apply rounded-[inherit] sq-inherit;
         @apply block w-full text-left cursor-pointer;
-        @apply pl-1.5 py-0.5;
+        @apply pl-1.5 py-1;
         @apply relative;
         @apply flex flex-row items-center gap-2;
 
@@ -37,7 +37,7 @@
         }
 
         > .fn-cl-content {
-          @apply flex-1 min-w-0 flex flex-col items-start justify-center space-y-0.5;
+          @apply flex-1 min-w-0 flex flex-col items-start justify-center;
 
           .fn-cl-clip {
             /* 上の行はchartCreator部分のみ、下の行は全体にclipとellipsisを適用する */
@@ -48,7 +48,7 @@
     }
   }
   .fn-cl-message {
-    @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2;
+    @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2.5;
     /* 下に移動する場合はinlineスタイルで top: を指定 */
   }
   .fn-cl-more {

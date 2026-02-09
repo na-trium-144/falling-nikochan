@@ -157,7 +157,7 @@ export function FlexYouTube(props: Props) {
         className={clsx(
           "absolute inset-0 bg-transparent backdrop-blur-xs -z-1",
           "flex flex-row items-center justify-center",
-          "text-default dark:text-default-dark",
+          "fg-base",
           !id && "hidden"
         )}
       >

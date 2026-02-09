@@ -35,6 +35,7 @@
 
   .fn-title {
     @apply absolute isolate leading-none text-center mx-auto w-96;
+    @apply fg-bright;
 
     > h1 {
       @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
@@ -77,6 +78,7 @@
 
   .fn-main-nav-item {
     @apply text-center rounded-2xl py-3 pl-2 pr-2;
+    @apply fg-bright;
   }
 
   .fn-sect {
@@ -93,9 +95,11 @@
   }
   .fn-heading-sect {
     @apply text-xl font-semibold font-title;
+    @apply fg-bright;
   }
   .fn-heading-box {
     @apply text-lg font-medium font-title;
+    @apply fg-bright;
     @apply text-center mb-2;
   }
 
@@ -103,6 +107,7 @@
     > h3 {
       @apply mb-2;
       @apply text-xl font-semibold font-title;
+      @apply fg-bright;
     }
     > ul {
       @apply mb-3;
@@ -111,6 +116,7 @@
   .fn-mdx-changelog {
     > h4 {
       @apply text-lg font-medium font-title;
+      @apply fg-bright;
     }
     > ul {
       @apply mb-2;

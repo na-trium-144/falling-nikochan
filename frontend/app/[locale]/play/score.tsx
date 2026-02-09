@@ -169,14 +169,14 @@ function lerp(start: number, end: number, t: number) {
 function useColorWithLerp(c: number) {
   const factorClip = (c: number) => Math.min(1, Math.max(0, c));
   const lchLight = [
-    lerp(0.279, 0.705, factorClip((c - 0.1) / 0.9)),
+    lerp(0, 0.705, factorClip(c / 1)),
     lerp(0.041, 0.213, factorClip((c - 0.25) / 0.75)),
-    lerp(260.031, 47.604, factorClip(c / 0.25)),
+    47.604,
   ];
   const lchDark = [
-    lerp(0.869, 0.852, factorClip(c / 0.1)),
-    lerp(0.005, 0.199, factorClip((c - 0.1) / 0.9)),
-    lerp(56.366, 91.936, factorClip(c / 0.1)),
+    lerp(0.97, 0.852, factorClip(c / 1)),
+    lerp(0.001, 0.199, factorClip((c - 0.1) / 0.9)),
+    lerp(106.424, 91.936, factorClip(c / 0.1)),
   ];
   const { isDark } = useTheme();
   return isDark ? lchDark : lchLight;

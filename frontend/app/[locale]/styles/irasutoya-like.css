@@ -1,5 +1,5 @@
 body.fn-csr-ready {
-  @apply text-default dark:text-default-dark;
+  @apply fg-base;
 
   > .fn-fallback-bg {
     @apply fixed inset-0 pointer-events-none z-fallback-bg;

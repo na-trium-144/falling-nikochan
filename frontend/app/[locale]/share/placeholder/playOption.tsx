@@ -184,22 +184,16 @@ function LevelButton(props: {
       className={clsx(
         "cursor-pointer w-full",
         "relative rounded-lg px-2 py-0.5 my-0.5",
-        props.selected ? "fn-flat-button fn-plain fn-selected" : "fn-flat-button fn-sky",
+        props.selected
+          ? "fn-flat-button fn-plain fn-selected"
+          : "fn-flat-button fn-sky",
         props.selected ? "shadow-2xs" : "hover:shadow-2xs",
         "shadow-slate-500/50 dark:shadow-stone-950/50"
       )}
       onClick={props.onClick}
     >
-      <span
-        className={clsx(
-          props.selected ? "fn-glass-1" : "fn-glass-1"
-        )}
-      />
-      <span
-        className={clsx(
-          props.selected ? "fn-glass-2" : "fn-glass-2"
-        )}
-      />
+      <span className={clsx(props.selected ? "fn-glass-1" : "fn-glass-1")} />
+      <span className={clsx(props.selected ? "fn-glass-2" : "fn-glass-2")} />
       <ButtonHighlight />
       <LevelBadge
         className="absolute top-0.5 -right-3 z-10"
@@ -380,7 +374,7 @@ function SelectedLevelInfo(props: {
         <div className="flex flex-row items-center ">
           <span
             className={clsx(
-              "bold-by-stroke",
+              "bold-by-stroke fg-bright",
               selectedBestScore || "text-slate-400 dark:text-stone-500"
             )}
           >
@@ -393,7 +387,9 @@ function SelectedLevelInfo(props: {
             </span>
           </span>
           {selectedBestScore && (
-            <span className="text-xl ml-1 ">({rankStr(totalScore)})</span>
+            <span className="text-xl ml-1 fg-bright">
+              ({rankStr(totalScore)})
+            </span>
           )}
         </div>
         {!showBestDetail && selectedBestScore && (

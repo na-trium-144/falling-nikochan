@@ -28,6 +28,13 @@
   -webkit-text-stroke: 0.03em currentColor;
 }
 
+@utility fg-base {
+  @apply text-fg-base dark:text-fg-base-dark;
+}
+@utility fg-bright {
+  @apply text-fg-bright dark:text-fg-bright-dark;
+}
+
 /* widthやbasisにはあるが、heightにはない (containerって横方向の長さ用だし) */
 @utility h-* {
   height: --value(--container-*);

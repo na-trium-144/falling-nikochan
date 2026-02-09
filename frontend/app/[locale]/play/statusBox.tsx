@@ -67,8 +67,8 @@ export default function StatusBox(props: Props) {
             fontSize: isMobile ? "0.8em" : undefined,
           }}
         >
-          <span className="fn-glass-1"/>
-          <span className="fn-glass-2"/>
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
           <span>{t("bestScore")}:</span>
           <span
             className="inline-block text-right"
@@ -289,7 +289,7 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "mt-1 w-full text-center bold-by-stroke",
+          "mt-1 w-full text-center bold-by-stroke fg-bright",
           props.disabled
             ? "text-slate-400/75 dark:text-stone-500/75"
             : props.color === "inverted"
@@ -310,7 +310,7 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
+          "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke fg-bright",
           props.disabled
             ? "text-slate-400/75 dark:text-stone-500/75"
             : props.color === "inverted"

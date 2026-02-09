@@ -148,7 +148,7 @@ export function ShareBox(props: Props) {
                   className={clsx(
                     "font-title text-xs main-wide:text-sm",
                     "overflow-hidden whitespace-nowrap text-ellipsis",
-                    "text-default dark:text-default-dark"
+                    "fg-base"
                   )}
                 >
                   {ytMeta?.channelTitle}
@@ -167,12 +167,24 @@ export function ShareBox(props: Props) {
                     <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
                   </button>
                 )}
-                <span>{cid && `ID: ${cid}`}</span>
+                {cid && (
+                  <>
+                    <span>ID:</span>
+                    <span className="ml-2 text-lg">{cid}</span>
+                  </>
+                )}
               </div>
-              <p className="font-title text-2xl font-semibold">
+              <p
+                className={clsx(
+                  "font-title text-2xl font-semibold",
+                  "fg-bright"
+                )}
+              >
                 {brief?.title}
               </p>
-              <p className="font-title text-lg font-medium">
+              <p
+                className={clsx("font-title text-lg font-medium", "fg-bright")}
+              >
                 {brief?.composer}
               </p>
               <p className="mt-1">
@@ -180,11 +192,13 @@ export function ShareBox(props: Props) {
                   <span className="text-sm">
                     {brief && `${t("chartCreator")}:`}
                   </span>
-                  <span className="ml-2 font-title text-lg">
+                  <span
+                    className={clsx("ml-2 font-title text-lg", "fg-bright")}
+                  >
                     {brief?.chartCreator}
                   </span>
                 </span>
-                <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
+                <span className="inline-block ml-3">
                   <span className="inline-block">
                     {updatedAt && `(${updatedAt})`}
                   </span>

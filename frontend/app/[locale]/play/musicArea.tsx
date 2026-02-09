@@ -170,7 +170,7 @@ export function MusicArea(props: Props) {
         <div
           className={clsx(
             "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
-            "text-default dark:text-default-dark",
+            "fg-base",
             props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
           )}
         >
@@ -179,6 +179,7 @@ export function MusicArea(props: Props) {
               className={clsx(
                 "flex flex-wrap items-baseline",
                 "font-medium font-title",
+                "fg-bright",
                 veryLargeTitle
                   ? "*:h-8 **:leading-8"
                   : largeTitle
@@ -189,7 +190,6 @@ export function MusicArea(props: Props) {
               {/* x-hiddenとy-visibleを組み合わせることはできないが、clipならok? */}
               <span
                 className={clsx(
-                  "font-title",
                   veryLargeTitle
                     ? "text-3xl"
                     : largeTitle
@@ -204,7 +204,6 @@ export function MusicArea(props: Props) {
               {props.chartBrief?.composer && (
                 <span
                   className={clsx(
-                    "font-title",
                     veryLargeTitle
                       ? "text-2xl"
                       : largeTitle
@@ -222,6 +221,7 @@ export function MusicArea(props: Props) {
             <p
               className={clsx(
                 "flex flex-wrap items-baseline",
+                "fg-bright",
                 veryLargeTitle
                   ? "*:h-7 **:leading-7"
                   : largeTitle
@@ -325,7 +325,7 @@ export function MusicArea(props: Props) {
                 ? "text-rose-600/75 dark:text-rose-400/75"
                 : props.playbackRate < 1
                   ? "text-emerald-600/75 dark:text-emerald-400/75"
-                  : "text-black/40 dark:text-white/40"
+                  : ""
             )}
           >
             <span className="flex-none w-max">
@@ -368,7 +368,7 @@ export function MusicArea(props: Props) {
       <button
         className={clsx(
           "fn-icon-button absolute",
-          "text-default dark:text-default-dark",
+          "fg-base",
           props.isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
@@ -389,7 +389,7 @@ export function MusicArea(props: Props) {
       </button>
       <div
         className={clsx(
-          "text-default dark:text-default-dark",
+          "fg-base",
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"

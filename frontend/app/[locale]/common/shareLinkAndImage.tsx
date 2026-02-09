@@ -134,9 +134,7 @@ export function useShareLink(
       <>
         {origin}
         {sharePath}
-        <span className="text-slate-500 dark:text-stone-400 ">
-          ?{shareParams}
-        </span>
+        <span className="opacity-60">?{shareParams}</span>
       </>
     ),
     path: sharePath + "?" + shareParams,

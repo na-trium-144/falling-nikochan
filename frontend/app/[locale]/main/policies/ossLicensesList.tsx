@@ -67,7 +67,10 @@ export function OSSLicensesList() {
   } else {
     return (
       <button
-        className={clsx("block w-full text-left ml-2 my-1 text-sm", "fn-link-1")}
+        className={clsx(
+          "block w-full text-left ml-2 my-1 text-sm",
+          "fn-link-1"
+        )}
         onClick={() => setOpen(true)}
       >
         {t("showDetail")}

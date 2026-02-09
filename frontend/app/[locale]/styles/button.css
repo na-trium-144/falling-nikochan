@@ -7,6 +7,7 @@
     @apply dark:bg-amber-800/75 dark:from-amber-950/75 dark:to-amber-800/75;
     @apply shadow-sm;
     @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+    @apply fg-bright;
 
     .fn-small {
       @apply h-8 py-0;
