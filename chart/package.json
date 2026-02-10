@@ -10,7 +10,7 @@
     "lint": "eslint src/ tests/",
     "t": "tsc",
     "cdev": "tsc --watch",
-    "test": "tsc && tsx --test tests/**/*.spec.ts"
+    "test": "tsc && tsx --test tests/**/*.spec.ts tests/*.spec.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",

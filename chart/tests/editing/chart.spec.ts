@@ -193,7 +193,7 @@ describe("ChartEditing", () => {
           snapDivider: 2,
         },
       ],
-      lua: [[], []],
+      lua: [["print('Hello, World!')"], []],
       locale: "en",
       zoom: 1,
       copyBuffer: dummyChartData.copyBuffer,

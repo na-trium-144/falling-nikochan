@@ -173,7 +173,7 @@ export const dummyChartData: ChartEdit = {
       ],
     },
   ],
-  lua: [[], []],
+  lua: [["print('Hello, World!')"], []],
   zoom: 1,
   copyBuffer: Array.from(new Array(10)).map(() => null),
 };
