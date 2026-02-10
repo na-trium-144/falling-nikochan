@@ -66,15 +66,17 @@ export const LuaTableSchema = () =>
     ),
   });
 export function findLuaLevelCode(rawCode: string) {
-  return (rawCode.match(/LEVEL_CODE_BEGIN[\w\W]*?LEVEL_CODE_END/g) ?? []).map(
-    (code) => {
-      let lines = code.split("\n").slice(1, -1);
-      while (lines.every((line) => line.startsWith(" "))) {
-        lines = lines.map((line) => line.slice(1));
-      }
-      return lines;
+  return (
+    rawCode.match(
+      /LEVEL_CODE_BEGIN(?:(?!LEVEL_CODE_BEGIN)[\w\W])*?LEVEL_CODE_END/g
+    ) ?? []
+  ).map((code) => {
+    let lines = code.split("\n").slice(1, -1);
+    while (lines.every((line) => line.startsWith(" "))) {
+      lines = lines.map((line) => line.slice(1));
     }
-  );
+    return lines;
+  });
 }
 export function chartToLuaTableCode(chart: ChartUntil14Min): string {
   const levelsLuaOnly = (
