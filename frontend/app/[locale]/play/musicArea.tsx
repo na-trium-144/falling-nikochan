@@ -310,10 +310,11 @@ export function MusicArea(props: Props) {
                   : "flex flex-col-reverse"
                 : "flex flex-row gap-[0.5em]",
               veryLargeTitle ? "text-xl" : largeTitle ? "text-base" : "text-sm",
+              "text-dim",
               props.playbackRate > 1
-                ? "text-rose-600/75 dark:text-rose-400/75"
+                ? "text-rose-600 dark:text-rose-400"
                 : props.playbackRate < 1
-                  ? "text-emerald-600/75 dark:text-emerald-400/75"
+                  ? "text-emerald-600 dark:text-emerald-400"
                   : ""
             )}
           >
