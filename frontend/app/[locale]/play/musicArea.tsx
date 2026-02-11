@@ -1,6 +1,5 @@
 import clsx from "clsx/lite";
-import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
-import { levelColors } from "@/common/levelColors";
+import { ChartBrief } from "@falling-nikochan/chart";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
@@ -253,29 +252,19 @@ export function MusicArea(props: Props) {
                     )}
                     <span
                       className={clsx(
-                        levelColors.at(levelTypes.indexOf(props.lvType)) ||
-                          levelColors[1],
+                        "fn-level-type",
+                        props.lvType,
                         veryLargeTitle
-                          ? "text-1_5xl"
+                          ? "text-2xl"
                           : largeTitle
-                            ? "text-base"
-                            : "text-xs"
+                            ? "text-lg"
+                            : "text-sm"
                       )}
                     >
-                      {props.lvType}-
-                    </span>
-                    <span
-                      className={clsx(
-                        levelColors.at(levelTypes.indexOf(props.lvType)) ||
-                          levelColors[1],
-                        veryLargeTitle
-                          ? "text-2_5xl"
-                          : largeTitle
-                            ? "text-xl"
-                            : "text-lg"
-                      )}
-                    >
-                      {props.chartBrief?.levels[props.lvIndex]?.difficulty}
+                      <span>{props.lvType}-</span>
+                      <span>
+                        {props.chartBrief?.levels[props.lvIndex]?.difficulty}
+                      </span>
                     </span>
                   </span>
                 )}

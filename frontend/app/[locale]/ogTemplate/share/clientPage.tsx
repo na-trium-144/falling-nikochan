@@ -7,7 +7,6 @@ import RhythmicalSlime from "@/play/rhythmicalSlime";
 import { useTranslations } from "next-intl";
 import { stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
-import { levelBgColors } from "@/common/levelColors";
 import {
   IrasutoyaLikeBgInner,
   IrasutoyaLikeGrassInner,
@@ -41,7 +40,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl",
-          levelBgColors[1],
+          "bg-amber-500",
           showDummyData || "invisible"
         )}
       >

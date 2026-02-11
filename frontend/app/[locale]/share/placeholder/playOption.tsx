@@ -15,7 +15,6 @@ import {
 } from "@/common/bestScore.js";
 import Button, { ButtonHighlight } from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
-import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
@@ -84,7 +83,7 @@ export function PlayOption(props: Props) {
                 <li
                   key={i}
                   className={clsx(
-                    "relative leading-0 w-full",
+                    "relative w-full",
                     selectedLevel !== null && selectedLevel >= 0
                       ? "pr-4"
                       : "pr-2"
@@ -182,8 +181,9 @@ function LevelButton(props: {
   return (
     <button
       className={clsx(
-        "cursor-pointer w-full",
-        "relative rounded-lg px-2 py-0.5 my-0.5",
+        "cursor-pointer w-full fg-bright",
+        "relative rounded-lg px-3 py-1 my-0.5",
+        "flex items-center justify-center",
         props.selected
           ? "fn-flat-button fn-plain fn-selected"
           : "fn-flat-button fn-sky",
@@ -200,17 +200,15 @@ function LevelButton(props: {
         status={[props.status]}
         levels={[levelTypes.indexOf(props.level.type)]}
       />
-      <span className="inline-block text-center truncate w-full ">
+      <span className="flex flex-wrap items-baseline justify-center max-w-full">
         {props.level.name && (
-          <span className="mr-2 font-title ">{props.level.name}</span>
+          <span className="mr-2 font-title truncate">{props.level.name}</span>
         )}
         <span
-          className={clsx(
-            props.selected && levelColors[levelTypes.indexOf(props.level.type)]
-          )}
+          className={clsx("fn-level-type", props.selected && props.level.type)}
         >
-          <span className="text-sm">{props.level.type}-</span>
-          <span className="text-lg">{props.level.difficulty}</span>
+          <span>{props.level.type}-</span>
+          <span>{props.level.difficulty}</span>
         </span>
       </span>
     </button>

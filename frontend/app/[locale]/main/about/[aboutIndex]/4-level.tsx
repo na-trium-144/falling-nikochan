@@ -2,7 +2,6 @@
 
 import clsx from "clsx/lite";
 import { levelTypes } from "@falling-nikochan/chart";
-import { levelColors } from "@/common/levelColors";
 import { useTranslations } from "next-intl";
 
 export function AboutContent4() {
@@ -14,10 +13,14 @@ export function AboutContent4() {
           {t.rich("content1", {
             level: (c) => (
               <span
-                className={clsx("inline-block ml-0.5", levelColors[Number(c)])}
+                className={clsx(
+                  "inline-block ml-0.5",
+                  "fn-level-type",
+                  levelTypes[Number(c)]
+                )}
               >
-                <span className="text-sm">{levelTypes[Number(c)]}-</span>
-                <span className="">{4 + Number(c) * 4}</span>
+                <span>{levelTypes[Number(c)]}-</span>
+                <span>{4 + Number(c) * 4}</span>
               </span>
             ),
           })}
@@ -25,7 +28,9 @@ export function AboutContent4() {
         <p>
           {t.rich("content2", {
             level: (c) => (
-              <span className={clsx("mx-1", levelColors[Number(c)])}>
+              <span
+                className={clsx("mx-1", `fn-level-col-${"sdm"[Number(c)]}`)}
+              >
                 {levelTypes[Number(c)]}
               </span>
             ),

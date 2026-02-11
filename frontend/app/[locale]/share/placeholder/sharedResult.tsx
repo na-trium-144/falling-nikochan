@@ -1,6 +1,5 @@
 import clsx from "clsx/lite";
 import { Box } from "@/common/box";
-import { levelColors } from "@/common/levelColors";
 import { JudgeIcon } from "@/play/statusBox";
 import {
   baseScoreRate,
@@ -42,11 +41,12 @@ export function SharedResultBox(props: Props) {
         <span
           className={clsx(
             "inline-block mr-2",
-            levelColors[props.result.lvType]
+            "fn-level-type",
+            levelTypes[props.result.lvType]
           )}
         >
-          <span className="text-sm">{levelTypes[props.result.lvType]}-</span>
-          <span className="text-lg">{props.result.lvDifficulty}</span>
+          <span>{levelTypes[props.result.lvType]}-</span>
+          <span>{props.result.lvDifficulty}</span>
         </span>
         {props.result.playbackRate4 !== 4 && (
           <span className="inline-block mr-2">

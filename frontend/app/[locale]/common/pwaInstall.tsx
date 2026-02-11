@@ -15,7 +15,6 @@ import Button from "./button";
 import { hasTouch } from "@/scale";
 import { Box, WarningBox } from "./box";
 import { SlimeSVG } from "./slime";
-import { levelBgColors } from "./levelColors";
 import ProgressBar from "./progressBar";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -380,7 +379,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             {workerUpdate?.progressNum !== undefined && (
               <ProgressBar
                 className="absolute bottom-1 inset-x-2.5 "
-                fixedColor={levelBgColors[1]}
+                fixedColor="fn-pbar-yellow"
                 value={
                   (workerUpdate?.progressNum || 0) /
                   (workerUpdate?.totalNum || 1)

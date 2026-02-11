@@ -7,4 +7,13 @@
       @apply absolute inset-y-0 rounded-full;
     }
   }
+  .fn-pbar-green {
+    @apply bg-emerald-500 dark:bg-emerald-900;
+  }
+  .fn-pbar-yellow {
+    @apply bg-amber-500 dark:bg-amber-900;
+  }
+  .fn-pbar-red {
+    @apply bg-rose-400 dark:bg-rose-900;
+  }
 }
