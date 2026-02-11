@@ -40,9 +40,7 @@ export default function Input(props: Props) {
         "font-main-ui",
         !props.left && "text-right",
         "fn-input",
-        props.isValid && !props.isValid(value) && "text-red-500",
-        props.disabled &&
-          "text-slate-400 border-slate-200 dark:text-stone-600 dark:border-stone-700",
+        props.isValid && !props.isValid(value) && "fn-invalid",
         props.className
       )}
       value={value}

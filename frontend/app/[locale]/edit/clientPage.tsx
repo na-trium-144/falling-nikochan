@@ -619,7 +619,7 @@ export default function Edit(props: {
                 <span className="grow-1 whitespace-nowrap ">
                   ID: {chart?.cid}
                 </span>
-                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-slate-500 dark:text-stone-400 ">
+                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-dim">
                   <span className="">ver.</span>
                   <span className="ml-1">{process.env.buildVersion}</span>
                 </span>

@@ -61,7 +61,7 @@ export default function StatusBox(props: Props) {
             "shadow-xs z-3",
             props.bestCount
               ? clsx("fn-inverted fn-status-best")
-              : clsx("fn-plain", "text-slate-500/75 dark:text-stone-400/75")
+              : clsx("fn-plain", "text-dim")
           )}
           style={{
             fontSize: isMobile ? "0.8em" : undefined,
@@ -181,7 +181,7 @@ export default function StatusBox(props: Props) {
         <span
           className={clsx(
             "flex-none w-[3.75em] self-end translate-y-1 flex flex-row items-baseline mr-2",
-            props.bigTotal === 0 && "text-slate-400 dark:text-stone-500"
+            props.bigTotal === 0 && "text-dim"
           )}
         >
           <span className="flex-1">/</span>
@@ -227,7 +227,7 @@ function StatusItem(props: {
         isMobile
           ? "flex-1 basis-1 flex flex-col"
           : clsx("flex flex-row items-baseline", props.wide || "mr-[3.75em]"),
-        props.disabled && "text-slate-400/75 dark:text-stone-500/75"
+        props.disabled && "text-dim"
       )}
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
@@ -289,14 +289,14 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "mt-1 w-full text-center bold-by-stroke fg-bright",
+          "mt-1 w-full text-center bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-500/75"
+            ? "text-dim"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"
-                ? "text-slate-500/75 dark:text-stone-400/75"
-                : null
+                ? "text-dim"
+                : "fg-bright"
         )}
         style={{
           fontSize: "2em",
@@ -310,14 +310,14 @@ function StatusValue(props: {
     return (
       <span
         className={clsx(
-          "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke fg-bright",
+          "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-500/75"
+            ? "text-dim"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"
-                ? "text-slate-500/75 dark:text-stone-400/75"
-                : null
+                ? "text-dim"
+                : "fg-bright"
         )}
         style={{
           fontSize: "2em",

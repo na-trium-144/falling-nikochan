@@ -27,6 +27,10 @@
     sans-serif;
   --default-font-family: var(--font-main-ui);
 }
+:root {
+  --alpha-dim: 60%;
+  --alpha-highlight: 50%;
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* utilities */

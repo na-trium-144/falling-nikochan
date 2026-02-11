@@ -35,6 +35,38 @@
   @apply text-fg-bright dark:text-fg-bright-dark;
 }
 
+@utility text-* {
+  --base-text-color: --value(--color-*);
+}
+@utility text-dim {
+  &,
+  * {
+    --dim-text-color: color-mix(
+      in oklab,
+      var(--base-text-color) var(--alpha-dim),
+      transparent
+    );
+    color: var(--highlighted-text-color, var(--dim-text-color));
+  }
+}
+@utility text-highlight {
+  /*
+    text-* で指定されている色に50%白を混ぜる。
+    直接 color: で指定している場合には --base-text-color 変数をセットする必要がある
+
+    dimとhighlightが両方指定されている場合、 dim -> highlight の順に適用
+  */
+  &,
+  * {
+    --highlighted-text-color: color-mix(
+      in oklab,
+      var(--dim-text-color, var(--base-text-color)) var(--alpha-highlight),
+      var(--color-white)
+    );
+    color: var(--highlighted-text-color);
+  }
+}
+
 /* widthやbasisにはあるが、heightにはない (containerって横方向の長さ用だし) */
 @utility h-* {
   height: --value(--container-*);

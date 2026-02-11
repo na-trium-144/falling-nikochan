@@ -88,10 +88,10 @@ export default function LevelTab(props: Props) {
           <li key={i}>
             <button
               className={clsx(
-                i === chart?.currentLevelIndex
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "hover:text-slate-500 hover:dark:text-stone-400",
-                level.meta.unlisted && "text-slate-400 dark:text-stone-500"
+                i === chart?.currentLevelIndex &&
+                  "text-blue-600 dark:text-blue-400",
+                "hover:text-highlight cursor-pointer",
+                level.meta.unlisted && "text-dim"
               )}
               onClick={() => chart?.setCurrentLevelIndex(i)}
             >
@@ -120,8 +120,7 @@ export default function LevelTab(props: Props) {
               <span
                 className={clsx(
                   "inline-block",
-                  level.freeze.notes.length ||
-                    "text-slate-400 dark:text-stone-500"
+                  level.freeze.notes.length || "text-dim"
                 )}
               >
                 ({level.freeze.notes.length} notes)

@@ -1,7 +1,16 @@
 @layer components {
   .fn-checkbox {
-    &:not(:has(input:disabled)) {
-      @apply hover:text-slate-500 hover:dark:text-stone-500;
+    &:hover:not(:has(input:disabled)) {
+      /*@apply text-highlight;*/
+      &,
+      *:not(svg):not(svg *) {
+        --highlighted-text-color: color-mix(
+          in oklab,
+          var(--dim-text-color, var(--base-text-color)) var(--alpha-highlight),
+          var(--color-white)
+        );
+        color: var(--highlighted-text-color);
+      }
     }
 
     &:has(input:disabled) {

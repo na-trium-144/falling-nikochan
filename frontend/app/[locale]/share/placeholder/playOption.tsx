@@ -344,9 +344,7 @@ function SelectedLevelInfo(props: {
           />
         )}
       {selectedRecord instanceof APIError && (
-        <p className="text-slate-400 dark:text-slate-500">
-          {selectedRecord.format(te)}
-        </p>
+        <p className="text-dim">{selectedRecord.format(te)}</p>
       )}
       <button
         className={clsx(
@@ -367,15 +365,15 @@ function SelectedLevelInfo(props: {
         )}
         <p className="">{t("bestScore")}</p>
         {showBestDetail && selectedBestScore?.date && (
-          <span className="text-sm text-slate-500 dark:text-stone-400">
+          <span className="text-sm text-dim">
             ({new Date(selectedBestScore.date).toLocaleDateString()})
           </span>
         )}
         <div className="flex flex-row items-center ">
           <span
             className={clsx(
-              "bold-by-stroke fg-bright",
-              selectedBestScore || "text-slate-400 dark:text-stone-500"
+              "bold-by-stroke",
+              selectedBestScore ? "fg-bright" : "text-dim"
             )}
           >
             <span className="inline-block text-2xl">

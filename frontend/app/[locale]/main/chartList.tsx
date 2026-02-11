@@ -496,7 +496,7 @@ function ChartListItemChildren(props: CProps) {
           <span className="ml-1 text-sm/3">{props.cid}</span>
           {props.dateDiff && (
             <DateDiff
-              className="ml-2 text-xs/3 text-slate-500 dark:text-stone-400"
+              className="ml-2 text-xs/3 text-dim"
               date={props.brief?.updatedAt || 0}
             />
           )}

@@ -445,15 +445,12 @@ export function MusicArea(props: Props) {
         </div>
         <div className="flex flex-row items-center mt-3 ">
           <SmilingFace
-            className={clsx(
-              "text-xl",
-              props.enableSE || "text-slate-400 dark:text-stone-500"
-            )}
+            className={clsx("text-xl", props.enableSE || "text-dim")}
           />
           <span
             className={clsx(
               "text-sm w-8 text-center",
-              props.enableSE || "text-slate-400 dark:text-stone-500"
+              props.enableSE || "text-dim"
             )}
           >
             {props.enableSE ? props.seVolume : t("off")}

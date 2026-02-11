@@ -8,7 +8,7 @@
     @variant disabled {
       @apply cursor-default;
       @apply hover:bg-[unset] active:bg-[unset];
-      @apply text-slate-400 dark:text-stone-500;
+      @apply text-dim;
     }
 
     &.fn-with-bg {
