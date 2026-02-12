@@ -289,7 +289,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
             >
               <p className="fn-heading-box">&lt; {t("shareImage")} &gt;</p>
               <div
-                className="max-w-full relative aspect-1200/630 bg-slate-300 mb-2 isolate"
+                className="max-w-full relative aspect-1200/630 mb-2 isolate"
                 style={{
                   width:
                     "min(45rem, calc(100dvw - 9rem), max(20rem, calc((100dvh - 17.25rem) * (1200 / 630)))",
@@ -310,7 +310,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
                 />
                 <div
                   className={clsx(
-                    "absolute inset-0 bg-gray-500/50 backdrop-blur-xs -z-1",
+                    "absolute inset-0 bg-gray-500/25 -z-1",
                     "flex flex-row items-center justify-center "
                   )}
                 >

@@ -513,10 +513,9 @@ export default function Edit(props: {
     >
       <div
         className={clsx(
-          "fixed z-edit-mobile-header top-0 inset-x-0 backdrop-blur-2xs",
+          "fixed z-edit-mobile-header top-0 inset-x-0",
           "flex edit-wide:hidden flex-row items-center",
-          "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200",
-          "dark:from-orange-975/0 dark:to-orange-975"
+          "fn-mh-blur"
         )}
       >
         <MobileHeader className="flex-1 " noBackButton={!standalone}>
@@ -928,12 +927,12 @@ export default function Edit(props: {
             <Box
               classNameOuter={clsx(
                 "mt-2",
-                "bg-slate-200/50 dark:bg-stone-600/50",
+                "bg-gray-500/25",
                 !(
                   luaExecutor.running ||
                   luaExecutor.stdout.length > 0 ||
                   luaExecutor.err.length > 0
-                ) && "main-wide:hidden"
+                ) && "edit-wide:hidden"
               )}
               classNameInner="h-24 max-h-24 edit-wide:h-auto"
               scrollableX

@@ -6,6 +6,11 @@
       @apply absolute left-3 inset-y-0;
     }
   }
+  .fn-mh-blur {
+    @applt backdrop-blur-2xs;
+    @apply bg-gradient-to-t to-70% from-sky-200/0 to-sky-200;
+    @apply dark:from-orange-975/0 dark:to-orange-975;
+  }
 
   .fn-mobile-footer {
     @apply pb-2 px-8 z-mobile-footer w-full;

@@ -120,7 +120,7 @@ export default function TimeBar(props: Props) {
   return (
     <div
       className={clsx(
-        "h-6 bg-slate-200 dark:bg-stone-600 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
+        "h-6 bg-gray-500/25 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
       )}
       ref={timeBarRef}
     >
@@ -129,7 +129,7 @@ export default function TimeBar(props: Props) {
         (_, dt) => (
           <span
             key={dt}
-            className="absolute border-l border-gray-400 dark:border-gray-600 "
+            className="absolute border-l border-gray-500 "
             style={{
               top: -1.25 * rem,
               bottom: -4,

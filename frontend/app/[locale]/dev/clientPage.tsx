@@ -218,8 +218,8 @@ function StorageEditor(props: EProps) {
         </div>
         <div
           className={clsx(
-            "bg-slate-200/50 dark:bg-stone-600/50 rounded-b-sq-box",
-            "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
+            "bg-gray-500/25 rounded-b-sq-box",
+            "shadow-[0_-2px_4px] shadow-gray-500/50",
             "overflow-hidden"
           )}
         >
