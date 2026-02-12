@@ -150,11 +150,18 @@ const nextConfig = {
       },
       module: {
         ...config.module,
-        rules: (config.module?.rules || []).map((r) => ({
-          ...r,
-          // https://github.com/vercel/next.js/issues/74743
-          exclude: (r.exclude || []).concat([/core-js/]),
-        })),
+        rules: (config.module?.rules || [])
+          .map((r) => ({
+            ...r,
+            // https://github.com/vercel/next.js/issues/74743
+            exclude: (r.exclude || []).concat([/core-js/]),
+          }))
+          .concat([
+            {
+              resourceQuery: /raw/,
+              type: "asset/source",
+            },
+          ]),
       },
       plugins: [
         ...config.plugins,

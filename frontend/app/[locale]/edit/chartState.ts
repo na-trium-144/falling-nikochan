@@ -29,6 +29,7 @@ import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
+import fnCommandsLib from "@fn-commands/fn-commands.lua?raw";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -392,6 +393,11 @@ export function useChartState(props: Props) {
           originalVer = newChartMin.ver;
         }
         newChartMin = await validateChartMin(newChartMin as ChartUntil14Min);
+        for (const lua of (newChartMin as Chart14Min).lua) {
+          if (lua.every((line) => !line.includes("fn-commands"))) {
+            lua.unshift('require "fn-commands"');
+          }
+        }
         return {
           originalVer,
           newChart: {
@@ -404,6 +410,7 @@ export function useChartState(props: Props) {
                   (
                     await luaExec(
                       process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+                      fnCommandsLib,
                       l.join("\n"),
                       { catchError: false, needReturnValue: false }
                     )
@@ -428,6 +435,7 @@ export function useChartState(props: Props) {
             const rawCode = new TextDecoder().decode(buffer);
             const luaResult = await luaExec(
               process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+              fnCommandsLib,
               rawCode,
               { catchError: false, needReturnValue: true }
             );

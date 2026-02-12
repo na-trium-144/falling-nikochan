@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./app/[locale]/*"]
+      "@/*": ["./app/[locale]/*"],
+      "@fn-commands/*": ["../fn-commands/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

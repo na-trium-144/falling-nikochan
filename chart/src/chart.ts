@@ -81,8 +81,9 @@ export const YoutubeIdSchema = () =>
     v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters")
   );
 export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
+// luaコードの実行結果をパースする際nilがundefinedになるので、それも受け付けるようにしている
 export const LuaLineSchema = () =>
-  v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0)));
+  v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), null);
 export const CidSchema = () =>
   v.pipe(v.string(), v.regex(/^[0-9]{6}$/, "cid must be 6 digits"));
 export const levelTypes = ["Single", "Double", "Maniac"];
