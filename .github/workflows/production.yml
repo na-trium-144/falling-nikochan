@@ -29,7 +29,7 @@ jobs:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
-          BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
+          BACKEND_ALT_PREFIX: ${{ vars.PRODUCTION_BACKEND_ALT_PREFIX }}
         run: pnpm dlx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
@@ -174,7 +174,7 @@ jobs:
           host: ${{ secrets.SELFHOST_HOST }}
           username: ${{ secrets.SELFHOST_USERNAME }}
           key: ${{ secrets.SELFHOST_KEY }}
-          port: ${{ secrets.SELFHOST_PORT }}
+          port: ${{ vars.SELFHOST_PORT }}
           script: |
             #!/usr/bin/env bash
             set -e

@@ -62,9 +62,8 @@ jobs:
       - name: Build Project Artifacts
         env:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
-          # ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
-          NO_PREFETCH: 1
-          # BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
+          ASSET_PREFIX: ${{ vars.STAGING_ASSET_PREFIX }}
+          NO_PREFETCH: ${{ vars.STAGING_NO_PREFETCH }}
           VERSION_SUFFIX: +stg
           TITLE_SUFFIX: Staging
         run: pnpm dlx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
