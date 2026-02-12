@@ -44,6 +44,7 @@
 
     > h1 {
       @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
+      -webkit-text-stroke: 0.02em currentColor;
     }
     > img {
       /* 他のnikochanはopacity-90だが、ここだけちがう */
