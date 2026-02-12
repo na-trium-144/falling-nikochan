@@ -1,4 +1,9 @@
-import { Bindings, cacheControl, languageDetector } from "./env.js";
+import {
+  backendOrigin,
+  Bindings,
+  cacheControl,
+  languageDetector,
+} from "./env.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
   baseScoreRate,
@@ -57,10 +62,7 @@ const shareApp = (config: {
       const tr = await getTranslations(qLang, "play.result");
       let placeholderUrl: URL;
       // if (c.req.path.startsWith("/share")) {
-      placeholderUrl = new URL(
-        `/${qLang}/share/placeholder`,
-        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-      );
+      placeholderUrl = new URL(`/${qLang}/share/placeholder`, backendOrigin(c));
       // } else {
       //   placeholderUrl = new URL(
       //     c.req.url.replace(/share\/[0-9]+/, "share/placeholder")
@@ -140,7 +142,7 @@ const shareApp = (config: {
             new URL(
               (resultParams ? `/og/result/${cid}?` : `/og/share/${cid}?`) +
                 ogQuery.toString(),
-              env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+              backendOrigin(c)
             ).toString()
           )
           .replaceAll(

@@ -63,7 +63,7 @@ export default function NoteTab(props: Props) {
           <Button
             keyName="N"
             text={t("noteAdd")}
-            onClick={() => chart?.pasteNote(0)}
+            onClick={() => chart?.pasteNote(0, true)}
             disabled={!currentLevel?.canAddNote}
           />
           <Button

@@ -1,5 +1,5 @@
 import { Context, Hono } from "hono";
-import { Bindings, languageDetector } from "./env.js";
+import { backendOrigin, Bindings, languageDetector } from "./env.js";
 import { isbot } from "isbot";
 import { env } from "hono/adapter";
 
@@ -14,20 +14,14 @@ const redirectApp = (config: {
     .get("/edit/:cid", (c) => {
       // deprecated (used until ver6.15)
       const cid = c.req.param("cid");
-      return c.redirect(
-        new URL(
-          `/edit?cid=${cid}`,
-          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-        ),
-        301
-      );
+      return c.redirect(new URL(`/edit?cid=${cid}`, backendOrigin(c)), 301);
     })
     .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
       const params = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.get("language");
       const redirected = new URL(
         `/${lang}${c.req.path}${params ? "?" + params : ""}`,
-        env(c).BACKEND_PREFIX || new URL(c.req.url).origin
+        backendOrigin(c)
       );
       if (isbot(c.req.header("User-Agent"))) {
         // crawlerに対してはリダイレクトのレスポンスを返す代わりにリダイレクト先のページを直接返す

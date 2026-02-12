@@ -19,13 +19,18 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         .map((size) => [
           {
             src:
-              process.env.ASSET_PREFIX + `/assets/app-icon-${size}-any.png?v=3`,
+              process.env.ASSET_PREFIX +
+              `/assets/app-icon-${size}-any.png` +
+              process.env.ASSET_QUERY_ICON,
             sizes: `${size}x${size}`,
             type: "image/png",
             purpose: "any",
           } as const,
           {
-            src: process.env.ASSET_PREFIX + `/assets/app-icon-${size}.png?v=3`,
+            src:
+              process.env.ASSET_PREFIX +
+              `/assets/app-icon-${size}.png` +
+              process.env.ASSET_QUERY_ICON,
             sizes: `${size}x${size}`,
             type: "image/png",
             purpose: "maskable",
@@ -33,13 +38,19 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         ])
         .flat(),
       {
-        src: process.env.ASSET_PREFIX + "/assets/app-icon-any.svg?v=3",
+        src:
+          process.env.ASSET_PREFIX +
+          "/assets/app-icon-any.svg" +
+          process.env.ASSET_QUERY_ICON,
         sizes: "any",
         type: "image/svg+xml",
         purpose: "any",
       },
       {
-        src: process.env.ASSET_PREFIX + "/assets/app-icon.svg?v=3",
+        src:
+          process.env.ASSET_PREFIX +
+          "/assets/app-icon.svg" +
+          process.env.ASSET_QUERY_ICON,
         sizes: "any",
         type: "image/svg+xml",
         purpose: "maskable",

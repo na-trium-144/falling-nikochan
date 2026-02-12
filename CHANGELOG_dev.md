@@ -1,3 +1,25 @@
+## ver. 14.14 - 2026/02/13
+
+* service workerがアイコンをfetchしていないのを修正
+* favicon.icoはキャッシュを返さずhtmlと同様必ずfetchするように変更
+* assetバージョンを更新 & それの記述をnext.configにまとめる
+
+## ver. 14.13 - 2026/02/12
+
+* 譜面編集のnoteTabの追加ボタンで2つ目以降の音符を追加できないのを修正
+
+## ver. 14.12 - 2026/02/09 [#958](https://github.com/na-trium-144/falling-nikochan/pull/958)
+
+* 音符の更新時にcursorのnoteIndexが毎回リセットされるのを修正
+
+## ver. 14.11 - 2026/02/08
+
+* 譜面の再生開始位置が再生終了位置と同じかそれより後になっていた場合のRangeErrorを修正
+
+## ver. 14.10 - 2026/02/08
+
+* サーバーがリダイレクトなどでbackendのoriginを決定する際にx-forwarded-protoヘッダーがあればそれを使う
+
 ## ver. 14.8 - 2026/02/05
 
 * shareページでのページタイトルの書き換えをsetIntervalで繰り返し行う
@@ -15,6 +37,7 @@
 ## ver. 14.6 - 2026/02/03 [#952](https://github.com/na-trium-144/falling-nikochan/pull/952)
 
 * ハッシュの計算をWebCryptoAPIを使った自前実装にもどす
+    * object-hashライブラリはWebCryptoAPIを使わず遅い実装になっていたため
 
 ## ver. 14.5 - 2026/02/02 [#951](https://github.com/na-trium-144/falling-nikochan/pull/951)
 

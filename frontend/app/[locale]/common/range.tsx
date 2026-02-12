@@ -21,10 +21,10 @@ export default function Range(rangeProps: Props) {
     <ReactRange
       step={1}
       min={rangeProps.min}
-      max={rangeProps.max}
+      max={Math.max(rangeProps.max, rangeProps.min + 1)}
       values={[rangeProps.value]}
       onChange={(values) => rangeProps.onChange(values[0])}
-      disabled={rangeProps.disabled}
+      disabled={rangeProps.disabled || rangeProps.min >= rangeProps.max}
       renderTrack={({ props, children }) => (
         <div {...props} className={clsx("fn-range", rangeProps.className)}>
           <div className="fn-range-bg">

@@ -1,5 +1,5 @@
 import { ExecutionContext, Hono } from "hono";
-import { Bindings, cacheControl } from "../env.js";
+import { backendOrigin, Bindings, cacheControl } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -102,10 +102,7 @@ const ogApp = (config: {
         );
         ogQuery.set("v", packageJson.version);
         return c.redirect(
-          new URL(
-            `${c.req.path}?${ogQuery.toString()}`,
-            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-          ),
+          new URL(`${c.req.path}?${ogQuery.toString()}`, backendOrigin(c)),
           307
         );
       }
@@ -171,10 +168,7 @@ const ogApp = (config: {
         ...f,
         pData: config.fetchStatic(
           env(c),
-          new URL(
-            `/og-fonts/${f.file}`,
-            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-          )
+          new URL(`/og-fonts/${f.file}`, backendOrigin(c))
         ),
       }));
       let imagePath: string;
@@ -190,15 +184,7 @@ const ogApp = (config: {
           throw new HTTPException(404);
       }
       const pBgImageBin = new Promise<Response>((res) =>
-        res(
-          config.fetchStatic(
-            env(c),
-            new URL(
-              imagePath,
-              env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-            )
-          )
-        )
+        res(config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c))))
       )
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
@@ -240,13 +226,7 @@ const ogApp = (config: {
         if (imagePath) {
           pInputTypeImageBin = new Promise<Response>((res) =>
             res(
-              config.fetchStatic(
-                env(c),
-                new URL(
-                  imagePath,
-                  env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-                )
-              )
+              config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
             )
           )
             .then((image) => image.arrayBuffer())
@@ -317,10 +297,7 @@ const ogApp = (config: {
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)
       c.redirect(
-        new URL(
-          `/og/share/${c.req.param("cid")}`,
-          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-        ),
+        new URL(`/og/share/${c.req.param("cid")}`, backendOrigin(c)),
         301
       )
     );

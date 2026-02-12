@@ -40,7 +40,37 @@ const app = new Hono({ strict: false })
   .notFound(notFound);
 
 export default {
-  fetch: app.fetch,
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // オリジン（DNSで設定したサーバー）に丸投げする
+    if (
+      url.hostname === "nikochan.utcode.net" &&
+      (url.pathname.startsWith("/api/") ||
+        url.pathname.startsWith("/og/") ||
+        url.pathname.startsWith("/sitemap.xml") ||
+        url.pathname.startsWith("/share/"))
+    ) {
+      // fetch(request) と書くだけで、Workerを通さずオリジンにリクエストが飛びます
+      try {
+        const res = await fetch(request.clone());
+        if (res.status < 500) {
+          return res;
+        } else {
+          console.log(
+            "passthrough request returned:",
+            res.status,
+            await res.text()
+          );
+        }
+      } catch (e) {
+        console.log("passthrough request failed:", e);
+        // passthrough
+      }
+    }
+
+    return app.fetch(request, env, ctx);
+  },
   async scheduled(controller, env, ctx) {
     ctx.waitUntil(
       (async () => {

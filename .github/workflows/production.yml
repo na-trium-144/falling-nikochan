@@ -29,7 +29,7 @@ jobs:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.PRODUCTION_NO_PREFETCH }}
-          BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
+          BACKEND_ALT_PREFIX: ${{ vars.PRODUCTION_BACKEND_ALT_PREFIX }}
         run: pnpm dlx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Upload .vercel/output
         uses: actions/upload-artifact@v4
@@ -57,6 +57,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -71,12 +74,27 @@ jobs:
           path: .vercel/output
           include-hidden-files: true
 
-      - name: Build and push Docker image
+      - name: Build and push by digest
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan:latest-${{ matrix.arch }}
+          platforms: linux/${{ matrix.arch }}
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan,push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
 
   docker-push-manifest:
     needs: [docker-build]
@@ -84,20 +102,25 @@ jobs:
     permissions:
       packages: write
     steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create and push manifest
-        env:
-          REPO: ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
         run: |
-          docker manifest create ${{ env.REPO }}:latest \
-            ${{ env.REPO }}:latest-amd64 \
-            ${{ env.REPO }}:latest-arm64
-          docker manifest push ${{ env.REPO }}:latest
+          docker buildx imagetools create -t ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan:latest \
+            $(printf 'ghcr.io/${{ github.repository_owner }}/falling-nikochan/falling-nikochan@sha256:%s ' *)
 
   deploy-vercel:
     needs: [docker-push-manifest]
@@ -174,7 +197,7 @@ jobs:
           host: ${{ secrets.SELFHOST_HOST }}
           username: ${{ secrets.SELFHOST_USERNAME }}
           key: ${{ secrets.SELFHOST_KEY }}
-          port: ${{ secrets.SELFHOST_PORT }}
+          port: ${{ vars.SELFHOST_PORT }}
           script: |
             #!/usr/bin/env bash
             set -e
