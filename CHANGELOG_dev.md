@@ -1,3 +1,7 @@
+## ver. 14.13 - 2026/02/12
+
+* 譜面編集のnoteTabの追加ボタンで2つ目以降の音符を追加できないのを修正
+
 ## ver. 14.12 - 2026/02/09 [#958](https://github.com/na-trium-144/falling-nikochan/pull/958)
 
 * 音符の更新時にcursorのnoteIndexが毎回リセットされるのを修正
