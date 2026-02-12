@@ -27,6 +27,7 @@ import { HelpIcon } from "@/common/caption";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
 import Range from "@/common/range";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
+import { ButtonHighlight } from "@/common/button";
 
 interface Props {
   chart?: ChartEditing;
@@ -162,13 +163,13 @@ export default function TimingTab(props: Props) {
           theme="filled"
           className={clsx(
             "inline-block align-middle ml-2",
-            props.enableHitSE || "text-slate-400 dark:text-stone-500"
+            props.enableHitSE || "text-dim"
           )}
         />
         <span
           className={clsx(
             "inline-block text-sm w-8 text-center",
-            props.enableHitSE || "text-slate-400 dark:text-stone-500"
+            props.enableHitSE || "text-dim"
           )}
         >
           {props.hitVolume}
@@ -194,13 +195,13 @@ export default function TimingTab(props: Props) {
           theme="filled"
           className={clsx(
             "inline-block align-middle ml-2",
-            props.enableBeatSE || "text-slate-400 dark:text-stone-500"
+            props.enableBeatSE || "text-dim"
           )}
         />
         <span
           className={clsx(
             "inline-block text-sm w-8 text-center",
-            props.enableBeatSE || "text-slate-400 dark:text-stone-500"
+            props.enableBeatSE || "text-dim"
           )}
         >
           {props.beatVolume}
@@ -536,7 +537,7 @@ export default function TimingTab(props: Props) {
                 .map((bs, j) => (
                   <button
                     key={j}
-                    className="rounded-full hover:bg-slate-200 active:bg-slate-300 p-1 "
+                    className="fn-icon-button p-1"
                     onClick={() => {
                       const countIndex = bar.length - 1 - j;
                       while (true) {
@@ -578,12 +579,13 @@ export default function TimingTab(props: Props) {
                     }}
                     disabled={!currentLevel?.currentSignatureEditable}
                   >
+                    <ButtonHighlight />
                     <BeatSlime size={bs} />
                   </button>
                 ))}
             </span>
             <button
-              className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 "
+              className="fn-icon-button inline-block self-end ml-2"
               onClick={() => {
                 currentLevel?.changeSignature({
                   ...currentLevel.currentSignature!,
@@ -595,10 +597,11 @@ export default function TimingTab(props: Props) {
               }}
               disabled={!currentLevel?.currentSignatureEditable}
             >
+              <ButtonHighlight />
               <CornerDownLeft />
             </button>
             <button
-              className="inline-block self-end ml-2 p-2 rounded-full hover:bg-slate-200 active:bg-slate-300 disabled:text-slate-400"
+              className="fn-icon-button inline-block self-end ml-2"
               onClick={() => {
                 currentLevel?.changeSignature({
                   ...currentLevel.currentSignature!,
@@ -613,6 +616,7 @@ export default function TimingTab(props: Props) {
                 !currentLevel?.currentSignatureEditable
               }
             >
+              <ButtonHighlight />
               <Close />
             </button>
             {i === 0 && (

@@ -1,14 +1,12 @@
-import { levelColors } from "@/common/levelColors";
-
 - 1 つの楽曲に複数の譜面データ (レベル) を作成することができます。
 - レベルには名前をつけることができます。つけなくてもよいです。
 - レベルの種類を
-  「<span className={levelColors[0]}>Single</span>」
-  「<span className={levelColors[1]}>Double</span>」
-  「<span className={levelColors[2]}>Maniac</span>」
+  「<span className="fn-level-col-s">Single</span>」
+  「<span className="fn-level-col-d">Double</span>」
+  「<span className="fn-level-col-m">Maniac</span>」
   から選択することができます。
-  - <span className={levelColors[0]}>Single</span> では同時に設置できる音符が1つまでに制限されます。
-  - 同様に <span className={levelColors[1]}>Double</span> では2つまでになります。
-  - <span className={levelColors[2]}>Maniac</span> には制限はありません。
+  - <span className="fn-level-col-s">Single</span> では同時に設置できる音符が1つまでに制限されます。
+  - 同様に <span className="fn-level-col-d">Double</span> では2つまでになります。
+  - <span className="fn-level-col-m">Maniac</span> には制限はありません。
 - レベルにはさらに譜面の難易度を表す数字 (1 〜 20) が自動でつきます。
   - これは譜面内の音符の量 (密度) を元に自動的に計算されます。

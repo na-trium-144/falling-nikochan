@@ -9,7 +9,6 @@ import Moon from "@icon-park/react/lib/icons/Moon";
 import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import { linkStyle1, linkStyle3 } from "@/common/linkStyle";
 import Link from "next/link";
 import { langNames, LangSwitcher } from "@/common/langSwitcher";
 import { ThemeSwitcher, useTheme } from "@/common/theme";
@@ -20,7 +19,6 @@ import { FestivalLink, useFestival } from "@/common/festival";
 import Code from "@icon-park/react/lib/icons/Code";
 import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { lastVisitedOld } from "@/common/version";
-import { inputStyle } from "@/common/input";
 import { XLogo } from "@/common/x";
 
 export default function LinksPage({ locale }: { locale: string }) {
@@ -42,11 +40,9 @@ export default function LinksPage({ locale }: { locale: string }) {
       noBackButtonPC
       locale={locale}
     >
-      <div className="mb-3 main-wide:hidden">
-        <h3 className="mb-2 text-xl font-semibold font-title">
-          {t("settings")}
-        </h3>
-        <div className="ml-2 space-y-2">
+      <section className="fn-sect no-pc">
+        <h3 className="fn-heading-sect">{t("settings")}</h3>
+        <div className="space-y-2">
           <p>
             <Translate className="inline-block align-middle" />
             <span className="ml-1">Language:</span>
@@ -54,8 +50,8 @@ export default function LinksPage({ locale }: { locale: string }) {
               locale={locale}
               className={clsx(
                 "relative inline-block align-top pr-6 text-center",
-                linkStyle1,
-                inputStyle
+                "fn-link-1",
+                "fn-input"
               )}
             >
               <div>{langNames[locale]}</div>
@@ -81,8 +77,8 @@ export default function LinksPage({ locale }: { locale: string }) {
             <ThemeSwitcher
               className={clsx(
                 "relative inline-block align-top pr-6 text-center",
-                linkStyle1,
-                inputStyle
+                "fn-link-1",
+                "fn-input"
               )}
             >
               <div>
@@ -103,19 +99,19 @@ export default function LinksPage({ locale }: { locale: string }) {
           </p>
           <PWAInstallDesc block />
         </div>
-      </div>
-      <PWAInstallDesc block className="mb-3 hidden main-wide:block" />
-      <div className="mb-3 ">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("about")}</h3>
-        <div className="ml-2 space-y-1">
-          <p>
+      </section>
+      <PWAInstallDesc block className="fn-sect no-mobile" />
+      <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("about")}</h3>
+        <div className="space-y-1">
+          <p className="text-left">
             <span>{t("version")}:</span>
             <span className="inline-block">
               <span className="ml-2">ver.</span>
               <span className="ml-1">{process.env.buildVersion}</span>
             </span>
             <Link
-              className={clsx(linkStyle3, "ml-2 inline-block relative")}
+              className={clsx("fn-link-3", "ml-2 inline-block relative")}
               href={`/${locale}/main/version`}
               prefetch={!process.env.NO_PREFETCH}
             >
@@ -129,14 +125,14 @@ export default function LinksPage({ locale }: { locale: string }) {
               />
             </Link>
           </p>
-          <p className="text-justify">
+          <p>
             {t("supportedBrowsers", {
               browserslist: process.env.browserslist!,
             })}
           </p>
-          <p className="main-wide:hidden ">
+          <p className="no-pc">
             <Link
-              className={clsx(linkStyle3)}
+              className={clsx("fn-link-3")}
               href={`/${locale}/main/policies`}
               prefetch={!process.env.NO_PREFETCH}
             >
@@ -144,10 +140,10 @@ export default function LinksPage({ locale }: { locale: string }) {
             </Link>
           </p>
         </div>
-      </div>
-      <div className="mb-3">
-        <h3 className="mb-2 text-xl font-semibold font-title">{t("title")}</h3>
-        <ul className="list-disc ml-6 space-y-1 ">
+      </section>
+      <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("title")}</h3>
+        <ul className="list-disc ml-6 space-y-1 text-left">
           <li>
             <FormOne className="inline-block align-middle mr-1" />
             <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
@@ -173,40 +169,30 @@ export default function LinksPage({ locale }: { locale: string }) {
               theme="filled"
             />
             <ExternalLink href="https://www.youtube.com/@nikochan144">
-              <span className="hidden main-wide:inline">
-                {t("officialChannel")}
-              </span>
-              <span className="main-wide:hidden">
-                {t("officialChannelShort")}
-              </span>
+              <span className="no-mobile">{t("officialChannel")}</span>
+              <span className="no-pc">{t("officialChannelShort")}</span>
             </ExternalLink>
           </li>
           <li>
             <XLogo className="mr-1" />
-            <ExternalLink href="https://twitter.com/@nikochan144">
-              <span className="hidden main-wide:inline">
-                {t("officialAccount")}
-              </span>
-              <span className="main-wide:hidden">
-                {t("officialAccountShort")}
-              </span>
+            <ExternalLink href="https://twitter.com/nikochan144">
+              <span className="no-mobile">{t("officialAccount")}</span>
+              <span className="no-pc">{t("officialAccountShort")}</span>
             </ExternalLink>
           </li>
           <li>
             <Github className="inline-block align-middle mr-1" />
             <span className="mr-1">GitHub:</span>
             <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
-              <span className="hidden main-wide:inline">na-trium-144/</span>
+              <span className="no-mobile">na-trium-144/</span>
               <span>falling-nikochan</span>
             </ExternalLink>
           </li>
           <li>
             <Code className="inline-block align-middle mr-1" />
             <ExternalLink href="/api" forceColor>
-              <span className="hidden main-wide:inline">
-                {t("apiReference")}
-              </span>
-              <span className="main-wide:hidden">{t("apiReferenceShort")}</span>
+              <span className="no-mobile">{t("apiReference")}</span>
+              <span className="no-pc">{t("apiReferenceShort")}</span>
             </ExternalLink>
           </li>
           <li>
@@ -220,7 +206,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             </li>
           )}
         </ul>
-      </div>
+      </section>
     </IndexMain>
   );
 }
@@ -243,7 +229,7 @@ function EMailImg() {
             style={{
               fill: theme.isDark
                 ? "var(--color-blue-500)"
-                : "var(--color-blue-800)", // linkStyle3
+                : "var(--color-blue-800)", // "fn-link-3"
             }}
           />
         </g>

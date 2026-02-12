@@ -1,3 +1,14 @@
+@utility no-pc {
+  @apply main-wide:hidden;
+}
+@utility no-mobile {
+  /* max- var(--breakpoint-main-wide) */
+  @apply max-[48rem]:hidden;
+}
+
+@utility grid-centering {
+  @apply grid place-content-center place-items-center grid-rows-1 grid-cols-1;
+}
 @utility select-none {
   /* tailwind css の user-select: none だけでは足りなかった */
   -moz-user-select: none;
@@ -15,6 +26,48 @@
 }
 @utility bold-by-stroke {
   -webkit-text-stroke: 0.03em currentColor;
+}
+
+@utility fg-base {
+  @apply text-fg-base dark:text-fg-base-dark;
+}
+@utility border-base {
+  @apply border-fg-base dark:border-fg-base-dark;
+}
+@utility fg-bright {
+  @apply text-fg-bright dark:text-fg-bright-dark;
+}
+
+@utility text-* {
+  --base-text-color: --value(--color-*);
+}
+@utility text-dim {
+  &,
+  * {
+    --dim-text-color: color-mix(
+      in oklab,
+      var(--base-text-color) var(--alpha-dim),
+      transparent
+    );
+    color: var(--highlighted-text-color, var(--dim-text-color));
+  }
+}
+@utility text-highlight {
+  /*
+    text-* で指定されている色に50%白を混ぜる。
+    直接 color: で指定している場合には --base-text-color 変数をセットする必要がある
+
+    dimとhighlightが両方指定されている場合、 dim -> highlight の順に適用
+  */
+  &,
+  * {
+    --highlighted-text-color: color-mix(
+      in oklab,
+      var(--dim-text-color, var(--base-text-color)) var(--alpha-highlight),
+      var(--color-white)
+    );
+    color: var(--highlighted-text-color);
+  }
 }
 
 /* widthやbasisにはあるが、heightにはない (containerって横方向の長さ用だし) */

@@ -2,11 +2,9 @@
 
 import clsx from "clsx/lite";
 import { CenterBox } from "@/common/box.js";
-import Button from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import CheckBox from "@/common/checkBox.js";
-import Input, { inputStyle } from "@/common/input";
-import { linkStyle1 } from "@/common/linkStyle";
-import { pagerButtonClass } from "@/common/pager";
+import Input from "@/common/input";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Caution from "@icon-park/react/lib/icons/Caution";
 import Pause from "@icon-park/react/lib/icons/Pause";
@@ -27,6 +25,8 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
+import { APIError } from "@/common/apiError";
+import { LinksOnError } from "@/common/errorPageComponent";
 
 interface MessageProps {
   className?: string;
@@ -92,11 +92,12 @@ export function ReadyMessage(props: MessageProps) {
           )}
           style={{ maxHeight: Math.max(optionMinHeight, props.maxHeight) }}
         >
-          <p className="text-lg font-title font-semibold mb-1">
+          <p className="fn-heading-box">
             <button
-              className={clsx(pagerButtonClass, "mr-4 align-bottom")}
+              className={clsx("fn-icon-button", "mr-4 align-bottom")}
               onClick={() => setOptionOpen(false)}
             >
+              <ButtonHighlight />
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
             </button>
             {t("option")}
@@ -115,12 +116,13 @@ export function ReadyMessage(props: MessageProps) {
         )}
         style={{ maxHeight: small ? undefined : props.maxHeight }}
       >
-        <p className="text-lg font-title font-semibold mb-2">
+        <p className="fn-heading-box">
           {props.back && (
             <button
-              className={clsx(pagerButtonClass, "mr-4 align-bottom")}
+              className={clsx("fn-icon-button", "mr-4 align-bottom")}
               onClick={() => setSlideIn(false, props.back!)}
             >
+              <ButtonHighlight />
               <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
             </button>
           )}
@@ -152,7 +154,7 @@ export function ReadyMessage(props: MessageProps) {
         )}
         {small ? (
           <button
-            className={clsx("block w-max relative mx-auto mt-2", linkStyle1)}
+            className={clsx("block w-max relative mx-auto mt-2", "fn-link-1")}
             onClick={() => setOptionOpen(!optionOpen)}
           >
             <RightOne className="absolute left-0 bottom-1 " theme="filled" />
@@ -160,7 +162,7 @@ export function ReadyMessage(props: MessageProps) {
           </button>
         ) : (
           <>
-            <div className="mt-2 mb-2 border-b border-slate-800 dark:border-stone-300" />
+            <div className="mt-2 mb-2 border-b border-base" />
             <OptionMenu {...props} header />
           </>
         )}
@@ -261,8 +263,8 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               onSelect={(s: string) => props.setPlaybackRate(Number(s))}
               className={clsx(
                 "relative inline-block pr-6 text-center",
-                linkStyle1,
-                inputStyle
+                "fn-link-1",
+                "fn-input"
               )}
             >
               <div>
@@ -306,7 +308,7 @@ function OptionMenu(props: MessageProps & { header?: boolean }) {
               </>
             )}
             <Range
-              className="block! w-full!"
+              className="block w-full"
               min={props.ytBegin}
               max={props.ytEnd}
               disabled={props.userBegin === null}
@@ -361,8 +363,8 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
   const diffMaxSec = -badFastSec;
   return (
     <div className="absolute inset-y-0 right-1.5 w-4 overflow-visible ">
-      <div className="absolute inset-y-0 inset-x-0.5 rounded-xs bg-slate-200 dark:bg-stone-600 " />
-      <div className="absolute top-1/2 inset-x-0 h-0 border-b border-slate-300 dark:border-stone-600" />
+      <div className="absolute inset-y-0 inset-x-0.5 rounded-xs bg-gray-500/25 " />
+      <div className="absolute top-1/2 inset-x-0 h-0 border-b border-gray-500" />
       <div
         className="absolute inset-x-0 h-full "
         style={{ top: `${(props.userOffset / diffMaxSec) * 50 + 50}%` }}
@@ -401,7 +403,7 @@ function TimeAdjustBar(props: { userOffset: number; times: number[] }) {
             />
           </>
         )}
-        <div className="absolute top-0 inset-x-0 h-0 border-b border-gray-400 " />
+        <div className="absolute top-0 inset-x-0 h-0 border-b border-gray-500 " />
       </div>
       <span className="absolute top-0 right-1/2 translate-x-1/2 text-xs">
         {t("offsetFast")}
@@ -439,9 +441,7 @@ export function StopMessage(props: MessageProps2) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      <p className="text-lg font-title font-semibold mb-2">
-        &lt; {t("stopped")} &gt;
-      </p>
+      <p className="fn-heading-box">&lt; {t("stopped")} &gt;</p>
       <p>
         <Button
           text={t("reset")}
@@ -462,10 +462,15 @@ interface MessageProps3 {
   className?: string;
   isTouch: boolean;
   exit: () => void;
-  msg: string;
+  msg: string | APIError;
 }
 export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
+  const te = useTranslations("error");
+
+  const status = props.msg instanceof APIError ? props.msg.status : undefined;
+  const message =
+    props.msg instanceof APIError ? props.msg.formatMsg(te) : props.msg;
 
   return (
     <CenterBox
@@ -473,10 +478,11 @@ export function InitErrorMessage(props: MessageProps3) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      <p className="mb-2">
-        <Caution className="inline-block text-lg align-middle mr-1" />
-        {props.msg}
-      </p>
+      {status && <h4 className="fn-heading-box">Error {status}</h4>}
+      <p className="mb-3">{message}</p>
+      {props.msg instanceof APIError && props.msg.isServerSide() && (
+        <LinksOnError />
+      )}
       <p>
         <Button
           text={t("exit")}

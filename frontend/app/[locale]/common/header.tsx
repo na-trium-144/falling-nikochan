@@ -2,9 +2,9 @@
 
 import clsx from "clsx/lite";
 import { ReactNode } from "react";
-import { pagerButtonClass } from "./pager.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import { historyBackWithReview } from "./pwaInstall.jsx";
+import { ButtonHighlight } from "./button.jsx";
 
 interface MProps {
   className?: string;
@@ -13,23 +13,19 @@ interface MProps {
 }
 export function MobileHeader(props: MProps) {
   return (
-    <header
-      className={clsx(
-        "p-3 w-full relative text-center text-xl font-semibold font-title main-wide:hidden",
-        props.className
-      )}
-    >
+    <header className={clsx("fn-mobile-header no-pc", props.className)}>
       {!props.noBackButton && (
         <button
-          className={clsx(pagerButtonClass, "absolute left-3 inset-y-3")}
+          className="fn-back fn-icon-button h-max m-auto"
           onClick={() => {
             historyBackWithReview();
           }}
         >
-          <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+          <ButtonHighlight />
+          <ArrowLeft className="inline-block w-max align-middle m-auto " />
         </button>
       )}
-      {props.children}
+      <span className="fn-heading-sect">{props.children}</span>
     </header>
   );
 }

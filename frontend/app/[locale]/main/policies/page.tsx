@@ -19,10 +19,9 @@ export default async function PolicyTab({ params }: MetadataProps) {
       mobileTabKey="links"
       locale={locale}
       noBackButtonPC
+      classNameInner="fn-mdx-policies"
     >
-      <div className="text-justify">
-        <Policies />
-      </div>
+      <Policies />
     </IndexMain>
   );
 }

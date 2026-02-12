@@ -1,0 +1,32 @@
+@layer components {
+  .fn-level-type {
+    line-height: 1.5em;
+
+    > :nth-child(1) {
+      font-size: 0.9em;
+    }
+    > :nth-child(2) {
+      font-size: 1.2em;
+    }
+  }
+  .fn-level-type.Single,
+  .fn-level-col-s {
+    @apply text-emerald-700 dark:text-emerald-400;
+  }
+  .fn-level-type.Double,
+  .fn-level-col-d {
+    @apply text-amber-700 dark:text-amber-400;
+  }
+  .fn-level-type.Maniac,
+  .fn-level-col-m {
+    @apply text-rose-700 dark:text-rose-400;
+  }
+
+  /*
+今はどこにも使われていないbg用の色
+(progressbarに転用されている)
+  *-emerald-500 dark:*-emerald-900
+  *-amber-500 dark:*-amber-900
+  *-rose-400 dark:*-rose-900
+*/
+}

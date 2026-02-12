@@ -5,7 +5,6 @@ import { ReactNode, useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Box } from "./box";
 import { ButtonHighlight } from "./button";
-import { skyFlatButtonStyle } from "./flatButton";
 import CheckSmall from "@icon-park/react/lib/icons/CheckSmall";
 import { useDelayedDisplayState } from "./delayedDisplayState";
 
@@ -116,8 +115,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
         minWidth: "max-content",
       }}
       classNameOuter={clsx(
-        "fixed! z-50 -translate-x-1/2",
-        "rounded-sq-2xl! shadow-modal overflow-hidden",
+        "fn-dropdown fixed -translate-x-1/2",
         "transition-[scale,opacity] duration-150",
         popupAppearing
           ? "ease-in scale-100 opacity-100"
@@ -126,19 +124,14 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
           ? "mt-1 origin-top"
           : "mb-1 origin-bottom"
       )}
-      classNameInner={clsx("flex flex-col")}
       onPointerLeave={() => setHighlightedIndex(-1)}
     >
       {options.map((option, index) => (
         <button
           key={index}
           className={clsx(
-            "relative cursor-pointer group",
-            skyFlatButtonStyle,
-            "hover:bg-sky-200/75! hover:dark:bg-orange-950/75!",
-            highlightedIndex === index && "bg-sky-200/75 dark:bg-orange-950/75",
-            props.value !== undefined ? "pl-7" : "pl-4",
-            "pr-4 py-1 flex flex-row items-center justify-center",
+            "fn-flat-button fn-sky fn-dropdown-item",
+            highlightedIndex === index && "fn-selected",
             option.className
           )}
           style={option.style}
@@ -151,9 +144,9 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
         >
           <ButtonHighlight />
           {option.value === props.value ? (
-            <CheckSmall className="absolute left-2 inset-y-0 h-max m-auto" />
+            <CheckSmall className="fn-check h-max m-auto" />
           ) : props.value !== undefined ? (
-            <span className="absolute left-2 inset-y-0 h-max m-auto" />
+            <span className="fn-check" />
           ) : null}
           {option.label}
         </button>
@@ -170,6 +163,7 @@ export default function DropDown<T = unknown>(props: DropDownProps<T>) {
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        disabled={props.disabled}
       >
         {props.children}
       </button>

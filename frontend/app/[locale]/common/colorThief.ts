@@ -4,7 +4,6 @@ import ColorThief, { RGBColor } from "colorthief";
 import { useCallback, useRef, useState } from "react";
 import { useTheme } from "./theme";
 import clsx from "clsx/lite";
-import { boxBorderStyle1, boxBorderStyle2 } from "./box";
 
 export function useColorThief() {
   const colorThiefRef = useRef<ColorThief>(null);
@@ -63,22 +62,11 @@ export function useColorThief() {
   return {
     imgRef,
     ready: color !== null,
-    boxStyle: clsx(
-      "inset-shadow-button",
-      "inset-shadow-slate-300/15 dark:inset-shadow-stone-950/15",
-      colorAdjusted
-        ? clsx(
-            "bg-[color-mix(in_oklab,currentColor_50%,var(--color-white))]",
-            "dark:bg-[color-mix(in_oklab,currentColor_50%,var(--color-stone-700))]"
-          )
-        : "bg-white/50 dark:bg-stone-700/50"
-    ),
+    boxStyle: clsx(colorAdjusted ? "fn-color-thief" : "fn-plain"),
     currentColor: colorAdjusted
       ? `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`
       : isDark
         ? "var(--color-stone-700)"
         : "var(--color-white)",
-    boxBorderStyle1: boxBorderStyle1,
-    boxBorderStyle2: clsx(boxBorderStyle2, "border-current/75!"),
   };
 }

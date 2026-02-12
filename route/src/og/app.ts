@@ -1,5 +1,5 @@
 import { ExecutionContext, Hono } from "hono";
-import { Bindings, cacheControl } from "../env.js";
+import { backendOrigin, Bindings, cacheControl } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -18,6 +18,7 @@ import { cors } from "hono/cors";
 import ColorThief from "colorthief";
 import { adjustColor } from "./style.js";
 import * as v from "valibot";
+import { fetchError } from "../error.js";
 
 export interface ChartBriefMin {
   ytId: string;
@@ -101,10 +102,7 @@ const ogApp = (config: {
         );
         ogQuery.set("v", packageJson.version);
         return c.redirect(
-          new URL(
-            `${c.req.path}?${ogQuery.toString()}`,
-            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-          ),
+          new URL(`${c.req.path}?${ogQuery.toString()}`, backendOrigin(c)),
           307
         );
       }
@@ -170,10 +168,7 @@ const ogApp = (config: {
         ...f,
         pData: config.fetchStatic(
           env(c),
-          new URL(
-            `/og-fonts/${f.file}`,
-            env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-          )
+          new URL(`/og-fonts/${f.file}`, backendOrigin(c))
         ),
       }));
       let imagePath: string;
@@ -189,15 +184,7 @@ const ogApp = (config: {
           throw new HTTPException(404);
       }
       const pBgImageBin = new Promise<Response>((res) =>
-        res(
-          config.fetchStatic(
-            env(c),
-            new URL(
-              imagePath,
-              env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-            )
-          )
-        )
+        res(config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c))))
       )
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
@@ -239,13 +226,7 @@ const ogApp = (config: {
         if (imagePath) {
           pInputTypeImageBin = new Promise<Response>((res) =>
             res(
-              config.fetchStatic(
-                env(c),
-                new URL(
-                  imagePath,
-                  env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-                )
-              )
+              config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
             )
           )
             .then((image) => image.arrayBuffer())
@@ -262,12 +243,14 @@ const ogApp = (config: {
 
       const pColorThief = fetch(
         `https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`
-      ).then(async (imgRes) => {
-        const imgBuf = await imgRes.arrayBuffer();
-        const color = await ColorThief.getColor(imgBuf, 1);
-        const colorAdjusted = adjustColor(color);
-        return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
-      });
+      )
+        .catch(fetchError(env(c)))
+        .then(async (imgRes) => {
+          const imgBuf = await imgRes.arrayBuffer();
+          const color = await ColorThief.getColor(imgBuf, 1);
+          const colorAdjusted = adjustColor(color);
+          return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
+        });
 
       let Image: Promise<React.ReactElement>;
       switch (c.req.param("type")) {
@@ -314,10 +297,7 @@ const ogApp = (config: {
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)
       c.redirect(
-        new URL(
-          `/og/share/${c.req.param("cid")}`,
-          env(c).BACKEND_PREFIX || new URL(c.req.url).origin
-        ),
+        new URL(`/og/share/${c.req.param("cid")}`, backendOrigin(c)),
         301
       )
     );

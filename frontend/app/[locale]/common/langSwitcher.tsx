@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import DropDown from "./dropdown";
-import { linkStyle1 } from "./linkStyle";
 import clsx from "clsx/lite";
 
 export const langNames: { [key: string]: string } = {
@@ -20,7 +19,7 @@ export function LangSwitcher(props: LangProps) {
 
   return (
     <DropDown
-      className={clsx(linkStyle1, props.className)}
+      className={clsx("fn-link-1", props.className)}
       value={props.locale}
       options={Object.keys(langNames).map((lang) => ({
         value: lang,

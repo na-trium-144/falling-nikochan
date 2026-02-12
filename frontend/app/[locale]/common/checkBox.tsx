@@ -23,16 +23,7 @@ export default function CheckBox(props: Props) {
       shape="curve"
       animation="smooth"
       color={isDark ? "danger-o" : "primary-o"}
-      className={clsx(
-        !props.disabled && "hover:text-slate-500 hover:dark:text-stone-500",
-        props.disabled && "[&_label]:line-through",
-        // 複数行のlabelを許可
-        "[&_label]:text-wrap",
-        // labelが複数行になる場合にチェックボックスの位置がバグるのをでっちあげ修正
-        // (元々の指定は top: calc(0% - (100% - 1em) - 8%))
-        "[&_svg]:top-[-0.08em]! [&_label::before]:top-[-0.08em]! [&_label::after]:top-[-0.08em]!",
-        props.className
-      )}
+      className={clsx("fn-checkbox", props.className)}
       icon={
         <svg className="svg svg-icon" viewBox="0 0 20 20">
           <path

@@ -14,10 +14,11 @@ import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import { TitleAsLink } from "@/common/titleLogo.jsx";
-import { MobileFooterWithGradient, PCFooter } from "@/common/footer.jsx";
+import { MobileFooter, PCFooter } from "@/common/footer.jsx";
 import { AboutModal } from "@/common/aboutModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import { AboutDescription } from "@/main/main.jsx";
+import { APIError } from "@/common/apiError.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -51,7 +52,9 @@ export default function ShareChart(props: Props) {
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | null>(null);
+  const [record, setRecord] = useState<RecordGetSummary[] | APIError | null>(
+    null
+  );
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {
@@ -70,20 +73,32 @@ export default function ShareChart(props: Props) {
     }
     setBrief(brief);
     document.title = titleShare(t, cid, brief);
-    const titleUpdate = setTimeout(() => {
+    const titleUpdate = setInterval(() => {
       // Next.jsが元のタイトルに戻してしまう場合があるので、再度上書き
-      document.title = titleShare(t, cid, brief);
+      if (document.title !== titleShare(t, cid, brief)) {
+        document.title = titleShare(t, cid, brief);
+      }
     }, 100);
     setRecord(null);
-    fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`)
-      .then((res) => {
+    (async () => {
+      try {
+        const res = await fetch(
+          process.env.BACKEND_PREFIX + `/api/record/${cid}`
+        );
         if (res.ok) {
-          res.json().then((record) => setRecord(record));
+          try {
+            setRecord(await res.json());
+          } catch (e) {
+            console.error(e);
+            setRecord(APIError.badResponse());
+          }
         } else {
-          throw new Error("failed to fetch record");
+          setRecord(await APIError.fromRes(res));
         }
-      })
-      .catch(() => setRecord([]));
+      } catch {
+        setRecord(APIError.fetchError());
+      }
+    })();
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
@@ -91,7 +106,7 @@ export default function ShareChart(props: Props) {
         console.error(e);
       }
     }
-    return () => clearTimeout(titleUpdate);
+    return () => clearInterval(titleUpdate);
   }, [t]);
 
   const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
@@ -117,7 +132,7 @@ export default function ShareChart(props: Props) {
         <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
         <div className="basis-0 flex-1" />
         <AboutDescription
-          className="mb-3"
+          className="mb-3 px-6"
           locale={locale}
           onClickAbout={() => setAboutPageIndex(1)}
         />
@@ -139,10 +154,15 @@ export default function ShareChart(props: Props) {
             />
           </Box>
         </div>
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
         <PCFooter locale={locale} nav />
       </div>
-      <MobileFooterWithGradient locale={locale} tabKey={null} />
+      <MobileFooter
+        className="fixed bottom-0"
+        blurBg
+        locale={locale}
+        tabKey={null}
+      />
     </main>
   );
 }

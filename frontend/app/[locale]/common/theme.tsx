@@ -4,14 +4,15 @@ import clsx from "clsx/lite";
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
-import { linkStyle1 } from "./linkStyle.js";
 import { useTranslations } from "next-intl";
 import { themeColorDark, themeColorLight } from "@/metadata.js";
 import DropDown from "./dropdown";
+import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
 
 export interface ThemeState {
   theme: "dark" | "light" | null;
@@ -43,17 +44,7 @@ function currentThemeIsDark() {
 }
 const applyTheme = () => {
   if (typeof document !== "undefined") {
-    document.body.classList.add(
-      "bg-gradient-to-t",
-      "bg-sky-50",
-      "from-sky-50",
-      "to-sky-200",
-      "dark:bg-orange-950",
-      "dark:from-orange-950",
-      "dark:to-orange-975",
-      "text-default",
-      "dark:text-default-dark"
-    );
+    document.body.classList.add("fn-csr-ready");
     if (currentThemeIsDark()) {
       /* ダークテーマの時 */
       document.body.classList.add("dark");
@@ -84,14 +75,13 @@ const applyTheme = () => {
 export function ThemeProvider(props: { children: ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light" | null>(null);
   const [isDark, setIsDark] = useState<boolean>(false);
-  applyTheme(); // できるだけ早く、useEffectとかよりも先に実行する
-  const updateTheme = () => {
+  const updateTheme = useCallback(() => {
     setTheme(getCurrentTheme());
     const isDark = currentThemeIsDark();
     setIsDark(isDark);
     applyTheme();
-  };
-  useEffect(() => {
+  }, []);
+  useLayoutEffect(() => {
     updateTheme();
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     mql.addEventListener("change", updateTheme);
@@ -100,7 +90,7 @@ export function ThemeProvider(props: { children: ReactNode }) {
       mql.removeEventListener("change", updateTheme);
       clearInterval(i);
     };
-  }, []);
+  }, [updateTheme]);
   return (
     <ThemeContext.Provider
       value={{
@@ -116,6 +106,8 @@ export function ThemeProvider(props: { children: ReactNode }) {
         },
       }}
     >
+      <div className="fn-fallback-bg" />
+      <IrasutoyaLikeBg />
       {props.children}
     </ThemeContext.Provider>
   );
@@ -130,7 +122,7 @@ export function ThemeSwitcher(props: {
 
   return (
     <DropDown
-      className={clsx(linkStyle1, props.className)}
+      className={clsx("fn-link-1", props.className)}
       value={theme}
       options={[
         { value: "dark" as const, label: t("dark") },

@@ -1,12 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import {
-  Box,
-  boxBorderStyle1,
-  boxBorderStyle2,
-  boxStyle,
-} from "@/common/box.js";
+import { Box } from "@/common/box.js";
 import { useDisplayMode } from "@/scale.js";
 import DisappointedFace from "@icon-park/react/lib/icons/DisappointedFace";
 import DistraughtFace from "@icon-park/react/lib/icons/DistraughtFace";
@@ -14,10 +9,6 @@ import GrinningFaceWithTightlyClosedEyesOpenMouth from "@icon-park/react/lib/ico
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
-import {
-  invertedFlatButtonBorderStyle1,
-  invertedFlatButtonBorderStyle2,
-} from "@/common/flatButton";
 
 interface Props {
   className?: string;
@@ -44,10 +35,11 @@ export default function StatusBox(props: Props) {
     <Box
       classNameOuter={clsx(
         props.className,
-        "overflow-visible!",
-        isMobile ? "rounded-sq-[1.5em]!" : "w-[17em]"
+        "overflow-visible",
+        isMobile ? "rounded-sq-[1.5em]" : "w-[17em]"
       )}
       classNameInner={clsx(
+        "overflow-visible",
         props.isMobile
           ? "relative flex flex-row items-center justify-between"
           : ""
@@ -68,34 +60,15 @@ export default function StatusBox(props: Props) {
             "w-max m-auto px-[0.5em] py-[0.2em] rounded-[0.75em]",
             "shadow-xs z-3",
             props.bestCount
-              ? clsx(
-                  // invertedFlatButtonStyle,
-                  "backdrop-blur-xs",
-                  "bg-orange-200/50 dark:bg-sky-800/50",
-                  "inset-shadow-button inset-shadow-orange-300/50 dark:inset-shadow-sky-975/75"
-                )
-              : clsx(boxStyle, "text-slate-500/75 dark:text-stone-400/75")
+              ? clsx("fn-inverted fn-status-best")
+              : clsx("fn-plain", "text-dim")
           )}
           style={{
             fontSize: isMobile ? "0.8em" : undefined,
           }}
         >
-          <span
-            className={clsx(
-              props.bestCount
-                ? invertedFlatButtonBorderStyle1
-                : boxBorderStyle1,
-              "opacity-100!"
-            )}
-          />
-          <span
-            className={clsx(
-              props.bestCount
-                ? invertedFlatButtonBorderStyle2
-                : boxBorderStyle2,
-              "opacity-100!"
-            )}
-          />
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
           <span>{t("bestScore")}:</span>
           <span
             className="inline-block text-right"
@@ -145,17 +118,16 @@ export default function StatusBox(props: Props) {
                 "inline-block w-[3.75em] pl-[0.5em] text-center",
                 "text-orange-400/75 dark:text-sky-500/75"
               )}
-              style={{ fontSize: "1.2em", lineHeight: 1 }}
             >
               {props.judgeCount[ji] !== props.bestCount[ji] && (
-                <>
+                <span style={{ fontSize: "1.2em", lineHeight: 1 }}>
                   <span className="mr-0.5">
                     {props.judgeCount[ji] > props.bestCount[ji] ? "+" : "-"}
                   </span>
                   <span>
                     {Math.abs(props.judgeCount[ji] - props.bestCount[ji])}
                   </span>
-                </>
+                </span>
               )}
             </span>
           )}
@@ -186,15 +158,14 @@ export default function StatusBox(props: Props) {
                 "inline-block w-[3.75em] pl-[0.5em] text-center",
                 "text-orange-400/75 dark:text-sky-500/75"
               )}
-              style={{ fontSize: "1.2em", lineHeight: 1 }}
             >
               {props.bigCount !== props.bestCount[4] && (
-                <>
+                <span style={{ fontSize: "1.2em", lineHeight: 1 }}>
                   <span className="mr-0.5">
                     {props.bigCount > props.bestCount[4] ? "+" : "-"}
                   </span>
                   <span>{Math.abs(props.bigCount - props.bestCount[4])}</span>
-                </>
+                </span>
               )}
             </span>
           ) : (
@@ -208,7 +179,7 @@ export default function StatusBox(props: Props) {
         <span
           className={clsx(
             "flex-none w-[3.75em] self-end translate-y-1 flex flex-row items-baseline mr-2",
-            props.bigTotal === 0 && "text-slate-400 dark:text-stone-500"
+            props.bigTotal === 0 && "text-dim"
           )}
         >
           <span className="flex-1">/</span>
@@ -254,7 +225,7 @@ function StatusItem(props: {
         isMobile
           ? "flex-1 basis-1 flex flex-col"
           : clsx("flex flex-row items-baseline", props.wide || "mr-[3.75em]"),
-        props.disabled && "text-slate-400/75 dark:text-stone-500/75"
+        props.disabled && "text-dim"
       )}
       style={{
         fontSize: isMobile ? "0.8em" : undefined,
@@ -318,12 +289,12 @@ function StatusValue(props: {
         className={clsx(
           "mt-1 w-full text-center bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-500/75"
+            ? "text-dim"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"
-                ? "text-slate-500/75 dark:text-stone-400/75"
-                : null
+                ? "text-dim"
+                : "fg-bright"
         )}
         style={{
           fontSize: "2em",
@@ -339,12 +310,12 @@ function StatusValue(props: {
         className={clsx(
           "inline-flex mt-1 w-4 justify-center items-baseline bold-by-stroke",
           props.disabled
-            ? "text-slate-400/75 dark:text-stone-500/75"
+            ? "text-dim"
             : props.color === "inverted"
               ? "text-orange-400/75 dark:text-sky-500/75"
               : props.color === "gray"
-                ? "text-slate-500/75 dark:text-stone-400/75"
-                : null
+                ? "text-dim"
+                : "fg-bright"
         )}
         style={{
           fontSize: "2em",

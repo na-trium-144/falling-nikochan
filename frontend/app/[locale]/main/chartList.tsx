@@ -1,7 +1,6 @@
 "use client";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
 import clsx from "clsx/lite";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -17,12 +16,8 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton.jsx";
-import { ButtonHighlight, buttonShadowStyle } from "@/common/button.jsx";
+import { ButtonHighlight } from "@/common/button.jsx";
+import { APIError } from "@/common/apiError.js";
 
 interface PProps {
   locale: string;
@@ -44,27 +39,22 @@ export default function ChartListPage(props: PProps) {
       locale={props.locale}
       boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
-      <h3
-        className={clsx(
-          "flex-none mb-2 text-xl font-semibold font-title",
-          "hidden main-wide:block"
-        )}
-      >
-        {props.title}
-      </h3>
-      <ChartList
-        type={props.type}
-        creator
-        href={(cid) => `/share/${cid}`}
-        onClick={openModal}
-        onClickMobile={openShareInternal}
-        showLoading
-        dateDiff={props.dateDiff}
-        moreHref={null}
-        badge={props.badge}
-        containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
-        containerHeight={boxSize.height} // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
-      />
+      <section className="fn-sect">
+        <h3 className={clsx("fn-heading-sect", "no-mobile")}>{props.title}</h3>
+        <ChartList
+          type={props.type}
+          creator
+          href={(cid) => `/share/${cid}`}
+          onClick={openModal}
+          onClickMobile={openShareInternal}
+          showLoading
+          dateDiff={props.dateDiff}
+          moreHref={null}
+          badge={props.badge}
+          containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
+          containerHeight={boxSize.height} // 正確にはPCでは見出しなどの分実際に表示できるサイズは小さかったりするが、面倒だし、はみ出すくらいでよい
+        />
+      </section>
     </IndexMain>
   );
 }
@@ -78,13 +68,9 @@ export interface ChartLineBrief {
   brief?: ChartBrief;
   original?: boolean;
 }
-type ErrorMsg = { status: number | null; message: string };
 interface Props {
   type?: ChartListType;
-  briefs?:
-    | ChartLineBrief[]
-    | { status: number | null; message: string }
-    | undefined;
+  briefs?: ChartLineBrief[] | APIError | undefined;
   fetchAll?: boolean;
   fixedRows?: boolean; // 表示数を6個で固定する
   containerHeight?: number;
@@ -107,9 +93,9 @@ export function ChartList(props: Props) {
 
   // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    (ChartLineBrief | null)[] | ErrorMsg | undefined
+    (ChartLineBrief | null)[] | APIError | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | ErrorMsg | undefined>(
+  const prevPropBriefs = useRef<ChartLineBrief[] | APIError | undefined>(
     props.briefs
   );
   useEffect(() => {
@@ -147,18 +133,11 @@ export function ChartList(props: Props) {
               const latestCId = (await latestRes.json()) as { cid: string }[];
               setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
             } else {
-              try {
-                setBriefs({
-                  status: latestRes.status,
-                  message: (await latestRes.json()).message,
-                });
-              } catch {
-                setBriefs({ status: latestRes.status, message: "" });
-              }
+              setBriefs(await APIError.fromRes(latestRes));
             }
           } catch (e) {
             console.error(e);
-            setBriefs({ status: null, message: "fetchError" });
+            setBriefs(APIError.fetchError());
           }
         })();
     }
@@ -167,7 +146,7 @@ export function ChartList(props: Props) {
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
   const itemMinWidth = 18; // * rem
-  const itemMinHeight = 11 / 4; // h-10 + gap-1
+  const itemMinHeight = 12 / 4; // h-11 + gap-1
   const ulCols = ulSize.width
     ? Math.floor(ulSize.width / (itemMinWidth * rem))
     : 1;
@@ -241,7 +220,7 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs: ChartLineBrief[] | ErrorMsg | undefined = Array.isArray(
+  const filteredBriefs: ChartLineBrief[] | APIError | undefined = Array.isArray(
     briefs
   )
     ? fetchAll
@@ -306,15 +285,7 @@ export function ChartList(props: Props) {
 
   return (
     <div className="relative w-full h-max isolate">
-      <ul
-        ref={ulSize.ref}
-        className="grid w-full mx-auto justify-items-start items-center gap-1 mb-1 "
-        style={{
-          gridTemplateColumns: `repeat(auto-fill, minmax(min(${itemMinWidth}rem, 100%), 1fr))`,
-          // max 3 columns
-          maxWidth: 4 * itemMinWidth - 0.1 + "rem",
-        }}
-      >
+      <ul ref={ulSize.ref} className="fn-chart-list">
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
             Array.isArray(filteredBriefs) &&
@@ -350,38 +321,25 @@ export function ChartList(props: Props) {
                 badge={props.badge}
               />
             ) : (
-              <li
-                key={i}
-                className={clsx(
-                  "w-full max-w-108 mx-auto h-10",
-                  chartListBgStyle
-                )}
-              />
+              <li key={i} className="fn-cl-item" />
             )
         )}
       </ul>
       {firstFetchingIndex >= 0 && props.showLoading ? (
         <div
-          className="absolute inset-x-0 w-max mx-auto "
+          className="fn-cl-message"
           style={{
             top:
-              0.5 +
-              itemMinHeight * Math.round(firstFetchingIndex / ulCols) +
-              "rem",
+              itemMinHeight * Math.round(firstFetchingIndex / ulCols) + "rem",
           }}
         >
           <SlimeSVG />
           Loading...
         </div>
       ) : briefs && "message" in briefs ? (
-        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
-          {briefs.status ? `${briefs.status}: ` : ""}
-          {te.has(`api.${briefs.message}`)
-            ? te(`api.${briefs.message}`)
-            : te("unknownApiError")}
-        </div>
+        <div className="fn-cl-message">{briefs.format(te)}</div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
-        <div className="absolute inset-x-0 top-2 w-max mx-auto ">
+        <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}
         </div>
       ) : null}
@@ -390,37 +348,35 @@ export function ChartList(props: Props) {
         props.onMoreClick ? (
           <button
             className={clsx(
-              "block w-max mx-auto mt-2",
-              firstFetchingIndex >= 0 && "invisible",
-              linkStyle1
+              "fn-cl-more fn-link-1",
+              firstFetchingIndex >= 0 && "invisible"
             )}
             onClick={props.onMoreClick}
           >
             {t("showAll")}
             <ArrowRight
-              className="inline-block align-middle ml-2 "
+              className="inline-block align-middle ml-2"
               theme="filled"
             />
           </button>
         ) : props.moreHref ? (
           <Link
             className={clsx(
-              "block w-max mx-auto mt-2",
-              firstFetchingIndex >= 0 && "invisible",
-              linkStyle1
+              "fn-cl-more fn-link-1",
+              firstFetchingIndex >= 0 && "invisible"
             )}
             href={props.moreHref}
             prefetch={!process.env.NO_PREFETCH}
           >
             {t("showAll")}
             <ArrowRight
-              className="inline-block align-middle ml-2 "
+              className="inline-block align-middle ml-2"
               theme="filled"
             />
           </Link>
         ) : null
       ) : props.moreHref || props.onMoreClick ? (
-        <div className="w-0 h-6 mt-2 " />
+        <div className="fn-cl-more" />
       ) : null}
       {padHeightForScroll > 0 && (
         <div className="w-0" style={{ height: padHeightForScroll }} />
@@ -429,17 +385,6 @@ export function ChartList(props: Props) {
   );
 }
 
-const chartListBgStyle = "rounded-md bg-sky-400/15 dark:bg-orange-700/10";
-const chartListStyle = clsx(
-  "block w-full text-left cursor-pointer",
-  // "hover:shadow active:shadow-inner",
-  "pl-1.5 py-0.5",
-  // "hover:-translate-y-0.5 active:translate-y-0",
-  chartListBgStyle,
-  skyFlatButtonStyle,
-  "hover:shadow-sm",
-  buttonShadowStyle
-);
 interface CProps {
   cid: string;
   brief?: ChartBrief;
@@ -455,18 +400,15 @@ interface CProps {
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
 
-  // ~36rem: 1列 -> 18~36rem -> max-width:27rem
-  // ~54rem: 2列 -> 18~27rem
-  // ~72rem: 3列 -> 18~24rem
   return (
-    <li className={clsx("w-full max-w-108 mx-auto h-max")}>
+    <li className="fn-cl-item">
       {props.onClick || (props.newTab && !isStandalone) ? (
         <>
           <a
             href={props.href}
             className={clsx(
-              chartListStyle,
-              props.onClickMobile && "hidden main-wide:block"
+              "fn-flat-button fn-sky",
+              props.onClickMobile && "no-mobile"
             )}
             target={props.newTab ? "_blank" : undefined}
             onClick={
@@ -478,22 +420,22 @@ export function ChartListItem(props: CProps) {
                 : undefined
             }
           >
-            <span className={skyFlatButtonBorderStyle1} />
-            <span className={skyFlatButtonBorderStyle2} />
+            <span className="fn-glass-1" />
+            <span className="fn-glass-2" />
             <ButtonHighlight />
             <ChartListItemChildren {...props} />
           </a>
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx(chartListStyle, "main-wide:hidden")}
+              className={clsx("fn-flat-button fn-sky", "no-pc")}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
               }}
             >
-              <span className={skyFlatButtonBorderStyle1} />
-              <span className={skyFlatButtonBorderStyle2} />
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
               <ButtonHighlight />
               <ChartListItemChildren {...props} />
             </a>
@@ -502,11 +444,11 @@ export function ChartListItem(props: CProps) {
       ) : (
         <Link
           href={props.href}
-          className={clsx(chartListStyle)}
+          className={clsx("fn-flat-button fn-sky")}
           prefetch={!process.env.NO_PREFETCH}
         >
-          <span className={skyFlatButtonBorderStyle1} />
-          <span className={skyFlatButtonBorderStyle2} />
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
           <ButtonHighlight />
           <ChartListItemChildren {...props} />
         </Link>
@@ -533,30 +475,28 @@ function ChartListItemChildren(props: CProps) {
   }, [props.cid, props.brief, props.badge]);
 
   return (
-    <div className="relative flex flex-row items-center gap-2 ">
+    <>
       <LevelBadge
         className="absolute z-10 top-0 -right-1"
         status={status}
         levels={levelColors}
         showDot
       />
-      <div className="flex-none ">
-        {props.brief?.ytId ? (
-          <img
-            className="h-9 w-16 object-cover object-center "
-            src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
-          />
-        ) : (
-          <div className="h-9 w-16 " />
-        )}
-      </div>
-      <div className="flex-1 min-w-0 flex flex-col items-begin justify-center space-y-0.5">
-        <div className="leading-4 overflow-x-clip overflow-y-visible ">
+      {props.brief?.ytId ? (
+        <img
+          className="fn-thumbnail"
+          src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
+        />
+      ) : (
+        <div className="fn-thumbnail" />
+      )}
+      <div className="fn-cl-content">
+        <div className="flex flex-wrap items-baseline max-w-full">
           <span className="text-xs/3">ID:</span>
           <span className="ml-1 text-sm/3">{props.cid}</span>
           {props.dateDiff && (
             <DateDiff
-              className="ml-2 text-xs/3 whitespace-nowrap text-slate-500 dark:text-stone-400"
+              className="ml-2 text-xs/3 text-dim"
               date={props.brief?.updatedAt || 0}
             />
           )}
@@ -564,32 +504,29 @@ function ChartListItemChildren(props: CProps) {
             <span className="ml-2 text-xs/3">(オリジナル曲)</span>
           )}
           {props.creator && (
-            <span
-              className={clsx(
-                "inline-block leading-3 max-w-full",
-                "overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis"
-              )}
-            >
-              <span className="ml-2 text-xs/3">by</span>
-              <span className="ml-1 font-title text-sm/3">
+            <span className="inline-block h-4 leading-4 fn-cl-clip">
+              <span className="ml-2 text-xs/4">by</span>
+              <span className={clsx("ml-1 font-title text-sm/4")}>
                 {props.brief?.chartCreator}
               </span>
             </span>
           )}
         </div>
-        <div className="overflow-x-clip overflow-y-visible whitespace-nowrap text-ellipsis leading-4 ">
-          <span className="font-title text-base/4 ">{props.brief?.title}</span>
+        <div className={clsx("h-5 **:leading-5 fn-cl-clip", "fg-bright")}>
+          <span className="font-title text-base font-medium">
+            {props.brief?.title}
+          </span>
           {!props.original && props.brief?.composer && (
             <>
-              <span className="ml-1 text-sm/4">/</span>
-              <span className="ml-1 font-title text-sm/4">
+              <span className="ml-1 text-sm">/</span>
+              <span className="ml-1 font-title text-base">
                 {props.brief.composer}
               </span>
             </>
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

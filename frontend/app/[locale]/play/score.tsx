@@ -33,10 +33,11 @@ function Cloud(props: CProps) {
         src={
           process.env.ASSET_PREFIX +
           (themeState.isDark
-            ? "/assets/cloud-black.svg?v=2"
-            : "/assets/cloud.svg?v=2")
+            ? "/assets/cloud-black.svg"
+            : "/assets/cloud.svg") +
+          process.env.ASSET_QUERY_CLOUD
         }
-        className="absolute inset-0 -z-10 "
+        className="absolute inset-0 z-disp-cloud"
       />
       <div
         className={clsx(props.className, "absolute")}
@@ -169,14 +170,14 @@ function lerp(start: number, end: number, t: number) {
 function useColorWithLerp(c: number) {
   const factorClip = (c: number) => Math.min(1, Math.max(0, c));
   const lchLight = [
-    lerp(0.279, 0.705, factorClip((c - 0.1) / 0.9)),
+    lerp(0, 0.705, factorClip(c / 1)),
     lerp(0.041, 0.213, factorClip((c - 0.25) / 0.75)),
-    lerp(260.031, 47.604, factorClip(c / 0.25)),
+    47.604,
   ];
   const lchDark = [
-    lerp(0.869, 0.852, factorClip(c / 0.1)),
-    lerp(0.005, 0.199, factorClip((c - 0.1) / 0.9)),
-    lerp(56.366, 91.936, factorClip(c / 0.1)),
+    lerp(0.97, 0.852, factorClip(c / 1)),
+    lerp(0.001, 0.199, factorClip((c - 0.1) / 0.9)),
+    lerp(106.424, 91.936, factorClip(c / 0.1)),
   ];
   const { isDark } = useTheme();
   return isDark ? lchDark : lchLight;
@@ -206,7 +207,7 @@ export function ChainDisp(props: ChainProps) {
       >
         <div className="relative flex-1 flex flex-row items-baseline">
           <span className="flex-3" />
-          <span className="z-10">
+          <span className="z-disp-chain">
             <NumDisp
               num={props.chain}
               fontSize1={40}
@@ -217,11 +218,11 @@ export function ChainDisp(props: ChainProps) {
           </span>
           <span className="flex-2" />
           <ChainDropAnim
-            className="z-5"
+            className="z-disp-chain-drop"
             chain={props.chain}
             playing={props.playing}
           />
-          <ChainBigAnim className="z-20" chain={props.chain} />
+          <ChainBigAnim className="z-disp-chain-big" chain={props.chain} />
         </div>
         <span
           className="relative text-center w-max overflow-visible "
@@ -377,11 +378,11 @@ function SkewedProgressBar(props: PProps) {
     <div
       className={clsx(
         "absolute overflow-hidden rounded-full bg-slate-300/15 shadow-[0_0_0.1em] shadow-slate-300/25",
+        "z-disp-pbar",
         "dark:bg-stone-500/15 shadow-stone-500/25",
         "m-auto origin-bottom perspective-origin-bottom"
       )}
       style={{
-        zIndex: -1,
         top: 54,
         left: 0,
         right: 0,

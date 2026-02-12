@@ -1,6 +1,5 @@
 import clsx from "clsx/lite";
 import { Box } from "@/common/box";
-import { levelColors } from "@/common/levelColors";
 import { JudgeIcon } from "@/play/statusBox";
 import {
   baseScoreRate,
@@ -34,9 +33,7 @@ export function SharedResultBox(props: Props) {
   }, [props.result.date]);
   return (
     <Box classNameOuter="w-max max-w-full mx-auto py-4 px-6 mt-4">
-      <p className="text-lg font-title font-semibold text-center ">
-        &lt; {th("sharedResult")} &gt;
-      </p>
+      <p className="fn-heading-box">&lt; {th("sharedResult")} &gt;</p>
       <p className="text-center ">
         {props.result.lvName && (
           <span className="font-title mr-2">{props.result.lvName}</span>
@@ -44,11 +41,12 @@ export function SharedResultBox(props: Props) {
         <span
           className={clsx(
             "inline-block mr-2",
-            levelColors[props.result.lvType]
+            "fn-level-type",
+            levelTypes[props.result.lvType]
           )}
         >
-          <span className="text-sm">{levelTypes[props.result.lvType]}-</span>
-          <span className="text-lg">{props.result.lvDifficulty}</span>
+          <span>{levelTypes[props.result.lvType]}-</span>
+          <span>{props.result.lvDifficulty}</span>
         </span>
         {props.result.playbackRate4 !== 4 && (
           <span className="inline-block mr-2">
@@ -57,7 +55,7 @@ export function SharedResultBox(props: Props) {
           </span>
         )}
         {props.result.date && (
-          <span className="inline-block text-slate-500 dark:text-stone-400 ">
+          <span className="inline-block text-dim">
             <span>(</span>
             <span>{resultDate}</span>
             {props.result.inputType === inputTypes.keyboard ? (
@@ -101,7 +99,7 @@ export function SharedResultBox(props: Props) {
                   "flex flex-row w-full items-baseline",
                   name === "bigNoteBonus" &&
                     props.result.bigCount === null &&
-                    "text-slate-400 dark:text-stone-500"
+                    "text-dim"
                 )}
               >
                 <span className="flex-1 text-sm ">{t(name)}:</span>
@@ -112,7 +110,7 @@ export function SharedResultBox(props: Props) {
                 </span>
               </p>
             ))}
-            <div className="mt-1 border-b border-slate-800 dark:border-stone-300" />
+            <div className="mt-1 border-b border-base" />
             <p className="flex flex-row w-full items-baseline ">
               <span className="flex-1 text-sm ">{t("totalScore")}:</span>
               <span className="text-2xl">
@@ -146,12 +144,7 @@ export function SharedResultBox(props: Props) {
             ) : null}
           </div>
         </div>
-        <div
-          className={clsx(
-            "w-32 flex flex-col justify-center",
-            "text-slate-500 dark:text-stone-400"
-          )}
-        >
+        <div className={clsx("w-32 flex flex-col justify-center", "text-dim")}>
           {["good", "ok", "bad", "miss"].map((name, ji) => (
             <div key={ji} className="flex flex-row items-baseline ">
               <span className="inline-block text-sm w-4 translate-y-0.5">
@@ -165,8 +158,7 @@ export function SharedResultBox(props: Props) {
             <div
               className={clsx(
                 "flex flex-row items-baseline",
-                props.result.bigCount === null &&
-                  "text-slate-400 dark:text-stone-500"
+                props.result.bigCount === null && "text-dim"
               )}
             >
               <span className="flex-1 text-xs ">{ts("big")}</span>

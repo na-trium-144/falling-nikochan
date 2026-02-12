@@ -81,6 +81,10 @@ const env = {
   BACKEND_PREFIX: process.env.BACKEND_PREFIX || "",
   // if not empty, disable all Next.js Link prefetch
   NO_PREFETCH: process.env.NO_PREFETCH || "",
+  // suffix for icon assets
+  ASSET_QUERY_ICON: "?v=4",
+  ASSET_QUERY_NIKOCHAN: "?v=2",
+  ASSET_QUERY_CLOUD: "?v=2",
 };
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);

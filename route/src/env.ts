@@ -3,8 +3,9 @@ import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
 import briefApp from "./api/brief.js";
-import { ExecutionContext, Hono } from "hono";
-import { onError } from "./error.js";
+import { Context, ExecutionContext, Hono } from "hono";
+import { fetchError, onError } from "./error.js";
+import { env } from "hono/adapter";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -25,6 +26,7 @@ export interface Bindings {
   GEMINI_API_KEY?: string;
   DISCORD_WEBHOOK_ID?: string;
   DISCORD_WEBHOOK_TOKEN?: string;
+  IS_SERVICE_WORKER?: string;
 }
 
 export function secretSalt(e: Bindings) {
@@ -49,6 +51,17 @@ export function cacheControl(e: Bindings, age: number | null) {
   }
 }
 
+export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
+  if (env(c).BACKEND_PREFIX) {
+    return env(c).BACKEND_PREFIX!;
+  } else {
+    const url = new URL(c.req.url);
+    if (c.req.header("x-forwarded-proto")) {
+      url.protocol = c.req.header("x-forwarded-proto")!;
+    }
+    return url.origin;
+  }
+}
 export const fetchBrief =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
@@ -60,20 +73,17 @@ export const fetchBrief =
       .request(`/api/brief/${cid}`, undefined, e, ctx);
   };
 export function fetchStatic(e: Bindings, url: URL) {
-  return fetch(
-    new URL(url.pathname, e.ASSET_PREFIX || e.BACKEND_PREFIX || url.origin),
-    {
-      headers: {
-        // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
-        // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
-        ...(e.VERCEL_PROTECTION_BYPASS_SECRET
-          ? {
-              "x-vercel-protection-bypass": e.VERCEL_PROTECTION_BYPASS_SECRET,
-            }
-          : {}),
-      },
-    }
-  );
+  return fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
+    headers: {
+      // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
+      // same as VERCEL_AUTOMATION_BYPASS_SECRET but manually set for preview env only
+      ...(e.VERCEL_PROTECTION_BYPASS_SECRET
+        ? {
+            "x-vercel-protection-bypass": e.VERCEL_PROTECTION_BYPASS_SECRET,
+          }
+        : {}),
+    },
+  }).catch(fetchError(e));
 }
 
 export function languageDetector() {

@@ -8,7 +8,6 @@ import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
 import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
 import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
-import { useTheme } from "@/common/theme";
 import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
@@ -75,7 +74,6 @@ export default function FallingWindow(props: Props) {
   const canvasMarginY =
     marginY !== undefined ? -canvasTop.current + marginY : undefined;
 
-  const { isDark } = useTheme();
   const { rem, playUIScale } = useDisplayMode();
   const noteSize = Math.max(1.5 * rem, 0.06 * (boxSize || 0));
 
@@ -188,7 +186,9 @@ export default function FallingWindow(props: Props) {
     Promise.all(
       [0, 1, 2, 3].map(async (i) => {
         const res = await fetch(
-          process.env.ASSET_PREFIX + `/assets/nikochan${i}.svg?v=2`
+          process.env.ASSET_PREFIX +
+            `/assets/nikochan${i}.svg` +
+            process.env.ASSET_QUERY_NIKOCHAN
         );
         const svg = await res.text();
         // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
@@ -397,15 +397,13 @@ export default function FallingWindow(props: Props) {
       {/* For nikochans tail */}
       <canvas
         ref={tailsCanvasRef}
+        className="absolute z-fw-canvas-tail pointer-events-none"
         style={{
-          zIndex: -7,
-          position: "absolute",
           left: canvasLeft.current,
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          pointerEvents: "none",
-          opacity: isDark ? 0.5 : 0.5,
+          opacity: 0.5,
         }}
         width={canvasWidth.current * tailsCanvasDPR}
         height={canvasHeight.current * tailsCanvasDPR}
@@ -413,15 +411,13 @@ export default function FallingWindow(props: Props) {
       {/* For nikochan */}
       <canvas
         ref={nikochanCanvasRef}
+        className="absolute z-fw-canvas-nikochan pointer-events-none"
         style={{
-          zIndex: 0,
-          position: "absolute",
           left: canvasLeft.current,
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          pointerEvents: "none",
-          opacity: isDark ? 0.7 : 0.9,
+          opacity: 0.9,
         }}
         width={canvasWidth.current * nikochanCanvasDPR.current}
         height={canvasHeight.current * nikochanCanvasDPR.current}
@@ -429,7 +425,7 @@ export default function FallingWindow(props: Props) {
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
         <TargetLine
-          className="-z-3"
+          className="z-fw-target-line"
           barFlash={
             props.barFlash === undefined || marginX === undefined
               ? undefined
@@ -658,7 +654,7 @@ function Ripple(props: RProps) {
   }, [noteSize]);
   return (
     <div
-      className="absolute -z-20 dark:opacity-70 opacity-90"
+      className="absolute z-fw-ripple dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,
@@ -749,7 +745,7 @@ function Particle(props: PProps) {
 
   return (
     <div
-      className="absolute -z-10 dark:opacity-70 opacity-90"
+      className="absolute z-fw-particle dark:opacity-70 opacity-90"
       style={{
         width: 1,
         height: 1,

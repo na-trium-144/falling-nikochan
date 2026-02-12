@@ -1,7 +1,6 @@
 import clsx from "clsx/lite";
 import {
   emptyLevel,
-  levelTypes,
   levelTypesConst,
   ChartEditing,
 } from "@falling-nikochan/chart";
@@ -9,7 +8,6 @@ import Button from "@/common/button.js";
 import { HelpIcon } from "@/common/caption";
 import CheckBox from "@/common/checkBox.js";
 import Input from "@/common/input.js";
-import { levelColors } from "@/common/levelColors";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
 import { Scrollable } from "@/common/scrollable";
@@ -88,10 +86,10 @@ export default function LevelTab(props: Props) {
           <li key={i}>
             <button
               className={clsx(
-                i === chart?.currentLevelIndex
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "hover:text-slate-500 hover:dark:text-stone-400",
-                level.meta.unlisted && "text-slate-400 dark:text-stone-500"
+                i === chart?.currentLevelIndex &&
+                  "text-blue-600 dark:text-blue-400",
+                "hover:text-highlight cursor-pointer",
+                level.meta.unlisted && "text-dim"
               )}
               onClick={() => chart?.setCurrentLevelIndex(i)}
             >
@@ -110,18 +108,17 @@ export default function LevelTab(props: Props) {
               <span
                 className={clsx(
                   "inline-block mr-2",
-                  i === chart?.currentLevelIndex &&
-                    levelColors[levelTypes.indexOf(level.meta.type)]
+                  "fn-level-type",
+                  i === chart?.currentLevelIndex && level.meta.type
                 )}
               >
-                <span className="text-sm">{level.meta.type}-</span>
-                <span className="text-lg">{level.difficulty}</span>
+                <span>{level.meta.type}-</span>
+                <span>{level.difficulty}</span>
               </span>
               <span
                 className={clsx(
                   "inline-block",
-                  level.freeze.notes.length ||
-                    "text-slate-400 dark:text-stone-500"
+                  level.freeze.notes.length || "text-dim"
                 )}
               >
                 ({level.freeze.notes.length} notes)
@@ -153,7 +150,7 @@ export default function LevelTab(props: Props) {
                 value={t === currentLevel?.meta.type}
                 className={clsx(
                   "ml-2",
-                  t === currentLevel?.meta.type && levelColors[i]
+                  t === currentLevel?.meta.type && `fn-level-col-${"sdm"[i]}`
                 )}
                 onChange={() => {
                   currentLevel?.updateMeta({ type: t });

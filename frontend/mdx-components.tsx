@@ -1,26 +1,18 @@
 import clsx from "clsx/lite";
 import { ExternalLink } from "@/common/extLink";
-import { linkStyle3 } from "@/common/linkStyle";
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
-    h1: (props) => (
-      <h3
-        className="text-xl font-bold font-title mt-4 first:mt-0 mb-2"
-        {...props}
-      />
-    ),
-    h2: (props) => (
-      <h4 className="text-lg font-bold font-title mt-1 " {...props} />
-    ),
+    h1: "h3",
+    h2: "h4",
     a: (props) =>
       props.href.startsWith("http") ? (
         <ExternalLink href={props.href}>{props.children}</ExternalLink>
       ) : (
         <Link
-          className={clsx(linkStyle3)}
+          className={clsx("fn-link-3")}
           href={props.href}
           prefetch={!process.env.NO_PREFETCH}
         >
@@ -28,16 +20,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         </Link>
       ),
     ul: (props) => <ul className="list-disc ml-6 " {...props} />,
-    code: (props) => (
-      <code
-        className={clsx(
-          "font-mono text-sm px-1 py-0.5 rounded border",
-          "bg-white border-slate-300",
-          "dark:bg-stone-700 dark:border-stone-500"
-        )}
-        {...props}
-      />
-    ),
+    code: (props) => <code className="fn-code" {...props} />,
     ...components,
   };
 }

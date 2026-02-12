@@ -13,9 +13,8 @@ import {
   ResultData,
   toResultParams,
 } from "@/common/bestScore.js";
-import Button, { ButtonHighlight, buttonShadowStyle } from "@/common/button.js";
+import Button, { ButtonHighlight } from "@/common/button.js";
 import { FourthNote } from "@/common/fourthNote.js";
-import { levelColors } from "@/common/levelColors";
 import { initSession } from "@/play/session.js";
 import { JudgeIcon } from "@/play/statusBox.js";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
@@ -29,23 +28,13 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import {
-  boxButtonBorderStyle1,
-  boxButtonBorderStyle2,
-  boxButtonStyle,
-  invertedFlatButtonBorderStyle1,
-  invertedFlatButtonBorderStyle2,
-  invertedFlatButtonStyle,
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton";
+import { APIError } from "@/common/apiError";
 
 interface Props {
   locale: string;
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | null;
+  record: RecordGetSummary[] | APIError | null;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -77,26 +66,24 @@ export function PlayOption(props: Props) {
       className={clsx(
         "mx-auto mt-4 p-3",
         "w-max max-w-full rounded-sq-2xl",
-        // "border-sky-200 dark:border-orange-900",
-        "bg-sky-200/25 dark:bg-orange-950/25",
         "relative",
-        "inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15"
+        "fn-sky fn-play-option"
       )}
     >
-      <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />
-      <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
       <div className="flex flex-col main-wide:flex-row">
         <p className="flex-none w-max self-begin main-wide:self-center ">
           {t("selectLevel")}:
         </p>
-        <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center ">
+        <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center">
           {props.brief.levels.map(
             (level, i) =>
               level.unlisted || (
                 <li
                   key={i}
                   className={clsx(
-                    "relative leading-0 w-full",
+                    "relative w-full",
                     selectedLevel !== null && selectedLevel >= 0
                       ? "pr-4"
                       : "pr-2"
@@ -116,8 +103,9 @@ export function PlayOption(props: Props) {
                       "rotate-45 origin-center",
                       "border-slate-400 dark:border-stone-500",
                       "bg-white dark:bg-stone-700",
+                      "no-mobile",
                       "invisible",
-                      selectedLevel === i && "main-wide:visible"
+                      selectedLevel === i && "visible"
                     )}
                   />
                 </li>
@@ -193,41 +181,34 @@ function LevelButton(props: {
   return (
     <button
       className={clsx(
-        "cursor-pointer w-full",
-        "relative rounded-lg px-2 py-0.5 my-0.5",
-        props.selected ? boxButtonStyle : skyFlatButtonStyle,
+        "cursor-pointer w-full fg-bright",
+        "relative rounded-lg px-3 py-1 my-0.5",
+        "flex items-center justify-center",
+        props.selected
+          ? "fn-flat-button fn-plain fn-selected"
+          : "fn-flat-button fn-sky",
         props.selected ? "shadow-2xs" : "hover:shadow-2xs",
-        buttonShadowStyle
+        "shadow-slate-500/50 dark:shadow-stone-950/50"
       )}
       onClick={props.onClick}
     >
-      <span
-        className={clsx(
-          props.selected ? boxButtonBorderStyle1 : skyFlatButtonBorderStyle1
-        )}
-      />
-      <span
-        className={clsx(
-          props.selected ? boxButtonBorderStyle2 : skyFlatButtonBorderStyle2
-        )}
-      />
+      <span className={clsx(props.selected ? "fn-glass-1" : "fn-glass-1")} />
+      <span className={clsx(props.selected ? "fn-glass-2" : "fn-glass-2")} />
       <ButtonHighlight />
       <LevelBadge
-        className="absolute top-0.5 -right-3 "
+        className="absolute top-0.5 -right-3 z-10"
         status={[props.status]}
         levels={[levelTypes.indexOf(props.level.type)]}
       />
-      <span className="inline-block text-center truncate w-full ">
+      <span className="flex flex-wrap items-baseline justify-center max-w-full">
         {props.level.name && (
-          <span className="mr-2 font-title ">{props.level.name}</span>
+          <span className="mr-2 font-title truncate">{props.level.name}</span>
         )}
         <span
-          className={clsx(
-            props.selected && levelColors[levelTypes.indexOf(props.level.type)]
-          )}
+          className={clsx("fn-level-type", props.selected && props.level.type)}
         >
-          <span className="text-sm">{props.level.type}-</span>
-          <span className="text-lg">{props.level.difficulty}</span>
+          <span>{props.level.type}-</span>
+          <span>{props.level.difficulty}</span>
         </span>
       </span>
     </button>
@@ -236,19 +217,22 @@ function LevelButton(props: {
 function SelectedLevelInfo(props: {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | null;
+  record: RecordGetSummary[] | APIError | null;
   selectedLevel: number;
   locale: string;
 }) {
   const t = useTranslations("share");
+  const te = useTranslations("error");
   const [showBestDetail, setShowBestDetail] = useState(false);
 
-  const selectedRecord =
+  const selectedRecord: RecordGetSummary | APIError | undefined =
     props.selectedLevel === null
-      ? null
-      : props.record?.find(
-          (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
-        );
+      ? undefined
+      : props.record instanceof APIError
+        ? props.record
+        : props.record?.find(
+            (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
+          );
 
   const [bestScoreState, setBestScoreState] = useState<(ResultData | null)[]>(
     []
@@ -309,7 +293,7 @@ function SelectedLevelInfo(props: {
             </>
           )}
         </div>
-        <span className="mx-3 hidden main-wide:block">/</span>
+        <span className="mx-3 no-mobile">/</span>
         <div>
           <span className="inline-block w-5 translate-y-0.5">
             <Timer />
@@ -326,7 +310,7 @@ function SelectedLevelInfo(props: {
               .padStart(2, "0")}
           </span>
         </div>
-        <span className="mx-3 hidden main-wide:block">/</span>
+        <span className="mx-3 no-mobile">/</span>
         <div>
           <span className="inline-block w-5 translate-y-0.5">
             <SmilingFace />
@@ -340,25 +324,31 @@ function SelectedLevelInfo(props: {
       <p className="mt-2 min-w-65 ">
         {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
-        {props.record !== null && (
-          <span className="ml-2 text-sm">({selectedRecord?.count || 0})</span>
-        )}
+        {selectedRecord !== undefined &&
+          !(selectedRecord instanceof APIError) && (
+            <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
+          )}
       </p>
       <span className={clsx(props.record === null ? "block" : "hidden")}>
         <SlimeSVG />
         Loading...
       </span>
-      {selectedRecord && selectedRecord.count >= 5 && (
-        <RecordHistogram
-          histogram={selectedRecord.histogram}
-          bestScoreTotal={selectedBestScore ? totalScore : null}
-        />
+      {selectedRecord !== undefined &&
+        !(selectedRecord instanceof APIError) &&
+        selectedRecord.count >= 5 && (
+          <RecordHistogram
+            histogram={selectedRecord.histogram}
+            bestScoreTotal={selectedBestScore ? totalScore : null}
+          />
+        )}
+      {selectedRecord instanceof APIError && (
+        <p className="text-dim">{selectedRecord.format(te)}</p>
       )}
       <button
         className={clsx(
           "w-full mt-2 px-2 rounded-sq-xl",
           "flex flex-col items-center",
-          selectedBestScore && invertedFlatButtonStyle
+          selectedBestScore && "fn-flat-button fn-inverted"
         )}
         onClick={() =>
           setShowBestDetail(!!selectedBestScore && !showBestDetail)
@@ -366,14 +356,14 @@ function SelectedLevelInfo(props: {
       >
         {selectedBestScore && (
           <>
-            <span className={invertedFlatButtonBorderStyle1} />
-            <span className={invertedFlatButtonBorderStyle2} />
+            <span className={"fn-glass-1"} />
+            <span className={"fn-glass-2"} />
             <ButtonHighlight />
           </>
         )}
         <p className="">{t("bestScore")}</p>
         {showBestDetail && selectedBestScore?.date && (
-          <span className="text-sm text-slate-500 dark:text-stone-400">
+          <span className="text-sm text-dim">
             ({new Date(selectedBestScore.date).toLocaleDateString()})
           </span>
         )}
@@ -381,7 +371,7 @@ function SelectedLevelInfo(props: {
           <span
             className={clsx(
               "bold-by-stroke",
-              selectedBestScore || "text-slate-400 dark:text-stone-500"
+              selectedBestScore ? "fg-bright" : "text-dim"
             )}
           >
             <span className="inline-block text-2xl">
@@ -393,7 +383,9 @@ function SelectedLevelInfo(props: {
             </span>
           </span>
           {selectedBestScore && (
-            <span className="text-xl ml-1 ">({rankStr(totalScore)})</span>
+            <span className="text-xl ml-1 fg-bright">
+              ({rankStr(totalScore)})
+            </span>
           )}
         </div>
         {!showBestDetail && selectedBestScore && (

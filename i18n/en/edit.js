@@ -4,6 +4,7 @@ export default {
     titleShort: "Chart Editor",
     description: "Falling Nikochan Chart Editor",
     help: "Help",
+    back: "Back",
     chartId: "Chart ID",
     enterPasswd: "Enter the password to edit.",
     passwdFailed: "Password is incorrect.",

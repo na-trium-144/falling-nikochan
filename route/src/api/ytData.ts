@@ -68,7 +68,11 @@ export async function getYTDataEntry(
           id: ytId,
           key: e.GOOGLE_API_KEY,
         })
-    );
+    ).catch(() => null);
+    if (!res) {
+      console.error(`Failed to fetch YT data for ${ytId}`);
+      return undefined;
+    }
     if (!res.ok) {
       console.error(
         `Failed to fetch YT data for ${ytId}: ${res.status} ${await res.text()}`

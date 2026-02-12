@@ -1,7 +1,18 @@
+body.fn-csr-ready {
+  @apply fg-base;
+
+  > .fn-fallback-bg {
+    @apply fixed inset-0 pointer-events-none z-fallback-bg;
+    @apply bg-gradient-to-t;
+    @apply bg-sky-50 from-sky-50 to-sky-200;
+    @apply dark:bg-orange-950 dark:from-orange-950 dark:to-orange-975;
+  }
+}
+
 @layer components {
   .fn-irasutoya-like-bg {
     /* absoluteにするとなぜかSafariでパフォーマンスが大幅に低下する。 */
-    @apply fixed -inset-0 -z-999999999 pointer-events-none;
+    @apply fixed inset-0 pointer-events-none z-irasutoya-like-bg;
 
     #bgGradient > stop {
       &:nth-child(1) {
@@ -19,7 +30,7 @@
     }
   }
   .fn-irasutoya-like-grass-far {
-    @apply fixed pointer-events-none;
+    @apply fixed pointer-events-none z-irasutoya-like-grass-far;
 
     rect:not(.dummy) {
       fill: var(--color-lime-600);
@@ -29,7 +40,7 @@
     }
   }
   .fn-irasutoya-like-grass-near {
-    @apply fixed pointer-events-none;
+    @apply fixed pointer-events-none z-irasutoya-like-grass-near;
 
     #grassPattern > g {
       fill: var(--color-lime-200);

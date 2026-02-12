@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import DownOne from "@icon-park/react/lib/icons/DownOne.js";
 import RightOne from "@icon-park/react/lib/icons/RightOne.js";
-import { linkStyle1 } from "@/common/linkStyle";
 import Close from "@icon-park/react/lib/icons/Close";
 import { ExternalLink } from "@/common/extLink";
 
@@ -55,7 +54,7 @@ export function OSSLicensesList() {
     return (
       <Box classNameOuter="mt-1 p-4">
         <p className="mb-2 text-sm">
-          <button className={clsx(linkStyle1)} onClick={() => setOpen(false)}>
+          <button className={clsx("fn-link-1")} onClick={() => setOpen(false)}>
             <Close className="inline-block align-middle mr-2" />
             {t("closeDetail")}
           </button>
@@ -68,7 +67,10 @@ export function OSSLicensesList() {
   } else {
     return (
       <button
-        className={clsx("block w-full text-left ml-2 my-1 text-sm", linkStyle1)}
+        className={clsx(
+          "block w-full text-left ml-2 my-1 text-sm",
+          "fn-link-1"
+        )}
         onClick={() => setOpen(true)}
       >
         {t("showDetail")}
@@ -118,7 +120,7 @@ function LicenseDetail(props: { license: LicenseOutput }) {
       className="mb-2 text-sm"
       onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
     >
-      <summary className={clsx("text-left break-all list-none", linkStyle1)}>
+      <summary className={clsx("text-left break-all list-none", "fn-link-1")}>
         <span className="font-bold">{props.license.name}</span>
         <span className="inline-block font-bold text-sm ml-1">
           {props.license.version}

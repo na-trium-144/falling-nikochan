@@ -120,7 +120,7 @@ export default function TimeBar(props: Props) {
   return (
     <div
       className={clsx(
-        "h-6 bg-slate-200 dark:bg-stone-600 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
+        "h-6 bg-gray-500/25 relative mt-10 mb-20 overflow-y-visible overflow-x-clip"
       )}
       ref={timeBarRef}
     >
@@ -129,7 +129,7 @@ export default function TimeBar(props: Props) {
         (_, dt) => (
           <span
             key={dt}
-            className="absolute border-l border-gray-400 dark:border-gray-600 "
+            className="absolute border-l border-gray-500 "
             style={{
               top: -1.25 * rem,
               bottom: -4,
@@ -217,7 +217,7 @@ export default function TimeBar(props: Props) {
                   {ch.bpm}
                   {currentLevel!.freeze.speedChanges[i + 1]?.interp && (
                     <span
-                      className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+                      className="absolute inset-y-0 left-0 m-auto h-0 border border-base"
                       style={{
                         width:
                           timeBarPos(
@@ -228,7 +228,7 @@ export default function TimeBar(props: Props) {
                   )}
                   {ch.interp && i >= 1 && (
                     <span
-                      className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+                      className="absolute inset-y-0 right-full m-auto h-0 border border-base"
                       style={{
                         width:
                           timeBarPos(ch.timeSec) -
@@ -315,14 +315,14 @@ export default function TimeBar(props: Props) {
       {currentLevel?.nextSpeedInterp && cur && chart && (
         <>
           <div
-            className="absolute z-10"
+            className="absolute z-edit-timebar-interp"
             style={{
               bottom: -3.75 * rem,
               left: timeBarPos(cur.timeSec + chart.offset),
             }}
           >
             <span
-              className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+              className="absolute inset-y-0 left-0 m-auto h-0 border border-base"
               style={{
                 width:
                   timeBarPos(currentLevel.nextSpeedChange!.timeSec) -
@@ -330,7 +330,7 @@ export default function TimeBar(props: Props) {
               }}
             />
             <span
-              className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+              className="absolute inset-y-0 right-full m-auto h-0 border border-base"
               style={{
                 width:
                   timeBarPos(cur.timeSec) -

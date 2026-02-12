@@ -53,7 +53,6 @@ import { useTranslations } from "next-intl";
 import { SlimeSVG } from "@/common/slime.js";
 import { useSE } from "@/common/se.js";
 import Pause from "@icon-park/react/lib/icons/Pause.js";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import { Key } from "@/common/key.js";
 import {
   detectOS,
@@ -65,6 +64,8 @@ import { updateRecordFactor } from "@/common/recordFactor.js";
 import { useRealFPS } from "@/common/fpsCalculator.jsx";
 import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
+import { ButtonHighlight } from "@/common/button.jsx";
+import { APIError } from "@/common/apiError.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -77,8 +78,7 @@ export function InitPlay({ locale }: { locale: string }) {
   const [chartSeq, setChartSeq] = useState<ChartSeqData6 | ChartSeqData13>();
   const [editing, setEditing] = useState<boolean>(false);
 
-  const [errorStatus, setErrorStatus] = useState<number>();
-  const [errorMsg, setErrorMsg] = useState<string>();
+  const [errorMsg, setErrorMsg] = useState<string | APIError>();
   useEffect(() => {
     const q = getQueryOptions();
     setQueryOptions(q);
@@ -108,7 +108,6 @@ export function InitPlay({ locale }: { locale: string }) {
 
     if (session?.level) {
       setChartSeq(loadChart13(session.level));
-      setErrorStatus(undefined);
       setErrorMsg(undefined);
     } else {
       void (async () => {
@@ -138,42 +137,27 @@ export function InitPlay({ locale }: { locale: string }) {
                   default:
                     seq satisfies never;
                 }
-                setErrorStatus(undefined);
                 setErrorMsg(undefined);
                 addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
                 seq.ver satisfies never;
                 setChartSeq(undefined);
-                setErrorStatus(undefined);
                 setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
               }
             } catch (e) {
               setChartSeq(undefined);
-              setErrorStatus(undefined);
               console.error(e);
-              setErrorMsg(te("badResponse"));
+              setErrorMsg(APIError.badResponse());
             }
           } else {
             setChartSeq(undefined);
-            setErrorStatus(res.status);
-            try {
-              const message = ((await res.json()) as { message?: string })
-                .message;
-              if (te.has("api." + message)) {
-                setErrorMsg(te("api." + message));
-              } else {
-                setErrorMsg(message || te("unknownApiError"));
-              }
-            } catch {
-              setErrorMsg(te("unknownApiError"));
-            }
+            setErrorMsg(await APIError.fromRes(res));
           }
         } catch (e) {
           setChartSeq(undefined);
-          setErrorStatus(undefined);
           console.error(e);
-          setErrorMsg(te("api.fetchError"));
+          setErrorMsg(APIError.fetchError());
         }
       })();
     }
@@ -181,9 +165,7 @@ export function InitPlay({ locale }: { locale: string }) {
 
   return (
     <Play
-      apiErrorMsg={
-        errorStatus && errorMsg ? `${errorStatus}: ${errorMsg}` : errorMsg
-      }
+      apiErrorMsg={errorMsg}
       cid={cid}
       lvIndex={lvIndex || 0}
       chartBrief={chartBrief}
@@ -196,7 +178,7 @@ export function InitPlay({ locale }: { locale: string }) {
 }
 
 interface Props {
-  apiErrorMsg?: string;
+  apiErrorMsg?: string | APIError;
   cid?: string;
   lvIndex: number;
   chartBrief?: ChartBrief;
@@ -217,7 +199,9 @@ function Play(props: Props) {
   } = props;
   const te = useTranslations("error");
 
-  const [record, setRecord] = useState<RecordGetSummary | undefined>(); // for showing in the result dialog
+  const [record, setRecord] = useState<
+    RecordGetSummary | APIError | undefined
+  >(); // for showing in the result dialog
 
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
@@ -583,7 +567,7 @@ function Play(props: Props) {
   const [ytReady, setYtReady] = useState<boolean>(false);
   const [ytError, setYtError] = useState<number | null>(null);
   const [initDone, setInitDone] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>();
+  const [errorMsg, setErrorMsg] = useState<string | APIError>();
   const [showLoading, setShowLoading] = useState<boolean>(false);
   const showLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [giveUpWaitingFps, setGiveUpWaitingFps] = useState<boolean>(false);
@@ -700,21 +684,28 @@ function Play(props: Props) {
             });
             reloadBestScore();
           }
-          void (async () => {
+          (async () => {
             try {
               const res = await fetch(
                 process.env.BACKEND_PREFIX + `/api/record/${cid}`
               );
               if (res.ok) {
-                const records: RecordGetSummary[] = await res.json();
-                setRecord(
-                  records.find(
-                    (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
-                  )
-                );
+                try {
+                  const records: RecordGetSummary[] = await res.json();
+                  setRecord(
+                    records.find(
+                      (r) => r.lvHash === chartBrief!.levels[lvIndex]?.hash
+                    )
+                  );
+                } catch (e) {
+                  console.error(e);
+                  setRecord(APIError.badResponse());
+                }
+              } else {
+                setRecord(await APIError.fromRes(res));
               }
-            } catch (e) {
-              console.error(e);
+            } catch {
+              setRecord(APIError.fetchError());
             }
           })();
         }
@@ -970,7 +961,7 @@ function Play(props: Props) {
         >
           <MusicArea
             className={clsx(
-              "isolate z-19 transition-transform duration-500 ease-in-out",
+              "isolate z-play-music-area transition-transform duration-500 ease-in-out",
               musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
             )}
             ready={musicAreaOk}
@@ -1000,7 +991,7 @@ function Play(props: Props) {
               <div className="grow-1 basis-0" />
               <StatusBox
                 className={clsx(
-                  "isolate z-15 flex-none m-3 mt-4.5 mb-0 self-end",
+                  "isolate z-play-status flex-none m-3 mt-4.5 mb-0 self-end",
                   "transition-opacity duration-100",
                   !statusHide && musicAreaOk && notesAll.length > 0
                     ? "ease-in opacity-100"
@@ -1056,7 +1047,7 @@ function Play(props: Props) {
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
           {isReadyAll && (
             <FallingWindow
-              className="absolute inset-0 isolate z-0"
+              className="absolute inset-0 isolate z-play-fw"
               notes={notesAll}
               getCurrentTimeSec={getCurrentTimeSec}
               playing={chartPlaying}
@@ -1078,7 +1069,7 @@ function Play(props: Props) {
           )}
           <div
             className={clsx(
-              "absolute inset-0 isolate z-10",
+              "absolute inset-0 isolate z-play-disp",
               "transition-all duration-300",
               cloudsOk
                 ? "opacity-100 translate-y-0"
@@ -1122,17 +1113,10 @@ function Play(props: Props) {
               onPointerUp={(e) => e.stopPropagation()}
             >
               <button
-                className={clsx(
-                  "rounded-full cursor-pointer leading-0",
-                  isTouch
-                    ? "bg-white/50 dark:bg-stone-700/50 p-2"
-                    : "py-2 px-1",
-                  "hover:bg-slate-200/50 active:bg-slate-300/50",
-                  "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-                  linkStyle1
-                )}
+                className={clsx("fn-icon-button", isTouch ? "fn-with-bg" : "")}
                 onClick={stop}
               >
+                <ButtonHighlight />
                 <Pause className="inline-block align-middle text-xl" />
                 {!isTouch && <Key handleKeyDown>Esc</Key>}
               </button>
@@ -1140,32 +1124,24 @@ function Play(props: Props) {
                 <>
                   <button
                     className={clsx(
-                      "rounded-full cursor-pointer",
-                      isTouch
-                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
-                        : "py-2 px-1",
-                      "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-                      linkStyle1
+                      "fn-icon-button",
+                      isTouch ? "fn-with-bg" : ""
                     )}
                     onClick={seekBack}
                   >
+                    <ButtonHighlight />
                     {!isTouch && <Key handleKeyDown>←</Key>}
-                    <span className="ml-1">5s</span>
+                    <span className="ml-1 text-base">5s</span>
                   </button>
                   <button
                     className={clsx(
-                      "rounded-full cursor-pointer",
-                      isTouch
-                        ? "bg-white/50 dark:bg-stone-700/50 p-2"
-                        : "py-2 px-1",
-                      "hover:bg-slate-200/50 active:bg-slate-300/50",
-                      "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-                      linkStyle1
+                      "fn-icon-button",
+                      isTouch ? "fn-with-bg" : ""
                     )}
                     onClick={seekForward}
                   >
-                    <span className="mr-1">5s</span>
+                    <ButtonHighlight />
+                    <span className="mr-1 text-base">5s</span>
                     {!isTouch && <Key handleKeyDown>→</Key>}
                   </button>
                 </>
@@ -1175,7 +1151,7 @@ function Play(props: Props) {
           {(!initDone || closeReadyAnim) && (
             <CenterBox
               classNameOuter={clsx(
-                "isolate z-20",
+                "isolate z-play-loading",
                 "transition-opacity duration-200 ease-out",
                 showLoading || loadingAfterReady ? "opacity-100" : "opacity-0"
               )}
@@ -1190,7 +1166,7 @@ function Play(props: Props) {
           )}
           {errorMsg && (
             <InitErrorMessage
-              className="isolate z-20"
+              className="isolate z-play-error"
               msg={errorMsg}
               isTouch={isTouch}
               exit={exit}
@@ -1199,7 +1175,7 @@ function Play(props: Props) {
           {showReady && (
             <ReadyMessage
               className={clsx(
-                "isolate z-20",
+                "isolate z-play-ready",
                 "transition-[scale,opacity] duration-200 ease-out",
                 !openReadyAnim && "opacity-0",
                 closeReadyAnim && "opacity-0 scale-0"
@@ -1232,7 +1208,7 @@ function Play(props: Props) {
           )}
           {showResult && (
             <Result
-              className="isolate z-21"
+              className="isolate z-play-result"
               mainWindowHeight={mainWindowSpace.height!}
               hidden={showReady}
               auto={wasAutoPlay}
@@ -1298,7 +1274,7 @@ function Play(props: Props) {
           )}
           {showStopped && (
             <StopMessage
-              className="isolate z-20"
+              className="isolate z-play-stop"
               hidden={showReady || showResult}
               isTouch={isTouch}
               reset={reset}
@@ -1319,8 +1295,6 @@ function Play(props: Props) {
         }}
       >
         <IrasutoyaLikeGrass
-          classNameNear="isolate z-10"
-          classNameFar="isolate -z-10"
           height={
             (isMobile
               ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
@@ -1330,7 +1304,7 @@ function Play(props: Props) {
         />
         {chartSeq && (
           <RhythmicalSlime
-            className="isolate z-14 absolute"
+            className="isolate z-play-slime absolute"
             style={{
               bottom: "100%",
               right: isMobile
@@ -1348,7 +1322,7 @@ function Play(props: Props) {
         )}
         <BPMSign
           className={clsx(
-            "isolate z-13",
+            "isolate z-play-bpm",
             "transition-opacity duration-500 ease-out",
             initAnim && chartSeq
               ? shouldHideBPMSign
@@ -1367,7 +1341,7 @@ function Play(props: Props) {
         {isMobile && (
           <>
             <StatusBox
-              className="absolute inset-0 isolate z-15"
+              className="absolute inset-0 isolate z-play-status"
               style={{
                 margin: 1 * statusScale * rem,
               }}
@@ -1412,7 +1386,7 @@ function Play(props: Props) {
               }
             />
             {queryOptions.fps && (
-              <span className="absolute left-3 bottom-full isolate z-16">
+              <span className="absolute left-3 bottom-full isolate z-play-version">
                 [{renderFps} / {runFps} / {Math.round(realFps)}
                 {!realFpsStable && "?"} FPS]
               </span>
@@ -1420,7 +1394,7 @@ function Play(props: Props) {
           </>
         )}
         {!isMobile && (
-          <div className="absolute bottom-2 left-3 opacity-50 isolate z-16">
+          <div className="absolute bottom-2 left-3 opacity-50 isolate z-play-version">
             <span className="inline-block">Falling Nikochan</span>
             <span className="inline-block">
               <span className="ml-2">ver.</span>
@@ -1438,8 +1412,8 @@ function Play(props: Props) {
       {!isMobile && statusHide && showResult && !showReady && (
         <div
           className={clsx(
-            "isolate z-20 absolute inset-y-0 my-auto",
-            "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
+            "isolate z-play-status-overlay absolute inset-y-0 my-auto",
+            "grid-centering"
           )}
           style={{ right: "0.75rem" }}
         >

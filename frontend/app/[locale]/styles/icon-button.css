@@ -1,0 +1,32 @@
+@layer components {
+  .fn-icon-button {
+    @apply relative inline-block leading-0;
+    @apply rounded-full p-2 cursor-pointer;
+    @apply hover:bg-slate-400/25 active:bg-slate-400/25;
+    @apply dark:hover:bg-stone-600/25 active:bg-stone-600/25;
+
+    @variant disabled {
+      @apply cursor-default;
+      @apply hover:bg-[unset] active:bg-[unset];
+      @apply text-dim;
+    }
+
+    &.fn-with-bg {
+      @apply bg-white/50 dark:bg-stone-700/50;
+      @apply hover:bg-slate-400/25 active:bg-slate-400/25;
+      @apply dark:hover:bg-stone-600/25 active:bg-stone-600/25;
+    }
+  }
+  .fn-help-icon {
+    @apply relative inline-block leading-0;
+    @apply rounded-full p-2 cursor-help;
+    @apply text-sky-300 hover:text-sky-500;
+    @apply dark:text-orange-700 dark:hover:text-orange-500;
+    @apply hover:bg-slate-400/25 active:bg-slate-400/25;
+    @apply dark:hover:bg-stone-600/25 active:bg-stone-600/25;
+  }
+  .fn-pager-arrow {
+    @apply text-center inline-block w-7 h-7;
+    @apply text-lg font-bold;
+  }
+}

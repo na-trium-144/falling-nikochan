@@ -2,13 +2,7 @@
 
 import clsx from "clsx/lite";
 import Down from "@icon-park/react/lib/icons/Down";
-import {
-  buttonStyle,
-  buttonStyleDisabled,
-  buttonBorderStyle1,
-  buttonBorderStyle2,
-  ButtonHighlight,
-} from "./button";
+import { ButtonHighlight } from "./button";
 import DropDown, { DropDownProps } from "./dropdown";
 
 // Buttonと同じ見た目で矢印を追加したSelectの外観をしたDropDown。
@@ -18,21 +12,10 @@ interface Props<T = unknown> extends DropDownProps<T> {
 }
 export default function Select<T = unknown>(props: Props<T>) {
   return (
-    <DropDown
-      {...props}
-      className={clsx(
-        props.disabled ? buttonStyleDisabled : buttonStyle,
-        "pr-6",
-        props.className
-      )}
-    >
-      {!props.disabled && (
-        <>
-          <span className={buttonBorderStyle1} />
-          <span className={buttonBorderStyle2} />
-          <ButtonHighlight />
-        </>
-      )}
+    <DropDown {...props} className={clsx("fn-button", "pr-6", props.className)}>
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
+      <ButtonHighlight />
       <span className="relative flex flex-row items-center justify-center">
         {props.showValue
           ? props.options.find((o) => o.value === props.value)?.label

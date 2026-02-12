@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { useDisplayMode } from "@/scale";
 import { RecordHistogram } from "@/common/recordHistogram";
+import { APIError } from "@/common/apiError";
 
 export const resultAnimDelays = [100, 500, 500, 500, 750, 750, 500] as const;
 
@@ -36,7 +37,7 @@ interface Props extends ResultParams {
   reset: () => void;
   exit: () => void;
   largeResult: boolean;
-  record: RecordGetSummary | undefined;
+  record: RecordGetSummary | APIError | undefined;
 }
 export default function Result(props: Props) {
   const t = useTranslations("play.result");
@@ -153,9 +154,7 @@ export default function Result(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <p className="text-lg font-title font-semibold">
-          &lt; {t("result")} &gt;
-        </p>
+        <p className="fn-heading-box">&lt; {t("result")} &gt;</p>
         <div
           className={clsx(
             "my-2 flex justify-center items-center",
@@ -186,7 +185,7 @@ export default function Result(props: Props) {
               score100={props.bigScore100}
               disabled={props.bigCount === null}
             />
-            <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
+            <div className="mt-2 mb-1 border-b border-base" />
             <ResultRow
               visible={showing >= 4}
               name={t("totalScore")}
@@ -276,6 +275,7 @@ export default function Result(props: Props) {
           </div>
         )}
         {props.showRecord &&
+          !(props.record instanceof APIError) &&
           props.record?.histogram &&
           props.record.count >= 5 && (
             <div className="mb-2" style={{ ...appearingAnimation3(7) }}>
@@ -286,6 +286,7 @@ export default function Result(props: Props) {
               />
             </div>
           )}
+        {/* props.recordがエラーだった場合のメッセージはわざわざ要らないか */}
         <div style={{ ...appearingAnimation3(7) }}>
           <Button
             text={t("reset")}
@@ -316,8 +317,7 @@ function ResultRow(props: RowProps) {
     <p
       className={clsx(
         "flex flex-row items-baseline",
-        props.visible || "opacity-0",
-        props.disabled && "text-slate-400 dark:text-stone-500",
+        props.visible ? clsx(props.disabled && "text-dim") : "opacity-0",
         props.className
       )}
     >
@@ -325,16 +325,19 @@ function ResultRow(props: RowProps) {
         {props.name}:
       </span>
       <span
-        className="text-3xl text-right bold-by-stroke"
+        className="text-3xl text-right bold-by-stroke fg-bright"
         style={props.scoreStyle}
       >
         {Math.floor(props.score100 / 100)}
       </span>
-      <span className="text-xl bold-by-stroke" style={props.scoreStyle}>
+      <span
+        className="text-xl bold-by-stroke fg-bright"
+        style={props.scoreStyle}
+      >
         .
       </span>
       <span
-        className="text-xl text-left bold-by-stroke w-7 "
+        className="text-xl text-left bold-by-stroke fg-bright w-7 "
         style={props.scoreStyle}
       >
         {(props.score100 % 100).toString().padStart(2, "0")}

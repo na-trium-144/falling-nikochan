@@ -3,30 +3,67 @@ on:
   push:
     branches:
       - staging
+  pull_request:
+    types: [opened, synchronize, labeled]
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID }}
 jobs:
+  sync-staging:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' &&
+      contains(github.event.pull_request.labels.*.name, 'staging')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0 # force pushするために履歴が必要
+
+      - name: Force push to staging branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # PRのHEADをstagingブランチとして強制push
+          git push origin HEAD:staging --force
+
   vercel-build:
     runs-on: ubuntu-latest
+    needs: [sync-staging]
     permissions:
       contents: read
+    # 実行条件:
+    # 1. 'push' イベントである (直接stagingにpushされた場合)
+    # 2. または、sync-staging ジョブが 'success' だった場合 (PR同期が完了した場合)
+    if: |
+      always() && 
+      (github.event_name == 'push' || needs.sync-staging.result == 'success')
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: staging # 更新されたstagingブランチを取得
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'pnpm'
+          cache: "pnpm"
       - run: pnpm config set node-linker hoisted --local
       - name: Pull Vercel Environment Information
         run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
         env:
           MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
-          # ASSET_PREFIX: ${{ vars.PRODUCTION_ASSET_PREFIX }}
-          NO_PREFETCH: 1
-          # BACKEND_ALT_PREFIX: ${{ secrets.BACKEND_ALT_PREFIX }}
+          ASSET_PREFIX: ${{ vars.STAGING_ASSET_PREFIX }}
+          NO_PREFETCH: ${{ vars.STAGING_NO_PREFETCH }}
           VERSION_SUFFIX: +stg
           TITLE_SUFFIX: Staging
         run: pnpm dlx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
@@ -48,7 +85,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'pnpm'
+          cache: "pnpm"
       - run: pnpm config set node-linker hoisted --local
       - run: pnpm install --frozen-lockfile
       - run: pnpm run t

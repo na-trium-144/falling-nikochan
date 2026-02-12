@@ -9,21 +9,21 @@ import {
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import { isSample } from "@falling-nikochan/chart";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
 import { useTranslations } from "next-intl";
 import { useShareLink } from "@/common/shareLinkAndImage.js";
 import { SharedResultBox } from "./sharedResult.js";
-import { pagerButtonClass } from "@/common/pager.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import { ExternalLink } from "@/common/extLink.jsx";
+import { ButtonHighlight } from "@/common/button.jsx";
+import { APIError } from "@/common/apiError.js";
 
 interface Props {
   cid: string | undefined;
   brief: ChartBrief | null;
-  record: RecordGetSummary[] | null;
+  record: RecordGetSummary[] | APIError | null;
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;
@@ -84,8 +84,8 @@ export function ShareBox(props: Props) {
           )}
           style={{ color: colorThief.currentColor }}
         >
-          <span className={colorThief.boxBorderStyle1} />
-          <span className={colorThief.boxBorderStyle2} />
+          <span className={"fn-glass-1"} />
+          <span className={"fn-glass-2"} />
           <FlexYouTube
             fixedSide="width"
             className="w-full"
@@ -125,13 +125,13 @@ export function ShareBox(props: Props) {
               >
                 <span
                   className={clsx(
-                    colorThief.boxBorderStyle1,
+                    "fn-glass-1",
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
                 <span
                   className={clsx(
-                    colorThief.boxBorderStyle2,
+                    "fn-glass-2",
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
@@ -148,7 +148,7 @@ export function ShareBox(props: Props) {
                   className={clsx(
                     "font-title text-xs main-wide:text-sm",
                     "overflow-hidden whitespace-nowrap text-ellipsis",
-                    "text-default dark:text-default-dark"
+                    "fg-base"
                   )}
                 >
                   {ytMeta?.channelTitle}
@@ -157,26 +157,34 @@ export function ShareBox(props: Props) {
             </div>
             <div className="flex-1" />
             <div>
-              <div
-                className={clsx(
-                  "mb-2",
-                  props.forceShowCId || "hidden main-wide:block"
-                )}
-              >
+              <div className={clsx("mb-2", props.forceShowCId || "no-mobile")}>
                 {props.backButton && (
                   <button
-                    className={clsx(pagerButtonClass, "mr-4")}
+                    className={clsx("fn-icon-button", "mr-4")}
                     onClick={props.backButton}
                   >
+                    <ButtonHighlight />
                     <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
                   </button>
                 )}
-                <span>{cid && `ID: ${cid}`}</span>
+                {cid && (
+                  <>
+                    <span>ID:</span>
+                    <span className="ml-2 text-lg">{cid}</span>
+                  </>
+                )}
               </div>
-              <p className="font-title text-2xl font-semibold">
+              <p
+                className={clsx(
+                  "font-title text-2xl font-semibold",
+                  "fg-bright"
+                )}
+              >
                 {brief?.title}
               </p>
-              <p className="font-title text-lg font-medium">
+              <p
+                className={clsx("font-title text-lg font-medium", "fg-bright")}
+              >
                 {brief?.composer}
               </p>
               <p className="mt-1">
@@ -184,11 +192,13 @@ export function ShareBox(props: Props) {
                   <span className="text-sm">
                     {brief && `${t("chartCreator")}:`}
                   </span>
-                  <span className="ml-2 font-title text-lg">
+                  <span
+                    className={clsx("ml-2 font-title text-lg", "fg-bright")}
+                  >
                     {brief?.chartCreator}
                   </span>
                 </span>
-                <span className="inline-block ml-3 text-slate-500 dark:text-stone-400 ">
+                <span className="inline-block ml-3">
                   <span className="inline-block">
                     {updatedAt && `(${updatedAt})`}
                   </span>
@@ -228,18 +238,14 @@ export function ShareBox(props: Props) {
       {sharedResult && <SharedResultBox result={sharedResult} />}
       {brief && (
         <p className="mt-2">
-          <span className="hidden main-wide:inline-block mr-2">
-            {t("shareLink")}:
-          </span>
+          <span className="no-mobile mr-2">{t("shareLink")}:</span>
           <a
-            className={clsx("inline-block py-2", linkStyle1)}
+            className={clsx("inline-block py-2", "fn-link-1")}
             href={shareLink.path}
             onClick={(e) => e.preventDefault()}
           >
-            <span className="main-wide:hidden">{t("shareLink")}</span>
-            <span className="hidden main-wide:inline-block">
-              {shareLink.url}
-            </span>
+            <span className="no-pc">{t("shareLink")}</span>
+            <span className="no-mobile">{shareLink.url}</span>
           </a>
           <span className="inline-block ml-2">{shareLink.buttons}</span>
         </p>
