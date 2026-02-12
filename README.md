@@ -1,7 +1,6 @@
 # Falling Nikochan
 
 [![Production Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Prod&color=%23b8f6fe)](https://nikochan.utcode.net)
-[![Alt Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-alt.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Alt&color=%23b8f6fe)](https://nikochan-alt.utcode.net)
 [![Staging Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-staging.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Staging&color=%23441306)](https://nikochan-staging.utcode.net)
 [![GitHub License](https://img.shields.io/github/license/na-trium-144/falling-nikochan)](./LICENSE)
 

@@ -87,10 +87,6 @@ const apiApp = async (config: {
             url: "https://nikochan.utcode.net/api",
             description: "Primary Server",
           },
-          {
-            url: "https://nikochan-v.utcode.net/api",
-            description: "Alternative Server",
-          },
         ],
       },
     })
