@@ -33,6 +33,10 @@ For more information, play, and chart creation, please visit the Falling Nikocha
         ```
         * or `pnpm run mongo-docker` does the same.
     * Falling Nikochan creates and uses a database named `nikochan` in it
+* Fetch submodules
+    ```sh
+    git submodule update --init --recursive
+    ```
 * Create a `.env` file with the following contents
     ```sh
     MONGODB_URI="mongodb://localhost:27017"

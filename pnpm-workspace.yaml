@@ -4,6 +4,7 @@ packages:
   - frontend
   - route
   - worker
+  - fn-commands
 
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated

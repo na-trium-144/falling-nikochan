@@ -29,7 +29,7 @@ import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
-import fnCommandsLib from "@fn-commands/fn-commands.lua?raw";
+import fnCommandsLib from "fn-commands?raw";
 
 interface Props {
   onLoad: (cid: string) => void;

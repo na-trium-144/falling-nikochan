@@ -1,5 +1,5 @@
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
-import fnCommandsLib from "@fn-commands/fn-commands.lua?raw";
+import fnCommandsLib from "fn-commands?raw";
 
 const worker = self as unknown as Worker;
 
