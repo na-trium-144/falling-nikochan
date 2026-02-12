@@ -16,7 +16,7 @@ export default function DragHandle(props: Props) {
     <div
       className={clsx(
         props.className,
-        "z-10",
+        "z-edit-draghandle",
         dragging ? "cursor-grabbing" : "cursor-grab"
       )}
       style={props.style}

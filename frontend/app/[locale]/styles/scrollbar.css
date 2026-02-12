@@ -1,13 +1,13 @@
 body {
   --scrollbar-color-thumb: color-mix(
     in oklab,
-    var(--color-default) 65%,
+    var(--color-fg-base) 65%,
     transparent
   );
   &:where(.dark, .dark *) {
     --scrollbar-color-thumb: color-mix(
       in oklab,
-      var(--color-default-dark) 65%,
+      var(--color-fg-base-dark) 65%,
       transparent
     );
   }

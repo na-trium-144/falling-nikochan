@@ -10,7 +10,7 @@ export function RecordHistogram(props: Props) {
   );
 
   return (
-    <div className="inline-flex flex-row w-max max-w-full text-xs/3 text-left ">
+    <div className="inline-flex flex-row w-max max-w-full text-xs/3 text-left isolate">
       {props.histogram.map((h, i) => (
         <div key={i} className="w-5 min-w-0 shrink relative">
           {[7, 10, 12].includes(i) && (

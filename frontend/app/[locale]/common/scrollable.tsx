@@ -88,37 +88,39 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           prevFadeBottom = fadeBottom;
           prevFadeLeft = fadeLeft;
           prevFadeRight = fadeRight;
-          const toPosition = (fade: number) =>
-            `calc(var(--spacing) * ${(padding ?? 0) / 2} + min(${refCurrent.clientWidth / 3}px, ${refCurrent.clientHeight / 3}px, 4rem, ${fade * 3}px))`;
-          const fromColor = (fade: number) =>
-            `rgb(0 0 0 / ${Math.max(0, 1 - fade / rem)})`;
+
+          refCurrent.style.setProperty(
+            "--fade-max",
+            Math.min(refCurrent.clientWidth / 3, refCurrent.clientHeight / 3) +
+              "px"
+          );
           if (scrollableX) {
             for (const [direction, fade] of [
-              ["right", fadeLeft],
-              ["left", fadeRight],
+              ["left", fadeLeft],
+              ["right", fadeRight],
             ] as const) {
               refCurrent.style.setProperty(
-                `--tw-mask-${direction}-to-position`,
-                toPosition(fade)
+                `--fade-${direction}`,
+                fade * 3 + "px"
               );
               refCurrent.style.setProperty(
-                `--tw-mask-${direction}-from-color`,
-                fromColor(fade)
+                `--alpha-${direction}`,
+                String(Math.max(0, 1 - fade / rem))
               );
             }
           }
           if (scrollableY) {
             for (const [direction, fade] of [
-              ["bottom", fadeTop],
-              ["top", fadeBottom],
+              ["top", fadeTop],
+              ["bottom", fadeBottom],
             ] as const) {
               refCurrent.style.setProperty(
-                `--tw-mask-${direction}-to-position`,
-                toPosition(fade)
+                `--fade-${direction}`,
+                fade * 3 + "px"
               );
               refCurrent.style.setProperty(
-                `--tw-mask-${direction}-from-color`,
-                fromColor(fade)
+                `--alpha-${direction}`,
+                String(Math.max(0, 1 - fade / rem))
               );
             }
           }
@@ -170,24 +172,15 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
     <Component
       ref={ref}
       className={clsx(
-        props.className,
-        scrollableX && "overflow-x-auto",
-        scrollableY && "overflow-y-auto",
-        // jsがロードされるまでの間の初期値としてbottomのみ適当なサイズのフェードを有効化する
-        scrollableY && "mask-b-to-0 mask-b-from-black mask-b-to-black",
-        scrollableY && "mask-t-to-10 mask-t-from-transparent mask-t-to-black",
-        scrollableX && "mask-r-to-0 mask-r-from-black mask-r-to-black",
-        scrollableX && "mask-l-to-0 mask-l-from-black mask-l-to-black"
+        "fn-scrollable",
+        scrollableX && "fn-scrollable-x",
+        scrollableY && "fn-scrollable-y",
+        props.className
       )}
       style={
         {
           ...props.style,
-          willChange: "mask-image",
-          padding: padding ? `calc(var(--spacing) * ${padding})` : undefined,
-          "--tw-mask-bottom-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
-          "--tw-mask-top-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
-          "--tw-mask-right-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
-          "--tw-mask-left-from-position": `calc(var(--spacing) * ${(padding ?? 0) / 2})`,
+          "--padding": padding ? `calc(var(--spacing) * ${padding})` : "0px",
         } as CSSProperties
       }
     >

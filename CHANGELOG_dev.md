@@ -1,3 +1,10 @@
+## ver. 14.15 - 2026/02/13 [#917](https://github.com/na-trium-144/falling-nikochan/pull/917)
+
+* 大量のTailwindCSSのutilityの羅列をカスタムコンポーネントとしてまとめる
+* modal-bgの透明度を上げた
+* タイトルや見出しのコントラストを上げた (slate-800/stone-300 → black/stone-100)
+* ハイライトと薄い文字のスタイル指定をベースの色にかかわらず統一するクラスを追加 (text-dim/text-highlight)
+
 ## ver. 14.14 - 2026/02/13
 
 * service workerがアイコンをfetchしていないのを修正

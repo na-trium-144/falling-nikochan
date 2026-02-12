@@ -2,7 +2,6 @@
 
 import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
-import { linkStyle3 } from "@/common/linkStyle";
 import { SmallDomainShare } from "@/common/small";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
@@ -44,7 +43,7 @@ export function AboutContent3({ locale }: { locale: string }) {
               linkPolicies: (c) => (
                 <Link
                   href={`/${locale}/main/policies`}
-                  className={clsx(linkStyle3)}
+                  className={clsx("fn-link-3")}
                   prefetch={!process.env.NO_PREFETCH}
                 >
                   {c}
@@ -56,7 +55,7 @@ export function AboutContent3({ locale }: { locale: string }) {
         {screenWidth >= 25 * rem && (
           <Box
             classNameOuter={clsx(
-              "rounded-none! relative",
+              "rounded-none relative",
               "basis-1/3 shrink max-w-32 h-48",
               "main-wide:basis-auto main-wide:shrink-0 main-wide:max-w-56 main-wide:w-56 main-wide:h-24"
             )}
@@ -91,7 +90,7 @@ export function AboutContent3({ locale }: { locale: string }) {
                   `/assets/nikochan0.svg` +
                   process.env.ASSET_QUERY_NIKOCHAN
                 }
-                className="w-full h-full opacity-70"
+                className="w-full h-full opacity-90"
               />
             </div>
             <div
@@ -109,7 +108,7 @@ export function AboutContent3({ locale }: { locale: string }) {
                   `/assets/nikochan0.svg` +
                   process.env.ASSET_QUERY_NIKOCHAN
                 }
-                className="w-full h-full opacity-70"
+                className="w-full h-full opacity-90"
               />
             </div>
           </Box>

@@ -150,14 +150,14 @@ export function FlexYouTube(props: Props) {
       ref={ref}
     >
       <img
-        className="absolute inset-0 opacity-50 w-full h-full object-cover object-center -z-20"
+        className="absolute inset-0 opacity-50 w-full h-full object-cover object-center -z-2"
         src={`https://i.ytimg.com/vi/${id}/default.jpg`}
       />
       <div
         className={clsx(
-          "absolute inset-0 bg-transparent backdrop-blur-xs -z-10",
+          "absolute inset-0 bg-transparent backdrop-blur-xs -z-1",
           "flex flex-row items-center justify-center",
-          "text-default dark:text-default-dark",
+          "fg-base",
           !id && "hidden"
         )}
       >

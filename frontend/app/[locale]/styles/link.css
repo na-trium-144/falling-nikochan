@@ -1,0 +1,26 @@
+@layer components {
+  .fn-link-1 {
+    @apply cursor-pointer hover:text-highlight;
+    @apply hover:dark:text-stone-400 active:dark:text-stone-500;
+  }
+
+  .fn-link-2 {
+    @apply cursor-pointer hover:underline;
+    @apply hover:text-blue-700;
+    @apply hover:dark:text-blue-500;
+
+    &:hover:not(:active) {
+      @apply text-highlight;
+    }
+  }
+
+  .fn-link-3 {
+    @apply cursor-pointer hover:underline;
+    @apply text-blue-700;
+    @apply dark:text-blue-500;
+
+    &:hover:not(:active) {
+      @apply text-highlight;
+    }
+  }
+}

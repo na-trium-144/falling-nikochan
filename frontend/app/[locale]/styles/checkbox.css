@@ -1,0 +1,34 @@
+@layer components {
+  .fn-checkbox {
+    &:hover:not(:has(input:disabled)) {
+      /*@apply text-highlight;*/
+      &,
+      *:not(svg):not(svg *) {
+        --highlighted-text-color: color-mix(
+          in oklab,
+          var(--dim-text-color, var(--base-text-color)) var(--alpha-highlight),
+          var(--color-white)
+        );
+        color: var(--highlighted-text-color);
+      }
+    }
+
+    &:has(input:disabled) {
+      label {
+        @apply line-through;
+      }
+    }
+
+    label {
+      /*複数行のlabelを許可*/
+      @apply text-wrap;
+    }
+    /*labelが複数行になる場合にチェックボックスの位置がバグるのをでっちあげ修正
+    (元々の指定は top: calc(0% - (100% - 1em) - 8%))*/
+    svg,
+    label::before,
+    label::after {
+      top: -0.08em !important;
+    }
+  }
+}

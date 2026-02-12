@@ -26,26 +26,10 @@ export default function Range(rangeProps: Props) {
       onChange={(values) => rangeProps.onChange(values[0])}
       disabled={rangeProps.disabled || rangeProps.min >= rangeProps.max}
       renderTrack={({ props, children }) => (
-        <div
-          {...props}
-          className={clsx(
-            "relative inline-block h-5 w-40 my-1 isolation",
-            rangeProps.className
-          )}
-        >
-          <div
-            className={clsx(
-              "absolute inset-y-1.5 inset-x-0 rounded-full -z-10",
-              "bg-slate-400/50 dark:bg-stone-500/50"
-            )}
-          >
+        <div {...props} className={clsx("fn-range", rangeProps.className)}>
+          <div className="fn-range-bg">
             <div
-              className={clsx(
-                "absolute inset-y-0 left-0 rounded-full",
-                rangeProps.disabled
-                  ? "bg-transparent"
-                  : "bg-blue-400 dark:bg-amber-800"
-              )}
+              className={clsx("fn-range-fill", rangeProps.disabled && "hidden")}
               style={{
                 width:
                   ((rangeProps.value - rangeProps.min) /
@@ -63,14 +47,10 @@ export default function Range(rangeProps: Props) {
           {...props}
           key={props.key}
           className={clsx(
-            "rounded-full w-5 h-5 shadow-sm",
-            rangeProps.disabled
-              ? "bg-slate-400 dark:bg-stone-500"
-              : active
-                ? "bg-blue-400 dark:bg-amber-800"
-                : hovered
-                  ? "bg-blue-200 dark:bg-amber-600"
-                  : "bg-blue-300 dark:bg-amber-700"
+            "fn-range-thumb",
+            hovered && "fn-r-hover",
+            active && "fn-r-active",
+            rangeProps.disabled && "fn-r-disabled"
           )}
           style={props.style}
           onPointerEnter={() => setHovered(true)}

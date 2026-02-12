@@ -1,0 +1,137 @@
+@layer components {
+  .fn-mobile-header {
+    @apply p-3 w-full relative text-center;
+
+    > .fn-back {
+      @apply absolute left-3 inset-y-0;
+    }
+  }
+  .fn-mh-blur {
+    @applt backdrop-blur-2xs;
+    @apply bg-gradient-to-t to-70% from-sky-200/0 to-sky-200;
+    @apply dark:from-orange-975/0 dark:to-orange-975;
+  }
+
+  .fn-mobile-footer {
+    @apply pb-2 px-8 z-mobile-footer w-full;
+    @apply flex flex-row items-center justify-stretch relative;
+
+    /* 100vw - (px-8) - (各ボタンの最小幅約5rem*4要素) */
+    gap: max(0px, calc((100vw - 4rem - 5rem * 4) / 7));
+
+    .fn-mf-item {
+      @apply w-full text-lg gap-0.5 flex flex-col items-center;
+      @apply pb-2 pt-2;
+      @apply rounded-2xl;
+    }
+
+    &.fn-mf-blur {
+      @apply backdrop-blur-2xs;
+      @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
+      @apply dark:from-orange-950 dark:to-orange-950/0;
+    }
+  }
+
+  .fn-pwa-install.fn-box {
+    @apply fixed z-pwa-install bottom-(--container-mobile-footer) translate-y-1 inset-x-0;
+    @apply w-max max-w-full mx-auto shadow-modal;
+    @apply rounded-sq-xl;
+  }
+
+  .fn-title {
+    @apply absolute isolate leading-none text-center mx-auto w-96;
+    @apply fg-bright;
+
+    > h1 {
+      @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
+      -webkit-text-stroke: 0.02em currentColor;
+    }
+    > img {
+      /* 他のnikochanはopacity-90だが、ここだけちがう */
+      @apply absolute;
+      width: 1.5rem;
+      height: 1.5rem;
+      right: 1rem;
+      bottom: 1.55rem;
+
+      &.phase-0 {
+        @apply -translate-y-28 translate-x-14 opacity-0;
+      }
+      &.phase-1 {
+        @apply transition-transform ease-linear duration-300;
+      }
+      &.phase-2 {
+      }
+    }
+    > .fn-title-diag {
+      @apply absolute border-b origin-bottom-right border-gray-300 -z-1;
+      width: 12rem;
+      right: calc(1rem + 1.5rem / 2 + 1rem);
+      bottom: calc(1.55rem + 1.5rem / 2 - 2rem);
+      transform: rotate(atan2(2rem, -1rem));
+    }
+  }
+  .fn-title-main {
+    @apply basis-24 relative;
+    width: calc(100% + 40rem);
+    marginleft: -20rem;
+    marginright: -20rem;
+
+    > .fn-title {
+      @apply absolute inset-0;
+    }
+  }
+
+  .fn-main-nav-item {
+    @apply text-center rounded-2xl py-3 pl-2 pr-2;
+    @apply fg-bright;
+  }
+
+  .fn-sect {
+    @apply mb-3;
+    @apply w-full;
+    @apply text-justify;
+
+    > h3 {
+      @apply mb-2;
+    }
+    &:not(.text-center):has(h3) > :not(h3, h4, ul, :has(.fn-chart-list)) {
+      @apply ml-2;
+    }
+  }
+  .fn-heading-sect {
+    @apply text-xl font-semibold font-title;
+    @apply fg-bright;
+  }
+  .fn-heading-box {
+    @apply text-lg font-medium font-title;
+    @apply fg-bright;
+    @apply text-center mb-2;
+  }
+
+  .fn-mdx-policies {
+    > h3 {
+      @apply mb-2;
+      @apply text-xl font-semibold font-title;
+      @apply fg-bright;
+    }
+    > ul {
+      @apply mb-3;
+    }
+  }
+  .fn-mdx-changelog {
+    > h4 {
+      @apply text-lg font-medium font-title;
+      @apply fg-bright;
+    }
+    > ul {
+      @apply mb-2;
+    }
+  }
+
+  .fn-code {
+    @apply font-mono text-sm px-1 py-0.5 rounded border;
+    @apply bg-white border-slate-300;
+    @apply dark:bg-stone-700 dark:border-stone-500;
+  }
+}

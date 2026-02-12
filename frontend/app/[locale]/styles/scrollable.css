@@ -1,0 +1,41 @@
+@layer components {
+  .fn-scrollable {
+    will-change: mask-image;
+    padding: var(--padding);
+    /* jsがロードされるまでの間の初期値としてbottomのみ適当なサイズのフェードを有効化する */
+    --fade-max: 4rem;
+    --fade-bottom: 2.5rem;
+    --alpha-bottom: 0;
+
+    &.fn-scrollable-x {
+      @apply overflow-x-auto;
+      @apply mask-r-to-black;
+      @apply mask-l-to-black;
+      --tw-mask-right-from-position: calc(var(--padding) / 2);
+      --tw-mask-left-from-position: calc(var(--padding) / 2);
+      --tw-mask-right-to-position: calc(
+        var(--padding) / 2 + min(var(--fade-max), 4rem, var(--fade-left, 0px))
+      );
+      --tw-mask-left-to-position: calc(
+        var(--padding) / 2 + min(var(--fade-max), 4rem, var(--fade-right, 0px))
+      );
+      --tw-mask-right-from-color: rgb(0 0 0 / var(--alpha-left, 1));
+      --tw-mask-left-from-color: rgb(0 0 0 / var(--alpha-right, 1));
+    }
+    &.fn-scrollable-y {
+      @apply overflow-y-auto;
+      @apply mask-b-to-black;
+      @apply mask-t-to-black;
+      --tw-mask-bottom-from-position: calc(var(--padding) / 2);
+      --tw-mask-top-from-position: calc(var(--padding) / 2);
+      --tw-mask-bottom-to-position: calc(
+        var(--padding) / 2 + min(var(--fade-max), 4rem, var(--fade-top, 0px))
+      );
+      --tw-mask-top-to-position: calc(
+        var(--padding) / 2 + min(var(--fade-max), 4rem, var(--fade-bottom, 0px))
+      );
+      --tw-mask-bottom-from-color: rgb(0 0 0 / var(--alpha-top, 1));
+      --tw-mask-top-from-color: rgb(0 0 0 / var(--alpha-bottom, 1));
+    }
+  }
+}

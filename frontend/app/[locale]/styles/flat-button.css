@@ -1,0 +1,74 @@
+@layer components {
+  /*
+  .fn-glass-* に対して、通常時非表示、hover時のみ表示、active時には2のみ表示
+  という動作を追加する。
+
+  ただし .fn-selected を追加すると通常時も常時表示する。
+  */
+  .fn-flat-button {
+    @apply relative cursor-pointer;
+
+    > .fn-glass-1 {
+      @apply opacity-0;
+    }
+    > .fn-glass-2 {
+      @apply opacity-0;
+    }
+    @variant hover {
+      > .fn-glass-1 {
+        @apply opacity-100;
+      }
+      > .fn-glass-2 {
+        @apply opacity-100;
+      }
+    }
+    @variant active {
+      @apply inset-shadow-button;
+      > .fn-glass-1 {
+        @apply opacity-0;
+      }
+      > .fn-glass-2 {
+        @apply mask-none;
+      }
+    }
+
+    &.fn-selected {
+      > .fn-glass-1 {
+        @apply opacity-100;
+      }
+      > .fn-glass-2 {
+        @apply opacity-100;
+      }
+    }
+
+    &.fn-sky {
+      @variant hover {
+        @apply bg-sky-200 dark:bg-orange-950;
+      }
+      @variant active {
+        @apply bg-sky-200 dark:bg-orange-950;
+      }
+
+      &.fn-dropdown-item {
+        &.fn-selected {
+          @apply bg-sky-200/75 dark:bg-orange-950/75;
+        }
+        @variant hover {
+          @apply bg-sky-200/75 dark:bg-orange-950/75;
+        }
+        @variant active {
+          @apply bg-sky-200/75 dark:bg-orange-950/75;
+        }
+      }
+    }
+
+    &.fn-inverted {
+      @variant hover {
+        @apply bg-orange-200 dark:bg-sky-950;
+      }
+      @variant active {
+        @apply bg-orange-200 dark:bg-sky-950;
+      }
+    }
+  }
+}

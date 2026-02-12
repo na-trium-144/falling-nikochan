@@ -271,7 +271,7 @@ export default function FallingWindow(props: Props) {
                 </>
               ) : (
                 <div
-                  className="absolute inset-0 z-10 "
+                  className="absolute inset-0 z-edit-drag-overlay"
                   onPointerDown={(e) => {
                     // touch環境でマウスを使ってクリックしようとしたときモードをリセットする
                     if (e.pointerType === "mouse") {
@@ -345,7 +345,7 @@ function NikochanAndTrace(props: NProps) {
           className={clsx(
             "absolute border-b origin-bottom-left",
             displayNote.history[di].id === currentNoteIndex
-              ? "border-red-300 z-10"
+              ? "border-red-300 z-edit-trace-current"
               : "border-gray-300"
           )}
           style={{

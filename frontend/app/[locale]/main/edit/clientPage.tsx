@@ -69,22 +69,25 @@ export default function EditTab({ locale }: { locale: string }) {
       noBackButtonPC
       locale={locale}
     >
-      <p className="text-justify">{t("welcome")}</p>
-      <p className="mb-3 text-left">
-        {t("welcome2")}
-        <ExternalLink
-          className="mx-1"
-          href="https://www.youtube.com/watch?v=hi9TY_78ETY"
-        >
-          <Youtube className="inline-block mr-1 align-middle" theme="filled" />
-          <span className="text-sm">{t("howToVideo")}</span>
-        </ExternalLink>
-      </p>
-      <div className="mb-3">
-        <h3 className="mb-2">
-          <span className="text-xl font-semibold font-title ">
-            {t("inputId")}:
-          </span>
+      <section className="fn-sect">
+        <p>{t("welcome")}</p>
+        <p>
+          {t("welcome2")}
+          <ExternalLink
+            className="mx-1"
+            href="https://www.youtube.com/watch?v=hi9TY_78ETY"
+          >
+            <Youtube
+              className="inline-block mr-1 align-middle"
+              theme="filled"
+            />
+            <span className="text-sm">{t("howToVideo")}</span>
+          </ExternalLink>
+        </p>
+      </section>
+      <section className="fn-sect">
+        <h3>
+          <span className="fn-heading-sect">{t("inputId")}:</span>
           <Input
             className="ml-4 w-20"
             actualValue={inputCId}
@@ -93,38 +96,36 @@ export default function EditTab({ locale }: { locale: string }) {
             isValid={(t) => v.safeParse(CidSchema(), t).success}
             left
           />
-          <ExternalLink
-            className={clsx("ml-1", inputCId !== "" || "hidden!")}
-            // use encodeURIComponent to silence CodeQL false positive alert
-            href={`/${locale}/edit?cid=${encodeURIComponent(inputCId)}`}
-          >
-            {t("newTab")}
-          </ExternalLink>
+          {inputCId !== "" && (
+            <ExternalLink
+              className={clsx("ml-1")}
+              // use encodeURIComponent to silence CodeQL false positive alert
+              href={`/${locale}/edit?cid=${encodeURIComponent(inputCId)}`}
+            >
+              {t("newTab")}
+            </ExternalLink>
+          )}
           <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
             <SlimeSVG />
             Loading...
           </span>
           <span className="ml-1 inline-block">{cidErrorMsg?.format(te)}</span>
         </h3>
-        <p className="pl-2 text-justify">{t("inputIdDesc")}</p>
-      </div>
-      <div className="mb-3">
-        <h3 className="mb-2">
-          <span className="text-xl font-semibold font-title ">{t("new")}:</span>
+        <p>{t("inputIdDesc")}</p>
+      </section>
+      <section className="fn-sect">
+        <h3>
+          <span className="fn-heading-sect">{t("new")}:</span>
           <ExternalLink className="ml-3" href={`/${locale}/edit?cid=new`}>
             {t("newButton")}
           </ExternalLink>
         </h3>
-        <p className="pl-2 text-justify">
-          {t("newDesc", { rateLimitMin: rateLimit.newChartFile / 60 })}
-        </p>
-      </div>
-      <div className="mb-3">
-        <h3 className="mb-2 text-xl font-semibold font-title">
-          {t("recentEdit")}
-        </h3>
+        <p>{t("newDesc", { rateLimitMin: rateLimit.newChartFile / 60 })}</p>
+      </section>
+      <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("recentEdit")}</h3>
         {isSafari && (
-          <p className="pl-2 mb-1 text-justify">
+          <p className="mb-1">
             <Caution className="inline-block mr-1 translate-y-0.5 " />
             {t("safariLSWarning")}
           </p>
@@ -137,7 +138,7 @@ export default function EditTab({ locale }: { locale: string }) {
           showLoading
           moreHref={null}
         />
-      </div>
+      </section>
     </IndexMain>
   );
 }

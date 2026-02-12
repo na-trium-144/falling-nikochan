@@ -9,7 +9,6 @@ import { levelTypes, stepZero } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
 import { Box } from "@/common/box";
 import { JudgeIcon } from "@/play/statusBox";
-import { levelBgColors, levelColors } from "@/common/levelColors";
 import {
   IrasutoyaLikeBgInner,
   IrasutoyaLikeGrassInner,
@@ -45,7 +44,7 @@ export default function OGTemplate() {
       <div
         className={clsx(
           "absolute top-0 right-0 w-124 pl-4 pb-4 pt-0 pr-0 rounded-bl-xl",
-          levelBgColors[1],
+          "bg-amber-500",
           showDummyData || "invisible"
         )}
       >
@@ -95,10 +94,11 @@ export default function OGTemplate() {
           )}
         >
           <span className="font-title text-4xl mr-4">LevelName</span>
-          <span className={clsx("text-4xl", levelColors[0])}>
-            {levelTypes[0]}-
+          {/* todo: fn-level-typeクラスの実装時にサイズが変わったが、 ogResult.tsx のほうに反映していない */}
+          <span className={clsx("text-4xl", "fn-level-type", levelTypes[0])}>
+            <span>{levelTypes[0]}-</span>
+            <span>44</span>
           </span>
-          <span className={clsx("text-5xl", levelColors[0])}>44</span>
         </div>
         <Box
           classNameOuter={clsx("flex-1 ml-20 mt-6 h-max")}
@@ -132,7 +132,7 @@ export default function OGTemplate() {
                   <span className="text-left w-10 text-3xl">44</span>
                 </p>
               ))}
-              <div className="border-b mt-2 w-full border-slate-800 dark:border-stone-300" />
+              <div className="border-b mt-2 w-full border-base" />
               <p
                 className={clsx(
                   "flex flex-row w-full items-baseline",

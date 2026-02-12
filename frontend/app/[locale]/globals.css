@@ -7,8 +7,10 @@
   --color-orange-975: #20100a; /* この色ってどうやって作ったの? 記憶にない */
   --color-amber-975: #20180a;
   --color-sky-975: #091823;
-  --color-default: var(--color-slate-800);
-  --color-default-dark: var(--color-stone-300);
+  --color-fg-bright: var(--color-black);
+  --color-fg-base: var(--color-slate-800);
+  --color-fg-bright-dark: var(--color-stone-100);
+  --color-fg-base-dark: var(--color-stone-300);
   --container-main-nav: 16rem;
   --container-main: 88rem;
   --container-mobile-header: 3.25rem; /* MobileHeader を編集したら変えること */
@@ -25,13 +27,38 @@
     sans-serif;
   --default-font-family: var(--font-main-ui);
 }
+:root {
+  --alpha-dim: 60%;
+  --alpha-highlight: 50%;
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* utilities */
 @import "./styles/utilities.css";
 @import "./styles/squircle.css";
+@import "./styles/z-index.css";
 
-@import "./styles/result.css";
+/* components in ./common/ */
+@import "./styles/glass.css";
+@import "./styles/box.css";
+@import "./styles/button.css";
+@import "./styles/checkbox.css";
+@import "./styles/dropdown.css";
+@import "./styles/flat-button.css";
+@import "./styles/input.css";
+@import "./styles/link.css";
+@import "./styles/level-type.css";
+@import "./styles/icon-button.css";
+@import "./styles/progressbar.css";
+@import "./styles/range.css";
+@import "./styles/scrollable.css";
 @import "./styles/irasutoya-like.css";
+
+/* other components */
+@import "./styles/main.css";
+@import "./styles/chart-list.css";
+
+/* other */
+@import "./styles/result.css";
 @import "./styles/scrollbar.css";
 @import "./styles/ace.css";
-/*@import "./styles/checkbox.scss";*/

@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 import packageJson from "@/../../package.json" with { type: "json" };
-import { Box, modalBg } from "./box";
+import { Box } from "./box";
 import Button from "./button";
 import { SlimeSVG } from "./slime";
 import saveAs from "file-saver";
@@ -134,9 +134,7 @@ export function useShareLink(
       <>
         {origin}
         {sharePath}
-        <span className="text-slate-500 dark:text-stone-400 ">
-          ?{shareParams}
-        </span>
+        <span className="text-dim">?{shareParams}</span>
       </>
     ),
     path: sharePath + "?" + shareParams,
@@ -268,15 +266,15 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
       {modalOpened && (
         <div
           className={clsx(
-            modalBg,
-            "transition-opacity duration-200 z-30!",
+            "fn-modal-bg",
+            "transition-opacity duration-200 z-share-image-bg",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
           onClick={closeModal}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
         >
-          <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+          <div className="absolute inset-12 grid-centering">
             <Box
               onClick={(e) => e.stopPropagation()}
               classNameOuter={clsx(
@@ -289,11 +287,9 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               scrollableY
               padding={6}
             >
-              <p className="text-lg font-title font-semibold mb-2">
-                &lt; {t("shareImage")} &gt;
-              </p>
+              <p className="fn-heading-box">&lt; {t("shareImage")} &gt;</p>
               <div
-                className="max-w-full relative aspect-1200/630 bg-slate-300 mb-2 isolate "
+                className="max-w-full relative aspect-1200/630 mb-2 isolate"
                 style={{
                   width:
                     "min(45rem, calc(100dvw - 9rem), max(20rem, calc((100dvh - 17.25rem) * (1200 / 630)))",
@@ -312,7 +308,12 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
                   src={process.env.BACKEND_PREFIX + ogPath}
                   className="absolute inset-0 "
                 />
-                <div className="absolute inset-0 bg-gray-500/50 backdrop-blur-xs -z-10 flex flex-row items-center justify-center ">
+                <div
+                  className={clsx(
+                    "absolute inset-0 bg-gray-500/25 -z-1",
+                    "flex flex-row items-center justify-center "
+                  )}
+                >
                   <SlimeSVG />
                   Loading...
                 </div>

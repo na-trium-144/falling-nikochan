@@ -6,7 +6,7 @@ import { TitleAsLink } from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
-  MobileFooterWithGradient,
+  MobileFooter,
   PCFooter,
   pcTabTitleKeys,
   tabURLs,
@@ -25,11 +25,6 @@ import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
 import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
 import { AboutModal } from "./common/aboutModal.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "./common/flatButton.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
 import { AboutDescription } from "./main/main.jsx";
 
@@ -56,7 +51,7 @@ export default function TopPage(props: Props) {
   const fes = useFestival();
 
   return (
-    <main className="w-full h-full overflow-x-clip overflow-y-auto ">
+    <main className="w-full h-full overflow-x-clip overflow-y-auto">
       {aboutPageIndex !== null && aboutOpen ? (
         <AboutModal
           aboutAnim={aboutAnim}
@@ -78,7 +73,7 @@ export default function TopPage(props: Props) {
         <TitleAsLink className="grow-3 shrink-0" locale={locale} />
         <div className="basis-0 flex-1 " />
         <AboutDescription
-          className="my-2"
+          className="my-2 px-6"
           locale={locale}
           onClickAbout={() => setAboutPageIndex(1)}
         />
@@ -87,9 +82,10 @@ export default function TopPage(props: Props) {
           <RedirectedWarning />
           <PWAInstallMain />
         </div>
-        <div
+        <section
           className={clsx(
-            "basis-auto grow-1 my-auto h-max mb-3 text-center px-6",
+            "fn-sect text-center",
+            "basis-auto grow-1 px-6",
             menuMoveAnimClass
           )}
         >
@@ -97,17 +93,16 @@ export default function TopPage(props: Props) {
             openModal={openModal}
             openShareInternal={openShareInternal}
           />
-        </div>
+        </section>
 
-        <div
+        <section
           className={clsx(
-            "basis-auto grow-1 my-auto h-max mb-3 text-center w-full px-6",
+            "fn-sect text-center",
+            "basis-auto grow-1 px-6",
             menuMoveAnimClass
           )}
         >
-          <h3 className="mb-2 text-xl font-semibold font-title">
-            {t("play.recent")}
-          </h3>
+          <h3 className="fn-heading-sect">{t("play.recent")}</h3>
           <ChartList
             type="recent"
             creator
@@ -119,7 +114,7 @@ export default function TopPage(props: Props) {
             badge
             fixedRows
           />
-        </div>
+        </section>
 
         <div
           className={clsx(
@@ -130,7 +125,7 @@ export default function TopPage(props: Props) {
         <nav
           className={clsx(
             "shrink-0 basis-auto grow-3",
-            "hidden main-wide:flex",
+            "no-mobile flex",
             "flex-col justify-center w-main-nav",
             "transition ease-out duration-200"
           )}
@@ -145,10 +140,7 @@ export default function TopPage(props: Props) {
             <Link
               key={i}
               href={`/${locale}${tabURLs[key]}`}
-              className={clsx(
-                "text-center rounded-2xl py-3 pl-2 pr-2",
-                skyFlatButtonStyle
-              )}
+              className={clsx("fn-main-nav-item fn-flat-button fn-sky")}
               prefetch={!process.env.NO_PREFETCH}
               onClick={(e) => {
                 requestReview();
@@ -159,8 +151,8 @@ export default function TopPage(props: Props) {
                 e.preventDefault();
               }}
             >
-              <span className={skyFlatButtonBorderStyle1} />
-              <span className={skyFlatButtonBorderStyle2} />
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
               <ButtonHighlight />
               {t(key + ".title")}
             </Link>
@@ -174,9 +166,14 @@ export default function TopPage(props: Props) {
         />
 
         <PCFooter locale={locale} />
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
       </div>
-      <MobileFooterWithGradient locale={locale} tabKey="top" />
+      <MobileFooter
+        className="fixed bottom-0"
+        blurBg
+        locale={locale}
+        tabKey="top"
+      />
     </main>
   );
 }
@@ -211,19 +208,17 @@ function InputCId(props: {
   };
   return (
     <>
-      <h3 className="mb-2 ">
-        <span className="text-xl font-semibold font-title">
-          {t("inputId")}:
-        </span>
+      <h3>
+        <span className="fn-heading-sect">{t("inputId")}:</span>
         <Input
-          className="ml-4 w-20 hidden main-wide:inline-block "
+          className="ml-4 w-20 no-mobile"
           actualValue=""
           updateValue={(cid: string) => gotoCId(cid, false)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}
           left
         />
         <Input
-          className="ml-4 w-20 main-wide:hidden"
+          className="ml-4 w-20 no-pc"
           actualValue=""
           updateValue={(cid: string) => gotoCId(cid, true)}
           isValid={(t) => v.safeParse(CidSchema(), t).success}

@@ -1,12 +1,13 @@
-import { Box, modalBg } from "./box";
+import { Box } from "./box";
 import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
-import { Pager, pagerButtonClass } from "./pager";
+import { Pager } from "./pager";
 import {
   AboutContent,
   maxAboutPageIndex,
 } from "@/main/about/[aboutIndex]/aboutContents";
+import { ButtonHighlight } from "./button";
 
 interface AProps {
   aboutAnim: boolean;
@@ -22,13 +23,13 @@ export function AboutModal(props: AProps) {
   return (
     <div
       className={clsx(
-        modalBg,
+        "fn-modal-bg",
         "transition-opacity duration-200",
         props.aboutAnim ? "ease-in opacity-100" : "ease-out opacity-0"
       )}
       onClick={close}
     >
-      <div className="absolute inset-12 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+      <div className="absolute inset-12 grid-centering">
         <Box
           classNameOuter={clsx(
             "w-180 h-max max-w-full max-h-full",
@@ -40,14 +41,12 @@ export function AboutModal(props: AProps) {
           padding={6}
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="mb-3 relative px-10 text-xl font-semibold font-title">
-            <button
-              className={clsx(pagerButtonClass, "absolute left-0 inset-y-0")}
-              onClick={close}
-            >
-              <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
+          <h3 className="mb-3 flex items-center">
+            <button className={clsx("fn-icon-button", "")} onClick={close}>
+              <ButtonHighlight />
+              <ArrowLeft className="inline-block" />
             </button>
-            {tm("title")}
+            <span className="ml-2 fn-heading-sect">{tm("title")}</span>
           </h3>
           <Pager
             index={props.aboutPageIndex}

@@ -56,7 +56,7 @@ export function AboutContent5() {
           {t.rich("content2", {
             total: baseScoreRate + chainScoreRate + bigScoreRate,
             totalSmall: baseScoreRate + chainScoreRate,
-            b: (c) => <span className="font-bold">{c}</span>,
+            b: (c) => <span className="font-bold fg-bright">{c}</span>,
           })}
         </p>
         <ul className="list-inside list-disc">
@@ -82,19 +82,19 @@ export function AboutContent5() {
                   <span className="ml-5 mr-1">{c}</span>
                 </span>
               ),
-              b: (c) => <span className="font-bold">{c}</span>,
+              b: (c) => <span className="font-bold fg-bright">{c}</span>,
             })}
           </li>
           <li>
             {t.rich("content4", {
               chainScoreRate,
-              b: (c) => <span className="font-bold">{c}</span>,
+              b: (c) => <span className="font-bold fg-bright">{c}</span>,
             })}
           </li>
           <li>
             {t.rich("content5", {
               bigScoreRate,
-              b: (c) => <span className="font-bold">{c}</span>,
+              b: (c) => <span className="font-bold fg-bright">{c}</span>,
             })}
           </li>
         </ul>

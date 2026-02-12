@@ -4,7 +4,6 @@ import clsx from "clsx/lite";
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Box } from "./box";
 import Link from "next/link";
-import { linkStyle1 } from "./linkStyle";
 import { useTranslations } from "next-intl";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { updateLastVisited } from "./version";
@@ -43,7 +42,7 @@ export function ChangeLogPopup(props: PopupProps) {
     popupOpened && (
       <>
         <div
-          className={clsx("fixed z-20 inset-0")}
+          className={clsx("fixed z-changelog-bg inset-0")}
           onClick={(e) => {
             props.onClose();
             e.stopPropagation();
@@ -51,8 +50,8 @@ export function ChangeLogPopup(props: PopupProps) {
         />
         <div
           className={clsx(
-            "absolute bottom-full mb-1 left-1/2 w-0 z-30",
-            "grid place-content-center place-items-center grid-rows-1 grid-cols-1"
+            "absolute bottom-full mb-1 left-1/2 w-0 z-changelog",
+            "grid-centering"
           )}
         >
           <Box
@@ -71,26 +70,24 @@ export function ChangeLogPopup(props: PopupProps) {
                 "mask-b-from-85% mask-b-to-97%"
               )}
             >
-              <p className="">
-                <span className="inline-block">Falling Nikochan</span>
-                <span className="inline-block">
-                  <span className="ml-2">ver.</span>
-                  <span className="ml-1">{process.env.buildVersion}</span>
-                  {/*process.env.buildCommit && (
+              <p className="text-center">
+                <span>Falling Nikochan</span>
+                <span className="ml-2">ver.</span>
+                <span className="ml-1">{process.env.buildVersion}</span>
+                {/*process.env.buildCommit && (
                   <span className="ml-1 text-sm">
                     ({process.env.buildCommit})
                   </span>
                 )*/}
-                </span>
               </p>
-              <h3 className="text-xl font-semibold font-title">
+              <h3 className="fn-heading-sect text-center mb-2">
                 {t("changelog")}
               </h3>
-              <div className="text-left ">{changeLog}</div>
+              <div className="fn-mdx-changelog">{changeLog}</div>
             </div>
             <div className={clsx("absolute bottom-4 inset-x-0")}>
               <Link
-                className={clsx("block w-max mx-auto mt-2", linkStyle1)}
+                className={clsx("block w-max mx-auto mt-2", "fn-link-1")}
                 href={`/${props.locale}/main/version`}
                 prefetch={!process.env.NO_PREFETCH}
               >

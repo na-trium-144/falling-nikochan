@@ -14,7 +14,7 @@ import TimeBar from "./timeBar.js";
 import Input from "@/common/input.js";
 import TimingTab from "./timingTab.js";
 import NoteTab from "./noteTab.js";
-import { Box, modalBg } from "@/common/box.js";
+import { Box } from "@/common/box.js";
 import { MetaTab } from "./metaTab.js";
 import { addRecent } from "@/common/recent.js";
 import { convertToPlay, createBrief } from "@falling-nikochan/chart";
@@ -27,7 +27,6 @@ import { initSession, SessionData } from "@/play/session.js";
 import { useDisplayMode } from "@/scale.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
-import { linkStyle1 } from "@/common/linkStyle.js";
 import { GuideMain } from "./guideMain.js";
 import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption.js";
@@ -41,11 +40,6 @@ import {
 import { useSE } from "@/common/se.js";
 import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 
@@ -519,10 +513,9 @@ export default function Edit(props: {
     >
       <div
         className={clsx(
-          "fixed z-10 top-0 inset-x-0 backdrop-blur-2xs",
+          "fixed z-edit-mobile-header top-0 inset-x-0",
           "flex edit-wide:hidden flex-row items-center",
-          "bg-gradient-to-t to-70% from-sky-200/0 to-sky-200",
-          "dark:from-orange-975/0 dark:to-orange-975"
+          "fn-mh-blur"
         )}
       >
         <MobileHeader className="flex-1 " noBackButton={!standalone}>
@@ -532,14 +525,17 @@ export default function Edit(props: {
       </div>
       <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
-        <div className={clsx(modalBg)} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={clsx("fn-modal-bg")}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="absolute inset-6 grid place-content-center">
             <Box
               classNameOuter={clsx(
                 "w-max h-max max-w-full max-h-full",
                 "shadow-modal"
               )}
-              classNameInner="flex flex-col items-center *:[&:last-child]:mb-0!"
+              classNameInner="flex flex-col items-center"
               scrollableY
               padding={6}
             >
@@ -564,7 +560,7 @@ export default function Edit(props: {
 
       {dragOver && (
         <div
-          className={clsx(modalBg, "z-30!")}
+          className="fn-modal-bg z-edit-dragover-bg"
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => {
             e.preventDefault();
@@ -608,7 +604,7 @@ export default function Edit(props: {
             <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
               {standalone && (
                 <button
-                  className={clsx(linkStyle1)}
+                  className={clsx("fn-link-1")}
                   onClick={() => {
                     historyBackWithReview();
                   }}
@@ -622,7 +618,7 @@ export default function Edit(props: {
                 <span className="grow-1 whitespace-nowrap ">
                   ID: {chart?.cid}
                 </span>
-                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-slate-500 dark:text-stone-400 ">
+                <span className="min-w-0 overflow-clip shrink-1 whitespace-nowrap text-dim">
                   <span className="">ver.</span>
                   <span className="ml-1">{process.env.buildVersion}</span>
                 </span>
@@ -639,8 +635,8 @@ export default function Edit(props: {
               )}
               style={{ color: colorThief.currentColor }}
             >
-              <span className={clsx(colorThief.boxBorderStyle1)} />
-              <span className={clsx(colorThief.boxBorderStyle2)} />
+              <span className={clsx("fn-glass-1")} />
+              <span className={clsx("fn-glass-2")} />
               <FlexYouTube
                 fixedSide="width"
                 className={clsx(
@@ -683,7 +679,7 @@ export default function Edit(props: {
               <button
                 className={clsx(
                   "self-start flex flex-row items-center",
-                  linkStyle1
+                  "fn-link-1"
                 )}
                 onClick={() => {
                   setDragMode(
@@ -857,8 +853,8 @@ export default function Edit(props: {
                 i === tab ? (
                   <Box
                     key={i}
-                    classNameOuter="sq-unset! rounded-t-2xl! rounded-b-none px-3 pt-2 pb-1"
-                    classNameBorder="border-b-0!"
+                    classNameOuter="sq-unset rounded-t-2xl rounded-b-none px-3 pt-2 pb-1"
+                    classNameBorder="border-b-0"
                   >
                     {t(`${key}.title`)}
                   </Box>
@@ -867,19 +863,15 @@ export default function Edit(props: {
                     key={i}
                     className={clsx(
                       "rounded-t-2xl px-3 pt-2 pb-1",
-                      skyFlatButtonStyle
+                      "fn-flat-button fn-sky"
                     )}
                     onClick={() => {
                       setTab(i);
                       ref.current?.focus();
                     }}
                   >
-                    <span
-                      className={clsx(skyFlatButtonBorderStyle1, "border-b-0")}
-                    />
-                    <span
-                      className={clsx(skyFlatButtonBorderStyle2, "border-b-0")}
-                    />
+                    <span className={clsx("fn-glass-1", "border-b-0")} />
+                    <span className={clsx("fn-glass-2", "border-b-0")} />
                     <ButtonHighlight />
                     {t(`${key}.title`)}
                   </button>
@@ -935,14 +927,14 @@ export default function Edit(props: {
             <Box
               classNameOuter={clsx(
                 "mt-2",
-                "bg-slate-200/50! dark:bg-stone-600/50!",
+                "bg-gray-500/25",
                 !(
                   luaExecutor.running ||
                   luaExecutor.stdout.length > 0 ||
                   luaExecutor.err.length > 0
-                ) && "main-wide:hidden"
+                ) && "edit-wide:hidden"
               )}
-              classNameInner="h-24! max-h-24 edit-wide:h-auto"
+              classNameInner="h-24 max-h-24 edit-wide:h-auto"
               scrollableX
               scrollableY
               padding={3}

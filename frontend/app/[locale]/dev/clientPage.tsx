@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@/common/box";
-import { MobileFooterWithGradient, PCFooter } from "@/common/footer";
+import { MobileFooter, PCFooter } from "@/common/footer";
 import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
 import YAML from "yaml";
-import { linkStyle1 } from "@/common/linkStyle";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Right from "@icon-park/react/lib/icons/Right";
 import Down from "@icon-park/react/lib/icons/Down";
@@ -18,7 +17,7 @@ import {
   historyBackWithForceReview,
   useAndroidTWADetector,
 } from "@/common/pwaInstall";
-import Button from "@/common/button";
+import Button, { ButtonHighlight } from "@/common/button";
 import dynamic from "next/dynamic";
 import { Scrollable } from "@/common/scrollable";
 const AceEditor = dynamic(
@@ -60,15 +59,15 @@ export function DevPage(props: { locale: string }) {
             scrollableY
             padding={6}
           >
-            <div className="hidden mb-3 main-wide:flex flex-row items-center">
+            <div className="no-mobile mb-3 flex flex-row items-center">
               <button
-                className={clsx("block w-max", linkStyle1)}
+                className={clsx("block w-max", "fn-link-1")}
                 onClick={() => history.back()}
               >
                 <ArrowLeft className="inline-block align-middle mr-2 " />
                 {t("back")}
               </button>
-              <span className="flex-1 text-center text-xl font-semibold font-title">
+              <span className="flex-1 text-center fn-heading-sect">
                 {t("title")}
               </span>
             </div>
@@ -84,10 +83,15 @@ export function DevPage(props: { locale: string }) {
             )}
           </Box>
         </div>
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
         <PCFooter locale={props.locale} />
       </div>
-      <MobileFooterWithGradient locale={props.locale} tabKey={null} />
+      <MobileFooter
+        className="fixed bottom-0"
+        blurBg
+        locale={props.locale}
+        tabKey={null}
+      />
     </main>
   );
 }
@@ -178,16 +182,12 @@ function StorageEditor(props: EProps) {
 
   return (
     <div className="">
-      <div className="text-center text-lg font-semibold font-title">
+      <div className="fn-heading-box">
         <button
-          className={clsx(
-            "rounded-full cursor-pointer px-2 py-1",
-            "hover:bg-slate-200/50 active:bg-slate-300/50",
-            "hover:dark:bg-stone-600/50 active:dark:bg-stone-500/50",
-            linkStyle1
-          )}
+          className={clsx("fn-icon-button px-2 py-1")}
           onClick={() => setShowEditor(!showEditor)}
         >
+          <ButtonHighlight />
           {props.name} ({props.storage?.length})
           {showEditor ? (
             <Down className="inline-block align-middle " />
@@ -218,8 +218,8 @@ function StorageEditor(props: EProps) {
         </div>
         <div
           className={clsx(
-            "bg-slate-200/50 dark:bg-stone-600/50 rounded-b-sq-box",
-            "shadow-[0_-2px_4px] shadow-slate-200 dark:shadow-stone-700",
+            "bg-gray-500/25 rounded-b-sq-box",
+            "shadow-[0_-2px_4px] shadow-gray-500/50",
             "overflow-hidden"
           )}
         >

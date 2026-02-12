@@ -13,7 +13,6 @@ import {
 import { ReactNode, RefObject, useCallback, useState } from "react";
 import Link from "next/link";
 import { TitleAsLink } from "@/common/titleLogo.js";
-import { linkStyle1, linkStyle3 } from "@/common/linkStyle.js";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
@@ -22,16 +21,9 @@ import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState";
 import { AboutModal } from "@/common/aboutModal";
 import { ButtonHighlight } from "@/common/button";
-import {
-  boxButtonBorderStyle1,
-  boxButtonBorderStyle2,
-  boxButtonStyle,
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-  skyFlatButtonStyle,
-} from "@/common/flatButton";
 
 interface Props {
+  classNameInner?: string;
   children?: ReactNode | ReactNode[];
   title: string;
   tabKey: TabKeys; // PC表示でnav内のアクティブなタブ or nullでnavを非表示
@@ -67,12 +59,9 @@ export function IndexMain(props: Props) {
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
-      <TitleAsLink
-        className="hidden main-wide:block shrink-0"
-        locale={locale}
-      />
+      <TitleAsLink className="no-mobile shrink-0" locale={locale} />
       <AboutDescription
-        className="my-2 hidden main-wide:block"
+        className="my-2 px-6 no-mobile"
         locale={locale}
         onClickAbout={() => setAboutPageIndex(1)}
       />
@@ -87,9 +76,7 @@ export function IndexMain(props: Props) {
         {props.tabKey !== null && (
           <nav
             className={clsx(
-              "hidden main-wide:flex",
-              "flex-col h-max w-main-nav shrink-0 my-auto",
-              "transition ease-out duration-200"
+              "no-mobile flex flex-col w-main-nav shrink-0 h-max my-auto"
             )}
           >
             {pcTabTitleKeys.map((key, i) =>
@@ -98,12 +85,12 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
-                    boxButtonStyle
+                    "fn-main-nav-item rounded-r-none",
+                    "fn-flat-button fn-plain fn-selected"
                   )}
                 >
-                  <span className={clsx(boxButtonBorderStyle1, "border-r-0")} />
-                  <span className={clsx(boxButtonBorderStyle2, "border-r-0")} />
+                  <span className={clsx("fn-glass-1 border-r-0")} />
+                  <span className={clsx("fn-glass-2 border-r-0")} />
                   <ButtonHighlight />
                   {t(key + ".title")}
                 </LinkWithReview>
@@ -112,16 +99,12 @@ export function IndexMain(props: Props) {
                   key={i}
                   href={`/${locale}${tabURLs[key]}`}
                   className={clsx(
-                    "rounded-l-2xl py-3 pl-2 pr-2 text-center",
-                    skyFlatButtonStyle
+                    "fn-main-nav-item rounded-r-none",
+                    "fn-flat-button fn-sky"
                   )}
                 >
-                  <span
-                    className={clsx(skyFlatButtonBorderStyle1, "border-r-0")}
-                  />
-                  <span
-                    className={clsx(skyFlatButtonBorderStyle2, "border-r-0")}
-                  />
+                  <span className={clsx("fn-glass-1 border-r-0")} />
+                  <span className={clsx("fn-glass-2 border-r-0")} />
                   <ButtonHighlight />
                   {t(key + ".title")}
                 </LinkWithReview>
@@ -132,13 +115,13 @@ export function IndexMain(props: Props) {
         <Box
           refInner={props.boxRef}
           classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
-          classNameInner={clsx("flex flex-col")}
+          classNameInner={clsx("flex flex-col", props.classNameInner)}
           scrollableY
           padding={6}
         >
           {!props.noBackButtonPC && (
             <button
-              className={clsx("hidden main-wide:block w-max mb-3", linkStyle1)}
+              className={clsx("no-mobile w-max mb-3 fn-link-1")}
               onClick={() => {
                 historyBackWithReview();
               }}
@@ -163,11 +146,11 @@ export function AboutDescription(props: {
 }) {
   const t = useTranslations("main");
   return (
-    <div className={clsx("flex-none text-center px-6", props.className)}>
+    <div className={clsx("flex-none text-center", props.className)}>
       {t("description")}
       <Link
         href={`/${props.locale}/main/about/1`}
-        className={clsx("main-wide:hidden inline-block", "ml-2", linkStyle3)}
+        className={clsx("no-pc inline-block", "ml-2", "fn-link-3")}
       >
         {t("aboutNikochan")}
         <ArrowRight
@@ -176,7 +159,7 @@ export function AboutDescription(props: {
         />
       </Link>
       <button
-        className={clsx("hidden main-wide:inline-block", "ml-2", linkStyle3)}
+        className={clsx("no-mobile inline-block", "ml-2", "fn-link-3")}
         onClick={props.onClickAbout}
       >
         {t("aboutNikochan")}

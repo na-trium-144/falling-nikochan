@@ -14,7 +14,7 @@ import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import { TitleAsLink } from "@/common/titleLogo.jsx";
-import { MobileFooterWithGradient, PCFooter } from "@/common/footer.jsx";
+import { MobileFooter, PCFooter } from "@/common/footer.jsx";
 import { AboutModal } from "@/common/aboutModal.jsx";
 import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
 import { AboutDescription } from "@/main/main.jsx";
@@ -132,7 +132,7 @@ export default function ShareChart(props: Props) {
         <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
         <div className="basis-0 flex-1" />
         <AboutDescription
-          className="mb-3"
+          className="mb-3 px-6"
           locale={locale}
           onClickAbout={() => setAboutPageIndex(1)}
         />
@@ -154,10 +154,15 @@ export default function ShareChart(props: Props) {
             />
           </Box>
         </div>
-        <div className="flex-none basis-mobile-footer main-wide:hidden " />
+        <div className="flex-none basis-mobile-footer no-pc" />
         <PCFooter locale={locale} nav />
       </div>
-      <MobileFooterWithGradient locale={locale} tabKey={null} />
+      <MobileFooter
+        className="fixed bottom-0"
+        blurBg
+        locale={locale}
+        tabKey={null}
+      />
     </main>
   );
 }

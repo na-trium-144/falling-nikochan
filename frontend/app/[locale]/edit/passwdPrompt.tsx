@@ -1,7 +1,6 @@
 import Button from "@/common/button";
 import CheckBox from "@/common/checkBox";
 import Input from "@/common/input";
-import { linkStyle1 } from "@/common/linkStyle";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -53,9 +52,7 @@ export function PasswdPrompt(props: PasswdProps) {
     return (
       <>
         {props.loadStatus.status && (
-          <h4 className="mb-2 text-lg font-semibold font-title">
-            Error {props.loadStatus.status}
-          </h4>
+          <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
         )}
         <p className="mb-3">{props.loadStatus.formatMsg(te)}</p>
         {props.loadStatus.isServerSide() && <LinksOnError />}
@@ -73,7 +70,7 @@ export function PasswdPrompt(props: PasswdProps) {
       | "rateLimited";
     return (
       <>
-        <h4 className="mb-2 text-lg font-semibold font-title">
+        <h4 className="fn-heading-box">
           <span className="">{t("chartId")}:</span>
           <span className="ml-2 ">{cid}</span>
         </h4>
@@ -120,7 +117,7 @@ export function PasswdPrompt(props: PasswdProps) {
         {process.env.NODE_ENV === "development" && (
           <div className="mb-2">
             <button
-              className={clsx(linkStyle1, "w-max m-auto")}
+              className={clsx("fn-link-1", "w-max m-auto")}
               onClick={() =>
                 props.fetchChart(cid, {
                   bypass: true,

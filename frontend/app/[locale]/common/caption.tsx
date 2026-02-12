@@ -2,10 +2,7 @@ import clsx from "clsx/lite";
 import Help from "@icon-park/react/lib/icons/Help";
 import { ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  skyFlatButtonBorderStyle1,
-  skyFlatButtonBorderStyle2,
-} from "./flatButton";
+import { ButtonHighlight } from "./button";
 
 interface CaptionProps {
   top: number;
@@ -34,30 +31,29 @@ function Caption({ top, left, content }: CaptionProps) {
 
   return (
     <div
-      className={clsx("pointer-events-none text-sm fixed z-50")}
+      className={clsx("pointer-events-none text-sm fixed z-caption isolate")}
       style={{ top, left }}
     >
-      <span
-        className={clsx(
-          "absolute inline-block bottom-0 left-0 -translate-x-2/4 translate-y-4.5",
-          "border-[0.9rem] border-transparent border-t-sky-300/50 dark:border-t-orange-800/30"
-        )}
-      />
       <div
         ref={contentRef}
         className={clsx(
+          // 色だけcssで定義、他は直接utilityクラス
+          "fn-sky fn-caption",
           "absolute inline-block bottom-0 left-0",
-          "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1",
-          "backdrop-blur-xs",
-          "bg-sky-200/50 dark:bg-orange-950/50",
-          "inset-shadow-button inset-shadow-sky-300/15 dark:inset-shadow-orange-975/15"
+          "text-center rounded-sq-2xl min-w-max py-2 px-3 z-1"
         )}
         style={{ translate: `${translateX} -0.5rem` }}
       >
-        <span className={clsx(skyFlatButtonBorderStyle1, "opacity-100!")} />
-        <span className={clsx(skyFlatButtonBorderStyle2, "opacity-100!")} />
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
         {content}
       </div>
+      <span
+        className={clsx(
+          "absolute inline-block bottom-0 left-0 -translate-x-2/4 translate-y-4.5",
+          "border-[0.9rem] fn-caption-border"
+        )}
+      />
     </div>
   );
 }
@@ -73,13 +69,7 @@ export function HelpIcon(props: Props) {
   return (
     <>
       <span
-        className={clsx(
-          "inline-block align-middle",
-          "rounded-full p-2 cursor-help text-xl",
-          "hover:bg-sky-100/50 text-sky-300 hover:text-sky-700",
-          "dark:hover:bg-stone-800/50 dark:text-orange-900 dark:hover:text-orange-500",
-          props.className
-        )}
+        className={clsx("fn-help-icon", props.className)}
         ref={ref}
         onPointerEnter={() => {
           const rect = ref.current.getBoundingClientRect();
@@ -91,7 +81,8 @@ export function HelpIcon(props: Props) {
         }}
         onPointerLeave={() => setCaptionData(null)}
       >
-        <Help />
+        <ButtonHighlight />
+        <Help className="inline-block align-middle text-xl" />
       </span>
       {captionData && createPortal(<Caption {...captionData} />, document.body)}
     </>

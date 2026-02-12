@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useTranslations } from "next-intl";
 import { fetchBrief } from "@/common/briefCache";
-import { Box, modalBg } from "@/common/box";
+import { Box } from "@/common/box";
 import { ShareBox } from "@/share/placeholder/shareBox";
 import { useRouter } from "next/navigation";
 import { useDelayedDisplayState } from "./delayedDisplayState";
@@ -130,7 +130,7 @@ export function SharePageModalProvider(props: {
       {modalOpened && (
         <div
           className={clsx(
-            modalBg,
+            "fn-modal-bg",
             "transition-opacity duration-200",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
@@ -138,7 +138,7 @@ export function SharePageModalProvider(props: {
             historyBackWithReview();
           }}
         >
-          <div className="absolute inset-x-24 inset-y-16 grid place-content-center place-items-center grid-rows-1 grid-cols-1">
+          <div className="absolute inset-x-24 inset-y-16 grid-centering">
             <Box
               onClick={(e) => e.stopPropagation()}
               classNameOuter={clsx(
