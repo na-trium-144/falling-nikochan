@@ -33,8 +33,9 @@ function Cloud(props: CProps) {
         src={
           process.env.ASSET_PREFIX +
           (themeState.isDark
-            ? "/assets/cloud-black.svg?v=2"
-            : "/assets/cloud.svg?v=2")
+            ? "/assets/cloud-black.svg"
+            : "/assets/cloud.svg") +
+          process.env.ASSET_QUERY_CLOUD
         }
         className="absolute inset-0 -z-10 "
       />

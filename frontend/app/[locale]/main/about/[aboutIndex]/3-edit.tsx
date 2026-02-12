@@ -86,7 +86,11 @@ export function AboutContent3({ locale }: { locale: string }) {
               }}
             >
               <img
-                src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg?v=2`}
+                src={
+                  process.env.ASSET_PREFIX +
+                  `/assets/nikochan0.svg` +
+                  process.env.ASSET_QUERY_NIKOCHAN
+                }
                 className="w-full h-full opacity-70"
               />
             </div>
@@ -100,7 +104,11 @@ export function AboutContent3({ locale }: { locale: string }) {
               }}
             >
               <img
-                src={process.env.ASSET_PREFIX + `/assets/nikochan0.svg?v=2`}
+                src={
+                  process.env.ASSET_PREFIX +
+                  `/assets/nikochan0.svg` +
+                  process.env.ASSET_QUERY_NIKOCHAN
+                }
                 className="w-full h-full opacity-70"
               />
             </div>

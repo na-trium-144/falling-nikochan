@@ -217,7 +217,6 @@ async function initAssetsCache(config: {
         return pathname;
       })
       .filter((n) => !n.endsWith(".ttf"))
-      .filter((n) => !n.includes("icon"))
       .filter((n) => !n.includes("ogTemplate"));
     // tmpCacheにデータを入れる
     let failed = false;
@@ -421,7 +420,11 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/*", async (c) => {
-    if (!c.req.path.includes(".") || c.req.path.endsWith(".txt")) {
+    if (
+      !c.req.path.includes(".") ||
+      c.req.path.endsWith(".txt") ||
+      c.req.path === "/favicon.ico"
+    ) {
       // キャッシュされた古いバージョンのページが読み込まれる問題を避けるために
       // htmlとtxtについてはキャッシュよりも最新バージョンのfetchを優先する
       // 1秒のタイムアウトを設け、fetchできなければキャッシュから返す

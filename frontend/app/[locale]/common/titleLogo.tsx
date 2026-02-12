@@ -69,7 +69,8 @@ export default function Title(props: Props) {
         <img
           src={
             process.env.ASSET_PREFIX +
-            `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg?v=2`
+            `/assets/nikochan${[0, 0, 1][nikochanPhase]}.svg` +
+            process.env.ASSET_QUERY_NIKOCHAN
           }
           // ここだけopacity-70でない
           className="w-full h-full opacity-100"

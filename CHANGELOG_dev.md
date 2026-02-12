@@ -1,3 +1,9 @@
+## ver. 14.14 - 2026/02/13
+
+* service workerがアイコンをfetchしていないのを修正
+* favicon.icoはキャッシュを返さずhtmlと同様必ずfetchするように変更
+* assetバージョンを更新 & それの記述をnext.configにまとめる
+
 ## ver. 14.13 - 2026/02/12
 
 * 譜面編集のnoteTabの追加ボタンで2つ目以降の音符を追加できないのを修正
