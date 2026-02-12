@@ -110,7 +110,7 @@ export function SharedResultBox(props: Props) {
                 </span>
               </p>
             ))}
-            <div className="mt-1 border-b border-slate-800 dark:border-stone-300" />
+            <div className="mt-1 border-b border-base" />
             <p className="flex flex-row w-full items-baseline ">
               <span className="flex-1 text-sm ">{t("totalScore")}:</span>
               <span className="text-2xl">

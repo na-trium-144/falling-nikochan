@@ -217,7 +217,7 @@ export default function TimeBar(props: Props) {
                   {ch.bpm}
                   {currentLevel!.freeze.speedChanges[i + 1]?.interp && (
                     <span
-                      className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+                      className="absolute inset-y-0 left-0 m-auto h-0 border border-base"
                       style={{
                         width:
                           timeBarPos(
@@ -228,7 +228,7 @@ export default function TimeBar(props: Props) {
                   )}
                   {ch.interp && i >= 1 && (
                     <span
-                      className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+                      className="absolute inset-y-0 right-full m-auto h-0 border border-base"
                       style={{
                         width:
                           timeBarPos(ch.timeSec) -
@@ -322,7 +322,7 @@ export default function TimeBar(props: Props) {
             }}
           >
             <span
-              className="absolute inset-y-0 left-0 m-auto h-0 border border-slate-800 dark:border-stone-300"
+              className="absolute inset-y-0 left-0 m-auto h-0 border border-base"
               style={{
                 width:
                   timeBarPos(currentLevel.nextSpeedChange!.timeSec) -
@@ -330,7 +330,7 @@ export default function TimeBar(props: Props) {
               }}
             />
             <span
-              className="absolute inset-y-0 right-full m-auto h-0 border border-slate-800 dark:border-stone-300"
+              className="absolute inset-y-0 right-full m-auto h-0 border border-base"
               style={{
                 width:
                   timeBarPos(cur.timeSec) -

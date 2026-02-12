@@ -31,6 +31,9 @@
 @utility fg-base {
   @apply text-fg-base dark:text-fg-base-dark;
 }
+@utility border-base {
+  @apply border-fg-base dark:border-fg-base-dark;
+}
 @utility fg-bright {
   @apply text-fg-bright dark:text-fg-bright-dark;
 }

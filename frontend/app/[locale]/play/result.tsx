@@ -185,7 +185,7 @@ export default function Result(props: Props) {
               score100={props.bigScore100}
               disabled={props.bigCount === null}
             />
-            <div className="mt-2 mb-1 border-b border-slate-800 dark:border-stone-300" />
+            <div className="mt-2 mb-1 border-b border-base" />
             <ResultRow
               visible={showing >= 4}
               name={t("totalScore")}

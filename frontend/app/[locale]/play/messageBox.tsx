@@ -162,7 +162,7 @@ export function ReadyMessage(props: MessageProps) {
           </button>
         ) : (
           <>
-            <div className="mt-2 mb-2 border-b border-slate-800 dark:border-stone-300" />
+            <div className="mt-2 mb-2 border-b border-base" />
             <OptionMenu {...props} header />
           </>
         )}

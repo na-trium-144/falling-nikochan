@@ -132,7 +132,7 @@ export default function OGTemplate() {
                   <span className="text-left w-10 text-3xl">44</span>
                 </p>
               ))}
-              <div className="border-b mt-2 w-full border-slate-800 dark:border-stone-300" />
+              <div className="border-b mt-2 w-full border-base" />
               <p
                 className={clsx(
                   "flex flex-row w-full items-baseline",
