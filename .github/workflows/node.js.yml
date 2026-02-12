@@ -13,7 +13,9 @@ jobs:
       matrix:
         node-version: [20.x, 22.x, 24.x]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
@@ -32,7 +34,9 @@ jobs:
       API_ENV: development
       # API_NO_RATELIMIT: "1"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
@@ -51,7 +55,9 @@ jobs:
       API_ENV: development
       # API_NO_RATELIMIT: "1"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
@@ -69,7 +75,9 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
@@ -86,7 +94,9 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
@@ -116,7 +126,9 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
     # .vercel/output と、それとは別に node_modules も必要
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4
       with:
