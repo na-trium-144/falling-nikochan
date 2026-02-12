@@ -395,7 +395,7 @@ export function useChartState(props: Props) {
         newChartMin = await validateChartMin(newChartMin as ChartUntil14Min);
         for (const lua of (newChartMin as Chart14Min).lua) {
           if (lua.every((line) => !line.includes("fn-commands"))) {
-            lua.unshift('require "fn-commands"');
+            lua.unshift('require("fn-commands")');
           }
         }
         return {

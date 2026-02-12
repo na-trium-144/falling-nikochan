@@ -58,7 +58,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#meta = JSON.parse(JSON.stringify(min));
     this.#lua = [...lua];
     if (this.#lua.every((line) => !line.includes("fn-commands"))) {
-      this.#lua.unshift('require "fn-commands"');
+      this.#lua.unshift('require("fn-commands")');
     }
     this.#freeze = JSON.parse(JSON.stringify(freeze));
     // 以下はupdateFreeze()内で初期化される
@@ -128,7 +128,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     const prevLua = this.#lua;
     this.#lua = lua;
     if (this.#lua.every((line) => !line.includes("fn-commands"))) {
-      this.#lua.unshift('require "fn-commands"');
+      this.#lua.unshift('require("fn-commands")');
     }
     this.#luaExecutorRef.current.abortExec();
     const levelFreezed = await this.#luaExecutorRef.current.exec(
