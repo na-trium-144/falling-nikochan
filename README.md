@@ -1,18 +1,24 @@
 # Falling Nikochan
 
+[![Production Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Prod&color=%23b8f6fe)](https://nikochan.utcode.net)
+[![Alt Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-alt.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Alt&color=%23b8f6fe)](https://nikochan-alt.utcode.net)
+[![Staging Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-staging.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Staging&color=%23441306)](https://nikochan-staging.utcode.net)
+[![GitHub License](https://img.shields.io/github/license/na-trium-144/falling-nikochan)](./LICENSE)
+
+[![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UChAEFwUtjsbWmWwZSxYLXWQ?label=%40nikochan144)](https://www.youtube.com/@nikochan144)
+[![Twitter Follow](https://img.shields.io/twitter/follow/nikochan144)](https://x.com/nikochan144)
+
 * Simple and cute rhythm game. Playable on web browsers such as PC, tablet, and smartphone.
 * Anyone can create a chart without any account registration or login. Share the chart ID on SNS to let others play.
 * Uses YouTube embed as audio source.
 
-For more information, play, and chart creation, please visit the [Falling Nikochan top page](https://nikochan.utcode.net).
+For more information, play, and chart creation, please visit the Falling Nikochan top page: https://nikochan.utcode.net .
 
 > * シンプルでかわいい音ゲーです。PC、タブレット、スマートフォンなどのブラウザーで手軽に遊べます。
 > * さらに、アカウント登録やログイン不要で誰でも譜面を作成でき、SNSなどで譜面IDを共有することで他の人に遊んでもらうことができます。
 > * 音源としてYouTube埋め込みを利用しています。
 >
-> 遊び方などの説明、プレイ、譜面作成 は、 [Falling Nikochan トップページ](https://nikochan.utcode.net) からどうぞ。
-
-YouTube: [@nikochan144](http://www.youtube.com/@nikochan144) / X (Twitter): [@nikochan144](https://x.com/nikochan144)
+> 遊び方などの説明、プレイ、譜面作成 は、Falling Nikochan トップページからどうぞ: https://nikochan.utcode.net
 
 [<img src="https://github.com/na-trium-144/falling-nikochan/blob/main/.github/screenshot.jpg?raw=true" width=960 />](https://www.youtube.com/watch?v=reUvjq5TRus)
 
