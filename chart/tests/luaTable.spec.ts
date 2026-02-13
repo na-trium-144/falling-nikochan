@@ -10,9 +10,16 @@ import { LuaFactory } from "wasmoon";
 import * as v from "valibot";
 import { readFile } from "node:fs/promises";
 
+const fnCommandsVer = JSON.parse(
+  await readFile(
+    import.meta.resolve("fn-commands/package.json").replace("file://", ""),
+    { encoding: "utf8" }
+  )
+).version;
+
 describe("luaTable", () => {
   test("should restore Chart14Edit except for lua by executing luaTable", async () => {
-    const code = chartToLuaTableCode(dummyChartData);
+    const code = chartToLuaTableCode(dummyChartData, fnCommandsVer);
     const factory = new LuaFactory();
     await factory.mountFile(
       "/usr/local/share/lua/5.4/fn-commands.lua",
@@ -27,7 +34,7 @@ describe("luaTable", () => {
     v.parse(ChartEditSchema14(), { ...result, lua: dummyChartData.lua });
   });
   test("should restore original lua code with findLuaLevelCode()", () => {
-    const code = chartToLuaTableCode(dummyChartData);
+    const code = chartToLuaTableCode(dummyChartData, fnCommandsVer);
     const parsedLua = findLuaLevelCode(code);
     expect(parsedLua).to.be.lengthOf(dummyChartData.lua.length);
     expect(parsedLua.at(0)).to.be.deep.equal(dummyChartData.lua.at(0));

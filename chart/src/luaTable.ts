@@ -14,7 +14,10 @@ export function findLuaLevelCode(rawCode: string) {
     return lines;
   });
 }
-export function chartToLuaTableCode(chart: ChartUntil14Min): string {
+export function chartToLuaTableCode(
+  chart: ChartUntil14Min,
+  fnCommandsVer: string
+): string {
   const levelsLuaOnly = (
     "levelsMin" in chart
       ? chart.levelsMin
@@ -50,15 +53,7 @@ ${jsonItems}
     })
     .join("\n");
   const jsonItems = (
-    [
-      "ver",
-      "offset",
-      "ytId",
-      "title",
-      "composer",
-      "chartCreator",
-      "zoom",
-    ] as const
+    ["offset", "ytId", "title", "composer", "chartCreator", "zoom"] as const
   )
     .map((key) =>
       key in chart ? `  ${key} = ${JSON.stringify((chart as any)[key])},` : null
@@ -76,6 +71,7 @@ ${jsonItems}
     .join("\n");
   return `require("fn-commands")
 return fnChart({
+  version = ${JSON.stringify(fnCommandsVer)},
 ${jsonItems}
   levels = {
 ${levelsLuaOnly}

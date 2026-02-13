@@ -29,6 +29,7 @@ import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
+import fnCommandsPackageJson from "fn-commands/package.json";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -360,7 +361,12 @@ export function useChartState(props: Props) {
             ]);
             break;
           case "lua":
-            blob = new Blob([chartToLuaTableCode(chartState.chart.toMin())]);
+            blob = new Blob([
+              chartToLuaTableCode(
+                chartState.chart.toMin(),
+                fnCommandsPackageJson.version.split(".").slice(0, 2).join(".")
+              ),
+            ]);
             break;
           default:
             format satisfies never;
