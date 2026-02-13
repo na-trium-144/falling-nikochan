@@ -174,29 +174,32 @@ const nextConfig = {
                   return packageName.startsWith("@falling-nikochan");
                 },
                 includePackages: () =>
-                  ["tailwindcss", "pretty-checkbox", "keyboard-css"].map(
-                    (pkg) => {
-                      const currentDirPkg = join(
-                        process.cwd(),
-                        "node_modules",
-                        pkg
+                  [
+                    "tailwindcss",
+                    "pretty-checkbox",
+                    "keyboard-css",
+                    "fn-commands",
+                  ].map((pkg) => {
+                    const currentDirPkg = join(
+                      process.cwd(),
+                      "node_modules",
+                      pkg
+                    );
+                    const parentDirPkg = join(
+                      dirname(process.cwd()),
+                      "node_modules",
+                      pkg
+                    );
+                    if (existsSync(currentDirPkg)) {
+                      return currentDirPkg;
+                    } else if (existsSync(parentDirPkg)) {
+                      return parentDirPkg;
+                    } else {
+                      throw new Error(
+                        `Cannot find package ${pkg} to include in OSS licenses`
                       );
-                      const parentDirPkg = join(
-                        dirname(process.cwd()),
-                        "node_modules",
-                        pkg
-                      );
-                      if (existsSync(currentDirPkg)) {
-                        return currentDirPkg;
-                      } else if (existsSync(parentDirPkg)) {
-                        return parentDirPkg;
-                      } else {
-                        throw new Error(
-                          `Cannot find package ${pkg} to include in OSS licenses`
-                        );
-                      }
                     }
-                  ),
+                  }),
               }),
             ]
           : []),
