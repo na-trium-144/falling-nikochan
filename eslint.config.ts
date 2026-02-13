@@ -3,7 +3,6 @@ import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
-// @ts-ignore - eslint-config-next doesn't have proper types but exports flat config
 import eslintConfigNext from "eslint-config-next";
 
 export default defineConfig(
