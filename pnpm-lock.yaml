@@ -109,6 +109,9 @@ importers:
       chai:
         specifier: ^6.2.2
         version: 6.2.2
+      fn-commands:
+        specifier: workspace:*
+        version: link:../fn-commands
 
   fn-commands: {}
 

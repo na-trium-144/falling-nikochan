@@ -3,7 +3,7 @@
 
 import * as v from "valibot";
 import { StepSchema } from "../step.js";
-import { LuaLineSchema } from "../chart.js";
+import { ArrayOrEmptyObj, LuaLineSchema } from "../chart.js";
 import {
   BPMChangeSchema9,
   ChartUntil9,
@@ -42,11 +42,11 @@ export const SpeedChange13SchemaWithoutLua = () =>
 
 export const LevelFreezeSchema13 = () =>
   v.object({
-    notes: v.array(NoteCommandSchema9()),
-    rest: v.array(RestSchema9()),
-    bpmChanges: v.array(BPMChangeSchema9()),
-    speedChanges: v.array(SpeedChangeSchema13()),
-    signature: v.array(SignatureSchema9()),
+    notes: ArrayOrEmptyObj(NoteCommandSchema9()),
+    rest: ArrayOrEmptyObj(RestSchema9()),
+    bpmChanges: ArrayOrEmptyObj(BPMChangeSchema9()),
+    speedChanges: ArrayOrEmptyObj(SpeedChangeSchema13()),
+    signature: ArrayOrEmptyObj(SignatureSchema9()),
   });
 export const LevelEditSchema13 = () =>
   v.object({

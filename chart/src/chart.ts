@@ -81,6 +81,19 @@ export const YoutubeIdSchema = () =>
     v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters")
   );
 export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
+// luaコードの実行結果をパースする際空配列が空オブジェクトになるので、それを受け付ける
+export const ArrayOrEmptyObj = <
+  T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+>(
+  schema: T
+) =>
+  v.union([
+    v.pipe(
+      v.strictObject({}),
+      v.transform(() => [] as v.InferOutput<T>[])
+    ),
+    v.array(schema),
+  ]);
 // luaコードの実行結果をパースする際nilがundefinedになるので、それも受け付けるようにしている
 export const LuaLineSchema = () =>
   v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), null);
@@ -144,7 +157,7 @@ export async function validateChart(chart: ChartUntil14): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
   chart satisfies Chart14Edit;
-  v.parse(ChartEditSchema14(), chart);
+  chart = v.parse(ChartEditSchema14(), chart);
   return { ...chart, ver: 14 };
 }
 export async function validateChart13(
@@ -153,7 +166,7 @@ export async function validateChart13(
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
   chart satisfies Chart13Edit;
-  v.parse(ChartEditSchema13(), chart);
+  chart = v.parse(ChartEditSchema13(), chart);
   return { ...chart, ver: 13 };
 }
 export async function validateChartMin(
@@ -162,7 +175,7 @@ export async function validateChartMin(
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 14) chart = await convertTo14Min(chart as ChartUntil13Min);
   chart satisfies Chart14Min;
-  v.parse(ChartMinSchema14(), chart);
+  chart = v.parse(ChartMinSchema14(), chart);
   return { ...chart, ver: 14 };
 }
 

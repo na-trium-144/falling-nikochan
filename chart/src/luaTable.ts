@@ -1,70 +1,6 @@
-import { levelTypesConst } from "./chart.js";
 import { defaultCopyBuffer } from "./command.js";
-import { YTBeginSchema11, YTEndSchema11 } from "./legacy/chart11.js";
 import { ChartUntil14Min } from "./legacy/chart14.js";
-import * as v from "valibot";
-import { stepZero } from "./step.js";
-import { NoteCommand9 } from "./legacy/chart9.js";
 
-export const CopyBufferEntrySchema = () =>
-  v.tuple([
-    v.number(), // x
-    v.number(), // vx
-    v.number(), // vy
-    v.boolean(), // big
-    v.boolean(), // fall
-  ]);
-export const LuaTableSchema = () =>
-  v.object({
-    falling: v.literal("nikochan"),
-    ver: v.pipe(v.number(), v.integer(), v.minValue(14)),
-    offset: v.pipe(v.number(), v.minValue(0)),
-    ytId: v.string(),
-    title: v.string(),
-    composer: v.string(),
-    chartCreator: v.string(),
-    zoom: v.pipe(v.number(), v.integer()),
-    copyBuffer: v.pipe(
-      v.object(
-        Object.fromEntries(
-          Array.from(new Array(10), (_, i) => [
-            String(i), // 0-9
-            v.optional(CopyBufferEntrySchema()),
-          ])
-        )
-      ),
-      v.transform((copyBuffer) =>
-        Array.from(new Array(10), (_, i) =>
-          copyBuffer[String(i)]
-            ? ({
-                hitX: copyBuffer[String(i)]![0],
-                hitVX: copyBuffer[String(i)]![1],
-                hitVY: copyBuffer[String(i)]![2],
-                big: copyBuffer[String(i)]![3],
-                fall: copyBuffer[String(i)]![4],
-                step: stepZero(),
-                luaLine: null,
-              } satisfies NoteCommand9)
-            : null
-        )
-      )
-    ),
-    levels: v.array(
-      v.object({
-        name: v.string(),
-        type: v.picklist(levelTypesConst),
-        unlisted: v.boolean(),
-        ytBegin: YTBeginSchema11(),
-        ytEnd: YTEndSchema11(),
-        ytEndSec: v.number(),
-        snapDivider: v.number(),
-        content: v.pipe(
-          v.optional(v.any()),
-          v.transform(() => undefined)
-        ),
-      })
-    ),
-  });
 export function findLuaLevelCode(rawCode: string) {
   return (
     rawCode.match(
@@ -115,7 +51,6 @@ ${jsonItems}
     .join("\n");
   const jsonItems = (
     [
-      "falling",
       "ver",
       "offset",
       "ytId",
@@ -139,7 +74,8 @@ ${jsonItems}
         : `    [${i}] = nil,`
     )
     .join("\n");
-  return `return {
+  return `require("fn-commands")
+return fnChart({
 ${jsonItems}
   levels = {
 ${levelsLuaOnly}
@@ -147,6 +83,6 @@ ${levelsLuaOnly}
   copyBuffer = {
 ${copyBuffer}
   },
-}`;
-  // locale, zoom, copyBufferを省略している
+})
+`;
 }

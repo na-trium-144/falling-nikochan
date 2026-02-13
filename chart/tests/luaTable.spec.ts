@@ -1,21 +1,30 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import {
+  ChartEditSchema14,
   chartToLuaTableCode,
   findLuaLevelCode,
-  LuaTableSchema,
 } from "@falling-nikochan/chart";
 import { dummyChartData } from "./editing/dummy";
 import { LuaFactory } from "wasmoon";
 import * as v from "valibot";
+import { readFile } from "node:fs/promises";
 
 describe("luaTable", () => {
-  test("should restore identical metadata by executing luaTable", async () => {
+  test("should restore Chart14Edit except for lua by executing luaTable", async () => {
     const code = chartToLuaTableCode(dummyChartData);
     const factory = new LuaFactory();
+    await factory.mountFile(
+      "/usr/local/share/lua/5.4/fn-commands.lua",
+      await readFile(
+        import.meta.resolve("fn-commands").replace("file://", ""),
+        { encoding: "utf8" }
+      )
+    );
     const lua = await factory.createEngine();
     const result = await lua.doString(code);
-    v.parse(LuaTableSchema(), result);
+    console.log(result);
+    v.parse(ChartEditSchema14(), { ...result, lua: dummyChartData.lua });
   });
   test("should restore original lua code with findLuaLevelCode()", () => {
     const code = chartToLuaTableCode(dummyChartData);

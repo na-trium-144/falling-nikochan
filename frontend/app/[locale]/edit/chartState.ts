@@ -15,7 +15,6 @@ import {
   ChartUntil14,
   ChartUntil14Min,
   Chart14Min,
-  LuaTableSchema,
   chartToLuaTableCode,
   findLuaLevelCode,
 } from "@falling-nikochan/chart";
@@ -392,7 +391,14 @@ export function useChartState(props: Props) {
         ) {
           originalVer = newChartMin.ver;
         }
-        newChartMin = await validateChartMin(newChartMin as ChartUntil14Min);
+        try {
+          newChartMin = await validateChartMin(newChartMin as ChartUntil14Min);
+        } catch (e) {
+          if (e instanceof v.ValiError) {
+            console.error(e.issues);
+          }
+          throw e;
+        }
         return {
           originalVer,
           newChart: {
@@ -435,17 +441,11 @@ export function useChartState(props: Props) {
               { catchError: false, needReturnValue: true }
             );
             console.log("lua rawReturnValue:", luaResult.rawReturnValue);
-            const luaTable = v.parse(
-              LuaTableSchema(),
-              luaResult.rawReturnValue
-            );
             result = await validateAndExec({
-              ...luaTable,
-              ver: luaTable.ver as 14,
-              locale,
+              ...(luaResult.rawReturnValue as object),
               lua: findLuaLevelCode(rawCode),
-              levelsMin: luaTable.levels,
-            } satisfies Chart14Min);
+              locale,
+            });
           } catch (e3) {
             console.error(e1);
             console.error(e2);
