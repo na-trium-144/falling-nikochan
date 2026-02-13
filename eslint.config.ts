@@ -1,4 +1,5 @@
 import { defineConfig } from "eslint/config";
+import type { Linter } from "eslint";
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -10,9 +11,12 @@ export default defineConfig(
   pluginJs.configs.recommended,
   tseslint.configs.recommended,
   eslintConfigPrettier,
-  ...eslintConfigNext.map((config: any) => ({
+  // eslint-config-next provides flat config but without complete TypeScript types
+  ...eslintConfigNext.map((config: Linter.Config) => ({
     ...config,
-    files: config.files?.map((pattern: string) => `frontend/${pattern}`) ?? ["frontend/**/*"],
+    files: config.files?.map((pattern) => 
+      typeof pattern === "string" ? `frontend/${pattern}` : pattern
+    ) ?? ["frontend/**/*"],
   })),
   {
     files: ["frontend/**/*"],
