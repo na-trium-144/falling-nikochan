@@ -86,6 +86,7 @@ export async function luaExec(
         )
     );
     // console.log(codeStatic);
+    await lua.doString('require("fn-commands")');
     const value = await lua.doString(codeStatic.join("\n"));
     if (options.needReturnValue) {
       result.rawReturnValue = value;
