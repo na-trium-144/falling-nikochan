@@ -13,6 +13,11 @@ export function initViewport(): Viewport {
       { media: "(prefers-color-scheme: light)", color: themeColorLight },
       { media: "(prefers-color-scheme: dark)", color: themeColorDark },
     ],
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    minimumScale: 1,
+    userScalable: false,
   };
 }
 
