@@ -301,7 +301,7 @@ export function useChartState(props: Props) {
       while (true) {
         // false positive TS7022: 'm' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
         const m: string | null = window.prompt(
-          t("confirmDelete", { cid: chartState.chart.cid })
+          t("meta.confirmDelete", { cid: chartState.chart.cid })
         );
         if (m === null) {
           return;
