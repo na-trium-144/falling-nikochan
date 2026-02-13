@@ -90,7 +90,7 @@ export function AboutContent3({ locale }: { locale: string }) {
                   `/assets/nikochan0.svg` +
                   process.env.ASSET_QUERY_NIKOCHAN
                 }
-                className="w-full h-full opacity-90"
+                className="w-full h-full opacity-70"
               />
             </div>
             <div
@@ -108,7 +108,7 @@ export function AboutContent3({ locale }: { locale: string }) {
                   `/assets/nikochan0.svg` +
                   process.env.ASSET_QUERY_NIKOCHAN
                 }
-                className="w-full h-full opacity-90"
+                className="w-full h-full opacity-70"
               />
             </div>
           </Box>
