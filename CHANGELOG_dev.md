@@ -1,3 +1,7 @@
+## ver. 14.17 - 2026/02/13 [#967](https://github.com/na-trium-144/falling-nikochan/pull/967)
+
+* android chromeで画面が拡大される場合があるためviewportを明示的に固定 (initialScale=1, minimumScale=1, maximumScale=1, userScalable=no)
+
 ## ver. 14.15 - 2026/02/13 [#917](https://github.com/na-trium-144/falling-nikochan/pull/917)
 
 * 大量のTailwindCSSのutilityの羅列をカスタムコンポーネントとしてまとめる
