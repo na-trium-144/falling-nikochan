@@ -81,6 +81,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    if: |
+      always() && 
+      (github.event_name == 'push' || needs.sync-staging.result == 'success')
     steps:
       - name: Checkout staging branch
         uses: actions/checkout@v6
