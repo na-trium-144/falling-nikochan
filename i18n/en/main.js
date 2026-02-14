@@ -158,6 +158,41 @@ export default {
     festival:
       "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
       "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",
+    newTopPage: {
+      title: "Falling Nikochan - New Top Page",
+      description:
+        "Simple and cute rhythm game, " +
+        "where anyone can create and share charts.",
+      playNow: "Play Now",
+      whatIs: "What is Falling Nikochan?",
+      whatIsDesc:
+        "A simple and cute rhythm game that you can play instantly from your browser without any downloads. Play on PC, tablet, or smartphone with ease.",
+      features: "More Than Just Playing!",
+      featuresDesc:
+        "In Falling Nikochan, you can not only play but also create charts without any account registration or login. Your created charts are saved on the server and can be easily shared on social media for others to enjoy.",
+      howToPlay: "How to Play",
+      howToPlayDesc:
+        "The rules are simple: just tap the notes when Nikochan overlaps with the line. Press any key on PC, or tap anywhere on the screen for tablets and smartphones.",
+      createChart: "Create Your Own Chart",
+      createChartDesc:
+        "You can create charts using your favorite songs. Any song uploaded to YouTube can be used. Create and share your charts for everyone to enjoy!",
+      createChartDesc2:
+        "In Falling Nikochan, you don't need to download audio files - it embeds and plays audio from YouTube, so you can use any song uploaded to YouTube.",
+      createChartDesc3:
+        "By sharing the chart ID or chart URL (nikochan.f5.si/share/000000) on social media, you can let others play it.",
+      popularCharts: "Popular Charts",
+      searchPlaceholder: "Search by song, author, or ID",
+      communityStats: "Community Stats",
+      totalPlays: "Total Plays",
+      totalCharts: "Public Charts",
+      recentCharts: "Recently Played",
+      backToOriginal: "← Back to Original Top Page",
+      videoPlaceholder: "[Background Video Placeholder]",
+      loading: "Loading...",
+      illustrativeNote: "* Illustrative numbers",
+      policies: "Terms and Policies",
+      links: "Contact & Other Links",
+    },
   },
   dev: {
     title: "Debugging Tools",
