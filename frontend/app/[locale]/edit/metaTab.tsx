@@ -2,11 +2,7 @@ import Button, { ButtonStyledLabel } from "@/common/button.js";
 import Input from "@/common/input.js";
 import { checkYouTubeId, getYouTubeId } from "@/common/ytId.js";
 import { ChangeEvent, useState } from "react";
-import {
-  ChartEditing,
-  currentChartVer,
-  lastIncompatibleVer,
-} from "@falling-nikochan/chart";
+import { ChartEditing, lastIncompatibleVer } from "@falling-nikochan/chart";
 import { initSession, SessionData } from "@/play/session.js";
 import { ExternalLink } from "@/common/extLink.js";
 import ProgressBar from "@/common/progressBar.js";
@@ -267,7 +263,7 @@ export function MetaTab(props: Props2) {
           <HelpIcon>
             {t.rich("localSaveLoadHelp", {
               br: () => <br />,
-              extension: `fn${currentChartVer}.lua`,
+              extension: `fn.lua`,
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
