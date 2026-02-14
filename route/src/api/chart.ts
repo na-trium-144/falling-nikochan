@@ -659,12 +659,14 @@ export function entryToChart(
         changePasswd: null,
         locale: entry.locale,
         copyBuffer: Object.fromEntries(
-          entry.copyBuffer!.map((entry, i) => [
-            String(i),
-            entry
-              ? [entry.hitX, entry.hitVX, entry.hitVY, entry.big, entry.fall]
-              : undefined,
-          ])
+          entry
+            .copyBuffer!.map((entry, i) => [
+              String(i),
+              entry
+                ? [entry.hitX, entry.hitVX, entry.hitVY, entry.big, entry.fall]
+                : undefined,
+            ])
+            .filter(([, value]) => value !== undefined)
         ),
         zoom: entry.zoom || 0,
       } as Chart15;

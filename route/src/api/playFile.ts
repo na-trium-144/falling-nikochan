@@ -8,11 +8,11 @@ import {
   convertTo6,
   Level6Play,
   CidSchema,
-  Level13Play,
-  LevelPlaySchema13,
   currentChartVer,
-  convertToPlay14,
-  convertTo14,
+  convertTo15,
+  convertToPlay15,
+  Level15Play,
+  LevelPlaySchema15,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -24,14 +24,14 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   describeRoute({
     description:
       "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
-      "Note that the level data is either in Chart6Play or Chart13Play format, " +
+      "Note that the level data is either in Chart6Play or Chart15Play format, " +
       `while this documentation only describes Chart${currentChartVer}Play format. `,
     responses: {
       200: {
         description: "chart file in MessagePack format.",
         content: {
           "application/vnd.msgpack": {
-            schema: resolver(LevelPlaySchema13()),
+            schema: resolver(LevelPlaySchema15()),
           },
         },
       },
@@ -71,7 +71,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
       let { chart } = await getChartEntry(db, cid, null);
 
-      let level: Level6Play | Level13Play;
+      let level: Level6Play | Level15Play;
       switch (chart.ver) {
         case 4:
         case 5:
@@ -104,13 +104,22 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           if (!chart.levels.at(lvIndex)) {
             throw new HTTPException(404, { message: "levelNotFound" });
           }
-          level = convertToPlay14(await convertTo14(chart), lvIndex);
+          level = convertToPlay15(await convertTo15(chart), lvIndex);
           break;
         case 14:
           if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
             throw new HTTPException(404, { message: "levelNotFound" });
           }
-          level = convertToPlay14(chart, lvIndex);
+          level = convertToPlay15(await convertTo15(chart), lvIndex);
+          break;
+        case 15:
+          if (
+            !chart.levelsMeta.at(lvIndex) ||
+            !chart.levelsFreeze.at(lvIndex)
+          ) {
+            throw new HTTPException(404, { message: "levelNotFound" });
+          }
+          level = convertToPlay15(chart, lvIndex);
           break;
         default:
           chart satisfies never;

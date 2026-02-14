@@ -12,6 +12,7 @@ import {
   SpeedChangeWithLua,
   Chart5,
   NoteCommandWithLua,
+  defaultCopyBufferObj,
 } from "@falling-nikochan/chart";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -29,7 +30,9 @@ try {
   const db = client.db("nikochan");
   for (const file of await readdir("./samples")) {
     const cid = file.split(".")[0];
-    const content: Chart5 = msgpack.decode(await readFile("./samples/" + file));
+    const content = msgpack.decode(
+      await readFile("./samples/" + file)
+    ) as Chart5;
     await db.collection<ChartEntryCompressed>("chart").updateOne(
       { cid },
       {
@@ -37,11 +40,9 @@ try {
           ...(await chartToEntry(
             {
               ...content,
-              ver: content.ver as 13,
-              levels: content.levels.map((l) => ({
+              ver: content.ver as 15,
+              levelsMeta: content.levels.map((l) => ({
                 ...l,
-                notes: l.notes as NoteCommandWithLua[],
-                speedChanges: l.speedChanges as SpeedChangeWithLua[],
                 type: l.type as (typeof levelTypesConst)[number],
                 unlisted: false,
                 ytBegin: 0,
@@ -53,11 +54,19 @@ try {
                         l.notes[l.notes.length - 1].step
                       ) + content.offset
                     : 0,
+                snapDivider: 1,
               })),
+              levelsFreeze: content.levels.map((l) => ({
+                ...l,
+                notes: l.notes as NoteCommandWithLua[],
+                speedChanges: l.speedChanges as SpeedChangeWithLua[],
+              })),
+              lua: content.levels.map((l) => l.lua),
+              zoom: 1,
               changePasswd: "p",
               published: true,
               locale: "ja",
-              copyBuffer: [],
+              copyBuffer: defaultCopyBufferObj(),
             },
             cid,
             Date.now(),
