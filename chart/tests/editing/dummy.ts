@@ -1,6 +1,7 @@
 import {
   ChartEdit,
   currentChartVer,
+  defaultCopyBufferObj,
   LevelFreeze,
   LuaExecutor,
   stepZero,
@@ -34,7 +35,7 @@ export const dummyChartData: ChartEdit = {
   locale: "ja",
   changePasswd: null,
   published: false,
-  levelsMin: [
+  levelsMeta: [
     {
       name: "level1",
       type: "Single",
@@ -175,5 +176,5 @@ export const dummyChartData: ChartEdit = {
   ],
   lua: [["print('Hello, World!')"], []],
   zoom: 1,
-  copyBuffer: Array.from(new Array(10)).map(() => null),
+  copyBuffer: defaultCopyBufferObj(),
 };

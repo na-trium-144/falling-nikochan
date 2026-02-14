@@ -25,6 +25,7 @@ export * from "./legacy/chart9.js";
 export * from "./legacy/chart11.js";
 export * from "./legacy/chart13.js";
 export * from "./legacy/chart14.js";
+export * from "./legacy/chart15.js";
 
 export * from "./lua/bpm.js";
 export * from "./lua/edit.js";

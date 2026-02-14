@@ -1,5 +1,5 @@
-import { defaultCopyBuffer } from "./command.js";
-import { ChartUntil14Min } from "./legacy/chart14.js";
+import { defaultCopyBufferObj } from "./command.js";
+import { ChartUntil15Min } from "./legacy/chart15.js";
 
 export function findLuaLevelCode(rawCode: string) {
   return (
@@ -15,15 +15,17 @@ export function findLuaLevelCode(rawCode: string) {
   });
 }
 export function chartToLuaTableCode(
-  chart: ChartUntil14Min,
+  chart: ChartUntil15Min,
   fnCommandsVer: string
 ): string {
   const levelsLuaOnly = (
-    "levelsMin" in chart
-      ? chart.levelsMin
-      : "levels" in chart
-        ? chart.levels
-        : []
+    "levelsMeta" in chart
+      ? chart.levelsMeta
+      : "levelsMin" in chart
+        ? chart.levelsMin
+        : "levels" in chart
+          ? chart.levels
+          : []
   )
     .map((min, i) => {
       const jsonItems = (
@@ -60,15 +62,24 @@ ${jsonItems}
     )
     .filter((line) => line)
     .join("\n");
-  const copyBuffer = (
-    "copyBuffer" in chart ? chart.copyBuffer : defaultCopyBuffer()
-  )
-    .map((n, i) =>
-      n
-        ? `    [${i}] = {${n.hitX}, ${n.hitVX}, ${n.hitVY}, ${n.big}, ${n.fall}},`
-        : `    [${i}] = nil,`
-    )
-    .join("\n");
+  const copyBuffer =
+    "copyBuffer" in chart && Array.isArray(chart.copyBuffer)
+      ? chart.copyBuffer
+          .map((entry, i) =>
+            entry
+              ? `    [${i}] = {${entry.hitX}, ${entry.hitVX}, ${entry.hitVY}, ${entry.big}, ${entry.fall}},`
+              : `    [${i}] = nil,`
+          )
+          .join("\n")
+      : Object.entries(
+          "copyBuffer" in chart ? chart.copyBuffer : defaultCopyBufferObj()
+        )
+          .map(([i, n]) =>
+            n
+              ? `    ["${i}"] = {${n[0]}, ${n[1]}, ${n[2]}, ${n[3]}, ${n[4]}},`
+              : `    ["${i}"] = nil,`
+          )
+          .join("\n");
   return `require("fn-commands")
 return fnChart({
   version = ${JSON.stringify(fnCommandsVer)},

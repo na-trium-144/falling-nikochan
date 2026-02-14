@@ -1,15 +1,15 @@
 import { EventEmitter } from "eventemitter3";
 import { EventType, LuaExecutorRef } from "./types.js";
 import { LevelEditing } from "./level.js";
-import { NoteCommandWithLua } from "../command.js";
 import {
   ChartEdit,
-  ChartMin,
   currentChartVer,
   LevelFreeze,
   LevelMin,
   numEvents,
 } from "../chart.js";
+import { CopyBuffer } from "../legacy/chart15.js";
+import { stepZero } from "../step.js";
 
 export class ChartEditing extends EventEmitter<EventType> {
   #offset: number;
@@ -23,7 +23,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   };
   #levels: LevelEditing[];
   #currentLevelIndex: number | undefined; // 範囲外にはせず、levelsが空の場合undefined
-  #copyBuffer: (NoteCommandWithLua | null)[];
+  #copyBuffer: CopyBuffer;
   #zoom: number;
   readonly #locale: string;
   #convertedFrom: number;
@@ -66,10 +66,10 @@ export class ChartEditing extends EventEmitter<EventType> {
       composer: obj.composer,
       chartCreator: obj.chartCreator,
     };
-    this.#levels = obj.levelsMin.map(
+    this.#levels = obj.levelsMeta.map(
       (_, i) =>
         new LevelEditing(
-          obj.levelsMin[i],
+          obj.levelsMeta[i],
           obj.levelsFreeze[i],
           obj.lua[i],
           (type) => this.emit(type),
@@ -77,7 +77,7 @@ export class ChartEditing extends EventEmitter<EventType> {
           this.#luaExecutorRef
         )
     );
-    this.#copyBuffer = obj.copyBuffer;
+    this.#copyBuffer = { ...obj.copyBuffer };
     this.#zoom = obj.zoom;
     this.#currentLevelIndex =
       options.currentLevelIndex ?? (this.#levels.length >= 1 ? 0 : undefined);
@@ -106,27 +106,11 @@ export class ChartEditing extends EventEmitter<EventType> {
       offset: this.#offset,
       locale: this.#locale,
       ...this.#meta,
-      levelsMin: this.#levels.map((l) => l.meta),
+      levelsMeta: this.#levels.map((l) => l.meta),
       lua: this.#levels.map((l) => [...l.lua]),
       levelsFreeze: this.#levels.map((l) => l.freeze),
       copyBuffer: this.#copyBuffer,
       changePasswd: this.#changePasswd,
-      zoom: this.#zoom,
-    };
-  }
-  toMin(): ChartMin {
-    return {
-      falling: "nikochan",
-      ver: currentChartVer,
-      offset: this.#offset,
-      locale: this.#locale,
-      ytId: this.#meta.ytId,
-      title: this.#meta.title,
-      composer: this.#meta.composer,
-      chartCreator: this.#meta.chartCreator,
-      levelsMin: this.#levels.map((l) => l.meta),
-      lua: this.#levels.map((l) => [...l.lua]),
-      copyBuffer: this.#copyBuffer,
       zoom: this.#zoom,
     };
   }
@@ -273,22 +257,36 @@ export class ChartEditing extends EventEmitter<EventType> {
 
   copyNote(copyIndex: number) {
     if (this.currentLevel?.currentNote) {
-      this.#copyBuffer[copyIndex] = this.currentLevel.currentNote!;
+      this.#copyBuffer[String(copyIndex)] = [
+        this.currentLevel.currentNote!.hitX,
+        this.currentLevel.currentNote!.hitVX,
+        this.currentLevel.currentNote!.hitVY,
+        this.currentLevel.currentNote!.big,
+        this.currentLevel.currentNote!.fall,
+      ];
       this.emit("rerender");
       // dataに変化があるが、changeは呼ばない
     }
   }
   pasteNote(copyIndex: number, forceAdd: boolean = false) {
-    if (this.#copyBuffer.at(copyIndex) && this.currentLevel) {
+    if (this.#copyBuffer[String(copyIndex)] && this.currentLevel) {
+      const note = {
+        hitX: this.#copyBuffer[String(copyIndex)]![0],
+        hitVX: this.#copyBuffer[String(copyIndex)]![1],
+        hitVY: this.#copyBuffer[String(copyIndex)]![2],
+        big: this.#copyBuffer[String(copyIndex)]![3],
+        fall: this.#copyBuffer[String(copyIndex)]![4],
+        step: stepZero(),
+      };
       if (this.currentLevel?.currentNote && !forceAdd) {
-        this.currentLevel.updateNote(this.#copyBuffer.at(copyIndex)!);
+        this.currentLevel.updateNote(note);
       } else {
-        this.currentLevel.addNote(this.#copyBuffer.at(copyIndex)!);
+        this.currentLevel.addNote(note);
       }
     }
   }
   hasCopyBuf(copyIndex: number) {
-    return !!this.#copyBuffer.at(copyIndex);
+    return !!this.#copyBuffer[String(copyIndex)];
   }
 
   get zoom() {

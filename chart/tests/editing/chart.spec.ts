@@ -2,7 +2,6 @@ import { test, describe } from "node:test";
 import { expect } from "chai";
 import {
   ChartEditing,
-  ChartMin,
   currentChartVer,
   emptyLevel,
   numEvents,
@@ -156,48 +155,6 @@ describe("ChartEditing", () => {
     });
     const obj = ce.toObject();
     expect(obj).to.deep.equal({ ...dummyChartData, locale: "en" });
-  });
-  test("toMin", () => {
-    const ce = new ChartEditing(dummyChartData, {
-      luaExecutorRef: dummyLuaExecutor(),
-      locale: "en",
-      cid: undefined,
-      currentPasswd: null,
-    });
-    const min = ce.toMin();
-    expect(min).to.deep.equal({
-      falling: "nikochan",
-      ver: currentChartVer,
-      offset: 10,
-      ytId: "123456789ab",
-      title: "title",
-      composer: "composer",
-      chartCreator: "chartCreator",
-      levelsMin: [
-        {
-          name: "level1",
-          type: "Single",
-          unlisted: false,
-          ytBegin: 10,
-          ytEnd: 20,
-          ytEndSec: 20,
-          snapDivider: 2,
-        },
-        {
-          name: "level2",
-          type: "Double",
-          unlisted: true,
-          ytBegin: 30,
-          ytEnd: 40,
-          ytEndSec: 40,
-          snapDivider: 2,
-        },
-      ],
-      lua: [["print('Hello, World!')"], []],
-      locale: "en",
-      zoom: 1,
-      copyBuffer: dummyChartData.copyBuffer,
-    } satisfies ChartMin);
   });
   describe("addLevel", () => {
     test("should add a new level", () => {

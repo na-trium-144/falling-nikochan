@@ -11,11 +11,9 @@ import {
 } from "./step.js";
 import { BPMChange1, BPMChange1Schema } from "./legacy/chart1.js";
 import { Signature5, Signature5Schema } from "./legacy/chart5.js";
-import {
-  Level13Play,
-  SpeedChange13SchemaWithoutLua,
-} from "./legacy/chart13.js";
+import { SpeedChange13SchemaWithoutLua } from "./legacy/chart13.js";
 import { Chart6, Level6Play } from "./legacy/chart6.js";
+import { Level15Play } from "./legacy/chart15.js";
 
 const PosSchema = () =>
   v.object({
@@ -157,7 +155,7 @@ function solveQuadEquation(
  * chartを読み込む
  */
 export function loadChart(
-  level: Level13Play | Level6Play | Chart6,
+  level: Level15Play | Level6Play | Chart6,
   levelIndex?: number
 ): ChartSeqData {
   if ("levels" in level) {
