@@ -1,30 +1,33 @@
 import { LuaFactory } from "wasmoon";
-import { Step, stepZero } from "../step.js";
-import {
-  luaAccel,
-  luaAccelEnd,
-  luaBeat,
-  luaBPM,
-  luaNote,
-  luaStep,
-} from "./api.js";
+import { Step, StepSchema, stepZero } from "../step.js";
 import { updateBpmTimeSec } from "../bpm.js";
 import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";
+import { LevelFreezeSchema13 } from "../legacy/chart13.js";
+import * as v from "valibot";
 
 export interface LuaExecResult {
   stdout: string[];
   err: string[];
   errorLine: number | null;
   levelFreezed: LevelFreeze;
+  rawReturnValue: unknown;
   step: Step;
 }
 export async function luaExec(
   wasmPath: string,
+  fnCommandsLib: string,
   code: string,
-  catchError: boolean
+  options: {
+    catchError?: boolean;
+    needReturnValue?: boolean;
+  }
 ): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
+  await factory.mountFile(
+    "/usr/local/share/lua/5.4/fn-commands.lua",
+    fnCommandsLib
+  );
   const lua = await factory.createEngine();
   const result: LuaExecResult = {
     stdout: [],
@@ -37,6 +40,7 @@ export async function luaExec(
       speedChanges: [],
       signature: [],
     },
+    rawReturnValue: undefined,
     step: stepZero(),
   };
   try {
@@ -52,23 +56,6 @@ export async function luaExec(
       Note()の引数に変数が入っていたりする場合は置き換えない (行番号はnullにする)
       この場合Noteタブなどから編集できない
     */
-
-    (
-      [
-        ["Note", luaNote],
-        ["Step", luaStep],
-        ["Beat", luaBeat],
-        ["BPM", luaBPM],
-        ["Accel", luaAccel],
-        ["AccelBegin", luaAccel],
-        ["AccelEnd", luaAccelEnd],
-      ] as const
-    ).forEach(([name, func]) => {
-      lua.global.set(name, (...args: unknown[]) => func(result, null, ...args));
-      lua.global.set(`${name}Static`, (...args: unknown[]) =>
-        func(result, ...args)
-      );
-    });
 
     const codeStatic = code.split("\n").map((lineStr, ln) =>
       lineStr
@@ -99,9 +86,35 @@ export async function luaExec(
         )
     );
     // console.log(codeStatic);
-    await lua.doString(codeStatic.join("\n"));
+    await lua.doString('require("fn-commands")');
+    const value = await lua.doString(codeStatic.join("\n"));
+    if (options.needReturnValue) {
+      result.rawReturnValue = value;
+    }
+
+    const fnState = await lua.doString("return _G.fnState");
+    console.log(fnState);
+    function parseArrayOrEmpty(a: unknown): unknown[] {
+      if (Array.isArray(a)) {
+        return a;
+      } else if (typeof a === "object" && a && Object.keys(a).length === 0) {
+        return [];
+      } else {
+        throw new Error(`unexpected object: ${JSON.stringify(a)}`);
+      }
+    }
+    if (fnState) {
+      result.levelFreezed = v.parse(LevelFreezeSchema13(), {
+        notes: parseArrayOrEmpty(fnState.notes),
+        rest: parseArrayOrEmpty(fnState.rest),
+        bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),
+        speedChanges: parseArrayOrEmpty(fnState.speedChanges),
+        signature: parseArrayOrEmpty(fnState.signature),
+      });
+      result.step = v.parse(StepSchema(), fnState.step);
+    }
   } catch (e) {
-    if (!catchError) {
+    if (!options.catchError) {
       throw e;
     }
     result.err = String(e).split("\n");

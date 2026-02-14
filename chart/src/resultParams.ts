@@ -2,7 +2,7 @@ import * as msgpack from "@msgpack/msgpack";
 import * as v from "valibot";
 
 const dateBase = new Date(2025, 2, 1);
-function serializeDate3(date: Date): number {
+export function serializeDate3(date: Date): number {
   const targetDate = new Date(
     date.getFullYear(),
     date.getMonth(),

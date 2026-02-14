@@ -1,3 +1,4 @@
+import { CopyBuffer } from "./legacy/chart15.js";
 import { NoteCommand9, Rest9 } from "./legacy/chart9.js";
 import { Step, stepZero } from "./step.js";
 
@@ -36,4 +37,7 @@ export function defaultCopyBuffer() {
   return ([defaultNoteCommand()] as (NoteCommandWithLua | null)[]).concat(
     Array.from(new Array(9)).map(() => null)
   );
+}
+export function defaultCopyBufferObj(): CopyBuffer {
+  return { "0": [-3, 1, 3, false, true] };
 }
