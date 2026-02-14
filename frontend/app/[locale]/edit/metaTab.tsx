@@ -117,7 +117,7 @@ interface Props2 {
   remoteSave: () => Promise<void>;
   saveState: SaveState;
   remoteDelete: () => Promise<void>;
-  localSave: (format: "yml" | "lua") => void;
+  localSave: (format: "lua") => void;
   localSaveState: SaveState;
   localLoad: (buffer: ArrayBuffer) => Promise<void>;
   localLoadState: LocalLoadState;
@@ -128,7 +128,7 @@ export function MetaTab(props: Props2) {
   const router = useRouter();
   const shareLink = useShareLink(
     props.chart?.cid,
-    props.chart?.toMin(),
+    props.chart?.toObject(),
     props.locale
   );
   const hasLevelData =

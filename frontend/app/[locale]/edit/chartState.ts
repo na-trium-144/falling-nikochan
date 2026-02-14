@@ -6,7 +6,6 @@ import {
 } from "@/common/passwdCache";
 import {
   ChartEdit,
-  currentChartVer,
   emptyChart,
   validateChart,
   validateChartMin,
@@ -17,6 +16,8 @@ import {
   Chart14Min,
   chartToLuaTableCode,
   findLuaLevelCode,
+  Chart14Edit,
+  convertToLatest,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -350,23 +351,23 @@ export function useChartState(props: Props) {
 
   const [localSaveState, setLocalSaveState] = useState<SaveState>(undefined);
   const localSave = useCallback(
-    (format: "yml" | "lua") => {
+    (format: "lua") => {
       if (chartState.state === "ok") {
         setLocalSaveState("saving");
         let blob: Blob;
         let extension: string;
         switch (format) {
-          case "yml":
-            extension = `fn${currentChartVer}.yml`;
-            blob = new Blob([
-              YAML.stringify(chartState.chart.toMin(), { indentSeq: false }),
-            ]);
-            break;
+          // case "yml":
+          //   extension = `fn${currentChartVer}.yml`;
+          //   blob = new Blob([
+          //     YAML.stringify(chartState.chart.toMin(), { indentSeq: false }),
+          //   ]);
+          //   break;
           case "lua":
             extension = `fn.lua`;
             blob = new Blob([
               chartToLuaTableCode(
-                chartState.chart.toMin(),
+                chartState.chart.toObject(),
                 fnCommandsPackageJson.version.split(".").slice(0, 2).join(".")
               ),
             ]);
@@ -410,7 +411,7 @@ export function useChartState(props: Props) {
         }
         return {
           originalVer,
-          newChart: {
+          newChart: await convertToLatest({
             ...(newChartMin as Chart14Min),
             changePasswd: null,
             published: false,
@@ -427,7 +428,7 @@ export function useChartState(props: Props) {
                   ).levelFreezed
               )
             ),
-          } satisfies ChartEdit,
+          } satisfies Chart14Edit),
         };
       };
       let result: Awaited<ReturnType<typeof validateAndExec>> | null = null;
@@ -450,11 +451,14 @@ export function useChartState(props: Props) {
               { catchError: false, needReturnValue: true }
             );
             console.log("lua rawReturnValue:", luaResult.rawReturnValue);
-            result = await validateAndExec({
-              ...(luaResult.rawReturnValue as object),
-              lua: findLuaLevelCode(rawCode),
-              locale,
-            });
+            result = {
+              originalVer: (luaResult.rawReturnValue as ChartEdit).ver,
+              newChart: await validateChart({
+                ...(luaResult.rawReturnValue as ChartEdit),
+                lua: findLuaLevelCode(rawCode),
+                locale,
+              }),
+            };
           } catch (e3) {
             console.error(e1);
             console.error(e2);

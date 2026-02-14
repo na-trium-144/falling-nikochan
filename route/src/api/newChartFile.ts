@@ -1,17 +1,15 @@
 import * as msgpack from "@msgpack/msgpack";
 import {
-  ChartEdit,
   currentChartVer,
   numEvents,
-  validateChart,
+  validateChartWithoutConvert,
   chartMaxEvent,
   fileMaxSize,
   rateLimit,
   CidSchema,
   ChartEditSchema13,
-  Chart13Edit,
-  validateChart13,
-  ChartUntil14,
+  Chart14Edit,
+  Chart15,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
@@ -132,20 +130,17 @@ const newChartFileApp = async (config: {
             });
           }
 
-          let newChartObj: ChartUntil14;
-          let newChart: Chart13Edit | ChartEdit;
+          let newChart: Chart14Edit | Chart15;
           try {
-            newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
-            if (newChartObj.ver === currentChartVer - 1) {
-              newChart = await validateChart13(newChartObj as Chart13Edit);
-            } else {
-              newChart = await validateChart(newChartObj);
-            }
+            newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
+            newChart = validateChartWithoutConvert(newChart) as
+              | Chart14Edit
+              | Chart15;
           } catch (e) {
             console.error(e);
             throw new HTTPException(415, { message: (e as Error).toString() });
           }
-          if (newChartObj.ver < currentChartVer - 1) {
+          if (newChart.ver < currentChartVer - 1) {
             throw new HTTPException(409, { message: "oldChartVersion" });
           }
 
