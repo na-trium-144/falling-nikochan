@@ -354,13 +354,16 @@ export function useChartState(props: Props) {
       if (chartState.state === "ok") {
         setLocalSaveState("saving");
         let blob: Blob;
+        let extension: string;
         switch (format) {
           case "yml":
+            extension = `fn${currentChartVer}.yml`;
             blob = new Blob([
               YAML.stringify(chartState.chart.toMin(), { indentSeq: false }),
             ]);
             break;
           case "lua":
+            extension = `fn.lua`;
             blob = new Blob([
               chartToLuaTableCode(
                 chartState.chart.toMin(),
@@ -372,7 +375,7 @@ export function useChartState(props: Props) {
             format satisfies never;
             throw new Error(`invalid format ${format}`);
         }
-        const filename = `${chartState.chart.cid}_${chartState.chart.meta.title}.fn${currentChartVer}.${format}`;
+        const filename = `${chartState.chart.cid}_${chartState.chart.meta.title}.${extension}`;
         saveAs(blob, filename);
         setLocalSaveState("ok");
         return filename;

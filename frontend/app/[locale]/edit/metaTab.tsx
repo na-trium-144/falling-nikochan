@@ -267,7 +267,7 @@ export function MetaTab(props: Props2) {
           <HelpIcon>
             {t.rich("localSaveLoadHelp", {
               br: () => <br />,
-              extension: `fn${currentChartVer}.lua`,
+              extension: `fn.lua`,
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
