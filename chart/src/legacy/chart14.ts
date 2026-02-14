@@ -2,7 +2,7 @@
 // snapDividerとzoomを追加
 
 import * as v from "valibot";
-import { ArrayOrEmptyObj, levelTypesConst } from "../chart.js";
+import { levelTypesConst } from "../chart.js";
 import {
   ChartUntil11,
   ChartUntil11Min,
@@ -34,64 +34,30 @@ export const LevelMinSchema14 = () =>
   });
 
 export const ChartMinSchema14 = () =>
-  v.pipe(
-    v.object({
-      falling: v.literal("nikochan"),
-      ver: v.union([v.literal(14)]),
-      offset: v.pipe(v.number(), v.minValue(0)),
-      ytId: v.string(),
-      title: v.string(),
-      composer: v.string(),
-      chartCreator: v.string(),
-      locale: v.string(),
-      levelsMin: ArrayOrEmptyObj(LevelMinSchema14()),
-      lua: v.array(v.array(v.string())),
-      // エディターの拡大率、 1.5^x 倍にする
-      zoom: v.pipe(v.number(), v.integer()),
-      copyBuffer: v.union([
-        v.pipe(v.array(v.nullable(NoteCommandSchema9())), v.length(10)),
-        // luaTableをパースして得られるオブジェクト
-        // (luaからnilを含む配列を返すことができないため)
-        v.pipe(
-          v.object(
-            Object.fromEntries(
-              Array.from(new Array(10), (_, i) => [
-                String(i), // 0-9
-                v.optional(NoteCommandSchema9()),
-              ])
-            )
-          ),
-          v.transform((copyBuffer) =>
-            Array.from(new Array(10), (_, i) => copyBuffer[String(i)] ?? null)
-          )
-        ),
-      ]),
-    }),
-    v.check(
-      (min) => min.levelsMin.length === min.lua.length,
-      "levelsMin.length and lua.length does not match"
-    )
-  );
+  v.object({
+    falling: v.literal("nikochan"),
+    ver: v.union([v.literal(14)]),
+    offset: v.pipe(v.number(), v.minValue(0)),
+    ytId: v.string(),
+    title: v.string(),
+    composer: v.string(),
+    chartCreator: v.string(),
+    locale: v.string(),
+    levelsMin: v.array(LevelMinSchema14()),
+    lua: v.array(v.array(v.string())),
+    // エディターの拡大率、 1.5^x 倍にする
+    zoom: v.pipe(v.number(), v.integer()),
+    copyBuffer: v.pipe(v.array(v.nullable(NoteCommandSchema9())), v.length(10)),
+  });
 export const ChartEditSchema14 = () =>
-  v.pipe(
-    v.object({
-      ...ChartMinSchema14().entries,
-      levelsFreeze: ArrayOrEmptyObj(LevelFreezeSchema13()),
-      changePasswd: v.optional(
-        v.nullable(v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))),
-        null
-      ),
-      published: v.boolean(),
-    }),
-    v.check(
-      (min) => min.levelsMin.length === min.lua.length,
-      "levelsMin.length and lua.length does not match"
+  v.object({
+    ...ChartMinSchema14().entries,
+    levelsFreeze: v.array(LevelFreezeSchema13()),
+    changePasswd: v.nullable(
+      v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))
     ),
-    v.check(
-      (min) => min.levelsMin.length === min.levelsFreeze.length,
-      "levelsMin.length and levelsFreeze.length does not match"
-    )
-  );
+    published: v.boolean(),
+  });
 
 export type Level14Min = v.InferOutput<ReturnType<typeof LevelMinSchema14>>;
 export type Chart14Min = v.InferOutput<ReturnType<typeof ChartMinSchema14>>;
