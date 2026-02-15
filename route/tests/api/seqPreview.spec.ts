@@ -38,7 +38,7 @@ describe("POST /api/seqPreview", () => {
     
     expect(res.status).to.equal(400);
     const body = await res.json();
-    expect(body.message).to.include("msgpack");
+    expect(body.message).to.equal("Invalid msgpack format");
   });
 
   test("should return 400 for invalid Level15Play data (missing required fields)", async () => {

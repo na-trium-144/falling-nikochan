@@ -16,7 +16,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
   "/",
   describeRoute({
     description:
-      "Accepts msgpack-encoded Level15Play data and returns chart sequence data in MessagePack format for preview purposes.",
+      "Accepts MessagePack-encoded Level15Play data and returns chart sequence data in MessagePack format for preview purposes.",
     requestBody: {
       description: "MessagePack-encoded Level15Play data",
       required: true,
