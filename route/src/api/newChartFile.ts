@@ -133,15 +133,15 @@ const newChartFileApp = async (config: {
           let newChart: Chart14Edit | Chart15;
           try {
             newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
+            if (newChart.ver < currentChartVer - 1) {
+              return c.json({ message: "oldChartVersion" }, 409);
+            }
             newChart = validateChartWithoutConvert(newChart) as
               | Chart14Edit
               | Chart15;
           } catch (e) {
             console.error(e);
             throw new HTTPException(415, { message: (e as Error).toString() });
-          }
-          if (newChart.ver < currentChartVer - 1) {
-            throw new HTTPException(409, { message: "oldChartVersion" });
           }
 
           if (numEvents(newChart) > chartMaxEvent) {
