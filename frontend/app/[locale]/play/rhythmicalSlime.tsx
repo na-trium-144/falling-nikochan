@@ -37,7 +37,7 @@ interface SlimeState {
   animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
-  const { playing, getCurrentTimeSec, bpmChanges, playbackRate } = props;
+  const { className, style, playing, getCurrentTimeSec, bpmChanges, signature, playbackRate } = props;
   const step = useRef<Step | null>(null);
   const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
@@ -67,7 +67,7 @@ export default function RhythmicalSlime(props: Props) {
             if (stepCmp(step.current, stepZero()) < 0) {
               step.current = stepZero();
             } else {
-              const ss = getSignatureState(props.signature, step.current);
+              const ss = getSignatureState(signature, step.current);
               step.current = ss.stepAligned;
               const slimeIndex = ss.count.fourth;
               const slimeSize = ss.bar[slimeIndex];
@@ -79,7 +79,7 @@ export default function RhythmicalSlime(props: Props) {
               step.current = stepAdd(ss.stepAligned, slimeSizeStep);
             }
           }
-          const ss = getSignatureState(props.signature, step.current);
+          const ss = getSignatureState(signature, step.current);
           step.current = ss.stepAligned;
           const slimeIndex = ss.count.fourth;
           const slimeSize = ss.bar[slimeIndex];
@@ -171,18 +171,18 @@ export default function RhythmicalSlime(props: Props) {
       lastPreparingSec.current = null;
       setSlimeStates([]);
       setMaxSlimeNum((num) =>
-        Math.max(num, props.signature[0]?.bars[0].length)
+        Math.max(num, signature[0]?.bars[0].length)
       );
-      setCurrentBar(props.signature[0]?.bars[0] || []);
+      setCurrentBar(signature[0]?.bars[0] || []);
     }
-  }, [bpmChanges, playing, getCurrentTimeSec, props.signature, playbackRate]);
+  }, [bpmChanges, playing, getCurrentTimeSec, signature, playbackRate]);
 
   const { playUIScale, rem } = useDisplayMode();
 
   return (
     <div
-      className={clsx(props.className, "flex flex-row-reverse")}
-      style={props.style}
+      className={clsx(className, "flex flex-row-reverse")}
+      style={style}
     >
       {Array.from(new Array(maxSlimeNum)).map((_, i) => (
         <Slime
@@ -210,12 +210,13 @@ interface PropsS {
   playbackRate: number;
 }
 function Slime(props: PropsS) {
+  const { size: propsSize, exists, state, getCurrentTimeSec, playUIScale, rem, playbackRate } = props;
   const prevSize = useRef<4 | 8 | 16 | null>(null);
   let size: 4 | 8 | 16;
-  if (props.size === null) {
+  if (propsSize === null) {
     size = prevSize.current || 4;
   } else {
-    size = props.size;
+    size = propsSize;
     prevSize.current = size;
   }
   const [firstFrame, setFirstFrame] = useState<boolean>(true);
@@ -226,7 +227,6 @@ function Slime(props: PropsS) {
   const [jumpingMidDate, setJumpingMidDate] =
     useState<DOMHighResTimeStamp | null>(null);
   const durationSec = useRef<number>(0);
-  const { getCurrentTimeSec, state, playbackRate } = props;
   useEffect(() => {
     const now = getCurrentTimeSec();
     if (now === undefined || state === undefined) {
@@ -247,15 +247,15 @@ function Slime(props: PropsS) {
         width:
           (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) *
           3.5 *
-          props.rem *
-          props.playUIScale,
-        marginLeft: 0 * props.playUIScale,
+          rem *
+          playUIScale,
+        marginLeft: 0 * playUIScale,
       }}
     >
       <SlimeSVG
         className="absolute inset-x-0 bottom-0 "
         appearingAnim
-        hidden={firstFrame || !props.exists}
+        hidden={firstFrame || !exists}
         jumpingMid={jumpingMidDate}
         duration={durationSec.current}
         noLoop

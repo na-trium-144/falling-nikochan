@@ -21,9 +21,27 @@ interface Props {
   onPointerLeave?: (e: MouseEvent) => void;
 }
 export function Box(props: Props) {
+  const {
+    refOuter,
+    refInner,
+    hidden,
+    classNameOuter,
+    classNameInner,
+    classNameBorder,
+    styleOuter,
+    styleInner,
+    onClick,
+    onPointerDown,
+    onPointerUp,
+    onPointerLeave,
+    scrollableX,
+    scrollableY,
+    padding,
+    children,
+  } = props;
   return (
     <div
-      ref={props.refOuter}
+      ref={refOuter}
       className={clsx(
         /*
         外側のabsolute要素の中央に揃えたい場合、 absolute inset-0 m-auto を使うとsafariでバグる。
@@ -36,40 +54,40 @@ export function Box(props: Props) {
         */
         "fn-box",
         "fn-plain",
-        props.hidden && "hidden",
-        props.classNameOuter
+        hidden && "hidden",
+        classNameOuter
       )}
-      style={props.styleOuter}
-      onClick={props.onClick}
-      onPointerDown={props.onPointerDown}
-      onPointerUp={props.onPointerUp}
-      onPointerLeave={props.onPointerLeave}
+      style={styleOuter}
+      onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerLeave={onPointerLeave}
     >
-      <span className={clsx("fn-glass-1", props.classNameBorder)} />
-      <span className={clsx("fn-glass-2", props.classNameBorder)} />
-      {props.scrollableX || props.scrollableY ? (
+      <span className={clsx("fn-glass-1", classNameBorder)} />
+      <span className={clsx("fn-glass-2", classNameBorder)} />
+      {scrollableX || scrollableY ? (
         <Scrollable
-          ref={props.refInner}
-          className={clsx("fn-box-inner", props.classNameInner)}
-          style={props.styleInner}
-          padding={props.padding ?? 0}
-          scrollableX={props.scrollableX}
-          scrollableY={props.scrollableY}
+          ref={refInner}
+          className={clsx("fn-box-inner", classNameInner)}
+          style={styleInner}
+          padding={padding ?? 0}
+          scrollableX={scrollableX}
+          scrollableY={scrollableY}
         >
-          {props.children}
+          {children}
         </Scrollable>
       ) : (
         <div
-          ref={props.refInner}
-          className={clsx("fn-box-inner", props.classNameInner)}
+          ref={refInner}
+          className={clsx("fn-box-inner", classNameInner)}
           style={{
-            ...props.styleInner,
-            padding: props.padding
-              ? `calc(var(--spacing) * ${props.padding})`
+            ...styleInner,
+            padding: padding
+              ? `calc(var(--spacing) * ${padding})`
               : undefined,
           }}
         >
-          {props.children}
+          {children}
         </div>
       )}
     </div>
@@ -77,47 +95,73 @@ export function Box(props: Props) {
 }
 
 export function CenterBox(props: Props) {
+  const {
+    refOuter,
+    refInner,
+    hidden,
+    classNameOuter,
+    classNameInner,
+    styleOuter,
+    styleInner,
+    scrollableX,
+    scrollableY,
+    padding,
+    onClick,
+    onPointerDown,
+    onPointerUp,
+    children,
+  } = props;
   return (
     <div
-      ref={props.refOuter}
+      ref={refOuter}
       className={clsx(
         "fn-centered-box-bg",
-        props.classNameOuter,
-        props.hidden && "hidden"
+        classNameOuter,
+        hidden && "hidden"
       )}
     >
       <Box
-        refInner={props.refInner}
+        refInner={refInner}
         classNameOuter=""
-        classNameInner={clsx(props.classNameInner)}
-        styleOuter={props.styleOuter}
-        styleInner={props.styleInner}
-        scrollableX={props.scrollableX}
-        scrollableY={props.scrollableY}
-        padding={props.padding ?? 6}
-        onClick={props.onClick}
-        onPointerDown={props.onPointerDown}
-        onPointerUp={props.onPointerUp}
+        classNameInner={clsx(classNameInner)}
+        styleOuter={styleOuter}
+        styleInner={styleInner}
+        scrollableX={scrollableX}
+        scrollableY={scrollableY}
+        padding={padding ?? 6}
+        onClick={onClick}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
       >
-        {props.children}
+        {children}
       </Box>
     </div>
   );
 }
 
 export function WarningBox(props: Props) {
+  const {
+    refOuter,
+    hidden,
+    classNameBorder,
+    styleOuter,
+    onClick,
+    onPointerDown,
+    onPointerUp,
+    children,
+  } = props;
   return (
     <div
-      className={clsx("fn-warning-box", props.hidden && "hidden")}
-      ref={props.refOuter}
-      style={props.styleOuter}
-      onClick={props.onClick}
-      onPointerDown={props.onPointerDown}
-      onPointerUp={props.onPointerUp}
+      className={clsx("fn-warning-box", hidden && "hidden")}
+      ref={refOuter}
+      style={styleOuter}
+      onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
     >
-      <span className={clsx("fn-glass-1", props.classNameBorder)} />
-      <span className={clsx("fn-glass-2", props.classNameBorder)} />
-      {props.children}
+      <span className={clsx("fn-glass-1", classNameBorder)} />
+      <span className={clsx("fn-glass-2", classNameBorder)} />
+      {children}
     </div>
   );
 }

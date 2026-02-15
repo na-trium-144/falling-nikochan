@@ -11,10 +11,11 @@ interface Props {
   bottom: number | string;
 }
 export default function TargetLine(props: Props) {
+  const { barFlash, className, style, left, right, bottom } = props;
   const [spreadShadow, setSpreadShadow] = useState(false);
   useEffect(() => {
-    console.log(props.barFlash);
-    if (props.barFlash !== undefined) {
+    console.log(barFlash);
+    if (barFlash !== undefined) {
       // なぜかrequestAnimationFrameだけではdelayが足りない
       const t = setTimeout(() =>
         requestAnimationFrame(() => {
@@ -33,26 +34,26 @@ export default function TargetLine(props: Props) {
         clearTimeout(t);
       };
     }
-  }, [props.barFlash]);
+  }, [barFlash]);
   const flashPos = useRef<number | string>(0);
-  if (props.barFlash !== undefined) {
-    flashPos.current = props.barFlash;
+  if (barFlash !== undefined) {
+    flashPos.current = barFlash;
   }
   return (
     <div
       className={clsx(
         "absolute h-0.5 transition-all",
         "overflow-x-clip",
-        props.barFlash !== undefined
+        barFlash !== undefined
           ? "bg-amber-400/70 duration-0"
           : "bg-black/35 dark:bg-white/35 duration-500",
-        props.className
+        className
       )}
       style={{
-        left: props.left,
-        right: props.right,
-        bottom: props.bottom,
-        ...props.style,
+        left: left,
+        right: right,
+        bottom: bottom,
+        ...style,
       }}
     >
       <div
@@ -63,10 +64,10 @@ export default function TargetLine(props: Props) {
           spreadShadow
             ? "scale-x-100 opacity-0 duration-400"
             : "scale-x-0 opacity-100 duration-0"
-          // props.barFlash === undefined && spreadShadow
+          // barFlash === undefined && spreadShadow
           //   ? "opacity-0"
           //   : "opacity-100",
-          // props.barFlash === undefined && !spreadShadow && "hidden"
+          // barFlash === undefined && !spreadShadow && "hidden"
         )}
         style={{
           left:

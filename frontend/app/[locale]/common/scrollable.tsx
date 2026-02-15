@@ -22,10 +22,10 @@ interface Props<T extends ElementType> {
   scrollableY?: boolean;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
+  const { ref: refProp, as, padding: paddingProp, className, style, children, scrollableX, scrollableY } = props;
   const myRef = useRef<HTMLDivElement>(null);
-  const ref = props.ref || myRef;
+  const ref = refProp || myRef;
   const { rem } = useDisplayMode();
-  const { scrollableX, scrollableY, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
     if (refCurrent) {
@@ -166,8 +166,8 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, padding, rem, scrollableX, scrollableY]);
-  const Component = props.as || "div";
+  }, [ref, paddingProp, rem, scrollableX, scrollableY]);
+  const Component = as || "div";
   return (
     <Component
       ref={ref}
@@ -175,16 +175,16 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         "fn-scrollable",
         scrollableX && "fn-scrollable-x",
         scrollableY && "fn-scrollable-y",
-        props.className
+        className
       )}
       style={
         {
-          ...props.style,
-          "--padding": padding ? `calc(var(--spacing) * ${padding})` : "0px",
+          ...style,
+          "--padding": paddingProp ? `calc(var(--spacing) * ${paddingProp})` : "0px",
         } as CSSProperties
       }
     >
-      {props.children}
+      {children}
     </Component>
   );
 }

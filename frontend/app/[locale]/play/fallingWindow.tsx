@@ -36,13 +36,25 @@ interface Props {
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
   const {
+    className,
+    style,
     notes,
     playing,
     getCurrentTimeSec,
     setRenderFPS,
     setRunFPS,
+    barFlash,
     noClear,
     playbackRate,
+    setShouldHideBPMSign,
+    shouldHideBPMSign: shouldHideBPMSignProp,
+    showTSOffset,
+    rawStartTimeStamp,
+    filteredStartTimeStamp,
+    userOffset,
+    audioLatency,
+    posOfs,
+    timeOfsEstimator,
   } = props;
   const { width, height, ref } = useResizeDetector();
   const boxSize: number | undefined =
@@ -316,8 +328,8 @@ export default function FallingWindow(props: Props) {
         }
         lastNow.current = now;
 
-        if (props.shouldHideBPMSign !== shouldHideBPMSign) {
-          setTimeout(() => props.setShouldHideBPMSign(shouldHideBPMSign));
+        if (shouldHideBPMSignProp !== shouldHideBPMSign) {
+          setTimeout(() => setShouldHideBPMSign(shouldHideBPMSign));
         }
       }
     } else {
@@ -341,8 +353,8 @@ export default function FallingWindow(props: Props) {
         }
       }
       displayNikochan.current = [];
-      if (props.shouldHideBPMSign !== false) {
-        setTimeout(() => props.setShouldHideBPMSign(false));
+      if (shouldHideBPMSignProp !== false) {
+        setTimeout(() => setShouldHideBPMSign(false));
       }
     }
   }
@@ -365,24 +377,24 @@ export default function FallingWindow(props: Props) {
   const filteredStartTimeStampSample = useRef<number | null>(null);
   const rawStartTimeStampSample = useRef<number | null>(null);
   useEffect(() => {
-    if (props.showTSOffset) {
+    if (showTSOffset) {
       const i = setInterval(() => {
-        rawStartTimeStampSample.current = props.rawStartTimeStamp.current;
+        rawStartTimeStampSample.current = rawStartTimeStamp.current;
         filteredStartTimeStampSample.current =
-          props.filteredStartTimeStamp.current;
+          filteredStartTimeStamp.current;
       }, 50);
       return () => clearInterval(i);
     }
   }, [
-    props.showTSOffset,
-    props.rawStartTimeStamp,
-    props.filteredStartTimeStamp,
+    showTSOffset,
+    rawStartTimeStamp,
+    filteredStartTimeStamp,
   ]);
   // rawStartTimeStampからoffsetとaudioを引けば -ytPlayer.current?.getCurrentTime() の値が残る
   const rawYTStartTimeStamp = rawStartTimeStampSample.current
     ? (((rawStartTimeStampSample.current -
-        props.userOffset * 1000 +
-        (props.audioLatency || 0) * 1000) %
+        userOffset * 1000 +
+        (audioLatency || 0) * 1000) %
         1000) +
         1000) %
       1000
@@ -390,8 +402,8 @@ export default function FallingWindow(props: Props) {
 
   return (
     <div
-      className={clsx(props.className, "overflow-visible")}
-      style={props.style}
+      className={clsx(className, "overflow-visible")}
+      style={style}
       ref={ref}
     >
       {/* For nikochans tail */}
@@ -427,11 +439,11 @@ export default function FallingWindow(props: Props) {
         <TargetLine
           className="z-fw-target-line"
           barFlash={
-            props.barFlash === undefined || marginX === undefined
+            barFlash === undefined || marginX === undefined
               ? undefined
-              : "targetX" in props.barFlash
-                ? props.barFlash.targetX * boxSize + marginX
-                : props.barFlash.clientX
+              : "targetX" in barFlash
+                ? barFlash.targetX * boxSize + marginX
+                : barFlash.clientX
           }
           left={0}
           right="-100%"
@@ -449,7 +461,7 @@ export default function FallingWindow(props: Props) {
           particleAssets={particleAssets}
         />
       )}
-      {boxSize && marginY !== undefined && props.showTSOffset && (
+      {boxSize && marginY !== undefined && showTSOffset && (
         <table
           className="absolute text-sm"
           style={{ bottom: targetY * boxSize + marginY, right: 0 }}
@@ -458,12 +470,12 @@ export default function FallingWindow(props: Props) {
             <tr>
               <td className="flex-1">PosEst</td>
               <td colSpan={1} className="text-right">
-                {(props.posOfs.current * 100).toFixed(2)}%
+                {(posOfs.current * 100).toFixed(2)}%
               </td>
               <td>/</td>
               <td colSpan={2} className="text-right">
-                {props.timeOfsEstimator.current &&
-                  (Math.sqrt(props.timeOfsEstimator.current.p) * 1000).toFixed(
+                {timeOfsEstimator.current &&
+                  (Math.sqrt(timeOfsEstimator.current.p) * 1000).toFixed(
                     2
                   )}
               </td>
@@ -471,13 +483,13 @@ export default function FallingWindow(props: Props) {
             <tr>
               <td className="flex-1">TimeEst</td>
               <td colSpan={1} className="text-right">
-                {props.timeOfsEstimator.current &&
-                  (props.timeOfsEstimator.current.mu * 1000).toFixed(2)}
+                {timeOfsEstimator.current &&
+                  (timeOfsEstimator.current.mu * 1000).toFixed(2)}
               </td>
               <td>/</td>
               <td colSpan={2} className="text-right">
-                {props.timeOfsEstimator.current &&
-                  (Math.sqrt(props.timeOfsEstimator.current.r) * 1000).toFixed(
+                {timeOfsEstimator.current &&
+                  (Math.sqrt(timeOfsEstimator.current.r) * 1000).toFixed(
                     2
                   )}
               </td>
@@ -485,12 +497,12 @@ export default function FallingWindow(props: Props) {
             <tr>
               <td className="flex-1">User</td>
               <td className="min-w-14 text-right">
-                {props.userOffset < 0 ? "-" : "+"}
-                {Math.floor(Math.abs(props.userOffset) * 1000)}
+                {userOffset < 0 ? "-" : "+"}
+                {Math.floor(Math.abs(userOffset) * 1000)}
               </td>
               <td>.</td>
               <td className="min-w-6">
-                {(Math.floor(Math.abs(props.userOffset) * 1000 * 100) % 100)
+                {(Math.floor(Math.abs(userOffset) * 1000 * 100) % 100)
                   .toString()
                   .padStart(2, "0")}
               </td>
@@ -499,13 +511,13 @@ export default function FallingWindow(props: Props) {
             <tr>
               <td>Audio</td>
               <td className="text-right">
-                {typeof props.audioLatency === "number" &&
-                  "-" + Math.floor(props.audioLatency * 1000)}
+                {typeof audioLatency === "number" &&
+                  "-" + Math.floor(audioLatency * 1000)}
               </td>
               <td>.</td>
               <td>
-                {typeof props.audioLatency === "number" &&
-                  (Math.floor(props.audioLatency * 1000 * 100) % 100)
+                {typeof audioLatency === "number" &&
+                  (Math.floor(audioLatency * 1000 * 100) % 100)
                     .toString()
                     .padStart(2, "0")}
               </td>
@@ -558,16 +570,17 @@ interface MProps {
   particleAssets: RefObject<string[]>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
-  return props.displayNotes.map((d) => (
+  const { displayNotes, notes, noteSize, marginX, marginY, boxSize, particleAssets } = props;
+  return displayNotes.map((d) => (
     <Nikochan
       key={d.id}
       displayNote={d}
-      note={props.notes[d.id]}
-      noteSize={props.noteSize}
-      marginX={props.marginX}
-      marginY={props.marginY}
-      boxSize={props.boxSize}
-      particleAssets={props.particleAssets}
+      note={notes[d.id]}
+      noteSize={noteSize}
+      marginX={marginX}
+      marginY={marginY}
+      boxSize={boxSize}
+      particleAssets={particleAssets}
     />
   ));
 });
@@ -582,13 +595,13 @@ interface NProps {
   particleAssets: RefObject<string[]>;
 }
 function Nikochan(props: NProps) {
+  const { displayNote, noteSize, marginX, marginY, boxSize, note, particleAssets } = props;
   /* にこちゃん
   d.done に応じて画像と動きを変える
   0: 通常
   1〜3: good, ok, bad
   4: miss は画像が0と同じ
   */
-  const { displayNote, noteSize, marginX, marginY, boxSize, note } = props;
   return (
     <>
       {[1].includes(displayNote.done) && (
@@ -611,7 +624,7 @@ function Nikochan(props: NProps) {
           noteSize={noteSize}
           big={!!displayNote.bigBonus}
           chain={displayNote.chain || 0}
-          particleAssets={props.particleAssets}
+          particleAssets={particleAssets}
         />
       )}
     </>
@@ -626,11 +639,11 @@ interface RProps {
   chain: number;
 }
 function Ripple(props: RProps) {
+  const { noteSize, left, bottom, big, chain } = props;
   const ref = useRef<HTMLDivElement>(null!);
   const ref2 = useRef<HTMLDivElement>(null!);
   const animateDone = useRef<boolean>(false);
-  const { noteSize } = props;
-  const rippleWidth = noteSize * 2.5 * (props.big ? 1.5 : 1);
+  const rippleWidth = noteSize * 2.5 * (big ? 1.5 : 1);
   const rippleHeight = rippleWidth * 0.7;
   useEffect(() => {
     if (!animateDone.current) {
@@ -658,8 +671,8 @@ function Ripple(props: RProps) {
       style={{
         width: 1,
         height: 1,
-        left: props.left,
-        bottom: props.bottom,
+        left: left,
+        bottom: bottom,
       }}
     >
       {[ref, ref2].map((r, i) => (
@@ -668,7 +681,7 @@ function Ripple(props: RProps) {
           ref={r}
           className={clsx(
             "absolute origin-center opacity-0",
-            props.chain >= bonusMax
+            chain >= bonusMax
               ? "bg-amber-300 border-amber-400/70 dark:bg-yellow-500 dark:border-yellow-400/70"
               : "bg-yellow-200 border-yellow-300/70 dark:bg-amber-600 dark:border-amber-500/70"
           )}
@@ -696,11 +709,11 @@ interface PProps {
   particleAssets: RefObject<string[]>;
 }
 function Particle(props: PProps) {
+  const { particleNum, left, bottom, noteSize, big, particleAssets } = props;
   const ref = useRef<HTMLImageElement>(null!);
   const refBig = useRef<HTMLImageElement | null>(null);
   const animateDone = useRef<boolean>(false);
   const bigAnimateDone = useRef<boolean>(false);
-  const { noteSize, particleNum } = props;
   const maxSize = noteSize * 2;
   const bigSize = noteSize * 3.5;
   useEffect(() => {
@@ -721,7 +734,7 @@ function Particle(props: PProps) {
       );
       animateDone.current = true;
     }
-    if (props.big && refBig.current && !bigAnimateDone.current) {
+    if (big && refBig.current && !bigAnimateDone.current) {
       const angleBig = Math.random() * 360;
       const angleVel = Math.random() * 120 - 60;
       refBig.current?.animate(
@@ -741,7 +754,7 @@ function Particle(props: PProps) {
       );
       bigAnimateDone.current = true;
     }
-  }, [props.big]);
+  }, [big]);
 
   return (
     <div
@@ -749,13 +762,13 @@ function Particle(props: PProps) {
       style={{
         width: 1,
         height: 1,
-        left: props.left,
-        bottom: props.bottom,
+        left: left,
+        bottom: bottom,
       }}
     >
       <img
         decoding="async"
-        src={props.particleAssets.current[particleNum]}
+        src={particleAssets.current[particleNum]}
         ref={ref}
         className="absolute opacity-0"
         style={{
@@ -767,10 +780,10 @@ function Particle(props: PProps) {
           minHeight: maxSize,
         }}
       />
-      {props.big && (
+      {big && (
         <img
           decoding="async"
-          src={props.particleAssets.current[particleNum - 2]}
+          src={particleAssets.current[particleNum - 2]}
           ref={refBig}
           className="absolute opacity-0"
           style={{

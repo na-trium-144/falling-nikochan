@@ -39,11 +39,34 @@ interface Props {
   setSEVolume: (vol: number) => void;
 }
 export function MusicArea(props: Props) {
+  const {
+    ready,
+    playing,
+    playbackRate,
+    className,
+    lvType,
+    lvIndex,
+    isMobile,
+    isTouch,
+    ytBeginSec,
+    ytPlayer,
+    chartBrief,
+    onReady,
+    onStart,
+    onStop,
+    onPlaybackRateChange,
+    onError,
+    ytVolume,
+    setYtVolume,
+    enableSE,
+    seVolume,
+    setSEVolume,
+  } = props;
   const { width, height, ref } = useResizeDetector();
   const { rem } = useDisplayMode();
   const ytHalf = width && width / 2 < 200;
-  const largeTitle = props.isMobile ? height && height > 8.5 * rem : true;
-  const veryLargeTitle = props.isMobile
+  const largeTitle = isMobile ? height && height > 8.5 * rem : true;
+  const veryLargeTitle = isMobile
     ? height && height > 11.5 * rem
     : width && width > 30 * rem;
 
@@ -60,46 +83,46 @@ export function MusicArea(props: Props) {
   const [pointerInVolumeCtrl, setPointerInVolumeCtrl] = useState(false);
   const initialVolumeCtrlOpenDone = useRef(false);
   useEffect(() => {
-    if (props.ready && !initialVolumeCtrlOpenDone.current) {
+    if (ready && !initialVolumeCtrlOpenDone.current) {
       const t = setTimeout(() => {
         setVolumeCtrlOpen(true);
         initialVolumeCtrlOpenDone.current = true;
       }, 500);
       return () => clearTimeout(t);
     }
-  }, [props.ready]);
+  }, [ready]);
   useEffect(() => {
-    if (props.playing && volumeCtrlOpen && !pointerInVolumeCtrl) {
+    if (playing && volumeCtrlOpen && !pointerInVolumeCtrl) {
       const t = setTimeout(() => {
         setVolumeCtrlOpen(false);
       }, 2000);
       return () => clearTimeout(t);
     }
-  }, [props.playing, volumeCtrlOpen, pointerInVolumeCtrl]);
+  }, [playing, volumeCtrlOpen, pointerInVolumeCtrl]);
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
-    props.chartBrief &&
-    props.lvIndex !== undefined &&
-    props.chartBrief.levels[props.lvIndex]
-      ? Math.max(0.1, props.chartBrief.levels[props.lvIndex].length)
+    chartBrief &&
+    lvIndex !== undefined &&
+    chartBrief.levels[lvIndex]
+      ? Math.max(0.1, chartBrief.levels[lvIndex].length)
       : 0.1;
   useEffect(() => {
     const id = setInterval(() => {
-      if (props.ytPlayer.current?.getCurrentTime) {
+      if (ytPlayer.current?.getCurrentTime) {
         setCurrentSec(
           Math.min(
             levelLength,
             Math.max(
               0,
-              (props.ytPlayer.current.getCurrentTime() || 0) - props.ytBeginSec
+              (ytPlayer.current.getCurrentTime() || 0) - ytBeginSec
             )
           )
         );
       }
     }, 50);
     return () => clearInterval(id);
-  }, [props.ytPlayer, props.ytBeginSec, levelLength]);
+  }, [ytPlayer, ytBeginSec, levelLength]);
 
   const colorThief = useColorThief();
 
@@ -107,12 +130,12 @@ export function MusicArea(props: Props) {
     <div
       className={clsx(
         "grow-0 shrink-0 flex",
-        // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
-        props.isMobile
+        // levelBgColors.at(levelTypes.indexOf(lvType)) || levelBgColors[1],
+        isMobile
           ? "rounded-b-sq-xl pb-1"
           : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
-        props.className,
+        className,
         colorThief.boxStyle
       )}
       style={{ color: colorThief.currentColor }}
@@ -137,7 +160,7 @@ export function MusicArea(props: Props) {
       <div
         className={clsx(
           "flex",
-          props.isMobile ? "flex-row-reverse" : "flex-col"
+          isMobile ? "flex-row-reverse" : "flex-col"
         )}
       >
         {width && (
@@ -145,24 +168,24 @@ export function MusicArea(props: Props) {
             fixedSide="width"
             className={clsx(
               "z-10",
-              props.isMobile ? "grow-0 shrink-0 w-1/2 mb-1.5" : "w-full mb-1"
+              isMobile ? "grow-0 shrink-0 w-1/2 mb-1.5" : "w-full mb-1"
             )}
             scale={ytHalf ? 0.5 : 1}
-            id={props.chartBrief?.ytId}
+            id={chartBrief?.ytId}
             control={false}
-            ytPlayer={props.ytPlayer}
-            onReady={props.onReady}
-            onStart={props.onStart}
-            onStop={props.onStop}
-            onError={props.onError}
-            onPlaybackRateChange={props.onPlaybackRateChange}
+            ytPlayer={ytPlayer}
+            onReady={onReady}
+            onStart={onStart}
+            onStop={onStop}
+            onError={onError}
+            onPlaybackRateChange={onPlaybackRateChange}
           />
         )}
-        {props.chartBrief?.ytId && (
+        {chartBrief?.ytId && (
           <img
             ref={colorThief.imgRef}
             className="hidden"
-            src={`https://i.ytimg.com/vi/${props.chartBrief?.ytId}/mqdefault.jpg`}
+            src={`https://i.ytimg.com/vi/${chartBrief?.ytId}/mqdefault.jpg`}
             crossOrigin="anonymous"
           />
         )}
@@ -170,10 +193,10 @@ export function MusicArea(props: Props) {
           className={clsx(
             "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
             "fg-base",
-            props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
+            isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
           )}
         >
-          <div className={clsx(props.isMobile && "h-0 overflow-visible")}>
+          <div className={clsx(isMobile && "h-0 overflow-visible")}>
             <p
               className={clsx(
                 "flex flex-wrap items-baseline",
@@ -198,9 +221,9 @@ export function MusicArea(props: Props) {
                   "max-w-full text-ellipsis whitespace-nowrap"
                 )}
               >
-                {props.chartBrief?.title}
+                {chartBrief?.title}
               </span>
-              {props.chartBrief?.composer && (
+              {chartBrief?.composer && (
                 <span
                   className={clsx(
                     veryLargeTitle
@@ -213,7 +236,7 @@ export function MusicArea(props: Props) {
                   )}
                 >
                   <span className="mx-[0.25em]">/</span>
-                  {props.chartBrief?.composer}
+                  {chartBrief?.composer}
                 </span>
               )}
             </p>
@@ -228,15 +251,15 @@ export function MusicArea(props: Props) {
                     : "*:h-4 **:leading-4"
               )}
             >
-              {props.lvIndex !== undefined &&
-                props.chartBrief?.levels[props.lvIndex] && (
+              {lvIndex !== undefined &&
+                chartBrief?.levels[lvIndex] && (
                   <span
                     className={clsx(
                       "overflow-x-clip overflow-y-visible",
                       "max-w-full text-ellipsis whitespace-nowrap"
                     )}
                   >
-                    {props.chartBrief?.levels[props.lvIndex].name && (
+                    {chartBrief?.levels[lvIndex].name && (
                       <span
                         className={clsx(
                           "font-title mr-[0.25em]",
@@ -247,13 +270,13 @@ export function MusicArea(props: Props) {
                               : "text-sm"
                         )}
                       >
-                        {props.chartBrief?.levels[props.lvIndex].name}
+                        {chartBrief?.levels[lvIndex].name}
                       </span>
                     )}
                     <span
                       className={clsx(
                         "fn-level-type",
-                        props.lvType,
+                        lvType,
                         veryLargeTitle
                           ? "text-2xl"
                           : largeTitle
@@ -261,9 +284,9 @@ export function MusicArea(props: Props) {
                             : "text-sm"
                       )}
                     >
-                      <span>{props.lvType}-</span>
+                      <span>{lvType}-</span>
                       <span>
-                        {props.chartBrief?.levels[props.lvIndex]?.difficulty}
+                        {chartBrief?.levels[lvIndex]?.difficulty}
                       </span>
                     </span>
                   </span>
@@ -296,7 +319,7 @@ export function MusicArea(props: Props) {
                         : "text-sm"
                   )}
                 >
-                  {props.chartBrief?.chartCreator}
+                  {chartBrief?.chartCreator}
                 </span>
               </span>
             </p>
@@ -304,16 +327,16 @@ export function MusicArea(props: Props) {
           <p
             className={clsx(
               "leading-[1em] mt-1.5",
-              props.isMobile
+              isMobile
                 ? veryLargeTitle
                   ? "flex flex-row justify-between mr-1.5"
                   : "flex flex-col-reverse"
                 : "flex flex-row gap-[0.5em]",
               veryLargeTitle ? "text-xl" : largeTitle ? "text-base" : "text-sm",
               "text-dim",
-              props.playbackRate > 1
+              playbackRate > 1
                 ? "text-rose-600 dark:text-rose-400"
-                : props.playbackRate < 1
+                : playbackRate < 1
                   ? "text-emerald-600 dark:text-emerald-400"
                   : ""
             )}
@@ -339,12 +362,12 @@ export function MusicArea(props: Props) {
                 </span>
               </span>
             </span>
-            {props.playbackRate !== 1 && (
+            {playbackRate !== 1 && (
               <span className="flex-none w-max">
                 <span style={{ fontSize: "0.875em", lineHeight: 0 }}>
                   {t("playbackRateDisplay")}:
                 </span>
-                <span className="ml-[0.25em]">{props.playbackRate}</span>
+                <span className="ml-[0.25em]">{playbackRate}</span>
               </span>
             )}
           </p>
@@ -353,19 +376,19 @@ export function MusicArea(props: Props) {
       <ProgressBar
         value={currentSec / levelLength}
         fixedColor="bg-red-500/75"
-        className={clsx(props.isMobile ? "mx-2" : "ml-0.5 mr-1")}
+        className={clsx(isMobile ? "mx-2" : "ml-0.5 mr-1")}
       />
       <button
         className={clsx(
           "fn-icon-button absolute",
           "fg-base",
-          props.isMobile
+          isMobile
             ? clsx(
                 "-bottom-9 inset-x-0 mx-auto w-max text-xl",
-                props.isTouch ? "fn-with-bg" : ""
+                isTouch ? "fn-with-bg" : ""
               )
             : "bottom-0 right-1",
-          props.isMobile &&
+          isMobile &&
             (initialVolumeCtrlOpenDone.current
               ? "transition-all ease-out duration-300 opacity-100 "
               : "opacity-0")
@@ -381,7 +404,7 @@ export function MusicArea(props: Props) {
         className={clsx(
           "fg-base",
           "absolute z-10",
-          props.isMobile
+          isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
             : "top-full left-3 ml-auto max-w-100 right-1 mt-1 p-3",
           "rounded-sq-box",
@@ -392,7 +415,7 @@ export function MusicArea(props: Props) {
             : "ease-in scale-0 opacity-0"
         )}
         style={{
-          transformOrigin: props.isMobile
+          transformOrigin: isMobile
             ? "center calc(100% + 0.5rem)"
             : "calc(100% - 0.75rem) -0.5rem",
           backdropFilter: "blur(2px)",
@@ -423,35 +446,35 @@ export function MusicArea(props: Props) {
         )}*/}
         <div className="flex flex-row items-center ">
           <Youtube className="text-xl " />
-          <span className="text-sm w-8 text-center ">{props.ytVolume}</span>
+          <span className="text-sm w-8 text-center ">{ytVolume}</span>
           <Range
             className="flex-1 mx-1 "
             min={0}
             max={100}
             disabled={!ytVolumeCtrlAvailable}
-            value={ytVolumeCtrlAvailable ? props.ytVolume : 100}
-            onChange={props.setYtVolume}
+            value={ytVolumeCtrlAvailable ? ytVolume : 100}
+            onChange={setYtVolume}
           />
         </div>
         <div className="flex flex-row items-center mt-3 ">
           <SmilingFace
-            className={clsx("text-xl", props.enableSE || "text-dim")}
+            className={clsx("text-xl", enableSE || "text-dim")}
           />
           <span
             className={clsx(
               "text-sm w-8 text-center",
-              props.enableSE || "text-dim"
+              enableSE || "text-dim"
             )}
           >
-            {props.enableSE ? props.seVolume : t("off")}
+            {enableSE ? seVolume : t("off")}
           </span>
           <Range
             className="flex-1 mx-1 "
             min={0}
             max={100}
-            disabled={!props.enableSE}
-            value={props.enableSE ? props.seVolume : 0}
-            onChange={props.setSEVolume}
+            disabled={!enableSE}
+            value={enableSE ? seVolume : 0}
+            onChange={setSEVolume}
           />
         </div>
       </div>
