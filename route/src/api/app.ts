@@ -7,6 +7,7 @@ import latestApp from "./latest.js";
 import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
 import seqFileApp from "./seqFile.js";
+import seqPreviewApp from "./seqPreview.js";
 import hashPasswdApp from "./hashPasswd.js";
 import recordApp from "./record.js";
 import { join, dirname } from "node:path";
@@ -54,6 +55,7 @@ const apiApp = async (config: {
       await newChartFileApp({ getConnInfo: config.getConnInfo })
     )
     .route("/seqFile", seqFileApp)
+    .route("/seqPreview", seqPreviewApp)
     .route("/playFile", playFileApp)
     .route("/latest", latestApp)
     .route("/popular", popularApp)
