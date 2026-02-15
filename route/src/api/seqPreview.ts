@@ -10,7 +10,7 @@ import {
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
-import { describeRoute, resolver, validator } from "hono-openapi";
+import { describeRoute, resolver } from "hono-openapi";
 import { errorLiteral } from "../error.js";
 
 const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
@@ -58,19 +58,23 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
     try {
       // Get the raw body as ArrayBuffer
       const rawBody = await c.req.arrayBuffer();
-      
+
       // Decode msgpack
       let decodedData: unknown;
       try {
         decodedData = msgpack.decode(new Uint8Array(rawBody));
-      } catch (error) {
-        throw new HTTPException(415, { 
-          message: "Invalid msgpack format" 
+      } catch {
+        throw new HTTPException(415, {
+          message: "Invalid msgpack format",
         });
       }
 
       // Check version first
-      if (typeof decodedData === "object" && decodedData !== null && "ver" in decodedData) {
+      if (
+        typeof decodedData === "object" &&
+        decodedData !== null &&
+        "ver" in decodedData
+      ) {
         if (decodedData.ver !== 15) {
           throw new HTTPException(409, { message: "oldChartVersion" });
         }
@@ -79,8 +83,8 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       // Validate with LevelPlaySchema15
       const parseResult = v.safeParse(LevelPlaySchema15(), decodedData);
       if (!parseResult.success) {
-        throw new HTTPException(415, { 
-          message: `Validation error: ${parseResult.issues.map(i => i.message).join(", ")}` 
+        throw new HTTPException(415, {
+          message: `Validation error: ${parseResult.issues.map((i) => i.message).join(", ")}`,
         });
       }
 
@@ -99,8 +103,8 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       if (error instanceof HTTPException) {
         throw error;
       }
-      throw new HTTPException(500, { 
-        message: "Internal server error" 
+      throw new HTTPException(500, {
+        message: "Internal server error",
       });
     }
   }

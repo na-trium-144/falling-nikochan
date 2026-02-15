@@ -8,7 +8,7 @@ describe("POST /api/seqPreview", () => {
   test("should return ChartSeqData from valid Level15Play data", async () => {
     const levelData = dummyLevel15();
     const encodedBody = msgpack.encode(levelData);
-    
+
     const res = await app.request("/api/seqPreview", {
       method: "POST",
       headers: {
@@ -16,18 +16,20 @@ describe("POST /api/seqPreview", () => {
       },
       body: encodedBody,
     });
-    
+
     expect(res.status).to.equal(200);
     expect(res.headers.get("Content-Type")).to.equal("application/vnd.msgpack");
-    expect(res.headers.get("Content-Disposition")).to.include("preview.fnseq.mpk");
-    
+    expect(res.headers.get("Content-Disposition")).to.include(
+      "preview.fnseq.mpk"
+    );
+
     const seqData = msgpack.decode(await res.arrayBuffer()) as ChartSeqData;
     expect(seqData.notes).to.deep.equal(loadChart(dummyLevel15()).notes);
   });
 
   test("should return 415 for invalid msgpack", async () => {
     const invalidBody = new Uint8Array([0xff, 0xfe, 0xfd]);
-    
+
     const res = await app.request("/api/seqPreview", {
       method: "POST",
       headers: {
@@ -35,7 +37,7 @@ describe("POST /api/seqPreview", () => {
       },
       body: invalidBody,
     });
-    
+
     expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.equal("Invalid msgpack format");
@@ -47,7 +49,7 @@ describe("POST /api/seqPreview", () => {
       // missing required fields like offset, notes, etc.
     };
     const encodedBody = msgpack.encode(invalidData);
-    
+
     const res = await app.request("/api/seqPreview", {
       method: "POST",
       headers: {
@@ -55,7 +57,7 @@ describe("POST /api/seqPreview", () => {
       },
       body: encodedBody,
     });
-    
+
     expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.include("Validation error");
@@ -68,7 +70,7 @@ describe("POST /api/seqPreview", () => {
       ver: 14, // wrong version
     };
     const encodedBody = msgpack.encode(invalidData);
-    
+
     const res = await app.request("/api/seqPreview", {
       method: "POST",
       headers: {
@@ -76,7 +78,7 @@ describe("POST /api/seqPreview", () => {
       },
       body: encodedBody,
     });
-    
+
     expect(res.status).to.equal(409);
     const body = await res.json();
     expect(body.message).to.equal("oldChartVersion");
@@ -89,7 +91,7 @@ describe("POST /api/seqPreview", () => {
       offset: -1, // negative offset is invalid
     };
     const encodedBody = msgpack.encode(invalidData);
-    
+
     const res = await app.request("/api/seqPreview", {
       method: "POST",
       headers: {
@@ -97,7 +99,7 @@ describe("POST /api/seqPreview", () => {
       },
       body: encodedBody,
     });
-    
+
     expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.include("Validation error");
