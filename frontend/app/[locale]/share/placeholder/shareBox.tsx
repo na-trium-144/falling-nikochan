@@ -30,8 +30,8 @@ interface Props {
   forceShowCId?: boolean; // 通常はPCでは表示、モバイルでは非表示だが、trueの場合モバイルでも表示する
 }
 export function ShareBox(props: Props) {
-  const { cid, brief, sharedResult, locale, record, backButton, forceShowCId } = props;
   const t = useTranslations("share");
+  const { cid, brief, sharedResult, locale, record, backButton, forceShowCId } = props;
 
   const [updatedAt, setUpdatedAt] = useState<string>("");
 

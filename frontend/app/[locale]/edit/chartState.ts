@@ -68,10 +68,10 @@ export interface FetchChartOptions {
 export const downloadExtension = `fn${currentChartVer}.yml`;
 
 export function useChartState(props: Props) {
-  const { onLoad, locale, luaExecutor } = props;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
   const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
+  const { onLoad, locale, luaExecutor } = props;
 
   const [chartState, setChartState] = useState<ChartAndState>({
     state: undefined,

@@ -23,8 +23,8 @@ interface Props {
   chart?: ChartEditing;
 }
 export default function TimeBar(props: Props) {
-  const { chart } = props;
   const t = useTranslations("edit.timeBar");
+  const { chart } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
   const { rem } = useDisplayMode();
