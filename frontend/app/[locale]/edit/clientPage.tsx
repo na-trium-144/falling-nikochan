@@ -713,6 +713,7 @@ export default function Edit(props: {
             className={clsx(
               "p-3 flex flex-col items-stretch",
               "h-5/6",
+              "min-w-0", // timebarのwidthが大きいので
               "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
             )}
           >
@@ -814,9 +815,7 @@ export default function Edit(props: {
                 />
               </span>
             </div>
-            <div className="flex-none">
-              <TimeBar chart={chart} />
-            </div>
+            <TimeBar chart={chart} />
             <div className="flex flex-row items-baseline">
               <span>{t("stepUnit")} =</span>
               <span className="ml-2">1</span>
