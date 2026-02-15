@@ -14,7 +14,7 @@ export default defineConfig(
   // eslint-config-next provides flat config but without complete TypeScript types
   ...eslintConfigNext.map((config: Linter.Config) => ({
     ...config,
-    files: config.files?.map((pattern) => 
+    files: config.files?.map((pattern) =>
       typeof pattern === "string" ? `frontend/${pattern}` : pattern
     ) ?? ["frontend/**/*"],
   })),
@@ -30,14 +30,10 @@ export default defineConfig(
       "@next/next/no-img-element": "off",
       "jsx-a11y/alt-text": "off",
       "react-hooks/exhaustive-deps": "error",
-      // React 19 introduced stricter rules that have false positives or require significant refactoring
-      // These ref-like objects are not actual React refs
-      "react-hooks/refs": "off",
-      // Disable immutability check for ref-like objects passed as props
-      "react-hooks/immutability": "off",
-      // Disable globals check for intentional module-level state patterns
-      "react-hooks/globals": "off",
-      // Downgrade to warning as this is a new React 19 strictness that would require significant refactoring
+      // TODO: React19,Next.js16で導入された以下のルールをerrorにし、すべて修正する
+      "react-hooks/refs": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/globals": "warn",
       "react-hooks/set-state-in-effect": "warn",
     },
   },
