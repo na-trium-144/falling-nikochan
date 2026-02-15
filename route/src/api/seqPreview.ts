@@ -11,6 +11,7 @@ import {
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
+import { errorLiteral } from "../error.js";
 
 const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
   "/",
@@ -35,8 +36,16 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
           },
         },
       },
-      400: {
-        description: "invalid Level15Play data",
+      409: {
+        description: "chart version is not 15",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("oldChartVersion")),
+          },
+        },
+      },
+      415: {
+        description: "Invalid chart format",
         content: {
           "application/json": {
             schema: resolver(v.object({ message: v.string() })),
@@ -55,15 +64,22 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       try {
         decodedData = msgpack.decode(new Uint8Array(rawBody));
       } catch (error) {
-        throw new HTTPException(400, { 
+        throw new HTTPException(415, { 
           message: "Invalid msgpack format" 
         });
+      }
+
+      // Check version first
+      if (typeof decodedData === "object" && decodedData !== null && "ver" in decodedData) {
+        if (decodedData.ver !== 15) {
+          throw new HTTPException(409, { message: "oldChartVersion" });
+        }
       }
 
       // Validate with LevelPlaySchema15
       const parseResult = v.safeParse(LevelPlaySchema15(), decodedData);
       if (!parseResult.success) {
-        throw new HTTPException(400, { 
+        throw new HTTPException(415, { 
           message: `Validation error: ${parseResult.issues.map(i => i.message).join(", ")}` 
         });
       }

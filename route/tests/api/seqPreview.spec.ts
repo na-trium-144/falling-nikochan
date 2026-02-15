@@ -25,7 +25,7 @@ describe("POST /api/seqPreview", () => {
     expect(seqData.notes).to.deep.equal(loadChart(dummyLevel15()).notes);
   });
 
-  test("should return 400 for invalid msgpack", async () => {
+  test("should return 415 for invalid msgpack", async () => {
     const invalidBody = new Uint8Array([0xff, 0xfe, 0xfd]);
     
     const res = await app.request("/api/seqPreview", {
@@ -36,12 +36,12 @@ describe("POST /api/seqPreview", () => {
       body: invalidBody,
     });
     
-    expect(res.status).to.equal(400);
+    expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.equal("Invalid msgpack format");
   });
 
-  test("should return 400 for invalid Level15Play data (missing required fields)", async () => {
+  test("should return 415 for invalid Level15Play data (missing required fields)", async () => {
     const invalidData = {
       ver: 15,
       // missing required fields like offset, notes, etc.
@@ -56,12 +56,12 @@ describe("POST /api/seqPreview", () => {
       body: encodedBody,
     });
     
-    expect(res.status).to.equal(400);
+    expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.include("Validation error");
   });
 
-  test("should return 400 for invalid ver field", async () => {
+  test("should return 409 for invalid ver field", async () => {
     const levelData = dummyLevel15();
     const invalidData = {
       ...levelData,
@@ -77,12 +77,12 @@ describe("POST /api/seqPreview", () => {
       body: encodedBody,
     });
     
-    expect(res.status).to.equal(400);
+    expect(res.status).to.equal(409);
     const body = await res.json();
-    expect(body.message).to.include("Validation error");
+    expect(body.message).to.equal("oldChartVersion");
   });
 
-  test("should return 400 for negative offset", async () => {
+  test("should return 415 for negative offset", async () => {
     const levelData = dummyLevel15();
     const invalidData = {
       ...levelData,
@@ -98,7 +98,7 @@ describe("POST /api/seqPreview", () => {
       body: encodedBody,
     });
     
-    expect(res.status).to.equal(400);
+    expect(res.status).to.equal(415);
     const body = await res.json();
     expect(body.message).to.include("Validation error");
   });
