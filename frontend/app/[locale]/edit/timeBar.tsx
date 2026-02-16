@@ -46,23 +46,38 @@ export default function TimeBar(props: Props) {
 
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onUserScrolled = useCallback(() => {
-    if (scrollTimeout.current !== null) {
-      clearTimeout(scrollTimeout.current);
-    }
-    setAndSeekCurrentTimeWithoutOffset(
-      (timeBarRef.current?.scrollLeft ?? 0) / zoomPxPerSec(),
-      true,
-      false
-    );
-    scrollTimeout.current = setTimeout(() => {
-      scrollTimeout.current = null;
+    if (
+      cur &&
+      chart &&
+      Math.abs(
+        (timeBarRef.current?.scrollLeft ?? 0) / zoomPxPerSec() -
+          (cur.timeSec + chart.offset)
+      ) > 0.01
+    ) {
+      if (scrollTimeout.current !== null) {
+        clearTimeout(scrollTimeout.current);
+      }
       setAndSeekCurrentTimeWithoutOffset(
         (timeBarRef.current?.scrollLeft ?? 0) / zoomPxPerSec(),
         true,
-        true
+        false
       );
-    }, 100);
-  }, [setAndSeekCurrentTimeWithoutOffset, zoomPxPerSec, timeBarRef]);
+      scrollTimeout.current = setTimeout(() => {
+        scrollTimeout.current = null;
+        setAndSeekCurrentTimeWithoutOffset(
+          (timeBarRef.current?.scrollLeft ?? 0) / zoomPxPerSec(),
+          true,
+          true
+        );
+      }, 100);
+    }
+  }, [
+    setAndSeekCurrentTimeWithoutOffset,
+    zoomPxPerSec,
+    timeBarRef,
+    chart,
+    cur,
+  ]);
   useEffect(() => {
     const scrollTimeBar = () => {
       if (cur && chart) {
@@ -80,10 +95,17 @@ export default function TimeBar(props: Props) {
 
   const timeBarBeginStep =
     chart && currentLevel && cur
-      ? getStep(
-          currentLevel.freeze.bpmChanges,
-          cur.timeSec - timeBarWidth / 2 / zoomPxPerSec(),
-          currentLevel.meta.snapDivider
+      ? stepAdd(
+          getStep(
+            currentLevel.freeze.bpmChanges,
+            cur.timeSec - timeBarWidth / 2 / zoomPxPerSec(),
+            currentLevel.meta.snapDivider
+          ),
+          {
+            fourth: 0,
+            numerator: -1,
+            denominator: currentLevel.meta.snapDivider,
+          }
         )
       : stepZero();
 
