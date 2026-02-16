@@ -174,10 +174,10 @@ export default function Edit(props: {
     ref.current?.focus();
   }, []);
   const setAndSeekCurrentTimeWithoutOffset = useCallback(
-    (timeSec: number, focus = true) => {
+    (timeSec: number, focus = true, allowSeekAhead = true) => {
       if (!playing) {
         chart?.setCurrentTimeWithoutOffset(timeSec);
-        ytPlayer.current?.seekTo?.(timeSec, true);
+        ytPlayer.current?.seekTo?.(timeSec, allowSeekAhead);
       }
       if (focus) {
         ref.current?.focus();
@@ -815,7 +815,12 @@ export default function Edit(props: {
                 />
               </span>
             </div>
-            <TimeBar chart={chart} />
+            <TimeBar
+              chart={chart}
+              setAndSeekCurrentTimeWithoutOffset={
+                setAndSeekCurrentTimeWithoutOffset
+              }
+            />
             <div className="flex flex-row items-baseline">
               <span>{t("stepUnit")} =</span>
               <span className="ml-2">1</span>
