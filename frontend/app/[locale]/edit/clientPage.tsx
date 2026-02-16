@@ -166,7 +166,7 @@ export default function Edit(props: {
     setPlaying(false);
   }, []);
   const start = useCallback(() => {
-    if(chart && cur){
+    if (chart && cur) {
       // scroll中などallowSeekAhead=falseでseekした状態で再生するとカーソル位置がバグる
       ytPlayer.current?.seekTo?.(cur.timeSec + chart.offset, true);
     }
