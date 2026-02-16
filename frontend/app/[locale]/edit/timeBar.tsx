@@ -142,7 +142,7 @@ export default function TimeBar(props: Props) {
         onScroll={onUserScrolled}
       >
         <div
-          className={clsx("relative mt-10 mb-20 h-6 overflow-visible")}
+          className={clsx("relative mt-10 mb-24 h-6 overflow-visible")}
           style={{
             marginLeft: timeBarWidth / 2,
             marginRight: timeBarWidth, // / 2,
@@ -219,10 +219,10 @@ export default function TimeBar(props: Props) {
                 ss: getSignatureState(currentLevel!.freeze.signature, step),
               }))
               .map(
-                ({ step, timeSec, ss }, dt) =>
+                ({ step, timeSec, ss }) =>
                   stepCmp(step, stepZero()) >= 0 && (
                     <span
-                      key={dt}
+                      key={timeSec}
                       className="absolute border-l border-red-400 dark:border-red-700 "
                       style={{
                         top: -4,
@@ -392,7 +392,7 @@ export default function TimeBar(props: Props) {
           >
             {timeStr(cur.timeSec + chart.offset)}
           </span>
-          <div className="absolute top-10 bottom-20">
+          <div className="absolute top-10 bottom-24">
             {/* 現在bpm */}
             <div
               className="absolute w-max px-1 rounded-md backdrop-blur-2xs"
