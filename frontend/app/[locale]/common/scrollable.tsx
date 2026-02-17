@@ -20,6 +20,7 @@ interface Props<T extends ElementType> {
   ref?: RefObject<HTMLDivElement | null>;
   scrollableX?: boolean;
   scrollableY?: boolean;
+  defaultFadeY?: boolean; // jsがロードされるまでの間フェードを有効化する
   onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
@@ -27,7 +28,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const ref = props.ref || myRef;
   const { onScroll: propsOnScroll } = props;
   const { rem } = useDisplayMode();
-  const { scrollableX, scrollableY, padding } = props;
+  const { scrollableX, scrollableY, defaultFadeY, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
     if (refCurrent) {
@@ -179,6 +180,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         "fn-scrollable",
         scrollableX && "fn-scrollable-x",
         scrollableY && "fn-scrollable-y",
+        defaultFadeY && "fn-default-y",
         props.className
       )}
       style={
