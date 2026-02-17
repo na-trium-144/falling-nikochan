@@ -135,18 +135,24 @@ export default function TimeBar(props: Props) {
     }
   }
 
+  const barTop = 2.5 * rem;
+  const barHeight = 1.5 * rem;
+  const barBottom = 6 * rem; // including scrollbar
   return (
     <div className="relative w-full **:leading-4">
       <Scrollable
-        className="min-w-0 w-full"
+        className="min-w-0 w-full overflow-x-scroll overflow-y-visible"
+        style={{ height: barTop + barHeight + barBottom }}
         ref={timeBarRef as RefObject<HTMLDivElement>}
         onScroll={onUserScrolled}
         scrollableX
         convertDeltaYToX
       >
         <div
-          className={clsx("relative mt-10 mb-24 h-6 overflow-visible")}
+          className={clsx("relative overflow-visible")}
           style={{
+            marginTop: barTop,
+            height: barHeight,
             marginLeft: timeBarWidth / 2,
             marginRight: timeBarWidth, // / 2,
             width:
@@ -395,7 +401,7 @@ export default function TimeBar(props: Props) {
           >
             {timeStr(cur.timeSec + chart.offset)}
           </span>
-          <div className="absolute top-10 bottom-24">
+          <div className="absolute" style={{ top: barTop, height: barHeight }}>
             {/* 現在bpm */}
             <div
               className="absolute w-max px-1 rounded-md backdrop-blur-2xs"
