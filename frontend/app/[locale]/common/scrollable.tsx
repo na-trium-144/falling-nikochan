@@ -21,6 +21,7 @@ interface Props<T extends ElementType> {
   scrollableX?: boolean;
   scrollableY?: boolean;
   defaultFadeY?: boolean; // jsがロードされるまでの間フェードを有効化する
+  convertDeltaYToX?: boolean; // 縦スクロールを横スクロールに変換する
   onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
@@ -189,6 +190,12 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           "--padding": padding ? `calc(var(--spacing) * ${padding})` : "0px",
         } as CSSProperties
       }
+      onWheel={(e) => {
+        if (props.convertDeltaYToX) {
+          e.preventDefault();
+          e.currentTarget.scrollLeft += e.deltaY;
+        }
+      }}
     >
       {props.children}
     </Component>

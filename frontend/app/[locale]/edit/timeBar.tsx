@@ -142,6 +142,7 @@ export default function TimeBar(props: Props) {
         ref={timeBarRef as RefObject<HTMLDivElement>}
         onScroll={onUserScrolled}
         scrollableX
+        convertDeltaYToX
       >
         <div
           className={clsx("relative mt-10 mb-24 h-6 overflow-visible")}
