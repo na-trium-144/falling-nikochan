@@ -20,10 +20,12 @@ interface Props<T extends ElementType> {
   ref?: RefObject<HTMLDivElement | null>;
   scrollableX?: boolean;
   scrollableY?: boolean;
+  onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const myRef = useRef<HTMLDivElement>(null);
   const ref = props.ref || myRef;
+  const { onScroll: propsOnScroll } = props;
   const { rem } = useDisplayMode();
   const { scrollableX, scrollableY, padding } = props;
   useEffect(() => {
@@ -69,6 +71,8 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       let prevFadeLeft = -1;
       let prevFadeRight = -1;
       const onScroll = () => {
+        propsOnScroll?.();
+
         const fadeTop = refCurrent.scrollTop;
         const fadeBottom =
           refCurrent.scrollHeight -
@@ -166,7 +170,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, padding, rem, scrollableX, scrollableY]);
+  }, [ref, padding, rem, scrollableX, scrollableY, propsOnScroll]);
   const Component = props.as || "div";
   return (
     <Component

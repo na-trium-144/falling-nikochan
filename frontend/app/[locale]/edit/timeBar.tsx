@@ -12,12 +12,13 @@ import {
   stepImproper,
   stepZero,
 } from "@falling-nikochan/chart";
-import { Fragment, useCallback, useEffect, useRef } from "react";
+import { Fragment, RefObject, useCallback, useEffect, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
 import { getBarLength } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
+import { Scrollable } from "@/common/scrollable.jsx";
 
 interface Props {
   chart?: ChartEditing;
@@ -136,10 +137,11 @@ export default function TimeBar(props: Props) {
 
   return (
     <div className="relative w-full **:leading-4">
-      <div
-        className="min-w-0 w-full overflow-x-auto overflow-y-clip"
-        ref={timeBarRef}
+      <Scrollable
+        className="min-w-0 w-full"
+        ref={timeBarRef as RefObject<HTMLDivElement>}
         onScroll={onUserScrolled}
+        scrollableX
       >
         <div
           className={clsx("relative mt-10 mb-24 h-6 overflow-visible")}
@@ -372,7 +374,7 @@ export default function TimeBar(props: Props) {
                 )
             )}
         </div>
-      </div>
+      </Scrollable>
       {/* 現在位置カーソル */}
       {currentLevel && cur && (
         <div className="absolute inset-0 h-full w-0 m-auto pointer-events-none">
