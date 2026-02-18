@@ -181,7 +181,7 @@ export default function Edit(props: {
     (timeSec: number, focus = true, allowSeekAhead = true) => {
       if (!playing) {
         chart?.setCurrentTimeWithoutOffset(timeSec);
-        if (ytPlayer.current && ytPlayer.current.getPlayerState() !== 5) {
+        if (ytPlayer.current && ytPlayer.current.getPlayerState?.() !== 5) {
           ytPlayer.current?.seekTo?.(timeSec, allowSeekAhead);
         }
       }
