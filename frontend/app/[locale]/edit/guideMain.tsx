@@ -39,7 +39,10 @@ export function GuideMain(props: Props) {
           onClickBefore={() => props.setIndex(props.index - 1)}
           onClickAfter={() => props.setIndex(props.index + 1)}
         />
-        <div className="flex-1">{props.content}</div>
+        {/* scrollableのフェードを更新するため、意図的にkeyを追加しこのdivごと変化させる */}
+        <div key={props.index} className="flex-1">
+          {props.content}
+        </div>
         <p className="w-max m-auto">
           <Button
             text={props.index === 1 ? t("agreeClose") : t("close")}

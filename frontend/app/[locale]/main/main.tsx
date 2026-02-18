@@ -117,6 +117,7 @@ export function IndexMain(props: Props) {
           classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}
           classNameInner={clsx("flex flex-col", props.classNameInner)}
           scrollableY
+          defaultFadeY
           padding={6}
         >
           {!props.noBackButtonPC && (
