@@ -3,6 +3,8 @@ import {
   emptyLevel,
   levelTypesConst,
   ChartEditing,
+  Difficulty,
+  difficulty,
 } from "@falling-nikochan/chart";
 import Button from "@/common/button.js";
 import { HelpIcon } from "@/common/caption";
@@ -11,6 +13,7 @@ import Input from "@/common/input.js";
 import RightOne from "@icon-park/react/lib/icons/RightOne";
 import { useTranslations } from "next-intl";
 import { Scrollable } from "@/common/scrollable";
+import { useEffect, useState } from "react";
 
 interface Props {
   chart?: ChartEditing;
@@ -25,6 +28,23 @@ export default function LevelTab(props: Props) {
     currentLevel && currentLevel?.maxHitNum > 2,
     false,
   ];
+
+  const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty | null>(
+    null
+  );
+  useEffect(() => {
+    if (currentLevel) {
+      const updateDifficulty = () =>
+        setCurrentDifficulty(
+          difficulty(currentLevel.freeze, currentLevel.meta.type)
+        );
+      updateDifficulty();
+      chart?.on("change", updateDifficulty);
+      return () => {
+        chart?.off("change", updateDifficulty);
+      };
+    }
+  }, [chart, currentLevel]);
 
   return (
     <>
@@ -113,7 +133,7 @@ export default function LevelTab(props: Props) {
                 )}
               >
                 <span>{level.meta.type}-</span>
-                <span>{level.difficulty}</span>
+                <span>{Math.round(level.difficulty.alv)}</span>
               </span>
               <span
                 className={clsx(
@@ -141,8 +161,8 @@ export default function LevelTab(props: Props) {
               left
             />
           </div>
-          <div className="mb-2">
-            <span>{t("difficulty")}:</span>
+          <div className="">
+            <span>{t("levelType")}:</span>
             {levelTypesConst.map((t, i) => (
               <CheckBox
                 id={`level-type-${t}`}
@@ -160,6 +180,41 @@ export default function LevelTab(props: Props) {
                 {t}
               </CheckBox>
             ))}
+          </div>
+          <div className="mb-2 ml-2 text-sm">
+            <span>{t("difficulty")}:</span>
+            <span className="text-base ml-2">
+              {(currentDifficulty?.alv ?? 0).toString()}
+            </span>
+            {currentDifficulty && (
+              <>
+                <span className="ml-2">(</span>
+                <span>{t("difficultyDetail.overall")}</span>
+                <span className="ml-1">{currentDifficulty.clv.toString()}</span>
+                <span className="mx-1">/</span>
+                <span>{t("difficultyDetail.localMax")}</span>
+                <span
+                  className={clsx(
+                    "ml-1",
+                    currentDifficulty.plv >= currentDifficulty.clv + 4 &&
+                      "fn-level-col-m"
+                  )}
+                >
+                  {currentDifficulty.plv.toString()}
+                  {currentDifficulty.plv >= currentDifficulty.clv + 4 && "+"}
+                </span>
+                {currentDifficulty.additionalHit > 0 && (
+                  <>
+                    <span className="mx-1">/</span>
+                    <span>{t("difficultyDetail.multi")}</span>
+                    <span className="fn-level-col-m">
+                      +{currentDifficulty.additionalHit.toString()}
+                    </span>
+                  </>
+                )}
+                <span>)</span>
+              </>
+            )}
           </div>
           <div>
             <CheckBox

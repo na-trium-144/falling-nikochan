@@ -203,7 +203,13 @@ export default {
       deleteConfirm: "このレベルを削除しますか?\nこの操作は取り消せません。",
       unlisted: "(非表示)",
       levelName: "レベル名",
+      levelType: "種類",
       difficulty: "難易度",
+      difficultyDetail: {
+        overall: "全体",
+        localMax: "局所",
+        multi: "同時押し",
+      },
       unlistLevel: "このレベルを非表示にする",
       unlistHelp:
         "共有用リンクや譜面IDからこの譜面をプレイしようとした時に<br></br>" +

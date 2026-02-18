@@ -38,20 +38,19 @@ function lvToNps(lv: number, multiHit: number) {
   return Math.exp((lv + 2) / 5) / multiHit;
 }
 
+export interface Difficulty {
+  baseHit: number;
+  additionalHit: number;
+  clv: number;
+  plv: number;
+  alv: number;
+}
 export function difficulty(
   level: { notes: NoteCommand[] | NoteCommand3[]; bpmChanges: BPMChange[] },
   type: string
-): number {
+): Difficulty {
   const maxLv = 20;
   const minLv = 1;
-  if (level.notes.length === 0) {
-    return minLv;
-  }
-
-  const notesHitSec = level.notes.map((n) =>
-    getTimeSec(level.bpmChanges, n.step)
-  );
-  let alv: number | null = null;
   let baseHit: number;
   switch (type) {
     case "Single":
@@ -65,17 +64,44 @@ export function difficulty(
       break;
   }
 
+  if (level.notes.length === 0) {
+    return {
+      baseHit,
+      additionalHit: 0,
+      clv: minLv,
+      plv: minLv,
+      alv: minLv,
+    };
+  }
+
+  const notesHitSec = level.notes.map((n) =>
+    getTimeSec(level.bpmChanges, n.step)
+  );
+  let currentDifficulty: Difficulty | null = null;
   for (
     let additionalHit = 0;
-    alv === null || additionalHit < alv;
+    currentDifficulty === null || additionalHit < currentDifficulty.alv;
     additionalHit++
   ) {
     const multiHit = baseHit + additionalHit;
     let clv: number | null = null;
     let plv: number | null = null;
     for (let lv = 1; ; lv += 0.5) {
-      if (clv === null && lv + additionalHit >= (alv || maxLv)) {
-        alv = alv || maxLv;
+      if (clv === null && !currentDifficulty && lv + additionalHit >= maxLv) {
+        currentDifficulty = {
+          baseHit,
+          additionalHit,
+          clv: maxLv,
+          plv: maxLv,
+          alv: maxLv,
+        };
+        break;
+      }
+      if (
+        clv === null &&
+        currentDifficulty &&
+        lv + additionalHit >= currentDifficulty.alv
+      ) {
         break;
       }
       const agentScore = agentsPlay(
@@ -91,17 +117,30 @@ export function difficulty(
         plv = lv;
       }
       if (clv !== null && plv !== null) {
-        alv = Math.max(
-          Math.min(Math.round((clv + plv) / 2) + additionalHit, alv || maxLv),
-          minLv
-        );
+        const alv = (clv + plv) / 2 + additionalHit;
+        if (!currentDifficulty || currentDifficulty.alv > alv) {
+          currentDifficulty = {
+            baseHit,
+            additionalHit,
+            clv,
+            plv,
+            alv: Math.max(Math.min(alv, maxLv), minLv),
+          };
+        }
         break;
       }
       if (clv !== null && lv >= clv + 4) {
-        alv = Math.max(
-          Math.min(Math.round(clv + 2) + additionalHit, alv || maxLv),
-          minLv
-        );
+        plv = clv + 4;
+        const alv = clv + 2 + additionalHit;
+        if (!currentDifficulty || currentDifficulty.alv > alv) {
+          currentDifficulty = {
+            baseHit,
+            additionalHit,
+            clv,
+            plv,
+            alv: Math.max(Math.min(alv, maxLv), minLv),
+          };
+        }
         break;
       }
     }
@@ -109,7 +148,7 @@ export function difficulty(
       break;
     }
   }
-  return alv;
+  return currentDifficulty;
 }
 
 function agentsPlay(

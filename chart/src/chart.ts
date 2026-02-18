@@ -385,7 +385,7 @@ export async function createBrief(
         unlisted: !!level.unlisted,
         hash: levelHashes.at(i) ?? "",
         noteCount: levelsFreeze[i].notes.length,
-        difficulty: difficulty(levelsFreeze[i], level.type),
+        difficulty: Math.round(difficulty(levelsFreeze[i], level.type).alv),
         bpmMin: levelsFreeze[i].bpmChanges
           .map((b) => b.bpm)
           .reduce((a, b) => Math.min(a, b)),

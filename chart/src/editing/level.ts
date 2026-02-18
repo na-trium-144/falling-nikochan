@@ -10,7 +10,7 @@ import {
   loadChart,
   Note,
 } from "../seq.js";
-import { difficulty } from "../difficulty.js";
+import { Difficulty, difficulty } from "../difficulty.js";
 import { Step, stepAdd, stepCmp, stepZero } from "../step.js";
 import {
   luaAddBpmChange,
@@ -60,7 +60,13 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#freeze = JSON.parse(JSON.stringify(freeze));
     // 以下はupdateFreeze()内で初期化される
     this.#seqNotes = [];
-    this.#difficulty = 0;
+    this.#difficulty = {
+      baseHit: 0,
+      additionalHit: 0,
+      clv: 0,
+      plv: 0,
+      alv: 0,
+    };
     this.#maxHitNum = 0;
     this.#lengthSec = 0;
     this.#ytDuration = 0;
@@ -91,6 +97,9 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#meta = { ...this.#meta, ...newMeta };
     if ("ytEnd" in newMeta) {
       this.#resetYTEnd();
+    }
+    if ("type" in newMeta) {
+      this.#resetDifficulty();
     }
     if ("snapDivider" in newMeta) {
       this.#current.reset(
@@ -164,7 +173,7 @@ export class LevelEditing extends EventEmitter<EventType> {
     return [...this.#seqNotes] as const;
   }
 
-  #difficulty: number;
+  #difficulty: Difficulty;
   #resetDifficulty() {
     this.#difficulty = difficulty(this.freeze, this.#meta.type);
   }
