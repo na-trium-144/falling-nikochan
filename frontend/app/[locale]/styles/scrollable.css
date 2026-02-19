@@ -2,10 +2,13 @@
   .fn-scrollable {
     will-change: mask-image;
     padding: var(--padding);
-    /* jsがロードされるまでの間の初期値としてbottomのみ適当なサイズのフェードを有効化する */
-    --fade-max: 4rem;
-    --fade-bottom: 2.5rem;
-    --alpha-bottom: 0;
+
+    &.fn-default-y {
+      /* jsがロードされるまでの間の初期値としてbottomのみ適当なサイズのフェードを有効化する */
+      --fade-max: 4rem;
+      --fade-bottom: 2.5rem;
+      --alpha-bottom: 0;
+    }
 
     &.fn-scrollable-x {
       @apply overflow-x-auto;

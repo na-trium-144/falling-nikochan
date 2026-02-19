@@ -47,7 +47,7 @@
       -webkit-text-stroke: 0.02em currentColor;
     }
     > img {
-      /* 他のnikochanはopacity-90だが、ここだけちがう */
+      /* 他のnikochanはopacity-70だが、ここだけちがう */
       @apply absolute;
       width: 1.5rem;
       height: 1.5rem;

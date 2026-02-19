@@ -420,7 +420,6 @@ export default function FallingWindow(props: Props) {
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
-          opacity: 0.9,
         }}
         width={canvasWidth.current * nikochanCanvasDPR.current}
         height={canvasHeight.current * nikochanCanvasDPR.current}

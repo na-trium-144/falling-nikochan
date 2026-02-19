@@ -20,12 +20,16 @@ interface Props<T extends ElementType> {
   ref?: RefObject<HTMLDivElement | null>;
   scrollableX?: boolean;
   scrollableY?: boolean;
+  defaultFadeY?: boolean; // jsがロードされるまでの間フェードを有効化する
+  convertDeltaYToX?: boolean; // 縦スクロールを横スクロールに変換する
+  onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const myRef = useRef<HTMLDivElement>(null);
   const ref = props.ref || myRef;
+  const { onScroll: propsOnScroll } = props;
   const { rem } = useDisplayMode();
-  const { scrollableX, scrollableY, padding } = props;
+  const { scrollableX, scrollableY, defaultFadeY, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
     if (refCurrent) {
@@ -69,6 +73,8 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       let prevFadeLeft = -1;
       let prevFadeRight = -1;
       const onScroll = () => {
+        propsOnScroll?.();
+
         const fadeTop = refCurrent.scrollTop;
         const fadeBottom =
           refCurrent.scrollHeight -
@@ -166,7 +172,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, padding, rem, scrollableX, scrollableY]);
+  }, [ref, padding, rem, scrollableX, scrollableY, propsOnScroll]);
   const Component = props.as || "div";
   return (
     <Component
@@ -175,6 +181,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         "fn-scrollable",
         scrollableX && "fn-scrollable-x",
         scrollableY && "fn-scrollable-y",
+        defaultFadeY && "fn-default-y",
         props.className
       )}
       style={
@@ -183,6 +190,12 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           "--padding": padding ? `calc(var(--spacing) * ${padding})` : "0px",
         } as CSSProperties
       }
+      onWheel={(e) => {
+        if (props.convertDeltaYToX) {
+          e.preventDefault();
+          e.currentTarget.scrollLeft += e.deltaY;
+        }
+      }}
     >
       {props.children}
     </Component>

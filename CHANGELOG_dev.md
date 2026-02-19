@@ -1,3 +1,26 @@
+## ver. 14.22 - 2026/02/19 [#973](https://github.com/na-trium-144/falling-nikochan/pull/973)
+
+* passwdHashをセッションに保存し、localStorageから削除してもそのセッション内では保存が動作するように
+* パスワード保存のチェックを外したら確実にpasswdHashがlocalStorageから消えるよう修正
+* 429の際メッセージを表示するのではなく勝手に待って再試行する
+
+## ver. 14.19 - 2026/02/18 [#969](https://github.com/na-trium-144/falling-nikochan/pull/969)
+
+* タイムバーをスクロール可能に
+* smallボタンが小さくなっていないのを修正
+* editで読み込み直後にカーソルを動かしただけでは再生されないようにした
+* main以外はデフォルトでscrollableのフェードをしない
+* editのローディングの不要なmarginを修正
+* 編集ヘルプのフェードを修正
+
+## ver. 14.18 - 2026/02/14
+
+* 音符の不透明度を70%で統一 (issue #962)
+
+## ver. 14.17 - 2026/02/13 [#967](https://github.com/na-trium-144/falling-nikochan/pull/967)
+
+* android chromeで画面が拡大される場合があるためviewportを明示的に固定 (initialScale=1, minimumScale=1, maximumScale=1, userScalable=no)
+
 ## ver. 14.15 - 2026/02/13 [#917](https://github.com/na-trium-144/falling-nikochan/pull/917)
 
 * 大量のTailwindCSSのutilityの羅列をカスタムコンポーネントとしてまとめる

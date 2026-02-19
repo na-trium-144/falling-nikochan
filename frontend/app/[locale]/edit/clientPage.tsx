@@ -166,18 +166,24 @@ export default function Edit(props: {
     setPlaying(false);
   }, []);
   const start = useCallback(() => {
+    if (chart && cur) {
+      // scroll中などallowSeekAhead=falseでseekした状態で再生するとカーソル位置がバグる
+      ytPlayer.current?.seekTo?.(cur.timeSec + chart.offset, true);
+    }
     ytPlayer.current?.playVideo();
     ref.current?.focus();
-  }, []);
+  }, [chart, cur]);
   const stop = useCallback(() => {
     ytPlayer.current?.pauseVideo();
     ref.current?.focus();
   }, []);
   const setAndSeekCurrentTimeWithoutOffset = useCallback(
-    (timeSec: number, focus = true) => {
+    (timeSec: number, focus = true, allowSeekAhead = true) => {
       if (!playing) {
         chart?.setCurrentTimeWithoutOffset(timeSec);
-        ytPlayer.current?.seekTo?.(timeSec, true);
+        if (ytPlayer.current && ytPlayer.current.getPlayerState?.() !== 5) {
+          ytPlayer.current?.seekTo?.(timeSec, allowSeekAhead);
+        }
       }
       if (focus) {
         ref.current?.focus();
@@ -713,6 +719,7 @@ export default function Edit(props: {
             className={clsx(
               "p-3 flex flex-col items-stretch",
               "h-5/6",
+              "min-w-0", // timebarのwidthが大きいので
               "edit-wide:h-full edit-wide:basis-main edit-wide:shrink-1"
             )}
           >
@@ -814,9 +821,12 @@ export default function Edit(props: {
                 />
               </span>
             </div>
-            <div className="flex-none">
-              <TimeBar chart={chart} />
-            </div>
+            <TimeBar
+              chart={chart}
+              setAndSeekCurrentTimeWithoutOffset={
+                setAndSeekCurrentTimeWithoutOffset
+              }
+            />
             <div className="flex flex-row items-baseline">
               <span>{t("stepUnit")} =</span>
               <span className="ml-2">1</span>
