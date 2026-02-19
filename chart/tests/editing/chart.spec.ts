@@ -16,14 +16,22 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: "123456",
-        currentPasswd: "passwd",
+        currentPasswd: {
+          p: "passwd",
+          ph: "passwdhash",
+          pbypass: null,
+        },
         convertedFrom: 5,
         currentLevelIndex: 1,
         hasChange: true,
       });
       expect(ce.convertedFrom).to.equal(5);
       expect(ce.cid).to.equal("123456");
-      expect(ce.currentPasswd).to.equal("passwd");
+      expect(ce.currentPasswd).to.deep.equal({
+        p: "passwd",
+        ph: "passwdhash",
+        pbypass: null,
+      });
       // expect(ce.locale).to.equal("en");
       expect(ce.hasChange).to.equal(true);
       expect(ce.currentLevelIndex).to.equal(1);
@@ -33,18 +41,21 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       expect(ce.convertedFrom).to.equal(currentChartVer);
       expect(ce.hasChange).to.equal(false);
       expect(ce.currentLevelIndex).to.equal(0);
+      expect(ce.currentPasswd).to.deep.equal({
+        p: null,
+        ph: null,
+        pbypass: null,
+      });
     });
     test("should calculate numEvents", () => {
       const ce = new ChartEditing(dummyChartData, {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       expect(ce.numEvents).to.equal(numEvents(dummyChartData));
     });
@@ -53,7 +64,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       let rerendered = false;
       let changed = false;
@@ -75,11 +85,14 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         convertedFrom: 1,
       });
       expect(ce.convertedFrom).to.equal(1);
-      ce.resetOnSave("1");
+      ce.resetOnSave("1", {
+        p: null,
+        ph: null,
+        pbypass: null,
+      });
       expect(ce.convertedFrom).to.equal(currentChartVer);
     });
     test("should reset hasChange", () => {
@@ -87,11 +100,14 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         hasChange: true,
       });
       expect(ce.hasChange).to.equal(true);
-      ce.resetOnSave("1");
+      ce.resetOnSave("1", {
+        p: null,
+        ph: null,
+        pbypass: null,
+      });
       expect(ce.hasChange).to.equal(false);
     });
     test("should move changePasswd to currentPasswd", () => {
@@ -99,26 +115,29 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: "oldpass",
+        currentPasswd: {
+          p: "oldpass",
+          ph: "oldpasshash",
+          pbypass: null,
+        },
       });
       ce.setChangePasswd("newpass");
-      expect(ce.currentPasswd).to.equal("oldpass");
-      expect(ce.changePasswd).to.equal("newpass");
-      ce.resetOnSave("1");
-      expect(ce.currentPasswd).to.equal("newpass");
-      expect(ce.changePasswd).to.be.null;
-    });
-    test("should keep currentPasswd if changePasswd is null", () => {
-      const ce = new ChartEditing(dummyChartData, {
-        luaExecutorRef: dummyLuaExecutor(),
-        locale: "en",
-        cid: undefined,
-        currentPasswd: "oldpass",
+      expect(ce.currentPasswd).to.deep.equal({
+        p: "oldpass",
+        ph: "oldpasshash",
+        pbypass: null,
       });
-      expect(ce.currentPasswd).to.equal("oldpass");
-      expect(ce.changePasswd).to.be.null;
-      ce.resetOnSave("1");
-      expect(ce.currentPasswd).to.equal("oldpass");
+      expect(ce.changePasswd).to.equal("newpass");
+      ce.resetOnSave("1", {
+        p: "newpass",
+        ph: "newpasshash",
+        pbypass: null,
+      });
+      expect(ce.currentPasswd).to.deep.equal({
+        p: "newpass",
+        ph: "newpasshash",
+        pbypass: null,
+      });
       expect(ce.changePasswd).to.be.null;
     });
     test("should set cid", () => {
@@ -126,10 +145,13 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       expect(ce.cid).to.be.undefined;
-      ce.resetOnSave("123");
+      ce.resetOnSave("123", {
+        p: null,
+        ph: null,
+        pbypass: null,
+      });
       expect(ce.cid).to.equal("123");
     });
     test("should emit rerender event", () => {
@@ -137,13 +159,16 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       let rerendered = false;
       ce.on("rerender", () => {
         rerendered = true;
       });
-      ce.resetOnSave("1");
+      ce.resetOnSave("1", {
+        p: null,
+        ph: null,
+        pbypass: null,
+      });
       expect(rerendered).to.equal(true);
     });
   });
@@ -152,7 +177,6 @@ describe("ChartEditing", () => {
       luaExecutorRef: dummyLuaExecutor(),
       locale: "en",
       cid: undefined,
-      currentPasswd: null,
     });
     const obj = ce.toObject();
     expect(obj).to.deep.equal({ ...dummyChartData, locale: "en" });
@@ -162,7 +186,6 @@ describe("ChartEditing", () => {
       luaExecutorRef: dummyLuaExecutor(),
       locale: "en",
       cid: undefined,
-      currentPasswd: null,
     });
     const min = ce.toMin();
     expect(min).to.deep.equal({
@@ -205,7 +228,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       const newLevel = emptyLevel();
@@ -220,7 +242,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       let rerendered = false;
@@ -245,7 +266,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       expect(ce.hasChange).to.equal(false);
@@ -260,7 +280,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 1,
       });
       ce.deleteLevel();
@@ -273,7 +292,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 1,
       });
       let rerendered = false;
@@ -298,7 +316,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 1,
       });
       expect(ce.hasChange).to.equal(false);
@@ -313,7 +330,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 1,
       });
       ce.moveLevelUp();
@@ -326,7 +342,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 1,
       });
       let rerendered = false;
@@ -351,7 +366,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 1,
       });
       expect(ce.hasChange).to.equal(false);
@@ -365,7 +379,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       ce.moveLevelDown();
@@ -378,7 +391,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       let rerendered = false;
@@ -403,7 +415,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       expect(ce.hasChange).to.equal(false);
@@ -417,7 +428,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       ce.setCurrentLevelIndex(1);
@@ -428,7 +438,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       ce.setCurrentLevelIndex(-1);
@@ -441,7 +450,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       let rerendered = false;
@@ -463,7 +471,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       ce.setChangePasswd("newpass");
       expect(ce.changePasswd).to.equal("newpass");
@@ -473,7 +480,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       ce.setChangePasswd("");
       expect(ce.changePasswd).to.be.null;
@@ -483,7 +489,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       let rerendered = false;
       let changed = false;
@@ -504,7 +509,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       expect(ce.currentLevel!.current.timeSec).to.equal(-10);
       ce.setOffset(0);
@@ -516,7 +520,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       let rerendered = false;
       let changed = false;
@@ -537,7 +540,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       ce.setCurrentTimeWithoutOffset(30);
       for (const level of ce.levels) {
@@ -551,7 +553,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       ce.setYTDuration(120);
       for (const level of ce.levels) {
@@ -565,7 +566,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
         currentLevelIndex: 0,
       });
       ce.currentLevel?.setCurrentTimeWithoutOffset(0 + ce.offset);
@@ -593,7 +593,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       ce.setZoom(2);
       expect(ce.zoom).to.equal(2);
@@ -603,7 +602,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       let rerendered = false;
       let changed = false;
@@ -624,7 +622,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       ce.updateMeta({ title: "new title", composer: "new composer" });
       expect(ce.meta.title).to.equal("new title");
@@ -635,7 +632,6 @@ describe("ChartEditing", () => {
         luaExecutorRef: dummyLuaExecutor(),
         locale: "en",
         cid: undefined,
-        currentPasswd: null,
       });
       let rerendered = false;
       let changed = false;

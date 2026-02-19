@@ -63,7 +63,9 @@ export default {
       savePasswdHelp:
         "パスワードをこのブラウザ (の Local Storage) に保存し、<br></br>" +
         "このブラウザからは次回パスワードを<br></br>" +
-        "入力しなくても編集できるようになります。",
+        "入力しなくても編集できるようになります。<br></br>" +
+        "チェックを外してサーバーに上書き保存すると<br></br>" +
+        "このブラウザに保存されているパスワードを削除します。",
       publish: "この譜面を一般公開する",
       publishHelp:
         "Falling Nikochan トップページの<br></br>" +

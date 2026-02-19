@@ -63,7 +63,9 @@ export default {
       savePasswdHelp:
         "Save the password in this browser's Local Storage, <br></br>" +
         "so you can edit without entering the password <br></br>" +
-        "next time from this browser.",
+        "next time from this browser. <br></br>" +
+        "If you uncheck it and save to the server, <br></br>" +
+        "it will delete the password saved in this browser.",
       publish: "Publish this chart",
       publishHelp:
         "You can list this chart on the <br></br>" +

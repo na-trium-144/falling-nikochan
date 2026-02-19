@@ -16,6 +16,7 @@ import {
   LuaExecutor,
   ChartUntil14,
   ChartUntil14Min,
+  CurrentPasswd,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -52,7 +53,7 @@ export type LocalLoadState = undefined | "loading" | "ok" | "loadFail";
 export type SaveState = undefined | "saving" | "ok" | APIError;
 interface EditSession {
   cid: string | undefined;
-  currentPasswd: string | null;
+  currentPasswd: CurrentPasswd;
   chart: ChartEdit;
   convertedFrom: number;
   currentLevelIndex: number | undefined;
@@ -101,16 +102,14 @@ export function useChartState(props: Props) {
       setChartState({ state: "loading" });
       setSavePasswd(options.savePasswd);
 
-      const q = new URLSearchParams();
-      if (getPasswd(cid)) {
-        q.set("ph", getPasswd(cid)!);
-      }
-      if (options.editPasswd) {
-        q.set("p", options.editPasswd);
-      }
-      if (options.bypass) {
-        q.set("pbypass", "1");
-      }
+      const currentPasswd: CurrentPasswd = {
+        p: options.editPasswd,
+        ph: getPasswd(cid),
+        pbypass: options.bypass ? "1" : null,
+      };
+      const q = new URLSearchParams(
+        Object.entries(currentPasswd).filter(([, v]) => v)
+      );
       let res: Response | null = null;
       try {
         res = await fetch(
@@ -141,20 +140,22 @@ export function useChartState(props: Props) {
                           : "same-origin",
                     }
                   );
-                  setPasswd(cid, await res.text());
+                  const ph = await res.text();
+                  setPasswd(cid, ph);
+                  currentPasswd.ph = ph;
                 } catch {
                   //ignore
                 }
               }
             } else {
-              unsetPasswd(cid);
+              // unsetPasswd(cid);
             }
             setChartState({
               chart: new ChartEditing(await validateChart(chartRes), {
                 luaExecutorRef,
                 locale,
                 cid,
-                currentPasswd: options.editPasswd || null,
+                currentPasswd,
                 convertedFrom: chartRes.ver,
               }),
               state: "ok",
@@ -189,29 +190,33 @@ export function useChartState(props: Props) {
   const remoteSave = useCallback<() => Promise<void>>(async () => {
     if (chartState.state === "ok") {
       const onSave = async (cid: string) => {
+        const currentPasswd = chartState.chart.currentPasswd;
         if (chartState.chart.changePasswd) {
-          if (savePasswd) {
-            try {
-              fetch(
-                process.env.BACKEND_PREFIX +
-                  `/api/hashPasswd/${cid}?p=${chartState.chart.changePasswd}`,
-                {
-                  credentials:
-                    process.env.NODE_ENV === "development"
-                      ? "include"
-                      : "same-origin",
-                }
-              ).then(async (res) => {
-                setPasswd(cid, await res.text());
-              });
-            } catch {
-              //ignore
-            }
-          } else {
-            unsetPasswd(cid);
-          }
+          currentPasswd.p = chartState.chart.changePasswd;
         }
-        chartState.chart.resetOnSave(cid);
+        if (savePasswd) {
+          try {
+            fetch(
+              process.env.BACKEND_PREFIX +
+                `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
+              {
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              }
+            ).then(async (res) => {
+              const ph = await res.text();
+              setPasswd(cid, ph);
+              currentPasswd.ph = ph;
+            });
+          } catch {
+            //ignore
+          }
+        } else {
+          unsetPasswd(cid);
+        }
+        chartState.chart.resetOnSave(cid, currentPasswd);
       };
 
       setSaveState("saving");
@@ -256,12 +261,9 @@ export function useChartState(props: Props) {
           return;
         }
       } else {
-        const q = new URLSearchParams();
-        if (chartState.chart.currentPasswd) {
-          q.set("p", chartState.chart.currentPasswd);
-        } else if (getPasswd(chartState.chart.cid)) {
-          q.set("ph", getPasswd(chartState.chart.cid)!);
-        }
+        const q = new URLSearchParams(
+          Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
+        );
         try {
           const res = await fetch(
             process.env.BACKEND_PREFIX +
@@ -310,12 +312,10 @@ export function useChartState(props: Props) {
           break;
         }
       }
-      const q = new URLSearchParams();
-      if (chartState.chart.currentPasswd) {
-        q.set("p", chartState.chart.currentPasswd);
-      } else if (getPasswd(chartState.chart.cid)) {
-        q.set("ph", getPasswd(chartState.chart.cid)!);
-      }
+
+      const q = new URLSearchParams(
+        Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
+      );
       try {
         const res = await fetch(
           process.env.BACKEND_PREFIX +
@@ -432,7 +432,7 @@ export function useChartState(props: Props) {
               currentPasswd:
                 chartState.state === "ok"
                   ? chartState.chart.currentPasswd
-                  : null,
+                  : undefined,
               convertedFrom: originalVer,
             }),
             state: "ok",
@@ -474,7 +474,7 @@ export function useChartState(props: Props) {
         }
       }
 
-      const savePasswd = preferSavePasswd();
+      const savePasswd = preferSavePasswd() || getPasswd(cid ?? "") !== null;
       setSavePasswd(savePasswd);
 
       if (cid === "new") {
@@ -483,7 +483,7 @@ export function useChartState(props: Props) {
             luaExecutorRef,
             locale,
             cid: undefined,
-            currentPasswd: null,
+            currentPasswd: undefined,
           }),
           state: "ok",
         });
