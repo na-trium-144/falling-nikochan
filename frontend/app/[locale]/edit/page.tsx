@@ -1,3 +1,4 @@
+import { ButtonKeyDisabler } from "@/common/button.jsx";
 import EditAuth from "./clientPage.js";
 import { initMetadata, MetadataProps } from "@/metadata.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic";
@@ -14,5 +15,9 @@ export default async function Page({ params }: MetadataProps) {
   const guideContents = ([null] as ReactNode[]).concat(
     (await importGuideMDX(locale)).map((Content: FC, i) => <Content key={i} />)
   );
-  return <EditAuth locale={locale} guideContents={guideContents} />;
+  return (
+    <ButtonKeyDisabler>
+      <EditAuth locale={locale} guideContents={guideContents} />
+    </ButtonKeyDisabler>
+  );
 }

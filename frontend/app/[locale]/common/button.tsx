@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, PointerEvent } from "react";
+import { ReactNode, PointerEvent, createContext, useContext } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 
@@ -21,6 +21,15 @@ export function ButtonHighlight(props: { className?: string }) {
   );
 }
 
+const ButtonKeyDisablerContext = createContext<boolean>(false);
+export function ButtonKeyDisabler(props: { children: ReactNode }) {
+  return (
+    <ButtonKeyDisablerContext.Provider value={true}>
+      {props.children}
+    </ButtonKeyDisablerContext.Provider>
+  );
+}
+
 interface Props {
   className?: string;
   onClick?: () => void;
@@ -32,6 +41,7 @@ interface Props {
   small?: boolean;
 }
 export default function Button(props: Props) {
+  const buttonKeyDisabled = useContext(ButtonKeyDisablerContext);
   return (
     <button
       className={clsx(
@@ -43,8 +53,20 @@ export default function Button(props: Props) {
       onClick={() => props.onClick && props.onClick()}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.stopPropagation()}
-      onKeyUp={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (buttonKeyDisabled) {
+          e.preventDefault();
+        } else {
+          e.stopPropagation();
+        }
+      }}
+      onKeyUp={(e) => {
+        if (buttonKeyDisabled) {
+          e.preventDefault();
+        } else {
+          e.stopPropagation();
+        }
+      }}
       disabled={props.disabled || props.loading}
     >
       <span className="fn-glass-1" />
