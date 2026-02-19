@@ -37,7 +37,15 @@ interface SlimeState {
   animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
-  const { className, style, playing, getCurrentTimeSec, bpmChanges, signature, playbackRate } = props;
+  const {
+    className,
+    style,
+    playing,
+    getCurrentTimeSec,
+    bpmChanges,
+    signature,
+    playbackRate,
+  } = props;
   const step = useRef<Step | null>(null);
   const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
@@ -170,9 +178,7 @@ export default function RhythmicalSlime(props: Props) {
       prevSS.current = null;
       lastPreparingSec.current = null;
       setSlimeStates([]);
-      setMaxSlimeNum((num) =>
-        Math.max(num, signature[0]?.bars[0].length)
-      );
+      setMaxSlimeNum((num) => Math.max(num, signature[0]?.bars[0].length));
       setCurrentBar(signature[0]?.bars[0] || []);
     }
   }, [bpmChanges, playing, getCurrentTimeSec, signature, playbackRate]);
@@ -180,10 +186,7 @@ export default function RhythmicalSlime(props: Props) {
   const { playUIScale, rem } = useDisplayMode();
 
   return (
-    <div
-      className={clsx(className, "flex flex-row-reverse")}
-      style={style}
-    >
+    <div className={clsx(className, "flex flex-row-reverse")} style={style}>
       {Array.from(new Array(maxSlimeNum)).map((_, i) => (
         <Slime
           key={i}
@@ -210,7 +213,15 @@ interface PropsS {
   playbackRate: number;
 }
 function Slime(props: PropsS) {
-  const { size: propsSize, exists, state, getCurrentTimeSec, playUIScale, rem, playbackRate } = props;
+  const {
+    size: propsSize,
+    exists,
+    state,
+    getCurrentTimeSec,
+    playUIScale,
+    rem,
+    playbackRate,
+  } = props;
   const prevSize = useRef<4 | 8 | 16 | null>(null);
   let size: 4 | 8 | 16;
   if (propsSize === null) {
@@ -245,10 +256,7 @@ function Slime(props: PropsS) {
       className="relative transition-all ease-in-out duration-150 "
       style={{
         width:
-          (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) *
-          3.5 *
-          rem *
-          playUIScale,
+          (size === 4 ? 1 : size === 8 ? 0.75 : 0.5) * 3.5 * rem * playUIScale,
         marginLeft: 0 * playUIScale,
       }}
     >

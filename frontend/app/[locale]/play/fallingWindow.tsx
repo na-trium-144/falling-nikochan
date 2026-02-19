@@ -380,16 +380,11 @@ export default function FallingWindow(props: Props) {
     if (showTSOffset) {
       const i = setInterval(() => {
         rawStartTimeStampSample.current = rawStartTimeStamp.current;
-        filteredStartTimeStampSample.current =
-          filteredStartTimeStamp.current;
+        filteredStartTimeStampSample.current = filteredStartTimeStamp.current;
       }, 50);
       return () => clearInterval(i);
     }
-  }, [
-    showTSOffset,
-    rawStartTimeStamp,
-    filteredStartTimeStamp,
-  ]);
+  }, [showTSOffset, rawStartTimeStamp, filteredStartTimeStamp]);
   // rawStartTimeStampからoffsetとaudioを引けば -ytPlayer.current?.getCurrentTime() の値が残る
   const rawYTStartTimeStamp = rawStartTimeStampSample.current
     ? (((rawStartTimeStampSample.current -
@@ -474,9 +469,7 @@ export default function FallingWindow(props: Props) {
               <td>/</td>
               <td colSpan={2} className="text-right">
                 {timeOfsEstimator.current &&
-                  (Math.sqrt(timeOfsEstimator.current.p) * 1000).toFixed(
-                    2
-                  )}
+                  (Math.sqrt(timeOfsEstimator.current.p) * 1000).toFixed(2)}
               </td>
             </tr>
             <tr>
@@ -488,9 +481,7 @@ export default function FallingWindow(props: Props) {
               <td>/</td>
               <td colSpan={2} className="text-right">
                 {timeOfsEstimator.current &&
-                  (Math.sqrt(timeOfsEstimator.current.r) * 1000).toFixed(
-                    2
-                  )}
+                  (Math.sqrt(timeOfsEstimator.current.r) * 1000).toFixed(2)}
               </td>
             </tr>
             <tr>
@@ -569,7 +560,15 @@ interface MProps {
   particleAssets: RefObject<string[]>;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
-  const { displayNotes, notes, noteSize, marginX, marginY, boxSize, particleAssets } = props;
+  const {
+    displayNotes,
+    notes,
+    noteSize,
+    marginX,
+    marginY,
+    boxSize,
+    particleAssets,
+  } = props;
   return displayNotes.map((d) => (
     <Nikochan
       key={d.id}
@@ -594,7 +593,15 @@ interface NProps {
   particleAssets: RefObject<string[]>;
 }
 function Nikochan(props: NProps) {
-  const { displayNote, noteSize, marginX, marginY, boxSize, note, particleAssets } = props;
+  const {
+    displayNote,
+    noteSize,
+    marginX,
+    marginY,
+    boxSize,
+    note,
+    particleAssets,
+  } = props;
   /* にこちゃん
   d.done に応じて画像と動きを変える
   0: 通常

@@ -25,7 +25,18 @@ interface Props<T extends ElementType> {
   onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
-  const { ref: refProp, as, padding: paddingProp, className, style, children, scrollableX, scrollableY, defaultFadeY, onScroll: propsOnScroll } = props;
+  const {
+    ref: refProp,
+    as,
+    padding: paddingProp,
+    className,
+    style,
+    children,
+    scrollableX,
+    scrollableY,
+    defaultFadeY,
+    onScroll: propsOnScroll,
+  } = props;
   const myRef = useRef<HTMLDivElement>(null);
   const ref = refProp || myRef;
   const { rem } = useDisplayMode();
@@ -186,7 +197,9 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       style={
         {
           ...style,
-          "--padding": paddingProp ? `calc(var(--spacing) * ${paddingProp})` : "0px",
+          "--padding": paddingProp
+            ? `calc(var(--spacing) * ${paddingProp})`
+            : "0px",
         } as CSSProperties
       }
       onWheel={(e) => {

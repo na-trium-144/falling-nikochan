@@ -58,11 +58,7 @@ export default function Input(props: Props) {
       value={value}
       onKeyDown={(e) => {
         e.stopPropagation();
-        if (
-          e.key === "Enter" &&
-          onEnter &&
-          (!isValid || isValid(value))
-        ) {
+        if (e.key === "Enter" && onEnter && (!isValid || isValid(value))) {
           if (valueSetTimer !== null) {
             clearTimeout(valueSetTimer);
           }

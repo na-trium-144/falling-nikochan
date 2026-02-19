@@ -85,9 +85,7 @@ export function Box(props: Props) {
           className={clsx("fn-box-inner", classNameInner)}
           style={{
             ...styleInner,
-            padding: padding
-              ? `calc(var(--spacing) * ${padding})`
-              : undefined,
+            padding: padding ? `calc(var(--spacing) * ${padding})` : undefined,
           }}
         >
           {children}
@@ -118,11 +116,7 @@ export function CenterBox(props: Props) {
   return (
     <div
       ref={refOuter}
-      className={clsx(
-        "fn-centered-box-bg",
-        classNameOuter,
-        hidden && "hidden"
-      )}
+      className={clsx("fn-centered-box-bg", classNameOuter, hidden && "hidden")}
     >
       <Box
         refInner={refInner}

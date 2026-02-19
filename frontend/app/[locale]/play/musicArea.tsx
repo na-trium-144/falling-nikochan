@@ -102,9 +102,7 @@ export function MusicArea(props: Props) {
 
   const [currentSec, setCurrentSec] = useState<number>(0);
   const levelLength =
-    chartBrief &&
-    lvIndex !== undefined &&
-    chartBrief.levels[lvIndex]
+    chartBrief && lvIndex !== undefined && chartBrief.levels[lvIndex]
       ? Math.max(0.1, chartBrief.levels[lvIndex].length)
       : 0.1;
   useEffect(() => {
@@ -113,10 +111,7 @@ export function MusicArea(props: Props) {
         setCurrentSec(
           Math.min(
             levelLength,
-            Math.max(
-              0,
-              (ytPlayer.current.getCurrentTime() || 0) - ytBeginSec
-            )
+            Math.max(0, (ytPlayer.current.getCurrentTime() || 0) - ytBeginSec)
           )
         );
       }
@@ -131,9 +126,7 @@ export function MusicArea(props: Props) {
       className={clsx(
         "grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(lvType)) || levelBgColors[1],
-        isMobile
-          ? "rounded-b-sq-xl pb-1"
-          : "rounded-bl-sq-box pl-3 pb-1.5",
+        isMobile ? "rounded-b-sq-xl pb-1" : "rounded-bl-sq-box pl-3 pb-1.5",
         "relative flex-col",
         className,
         colorThief.boxStyle
@@ -157,12 +150,7 @@ export function MusicArea(props: Props) {
           props.isMobile && "border-l-0"
         )}
       />
-      <div
-        className={clsx(
-          "flex",
-          isMobile ? "flex-row-reverse" : "flex-col"
-        )}
-      >
+      <div className={clsx("flex", isMobile ? "flex-row-reverse" : "flex-col")}>
         {width && (
           <FlexYouTube
             fixedSide="width"
@@ -251,32 +239,17 @@ export function MusicArea(props: Props) {
                     : "*:h-4 **:leading-4"
               )}
             >
-              {lvIndex !== undefined &&
-                chartBrief?.levels[lvIndex] && (
-                  <span
-                    className={clsx(
-                      "overflow-x-clip overflow-y-visible",
-                      "max-w-full text-ellipsis whitespace-nowrap"
-                    )}
-                  >
-                    {chartBrief?.levels[lvIndex].name && (
-                      <span
-                        className={clsx(
-                          "font-title mr-[0.25em]",
-                          veryLargeTitle
-                            ? "text-2xl"
-                            : largeTitle
-                              ? "text-lg"
-                              : "text-sm"
-                        )}
-                      >
-                        {chartBrief?.levels[lvIndex].name}
-                      </span>
-                    )}
+              {lvIndex !== undefined && chartBrief?.levels[lvIndex] && (
+                <span
+                  className={clsx(
+                    "overflow-x-clip overflow-y-visible",
+                    "max-w-full text-ellipsis whitespace-nowrap"
+                  )}
+                >
+                  {chartBrief?.levels[lvIndex].name && (
                     <span
                       className={clsx(
-                        "fn-level-type",
-                        lvType,
+                        "font-title mr-[0.25em]",
                         veryLargeTitle
                           ? "text-2xl"
                           : largeTitle
@@ -284,13 +257,25 @@ export function MusicArea(props: Props) {
                             : "text-sm"
                       )}
                     >
-                      <span>{lvType}-</span>
-                      <span>
-                        {chartBrief?.levels[lvIndex]?.difficulty}
-                      </span>
+                      {chartBrief?.levels[lvIndex].name}
                     </span>
+                  )}
+                  <span
+                    className={clsx(
+                      "fn-level-type",
+                      lvType,
+                      veryLargeTitle
+                        ? "text-2xl"
+                        : largeTitle
+                          ? "text-lg"
+                          : "text-sm"
+                    )}
+                  >
+                    <span>{lvType}-</span>
+                    <span>{chartBrief?.levels[lvIndex]?.difficulty}</span>
                   </span>
-                )}
+                </span>
+              )}
               <span
                 className={clsx(
                   "overflow-x-clip overflow-y-visible",
@@ -457,14 +442,9 @@ export function MusicArea(props: Props) {
           />
         </div>
         <div className="flex flex-row items-center mt-3 ">
-          <SmilingFace
-            className={clsx("text-xl", enableSE || "text-dim")}
-          />
+          <SmilingFace className={clsx("text-xl", enableSE || "text-dim")} />
           <span
-            className={clsx(
-              "text-sm w-8 text-center",
-              enableSE || "text-dim"
-            )}
+            className={clsx("text-sm w-8 text-center", enableSE || "text-dim")}
           >
             {enableSE ? seVolume : t("off")}
           </span>

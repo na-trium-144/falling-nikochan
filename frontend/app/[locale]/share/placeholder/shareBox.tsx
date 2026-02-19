@@ -31,7 +31,8 @@ interface Props {
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
-  const { cid, brief, sharedResult, locale, record, backButton, forceShowCId } = props;
+  const { cid, brief, sharedResult, locale, record, backButton, forceShowCId } =
+    props;
 
   const [updatedAt, setUpdatedAt] = useState<string>("");
 
@@ -251,12 +252,7 @@ export function ShareBox(props: Props) {
         </p>
       )}
       {cid && brief && (
-        <PlayOption
-          cid={cid}
-          brief={brief}
-          record={record}
-          locale={locale}
-        />
+        <PlayOption cid={cid} brief={brief} record={record} locale={locale} />
       )}
     </>
   );
