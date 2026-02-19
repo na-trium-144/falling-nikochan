@@ -7,6 +7,7 @@ interface Props {
   refInner?: { current: HTMLDivElement | null };
   scrollableX?: boolean;
   scrollableY?: boolean;
+  defaultFadeY?: boolean;
   padding?: number; // * spacing
   children: ReactNode | ReactNode[];
   hidden?: boolean;
@@ -36,6 +37,7 @@ export function Box(props: Props) {
     onPointerLeave,
     scrollableX,
     scrollableY,
+    defaultFadeY,
     padding,
     children,
   } = props;
@@ -73,6 +75,7 @@ export function Box(props: Props) {
           padding={padding ?? 0}
           scrollableX={scrollableX}
           scrollableY={scrollableY}
+          defaultFadeY={defaultFadeY}
         >
           {children}
         </Scrollable>
@@ -105,6 +108,7 @@ export function CenterBox(props: Props) {
     styleInner,
     scrollableX,
     scrollableY,
+    defaultFadeY,
     padding,
     onClick,
     onPointerDown,
@@ -128,6 +132,7 @@ export function CenterBox(props: Props) {
         styleInner={styleInner}
         scrollableX={scrollableX}
         scrollableY={scrollableY}
+        defaultFadeY={defaultFadeY}
         padding={padding ?? 6}
         onClick={onClick}
         onPointerDown={onPointerDown}

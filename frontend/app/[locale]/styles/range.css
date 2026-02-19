@@ -4,7 +4,7 @@
 
     > .fn-range-bg {
       @apply absolute inset-y-1.5 inset-x-0 rounded-full -z-10;
-      @apply bg-slate-400/50 dark:bg-stone-500/5;
+      @apply bg-slate-400/50 dark:bg-stone-500/50;
 
       > .fn-range-fill {
         @apply absolute inset-y-0 left-0 rounded-full;

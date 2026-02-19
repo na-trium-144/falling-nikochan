@@ -132,9 +132,6 @@
 @utility z-edit-ace-placeholder {
   z-index: -10;
 }
-@utility z-edit-timebar-interp {
-  z-index: 10;
-}
 /* これはFallingWindowの中にあるので、FallingWindowにzを設定すればローカルになる */
 @utility z-edit-draghandle {
   z-index: 10;

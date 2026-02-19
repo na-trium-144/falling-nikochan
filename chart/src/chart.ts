@@ -338,6 +338,7 @@ export function emptyLevel(
       bpm: 120,
       step: stepZero(),
       timeSec: 0,
+      interp: false,
     })!;
     level = luaAddBeatChange(level, {
       step: stepZero(),

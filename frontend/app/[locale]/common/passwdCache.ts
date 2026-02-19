@@ -1,8 +1,15 @@
+import { HashSchema } from "@falling-nikochan/chart";
+import * as v from "valibot";
+
 function passwdKey(cid: string) {
   return "ph-" + cid;
 }
 export function getPasswd(cid: string): string | null {
-  return localStorage.getItem(passwdKey(cid));
+  try {
+    return v.parse(HashSchema(), localStorage.getItem(passwdKey(cid)));
+  } catch {
+    return null;
+  }
 }
 export function preferSavePasswd(): boolean {
   return !!Number(localStorage.getItem("preferSavePasswd"));

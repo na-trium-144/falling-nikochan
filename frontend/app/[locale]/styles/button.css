@@ -9,7 +9,7 @@
     @apply shadow-slate-500/50 dark:shadow-stone-950/50;
     @apply fg-bright;
 
-    .fn-small {
+    &.fn-small {
       @apply h-8 py-0;
     }
 

@@ -20,9 +20,12 @@ interface Props<T extends ElementType> {
   ref?: RefObject<HTMLDivElement | null>;
   scrollableX?: boolean;
   scrollableY?: boolean;
+  defaultFadeY?: boolean; // jsがロードされるまでの間フェードを有効化する
+  convertDeltaYToX?: boolean; // 縦スクロールを横スクロールに変換する
+  onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
-  const { ref: refProp, as, padding: paddingProp, className, style, children, scrollableX, scrollableY } = props;
+  const { ref: refProp, as, padding: paddingProp, className, style, children, scrollableX, scrollableY, defaultFadeY, onScroll: propsOnScroll } = props;
   const myRef = useRef<HTMLDivElement>(null);
   const ref = refProp || myRef;
   const { rem } = useDisplayMode();
@@ -69,6 +72,8 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
       let prevFadeLeft = -1;
       let prevFadeRight = -1;
       const onScroll = () => {
+        propsOnScroll?.();
+
         const fadeTop = refCurrent.scrollTop;
         const fadeBottom =
           refCurrent.scrollHeight -
@@ -166,7 +171,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, paddingProp, rem, scrollableX, scrollableY]);
+  }, [ref, paddingProp, rem, scrollableX, scrollableY, propsOnScroll]);
   const Component = as || "div";
   return (
     <Component
@@ -175,6 +180,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         "fn-scrollable",
         scrollableX && "fn-scrollable-x",
         scrollableY && "fn-scrollable-y",
+        defaultFadeY && "fn-default-y",
         className
       )}
       style={
@@ -183,6 +189,12 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
           "--padding": paddingProp ? `calc(var(--spacing) * ${paddingProp})` : "0px",
         } as CSSProperties
       }
+      onWheel={(e) => {
+        if (props.convertDeltaYToX) {
+          e.preventDefault();
+          e.currentTarget.scrollLeft += e.deltaY;
+        }
+      }}
     >
       {children}
     </Component>

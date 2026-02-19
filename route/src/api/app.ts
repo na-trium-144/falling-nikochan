@@ -32,6 +32,7 @@ const apiApp = async (config: {
         origin:
           process.env.API_ENV === "development" ? (origin) => origin : "*",
         credentials: process.env.API_ENV === "development",
+        exposeHeaders: ["Retry-After"],
       })
     )
     .use(
