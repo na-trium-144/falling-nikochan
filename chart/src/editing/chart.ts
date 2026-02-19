@@ -11,6 +11,11 @@ import {
   numEvents,
 } from "../chart.js";
 
+export interface CurrentPasswd {
+  p: string | null;
+  ph: string | null;
+  pbypass: string | null;
+}
 export class ChartEditing extends EventEmitter<EventType> {
   #offset: number;
   #luaExecutorRef: LuaExecutorRef;
@@ -33,7 +38,7 @@ export class ChartEditing extends EventEmitter<EventType> {
   #cid: string | undefined;
   // fetchに成功したらセット、
   // 以降保存のたびにこれを使ってpostし、新しいパスワードでこれを上書き
-  #currentPasswd: string | null;
+  #currentPasswd: CurrentPasswd;
   // 新しいパスワード
   #changePasswd: string | null;
 
@@ -43,7 +48,7 @@ export class ChartEditing extends EventEmitter<EventType> {
       luaExecutorRef: LuaExecutorRef;
       locale: string;
       cid: string | undefined;
-      currentPasswd: string | null;
+      currentPasswd?: CurrentPasswd;
       convertedFrom?: number;
       currentLevelIndex?: number;
       hasChange?: boolean;
@@ -55,7 +60,11 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.#locale = options.locale;
     this.#convertedFrom = options.convertedFrom ?? obj.ver;
     this.#cid = options.cid;
-    this.#currentPasswd = options.currentPasswd;
+    this.#currentPasswd = options.currentPasswd ?? {
+      p: null,
+      ph: null,
+      pbypass: null,
+    };
     this.#changePasswd = null;
 
     this.#offset = obj.offset;
@@ -89,12 +98,10 @@ export class ChartEditing extends EventEmitter<EventType> {
       this.#numEvents = numEvents(this.toObject());
     });
   }
-  resetOnSave(cid: string) {
+  resetOnSave(cid: string, passwd: CurrentPasswd) {
     this.#convertedFrom = currentChartVer;
     this.#hasChange = false;
-    if (this.#changePasswd) {
-      this.#currentPasswd = this.changePasswd;
-    }
+    this.#currentPasswd = passwd;
     this.#changePasswd = null;
     this.#cid = cid;
     this.emit("rerender");
