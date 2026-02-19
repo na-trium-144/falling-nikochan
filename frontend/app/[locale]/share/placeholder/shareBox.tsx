@@ -31,7 +31,8 @@ interface Props {
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
-  const { cid, brief, sharedResult, locale } = props;
+  const { cid, brief, sharedResult, locale, record, backButton, forceShowCId } =
+    props;
 
   const [updatedAt, setUpdatedAt] = useState<string>("");
 
@@ -157,11 +158,11 @@ export function ShareBox(props: Props) {
             </div>
             <div className="flex-1" />
             <div>
-              <div className={clsx("mb-2", props.forceShowCId || "no-mobile")}>
-                {props.backButton && (
+              <div className={clsx("mb-2", forceShowCId || "no-mobile")}>
+                {backButton && (
                   <button
                     className={clsx("fn-icon-button", "mr-4")}
-                    onClick={props.backButton}
+                    onClick={backButton}
                   >
                     <ButtonHighlight />
                     <ArrowLeft className="inline-block w-max align-middle text-base m-auto " />
@@ -251,12 +252,7 @@ export function ShareBox(props: Props) {
         </p>
       )}
       {cid && brief && (
-        <PlayOption
-          cid={cid}
-          brief={brief}
-          record={props.record}
-          locale={props.locale}
-        />
+        <PlayOption cid={cid} brief={brief} record={record} locale={locale} />
       )}
     </>
   );

@@ -72,6 +72,7 @@ export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
   const rerender = useCallback(() => setRerenderIndex((i) => i + 1), []);
+  const { onLoad, locale, luaExecutor } = props;
 
   const [chartState, setChartState] = useState<ChartAndState>({
     state: undefined,
@@ -88,12 +89,11 @@ export function useChartState(props: Props) {
   const t = useTranslations("edit");
   const router = useRouter();
 
-  const { onLoad, locale } = props;
   const onLoadRef = useRef<(cid: string) => void>(null!);
   onLoadRef.current = onLoad;
 
   const luaExecutorRef = useRef<LuaExecutor>(null!);
-  luaExecutorRef.current = props.luaExecutor;
+  luaExecutorRef.current = luaExecutor;
 
   const [savePasswd, setSavePasswd] = useState<boolean>(false);
 

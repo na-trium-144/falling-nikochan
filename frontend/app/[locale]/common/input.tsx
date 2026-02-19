@@ -21,42 +21,50 @@ interface Props {
   onEnter?: (v: string) => void; // これが呼ばれた時点では値がまだ外側のstateに反映されていない場合がある
 }
 export default function Input(props: Props) {
-  const [value, setValue] = useState<string>(props.actualValue);
+  const {
+    ref,
+    actualValue,
+    updateValue,
+    updateInvalidValue,
+    isValid,
+    left,
+    passwd,
+    disabled,
+    onEnter,
+    className,
+  } = props;
+  const [value, setValue] = useState<string>(actualValue);
   const [focus, setFocus] = useState<boolean>(false);
   const [valueSetTimer, setValueSetTimer] = useState<ReturnType<
     typeof setTimeout
   > | null>(null);
   useEffect(() => {
     if (!focus && valueSetTimer === null) {
-      setValue(props.actualValue);
+      setValue(actualValue);
     }
-  }, [focus, props, valueSetTimer]);
+  }, [focus, actualValue, valueSetTimer]);
 
   return (
     <input
-      ref={props.ref}
-      type={props.passwd ? "password" : "text"}
+      ref={ref}
+      type={passwd ? "password" : "text"}
       className={clsx(
         "font-main-ui",
-        !props.left && "text-right",
+        !left && "text-right",
         "fn-input",
-        props.isValid && !props.isValid(value) && "fn-invalid",
-        props.className
+        isValid && !isValid(value) && "fn-invalid",
+        className
       )}
       value={value}
       onKeyDown={(e) => {
         e.stopPropagation();
-        if (
-          e.key === "Enter" &&
-          props.onEnter &&
-          (!props.isValid || props.isValid(value))
-        ) {
+        if (e.key === "Enter" && onEnter && (!isValid || isValid(value))) {
           if (valueSetTimer !== null) {
             clearTimeout(valueSetTimer);
           }
           setValueSetTimer(null);
-          props.updateValue(value);
-          props.onEnter(value);
+          updateValue(value);
+          onEnter(value);
         }
       }}
       onKeyUp={(e) => e.stopPropagation()}
@@ -69,10 +77,10 @@ export default function Input(props: Props) {
         // 値の更新を遅延させる
         setValueSetTimer(
           setTimeout(() => {
-            if (!props.isValid || props.isValid(e.target.value)) {
-              props.updateValue(e.target.value);
-            } else if (props.updateInvalidValue) {
-              props.updateInvalidValue(e.target.value);
+            if (!isValid || isValid(e.target.value)) {
+              updateValue(e.target.value);
+            } else if (updateInvalidValue) {
+              updateInvalidValue(e.target.value);
             }
             setValueSetTimer(null);
           }, 250)
@@ -80,7 +88,7 @@ export default function Input(props: Props) {
       }}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
-      disabled={props.disabled}
+      disabled={disabled}
     />
   );
 }

@@ -25,11 +25,21 @@ interface Props<T extends ElementType> {
   onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
+  const {
+    ref: refProp,
+    as,
+    padding: paddingProp,
+    className,
+    style,
+    children,
+    scrollableX,
+    scrollableY,
+    defaultFadeY,
+    onScroll: propsOnScroll,
+  } = props;
   const myRef = useRef<HTMLDivElement>(null);
-  const ref = props.ref || myRef;
-  const { onScroll: propsOnScroll } = props;
+  const ref = refProp || myRef;
   const { rem } = useDisplayMode();
-  const { scrollableX, scrollableY, defaultFadeY, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
     if (refCurrent) {
@@ -172,8 +182,8 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       };
     }
-  }, [ref, padding, rem, scrollableX, scrollableY, propsOnScroll]);
-  const Component = props.as || "div";
+  }, [ref, paddingProp, rem, scrollableX, scrollableY, propsOnScroll]);
+  const Component = as || "div";
   return (
     <Component
       ref={ref}
@@ -182,12 +192,14 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         scrollableX && "fn-scrollable-x",
         scrollableY && "fn-scrollable-y",
         defaultFadeY && "fn-default-y",
-        props.className
+        className
       )}
       style={
         {
-          ...props.style,
-          "--padding": padding ? `calc(var(--spacing) * ${padding})` : "0px",
+          ...style,
+          "--padding": paddingProp
+            ? `calc(var(--spacing) * ${paddingProp})`
+            : "0px",
         } as CSSProperties
       }
       onWheel={(e) => {
@@ -197,7 +209,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         }
       }}
     >
-      {props.children}
+      {children}
     </Component>
   );
 }
