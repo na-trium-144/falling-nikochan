@@ -169,7 +169,7 @@ export function useChartState(props: Props) {
               setChartState({ state: APIError.badResponse() });
             }
           } else {
-            if (res.status === 401) {
+            if (res.status === 401 || res.status === 400) {
               if (options.isFirst) {
                 setChartState({ state: "passwdFailedSilent" });
               } else {
@@ -208,7 +208,7 @@ export function useChartState(props: Props) {
         if (chartState.chart.changePasswd) {
           currentPasswd.p = chartState.chart.changePasswd;
         }
-        if (savePasswd) {
+        if (savePasswd && currentPasswd.p) {
           try {
             fetch(
               process.env.BACKEND_PREFIX +
@@ -220,9 +220,11 @@ export function useChartState(props: Props) {
                     : "same-origin",
               }
             ).then(async (res) => {
-              const ph = await res.text();
-              setPasswd(cid, ph);
-              currentPasswd.ph = ph;
+              if (res.ok) {
+                const ph = await res.text();
+                setPasswd(cid, ph);
+                currentPasswd.ph = ph;
+              }
             });
           } catch {
             //ignore
