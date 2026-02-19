@@ -1,3 +1,9 @@
+## ver. 14.22 - 2026/02/19 [#973](https://github.com/na-trium-144/falling-nikochan/pull/973)
+
+* passwdHashをセッションに保存し、localStorageから削除してもそのセッション内では保存が動作するように
+* パスワード保存のチェックを外したら確実にpasswdHashがlocalStorageから消えるよう修正
+* 429の際メッセージを表示するのではなく勝手に待って再試行する
+
 ## ver. 14.19 - 2026/02/18 [#969](https://github.com/na-trium-144/falling-nikochan/pull/969)
 
 * タイムバーをスクロール可能に
