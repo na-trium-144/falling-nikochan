@@ -112,71 +112,85 @@ export function useChartState(props: Props) {
       );
       let res: Response | null = null;
       try {
-        res = await fetch(
-          process.env.BACKEND_PREFIX + `/api/chartFile/${cid}?` + q.toString(),
-          {
-            cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          }
-        );
-        if (res.ok) {
-          try {
-            const chartRes = msgpack.decode(
-              await res.arrayBuffer()
-            ) as ChartUntil14;
-            if (options.savePasswd) {
-              if (options.editPasswd) {
-                try {
-                  const res = await fetch(
-                    process.env.BACKEND_PREFIX +
-                      `/api/hashPasswd/${cid}?p=${options.editPasswd}`,
-                    {
-                      credentials:
-                        process.env.NODE_ENV === "development"
-                          ? "include"
-                          : "same-origin",
-                    }
-                  );
-                  const ph = await res.text();
-                  setPasswd(cid, ph);
-                  currentPasswd.ph = ph;
-                } catch {
-                  //ignore
+        for (let retry = 0; ; retry++) {
+          res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/chartFile/${cid}?` +
+              q.toString(),
+            {
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            }
+          );
+          if (res.ok) {
+            try {
+              const chartRes = msgpack.decode(
+                await res.arrayBuffer()
+              ) as ChartUntil14;
+              if (options.savePasswd) {
+                if (options.editPasswd) {
+                  try {
+                    const res = await fetch(
+                      process.env.BACKEND_PREFIX +
+                        `/api/hashPasswd/${cid}?p=${options.editPasswd}`,
+                      {
+                        credentials:
+                          process.env.NODE_ENV === "development"
+                            ? "include"
+                            : "same-origin",
+                      }
+                    );
+                    const ph = await res.text();
+                    setPasswd(cid, ph);
+                    currentPasswd.ph = ph;
+                  } catch {
+                    //ignore
+                  }
                 }
+              } else {
+                // unsetPasswd(cid);
               }
-            } else {
-              // unsetPasswd(cid);
+              setChartState({
+                chart: new ChartEditing(await validateChart(chartRes), {
+                  luaExecutorRef,
+                  locale,
+                  cid,
+                  currentPasswd,
+                  convertedFrom: chartRes.ver,
+                }),
+                state: "ok",
+              });
+              onLoadRef.current(cid);
+            } catch (e) {
+              console.error(e);
+              setChartState({ state: APIError.badResponse() });
             }
-            setChartState({
-              chart: new ChartEditing(await validateChart(chartRes), {
-                luaExecutorRef,
-                locale,
-                cid,
-                currentPasswd,
-                convertedFrom: chartRes.ver,
-              }),
-              state: "ok",
-            });
-            onLoadRef.current(cid);
-          } catch (e) {
-            console.error(e);
-            setChartState({ state: APIError.badResponse() });
-          }
-        } else {
-          if (res.status === 401) {
-            if (options.isFirst) {
-              setChartState({ state: "passwdFailedSilent" });
-            } else {
-              setChartState({ state: "passwdFailed" });
-            }
-          } else if (res?.status === 429) {
-            setChartState({ state: "rateLimited" });
           } else {
-            setChartState({ state: await APIError.fromRes(res) });
+            if (res.status === 401) {
+              if (options.isFirst) {
+                setChartState({ state: "passwdFailedSilent" });
+              } else {
+                setChartState({ state: "passwdFailed" });
+              }
+            } else if (res?.status === 429) {
+              if (retry < 3) {
+                await new Promise((r) =>
+                  setTimeout(
+                    r,
+                    Number(res?.headers.get("Retry-After")) * 1000 + 500
+                  )
+                );
+                continue;
+              }
+              setChartState({ state: "rateLimited" });
+            } else {
+              setChartState({ state: await APIError.fromRes(res) });
+            }
           }
+          break;
         }
       } catch (e) {
         console.error(e);
@@ -265,27 +279,39 @@ export function useChartState(props: Props) {
           Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
         );
         try {
-          const res = await fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/chartFile/${chartState.chart.cid}?` +
-              q.toString(),
-            {
-              method: "POST",
-              body: msgpack.encode(chartState.chart.toObject()),
-              cache: "no-store",
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
+          for (let retry = 0; ; retry++) {
+            const res = await fetch(
+              process.env.BACKEND_PREFIX +
+                `/api/chartFile/${chartState.chart.cid}?` +
+                q.toString(),
+              {
+                method: "POST",
+                body: msgpack.encode(chartState.chart.toObject()),
+                cache: "no-store",
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              }
+            );
+            if (res.ok) {
+              onSave(chartState.chart.cid);
+              setSaveState("ok");
+              return;
+            } else {
+              if (res.status === 429 && retry < 3) {
+                await new Promise((r) =>
+                  setTimeout(
+                    r,
+                    Number(res?.headers.get("Retry-After")) * 1000 + 500
+                  )
+                );
+                continue;
+              }
+              setSaveState(await APIError.fromRes(res));
+              return;
             }
-          );
-          if (res.ok) {
-            onSave(chartState.chart.cid);
-            setSaveState("ok");
-            return;
-          } else {
-            setSaveState(await APIError.fromRes(res));
-            return;
+            break;
           }
         } catch (e) {
           console.error(e);
@@ -317,25 +343,38 @@ export function useChartState(props: Props) {
         Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
       );
       try {
-        const res = await fetch(
-          process.env.BACKEND_PREFIX +
-            `/api/chartFile/${chartState.chart.cid}?` +
-            q.toString(),
-          {
-            method: "DELETE",
-            cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
-          }
-        );
-        if (res.ok) {
-          if (isStandalone()) {
-            history.back();
+        for (let retry = 0; ; retry++) {
+          const res = await fetch(
+            process.env.BACKEND_PREFIX +
+              `/api/chartFile/${chartState.chart.cid}?` +
+              q.toString(),
+            {
+              method: "DELETE",
+              cache: "no-store",
+              credentials:
+                process.env.NODE_ENV === "development"
+                  ? "include"
+                  : "same-origin",
+            }
+          );
+          if (res.ok) {
+            if (isStandalone()) {
+              history.back();
+            } else {
+              window.close();
+            }
           } else {
-            window.close();
+            if (res.status === 429 && retry < 3) {
+              await new Promise((r) =>
+                setTimeout(
+                  r,
+                  Number(res?.headers.get("Retry-After")) * 1000 + 500
+                )
+              );
+              continue;
+            }
           }
+          break;
         }
       } catch (e) {
         console.error(e);
