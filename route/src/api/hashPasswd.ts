@@ -27,14 +27,15 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           "sha256(sha256(cid + passwd + secretSalt + pRandomSalt) + pUserSalt)",
         content: {
           "text/plain": {
-            schema: v.string(),
+            schema: resolver(v.string()),
           },
         },
         headers: {
           "Set-Cookie": {
             description:
               "Sets the pUserSalt cookie if it was not present in the request.",
-            schema: v.string(),
+            // @ts-expect-error type OpenAPIV3_1.SchemaObject is not assignable to type OpenAPIV3.SchemaObject... why?
+            schema: (await resolver(v.string()).toOpenAPISchema()).schema,
           },
         },
       },

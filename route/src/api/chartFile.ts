@@ -272,10 +272,8 @@ const chartFileApp = async (config: {
             "Chart data in MessagePack format. See also GET response.",
           required: true,
           content: {
-            "application/vnd.msgpack": {
-              // ↓scalarのUIに現れない...
-              schema: ChartEditSchema13(),
-            },
+            "application/vnd.msgpack":
+              await resolver(ChartEditSchema13()).toOpenAPISchema(),
           },
         },
         responses: {

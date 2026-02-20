@@ -22,9 +22,8 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       description: "MessagePack-encoded Level15Play data",
       required: true,
       content: {
-        "application/vnd.msgpack": {
-          schema: LevelPlaySchema15(),
-        },
+        "application/vnd.msgpack":
+          await resolver(LevelPlaySchema15()).toOpenAPISchema(),
       },
     },
     responses: {

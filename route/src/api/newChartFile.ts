@@ -46,9 +46,8 @@ const newChartFileApp = async (config: {
             "Chart data in MessagePack format. See also response type of GET /api/chartFile.",
           required: true,
           content: {
-            "application/vnd.msgpack": {
-              schema: ChartEditSchema13(),
-            },
+            "application/vnd.msgpack":
+              await resolver(ChartEditSchema13()).toOpenAPISchema(),
           },
         },
         responses: {
