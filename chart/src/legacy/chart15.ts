@@ -2,7 +2,12 @@
 // copyBuffer仕様変更
 
 import * as v from "valibot";
-import { ArrayOrEmptyObj, levelTypesConst } from "../chart.js";
+import {
+  ArrayOrEmptyObjDoc,
+  ArrayOrEmptyObj,
+  levelTypesConst,
+  LuaLineSchema,
+} from "../chart.js";
 import { YTBeginSchema11, YTEndSchema11 } from "./chart11.js";
 import {
   BPMChangeSchema9,
@@ -17,6 +22,101 @@ import {
   ChartUntil14Min,
   convertTo14,
 } from "./chart14.js";
+import { resolver } from "hono-openapi";
+import { docRefs, Schema } from "../docSchema.js";
+import { StepSchema } from "../step.js";
+
+export const NoteCommandSchema15 = () =>
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      big: v.pipe(
+        v.boolean(),
+        v.description("Whether the note is a big note or not")
+      ),
+      hitX: v.pipe(
+        v.number(),
+        v.description(
+          "The x coordinate of the note when hit. " +
+            "left edge: -5.0 - right edge: +5.0"
+        )
+      ),
+      hitVX: v.pipe(
+        v.number(),
+        v.description("The x velocity of the note when hit")
+      ),
+      hitVY: v.pipe(
+        v.number(),
+        v.description("The y velocity of the note when hit")
+      ),
+      fall: v.pipe(
+        v.boolean(),
+        v.description(
+          "Whether the note falls from the top of the screen, or thrown up from the bottom"
+        )
+      ),
+      luaLine: LuaLineSchema(),
+    }),
+    v.description("A note command described by hit position and velocity.")
+  );
+export async function NoteCommand15Doc(): Promise<Schema> {
+  const schema = (await resolver(NoteCommandSchema15()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+      luaLine: docRefs("LuaLine"),
+    },
+  };
+}
+export const RestSchema15 = () =>
+  v.pipe(
+    v.object({
+      begin: StepSchema(),
+      duration: StepSchema(),
+      luaLine: LuaLineSchema(),
+    }),
+    v.description(
+      "A rest command that specifies a rest period between notes. " +
+        "Only used by chart editor for inserting other commands to lua code, and is ignored when playing."
+    )
+  );
+export async function Rest15Doc(): Promise<Schema> {
+  const schema = (await resolver(RestSchema15()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      begin: docRefs("Step"),
+      duration: docRefs("Step"),
+      luaLine: docRefs("LuaLine"),
+    },
+  };
+}
+export const BPMChangeSchema15 = () =>
+  v.object({
+    step: StepSchema(),
+    bpm: v.pipe(v.number(), v.gtValue(0)),
+    timeSec: v.pipe(v.number(), v.minValue(0)),
+    luaLine: LuaLineSchema(),
+  });
+export const SpeedChangeSchema15 = () =>
+  v.object({
+    step: StepSchema(),
+    bpm: v.number(),
+    timeSec: v.pipe(v.number(), v.minValue(0)),
+    luaLine: LuaLineSchema(),
+  });
+export const SignatureSchema15 = () =>
+  v.object({
+    step: StepSchema(),
+    offset: StepSchema(),
+    barNum: v.pipe(v.number(), v.integer(), v.minValue(0)),
+    bars: v.array(v.array(v.picklist([4, 8, 16] as const))),
+    luaLine: LuaLineSchema(),
+  });
 
 export const LevelMetaSchema15 = () =>
   v.object({
@@ -26,9 +126,12 @@ export const LevelMetaSchema15 = () =>
     ytBegin: YTBeginSchema11(),
     ytEnd: YTEndSchema11(),
     ytEndSec: v.number(),
-    // snapの刻み幅 を1stepの4n分の1にする
-    snapDivider: v.number(),
+    snapDivider: v.pipe(
+      v.number(),
+      v.description("The step unit in chart editor is set to 1/(4*snapDivider)")
+    ),
   });
+
 export const LevelFreezeSchema15 = () =>
   v.object({
     notes: ArrayOrEmptyObj(NoteCommandSchema9()),
@@ -37,6 +140,22 @@ export const LevelFreezeSchema15 = () =>
     speedChanges: ArrayOrEmptyObj(SpeedChangeSchema13()),
     signature: ArrayOrEmptyObj(SignatureSchema9()),
   });
+export async function LevelFreeze15Doc(): Promise<Schema> {
+  const schema = (await resolver(LevelFreezeSchema15()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      notes: ArrayOrEmptyObjDoc(docRefs("NoteCommand15")),
+      rest: ArrayOrEmptyObjDoc(docRefs("Rest15")),
+      bpmChanges: ArrayOrEmptyObjDoc(docRefs("BPMChange15")),
+      speedChanges: ArrayOrEmptyObjDoc(docRefs("SpeedChange15")),
+      signature: ArrayOrEmptyObjDoc(docRefs("Signature15")),
+    },
+  };
+}
+
 export const LevelPlaySchema15 = () =>
   v.object({
     ver: v.union([v.literal(15)]),
@@ -51,12 +170,13 @@ export const LevelPlaySchema15 = () =>
 
 export const CopyBufferEntrySchema = () =>
   v.tuple([
-    v.number(), // x
-    v.number(), // vx
-    v.number(), // vy
-    v.boolean(), // big
-    v.boolean(), // fall
+    v.pipe(v.number(), v.description("hitX value")),
+    v.pipe(v.number(), v.description("hitVX value")),
+    v.pipe(v.number(), v.description("hitVY value")),
+    v.pipe(v.boolean(), v.description("big value")),
+    v.pipe(v.boolean(), v.description("fall value")),
   ]);
+
 // luaTableをパースして得られるオブジェクト
 // (luaからnilを含む配列を返すことができないため)
 export const CopyBufferSchema = () =>
@@ -68,6 +188,18 @@ export const CopyBufferSchema = () =>
       ])
     )
   );
+export async function CopyBufferDoc(): Promise<Schema> {
+  const schema = (await resolver(CopyBufferSchema()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: Object.fromEntries(
+      Array.from(new Array(10), (_, i) => [
+        String(i), // 0-9
+        docRefs("CopyBufferEntry"),
+      ])
+    ),
+  };
+}
 
 export const ChartSchema15 = () =>
   v.pipe(
@@ -79,16 +211,39 @@ export const ChartSchema15 = () =>
       title: v.string(),
       composer: v.string(),
       chartCreator: v.string(),
-      locale: v.string(),
+      locale: v.pipe(
+        v.string(),
+        v.description(
+          "Locale where this chart was created, e.g. 'jp', 'en', " +
+            "though this field is currently not used for anything."
+        )
+      ),
       levelsMeta: ArrayOrEmptyObj(LevelMetaSchema15()),
-      lua: v.array(v.array(v.string())),
-      // エディターの拡大率、 1.5^x 倍にする
-      zoom: v.pipe(v.number(), v.integer()),
+      lua: v.pipe(
+        v.array(v.array(v.string())),
+        v.description(
+          "Lua source code split by line. " +
+            "Only used for editing in the chart editor, and is ignored in server side."
+        )
+      ),
+      zoom: v.pipe(
+        v.number(),
+        v.integer(),
+        v.description("Editor zoom level, where the zoom ratio is 1.5^x")
+      ),
       copyBuffer: CopyBufferSchema(),
       levelsFreeze: ArrayOrEmptyObj(LevelFreezeSchema15()),
-      changePasswd: v.optional(
-        v.nullable(v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))),
-        null
+      changePasswd: v.pipe(
+        v.optional(
+          v.nullable(
+            v.pipe(v.string(), v.nonEmpty("Passwd must not be empty"))
+          ),
+          null
+        ),
+        v.description(
+          "When this field is not null on POST request, " +
+            "the server changes the chart passwd to this value."
+        )
       ),
       published: v.boolean(),
     }),
@@ -101,6 +256,18 @@ export const ChartSchema15 = () =>
       "levelsMeta.length and levelsFreeze.length does not match"
     )
   );
+export async function Chart15Doc(): Promise<Schema> {
+  const schema = (await resolver(ChartSchema15()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      copyBuffer: docRefs("CopyBuffer"),
+      levelsMeta: ArrayOrEmptyObjDoc(docRefs("LevelMeta15")),
+      levelsFreeze: ArrayOrEmptyObjDoc(docRefs("LevelFreeze15")),
+    },
+  };
+}
 
 export type CopyBuffer = v.InferOutput<ReturnType<typeof CopyBufferSchema>>;
 export type CopyBufferEntry = v.InferOutput<

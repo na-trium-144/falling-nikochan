@@ -14,6 +14,7 @@ import {
   validateChartWithoutConvert,
   Chart14Edit,
   Chart15,
+  docRefs,
 } from "@falling-nikochan/chart";
 import { Db, MongoClient } from "mongodb";
 import {
@@ -154,7 +155,7 @@ const chartFileApp = async (config: {
             description: "Successful response",
             content: {
               "application/vnd.msgpack": {
-                schema: resolver(ChartEditSchema13()),
+                schema: docRefs("Chart15"),
               },
             },
           },

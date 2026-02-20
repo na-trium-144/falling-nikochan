@@ -78,6 +78,7 @@ import {
   Level15Meta,
   Level15Play,
 } from "./legacy/chart15.js";
+import { docRefs, Reference, Schema } from "./docSchema.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -85,22 +86,46 @@ export const YoutubeIdSchema = () =>
     v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters")
   );
 export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
-// luaコードの実行結果をパースする際空配列が空オブジェクトになるので、それを受け付ける
+
+export const EmptyObj = <
+  T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+>() =>
+  v.pipe(
+    v.strictObject({}),
+    v.transform(() => [] as v.InferOutput<T>[]),
+    v.description(
+      "accept empty object instead of empty array for Lua compatibility"
+    )
+  );
 export const ArrayOrEmptyObj = <
   T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
 >(
   schema: T
-) =>
-  v.union([
-    v.pipe(
-      v.strictObject({}),
-      v.transform(() => [] as v.InferOutput<T>[])
-    ),
-    v.array(schema),
-  ]);
+) => v.union([v.array(schema), EmptyObj<T>()]);
+export function ArrayOrEmptyObjDoc(doc: Schema | Reference): Schema {
+  return {
+    anyOf: [
+      {
+        type: "array",
+        items: doc,
+      },
+      docRefs("EmptyObj"),
+    ],
+  };
+}
+
 // luaコードの実行結果をパースする際nilがundefinedになるので、それも受け付けるようにしている
 export const LuaLineSchema = () =>
-  v.optional(v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))), null);
+  v.pipe(
+    v.optional(
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))),
+      null
+    ),
+    v.description(
+      "A line number corresponding to the Lua code, or null if not editable. " +
+        "The first line is 0."
+    )
+  );
 export const CidSchema = () =>
   v.pipe(v.string(), v.regex(/^[0-9]{6}$/, "cid must be 6 digits"));
 export const levelTypes = ["Single", "Double", "Maniac"];

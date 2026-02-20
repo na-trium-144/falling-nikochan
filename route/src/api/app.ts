@@ -15,7 +15,7 @@ import dotenv from "dotenv";
 import popularApp from "./popular.js";
 import searchApp from "./search.js";
 import { bodyLimit } from "hono/body-limit";
-import { fileMaxSize } from "@falling-nikochan/chart";
+import { docSchemas, fileMaxSize } from "@falling-nikochan/chart";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
@@ -79,6 +79,9 @@ const apiApp = async (config: {
             identifier: "MIT",
             url: "https://opensource.org/licenses/MIT",
           },
+        },
+        components: {
+          schemas: await docSchemas(),
         },
         servers: [
           ...(process.env.API_ENV === "development"

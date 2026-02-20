@@ -19,7 +19,7 @@ export const StepSchema = () =>
       fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
       numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
       denominator: v.pipe(v.number(), v.integer(), v.minValue(1)),
-    })
+    }),
     /* v.forward(
     v.check(
       ({ numerator, denominator }) => numerator < denominator,
@@ -27,6 +27,14 @@ export const StepSchema = () =>
     ),
     ["numerator"]
     ) */
+    v.description(
+      "Represents the time duration of (fourth + numerator / denominator) quarter notes. " +
+        "All parameters are positive integers greater than or equal to 0, with numerator < denominator. " +
+        "However, they are not necessarily indecomposable fractions.\n" +
+        "Always counts the number of quarter notes, regardless of the signature.\n" +
+        "Confusingly, the increment used to move the cursor on the edit screen " +
+        "(1 / snapDivider) is also called a step, but it's a different thing. "
+    )
   );
 export type Step = v.InferOutput<ReturnType<typeof StepSchema>>;
 export function stepZero(): Step {
