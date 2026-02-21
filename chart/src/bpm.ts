@@ -1,6 +1,10 @@
 import { BPMChange1 } from "./legacy/chart1.js";
-import { SpeedChange13, SpeedChangeWithLua13 } from "./legacy/chart13.js";
-import { BPMChange9 } from "./legacy/chart9.js";
+import {
+  BPMChange15,
+  BPMChangeWithLua15,
+  SpeedChange15,
+  SpeedChangeWithLua15,
+} from "./legacy/chart15.js";
 import { stepCmp, stepToFloat } from "./step.js";
 
 /**
@@ -8,39 +12,50 @@ import { stepCmp, stepToFloat } from "./step.js";
  *  (60 / bpmChanges[bi].bpm) *
  *  (bpmChanges[bi + 1].step - bpmChanges[bi].step);
  */
-export type BPMChange = Omit<BPMChange9, "luaLine">;
-export type BPMChangeWithLua = BPMChange9;
+export type BPMChange = BPMChange15;
+export type BPMChangeWithLua = BPMChangeWithLua15;
+export type BPMChangeWithTimeSec = BPMChangeWithLua & { timeSec: number };
 
-export type SpeedChange = SpeedChange13;
-export type SpeedChangeWithLua = SpeedChangeWithLua13;
+export type SpeedChange = SpeedChange15;
+export type SpeedChangeWithLua = SpeedChangeWithLua15;
+export type SpeedChangeWithTimeSec = SpeedChangeWithLua & { timeSec: number };
 /**
  * stepが正しいとしてtimeSecを再計算
  */
-export function updateBpmTimeSec(
-  bpmChanges: BPMChange[] | BPMChange1[],
-  scaleChanges: BPMChange[] | BPMChange1[]
-) {
+export function updateBpmTimeSec<
+  BPMChanges extends Array<Omit<BPMChange1, "timeSec">>,
+  SpeedChanges extends Array<Omit<BPMChange1, "timeSec">>,
+>(
+  bpmChanges: BPMChanges,
+  scaleChanges: SpeedChanges
+): {
+  bpm: Array<BPMChanges[number] & { timeSec: number }>;
+  speed: Array<SpeedChanges[number] & { timeSec: number }>;
+} {
   let timeSum = 0;
   let si = 0;
-  for (let bi = 0; bi < bpmChanges.length; bi++) {
-    bpmChanges[bi].timeSec = timeSum;
+  const bpm = bpmChanges.map((bpmChange) => ({ ...bpmChange, timeSec: 0 }));
+  const speed = scaleChanges.map((scaleChange) => ({
+    ...scaleChange,
+    timeSec: 0,
+  }));
+  for (let bi = 0; bi < bpm.length; bi++) {
+    bpm[bi].timeSec = timeSum;
     while (
-      si < scaleChanges.length &&
-      (bi + 1 >= bpmChanges.length ||
-        stepCmp(scaleChanges[si].step, bpmChanges[bi + 1].step) < 0)
+      si < speed.length &&
+      (bi + 1 >= bpm.length || stepCmp(speed[si].step, bpm[bi + 1].step) < 0)
     ) {
-      scaleChanges[si].timeSec =
+      speed[si].timeSec =
         timeSum +
-        (60 / bpmChanges[bi].bpm) *
-          (stepToFloat(scaleChanges[si].step) -
-            stepToFloat(bpmChanges[bi].step));
+        (60 / bpm[bi].bpm) *
+          (stepToFloat(speed[si].step) - stepToFloat(bpm[bi].step));
       si++;
     }
-    if (bi + 1 < bpmChanges.length) {
+    if (bi + 1 < bpm.length) {
       timeSum +=
-        (60 / bpmChanges[bi].bpm) *
-        (stepToFloat(bpmChanges[bi + 1].step) -
-          stepToFloat(bpmChanges[bi].step));
+        (60 / bpm[bi].bpm) *
+        (stepToFloat(bpm[bi + 1].step) - stepToFloat(bpm[bi].step));
     }
   }
+  return { bpm, speed };
 }

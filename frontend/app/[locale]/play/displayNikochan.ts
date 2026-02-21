@@ -1,11 +1,8 @@
 import {
   bigScale,
-  displayNote13,
-  displayNote6,
-  DisplayNote6,
-  DisplayNote7,
-  Note13,
-  Note6,
+  displayNote,
+  DisplayNote,
+  Note,
   Pos,
   targetY,
 } from "@falling-nikochan/chart";
@@ -34,14 +31,14 @@ interface Context {
   lastNow: number;
 }
 export class DisplayNikochan {
-  #n: Note6 | Note13;
-  #dn: DisplayNote6 | DisplayNote7;
+  #n: Note;
+  #dn: DisplayNote;
   #c: Context;
   #fadeinStart: DOMHighResTimeStamp;
   #fadeoutStart: DOMHighResTimeStamp | null;
   #tailVel: Pos;
 
-  constructor(n: Note6 | Note13, dn: DisplayNote6 | DisplayNote7, c: Context) {
+  constructor(n: Note, dn: DisplayNote, c: Context) {
     this.#n = n;
     this.#dn = dn;
     this.#c = c;
@@ -56,7 +53,7 @@ export class DisplayNikochan {
     this.#fadeoutStart = null;
     this.#tailVel = { x: 0, y: 0 };
   }
-  update(dn: DisplayNote6 | DisplayNote7, c: Context) {
+  update(dn: DisplayNote, c: Context) {
     this.#dn = dn;
     this.#c = c;
   }
@@ -126,9 +123,7 @@ export class DisplayNikochan {
 
     for (let di = 1; di < dtSplitNum; di++) {
       const t = this.#c.lastNow + dt * di;
-      const newVel = (
-        this.#n.ver === 6 ? displayNote6(this.#n, t) : displayNote13(this.#n, t)
-      )?.vel;
+      const newVel = displayNote(this.#n, t)?.vel;
       if (newVel) {
         updateVelDamp(newVel);
       }

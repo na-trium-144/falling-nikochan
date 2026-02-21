@@ -9,7 +9,7 @@ describe("LevelEditing", () => {
       let rerendered = false;
       let changed = false;
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         (type: EventType) => {
@@ -26,7 +26,7 @@ describe("LevelEditing", () => {
     });
     test("should initialize properties not in level data", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -44,7 +44,7 @@ describe("LevelEditing", () => {
     });
     test("should initialize cursor object", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -58,7 +58,7 @@ describe("LevelEditing", () => {
   describe("updateMeta", () => {
     test("should update meta data", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -70,7 +70,7 @@ describe("LevelEditing", () => {
     });
     test("should trigger rerender and change events", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -91,7 +91,7 @@ describe("LevelEditing", () => {
     });
     test("should reset ytEndSec when ytEnd is changed", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -107,7 +107,7 @@ describe("LevelEditing", () => {
     });
     test("should update current cursor when snapDivider is changed", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -135,7 +135,7 @@ describe("LevelEditing", () => {
   describe("updateFreeze", () => {
     test("should trigger rerender and change events", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -156,7 +156,7 @@ describe("LevelEditing", () => {
     });
     test("should update freeze data", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -189,7 +189,7 @@ describe("LevelEditing", () => {
     });
     test("should update properties not in level data", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -221,7 +221,7 @@ describe("LevelEditing", () => {
     });
     test("should initialize cursor object", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -255,7 +255,7 @@ describe("LevelEditing", () => {
     test("should abort current execution", () => {
       let aborted = false;
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -273,7 +273,7 @@ describe("LevelEditing", () => {
     test("should try to execute new lua", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -288,7 +288,7 @@ describe("LevelEditing", () => {
     });
     test("should update lua and freeze data", async () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -321,7 +321,7 @@ describe("LevelEditing", () => {
     });
     test("should not update lua and freeze data if execution returns null", async () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -340,7 +340,7 @@ describe("LevelEditing", () => {
   describe("setYTDuration", () => {
     test("should update ytDuration and ytEndSec if ytEnd is 'yt'", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -354,7 +354,7 @@ describe("LevelEditing", () => {
     });
     test("should update ytDuration but not ytEndSec if ytEnd is 'note'", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -368,7 +368,7 @@ describe("LevelEditing", () => {
     });
     test("should update ytDuration but not ytEndSec if ytEnd is a number", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -385,7 +385,7 @@ describe("LevelEditing", () => {
   describe("setCurrentTimeWithoutOffset", () => {
     test("should update current time", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -397,7 +397,7 @@ describe("LevelEditing", () => {
     });
     test("should update snapDivider if provided", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -410,7 +410,7 @@ describe("LevelEditing", () => {
     });
     test("should not update if time and snapDivider are the same", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -429,7 +429,7 @@ describe("LevelEditing", () => {
   describe("selectNextNote", () => {
     test("should select the next note when there are multiple notes at the same step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -444,7 +444,7 @@ describe("LevelEditing", () => {
     });
     test("should not select if noteIndex is at the last note of the step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -458,7 +458,7 @@ describe("LevelEditing", () => {
     });
     test("should not select if noteIndex is undefined", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -475,7 +475,7 @@ describe("LevelEditing", () => {
   describe("selectPrevNote", () => {
     test("should select the previous note when there are multiple notes at the same step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -492,7 +492,7 @@ describe("LevelEditing", () => {
     });
     test("should not select if noteIndex is at the first note of the step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -506,7 +506,7 @@ describe("LevelEditing", () => {
     });
     test("should not select if noteIndex is undefined", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -523,7 +523,7 @@ describe("LevelEditing", () => {
   describe("findBpmChangeFromStep", () => {
     test("should find bpm change at or before the given step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -539,7 +539,7 @@ describe("LevelEditing", () => {
     });
     test("should find bpm change before the given step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -555,7 +555,7 @@ describe("LevelEditing", () => {
     });
     test("should find bpm change for large step values", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -575,7 +575,7 @@ describe("LevelEditing", () => {
   describe("findSpeedChangeFromStep", () => {
     test("should find speed change at the given step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -592,7 +592,7 @@ describe("LevelEditing", () => {
     });
     test("should find speed change before the given step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -609,7 +609,7 @@ describe("LevelEditing", () => {
     });
     test("should find speed change for large step values", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -629,7 +629,7 @@ describe("LevelEditing", () => {
   describe("findSignatureFromStep", () => {
     test("should find signature at the given step", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -645,7 +645,7 @@ describe("LevelEditing", () => {
     });
     test("should find signature for large step values", () => {
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -666,7 +666,7 @@ describe("LevelEditing", () => {
     test("should update bpm and call updateLua with expected code", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -685,7 +685,7 @@ describe("LevelEditing", () => {
     test("should update speed and call updateLua with expected code", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -704,7 +704,7 @@ describe("LevelEditing", () => {
     test("should update both bpm and speed when both are provided", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -731,7 +731,7 @@ describe("LevelEditing", () => {
     test("should update signature and call updateLua with expected code", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -758,7 +758,7 @@ describe("LevelEditing", () => {
     test("should add bpm change when toggled on at a position without one", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -779,7 +779,7 @@ describe("LevelEditing", () => {
     test("should delete bpm change when toggled off", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -800,7 +800,7 @@ describe("LevelEditing", () => {
     test("should add speed change when toggled on at a position without one", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -821,7 +821,7 @@ describe("LevelEditing", () => {
     test("should delete speed change when toggled off", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -842,7 +842,7 @@ describe("LevelEditing", () => {
     test("should not toggle if step is zero", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -865,7 +865,7 @@ describe("LevelEditing", () => {
     test("should add signature change when not present", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -886,7 +886,7 @@ describe("LevelEditing", () => {
     test("should delete signature change when present", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -907,7 +907,7 @@ describe("LevelEditing", () => {
     test("should not toggle if step is zero", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -930,7 +930,7 @@ describe("LevelEditing", () => {
     test("should add note and call updateLua with expected code", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -960,7 +960,7 @@ describe("LevelEditing", () => {
     test("should delete note and call updateLua", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -981,7 +981,7 @@ describe("LevelEditing", () => {
     test("should not delete if noteIndex is undefined", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -1005,7 +1005,7 @@ describe("LevelEditing", () => {
     test("should update note and call updateLua with expected code", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
@@ -1033,7 +1033,7 @@ describe("LevelEditing", () => {
     test("should not update if noteIndex is undefined", async () => {
       let executedCode = "";
       const level = new LevelEditing(
-        dummyChartData.levelsMin[0],
+        dummyChartData.levelsMeta[0],
         dummyChartData.levelsFreeze[0],
         dummyChartData.lua[0],
         () => {},
