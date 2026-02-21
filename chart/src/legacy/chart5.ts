@@ -1,10 +1,9 @@
 import { hash } from "../chart.js";
 import { luaAddBeatChange } from "../lua/signature.js";
-import { Step, StepSchema, stepZero } from "../step.js";
+import { Step, stepZero } from "../step.js";
 import { BPMChangeWithLua3, NoteCommandWithLua3, RestStep3 } from "./chart3.js";
 import { ChartUntil4, convertTo4 } from "./chart4.js";
 import { Level6 } from "./chart6.js";
-import * as v from "valibot";
 
 export interface Chart5 {
   falling: "nikochan"; // magic
@@ -39,15 +38,6 @@ export interface Signature5 {
 export interface SignatureWithLua5 extends Signature5 {
   luaLine: number | null;
 }
-export const Signature5Schema = () =>
-  v.object({
-    step: StepSchema(),
-    offset: StepSchema(),
-    barNum: v.number(),
-    bars: v.array(
-      v.array(v.union([v.literal(4), v.literal(8), v.literal(16)]))
-    ),
-  });
 
 export async function hashLevel5(level: Level5 | Level6) {
   return await hash(

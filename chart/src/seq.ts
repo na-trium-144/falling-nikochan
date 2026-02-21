@@ -1,19 +1,30 @@
 import * as v from "valibot";
-import { getBarLength, Signature, toStepArray } from "./signature.js";
-import { BPMChange, BPMChangeWithLua } from "./bpm.js";
+import {
+  getBarLength,
+  Signature,
+  SignatureBarSchema,
+  toStepArray,
+} from "./signature.js";
+import { BPMChange, BPMChangeWithLua, updateBpmTimeSec } from "./bpm.js";
 import {
   Step,
   stepAdd,
   stepCmp,
+  StepSchema,
   stepSub,
   stepToFloat,
   stepZero,
 } from "./step.js";
-import { BPMChange1, BPMChange1Schema } from "./legacy/chart1.js";
-import { Signature5, Signature5Schema } from "./legacy/chart5.js";
-import { SpeedChange13SchemaWithoutLua } from "./legacy/chart13.js";
+import { BPMChange1 } from "./legacy/chart1.js";
+import { Signature5 } from "./legacy/chart5.js";
 import { Chart6, Level6Play } from "./legacy/chart6.js";
-import { Level15Play } from "./legacy/chart15.js";
+import {
+  Level15Play,
+  YTBeginSchema15,
+  YTEndSecSchema15,
+} from "./legacy/chart15.js";
+import { docRefs, Schema } from "./docSchema.js";
+import { resolver } from "hono-openapi";
 
 const PosSchema = () =>
   v.object({
@@ -33,76 +44,181 @@ export const DisplayParamSchema = () =>
   });
 export type DisplayParam = v.InferOutput<ReturnType<typeof DisplayParamSchema>>;
 
-/**
- * Note properties used in-game
- */
-export const NoteSchema = () =>
-  v.object({
-    id: v.pipe(
-      v.number(),
-      v.description("unique number of note, always equals to index in array")
-    ),
-    big: v.pipe(v.boolean(), v.description("whether the note is big")),
-    bigDone: v.pipe(
-      v.boolean(),
-      v.description("whether the note has been judged, false by default")
-    ),
-    hitTimeSec: v.pipe(
-      v.number(),
-      v.description("hit judgement time, ignoring offset")
-    ),
-    appearTimeSec: v.pipe(
-      v.number(),
-      v.description("when note starts appearing")
-    ),
-    targetX: v.pipe(
-      v.number(),
-      v.description(
-        "left edge: 0.0 - right edge: 1.0  (1 / 10 of NoteCommand.x)"
-      )
-    ),
-    vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
-    vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
-    ay: v.pipe(v.number(), v.description("always 1 / 4")),
-    display: v.pipe(
-      v.array(DisplayParamSchema()),
-      v.description(
-        "Parameter u for each time.\n" +
-          "The note position between \n" +
-          "  display[i].timeSecBefore < (hitTimeSec - current time) < display[i+1].timeSecBefore \n" +
-          "is calculated as follows:\n" +
-          "t = hitTimeSec - current time - display[i].timeSecBefore,\n" +
-          "u = u0 + du * t + ddu * t^2 / 2,\n" +
-          "x = targetX + vx * u,\n" +
-          "y = vy * u - ay * u^2 / 2.\n" +
-          "(Exceptionally, if hitTimeSec - current time < 0, use display[0] with t = hitTimeSec - current time - 0.)"
-      )
-    ),
-    hitPos: v.pipe(
-      v.optional(PosSchema()),
-      v.description("position of the note when hit")
-    ),
-    done: v.pipe(
-      v.number(),
-      v.description("judgement result, 0:NotYet 1:Good 2:OK 3:bad 4:miss 5:")
-    ),
-    baseScore: v.optional(v.number()),
-    chainBonus: v.optional(v.number()),
-    bigBonus: v.optional(v.number()),
-    chain: v.optional(v.number()),
-  });
-export type Note = v.InferOutput<ReturnType<typeof NoteSchema>>;
+export const NoteSeqSchema = () =>
+  v.pipe(
+    v.object({
+      id: v.pipe(
+        v.number(),
+        v.description("unique number of note, always equals to index in array")
+      ),
+      big: v.pipe(v.boolean(), v.description("whether the note is big")),
+      bigDone: v.pipe(
+        v.boolean(),
+        v.description("whether the note has been judged, false by default")
+      ),
+      hitTimeSec: v.pipe(
+        v.number(),
+        v.description("hit judgement time, ignoring offset")
+      ),
+      appearTimeSec: v.pipe(
+        v.number(),
+        v.description("when note starts appearing")
+      ),
+      targetX: v.pipe(
+        v.number(),
+        v.description(
+          "left edge: 0.0 - right edge: 1.0  (1 / 10 of NoteCommand.x)"
+        )
+      ),
+      vx: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vx")),
+      vy: v.pipe(v.number(), v.description("1 / 4 of NoteCommand.vy")),
+      ay: v.pipe(v.number(), v.description("always 1 / 4")),
+      display: v.pipe(
+        v.array(DisplayParamSchema()),
+        v.description(
+          "Parameter u for each time.\n" +
+            "The note position between \n" +
+            "  display[i].timeSecBefore < (hitTimeSec - current time) < display[i+1].timeSecBefore \n" +
+            "is calculated as follows:\n" +
+            "t = hitTimeSec - current time - display[i].timeSecBefore,\n" +
+            "u = u0 + du * t + ddu * t^2 / 2,\n" +
+            "x = targetX + vx * u,\n" +
+            "y = vy * u - ay * u^2 / 2.\n" +
+            "(Exceptionally, if hitTimeSec - current time < 0, use display[0] with t = hitTimeSec - current time - 0.)"
+        )
+      ),
+      hitPos: v.pipe(
+        v.optional(PosSchema()),
+        v.description("position of the note when hit")
+      ),
+      done: v.pipe(
+        v.number(),
+        v.description("judgement result, 0:NotYet 1:Good 2:OK 3:bad 4:miss 5:")
+      ),
+      baseScore: v.optional(v.number()),
+      chainBonus: v.optional(v.number()),
+      bigBonus: v.optional(v.number()),
+      chain: v.optional(v.number()),
+    }),
+    v.description("Note data used for judgement and display during play.")
+  );
+export type Note = v.InferOutput<ReturnType<typeof NoteSeqSchema>>;
+
+export const BPMChangeSeqSchema = () =>
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      timeSec: v.pipe(
+        v.number(),
+        v.description(
+          "the timestamp when the bpm change happens, ignoring offset"
+        )
+      ),
+      bpm: v.number(),
+    }),
+    v.description("BPM change command data with timestamp.")
+  );
+export async function BPMChangeSeqDoc(): Promise<Schema> {
+  const schema = (await resolver(BPMChangeSeqSchema()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+    },
+  };
+}
+export const SpeedChangeSeqSchema = () =>
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      bpm: v.pipe(
+        v.number(),
+        v.description(
+          "the timestamp when the speed change happens, ignoring offset"
+        )
+      ),
+      interp: v.pipe(
+        v.boolean(),
+        v.description(
+          "whether the speed change is gradual between the previous and this speed change command."
+        )
+      ),
+      timeSec: v.pipe(v.number(), v.minValue(0)),
+    }),
+    v.description(
+      "Speed change command with timestamp, where bpm is the speed multiplier."
+    )
+  );
+export async function SpeedChangeSeqDoc(): Promise<Schema> {
+  const schema = (await resolver(SpeedChangeSeqSchema()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+    },
+  };
+}
+
+export const SignatureSeqSchema = () =>
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      offset: StepSchema(),
+      bars: SignatureBarSchema(),
+    }),
+    v.description(
+      "Time signature change command. " +
+        "Only beats that can be expressed as the sum of 4th, 8th, and 16th notes are supported. " +
+        "If offset is not zero, the count start from the middle of the time signature. " +
+        "(step - offset is the time of the first beat of this signature) \n" +
+        "This only affects the display of slime-chans at the bottom right of the screen during play, " +
+        "and does not affect the timing of notes or other commands."
+    )
+  );
+export async function SignatureSeqDoc(): Promise<Schema> {
+  const schema = (await resolver(SignatureSeqSchema()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+      offset: docRefs("Step"),
+      bars: docRefs("SignatureBar"),
+    },
+  };
+}
 
 export const ChartSeqDataSchema = () =>
   v.object({
-    notes: v.array(NoteSchema()),
-    bpmChanges: v.array(BPMChange1Schema()),
-    speedChanges: v.array(SpeedChange13SchemaWithoutLua()),
-    signature: v.array(Signature5Schema()),
+    notes: v.array(NoteSeqSchema()),
+    bpmChanges: v.array(BPMChangeSeqSchema()),
+    speedChanges: v.array(SpeedChangeSeqSchema()),
+    signature: v.array(SignatureSeqSchema()),
     offset: v.number(),
-    ytBegin: v.number(),
-    ytEndSec: v.number(),
+    ytBegin: YTBeginSchema15(),
+    ytEndSec: YTEndSecSchema15(),
   });
+export async function ChartSeqDataDoc(): Promise<Schema> {
+  const schema = (await resolver(ChartSeqDataSchema()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      notes: docRefs("NoteSeq"),
+      bpmChanges: docRefs("BPMChangeSeq"),
+      speedChanges: docRefs("SpeedChangeSeq"),
+      signature: docRefs("SignatureSeq"),
+      ytBegin: docRefs("YTBegin15"),
+      ytEndSec: docRefs("YTEndSec15"),
+    },
+  };
+}
 export type ChartSeqData = v.InferOutput<ReturnType<typeof ChartSeqDataSchema>>;
 
 /**
@@ -177,12 +293,18 @@ export function loadChart(
       };
     }
   }
+
+  const { bpm: bpmChanges, speed: speedChanges } = updateBpmTimeSec(
+    level.bpmChanges,
+    level.speedChanges
+  );
+
   const notes: Note[] = [];
   for (let id = 0; id < level.notes.length; id++) {
     const c = level.notes[id];
 
     // hitの時刻
-    const hitTimeSec: number = getTimeSec(level.bpmChanges, c.step);
+    const hitTimeSec: number = getTimeSec(bpmChanges, c.step);
 
     const display: DisplayParam[] = [];
     let tBegin = hitTimeSec;
@@ -235,8 +357,8 @@ export function loadChart(
     const ayLegacy = 1;
 
     let appearTimeSec: number | null = null;
-    for (let ti = level.speedChanges.length - 1; ti >= 0; ti--) {
-      const ts = level.speedChanges[ti];
+    for (let ti = speedChanges.length - 1; ti >= 0; ti--) {
+      const ts = speedChanges[ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
         continue;
       }
@@ -246,7 +368,7 @@ export function loadChart(
       //  u = u(tBegin) + du * t
       let du: number;
       let ddu: number;
-      const tsNext = level.speedChanges.at(ti + 1);
+      const tsNext = speedChanges.at(ti + 1);
       if (tsNext && "interp" in tsNext && tsNext.interp && tBegin !== tEnd) {
         let nextBpm = tsNext.bpm;
         if (tBegin < tsNext.timeSec) {
@@ -380,10 +502,17 @@ export function loadChart(
   return {
     offset: level.offset,
     signature: level.signature,
-    bpmChanges: level.bpmChanges,
-    speedChanges: level.speedChanges.map((s) => ({
-      ...s,
+    bpmChanges: bpmChanges.map((b) => ({
+      // 余計なプロパティを削除
+      step: b.step,
+      timeSec: b.timeSec,
+      bpm: b.bpm,
+    })),
+    speedChanges: speedChanges.map((s) => ({
+      step: s.step,
+      timeSec: s.timeSec,
       interp: "interp" in s ? s.interp : false,
+      bpm: s.bpm,
     })),
     notes,
     ytBegin: "ytBegin" in level ? level.ytBegin : 0,
@@ -391,10 +520,8 @@ export function loadChart(
       "ytEndSec" in level
         ? level.ytEndSec
         : level.notes.length >= 1
-          ? getTimeSec(
-              level.bpmChanges,
-              level.notes[level.notes.length - 1].step
-            ) + level.offset
+          ? getTimeSec(bpmChanges, level.notes[level.notes.length - 1].step) +
+            level.offset
           : 0,
   };
 }
@@ -469,15 +596,12 @@ export interface Pos {
 }
 
 function defaultBpmChange(): BPMChangeWithLua {
-  return { timeSec: 0, bpm: 120, step: stepZero(), luaLine: null };
+  return { bpm: 120, step: stepZero(), luaLine: null };
 }
 /**
  * bpmとstep数→時刻(秒数)
  */
-export function getTimeSec(
-  bpmChanges: BPMChange[] | BPMChange1[],
-  step: Step
-): number {
+export function getTimeSec(bpmChanges: BPMChange1[], step: Step): number {
   const targetBpmChange =
     bpmChanges[findBpmIndexFromStep(bpmChanges, step)] || defaultBpmChange();
   return (
@@ -490,7 +614,7 @@ export function getTimeSec(
  * bpmと時刻(秒数)→step
  */
 export function getStep(
-  bpmChanges: BPMChange[] | BPMChange1[],
+  bpmChanges: BPMChange1[],
   timeSec: number,
   denominator: number
 ): Step {
@@ -510,7 +634,7 @@ export function getStep(
  * 時刻(step)→小節数+小節内の拍数
  */
 export function getSignatureState(
-  signature: Signature[] | Signature5[],
+  signature: Signature5[],
   step: Step
 ): SignatureState {
   const targetSignature = signature[findBpmIndexFromStep(signature, step)];
@@ -563,7 +687,7 @@ export interface SignatureState {
  * 時刻(秒数)→bpm
  */
 export function findBpmIndexFromSec(
-  bpmChanges: BPMChange[] | BPMChange1[],
+  bpmChanges: BPMChange1[],
   timeSec: number
 ): number {
   if (bpmChanges.length === 0) {

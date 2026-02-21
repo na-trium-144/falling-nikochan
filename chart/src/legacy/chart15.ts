@@ -19,6 +19,7 @@ import {
 import { resolver } from "hono-openapi";
 import { docRefs, Schema } from "../docSchema.js";
 import { StepSchema } from "../step.js";
+import { SignatureBarSchema } from "../signature.js";
 
 export const NoteCommandSchema15 = () =>
   v.pipe(
@@ -144,14 +145,7 @@ export const SignatureSchema15 = () =>
     v.object({
       step: StepSchema(),
       offset: StepSchema(),
-      bars: v.pipe(
-        v.array(v.array(v.picklist([4, 8, 16] as const))),
-        v.description(
-          "The time signature pattern. " +
-            "For instance, [[4, 4, 4, 4]] is 4/4 beat, [[4, 4, 4, 8]] is 7/8 beat, " +
-            "[[4, 4, 4, 4], [4, 4, 4]] is 4/4 + 3/4 beat."
-        )
-      ),
+      bars: SignatureBarSchema(),
       luaLine: LuaLineSchema(),
     }),
     v.description(
@@ -171,6 +165,7 @@ export async function Signature15Doc(): Promise<Schema> {
       ...schema.properties,
       step: docRefs("Step"),
       offset: docRefs("Step"),
+      bars: docRefs("SignatureBar"),
       luaLine: docRefs("LuaLine"),
     },
   };

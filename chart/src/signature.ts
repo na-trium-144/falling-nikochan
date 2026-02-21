@@ -8,6 +8,17 @@ import {
   stepSub,
   stepZero,
 } from "./step.js";
+import * as v from "valibot";
+
+export const SignatureBarSchema = () =>
+  v.pipe(
+    v.array(v.array(v.picklist([4, 8, 16] as const))),
+    v.description(
+      "The time signature pattern. " +
+        "For instance, [[4, 4, 4, 4]] is 4/4 beat, [[4, 4, 4, 8]] is 7/8 beat, " +
+        "[[4, 4, 4, 4], [4, 4, 4]] is 4/4 + 3/4 beat."
+    )
+  );
 
 export type Signature = Signature15;
 export type SignatureWithLua = SignatureWithLua15;

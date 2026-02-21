@@ -32,13 +32,6 @@ export const SpeedChangeSchema13 = () =>
     timeSec: v.pipe(v.number(), v.minValue(0)),
     luaLine: LuaLineSchema(),
   });
-export const SpeedChange13SchemaWithoutLua = () =>
-  v.object({
-    step: StepSchema(),
-    bpm: v.number(),
-    interp: v.boolean(),
-    timeSec: v.pipe(v.number(), v.minValue(0)),
-  });
 
 export const LevelFreezeSchema13 = () =>
   v.object({

@@ -18,6 +18,14 @@ import {
 import { EmptyObj, LuaLineSchema } from "./chart.js";
 import { StepSchema } from "./step.js";
 import { resolver } from "hono-openapi";
+import {
+  BPMChangeSeqDoc,
+  ChartSeqDataDoc,
+  NoteSchema,
+  SignatureSeqDoc,
+  SpeedChangeSeqDoc,
+} from "./seq.js";
+import { SignatureBarSchema } from "./signature.js";
 
 export type Schema = OpenAPIV3_1.SchemaObject;
 export type Reference = OpenAPIV3_1.ReferenceObject;
@@ -34,6 +42,7 @@ export const docSchemas = async () => ({
   Rest15: await Rest15Doc(),
   BPMChange15: await BPMChange15Doc(),
   SpeedChange15: await SpeedChange15Doc(),
+  SignatureBar: (await resolver(SignatureBarSchema()).toOpenAPISchema()).schema,
   Signature15: await Signature15Doc(),
   YTBegin15: (await resolver(YTBeginSchema15()).toOpenAPISchema()).schema,
   YTEnd15: (await resolver(YTEndSchema15()).toOpenAPISchema()).schema,
@@ -41,6 +50,11 @@ export const docSchemas = async () => ({
   CopyBufferEntry: (await resolver(CopyBufferEntrySchema()).toOpenAPISchema())
     .schema,
   CopyBuffer: await CopyBufferDoc(),
+  ChartSeqData: await ChartSeqDataDoc(),
+  NoteSeq: (await resolver(NoteSchema()).toOpenAPISchema()).schema,
+  BPMChangeSeq: await BPMChangeSeqDoc(),
+  SpeedChangeSeq: await SpeedChangeSeqDoc(),
+  SignatureSeq: await SignatureSeqDoc(),
 });
 
 export const docRefs = (
