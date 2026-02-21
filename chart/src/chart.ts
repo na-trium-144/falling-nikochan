@@ -104,13 +104,13 @@ export const ArrayOrEmptyObj = <
 ) => v.union([v.array(schema), EmptyObj<T>()]);
 export function ArrayOrEmptyObjDoc(doc: Schema | Reference): Schema {
   return {
-    anyOf: [
-      {
-        type: "array",
-        items: doc,
-      },
-      docRefs("EmptyObj"),
-    ],
+    anyOf: [ArrayDoc(doc), docRefs("EmptyObj")],
+  };
+}
+export function ArrayDoc(doc: Schema | Reference): Schema {
+  return {
+    type: "array",
+    items: doc,
   };
 }
 
@@ -261,7 +261,6 @@ export async function hashLevel(
       ({
         step: stepSimplify({ ...bpm.step }),
         bpm: bpm.bpm,
-        timeSec: bpm.timeSec,
       }) satisfies BPMChange
   );
 
@@ -270,7 +269,6 @@ export async function hashLevel(
       ({
         step: stepSimplify({ ...speed.step }),
         bpm: speed.bpm,
-        timeSec: speed.timeSec,
         interp: "interp" in speed ? speed.interp : false,
       }) satisfies SpeedChange
   );
@@ -282,7 +280,6 @@ export async function hashLevel(
             ({
               step: stepSimplify({ ...sig.step }),
               offset: stepSimplify({ ...sig.offset }),
-              barNum: sig.barNum,
               bars: sig.bars,
             }) satisfies Signature
         )

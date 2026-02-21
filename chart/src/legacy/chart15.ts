@@ -7,15 +7,9 @@ import {
   ArrayOrEmptyObj,
   levelTypesConst,
   LuaLineSchema,
+  ArrayDoc,
 } from "../chart.js";
-import { YTBeginSchema11, YTEndSchema11 } from "./chart11.js";
-import {
-  BPMChangeSchema9,
-  NoteCommandSchema9,
-  RestSchema9,
-  SignatureSchema9,
-} from "./chart9.js";
-import { ChartUntil13, SpeedChangeSchema13 } from "./chart13.js";
+import { ChartUntil13 } from "./chart13.js";
 import {
   Chart14Edit,
   ChartUntil14,
@@ -96,49 +90,149 @@ export async function Rest15Doc(): Promise<Schema> {
   };
 }
 export const BPMChangeSchema15 = () =>
-  v.object({
-    step: StepSchema(),
-    bpm: v.pipe(v.number(), v.gtValue(0)),
-    timeSec: v.pipe(v.number(), v.minValue(0)),
-    luaLine: LuaLineSchema(),
-  });
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      bpm: v.pipe(v.number(), v.gtValue(0)),
+      luaLine: LuaLineSchema(),
+    }),
+    v.description("BPM change command.")
+  );
+export async function BPMChange15Doc(): Promise<Schema> {
+  const schema = (await resolver(BPMChangeSchema15()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+      luaLine: docRefs("LuaLine"),
+    },
+  };
+}
 export const SpeedChangeSchema15 = () =>
-  v.object({
-    step: StepSchema(),
-    bpm: v.number(),
-    timeSec: v.pipe(v.number(), v.minValue(0)),
-    luaLine: LuaLineSchema(),
-  });
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      bpm: v.number(),
+      interp: v.pipe(
+        v.boolean(),
+        v.description(
+          "whether the speed change is gradual between the previous and this speed change command."
+        )
+      ),
+      luaLine: LuaLineSchema(),
+    }),
+    v.description(
+      "Speed change command, where bpm is the speed multiplier. " +
+        "0 and negative values can also be used."
+    )
+  );
+export async function SpeedChange15Doc(): Promise<Schema> {
+  const schema = (await resolver(SpeedChangeSchema15()).toOpenAPISchema())
+    .schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+      luaLine: docRefs("LuaLine"),
+    },
+  };
+}
 export const SignatureSchema15 = () =>
-  v.object({
-    step: StepSchema(),
-    offset: StepSchema(),
-    barNum: v.pipe(v.number(), v.integer(), v.minValue(0)),
-    bars: v.array(v.array(v.picklist([4, 8, 16] as const))),
-    luaLine: LuaLineSchema(),
-  });
+  v.pipe(
+    v.object({
+      step: StepSchema(),
+      offset: StepSchema(),
+      bars: v.pipe(
+        v.array(v.array(v.picklist([4, 8, 16] as const))),
+        v.description(
+          "The time signature pattern. " +
+            "For instance, [[4, 4, 4, 4]] is 4/4 beat, [[4, 4, 4, 8]] is 7/8 beat, " +
+            "[[4, 4, 4, 4], [4, 4, 4]] is 4/4 + 3/4 beat."
+        )
+      ),
+      luaLine: LuaLineSchema(),
+    }),
+    v.description(
+      "Time signature change command. " +
+        "Only beats that can be expressed as the sum of 4th, 8th, and 16th notes are supported. " +
+        "If offset is not zero, the count start from the middle of the time signature. " +
+        "(step - offset is the time of the first beat of this signature) \n" +
+        "This only affects the display of slime-chans at the bottom right of the screen during play, " +
+        "and does not affect the timing of notes or other commands."
+    )
+  );
+export async function Signature15Doc(): Promise<Schema> {
+  const schema = (await resolver(SignatureSchema15()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      step: docRefs("Step"),
+      offset: docRefs("Step"),
+      luaLine: docRefs("LuaLine"),
+    },
+  };
+}
+
+export const YTBeginSchema15 = () =>
+  v.pipe(
+    v.number(),
+    v.minValue(0),
+    v.description("The time in seconds to start the video")
+  );
+export const YTEndSchema15 = () =>
+  v.pipe(
+    v.union([v.literal("note"), v.literal("yt"), v.number()]),
+    v.description(
+      "The time to end the video. " +
+        "'note': the end time is determined by the last note, rest or bpm/speed change command. " +
+        "'yt': the end time is determined by ytEndSec. " +
+        "a number value: the end time in seconds. " +
+        "This is only used by the chart editor and is ignored when playing."
+    )
+  );
+export const YTEndSecSchema15 = () =>
+  v.pipe(
+    v.number(),
+    v.minValue(0),
+    v.description("The time in seconds to end the video.")
+  );
 
 export const LevelMetaSchema15 = () =>
   v.object({
     name: v.string(),
     type: v.picklist(levelTypesConst),
     unlisted: v.boolean(),
-    ytBegin: YTBeginSchema11(),
-    ytEnd: YTEndSchema11(),
-    ytEndSec: v.number(),
+    ytBegin: YTBeginSchema15(),
+    ytEnd: YTEndSchema15(),
+    ytEndSec: YTEndSecSchema15(),
     snapDivider: v.pipe(
       v.number(),
       v.description("The step unit in chart editor is set to 1/(4*snapDivider)")
     ),
   });
+export async function LevelMeta15Doc(): Promise<Schema> {
+  const schema = (await resolver(LevelMetaSchema15()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      ytBegin: docRefs("YTBegin15"),
+      ytEnd: docRefs("YTEnd15"),
+      ytEndSec: docRefs("YTEndSec15"),
+    },
+  };
+}
 
 export const LevelFreezeSchema15 = () =>
   v.object({
-    notes: ArrayOrEmptyObj(NoteCommandSchema9()),
-    rest: ArrayOrEmptyObj(RestSchema9()),
-    bpmChanges: ArrayOrEmptyObj(BPMChangeSchema9()),
-    speedChanges: ArrayOrEmptyObj(SpeedChangeSchema13()),
-    signature: ArrayOrEmptyObj(SignatureSchema9()),
+    notes: ArrayOrEmptyObj(NoteCommandSchema15()),
+    rest: ArrayOrEmptyObj(RestSchema15()),
+    bpmChanges: ArrayOrEmptyObj(BPMChangeSchema15()),
+    speedChanges: ArrayOrEmptyObj(SpeedChangeSchema15()),
+    signature: ArrayOrEmptyObj(SignatureSchema15()),
   });
 export async function LevelFreeze15Doc(): Promise<Schema> {
   const schema = (await resolver(LevelFreezeSchema15()).toOpenAPISchema())
@@ -160,13 +254,28 @@ export const LevelPlaySchema15 = () =>
   v.object({
     ver: v.union([v.literal(15)]),
     offset: v.pipe(v.number(), v.minValue(0)),
-    notes: v.array(NoteCommandSchema9()),
-    bpmChanges: v.array(BPMChangeSchema9()),
-    speedChanges: v.array(SpeedChangeSchema13()),
-    signature: v.array(SignatureSchema9()),
-    ytBegin: YTBeginSchema11(),
-    ytEndSec: v.number(),
+    notes: v.array(NoteCommandSchema15()),
+    bpmChanges: v.array(BPMChangeSchema15()),
+    speedChanges: v.array(SpeedChangeSchema15()),
+    signature: v.array(SignatureSchema15()),
+    ytBegin: YTBeginSchema15(),
+    ytEndSec: YTEndSecSchema15(),
   });
+export async function LevelPlay15Doc(): Promise<Schema> {
+  const schema = (await resolver(LevelPlaySchema15()).toOpenAPISchema()).schema;
+  return {
+    ...schema,
+    properties: {
+      ...schema.properties,
+      notes: ArrayDoc(docRefs("NoteCommand15")),
+      bpmChanges: ArrayDoc(docRefs("BPMChange15")),
+      speedChanges: ArrayDoc(docRefs("SpeedChange15")),
+      signature: ArrayDoc(docRefs("Signature15")),
+      ytBegin: docRefs("YTBegin15"),
+      ytEndSec: docRefs("YTEndSec15"),
+    },
+  };
+}
 
 export const CopyBufferEntrySchema = () =>
   v.tuple([
@@ -268,6 +377,29 @@ export async function Chart15Doc(): Promise<Schema> {
     },
   };
 }
+
+export type YTBegin15 = v.InferOutput<ReturnType<typeof YTBeginSchema15>>;
+export type YTEnd15 = v.InferOutput<ReturnType<typeof YTEndSchema15>>;
+export type YTEndSec15 = v.InferOutput<ReturnType<typeof YTEndSecSchema15>>;
+
+export type NoteCommandWithLua15 = v.InferOutput<
+  ReturnType<typeof NoteCommandSchema15>
+>;
+export type RestWithLua15 = v.InferOutput<ReturnType<typeof RestSchema15>>;
+export type BPMChangeWithLua15 = v.InferOutput<
+  ReturnType<typeof BPMChangeSchema15>
+>;
+export type SpeedChangeWithLua15 = v.InferOutput<
+  ReturnType<typeof SpeedChangeSchema15>
+>;
+export type SignatureWithLua15 = v.InferOutput<
+  ReturnType<typeof SignatureSchema15>
+>;
+export type NoteCommand15 = Omit<NoteCommandWithLua15, "luaLine">;
+export type Rest15 = Omit<RestWithLua15, "luaLine">;
+export type BPMChange15 = Omit<BPMChangeWithLua15, "luaLine">;
+export type SpeedChange15 = Omit<SpeedChangeWithLua15, "luaLine">;
+export type Signature15 = Omit<SignatureWithLua15, "luaLine">;
 
 export type CopyBuffer = v.InferOutput<ReturnType<typeof CopyBufferSchema>>;
 export type CopyBufferEntry = v.InferOutput<
