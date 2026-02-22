@@ -1,8 +1,9 @@
 import { rateLimit } from "@falling-nikochan/chart";
-import { Context } from "hono";
+import { Context, Hono } from "hono";
 import { Db } from "mongodb";
 import { Bindings } from "../env.js";
 import { ConnInfo } from "hono/conninfo";
+import { env } from "hono/adapter";
 
 interface RateLimitEntry {
   ip: string;
@@ -12,6 +13,16 @@ interface RateLimitEntry {
 }
 
 type Route = "newChartFile" | "chartFile" | "record";
+
+export const forwardCheckApp = (config: {
+  getConnInfo: (c: Context) => ConnInfo | null;
+}) =>
+  new Hono<{ Bindings: Bindings }>({ strict: false }).get("/", (c) =>
+    c.json({
+      ip: getIp(c, config.getConnInfo),
+      noLimit: !!(env(c).API_ENV === "development" && env(c).API_NO_RATELIMIT),
+    })
+  );
 
 export function getIp(
   c: Context,
