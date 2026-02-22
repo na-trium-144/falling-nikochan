@@ -62,7 +62,7 @@ const apiApp = async (config: {
     .route("/popular", popularApp)
     .route("/search", searchApp)
     .route("/hashPasswd", hashPasswdApp)
-    .route("/record", recordApp);
+    .route("/record", await recordApp({ getConnInfo: config.getConnInfo }));
   apiApp.get(
     "/openapi.json",
     openAPIRouteHandler(apiApp, {

@@ -3,6 +3,7 @@ export const popularDays = 3;
 export const rateLimit = {
   newChartFile: 600,
   chartFile: 3,
+  record: 10,
 } as const;
 export const chartMaxEvent = 20000;
 export const fileMaxSize = chartMaxEvent * (100 + 150);
