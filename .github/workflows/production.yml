@@ -208,8 +208,22 @@ jobs:
             docker compose up -d
             docker system prune -f
 
+  check-ip:
+    needs: [deploy-vercel, deploy-cf, deploy-selfhosting]
+    # 本番環境のrate limitが動作しているかを確認する
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - run: |
+          api_result=$(curl -4 https://nikochan.utcode.net/api/ip)
+          actual_ip=$(curl -4 https://ifconfig.me)
+          echo "api result: $api_result"
+          echo "actual ip: $actual_ip"
+          test $(echo "$api_result" | jq -r .ip) = "$actual_ip"
+          
   notify-failure:
-    needs: [vercel-build, docker-build, docker-push-manifest, deploy-vercel, deploy-cf, deploy-selfhosting]
+    needs: [vercel-build, docker-build, docker-push-manifest, deploy-vercel, deploy-cf, deploy-selfhosting, check-ip]
     if: failure()
     runs-on: ubuntu-latest
     permissions:
