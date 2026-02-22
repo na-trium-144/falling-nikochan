@@ -1,16 +1,28 @@
 import { rateLimit } from "@falling-nikochan/chart";
-import { Context } from "hono";
+import { Context, Hono } from "hono";
 import { Db } from "mongodb";
 import { Bindings } from "../env.js";
 import { ConnInfo } from "hono/conninfo";
+import { env } from "hono/adapter";
 
 interface RateLimitEntry {
   ip: string;
   lastCreate: Date; // for /api/newChartFile
   lastChartFileAccess: Date; // for /api/chartFile
+  lastRecordPost: Date; // for /api/record
 }
 
-type Route = "newChartFile" | "chartFile";
+type Route = "newChartFile" | "chartFile" | "record";
+
+export const forwardCheckApp = (config: {
+  getConnInfo: (c: Context) => ConnInfo | null;
+}) =>
+  new Hono<{ Bindings: Bindings }>({ strict: false }).get("/", (c) =>
+    c.json({
+      ip: getIp(c, config.getConnInfo),
+      noLimit: !!(env(c).API_ENV === "development" && env(c).API_NO_RATELIMIT),
+    })
+  );
 
 export function getIp(
   c: Context,
@@ -45,6 +57,9 @@ export async function updateIp(
     case "chartFile":
       lastAccess = entry?.lastChartFileAccess;
       break;
+    case "record":
+      lastAccess = entry?.lastRecordPost;
+      break;
     default:
       route satisfies never;
   }
@@ -70,6 +85,15 @@ export async function updateIp(
           .updateOne(
             { ip },
             { $set: { ip, lastChartFileAccess: new Date() } },
+            { upsert: true }
+          );
+        break;
+      case "record":
+        await db
+          .collection<RateLimitEntry>("rateLimit")
+          .updateOne(
+            { ip },
+            { $set: { ip, lastRecordPost: new Date() } },
             { upsert: true }
           );
         break;

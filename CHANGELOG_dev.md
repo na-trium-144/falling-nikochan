@@ -1,3 +1,9 @@
+## ver. 14.23 - 2026/02/22 [#975](https://github.com/na-trium-144/falling-nikochan/pull/975)
+
+* base, chain, bigをrecordに含める
+* /api/recordにratelimit追加
+* ip取得の動作確認を/api/newChartFileのconsole.logでやらず、/api/ipのレスポンスで確認できるようにする
+
 ## ver. 14.22 - 2026/02/19 [#973](https://github.com/na-trium-144/falling-nikochan/pull/973)
 
 * passwdHashをセッションに保存し、localStorageから削除してもそのセッション内では保存が動作するように
