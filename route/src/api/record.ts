@@ -22,6 +22,9 @@ export interface PlayRecordEntry {
   playedAt: number;
   auto: boolean;
   score: number;
+  baseScore?: number;
+  chainScore?: number;
+  bigScore?: number;
   fc: boolean;
   fb: boolean;
   factor?: number;
@@ -150,8 +153,18 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     validator("json", RecordPostSchema()),
     async (c) => {
       const { cid } = c.req.valid("param");
-      const { lvHash, auto, score, fc, fb, factor, editing } =
-        c.req.valid("json");
+      const {
+        lvHash,
+        auto,
+        score,
+        baseScore,
+        chainScore,
+        bigScore,
+        fc,
+        fb,
+        factor,
+        editing,
+      } = c.req.valid("json");
 
       const client = new MongoClient(env(c).MONGODB_URI);
       try {
@@ -163,6 +176,9 @@ const recordApp = new Hono<{ Bindings: Bindings }>({ strict: false })
           auto,
           playedAt: Date.now(),
           score,
+          baseScore,
+          chainScore,
+          bigScore,
           fc,
           fb,
           factor: typeof factor === "number" ? factor : 1,
