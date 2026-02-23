@@ -49,7 +49,8 @@ export const RecordPostSchema = () =>
               record.baseScore -
               record.chainScore -
               record.bigScore
-          ) < Number.EPSILON
+          ) <
+          Number.EPSILON * record.score * 4
         );
       } else {
         return false;
