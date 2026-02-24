@@ -208,26 +208,28 @@ export function useChartState(props: Props) {
         if (chartState.chart.changePasswd) {
           currentPasswd.p = chartState.chart.changePasswd;
         }
-        if (savePasswd && currentPasswd.p) {
-          try {
-            fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
-              {
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              }
-            ).then(async (res) => {
-              if (res.ok) {
-                const ph = await res.text();
-                setPasswd(cid, ph);
-                currentPasswd.ph = ph;
-              }
-            });
-          } catch {
-            //ignore
+        if (savePasswd) {
+          if (currentPasswd.p) {
+            try {
+              fetch(
+                process.env.BACKEND_PREFIX +
+                  `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
+                {
+                  credentials:
+                    process.env.NODE_ENV === "development"
+                      ? "include"
+                      : "same-origin",
+                }
+              ).then(async (res) => {
+                if (res.ok) {
+                  const ph = await res.text();
+                  setPasswd(cid, ph);
+                  currentPasswd.ph = ph;
+                }
+              });
+            } catch {
+              //ignore
+            }
           }
         } else {
           unsetPasswd(cid);
