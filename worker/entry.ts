@@ -376,6 +376,7 @@ const app = new Hono({ strict: false })
   )
   .all("/api/*", (c) => fetchAPI(c.req.raw))
   .all("/api", (c) => fetchAPI(c.req.raw))
+  .get("/sitemap.xml", (c) => fetchAPI(c.req.raw))
   .get("/og/*", async (c) => {
     // return fetch(...) だと、30xリダイレクトを含む場合エラー
     const res = await fetchAPI(c.req.url, {
@@ -465,6 +466,6 @@ self.addEventListener("fetch", (e) => {
     (process.env.ASSET_PREFIX &&
       e.request.url.startsWith(process.env.ASSET_PREFIX))
   ) {
-    return handle(app)(e);
+    return handle(app, { fetch: undefined })(e);
   }
 });
