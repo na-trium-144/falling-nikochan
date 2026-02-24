@@ -33,6 +33,7 @@ export function luaAddSpeedChange<L extends LevelForLuaEdit>(
   );
   (chart.speedChanges as Array<(typeof chart.speedChanges)[number]>).push({
     ...change,
+    timeSec: "timeSec" in change ? change.timeSec : 0,
     luaLine: insert.luaLine,
   });
   chart.speedChanges = chart.speedChanges.sort((a, b) =>
@@ -66,7 +67,9 @@ export function luaDeleteSpeedChange<L extends LevelForLuaEdit>(
     return null;
   }
   deleteLua(chart, chart.speedChanges[index].luaLine);
-  chart.speedChanges = chart.speedChanges.filter((_ch, i) => i !== index);
+  chart.speedChanges = chart.speedChanges.filter(
+    (_ch, i) => i !== index
+  ) as L["speedChanges"];
   // updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
   return chart;
 }

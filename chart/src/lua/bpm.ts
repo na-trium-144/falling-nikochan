@@ -22,7 +22,11 @@ export function luaAddBpmChange<L extends LevelForLuaEdit>(
   }
   chart = insert.chart;
   insertLua(chart, insert.luaLine, bpmLuaCommand(change.bpm));
-  chart.bpmChanges.push({ ...change, luaLine: insert.luaLine });
+  chart.bpmChanges.push({
+    ...change,
+    timeSec: "timeSec" in change ? change.timeSec : 0,
+    luaLine: insert.luaLine,
+  });
   chart.bpmChanges = chart.bpmChanges.sort((a, b) => stepCmp(a.step, b.step));
   return chart;
 }

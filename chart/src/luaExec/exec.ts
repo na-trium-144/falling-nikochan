@@ -1,7 +1,5 @@
 import { LuaFactory } from "wasmoon";
 import { Step, StepSchema, stepZero } from "../step.js";
-import { updateBpmTimeSec } from "../bpm.js";
-import { updateBarNum } from "../signature.js";
 import { LevelFreeze } from "../chart.js";
 import { LevelFreezeSchema13 } from "../legacy/chart13.js";
 import * as v from "valibot";
@@ -144,7 +142,6 @@ export async function luaExec(
     result.levelFreezed.bpmChanges.push({
       bpm: 120,
       step: stepZero(),
-      timeSec: 0,
       luaLine: null,
     });
   }
@@ -152,7 +149,6 @@ export async function luaExec(
     result.levelFreezed.speedChanges.push({
       bpm: 120,
       step: stepZero(),
-      timeSec: 0,
       luaLine: null,
       interp: false,
     });
@@ -161,15 +157,9 @@ export async function luaExec(
     result.levelFreezed.signature.push({
       step: stepZero(),
       offset: stepZero(),
-      barNum: 0,
       bars: [[4, 4, 4, 4]],
       luaLine: null,
     });
   }
-  updateBpmTimeSec(
-    result.levelFreezed.bpmChanges,
-    result.levelFreezed.speedChanges
-  );
-  updateBarNum(result.levelFreezed.signature);
   return result;
 }
