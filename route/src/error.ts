@@ -50,18 +50,24 @@ export const onError =
       if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
         return c.json({ message }, status);
       } else {
-        return c.body(
-          await errorResponse(
-            config.fetchStatic,
-            env(c),
-            backendOrigin(c),
-            lang,
+        if (c.req.path === `/${lang}/errorPlaceholder`) {
+          // エラーハンドラーがfetchに失敗して無限ループになるのを防ぐ
+          console.warn("Fallback to plain error placeholder message.");
+          return c.text("Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE");
+        } else {
+          return c.body(
+            await errorResponse(
+              config.fetchStatic,
+              env(c),
+              backendOrigin(c),
+              lang,
+              status,
+              message
+            ),
             status,
-            message
-          ),
-          status,
-          { "Content-Type": "text/html" }
-        );
+            { "Content-Type": "text/html" }
+          );
+        }
       }
     } catch (e) {
       console.error("While handling the above error, another error thrown:", e);

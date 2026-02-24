@@ -6,6 +6,48 @@ import { MongoClient } from "mongodb";
 import { PlayRecordEntry } from "@falling-nikochan/route/src/api/record";
 
 describe("POST /api/record/:cid", () => {
+  test(
+    "should return 429 for too many requests",
+    {
+      skip:
+        process.env.API_ENV === "development" && !!process.env.API_NO_RATELIMIT,
+    },
+    async () => {
+      await initDb();
+      const res1 = await app.request("/api/record/100000", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lvHash: await hash("dummy"),
+          auto: false,
+          score: 100,
+          fc: true,
+          fb: false,
+          factor: 0.5,
+          editing: false,
+        } satisfies RecordPost),
+      });
+      expect(res1.status).to.equal(204);
+
+      const res2 = await app.request("/api/record/100000", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lvHash: await hash("dummy"),
+          auto: false,
+          score: 100,
+          fc: true,
+          fb: false,
+          factor: 0.5,
+          editing: false,
+        } satisfies RecordPost),
+      });
+      expect(res2.status).to.equal(429);
+      const body = await res2.json();
+      expect(body).to.deep.equal({ message: "tooManyRequest" });
+    }
+  );
+
   test("should store record", async () => {
     await initDb();
     let res = await app.request("/api/record/100000", {
@@ -15,6 +57,9 @@ describe("POST /api/record/:cid", () => {
         lvHash: await hash("dummy"),
         auto: false,
         score: 100,
+        baseScore: 70,
+        chainScore: 15,
+        bigScore: 15,
         fc: true,
         fb: false,
         factor: 0.5,
@@ -37,6 +82,9 @@ describe("POST /api/record/:cid", () => {
         lvHash: await hash("dummy"),
         auto: false,
         score: 100,
+        baseScore: 70,
+        chainScore: 15,
+        bigScore: 15,
         fc: true,
         fb: false,
         factor: 0.5,
@@ -48,7 +96,7 @@ describe("POST /api/record/:cid", () => {
 
     res = await app.request("/api/record/100000", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-forwarded-for": "123" },
       body: JSON.stringify({
         lvHash: await hash("dummy"),
         auto: false,

@@ -1,3 +1,15 @@
+## ver. 14.24 - 2026/02/25 [#976](https://github.com/na-trium-144/falling-nikochan/pull/976)
+
+* honoのフォールバックを無効化
+* sitemap.xmlの404を修正
+* エラーハンドラーの無限ループを修正
+
+## ver. 14.23 - 2026/02/22 [#975](https://github.com/na-trium-144/falling-nikochan/pull/975)
+
+* base, chain, bigをrecordに含める
+* /api/recordにratelimit追加
+* ip取得の動作確認を/api/newChartFileのconsole.logでやらず、/api/ipのレスポンスで確認できるようにする
+
 ## ver. 14.22 - 2026/02/19 [#973](https://github.com/na-trium-144/falling-nikochan/pull/973)
 
 * passwdHashをセッションに保存し、localStorageから削除してもそのセッション内では保存が動作するように

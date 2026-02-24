@@ -21,6 +21,7 @@ import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
 import { ConnInfo } from "hono/conninfo";
 import ytMetaApp from "./ytMeta.js";
+import { forwardCheckApp } from "./dbRateLimit.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = async (config: {
@@ -62,7 +63,8 @@ const apiApp = async (config: {
     .route("/popular", popularApp)
     .route("/search", searchApp)
     .route("/hashPasswd", hashPasswdApp)
-    .route("/record", recordApp);
+    .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
+    .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }));
   apiApp.get(
     "/openapi.json",
     openAPIRouteHandler(apiApp, {
