@@ -1,5 +1,5 @@
+import { Signature15, SignatureWithLua15 } from "./legacy/chart15.js";
 import { Signature5 } from "./legacy/chart5.js";
-import { Signature9 } from "./legacy/chart9.js";
 import {
   Step,
   stepAdd,
@@ -8,22 +8,21 @@ import {
   stepSub,
   stepZero,
 } from "./step.js";
+import * as v from "valibot";
 
-/**
- * 例: 15/8 = 4/4 + 7/8 の場合
- * (4分, 4分, 4分, 4分) + (4分, 4分, 4分, 8分)
- * → [[4, 4, 4, 4], [4, 4, 4, 8]]
- * 4分、8分、16分の和で表せる拍子のみしか対応しない。
- *
- * step: 変化位置
- * offset: n拍目からカウントを始める
- *  (step - offset がこのSignatureの1拍目になる)
- *
- * barNum: このSignatureが始まる時点の小節番号
- *
- */
-export type Signature = Omit<Signature9, "luaLine">;
-export type SignatureWithLua = Signature9;
+export const SignatureBarSchema = () =>
+  v.pipe(
+    v.array(v.array(v.picklist([4, 8, 16] as const))),
+    v.description(
+      "The time signature pattern. " +
+        "For instance, [[4, 4, 4, 4]] is 4/4 beat, [[4, 4, 4, 8]] is 7/8 beat, " +
+        "[[4, 4, 4, 4], [4, 4, 4]] is 4/4 + 3/4 beat."
+    )
+  );
+
+export type Signature = Signature15;
+export type SignatureWithLua = SignatureWithLua15;
+export type SignatureWithBarNum = SignatureWithLua & { barNum: number };
 
 export function getBarLength(s: Signature | Signature5): Step[] {
   const barLength = toStepArray(s).map((b) =>
@@ -63,17 +62,19 @@ export function barFromLength(len: Step): (4 | 8 | 16)[] {
   }
   return newBar;
 }
-export function updateBarNum(signatures: Signature[]) {
+export function updateBarNum<
+  Signatures extends Array<Omit<Signature5, "barNum">>,
+>(signatures: Signatures): Array<Signatures[number] & { barNum: number }> {
   let barNum = 0;
-  signatures[0].barNum = 0;
-  for (let si = 1; si < signatures.length; si++) {
+  const signaturesWithBarNum = signatures.map((s) => ({ ...s, barNum: 0 }));
+  for (let si = 1; si < signaturesWithBarNum.length; si++) {
     let prevBarBegin = stepSub(
-      signatures[si - 1].step,
-      signatures[si - 1].offset
+      signaturesWithBarNum[si - 1].step,
+      signaturesWithBarNum[si - 1].offset
     );
-    const prevBarLength = getBarLength(signatures[si - 1]);
+    const prevBarLength = getBarLength(signaturesWithBarNum[si - 1]);
     let bi = 0;
-    while (stepCmp(prevBarBegin, signatures[si].step) < 0) {
+    while (stepCmp(prevBarBegin, signaturesWithBarNum[si].step) < 0) {
       barNum += 1;
       prevBarBegin = stepAdd(
         prevBarBegin,
@@ -81,6 +82,7 @@ export function updateBarNum(signatures: Signature[]) {
       );
       bi += 1;
     }
-    signatures[si].barNum = barNum;
+    signaturesWithBarNum[si].barNum = barNum;
   }
+  return signaturesWithBarNum;
 }

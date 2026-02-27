@@ -1,20 +1,8 @@
-import { NoteCommand9, Rest9 } from "./legacy/chart9.js";
+import { CopyBuffer, NoteCommand15, NoteCommandWithLua15, Rest15, RestWithLua15 } from "./legacy/chart15.js";
 import { Step, stepZero } from "./step.js";
 
-/**
- * 音符コマンド
- * step: 判定時刻(step数)
- * hitX: 判定時のX
- * (hitY = 0)
- * hitVX: 判定時のX速度
- * hitVY: 判定時のY速度
- * (accelX = 0)
- * accelY: Y加速度
- * timeScale: { 時刻(判定時刻 - step数), VX,VY,accelYの倍率 } のリスト
- * fall: 音符出現位置を画面上にする(true) or 下にする(false)
- */
-export type NoteCommand = Omit<NoteCommand9, "luaLine">;
-export type NoteCommandWithLua = NoteCommand9;
+export type NoteCommand = NoteCommand15;
+export type NoteCommandWithLua = NoteCommandWithLua15;
 
 export function defaultNoteCommand(
   currentStep: Step = stepZero()
@@ -30,10 +18,14 @@ export function defaultNoteCommand(
   };
 }
 
-export type RestStep = Rest9;
+export type RestStep = Rest15;
+export type RestStepWithLua = RestWithLua15;
 
 export function defaultCopyBuffer() {
   return ([defaultNoteCommand()] as (NoteCommandWithLua | null)[]).concat(
     Array.from(new Array(9)).map(() => null)
   );
+}
+export function defaultCopyBufferObj(): CopyBuffer {
+  return { "0": [-3, 1, 3, false, true] };
 }

@@ -22,14 +22,23 @@ import {
   luaDeleteSpeedChange,
   luaUpdateSpeedChange,
 } from "../lua/speed.js";
-import { Signature } from "../signature.js";
+import { Signature, SignatureWithBarNum, updateBarNum } from "../signature.js";
 import {
   luaAddBeatChange,
   luaDeleteBeatChange,
   luaUpdateBeatChange,
 } from "../lua/signature.js";
-import { NoteCommand } from "../command.js";
+import {
+  NoteCommand,
+  NoteCommandWithLua,
+  RestStepWithLua,
+} from "../command.js";
 import { luaAddNote, luaDeleteNote, luaUpdateNote } from "../lua/note.js";
+import {
+  BPMChangeWithTimeSec,
+  SpeedChangeWithTimeSec,
+  updateBpmTimeSec,
+} from "../bpm.js";
 
 export class LevelEditing extends EventEmitter<EventType> {
   // これは親のChartEditingと同期
@@ -38,7 +47,13 @@ export class LevelEditing extends EventEmitter<EventType> {
   // 以下の編集には updateMeta(), updateFreeze(), updateLua() を使う
   #meta: LevelMin;
   #lua: string[];
-  #freeze: LevelFreeze;
+  #freeze: {
+    notes: NoteCommandWithLua[];
+    rest: RestStepWithLua[];
+    bpmChanges: BPMChangeWithTimeSec[];
+    speedChanges: SpeedChangeWithTimeSec[];
+    signature: SignatureWithBarNum[];
+  };
 
   constructor(
     min: Readonly<LevelMin>,
@@ -106,7 +121,23 @@ export class LevelEditing extends EventEmitter<EventType> {
     }
   }
   updateFreeze(newFreeze: Partial<LevelFreeze>) {
-    this.#freeze = { ...this.#freeze, ...newFreeze };
+    if (newFreeze.notes) {
+      this.#freeze.notes = newFreeze.notes;
+    }
+    if (newFreeze.rest) {
+      this.#freeze.rest = newFreeze.rest;
+    }
+    if (newFreeze.bpmChanges || newFreeze.speedChanges) {
+      const { bpm, speed } = updateBpmTimeSec(
+        newFreeze.bpmChanges ?? this.#freeze.bpmChanges,
+        newFreeze.speedChanges ?? this.#freeze.speedChanges
+      );
+      this.#freeze.bpmChanges = bpm;
+      this.#freeze.speedChanges = speed;
+    }
+    if (newFreeze.signature) {
+      this.#freeze.signature = updateBarNum(newFreeze.signature);
+    }
     this.#current.reset(
       this.#current.timeSec,
       this.#meta.snapDivider,

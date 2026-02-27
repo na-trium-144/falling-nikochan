@@ -1,6 +1,14 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyChart, dummyChart11, dummyChart13, initDb } from "./init";
+import {
+  app,
+  dummyChart,
+  dummyChart12,
+  dummyChart13,
+  dummyChart14,
+  dummyChart4,
+  initDb,
+} from "./init";
 import {
   chartMaxEvent,
   currentChartVer,
@@ -139,27 +147,51 @@ describe("POST /api/newChartFile", () => {
     const body = await res.json();
     expect(body).to.deep.equal({ message: "tooManyEvent" });
   });
-  test("should return 409 for chart version older than 13", async () => {
-    currentChartVer satisfies 14; // edit this test when chart version is bumped
-    await initDb();
-    const res = await app.request("/api/newChartFile", {
-      method: "POST",
-      headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.encode({ ...dummyChart11() }),
+  describe("should return 409 for chart version older than 14", () => {
+    currentChartVer satisfies 15; // edit this test when chart version is bumped
+    test("version 13", async () => {
+      await initDb();
+      const res = await app.request("/api/newChartFile", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.encode({ ...dummyChart13() }),
+      });
+      expect(res.status).to.equal(409);
+      const body = await res.json();
+      expect(body).to.deep.equal({ message: "oldChartVersion" });
     });
-    expect(res.status).to.equal(409);
-    const body = await res.json();
-    expect(body).to.deep.equal({ message: "oldChartVersion" });
+    test("version 12", async () => {
+      await initDb();
+      const res = await app.request("/api/newChartFile", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.encode({ ...dummyChart12() }),
+      });
+      expect(res.status).to.equal(409);
+      const body = await res.json();
+      expect(body).to.deep.equal({ message: "oldChartVersion" });
+    });
+    test("version 4", async () => {
+      await initDb();
+      const res = await app.request("/api/newChartFile", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.encode({ ...dummyChart4() }),
+      });
+      expect(res.status).to.equal(409);
+      const body = await res.json();
+      expect(body).to.deep.equal({ message: "oldChartVersion" });
+    });
   });
-  test("should create chart for chart version 13", async () => {
-    currentChartVer satisfies 14; // edit this test when chart version is bumped
+  test("should create chart for chart version 14", async () => {
+    currentChartVer satisfies 15; // edit this test when chart version is bumped
     await initDb();
     const dateBefore = new Date();
     const res = await app.request("/api/newChartFile", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({
-        ...dummyChart13(),
+        ...dummyChart14(),
         changePasswd: "p",
       }),
     });

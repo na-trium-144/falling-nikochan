@@ -15,7 +15,7 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { useDisplayMode } from "@/scale.js";
-import { downloadExtension, LocalLoadState, SaveState } from "./chartState";
+import { LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
 
 interface Props {
@@ -117,7 +117,7 @@ interface Props2 {
   remoteSave: () => Promise<void>;
   saveState: SaveState;
   remoteDelete: () => Promise<void>;
-  localSave: () => void;
+  localSave: (format: "lua") => void;
   localSaveState: SaveState;
   localLoad: (buffer: ArrayBuffer) => Promise<void>;
   localLoadState: LocalLoadState;
@@ -128,7 +128,7 @@ export function MetaTab(props: Props2) {
   const router = useRouter();
   const shareLink = useShareLink(
     props.chart?.cid,
-    props.chart?.toMin(),
+    props.chart?.toObject(),
     props.locale
   );
   const hasLevelData =
@@ -263,11 +263,14 @@ export function MetaTab(props: Props2) {
           <HelpIcon>
             {t.rich("localSaveLoadHelp", {
               br: () => <br />,
-              extension: downloadExtension,
+              extension: `fn.lua`,
             })}
           </HelpIcon>
           <span className="inline-block ml-1">
-            <Button text={t("saveToLocal")} onClick={props.localSave} />
+            <Button
+              text={t("saveToLocal")}
+              onClick={() => props.localSave("lua")}
+            />
             <ButtonStyledLabel htmlFor="upload-bin">
               {t("loadFromLocal")}
             </ButtonStyledLabel>

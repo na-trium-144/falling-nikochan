@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
+import { ChartBrief, ChartUntil15Min } from "@falling-nikochan/chart";
 import {
   createContext,
   useCallback,
@@ -23,7 +23,7 @@ import { XLogo } from "./x";
 
 export function useShareLink(
   cid: string | undefined,
-  brief: ChartMin | ChartBrief | undefined | null,
+  brief: ChartUntil15Min | ChartBrief | undefined | null,
   lang?: string,
   resultParam?: string,
   date?: number | null

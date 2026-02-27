@@ -10,11 +10,12 @@
     "lint": "eslint src/ tests/",
     "t": "tsc",
     "cdev": "tsc --watch",
-    "test": "tsc && tsx --test tests/**/*.spec.ts"
+    "test": "tsc && tsx --test tests/**/*.spec.ts tests/*.spec.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",
     "eventemitter3": "^5.0.1",
+    "hono-openapi": "^1.2.0",
     "valibot": "^1.0.0",
     "wasmoon": "^1.16.0"
   },
@@ -22,6 +23,8 @@
     "@falling-nikochan/chart": "workspace:*",
     "@types/chai": "^5.2.3",
     "@types/object-hash": "^3.0.6",
-    "chai": "^6.2.2"
+    "chai": "^6.2.2",
+    "fn-commands": "workspace:*",
+    "openapi-types": "^12.1.3"
   }
 }

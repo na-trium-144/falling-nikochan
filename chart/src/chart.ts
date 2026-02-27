@@ -36,15 +36,12 @@ import { luaAddBpmChange } from "./lua/bpm.js";
 import { luaAddBeatChange } from "./lua/signature.js";
 import { luaAddSpeedChange } from "./lua/speed.js";
 import { stepZero, stepSimplify } from "./step.js";
-import { defaultCopyBuffer, NoteCommand } from "./command.js";
+import { defaultCopyBufferObj, NoteCommand } from "./command.js";
 import {
   Chart13Edit,
   ChartEditSchema13,
-  ChartUntil13,
   ChartUntil13Min,
-  convertTo13,
   Level13Freeze,
-  Level13Play,
 } from "./legacy/chart13.js";
 import {
   Chart14Edit,
@@ -53,11 +50,8 @@ import {
   ChartMinSchema14,
   ChartUntil14,
   ChartUntil14Min,
-  convertTo14,
   convertTo14Min,
   convertToMin14,
-  convertToPlay14,
-  Level14Min,
 } from "./legacy/chart14.js";
 import { LevelForLuaEditLatest } from "./lua/edit.js";
 import {
@@ -65,15 +59,27 @@ import {
   BPMChangeWithLua,
   SpeedChange,
   SpeedChangeWithLua,
+  updateBpmTimeSec,
 } from "./bpm.js";
 import { Signature, SignatureWithLua } from "./signature.js";
-import { ChartUntil11, Level11Freeze } from "./legacy/chart11.js";
+import { Level11Freeze } from "./legacy/chart11.js";
 import { Chart5, Level5 } from "./legacy/chart5.js";
 import { Level9Freeze } from "./legacy/chart9.js";
 import { Level8Freeze } from "./legacy/chart8.js";
 import { Level7 } from "./legacy/chart7.js";
 import { Level6 } from "./legacy/chart6.js";
 import { Level4 } from "./legacy/chart4.js";
+import {
+  Chart15,
+  ChartSchema15,
+  ChartUntil15,
+  convertTo15,
+  convertToPlay15,
+  Level15Freeze,
+  Level15Meta,
+  Level15Play,
+} from "./legacy/chart15.js";
+import { docRefs, Reference, Schema } from "./docSchema.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -81,8 +87,46 @@ export const YoutubeIdSchema = () =>
     v.regex(/^[a-zA-Z0-9_-]{11}$/, "YouTube video id must be 11 characters")
   );
 export const HashSchema = () => v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/));
+
+export const EmptyObj = <
+  T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+>() =>
+  v.pipe(
+    v.strictObject({}),
+    v.transform(() => [] as v.InferOutput<T>[]),
+    v.description(
+      "accept empty object instead of empty array for Lua compatibility"
+    )
+  );
+export const ArrayOrEmptyObj = <
+  T extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+>(
+  schema: T
+) => v.union([v.array(schema), EmptyObj<T>()]);
+export function ArrayOrEmptyObjDoc(doc: Schema | Reference): Schema {
+  return {
+    anyOf: [ArrayDoc(doc), docRefs("EmptyObj")],
+  };
+}
+export function ArrayDoc(doc: Schema | Reference): Schema {
+  return {
+    type: "array",
+    items: doc,
+  };
+}
+
+// luaコードの実行結果をパースする際nilがundefinedになるので、それも受け付けるようにしている
 export const LuaLineSchema = () =>
-  v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0)));
+  v.pipe(
+    v.optional(
+      v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0))),
+      null
+    ),
+    v.description(
+      "A line number corresponding to the Lua code, or null if not editable. " +
+        "The first line is 0."
+    )
+  );
 export const CidSchema = () =>
   v.pipe(v.string(), v.regex(/^[0-9]{6}$/, "cid must be 6 digits"));
 export const levelTypes = ["Single", "Double", "Maniac"];
@@ -125,43 +169,49 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 14;
+export const currentChartVer = 15;
 export const lastIncompatibleVer = 6;
-export type ChartMin = Chart14Min;
-export type LevelMin = Level14Min;
-export type ChartEdit = Chart14Edit;
-export type LevelFreeze = Level13Freeze;
-export type LevelPlay = Level13Play;
+export type ChartEdit = Chart15;
+export type LevelPlay = Level15Play;
+export type LevelMin = Level15Meta;
+export type LevelFreeze = Level15Freeze;
 export const convertToMin = convertToMin14;
-export const convertToPlay = convertToPlay14;
+export const convertToPlay = convertToPlay15;
 
-export async function convertToLatest(chart: ChartUntil14): Promise<ChartEdit> {
-  if (chart.ver !== 14) chart = await convertTo14(chart as ChartUntil13);
+export async function convertToLatest(chart: ChartUntil15): Promise<ChartEdit> {
+  if (chart.ver !== 15) chart = await convertTo15(chart as ChartUntil14);
   return chart;
 }
-export async function validateChart(chart: ChartUntil14): Promise<ChartEdit> {
+export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
-  chart satisfies Chart14Edit;
-  v.parse(ChartEditSchema14(), chart);
-  return { ...chart, ver: 14 };
+  chart satisfies Chart15;
+  chart = v.parse(ChartSchema15(), chart);
+  return { ...chart, ver: 15 };
 }
-export async function validateChart13(
-  chart: ChartUntil13
-): Promise<Chart13Edit> {
+export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 13) chart = await convertTo13(chart as ChartUntil11);
-  chart satisfies Chart13Edit;
-  v.parse(ChartEditSchema13(), chart);
-  return { ...chart, ver: 13 };
+  switch (chart.ver) {
+    case 15:
+      chart satisfies Chart15;
+      return v.parse(ChartSchema15(), chart);
+    case 14:
+      chart satisfies Chart14Edit;
+      return v.parse(ChartEditSchema14(), chart);
+    case 13:
+      chart satisfies Chart13Edit;
+      return v.parse(ChartEditSchema13(), chart);
+    default:
+      throw `chart version too old: ${chart.ver}`;
+  }
 }
 export async function validateChartMin(
   chart: ChartUntil14Min
-): Promise<ChartEdit | ChartMin> {
+): Promise<Chart14Min> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver !== 14) chart = await convertTo14Min(chart as ChartUntil13Min);
   chart satisfies Chart14Min;
-  v.parse(ChartMinSchema14(), chart);
+  chart = v.parse(ChartMinSchema14(), chart);
   return { ...chart, ver: 14 };
 }
 
@@ -184,7 +234,8 @@ export async function hash(text: string) {
  */
 export async function hashLevel(
   level:
-    | LevelFreeze
+    | Level15Freeze
+    | Level13Freeze
     | Level11Freeze
     | Level9Freeze
     | Level8Freeze
@@ -211,7 +262,6 @@ export async function hashLevel(
       ({
         step: stepSimplify({ ...bpm.step }),
         bpm: bpm.bpm,
-        timeSec: bpm.timeSec,
       }) satisfies BPMChange
   );
 
@@ -220,7 +270,6 @@ export async function hashLevel(
       ({
         step: stepSimplify({ ...speed.step }),
         bpm: speed.bpm,
-        timeSec: speed.timeSec,
         interp: "interp" in speed ? speed.interp : false,
       }) satisfies SpeedChange
   );
@@ -232,7 +281,6 @@ export async function hashLevel(
             ({
               step: stepSimplify({ ...sig.step }),
               offset: stepSimplify({ ...sig.offset }),
-              barNum: sig.barNum,
               bars: sig.bars,
             }) satisfies Signature
         )
@@ -248,30 +296,17 @@ export async function hashLevel(
   );
 }
 
-export function numEvents(chart: Chart13Edit | ChartEdit): number {
-  if (chart.ver === 13) {
-    return chart.levels
-      .map(
-        (l) =>
-          l.notes.length +
-          l.rest.length +
-          l.bpmChanges.length +
-          l.speedChanges.length +
-          l.signature.length
-      )
-      .reduce((a, b) => a + b);
-  } else {
-    return chart.levelsFreeze
-      .map(
-        (l) =>
-          l.notes.length +
-          l.rest.length +
-          l.bpmChanges.length +
-          l.speedChanges.length +
-          l.signature.length
-      )
-      .reduce((a, b) => a + b);
-  }
+export function numEvents(chart: Chart14Edit | ChartEdit): number {
+  return chart.levelsFreeze
+    .map(
+      (l) =>
+        l.notes.length +
+        l.rest.length +
+        l.bpmChanges.length +
+        l.speedChanges.length +
+        l.signature.length
+    )
+    .reduce((a, b) => a + b);
 }
 
 export function emptyChart(locale: string): ChartEdit {
@@ -279,7 +314,7 @@ export function emptyChart(locale: string): ChartEdit {
   let chart: ChartEdit = {
     falling: "nikochan",
     ver: currentChartVer,
-    levelsMin: [min],
+    levelsMeta: [min],
     lua: [lua],
     levelsFreeze: [freeze],
     offset: 0,
@@ -290,7 +325,7 @@ export function emptyChart(locale: string): ChartEdit {
     changePasswd: null,
     published: false,
     locale,
-    copyBuffer: defaultCopyBuffer(),
+    copyBuffer: defaultCopyBufferObj(),
     zoom: 0,
   };
   return chart;
@@ -363,7 +398,7 @@ export function emptyLevel(
 export async function createBrief(
   // API用に過去2バージョンサポート
   // seedでChart5を使う
-  chart: Chart5 | Chart13Edit | Chart14Edit,
+  chart: Chart5 | Chart14Edit | Chart15,
   updatedAt: number
 ): Promise<ChartBrief> {
   let levelHashes: string[] = [];
@@ -376,7 +411,12 @@ export async function createBrief(
   } catch (e) {
     console.error(e);
   }
-  const levelsMin = "levels" in chart ? chart.levels : chart.levelsMin;
+  const levelsMin =
+    "levels" in chart
+      ? chart.levels
+      : "levelsMin" in chart
+        ? chart.levelsMin
+        : chart.levelsMeta;
   const levelsFreeze = "levels" in chart ? chart.levels : chart.levelsFreeze;
   const levelBrief = levelsMin.map(
     (level, i) =>
@@ -386,7 +426,16 @@ export async function createBrief(
         unlisted: !!level.unlisted,
         hash: levelHashes.at(i) ?? "",
         noteCount: levelsFreeze[i].notes.length,
-        difficulty: difficulty(levelsFreeze[i], level.type),
+        difficulty: difficulty(
+          {
+            ...levelsFreeze[i],
+            bpmChanges: updateBpmTimeSec(
+              levelsFreeze[i].bpmChanges,
+              levelsFreeze[i].speedChanges
+            ).bpm,
+          },
+          level.type
+        ),
         bpmMin: levelsFreeze[i].bpmChanges
           .map((b) => b.bpm)
           .reduce((a, b) => Math.min(a, b)),

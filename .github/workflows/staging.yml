@@ -23,7 +23,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout PR code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0 # force pushするために履歴が必要
@@ -48,9 +48,11 @@ jobs:
       (github.event_name == 'push' || needs.sync-staging.result == 'success')
     steps:
       - name: Checkout staging branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: staging # 更新されたstagingブランチを取得
+          submodules: 'recursive'
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -79,8 +81,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    if: |
+      always() && 
+      (github.event_name == 'push' || needs.sync-staging.result == 'success')
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout staging branch
+        uses: actions/checkout@v6
+        with:
+          ref: staging
+          submodules: 'recursive'
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

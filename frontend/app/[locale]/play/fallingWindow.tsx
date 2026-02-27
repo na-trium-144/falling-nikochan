@@ -2,12 +2,17 @@
 
 import clsx from "clsx/lite";
 import { memo, RefObject, useEffect, useRef, useState } from "react";
-import { targetY, bigScale, bonusMax } from "@falling-nikochan/chart";
+import {
+  targetY,
+  bigScale,
+  bonusMax,
+  Note,
+  DisplayNote,
+  displayNote,
+} from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
 import { useDisplayMode } from "@/scale.js";
-import { displayNote6, DisplayNote6, Note6 } from "@falling-nikochan/chart";
-import { displayNote13, DisplayNote7, Note13 } from "@falling-nikochan/chart";
 import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
@@ -15,7 +20,7 @@ import { OffsetEstimator } from "./offsetEstimator";
 interface Props {
   className?: string;
   style?: object;
-  notes: Note6[] | Note13[];
+  notes: Note[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setRunFPS: (fps: number) => void;
@@ -237,7 +242,7 @@ export default function FallingWindow(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteSize, nikochanCanvasDPR.current]);
 
-  const displayNotes = useRef<DisplayNote6[] | DisplayNote7[]>([]);
+  const displayNotes = useRef<DisplayNote[]>([]);
   const displayNikochan = useRef<(DisplayNikochan | null)[]>([]);
   useEffect(() => {
     displayNotes.current = [];
@@ -281,9 +286,7 @@ export default function FallingWindow(props: Props) {
       };
 
       displayNotes.current = notes
-        .map((n) =>
-          n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now)
-        )
+        .map((n) => displayNote(n, now))
         .filter((n) => n !== null);
       displayNotes.current.reverse(); // 奥に表示されるものが最初
 
@@ -548,8 +551,8 @@ export default function FallingWindow(props: Props) {
 }
 
 interface MProps {
-  displayNotes: DisplayNote6[] | DisplayNote7[];
-  notes: Note6[] | Note13[];
+  displayNotes: DisplayNote[];
+  notes: Note[];
   noteSize: number;
   boxSize: number;
   marginX: number;
@@ -572,9 +575,9 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
 });
 
 interface NProps {
-  displayNote: DisplayNote6 | DisplayNote7;
+  displayNote: DisplayNote;
   noteSize: number;
-  note: Note6 | Note13;
+  note: Note;
   marginX: number;
   marginY: number;
   boxSize: number;
