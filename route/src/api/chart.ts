@@ -28,6 +28,11 @@ import {
   Chart15,
   stepZero,
   CopyBuffer,
+  NoteCommandWithLua15,
+  RestWithLua15,
+  BPMChangeWithLua15,
+  SpeedChangeWithLua15,
+  SignatureWithLua15,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { gzip, gunzip } from "node:zlib";
@@ -249,6 +254,18 @@ export interface ChartLevelCore14 {
   ytEnd: "note" | "yt" | number;
   snapDivider: number;
 }
+export interface ChartLevelCore15 {
+  notes: NoteCommandWithLua15[];
+  rest: RestWithLua15[];
+  bpmChanges: BPMChangeWithLua15[];
+  speedChanges: SpeedChangeWithLua15[];
+  signature: SignatureWithLua15[];
+  lua: string[];
+  ytBegin: number;
+  ytEndSec: number;
+  ytEnd: "note" | "yt" | number;
+  snapDivider: number;
+}
 export type ChartEntry = ChartEntryCompressed &
   (
     | { ver: 4; levels: ChartLevelCore3[] }
@@ -257,7 +274,8 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 9 | 10; levels: ChartLevelCore9[] }
     | { ver: 11 | 12; levels: ChartLevelCore11[] }
     | { ver: 13; levels: ChartLevelCore13[] }
-    | { ver: 14 | 15; levels: ChartLevelCore14[] }
+    | { ver: 14; levels: ChartLevelCore14[] }
+    | { ver: 15; levels: ChartLevelCore15[] }
   );
 
 export async function unzipEntry(
@@ -349,6 +367,7 @@ export async function chartToEntry(
   const levelsMin = "levelsMin" in chart ? chart.levelsMin : chart.levelsMeta;
   const levelsFreeze = chart.levelsFreeze;
   const lua = chart.lua;
+  // @ts-expect-error ChartLevelCore14 | ChartLevelCore15 だが、この書き方だとfreezeとverの対応関係を正しく推論できない
   return {
     cid,
     deleted: prevEntry?.deleted || false,

@@ -22,6 +22,7 @@ export const SignatureBarSchema = () =>
 
 export type Signature = Signature15;
 export type SignatureWithLua = SignatureWithLua15;
+export type SignatureWithBarNum = SignatureWithLua & { barNum: number };
 
 export function getBarLength(s: Signature | Signature5): Step[] {
   const barLength = toStepArray(s).map((b) =>

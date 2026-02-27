@@ -115,7 +115,26 @@ export class ChartEditing extends EventEmitter<EventType> {
       ...this.#meta,
       levelsMeta: this.#levels.map((l) => l.meta),
       lua: this.#levels.map((l) => [...l.lua]),
-      levelsFreeze: this.#levels.map((l) => l.freeze),
+      levelsFreeze: this.#levels.map((l) => ({
+        ...l.freeze,
+        bpmChanges: l.freeze.bpmChanges.map((c) => ({
+          step: c.step,
+          bpm: c.bpm,
+          luaLine: c.luaLine,
+        })),
+        speedChanges: l.freeze.speedChanges.map((c) => ({
+          step: c.step,
+          bpm: c.bpm,
+          interp: c.interp,
+          luaLine: c.luaLine,
+        })),
+        signature: l.freeze.signature.map((s) => ({
+          step: s.step,
+          offset: s.offset,
+          bars: s.bars,
+          luaLine: s.luaLine,
+        })),
+      })),
       copyBuffer: this.#copyBuffer,
       changePasswd: this.#changePasswd,
       zoom: this.#zoom,

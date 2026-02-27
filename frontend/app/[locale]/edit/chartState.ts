@@ -19,6 +19,8 @@ import {
   findLuaLevelCode,
   Chart14Edit,
   convertToLatest,
+  updateBpmTimeSec,
+  updateBarNum,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -459,17 +461,25 @@ export function useChartState(props: Props) {
             changePasswd: null,
             published: false,
             levelsFreeze: await Promise.all(
-              (newChartMin as Chart14Min).lua.map(
-                async (l) =>
-                  (
-                    await luaExec(
-                      process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-                      fnCommandsLib,
-                      l.join("\n"),
-                      { catchError: false, needReturnValue: false }
-                    )
-                  ).levelFreezed
-              )
+              (newChartMin as Chart14Min).lua.map(async (l) => {
+                const { levelFreezed } = await luaExec(
+                  process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+                  fnCommandsLib,
+                  l.join("\n"),
+                  { catchError: false, needReturnValue: false }
+                );
+                const { bpm, speed } = updateBpmTimeSec(
+                  levelFreezed.bpmChanges,
+                  levelFreezed.speedChanges
+                );
+                const signature = updateBarNum(levelFreezed.signature);
+                return {
+                  ...levelFreezed,
+                  bpmChanges: bpm,
+                  speedChanges: speed,
+                  signature,
+                };
+              })
             ),
           } satisfies Chart14Edit),
         };

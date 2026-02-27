@@ -21,7 +21,7 @@ import { resolver } from "hono-openapi";
 import {
   BPMChangeSeqDoc,
   ChartSeqDataDoc,
-  NoteSchema,
+  NoteSeqSchema,
   SignatureSeqDoc,
   SpeedChangeSeqDoc,
 } from "./seq.js";
@@ -51,7 +51,7 @@ export const docSchemas = async () => ({
     .schema,
   CopyBuffer: await CopyBufferDoc(),
   ChartSeqData: await ChartSeqDataDoc(),
-  NoteSeq: (await resolver(NoteSchema()).toOpenAPISchema()).schema,
+  NoteSeq: (await resolver(NoteSeqSchema()).toOpenAPISchema()).schema,
   BPMChangeSeq: await BPMChangeSeqDoc(),
   SpeedChangeSeq: await SpeedChangeSeqDoc(),
   SignatureSeq: await SignatureSeqDoc(),

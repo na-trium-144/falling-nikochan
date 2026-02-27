@@ -1,5 +1,5 @@
 import { BPMChangeWithLua, SpeedChangeWithLua } from "../bpm.js";
-import { NoteCommandWithLua, RestStep } from "../command.js";
+import { NoteCommandWithLua, RestStepWithLua } from "../command.js";
 import { SpeedChangeWithLua13 } from "../legacy/chart13.js";
 import { BPMChangeWithLua15, NoteCommandWithLua15, RestWithLua15, SignatureWithLua15, SpeedChangeWithLua15 } from "../legacy/chart15.js";
 import {
@@ -32,7 +32,7 @@ import {
  */
 export interface LevelForLuaEditLatest {
   notes: NoteCommandWithLua[];
-  rest: RestStep[];
+  rest: RestStepWithLua[];
   bpmChanges: BPMChangeWithLua[];
   speedChanges: SpeedChangeWithLua[];
   signature: SignatureWithLua[];

@@ -59,6 +59,7 @@ import {
   BPMChangeWithLua,
   SpeedChange,
   SpeedChangeWithLua,
+  updateBpmTimeSec,
 } from "./bpm.js";
 import { Signature, SignatureWithLua } from "./signature.js";
 import { Level11Freeze } from "./legacy/chart11.js";
@@ -425,7 +426,16 @@ export async function createBrief(
         unlisted: !!level.unlisted,
         hash: levelHashes.at(i) ?? "",
         noteCount: levelsFreeze[i].notes.length,
-        difficulty: difficulty(levelsFreeze[i], level.type),
+        difficulty: difficulty(
+          {
+            ...levelsFreeze[i],
+            bpmChanges: updateBpmTimeSec(
+              levelsFreeze[i].bpmChanges,
+              levelsFreeze[i].speedChanges
+            ).bpm,
+          },
+          level.type
+        ),
         bpmMin: levelsFreeze[i].bpmChanges
           .map((b) => b.bpm)
           .reduce((a, b) => Math.min(a, b)),
