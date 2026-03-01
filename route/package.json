@@ -43,7 +43,7 @@
     "@types/chai": "^5.2.3",
     "@types/colorthief": "^2.6.1",
     "@types/moji": "^0.5.3",
-    "@types/react": "^19.2.10",
+    "@types/react": "^19.2.14",
     "@types/twitter-text": "^3.1.10",
     "chai": "^6.2.2"
   }
