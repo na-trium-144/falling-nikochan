@@ -31,7 +31,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.29.0",
     "@eslint/config-helpers": "^0.4.2",
-    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/eslintrc": "^3.3.4",
     "@eslint/js": "^9.39.2",
     "@types/node": "^22.19.7",
     "core-js": "^3.42.0",
