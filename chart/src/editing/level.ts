@@ -73,6 +73,14 @@ export class LevelEditing extends EventEmitter<EventType> {
     this.#meta = JSON.parse(JSON.stringify(min));
     this.#lua = [...lua];
     this.#freeze = JSON.parse(JSON.stringify(freeze));
+    const { bpm, speed } = updateBpmTimeSec(
+      this.#freeze.bpmChanges,
+      this.#freeze.speedChanges
+    );
+    this.#freeze.bpmChanges = bpm;
+    this.#freeze.speedChanges = speed!;
+    this.#freeze.signature = updateBarNum(this.#freeze.signature);
+
     // 以下はupdateFreeze()内で初期化される
     this.#seqNotes = [];
     this.#difficulty = 0;

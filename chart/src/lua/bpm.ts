@@ -40,7 +40,12 @@ export function luaUpdateBpmChange<L extends LevelForLuaEdit>(
   }
   replaceLua(chart, chart.bpmChanges[index].luaLine, bpmLuaCommand(bpm));
   chart.bpmChanges[index].bpm = bpm;
-  updateBpmTimeSec(chart.bpmChanges, chart.speedChanges);
+  const { bpm: bpmChanges, speed: speedChanges } = updateBpmTimeSec(
+    chart.bpmChanges,
+    chart.speedChanges
+  );
+  chart.bpmChanges = bpmChanges;
+  chart.speedChanges = speedChanges!;
   return chart;
 }
 export function luaDeleteBpmChange<L extends LevelForLuaEdit>(
