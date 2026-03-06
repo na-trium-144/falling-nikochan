@@ -6,15 +6,16 @@ import chartFileApp from "./chartFile.js";
 import latestApp from "./latest.js";
 import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
+import seqFileApp from "./seqFile.js";
+import seqPreviewApp from "./seqPreview.js";
 import hashPasswdApp from "./hashPasswd.js";
 import recordApp from "./record.js";
-import { HTTPException } from "hono/http-exception";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import popularApp from "./popular.js";
 import searchApp from "./search.js";
 import { bodyLimit } from "hono/body-limit";
-import { fileMaxSize } from "@falling-nikochan/chart";
+import { docSchemas, fileMaxSize } from "@falling-nikochan/chart";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
@@ -55,9 +56,8 @@ const apiApp = async (config: {
       "/newChartFile",
       await newChartFileApp({ getConnInfo: config.getConnInfo })
     )
-    .get("/seqFile/*", () => {
-      throw new HTTPException(410, { message: "noLongerSupportedAPI" });
-    })
+    .route("/seqFile", seqFileApp)
+    .route("/seqPreview", seqPreviewApp)
     .route("/playFile", playFileApp)
     .route("/latest", latestApp)
     .route("/popular", popularApp)
@@ -81,6 +81,9 @@ const apiApp = async (config: {
             identifier: "MIT",
             url: "https://opensource.org/licenses/MIT",
           },
+        },
+        components: {
+          schemas: await docSchemas(),
         },
         servers: [
           ...(process.env.API_ENV === "development"

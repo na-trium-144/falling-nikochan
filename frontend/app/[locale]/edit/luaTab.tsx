@@ -36,9 +36,9 @@ const AceEditor = dynamic(
   },
   { ssr: false }
 );
+import type { Selection } from "ace-builds-internal/selection";
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
-import { Selection } from "ace-builds-internal/selection";
 
 export function useLuaExecutor(): LuaExecutor {
   const [stdout, setStdout] = useState<string[]>([]);
