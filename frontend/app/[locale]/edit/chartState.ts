@@ -476,7 +476,7 @@ export function useChartState(props: Props) {
                 return {
                   ...levelFreezed,
                   bpmChanges: bpm,
-                  speedChanges: speed,
+                  speedChanges: speed!,
                   signature,
                 };
               })

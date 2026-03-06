@@ -133,7 +133,7 @@ export class LevelEditing extends EventEmitter<EventType> {
         newFreeze.speedChanges ?? this.#freeze.speedChanges
       );
       this.#freeze.bpmChanges = bpm;
-      this.#freeze.speedChanges = speed;
+      this.#freeze.speedChanges = speed!;
     }
     if (newFreeze.signature) {
       this.#freeze.signature = updateBarNum(newFreeze.signature);

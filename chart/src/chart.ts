@@ -429,10 +429,7 @@ export async function createBrief(
         difficulty: difficulty(
           {
             ...levelsFreeze[i],
-            bpmChanges: updateBpmTimeSec(
-              levelsFreeze[i].bpmChanges,
-              levelsFreeze[i].speedChanges
-            ).bpm,
+            bpmChanges: updateBpmTimeSec(levelsFreeze[i].bpmChanges).bpm,
           },
           level.type
         ),

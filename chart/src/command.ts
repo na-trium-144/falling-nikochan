@@ -1,4 +1,10 @@
-import { CopyBuffer, NoteCommand15, NoteCommandWithLua15, Rest15, RestWithLua15 } from "./legacy/chart15.js";
+import {
+  CopyBuffer,
+  NoteCommand15,
+  NoteCommandWithLua15,
+  Rest15,
+  RestWithLua15,
+} from "./legacy/chart15.js";
 import { Step, stepZero } from "./step.js";
 
 export type NoteCommand = NoteCommand15;

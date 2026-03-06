@@ -27,21 +27,22 @@ export function updateBpmTimeSec<
   SpeedChanges extends Array<Omit<BPMChange1, "timeSec">>,
 >(
   bpmChanges: BPMChanges,
-  scaleChanges: SpeedChanges
+  scaleChanges?: SpeedChanges
 ): {
   bpm: Array<BPMChanges[number] & { timeSec: number }>;
-  speed: Array<SpeedChanges[number] & { timeSec: number }>;
+  speed?: Array<SpeedChanges[number] & { timeSec: number }>;
 } {
   let timeSum = 0;
   let si = 0;
   const bpm = bpmChanges.map((bpmChange) => ({ ...bpmChange, timeSec: 0 }));
-  const speed = scaleChanges.map((scaleChange) => ({
+  const speed = scaleChanges?.map((scaleChange) => ({
     ...scaleChange,
     timeSec: 0,
   }));
   for (let bi = 0; bi < bpm.length; bi++) {
     bpm[bi].timeSec = timeSum;
     while (
+      speed !== undefined &&
       si < speed.length &&
       (bi + 1 >= bpm.length || stepCmp(speed[si].step, bpm[bi + 1].step) < 0)
     ) {

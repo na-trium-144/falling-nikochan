@@ -357,8 +357,8 @@ export function loadChart(
     const ayLegacy = 1;
 
     let appearTimeSec: number | null = null;
-    for (let ti = speedChanges.length - 1; ti >= 0; ti--) {
-      const ts = speedChanges[ti];
+    for (let ti = speedChanges!.length - 1; ti >= 0; ti--) {
+      const ts = speedChanges![ti];
       if (ts.timeSec >= hitTimeSec && ti >= 1) {
         continue;
       }
@@ -368,7 +368,7 @@ export function loadChart(
       //  u = u(tBegin) + du * t
       let du: number;
       let ddu: number;
-      const tsNext = speedChanges.at(ti + 1);
+      const tsNext = speedChanges!.at(ti + 1);
       if (tsNext && "interp" in tsNext && tsNext.interp && tBegin !== tEnd) {
         let nextBpm = tsNext.bpm;
         if (tBegin < tsNext.timeSec) {
@@ -508,7 +508,7 @@ export function loadChart(
       timeSec: b.timeSec,
       bpm: b.bpm,
     })),
-    speedChanges: speedChanges.map((s) => ({
+    speedChanges: speedChanges!.map((s) => ({
       step: s.step,
       timeSec: s.timeSec,
       interp: "interp" in s ? s.interp : false,
