@@ -1,6 +1,7 @@
 import {
   ChartEdit,
   currentChartVer,
+  defaultCopyBufferObj,
   LevelFreeze,
   LuaExecutor,
   stepZero,
@@ -34,7 +35,7 @@ export const dummyChartData: ChartEdit = {
   locale: "ja",
   changePasswd: null,
   published: false,
-  levelsMin: [
+  levelsMeta: [
     {
       name: "level1",
       type: "Single",
@@ -107,33 +108,29 @@ export const dummyChartData: ChartEdit = {
         },
       ],
       bpmChanges: [
-        { step: stepZero(), bpm: 60, timeSec: 0, luaLine: 0 },
+        { step: stepZero(), bpm: 60, luaLine: 0 },
         {
           step: { fourth: 1, numerator: 0, denominator: 1 },
           bpm: 120,
-          timeSec: 1,
           luaLine: 0,
         },
         {
           step: { fourth: 3, numerator: 0, denominator: 1 },
           bpm: 120,
-          timeSec: 2,
           luaLine: null,
         },
       ],
       speedChanges: [
-        { step: stepZero(), bpm: 60, timeSec: 0, luaLine: 0, interp: false },
+        { step: stepZero(), bpm: 60, luaLine: 0, interp: false },
         {
           step: { fourth: 1, numerator: 0, denominator: 1 },
           bpm: 60,
-          timeSec: 1,
           luaLine: 0,
           interp: false,
         },
         {
           step: { fourth: 3, numerator: 0, denominator: 1 },
           bpm: 120,
-          timeSec: 2,
           luaLine: 0,
           interp: true,
         },
@@ -142,14 +139,12 @@ export const dummyChartData: ChartEdit = {
         {
           step: stepZero(),
           offset: stepZero(),
-          barNum: 0,
           bars: [[4]],
           luaLine: 0,
         },
         {
           step: { fourth: 1, numerator: 0, denominator: 1 },
           offset: stepZero(),
-          barNum: 1,
           bars: [[4, 4]],
           luaLine: 0,
         },
@@ -158,22 +153,19 @@ export const dummyChartData: ChartEdit = {
     {
       notes: [],
       rest: [],
-      bpmChanges: [{ step: stepZero(), bpm: 60, timeSec: 0, luaLine: 0 }],
-      speedChanges: [
-        { step: stepZero(), bpm: 60, timeSec: 0, luaLine: 0, interp: false },
-      ],
+      bpmChanges: [{ step: stepZero(), bpm: 60, luaLine: 0 }],
+      speedChanges: [{ step: stepZero(), bpm: 60, luaLine: 0, interp: false }],
       signature: [
         {
           step: stepZero(),
           offset: stepZero(),
-          barNum: 0,
           bars: [[4]],
           luaLine: 0,
         },
       ],
     },
   ],
-  lua: [[], []],
+  lua: [["print('Hello, World!')"], []],
   zoom: 1,
-  copyBuffer: Array.from(new Array(10)).map(() => null),
+  copyBuffer: defaultCopyBufferObj(),
 };

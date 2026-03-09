@@ -1,11 +1,9 @@
 import { Context, Hono } from "hono";
 import * as msgpack from "@msgpack/msgpack";
 import {
-  ChartEdit,
   currentChartVer,
   hashLevel,
   numEvents,
-  validateChart,
   chartMaxEvent,
   fileMaxSize,
   CidSchema,
@@ -13,9 +11,10 @@ import {
   ChartEditSchema13,
   rateLimit,
   convertToLatest,
-  validateChart13,
-  Chart13Edit,
-  ChartUntil14,
+  validateChartWithoutConvert,
+  Chart14Edit,
+  Chart15,
+  docRefs,
 } from "@falling-nikochan/chart";
 import { Db, MongoClient } from "mongodb";
 import {
@@ -156,7 +155,7 @@ const chartFileApp = async (config: {
             description: "Successful response",
             content: {
               "application/vnd.msgpack": {
-                schema: resolver(ChartEditSchema13()),
+                schema: docRefs("Chart15"),
               },
             },
           },
@@ -196,8 +195,10 @@ const chartFileApp = async (config: {
       }),
       (c) => {
         const chart = c.get("chart");
+        const filename = `${c.get("cid")}.fn${chart.ver}.mpk`;
         return c.body(new Blob([msgpack.encode(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
+          "Content-Disposition": `attachment; filename="${filename}"`,
         });
       }
     )
@@ -271,10 +272,8 @@ const chartFileApp = async (config: {
             "Chart data in MessagePack format. See also GET response.",
           required: true,
           content: {
-            "application/vnd.msgpack": {
-              // ↓scalarのUIに現れない...
-              schema: ChartEditSchema13(),
-            },
+            "application/vnd.msgpack":
+              await resolver(ChartEditSchema13()).toOpenAPISchema(),
           },
         },
         responses: {
@@ -356,25 +355,22 @@ const chartFileApp = async (config: {
           });
         }
 
-        let newChartObj: ChartUntil14;
-        let newChart: Chart13Edit | ChartEdit;
+        let newChart: Chart14Edit | Chart15;
         try {
-          newChartObj = msgpack.decode(chartBuf) as ChartUntil14;
-          if (newChartObj.ver === currentChartVer - 1) {
-            newChart = await validateChart13(newChartObj as Chart13Edit);
-          } else {
-            newChart = await validateChart(newChartObj);
+          newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
+          if (newChart.ver < currentChartVer - 1) {
+            // 過去2バージョンまでサポート
+            return c.json({ message: "oldChartVersion" }, 409);
           }
+          newChart = validateChartWithoutConvert(newChart) as
+            | Chart14Edit
+            | Chart15;
         } catch (e) {
           console.error(e);
           throw new HTTPException(415, { message: (e as Error).toString() });
         }
-        if (newChartObj.ver < currentChartVer - 1) {
-          // 過去2バージョンまでサポート
-          throw new HTTPException(409, { message: "oldChartVersion" });
-        }
 
-        if (numEvents(newChart) > chartMaxEvent) {
+        if (numEvents(newChart as Chart14Edit | Chart15) > chartMaxEvent) {
           throw new HTTPException(413, {
             message: "tooManyEvent",
             // message: `Chart too large (number of events is ${numEvents(
@@ -392,7 +388,7 @@ const chartFileApp = async (config: {
           unlisted: boolean;
         }
         const prevHashes: LevelHash[] = await Promise.all(
-          upgradedChart.levelsMin.map(async (min, i) => ({
+          upgradedChart.levelsMeta.map(async (min, i) => ({
             unlisted: min.unlisted,
             hash: await hashLevel(upgradedChart.levelsFreeze[i]),
           }))
@@ -402,15 +398,15 @@ const chartFileApp = async (config: {
           savedHashesMap[prevHashes[i].hash] = entry.levelBrief[i].hash;
         }
         const newHashes: LevelHash[] =
-          newChart.ver === 13
+          newChart.ver === 14
             ? await Promise.all(
-                newChart.levels.map(async (level) => ({
+                newChart.levelsMin.map(async (level, i) => ({
                   unlisted: level.unlisted,
-                  hash: await hashLevel(level),
+                  hash: await hashLevel(newChart.levelsFreeze[i]),
                 }))
               )
             : await Promise.all(
-                newChart.levelsMin.map(async (min, i) => ({
+                newChart.levelsMeta.map(async (min, i) => ({
                   unlisted: min.unlisted,
                   hash: await hashLevel(newChart.levelsFreeze[i]),
                 }))

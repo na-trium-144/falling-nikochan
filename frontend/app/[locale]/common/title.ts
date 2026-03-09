@@ -1,4 +1,4 @@
-import { ChartBrief, ChartMin } from "@falling-nikochan/chart";
+import { ChartBrief, ChartUntil15Min } from "@falling-nikochan/chart";
 
 export const titleWithSiteName = (title: string) =>
   (title ? `${title} | Falling Nikochan` : "Falling Nikochan") +
@@ -11,7 +11,7 @@ export const titleWithoutSiteName = (title: string) =>
 export function titleShare(
   t: any,
   cid?: string,
-  brief?: ChartMin | ChartBrief | null
+  brief?: ChartUntil15Min | ChartBrief | null
 ): string {
   return titleWithSiteName(
     brief?.composer
@@ -29,7 +29,7 @@ export function titleShare(
 export function titleShareResult(
   t: any,
   cid: string | undefined,
-  brief: ChartMin | ChartBrief | null | undefined,
+  brief: ChartUntil15Min | ChartBrief | null | undefined,
   date: Date | undefined
 ): string {
   if (date) {

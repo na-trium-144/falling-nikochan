@@ -9,6 +9,7 @@ import {
   Chart11Edit,
   Chart13Edit,
   Chart14Edit,
+  Chart15,
   Chart4,
   Chart5,
   Chart6,
@@ -17,7 +18,8 @@ import {
   Chart9Edit,
   currentChartVer,
   defaultCopyBuffer,
-  Level13Play,
+  defaultCopyBufferObj,
+  Level15Play,
   Level6Play,
   stepZero,
 } from "@falling-nikochan/chart";
@@ -52,7 +54,7 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
 
 export const dummyCid = "100000";
 export const dummyDate = new Date(2025, 0, 1);
-export function dummyChart(): Chart14Edit {
+export function dummyChart(): Chart15 {
   return {
     falling: "nikochan",
     ver: currentChartVer,
@@ -64,9 +66,9 @@ export function dummyChart(): Chart14Edit {
     locale: "d",
     changePasswd: null,
     published: false,
-    copyBuffer: defaultCopyBuffer(),
+    copyBuffer: defaultCopyBufferObj(),
     zoom: 1,
-    levelsMin: [
+    levelsMeta: [
       {
         name: "e",
         type: "Single",
@@ -123,9 +125,20 @@ export function dummyChart(): Chart14Edit {
     ],
   };
 }
+export function dummyChart14(): Chart14Edit {
+  const c: Chart14Edit & Partial<Omit<Chart15, "ver" | "copyBuffer">> = {
+    ...dummyChart(),
+    ver: 14,
+    levelsMin: [],
+    copyBuffer: defaultCopyBuffer(),
+  };
+  c.levelsMin = c.levelsMeta!;
+  delete c.levelsMeta;
+  return c;
+}
 export function dummyChart13(): Chart13Edit {
   const c: Chart13Edit & Partial<Omit<Chart14Edit, "ver">> = {
-    ...dummyChart(),
+    ...dummyChart14(),
     levels: [],
     ver: 13,
   };
@@ -218,9 +231,9 @@ export function dummyChart4(): Chart4 {
   };
 }
 
-export function dummyLevel13(): Level13Play {
+export function dummyLevel15(): Level15Play {
   return {
-    ver: 13,
+    ver: 15,
     offset: 1.23,
     notes: [
       {
@@ -255,7 +268,6 @@ export function dummyLevel13(): Level13Play {
       },
     ],
     ytBegin: 0,
-    ytEnd: "note",
     ytEndSec: 1.23,
   };
 }
@@ -626,6 +638,32 @@ export async function initDb() {
           )),
           ver: 13,
           levels: dummyChart13().levels,
+        }),
+      },
+      { upsert: true }
+    );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 14) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 14),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null
+          )),
+          ver: 14,
+          levels: dummyChart14().levelsMin.map((meta, i) => ({
+            ...meta,
+            ...dummyChart14().levelsFreeze![i],
+            lua: dummyChart14().lua![i],
+          })),
         }),
       },
       { upsert: true }

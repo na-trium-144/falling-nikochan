@@ -13,9 +13,9 @@ import {
   bigScoreRate,
   okSecThru,
   goodSecThru,
+  Note,
+  displayNote,
 } from "@falling-nikochan/chart";
-import { displayNote6, Note6 } from "@falling-nikochan/chart";
-import { displayNote13, Note13 } from "@falling-nikochan/chart";
 import { SEType } from "@/common/se";
 import { OffsetEstimator } from "./offsetEstimator";
 import { NoteDone } from "./score";
@@ -33,11 +33,11 @@ export default function useGameLogic(
   playSE: (s: SEType) => void,
   flash: (x: { targetX: number }) => void
 ) {
-  const [notesAll, setNotesAll] = useState<Note6[] | Note13[]>([]);
+  const [notesAll, setNotesAll] = useState<Note[]>([]);
   const [notesDone, setNotesDone] = useState<NoteDone[][]>([]);
-  const notesYetDone = useRef<Note6[] | Note13[]>([]); // まだ判定していないNote
-  const notesBigYetDone = useRef<(Note6 | Note13)[]>([]); // 通常判定がおわってbig判定がまだのNote
-  const iosThruNote = useRef<Note6 | Note13 | null>(null); // iosThru判定が発生した場合の音符 (判定終了済みではあり、notesYetDoneには含まれない)
+  const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
+  const notesBigYetDone = useRef<Note[]>([]); // 通常判定がおわってbig判定がまだのNote
+  const iosThruNote = useRef<Note | null>(null); // iosThru判定が発生した場合の音符 (判定終了済みではあり、notesYetDoneには含まれない)
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
@@ -107,7 +107,7 @@ export default function useGameLogic(
 
         // doneを0にすることで判定後であってもvelを計算させる
         const n = { ...notesAll[noteIndex], done: 0 };
-        const dn = n.ver === 6 ? displayNote6(n, now) : displayNote13(n, now);
+        const dn = displayNote(n, now);
         if (timeOfsEstimator.current && dn) {
           const nPosOfs = dn ? -dn.pos.y : 0;
           // ユーザーが認識している判定線位置のずれの予測 (=入力遅延によらず一定になる)
@@ -146,11 +146,7 @@ export default function useGameLogic(
       } else {
         // c.judge = 1 ~ 4
         if (c.judge <= 3) {
-          c.note.hitPos = (
-            c.note.ver === 6
-              ? displayNote6(c.note, c.note.hitTimeSec + c.late)
-              : displayNote13(c.note, c.note.hitTimeSec + c.late)
-          )?.pos; // 位置を固定
+          c.note.hitPos = displayNote(c.note, c.note.hitTimeSec + c.late)?.pos; // 位置を固定
         }
         c.note.done = c.judge;
         let thisChain: number;
@@ -234,11 +230,9 @@ export default function useGameLogic(
   );
 
   const resetNotesAll = useCallback(
-    (notes: Note6[] | Note13[], now: number) => {
+    (notes: Note[], now: number) => {
       // note.done などを書き換えるため、元データを壊さないようdeepcopy
-      const notesCopy = notes.map((n) => ({ ...n })).slice() as
-        | Note6[]
-        | Note13[];
+      const notesCopy = notes.map((n) => ({ ...n })).slice();
       setNotesAll(notesCopy.slice());
       setNotesDone([]);
       notesYetDone.current = notesCopy.slice();
@@ -275,7 +269,7 @@ export default function useGameLogic(
     }
   }, [getCurrentTimeSec]);
   interface HitCandidate {
-    note: Note6 | Note13;
+    note: Note;
     judge: 1 | 2 | 3 | 4 | 5;
     late: number;
   }
