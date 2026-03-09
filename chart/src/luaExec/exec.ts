@@ -1,8 +1,8 @@
 import { LuaFactory } from "wasmoon";
 import { Step, StepSchema, stepZero } from "../step.js";
 import { LevelFreeze } from "../chart.js";
-import { LevelFreezeSchema13 } from "../legacy/chart13.js";
 import * as v from "valibot";
+import { LevelFreezeSchema15 } from "../legacy/chart15.js";
 
 export interface LuaExecResult {
   stdout: string[];
@@ -102,7 +102,7 @@ export async function luaExec(
       }
     }
     if (fnState) {
-      result.levelFreezed = v.parse(LevelFreezeSchema13(), {
+      result.levelFreezed = v.parse(LevelFreezeSchema15(), {
         notes: parseArrayOrEmpty(fnState.notes),
         rest: parseArrayOrEmpty(fnState.rest),
         bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),
