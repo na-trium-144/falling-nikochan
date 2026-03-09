@@ -52,7 +52,7 @@ For more information, play, and chart creation, please visit the Falling Nikocha
         * `BACKEND_ALT_PREFIX` (frontend): `https://domain-of-your-backend` or unset
             * used when backend returns 5xx
         * `NO_PREFETCH` (frontend): `1` or unset
-        * `GOOGLE_API_KEY` (backend): API key for YouTube Data API v3 (optional)
+        * `YOUTUBE_API_KEY` (backend): API key for YouTube Data API v3 (optional)
         * `ALLOW_FETCH_ERROR` (frontend): `1` or unset
         * `VERSION_SUFFIX` (frontend): string
         * `TITLE_SUFFIX` (frontend): string
