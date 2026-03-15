@@ -103,6 +103,51 @@ const apiApp = async (config: {
       theme: "default",
       url: "/api/openapi.json",
       pageTitle: "Falling Nikochan API Reference",
+      customCss: `
+body {
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--background-gradient);
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+.scalar-app, .references-rendered {
+  background-color: unset !important;
+}
+.scalar-container > .scalar-client,
+.z-context {
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+}
+.light-mode,
+.light-mode .dark-mode {
+  --scalar-color-1: #000; /* fg-bright */
+  --scalar-color-2: oklch(27.9% 0.041 260.031); /* fg-base: slate-800 */
+  --scalar-color-3: oklch(27.9% 0.041 260.031); /* fg-base: slate-800 */
+  --scalar-color-accent: oklch(48.8% 0.243 264.376); /* fn-link-3: blue-700 */
+  --background-gradient: linear-gradient(to top, oklch(0.977 0.013 236.62) 0px, oklch(0.901 0.058 230.902) 100%);
+  --scalar-background-1: rgba(255, 255, 255, 0.5);
+  --scalar-background-2: rgba(255, 255, 255, 0.5);
+  --scalar-background-3: rgba(255, 255, 255, 0.5);
+  --scalar-background-accent: oklch(90.1% 0.058 230.902); /* fn-sky: sky-200 */
+  --scalar-border-color: oklch(86.9% 0.022 252.894 / 0.8); /* fn-plain: slate-300 */
+}
+.dark-mode {
+  --scalar-color-1: oklch(97% 0.001 106.424); /* stone-100 */
+  --scalar-color-2: oklch(86.9% 0.005 56.366); /* stone-300 */
+  --scalar-color-3: oklch(86.9% 0.005 56.366); /* stone-300 */
+  --scalar-color-accent: oklch(62.3% 0.214 259.815); /* blue-500 */
+  --background-gradient: linear-gradient(to top, oklch(0.266 0.079 36.259) 0px, rgb(32, 16, 10) 100%);
+  --scalar-background-1: oklch(37.4% .01 67.558 / 0.5); /* stone-700 */
+  --scalar-background-2: oklch(37.4% .01 67.558 / 0.5); /* stone-700 */
+  --scalar-background-3: oklch(37.4% .01 67.558 / 0.5); /* stone-700 */
+  --scalar-background-accent: oklch(21.6% 0.006 56.043 / 0.3); /* stone-900 */
+}`,
     })
   );
 
