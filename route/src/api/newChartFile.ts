@@ -41,10 +41,10 @@ const newChartFileApp = async (config: {
           "Chart data in MessagePack format. See also response type of GET /api/chartFile.",
         required: true,
         content: {
-            "application/vnd.msgpack": {
-              schema: docRefs("Chart15"),
-            },
+          "application/vnd.msgpack": {
+            schema: docRefs("Chart15"),
           },
+        },
       },
       responses: {
         200: {
