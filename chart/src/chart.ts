@@ -140,7 +140,13 @@ export const ChartBriefSchema = () =>
     chartCreator: v.string(),
     updatedAt: v.pipe(v.number(), v.description("value from Date.getTime()")),
     published: v.boolean(),
-    locale: v.string(),
+    locale: v.pipe(
+      v.string(),
+      v.description(
+        "Locale where this chart was created, e.g. 'jp', 'en', " +
+          "though this field is currently not used for anything."
+      )
+    ),
     levels: v.array(
       v.object({
         name: v.string(),
@@ -150,7 +156,11 @@ export const ChartBriefSchema = () =>
         noteCount: v.pipe(v.number(), v.integer(), v.minValue(0)),
         bpmMin: v.pipe(v.number(), v.gtValue(0)),
         bpmMax: v.pipe(v.number(), v.gtValue(0)),
-        length: v.pipe(v.number(), v.minValue(0)),
+        length: v.pipe(
+          v.number(),
+          v.minValue(0),
+          v.description("The length of chart in seconds")
+        ),
         unlisted: v.boolean(),
       })
     ),

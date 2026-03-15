@@ -15,7 +15,7 @@ import {
   YTEndSchema15,
   YTEndSecSchema15,
 } from "./legacy/chart15.js";
-import { EmptyObj, LuaLineSchema } from "./chart.js";
+import { ChartBriefSchema, EmptyObj, LuaLineSchema } from "./chart.js";
 import { StepSchema } from "./step.js";
 import { resolver } from "hono-openapi";
 import {
@@ -35,6 +35,7 @@ export const docSchemas = async () => ({
   LevelMeta15: await LevelMeta15Doc(),
   LevelFreeze15: await LevelFreeze15Doc(),
   LevelPlay15: await LevelPlay15Doc(),
+  ChartBrief: (await resolver(ChartBriefSchema()).toOpenAPISchema()).schema,
   EmptyObj: (await resolver(EmptyObj()).toOpenAPISchema()).schema,
   Step: (await resolver(StepSchema()).toOpenAPISchema()).schema,
   LuaLine: (await resolver(LuaLineSchema()).toOpenAPISchema()).schema,

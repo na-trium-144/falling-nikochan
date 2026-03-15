@@ -7,9 +7,9 @@ import {
   fileMaxSize,
   rateLimit,
   CidSchema,
-  ChartEditSchema13,
   Chart14Edit,
   Chart15,
+  docRefs,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { MongoClient } from "mongodb";
@@ -33,7 +33,7 @@ const newChartFileApp = async (config: {
       description:
         "Create a new chart. " +
         "The chart data should be in MessagePack format, and " +
-        `must be the latest format (Chart${currentChartVer}Edit) or one version earlier. ` +
+        `must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
         "Returns the chart ID (cid) of the newly created chart. " +
         `This endpoint is rate limited to one request per ${rateLimit.newChartFile / 60} minutes. `,
       requestBody: {
@@ -41,9 +41,10 @@ const newChartFileApp = async (config: {
           "Chart data in MessagePack format. See also response type of GET /api/chartFile.",
         required: true,
         content: {
-          "application/vnd.msgpack":
-            await resolver(ChartEditSchema13()).toOpenAPISchema(),
-        },
+            "application/vnd.msgpack": {
+              schema: docRefs("Chart15"),
+            },
+          },
       },
       responses: {
         200: {

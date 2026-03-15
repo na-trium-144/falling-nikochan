@@ -9,9 +9,9 @@ import {
   CidSchema,
   ChartSeqData,
   loadChart,
-  ChartSeqDataSchema,
   convertTo15,
   convertToPlay15,
+  docRefs,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -28,7 +28,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         description: "chart sequence data in MessagePack format.",
         content: {
           "application/vnd.msgpack": {
-            schema: resolver(ChartSeqDataSchema()),
+            schema: docRefs("ChartSeqData"),
           },
         },
       },

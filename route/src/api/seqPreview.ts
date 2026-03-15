@@ -4,9 +4,9 @@ import { Hono } from "hono";
 import {
   ChartSeqData,
   loadChart,
-  ChartSeqDataSchema,
   LevelPlaySchema15,
   Level15Play,
+  docRefs,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -22,8 +22,9 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       description: "MessagePack-encoded Level15Play data",
       required: true,
       content: {
-        "application/vnd.msgpack":
-          await resolver(LevelPlaySchema15()).toOpenAPISchema(),
+        "application/vnd.msgpack": {
+          schema: docRefs("LevelPlay15"),
+        },
       },
     },
     responses: {
@@ -31,7 +32,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         description: "chart sequence data in MessagePack format for preview.",
         content: {
           "application/vnd.msgpack": {
-            schema: resolver(ChartSeqDataSchema()),
+            schema: docRefs("ChartSeqData"),
           },
         },
       },

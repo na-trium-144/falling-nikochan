@@ -8,11 +8,10 @@ import {
   convertTo6,
   Level6Play,
   CidSchema,
-  currentChartVer,
   convertTo15,
   convertToPlay15,
   Level15Play,
-  LevelPlaySchema15,
+  docRefs,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -24,14 +23,14 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   describeRoute({
     description:
       "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
-      "Note that the level data is either in Chart6Play or Chart15Play format, " +
-      `while this documentation only describes Chart${currentChartVer}Play format. `,
+      "Note that the level data is either in Level6Play or Level15Play format, " +
+      `while this documentation only describes Level15Play format. `,
     responses: {
       200: {
         description: "chart file in MessagePack format.",
         content: {
           "application/vnd.msgpack": {
-            schema: resolver(LevelPlaySchema15()),
+            schema: docRefs("LevelPlay15"),
           },
         },
       },

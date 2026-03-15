@@ -8,7 +8,6 @@ import {
   fileMaxSize,
   CidSchema,
   HashSchema,
-  ChartEditSchema13,
   rateLimit,
   convertToLatest,
   validateChartWithoutConvert,
@@ -146,10 +145,9 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Get a raw chart file in MessagePack format. Requires a password (either p or ph). " +
-          "Note that the chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit or Chart13Edit, " +
-          `while this documentation only describes Chart${currentChartVer}Edit format. ` +
-          `The file format used by the chart editor is a subset of Chart${currentChartVer}Edit, ` +
-          `so it is possible to import API data into the chart editor, but not the other way around.`,
+          "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit or Chart14Edit, " +
+          `while this documentation only describes Chart15 format. ` +
+          `The chart editor can import chart data from the API.`,
         responses: {
           200: {
             description: "Successful response",
@@ -265,15 +263,15 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Update a chart file with new data in MessagePack format. " +
-          `The chart data format must be the latest format (Chart${currentChartVer}Edit) or one version earlier. ` +
+          `The chart data format must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
           "The previous password is required (either p or ph). If the posted chart data has a different password, it will be used next time.",
         requestBody: {
-          description:
-            "Chart data in MessagePack format. See also GET response.",
+          description: "Chart data in MessagePack format.",
           required: true,
           content: {
-            "application/vnd.msgpack":
-              await resolver(ChartEditSchema13()).toOpenAPISchema(),
+            "application/vnd.msgpack": {
+              schema: docRefs("Chart15"),
+            },
           },
         },
         responses: {
