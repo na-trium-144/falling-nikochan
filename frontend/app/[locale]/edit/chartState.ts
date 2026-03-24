@@ -56,7 +56,13 @@ export type ChartAndState =
         | APIError;
     };
 export type LoadState = ChartAndState["state"];
-export type LocalLoadState = undefined | "loading" | "ok" | "loadFail";
+export class LocalLoadError {
+  message: string;
+  constructor(message: string) {
+    this.message = message;
+  }
+}
+export type LocalLoadState = undefined | "loading" | "ok" | LocalLoadError;
 export type SaveState = undefined | "saving" | "ok" | APIError;
 interface EditSession {
   cid: string | undefined;
@@ -397,6 +403,7 @@ export function useChartState(props: Props) {
   const [localSaveState, setLocalSaveState] = useState<SaveState>(undefined);
   const localSave = useCallback(
     (format: "lua") => {
+      setLocalLoadState(undefined);
       if (chartState.state === "ok") {
         setLocalSaveState("saving");
         let blob: Blob;
@@ -436,53 +443,63 @@ export function useChartState(props: Props) {
   const localLoad = useCallback(
     async (buffer: ArrayBuffer) => {
       setLocalLoadState("loading");
+      setLocalSaveState(undefined);
       const validateAndExec = async (newChartMin: unknown) => {
-        let originalVer: number = 0;
         if (
           typeof newChartMin === "object" &&
           newChartMin &&
+          "falling" in newChartMin &&
+          newChartMin.falling === "nikochan" &&
           "ver" in newChartMin &&
           typeof newChartMin.ver === "number"
         ) {
-          originalVer = newChartMin.ver;
-        }
-        try {
-          newChartMin = await validateChartMin(newChartMin as ChartUntil14Min);
-        } catch (e) {
-          if (e instanceof v.ValiError) {
-            console.error(e.issues);
+          const originalVer = newChartMin.ver;
+          try {
+            newChartMin = await validateChartMin(
+              newChartMin as ChartUntil14Min
+            );
+          } catch (e) {
+            if (e instanceof v.ValiError) {
+              console.error(e.issues);
+              throw new LocalLoadError(
+                e.issues.map((i) => i.message).join(", ")
+              );
+            } else {
+              throw new LocalLoadError(String(e));
+            }
           }
-          throw e;
+          return {
+            originalVer,
+            newChart: await convertToLatest({
+              ...(newChartMin as Chart14Min),
+              changePasswd: null,
+              published: false,
+              levelsFreeze: await Promise.all(
+                (newChartMin as Chart14Min).lua.map(async (l) => {
+                  const { levelFreezed } = await luaExec(
+                    process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
+                    fnCommandsLib,
+                    l.join("\n"),
+                    { catchError: false, needReturnValue: false }
+                  );
+                  const { bpm, speed } = updateBpmTimeSec(
+                    levelFreezed.bpmChanges,
+                    levelFreezed.speedChanges
+                  );
+                  const signature = updateBarNum(levelFreezed.signature);
+                  return {
+                    ...levelFreezed,
+                    bpmChanges: bpm,
+                    speedChanges: speed!,
+                    signature,
+                  };
+                })
+              ),
+            } satisfies Chart14Edit),
+          };
+        } else {
+          throw new Error("invalid chart format");
         }
-        return {
-          originalVer,
-          newChart: await convertToLatest({
-            ...(newChartMin as Chart14Min),
-            changePasswd: null,
-            published: false,
-            levelsFreeze: await Promise.all(
-              (newChartMin as Chart14Min).lua.map(async (l) => {
-                const { levelFreezed } = await luaExec(
-                  process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
-                  fnCommandsLib,
-                  l.join("\n"),
-                  { catchError: false, needReturnValue: false }
-                );
-                const { bpm, speed } = updateBpmTimeSec(
-                  levelFreezed.bpmChanges,
-                  levelFreezed.speedChanges
-                );
-                const signature = updateBarNum(levelFreezed.signature);
-                return {
-                  ...levelFreezed,
-                  bpmChanges: bpm,
-                  speedChanges: speed!,
-                  signature,
-                };
-              })
-            ),
-          } satisfies Chart14Edit),
-        };
       };
       let result: Awaited<ReturnType<typeof validateAndExec>> | null = null;
       try {
@@ -490,19 +507,22 @@ export function useChartState(props: Props) {
           YAML.parse(new TextDecoder().decode(buffer))
         );
       } catch (e1) {
-        console.warn("fallback to msgpack deserialize");
+        console.log("yaml deserialize failed:", e1);
         try {
           result = await validateAndExec(msgpack.decode(buffer));
         } catch (e2) {
-          console.warn("fallback to lua execution");
+          console.log("msgpack deserialize failed:", e2);
           try {
             const rawCode = new TextDecoder().decode(buffer);
             const luaResult = await luaExec(
               process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
               fnCommandsLib,
               rawCode,
-              { catchError: false, needReturnValue: true }
+              { catchError: true, needReturnValue: true }
             );
+            if (luaResult.err.length > 0) {
+              throw new LocalLoadError(luaResult.err.join(", "));
+            }
             console.log("lua rawReturnValue:", luaResult.rawReturnValue);
             result = {
               originalVer: (luaResult.rawReturnValue as ChartEdit).ver,
@@ -512,16 +532,29 @@ export function useChartState(props: Props) {
                 locale,
               }),
             };
-          } catch (e3) {
-            console.error(e1);
-            console.error(e2);
-            console.error(e3);
+          } catch (e3: unknown) {
+            console.log("lua execution failed:", e3);
+
+            if (e3 instanceof v.ValiError) {
+              console.error(e3.issues);
+              // eslint-disable-next-line no-ex-assign
+              e3 = new LocalLoadError(
+                e3.issues.map((i) => i.message).join(", ")
+              );
+            }
+
+            if (e1 instanceof LocalLoadError) {
+              setLocalLoadState(e1);
+            } else if (e2 instanceof LocalLoadError) {
+              setLocalLoadState(e2);
+            } else if (e3 instanceof LocalLoadError) {
+              setLocalLoadState(e3);
+            } else {
+              setLocalLoadState(new LocalLoadError(""));
+            }
+            return;
           }
         }
-      }
-      if (!result) {
-        setLocalLoadState("loadFail");
-        return;
       }
 
       if (confirm(t("meta.confirmLoad"))) {

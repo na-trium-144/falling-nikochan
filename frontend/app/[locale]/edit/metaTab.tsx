@@ -15,7 +15,7 @@ import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { useDisplayMode } from "@/scale.js";
-import { LocalLoadState, SaveState } from "./chartState";
+import { LocalLoadError, LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
 
 interface Props {
@@ -279,8 +279,8 @@ export function MetaTab(props: Props2) {
                 ? t("saveDone")
                 : props.localLoadState === "ok"
                   ? null
-                  : props.localLoadState === "loadFail"
-                    ? t("loadFail")
+                  : props.localLoadState instanceof LocalLoadError
+                    ? `${t("loadFail")}: ${props.localLoadState.message}`
                     : null}
             </span>
             <input
