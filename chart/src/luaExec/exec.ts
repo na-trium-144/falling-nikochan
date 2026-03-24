@@ -19,6 +19,7 @@ export async function luaExec(
   options: {
     catchError?: boolean;
     needReturnValue?: boolean;
+    isChartFile?: boolean;
   }
 ): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
@@ -55,34 +56,57 @@ export async function luaExec(
       この場合Noteタブなどから編集できない
     */
 
-    const codeStatic = code.split("\n").map((lineStr, ln) =>
-      lineStr
-        .replace(
-          /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
-          `$1NoteStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
-          `$1StepStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
-          `$1BeatStatic(${ln},$2)$3`
-        )
-        .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
-        .replace(
-          /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelBeginStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelEndStatic(${ln},$2)$3`
-        )
-    );
+    const lines = code.split("\n");
+    let codeStatic: string[] = [];
+    let levelBeginLn = 0;
+    let isLevelCode = false;
+    for (let ln = 0; ln < lines.length; ln++) {
+      const lineStr = lines[ln];
+      // luaコードが単一のレベルデータでない場合、
+      // LEVEL_CODE_BEGIN〜LEVEL_CODE_ENDのみを置き換え対象にする & それに合わせて行番号も調整する
+      if (options.isChartFile && lineStr.includes("LEVEL_CODE_BEGIN")) {
+        levelBeginLn = ln + 1;
+        isLevelCode = true;
+      }
+      if (options.isChartFile && lineStr.includes("LEVEL_CODE_END")) {
+        isLevelCode = false;
+      }
+      if (options.isChartFile && !isLevelCode) {
+        codeStatic.push(lineStr);
+        continue;
+      }
+      codeStatic.push(
+        lineStr
+          .replace(
+            /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
+            `$1NoteStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
+            `$1StepStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
+            `$1BeatStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)BPM\(( *[\d.]+ *)\)( *)$/,
+            `$1BPMStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
+            `$1AccelStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
+            `$1AccelBeginStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
+            `$1AccelEndStatic(${ln - levelBeginLn},$2)$3`
+          )
+      );
+    }
     // console.log(codeStatic);
     await lua.doString('require("fn-commands")');
     const value = await lua.doString(codeStatic.join("\n"));

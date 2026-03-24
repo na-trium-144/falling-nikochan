@@ -518,7 +518,7 @@ export function useChartState(props: Props) {
               process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
               fnCommandsLib,
               rawCode,
-              { catchError: true, needReturnValue: true }
+              { catchError: true, needReturnValue: true, isChartFile: true }
             );
             if (luaResult.err.length > 0) {
               throw new LocalLoadError(luaResult.err.join(", "));
