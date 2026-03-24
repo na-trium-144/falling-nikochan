@@ -581,7 +581,14 @@ function Play(props: Props) {
       setShowLoading(false);
       setShowReady(true);
       setTimeout(() => requestAnimationFrame(() => setOpenReadyAnim(true)));
-      resetNotesAll(chartSeq.notes, -Infinity);
+      resetNotesAll(
+        chartSeq.notes.map((n) => ({
+          ...n,
+          done: 0,
+          bigDone: false,
+        })),
+        -Infinity
+      );
       ref.current?.focus();
       setInitDone(true);
     } else {
@@ -794,7 +801,14 @@ function Play(props: Props) {
         (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
         chartSeq.offset -
         offsetPlusLatency * playbackRate;
-      resetNotesAll(chartSeq.notes, now);
+      resetNotesAll(
+        chartSeq.notes.map((n) => ({
+          ...n,
+          done: 0,
+          bigDone: false,
+        })),
+        now
+      );
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
     }

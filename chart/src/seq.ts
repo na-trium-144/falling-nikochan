@@ -26,12 +26,6 @@ import {
 import { docRefs, Schema } from "./docSchema.js";
 import { resolver } from "hono-openapi";
 
-const PosSchema = () =>
-  v.object({
-    x: v.number(),
-    y: v.number(),
-  });
-
 export const DisplayParamSchema = () =>
   v.object({
     timeSecBefore: v.pipe(
@@ -52,10 +46,6 @@ export const NoteSeqSchema = () =>
         v.description("unique number of note, always equals to index in array")
       ),
       big: v.pipe(v.boolean(), v.description("whether the note is big")),
-      bigDone: v.pipe(
-        v.boolean(),
-        v.description("whether the note has been judged, false by default")
-      ),
       hitTimeSec: v.pipe(
         v.number(),
         v.description("hit judgement time, ignoring offset")
@@ -87,22 +77,28 @@ export const NoteSeqSchema = () =>
             "(Exceptionally, if hitTimeSec - current time < 0, use display[0] with t = hitTimeSec - current time - 0.)"
         )
       ),
-      hitPos: v.pipe(
-        v.optional(PosSchema()),
-        v.description("position of the note when hit")
-      ),
-      done: v.pipe(
-        v.number(),
-        v.description("judgement result, 0:NotYet 1:Good 2:OK 3:bad 4:miss 5:")
-      ),
-      baseScore: v.optional(v.number()),
-      chainBonus: v.optional(v.number()),
-      bigBonus: v.optional(v.number()),
-      chain: v.optional(v.number()),
     }),
     v.description("Note data used for judgement and display during play.")
   );
-export type Note = v.InferOutput<ReturnType<typeof NoteSeqSchema>>;
+export type NoteAPI = v.InferOutput<ReturnType<typeof NoteSeqSchema>>;
+export type NoteInGame = NoteAPI & {
+  /**
+   * whether the note has been judged, false by default
+   */
+  bigDone: boolean;
+  /**
+   * position of the note when hit
+   */
+  hitPos?: Pos;
+  /**
+   * judgement result, 0:NotYet 1:Good 2:OK 3:bad 4:miss 5:
+   */
+  done: number;
+  baseScore?: number;
+  chainBonus?: number;
+  bigBonus?: number;
+  chain?: number;
+};
 
 export const BPMChangeSeqSchema = () =>
   v.pipe(
@@ -299,7 +295,7 @@ export function loadChart(
     level.speedChanges
   );
 
-  const notes: Note[] = [];
+  const notes: NoteAPI[] = [];
   for (let id = 0; id < level.notes.length; id++) {
     const c = level.notes[id];
 
@@ -490,8 +486,6 @@ export function loadChart(
       big: c.big,
       hitTimeSec,
       appearTimeSec,
-      done: 0,
-      bigDone: false,
       display,
       targetX,
       vx,
@@ -526,7 +520,10 @@ export function loadChart(
   };
 }
 
-export function displayNote(note: Note, timeSec: number): DisplayNote | null {
+export function displayNote(
+  note: NoteInGame,
+  timeSec: number
+): DisplayNote | null {
   if (timeSec - note.hitTimeSec > 1.0) {
     return null;
   } else if (note.done >= 1 && note.done <= 3) {

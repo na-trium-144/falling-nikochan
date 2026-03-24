@@ -13,8 +13,8 @@ import {
   bigScoreRate,
   okSecThru,
   goodSecThru,
-  Note,
   displayNote,
+  NoteInGame,
 } from "@falling-nikochan/chart";
 import { SEType } from "@/common/se";
 import { OffsetEstimator } from "./offsetEstimator";
@@ -33,11 +33,11 @@ export default function useGameLogic(
   playSE: (s: SEType) => void,
   flash: (x: { targetX: number }) => void
 ) {
-  const [notesAll, setNotesAll] = useState<Note[]>([]);
+  const [notesAll, setNotesAll] = useState<NoteInGame[]>([]);
   const [notesDone, setNotesDone] = useState<NoteDone[][]>([]);
-  const notesYetDone = useRef<Note[]>([]); // まだ判定していないNote
-  const notesBigYetDone = useRef<Note[]>([]); // 通常判定がおわってbig判定がまだのNote
-  const iosThruNote = useRef<Note | null>(null); // iosThru判定が発生した場合の音符 (判定終了済みではあり、notesYetDoneには含まれない)
+  const notesYetDone = useRef<NoteInGame[]>([]); // まだ判定していないNote
+  const notesBigYetDone = useRef<NoteInGame[]>([]); // 通常判定がおわってbig判定がまだのNote
+  const iosThruNote = useRef<NoteInGame | null>(null); // iosThru判定が発生した場合の音符 (判定終了済みではあり、notesYetDoneには含まれない)
 
   // good, ok, bad, missの個数
   const [judgeCount, setJudgeCount] = useState<
@@ -230,7 +230,7 @@ export default function useGameLogic(
   );
 
   const resetNotesAll = useCallback(
-    (notes: Note[], now: number) => {
+    (notes: NoteInGame[], now: number) => {
       // note.done などを書き換えるため、元データを壊さないようdeepcopy
       const notesCopy = notes.map((n) => ({ ...n })).slice();
       setNotesAll(notesCopy.slice());
@@ -269,7 +269,7 @@ export default function useGameLogic(
     }
   }, [getCurrentTimeSec]);
   interface HitCandidate {
-    note: Note;
+    note: NoteInGame;
     judge: 1 | 2 | 3 | 4 | 5;
     late: number;
   }

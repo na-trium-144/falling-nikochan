@@ -6,9 +6,9 @@ import {
   targetY,
   bigScale,
   bonusMax,
-  Note,
   DisplayNote,
   displayNote,
+  NoteInGame,
 } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import TargetLine from "@/common/targetLine.js";
@@ -20,7 +20,7 @@ import { OffsetEstimator } from "./offsetEstimator";
 interface Props {
   className?: string;
   style?: object;
-  notes: Note[];
+  notes: NoteInGame[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
   setRunFPS: (fps: number) => void;
@@ -552,7 +552,7 @@ export default function FallingWindow(props: Props) {
 
 interface MProps {
   displayNotes: DisplayNote[];
-  notes: Note[];
+  notes: NoteInGame[];
   noteSize: number;
   boxSize: number;
   marginX: number;
@@ -577,7 +577,7 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
 interface NProps {
   displayNote: DisplayNote;
   noteSize: number;
-  note: Note;
+  note: NoteInGame;
   marginX: number;
   marginY: number;
   boxSize: number;

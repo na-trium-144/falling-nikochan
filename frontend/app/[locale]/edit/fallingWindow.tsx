@@ -2,13 +2,13 @@
 
 import clsx from "clsx/lite";
 import {
-  Note,
   DisplayNote,
   targetY,
   bigScale,
   displayNote,
   ChartEditing,
   NoteCommandWithLua,
+  NoteInGame,
 } from "@falling-nikochan/chart";
 import { useResizeDetector } from "react-resize-detector";
 import Arrow from "./arrow.js";
@@ -294,7 +294,7 @@ interface NProps {
   marginX: number;
   marginY: number;
   noteSize: number;
-  notes: readonly Note[];
+  notes: readonly NoteInGame[];
 }
 function NikochanAndTrace(props: NProps) {
   const {

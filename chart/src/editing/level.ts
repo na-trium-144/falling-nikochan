@@ -8,7 +8,7 @@ import {
   getSignatureState,
   getTimeSec,
   loadChart,
-  Note,
+  NoteInGame,
 } from "../seq.js";
 import { difficulty } from "../difficulty.js";
 import { Step, stepAdd, stepCmp, stepZero } from "../step.js";
@@ -190,14 +190,18 @@ export class LevelEditing extends EventEmitter<EventType> {
     return [...this.#lua] as const;
   }
 
-  #seqNotes: Note[];
+  #seqNotes: NoteInGame[];
   #resetSeqNotes() {
     this.#seqNotes = loadChart({
       ver: currentChartVer,
       offset: this.#offset(),
       ...this.#freeze,
       ...this.#meta,
-    } satisfies LevelPlay).notes;
+    } satisfies LevelPlay).notes.map((n) => ({
+      ...n,
+      done: 0,
+      bigDone: false,
+    }));
   }
   get seqNotes() {
     return [...this.#seqNotes] as const;

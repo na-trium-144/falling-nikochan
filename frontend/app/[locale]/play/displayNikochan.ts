@@ -2,7 +2,7 @@ import {
   bigScale,
   displayNote,
   DisplayNote,
-  Note,
+  NoteInGame,
   Pos,
   targetY,
 } from "@falling-nikochan/chart";
@@ -31,14 +31,14 @@ interface Context {
   lastNow: number;
 }
 export class DisplayNikochan {
-  #n: Note;
+  #n: NoteInGame;
   #dn: DisplayNote;
   #c: Context;
   #fadeinStart: DOMHighResTimeStamp;
   #fadeoutStart: DOMHighResTimeStamp | null;
   #tailVel: Pos;
 
-  constructor(n: Note, dn: DisplayNote, c: Context) {
+  constructor(n: NoteInGame, dn: DisplayNote, c: Context) {
     this.#n = n;
     this.#dn = dn;
     this.#c = c;
