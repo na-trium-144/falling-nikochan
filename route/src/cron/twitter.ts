@@ -73,7 +73,9 @@ export async function postChart(
       // `ID: ${cid}\n`,
       messageAboutSong + "\n",
       messageAboutLevel,
-    ].join("");
+    ]
+      .join("")
+      .replaceAll("@", "＠");
   while (twitterText.parseTweet(messageJoined()).weightedLength > 280) {
     messageAboutSong = messageAboutSong.slice(0, -2) + "…";
   }
@@ -139,7 +141,7 @@ export async function postPopular(
     while (twitterText.parseTweet(line).weightedLength > maxEntryLen) {
       line = line.slice(0, -3) + "…\n";
     }
-    messageEntries.push(line);
+    messageEntries.push(line.replaceAll("@", "＠"));
   }
   try {
     if (
