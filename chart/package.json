@@ -24,7 +24,7 @@
     "@types/chai": "^5.2.3",
     "@types/object-hash": "^3.0.6",
     "chai": "^6.2.2",
-    "fn-commands": "^0.3.0",
+    "fn-commands": "^1.0.0",
     "openapi-types": "^12.1.3"
   }
 }
