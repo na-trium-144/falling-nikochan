@@ -4,7 +4,7 @@ import { entryToBrief, getChartEntryCompressed } from "./chart.js";
 import { MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
-import { ChartBriefSchema, CidSchema } from "@falling-nikochan/chart";
+import { CidSchema, docRefs } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
@@ -25,7 +25,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         description: "Successful response",
         content: {
           "application/json": {
-            schema: resolver(ChartBriefSchema()),
+            schema: docRefs("ChartBrief"),
           },
         },
       },

@@ -41,7 +41,11 @@ export function luaAddBeatChange<L extends LevelForLuaEdit>(
     return null;
   }
   insertLua(chart, insert.luaLine, beatLuaCommand(change));
-  chart.signature.push({ ...change, luaLine: insert.luaLine });
+  chart.signature.push({
+    ...change,
+    barNum: "barNum" in change ? change.barNum : 0,
+    luaLine: insert.luaLine,
+  });
   chart.signature = chart.signature.sort((a, b) => stepCmp(a.step, b.step));
   updateBarNum(chart.signature);
   return chart;

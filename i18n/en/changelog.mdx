@@ -4,6 +4,15 @@ import { TranslateIcon, SunIcon, HelpIcon } from "@/common/mdxIcons.js";
 import { XLogo } from "@/common/x.js";
 import { Hidden } from "@/common/mdxHiddenPart.js";
 
+## ver. 15.0 - 03/25/2026
+
+- Changed the file format for saving score chart locally (~.fn.lua)
+  - Saved Lua files can be read using the [fn-commands](https://github.com/na-trium-144/fn-commands) library.
+  - Files in the previous format (~.fn14.yml, etc.) can still be read.
+- Improved the error messages when reading local files in chart editor.
+- Improved the explanation of data formats in the [API Documentation](/api).
+- Added /api/seqFile and /api/seqPreview APIs.
+
 ## ver. 14.22 - 02/19/2026
 
 - Saving a chart with the "Save password" option unchecked now clears the saved password for that chart.

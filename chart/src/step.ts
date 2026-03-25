@@ -1,16 +1,3 @@
-/**
- * 時刻(step数)の数え方
- * 4分音符の個数 = fourth + numerator / denominator
- * パラメーターはいずれも自然数で、 numerator < denominator
- * ただし既約分数であるとは限らない
- *
- * signatureによらず常に4分音符の個数を数える。
- *
- * ややこしいことにedit画面でカーソルを動かす刻み幅
- * (1 / snapDivider) もstepと呼んでいるが別物。
- *
- */
-
 import * as v from "valibot";
 
 export const StepSchema = () =>
@@ -19,7 +6,7 @@ export const StepSchema = () =>
       fourth: v.pipe(v.number(), v.integer(), v.minValue(0)),
       numerator: v.pipe(v.number(), v.integer(), v.minValue(0)),
       denominator: v.pipe(v.number(), v.integer(), v.minValue(1)),
-    })
+    }),
     /* v.forward(
     v.check(
       ({ numerator, denominator }) => numerator < denominator,
@@ -27,6 +14,14 @@ export const StepSchema = () =>
     ),
     ["numerator"]
     ) */
+    v.description(
+      "Represents the time duration of (fourth + numerator / denominator) quarter notes. " +
+        "All parameters are positive integers greater than or equal to 0, with numerator < denominator. " +
+        "However, they are not necessarily indecomposable fractions.\n" +
+        "Always counts the number of quarter notes, regardless of the signature.\n" +
+        "Confusingly, the increment used to move the cursor on the edit screen " +
+        "(1 / snapDivider) is also called a step, but it's a different thing. "
+    )
   );
 export type Step = v.InferOutput<ReturnType<typeof StepSchema>>;
 export function stepZero(): Step {

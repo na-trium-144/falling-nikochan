@@ -1,3 +1,18 @@
+## ver. 15.0 - 2026/03/25 [#960](https://github.com/na-trium-144/falling-nikochan/pull/960)
+
+* openapi specにドキュメントを追加
+    * ChartSeqData6と13を統一してvalibotのschemaに書き直し、displayParamの説明を追加
+    * openapi specでrequest bodyのschemaの出力を修正
+* /api/seqFile APIを追加
+* /api/seqPreview API を追加
+* ついでにresultParamsのテストを追加
+* APIのレスポンスにcontent-dispositionを追加
+* lua形式での保存・読み込みを実装
+    * fn-commands luaライブラリを作成 → https://github.com/na-trium-144/fn-commands
+* Chart15
+    * bpmとspeedからtimeSecを削除、signatureからbarNumを削除 (譜面データには含めず、LevelEditingとloadChartでやるべき)
+* エディタでのファイルロード時のエラーメッセージ表示
+
 ## ver. 14.24 - 2026/02/25 [#976](https://github.com/na-trium-144/falling-nikochan/pull/976)
 
 * honoのフォールバックを無効化

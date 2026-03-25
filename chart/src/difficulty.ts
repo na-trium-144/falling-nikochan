@@ -1,4 +1,4 @@
-import { BPMChange } from "./bpm.js";
+import { BPMChange, BPMChangeWithTimeSec } from "./bpm.js";
 import { NoteCommand } from "./command.js";
 import {
   baseScoreRate,
@@ -39,7 +39,10 @@ function lvToNps(lv: number, multiHit: number) {
 }
 
 export function difficulty(
-  level: { notes: NoteCommand[] | NoteCommand3[]; bpmChanges: BPMChange[] },
+  level: {
+    notes: NoteCommand[] | NoteCommand3[];
+    bpmChanges: BPMChangeWithTimeSec[];
+  },
   type: string
 ): number {
   const maxLv = 20;

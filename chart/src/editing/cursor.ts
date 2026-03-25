@@ -7,8 +7,10 @@ import {
   getStep,
   SignatureState,
 } from "../seq.js";
-import { LevelFreeze } from "../chart.js";
 import { findInsertLine } from "../lua/edit.js";
+import { NoteCommandWithLua, RestStepWithLua } from "../command.js";
+import { BPMChangeWithTimeSec, SpeedChangeWithTimeSec } from "../bpm.js";
+import { SignatureWithBarNum } from "../signature.js";
 
 export class CursorState extends EventEmitter<EventType> {
   // 現在のカーソル位置と、それに応じて変わる情報
@@ -25,7 +27,13 @@ export class CursorState extends EventEmitter<EventType> {
   #signatureIndex: number = 0;
   constructor(
     timeSec: number,
-    freeze: LevelFreeze,
+    freeze: {
+      notes: NoteCommandWithLua[];
+      rest: RestStepWithLua[];
+      bpmChanges: BPMChangeWithTimeSec[];
+      speedChanges: SpeedChangeWithTimeSec[];
+      signature: SignatureWithBarNum[];
+    },
     lua: string[],
     parentEmit: (type: EventType) => void
   ) {
@@ -38,7 +46,13 @@ export class CursorState extends EventEmitter<EventType> {
   reset(
     timeSec: number,
     snapDivider: number,
-    freeze: LevelFreeze,
+    freeze: {
+      notes: NoteCommandWithLua[];
+      rest: RestStepWithLua[];
+      bpmChanges: BPMChangeWithTimeSec[];
+      speedChanges: SpeedChangeWithTimeSec[];
+      signature: SignatureWithBarNum[];
+    },
     lua: string[]
   ) {
     // this.#snapDivider = snapDivider;

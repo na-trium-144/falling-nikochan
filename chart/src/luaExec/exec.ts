@@ -1,30 +1,32 @@
 import { LuaFactory } from "wasmoon";
-import { Step, stepZero } from "../step.js";
-import {
-  luaAccel,
-  luaAccelEnd,
-  luaBeat,
-  luaBPM,
-  luaNote,
-  luaStep,
-} from "./api.js";
-import { updateBpmTimeSec } from "../bpm.js";
-import { updateBarNum } from "../signature.js";
+import { Step, StepSchema, stepZero } from "../step.js";
 import { LevelFreeze } from "../chart.js";
+import * as v from "valibot";
+import { LevelFreezeSchema15 } from "../legacy/chart15.js";
 
 export interface LuaExecResult {
   stdout: string[];
   err: string[];
   errorLine: number | null;
   levelFreezed: LevelFreeze;
+  rawReturnValue: unknown;
   step: Step;
 }
 export async function luaExec(
   wasmPath: string,
+  fnCommandsLib: string,
   code: string,
-  catchError: boolean
+  options: {
+    catchError?: boolean;
+    needReturnValue?: boolean;
+    isChartFile?: boolean;
+  }
 ): Promise<LuaExecResult> {
   const factory = new LuaFactory(wasmPath);
+  await factory.mountFile(
+    "/usr/local/share/lua/5.4/fn-commands.lua",
+    fnCommandsLib
+  );
   const lua = await factory.createEngine();
   const result: LuaExecResult = {
     stdout: [],
@@ -37,6 +39,7 @@ export async function luaExec(
       speedChanges: [],
       signature: [],
     },
+    rawReturnValue: undefined,
     step: stepZero(),
   };
   try {
@@ -53,55 +56,87 @@ export async function luaExec(
       この場合Noteタブなどから編集できない
     */
 
-    (
-      [
-        ["Note", luaNote],
-        ["Step", luaStep],
-        ["Beat", luaBeat],
-        ["BPM", luaBPM],
-        ["Accel", luaAccel],
-        ["AccelBegin", luaAccel],
-        ["AccelEnd", luaAccelEnd],
-      ] as const
-    ).forEach(([name, func]) => {
-      lua.global.set(name, (...args: unknown[]) => func(result, null, ...args));
-      lua.global.set(`${name}Static`, (...args: unknown[]) =>
-        func(result, ...args)
+    const lines = code.split("\n");
+    let codeStatic: string[] = [];
+    let levelBeginLn = 0;
+    let isLevelCode = false;
+    for (let ln = 0; ln < lines.length; ln++) {
+      const lineStr = lines[ln];
+      // luaコードが単一のレベルデータでない場合、
+      // LEVEL_CODE_BEGIN〜LEVEL_CODE_ENDのみを置き換え対象にする & それに合わせて行番号も調整する
+      if (options.isChartFile && lineStr.includes("LEVEL_CODE_BEGIN")) {
+        levelBeginLn = ln + 1;
+        isLevelCode = true;
+      }
+      if (options.isChartFile && lineStr.includes("LEVEL_CODE_END")) {
+        isLevelCode = false;
+      }
+      if (options.isChartFile && !isLevelCode) {
+        codeStatic.push(lineStr);
+        continue;
+      }
+      codeStatic.push(
+        lineStr
+          .replace(
+            /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
+            `$1NoteStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
+            `$1StepStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
+            `$1BeatStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)BPM\(( *[\d.]+ *)\)( *)$/,
+            `$1BPMStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
+            `$1AccelStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
+            `$1AccelBeginStatic(${ln - levelBeginLn},$2)$3`
+          )
+          .replace(
+            /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
+            `$1AccelEndStatic(${ln - levelBeginLn},$2)$3`
+          )
       );
-    });
-
-    const codeStatic = code.split("\n").map((lineStr, ln) =>
-      lineStr
-        .replace(
-          /^( *)Note\(( *-?[\d.]+ *(?:, *-?[\d.]+ *){2}(?:, *(?:true|false) *){1,2})\)( *)$/,
-          `$1NoteStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)Step\(( *[\d.]+ *, *[\d.]+ *)\)( *)$/,
-          `$1StepStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)Beat\(( *{[-\d.,{} ]+} *(?:, *[\d.]+ *){0,2})\)( *)$/,
-          `$1BeatStatic(${ln},$2)$3`
-        )
-        .replace(/^( *)BPM\(( *[\d.]+ *)\)( *)$/, `$1BPMStatic(${ln},$2)$3`)
-        .replace(
-          /^( *)Accel\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)AccelBegin\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelBeginStatic(${ln},$2)$3`
-        )
-        .replace(
-          /^( *)AccelEnd\(( *-?[\d.]+ *)\)( *)$/,
-          `$1AccelEndStatic(${ln},$2)$3`
-        )
-    );
+    }
     // console.log(codeStatic);
-    await lua.doString(codeStatic.join("\n"));
+    await lua.doString('require("fn-commands")');
+    const value = await lua.doString(codeStatic.join("\n"));
+    if (options.needReturnValue) {
+      result.rawReturnValue = value;
+    }
+
+    const fnState = await lua.doString("return _G.fnState");
+    console.log(fnState);
+    function parseArrayOrEmpty(a: unknown): unknown[] {
+      if (Array.isArray(a)) {
+        return a;
+      } else if (typeof a === "object" && a && Object.keys(a).length === 0) {
+        return [];
+      } else {
+        throw new Error(`unexpected object: ${JSON.stringify(a)}`);
+      }
+    }
+    if (fnState) {
+      result.levelFreezed = v.parse(LevelFreezeSchema15(), {
+        notes: parseArrayOrEmpty(fnState.notes),
+        rest: parseArrayOrEmpty(fnState.rest),
+        bpmChanges: parseArrayOrEmpty(fnState.bpmChanges),
+        speedChanges: parseArrayOrEmpty(fnState.speedChanges),
+        signature: parseArrayOrEmpty(fnState.signature),
+      });
+      result.step = v.parse(StepSchema(), fnState.step);
+    }
   } catch (e) {
-    if (!catchError) {
+    if (!options.catchError) {
       throw e;
     }
     result.err = String(e).split("\n");
@@ -131,7 +166,6 @@ export async function luaExec(
     result.levelFreezed.bpmChanges.push({
       bpm: 120,
       step: stepZero(),
-      timeSec: 0,
       luaLine: null,
     });
   }
@@ -139,7 +173,6 @@ export async function luaExec(
     result.levelFreezed.speedChanges.push({
       bpm: 120,
       step: stepZero(),
-      timeSec: 0,
       luaLine: null,
       interp: false,
     });
@@ -148,15 +181,9 @@ export async function luaExec(
     result.levelFreezed.signature.push({
       step: stepZero(),
       offset: stepZero(),
-      barNum: 0,
       bars: [[4, 4, 4, 4]],
       luaLine: null,
     });
   }
-  updateBpmTimeSec(
-    result.levelFreezed.bpmChanges,
-    result.levelFreezed.speedChanges
-  );
-  updateBarNum(result.levelFreezed.signature);
   return result;
 }

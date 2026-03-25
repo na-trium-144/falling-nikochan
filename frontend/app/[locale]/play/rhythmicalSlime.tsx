@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx/lite";
 import {
   BPMChange,
@@ -9,6 +9,8 @@ import {
   SignatureState,
   stepCmp,
   stepZero,
+  updateBarNum,
+  updateBpmTimeSec,
 } from "@falling-nikochan/chart";
 import { Signature } from "@falling-nikochan/chart";
 import { getSignatureState, getTimeSec } from "@falling-nikochan/chart";
@@ -44,13 +46,21 @@ export default function RhythmicalSlime(props: Props) {
   const [maxSlimeNum, setMaxSlimeNum] = useState<number>(0);
   const [currentBar, setCurrentBar] = useState<(4 | 8 | 16)[]>([]);
   const [slimeStates, setSlimeStates] = useState<SlimeState[][]>([]);
+  const bpmChangesWithTimeSec = useMemo(
+    () => (bpmChanges ? updateBpmTimeSec(bpmChanges).bpm : undefined),
+    [bpmChanges]
+  );
+  const signatureWithBar = useMemo(
+    () => updateBarNum(props.signature),
+    [props.signature]
+  );
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     if (playing) {
       const nextStep = () => {
         const now = getCurrentTimeSec();
-        while (now !== undefined && playing && bpmChanges) {
+        while (now !== undefined && playing && bpmChangesWithTimeSec) {
           if (
             lastPreparingSec.current != null &&
             lastPreparingSec.current > now
@@ -63,11 +73,11 @@ export default function RhythmicalSlime(props: Props) {
           }
           if (!step.current) {
             // play開始直後にstepを初期化 (zeroとは限らない)
-            step.current = getStep(bpmChanges, now, 32);
+            step.current = getStep(bpmChangesWithTimeSec, now, 32);
             if (stepCmp(step.current, stepZero()) < 0) {
               step.current = stepZero();
             } else {
-              const ss = getSignatureState(props.signature, step.current);
+              const ss = getSignatureState(signatureWithBar, step.current);
               step.current = ss.stepAligned;
               const slimeIndex = ss.count.fourth;
               const slimeSize = ss.bar[slimeIndex];
@@ -79,7 +89,7 @@ export default function RhythmicalSlime(props: Props) {
               step.current = stepAdd(ss.stepAligned, slimeSizeStep);
             }
           }
-          const ss = getSignatureState(props.signature, step.current);
+          const ss = getSignatureState(signatureWithBar, step.current);
           step.current = ss.stepAligned;
           const slimeIndex = ss.count.fourth;
           const slimeSize = ss.bar[slimeIndex];
@@ -93,7 +103,10 @@ export default function RhythmicalSlime(props: Props) {
             prevSS.current.bar.length !== ss.bar.length ||
             !prevSS.current.bar.every((v, i) => v === ss.bar[i])
           ) {
-            const barChangeSec = getTimeSec(bpmChanges, ss.stepAligned);
+            const barChangeSec = getTimeSec(
+              bpmChangesWithTimeSec,
+              ss.stepAligned
+            );
             const barChange = () => {
               setMaxSlimeNum((num) => Math.max(num, ss.bar.length));
               setCurrentBar(ss.bar);
@@ -109,7 +122,7 @@ export default function RhythmicalSlime(props: Props) {
           }
           prevSS.current = ss;
           // const jumpBeginSec = getTimeSec(
-          //   bpmChanges,
+          //   bpmChangesWithTimeSec,
           //   stepSub(ss.stepAligned, {
           //     fourth: 0,
           //     numerator: 1,
@@ -117,7 +130,7 @@ export default function RhythmicalSlime(props: Props) {
           //   })
           // );
           const jumpMidSec = getTimeSec(
-            bpmChanges,
+            bpmChangesWithTimeSec,
             stepAdd(ss.stepAligned, {
               fourth: 0,
               numerator: 1,
@@ -125,7 +138,7 @@ export default function RhythmicalSlime(props: Props) {
             })
           );
           const landingSec = getTimeSec(
-            bpmChanges,
+            bpmChangesWithTimeSec,
             stepAdd(ss.stepAligned, {
               fourth: 0,
               numerator: 3,
@@ -171,11 +184,17 @@ export default function RhythmicalSlime(props: Props) {
       lastPreparingSec.current = null;
       setSlimeStates([]);
       setMaxSlimeNum((num) =>
-        Math.max(num, props.signature[0]?.bars[0].length)
+        Math.max(num, signatureWithBar[0]?.bars[0].length)
       );
-      setCurrentBar(props.signature[0]?.bars[0] || []);
+      setCurrentBar(signatureWithBar[0]?.bars[0] || []);
     }
-  }, [bpmChanges, playing, getCurrentTimeSec, props.signature, playbackRate]);
+  }, [
+    bpmChangesWithTimeSec,
+    playing,
+    getCurrentTimeSec,
+    signatureWithBar,
+    playbackRate,
+  ]);
 
   const { playUIScale, rem } = useDisplayMode();
 
