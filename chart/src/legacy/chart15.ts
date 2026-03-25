@@ -288,7 +288,7 @@ export const CopyBufferSchema = () =>
     Object.fromEntries(
       Array.from(new Array(10), (_, i) => [
         String(i), // 0-9
-        v.optional(CopyBufferEntrySchema()),
+        v.optional(v.nullable(CopyBufferEntrySchema())),
       ])
     )
   );
