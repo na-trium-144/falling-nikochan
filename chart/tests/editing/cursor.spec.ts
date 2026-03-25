@@ -6,7 +6,7 @@ import { dummyChartData, dummyLuaExecutor } from "./dummy";
 
 describe("CursorState", () => {
   const level = new LevelEditing(
-    dummyChartData.levelsMin[0],
+    dummyChartData.levelsMeta[0],
     dummyChartData.levelsFreeze[0],
     dummyChartData.lua[0],
     () => {},

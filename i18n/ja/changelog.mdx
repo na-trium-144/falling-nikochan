@@ -6,6 +6,15 @@ import { TranslateIcon, SunIcon, HelpIcon } from "@/common/mdxIcons.js";
 import { XLogo } from "@/common/x.js";
 import { Hidden } from "@/common/mdxHiddenPart.js";
 
+## ver. 15.0 - 2026/03/25
+
+- 譜面データをローカルに保存する際のファイル形式を変更しました (〜.fn.lua)
+  - 保存されるLuaファイルは [fn-commands](https://github.com/na-trium-144/fn-commands) ライブラリを使って読み込むことができます。
+  - 以前の形式 (〜.fn14.yml など) のファイルも引き続き読み込めます。
+- 譜面編集でローカルのファイルを読み込む際のエラーメッセージを詳しくしました。
+- [APIドキュメント](/api) のデータ形式の説明を改善しました。
+- /api/seqFile, /api/seqPreview API を追加
+
 ## ver. 14.22 - 2026/02/19
 
 - 「パスワードを保存する」のチェックを外して譜面を保存することで保存済みのその譜面のパスワードがクリアされるようにしました
