@@ -18,8 +18,8 @@ importers:
         specifier: ^0.8.6
         version: 0.8.6
       hono:
-        specifier: ^4.11.10
-        version: 4.11.10
+        specifier: ^4.12.9
+        version: 4.12.9
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.29.0
@@ -92,7 +92,7 @@ importers:
         version: 5.0.4
       hono-openapi:
         specifier: ^1.2.0
-        version: 1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.10)(openapi-types@12.1.3)
+        version: 1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.9))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.9)(openapi-types@12.1.3)
       valibot:
         specifier: ^1.0.0
         version: 1.2.0(typescript@5.9.3)
@@ -280,19 +280,19 @@ importers:
         version: 1.39.0
       '@hono/node-server':
         specifier: ^1.19.7
-        version: 1.19.9(hono@4.11.10)
+        version: 1.19.9(hono@4.12.9)
       '@hono/standard-validator':
         specifier: ^0.2.1
-        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.9)
       '@hono/swagger-ui':
         specifier: ^0.5.3
-        version: 0.5.3(hono@4.11.10)
+        version: 0.5.3(hono@4.12.9)
       '@msgpack/msgpack':
         specifier: ^3.1.3
         version: 3.1.3
       '@scalar/hono-api-reference':
         specifier: ^0.9.39
-        version: 0.9.39(hono@4.11.10)
+        version: 0.9.39(hono@4.12.9)
       '@valibot/to-json-schema':
         specifier: ^1.5.0
         version: 1.5.0(valibot@1.2.0(typescript@5.9.3))
@@ -309,11 +309,11 @@ importers:
         specifier: ^16.6.1
         version: 16.6.1
       hono:
-        specifier: ^4.11.10
-        version: 4.11.10
+        specifier: ^4.12.9
+        version: 4.12.9
       hono-openapi:
         specifier: ^1.2.0
-        version: 1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.10)(openapi-types@12.1.3)
+        version: 1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.9))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.9)(openapi-types@12.1.3)
       isbot:
         specifier: ^5.1.34
         version: 5.1.34
@@ -370,8 +370,8 @@ importers:
         specifier: workspace:*
         version: link:../route
       hono:
-        specifier: ^4.11.10
-        version: 4.11.10
+        specifier: ^4.12.9
+        version: 4.12.9
     devDependencies:
       babel-loader:
         specifier: ^10.0.0
@@ -485,12 +485,17 @@ packages:
     resolution: {integrity: sha512-z+PwLziMNBeSQJonizz2AGnndLsP2DeGHIxDAn+wdHOGuo4Fo1x1HBPPXeE9TAOPHNNWQKCSlA2VZyYyyibDnQ==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helpers@7.28.6':
-    resolution: {integrity: sha512-xOBvwq86HHdB7WUDTfKfT/Vuxh7gElQ+Sfti2Cy6yIWNW05P8iUslOVcZ4/sKbE+/jQaukQAdz/gf3724kYdqw==}
+  '@babel/helpers@7.29.2':
+    resolution: {integrity: sha512-HoGuUs4sCZNezVEKdVcwqmZN8GoHirLUcLaYVNBK2J0DadGtdcqgr3BCbvH8+XUo4NGjNl3VOtSjEKNzqfFgKw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/parser@7.29.0':
     resolution: {integrity: sha512-IyDgFV5GeDUVX4YdF/3CPULtVGSXXMLh1xVIgdCgxApktqnQV0r7/8Nqthg+8YLGaAtdyIlo2qIdZrbCv4+7ww==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  '@babel/parser@7.29.2':
+    resolution: {integrity: sha512-4GgRzy/+fsBa72/RZVJmGKPmZu9Byn8o4MoLpmNe1m8ZfYnz5emHLQz3U4gLud6Zwl0RZIcgiLD7Uq7ySFuDLA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -3174,8 +3179,8 @@ packages:
       hono:
         optional: true
 
-  hono@4.11.10:
-    resolution: {integrity: sha512-kyWP5PAiMooEvGrA9jcD3IXF7ATu8+o7B3KCbPXid5se52NPqnOpM/r9qeW2heMnOekF4kqR1fXJqCYeCLKrZg==}
+  hono@4.12.9:
+    resolution: {integrity: sha512-wy3T8Zm2bsEvxKZM5w21VdHDDcwVS1yUFFY6i8UobSsKfFceT7TOwhbhfKsDyx7tYQlmRM5FLpIuYvNFyjctiA==}
     engines: {node: '>=16.9.0'}
 
   https-proxy-agent@7.0.6:
@@ -4801,8 +4806,8 @@ snapshots:
       '@babel/generator': 7.29.1
       '@babel/helper-compilation-targets': 7.28.6
       '@babel/helper-module-transforms': 7.28.6(@babel/core@7.28.6)
-      '@babel/helpers': 7.28.6
-      '@babel/parser': 7.29.0
+      '@babel/helpers': 7.29.2
+      '@babel/parser': 7.29.2
       '@babel/template': 7.28.6
       '@babel/traverse': 7.29.0
       '@babel/types': 7.29.0
@@ -4936,12 +4941,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/helpers@7.28.6':
+  '@babel/helpers@7.29.2':
     dependencies:
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
 
   '@babel/parser@7.29.0':
+    dependencies:
+      '@babel/types': 7.29.0
+
+  '@babel/parser@7.29.2':
     dependencies:
       '@babel/types': 7.29.0
 
@@ -5684,18 +5693,18 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@hono/node-server@1.19.9(hono@4.11.10)':
+  '@hono/node-server@1.19.9(hono@4.12.9)':
     dependencies:
-      hono: 4.11.10
+      hono: 4.12.9
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.9)':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      hono: 4.11.10
+      hono: 4.12.9
 
-  '@hono/swagger-ui@0.5.3(hono@4.11.10)':
+  '@hono/swagger-ui@0.5.3(hono@4.12.9)':
     dependencies:
-      hono: 4.11.10
+      hono: 4.12.9
 
   '@humanfs/core@0.19.1': {}
 
@@ -6062,10 +6071,10 @@ snapshots:
 
   '@scalar/helpers@0.2.10': {}
 
-  '@scalar/hono-api-reference@0.9.39(hono@4.11.10)':
+  '@scalar/hono-api-reference@0.9.39(hono@4.12.9)':
     dependencies:
       '@scalar/core': 0.3.36
-      hono: 4.11.10
+      hono: 4.12.9
 
   '@scalar/types@0.6.1':
     dependencies:
@@ -7754,17 +7763,17 @@ snapshots:
 
   hex-rgb@4.3.0: {}
 
-  hono-openapi@1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.10)(openapi-types@12.1.3):
+  hono-openapi@1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.9))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.9)(openapi-types@12.1.3):
     dependencies:
       '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
       '@standard-community/standard-openapi': 0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10)
-      hono: 4.11.10
+      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.9)
+      hono: 4.12.9
 
-  hono@4.11.10: {}
+  hono@4.12.9: {}
 
   https-proxy-agent@7.0.6:
     dependencies:
