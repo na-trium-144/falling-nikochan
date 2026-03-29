@@ -116,17 +116,16 @@ export function useSE(
       gainNodeHit.current = audioContext.current.createGain();
       gainNodeBeat.current = audioContext.current.createGain();
       const vol = Number(
-        localStorage.getItem(lsKeys.hitVolume) ||
-          (lsKeys.hitVolumeCid && localStorage.getItem(lsKeys.hitVolumeCid)) ||
+        (lsKeys.hitVolumeCid && localStorage.getItem(lsKeys.hitVolumeCid)) ||
+          localStorage.getItem(lsKeys.hitVolume) ||
           100
       );
       setHitVolume_(vol);
       gainNodeHit.current.gain.value = vol / 100;
       gainNodeHit.current.connect(audioContext.current.destination);
       const vol2 = Number(
-        (lsKeys.beatVolume && localStorage.getItem(lsKeys.beatVolume)) ||
-          (lsKeys.beatVolumeCid &&
-            localStorage.getItem(lsKeys.beatVolumeCid)) ||
+        (lsKeys.beatVolumeCid && localStorage.getItem(lsKeys.beatVolumeCid)) ||
+          (lsKeys.beatVolume && localStorage.getItem(lsKeys.beatVolume)) ||
           30
       );
       setBeatVolume_(vol2);
