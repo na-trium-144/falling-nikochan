@@ -35,7 +35,7 @@
     "@next/mdx": "~15.5.14",
     "ace-builds": "^1.43.5",
     "clsx": "^2.1.1",
-    "colorthief": "^2.6.0",
+    "colorthief": "^3.3.1",
     "file-saver": "^2.0.5",
     "fn-commands": "^1.0.0",
     "keyboard-css": "^1.2.4",
