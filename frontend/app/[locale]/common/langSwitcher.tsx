@@ -33,8 +33,10 @@ export function LangSwitcher(props: LangProps) {
             { scroll: false }
           );
         } else {
-          // /share/cid など
-          router.refresh();
+          // /share/cid の場合。
+          // router.refresh(); は /share/placeholder に飛ぶのでダメ。
+          // クエリパラメータのlangを消したurlに遷移
+          window.location.replace(window.location.pathname);
         }
       }}
     >

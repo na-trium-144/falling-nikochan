@@ -57,8 +57,8 @@ export async function getYTDataEntry(
   if (entry && entry.lastFetched > Date.now() - 24 * 60 * 60 * 1000) {
     return entry;
   } else {
-    if (!e.GOOGLE_API_KEY) {
-      console.error("GOOGLE_API_KEY not set");
+    if (!e.YOUTUBE_API_KEY) {
+      console.error("YOUTUBE_API_KEY not set");
       return undefined;
     }
     const res = await fetch(
@@ -66,7 +66,7 @@ export async function getYTDataEntry(
         new URLSearchParams({
           part: "snippet,localizations",
           id: ytId,
-          key: e.GOOGLE_API_KEY,
+          key: e.YOUTUBE_API_KEY,
         })
     ).catch(() => null);
     if (!res) {

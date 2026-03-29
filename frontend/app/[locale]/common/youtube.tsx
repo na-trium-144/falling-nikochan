@@ -44,7 +44,9 @@ export function FlexYouTube(props: Props) {
     resizeYouTube.current = () => {
       if (ytPlayer.current) {
         if (width && height) {
+          if (typeof ytPlayer.current.getIframe !== "function") return;
           const iframe = ytPlayer.current.getIframe();
+          if (!iframe) return;
           if (fixedSide === "width") {
             iframe.width = String(width / scale);
             iframe.height = String((width * 9) / 16 / scale);
@@ -127,6 +129,10 @@ export function FlexYouTube(props: Props) {
 
         const firstScriptTag = document.getElementsByTagName("script")[0];
         firstScriptTag.parentNode!.insertBefore(tag, firstScriptTag);
+      } else if ((window as any).YT.Player === undefined) {
+        // YT object exists but Player constructor is not yet available
+        // (API script loaded but initialization not complete)
+        (window as any).onYouTubeIframeAPIReady = loadVideo;
       } else {
         // If script is already there, load the video directly
         loadVideo();

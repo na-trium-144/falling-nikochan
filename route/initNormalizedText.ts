@@ -8,8 +8,8 @@ dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 if (!process.env.MONGODB_URI) {
   throw new Error("MONGODB_URI is not set");
 }
-if (!process.env.GOOGLE_API_KEY) {
-  throw new Error("GOOGLE_API_KEY is not set");
+if (!process.env.YOUTUBE_API_KEY) {
+  throw new Error("YOUTUBE_API_KEY is not set");
 }
 const client = new MongoClient(process.env.MONGODB_URI!);
 try {

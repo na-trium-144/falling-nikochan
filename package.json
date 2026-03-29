@@ -1,6 +1,6 @@
 {
   "name": "falling-nikochan",
-  "version": "15.0.0",
+  "version": "15.1.0",
   "type": "module",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -26,7 +26,7 @@
   "dependencies": {
     "@falling-nikochan/route": "workspace:*",
     "@vercel/og": "^0.8.6",
-    "hono": "^4.11.10"
+    "hono": "^4.12.9"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.0",
@@ -36,10 +36,10 @@
     "@types/node": "^22.19.7",
     "core-js": "^3.42.0",
     "eslint": "^9.39.2",
-    "eslint-config-next": "~15.5.11",
+    "eslint-config-next": "~15.5.14",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.0.0",
-    "next": "~15.5.11",
+    "next": "~15.5.14",
     "prettier": "^3.7.4",
     "semver": "^7.7.3",
     "tsx": "^4.21.0",
