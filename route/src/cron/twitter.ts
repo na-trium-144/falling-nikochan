@@ -79,6 +79,7 @@ export async function postChart(
   while (twitterText.parseTweet(messageJoined()).weightedLength > 280) {
     messageAboutSong = messageAboutSong.slice(0, -2) + "…";
   }
+  const message = messageJoined();
   try {
     if (
       twitterText.extractUrls(brief.title).length > 0 ||
@@ -88,21 +89,24 @@ export async function postChart(
         env,
         "Skipped posting tweet due to URL in song title or composer.\n\n" +
           "Original message:\n" +
-          messageJoined()
+          message
       );
       return "skipped";
     }
-    if (!(await checkTextSafety(env, messageJoined()))) {
+    const safetyReason = await checkTextSafety(env, message);
+    if (safetyReason !== null) {
       await reportToDiscord(
         env,
         "Skipped posting tweet due to unsafe content detected by Gemini.\n\n" +
-          "Original message:\n" +
-          messageJoined()
+          "Reason:\n" +
+          safetyReason +
+          "\n\nOriginal message:\n" +
+          message
       );
       return "skipped";
     }
 
-    await tweet(env, messageJoined());
+    await tweet(env, message);
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {
@@ -110,7 +114,7 @@ export async function postChart(
         env,
         "Skipped posting tweet due to duplicate tweet error.\n\n" +
           "Original message:\n" +
-          messageJoined()
+          message
       );
       return "skipped";
     }
@@ -119,7 +123,7 @@ export async function postChart(
       "Error trying to post tweet:\n" +
         String(e) +
         "\n\nOriginal message:\n" +
-        messageJoined()
+        message
     );
     return "error";
   }
@@ -143,6 +147,7 @@ export async function postPopular(
     }
     messageEntries.push(line.replaceAll("@", "＠"));
   }
+  const message = messageHeader + messageEntries.join("");
   try {
     if (
       messageEntries.some((entry) => twitterText.extractUrls(entry).length > 0)
@@ -151,25 +156,24 @@ export async function postPopular(
         env,
         "Skipped posting popular charts tweet due to URL in song title or composer.\n\n" +
           "Original message:\n" +
-          messageHeader +
-          messageEntries.join("")
+          message
       );
       return "skipped";
     }
-    if (
-      !(await checkTextSafety(env, messageHeader + messageEntries.join("")))
-    ) {
+    const safetyReason = await checkTextSafety(env, message);
+    if (safetyReason !== null) {
       await reportToDiscord(
         env,
         "Skipped posting popular charts tweet due to unsafe content detected by Gemini.\n\n" +
-          "Original message:\n" +
-          messageHeader +
-          messageEntries.join("")
+          "Reason:\n" +
+          safetyReason +
+          "\n\nOriginal message:\n" +
+          message
       );
       return "skipped";
     }
 
-    await tweet(env, messageHeader + messageEntries.join(""));
+    await tweet(env, message);
     return "ok";
   } catch (e) {
     if (String(e).includes("duplicate")) {
@@ -177,8 +181,7 @@ export async function postPopular(
         env,
         "Skipped posting popular charts tweet due to duplicate tweet error.\n\n" +
           "Original message:\n" +
-          messageHeader +
-          messageEntries.join("")
+          message
       );
       return "skipped";
     }
@@ -187,8 +190,7 @@ export async function postPopular(
       "Error trying to post popular charts tweet:\n" +
         String(e) +
         "\n\nOriginal message:\n" +
-        messageHeader +
-        messageEntries.join("")
+        message
     );
     return "error";
   }

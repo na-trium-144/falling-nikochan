@@ -45,10 +45,14 @@ export async function generateContent(
   }
 }
 
+/**
+ * Check if the content is safe to post on X (Twitter).
+ * Returns null if safe, or a string describing the reason (Gemini's full output) if unsafe.
+ */
 export async function checkTextSafety(
   env: Bindings,
   content: string
-): Promise<boolean> {
+): Promise<string | null> {
   content = content.replaceAll("`", "'");
 
   const promptJp = `以下の内容をX(Twitter)に投稿しても安全かどうかを予測してください。
@@ -72,15 +76,28 @@ ${content}
 \`\`\`
 `;
 
-  const isSafeJp = generateContent(env, promptJp).then(
-    (res) =>
-      !res.toLowerCase().includes("unsafe") &&
-      res.toLowerCase().includes("safe")
-  );
-  const isSafeEn = generateContent(env, promptEn).then(
-    (res) =>
-      !res.toLowerCase().includes("unsafe") &&
-      res.toLowerCase().includes("safe")
-  );
-  return (await isSafeJp) && (await isSafeEn);
+  const [resJp, resEn] = await Promise.all([
+    generateContent(env, promptJp),
+    generateContent(env, promptEn),
+  ]);
+
+  const isSafeJp =
+    !resJp.toLowerCase().includes("unsafe") &&
+    resJp.toLowerCase().includes("safe");
+  const isSafeEn =
+    !resEn.toLowerCase().includes("unsafe") &&
+    resEn.toLowerCase().includes("safe");
+
+  if (isSafeJp && isSafeEn) {
+    return null;
+  }
+
+  const reasons: string[] = [];
+  if (!isSafeJp) {
+    reasons.push(`Gemini (JP): ${resJp.trim()}`);
+  }
+  if (!isSafeEn) {
+    reasons.push(`Gemini (EN): ${resEn.trim()}`);
+  }
+  return reasons.join("\n");
 }
