@@ -1,3 +1,10 @@
+## ver. 15.1 - 2026/03/30
+
+* Enterキー連打でopenModalが2回呼ばれるのを修正, その際のTypeErrorを修正 [#1011](https://github.com/na-trium-144/falling-nikochan/pull/1011)
+* shareページで言語を切り替えると404になるのを修正 [#1012](https://github.com/na-trium-144/falling-nikochan/pull/1012)
+* Twitter自動ポスト時にunsafeと判定した理由をDiscordの通知に含める [#1009](https://github.com/na-trium-144/falling-nikochan/pull/1009)
+* google_api_keyをyoutube_api_keyに名前変更 [#1003](https://github.com/na-trium-144/falling-nikochan/pull/1003)
+
 ## ver. 15.0 - 2026/03/25 [#960](https://github.com/na-trium-144/falling-nikochan/pull/960)
 
 * openapi specにドキュメントを追加
