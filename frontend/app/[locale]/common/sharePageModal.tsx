@@ -48,6 +48,12 @@ export function SharePageModalProvider(props: {
   const router = useRouter();
   const openModal = useCallback(
     (cid: string) => {
+      if (modalCId !== null) {
+        console.warn(
+          `openModal called with cid=${cid} while modal ${modalCId} is already open, ignoring`
+        );
+        return;
+      }
       if (window.location.pathname !== `/share/${cid}`) {
         // pushStateではpopstateイベントは発生しない
         window.history.pushState(null, "", `/share/${cid}`);
@@ -83,7 +89,7 @@ export function SharePageModalProvider(props: {
       })();
       setModalOpened(true);
     },
-    [th, setModalOpened]
+    [th, setModalOpened, modalCId]
   );
   const openShareInternal = useCallback(
     (cid: string, brief: ChartBrief | undefined) => {
