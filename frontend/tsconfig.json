@@ -1,13 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2017",
-      "es2021.string",
-      "es2023.array"
-    ],
+    "lib": ["dom", "dom.iterable", "es2017", "es2021.string", "es2023.array"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -26,9 +20,7 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./app/[locale]/*"
-      ]
+      "@/*": ["./app/[locale]/*"]
     }
   },
   "include": [
@@ -38,7 +30,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

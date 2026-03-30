@@ -14,7 +14,7 @@ export default defineConfig(
   // eslint-config-next provides flat config but without complete TypeScript types
   ...eslintConfigNext.map((config: Linter.Config) => ({
     ...config,
-    files: config.files?.map((pattern) => 
+    files: config.files?.map((pattern) =>
       typeof pattern === "string" ? `frontend/${pattern}` : pattern
     ) ?? ["frontend/**/*"],
   })),
