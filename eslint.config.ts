@@ -30,15 +30,9 @@ export default defineConfig(
       "@next/next/no-img-element": "off",
       "jsx-a11y/alt-text": "off",
       "react-hooks/exhaustive-deps": "error",
-      // React 19 introduced stricter rules that have false positives or require significant refactoring
-      // These ref-like objects are not actual React refs
+      // React19で追加された以下のエラーについては諦めている
       "react-hooks/refs": "off",
-      // Disable immutability check for ref-like objects passed as props
-      "react-hooks/immutability": "off",
-      // Disable globals check for intentional module-level state patterns
-      "react-hooks/globals": "off",
-      // Downgrade to warning as this is a new React 19 strictness that would require significant refactoring
-      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/set-state-in-effect": "off",
     },
   },
   {

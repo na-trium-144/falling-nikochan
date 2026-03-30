@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "lint": "tsc --noEmit && eslint app/",
-    "dev": "node ./initAssets.js && next dev -H 0.0.0.0",
+    "dev": "node ./initAssets.js && next dev -H 0.0.0.0 --webpack",
     "build": "node ./initAssets.js && next build --webpack && svgo -f ./public/assets/ -o ./out/assets/",
     "postbuild": "node ./listStaticFiles.js && node ./insertBanner.js"
   },
