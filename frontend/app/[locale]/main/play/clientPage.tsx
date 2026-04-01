@@ -179,17 +179,14 @@ export default function PlayTab(props: Props) {
         />
       </AccordionLike>
       <AccordionLike className="fn-sect" hidden={searching || !!searchResult}>
-        <h3>
+        <h3 className="flex gap-2 items-center justify-between">
           <span className="fn-heading-sect">{t("latest")}</span>
           <a 
             href={process.env.BACKEND_PREFIX + "/rss.xml"}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200"
-            title="RSS Feed"
-          >
-            <Rss size={20} />
-          </a>
+            className="fn-rss-button"
+          />
         </h3>
         <p>
           {t.rich("latestDesc", {
