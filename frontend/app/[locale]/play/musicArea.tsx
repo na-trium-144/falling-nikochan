@@ -3,7 +3,7 @@ import { ChartBrief } from "@falling-nikochan/chart";
 import ProgressBar from "@/common/progressBar.js";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
 import { useDisplayMode } from "@/scale.js";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import SmilingFace from "@icon-park/react/lib/icons/SmilingFace";
 import VolumeNotice from "@icon-park/react/lib/icons/VolumeNotice";
@@ -24,7 +24,7 @@ interface Props {
   isMobile: boolean; // 横並び or 縦並び
   isTouch: boolean;
   ytBeginSec: number;
-  ytPlayer: { current?: YouTubePlayer };
+  ytPlayer: RefObject<YouTubePlayer | undefined>;
   chartBrief?: ChartBrief;
   offset: number;
   onReady: () => void;
