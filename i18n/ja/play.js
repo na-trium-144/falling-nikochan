@@ -34,6 +34,9 @@ export default {
       userBegin: "途中から練習",
       playbackRateDisplay: "再生速度",
     },
+    needManualStart:
+      "始まらない場合は、右上のYouTube動画を<br></br>" +
+      "クリック/タップして再生してください...",
     score: {
       auto: "オートプレイ",
       score: "スコア",

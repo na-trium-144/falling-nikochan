@@ -42,6 +42,9 @@ export default {
       // shorter version of playbackRate to fit on mobile screen
       playbackRateDisplay: "Speed",
     },
+    needManualStart:
+      "If it doesn't start, please click/tap to play <br></br>" +
+      "the YouTube video in the upper right corner...",
     score: {
       auto: "Auto Play",
       score: "Score",

@@ -194,6 +194,7 @@ function Play(props: Props) {
     queryOptions,
   } = props;
   const te = useTranslations("error");
+  const t = useTranslations("play");
 
   const [record, setRecord] = useState<
     RecordGetSummary | APIError | undefined
@@ -489,8 +490,9 @@ function Play(props: Props) {
   const [openReadyAnim, setOpenReadyAnim] = useState<boolean>(false);
   // スタートボタンを押し、準備完了画面を隠すアニメーションをする
   const [closeReadyAnim, setCloseReadyAnim] = useState<boolean>(false);
-  const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const readyTimeout = useRef<ReturnType<typeof setInterval> | null>(null);
   const [loadingAfterReady, setLoadingAfterReady] = useState<boolean>(false);
+  const [needManualStart, setNeedManualStart] = useState<boolean>(false);
   // 譜面を中断した
   const [showStopped, setShowStopped] = useState<boolean>(false);
   // result画面を表示する
@@ -513,7 +515,11 @@ function Play(props: Props) {
     }
     // startボタンを押して数秒経っても始まらなかったらloadingを表示
     setCloseReadyAnim(true);
-    readyTimeout.current = setTimeout(() => setLoadingAfterReady(true), 1500);
+    readyTimeout.current = setInterval(() => {
+      setLoadingAfterReady(true);
+      // iframe内など特殊な環境ではplayVideo()で開始せずstateが-1になる場合がある
+      setNeedManualStart(ytPlayer.current?.getPlayerState() === -1);
+    }, 1500);
     // 再生中に呼んでもなにもしない
     playSE("hit"); // ユーザー入力のタイミングで鳴らさないとaudioが有効にならないsafariの対策
     // 譜面のリセットと開始はonStart()で処理
@@ -786,10 +792,11 @@ function Play(props: Props) {
       setShowReady(false);
       setCloseReadyAnim(false);
       if (readyTimeout.current !== null) {
-        clearTimeout(readyTimeout.current);
+        clearInterval(readyTimeout.current);
         readyTimeout.current = null;
       }
       setLoadingAfterReady(false);
+      setNeedManualStart(false);
       setShowResult(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
@@ -1164,6 +1171,11 @@ function Play(props: Props) {
                 <SlimeSVG />
                 Loading...
               </p>
+              {needManualStart && (
+                <p className="mt-2">
+                  {t.rich("needManualStart", { br: () => <br /> })}
+                </p>
+              )}
             </CenterBox>
           )}
           {errorMsg && (
