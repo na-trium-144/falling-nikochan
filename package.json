@@ -19,8 +19,8 @@
     "seed": "pnpm run -r --if-present t && pnpm run --filter route seed",
     "ndev": "pnpm run --filter frontend dev",
     "nbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build",
-    "swbuild": "pnpm run -r --if-present t && pnpm run --filter worker build && pnpm run --filter frontend postbuild",
-    "allbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter worker build && pnpm run --filter frontend postbuild",
+    "swbuild": "true",
+    "allbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build",
     "ldev": "pnpm run --filter route dev"
   },
   "dependencies": {

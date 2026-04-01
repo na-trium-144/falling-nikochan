@@ -1,0 +1,57 @@
+name: Node.js CI
+on:
+  push:
+    branches: [ "next16-rsc-bug" ]
+permissions:
+  contents: read
+jobs:
+  vercel-build:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    - uses: actions/checkout@v6
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+        cache: 'pnpm'
+    - run: pnpm config set node-linker hoisted --local
+    - name: Pull Vercel Environment Information
+      run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Build Project Artifacts
+      run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Upload .vercel/output
+      uses: actions/upload-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+        include-hidden-files: true
+
+  vercel-deploy:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+    # .vercel/output と、それとは別に node_modules も必要
+    - uses: actions/checkout@v6
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+        cache: 'pnpm'
+    - run: pnpm config set node-linker hoisted --local
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm run t
+    - name: Pull Vercel Environment Information
+      run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Download .vercel/output
+      uses: actions/download-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+    - name: Deploy Project Artifacts to Vercel
+      run: pnpm dlx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
