@@ -62,6 +62,7 @@ const config = {
       "./cron/popular.js": false,
       "./cron/discord.js": false,
       "./sitemap.js": false,
+      "./rss.js": false,
     },
     fallback: {
       path: false,
