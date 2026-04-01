@@ -17,6 +17,7 @@ export default async function Page({ params }: MetadataProps) {
         locale={locale}
         title={t("latest")}
         type="latest"
+        rssButton
         tabKey="play"
         mobileTabKey="play"
         dateDiff
