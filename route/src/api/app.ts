@@ -1,7 +1,7 @@
 import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import briefApp from "./brief.js";
-import { Bindings } from "../env.js";
+import { Bindings, fetchBrief, fetchStatic } from "../env.js";
 import chartFileApp from "./chartFile.js";
 import latestApp from "./latest.js";
 import newChartFileApp from "./newChartFile.js";
@@ -22,6 +22,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { ConnInfo } from "hono/conninfo";
 import ytMetaApp from "./ytMeta.js";
 import { forwardCheckApp } from "./dbRateLimit.js";
+import oembedApp from "./oembed.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = async (config: {
@@ -64,7 +65,11 @@ const apiApp = async (config: {
     .route("/search", searchApp)
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
-    .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }));
+    .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
+    .route(
+      "/oembed",
+      await oembedApp({ fetchBrief: fetchBrief({ fetchStatic }) })
+    );
   apiApp.get(
     "/openapi.json",
     openAPIRouteHandler(apiApp, {

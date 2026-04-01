@@ -34,6 +34,7 @@ import { isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
+import { isInsideFrame } from "@/scale";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -374,7 +375,7 @@ export function useChartState(props: Props) {
             }
           );
           if (res.ok) {
-            if (isStandalone()) {
+            if (isStandalone() || isInsideFrame()) {
               history.back();
             } else {
               window.close();
