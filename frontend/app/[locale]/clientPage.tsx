@@ -142,14 +142,6 @@ export default function TopPage(props: Props) {
               href={`/${locale}${tabURLs[key]}`}
               className={clsx("fn-main-nav-item fn-flat-button fn-sky")}
               prefetch={!process.env.NO_PREFETCH}
-              onClick={(e) => {
-                requestReview();
-                setMenuMove(true);
-                setTimeout(() => {
-                  router.push(`/${locale}${tabURLs[key]}`);
-                }, 150);
-                e.preventDefault();
-              }}
             >
               <span className="fn-glass-1" />
               <span className="fn-glass-2" />
