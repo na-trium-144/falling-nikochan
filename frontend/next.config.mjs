@@ -16,44 +16,6 @@ import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
-const coreJsVersion = parentPackageJson.devDependencies["core-js"]
-  .slice(1)
-  .split(".")
-  .slice(0, 2)
-  .join(".");
-const workerBabelRc = JSON.parse(
-  readFileSync(join(dirname(process.cwd()), "worker", ".babelrc"), "utf-8")
-);
-const workerBabelCoreJsVersion = workerBabelRc.presets[0][1].corejs;
-if (coreJsVersion !== workerBabelCoreJsVersion) {
-  // https://github.com/babel/babel/issues/15412
-  throw new Error(
-    `core-js version in worker/.babelrc (${workerBabelCoreJsVersion}) must be exactly the same as that of installed (${coreJsVersion})`
-  );
-}
-
-// development時にはswcを使い、productionではcore-jsを設定したbabelを使う
-if (process.env.NODE_ENV === "development") {
-  if (existsSync(".babelrc")) {
-    unlinkSync(".babelrc");
-  }
-} else {
-  const babelRc = {
-    "presets": [
-      [
-        "next/babel",
-        {
-          "preset-env": {
-            "useBuiltIns": "usage",
-            "corejs": workerBabelCoreJsVersion,
-          },
-        },
-      ],
-    ],
-  };
-  writeFileSync(".babelrc", JSON.stringify(babelRc), "utf8");
-}
-
 const date = new Date().toUTCString();
 let commit = "";
 try {
@@ -146,11 +108,6 @@ const nextConfig = {
       module: {
         ...config.module,
         rules: (config.module?.rules || [])
-          .map((r) => ({
-            ...r,
-            // https://github.com/vercel/next.js/issues/74743
-            exclude: (r.exclude || []).concat([/core-js/]),
-          }))
           .concat([
             {
               resourceQuery: /raw/,
@@ -158,47 +115,6 @@ const nextConfig = {
             },
           ]),
       },
-      plugins: [
-        ...config.plugins,
-        ...(process.env.NODE_ENV !== "development"
-          ? [
-              new LicensePlugin({
-                outputFilename: "../public/oss-licenses/frontend.json",
-                includeNoticeText: true,
-                excludedPackageTest: (packageName /*, version*/) => {
-                  return packageName.startsWith("@falling-nikochan");
-                },
-                includePackages: () =>
-                  [
-                    "tailwindcss",
-                    "pretty-checkbox",
-                    "keyboard-css",
-                    "fn-commands",
-                  ].map((pkg) => {
-                    const currentDirPkg = join(
-                      process.cwd(),
-                      "node_modules",
-                      pkg
-                    );
-                    const parentDirPkg = join(
-                      dirname(process.cwd()),
-                      "node_modules",
-                      pkg
-                    );
-                    if (existsSync(currentDirPkg)) {
-                      return currentDirPkg;
-                    } else if (existsSync(parentDirPkg)) {
-                      return parentDirPkg;
-                    } else {
-                      throw new Error(
-                        `Cannot find package ${pkg} to include in OSS licenses`
-                      );
-                    }
-                  }),
-              }),
-            ]
-          : []),
-      ],
     };
   },
 };
