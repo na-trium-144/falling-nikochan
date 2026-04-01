@@ -13,61 +13,13 @@ export async function generateMetadata({ params }: MetadataProps) {
 
 export default async function Page({ params }: MetadataProps) {
   const locale = (await params).locale;
-  const pSampleBriefs = sampleCId.map(async (cid) => {
-    try {
-      return {
-        cid,
-        fetched: true,
-        brief: (await (await briefApp.request(`/${cid}`)).json()) as ChartBrief,
-      } satisfies ChartLineBrief;
-    } catch (e) {
-      if (
-        process.env.NODE_ENV === "development" ||
-        process.env.ALLOW_FETCH_ERROR
-      ) {
-        console.error(`Error fetching brief for ${cid}:`, e);
-        return {
-          cid,
-          fetched: true,
-          brief: undefined,
-        } satisfies ChartLineBrief;
-      } else {
-        throw e;
-      }
-    }
-  });
-  const pOriginalBriefs = originalCId.map(async (cid) => {
-    try {
-      return {
-        cid,
-        fetched: true,
-        brief: (await (await briefApp.request(`/${cid}`)).json()) as ChartBrief,
-        original: true,
-      } satisfies ChartLineBrief;
-    } catch (e) {
-      if (
-        process.env.NODE_ENV === "development" ||
-        process.env.ALLOW_FETCH_ERROR
-      ) {
-        console.error(`Error fetching brief for ${cid}:`, e);
-        return {
-          cid,
-          fetched: true,
-          brief: undefined,
-          original: true,
-        } satisfies ChartLineBrief;
-      } else {
-        throw e;
-      }
-    }
-  });
   return (
     <SharePageModalProvider locale={locale} from="play" noResetTitle>
       {/* noResetTitle: PlayTabでは独自のpopstateハンドラを実装しているため、sharePageModal側で閉じる際にタイトルを戻す処理は不要 */}
       <PlayTab
         locale={locale}
-        sampleBriefs={await Promise.all(pSampleBriefs)}
-        originalBriefs={await Promise.all(pOriginalBriefs)}
+        sampleBriefs={[]}
+        originalBriefs={[]}
       />
     </SharePageModalProvider>
   );
