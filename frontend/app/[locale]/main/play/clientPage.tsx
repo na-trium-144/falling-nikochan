@@ -5,7 +5,6 @@ import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
-import Rss from "@icon-park/react/lib/icons/Rss";
 import { popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
@@ -181,7 +180,7 @@ export default function PlayTab(props: Props) {
       <AccordionLike className="fn-sect" hidden={searching || !!searchResult}>
         <h3 className="flex gap-2 items-center justify-between">
           <span className="fn-heading-sect">{t("latest")}</span>
-          <a 
+          <a
             href={process.env.BACKEND_PREFIX + "/rss.xml"}
             target="_blank"
             rel="noopener noreferrer"
