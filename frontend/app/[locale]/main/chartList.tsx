@@ -22,6 +22,7 @@ import { APIError } from "@/common/apiError.js";
 interface PProps {
   locale: string;
   title: string;
+  rssButton?: boolean;
   tabKey: TabKeys;
   mobileTabKey: "top" | "play";
   type: ChartListType;
@@ -40,7 +41,17 @@ export default function ChartListPage(props: PProps) {
       boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
       <section className="fn-sect">
-        <h3 className={clsx("fn-heading-sect", "no-mobile")}>{props.title}</h3>
+        <h3 className="no-mobile flex items-center justify-between">
+          <span className="fn-heading-sect">{props.title}</span>
+          {props.rssButton && (
+            <a
+              href={process.env.BACKEND_PREFIX + "/rss.xml"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="fn-rss-button"
+            />
+          )}
+        </h3>
         <ChartList
           type={props.type}
           creator
