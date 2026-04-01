@@ -54,15 +54,22 @@ const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         .ele("channel");
 
       doc.ele("title").txt("Falling Nikochan - Latest Charts").up();
-      doc
-        .ele("link")
-        .txt(`${backendOrigin(c)}/main/play`)
-        .up();
+      doc.ele("link").txt(backendOrigin(c)).up();
       doc
         .ele("description")
-        .txt("Latest rhythm game charts from Falling Nikochan")
+        .txt(
+          "Simple and cute rhythm game, where anyone can create and share charts."
+        )
         .up();
-      doc.ele("language").txt("ja").up();
+
+      const images = doc.ele("image");
+      images
+        .ele("url")
+        .txt(`${backendOrigin(c)}/assets/icon.png`)
+        .up();
+      images.ele("title").txt("Falling Nikochan").up();
+      images.ele("link").txt(backendOrigin(c)).up();
+      images.up();
 
       // <atom:link ... />
       doc
