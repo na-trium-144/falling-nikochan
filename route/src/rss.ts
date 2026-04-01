@@ -1,9 +1,10 @@
 import { Hono } from "hono";
-import { Bindings, cacheControl } from "./env.js";
+import { backendOrigin, Bindings, cacheControl } from "./env.js";
 import { env } from "hono/adapter";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "./api/chart.js";
 import { isSample } from "@falling-nikochan/chart";
+import xmlbuilder2 from "xmlbuilder2";
 
 // Cache duration for RSS feed (in seconds) - 30 minutes
 const CACHE_MAX_AGE = 1800;
@@ -17,7 +18,7 @@ const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     try {
       await client.connect();
       const db = client.db("nikochan");
-      
+
       const charts = (
         await db
           .collection<ChartEntryCompressed>("chart")
@@ -30,40 +31,75 @@ const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             composer: string;
             chartCreator: string;
             updatedAt: number;
-          }>({ 
-            _id: 0, 
-            cid: 1, 
-            title: 1, 
-            composer: 1, 
-            chartCreator: 1, 
-            updatedAt: 1 
+          }>({
+            _id: 0,
+            cid: 1,
+            title: 1,
+            composer: 1,
+            chartCreator: 1,
+            updatedAt: 1,
           })
           .toArray()
       ).filter((e) => !isSample(e.cid));
 
-      // Generate RSS XML
-      const baseUrl = "https://nikochan.utcode.net";
-      const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Falling Nikochan - Latest Charts</title>
-    <link>${baseUrl}/main/play</link>
-    <description>Latest rhythm game charts from Falling Nikochan</description>
-    <language>ja</language>
-    <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml" />
-${charts
-  .map(
-    (chart) => `    <item>
-      <title>${escapeXml(chart.title)} - ${escapeXml(chart.composer)} (Chart by ${escapeXml(chart.chartCreator)})</title>
-      <link>${baseUrl}/share/${escapeXml(chart.cid)}</link>
-      <guid isPermaLink="true">${baseUrl}/share/${escapeXml(chart.cid)}</guid>
-      <pubDate>${new Date(chart.updatedAt).toUTCString()}</pubDate>
-      <description>${escapeXml(`${chart.title} by ${chart.composer} - Chart created by ${chart.chartCreator}`)}</description>
-    </item>`
-  )
-  .join("\n")}
-  </channel>
-</rss>`;
+      // xmlbuilder2でRSS XMLを構築
+      const doc = xmlbuilder2
+        .create({ version: "1.0", encoding: "UTF-8" })
+        .ele("rss", {
+          version: "2.0",
+          "xmlns:atom": "http://www.w3.org/2005/Atom",
+        })
+        .ele("channel");
+
+      doc.ele("title").txt("Falling Nikochan - Latest Charts").up();
+      doc.ele("link").txt(`${backendOrigin(c)}/main/play`).up();
+      doc
+        .ele("description")
+        .txt("Latest rhythm game charts from Falling Nikochan")
+        .up();
+      doc.ele("language").txt("ja").up();
+
+      // <atom:link ... />
+      doc
+        .ele("atom:link", {
+          href: `${backendOrigin(c)}/rss.xml`,
+          rel: "self",
+          type: "application/rss+xml",
+        })
+        .up();
+
+      // <item>群
+      for (const chart of charts) {
+        const item = doc.ele("item");
+
+        item
+          .ele("title")
+          .txt(
+            `${chart.title} - ${chart.composer} (Chart by ${chart.chartCreator})`
+          )
+          .up();
+
+        item.ele("link").txt(`${backendOrigin(c)}/share/${chart.cid}`).up();
+
+        item
+          .ele("guid", { isPermaLink: "true" })
+          .txt(`${backendOrigin(c)}/share/${chart.cid}`)
+          .up();
+
+        item.ele("pubDate").txt(new Date(chart.updatedAt).toUTCString()).up();
+
+        item
+          .ele("description")
+          .txt(
+            `${chart.title} by ${chart.composer} - Chart created by ${chart.chartCreator}`
+          )
+          .up();
+
+        item.up(); // </item>
+      }
+
+      // channelまで上がってからXML化
+      const rssXml = doc.up().up().end({ prettyPrint: true });
 
       return c.body(rssXml, 200, {
         "Content-Type": "application/rss+xml; charset=utf-8",
@@ -74,14 +110,5 @@ ${charts
     }
   }
 );
-
-function escapeXml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
 
 export default rssApp;
