@@ -60,7 +60,10 @@ export async function initMetadata(
                 },
                 {} as { [key: string]: string }
               ),
-          types: options?.alternateTypes || {},
+          types: {
+            "application/rss+xml": process.env.BACKEND_PREFIX + "/rss.xml",
+            ...(options?.alternateTypes || {}),
+          },
         }
       : undefined,
     description,
