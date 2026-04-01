@@ -14,7 +14,7 @@ import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/shareLinkAndImage";
 import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
-import { useDisplayMode } from "@/scale.js";
+import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { LocalLoadError, LocalLoadState, SaveState } from "./chartState";
 import { APIError } from "@/common/apiError";
 
@@ -156,7 +156,7 @@ export function MetaTab(props: Props2) {
           onClick={() => {
             if (props.sessionData) {
               initSession(props.sessionData, props.sessionId);
-              if (isStandalone()) {
+              if (isStandalone() || isInsideFrame()) {
                 props.saveEditSession();
                 router.push(`/${props.locale}/play?sid=${props.sessionId}`);
               } else {

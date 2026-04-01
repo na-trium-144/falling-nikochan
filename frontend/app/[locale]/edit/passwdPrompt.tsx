@@ -13,6 +13,7 @@ import {
   historyBackWithReview,
   useStandaloneDetector,
 } from "@/common/pwaInstall";
+import { useInsideFrameDetector } from "@/scale";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -32,6 +33,7 @@ export function PasswdPrompt(props: PasswdProps) {
   const [editPasswd, setEditPasswd] = useState<string>("");
   const te = useTranslations("error");
   const standalone = useStandaloneDetector();
+  const insideFrame = useInsideFrameDetector();
 
   const [cid, setCId] = useState<string>("");
   useEffect(() => {
@@ -56,7 +58,7 @@ export function PasswdPrompt(props: PasswdProps) {
         )}
         <p className="mb-3">{props.loadStatus.formatMsg(te)}</p>
         {props.loadStatus.isServerSide() && <LinksOnError />}
-        {standalone && (
+        {(standalone || insideFrame) && (
           <p>
             <Button text={t("back")} onClick={historyBackWithReview} />
           </p>
@@ -130,7 +132,7 @@ export function PasswdPrompt(props: PasswdProps) {
             </button>
           </div>
         )}
-        {standalone && (
+        {(standalone || insideFrame) && (
           <p>
             <Button text={t("back")} onClick={historyBackWithReview} />
           </p>

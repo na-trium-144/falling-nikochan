@@ -4,6 +4,7 @@ import clsx from "clsx/lite";
 import { useStandaloneDetector } from "./pwaInstall";
 import Link from "next/link";
 import EfferentThree from "@icon-park/react/lib/icons/EfferentThree";
+import { useInsideFrameDetector } from "@/scale";
 
 interface Props {
   className?: string;
@@ -23,6 +24,7 @@ function LinkChildren(props: Props) {
 }
 export function ExternalLink(props: Props) {
   const isStandalone = useStandaloneDetector();
+  const isInsideFrame = useInsideFrameDetector();
   if (props.onClick) {
     return (
       <button
@@ -32,7 +34,7 @@ export function ExternalLink(props: Props) {
         <LinkChildren {...props} />
       </button>
     );
-  } else if (props.href?.startsWith("/") && isStandalone) {
+  } else if (props.href?.startsWith("/") && (isStandalone || isInsideFrame)) {
     return (
       <Link className={clsx("fn-link-1", props.className)} href={props.href}>
         <LinkChildren {...props} />

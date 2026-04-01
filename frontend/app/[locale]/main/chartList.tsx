@@ -15,7 +15,7 @@ import { getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
-import { useDisplayMode } from "@/scale.jsx";
+import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
 
@@ -399,10 +399,11 @@ interface CProps {
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
+  const isInsideFrame = useInsideFrameDetector();
 
   return (
     <li className="fn-cl-item">
-      {props.onClick || (props.newTab && !isStandalone) ? (
+      {props.onClick || (props.newTab && !isStandalone && !isInsideFrame) ? (
         <>
           <a
             href={props.href}
