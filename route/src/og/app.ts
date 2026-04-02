@@ -15,7 +15,7 @@ import { env } from "hono/adapter";
 import * as msgpack from "@msgpack/msgpack";
 import packageJson from "../../package.json" with { type: "json" };
 import { cors } from "hono/cors";
-import ColorThief from "colorthief";
+import { getColor } from "colorthief";
 import { adjustColor } from "./style.js";
 import * as v from "valibot";
 import { fetchError } from "../error.js";
@@ -247,8 +247,8 @@ const ogApp = (config: {
         .catch(fetchError(env(c)))
         .then(async (imgRes) => {
           const imgBuf = await imgRes.arrayBuffer();
-          const color = await ColorThief.getColor(imgBuf, 1);
-          const colorAdjusted = adjustColor(color);
+          const colorResult = await getColor(Buffer.from(imgBuf), { quality: 1 });
+          const colorAdjusted = adjustColor(colorResult ? colorResult.array() : [128, 128, 128]);
           return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
         });
 

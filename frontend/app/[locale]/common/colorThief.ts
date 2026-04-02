@@ -1,30 +1,28 @@
 "use client";
 
-import ColorThief, { RGBColor } from "colorthief";
-import { useCallback, useRef, useState } from "react";
+import { getColorSync } from "colorthief";
+import { useCallback, useState } from "react";
 import { useTheme } from "./theme";
 import clsx from "clsx/lite";
 
 export function useColorThief() {
-  const colorThiefRef = useRef<ColorThief>(null);
-  const [color, setColor] = useState<RGBColor | null>(null);
+  const [color, setColor] = useState<[number, number, number] | null>(null);
   const { isDark } = useTheme();
 
   const imgRef = useCallback((node: HTMLImageElement | null) => {
-    if (colorThiefRef.current === null) {
-      colorThiefRef.current = new ColorThief();
-    }
     if (node) {
-      if (node.complete) {
-        setColor(colorThiefRef.current.getColor(node, 1));
-      }
-      node.onload = () => {
-        setColor(colorThiefRef.current!.getColor(node, 1));
+      const extract = () => {
+        const c = getColorSync(node, { quality: 1 });
+        setColor(c ? c.array() : null);
       };
+      if (node.complete) {
+        extract();
+      }
+      node.onload = extract;
     }
   }, []);
 
-  let colorAdjusted: RGBColor | null = color;
+  let colorAdjusted: [number, number, number] | null = color;
   if (colorAdjusted) {
     let [r, g, b] = colorAdjusted;
     // 1. 輝度（Brightness）を計算 (0〜255)
