@@ -1,3 +1,12 @@
+## ver. 15.3 - 2026/04/02
+
+* iframeの中で動くようにする [#877](https://github.com/na-trium-144/falling-nikochan/pull/877)
+    * iframeの中でSecurityErrorになったのを修正
+    * iframeではstandaloneと同様の1ページ完結動作にする
+    * oembed apiとmetaタグを追加
+* startボタンでYouTube埋め込みが再生されない場合、Loading...とあわせて追加のメッセージを表示
+* Add RSS feed endpoint at /rss.xml [#944](https://github.com/na-trium-144/falling-nikochan/pull/944)
+
 ## ver. 15.1 - 2026/03/30
 
 * Enterキー連打でopenModalが2回呼ばれるのを修正, その際のTypeErrorを修正 [#1011](https://github.com/na-trium-144/falling-nikochan/pull/1011)
