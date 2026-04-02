@@ -24,7 +24,7 @@ import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import Select from "@/common/select.js";
 import LevelTab from "./levelTab.js";
 import { initSession, SessionData } from "@/play/session.js";
-import { useDisplayMode } from "@/scale.js";
+import { useDisplayMode, useInsideFrameDetector } from "@/scale.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { GuideMain } from "./guideMain.js";
@@ -53,6 +53,7 @@ export default function Edit(props: {
   const t = useTranslations("edit");
   const { isTouch } = useDisplayMode();
   const standalone = useStandaloneDetector();
+  const insideFrame = useInsideFrameDetector();
 
   const luaExecutor = useLuaExecutor();
 
@@ -524,7 +525,10 @@ export default function Edit(props: {
           "fn-mh-blur"
         )}
       >
-        <MobileHeader className="flex-1 " noBackButton={!standalone}>
+        <MobileHeader
+          className="flex-1 "
+          noBackButton={!standalone && !insideFrame}
+        >
           {t("titleShort")} ID: {chart?.cid}
         </MobileHeader>
         <Button text={t("help")} onClick={openGuide} />
@@ -608,7 +612,7 @@ export default function Edit(props: {
             )}
           >
             <div className="hidden edit-wide:flex flex-row items-baseline mb-3 space-x-2">
-              {standalone && (
+              {(standalone || insideFrame) && (
                 <button
                   className={clsx("fn-link-1")}
                   onClick={() => {

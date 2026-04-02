@@ -134,4 +134,19 @@
     @apply bg-white border-slate-300;
     @apply dark:bg-stone-700 dark:border-stone-500;
   }
+
+  .fn-rss-button {
+    @apply relative size-4 bg-contain;
+    background-image: url(/feed-icon-28x28.png);
+
+    &::after {
+      content: "";
+      @apply absolute inset-0 rounded-sm;
+    }
+    @variant hover {
+      &::after {
+        @apply bg-white/50;
+      }
+    }
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/route",
-  "version": "15.2.0",
+  "version": "15.3.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -36,7 +36,8 @@
     "react": "^19.2.4",
     "sitemap": "^9.0.0",
     "twitter-text": "^3.1.0",
-    "valibot": "^1.0.0"
+    "valibot": "^1.0.0",
+    "xmlbuilder2": "^4.0.3"
   },
   "devDependencies": {
     "@falling-nikochan/route": "workspace:*",

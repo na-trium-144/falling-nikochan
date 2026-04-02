@@ -2,6 +2,7 @@ import {
   apiApp,
   redirectApp,
   sitemapApp,
+  rssApp,
   shareApp,
   languageDetector,
   onError,
@@ -27,6 +28,7 @@ const app = new Hono({ strict: false })
     );
   })
   .route("/sitemap.xml", sitemapApp)
+  .route("/rss.xml", rssApp)
   .route(
     "/share",
     shareApp({
@@ -49,6 +51,7 @@ export default {
       (url.pathname.startsWith("/api/") ||
         url.pathname.startsWith("/og/") ||
         url.pathname.startsWith("/sitemap.xml") ||
+        url.pathname.startsWith("/rss.xml") ||
         url.pathname.startsWith("/share/"))
     ) {
       // fetch(request) と書くだけで、Workerを通さずオリジンにリクエストが飛びます
