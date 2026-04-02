@@ -20,7 +20,7 @@
     "hono": "^4.12.9"
   },
   "devDependencies": {
-    "babel-loader": "^10.0.0",
+    "babel-loader": "^10.1.1",
     "dotenv": "^16.6.1"
   }
 }
