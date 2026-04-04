@@ -126,7 +126,7 @@ export function LinkWithReview(props: LinkProps) {
       {props.children}
     </button>
   ) : (
-    <Link {...props} prefetch={!process.env.NO_PREFETCH}>
+    <Link {...props} prefetch={process.env.PREFETCH as "auto"}>
       {props.children}
     </Link>
   );

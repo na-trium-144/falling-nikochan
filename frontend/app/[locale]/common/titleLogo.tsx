@@ -69,7 +69,7 @@ export function TitleAsLink(props: { className: string; locale: string }) {
     <Link
       href={`/${props.locale}`}
       className={clsx("fn-title-main fn-link-1", props.className)}
-      prefetch={!process.env.NO_PREFETCH}
+      prefetch={process.env.PREFETCH as "auto"}
     >
       <Title anim />
     </Link>
