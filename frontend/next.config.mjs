@@ -17,7 +17,6 @@ import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const coreJsVersion = parentPackageJson.devDependencies["core-js"]
-  .slice(1)
   .split(".")
   .slice(0, 2)
   .join(".");

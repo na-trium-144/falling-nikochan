@@ -15,13 +15,14 @@ import { getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
-import { useDisplayMode } from "@/scale.jsx";
+import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
 
 interface PProps {
   locale: string;
   title: string;
+  rssButton?: boolean;
   tabKey: TabKeys;
   mobileTabKey: "top" | "play";
   type: ChartListType;
@@ -40,7 +41,17 @@ export default function ChartListPage(props: PProps) {
       boxRef={boxSize.ref as RefObject<HTMLDivElement | null>}
     >
       <section className="fn-sect">
-        <h3 className={clsx("fn-heading-sect", "no-mobile")}>{props.title}</h3>
+        <h3 className="no-mobile flex items-center justify-between">
+          <span className="fn-heading-sect">{props.title}</span>
+          {props.rssButton && (
+            <a
+              href={process.env.BACKEND_PREFIX + "/rss.xml"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="fn-rss-button"
+            />
+          )}
+        </h3>
         <ChartList
           type={props.type}
           creator
@@ -399,10 +410,11 @@ interface CProps {
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
+  const isInsideFrame = useInsideFrameDetector();
 
   return (
     <li className="fn-cl-item">
-      {props.onClick || (props.newTab && !isStandalone) ? (
+      {props.onClick || (props.newTab && !isStandalone && !isInsideFrame) ? (
         <>
           <a
             href={props.href}

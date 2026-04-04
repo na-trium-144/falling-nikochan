@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/i18n",
-  "version": "15.2.0",
+  "version": "15.3.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -9,6 +9,6 @@
     "lint": "eslint && node verifyKeys.js"
   },
   "dependencies": {
-    "next-intl": "^4.7.0"
+    "next-intl": "^4.9.0"
   }
 }

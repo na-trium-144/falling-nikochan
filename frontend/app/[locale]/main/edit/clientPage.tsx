@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
 import { APIError } from "@/common/apiError.js";
+import { isInsideFrame } from "@/scale.jsx";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -41,7 +42,7 @@ export default function EditTab({ locale }: { locale: string }) {
       );
       setCidFetching(false);
       if (res.ok) {
-        if (isStandalone()) {
+        if (isStandalone() || isInsideFrame()) {
           router.push(`/${locale}/edit?cid=${cid}`);
         } else {
           window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
