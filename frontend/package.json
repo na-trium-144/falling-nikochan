@@ -54,6 +54,7 @@
     "yaml": "^2.8.3"
   },
   "devDependencies": {
+    "@gera2ld/tarjs": "^0.3.1",
     "@icon-park/svg": "^1.4.2",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/colorthief": "^2.6.1",
