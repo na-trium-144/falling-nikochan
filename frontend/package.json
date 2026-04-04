@@ -16,7 +16,7 @@
     "lint": "tsc --noEmit && eslint app/",
     "dev": "node ./initAssets.js && next dev -H 0.0.0.0",
     "build": "node ./initAssets.js && next build && svgo -f ./public/assets/ -o ./out/assets/",
-    "postbuild": "node ./listStaticFiles.js && node ./insertBanner.js"
+    "postbuild": "node ./insertBanner.js && node ./listStaticFiles.js"
   },
   "dependencies": {
     "@falling-nikochan/chart": "workspace:*",

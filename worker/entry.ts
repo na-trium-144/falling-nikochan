@@ -120,6 +120,91 @@ function returnBody(body: string | ReadableStream | null, headers: Headers) {
   });
 }
 
+// Determine Content-Type from a file path
+function getContentType(pathname: string): string {
+  const ext = pathname.split(".").pop()?.toLowerCase() ?? "";
+  const types: Record<string, string> = {
+    html: "text/html; charset=utf-8",
+    css: "text/css; charset=utf-8",
+    js: "application/javascript; charset=utf-8",
+    mjs: "application/javascript; charset=utf-8",
+    json: "application/json; charset=utf-8",
+    txt: "text/plain; charset=utf-8",
+    svg: "image/svg+xml",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    webp: "image/webp",
+    ico: "image/x-icon",
+    woff: "font/woff",
+    woff2: "font/woff2",
+    wasm: "application/wasm",
+    xml: "application/xml",
+    gz: "application/gzip",
+  };
+  return types[ext] ?? "application/octet-stream";
+}
+
+// Decompress gzip data using the browser's native DecompressionStream
+async function decompressGzip(compressed: ArrayBuffer): Promise<ArrayBuffer> {
+  const ds = new DecompressionStream("gzip");
+  const writer = ds.writable.getWriter();
+  const reader = ds.readable.getReader();
+  writer.write(new Uint8Array(compressed));
+  writer.close();
+  const chunks: Uint8Array[] = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result.buffer as ArrayBuffer;
+}
+
+// Parse a tar archive and return file entries (name = relative path, data = content)
+function parseTarEntries(
+  buffer: ArrayBuffer
+): Array<{ name: string; data: ArrayBuffer }> {
+  const bytes = new Uint8Array(buffer);
+  const entries: Array<{ name: string; data: ArrayBuffer }> = [];
+  const decoder = new TextDecoder();
+  let offset = 0;
+  while (offset + 512 <= bytes.length) {
+    const header = bytes.subarray(offset, offset + 512);
+    // End-of-archive: two consecutive zero blocks
+    if (header.every((b) => b === 0)) break;
+    // name (0-99) and prefix (345-499) for paths > 100 chars
+    const namePart = decoder
+      .decode(header.subarray(0, 100))
+      .replace(/\0[\s\S]*$/, "");
+    const prefix = decoder
+      .decode(header.subarray(345, 500))
+      .replace(/\0[\s\S]*$/, "");
+    const name = prefix ? prefix + "/" + namePart : namePart;
+    // size (124-135): octal string, null/space-terminated
+    const sizeStr = decoder
+      .decode(header.subarray(124, 136))
+      .replace(/[\0\s][\s\S]*$/, "")
+      .trim();
+    const size = parseInt(sizeStr, 8) || 0;
+    // typeflag (156): 0x30='0' or 0x00 = regular file
+    const typeflag = header[156];
+    offset += 512;
+    if ((typeflag === 0x30 || typeflag === 0) && size > 0) {
+      entries.push({ name, data: buffer.slice(offset, offset + size) });
+    }
+    offset += Math.ceil(size / 512) * 512;
+  }
+  return entries;
+}
+
 interface InitAssetsState {
   type: "initAssets";
   state: InitAssetsResult;
@@ -173,6 +258,7 @@ async function initAssetsCache(config: {
     if (!remoteRes.ok) {
       return sendInitState("failed");
     }
+    const remoteVerRes = remoteRes.clone();
     remoteVer = await remoteRes.json();
     const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
       cache.match("/buildVer").then((res) => res?.json())
@@ -189,51 +275,101 @@ async function initAssetsCache(config: {
 
     const cache = await mainCache();
     const tmp = await tmpCache();
-    let filesRes: Response;
-    let remoteVerRes: Response;
+
+    // Fetch tar.gz archive (non-_next files) and _next file list simultaneously
+    let tarRes: Response;
+    let nextFilesRes: Response;
     try {
-      filesRes = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + "/assets/staticFiles.json",
-        { cache: "no-store" }
-      ).catch(fetchError(e));
-      remoteVerRes = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) + "/buildVer.json",
-        { cache: "no-store" }
-      ).catch(fetchError(e));
-    } catch (e) {
-      console.error(e);
+      [tarRes, nextFilesRes] = await Promise.all([
+        fetch(
+          (process.env.ASSET_PREFIX || self.origin) +
+            "/assets/staticFiles.tar.gz",
+          { cache: "no-store" }
+        ).catch(fetchError(e)),
+        fetch(
+          (process.env.ASSET_PREFIX || self.origin) +
+            "/assets/staticFiles.json",
+          { cache: "no-store" }
+        ).catch(fetchError(e)),
+      ]);
+    } catch (err) {
+      console.error(err);
       return sendInitState("failed");
     }
-    if (!filesRes.ok || !remoteVerRes.ok) {
-      console.error("initAssetsCache: failed to fetch json");
+    if (!tarRes.ok || !nextFilesRes.ok) {
+      console.error("initAssetsCache: failed to fetch files");
       return sendInitState("failed");
     }
-    const files = ((await filesRes.json()) as string[])
-      .map((file) => {
-        let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
+
+    // _next/ files are still downloaded individually (hash in filename avoids re-download)
+    const nextFiles = ((await nextFilesRes.json()) as string[]).map((file) => {
+      let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
+      if (pathname.endsWith(".html")) {
+        pathname = pathname.slice(0, -5);
+      }
+      return pathname;
+    });
+
+    // Decompress and parse the tar.gz archive
+    let tarEntries: Array<{
+      pathname: string;
+      data: ArrayBuffer;
+      contentType: string;
+    }>;
+    try {
+      const tarBuffer = await decompressGzip(await tarRes.arrayBuffer());
+      tarEntries = parseTarEntries(tarBuffer).map(({ name, data }) => {
+        const originalPath = "/" + name;
+        const contentType = getContentType(originalPath);
+        let pathname = originalPath
+          .replaceAll("[", "%5B")
+          .replaceAll("]", "%5D");
         if (pathname.endsWith(".html")) {
           pathname = pathname.slice(0, -5);
         }
-        return pathname;
-      })
-      .filter((n) => !n.endsWith(".ttf"))
-      .filter((n) => !n.includes("ogTemplate"));
-    // tmpCacheにデータを入れる
+        return { pathname, data, contentType };
+      });
+    } catch (err) {
+      console.error("initAssetsCache: failed to decompress tar", err);
+      return sendInitState("failed");
+    }
+
+    // Determine which _next/ files actually need downloading (uncached ones)
+    const nextFilesToFetch = (
+      await Promise.all(
+        nextFiles.map(async (pathname) =>
+          (await cache.match(pathname)) || (await tmp.match(pathname))
+            ? null
+            : pathname
+        )
+      )
+    ).filter((p): p is string => p !== null);
+
     let failed = false;
-    let totalNum = files.length;
+    const totalNum = tarEntries.length + nextFilesToFetch.length;
     let progressNum = 0;
     let progressSize = 0;
+    sendInitState("updating", progressNum, totalNum, progressSize);
+
+    // tmpCacheにデータを入れる (tar entries)
+    for (const { pathname, data, contentType } of tarEntries) {
+      await tmp.put(
+        pathname,
+        new Response(data, {
+          headers: {
+            "Content-Type": contentType,
+            "Cache-Control": "no-store",
+          },
+        })
+      );
+      progressNum++;
+      progressSize += data.byteLength;
+      sendInitState("updating", progressNum, totalNum, progressSize);
+    }
+
+    // tmpCacheにデータを入れる (_next/ files, downloaded individually)
     await Promise.all(
-      files.map(async (pathname: string) => {
-        if (
-          pathname.startsWith("/_next") &&
-          ((await cache.match(pathname)) || (await tmp.match(pathname)))
-        ) {
-          // パス名にハッシュが入っているので更新する必要がない
-          totalNum--;
-          sendInitState("updating", progressNum, totalNum, progressSize);
-          return;
-        }
+      nextFilesToFetch.map(async (pathname: string) => {
         try {
           const res = await fetch(
             (process.env.ASSET_PREFIX || self.origin) + pathname,
@@ -249,8 +385,8 @@ async function initAssetsCache(config: {
             console.error(`failed to fetch ${pathname}: ${res.status}`);
             failed = true;
           }
-        } catch (e) {
-          console.error(`failed to fetch ${pathname}: ${e}`);
+        } catch (err) {
+          console.error(`failed to fetch ${pathname}: ${err}`);
           failed = true;
         }
       })
@@ -260,11 +396,16 @@ async function initAssetsCache(config: {
       console.error("initAssetsCache: failed to fetch some files");
       return sendInitState("failed");
     }
+
+    const allPathnames = [
+      ...tarEntries.map((entry) => entry.pathname),
+      ...nextFiles,
+    ];
     if (config.clearOld) {
       const keys = await cache.keys();
       await Promise.all(
         keys.map(async (req) => {
-          if (!files.includes(new URL(req.url).pathname)) {
+          if (!allPathnames.includes(new URL(req.url).pathname)) {
             console.warn(`delete ${req.url}`);
             await cache.delete(req);
           }
@@ -273,7 +414,7 @@ async function initAssetsCache(config: {
     }
     // tmpからmainに移す
     await Promise.all(
-      files.map(async (pathname: string) => {
+      allPathnames.map(async (pathname: string) => {
         const res = await tmp.match(pathname);
         if (res) {
           await cache.put(pathname, res);
