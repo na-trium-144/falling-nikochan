@@ -1,9 +1,14 @@
 import { MongoClient } from "mongodb";
 import { Bindings } from "../env.js";
-import { CidCount, getPopularCharts } from "../api/popular.js";
-import { entryToBrief, getChartEntryCompressed } from "../api/chart.js";
+import {
+  ChartEntryCompressed,
+  ChartLevelBrief,
+  entryToBrief,
+  getChartEntryCompressed,
+} from "../api/chart.js";
 import { ChartBrief } from "@falling-nikochan/chart";
 import { postPopular } from "./twitter.js";
+import { aggeratePopularCounts, getRawPopularCounts } from "../api/search.js";
 
 export async function reportPopularCharts(env: Bindings) {
   const client = new MongoClient(env.MONGODB_URI);
@@ -25,9 +30,30 @@ export async function reportPopularCharts(env: Bindings) {
       );
       return;
     } else {
-      const popularCids: CidCount[] = await getPopularCharts(db);
+      const rawPopularCounts = await getRawPopularCounts(db);
+      const results = await db
+        .collection<ChartEntryCompressed>("chart")
+        .find({ published: true, deleted: false })
+        .project<{
+          cid: string;
+          levelBrief: ChartLevelBrief[];
+        }>({
+          _id: 0,
+          cid: 1,
+          levelBrief: 1,
+        })
+        .toArray();
+      const sortedResults = results
+        .map((r) => ({
+          cid: r.cid,
+          count: aggeratePopularCounts(rawPopularCounts, r),
+        }))
+        .filter((r) => r.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 6);
+
       popularBriefs = await Promise.all(
-        popularCids.map(async ({ cid }) =>
+        sortedResults.map(async ({ cid }) =>
           getChartEntryCompressed(db, cid, null).then((entry) =>
             entryToBrief(entry)
           )
