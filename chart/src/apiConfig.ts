@@ -14,6 +14,9 @@ export const fileMaxSize = chartMaxEvent * (100 + 150);
 // BPMChange: 21 + 27 + 53 = 101
 // Signature: 27 + 30くらい + 53 * 2 = 133
 
+export const maxLv = 20;
+export const minLv = 1;
+
 export const originalCId = ["602399", "983403"];
 export const sampleCId = [
   "850858",

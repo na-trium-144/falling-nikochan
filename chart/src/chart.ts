@@ -80,6 +80,7 @@ import {
   Level15Play,
 } from "./legacy/chart15.js";
 import { docRefs, Reference, Schema } from "./docSchema.js";
+import { maxLv, minLv } from "./apiConfig.js";
 
 export const YoutubeIdSchema = () =>
   v.pipe(
@@ -131,7 +132,8 @@ export const CidSchema = () =>
   v.pipe(v.string(), v.regex(/^[0-9]{6}$/, "cid must be 6 digits"));
 export const levelTypes = ["Single", "Double", "Maniac"];
 export const levelTypesConst = ["Single", "Double", "Maniac"] as const;
-
+export const DifficultySchema = () =>
+  v.pipe(v.number(), v.integer(), v.minValue(minLv), v.maxValue(maxLv));
 export const ChartBriefSchema = () =>
   v.object({
     ytId: YoutubeIdSchema(),
@@ -152,7 +154,7 @@ export const ChartBriefSchema = () =>
         name: v.string(),
         hash: HashSchema(),
         type: v.picklist(levelTypesConst),
-        difficulty: v.pipe(v.number(), v.integer(), v.minValue(1)),
+        difficulty: DifficultySchema(),
         noteCount: v.pipe(v.number(), v.integer(), v.minValue(0)),
         bpmMin: v.pipe(v.number(), v.gtValue(0)),
         bpmMax: v.pipe(v.number(), v.gtValue(0)),

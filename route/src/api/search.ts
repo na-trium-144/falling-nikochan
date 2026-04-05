@@ -7,7 +7,13 @@ import { ChartEntryCompressed, ChartLevelBrief } from "./chart.js";
 import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { numLatest, popularDays } from "@falling-nikochan/chart";
+import {
+  DifficultySchema,
+  maxLv,
+  minLv,
+  numLatest,
+  popularDays,
+} from "@falling-nikochan/chart";
 import { PlayRecordEntry } from "./record.js";
 
 // Cache duration for this API endpoint (in seconds)
@@ -44,7 +50,9 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     description:
       "Search charts by text or get charts sorted by latest or popularity. " +
       "If q is provided, searches by title, artist, tags, and author name. " +
-      "Sort order can be 'relevance', 'popular', or 'latest'.",
+      "Otherwise, returns all charts. " +
+      "Sort order can be 'relevance', 'popular', or 'latest'. " +
+      "Optional difficultyMin and difficultyMax can be used to filter charts by difficulty range.",
     responses: {
       200: {
         description: "Successful response",
@@ -64,10 +72,20 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         v.picklist(["relevance", "popular", "latest"]),
         "relevance"
       ),
+      difficultyMin: v.pipe(
+        v.optional(v.string(), String(minLv)),
+        v.transform(Number),
+        DifficultySchema()
+      ),
+      difficultyMax: v.pipe(
+        v.optional(v.string(), String(maxLv)),
+        v.transform(Number),
+        DifficultySchema()
+      ),
     })
   ),
   async (c) => {
-    let { q, sort } = c.req.valid("query");
+    let { q, sort, difficultyMin, difficultyMax } = c.req.valid("query");
 
     const normalizedQueries = q
       ? normalizeStr(q)
@@ -81,24 +99,31 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
 
-      let mongoQuery: Filter<ChartEntryCompressed>;
+      let mongoQuery: Filter<ChartEntryCompressed> = {
+        published: true,
+        deleted: false,
+        levelBrief: {
+          $elemMatch: {
+            difficulty: {
+              $gte: difficultyMin,
+              $lte: difficultyMax,
+            },
+          },
+        },
+      };
+
       if (normalizedQueries.length > 0) {
         mongoQuery = {
+          ...mongoQuery,
           $or: [
-            { cid: q, published: true, deleted: false },
+            { cid: q },
             {
-              $and: [
-                ...normalizedQueries.map((s) => ({
-                  normalizedText: { $regex: s },
-                })),
-                { published: true },
-                { deleted: false },
-              ],
+              $and: normalizedQueries.map((s) => ({
+                normalizedText: { $regex: s },
+              })),
             },
           ],
         };
-      } else {
-        mongoQuery = { published: true, deleted: false };
       }
 
       let results = await db
