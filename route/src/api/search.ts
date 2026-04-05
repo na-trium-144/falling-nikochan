@@ -1,15 +1,38 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
-import { MongoClient } from "mongodb";
+import { Db, Filter, MongoClient } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
-import { ChartEntryCompressed } from "./chart.js";
+import { ChartEntryCompressed, ChartLevelBrief } from "./chart.js";
 import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
 import { describeRoute, resolver, validator } from "hono-openapi";
+import { numLatest, popularDays } from "@falling-nikochan/chart";
+import { PlayRecordEntry } from "./record.js";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
+
+const SearchResultSchema = () =>
+  v.object({
+    cid: v.string(),
+    count: v.optional(
+      v.pipe(
+        v.number(),
+        v.description(
+          "Popularity score, only present when sorted by popularity"
+        )
+      )
+    ),
+    updatedAt: v.optional(
+      v.pipe(
+        v.number(),
+        v.description(
+          "Timestamp of the latest update, only present when sorted by latest"
+        )
+      )
+    ),
+  });
 
 const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/",
@@ -19,85 +42,186 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   }),
   describeRoute({
     description:
-      "Search charts by text in the title, artist, tags, and author name. " +
-      "Multiple words are treated as AND condition. " +
-      "The search is case-insensitive and ignores spaces and special characters.",
+      "Search charts by text or get charts sorted by latest or popularity. " +
+      "If q is provided, searches by title, artist, tags, and author name. " +
+      "Sort order can be 'relevance', 'popular', or 'latest'.",
     responses: {
       200: {
         description: "Successful response",
         content: {
           "application/json": {
-            schema: resolver(v.array(v.object({ cid: v.string() }))),
+            schema: resolver(v.array(SearchResultSchema())),
           },
         },
       },
     },
   }),
-  validator("query", v.object({ q: v.string() })),
+  validator(
+    "query",
+    v.object({
+      q: v.optional(v.string(), ""),
+      sort: v.optional(
+        v.picklist(["relevance", "popular", "latest"]),
+        "relevance"
+      ),
+    })
+  ),
   async (c) => {
-    const { q } = c.req.valid("query");
-    const normalizedQueries = normalizeStr(q)
-      .split(" ")
-      .map((s) => s.trim())
-      .filter((s) => s);
-    if (normalizedQueries.length === 0) {
-      return c.json([], 200, {
-        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
-      });
-    }
-    console.log(normalizedQueries);
+    let { q, sort } = c.req.valid("query");
+
+    const normalizedQueries = q
+      ? normalizeStr(q)
+          .split(" ")
+          .map((s) => s.trim())
+          .filter((s) => s)
+      : [];
+
     const client = new MongoClient(env(c).MONGODB_URI);
     try {
       await client.connect();
       const db = client.db("nikochan");
-      return c.json(
-        (
-          await db
-            .collection<ChartEntryCompressed>("chart")
-            .find({
-              $or: [
-                { cid: q, published: true, deleted: false },
-                {
-                  $and: [
-                    ...normalizedQueries.map((s) => ({
-                      normalizedText: { $regex: s },
-                    })),
-                    { published: true },
-                    { deleted: false },
-                  ],
-                },
+
+      let mongoQuery: Filter<ChartEntryCompressed>;
+      if (normalizedQueries.length > 0) {
+        mongoQuery = {
+          $or: [
+            { cid: q, published: true, deleted: false },
+            {
+              $and: [
+                ...normalizedQueries.map((s) => ({
+                  normalizedText: { $regex: s },
+                })),
+                { published: true },
+                { deleted: false },
               ],
-            })
-            // .sort({ updatedAt: -1 })
-            // .limit(numLatest)
-            .project<{ cid: string; normalizedText: string }>({
-              _id: 0,
-              cid: 1,
-              normalizedText: 1,
-            })
-            .toArray()
-        )
-          .sort(
-            (a, b) =>
-              // sort by the number of queries occurence in the normalizedText
-              -normalizedQueries.reduce(
-                (prev, q) =>
-                  prev +
-                  a.normalizedText.split(q).length -
-                  b.normalizedText.split(q).length,
-                0
-              )
-          )
-          .map((r) => ({ cid: r.cid })),
-        200,
-        {
-          "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+            },
+          ],
+        };
+      } else {
+        mongoQuery = { published: true, deleted: false };
+      }
+
+      let results = await db
+        .collection<ChartEntryCompressed>("chart")
+        .find(mongoQuery)
+        .project<{
+          cid: string;
+          normalizedText: string;
+          updatedAt: number;
+          levelBrief: ChartLevelBrief[];
+        }>({
+          _id: 0,
+          cid: 1,
+          normalizedText: 1,
+          updatedAt: 1,
+          levelBrief: 1,
+        })
+        .toArray();
+
+      let sortedResults: v.InferOutput<ReturnType<typeof SearchResultSchema>>[];
+
+      switch (sort) {
+        case "popular": {
+          const rawPopularCounts = await getRawPopularCounts(db);
+          const mapped = results
+            .map((r) => ({
+              cid: r.cid,
+              updatedAt: r.updatedAt,
+              count: aggeratePopularCounts(rawPopularCounts, r),
+            }))
+            .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
+            .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
+
+          if (!q) {
+            // Behave like popular.ts when q is empty
+            sortedResults = mapped.slice(0, numLatest).map((r) => ({
+              cid: r.cid,
+              count: r.count,
+            }));
+          } else {
+            sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
+          }
+          break;
         }
-      );
+        case "latest":
+          sortedResults = results
+            .sort((a, b) => b.updatedAt - a.updatedAt)
+            .map((r) => ({ cid: r.cid, updatedAt: r.updatedAt }));
+          break;
+        case "relevance":
+          sortedResults = results
+            .sort(
+              (a, b) =>
+                -normalizedQueries.reduce(
+                  (prev, token) =>
+                    prev +
+                    a.normalizedText.split(token).length -
+                    b.normalizedText.split(token).length,
+                  0
+                ) || b.updatedAt - a.updatedAt
+            )
+            .map((r) => ({ cid: r.cid }));
+          break;
+      }
+
+      return c.json(sortedResults, 200, {
+        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+      });
     } finally {
       await client.close();
     }
   }
 );
+
+export type RawPopularCount = {
+  cid: string;
+  lvHash: string;
+  count: number;
+};
+
+export async function getRawPopularCounts(db: Db): Promise<RawPopularCount[]> {
+  return await db
+    .collection<PlayRecordEntry>("playRecord")
+    .aggregate<RawPopularCount>([
+      {
+        $match: {
+          playedAt: { $gt: Date.now() - 1000 * 60 * 60 * 24 * popularDays },
+          editing: { $ne: true },
+        },
+      },
+      {
+        $group: {
+          _id: { cid: "$cid", lvHash: "$lvHash" },
+          count: { $sum: { $ifNull: ["$factor", 1] } },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cid: "$_id.cid",
+          lvHash: "$_id.lvHash",
+          count: 1,
+        },
+      },
+    ])
+    .toArray();
+}
+
+export function aggeratePopularCounts(
+  raw: RawPopularCount[],
+  r: { cid: string; levelBrief: ChartLevelBrief[] }
+) {
+  const rcs = raw.filter((rc) => rc.cid === r.cid);
+  let score = 0;
+  for (const rc of rcs) {
+    const l = r.levelBrief.find((l) => l.hash === rc.lvHash);
+    if (l) {
+      // 曲の長さに応じて重み付けの上限を制限。 2min => 1, 1min => 0.7, 30s => 0.5, 10s => 0.3
+      const lengthFactor = Math.max(0.3, Math.sqrt(l.length / 120));
+      score += rc.count * lengthFactor;
+    }
+  }
+  return score;
+}
 
 export default searchApp;
