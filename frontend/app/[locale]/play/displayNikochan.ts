@@ -56,35 +56,30 @@ export class DisplayNikochan {
   update(dn: DisplayNote, c: Context) {
     this.#dn = dn;
     this.#c = c;
+    if (this.#n.done !== 0) {
+      if (this.#fadeoutStart === null) {
+        this.#fadeoutStart = performance.now();
+      }
+    }
   }
 
   drawNikochan(nctx: CanvasRenderingContext2D) {
     let dx = 0;
     let dy = 0;
     let scale = 1;
-    if (this.#n.done === 0) {
-      const fadeinFactor = Math.min(
-        1,
-        (performance.now() - this.#fadeinStart) / 100
-      );
-      nctx.globalAlpha = 0.7 * fadeinFactor;
-    } else {
-      if (this.#fadeoutStart === null) {
-        this.#fadeoutStart = performance.now();
-      }
-      const fadeoutFactor = (performance.now() - this.#fadeoutStart) / 300;
-      if (fadeoutFactor >= 1) {
+    if (this.#n.done !== 0) {
+      if (this.fadeoutFactor >= 1) {
         return;
       }
-      nctx.globalAlpha = 0.7 * (1 - fadeoutFactor);
       if (this.#n.done === 1) {
-        dy = -1 * this.#c.rem * fadeoutFactor;
-        scale = 1 + 0.25 * fadeoutFactor;
+        dy = -1 * this.#c.rem * this.fadeoutFactor;
+        scale = 1 + 0.25 * this.fadeoutFactor;
       }
       if (this.#n.done === 2) {
-        dy = -0.5 * this.#c.rem * fadeoutFactor;
+        dy = -0.5 * this.#c.rem * this.fadeoutFactor;
       }
     }
+    nctx.globalAlpha = 0.7 * this.globalAlpha;
     dx -= (this.size * (scale - 1)) / 2;
     dy -= (this.size * (scale - 1)) / 2;
     nctx.drawImage(
@@ -101,6 +96,11 @@ export class DisplayNikochan {
   drawTail(ctx: CanvasRenderingContext2D) {
     const headSize = this.#c.noteSize * 1;
     const tailSize = this.#c.noteSize * 0.85;
+    if (this.#n.done !== 0) {
+      if (this.fadeoutFactor >= 1) {
+        return;
+      }
+    }
 
     // 速度の変化が大きい場合に、細かく刻んで計算する
     const dtSplitNum = Math.max(
@@ -162,7 +162,7 @@ export class DisplayNikochan {
       ctx.fillStyle = tailGrad;
       // ctx.shadowBlur = 10;
       // ctx.shadowColor = "#facd0080";
-      ctx.globalAlpha = tailOpacity;
+      ctx.globalAlpha = tailOpacity * this.globalAlpha;
       ctx.fill();
       ctx.restore();
     }
@@ -180,7 +180,8 @@ export class DisplayNikochan {
           targetY * this.#c.boxSize -
           this.#dn.pos.y * this.#c.boxSize
       );
-      ctx.globalAlpha = this.#n.done === 0 ? 1 : tailOpacity;
+      ctx.globalAlpha =
+        (this.#n.done === 0 ? 1 : tailOpacity) * this.globalAlpha;
       ctx.beginPath();
       const headRadius = (headSize * bigScale(this.#n.big)) / 2;
       ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
@@ -191,6 +192,20 @@ export class DisplayNikochan {
       ctx.fillStyle = headGrad;
       ctx.fill();
       ctx.restore();
+    }
+  }
+
+  get fadeinFactor() {
+    return Math.min(1, (performance.now() - this.#fadeinStart) / 100);
+  }
+  get fadeoutFactor() {
+    return Math.min(1, (performance.now() - this.#fadeoutStart!) / 300);
+  }
+  get globalAlpha() {
+    if (this.#n.done === 0) {
+      return this.fadeinFactor;
+    } else {
+      return 1 - this.fadeoutFactor;
     }
   }
 
