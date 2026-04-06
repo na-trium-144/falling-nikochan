@@ -1,7 +1,7 @@
 import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import briefApp from "./brief.js";
-import { Bindings, fetchBrief, fetchStatic } from "../env.js";
+import { backendOrigin, Bindings, fetchBrief, fetchStatic } from "../env.js";
 import chartFileApp from "./chartFile.js";
 import newChartFileApp from "./newChartFile.js";
 import playFileApp from "./playFile.js";
@@ -58,8 +58,12 @@ const apiApp = async (config: {
     .route("/seqFile", seqFileApp)
     .route("/seqPreview", seqPreviewApp)
     .route("/playFile", playFileApp)
-    .get("/latest", (c) => c.redirect("/api/search?sort=latest", 308))
-    .get("/popular", (c) => c.redirect("/api/search?sort=popular", 308))
+    .get("/latest", (c) =>
+      c.redirect(new URL("/api/search?sort=latest", backendOrigin(c)), 307)
+    )
+    .get("/popular", (c) =>
+      c.redirect(new URL("/api/search?sort=popular", backendOrigin(c)), 307)
+    )
     .route("/search", searchApp)
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
