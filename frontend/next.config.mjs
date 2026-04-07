@@ -13,7 +13,6 @@ import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
 import LicensePlugin from "webpack-license-plugin";
 import { join, dirname } from "node:path";
-import { createRequire } from "node:module";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -99,15 +98,6 @@ copyFileSync(
   join(process.cwd(), "public/LICENSE")
 );
 
-// Use the browser build of colorthief to avoid pulling in the sharp dependency
-// (which is Node.js-only) into the webpack server bundle.
-const req = createRequire(import.meta.url);
-// colorthief v3 exports separate browser/Node.js builds; resolve the Node.js
-// entry and replace the filename to find the browser counterpart.
-const colorthiefBrowserBuild = req
-  .resolve("colorthief")
-  .replace(/[\\/]dist[\\/]index(\.cjs)?$/, "/dist/index.browser.js");
-
 const nextConfig = {
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -146,7 +136,7 @@ const nextConfig = {
         alias: {
           ...(config.resolve?.alias || {}),
           // Force the browser build to avoid sharp warnings in the server bundle
-          colorthief: colorthiefBrowserBuild,
+          colorthief: "colorthief/dist/index.browser.js",
         },
         extensionAlias: {
           ".js": [".js", ".ts", ".tsx"],
