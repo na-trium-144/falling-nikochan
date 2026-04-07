@@ -1,4 +1,3 @@
-
 export const fontMainUi = "merriweather, kaisei-opti";
 export const fontTitle = "noto-sans, noto-sans-jp";
 export const flexCol = { display: "flex", flexDirection: "column" } as const;

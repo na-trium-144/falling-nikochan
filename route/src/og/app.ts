@@ -247,8 +247,12 @@ const ogApp = (config: {
         .catch(fetchError(env(c)))
         .then(async (imgRes) => {
           const imgBuf = await imgRes.arrayBuffer();
-          const colorResult = await getColor(Buffer.from(imgBuf), { quality: 1 });
-          const colorAdjusted = adjustColor(colorResult ? colorResult.array() : [128, 128, 128]);
+          const colorResult = await getColor(Buffer.from(imgBuf), {
+            quality: 1,
+          });
+          const colorAdjusted = adjustColor(
+            colorResult ? colorResult.array() : [128, 128, 128]
+          );
           return `rgb(${colorAdjusted[0]}, ${colorAdjusted[1]}, ${colorAdjusted[2]})`;
         });
 
