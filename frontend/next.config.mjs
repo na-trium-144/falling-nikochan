@@ -133,11 +133,6 @@ const nextConfig = {
       //    but it seems like it's actually reading the browserslist config in ./package.json anyway
       resolve: {
         ...config.resolve,
-        alias: {
-          ...(config.resolve?.alias || {}),
-          // Force the browser build to avoid sharp warnings in the server bundle
-          colorthief: "colorthief/dist/index.browser.js",
-        },
         extensionAlias: {
           ".js": [".js", ".ts", ".tsx"],
           ".jsx": [".js", ".ts", ".tsx"],
