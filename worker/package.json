@@ -17,7 +17,7 @@
   "dependencies": {
     "@falling-nikochan/i18n": "workspace:*",
     "@falling-nikochan/route": "workspace:*",
-    "hono": "^4.12.9"
+    "hono": "^4.12.12"
   },
   "devDependencies": {
     "babel-loader": "^10.1.1",
