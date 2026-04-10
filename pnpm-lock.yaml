@@ -221,6 +221,9 @@ importers:
         specifier: ^2.8.3
         version: 2.8.3
     devDependencies:
+      '@gera2ld/tarjs':
+        specifier: ^0.3.1
+        version: 0.3.1
       '@icon-park/svg':
         specifier: ^1.4.2
         version: 1.4.2
@@ -366,6 +369,9 @@ importers:
       '@falling-nikochan/route':
         specifier: workspace:*
         version: link:../route
+      '@gera2ld/tarjs':
+        specifier: ^0.3.1
+        version: 0.3.1
       hono:
         specifier: ^4.12.9
         version: 4.12.9
@@ -1148,6 +1154,9 @@ packages:
 
   '@formatjs/intl-localematcher@0.8.2':
     resolution: {integrity: sha512-q05KMYGJLyqFNFtIb8NhWLF5X3aK/k0wYt7dnRFuy6aLQL+vUwQ1cg5cO4qawEiINybeCPXAWlprY2mSBjSXAQ==}
+
+  '@gera2ld/tarjs@0.3.1':
+    resolution: {integrity: sha512-ygcXngovMTj+zI3j2ZSjGiIziELuSCfk5tjUHBjUL/9/9dPLzIdNefW5cZZopB67Di/j/6H9BCGp/0o45qRefQ==}
 
   '@google/genai@1.48.0':
     resolution: {integrity: sha512-plonYK4ML2PrxsRD9SeqmFt76eREWkQdPCglOA6aYDzL1AAbE+7PUnT54SvpWGfws13L0AZEqGSpL7+1IPnTxQ==}
@@ -5615,6 +5624,10 @@ snapshots:
   '@formatjs/intl-localematcher@0.8.2':
     dependencies:
       '@formatjs/fast-memoize': 3.1.1
+
+  '@gera2ld/tarjs@0.3.1':
+    dependencies:
+      '@babel/runtime': 7.28.6
 
   '@google/genai@1.48.0':
     dependencies:
