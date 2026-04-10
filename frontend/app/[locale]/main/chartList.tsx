@@ -187,7 +187,11 @@ export function ChartList(props: Props) {
           changed = true;
           fetchBrief(b.cid).then(({ brief, is404 }) => {
             setBriefs((briefs) => {
-              if (Array.isArray(briefs)) {
+              if (
+                Array.isArray(briefs) &&
+                briefs[i] !== null &&
+                briefs[i]!.cid === b.cid
+              ) {
                 if (is404) {
                   briefs[i] = null;
                 } else {
