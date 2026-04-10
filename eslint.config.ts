@@ -1,37 +1,40 @@
 import { defineConfig } from "eslint/config";
-// https://stackoverflow.com/questions/79841715/typescript-error-pluginflatconfig-is-not-assignable-to-configwithextends-when-u
-import { ConfigWithExtends } from "@eslint/config-helpers";
+import type { Linter } from "eslint";
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
-
-const eslintPluginNext = compat.config({
-  extends: ["next/core-web-vitals"],
-  settings: {
-    next: {
-      rootDir: "frontend/",
-    },
-  },
-  rules: {
-    "@next/next/no-html-link-for-pages": "warn",
-    "@next/next/no-img-element": "off",
-    "jsx-a11y/alt-text": "off",
-    "react-hooks/exhaustive-deps": "error",
-  },
-});
+import eslintConfigNext from "eslint-config-next";
 
 export default defineConfig(
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   tseslint.configs.recommended,
   eslintConfigPrettier,
-  { files: ["frontend/**/*"], extends: eslintPluginNext } as ConfigWithExtends,
+  // eslint-config-next provides flat config but without complete TypeScript types
+  ...eslintConfigNext.map((config: Linter.Config) => ({
+    ...config,
+    files: config.files?.map((pattern) =>
+      typeof pattern === "string" ? `frontend/${pattern}` : pattern
+    ) ?? ["frontend/**/*"],
+  })),
+  {
+    files: ["frontend/**/*"],
+    settings: {
+      next: {
+        rootDir: "frontend/",
+      },
+    },
+    rules: {
+      "@next/next/no-html-link-for-pages": "warn",
+      "@next/next/no-img-element": "off",
+      "jsx-a11y/alt-text": "off",
+      "react-hooks/exhaustive-deps": "error",
+      // React19で追加された以下のエラーについては諦めている
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
   {
     files: ["i18n/**/*"],
     rules: {

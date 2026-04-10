@@ -1,5 +1,3 @@
-import { RGBColor } from "colorthief";
-
 export const fontMainUi = "merriweather, kaisei-opti";
 export const fontTitle = "noto-sans, noto-sans-jp";
 export const flexCol = { display: "flex", flexDirection: "column" } as const;
@@ -28,7 +26,7 @@ export const levelColors = [
   "rgb(199, 0, 54)", // rose-700
 ] as const;
 
-export function adjustColor(colorAdjusted: RGBColor) {
+export function adjustColor(colorAdjusted: [number, number, number]) {
   // frontendの common/colorThief.ts に同じ処理がある
   let [r, g, b] = colorAdjusted;
   // 1. 輝度（Brightness）を計算 (0〜255)

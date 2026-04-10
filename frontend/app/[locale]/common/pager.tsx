@@ -27,7 +27,7 @@ export function Pager(props: Props) {
               href={props.hrefBefore}
               scroll={false}
               replace
-              prefetch={!process.env.NO_PREFETCH}
+              prefetch={process.env.PREFETCH as "auto"}
             >
               <ButtonHighlight />
               &lt;
@@ -56,7 +56,7 @@ export function Pager(props: Props) {
               href={props.hrefAfter}
               scroll={false}
               replace
-              prefetch={!process.env.NO_PREFETCH}
+              prefetch={process.env.PREFETCH as "auto"}
             >
               <ButtonHighlight />
               &gt;
