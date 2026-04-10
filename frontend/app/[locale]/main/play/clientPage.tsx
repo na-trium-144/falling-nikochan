@@ -26,6 +26,7 @@ import { APIError } from "@/common/apiError.js";
 import { useRouter, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
+import Search from "@icon-park/react/lib/icons/Search";
 
 interface Props {
   locale: string;
@@ -223,6 +224,7 @@ function PlayTabInternal(
           <li>
             <div className="flex items-baseline">
               <span className="mr-2">{t("search")}:</span>
+              <Search className="text-lg self-center" />
               <Input
                 actualValue={params.search}
                 updateValue={(v) => updateParams({ search: v })}
@@ -292,7 +294,7 @@ function PlayTabInternal(
                   setDifficultyDebounceTimer(
                     setTimeout(() => {
                       updateParams({ minLv: min, maxLv: max });
-                    }, 1000)
+                    }, 250)
                   );
                 }}
               />
