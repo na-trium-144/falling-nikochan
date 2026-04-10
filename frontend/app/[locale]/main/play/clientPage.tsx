@@ -15,6 +15,7 @@ import {
   useRef,
   useState,
   Suspense,
+  useMemo,
 } from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
@@ -62,20 +63,29 @@ function PlayTabInternal(
     minLv: number;
     maxLv: number;
   }
-  const params: PageParams = {
-    search: props.searchParams?.get("search") || "",
-    sort: props.searchParams
-      ? (props.searchParams.get("sort") as
-          | "relevance"
-          | "latest"
-          | "popular") || "relevance"
-      : undefined,
-    minLv: Number(props.searchParams?.get("minLv") ?? minLv),
-    maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
-  };
-  if (params && !params.search && params.sort === "relevance") {
-    params.sort = "latest";
-  }
+  const prevParam = useRef<PageParams>(null);
+  const params = useMemo(() => {
+    // /share の間はsearchParamを無視する
+    if (prevParam.current && window.location.pathname.includes("/share")) {
+      return prevParam.current;
+    }
+    const params: PageParams = {
+      search: props.searchParams?.get("search") || "",
+      sort: props.searchParams
+        ? (props.searchParams.get("sort") as
+            | "relevance"
+            | "latest"
+            | "popular") || "relevance"
+        : undefined,
+      minLv: Number(props.searchParams?.get("minLv") ?? minLv),
+      maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
+    };
+    if (params && !params.search && params.sort === "relevance") {
+      params.sort = "latest";
+    }
+    prevParam.current = params;
+    return params;
+  }, [props.searchParams]);
   const updateParams = useCallback(
     (params: Partial<PageParams>) => {
       const newParams = new URLSearchParams(props.searchParams);
