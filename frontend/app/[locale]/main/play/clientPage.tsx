@@ -8,7 +8,14 @@ import { maxLv, minLv, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  Suspense,
+} from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useResizeDetector } from "react-resize-detector";
@@ -22,7 +29,23 @@ import { Range2 } from "@/common/range.js";
 interface Props {
   locale: string;
 }
+
 export default function PlayTab(props: Props) {
+  return (
+    <Suspense fallback={<PlayTabInternal {...props} />}>
+      <PlayTabWithParams {...props} />
+    </Suspense>
+  );
+}
+
+function PlayTabWithParams(props: Props) {
+  const searchParams = useSearchParams();
+  return <PlayTabInternal {...props} searchParams={searchParams} />;
+}
+
+function PlayTabInternal(
+  props: Props & { searchParams?: ReturnType<typeof useSearchParams> }
+) {
   const t = useTranslations("main.play");
   const { locale } = props;
 
@@ -31,29 +54,31 @@ export default function PlayTab(props: Props) {
   // ユーザーが文字を入力してから実際にAPIを呼び出すまでの間loading表示にする
   const [waitingDebounce, setWaitingDebounce] = useState(false);
 
-  const pageParams = useSearchParams();
   const router = useRouter();
 
   interface PageParams {
     search: string;
-    sort: "relevance" | "latest" | "popular";
+    sort: "relevance" | "latest" | "popular" | undefined;
     minLv: number;
     maxLv: number;
   }
   const params: PageParams = {
-    search: pageParams.get("search") || "",
-    sort:
-      (pageParams.get("sort") as "relevance" | "latest" | "popular") ||
-      "relevance",
-    minLv: Number(pageParams.get("minLv") || minLv),
-    maxLv: Number(pageParams.get("maxLv") || maxLv),
+    search: props.searchParams?.get("search") || "",
+    sort: props.searchParams
+      ? (props.searchParams.get("sort") as
+          | "relevance"
+          | "latest"
+          | "popular") || "relevance"
+      : undefined,
+    minLv: Number(props.searchParams?.get("minLv") ?? minLv),
+    maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
   };
-  if (!params.search && params.sort === "relevance") {
+  if (params && !params.search && params.sort === "relevance") {
     params.sort = "latest";
   }
   const updateParams = useCallback(
     (params: Partial<PageParams>) => {
-      const newParams = new URLSearchParams(pageParams);
+      const newParams = new URLSearchParams(props.searchParams);
       if (params.search !== undefined) {
         if (params.search) {
           newParams.set("search", params.search);
@@ -78,7 +103,7 @@ export default function PlayTab(props: Props) {
         setWaitingDebounce(false);
       }, 250);
     },
-    [pageParams, router]
+    [props.searchParams, router]
   );
 
   const abortSearching = useRef<AbortController | null>(null);
@@ -87,6 +112,9 @@ export default function PlayTab(props: Props) {
   >();
 
   useEffect(() => {
+    if (!params.sort) {
+      return;
+    }
     if (abortSearching.current) {
       abortSearching.current.abort();
       abortSearching.current = null;
