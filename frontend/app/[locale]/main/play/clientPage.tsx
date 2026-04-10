@@ -237,14 +237,15 @@ function PlayTabInternal(
             </div>
           </li>
           <li>
-            <div>
+            <div className="flex flex-wrap items-center">
               <span className="mr-2">{t("sort")}:</span>
-              <span className="inline-grid grid-cols-3 w-max ">
+              <span className="inline-grid grid-cols-3 w-max max-w-full">
                 {(["relevance", "latest", "popular"] as const).map((sort) => (
                   <button
                     key={sort}
                     className={clsx(
                       "fg-bright",
+                      "flex items-center justify-center",
                       "rounded-lg px-3 py-1 my-0.5",
                       sort === params.sort
                         ? "fn-flat-button fn-plain fn-selected"

@@ -60,7 +60,7 @@ export default {
       recent: "Recently Played Charts",
       relevance: "Relevance",
       latest: "Latest",
-      popular: "Most Popular",
+      popular: "Popular",
       popularDesc: "Sorted by the most played in the last {popularDays} days.",
       latestDesc: "Sorted by the most recently created or updated.",
       level: "Level",
