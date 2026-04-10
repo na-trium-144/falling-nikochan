@@ -41,7 +41,7 @@ export default {
       title: "公開されている譜面で遊ぶ",
       titleShort: "公開譜面",
       description:
-        "人気の譜面 / 新着譜面 / サンプル譜面 から曲を探すことができます。",
+        "人気の譜面 / 新着譜面 から曲を探すことができます。",
       search: "検索",
       searchDesc: "曲名や作曲者、譜面製作者などから検索します。",
       searchTitle: "{search} の検索結果",
@@ -56,14 +56,6 @@ export default {
         "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
       latestDesc2:
         "譜面を制作する方へ: 譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
-      sample: "サンプル譜面",
-      sampleDesc:
-        "Falling Nikochan の作者 <small>(na-trium-144)</small> が作った譜面です。" +
-        "初めての方はこちらからどうぞ。",
-      sampleDesc2:
-        "また、これ以外にも Falling Nikochan の YouTube チャンネル <youtube>@nikochan144</youtube> で譜面を公開しています。",
-      sampleDevonly:
-        "dev環境ではタイトルや作曲者だけ入力したダミーのファイルが表示されます",
     },
     edit: {
       title: "譜面を作る",
