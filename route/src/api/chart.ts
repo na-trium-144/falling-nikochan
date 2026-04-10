@@ -11,8 +11,6 @@ import {
   NoteCommandWithLua7,
   Chart6,
   Chart4,
-  isSample,
-  getSample,
   Chart8Edit,
   CidSchema,
   Chart9Edit,
@@ -66,22 +64,7 @@ export async function getChartEntryCompressed(
     .collection<ChartEntryCompressed>("chart")
     .findOne({ cid, deleted: false });
   if (entryCompressed === null) {
-    if (process.env.API_ENV === "development" && isSample(cid)) {
-      const chart = getSample(cid);
-      return zipEntry(
-        await chartToEntry(
-          { ...chart, changePasswd: "a" },
-          cid,
-          0,
-          null,
-          undefined,
-          "",
-          null
-        )
-      );
-    } else {
-      throw new HTTPException(404, { message: "chartIdNotFound" });
-    }
+    throw new HTTPException(404, { message: "chartIdNotFound" });
   }
   if (typeof entryCompressed.published !== "boolean") {
     entryCompressed.published = false;

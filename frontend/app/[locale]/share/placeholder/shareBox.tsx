@@ -9,7 +9,6 @@ import {
 } from "@falling-nikochan/chart";
 import { useEffect, useRef, useState } from "react";
 import { FlexYouTube, YouTubePlayer } from "@/common/youtube.js";
-import { isSample } from "@falling-nikochan/chart";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import International from "@icon-park/react/lib/icons/International.js";
 import { useTranslations } from "next-intl";
@@ -203,12 +202,7 @@ export function ShareBox(props: Props) {
                     {updatedAt && `(${updatedAt})`}
                   </span>
                   <span>
-                    {cid && isSample(cid) ? (
-                      <span className="ml-2">
-                        <International className="inline-block w-5 translate-y-0.5" />
-                        <span>{t("isSample")}</span>
-                      </span>
-                    ) : brief?.published ? (
+                    {brief?.published ? (
                       <span className="ml-2">
                         <International className="inline-block w-5 translate-y-0.5" />
                         <span>{t("isPublished")}</span>
