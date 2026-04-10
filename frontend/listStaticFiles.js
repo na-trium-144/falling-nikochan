@@ -25,15 +25,21 @@ const nextFiles = allFiles.filter((n) => n.startsWith("/_next"));
 // Non-_next files for tar.gz archive (excluding .ttf and ogTemplate, matching entry.ts)
 const archiveFiles = allFiles
   .filter((n) => !n.startsWith("/_next"))
-  .filter((n) => !n.endsWith(".ttf"))
-  .filter((n) => !n.includes("ogTemplate"));
+  .filter((n) => !n.startsWith("/og-"))
+  .filter((n) => !n.includes("ogTemplate"))
+  .filter((n) => !n.includes("app-icon-"))
+  .filter(
+    (n) =>
+      ![
+        "/sw.js",
+        "/buildVer.json",
+        "/nextFiles.txt",
+        "/staticFiles.tar.gz",
+      ].includes(n)
+  );
 
-// Write staticFiles.json with only _next/ file paths for individual download
-writeFileSync(
-  "out/assets/staticFiles.json",
-  JSON.stringify(nextFiles),
-  "utf-8"
-);
+// Write nextFiles.txt with only _next/ file paths for individual download
+writeFileSync("out/nextFiles.txt", nextFiles.join("\n"), "utf-8");
 
 // Build tar archive and gzip-compress it, then write to disk
 const writer = new TarWriter();
@@ -43,6 +49,6 @@ for (const filePath of archiveFiles) {
 }
 const blob = await writer.write();
 writeFileSync(
-  "out/assets/staticFiles.tar.gz",
+  "out/staticFiles.tar.gz",
   gzipSync(Buffer.from(await blob.arrayBuffer()))
 );

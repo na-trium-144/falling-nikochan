@@ -227,14 +227,11 @@ async function initAssetsCache(config: {
     // tar.gz内のファイルをダウンロードして展開し、tmpCacheに入れる
     const downloadTarAssets = async (): Promise<string[]> => {
       const tarRes = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) +
-          "/assets/staticFiles.tar.gz",
+        (process.env.ASSET_PREFIX || self.origin) + "/staticFiles.tar.gz",
         { cache: "no-store" }
       ).catch(fetchError(e));
       if (!tarRes.ok) {
-        throw new Error(
-          `failed to fetch staticFiles.tar.gz: ${tarRes.status}`
-        );
+        throw new Error(`failed to fetch staticFiles.tar.gz: ${tarRes.status}`);
       }
       const tarBuffer = await decompressGzip(await tarRes.arrayBuffer());
       const reader = await TarReader.load(tarBuffer);
@@ -243,9 +240,7 @@ async function initAssetsCache(config: {
         if (info.type !== TarFileType.File) continue;
         const originalPath = "/" + info.name;
         const contentType = getContentType(originalPath);
-        let pathname = originalPath
-          .replaceAll("[", "%5B")
-          .replaceAll("]", "%5D");
+        let pathname = originalPath;
         if (pathname.endsWith(".html")) {
           pathname = pathname.slice(0, -5);
         }
@@ -264,24 +259,17 @@ async function initAssetsCache(config: {
     // _next/以下のファイルをダウンロードしてtmpCacheに入れる (進捗をクライアントに送信)
     const downloadNextAssets = async (): Promise<string[]> => {
       const nextFilesRes = await fetch(
-        (process.env.ASSET_PREFIX || self.origin) +
-          "/assets/staticFiles.json",
+        (process.env.ASSET_PREFIX || self.origin) + "/nextFiles.txt",
         { cache: "no-store" }
       ).catch(fetchError(e));
       if (!nextFilesRes.ok) {
         throw new Error(
-          `failed to fetch staticFiles.json: ${nextFilesRes.status}`
+          `failed to fetch nextFiles.txt: ${nextFilesRes.status}`
         );
       }
-      const nextFiles = ((await nextFilesRes.json()) as string[]).map(
-        (file) => {
-          let pathname = file.replaceAll("[", "%5B").replaceAll("]", "%5D");
-          if (pathname.endsWith(".html")) {
-            pathname = pathname.slice(0, -5);
-          }
-          return pathname;
-        }
-      );
+      const nextFiles = (await nextFilesRes.text())
+        .split("\n")
+        .map((file) => file.replaceAll("[", "%5B").replaceAll("]", "%5D"));
       // パス名にハッシュが入っているので既にキャッシュ済みのものはスキップ
       const toFetch = (
         await Promise.all(
