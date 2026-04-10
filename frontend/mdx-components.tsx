@@ -14,7 +14,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         <Link
           className={clsx("fn-link-3")}
           href={props.href}
-          prefetch={!process.env.NO_PREFETCH}
+          prefetch={process.env.PREFETCH as "auto"}
         >
           {props.children}
         </Link>

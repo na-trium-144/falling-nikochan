@@ -1,7 +1,13 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useEffect, useRef } from "react";
+import {
+  RefObject,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { SlimeSVG } from "./slime";
 // import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
@@ -12,7 +18,7 @@ interface Props {
   scale?: number;
   control: boolean;
   id?: string;
-  ytPlayer: { current?: YouTubePlayer };
+  ytPlayer: RefObject<YouTubePlayer | undefined>;
   onReady?: () => void;
   onStart?: () => void;
   onStop?: () => void;
@@ -32,6 +38,12 @@ export function FlexYouTube(props: Props) {
     onPlaybackRateChange,
     fixedSide,
   } = props;
+  // 子コンポーネント内部で持つ、実際のYouTube Playerの参照
+  const [internalPlayer, setInternalPlayer] = useState<
+    YouTubePlayer | undefined
+  >(undefined);
+  useImperativeHandle(ytPlayer, () => internalPlayer, [internalPlayer]);
+
   const { width, height, ref } = useResizeDetector();
   const scale = props.scale || 1;
   const resizeYouTube = useRef<() => void>(undefined);
@@ -42,10 +54,10 @@ export function FlexYouTube(props: Props) {
   const onPlaybackRateChangeRef = useRef<(rate: number) => void>(undefined);
   useEffect(() => {
     resizeYouTube.current = () => {
-      if (ytPlayer.current) {
+      if (internalPlayer) {
         if (width && height) {
-          if (typeof ytPlayer.current.getIframe !== "function") return;
-          const iframe = ytPlayer.current.getIframe();
+          if (typeof internalPlayer.getIframe !== "function") return;
+          const iframe = internalPlayer.getIframe();
           if (!iframe) return;
           if (fixedSide === "width") {
             iframe.width = String(width / scale);
@@ -58,7 +70,7 @@ export function FlexYouTube(props: Props) {
       }
     };
     resizeYouTube.current();
-  }, [width, height, ytPlayer, fixedSide, scale]);
+  }, [width, height, internalPlayer, fixedSide, scale]);
 
   onReadyRef.current = onReady;
   onStartRef.current = onStart;
@@ -67,11 +79,12 @@ export function FlexYouTube(props: Props) {
   onPlaybackRateChangeRef.current = onPlaybackRateChange;
 
   useEffect(() => {
+    let internalPlayer: YouTubePlayer | undefined = undefined;
     if (id) {
       const loadVideo = () => {
         // the Player object is created uniquely based on the id in props
         // https://developers.google.com/youtube/iframe_api_reference?hl=ja#Loading_a_Video_Player
-        ytPlayer.current = new (window as any).YT.Player("youtube-player", {
+        internalPlayer = new (window as any).YT.Player("youtube-player", {
           width: 1,
           height: 1,
           videoId: id,
@@ -117,6 +130,7 @@ export function FlexYouTube(props: Props) {
             },
           },
         }) as YouTubePlayer;
+        setInternalPlayer(internalPlayer);
       };
       // https://stackoverflow.com/questions/54017100/how-to-integrate-youtube-iframe-api-in-reactjs-solution
       if (!(window as any).YT) {
@@ -138,7 +152,10 @@ export function FlexYouTube(props: Props) {
         loadVideo();
       }
 
-      return () => ytPlayer.current?.destroy();
+      return () => {
+        internalPlayer?.destroy();
+        setInternalPlayer(undefined);
+      };
     }
   }, [id, control, ytPlayer]);
   return (

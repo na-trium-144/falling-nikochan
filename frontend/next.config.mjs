@@ -79,7 +79,8 @@ const env = {
   // prefix for every API call URL
   BACKEND_PREFIX: process.env.BACKEND_PREFIX || "",
   // if not empty, disable all Next.js Link prefetch
-  NO_PREFETCH: process.env.NO_PREFETCH || "",
+  // use prefetch=auto instead of true dut to a bug in Next.js16: https://github.com/vercel/next.js/issues/92341
+  PREFETCH: process.env.NO_PREFETCH ? false : "auto",
   // suffix for icon assets
   ASSET_QUERY_ICON: "?v=4",
   ASSET_QUERY_NIKOCHAN: "?v=2",
@@ -99,11 +100,6 @@ copyFileSync(
 );
 
 const nextConfig = {
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
