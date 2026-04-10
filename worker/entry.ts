@@ -294,9 +294,12 @@ async function initAssetsCache(config: {
               { cache: "no-cache" }
             ).catch(fetchError(e));
             if (res.ok) {
-              tmp.put(pathname, returnBody(res.clone().body, res.headers));
+              const tmpBody = returnBody(res.clone().body, res.headers);
+              const [size] = await Promise.all([
+                res.arrayBuffer().then((a) => a.byteLength),
+                tmp.put(pathname, tmpBody),
+              ]);
               progressNum++;
-              const size = (await res.arrayBuffer()).byteLength;
               progressSize += size;
               sendInitState("updating", progressNum, totalNum, progressSize);
             } else {
