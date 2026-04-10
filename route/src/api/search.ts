@@ -11,7 +11,6 @@ import {
   DifficultySchema,
   maxLv,
   minLv,
-  numLatest,
   popularDays,
 } from "@falling-nikochan/chart";
 import { PlayRecordEntry } from "./record.js";
@@ -157,15 +156,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
             .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
 
-          if (!q) {
-            // Behave like popular.ts when q is empty
-            sortedResults = mapped.slice(0, numLatest).map((r) => ({
-              cid: r.cid,
-              count: r.count,
-            }));
-          } else {
-            sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
-          }
+          sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
           break;
         }
         case "latest":
