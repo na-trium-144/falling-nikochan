@@ -126,13 +126,7 @@ export default function PlayTab(props: Props) {
         console.error(e);
         setSearchResult(APIError.fetchError());
       });
-  }, [
-    t,
-    params.search,
-    params.sort,
-    params.maxLv,
-    params.minLv,
-  ]);
+  }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 
   const boxSize = useResizeDetector();
   const { rem } = useDisplayMode();
@@ -149,10 +143,7 @@ export default function PlayTab(props: Props) {
       setMaxLvCurrent(params.maxLv);
     }
   } else {
-    if (
-      minLvCurrent === params.minLv &&
-      maxLvCurrent === params.maxLv
-    ) {
+    if (minLvCurrent === params.minLv && maxLvCurrent === params.maxLv) {
       clearTimeout(difficultyDebounceTimer);
       setDifficultyDebounceTimer(null);
       setWaitingDebounce(false);
