@@ -8,7 +8,6 @@ export default {
       main.main.descriptionVerbose,
     chartCreatorEmpty: "(名無し)",
     chartCreator: "譜面作成",
-    isSample: "サンプル譜面",
     isPublished: "一般公開",
     shareLink: "共有用リンク",
     copyURL: "URLをコピー",

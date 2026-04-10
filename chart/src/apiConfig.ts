@@ -16,18 +16,3 @@ export const fileMaxSize = chartMaxEvent * (100 + 150);
 
 export const maxLv = 20;
 export const minLv = 1;
-
-export const originalCId = ["602399", "983403"];
-export const sampleCId = [
-  "850858",
-  "596134",
-  "170465",
-  "592994",
-  "488006",
-  "142383",
-  "683932",
-  "768743",
-];
-export function isSample(cid: string) {
-  return sampleCId.includes(cid) || originalCId.includes(cid);
-}
