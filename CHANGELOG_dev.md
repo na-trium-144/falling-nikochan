@@ -1,3 +1,11 @@
+## ver. 15.4 - 2026/04/11
+
+* 音符のtailのフェードアウトを修正 [#1045](https://github.com/na-trium-144/falling-nikochan/pull/1045)
+* colorthiefをv3にアップデート、仕様変更に対応 [#1042](https://github.com/na-trium-144/falling-nikochan/pull/1042)
+* Next.jsを16にアップデート [#1015](https://github.com/na-trium-144/falling-nikochan/pull/1015)
+* `_next` ディレクトリ以外のstaticファイルを Service Worker でダウンロードする際に個別のファイルではなくtar.gzアーカイブにまとめたものをfetchする [#1043](https://github.com/na-trium-144/falling-nikochan/pull/1043)
+* AGENTS.mdを追加
+
 ## ver. 15.3 - 2026/04/02
 
 * iframeの中で動くようにする [#877](https://github.com/na-trium-144/falling-nikochan/pull/877)
