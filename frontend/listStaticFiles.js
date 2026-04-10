@@ -45,7 +45,7 @@ writeFileSync("out/nextFiles.txt", nextFiles.join("\n"), "utf-8");
 const writer = new TarWriter();
 for (const filePath of archiveFiles) {
   const data = readFileSync(join(baseDir, filePath.slice(1)));
-  writer.addFile(filePath.slice(1), data.buffer); // remove leading '/'
+  writer.addFile(filePath.slice(1), data); // remove leading '/'
 }
 const blob = await writer.write();
 writeFileSync(
