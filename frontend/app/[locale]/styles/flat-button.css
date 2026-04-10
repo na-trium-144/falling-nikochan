@@ -8,27 +8,33 @@
   .fn-flat-button {
     @apply relative cursor-pointer;
 
+    @variant disabled {
+      @apply cursor-default;
+    }
+
     > .fn-glass-1 {
       @apply opacity-0;
     }
     > .fn-glass-2 {
       @apply opacity-0;
     }
+    &:not(:disabled) {
     @variant hover {
-      > .fn-glass-1 {
-        @apply opacity-100;
+        > .fn-glass-1 {
+          @apply opacity-100;
+        }
+        > .fn-glass-2 {
+          @apply opacity-100;
+        }
       }
-      > .fn-glass-2 {
-        @apply opacity-100;
-      }
-    }
-    @variant active {
-      @apply inset-shadow-button;
-      > .fn-glass-1 {
-        @apply opacity-0;
-      }
-      > .fn-glass-2 {
-        @apply mask-none;
+      @variant active {
+        @apply inset-shadow-button;
+        > .fn-glass-1 {
+          @apply opacity-0;
+        }
+        > .fn-glass-2 {
+          @apply mask-none;
+        }
       }
     }
 
@@ -43,10 +49,14 @@
 
     &.fn-sky {
       @variant hover {
-        @apply bg-sky-200 dark:bg-orange-950;
+        &:not(:disabled) {
+          @apply bg-sky-200 dark:bg-orange-950;
+        }
       }
       @variant active {
-        @apply bg-sky-200 dark:bg-orange-950;
+        &:not(:disabled) {
+          @apply bg-sky-200 dark:bg-orange-950;
+        }
       }
 
       &.fn-dropdown-item {
