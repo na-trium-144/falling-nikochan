@@ -19,7 +19,7 @@
       @apply opacity-0;
     }
     &:not(:disabled) {
-    @variant hover {
+      @variant hover {
         > .fn-glass-1 {
           @apply opacity-100;
         }

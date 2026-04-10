@@ -41,11 +41,11 @@ describe("GET /api/search", () => {
     expect(res.status).to.equal(200);
     expect(await res.json()).to.not.deep.include({ cid: dummyCid });
   });
-  test("empty query", async () => {
+  test("empty query returns all charts", async () => {
     await initDb();
     const res = await app.request("/api/search?q=");
     expect(res.status).to.equal(200);
-    expect(await res.json()).to.not.deep.include({ cid: dummyCid });
+    expect(await res.json()).to.deep.include({ cid: dummyCid });
   });
 
   test("should return latest entries with sort=latest", async () => {
@@ -58,6 +58,7 @@ describe("GET /api/search", () => {
       expect(entry.cid).to.be.a("string");
     }
 
+    const date = new Date().getTime();
     const client = new MongoClient(process.env.MONGODB_URI!);
     try {
       await client.connect();
@@ -66,7 +67,7 @@ describe("GET /api/search", () => {
         { cid: dummyCid },
         {
           $set: {
-            updatedAt: new Date().getTime(),
+            updatedAt: date,
             published: true,
           },
         }
@@ -75,12 +76,13 @@ describe("GET /api/search", () => {
       await client.close();
     }
 
-    const res2 = await app.request("/api/latest");
+    const res2 = await app.request("/api/search?sort=latest");
     expect(res2.status).to.equal(200);
     const entries2: { cid: string }[] = await res2.json();
     expect(entries2.length).to.be.at.most(25);
     expect(entries2[0]).to.deep.equal({
       cid: dummyCid,
+      updatedAt: date,
     });
   });
 });

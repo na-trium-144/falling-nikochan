@@ -48,22 +48,22 @@ export default {
       title: "Play with Public Charts",
       // mobile navigation
       titleShort: "Play",
-      description:
-        "You can find songs from popular charts / latest charts.",
-      search: "Search",
-      searchDesc: "Search by song title, composer, chart creator, etc.",
-      searchTitle: "Search results for {search}",
-      recent: "Recently Played Charts",
-      popular: "Popular Charts",
-      popularDesc: "Charts played many times in the last {popularDays} days.",
-      latest: "Latest Charts / All Charts",
-      latestDesc:
-        "List of published charts. Sorted by the most recently created or updated. " +
+      description: "List of published charts.",
+      descriptionX:
         "Updates are also announced on the official account of <xlogo></xlogo> <twitter>@nikochan144</twitter>.",
-      latestDescText:
-        "List of published charts. Sorted by the most recently created or updated. ",
-      latestDesc2:
-        "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
+      descriptionPublic:
+        "Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
+      search: "Search",
+      searchPlaceholder: "Song title, composer, chart creator, etc.",
+      searchTitle: "Search results for {search}",
+      sort: "Sort by",
+      recent: "Recently Played Charts",
+      relevance: "Relevance",
+      latest: "Latest",
+      popular: "Most Popular",
+      popularDesc: "Sorted by the most played in the last {popularDays} days.",
+      latestDesc: "Sorted by the most recently created or updated.",
+      level: "Level",
     },
     edit: {
       title: "Create a Chart",
