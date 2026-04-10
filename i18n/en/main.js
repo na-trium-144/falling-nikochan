@@ -49,7 +49,7 @@ export default {
       // mobile navigation
       titleShort: "Play",
       description:
-        "You can find songs from popular charts / latest charts / sample charts.",
+        "You can find songs from popular charts / latest charts.",
       search: "Search",
       searchDesc: "Search by song title, composer, chart creator, etc.",
       searchTitle: "Search results for {search}",
@@ -64,13 +64,6 @@ export default {
         "List of published charts. Sorted by the most recently created or updated. ",
       latestDesc2:
         "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
-      sample: "Sample Charts",
-      sampleDesc:
-        "Charts created by Falling Nikochan author <small>(na-trium-144)</small>. Start here if you are new. ",
-      sampleDesc2:
-        "Also, more charts are available on Falling Nikochan's YouTube channel <youtube>@nikochan144</youtube>.",
-      sampleDevonly:
-        "In dev environment, dummy files with only title and composer are displayed.",
     },
     edit: {
       title: "Create a Chart",
