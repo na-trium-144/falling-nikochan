@@ -22,6 +22,7 @@ interface Props {
   passwd?: boolean;
   disabled?: boolean;
   onEnter?: (v: string) => void; // これが呼ばれた時点では値がまだ外側のstateに反映されていない場合がある
+  placeholder?: string;
 }
 export default function Input(props: Props) {
   const [value, setValue] = useState<string>(props.actualValue);
@@ -47,6 +48,7 @@ export default function Input(props: Props) {
         props.className
       )}
       value={value}
+      placeholder={props.placeholder}
       onKeyDown={(e) => {
         e.stopPropagation();
         if (

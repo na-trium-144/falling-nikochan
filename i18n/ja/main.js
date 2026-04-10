@@ -40,22 +40,23 @@ export default {
     play: {
       title: "公開されている譜面で遊ぶ",
       titleShort: "公開譜面",
-      description:
-        "人気の譜面 / 新着譜面 から曲を探すことができます。",
-      search: "検索",
-      searchDesc: "曲名や作曲者、譜面製作者などから検索します。",
-      searchTitle: "{search} の検索結果",
-      recent: "最近プレイした譜面",
-      popular: "人気の譜面",
-      popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
-      latest: "新着譜面・すべての譜面",
-      latestDesc:
-        "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。" +
+      description: "公開されている譜面の一覧です。",
+      descriptionX:
         "<xlogo></xlogo> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
-      latestDescText:
-        "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
-      latestDesc2:
-        "譜面を制作する方へ: 譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
+      descriptionPublic:
+        "譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
+      search: "検索",
+      searchPlaceholder: "曲名や作曲者、譜面製作者など",
+      searchTitle: "{search} の検索結果",
+      sort: "表示順",
+      recent: "最近プレイした譜面",
+      relevance: "関連度順",
+      latest: "更新日順",
+      popular: "人気順",
+      popularDesc:
+        "直近 {popularDays} 日間にプレイされた回数の多い順に表示します。",
+      latestDesc: "最近作成・更新された順に表示します。",
+      level: "レベル",
     },
     edit: {
       title: "譜面を作る",
