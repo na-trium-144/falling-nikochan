@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { Fragment, RefObject, useEffect, useRef, useState } from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
@@ -526,7 +526,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <>
       <LevelBadge
-        className="absolute z-10 top-1 right-0"
+        className="no-pc absolute z-10 top-1 right-0"
         status={status}
         levels={levelColors}
         showDot
@@ -576,11 +576,41 @@ function ChartListItemChildren(props: CProps) {
           </div>
         )}
         {props.creator && (
-          <div className="h-5 **:leading-5 fn-cl-clip">
-            <span className="text-xs">{t("chartCreator")}:</span>
-            <span className="ml-1 font-title text-sm fg-bright">
-              {props.brief?.chartCreator}
+          <div className="h-5 **:leading-5">
+            <span className="flex-1 min-w-0 fn-cl-clip">
+              <span className="text-xs">{t("chartCreator")}:</span>
+              <span className="ml-1 font-title text-sm fg-bright">
+                {props.brief?.chartCreator}
+              </span>
             </span>
+            {props.badge && (
+              <div className="no-mobile ml-2 flex-none min-w-0 max-w-1/2 fn-cl-clip mr-2">
+                {props.brief?.levels
+                  .filter((l) => !l.unlisted)
+                  .map((l, i) => (
+                    <Fragment key={i}>
+                      {i !== 0 && <span className="mx-1 text-xs">/</span>}
+                      <span
+                        className={clsx(
+                          `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
+                          "text-sm"
+                        )}
+                      >
+                        {l.difficulty}
+                      </span>
+                      {status[i] && (
+                        <span className="inline-block relative w-4 h-0">
+                          <LevelBadge
+                            className="absolute -bottom-3.5"
+                            status={[status[i]]}
+                            levels={[levelTypes.indexOf(l.type)]}
+                          />
+                        </span>
+                      )}
+                    </Fragment>
+                  ))}
+              </div>
+            )}
           </div>
         )}
       </div>
