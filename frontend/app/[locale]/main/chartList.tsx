@@ -505,6 +505,7 @@ export function ChartListItem(props: CProps) {
   );
 }
 function ChartListItemChildren(props: CProps) {
+  const t = useTranslations("main.chartList");
   const [status, setStatus] = useState<BadgeStatus[]>([]);
   const levelColors =
     props.brief?.levels
@@ -557,9 +558,7 @@ function ChartListItemChildren(props: CProps) {
             {!props.original && props.brief?.composer && (
               <>
                 <span className="ml-1.5">/</span>
-                <span className="ml-1">
-                  {props.brief.composer}
-                </span>
+                <span className="ml-1">{props.brief.composer}</span>
               </>
             )}
           </span>
@@ -570,7 +569,7 @@ function ChartListItemChildren(props: CProps) {
           </span>
         </div>
         {!props.original && props.brief?.composer && (
-          <div className="no-mobile h-5 **:leading-5">
+          <div className="no-mobile h-5 **:leading-5 fg-bright">
             <span className="text-sm fn-cl-clip font-title">
               {props.brief.composer}
             </span>
@@ -578,8 +577,8 @@ function ChartListItemChildren(props: CProps) {
         )}
         {props.creator && (
           <div className="h-5 **:leading-5 fn-cl-clip">
-            <span className="text-xs">by</span>
-            <span className={clsx("ml-1 font-title text-sm")}>
+            <span className="text-xs">{t("chartCreator")}:</span>
+            <span className="ml-1 font-title text-sm fg-bright">
               {props.brief?.chartCreator}
             </span>
           </div>

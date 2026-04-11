@@ -87,6 +87,7 @@ export default {
         "編集した譜面のリストやパスワードなどのブラウザに保存したデータがすべて削除されてしまいます。",
     },
     chartList: {
+      chartCreator: "譜面作成",
       showAll: "もっと表示",
       empty: "まだありません",
       notFound: "見つかりませんでした",
