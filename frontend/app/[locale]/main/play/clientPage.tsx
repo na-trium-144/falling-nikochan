@@ -152,10 +152,13 @@ function PlayTabInternal(
       .then(async (res) => {
         if (res.ok) {
           setSearchResult(
-            (await res.json()).map((r: { cid: string }) => ({
-              cid: r.cid,
-              fetched: false,
-            }))
+            (await res.json()).map(
+              (r: { cid: string; updatedAt?: number }) => ({
+                cid: r.cid,
+                updatedAt: r.updatedAt,
+                fetched: false,
+              })
+            )
           );
         } else {
           setSearchResult(await APIError.fromRes(res));
@@ -313,6 +316,7 @@ function PlayTabInternal(
         onClickMobile={openShareInternal}
         showLoading
         badge
+        dateDiff={params.sort === "latest"}
         containerRef={boxSize.ref as RefObject<HTMLDivElement | null>}
         containerHeight={
           boxSize.height ? boxSize.height - (12 / 4) * rem : undefined

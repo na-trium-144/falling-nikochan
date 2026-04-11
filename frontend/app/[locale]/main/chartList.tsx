@@ -74,6 +74,7 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 export interface ChartLineBrief {
   cid: string;
+  updatedAt?: number; // searchAPIのレスポンスにこれがある場合はbrief.updatedAtよりも優先する
   fetching?: boolean;
   fetched: boolean;
   brief?: ChartBrief;
@@ -309,6 +310,7 @@ export function ChartList(props: Props) {
               <ChartListItem
                 key={i}
                 cid={filteredBriefs.at(i)!.cid}
+                updatedAt={filteredBriefs.at(i)!.updatedAt}
                 brief={filteredBriefs.at(i)!.brief}
                 href={props.href(filteredBriefs.at(i)!.cid)}
                 onClick={
@@ -402,6 +404,7 @@ export function ChartList(props: Props) {
 
 interface CProps {
   cid: string;
+  updatedAt?: number;
   brief?: ChartBrief;
   href: string;
   onClick?: () => void;
@@ -513,7 +516,7 @@ function ChartListItemChildren(props: CProps) {
           {props.dateDiff && (
             <DateDiff
               className="ml-2 text-xs/3 text-dim"
-              date={props.brief?.updatedAt || 0}
+              date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
             />
           )}
           {props.original && (
