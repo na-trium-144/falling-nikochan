@@ -11,11 +11,11 @@ import Input from "@/common/input.jsx";
 import {
   RefObject,
   useCallback,
-  useEffect,
   useRef,
   useState,
   Suspense,
   useMemo,
+  useLayoutEffect,
 } from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
@@ -122,7 +122,7 @@ function PlayTabInternal(
     ChartLineBrief[] | APIError | undefined
   >();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!params.sort) {
       return;
     }
