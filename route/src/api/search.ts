@@ -99,7 +99,6 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const db = client.db("nikochan");
 
       let mongoQuery: Filter<ChartEntryCompressed> = {
-        published: true,
         deleted: false,
         levelBrief: {
           $elemMatch: {
@@ -117,11 +116,17 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           $or: [
             { cid: q },
             {
+              published: true,
               $and: normalizedQueries.map((s) => ({
                 normalizedText: { $regex: s },
               })),
             },
           ],
+        };
+      } else {
+        mongoQuery = {
+          ...mongoQuery,
+          published: true,
         };
       }
 
