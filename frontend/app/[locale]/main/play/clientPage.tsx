@@ -250,7 +250,7 @@ function PlayTabInternal(
                       "fn-toggle",
                       sort === params.sort
                         ? "fn-flat-button fn-plain fn-selected"
-                        : "fn-flat-button fn-sky",
+                        : "fn-flat-button fn-sky"
                     )}
                     onClick={() => updateParams({ sort })}
                     disabled={sort === "relevance" && !params.search}
