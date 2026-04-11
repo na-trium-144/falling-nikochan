@@ -94,6 +94,7 @@ export default {
         "all data saved in the browser, such as the list of edited charts and passwords, will be deleted.",
     },
     chartList: {
+      chartCreator: "Chart by",
       // "Show More →" button
       showAll: "Show More",
       empty: "No charts yet",
