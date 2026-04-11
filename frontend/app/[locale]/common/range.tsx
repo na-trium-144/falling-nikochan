@@ -40,7 +40,11 @@ export default function Range(rangeProps: Props) {
         </div>
       )}
       renderThumb={({ props }) => (
-        <RenderThumb {...props} disabled={rangeProps.disabled} />
+        <RenderThumb
+          {...props}
+          key={props.key}
+          disabled={rangeProps.disabled}
+        />
       )}
     />
   );
@@ -111,7 +115,11 @@ export function Range2(rangeProps: Props2) {
         </div>
       )}
       renderThumb={({ props }) => (
-        <RenderThumb {...props} disabled={rangeProps.disabled} />
+        <RenderThumb
+          {...props}
+          key={props.key}
+          disabled={rangeProps.disabled}
+        />
       )}
     />
   );
