@@ -80,5 +80,19 @@
         @apply bg-orange-200 dark:bg-sky-950;
       }
     }
+
+    &.fn-toggle {
+      /* /main/playの並べ替え選択、playOptionのレベル選択で使われている */
+      @apply fg-bright;
+      @apply flex items-center justify-center;
+      @apply rounded-lg px-3 py-1 my-0.5;
+      @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+      @apply disabled:text-dim;
+
+      &.fn-selected,
+      &:hover:not(:disabled) {
+        @apply shadow-2xs;
+      }
+    }
   }
 }

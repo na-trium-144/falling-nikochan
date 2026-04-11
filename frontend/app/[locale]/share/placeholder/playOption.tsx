@@ -182,14 +182,11 @@ function LevelButton(props: {
   return (
     <button
       className={clsx(
-        "w-full fg-bright",
-        "rounded-lg px-3 py-1 my-0.5",
-        "flex items-center justify-center",
+        "w-full",
+        "fn-toggle",
         props.selected
           ? "fn-flat-button fn-plain fn-selected"
-          : "fn-flat-button fn-sky",
-        props.selected ? "shadow-2xs" : "hover:shadow-2xs",
-        "shadow-slate-500/50 dark:shadow-stone-950/50"
+          : "fn-flat-button fn-sky"
       )}
       onClick={props.onClick}
     >
