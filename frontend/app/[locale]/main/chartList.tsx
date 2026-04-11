@@ -157,17 +157,44 @@ export function ChartList(props: Props) {
 
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
-  const itemMinWidth = 18; // * rem
-  const itemMinHeight = 12 / 4; // h-11 + gap-1
-  const ulCols = ulSize.width
-    ? Math.floor(ulSize.width / (itemMinWidth * rem))
-    : 1;
+  const [itemMinWidth, setItemMinWidth] = useState<number>(); // * rem;
+  const [itemMinHeight, setItemMinHeight] = useState<number>(); // * rem;
+  useEffect(() => {
+    function updateSize() {
+      if (ulSize.ref.current instanceof HTMLElement) {
+        const minWidth = getComputedStyle(ulSize.ref.current).getPropertyValue(
+          "--item-min-width"
+        );
+        if (minWidth.endsWith("rem")) {
+          setItemMinWidth(Number(minWidth.slice(0, -3)));
+        } else {
+          throw new Error("Invalid --item-min-width value: " + minWidth);
+        }
+        const minHeight = getComputedStyle(ulSize.ref.current).getPropertyValue(
+          "--item-min-height"
+        );
+        if (minHeight.endsWith("rem")) {
+          setItemMinHeight(Number(minHeight.slice(0, -3)));
+        } else {
+          throw new Error("Invalid --item-min-height value: " + minHeight);
+        }
+      }
+    }
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, [rem, ulSize.ref]);
+  const ulCols =
+    itemMinWidth && ulSize.width
+      ? Math.max(1, Math.floor(ulSize.width / (itemMinWidth * rem)))
+      : 1;
   // 現在の画面サイズに応じた最大サイズ
   const [pagination, setPagination] = useState<number>(1);
   // 1ページあたりに表示できる最大数
-  const maxRowPerPage = props.containerHeight
-    ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
-    : undefined;
+  const maxRowPerPage =
+    itemMinHeight && props.containerHeight
+      ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
+      : undefined;
   // この個数は空でも枠を表示する
   const fixedRow = props.fixedRows ? 6 : 0;
   // 最大で表示する個数
@@ -270,7 +297,8 @@ export function ChartList(props: Props) {
         props.containerRef?.current &&
         props.containerHeight &&
         padHeightForScroll > 0 &&
-        maxRowPerPage
+        maxRowPerPage &&
+        itemMinHeight
       ) {
         setPagination((pagination) =>
           Math.max(
@@ -347,7 +375,8 @@ export function ChartList(props: Props) {
           className="fn-cl-message"
           style={{
             top:
-              itemMinHeight * Math.round(firstFetchingIndex / ulCols) + "rem",
+              (itemMinHeight ?? 0) * Math.round(firstFetchingIndex / ulCols) +
+              "rem",
           }}
         >
           <SlimeSVG />
@@ -496,7 +525,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <>
       <LevelBadge
-        className="absolute z-10 top-0 -right-1"
+        className="absolute z-10 top-1 right-0"
         status={status}
         levels={levelColors}
         showDot
@@ -510,40 +539,51 @@ function ChartListItemChildren(props: CProps) {
         <div className="fn-thumbnail" />
       )}
       <div className="fn-cl-content">
-        <div className="flex flex-wrap items-baseline max-w-full">
-          <span className="text-xs/3">ID:</span>
-          <span className="ml-1 text-sm/3">{props.cid}</span>
+        <div className="h-4 **:leading-4">
+          <span className="text-xs text-dim">{props.cid}</span>
           {props.dateDiff && (
             <DateDiff
-              className="ml-2 text-xs/3 text-dim"
+              className="ml-2 text-xs"
               date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
             />
           )}
           {props.original && (
-            <span className="ml-2 text-xs/3">(オリジナル曲)</span>
-          )}
-          {props.creator && (
-            <span className="inline-block h-4 leading-4 fn-cl-clip">
-              <span className="ml-2 text-xs/4">by</span>
-              <span className={clsx("ml-1 font-title text-sm/4")}>
-                {props.brief?.chartCreator}
-              </span>
-            </span>
+            <span className="ml-2 text-xs">(オリジナル曲)</span>
           )}
         </div>
-        <div className={clsx("h-5 **:leading-5 fn-cl-clip", "fg-bright")}>
-          <span className="font-title text-base font-medium">
+        <div className="no-pc h-5 **:leading-5 fg-bright">
+          <span className="font-title text-base fn-cl-clip">
+            <span className="font-medium">{props.brief?.title}</span>
+            {!props.original && props.brief?.composer && (
+              <>
+                <span className="ml-1.5">/</span>
+                <span className="ml-1">
+                  {props.brief.composer}
+                </span>
+              </>
+            )}
+          </span>
+        </div>
+        <div className="no-mobile h-5.5 **:leading-5.5 fg-bright">
+          <span className="font-title text-lg font-medium fn-cl-clip">
             {props.brief?.title}
           </span>
-          {!props.original && props.brief?.composer && (
-            <>
-              <span className="ml-1 text-sm">/</span>
-              <span className="ml-1 font-title text-base">
-                {props.brief.composer}
-              </span>
-            </>
-          )}
         </div>
+        {!props.original && props.brief?.composer && (
+          <div className="no-mobile h-5 **:leading-5">
+            <span className="text-sm fn-cl-clip font-title">
+              {props.brief.composer}
+            </span>
+          </div>
+        )}
+        {props.creator && (
+          <div className="h-5 **:leading-5 fn-cl-clip">
+            <span className="text-xs">by</span>
+            <span className={clsx("ml-1 font-title text-sm")}>
+              {props.brief?.chartCreator}
+            </span>
+          </div>
+        )}
       </div>
     </>
   );
