@@ -247,17 +247,10 @@ function PlayTabInternal(
                   <button
                     key={sort}
                     className={clsx(
-                      "fg-bright",
-                      "flex items-center justify-center",
-                      "rounded-lg px-3 py-1 my-0.5",
+                      "fn-toggle",
                       sort === params.sort
                         ? "fn-flat-button fn-plain fn-selected"
                         : "fn-flat-button fn-sky",
-                      sort === params.sort
-                        ? "shadow-2xs"
-                        : "hover:not-disabled:shadow-2xs",
-                      "shadow-slate-500/50 dark:shadow-stone-950/50",
-                      "disabled:text-dim"
                     )}
                     onClick={() => updateParams({ sort })}
                     disabled={sort === "relevance" && !params.search}
