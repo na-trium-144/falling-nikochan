@@ -171,12 +171,12 @@ export function ChartList(props: Props) {
           throw new Error("Invalid --item-min-width value: " + minWidth);
         }
         const minHeight = getComputedStyle(ulSize.ref.current).getPropertyValue(
-          "--item-min-height"
+          "--item-height"
         );
         if (minHeight.endsWith("rem")) {
           setItemMinHeight(Number(minHeight.slice(0, -3)));
         } else {
-          throw new Error("Invalid --item-min-height value: " + minHeight);
+          throw new Error("Invalid --item-height value: " + minHeight);
         }
       }
     }
@@ -366,7 +366,7 @@ export function ChartList(props: Props) {
                 badge={props.badge}
               />
             ) : (
-              <li key={i} className="fn-cl-item" />
+              <li key={i} className="fn-cl-item fn-cl-empty" />
             )
         )}
       </ul>
