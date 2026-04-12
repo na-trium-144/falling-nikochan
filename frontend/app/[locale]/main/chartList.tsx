@@ -159,24 +159,25 @@ export function ChartList(props: Props) {
   const { rem } = useDisplayMode();
   const [itemMinWidth, setItemMinWidth] = useState<number>(); // * rem;
   const [itemMinHeight, setItemMinHeight] = useState<number>(); // * rem;
+  const [itemGap, setItemGap] = useState<number>(); // * rem;
   useEffect(() => {
     function updateSize() {
       if (ulSize.ref.current instanceof HTMLElement) {
-        const minWidth = getComputedStyle(ulSize.ref.current).getPropertyValue(
-          "--item-min-width"
-        );
-        if (minWidth.endsWith("rem")) {
-          setItemMinWidth(Number(minWidth.slice(0, -3)));
-        } else {
-          throw new Error("Invalid --item-min-width value: " + minWidth);
-        }
-        const minHeight = getComputedStyle(ulSize.ref.current).getPropertyValue(
-          "--item-height"
-        );
-        if (minHeight.endsWith("rem")) {
-          setItemMinHeight(Number(minHeight.slice(0, -3)));
-        } else {
-          throw new Error("Invalid --item-height value: " + minHeight);
+        for (const [setter, propName] of [
+          [setItemMinWidth, "--item-min-width"],
+          [setItemMinHeight, "--item-height"],
+          [setItemGap, "--item-gap"],
+        ] as const) {
+          const value = getComputedStyle(ulSize.ref.current).getPropertyValue(
+            propName
+          );
+          if (value.endsWith("rem")) {
+            setter(Number(value.slice(0, -3)));
+          } else {
+            throw new Error(
+              `${propName} value does not ends with "rem": ${value}`
+            );
+          }
         }
       }
     }
@@ -192,8 +193,9 @@ export function ChartList(props: Props) {
   const [pagination, setPagination] = useState<number>(1);
   // 1ページあたりに表示できる最大数
   const maxRowPerPage =
-    itemMinHeight && props.containerHeight
-      ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
+    itemMinHeight && itemGap && props.containerHeight
+      ? Math.ceil(props.containerHeight / ((itemMinHeight + itemGap) * rem)) *
+        ulCols
       : undefined;
   // この個数は空でも枠を表示する
   const fixedRow = props.fixedRows ? 6 : 0;
@@ -298,14 +300,15 @@ export function ChartList(props: Props) {
         props.containerHeight &&
         padHeightForScroll > 0 &&
         maxRowPerPage &&
-        itemMinHeight
+        itemMinHeight &&
+        itemGap
       ) {
         setPagination((pagination) =>
           Math.max(
             Math.floor(
               (props.containerRef!.current!.scrollTop +
                 props.containerHeight!) /
-                ((itemMinHeight * rem * maxRowPerPage!) / ulCols)
+                (((itemMinHeight + itemGap) * rem * maxRowPerPage!) / ulCols)
             ) + 1,
             pagination
           )
@@ -321,6 +324,7 @@ export function ChartList(props: Props) {
     props.containerRef,
     padHeightForScroll,
     itemMinHeight,
+    itemGap,
     rem,
     maxRowPerPage,
     ulCols,
@@ -375,7 +379,8 @@ export function ChartList(props: Props) {
           className="fn-cl-message"
           style={{
             top:
-              (itemMinHeight ?? 0) * Math.round(firstFetchingIndex / ulCols) +
+              (itemMinHeight + itemGap ?? 0) *
+                Math.round(firstFetchingIndex / ulCols) +
               "rem",
           }}
         >

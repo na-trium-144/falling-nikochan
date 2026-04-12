@@ -1,6 +1,7 @@
 @layer components {
   .fn-chart-list {
-    @apply grid w-full mx-auto justify-items-start items-center gap-0 mb-1;
+    @apply grid w-full mx-auto justify-items-start items-center mb-1;
+    gap: var(--item-gap);
 
     /*
     ~48rem: 1列 -> 24~48rem -> max-width:36rem
@@ -8,11 +9,13 @@
     ~88rem(w-main): 3列 -> 24~
     */
 
+    /* getComputedStyle() で取得したいので、remでの記述に揃え、calc()は使わない */
     --item-min-width: 24rem;
     --item-max-width: 36rem;
-    --item-height: 4.25rem;
+    --item-gap: 0.375rem;
+    --item-height: 4rem;
     @variant main-wide {
-      --item-height: 5.625rem;
+      --item-height: 5.375rem;
     }
 
     grid-template-columns: repeat(
@@ -24,7 +27,7 @@
 
     .fn-cl-item {
       @apply rounded-md;
-      /*@apply bg-sky-400/15 dark:bg-orange-700/10;*/
+      @apply bg-sky-400/10 dark:bg-orange-700/10;
       @apply w-full mx-auto h-max;
       max-width: var(--item-max-width);
       /*min-height: var(--item-height);*/
@@ -37,7 +40,7 @@
       > .fn-flat-button {
         @apply rounded-[inherit] sq-inherit;
         @apply block w-full text-left cursor-pointer;
-        @apply pl-1 py-1.5;
+        @apply pl-1 py-1;
         @apply relative;
         @apply flex flex-row items-center gap-2;
 
