@@ -99,6 +99,11 @@ For more information, play, and chart creation, please visit the Falling Nikocha
         ```sh
         pnpm run nbuild
         ```
+    * This project uses icon-park library for icons. Import with `import IconName from "@icon-park/react/lib/icons/IconName";`.
+    * This project uses TailwindCSS.
+        * Custom theme variables are defined in app/[locale]/globals.css.
+        * Custom utility classes are defined in styles/utilities.css.
+        * Instead of writing the same style multiple times, extract it into a tailwind component and put it in a CSS file under styles/ (the name of custom component starts with `fn-`).
 * Service Worker
     * Build frontend and service worker
     ```sh
