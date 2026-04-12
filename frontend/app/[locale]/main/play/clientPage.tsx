@@ -226,7 +226,7 @@ function PlayTabInternal(
         <ul className="list-disc ml-6 space-y-1 text-left">
           <li>
             <div className="flex items-baseline">
-              <span className="mr-2">{t("search")}:</span>
+              <span className="mr-2 flex-none">{t("search")}:</span>
               <Search className="text-lg self-center" />
               <Input
                 actualValue={params.search}
@@ -234,7 +234,7 @@ function PlayTabInternal(
                 updateDebounce={1000}
                 onChange={() => setWaitingDebounce(true)}
                 left
-                className="flex-1 font-title "
+                className="flex-1 font-title min-w-0"
                 placeholder={t("searchPlaceholder")}
               />
             </div>
