@@ -10,9 +10,9 @@
 
     --item-min-width: 24rem;
     --item-max-width: 36rem;
-    --item-min-height: 4.25rem;
+    --item-height: 4.25rem;
     @variant main-wide {
-      --item-min-height: 5.625rem;
+      --item-height: 5.625rem;
     }
 
     grid-template-columns: repeat(
@@ -27,7 +27,11 @@
       /*@apply bg-sky-400/15 dark:bg-orange-700/10;*/
       @apply w-full mx-auto h-max;
       max-width: var(--item-max-width);
-      min-height: var(--item-min-height);
+      /*min-height: var(--item-height);*/
+
+      &.fn-cl-empty {
+        height: var(--item-height);
+      }
 
       /* 選択可能な chart-list item は、.fn-cl-item > .fn-flat-button.fn-sky と定義される */
       > .fn-flat-button {
