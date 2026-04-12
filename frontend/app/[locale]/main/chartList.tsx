@@ -589,11 +589,11 @@ function ChartListItemChildren(props: CProps) {
                   .filter((l) => !l.unlisted)
                   .map((l, i) => (
                     <Fragment key={i}>
-                      {i !== 0 && <span className="mx-1 text-xs">/</span>}
+                      {i !== 0 && <span className="mx-1 text-sm">/</span>}
                       <span
                         className={clsx(
                           `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
-                          "text-sm"
+                          "text-base"
                         )}
                       >
                         {l.difficulty}
@@ -601,7 +601,7 @@ function ChartListItemChildren(props: CProps) {
                       {status[i] && (
                         <span className="inline-block relative w-4 h-0">
                           <LevelBadge
-                            className="absolute -bottom-3.5"
+                            className="absolute -bottom-3"
                             status={[status[i]]}
                             levels={[levelTypes.indexOf(l.type)]}
                           />
