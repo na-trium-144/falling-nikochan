@@ -47,7 +47,6 @@ export default function ChartListPage(props: PProps) {
             <a
               href={process.env.BACKEND_PREFIX + "/rss.xml"}
               target="_blank"
-              rel="noopener noreferrer"
               className="fn-rss-button"
             />
           )}
