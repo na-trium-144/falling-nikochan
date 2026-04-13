@@ -537,7 +537,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <>
       <LevelBadge
-        className="no-pc absolute z-10 top-1 right-0"
+        className={clsx(!props.small && "no-pc", "absolute z-10 top-1 right-0")}
         status={status}
         levels={levelColors}
         showDot
@@ -553,7 +553,7 @@ function ChartListItemChildren(props: CProps) {
       <div className="fn-cl-content">
         {props.small ? (
           <>
-            <div className="flex flex-wrap items-baseline max-w-full">
+            <div className="flex-wrap max-w-full">
               <span className="text-xs/3">ID:</span>
               <span className="ml-1 text-sm/3">{props.cid}</span>
               {props.dateDiff && (
@@ -574,18 +574,20 @@ function ChartListItemChildren(props: CProps) {
                 </span>
               )}
             </div>
-            <div className="h-5 **:leading-5 fn-cl-clip fg-bright">
-              <span className="font-title text-base font-medium">
-                {props.brief?.title}
+            <div className="h-5 **:leading-5 fg-bright">
+              <span className="fn-cl-clip">
+                <span className="font-title text-base font-medium">
+                  {props.brief?.title}
+                </span>
+                {!props.original && props.brief?.composer && (
+                  <>
+                    <span className="ml-1 text-sm">/</span>
+                    <span className="ml-1 font-title text-base">
+                      {props.brief.composer}
+                    </span>
+                  </>
+                )}
               </span>
-              {!props.original && props.brief?.composer && (
-                <>
-                  <span className="ml-1 text-sm">/</span>
-                  <span className="ml-1 font-title text-base">
-                    {props.brief.composer}
-                  </span>
-                </>
-              )}
             </div>
           </>
         ) : (
