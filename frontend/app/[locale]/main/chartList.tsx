@@ -379,7 +379,7 @@ export function ChartList(props: Props) {
           className="fn-cl-message"
           style={{
             top:
-              (itemMinHeight + itemGap ?? 0) *
+              ((itemMinHeight ?? 0) + (itemGap ?? 0)) *
                 Math.round(firstFetchingIndex / ulCols) +
               "rem",
           }}
