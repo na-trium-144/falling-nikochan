@@ -113,6 +113,7 @@ export default function TopPage(props: Props) {
             moreHref={`/${locale}/main/recent`}
             badge
             fixedRows
+            small
           />
         </section>
 

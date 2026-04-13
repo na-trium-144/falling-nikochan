@@ -98,6 +98,7 @@ interface Props {
   moreHref?: string | null;
   onMoreClick?: () => void;
   badge?: boolean;
+  small?: boolean;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
@@ -333,7 +334,10 @@ export function ChartList(props: Props) {
 
   return (
     <div className="relative w-full h-max isolate">
-      <ul ref={ulSize.ref} className="fn-chart-list">
+      <ul
+        ref={ulSize.ref}
+        className={clsx("fn-chart-list", props.small && "fn-cl-small")}
+      >
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
             Array.isArray(filteredBriefs) &&
@@ -368,6 +372,7 @@ export function ChartList(props: Props) {
                 newTab={props.newTab}
                 dateDiff={props.dateDiff}
                 badge={props.badge}
+                small={props.small}
               />
             ) : (
               <li key={i} className="fn-cl-item fn-cl-empty" />
@@ -448,6 +453,7 @@ interface CProps {
   newTab?: boolean;
   dateDiff?: boolean;
   badge?: boolean;
+  small?: boolean;
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
@@ -545,78 +551,119 @@ function ChartListItemChildren(props: CProps) {
         <div className="fn-thumbnail" />
       )}
       <div className="fn-cl-content">
-        <div className="h-4 **:leading-4">
-          <span className="text-xs text-dim">{props.cid}</span>
-          {props.dateDiff && (
-            <DateDiff
-              className="ml-2 text-xs"
-              date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
-            />
-          )}
-          {props.original && (
-            <span className="ml-2 text-xs">(オリジナル曲)</span>
-          )}
-        </div>
-        <div className="no-pc h-5 **:leading-5 fg-bright">
-          <span className="font-title text-base fn-cl-clip">
-            <span className="font-medium">{props.brief?.title}</span>
-            {!props.original && props.brief?.composer && (
-              <>
-                <span className="ml-1.5">/</span>
-                <span className="ml-1">{props.brief.composer}</span>
-              </>
-            )}
-          </span>
-        </div>
-        <div className="no-mobile h-5.5 **:leading-5.5 fg-bright">
-          <span className="font-title text-lg font-medium fn-cl-clip">
-            {props.brief?.title}
-          </span>
-        </div>
-        {!props.original && props.brief?.composer && (
-          <div className="no-mobile h-5 **:leading-5 fg-bright">
-            <span className="text-sm fn-cl-clip font-title">
-              {props.brief.composer}
-            </span>
-          </div>
-        )}
-        {props.creator && (
-          <div className="h-5 **:leading-5">
-            <span className="flex-1 min-w-0 fn-cl-clip">
-              <span className="text-xs">{t("chartCreator")}:</span>
-              <span className="ml-1 font-title text-sm fg-bright">
-                {props.brief?.chartCreator}
+        {props.small ? (
+          <>
+            <div className="flex flex-wrap items-baseline max-w-full">
+              <span className="text-xs/3">ID:</span>
+              <span className="ml-1 text-sm/3">{props.cid}</span>
+              {props.dateDiff && (
+                <DateDiff
+                  className="ml-2 text-xs/3 text-dim"
+                  date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
+                />
+              )}
+              {props.original && (
+                <span className="ml-2 text-xs/3">(オリジナル曲)</span>
+              )}
+              {props.creator && (
+                <span className="inline-block h-4 leading-4 fn-cl-clip">
+                  <span className="ml-2 text-xs/4">by</span>
+                  <span className="ml-1 font-title text-sm/4">
+                    {props.brief?.chartCreator}
+                  </span>
+                </span>
+              )}
+            </div>
+            <div className="h-5 **:leading-5 fn-cl-clip fg-bright">
+              <span className="font-title text-base font-medium">
+                {props.brief?.title}
               </span>
-            </span>
-            {props.badge && (
-              <div className="no-mobile ml-2 flex-none min-w-0 max-w-1/2 fn-cl-clip mr-2">
-                {props.brief?.levels
-                  .filter((l) => !l.unlisted)
-                  .map((l, i) => (
-                    <Fragment key={i}>
-                      {i !== 0 && <span className="mx-1 text-sm">/</span>}
-                      <span
-                        className={clsx(
-                          `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
-                          "text-base"
-                        )}
-                      >
-                        {l.difficulty}
-                      </span>
-                      {status[i] && (
-                        <span className="inline-block relative w-4 h-0">
-                          <LevelBadge
-                            className="absolute -bottom-3"
-                            status={[status[i]]}
-                            levels={[levelTypes.indexOf(l.type)]}
-                          />
-                        </span>
-                      )}
-                    </Fragment>
-                  ))}
+              {!props.original && props.brief?.composer && (
+                <>
+                  <span className="ml-1 text-sm">/</span>
+                  <span className="ml-1 font-title text-base">
+                    {props.brief.composer}
+                  </span>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="h-4 **:leading-4">
+              <span className="text-xs text-dim">{props.cid}</span>
+              {props.dateDiff && (
+                <DateDiff
+                  className="ml-2 text-xs"
+                  date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
+                />
+              )}
+              {props.original && (
+                <span className="ml-2 text-xs">(オリジナル曲)</span>
+              )}
+            </div>
+            <div className="no-pc h-5 **:leading-5 fg-bright">
+              <span className="font-title text-base fn-cl-clip">
+                <span className="font-medium">{props.brief?.title}</span>
+                {!props.original && props.brief?.composer && (
+                  <>
+                    <span className="ml-1.5">/</span>
+                    <span className="ml-1">{props.brief.composer}</span>
+                  </>
+                )}
+              </span>
+            </div>
+            <div className="no-mobile h-5.5 **:leading-5.5 fg-bright">
+              <span className="font-title text-lg font-medium fn-cl-clip">
+                {props.brief?.title}
+              </span>
+            </div>
+            {!props.original && props.brief?.composer && (
+              <div className="no-mobile h-5 **:leading-5 fg-bright">
+                <span className="text-sm fn-cl-clip font-title">
+                  {props.brief.composer}
+                </span>
               </div>
             )}
-          </div>
+            {props.creator && (
+              <div className="h-5 **:leading-5">
+                <span className="flex-1 min-w-0 fn-cl-clip">
+                  <span className="text-xs">{t("chartCreator")}:</span>
+                  <span className="ml-1 font-title text-sm fg-bright">
+                    {props.brief?.chartCreator}
+                  </span>
+                </span>
+                {props.badge && (
+                  <div className="no-mobile ml-2 flex-none min-w-0 max-w-1/2 fn-cl-clip mr-2">
+                    {props.brief?.levels
+                      .filter((l) => !l.unlisted)
+                      .map((l, i) => (
+                        <Fragment key={i}>
+                          {i !== 0 && <span className="mx-1 text-sm">/</span>}
+                          <span
+                            className={clsx(
+                              `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
+                              "text-base"
+                            )}
+                          >
+                            {l.difficulty}
+                          </span>
+                          {status[i] && (
+                            <span className="inline-block relative w-4 h-0">
+                              <LevelBadge
+                                className="absolute -bottom-3"
+                                status={[status[i]]}
+                                levels={[levelTypes.indexOf(l.type)]}
+                              />
+                            </span>
+                          )}
+                        </Fragment>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

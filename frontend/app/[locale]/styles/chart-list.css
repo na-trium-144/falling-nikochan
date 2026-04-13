@@ -68,6 +68,16 @@
       }
     }
   }
+  .fn-cl-small {
+    --item-min-width: 18rem;
+    --item-max-width: 27rem;
+    --item-gap: 0.25rem;
+    --item-height: 2.75rem;
+
+    .fn-cl-item > .fn-flat-button > .fn-thumbnail {
+      @apply h-9 w-16 aspect-auto;
+    }
+  }
   .fn-cl-message {
     @apply absolute inset-x-0 top-0 w-max mx-auto translate-y-2.5;
     /* 下に移動する場合はinlineスタイルで top: を指定 */
