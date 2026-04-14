@@ -142,7 +142,7 @@ export default function TopPage(props: Props) {
               key={i}
               href={`/${locale}${tabURLs[key]}`}
               className={clsx("fn-main-nav-item fn-flat-button fn-sky")}
-              prefetch={!process.env.NO_PREFETCH}
+              prefetch={process.env.PREFETCH as "auto"}
               onClick={(e) => {
                 requestReview();
                 setMenuMove(true);

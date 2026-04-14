@@ -113,7 +113,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             <Link
               className={clsx("fn-link-3", "ml-2 inline-block relative")}
               href={`/${locale}/main/version`}
-              prefetch={!process.env.NO_PREFETCH}
+              prefetch={process.env.PREFETCH as "auto"}
             >
               {t("changelog")}
               <span
@@ -134,7 +134,7 @@ export default function LinksPage({ locale }: { locale: string }) {
             <Link
               className={clsx("fn-link-3")}
               href={`/${locale}/main/policies`}
-              prefetch={!process.env.NO_PREFETCH}
+              prefetch={process.env.PREFETCH as "auto"}
             >
               {t("policies")}
             </Link>

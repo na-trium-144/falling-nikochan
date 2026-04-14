@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/worker",
-  "version": "15.3.0",
+  "version": "15.4.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -17,7 +17,8 @@
   "dependencies": {
     "@falling-nikochan/i18n": "workspace:*",
     "@falling-nikochan/route": "workspace:*",
-    "hono": "^4.12.9"
+    "@gera2ld/tarjs": "^0.3.1",
+    "hono": "^4.12.12"
   },
   "devDependencies": {
     "babel-loader": "^10.1.1",

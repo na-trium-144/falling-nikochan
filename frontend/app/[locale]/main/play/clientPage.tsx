@@ -218,7 +218,6 @@ function PlayTabInternal(
         <a
           href={process.env.BACKEND_PREFIX + "/rss.xml"}
           target="_blank"
-          rel="noopener noreferrer"
           className="block absolute right-0 bottom-0 fn-rss-button"
         />
       </section>
