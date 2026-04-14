@@ -40,30 +40,23 @@ export default {
     play: {
       title: "公開されている譜面で遊ぶ",
       titleShort: "公開譜面",
-      description:
-        "人気の譜面 / 新着譜面 / サンプル譜面 から曲を探すことができます。",
-      search: "検索",
-      searchDesc: "曲名や作曲者、譜面製作者などから検索します。",
-      searchTitle: "{search} の検索結果",
-      recent: "最近プレイした譜面",
-      popular: "人気の譜面",
-      popularDesc: "直近 {popularDays} 日間にプレイされた回数の多い譜面です。",
-      latest: "新着譜面・すべての譜面",
-      latestDesc:
-        "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。" +
+      description: "公開されている譜面の一覧です。",
+      descriptionX:
         "<xlogo></xlogo> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
-      latestDescText:
-        "公開されている譜面の一覧です。最近作成・更新された順に並んでいます。",
-      latestDesc2:
-        "譜面を制作する方へ: 譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
-      sample: "サンプル譜面",
-      sampleDesc:
-        "Falling Nikochan の作者 <small>(na-trium-144)</small> が作った譜面です。" +
-        "初めての方はこちらからどうぞ。",
-      sampleDesc2:
-        "また、これ以外にも Falling Nikochan の YouTube チャンネル <youtube>@nikochan144</youtube> で譜面を公開しています。",
-      sampleDevonly:
-        "dev環境ではタイトルや作曲者だけ入力したダミーのファイルが表示されます",
+      descriptionPublic:
+        "譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
+      search: "検索",
+      searchPlaceholder: "曲名や作曲者、譜面製作者など",
+      searchTitle: "{search} の検索結果",
+      sort: "表示順",
+      recent: "最近プレイした譜面",
+      relevance: "関連度順",
+      latest: "更新日順",
+      popular: "人気順",
+      popularDesc:
+        "直近 {popularDays} 日間にプレイされた回数の多い順に表示します。",
+      latestDesc: "最近作成・更新された順に表示します。",
+      level: "レベル",
     },
     edit: {
       title: "譜面を作る",
@@ -94,6 +87,7 @@ export default {
         "編集した譜面のリストやパスワードなどのブラウザに保存したデータがすべて削除されてしまいます。",
     },
     chartList: {
+      chartCreator: "譜面作成",
       showAll: "もっと表示",
       empty: "まだありません",
       notFound: "見つかりませんでした",

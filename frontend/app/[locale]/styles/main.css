@@ -92,7 +92,7 @@
     @apply w-full;
     @apply text-justify;
 
-    > h3 {
+    > h3:not(:last-child) {
       @apply mb-2;
     }
     &:not(.text-center):has(h3) > :not(h3, h4, ul, :has(.fn-chart-list)) {

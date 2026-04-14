@@ -8,27 +8,33 @@
   .fn-flat-button {
     @apply relative cursor-pointer;
 
+    @variant disabled {
+      @apply cursor-default;
+    }
+
     > .fn-glass-1 {
       @apply opacity-0;
     }
     > .fn-glass-2 {
       @apply opacity-0;
     }
-    @variant hover {
-      > .fn-glass-1 {
-        @apply opacity-100;
+    &:not(:disabled) {
+      @variant hover {
+        > .fn-glass-1 {
+          @apply opacity-100;
+        }
+        > .fn-glass-2 {
+          @apply opacity-100;
+        }
       }
-      > .fn-glass-2 {
-        @apply opacity-100;
-      }
-    }
-    @variant active {
-      @apply inset-shadow-button;
-      > .fn-glass-1 {
-        @apply opacity-0;
-      }
-      > .fn-glass-2 {
-        @apply mask-none;
+      @variant active {
+        @apply inset-shadow-button;
+        > .fn-glass-1 {
+          @apply opacity-0;
+        }
+        > .fn-glass-2 {
+          @apply mask-none;
+        }
       }
     }
 
@@ -43,10 +49,14 @@
 
     &.fn-sky {
       @variant hover {
-        @apply bg-sky-200 dark:bg-orange-950;
+        &:not(:disabled) {
+          @apply bg-sky-200 dark:bg-orange-950;
+        }
       }
       @variant active {
-        @apply bg-sky-200 dark:bg-orange-950;
+        &:not(:disabled) {
+          @apply bg-sky-200 dark:bg-orange-950;
+        }
       }
 
       &.fn-dropdown-item {
@@ -68,6 +78,20 @@
       }
       @variant active {
         @apply bg-orange-200 dark:bg-sky-950;
+      }
+    }
+
+    &.fn-toggle {
+      /* /main/playの並べ替え選択、playOptionのレベル選択で使われている */
+      @apply fg-bright;
+      @apply flex items-center justify-center;
+      @apply rounded-lg px-3 py-1 my-0.5;
+      @apply shadow-slate-500/50 dark:shadow-stone-950/50;
+      @apply disabled:text-dim;
+
+      &.fn-selected,
+      &:hover:not(:disabled) {
+        @apply shadow-2xs;
       }
     }
   }

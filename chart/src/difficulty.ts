@@ -1,3 +1,4 @@
+import { maxLv, minLv } from "./apiConfig.js";
 import { BPMChange, BPMChangeWithTimeSec } from "./bpm.js";
 import { NoteCommand } from "./command.js";
 import {
@@ -45,8 +46,6 @@ export function difficulty(
   },
   type: string
 ): number {
-  const maxLv = 20;
-  const minLv = 1;
   if (level.notes.length === 0) {
     return minLv;
   }

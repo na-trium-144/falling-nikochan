@@ -182,19 +182,16 @@ function LevelButton(props: {
   return (
     <button
       className={clsx(
-        "cursor-pointer w-full fg-bright",
-        "relative rounded-lg px-3 py-1 my-0.5",
-        "flex items-center justify-center",
+        "w-full",
+        "fn-toggle",
         props.selected
           ? "fn-flat-button fn-plain fn-selected"
-          : "fn-flat-button fn-sky",
-        props.selected ? "shadow-2xs" : "hover:shadow-2xs",
-        "shadow-slate-500/50 dark:shadow-stone-950/50"
+          : "fn-flat-button fn-sky"
       )}
       onClick={props.onClick}
     >
-      <span className={clsx(props.selected ? "fn-glass-1" : "fn-glass-1")} />
-      <span className={clsx(props.selected ? "fn-glass-2" : "fn-glass-2")} />
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
       <ButtonHighlight />
       <LevelBadge
         className="absolute top-0.5 -right-3 z-10"

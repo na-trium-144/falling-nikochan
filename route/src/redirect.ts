@@ -16,6 +16,15 @@ const redirectApp = (config: {
       const cid = c.req.param("cid");
       return c.redirect(new URL(`/edit?cid=${cid}`, backendOrigin(c)), 301);
     })
+    .get("/:lang/main/:sort{latest|popular}", (c) => {
+      // deprecated (used until ver15.3)
+      const lang = c.req.param("lang");
+      const sort = c.req.param("sort");
+      return c.redirect(
+        new URL(`/${lang}/main/play?sort=${sort}`, backendOrigin(c)),
+        301
+      );
+    })
     .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
       const params = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.get("language");
