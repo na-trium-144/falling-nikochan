@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { Fragment, RefObject, useEffect, useRef, useState } from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
@@ -73,6 +73,7 @@ export type ChartListType = "recent" | "recentEdit" | "popular" | "latest";
 
 export interface ChartLineBrief {
   cid: string;
+  updatedAt?: number; // searchAPIのレスポンスにこれがある場合はbrief.updatedAtよりも優先する
   fetching?: boolean;
   fetched: boolean;
   brief?: ChartBrief;
@@ -96,6 +97,7 @@ interface Props {
   moreHref?: string | null;
   onMoreClick?: () => void;
   badge?: boolean;
+  small?: boolean;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
@@ -155,17 +157,46 @@ export function ChartList(props: Props) {
 
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
-  const itemMinWidth = 18; // * rem
-  const itemMinHeight = 12 / 4; // h-11 + gap-1
-  const ulCols = ulSize.width
-    ? Math.floor(ulSize.width / (itemMinWidth * rem))
-    : 1;
+  const [itemMinWidth, setItemMinWidth] = useState<number>(); // * rem;
+  const [itemMinHeight, setItemMinHeight] = useState<number>(); // * rem;
+  const [itemGap, setItemGap] = useState<number>(); // * rem;
+  useEffect(() => {
+    function updateSize() {
+      if (ulSize.ref.current instanceof HTMLElement) {
+        for (const [setter, propName] of [
+          [setItemMinWidth, "--item-min-width"],
+          [setItemMinHeight, "--item-height"],
+          [setItemGap, "--item-gap"],
+        ] as const) {
+          const value = getComputedStyle(ulSize.ref.current).getPropertyValue(
+            propName
+          );
+          if (value.endsWith("rem")) {
+            setter(Number(value.slice(0, -3)));
+          } else {
+            throw new Error(
+              `${propName} value does not ends with "rem": ${value}`
+            );
+          }
+        }
+      }
+    }
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, [rem, ulSize.ref]);
+  const ulCols =
+    itemMinWidth && ulSize.width
+      ? Math.max(1, Math.floor(ulSize.width / (itemMinWidth * rem)))
+      : 1;
   // 現在の画面サイズに応じた最大サイズ
   const [pagination, setPagination] = useState<number>(1);
   // 1ページあたりに表示できる最大数
-  const maxRowPerPage = props.containerHeight
-    ? Math.ceil(props.containerHeight / (itemMinHeight * rem)) * ulCols
-    : undefined;
+  const maxRowPerPage =
+    itemMinHeight && itemGap && props.containerHeight
+      ? Math.ceil(props.containerHeight / ((itemMinHeight + itemGap) * rem)) *
+        ulCols
+      : undefined;
   // この個数は空でも枠を表示する
   const fixedRow = props.fixedRows ? 6 : 0;
   // 最大で表示する個数
@@ -186,7 +217,11 @@ export function ChartList(props: Props) {
           changed = true;
           fetchBrief(b.cid).then(({ brief, is404 }) => {
             setBriefs((briefs) => {
-              if (Array.isArray(briefs)) {
+              if (
+                Array.isArray(briefs) &&
+                briefs[i] !== null &&
+                briefs[i]!.cid === b.cid
+              ) {
                 if (is404) {
                   briefs[i] = null;
                 } else {
@@ -264,14 +299,16 @@ export function ChartList(props: Props) {
         props.containerRef?.current &&
         props.containerHeight &&
         padHeightForScroll > 0 &&
-        maxRowPerPage
+        maxRowPerPage &&
+        itemMinHeight &&
+        itemGap
       ) {
         setPagination((pagination) =>
           Math.max(
             Math.floor(
               (props.containerRef!.current!.scrollTop +
                 props.containerHeight!) /
-                ((itemMinHeight * rem * maxRowPerPage!) / ulCols)
+                (((itemMinHeight + itemGap) * rem * maxRowPerPage!) / ulCols)
             ) + 1,
             pagination
           )
@@ -287,6 +324,7 @@ export function ChartList(props: Props) {
     props.containerRef,
     padHeightForScroll,
     itemMinHeight,
+    itemGap,
     rem,
     maxRowPerPage,
     ulCols,
@@ -295,7 +333,10 @@ export function ChartList(props: Props) {
 
   return (
     <div className="relative w-full h-max isolate">
-      <ul ref={ulSize.ref} className="fn-chart-list">
+      <ul
+        ref={ulSize.ref}
+        className={clsx("fn-chart-list", props.small && "fn-cl-small")}
+      >
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
             Array.isArray(filteredBriefs) &&
@@ -304,6 +345,7 @@ export function ChartList(props: Props) {
               <ChartListItem
                 key={i}
                 cid={filteredBriefs.at(i)!.cid}
+                updatedAt={filteredBriefs.at(i)!.updatedAt}
                 brief={filteredBriefs.at(i)!.brief}
                 href={props.href(filteredBriefs.at(i)!.cid)}
                 onClick={
@@ -329,9 +371,10 @@ export function ChartList(props: Props) {
                 newTab={props.newTab}
                 dateDiff={props.dateDiff}
                 badge={props.badge}
+                small={props.small}
               />
             ) : (
-              <li key={i} className="fn-cl-item" />
+              <li key={i} className="fn-cl-item fn-cl-empty" />
             )
         )}
       </ul>
@@ -340,7 +383,9 @@ export function ChartList(props: Props) {
           className="fn-cl-message"
           style={{
             top:
-              itemMinHeight * Math.round(firstFetchingIndex / ulCols) + "rem",
+              ((itemMinHeight ?? 0) + (itemGap ?? 0)) *
+                Math.round(firstFetchingIndex / ulCols) +
+              "rem",
           }}
         >
           <SlimeSVG />
@@ -397,6 +442,7 @@ export function ChartList(props: Props) {
 
 interface CProps {
   cid: string;
+  updatedAt?: number;
   brief?: ChartBrief;
   href: string;
   onClick?: () => void;
@@ -406,6 +452,7 @@ interface CProps {
   newTab?: boolean;
   dateDiff?: boolean;
   badge?: boolean;
+  small?: boolean;
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
@@ -468,6 +515,7 @@ export function ChartListItem(props: CProps) {
   );
 }
 function ChartListItemChildren(props: CProps) {
+  const t = useTranslations("main.chartList");
   const [status, setStatus] = useState<BadgeStatus[]>([]);
   const levelColors =
     props.brief?.levels
@@ -488,7 +536,7 @@ function ChartListItemChildren(props: CProps) {
   return (
     <>
       <LevelBadge
-        className="absolute z-10 top-0 -right-1"
+        className={clsx(!props.small && "no-pc", "absolute z-10 top-1 right-0")}
         status={status}
         levels={levelColors}
         showDot
@@ -502,40 +550,122 @@ function ChartListItemChildren(props: CProps) {
         <div className="fn-thumbnail" />
       )}
       <div className="fn-cl-content">
-        <div className="flex flex-wrap items-baseline max-w-full">
-          <span className="text-xs/3">ID:</span>
-          <span className="ml-1 text-sm/3">{props.cid}</span>
-          {props.dateDiff && (
-            <DateDiff
-              className="ml-2 text-xs/3 text-dim"
-              date={props.brief?.updatedAt || 0}
-            />
-          )}
-          {props.original && (
-            <span className="ml-2 text-xs/3">(オリジナル曲)</span>
-          )}
-          {props.creator && (
-            <span className="inline-block h-4 leading-4 fn-cl-clip">
-              <span className="ml-2 text-xs/4">by</span>
-              <span className={clsx("ml-1 font-title text-sm/4")}>
-                {props.brief?.chartCreator}
+        {props.small ? (
+          <>
+            <div className="flex-wrap max-w-full">
+              <span className="text-xs/3">ID:</span>
+              <span className="ml-1 text-sm/3">{props.cid}</span>
+              {props.dateDiff && (
+                <DateDiff
+                  className="ml-2 text-xs/3 text-dim"
+                  date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
+                />
+              )}
+              {props.original && (
+                <span className="ml-2 text-xs/3">(オリジナル曲)</span>
+              )}
+              {props.creator && (
+                <span className="inline-block h-4 leading-4 fn-cl-clip">
+                  <span className="ml-2 text-xs/4">by</span>
+                  <span className="ml-1 font-title text-sm/4">
+                    {props.brief?.chartCreator}
+                  </span>
+                </span>
+              )}
+            </div>
+            <div className="h-5 **:leading-5 fg-bright">
+              <span className="fn-cl-clip">
+                <span className="font-title text-base font-medium">
+                  {props.brief?.title}
+                </span>
+                {!props.original && props.brief?.composer && (
+                  <>
+                    <span className="ml-1 text-sm">/</span>
+                    <span className="ml-1 font-title text-base">
+                      {props.brief.composer}
+                    </span>
+                  </>
+                )}
               </span>
-            </span>
-          )}
-        </div>
-        <div className={clsx("h-5 **:leading-5 fn-cl-clip", "fg-bright")}>
-          <span className="font-title text-base font-medium">
-            {props.brief?.title}
-          </span>
-          {!props.original && props.brief?.composer && (
-            <>
-              <span className="ml-1 text-sm">/</span>
-              <span className="ml-1 font-title text-base">
-                {props.brief.composer}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="h-4 **:leading-4">
+              <span className="text-xs text-dim">{props.cid}</span>
+              {props.dateDiff && (
+                <DateDiff
+                  className="ml-2 text-xs"
+                  date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
+                />
+              )}
+              {props.original && (
+                <span className="ml-2 text-xs">(オリジナル曲)</span>
+              )}
+            </div>
+            <div className="no-pc h-5 **:leading-5 fg-bright">
+              <span className="font-title text-base fn-cl-clip">
+                <span className="font-medium">{props.brief?.title}</span>
+                {!props.original && props.brief?.composer && (
+                  <>
+                    <span className="ml-1.5">/</span>
+                    <span className="ml-1">{props.brief.composer}</span>
+                  </>
+                )}
               </span>
-            </>
-          )}
-        </div>
+            </div>
+            <div className="no-mobile h-5.5 **:leading-5.5 fg-bright">
+              <span className="font-title text-lg font-medium fn-cl-clip">
+                {props.brief?.title}
+              </span>
+            </div>
+            {!props.original && props.brief?.composer && (
+              <div className="no-mobile h-5 **:leading-5 fg-bright">
+                <span className="text-sm fn-cl-clip font-title">
+                  {props.brief.composer}
+                </span>
+              </div>
+            )}
+            {props.creator && (
+              <div className="h-5 **:leading-5">
+                <span className="flex-1 min-w-0 fn-cl-clip">
+                  <span className="text-xs">{t("chartCreator")}:</span>
+                  <span className="ml-1 font-title text-sm fg-bright">
+                    {props.brief?.chartCreator}
+                  </span>
+                </span>
+                {props.badge && (
+                  <div className="no-mobile ml-2 flex-none min-w-0 max-w-1/2 fn-cl-clip mr-2">
+                    {props.brief?.levels
+                      .filter((l) => !l.unlisted)
+                      .map((l, i) => (
+                        <Fragment key={i}>
+                          {i !== 0 && <span className="mx-1 text-sm">/</span>}
+                          <span
+                            className={clsx(
+                              `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
+                              "text-base"
+                            )}
+                          >
+                            {l.difficulty}
+                          </span>
+                          {status[i] && (
+                            <span className="inline-block relative w-4 h-0">
+                              <LevelBadge
+                                className="absolute -bottom-3"
+                                status={[status[i]]}
+                                levels={[levelTypes.indexOf(l.type)]}
+                              />
+                            </span>
+                          )}
+                        </Fragment>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </>
   );

@@ -3,7 +3,6 @@ import { backendOrigin, Bindings, cacheControl } from "./env.js";
 import { env } from "hono/adapter";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "./api/chart.js";
-import { isSample } from "@falling-nikochan/chart";
 import xmlbuilder2 from "xmlbuilder2";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 
@@ -21,28 +20,26 @@ const rssApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       await client.connect();
       const db = client.db("nikochan");
 
-      const charts = (
-        await db
-          .collection<ChartEntryCompressed>("chart")
-          .find({ published: true, deleted: false })
-          .sort({ updatedAt: -1 })
-          .limit(RSS_ITEM_LIMIT)
-          .project<{
-            cid: string;
-            title: string;
-            composer: string;
-            chartCreator: string;
-            updatedAt: number;
-          }>({
-            _id: 0,
-            cid: 1,
-            title: 1,
-            composer: 1,
-            chartCreator: 1,
-            updatedAt: 1,
-          })
-          .toArray()
-      ).filter((e) => !isSample(e.cid));
+      const charts = await db
+        .collection<ChartEntryCompressed>("chart")
+        .find({ published: true, deleted: false })
+        .sort({ updatedAt: -1 })
+        .limit(RSS_ITEM_LIMIT)
+        .project<{
+          cid: string;
+          title: string;
+          composer: string;
+          chartCreator: string;
+          updatedAt: number;
+        }>({
+          _id: 0,
+          cid: 1,
+          title: 1,
+          composer: 1,
+          chartCreator: 1,
+          updatedAt: 1,
+        })
+        .toArray();
 
       // xmlbuilder2でRSS XMLを構築
       const doc = xmlbuilder2

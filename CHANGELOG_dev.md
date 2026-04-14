@@ -1,4 +1,10 @@
-## ver. 15.4 - 2026/04/11
+## ver. 15.5 - 2026/04/15 [#1044](https://github.com/na-trium-144/falling-nikochan/pull/1044), [#1055](https://github.com/na-trium-144/falling-nikochan/pull/1055)
+
+* latestとpopularのAPIをsearchに統合
+* 人気の譜面、新着譜面リストを検索機能に統合
+* サンプル譜面リストを削除
+
+## ver. 15.4 - 2026/04/15
 
 * 音符のtailのフェードアウトを修正 [#1045](https://github.com/na-trium-144/falling-nikochan/pull/1045)
 * colorthiefをv3にアップデート、仕様変更に対応 [#1042](https://github.com/na-trium-144/falling-nikochan/pull/1042)

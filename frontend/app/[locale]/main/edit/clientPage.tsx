@@ -138,6 +138,7 @@ export default function EditTab({ locale }: { locale: string }) {
           newTab
           showLoading
           moreHref={null}
+          small
         />
       </section>
     </IndexMain>

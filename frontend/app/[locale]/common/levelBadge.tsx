@@ -40,7 +40,7 @@ export function LevelBadge(props: Props) {
   return props.status.toReversed().map((s, i) => (
     <span
       className={clsx(
-        "w-5 h-5 text-center text-base",
+        "text-center text-base",
         iconColorClasses[props.levels.toReversed()[i]],
         props.className
       )}

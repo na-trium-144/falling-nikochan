@@ -8,7 +8,6 @@ export default {
       main.main.descriptionVerbose,
     chartCreatorEmpty: "(Anonymous)",
     chartCreator: "Chart created by",
-    isSample: "Sample Chart",
     isPublished: "Published",
     shareLink: "Share Link",
     copyURL: "Copy URL",

@@ -46,6 +46,10 @@
     {
       "source": "/(edit|edit/.*|play|main/.*)",
       "destination": "/api"
+    },
+    {
+      "source": "/(.*)/main/(latest|popular)",
+      "destination": "/api"
     }
   ]
 }

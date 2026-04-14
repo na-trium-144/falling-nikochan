@@ -48,29 +48,22 @@ export default {
       title: "Play with Public Charts",
       // mobile navigation
       titleShort: "Play",
-      description:
-        "You can find songs from popular charts / latest charts / sample charts.",
-      search: "Search",
-      searchDesc: "Search by song title, composer, chart creator, etc.",
-      searchTitle: "Search results for {search}",
-      recent: "Recently Played Charts",
-      popular: "Popular Charts",
-      popularDesc: "Charts played many times in the last {popularDays} days.",
-      latest: "Latest Charts / All Charts",
-      latestDesc:
-        "List of published charts. Sorted by the most recently created or updated. " +
+      description: "List of published charts.",
+      descriptionX:
         "Updates are also announced on the official account of <xlogo></xlogo> <twitter>@nikochan144</twitter>.",
-      latestDescText:
-        "List of published charts. Sorted by the most recently created or updated. ",
-      latestDesc2:
-        "For chart creators: Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
-      sample: "Sample Charts",
-      sampleDesc:
-        "Charts created by Falling Nikochan author <small>(na-trium-144)</small>. Start here if you are new. ",
-      sampleDesc2:
-        "Also, more charts are available on Falling Nikochan's YouTube channel <youtube>@nikochan144</youtube>.",
-      sampleDevonly:
-        "In dev environment, dummy files with only title and composer are displayed.",
+      descriptionPublic:
+        "Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
+      search: "Search",
+      searchPlaceholder: "Song title, composer, chart creator, etc.",
+      searchTitle: "Search results for {search}",
+      sort: "Sort by",
+      recent: "Recently Played Charts",
+      relevance: "Relevance",
+      latest: "Latest",
+      popular: "Popular",
+      popularDesc: "Sorted by the most played in the last {popularDays} days.",
+      latestDesc: "Sorted by the most recently created or updated.",
+      level: "Level",
     },
     edit: {
       title: "Create a Chart",
@@ -101,6 +94,7 @@ export default {
         "all data saved in the browser, such as the list of edited charts and passwords, will be deleted.",
     },
     chartList: {
+      chartCreator: "Chart by",
       // "Show More →" button
       showAll: "Show More",
       empty: "No charts yet",
