@@ -183,7 +183,6 @@ export default function PlayTab(props: Props) {
           <a
             href={process.env.BACKEND_PREFIX + "/rss.xml"}
             target="_blank"
-            rel="noopener noreferrer"
             className="fn-rss-button"
           />
         </h3>

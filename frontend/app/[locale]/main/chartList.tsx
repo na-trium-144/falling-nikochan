@@ -47,7 +47,6 @@ export default function ChartListPage(props: PProps) {
             <a
               href={process.env.BACKEND_PREFIX + "/rss.xml"}
               target="_blank"
-              rel="noopener noreferrer"
               className="fn-rss-button"
             />
           )}
@@ -377,7 +376,7 @@ export function ChartList(props: Props) {
               firstFetchingIndex >= 0 && "invisible"
             )}
             href={props.moreHref}
-            prefetch={!process.env.NO_PREFETCH}
+            prefetch={process.env.PREFETCH as "auto"}
           >
             {t("showAll")}
             <ArrowRight
@@ -457,7 +456,7 @@ export function ChartListItem(props: CProps) {
         <Link
           href={props.href}
           className={clsx("fn-flat-button fn-sky")}
-          prefetch={!process.env.NO_PREFETCH}
+          prefetch={process.env.PREFETCH as "auto"}
         >
           <span className="fn-glass-1" />
           <span className="fn-glass-2" />

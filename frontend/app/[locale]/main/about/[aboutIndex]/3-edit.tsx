@@ -44,7 +44,7 @@ export function AboutContent3({ locale }: { locale: string }) {
                 <Link
                   href={`/${locale}/main/policies`}
                   className={clsx("fn-link-3")}
-                  prefetch={!process.env.NO_PREFETCH}
+                  prefetch={process.env.PREFETCH as "auto"}
                 >
                   {c}
                 </Link>

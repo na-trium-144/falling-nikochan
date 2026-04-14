@@ -89,7 +89,7 @@ export function ChangeLogPopup(props: PopupProps) {
               <Link
                 className={clsx("block w-max mx-auto mt-2", "fn-link-1")}
                 href={`/${props.locale}/main/version`}
-                prefetch={!process.env.NO_PREFETCH}
+                prefetch={process.env.PREFETCH as "auto"}
               >
                 {t("showAll")}
                 <ArrowRight
