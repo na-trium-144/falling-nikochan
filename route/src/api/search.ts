@@ -106,7 +106,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
               $gte: difficultyMin,
               $lte: difficultyMax,
             },
-            unlisted: false,
+            unlisted: { $ne: true },
           },
         },
       };

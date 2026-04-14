@@ -1,3 +1,7 @@
+## ver. 15.6 - 2026/04/15
+
+* ChartBriefのunlistedの値がnullのケースがある
+
 ## ver. 15.5 - 2026/04/15 [#1044](https://github.com/na-trium-144/falling-nikochan/pull/1044), [#1055](https://github.com/na-trium-144/falling-nikochan/pull/1055)
 
 * latestとpopularのAPIをsearchに統合

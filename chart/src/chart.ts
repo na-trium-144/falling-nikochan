@@ -163,7 +163,8 @@ export const ChartBriefSchema = () =>
           v.minValue(0),
           v.description("The length of chart in seconds")
         ),
-        unlisted: v.boolean(),
+        // どこかのタイミングでmigrationをミスったか、unlisted:nullのデータがDBに存在している
+        unlisted: v.nullable(v.boolean()),
       })
     ),
   });

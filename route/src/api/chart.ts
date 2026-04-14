@@ -170,7 +170,7 @@ export interface ChartLevelBrief {
   bpmMin: number;
   bpmMax: number;
   length: number;
-  unlisted: boolean;
+  unlisted: boolean | null;
 }
 export interface ChartLevelCore3 {
   notes: NoteCommandWithLua3[];
