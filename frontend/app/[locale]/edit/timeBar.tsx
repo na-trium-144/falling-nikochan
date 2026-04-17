@@ -46,6 +46,7 @@ export default function TimeBar(props: Props) {
   const timeBarPos = (timeSec: number) => timeSec * zoomPxPerSec();
 
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressNoteClickUntil = useRef(0);
   const onUserScrolled = useCallback(() => {
     if (
       cur &&
@@ -93,6 +94,49 @@ export default function TimeBar(props: Props) {
       chart?.off("rerender", scrollTimeBar);
     };
   }, [chart, cur, timeBarRef, zoomPxPerSec]);
+  useEffect(() => {
+    const timeBar = timeBarRef.current;
+    if (!timeBar) return;
+    let dragging = false;
+    let dragStartX = 0;
+    let dragStartScrollLeft = 0;
+    let dragged = false;
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      dragged = false;
+      dragStartX = e.clientX;
+      dragStartScrollLeft = timeBar.scrollLeft;
+    };
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - dragStartX;
+      if (Math.abs(dx) > 1) {
+        dragged = true;
+      }
+      timeBar.scrollLeft = dragStartScrollLeft - dx;
+      e.preventDefault();
+    };
+    const onMouseUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      if (dragged) {
+        suppressNoteClickUntil.current = Date.now() + 100;
+      }
+    };
+
+    timeBar.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("blur", onMouseUp);
+    return () => {
+      timeBar.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("blur", onMouseUp);
+    };
+  }, [timeBarRef]);
 
   const timeBarBeginStep =
     chart && currentLevel && cur
@@ -141,7 +185,7 @@ export default function TimeBar(props: Props) {
   return (
     <div className="relative w-full **:leading-4">
       <Scrollable
-        className="min-w-0 w-full overflow-x-scroll overflow-y-visible"
+        className="min-w-0 w-full overflow-x-scroll overflow-y-visible cursor-grab"
         style={{ height: barTop + barHeight + barBottom }}
         ref={timeBarRef as RefObject<HTMLDivElement>}
         onScroll={onUserScrolled}
@@ -349,11 +393,17 @@ export default function TimeBar(props: Props) {
                   <span
                     key={n.id}
                     className={clsx(
-                      "absolute rounded-full",
+                      "absolute rounded-full cursor-pointer",
                       n.hitTimeSec === currentLevel.currentSeqNote?.hitTimeSec
                         ? "bg-red-400"
                         : "bg-yellow-400"
                     )}
+                    onClick={() => {
+                      if (Date.now() < suppressNoteClickUntil.current) return;
+                      setAndSeekCurrentTimeWithoutOffset(
+                        n.hitTimeSec + chart.offset
+                      );
+                    }}
                     style={{
                       width: n.big ? "1.5rem" : "1rem",
                       height: n.big ? "1.5rem" : "1rem",
