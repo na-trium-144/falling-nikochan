@@ -12,7 +12,14 @@ import {
   stepImproper,
   stepZero,
 } from "@falling-nikochan/chart";
-import { Fragment, RefObject, useCallback, useEffect, useRef } from "react";
+import {
+  Fragment,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { timeSecStr, timeStr } from "./str.js";
 import { useDisplayMode } from "@/scale.js";
@@ -28,12 +35,16 @@ interface Props {
     allowSeekAhead?: boolean
   ) => void;
 }
+const DRAG_THRESHOLD_PX = 1;
+const DRAG_CLICK_SUPPRESSION_MS = 100;
+
 export default function TimeBar(props: Props) {
   const t = useTranslations("edit.timeBar");
   const { chart, setAndSeekCurrentTimeWithoutOffset } = props;
   const currentLevel = chart?.currentLevel;
   const cur = currentLevel?.current;
   const { rem } = useDisplayMode();
+  const [draggingTimeBar, setDraggingTimeBar] = useState(false);
 
   const timeBarResize = useResizeDetector<HTMLDivElement>();
   const timeBarWidth = timeBarResize.width || 500;
@@ -105,6 +116,7 @@ export default function TimeBar(props: Props) {
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
       dragging = true;
+      setDraggingTimeBar(true);
       dragged = false;
       dragStartX = e.clientX;
       dragStartScrollLeft = timeBar.scrollLeft;
@@ -112,7 +124,7 @@ export default function TimeBar(props: Props) {
     const onMouseMove = (e: MouseEvent) => {
       if (!dragging) return;
       const dx = e.clientX - dragStartX;
-      if (Math.abs(dx) > 1) {
+      if (Math.abs(dx) > DRAG_THRESHOLD_PX) {
         dragged = true;
       }
       timeBar.scrollLeft = dragStartScrollLeft - dx;
@@ -121,8 +133,10 @@ export default function TimeBar(props: Props) {
     const onMouseUp = () => {
       if (!dragging) return;
       dragging = false;
+      setDraggingTimeBar(false);
       if (dragged) {
-        suppressNoteClickUntil.current = Date.now() + 100;
+        suppressNoteClickUntil.current =
+          Date.now() + DRAG_CLICK_SUPPRESSION_MS;
       }
     };
 
@@ -135,6 +149,7 @@ export default function TimeBar(props: Props) {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("blur", onMouseUp);
+      setDraggingTimeBar(false);
     };
   }, [timeBarRef]);
 
@@ -185,7 +200,10 @@ export default function TimeBar(props: Props) {
   return (
     <div className="relative w-full **:leading-4">
       <Scrollable
-        className="min-w-0 w-full overflow-x-scroll overflow-y-visible cursor-grab"
+        className={clsx(
+          "min-w-0 w-full overflow-x-scroll overflow-y-visible",
+          draggingTimeBar ? "cursor-grabbing" : "cursor-grab"
+        )}
         style={{ height: barTop + barHeight + barBottom }}
         ref={timeBarRef as RefObject<HTMLDivElement>}
         onScroll={onUserScrolled}
