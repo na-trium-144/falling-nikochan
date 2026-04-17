@@ -40,7 +40,11 @@ import type { Selection } from "ace-builds-internal/selection";
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
 
-export function useLuaExecutor(): LuaExecutor {
+export type LuaExecutorState = LuaExecutor & {
+  resetError: () => void;
+};
+
+export function useLuaExecutor(): LuaExecutorState {
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
   const [errLine, setErrLine] = useState<number | null>(null);
@@ -49,6 +53,12 @@ export function useLuaExecutor(): LuaExecutor {
   const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
     null
   );
+
+  const resetError = useCallback(() => {
+    setStdout([]);
+    setErr([]);
+    setErrLine(null);
+  }, []);
 
   const abortExec = useCallback(() => {
     if (worker.current !== null) {
@@ -98,7 +108,7 @@ export function useLuaExecutor(): LuaExecutor {
     },
     [abortExec]
   );
-  return { stdout, err, errLine, running, exec, abortExec };
+  return { stdout, err, errLine, running, exec, abortExec, resetError };
 }
 
 // Aceはposition:fixedがviewportに対する絶対座標であることを想定しているが
@@ -111,6 +121,7 @@ interface Props {
   seekStepAbs: (s: Step) => void;
   errLine: number | null;
   err: string[];
+  onCurrentLevelChange: () => void;
 }
 interface LuaPositionData {
   top: number;
@@ -164,6 +175,13 @@ export function LuaTabProvider(props: Props & PProps) {
       chart?.off("change", updateCode);
     };
   }, [codeChanged, chart, currentLevel]);
+
+  useEffect(() => {
+    chart?.on("levelIndex", props.onCurrentLevelChange);
+    return () => {
+      chart?.off("levelIndex", props.onCurrentLevelChange);
+    };
+  }, [chart, props.onCurrentLevelChange]);
 
   const changeCodeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const changeCode = (code: string) => {

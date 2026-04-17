@@ -598,6 +598,7 @@ export default function Edit(props: {
         seekStepAbs={seekStepAbs}
         errLine={luaExecutor.running ? null : luaExecutor.errLine}
         err={luaExecutor.err}
+        onCurrentLevelChange={luaExecutor.resetError}
       >
         <div
           className={clsx(
