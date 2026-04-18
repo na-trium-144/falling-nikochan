@@ -135,8 +135,7 @@ export default function TimeBar(props: Props) {
       dragging = false;
       setDraggingTimeBar(false);
       if (dragged) {
-        suppressNoteClickUntil.current =
-          Date.now() + DRAG_CLICK_SUPPRESSION_MS;
+        suppressNoteClickUntil.current = Date.now() + DRAG_CLICK_SUPPRESSION_MS;
       }
     };
 
