@@ -66,12 +66,12 @@ export default function LevelTab(props: Props) {
             />
             <Button
               text="↑"
-              onClick={chart?.moveLevelUp}
+              onClick={() => chart?.moveLevelUp()}
               disabled={chart?.currentLevelIndex === 0}
             />
             <Button
               text="↓"
-              onClick={chart?.moveLevelDown}
+              onClick={() => chart?.moveLevelDown()}
               disabled={chart.currentLevelIndex === chart.levels.length - 1}
             />
           </>
