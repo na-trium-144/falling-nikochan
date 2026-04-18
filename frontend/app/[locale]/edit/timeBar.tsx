@@ -413,7 +413,7 @@ export default function TimeBar(props: Props) {
                     className={clsx(
                       "absolute rounded-full cursor-pointer",
                       "transition duration-100",
-                      "hover:brightness-115 hover:scale-110 active:brightness-125",
+                      "hover:brightness-110 hover:scale-110 active:brightness-125",
                       n.hitTimeSec === currentLevel.currentSeqNote?.hitTimeSec
                         ? "bg-red-400"
                         : "bg-yellow-400"
