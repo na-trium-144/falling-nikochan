@@ -18,8 +18,8 @@ importers:
         specifier: ^0.11.1
         version: 0.11.1
       hono:
-        specifier: ^4.12.12
-        version: 4.12.12
+        specifier: ^4.12.14
+        version: 4.12.14
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.29.2
@@ -71,7 +71,7 @@ importers:
         version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       webpack:
         specifier: ^5.105.4
-        version: 5.105.4(webpack-cli@7.0.2)
+        version: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
       webpack-cli:
         specifier: ^7.0.2
         version: 7.0.2(webpack@5.105.4)
@@ -92,7 +92,7 @@ importers:
         version: 5.0.4
       hono-openapi:
         specifier: ^1.3.0
-        version: 1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.12))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.12)(openapi-types@12.1.3)
+        version: 1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.14)(openapi-types@12.1.3)
       valibot:
         specifier: ^1.3.1
         version: 1.3.1(typescript@5.9.3)
@@ -153,7 +153,7 @@ importers:
         version: 1.4.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@mdx-js/loader':
         specifier: ^3.1.1
-        version: 3.1.1(webpack@5.105.4(webpack-cli@7.0.2))
+        version: 3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       '@mdx-js/react':
         specifier: ^3.1.1
         version: 3.1.1(@types/react@19.2.14)(react@19.2.4)
@@ -162,7 +162,7 @@ importers:
         version: 3.1.3
       '@next/mdx':
         specifier: 16.1.7
-        version: 16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2)))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))
+        version: 16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))
       ace-builds:
         specifier: ^1.43.5
         version: 1.43.6
@@ -280,19 +280,19 @@ importers:
         version: 1.48.0
       '@hono/node-server':
         specifier: ^1.19.13
-        version: 1.19.13(hono@4.12.12)
+        version: 1.19.13(hono@4.12.14)
       '@hono/standard-validator':
         specifier: ^0.2.1
-        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.12)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14)
       '@hono/swagger-ui':
         specifier: ^0.6.1
-        version: 0.6.1(hono@4.12.12)
+        version: 0.6.1(hono@4.12.14)
       '@msgpack/msgpack':
         specifier: ^3.1.3
         version: 3.1.3
       '@scalar/hono-api-reference':
         specifier: ^0.10.5
-        version: 0.10.5(hono@4.12.12)
+        version: 0.10.5(hono@4.12.14)
       '@valibot/to-json-schema':
         specifier: ^1.6.0
         version: 1.6.0(valibot@1.3.1(typescript@5.9.3))
@@ -309,11 +309,11 @@ importers:
         specifier: ^16.6.1
         version: 16.6.1
       hono:
-        specifier: ^4.12.12
-        version: 4.12.12
+        specifier: ^4.12.14
+        version: 4.12.14
       hono-openapi:
         specifier: ^1.3.0
-        version: 1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.12))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.12)(openapi-types@12.1.3)
+        version: 1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.14)(openapi-types@12.1.3)
       isbot:
         specifier: ^5.1.37
         version: 5.1.37
@@ -373,12 +373,12 @@ importers:
         specifier: ^0.3.1
         version: 0.3.1
       hono:
-        specifier: ^4.12.12
-        version: 4.12.12
+        specifier: ^4.12.14
+        version: 4.12.14
     devDependencies:
       babel-loader:
         specifier: ^10.1.1
-        version: 10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2))
+        version: 10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -3168,8 +3168,8 @@ packages:
       hono:
         optional: true
 
-  hono@4.12.12:
-    resolution: {integrity: sha512-p1JfQMKaceuCbpJKAPKVqyqviZdS0eUxH9v82oWo1kb9xjQ5wA6iP3FNVAPDFlz5/p7d45lO+BpSk1tuSZMF4Q==}
+  hono@4.12.14:
+    resolution: {integrity: sha512-am5zfg3yu6sqn5yjKBNqhnTX7Cv+m00ox+7jbaKkrLMRJ4rAdldd1xPd/JzbBWspqaQv6RSTrgFN95EsfhC+7w==}
     engines: {node: '>=16.9.0'}
 
   https-proxy-agent@7.0.6:
@@ -5641,18 +5641,18 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@hono/node-server@1.19.13(hono@4.12.12)':
+  '@hono/node-server@1.19.13(hono@4.12.14)':
     dependencies:
-      hono: 4.12.12
+      hono: 4.12.14
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.12)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14)':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      hono: 4.12.12
+      hono: 4.12.14
 
-  '@hono/swagger-ui@0.6.1(hono@4.12.12)':
+  '@hono/swagger-ui@0.6.1(hono@4.12.14)':
     dependencies:
-      hono: 4.12.12
+      hono: 4.12.14
 
   '@humanfs/core@0.19.1': {}
 
@@ -5802,12 +5802,12 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2))':
+  '@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))':
     dependencies:
       '@mdx-js/mdx': 3.1.1
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.105.4(webpack-cli@7.0.2)
+      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
     transitivePeerDependencies:
       - supports-color
 
@@ -5866,11 +5866,11 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/mdx@16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2)))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))':
+  '@next/mdx@16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))':
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
-      '@mdx-js/loader': 3.1.1(webpack@5.105.4(webpack-cli@7.0.2))
+      '@mdx-js/loader': 3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.4)
 
   '@next/swc-darwin-arm64@16.1.7':
@@ -6035,10 +6035,10 @@ snapshots:
 
   '@scalar/helpers@0.4.2': {}
 
-  '@scalar/hono-api-reference@0.10.5(hono@4.12.12)':
+  '@scalar/hono-api-reference@0.10.5(hono@4.12.14)':
     dependencies:
       '@scalar/core': 0.4.5
-      hono: 4.12.12
+      hono: 4.12.14
 
   '@scalar/types@0.7.5':
     dependencies:
@@ -6675,12 +6675,12 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2)):
+  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
     dependencies:
       '@babel/core': 7.29.0
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.105.4(webpack-cli@7.0.2)
+      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
 
   babel-plugin-polyfill-corejs2@0.4.15(@babel/core@7.29.0):
     dependencies:
@@ -7704,17 +7704,17 @@ snapshots:
 
   hex-rgb@4.3.0: {}
 
-  hono-openapi@1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.12))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.12)(openapi-types@12.1.3):
+  hono-openapi@1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.14)(openapi-types@12.1.3):
     dependencies:
       '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6)
       '@standard-community/standard-openapi': 0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.6.0(valibot@1.3.1(typescript@5.9.3)))(quansync@0.2.11)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6))(@standard-schema/spec@1.1.0)(openapi-types@12.1.3)(valibot@1.3.1(typescript@5.9.3))(zod@4.3.6)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.12)
-      hono: 4.12.12
+      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14)
+      hono: 4.12.14
 
-  hono@4.12.12: {}
+  hono@4.12.14: {}
 
   https-proxy-agent@7.0.6:
     dependencies:
@@ -9230,13 +9230,13 @@ snapshots:
 
   tapable@2.3.2: {}
 
-  terser-webpack-plugin@5.4.0(webpack@5.105.4):
+  terser-webpack-plugin@5.4.0(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.46.1
-      webpack: 5.105.4(webpack-cli@7.0.2)
+      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
 
   terser@5.46.1:
     dependencies:
@@ -9494,7 +9494,7 @@ snapshots:
       import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.105.4(webpack-cli@7.0.2)
+      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
       webpack-merge: 6.0.1
 
   webpack-license-plugin@4.5.1(webpack@5.105.4):
@@ -9503,7 +9503,7 @@ snapshots:
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.105.4(webpack-cli@7.0.2)
+      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
       webpack-sources: 3.3.4
 
   webpack-merge@6.0.1:
@@ -9514,7 +9514,7 @@ snapshots:
 
   webpack-sources@3.3.4: {}
 
-  webpack@5.105.4(webpack-cli@7.0.2):
+  webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.8
@@ -9538,7 +9538,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.2
-      terser-webpack-plugin: 5.4.0(webpack@5.105.4)
+      terser-webpack-plugin: 5.4.0(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       watchpack: 2.5.1
       webpack-sources: 3.3.4
     optionalDependencies:
