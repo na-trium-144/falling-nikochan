@@ -1,3 +1,9 @@
+## ver. 15.7 - 2026/04/18
+
+* FPSCalculatorのログを削除
+* levelタブの並べ替えボタンがエラーになるバグを修正 [#1074](https://github.com/na-trium-144/falling-nikochan/pull/1074)
+* timebarをマウスのドラッグでスクロール可能に & クリックで音符を選択可能に [#1066](https://github.com/na-trium-144/falling-nikochan/pull/1066)
+
 ## ver. 15.6 - 2026/04/15
 
 * ChartBriefのunlistedの値がnullのケースがある
