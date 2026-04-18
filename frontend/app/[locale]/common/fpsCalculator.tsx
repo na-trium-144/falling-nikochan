@@ -59,7 +59,7 @@ export function FPSCalculatorProvider(props: { children: ReactNode }) {
           } else {
             fps = 1000 / deltas[Math.round(deltas.length / 2)];
             setFPS(fps);
-            console.log("FPSCalculator:", fps);
+            // console.log("FPSCalculator:", fps);
             hasStableValue = isStable;
             setHasStableValue(isStable);
             localStorage.setItem(
