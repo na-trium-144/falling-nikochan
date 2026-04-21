@@ -2,11 +2,44 @@
 
 Thank you for your interest in contributing!
 
-## Development Setup
+## Issues
+
+- There are no specific rules for creating issues. Feel free to create issues for questions, bug reports, or feature requests.
+- Issues can be in Japanese or English.
+- However, please note that we may not always respond positively to feature requests.
+  - We can accept pull requests for issues tagged with priority/2 or 3. Issues without a priority tag are less likely to be accepted even if you create a pull request.
+
+## Pull Requests
+
+- Always create pull requests to the main branch. (Although the maintainer may change the merge target branch to staging or other branches.)
+- Enable "Allow edits by maintainers."
+- There are no specific rules for branch names or commit messages.
+- You don't need to fill in the CHANGELOG or bump version numbers; the maintainer will do that before or after the merge.
+
+### Before Opening a PR
+
+Please run the following checks:
+
+1. **Format** — run Prettier on all code:
+   ```sh
+   pnpm run format
+   ```
+
+2. **Lint** — verify there are no type or lint errors (warnings are acceptable):
+   ```sh
+   pnpm run lint
+   ```
+
+3. **Test** — if you have changed `chart/` or backend code, and MongoDB is available:
+   ```sh
+   pnpm run test
+   ```
+
+## Development Setup, Project Structure
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/download) >=20.x (>=23.6 required for `pnpm run test`)
+- [Node.js](https://nodejs.org/en/download) (>=23.6 required for `pnpm run test`)
 - [pnpm](https://pnpm.io/installation) >=10
 - [MongoDB](https://www.mongodb.com/docs/manual/installation/) running on `localhost:27017`
   - Required for running the backend and tests. Not required if you are only working on the frontend.
@@ -31,24 +64,6 @@ API_ENV="development"
 API_NO_RATELIMIT="1"
 ```
 
-Other optional environment variables:
-
-| Variable | Location | Description |
-|---|---|---|
-| `SECRET_SALT` | backend | string |
-| `VERCEL_PROTECTION_BYPASS_SECRET` | backend | string |
-| `API_CACHE_EDGE` | backend | `1` or unset |
-| `ASSET_PREFIX` | backend & frontend | `https://domain-of-your-assets` or unset |
-| `BACKEND_PREFIX` | backend & frontend | `https://domain-of-your-backend` or unset — needed when the page origin differs from the backend origin |
-| `BACKEND_OG_PREFIX` | backend | alternate backend for OG image generation; used by Cloudflare Worker entrypoint only |
-| `BACKEND_ALT_PREFIX` | frontend | fallback backend URL used when the primary backend returns 5xx |
-| `NO_PREFETCH` | frontend | `1` or unset |
-| `YOUTUBE_API_KEY` | backend | API key for YouTube Data API v3 (optional) |
-| `ALLOW_FETCH_ERROR` | frontend | `1` or unset |
-| `VERSION_SUFFIX` | frontend | string |
-| `TITLE_SUFFIX` | frontend | string |
-| `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
-
 ### Install Dependencies
 
 ```sh
@@ -67,43 +82,62 @@ This inserts a sample chart at cid `102399` ("Get Started!").
 
 The `chart/` directory contains chart data schemas and conversion logic shared between the frontend and backend.
 
-The frontend does not import `.ts` files from `chart/` directly; it uses the compiled `.js` files. After modifying files in `chart/`, run:
-
+The frontend does not import `.ts` files from `chart/` directly; it uses the compiled `.js` files.
+After modifying files in `chart/`, run:
 ```sh
 pnpm run t
 ```
-
 To watch for changes and recompile automatically during development:
-
 ```sh
 pnpm run cdev
 ```
-
 The compiled files are also regenerated automatically when building the frontend or before running tests.
+
+**Conventions**
+
+- Valibot schemas are defined as **functions** (e.g., `export const FooSchema = () => v.object(...)`). This is intentional: lazy evaluation avoids circular reference errors.
+- For frequently used data types, OpenAPI schemas are also defined simultaneously to simplify OpenAPI documentation and registered in docSchema.ts.
+- Making changes to the chart data format (`chart/legacy/`) involves a complicated procedure. It is recommended that you do not touch it unless you have a thorough understanding of Falling Nikochan's internal structure.
+
+  <details><summary>When bumping major version</summary>
+
+  * Create new file in `chart/src/legacy/`
+      * Parts of the schema that remain unchanged do not need to be duplicated; they can be imported from the previous version.
+  * Update `chart/src/index.ts` so it can import the new file in `legacy/`.
+  * Update type aliases, currentChartVer, convertToPlay, convertToLatest etc. in `chart/src/chart.ts`
+  * In `route/src/api/chart.ts`,
+      * Update the ChartEntry and ChartEntryCompressed type to support the new version.
+      * Update chartToEntry function to support the last 2 versions.
+      * Update entryToChart function to support the new version.
+  * Update `route/src/api/chartFile.ts`, `newChartFile.ts`, `playFile.ts` and `seqPreview.ts` to support the last 2 versions, including the OpenAPI documentation (describeRoute).
+  * Fix any typecheck and lint errors.
+      * Statements like `currentChartVer satisfies 15;` indicates that not only that statement but also the surrounding code needs to be updated when the version changes.
+  * Release new version of `fn-commands` library
+
+  </details>
 
 ### Backend
 
-The backend serves `/api`, `/share`, `/og`, and `/` (redirect). It is built with [Hono](https://hono.dev/) and can run on multiple runtimes.
+The backend is built with Hono and can run on multiple runtimes.
+There are five backend entry points:
+- `route/serve-local.ts` for Node.js (local development)
+- `route/serve-bun-prod.ts` for Bun (production)
+- `route/serve-cf.js` for Cloudflare Worker
+- `api/index.js` for Vercel
+- (`worker/entry.ts` executed by the Service Worker)
 
-> **Note:** The actual backend source code lives in the [`route/`](route/) directory, **not** in [`api/`](api/). The `api/` directory is only the Vercel entrypoint.
+If you modify any of these, please update all of them.
+When adding new API paths, you may also need to update the `rewrites` in `vercel.json`.
 
 For local development, start the Node.js server at `http://localhost:8787`:
-
 ```sh
 pnpm run ldev
 ```
 
-Deployment entrypoints:
+**Conventions**
 
-| File | Runtime |
-|---|---|
-| `route/serve-local.ts` | Node.js (local dev) |
-| `route/serve-bun-prod.ts` | Bun |
-| `route/serve-cf.js` | Cloudflare Worker |
-| `api/index.js` | Vercel |
-| `worker/entry.ts` | Service Worker (partial — redirects etc.) |
-
-When adding new API paths, you may also need to update the `rewrites` in [`vercel.json`](vercel.json).
+- When code branches depending on the deployment target, the Hono App creation is made into a function. (`const fooApp = async (config: ...) => new Hono(...)`)
+- Error messages use only those included in `i18n/[locale]/error.js`, except for validation errors, and are returned using `throw new HTTPException` or `return c.json()`.
 
 ### Frontend
 
@@ -113,15 +147,28 @@ Start the Next.js development server (hot-reload) at `http://localhost:3000/ja` 
 pnpm run ndev
 ```
 
-> `http://localhost:3000/` returns 404. Always use `/ja` or `/en`.
+`http://localhost:3000/` returns 404. Always access `/ja` or `/en`.
 
-Or build and export the static HTML (no hot-reload; all pages are served via `http://localhost:8787` after building):
-
+To build and export the static HTML:
 ```sh
 pnpm run nbuild
 ```
 
-> **Note:** The `/share/[cid]` page is special. It works by having the Hono backend rewrite the exported placeholder HTML at runtime. It does **not** work in the `pnpm run ndev` development environment. Use `/{ja,en}/share/placeholder` for the placeholder page during development.
+**Convention**
+
+- The `@/...` path alias resolves to `app/[locale]/`.
+- Import extensions (none, `.js`, `.jsx`) are mixed in the codebase. All work fine; new code can use any style.
+- Icons: use [icon-park](https://iconpark.oceanengine.com/official). Import as:
+  ```ts
+  import IconName from "@icon-park/react/lib/icons/IconName";
+  ```
+- CSS: [TailwindCSS](https://tailwindcss.com/).
+  - Custom theme variables: `app/[locale]/globals.css`
+  - This project uses custom breakpoints such as `main-wide:` instead of standard `md:` or `lg:`.
+  - Custom utility classes: `styles/utilities.css`
+  - When the same styles are repeated, extract them into a Tailwind component in a `styles/*.css` file. Custom component names start with `fn-`.
+- The `/share/[cid]` page is special. It works by having the Hono backend rewrite the exported placeholder HTML at runtime. It does **not** work in the `pnpm run ndev` development environment.
+  - Use `/{ja,en}/share/placeholder` for the placeholder page during development.
 
 ### Service Worker
 
@@ -133,65 +180,44 @@ pnpm run nbuild && pnpm run swbuild
 
 The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`) caches all static assets and pages (except `/api` and `/og`). It updates the cache whenever `/buildVer.json` changes.
 
-## Project Structure & Conventions
-
-### Common Logic (`chart/`)
-
-- Valibot schemas are defined as **functions** (e.g., `export const FooSchema = () => v.object(...)`). This is intentional: lazy evaluation avoids circular reference errors. Follow this pattern when adding new schemas.
-
-### Backend
-
-- Input validation and OpenAPI type definitions use [Valibot](https://valibot.dev/).
-- There are five entrypoints (see table above). When making backend changes, make sure all relevant entrypoints are updated.
-
-### Frontend
-
-- All frontend source code is under `frontend/app/[locale]/` — literally `[locale]`, not `ja` or `en` (Next.js dynamic route).
-- The `@/...` path alias resolves to `app/[locale]/`.
-- Import extensions (none, `.js`, `.jsx`) are mixed in the codebase. All work fine; new code can use any style.
-- Icons: use [icon-park](https://github.com/bytedance/IconPark). Import as:
-  ```ts
-  import IconName from "@icon-park/react/lib/icons/IconName";
-  ```
-- CSS: [TailwindCSS](https://tailwindcss.com/).
-  - Custom theme variables: `app/[locale]/globals.css`
-  - Custom utility classes: `styles/utilities.css`
-  - When the same styles are repeated, extract them into a Tailwind component in a `styles/*.css` file. Custom component names start with `fn-`.
-  - This project uses custom breakpoints such as `main-wide:` instead of standard `md:` or `lg:`.
-
 ### Localization (i18n)
 
-- Language resources are in `i18n/[locale]/`.
-- When adding or changing UI text, follow [next-intl](https://next-intl.dev/docs/usage/messages) conventions and keep all locales in sync.
+- Language resources are in `i18n` directory.
+- To add a new language, create a new directory with the language code and add all the translations in the corresponding files.
 
-## Issues and Pull Requests
+See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 
-- There is no strict issue or PR template. Commit message format and branch naming are flexible.
-- For large new features, consider opening an issue or draft PR first to discuss.
-  - Large feature proposals are reviewed carefully and may not always be accepted.
-- In most cases, open PRs against the `main` branch.
-  - Maintainers may sometimes ask you to retarget a PR to the `staging` branch.
+## Versioning
 
-## Before Opening a PR
-
-Please run the following checks:
-
-1. **Format** — run Prettier on all code:
-   ```sh
-   pnpm run format
-   ```
-
-2. **Lint** — verify there are no type or lint errors (warnings are acceptable):
-   ```sh
-   pnpm run lint
-   ```
-
-3. **Test** — if you have changed `chart/` or backend code, and MongoDB is available:
-   ```sh
-   pnpm run test
-   ```
+* major version follows the Chart data format version.
+* minor version is increased with `node ./versionBump.js minor` for each PR
+    * Changes that do not so much affect app/ such as dependabot or update README.md or minor fixes are not counted.
+* ChangeLogs are written in [i18n/[locale]/changelog.mdx](i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation. I may not update the information if the changes are minor.
 
 ## Deployment Notes (for maintainers)
+
+<details>
+
+### Environment Variables
+
+| Variable | Location | Description |
+|---|---|---|
+| `MONGODB_URI` | backend | `mongodb://...` | 
+| `API_ENV` | backend | DO NOT SET; if set to `development`, development-specific behaviors such as password bypass will be enabled |
+| `API_NO_RATELIMIT` | backend | DO NOT SET |
+| `SECRET_SALT` | backend | string |
+| `VERCEL_PROTECTION_BYPASS_SECRET` | backend | string |
+| `API_CACHE_EDGE` | backend | `1` or unset |
+| `ASSET_PREFIX` | backend & frontend | `https://domain-of-your-assets` or unset |
+| `BACKEND_PREFIX` | backend & frontend | `https://domain-of-your-backend` or unset — needed when the page origin differs from the backend origin |
+| `BACKEND_OG_PREFIX` | backend | alternate backend for OG image generation; used by Cloudflare Worker entrypoint only |
+| `BACKEND_ALT_PREFIX` | frontend | fallback backend URL used when the primary backend returns 5xx |
+| `NO_PREFETCH` | frontend | `1` or unset |
+| `YOUTUBE_API_KEY` | backend | API key for YouTube Data API v3 |
+| `ALLOW_FETCH_ERROR` | frontend | `1` or unset |
+| `VERSION_SUFFIX` | frontend | string |
+| `TITLE_SUFFIX` | frontend | string |
+| `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
 
 ### Vercel
 
@@ -207,3 +233,5 @@ Please run the following checks:
 ### Reverse Proxy
 
 - Falling Nikochan uses the **rightmost** value of `x-forwarded-for` for rate limiting. Avoid adding the IP address to `x-forwarded-for` multiple times when going through two or more proxy servers.
+
+</details>

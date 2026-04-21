@@ -21,7 +21,7 @@ For more information, play, and chart creation, please visit the Falling Nikocha
 
 <img src="https://github.com/na-trium-144/falling-nikochan/blob/main/.github/screenshot_15.jpg?raw=true" width=960 />
 
-## Development
+## Development and Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development setup guide, project structure, conventions, and how to open a pull request.
 
@@ -32,37 +32,6 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 API Reference is here: https://nikochan.utcode.net/api
 
 See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart data formats.
-
-## Localization
-
-[i18n/](i18n/) directory contains the translations of the application.
-
-To add a new language, create a new directory with the language code and add all the translations in the corresponding files.
-
-See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
-
-## Versioning
-
-* major version follows the Chart data format version.
-* minor version is increased with `node ./versionBump.js minor` for each PR
-    * Changes that do not so much affect app/ such as dependabot or update README.md or minor fixes are not counted.
-* ChangeLogs are written in [i18n/[locale]/changelog.mdx](i18n/ja/changelog.mdx) for user-friendly explanation and in [CHANGELOG_dev.md](CHANGELOG_dev.md) for more detailed explanation. I may not update the information if the changes are minor.
-<details><summary>When bumping major version</summary>
-
-* Create new file in chart/src/legacy/
-    * Parts of the schema that remain unchanged do not need to be duplicated; they can be imported from the previous version.
-* Update chart/src/index.ts so it can import the new file in legacy/.
-* Update type aliases, currentChartVer, convertToPlay, convertToLatest etc. in chart/src/chart.ts
-* In route/src/api/chart.ts,
-    * Update the ChartEntry and ChartEntryCompressed type to support the new version.
-    * Update chartToEntry function to support the last 2 versions.
-    * Update entryToChart function to support the new version.
-* Update route/src/api/chartFile.ts, newChartFile.ts, playFile.ts and seqPreview.ts to support the last 2 versions, including the OpenAPI documentation (describeRoute).
-* Fix any typecheck and lint errors.
-    * Statements like `currentChartVer satisfies 15;` indicates that not only that statement but also the surrounding code needs to be updated when the version changes.
-* Release new version of fn-commands library
-
-</details>
 
 ## License
 
