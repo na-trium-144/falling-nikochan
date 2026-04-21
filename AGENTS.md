@@ -42,6 +42,8 @@ AIエージェントは以下の特殊な構成に注意してください。
 - CSSはTailwindCSSを使用しています。app/[locale]/globals.cssで独自のテーマ変数を定義しており、特にbreakpointは一般的なmdやlgを使わず独自のmain-wide:などを使用します。またstyles/utilities.cssに独自のユーティリティクラスが定義されています。同じスタイルの記述を複数書く場合はtailwind componentに抽出し、styles/以下のcssファイルに書きます(その場合独自のコンポーネントの名前はfn-で始めます)。
 - これはパブリックなサイトであり、また meta referrer タグでreferrerをoriginのみに制限しているので、外部へのリンクに `rel="noreferrer"` をつける必要はありません。また現代のモダンなブラウザでは `noopener` も不要です。
 - shareページ(`/share/[cid]`)はNext.jsの標準的な開発環境（`pnpm run ndev`）では正しく動作しません。実際には [locale]/share/placeholder にあるダミーのページをエクスポートしたHTMLを本番環境のHonoバックエンドが書き換えることで動作しています。
+- playページでは、 FallingWindow コンポーネントで`rerenderIndex` というstateをrequestAnimationFrame内で更新することで毎フレームReactの再レンダリングを起こしています。
+- editページでは、編集中の譜面データの状態はChartEditingクラス(`chart/src/editing/` 以下)で管理され、React的な状態管理ではありません。useEffectの依存配列を記述するだけでは正しく自動的に再実行されず、ChartEditingのイベントにsubscribeする必要があります。
 
 ### 4. Localization (i18n)
 - 言語リソースは `i18n/[locale]/` に配置されています。

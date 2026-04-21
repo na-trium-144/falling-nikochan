@@ -8,6 +8,7 @@ Thank you for your interest in contributing!
 - Issues can be in Japanese or English.
 - However, please note that we may not always respond positively to feature requests.
   - We can accept pull requests for issues tagged with priority/2 or 3. Issues without a priority tag are less likely to be accepted even if you create a pull request.
+- The code may have few comments and a messy structure. Please feel free to ask any questions about the code.
 
 ## Pull Requests
 
@@ -169,6 +170,12 @@ pnpm run nbuild
   - When the same styles are repeated, extract them into a Tailwind component in a `styles/*.css` file. Custom component names start with `fn-`.
 - The `/share/[cid]` page is special. It works by having the Hono backend rewrite the exported placeholder HTML at runtime. It does **not** work in the `pnpm run ndev` development environment.
   - Use `/{ja,en}/share/placeholder` for the placeholder page during development.
+- `/play` page
+  - In the FallingWindow component, it triggers a React re-render every frame by updating a state called `rerenderIndex` within the requestAnimationFrame.
+  - Notes are drawn on the canvas. Canvas manipulation occurs during the FallingWindow re-render. The code that actually draws each note is managed by the DisplayNikochan class.
+- `/edit` page
+  - The state of the chart data being edited is managed by the `ChartEditing` class (under `chart/src/editing/`), and is not a typical React state management method.
+  - `useEffect` will not execute automatically even if the dependency array is correctly specified; it needs to subscribe to the events of `ChartEditing` class.
 
 ### Service Worker
 
