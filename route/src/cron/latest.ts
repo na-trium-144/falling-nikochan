@@ -7,6 +7,10 @@ import {
 import { Bindings } from "../env.js";
 import { postChart } from "./twitter.js";
 
+const CHART_SCAN_LOOKBACK_MS = 24 * 60 * 60 * 1000;
+const CHART_POST_DELAY_MS = 15 * 60 * 1000;
+const CHART_REPOST_COOLDOWN_MS = 72 * 60 * 60 * 1000;
+
 export async function checkNewCharts(env: Bindings) {
   const client = new MongoClient(env.MONGODB_URI);
   let newCharts: ChartEntryCompressed[] = [];
@@ -27,8 +31,8 @@ export async function checkNewCharts(env: Bindings) {
             deleted: false,
             notifiedAt: { $exists: false },
             updatedAt: {
-              $gte: now - 24 * 60 * 60 * 1000,
-              $lte: now - 15 * 60 * 1000,
+              $gte: now - CHART_SCAN_LOOKBACK_MS,
+              $lte: now - CHART_POST_DELAY_MS,
             },
           })
           .toArray()
@@ -43,16 +47,17 @@ export async function checkNewCharts(env: Bindings) {
           .find({
             published: true,
             deleted: false,
-            notifiedAt: { $lt: now - 12 * 60 * 60 * 1000 },
+            notifiedAt: { $lt: now - CHART_REPOST_COOLDOWN_MS },
             updatedAt: {
-              $gte: now - 24 * 60 * 60 * 1000,
-              $lte: now - 15 * 60 * 1000,
+              $gte: now - CHART_SCAN_LOOKBACK_MS,
+              $lte: now - CHART_POST_DELAY_MS,
             },
           })
           .toArray()
       )
         .filter(
-          (chart) => chart.updatedAt > chart.notifiedAt! + 12 * 60 * 60 * 1000
+          (chart) =>
+            chart.updatedAt > chart.notifiedAt! + CHART_REPOST_COOLDOWN_MS
         )
         .map((compressed) => unzipEntry(compressed))
     );

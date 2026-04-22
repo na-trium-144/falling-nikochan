@@ -1,44 +1,81 @@
 import { GoogleGenAI } from "@google/genai";
 import { Bindings } from "../env.js";
 
+const GEMINI_CALL_INTERVAL_MS = 30 * 1000;
+const GEMINI_HIGH_DEMAND_MESSAGE =
+  "This model is currently experiencing high demand.";
+const GEMINI_HIGH_DEMAND_RETRY_COUNT = 3;
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isGeminiHighDemandError(error: unknown) {
+  return String(error).includes(GEMINI_HIGH_DEMAND_MESSAGE);
+}
+
+async function generateContentWithRetry(
+  generate: () => Promise<string>
+): Promise<string> {
+  let retryCount = 0;
+  while (true) {
+    try {
+      return await generate();
+    } catch (e) {
+      if (
+        isGeminiHighDemandError(e) &&
+        retryCount < GEMINI_HIGH_DEMAND_RETRY_COUNT
+      ) {
+        retryCount++;
+        await wait(GEMINI_CALL_INTERVAL_MS);
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
+async function generateContentInner(
+  ai: GoogleGenAI,
+  prompt: string,
+  emptyErrorMessage = "Empty response from Gemini API"
+) {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      temperature: 0,
+    },
+  });
+  if (response.text?.trim()) {
+    return response.text;
+  } else {
+    throw new Error(emptyErrorMessage);
+  }
+}
+
 export async function generateContent(
   env: Bindings,
   prompt: string
 ): Promise<string> {
+  const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY! });
   try {
-    const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY! });
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        temperature: 0,
-      },
-    });
-    if (response.text?.trim()) {
-      return response.text;
-    } else {
-      throw new Error("Empty response from Gemini API");
-    }
+    return await generateContentWithRetry(() => generateContentInner(ai, prompt));
   } catch (e) {
     if (String(e).includes("User location is not supported")) {
-      const ai = new GoogleGenAI({
+      const proxyAi = new GoogleGenAI({
         apiKey: env.GEMINI_API_KEY!,
         httpOptions: {
           baseUrl: "https://gemini-proxy.utcode.net",
         },
       });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          temperature: 0,
-        },
-      });
-      if (response.text?.trim()) {
-        return response.text;
-      } else {
-        throw new Error("Empty response from Gemini API via proxy");
-      }
+      return await generateContentWithRetry(() =>
+        generateContentInner(
+          proxyAi,
+          prompt,
+          "Empty response from Gemini API via proxy"
+        )
+      );
     } else {
       throw e;
     }
@@ -76,10 +113,9 @@ ${content}
 \`\`\`
 `;
 
-  const [resJp, resEn] = await Promise.all([
-    generateContent(env, promptJp),
-    generateContent(env, promptEn),
-  ]);
+  const resJp = await generateContent(env, promptJp);
+  await wait(GEMINI_CALL_INTERVAL_MS);
+  const resEn = await generateContent(env, promptEn);
 
   const isSafeJp =
     !resJp.toLowerCase().includes("unsafe") &&
