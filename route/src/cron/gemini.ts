@@ -11,14 +11,15 @@ function wait(ms: number) {
 }
 
 function isGeminiHighDemandError(error: unknown) {
-  return String(error).includes(GEMINI_HIGH_DEMAND_MESSAGE);
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes(GEMINI_HIGH_DEMAND_MESSAGE);
 }
 
 async function generateContentWithRetry(
   generate: () => Promise<string>
 ): Promise<string> {
   let retryCount = 0;
-  while (true) {
+  while (retryCount <= GEMINI_HIGH_DEMAND_RETRY_COUNT) {
     try {
       return await generate();
     } catch (e) {
@@ -33,6 +34,7 @@ async function generateContentWithRetry(
       throw e;
     }
   }
+  throw new Error("Exceeded Gemini retry limit");
 }
 
 async function generateContentInner(
