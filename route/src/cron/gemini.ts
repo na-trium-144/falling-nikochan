@@ -4,7 +4,7 @@ import { Bindings } from "../env.js";
 const GEMINI_CALL_INTERVAL_MS = 30 * 1000;
 const GEMINI_HIGH_DEMAND_MESSAGE =
   "This model is currently experiencing high demand.";
-const GEMINI_HIGH_DEMAND_RETRY_COUNT = 3;
+const GEMINI_HIGH_DEMAND_MAX_ATTEMPTS = 4;
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,19 +18,24 @@ function isGeminiHighDemandError(error: unknown) {
 async function generateContentWithRetry(
   generate: () => Promise<string>
 ): Promise<string> {
-  for (let retryCount = 0; ; retryCount++) {
+  for (
+    let attempt = 1;
+    attempt <= GEMINI_HIGH_DEMAND_MAX_ATTEMPTS;
+    attempt++
+  ) {
     try {
       return await generate();
     } catch (e) {
       if (
         !isGeminiHighDemandError(e) ||
-        retryCount >= GEMINI_HIGH_DEMAND_RETRY_COUNT
+        attempt === GEMINI_HIGH_DEMAND_MAX_ATTEMPTS
       ) {
         throw e;
       }
       await wait(GEMINI_CALL_INTERVAL_MS);
     }
   }
+  throw new Error("Failed to generate Gemini content");
 }
 
 async function generateContentInner(
