@@ -18,23 +18,19 @@ function isGeminiHighDemandError(error: unknown) {
 async function generateContentWithRetry(
   generate: () => Promise<string>
 ): Promise<string> {
-  let retryCount = 0;
-  while (retryCount <= GEMINI_HIGH_DEMAND_RETRY_COUNT) {
+  for (let retryCount = 0; ; retryCount++) {
     try {
       return await generate();
     } catch (e) {
       if (
-        isGeminiHighDemandError(e) &&
-        retryCount < GEMINI_HIGH_DEMAND_RETRY_COUNT
+        !isGeminiHighDemandError(e) ||
+        retryCount >= GEMINI_HIGH_DEMAND_RETRY_COUNT
       ) {
-        retryCount++;
-        await wait(GEMINI_CALL_INTERVAL_MS);
-        continue;
+        throw e;
       }
-      throw e;
+      await wait(GEMINI_CALL_INTERVAL_MS);
     }
   }
-  throw new Error("Exceeded Gemini retry limit");
 }
 
 async function generateContentInner(
