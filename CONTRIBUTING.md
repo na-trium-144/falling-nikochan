@@ -7,7 +7,7 @@ Thank you for your interest in contributing!
 - There are no specific rules for creating issues. Feel free to create issues for questions, bug reports, or feature requests.
 - Issues can be in Japanese or English.
 - However, please note that we may not always respond positively to feature requests.
-  - We can accept pull requests for issues tagged with priority/2 or 3. Issues without a priority tag are less likely to be accepted even if you create a pull request.
+  - We can accept pull requests for issues tagged with priority-2 or 3. Issues without a priority tag are less likely to be accepted even if you create a pull request.
 - The code may have few comments and a messy structure. Please feel free to ask any questions about the code.
 
 ## Pull Requests
