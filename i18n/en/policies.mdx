@@ -1,5 +1,6 @@
 import { Small, SmallDomainOnly } from "@/common/small.js";
 import { OSSLicensesList } from "@/main/policies/ossLicensesList.js";
+import { getLicenses } from "next-license-list";
 
 # As software
 
@@ -17,7 +18,7 @@ import { OSSLicensesList } from "@/main/policies/ossLicensesList.js";
   - Secondary use of these materials is free, as long as the copyright and license information is displayed. <Small>([About CC
     Licenses](https://creativecommons.org/share-your-work/cclicenses/))</Small>
 - You can check the third-party OSS libraries used by Falling Nikochan and their respective licenses below.
-  <OSSLicensesList />
+  <OSSLicensesList frontendLicenses={await getLicenses()}/>
 
 # As a service
 
