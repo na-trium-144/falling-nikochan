@@ -1,3 +1,8 @@
+## ver. 15.8 - 2026/04/24
+
+* frontendのライセンス情報取得処理を[next-license-list](https://github.com/na-trium-144/next-license-list)ライブラリに分離 [#1089](https://github.com/na-trium-144/falling-nikochan/pull/1089)
+* CONTRIBUTING.md を追加 [#1085](https://github.com/na-trium-144/falling-nikochan/pull/1085)
+
 ## ver. 15.7 - 2026/04/18
 
 * FPSCalculatorのログを削除
