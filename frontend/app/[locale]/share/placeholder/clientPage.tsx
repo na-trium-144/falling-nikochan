@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import {
   ChartBrief,
@@ -90,6 +91,7 @@ export default function ShareChart(props: Props) {
             setRecord(await res.json());
           } catch (e) {
             console.error(e);
+            Sentry.captureException(e);
             setRecord(APIError.badResponse());
           }
         } else {
@@ -104,6 +106,7 @@ export default function ShareChart(props: Props) {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
       } catch (e) {
         console.error(e);
+        Sentry.captureException(e);
       }
     }
     return () => clearInterval(titleUpdate);

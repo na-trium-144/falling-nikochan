@@ -9,6 +9,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import createMDX from "@next/mdx";
+import { withSentryConfig } from "@sentry/nextjs";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
 import { join, dirname } from "node:path";
@@ -86,6 +87,9 @@ const env = {
   ASSET_QUERY_ICON: "?v=4",
   ASSET_QUERY_NIKOCHAN: "?v=2",
   ASSET_QUERY_CLOUD: "?v=2",
+  // Sentry DSN (make available to client-side code)
+  SENTRY_DSN: process.env.SENTRY_DSN || "",
+  SENTRY_SEND_PII: process.env.SENTRY_SEND_PII || "",
 };
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
@@ -180,4 +184,14 @@ nextConfig = withLicense(nextConfig, {
     ),
 });
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  sentryUrl: process.env.SENTRY_URL || undefined,
+  silent: true,
+  // server-side auto-instrumentation is not applicable for static export
+  autoInstrumentServerFunctions: false,
+  autoInstrumentMiddleware: false,
+  disableLogger: true,
+});

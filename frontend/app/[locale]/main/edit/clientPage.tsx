@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import { useEffect, useState } from "react";
 import { IndexMain } from "../main.js";
@@ -55,6 +56,7 @@ export default function EditTab({ locale }: { locale: string }) {
       }
     } catch (e) {
       console.error(e);
+      Sentry.captureException(e);
       setCidFetching(false);
       setCIdErrorMsg(APIError.fetchError());
       setInputCId("");

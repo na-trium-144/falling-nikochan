@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import { titleShare, titleWithSiteName } from "@/common/title";
 import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
@@ -78,6 +79,7 @@ export function SharePageModalProvider(props: {
               setModalRecord(await res.json());
             } catch (e) {
               console.error(e);
+              Sentry.captureException(e);
               setModalRecord(APIError.badResponse());
             }
           } else {

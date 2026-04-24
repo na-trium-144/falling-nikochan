@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import {
   getPasswd,
   preferSavePasswd,
@@ -179,6 +180,7 @@ export function useChartState(props: Props) {
               onLoadRef.current(cid);
             } catch (e) {
               console.error(e);
+              Sentry.captureException(e);
               setChartState({ state: APIError.badResponse() });
             }
           } else {
@@ -207,6 +209,7 @@ export function useChartState(props: Props) {
         }
       } catch (e) {
         console.error(e);
+        Sentry.captureException(e);
         setChartState({ state: APIError.fetchError() });
       }
     },
@@ -288,6 +291,7 @@ export function useChartState(props: Props) {
           }
         } catch (e) {
           console.error(e);
+          Sentry.captureException(e);
           setSaveState(APIError.fetchError());
           return;
         }
@@ -332,6 +336,7 @@ export function useChartState(props: Props) {
           }
         } catch (e) {
           console.error(e);
+          Sentry.captureException(e);
           setSaveState(APIError.fetchError());
           return;
         }
@@ -395,6 +400,7 @@ export function useChartState(props: Props) {
         }
       } catch (e) {
         console.error(e);
+        Sentry.captureException(e);
       }
     } else {
       throw new Error("chart is empty");
