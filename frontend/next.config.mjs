@@ -65,13 +65,15 @@ try {
   console.error("Failed to get commit hash: ", e);
 }
 
+const buildVersion =
+  packageJson.version.split(".").slice(0, 2).join(".") +
+  (process.env.VERSION_SUFFIX ||
+    (process.env.NODE_ENV === "development" ? "+dev" : ""));
+
 const env = {
   buildDate: date,
   buildCommit: commit,
-  buildVersion:
-    packageJson.version.split(".").slice(0, 2).join(".") +
-    (process.env.VERSION_SUFFIX ||
-      (process.env.NODE_ENV === "development" ? "+dev" : "")),
+  buildVersion,
   browserslist: packageJson.browserslist.join(", "),
   TITLE_SUFFIX:
     process.env.TITLE_SUFFIX ||
@@ -90,6 +92,8 @@ const env = {
   // Sentry DSN (make available to client-side code)
   SENTRY_DSN: process.env.SENTRY_DSN || "",
   SENTRY_SEND_PII: process.env.SENTRY_SEND_PII || "",
+  // Sentry release name: "<buildVersion>-<buildCommit>"
+  SENTRY_RELEASE: commit ? `${buildVersion}-${commit}` : buildVersion,
 };
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
@@ -189,6 +193,7 @@ export default withSentryConfig(nextConfig, {
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   sentryUrl: process.env.SENTRY_URL || undefined,
+  release: { name: env.SENTRY_RELEASE },
   silent: true,
   // server-side auto-instrumentation is not applicable for static export
   autoInstrumentServerFunctions: false,
