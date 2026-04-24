@@ -18,11 +18,7 @@ function isGeminiHighDemandError(error: unknown) {
 async function generateContentWithRetry(
   generate: () => Promise<string>
 ): Promise<string> {
-  for (
-    let attempt = 1;
-    attempt <= GEMINI_HIGH_DEMAND_MAX_ATTEMPTS;
-    attempt++
-  ) {
+  for (let attempt = 1; attempt <= GEMINI_HIGH_DEMAND_MAX_ATTEMPTS; attempt++) {
     try {
       return await generate();
     } catch (e) {
@@ -63,7 +59,9 @@ export async function generateContent(
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY! });
   try {
-    return await generateContentWithRetry(() => generateContentInner(ai, prompt));
+    return await generateContentWithRetry(() =>
+      generateContentInner(ai, prompt)
+    );
   } catch (e) {
     if (String(e).includes("User location is not supported")) {
       const proxyAi = new GoogleGenAI({
