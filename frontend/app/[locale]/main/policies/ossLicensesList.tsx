@@ -8,47 +8,43 @@ import DownOne from "@icon-park/react/lib/icons/DownOne.js";
 import RightOne from "@icon-park/react/lib/icons/RightOne.js";
 import Close from "@icon-park/react/lib/icons/Close";
 import { ExternalLink } from "@/common/extLink";
+import { LicenseEntry, normalizeRepositoryURL } from "next-license-list";
 
-// https://github.com/codepunkt/webpack-license-plugin の出力形式
-interface LicenseOutput {
-  name: string;
-  version: string;
-  author?: string;
-  repository?: string;
-  source?: string;
-  license?: string;
-  licenseText?: string;
-  noticeText?: string;
-}
-
-export function OSSLicensesList() {
+export function OSSLicensesList({
+  frontendLicenses,
+}: {
+  frontendLicenses: LicenseEntry[];
+}) {
   const t = useTranslations("main.policies.license");
   const [open, setOpen] = useState<boolean>(false);
-  const [licenses, setLicenses] = useState<LicenseOutput[] | null>(null);
+  const [workerLicenses, setWorkerLicenses] = useState<LicenseEntry[] | null>(
+    null
+  );
   useEffect(() => {
-    if (open && licenses === null) {
-      (async () => {
-        const pFrontendLicenses = fetch(
-          process.env.ASSET_PREFIX + "/oss-licenses/frontend.json"
+    if (workerLicenses === null) {
+      fetch(process.env.ASSET_PREFIX + "/oss-licenses/worker.json")
+        .then((res) => res.json())
+        .then((data) =>
+          setWorkerLicenses(
+            (data as LicenseEntry[]).map((e) => normalizeRepositoryURL(e))
+          )
         )
-          .then((res) => res.json())
-          .catch(() => []);
-        const pWorkerLicenses = fetch(
-          process.env.ASSET_PREFIX + "/oss-licenses/worker.json"
-        )
-          .then((res) => res.json())
-          .catch(() => []);
-        const licenses: LicenseOutput[] = await pFrontendLicenses;
-        for (const wl of await pWorkerLicenses) {
-          if (!licenses.some((fl) => fl.name === wl.name)) {
-            licenses.push(wl);
-          }
-        }
-        licenses.sort((a, b) => a.name.localeCompare(b.name));
-        setLicenses(licenses);
-      })();
+        .catch(() => []);
     }
-  }, [open, licenses]);
+  }, [workerLicenses]);
+  const licenses: LicenseEntry[] = Array.isArray(frontendLicenses)
+    ? frontendLicenses.slice()
+    : [];
+  if (workerLicenses) {
+    for (const wl of workerLicenses) {
+      if (
+        !licenses.some((fl) => fl.name === wl.name && fl.version === wl.version)
+      ) {
+        licenses.push(wl);
+      }
+    }
+  }
+  licenses.sort((a, b) => a.name.localeCompare(b.name));
 
   if (open) {
     return (
@@ -80,40 +76,13 @@ export function OSSLicensesList() {
   }
 }
 
-function LicenseDetail(props: { license: LicenseOutput }) {
+function LicenseDetail(props: { license: LicenseEntry }) {
   const t = useTranslations("main.policies.license");
   const [open, setOpen] = useState<boolean>(false);
   let author: string = props.license.author ?? "";
   // remove email or url
   author = author.replace(/(.*) <.*@.*>/, "$1");
   author = author.replace(/(.*) \(https?:\/\/.*\)/, "$1");
-  let repositoryURL: string;
-  if (props.license.repository?.startsWith("http")) {
-    repositoryURL = props.license.repository;
-  } else if (props.license.repository?.startsWith("git+http")) {
-    repositoryURL = props.license.repository?.slice(4);
-  } else if (props.license.repository?.startsWith("git@")) {
-    repositoryURL =
-      "https://" +
-      props.license.repository
-        .slice(4)
-        .replace(":", "/")
-        .replace(/\.git$/, "");
-  } else if (
-    props.license.repository &&
-    /github:[\w-]+\/[\w-]+/.test(props.license.repository)
-  ) {
-    repositoryURL = `https://github.com/${props.license.repository.slice(7)}`;
-  } else if (
-    props.license.repository &&
-    /[\w-]+\/[\w-]+/.test(props.license.repository)
-  ) {
-    // assume github username/repository
-    repositoryURL = `https://github.com/${props.license.repository}`;
-  } else {
-    // fallback to source url
-    repositoryURL = props.license.source ?? "";
-  }
 
   return (
     <details
@@ -138,12 +107,15 @@ function LicenseDetail(props: { license: LicenseOutput }) {
       <div className="pl-4">
         <p className="mt-1 text-left">
           <span className="mr-1">{t("source")}:</span>
-          <ExternalLink className="max-w-full break-all" href={repositoryURL}>
-            {repositoryURL}
+          <ExternalLink
+            className="max-w-full break-all"
+            href={props.license.repository}
+          >
+            {props.license.repository}
           </ExternalLink>
         </p>
         <LicenseTextBox>
-          {props.license.licenseText +
+          {(props.license.licenseText ?? "") +
             "\n\n" +
             (props.license.noticeText ?? "")}
         </LicenseTextBox>

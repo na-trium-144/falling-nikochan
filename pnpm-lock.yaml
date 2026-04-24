@@ -187,6 +187,9 @@ importers:
       next-intl:
         specifier: ^4.9.1
         version: 4.9.1(next@16.1.7(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(typescript@5.9.3)
+      next-license-list:
+        specifier: ^1.0.1
+        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2))
       pretty-checkbox:
         specifier: ^3.0.3
         version: 3.0.3
@@ -3818,6 +3821,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  next-license-list@1.0.1:
+    resolution: {integrity: sha512-Hmhk2iICM44FNRxnVG+gqz8ta+5lHbMUfKHkAwg05KtFTFzARe3CjjdImE5E/xmHxdfBM+ILj0WhJnddtEiNYw==}
 
   next@16.1.7:
     resolution: {integrity: sha512-WM0L7WrSvKwoLegLYr6V+mz+RIofqQgVAfHhMp9a88ms0cFX8iX9ew+snpWlSBwpkURJOUdvCEt3uLl3NNzvWg==}
@@ -8485,6 +8491,12 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@swc/helpers'
+
+  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2)):
+    dependencies:
+      webpack-license-plugin: 4.5.1(webpack@5.105.4)
+    transitivePeerDependencies:
+      - webpack
 
   next@16.1.7(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0):
     dependencies:

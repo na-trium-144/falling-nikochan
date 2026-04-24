@@ -1,5 +1,6 @@
 import { Small, SmallDomainOnly } from "@/common/small.js";
 import { OSSLicensesList } from "@/main/policies/ossLicensesList.js";
+import { getLicenses } from "next-license-list";
 
 # ソフトウェアとして
 
@@ -17,7 +18,7 @@ import { OSSLicensesList } from "@/main/policies/ossLicensesList.js";
   - 著作権およびライセンスの表示を行う限り、これらの二次利用は自由に行うことができます。
     <Small>([CCライセンスとは?](https://creativecommons.jp/licenses/))</Small>
 - Falling Nikochan が使用しているサードパーティーのOSSライブラリとそれぞれのライセンスについては、以下で確認できます。
-  <OSSLicensesList />
+  <OSSLicensesList frontendLicenses={await getLicenses()}/>
 
 # サービスとして
 

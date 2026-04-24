@@ -11,8 +11,9 @@ import {
 import createMDX from "@next/mdx";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
-import LicensePlugin from "webpack-license-plugin";
 import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { withLicense } from "next-license-list/config";
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
@@ -99,7 +100,7 @@ copyFileSync(
   join(process.cwd(), "public/LICENSE")
 );
 
-const nextConfig = {
+let nextConfig = {
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
@@ -158,47 +159,6 @@ const nextConfig = {
             },
           ]),
       },
-      plugins: [
-        ...config.plugins,
-        ...(process.env.NODE_ENV !== "development"
-          ? [
-              new LicensePlugin({
-                outputFilename: "../public/oss-licenses/frontend.json",
-                includeNoticeText: true,
-                excludedPackageTest: (packageName /*, version*/) => {
-                  return packageName.startsWith("@falling-nikochan");
-                },
-                includePackages: () =>
-                  [
-                    "tailwindcss",
-                    "pretty-checkbox",
-                    "keyboard-css",
-                    "fn-commands",
-                  ].map((pkg) => {
-                    const currentDirPkg = join(
-                      process.cwd(),
-                      "node_modules",
-                      pkg
-                    );
-                    const parentDirPkg = join(
-                      dirname(process.cwd()),
-                      "node_modules",
-                      pkg
-                    );
-                    if (existsSync(currentDirPkg)) {
-                      return currentDirPkg;
-                    } else if (existsSync(parentDirPkg)) {
-                      return parentDirPkg;
-                    } else {
-                      throw new Error(
-                        `Cannot find package ${pkg} to include in OSS licenses`
-                      );
-                    }
-                  }),
-              }),
-            ]
-          : []),
-      ],
     };
   },
 };
@@ -206,4 +166,18 @@ const nextConfig = {
 const withMDX = createMDX({
   // Add markdown plugins here, as desired
 });
-export default withMDX(nextConfig);
+nextConfig = withMDX(nextConfig);
+
+nextConfig = withLicense(nextConfig, {
+  includeNoticeText: true,
+  excludedPackageTest: (packageName /*, version*/) => {
+    return packageName.startsWith("@falling-nikochan");
+  },
+  includePackages: () =>
+    ["tailwindcss", "pretty-checkbox", "keyboard-css", "fn-commands"].map(
+      (pkg) =>
+        dirname(fileURLToPath(import.meta.resolve(`${pkg}/package.json`)))
+    ),
+});
+
+export default nextConfig;
