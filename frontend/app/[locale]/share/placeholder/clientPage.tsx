@@ -155,7 +155,7 @@ export default function ShareChart(props: Props) {
           </Box>
         </div>
         <div className="flex-none basis-mobile-footer no-pc" />
-        <PCFooter locale={locale} nav />
+        <PCFooter locale={locale} />
       </div>
       <MobileFooter
         className="fixed bottom-0"

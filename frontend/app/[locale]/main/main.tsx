@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { MobileHeader } from "@/common/header.js";
+import { MobileHeader, PCHeader } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import {
   MobileFooter,
@@ -37,34 +37,12 @@ export function IndexMain(props: Props) {
   const locale = props.locale;
   const t = useTranslations("main");
 
-  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
-  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
-  const setAboutPageIndex = useCallback(
-    (i: number | null) => {
-      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
-    },
-    [setAboutOpen_]
-  );
-
   return (
     <main className="flex flex-col w-full h-full items-center ">
-      {aboutPageIndex !== null && aboutOpen ? (
-        <AboutModal
-          aboutAnim={aboutAnim}
-          aboutPageIndex={aboutPageIndex}
-          setAboutPageIndex={setAboutPageIndex}
-          locale={props.locale}
-        />
-      ) : null}
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
-      <TitleAsLink className="no-mobile shrink-0" locale={locale} />
-      <AboutDescription
-        className="my-2 px-6 no-mobile"
-        locale={locale}
-        onClickAbout={() => setAboutPageIndex(1)}
-      />
+      <PCHeader locale={locale} />
       <RedirectedWarning />
       <div
         className={clsx(
@@ -95,7 +73,7 @@ export function IndexMain(props: Props) {
           {props.children}
         </Box>
       </div>
-      <PCFooter locale={locale} nav={props.tabKey === null} />
+      <PCFooter locale={locale} />
       <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
   );

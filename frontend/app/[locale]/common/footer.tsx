@@ -30,12 +30,10 @@ export const tabURLs = {
 } as const;
 
 interface Props {
-  nav?: boolean; // trueで表示
   locale: string;
 }
 export function PCFooter(props: Props) {
   const themeState = useTheme();
-  const tm = useTranslations("main");
   const t = useTranslations("footer");
   const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
@@ -43,24 +41,6 @@ export function PCFooter(props: Props) {
 
   return (
     <footer className="no-mobile w-full py-3 space-y-2">
-      {props.nav && (
-        <div
-          className={clsx(
-            "divide-x divide-solid divide-slate-800 dark:divide-stone-300",
-            "flex flex-row items-stretch justify-center"
-          )}
-        >
-          {pcTabTitleKeys.map((key, i) => (
-            <LinkWithReview
-              key={i}
-              className={clsx("px-2", "fn-link-1")}
-              href={`/${props.locale}${tabURLs[key]}`}
-            >
-              {tm(key + ".title")}
-            </LinkWithReview>
-          ))}
-        </div>
-      )}
       <div
         className={clsx("flex flex-row items-baseline justify-center gap-3")}
       >
