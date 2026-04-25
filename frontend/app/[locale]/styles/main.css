@@ -82,11 +82,6 @@
     }
   }
 
-  .fn-main-nav-item {
-    @apply text-center rounded-2xl py-3 pl-2 pr-2;
-    @apply fg-bright;
-  }
-
   .fn-sect {
     @apply mb-3;
     @apply w-full;

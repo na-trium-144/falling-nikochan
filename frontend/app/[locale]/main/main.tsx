@@ -73,45 +73,6 @@ export function IndexMain(props: Props) {
           "flex flex-row items-stretch justify-center px-3 main-wide:px-6"
         )}
       >
-        {props.tabKey !== null && (
-          <nav
-            className={clsx(
-              "no-mobile flex flex-col w-main-nav shrink-0 h-max my-auto"
-            )}
-          >
-            {pcTabTitleKeys.map((key, i) =>
-              key === props.tabKey ? (
-                <LinkWithReview
-                  key={i}
-                  href={`/${locale}${tabURLs[key]}`}
-                  className={clsx(
-                    "fn-main-nav-item rounded-r-none",
-                    "fn-flat-button fn-plain fn-selected"
-                  )}
-                >
-                  <span className={clsx("fn-glass-1 border-r-0")} />
-                  <span className={clsx("fn-glass-2 border-r-0")} />
-                  <ButtonHighlight />
-                  {t(key + ".title")}
-                </LinkWithReview>
-              ) : (
-                <LinkWithReview
-                  key={i}
-                  href={`/${locale}${tabURLs[key]}`}
-                  className={clsx(
-                    "fn-main-nav-item rounded-r-none",
-                    "fn-flat-button fn-sky"
-                  )}
-                >
-                  <span className={clsx("fn-glass-1 border-r-0")} />
-                  <span className={clsx("fn-glass-2 border-r-0")} />
-                  <ButtonHighlight />
-                  {t(key + ".title")}
-                </LinkWithReview>
-              )
-            )}
-          </nav>
-        )}
         <Box
           refInner={props.boxRef}
           classNameOuter={clsx("min-h-0 basis-main shrink-1 min-w-0")}

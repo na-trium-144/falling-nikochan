@@ -53,7 +53,12 @@ export default function TopPage(props: Props) {
   const fes = useFestival();
 
   return (
-    <main className="w-full h-full overflow-x-clip overflow-y-auto">
+    <main
+      className={clsx(
+        "w-full h-full overflow-x-clip overflow-y-auto",
+        "flex flex-col items-center *:max-w-main"
+      )}
+    >
       <section className="min-h-screen flex flex-col items-center justify-center gap-12">
         <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
         <p className="text-2xl">{t("description")}</p>
@@ -168,62 +173,8 @@ export default function TopPage(props: Props) {
         <div className="basis-2/5 border">イメージ画像</div>
       </section>
 
-      <div
-        className={clsx(
-          "flex flex-col w-full min-h-full h-max items-center",
-          menuMove &&
-            clsx(
-              "transition-[max-height] duration-200 ease-out",
-              menuMoveAnim ? "max-h-full" : "max-h-max"
-            )
-        )}
-      >
-        <nav
-          className={clsx(
-            "shrink-0 basis-auto grow-3",
-            "no-mobile flex",
-            "flex-col justify-center w-main-nav",
-            "transition ease-out duration-200"
-          )}
-          style={{
-            transform: menuMove
-              ? // 挿入されるBoxのサイズは (w-main) or (100% - w-main-nav - p-6)
-                "translateX(max(calc(var(--container-main) / -2), calc((100vw - var(--container-main-nav) - var(--spacing) * 12) / -2)))"
-              : undefined,
-          }}
-        >
-          {pcTabTitleKeys.map((key, i) => (
-            <Link
-              key={i}
-              href={`/${locale}${tabURLs[key]}`}
-              className={clsx("fn-main-nav-item fn-flat-button fn-sky")}
-              prefetch={process.env.PREFETCH as "auto"}
-              onClick={(e) => {
-                requestReview();
-                setMenuMove(true);
-                setTimeout(() => {
-                  router.push(`/${locale}${tabURLs[key]}`);
-                }, 150);
-                e.preventDefault();
-              }}
-            >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
-              <ButtonHighlight />
-              {t(key + ".title")}
-            </Link>
-          ))}
-        </nav>
-        <div
-          className={clsx(
-            "shrink-1 h-dvh transition-all duration-200 ease-in",
-            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
-          )}
-        />
-
-        <PCFooter locale={locale} />
-        <div className="flex-none basis-mobile-footer no-pc" />
-      </div>
+      <PCFooter locale={locale} />
+      <div className="flex-none basis-mobile-footer no-pc" />
       <MobileFooter
         className="fixed bottom-0"
         blurBg
