@@ -27,6 +27,8 @@ import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
 import { AboutModal } from "./common/aboutModal.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
 import { AboutDescription } from "./main/main.jsx";
+import { Key } from "./common/key.js";
+import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 
 interface Props {
   locale: string;
@@ -52,14 +54,120 @@ export default function TopPage(props: Props) {
 
   return (
     <main className="w-full h-full overflow-x-clip overflow-y-auto">
-      {aboutPageIndex !== null && aboutOpen ? (
-        <AboutModal
-          aboutAnim={aboutAnim}
-          aboutPageIndex={aboutPageIndex}
-          setAboutPageIndex={setAboutPageIndex}
-          locale={props.locale}
+      <section className="min-h-screen flex flex-col items-center justify-center gap-12">
+        <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
+        <p className="text-2xl">{t("description")}</p>
+        <Link href={`/${locale}/main/play`} className="fn-button fn-cta">
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
+          <ButtonHighlight />
+          {t("playNow")}
+        </Link>
+      </section>
+
+      <FestivalLink {...fes} className="my-2 px-6 text-center " />
+      <RedirectedWarning />
+      <PWAInstallMain />
+
+      <section className="text-center px-6 mb-12">
+        <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
+        {/*TODO: カードの形を変える*/}
+        <ChartList
+          type="popular"
+          creator
+          href={(cid) => `/share/${cid}`}
+          onClick={openModal}
+          onClickMobile={openShareInternal}
+          showLoading
+          moreHref={`/${locale}/main/recent`}
+          badge
+          fixedRows
         />
-      ) : null}
+      </section>
+
+      <section className="mb-12 flex w-full">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+          <h2 className="fn-heading-sect text-3xl mb-4">
+            {t("howToPlay.title")}
+          </h2>
+          <div className="mb-4 space-y-2">
+            <p>{t("howToPlay.content1")}</p>
+            <p>{t("howToPlay.content2")}</p>
+          </div>
+          <div className="mb-4 space-y-2">
+            <p>{t("howToPlay.content3")}</p>
+            {/*優先的に改行してほしい位置にinlineBlockを入れる*/}
+            <p>
+              {t.rich("howToPlay.content4", {
+                key: (c) => <Key>{String(c)}</Key>,
+                inlineBlock: (c) => <span className="inline-block">{c}</span>,
+              })}
+            </p>
+            <p>{t("howToPlay.content5")}</p>
+          </div>
+          <Link href={`/${locale}/main/play`} className="fn-button fn-cta">
+            <span className="fn-glass-1" />
+            <span className="fn-glass-2" />
+            <ButtonHighlight />
+            {t("playNow")}
+          </Link>
+        </div>
+        <div className="basis-2/5 border">イメージ画像</div>
+      </section>
+
+      <section className="mb-12 flex flex-row-reverse w-full">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+          <h2 className="fn-heading-sect text-3xl mb-4">
+            {t("howToEdit.title")}
+          </h2>
+          <div className="mb-4 space-y-2">
+            <p>{t("howToEdit.content1")}</p>
+            <p>
+              {t.rich("howToEdit.content2", {
+                youtube: (c) => (
+                  <span className="relative inline-block">
+                    <Youtube
+                      className="absolute left-0.5 bottom-1"
+                      theme="filled"
+                    />
+                    <span className="ml-5 mr-1">{c}</span>
+                  </span>
+                ),
+              })}
+            </p>
+            <p>
+              {t.rich("howToEdit.content3", {
+                small: (c) => <span className="text-sm">{c}</span>,
+                linkPolicies: (c) => (
+                  <Link
+                    href={`/${locale}/main/policies`}
+                    className={clsx("fn-link-3")}
+                    prefetch={process.env.PREFETCH as "auto"}
+                  >
+                    {c}
+                  </Link>
+                ),
+              })}
+            </p>
+          </div>
+          <div className="mb-4 space-y-2">
+            <p>{t("howToEdit.content4")}</p>
+            <p>
+              {t.rich("howToEdit.content5", {
+                url: () => <SmallDomainShare />,
+              })}
+            </p>
+          </div>
+          <Link href={`/${locale}/main/edit`} className="fn-button fn-cta">
+            <span className="fn-glass-1" />
+            <span className="fn-glass-2" />
+            <ButtonHighlight />
+            {t("editNow")}
+          </Link>
+        </div>
+        <div className="basis-2/5 border">イメージ画像</div>
+      </section>
+
       <div
         className={clsx(
           "flex flex-col w-full min-h-full h-max items-center",
@@ -70,59 +178,6 @@ export default function TopPage(props: Props) {
             )
         )}
       >
-        <TitleAsLink className="grow-3 shrink-0" locale={locale} />
-        <div className="basis-0 flex-1 " />
-        <AboutDescription
-          className="my-2 px-6"
-          locale={locale}
-          onClickAbout={() => setAboutPageIndex(1)}
-        />
-        <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
-        <div className={clsx("basis-auto grow-2", menuMoveAnimClass)}>
-          <RedirectedWarning />
-          <PWAInstallMain />
-        </div>
-        <section
-          className={clsx(
-            "fn-sect text-center",
-            "basis-auto grow-1 px-6",
-            menuMoveAnimClass
-          )}
-        >
-          <InputCId
-            openModal={openModal}
-            openShareInternal={openShareInternal}
-          />
-        </section>
-
-        <section
-          className={clsx(
-            "fn-sect text-center",
-            "basis-auto grow-1 px-6",
-            menuMoveAnimClass
-          )}
-        >
-          <h3 className="fn-heading-sect">{t("play.recent")}</h3>
-          <ChartList
-            type="recent"
-            creator
-            href={(cid) => `/share/${cid}`}
-            onClick={openModal}
-            onClickMobile={openShareInternal}
-            showLoading
-            moreHref={`/${locale}/main/recent`}
-            badge
-            fixedRows
-            small
-          />
-        </section>
-
-        <div
-          className={clsx(
-            "shrink-1 h-dvh transition-all duration-200 ease-in",
-            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
-          )}
-        />
         <nav
           className={clsx(
             "shrink-0 basis-auto grow-3",
