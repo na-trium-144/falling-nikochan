@@ -50,13 +50,16 @@ export function ChangeLogPopup(props: PopupProps) {
         />
         <div
           className={clsx(
-            "absolute bottom-full mb-1 left-1/2 w-0 z-changelog",
-            "grid-centering"
+            "absolute top-full mt-1 w-max z-changelog",
+            // gap-3 + menu(実測2rem)
+            "-right-11"
           )}
         >
           <Box
             classNameOuter={clsx(
-              "w-max h-max origin-bottom",
+              "w-max h-max",
+              // ここの3remは適当
+              "origin-[calc(100%-3rem)_0]",
               "shadow-modal",
               "transition-all duration-200",
               popupAppearing

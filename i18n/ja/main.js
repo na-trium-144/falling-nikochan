@@ -127,7 +127,8 @@ export default {
       notFound: "見つかりませんでした",
     },
     policies: {
-      title: "利用規約っぽいもの",
+      title: "利用規約",
+      titleShort: "利用規約",
       license: {
         showDetail: "詳細を表示",
         closeDetail: "閉じる",

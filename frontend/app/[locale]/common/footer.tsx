@@ -19,9 +19,8 @@ import { LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
 
 export type TabKeys = "top" | "play" | "edit" | "policies" | "links" | null;
-export const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
-export const mobileTabTitleKeys = ["top", "play", "edit", "links"] as const;
-export const tabURLs = {
+const mobileTabTitleKeys = ["top", "play", "edit", "links"] as const;
+const tabURLs = {
   play: "/main/play",
   edit: "/main/edit",
   policies: "/main/policies",

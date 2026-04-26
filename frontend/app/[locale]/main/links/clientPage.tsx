@@ -10,8 +10,8 @@ import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import Link from "next/link";
-import { langNames, LangSwitcher } from "@/common/langSwitcher";
-import { ThemeSwitcher, useTheme } from "@/common/theme";
+import { langNames, LangSwitcher, MenuLangSwitcher } from "@/common/langSwitcher";
+import { MenuThemeSwitcher, ThemeSwitcher, useTheme } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useEffect, useState } from "react";
 import Mail from "@icon-park/react/lib/icons/Mail";
@@ -23,7 +23,6 @@ import { XLogo } from "@/common/x";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
-  const themeState = useTheme();
   const [mailAddress, setMailAddress] = useState<string>("");
   const deferShowMail = () =>
     setMailAddress(atob("bmlrb2NoYW5hYWExNDRAZ21haWwuY29t"));
@@ -43,60 +42,8 @@ export default function LinksPage({ locale }: { locale: string }) {
       <section className="fn-sect no-pc">
         <h3 className="fn-heading-sect">{t("settings")}</h3>
         <div className="space-y-2">
-          <p>
-            <Translate className="inline-block align-middle" />
-            <span className="ml-1">Language:</span>
-            <LangSwitcher
-              locale={locale}
-              className={clsx(
-                "relative inline-block align-top pr-6 text-center",
-                "fn-link-1",
-                "fn-input"
-              )}
-            >
-              <div>{langNames[locale]}</div>
-              <DownOne
-                className="absolute right-1 inset-y-0 h-max m-auto"
-                theme="filled"
-              />
-              {Object.values(langNames).map((l) => (
-                // 最大幅を取得するため
-                <span key={l} className="block h-0 overflow-hidden">
-                  {l}
-                </span>
-              ))}
-            </LangSwitcher>
-          </p>
-          <p>
-            {themeState.isDark ? (
-              <Moon className="inline-block align-middle " />
-            ) : (
-              <Sun className="inline-block align-middle " />
-            )}
-            <span className="ml-1 ">{t("theme")}:</span>
-            <ThemeSwitcher
-              className={clsx(
-                "relative inline-block align-top pr-6 text-center",
-                "fn-link-1",
-                "fn-input"
-              )}
-            >
-              <div>
-                {themeState.theme === "dark"
-                  ? t("dark")
-                  : themeState.theme === "light"
-                    ? t("light")
-                    : t("default")}
-              </div>
-              <DownOne
-                className="absolute right-1 inset-y-0 h-max m-auto"
-                theme="filled"
-              />
-              <span className="block h-0 overflow-hidden">{t("dark")}</span>
-              <span className="block h-0 overflow-hidden">{t("light")}</span>
-              <span className="block h-0 overflow-hidden">{t("default")}</span>
-            </ThemeSwitcher>
-          </p>
+          <MenuLangSwitcher locale={locale}/>
+          <MenuThemeSwitcher />
           <PWAInstallDesc block />
         </div>
       </section>

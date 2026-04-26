@@ -6,9 +6,7 @@ import { Box } from "@/common/box.js";
 import {
   MobileFooter,
   PCFooter,
-  pcTabTitleKeys,
   TabKeys,
-  tabURLs,
 } from "@/common/footer.js";
 import { ReactNode, RefObject, useCallback, useState } from "react";
 import Link from "next/link";
@@ -48,7 +46,8 @@ export function IndexMain(props: Props) {
         className={clsx(
           "w-full overflow-hidden",
           "shrink-0 basis-0 grow-2",
-          "flex flex-row items-stretch justify-center px-3 main-wide:px-6"
+          "flex flex-row items-stretch justify-center",
+          "px-3 main-wide:px-6 main-wide:pb-6"
         )}
       >
         <Box
@@ -73,7 +72,6 @@ export function IndexMain(props: Props) {
           {props.children}
         </Box>
       </div>
-      <PCFooter locale={locale} />
       <MobileFooter locale={locale} tabKey={props.mobileTabKey} />
     </main>
   );

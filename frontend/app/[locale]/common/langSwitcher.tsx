@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import DropDown from "./dropdown";
 import clsx from "clsx/lite";
+import Translate from "@icon-park/react/lib/icons/Translate";
+import DownOne from "@icon-park/react/lib/icons/DownOne";
 
 export const langNames: { [key: string]: string } = {
   ja: "日本語",
@@ -42,5 +44,34 @@ export function LangSwitcher(props: LangProps) {
     >
       {props.children}
     </DropDown>
+  );
+}
+
+export function MenuLangSwitcher({ locale }: { locale: string }) {
+  return (
+    <p>
+      <Translate className="inline-block align-middle" />
+      <span className="ml-1">Language:</span>
+      <LangSwitcher
+        locale={locale}
+        className={clsx(
+          "relative inline-block align-top pr-6 text-center",
+          "fn-link-1",
+          "fn-input"
+        )}
+      >
+        <div>{langNames[locale]}</div>
+        <DownOne
+          className="absolute right-1 inset-y-0 h-max m-auto"
+          theme="filled"
+        />
+        {Object.values(langNames).map((l) => (
+          // 最大幅を取得するため
+          <span key={l} className="block h-0 overflow-hidden">
+            {l}
+          </span>
+        ))}
+      </LangSwitcher>
+    </p>
   );
 }

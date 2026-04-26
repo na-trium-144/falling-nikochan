@@ -8,8 +8,6 @@ import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import {
   MobileFooter,
   PCFooter,
-  pcTabTitleKeys,
-  tabURLs,
 } from "./common/footer.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
