@@ -194,9 +194,4 @@ export default withSentryConfig(nextConfig, {
   authToken: process.env.SENTRY_AUTH_TOKEN,
   sentryUrl: process.env.SENTRY_URL || undefined,
   release: { name: env.SENTRY_RELEASE },
-  silent: true,
-  // server-side auto-instrumentation is not applicable for static export
-  autoInstrumentServerFunctions: false,
-  autoInstrumentMiddleware: false,
-  disableLogger: true,
 });
