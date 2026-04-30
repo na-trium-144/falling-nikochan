@@ -18,6 +18,15 @@ import { PlayRecordEntry } from "./record.js";
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
 
+// Limits to prevent DoS/ReDoS attacks
+const MAX_QUERY_LENGTH = 200;
+const MAX_QUERY_TOKENS = 10;
+const MAX_SEARCH_RESULTS = 200;
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const SearchResultSchema = () =>
   v.object({
     cid: v.string(),
@@ -66,7 +75,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator(
     "query",
     v.object({
-      q: v.optional(v.string(), ""),
+      q: v.optional(v.pipe(v.string(), v.maxLength(MAX_QUERY_LENGTH)), ""),
       sort: v.optional(
         v.picklist(["relevance", "popular", "latest"]),
         "relevance"
@@ -91,6 +100,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           .split(" ")
           .map((s) => s.trim())
           .filter((s) => s)
+          .slice(0, MAX_QUERY_TOKENS)
       : [];
 
     const client = new MongoClient(env(c).MONGODB_URI);
@@ -119,7 +129,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             {
               published: true,
               $and: normalizedQueries.map((s) => ({
-                normalizedText: { $regex: s },
+                normalizedText: { $regex: escapeRegex(s) },
               })),
             },
           ],
@@ -134,6 +144,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       let results = await db
         .collection<ChartEntryCompressed>("chart")
         .find(mongoQuery)
+        .limit(MAX_SEARCH_RESULTS)
         .project<{
           cid: string;
           normalizedText: string;
