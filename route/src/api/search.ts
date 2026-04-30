@@ -75,7 +75,13 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator(
     "query",
     v.object({
-      q: v.optional(v.pipe(v.string(), v.maxLength(MAX_QUERY_LENGTH)), ""),
+      q: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform((s) => s.slice(0, MAX_QUERY_LENGTH))
+        ),
+        ""
+      ),
       sort: v.optional(
         v.picklist(["relevance", "popular", "latest"]),
         "relevance"
