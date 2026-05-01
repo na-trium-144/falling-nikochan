@@ -14,7 +14,11 @@
     }
 
     &.fn-cta {
-      @apply h-14 px-5 text-xl font-bold rounded-2xl;
+      @apply h-18 px-8 text-2xl font-bold rounded-3xl;
+      @apply shadow-md;
+    }
+    &.fn-cta2 {
+      @apply h-12 px-4 text-lg font-bold rounded-2xl;
       @apply shadow-md;
     }
 

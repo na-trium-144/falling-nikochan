@@ -1,0 +1,75 @@
+import { Key } from "@/common/key.js";
+import clsx from "clsx/lite";
+import {
+  levelTypes,
+  goodSec,
+  okSec,
+  badFastSec,
+  badLateSec,
+} from "@falling-nikochan/chart";
+import { JudgeIcon } from "@/play/statusBox.js";
+
+# ゲームルール
+
+- ニコチャンが判定線に重なったときに、 PC なら (<Key className="text-sm p-0.5 ">Esc</Key> 以外の) どれかのキーを押し、タブレット・スマホなら画面のどこかをタップしてください。
+- ニコチャンの位置や飛んでくる方向に関係なく、すべて同じノーツです。
+- 大きいニコチャンは、2つのキーを同時押しまたは2本指でタップするとボーナススコアが入ります。
+
+# 難易度について
+
+export const LevelDifficulty = ({ i, lv }) => (
+  <span className={clsx("inline-block ml-0.5", "fn-level-type", levelTypes[i])}>
+    <span>{levelTypes[i]}-</span>
+    <span>{lv}</span>
+  </span>
+);
+
+export const LevelOnly = ({ i }) => (
+  <span className={clsx("mx-1", `fn-level-col-${"sdm"[i]}`)}>
+    {levelTypes[i]}
+  </span>
+);
+
+- 1つの楽曲に複数の譜面 (レベル) が用意されている場合があります。
+  譜面ごとに<LevelDifficulty i={0} lv={4} />、<LevelDifficulty i={1} lv={8} />、<LevelDifficulty i={2} lv={12} />などのように難易度が表記されています。
+- <LevelOnly i={0} />
+  の譜面には同時押しがないので、片手でも手軽にプレイできます。
+  <LevelOnly i={1} />
+  の譜面は同時に2つ、
+  <LevelOnly i={2} />
+  の譜面は同時に3つ以上の音符を処理する必要がある場合があります。 -
+  必ずしも表記通りに(
+  <LevelOnly i={0} />
+  は片手で、など)プレイしなければならないわけではないです)
+- 難易度の後ろの数字 (1〜20) はその譜面の難しさを表しています。
+  - 難易度表記は譜面の音符密度のみから自動で計算されます。音符の配置パターンや譜面の見た目などは考慮されないため、必ずしも表記通りの難易度であるとは限りません。あくまで目安として活用してください。
+
+# スコアについて
+
+- スコアは「<span className="font-bold fg-bright">ベーススコア</span>」「<span className="font-bold fg-bright">コンボボーナス</span>」「<span className="font-bold fg-bright">Big ボーナス</span>」の3つからなり、合計 120 点が最高となります。
+- 合計スコアに応じて、B(70〜)、B+(80〜)、A(90〜)、A+(100〜)、S(110〜)、S+(120〜) のランクで評価されます。
+
+## ベーススコア (80 点)
+
+export const JudgeName = ({ i, name, sec }) => (
+  <span className="relative inline-block">
+    <span className="absolute left-0.5 bottom-1">
+      <JudgeIcon index={i} />
+    </span>
+    <span className="ml-5">{name}</span>
+    <span className="text-sm mx-0.5">({sec})</span>
+  </span>
+);
+
+- ニコチャンを叩いたタイミングによって、<JudgeName i={0} name="よい" sec={`±${goodSec*1000}ms`} />、<JudgeName i={1} name="まあまあ" sec={`±${okSec*1000}ms`} />、<JudgeName i={2} name="だめ" sec={`+${badLateSec*1000}ms 〜 ${badFastSec * 1000}ms)`} />の判定があります。
+- すべて よい 判定なら合計 80 点になり、まあまあ判定は よい 判定の 0.3 倍の点数が入ります。
+
+## コンボボーナス (20 点)
+
+- よい または まあまあ 判定で連続でニコチャンを叩くとコンボが増え、それに応じてボーナス得点が入ります。
+
+## Big ボーナス (20 点)
+
+- 大きいニコチャンで2つのキーを押した場合・2本指でタップした場合に入るボーナス得点です。
+- 判定基準は1つしかなく、±{`${okSec * 1000}`}ms 以内であれば得点が入ります。
+- 大きいニコチャンが1つもない譜面では Big ボーナスはなく、100 点が満点になります。

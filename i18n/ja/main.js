@@ -28,6 +28,7 @@ export default {
       content5:
         "大きいニコチャンも通常のニコチャンと同じように叩けますが、" +
         "2つのキーを同時押しまたは2本指でタップすると、通常より多くのスコアが入ります。",
+      about: "ゲームルールについて詳しく",
     },
     howToEdit: {
       title: "譜面を作ろう",
@@ -66,7 +67,9 @@ export default {
       "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
     aboutNikochan: "Falling Nikochan について詳しく",
     about: {
-      title: "Falling Nikochan について",
+      title: "ゲーム仕様について",
+      description:
+        "音楽ゲームとしての Falling Nikochan のルールや判定などの仕様を説明します。",
     },
     top: {
       titleShort: "ホーム",
@@ -74,6 +77,7 @@ export default {
     play: {
       title: "公開されている譜面で遊ぶ",
       titleShort: "公開譜面",
+      titleHeader: "公開譜面で遊ぶ",
       description: "公開されている譜面の一覧です。",
       descriptionX:
         "<xlogo></xlogo> の公式アカウント <twitter>@nikochan144</twitter> でも更新情報をお知らせしています。",
@@ -95,6 +99,7 @@ export default {
     edit: {
       title: "譜面を作る",
       titleShort: "譜面作成",
+      titleHeader: "譜面を作る",
       description:
         "Falling Nikochan の譜面エディタにようこそ。" +
         "アカウント登録不要で誰でも譜面を作成することができます。" +

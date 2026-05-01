@@ -110,6 +110,11 @@
       @apply text-xl font-semibold font-title;
       @apply fg-bright;
     }
+    > h4 {
+      @apply mb-2;
+      @apply text-lg font-medium font-title;
+      @apply fg-bright;
+    }
     > ul {
       @apply mb-3;
     }

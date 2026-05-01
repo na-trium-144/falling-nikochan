@@ -10,7 +10,11 @@ import Sun from "@icon-park/react/lib/icons/Sun";
 import Translate from "@icon-park/react/lib/icons/Translate";
 import Youtube from "@icon-park/react/lib/icons/Youtube";
 import Link from "next/link";
-import { langNames, LangSwitcher, MenuLangSwitcher } from "@/common/langSwitcher";
+import {
+  langNames,
+  LangSwitcher,
+  MenuLangSwitcher,
+} from "@/common/langSwitcher";
 import { MenuThemeSwitcher, ThemeSwitcher, useTheme } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useEffect, useState } from "react";
@@ -42,7 +46,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       <section className="fn-sect no-pc">
         <h3 className="fn-heading-sect">{t("settings")}</h3>
         <div className="space-y-2">
-          <MenuLangSwitcher locale={locale}/>
+          <MenuLangSwitcher locale={locale} />
           <MenuThemeSwitcher />
           <PWAInstallDesc block />
         </div>

@@ -5,10 +5,7 @@ import Link from "next/link";
 import { TitleAsLink } from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
-import {
-  MobileFooter,
-  PCFooter,
-} from "./common/footer.js";
+import { MobileFooter, PCFooter } from "./common/footer.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
@@ -27,6 +24,7 @@ import { ButtonHighlight } from "./common/button.jsx";
 import { AboutDescription } from "./main/main.jsx";
 import { Key } from "./common/key.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 
 interface Props {
   locale: string;
@@ -108,12 +106,21 @@ export default function TopPage(props: Props) {
             </p>
             <p>{t("howToPlay.content5")}</p>
           </div>
-          <Link href={`/${locale}/main/play`} className="fn-button fn-cta">
-            <span className="fn-glass-1" />
-            <span className="fn-glass-2" />
-            <ButtonHighlight />
-            {t("playNow")}
-          </Link>
+          <div className="flex items-baseline gap-3">
+            <Link href={`/${locale}/main/play`} className="fn-button fn-cta2">
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
+              <ButtonHighlight />
+              {t("playNow")}
+            </Link>
+            <Link href={`/${locale}/main/about`} className="fn-link-3">
+              {t("howToPlay.about")}
+              <ArrowRight
+                className="inline-block align-middle ml-1"
+                theme="filled"
+              />
+            </Link>
+          </div>
         </div>
         <div className="basis-2/5 border">イメージ画像</div>
       </section>
@@ -161,7 +168,7 @@ export default function TopPage(props: Props) {
               })}
             </p>
           </div>
-          <Link href={`/${locale}/main/edit`} className="fn-button fn-cta">
+          <Link href={`/${locale}/main/edit`} className="fn-button fn-cta2">
             <span className="fn-glass-1" />
             <span className="fn-glass-2" />
             <ButtonHighlight />

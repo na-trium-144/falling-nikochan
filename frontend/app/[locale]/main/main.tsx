@@ -3,11 +3,7 @@
 import clsx from "clsx/lite";
 import { MobileHeader, PCHeader } from "@/common/header.js";
 import { Box } from "@/common/box.js";
-import {
-  MobileFooter,
-  PCFooter,
-  TabKeys,
-} from "@/common/footer.js";
+import { MobileFooter, PCFooter, TabKeys } from "@/common/footer.js";
 import { ReactNode, RefObject, useCallback, useState } from "react";
 import Link from "next/link";
 import { TitleAsLink } from "@/common/titleLogo.js";

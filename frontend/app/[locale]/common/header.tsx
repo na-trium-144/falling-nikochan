@@ -21,12 +21,10 @@ import { Box } from "./box.js";
 import { MenuLangSwitcher } from "./langSwitcher.js";
 import { MenuThemeSwitcher } from "./theme.js";
 
-const pcTabTitleKeys = ["play", "edit", "policies", "links"] as const;
+const pcTabTitleKeys = ["play", "edit"] as const;
 const tabURLs = {
   play: "/main/play",
   edit: "/main/edit",
-  policies: "/main/policies",
-  links: "/main/links",
 } as const;
 
 interface MProps {
@@ -84,7 +82,7 @@ export function PCHeader(props: Props) {
             href={`/${props.locale}${tabURLs[key]}`}
             className="fn-link-1"
           >
-            {t(key + ".titleShort")}
+            {t(key + ".titleHeader")}
           </LinkWithReview>
         ))}
       </nav>
