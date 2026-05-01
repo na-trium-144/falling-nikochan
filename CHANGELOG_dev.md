@@ -1,3 +1,7 @@
+## ver. 15.9 - 2026/04/24
+
+* search APIのDoS,ReDoS脆弱性を修正 [#1101](https://github.com/na-trium-144/falling-nikochan/pull/1101)
+
 ## ver. 15.8 - 2026/04/24
 
 * frontendのライセンス情報取得処理を[next-license-list](https://github.com/na-trium-144/next-license-list)ライブラリに分離 [#1089](https://github.com/na-trium-144/falling-nikochan/pull/1089)

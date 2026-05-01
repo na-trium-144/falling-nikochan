@@ -18,6 +18,19 @@ import { PlayRecordEntry } from "./record.js";
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
 
+// Limits to prevent DoS/ReDoS attacks
+const MAX_QUERY_LENGTH = 200;
+const MAX_QUERY_TOKENS = 20;
+
+/*
+レスポンスで返す譜面の数には制限を設けていない。
+データベース上の譜面の数がさらに増えたら、結果のpaginationの実装を検討する必要がある。 (TODO)
+*/
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const SearchResultSchema = () =>
   v.object({
     cid: v.string(),
@@ -66,7 +79,13 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator(
     "query",
     v.object({
-      q: v.optional(v.string(), ""),
+      q: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform((s) => s.slice(0, MAX_QUERY_LENGTH))
+        ),
+        ""
+      ),
       sort: v.optional(
         v.picklist(["relevance", "popular", "latest"]),
         "relevance"
@@ -87,10 +106,14 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     let { q, sort, difficultyMin, difficultyMax } = c.req.valid("query");
 
     const normalizedQueries = q
-      ? normalizeStr(q)
-          .split(" ")
-          .map((s) => s.trim())
-          .filter((s) => s)
+      ? Array.from(
+          new Set(
+            normalizeStr(q)
+              .split(" ")
+              .map((s) => s.trim())
+              .filter((s) => s)
+          )
+        ).slice(0, MAX_QUERY_TOKENS)
       : [];
 
     const client = new MongoClient(env(c).MONGODB_URI);
@@ -115,11 +138,12 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         mongoQuery = {
           ...mongoQuery,
           $or: [
+            // クエリがcidに完全一致する場合は、publishedの状態に関わらず返す。これは意図的な仕様
             { cid: q },
             {
               published: true,
               $and: normalizedQueries.map((s) => ({
-                normalizedText: { $regex: s },
+                normalizedText: { $regex: escapeRegex(s) },
               })),
             },
           ],
