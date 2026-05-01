@@ -37,7 +37,6 @@ export default function LinksPage({ locale }: { locale: string }) {
       tabKey="links"
       mobileTabKey="links"
       noBackButtonMobile
-      noBackButtonPC
       locale={locale}
     >
       <section className="fn-sect no-pc">
