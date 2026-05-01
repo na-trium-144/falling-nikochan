@@ -20,8 +20,12 @@ const CACHE_MAX_AGE = 600;
 
 // Limits to prevent DoS/ReDoS attacks
 const MAX_QUERY_LENGTH = 200;
-const MAX_QUERY_TOKENS = 10;
-const MAX_SEARCH_RESULTS = 200;
+const MAX_QUERY_TOKENS = 20;
+
+/*
+レスポンスで返す譜面の数には制限を設けていない。
+データベース上の譜面の数がさらに増えたら、結果のpaginationの実装を検討する必要がある。 (TODO)
+*/
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -131,6 +135,7 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         mongoQuery = {
           ...mongoQuery,
           $or: [
+            // クエリがcidに完全一致する場合は、publishedの状態に関わらず返す。これは意図的な仕様
             { cid: q },
             {
               published: true,
@@ -150,7 +155,6 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       let results = await db
         .collection<ChartEntryCompressed>("chart")
         .find(mongoQuery)
-        .limit(MAX_SEARCH_RESULTS)
         .project<{
           cid: string;
           normalizedText: string;
