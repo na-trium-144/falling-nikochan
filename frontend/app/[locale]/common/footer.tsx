@@ -28,60 +28,6 @@ const tabURLs = {
   top: "/",
 } as const;
 
-interface Props {
-  locale: string;
-}
-export function PCFooter(props: Props) {
-  const themeState = useTheme();
-  const t = useTranslations("footer");
-  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
-  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
-  const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
-
-  return (
-    <footer className="no-mobile w-full py-3 space-y-2">
-      <div
-        className={clsx("flex flex-row items-baseline justify-center gap-3")}
-      >
-        <div className="relative">
-          <button
-            className={clsx("inline-block relative", "fn-link-1")}
-            onClick={() => {
-              setShowChangeLog(!showChangeLog);
-            }}
-          >
-            <span>ver.</span>
-            <span className="ml-1 mr-0.5">{process.env.buildVersion}</span>
-            <Comment className="inline-block align-middle" />
-            {isLastVisitedOld && (
-              <span
-                className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
-                style={{ top: "-0.1rem", right: "-0.25rem" }}
-              />
-            )}
-          </button>
-          <ChangeLogPopup
-            locale={props.locale}
-            open={showChangeLog}
-            onClose={() => setShowChangeLog(false)}
-          />
-        </div>
-        <LangSwitcher locale={props.locale}>
-          <Translate className="absolute bottom-1 left-0 " />
-          <span className="ml-5 ">Language</span>
-        </LangSwitcher>
-        <ThemeSwitcher>
-          {themeState.isDark ? (
-            <Moon className="absolute bottom-1 left-0 " />
-          ) : (
-            <Sun className="absolute bottom-1 left-0 " />
-          )}
-          <span className="ml-5 ">{t("theme")}</span>
-        </ThemeSwitcher>
-      </div>
-    </footer>
-  );
-}
 interface MobileProps {
   className?: string;
   blurBg?: boolean;
