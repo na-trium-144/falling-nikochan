@@ -85,4 +85,15 @@ describe("GET /api/search", () => {
       updatedAt: date,
     });
   });
+
+  test("regex special characters are escaped", async () => {
+    await initDb();
+    // Queries containing regex special characters should not throw and return valid JSON
+    for (const q of [".*", "[invalid", "^$", "(foo|bar)+", "\\w+"]) {
+      const res = await app.request(`/api/search?q=${encodeURIComponent(q)}`);
+      expect(res.status).to.equal(200);
+      const body = await res.json();
+      expect(body).to.be.an("array");
+    }
+  });
 });
