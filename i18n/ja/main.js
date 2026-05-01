@@ -17,14 +17,9 @@ export default {
       content1:
         "ダウンロード不要でブラウザーからすぐに遊べる、" +
         "シンプルでかわいいリズムゲーム (音ゲー) です。",
-      content2:
-        "PCだけでなくタブレットやスマートフォンなどでも手軽に遊べます。",
       content3:
-        "ニコチャンが線に重なったときに音符を叩くだけの簡単なルールです。",
-      content4:
-        "ニコチャンの位置や飛び方によらず、" +
-        " PC なら <inlineBlock>(<key>Esc</key> 以外の)</inlineBlock> どれかのキーを押して、" +
-        "<inlineBlock>タブレット・スマホなら</inlineBlock>画面のどこかをタップすることで音符を叩くことができます。",
+        "ニコチャンが線に重なったときにどれかのキーを押すか画面のどこかをタップするだけの簡単なルールで、" +
+        "PCだけでなくタブレットやスマートフォンなどでも手軽に遊べるのが特徴です。",
       content5:
         "大きいニコチャンも通常のニコチャンと同じように叩けますが、" +
         "2つのキーを同時押しまたは2本指でタップすると、通常より多くのスコアが入ります。",
@@ -32,17 +27,13 @@ export default {
     },
     howToEdit: {
       title: "譜面を作ろう",
-      content1: "好きな楽曲を使って譜面を作ることができます。",
+      content1:
+        "Falling Nikochan では誰でも譜面を作って公開することができます。",
       content2:
-        "Falling Nikochan では音源をダウンロードする必要はなく、<youtube>YouTube</youtube>を埋め込んで音源を再生するので、" +
+        "Falling Nikochan では<youtube>YouTube</youtube>を埋め込んで音源を再生するので、" +
         "YouTube にアップロードされている楽曲であればなんでも使用できます。",
-      content3:
-        "音源を再配布しているわけではないので、ほとんどの場合著作権などで問題になることはありません。" +
-        "<small>(詳細は<linkPolicies>利用規約</linkPolicies>を参照してください)</small>",
-      content4:
-        "譜面を作って Falling Nikochan のサーバーにアップロードすると、譜面ID (6桁の数字) が発行されます。",
       content5:
-        "その譜面IDまたは譜面のURL (<url></url>)をSNSなどで共有することで、遊んでもらうことができます。",
+        "作成した譜面は、発行される譜面ID (6桁の数字) または譜面のURL (<url></url>) を共有して他のユーザーに遊んでもらうことができます。",
     },
     pwa: {
       installWithPrompt:
@@ -139,6 +130,12 @@ export default {
         closeDetail: "閉じる",
         source: "ソース",
       },
+      content1: "Falling Nikochan はオープンソースです。",
+      content2:
+        "Falling Nikochan では遊ぶ方も譜面を作る方もユーザー登録なしで利用でき、個人情報を収集しません。",
+      content3:
+        "ゲームに使用される音源や動画は YouTube の規約に従って動画を直接埋め込むことで再生しており、" +
+        "動画の権利は元の動画の著作権者にあります。",
     },
     version: {
       title: "バージョン情報",
