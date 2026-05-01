@@ -106,11 +106,14 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     let { q, sort, difficultyMin, difficultyMax } = c.req.valid("query");
 
     const normalizedQueries = q
-      ? normalizeStr(q)
-          .split(" ")
-          .map((s) => s.trim())
-          .filter((s) => s)
-          .slice(0, MAX_QUERY_TOKENS)
+      ? Array.from(
+          new Set(
+            normalizeStr(q)
+              .split(" ")
+              .map((s) => s.trim())
+              .filter((s) => s)
+          )
+        ).slice(0, MAX_QUERY_TOKENS)
       : [];
 
     const client = new MongoClient(env(c).MONGODB_URI);
