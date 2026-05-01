@@ -57,25 +57,15 @@ interface Props {
 }
 export function PCHeader(props: Props) {
   const t = useTranslations("main");
-  const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
-  const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
-  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
   return (
-    <header
-      className={clsx(
-        "no-mobile flex flex-row items-center w-full",
-        "pr-6 h-16 gap-3",
-        props.className
-      )}
-    >
+    <header className={clsx("no-mobile fn-pc-header", props.className)}>
       <LinkWithReview
         href={`/${props.locale}`}
         className="fn-link-1 w-72 h-full overflow-visible"
       >
         <Title className="relative h-22 scale-75 origin-top-left" />
       </LinkWithReview>
-      <nav className="flex-none flex flex-row gap-3 text-lg">
+      <nav>
         {pcTabTitleKeys.map((key, i) => (
           <LinkWithReview
             key={i}
@@ -86,12 +76,29 @@ export function PCHeader(props: Props) {
           </LinkWithReview>
         ))}
       </nav>
-      <div className="flex-1" />
-      <div className="relative min-w-0 flex justify-end">
-        {/* バージョン表記が長い場合、メニューに入れたりするのは面倒なので雑に左のnavに被らせる
-        productionでは短い表記なので被ることはないはず... */}
+    </header>
+  );
+}
+interface Props2 {
+  className?: string;
+  locale: string;
+  backdropBlur?: boolean;
+}
+export function PCHeader2(props: Props2) {
+  const t = useTranslations("main");
+  const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState<boolean>(false);
+  const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
+  useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
+  return (
+    <aside className={clsx("no-mobile fn-pc-header2", props.className)}>
+      {props.backdropBlur && (
+        // 親要素自体にbackdrop-blurクラスを追加すると、changelogPopupやmenuがその中でbackdrop-blurを使えなくなってしまうので、別要素にしている
+        <div className="absolute inset-0 backdrop-blur-xs rounded-bl-sq-2xl" />
+      )}
+      <div className="relative">
         <button
-          className={clsx("flex-none inline-block relative", "fn-link-1")}
+          className={clsx("inline-block relative", "fn-link-1")}
           onClick={() => {
             setShowChangeLog(!showChangeLog);
           }}
@@ -128,7 +135,7 @@ export function PCHeader(props: Props) {
           onClose={() => setShowMenu(false)}
         />
       </div>
-    </header>
+    </aside>
   );
 }
 

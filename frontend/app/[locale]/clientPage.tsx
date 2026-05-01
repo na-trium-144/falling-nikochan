@@ -32,6 +32,7 @@ import Github from "@icon-park/react/lib/icons/Github.js";
 import Code from "@icon-park/react/lib/icons/Code.js";
 import Mail from "@icon-park/react/lib/icons/Mail.js";
 import { useTheme } from "./common/theme.js";
+import { PCHeader2 } from "./common/header.js";
 
 interface Props {
   locale: string;
@@ -59,9 +60,16 @@ export default function TopPage(props: Props) {
     <main
       className={clsx(
         "w-full h-full overflow-x-clip overflow-y-auto",
-        "flex flex-col items-center *:max-w-main"
+        "flex flex-col items-center *:max-w-main",
+        "relative"
       )}
     >
+      <PCHeader2
+        className="fixed top-0 right-0"
+        locale={locale}
+        backdropBlur
+      />
+
       <section className="min-h-screen flex flex-col items-center justify-center gap-12">
         <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
         <p className="text-2xl">{t("description")}</p>

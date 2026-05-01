@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { MobileHeader, PCHeader } from "@/common/header.js";
+import { MobileHeader, PCHeader, PCHeader2 } from "@/common/header.js";
 import { Box } from "@/common/box.js";
 import { MobileFooter, PCFooter, TabKeys } from "@/common/footer.js";
 import { ReactNode, RefObject, useCallback, useState } from "react";
@@ -32,11 +32,12 @@ export function IndexMain(props: Props) {
   const t = useTranslations("main");
 
   return (
-    <main className="flex flex-col w-full h-full items-center ">
+    <main className="relative flex flex-col w-full h-full items-center">
       <MobileHeader noBackButton={props.noBackButtonMobile}>
         {props.title}
       </MobileHeader>
       <PCHeader locale={locale} />
+      <PCHeader2 className="absolute top-0 right-0" locale={locale}/>
       <RedirectedWarning />
       <div
         className={clsx(

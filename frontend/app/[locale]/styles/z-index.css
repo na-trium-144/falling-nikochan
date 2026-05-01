@@ -35,6 +35,9 @@
 @utility z-mobile-footer {
   z-index: 10;
 }
+@utility z-header2 {
+  z-index: 10;
+}
 
 @utility z-fallback-bg {
   z-index: -101;
