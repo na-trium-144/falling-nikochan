@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
@@ -166,6 +167,7 @@ function PlayTabInternal(
       })
       .catch((e) => {
         console.error(e);
+        Sentry.captureException(e);
         setSearchResult(APIError.fetchError());
       });
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
