@@ -75,6 +75,9 @@ export const IrasutoyaLikeBgInner = memo(function IrasutoyaLikeBgInner(props: {
 interface GrassProps {
   classNameNear?: string;
   classNameFar?: string;
+  className?: string;
+  refNear?: React.RefObject<SVGSVGElement | null>;
+  refFar?: React.RefObject<SVGSVGElement | null>;
   style?: object;
   height: number;
 }
@@ -182,7 +185,12 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   return (
     <>
       <svg
-        className={clsx("fn-irasutoya-like-grass-far", props.classNameFar)}
+        ref={props.refFar}
+        className={clsx(
+          "fn-irasutoya-like-grass-far",
+          props.classNameFar,
+          props.className
+        )}
         style={style}
         viewBox={viewBox}
       >
@@ -236,7 +244,12 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
         </g>
       </svg>
       <svg
-        className={clsx("fn-irasutoya-like-grass-near", props.classNameNear)}
+        ref={props.refNear}
+        className={clsx(
+          "fn-irasutoya-like-grass-near",
+          props.classNameNear,
+          props.className
+        )}
         style={style}
         viewBox={viewBox}
       >

@@ -8,7 +8,7 @@ import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
 import { MobileFooter, PCFooter } from "./common/footer.js";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Input from "./common/input.jsx";
 import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
@@ -33,6 +33,8 @@ import Code from "@icon-park/react/lib/icons/Code.js";
 import Mail from "@icon-park/react/lib/icons/Mail.js";
 import { useTheme } from "./common/theme.js";
 import { PCHeader2 } from "./common/header.js";
+import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
+import { useDisplayMode } from "./scale.js";
 
 interface Props {
   locale: string;
@@ -56,8 +58,38 @@ export default function TopPage(props: Props) {
   );
   const fes = useFestival();
 
+  const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
+  const isMobilePlay = screenWidth < screenHeight;
+  const grassRefNear = useRef<SVGSVGElement>(null);
+  const grassRefFar = useRef<SVGSVGElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [initAnim, setInitAnim] = useState<boolean>(false);
+  useEffect(() => {
+    setTimeout(
+      () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => setInitAnim(true))
+        ),
+      100
+    );
+  }, []);
+  useEffect(() => {
+    const main = mainRef.current;
+    if (initAnim && main) {
+      const onScroll = () => {
+        if (grassRefNear.current && grassRefFar.current) {
+          grassRefNear.current.style.transform = `translateY(${main.scrollTop / 2}px)`;
+          grassRefFar.current.style.transform = `translateY(${main.scrollTop / 2}px)`;
+        }
+      };
+      main.addEventListener("scroll", onScroll);
+      return () => main.removeEventListener("scroll", onScroll);
+    }
+  }, [initAnim]);
+
   return (
     <main
+      ref={mainRef}
       className={clsx(
         "w-full h-full overflow-x-clip overflow-y-auto",
         "flex flex-col items-center *:max-w-main",
@@ -73,6 +105,22 @@ export default function TopPage(props: Props) {
           backdropBlur
         />
       </div>
+
+      <IrasutoyaLikeGrass
+        refNear={grassRefNear}
+        refFar={grassRefFar}
+        className={clsx(
+          "fixed",
+          "transition-transform duration-500 ease-out",
+          initAnim ? "" : "translate-y-[30vh] opacity-0"
+        )}
+        height={
+          (isMobilePlay
+            ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+            : 0.1 * screenHeight) +
+          1 * rem
+        }
+      />
 
       <section className="min-h-screen flex flex-col items-center justify-center gap-12">
         <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
