@@ -64,11 +64,15 @@ export default function TopPage(props: Props) {
         "relative"
       )}
     >
-      <PCHeader2
-        className="fixed top-0 right-0"
-        locale={locale}
-        backdropBlur
-      />
+      <div className="sticky top-0 h-0 w-full max-w-full! z-header2">
+        {/* ↑なぜかここにz-indexがないとChangelogPopupが前に出てこない */}
+        {/* main直下にPCHeader2をfixedで置くとスクロールバーに被る */}
+        <PCHeader2
+          className="absolute top-0 right-0"
+          locale={locale}
+          backdropBlur
+        />
+      </div>
 
       <section className="min-h-screen flex flex-col items-center justify-center gap-12">
         <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>

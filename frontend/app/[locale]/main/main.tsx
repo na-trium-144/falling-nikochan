@@ -37,7 +37,7 @@ export function IndexMain(props: Props) {
         {props.title}
       </MobileHeader>
       <PCHeader locale={locale} />
-      <PCHeader2 className="absolute top-0 right-0" locale={locale}/>
+      <PCHeader2 className="absolute top-0 right-0" locale={locale} />
       <RedirectedWarning />
       <div
         className={clsx(
