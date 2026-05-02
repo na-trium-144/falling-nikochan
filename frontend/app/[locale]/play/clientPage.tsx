@@ -65,6 +65,7 @@ import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
+import { useFlash } from "./useFlash.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -412,34 +413,7 @@ function Play(props: Props) {
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
 
-  // キーを押したとき一定時間光らせる
-  // ここではnoteのx座標の値そのままを扱う
-  const [barFlash, setBarFlash] = useState<FlashPos>(undefined);
-  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const flashAnimationFrame = useRef<ReturnType<
-    typeof requestAnimationFrame
-  > | null>(null);
-  const flash = useCallback((x: FlashPos) => {
-    if (flashAnimationFrame.current !== null) {
-      cancelAnimationFrame(flashAnimationFrame.current);
-      flashAnimationFrame.current = null;
-    }
-    if (flashTimeout.current !== null) {
-      clearTimeout(flashTimeout.current);
-      flashTimeout.current = null;
-      setBarFlash(undefined);
-      flashAnimationFrame.current = requestAnimationFrame(() => {
-        flashAnimationFrame.current = null;
-        flash(x);
-      });
-    } else {
-      setBarFlash(x);
-      flashTimeout.current = setTimeout(() => {
-        flashTimeout.current = null;
-        setBarFlash(undefined);
-      }, 100);
-    }
-  }, []);
+  const { barFlash, flash } = useFlash();
 
   const {
     baseScore,

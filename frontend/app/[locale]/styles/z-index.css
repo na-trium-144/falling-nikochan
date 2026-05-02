@@ -38,6 +38,9 @@
 @utility z-header2 {
   z-index: 10;
 }
+@utility z-title-fw {
+  z-index: -5;
+}
 
 @utility z-fallback-bg {
   z-index: -101;

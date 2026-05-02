@@ -17,7 +17,7 @@ import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
 
-interface Props {
+type Props = {
   className?: string;
   style?: object;
   notes: NoteInGame[];
@@ -30,14 +30,19 @@ interface Props {
   playbackRate: number;
   setShouldHideBPMSign: (hide: boolean) => void;
   shouldHideBPMSign: boolean;
-  showTSOffset: boolean;
-  rawStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
-  filteredStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
-  userOffset: number;
-  audioLatency: number | null | undefined;
-  posOfs: RefObject<number>;
-  timeOfsEstimator: RefObject<OffsetEstimator | null>;
-}
+} & (
+  | {
+      showTSOffset: boolean;
+      // 以下、tsOffsetの表示にのみ使用
+      rawStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+      filteredStartTimeStamp: RefObject<DOMHighResTimeStamp | null>;
+      userOffset: number;
+      audioLatency: number | null | undefined;
+      posOfs: RefObject<number>;
+      timeOfsEstimator: RefObject<OffsetEstimator | null>;
+    }
+  | { showTSOffset: false }
+);
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
   const {

@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Input from "./common/input.jsx";
-import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
+import { ChartBrief, ChartSeqData, CidSchema } from "@falling-nikochan/chart";
 import { SlimeSVG } from "./common/slime.jsx";
 import { SmallDomainShare } from "./common/small.jsx";
 import { fetchBrief } from "./common/briefCache.js";
@@ -35,6 +35,7 @@ import { useTheme } from "./common/theme.js";
 import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
+import { TopDemo } from "./topDemo.js";
 
 interface Props {
   locale: string;
@@ -63,6 +64,7 @@ export default function TopPage(props: Props) {
   const grassRefNear = useRef<SVGSVGElement>(null);
   const grassRefFar = useRef<SVGSVGElement>(null);
   const [initAnim, setInitAnim] = useState<boolean>(false);
+  const [demoVisible, setDemoVisible] = useState<boolean>(false);
   useEffect(() => {
     setTimeout(
       () =>
@@ -79,6 +81,7 @@ export default function TopPage(props: Props) {
           grassRefNear.current.style.transform = `translateY(${window.scrollY / 2}px)`;
           grassRefFar.current.style.transform = `translateY(${window.scrollY / 2}px)`;
         }
+        setDemoVisible(window.scrollY < window.innerHeight);
       };
       // initAnimがtrueになる瞬間にも実行する必要がある
       onScroll();
@@ -112,6 +115,8 @@ export default function TopPage(props: Props) {
           1 * rem
         }
       />
+
+      <TopDemo visible={demoVisible} />
 
       <section className="min-h-screen flex flex-col items-center justify-center gap-12">
         <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
