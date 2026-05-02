@@ -77,7 +77,7 @@ importers:
         version: 7.0.2(webpack@5.105.4)
       webpack-license-plugin:
         specifier: ^4.5.1
-        version: 4.5.1(webpack@5.105.4)
+        version: 4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       yaml:
         specifier: ^2.8.3
         version: 2.8.3
@@ -189,7 +189,7 @@ importers:
         version: 4.9.1(next@16.1.7(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(typescript@5.9.3)
       next-license-list:
         specifier: ^1.0.1
-        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2))
+        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       pretty-checkbox:
         specifier: ^3.0.3
         version: 3.0.3
@@ -282,8 +282,8 @@ importers:
         specifier: ^1.48.0
         version: 1.48.0
       '@hono/node-server':
-        specifier: ^1.19.13
-        version: 1.19.13(hono@4.12.14)
+        specifier: ^2.0.1
+        version: 2.0.1(hono@4.12.14)
       '@hono/standard-validator':
         specifier: ^0.2.1
         version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.14)
@@ -1164,9 +1164,9 @@ packages:
       '@modelcontextprotocol/sdk':
         optional: true
 
-  '@hono/node-server@1.19.13':
-    resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
-    engines: {node: '>=18.14.1'}
+  '@hono/node-server@2.0.1':
+    resolution: {integrity: sha512-jI9yMDyFpqBeSighf/zlXnQG/nl9AyBc6aAgy4XtxJMyt/CNyJpvPfzDD+bCc2zAOmhhqtF6TnmIaY+xV4mIrw==}
+    engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
 
@@ -5647,7 +5647,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@hono/node-server@1.19.13(hono@4.12.14)':
+  '@hono/node-server@2.0.1(hono@4.12.14)':
     dependencies:
       hono: 4.12.14
 
@@ -8492,9 +8492,9 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2)):
+  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
     dependencies:
-      webpack-license-plugin: 4.5.1(webpack@5.105.4)
+      webpack-license-plugin: 4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
     transitivePeerDependencies:
       - webpack
 
@@ -9509,7 +9509,7 @@ snapshots:
       webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
       webpack-merge: 6.0.1
 
-  webpack-license-plugin@4.5.1(webpack@5.105.4):
+  webpack-license-plugin@4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
     dependencies:
       chalk: 5.6.2
       lodash: 4.18.1
