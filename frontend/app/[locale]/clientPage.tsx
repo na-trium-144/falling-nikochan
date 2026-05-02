@@ -62,7 +62,6 @@ export default function TopPage(props: Props) {
   const isMobilePlay = screenWidth < screenHeight;
   const grassRefNear = useRef<SVGSVGElement>(null);
   const grassRefFar = useRef<SVGSVGElement>(null);
-  const mainRef = useRef<HTMLDivElement>(null);
   const [initAnim, setInitAnim] = useState<boolean>(false);
   useEffect(() => {
     setTimeout(
@@ -74,43 +73,35 @@ export default function TopPage(props: Props) {
     );
   }, []);
   useEffect(() => {
-    const main = mainRef.current;
-    if (initAnim && main) {
+    if (initAnim) {
       const onScroll = () => {
         if (grassRefNear.current && grassRefFar.current) {
-          grassRefNear.current.style.transform = `translateY(${main.scrollTop / 2}px)`;
-          grassRefFar.current.style.transform = `translateY(${main.scrollTop / 2}px)`;
+          grassRefNear.current.style.transform = `translateY(${window.scrollY / 2}px)`;
+          grassRefFar.current.style.transform = `translateY(${window.scrollY / 2}px)`;
         }
       };
-      main.addEventListener("scroll", onScroll);
-      return () => main.removeEventListener("scroll", onScroll);
+      // initAnimがtrueになる瞬間にも実行する必要がある
+      onScroll();
+      window.addEventListener("scroll", onScroll);
+      return () => window.removeEventListener("scroll", onScroll);
     }
   }, [initAnim]);
 
   return (
     <main
-      ref={mainRef}
       className={clsx(
-        "w-full h-full overflow-x-clip overflow-y-auto",
+        "fn-body-scrollable",
         "flex flex-col items-center *:max-w-main",
         "relative"
       )}
     >
-      <div className="sticky top-0 h-0 w-full max-w-full! z-header2">
-        {/* ↑なぜかここにz-indexがないとChangelogPopupが前に出てこない */}
-        {/* main直下にPCHeader2をfixedで置くとスクロールバーに被る */}
-        <PCHeader2
-          className="absolute top-0 right-0"
-          locale={locale}
-          backdropBlur
-        />
-      </div>
+      <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
       <IrasutoyaLikeGrass
         refNear={grassRefNear}
         refFar={grassRefFar}
         className={clsx(
-          "fixed",
+          "max-w-[unset]!",
           "transition-transform duration-500 ease-out",
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}

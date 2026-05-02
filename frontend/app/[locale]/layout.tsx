@@ -29,7 +29,7 @@ export default async function RootLayout({
   const ChangeLog = await importChangeLogMDX(locale);
   return (
     <html lang={locale}>
-      <body className="w-full h-dvh overflow-hidden touch-none ">
+      <body className="fn-body">
         <ThemeProvider>
           <IntlProvider locale={locale}>
             <ChangeLogProvider changeLog={<ChangeLog />}>

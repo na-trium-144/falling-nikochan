@@ -16,7 +16,7 @@ export default function Error(props: ErrorProps) {
     <html>
       <body
         className={clsx(
-          "w-full h-dvh overflow-hidden touch-none",
+          "fn-body",
           // ThemeProviderのimportも避けて直接書いている。
           "fn-csr-ready"
         )}

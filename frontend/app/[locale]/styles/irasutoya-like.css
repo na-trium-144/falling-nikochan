@@ -1,11 +1,20 @@
-body.fn-csr-ready {
-  @apply fg-base;
+body.fn-body {
+  &:not(:has(> .fn-body-scrollable)) {
+    @apply w-full h-dvh overflow-hidden touch-none;
+  }
+  &:has(> .fn-body-scrollable) {
+    @apply w-full min-h-dvh overflow-x-clip overflow-y-auto;
+  }
 
-  > .fn-fallback-bg {
-    @apply fixed inset-0 pointer-events-none z-fallback-bg;
-    @apply bg-gradient-to-t;
-    @apply bg-sky-50 from-sky-50 to-sky-200;
-    @apply dark:bg-orange-950 dark:from-orange-950 dark:to-orange-975;
+  &.fn-csr-ready {
+    @apply fg-base;
+
+    > .fn-fallback-bg {
+      @apply fixed inset-0 pointer-events-none z-fallback-bg;
+      @apply bg-gradient-to-t;
+      @apply bg-sky-50 from-sky-50 to-sky-200;
+      @apply dark:bg-orange-950 dark:from-orange-950 dark:to-orange-975;
+    }
   }
 }
 
