@@ -16,7 +16,7 @@ interface DemoChart {
 }
 export const demoCharts: DemoChart[] = (
   process.env.NODE_ENV === "development"
-    ? ([["102399", 0, 2]] as const)
+    ? ([["102399", 0, 4.5]] as const)
     : ([] as const)
 ).map(([cid, lvIndex, offset]) => ({ cid, lvIndex, offset }));
 
@@ -76,7 +76,7 @@ export function TopDemo(props: { visible: boolean } & Partial<DemoChart>) {
               done: 0,
               bigDone: false,
             })),
-            -Infinity
+            props.offset!
           );
           currentTimeSec.current = props.offset!;
         });

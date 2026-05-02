@@ -100,7 +100,7 @@ export default function TopPage(props: Props) {
     <main
       className={clsx(
         "fn-body-scrollable",
-        "flex flex-col items-center *:max-w-main",
+        "flex flex-col items-center",
         "relative"
       )}
     >
@@ -110,7 +110,6 @@ export default function TopPage(props: Props) {
         refNear={grassRefNear}
         refFar={grassRefFar}
         className={clsx(
-          "max-w-[unset]!",
           "transition-transform duration-500 ease-out",
           initAnim ? "" : "translate-y-[30vh] opacity-0"
         )}
@@ -123,7 +122,7 @@ export default function TopPage(props: Props) {
       />
 
       <div
-        className="w-full max-w-[unset]! h-screen flex items-center justify-center"
+        className="w-full h-screen flex items-center justify-center"
         style={{
           paddingBottom:
             (isMobilePlay
@@ -158,7 +157,7 @@ export default function TopPage(props: Props) {
       <RedirectedWarning />
       <PWAInstallMain />
 
-      <section className="text-center px-6 mb-12">
+      <section className="w-full max-w-main text-center px-6 mb-12">
         <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
         {/*TODO: カードの形を変える*/}
         <ChartList
@@ -174,7 +173,7 @@ export default function TopPage(props: Props) {
         />
       </section>
 
-      <section className="mb-12 flex w-full">
+      <section className="w-full max-w-main mb-12 flex">
         <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
           <h2 className="fn-heading-sect text-3xl mb-4">
             {t("howToPlay.title")}
@@ -203,7 +202,7 @@ export default function TopPage(props: Props) {
         <div className="basis-2/5 border">イメージ画像</div>
       </section>
 
-      <section className="mb-12 flex flex-row-reverse w-full">
+      <section className="w-full max-w-main mb-12 flex flex-row-reverse">
         <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
           <h2 className="fn-heading-sect text-3xl mb-4">
             {t("howToEdit.title")}
@@ -239,11 +238,11 @@ export default function TopPage(props: Props) {
         <div className="basis-2/5 border">イメージ画像</div>
       </section>
 
-      <div className="w-full">
+      <div className="w-full max-w-main">
         <hr className="h-px w-3/4 my-12 mx-auto border-current/50" />
       </div>
 
-      <section className="mb-24 flex flex-row w-full px-12 gap-12">
+      <section className="w-full max-w-main mb-24 flex flex-row px-12 gap-12">
         <div className="basis-1/2 flex flex-col items-center justify-center text-center">
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("policies.title")}
