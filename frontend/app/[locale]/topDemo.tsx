@@ -3,10 +3,14 @@ import { useRealFPS } from "./common/fpsCalculator";
 import FallingWindow from "./play/fallingWindow";
 import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
-import { ChartSeqData } from "@falling-nikochan/chart";
+import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
+import { useColorThief } from "./common/colorThief";
+import clsx from "clsx/lite";
+import Link from "next/link";
+import { ButtonHighlight } from "./common/button";
 
-export function TopDemo(props: {visible: boolean}) {
+export function TopDemo(props: { visible: boolean }) {
   const { realFps, stable: realFpsStable } = useRealFPS();
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
@@ -17,6 +21,7 @@ export function TopDemo(props: {visible: boolean}) {
       setShowFps(true);
     }
   }, []);
+
   const { barFlash, flash } = useFlash();
   const currentTimeSec = useRef<number>(0);
   const prevTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
@@ -63,7 +68,7 @@ export function TopDemo(props: {visible: boolean}) {
   return (
     <>
       <FallingWindow
-        className="absolute inset-x-0 top-0 h-screen max-w-[unset]! blur-2xs isolate z-title-fw"
+        className="absolute inset-0 blur-2xs isolate z-title-fw"
         notes={notesAll}
         getCurrentTimeSec={getCurrentTimeSec}
         playing={true}
@@ -83,5 +88,45 @@ export function TopDemo(props: {visible: boolean}) {
         </span>
       )}
     </>
+  );
+}
+
+export function DemoDetail() {
+  const [brief, setBrief] = useState<ChartBrief>();
+  useEffect(() => {
+    if (!brief) {
+      fetch(process.env.BACKEND_PREFIX + `/api/brief/102399`)
+        .then((res) => res.json())
+        .then((brief: ChartBrief) => setBrief(brief));
+    }
+  }, [brief]);
+
+  const colorThief = useColorThief();
+
+  return (
+    <Link
+      href={`/share/foo`}
+      className={clsx(
+        "w-96",
+        "rounded-sq-xl p-3",
+        "relative flex flex-col",
+        "fn-flat-button",
+        colorThief.boxStyle
+      )}
+      style={{ color: colorThief.currentColor }}
+    >
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
+      <ButtonHighlight />
+      <div className="flex flex-row-reverse main-wide:flex-col">
+        {brief?.ytId && (
+          <img
+            ref={colorThief.imgRef}
+            src={`https://i.ytimg.com/vi/${brief?.ytId}/mqdefault.jpg`}
+            crossOrigin="anonymous"
+          />
+        )}
+      </div>
+    </Link>
   );
 }
