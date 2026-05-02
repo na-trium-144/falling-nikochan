@@ -77,7 +77,7 @@ importers:
         version: 7.0.2(webpack@5.105.4)
       webpack-license-plugin:
         specifier: ^4.5.1
-        version: 4.5.1(webpack@5.105.4)
+        version: 4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       yaml:
         specifier: ^2.8.3
         version: 2.8.3
@@ -189,7 +189,7 @@ importers:
         version: 4.9.1(next@16.1.7(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(typescript@5.9.3)
       next-license-list:
         specifier: ^1.0.1
-        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2))
+        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
       pretty-checkbox:
         specifier: ^3.0.3
         version: 3.0.3
@@ -306,8 +306,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1(sharp@0.34.5)
       discord.js:
-        specifier: ^14.26.0
-        version: 14.26.0
+        specifier: ^14.26.4
+        version: 14.26.4
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -2640,11 +2640,11 @@ packages:
   diff-match-patch@1.0.5:
     resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
 
-  discord-api-types@0.38.44:
-    resolution: {integrity: sha512-q91MgBzP/gRaCLIbQTaOrOhbD8uVIaPKxpgX2sfFB2nZ9nSiTYM9P3NFQ7cbO6NCxctI6ODttc67MI+YhIfILg==}
+  discord-api-types@0.38.47:
+    resolution: {integrity: sha512-XgXQodHQBAE6kfD7kMvVo30863iHX1LHSqNq6MGUTDwIFCCvHva13+rwxyxVXDqudyApMNAd32PGjgVETi5rjA==}
 
-  discord.js@14.26.0:
-    resolution: {integrity: sha512-I+5dmdg7WnjIOEXspX6mJ4jLgblhZV6QpQcC3U2JjrFWnHCKDpoLkhV46SBP8k9QePs3YWJOvndVutUARRO0AQ==}
+  discord.js@14.26.4:
+    resolution: {integrity: sha512-4oBp8tc6Kf8IDBwAHhbsMaAqx1b5fob9SNasZT7V6yyyUydoO5i5fGuX7TmvRtR+q/WgKRnRViRoAWnG7fNyvA==}
     engines: {node: '>=18'}
 
   doctrine@2.1.0:
@@ -4728,6 +4728,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.20.0:
+    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xmlbuilder2@4.0.3:
     resolution: {integrity: sha512-bx8Q1STctnNaaDymWnkfQLKofs0mGNN7rLLapJlGuV3VlvegD7Ls4ggMjE3aUSWItCCzU0PEv45lI87iSigiCA==}
     engines: {node: '>=20.0'}
@@ -5422,7 +5434,7 @@ snapshots:
       '@discordjs/formatters': 0.6.2
       '@discordjs/util': 1.2.0
       '@sapphire/shapeshift': 4.0.0
-      discord-api-types: 0.38.44
+      discord-api-types: 0.38.47
       fast-deep-equal: 3.1.3
       ts-mixer: 6.0.4
       tslib: 2.8.1
@@ -5433,7 +5445,7 @@ snapshots:
 
   '@discordjs/formatters@0.6.2':
     dependencies:
-      discord-api-types: 0.38.44
+      discord-api-types: 0.38.47
 
   '@discordjs/rest@2.6.1':
     dependencies:
@@ -5442,14 +5454,14 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@sapphire/snowflake': 3.5.5
       '@vladfrangu/async_event_emitter': 2.4.7
-      discord-api-types: 0.38.44
+      discord-api-types: 0.38.47
       magic-bytes.js: 1.13.0
       tslib: 2.8.1
       undici: 6.24.1
 
   '@discordjs/util@1.2.0':
     dependencies:
-      discord-api-types: 0.38.44
+      discord-api-types: 0.38.47
 
   '@discordjs/ws@1.2.3':
     dependencies:
@@ -5459,9 +5471,9 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@types/ws': 8.18.1
       '@vladfrangu/async_event_emitter': 2.4.7
-      discord-api-types: 0.38.44
+      discord-api-types: 0.38.47
       tslib: 2.8.1
-      ws: 8.19.0
+      ws: 8.20.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -6955,9 +6967,9 @@ snapshots:
 
   diff-match-patch@1.0.5: {}
 
-  discord-api-types@0.38.44: {}
+  discord-api-types@0.38.47: {}
 
-  discord.js@14.26.0:
+  discord.js@14.26.4:
     dependencies:
       '@discordjs/builders': 1.14.1
       '@discordjs/collection': 1.5.3
@@ -6966,7 +6978,7 @@ snapshots:
       '@discordjs/util': 1.2.0
       '@discordjs/ws': 1.2.3
       '@sapphire/snowflake': 3.5.3
-      discord-api-types: 0.38.44
+      discord-api-types: 0.38.47
       fast-deep-equal: 3.1.3
       lodash.snakecase: 4.1.1
       magic-bytes.js: 1.13.0
@@ -8492,9 +8504,9 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2)):
+  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
     dependencies:
-      webpack-license-plugin: 4.5.1(webpack@5.105.4)
+      webpack-license-plugin: 4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
     transitivePeerDependencies:
       - webpack
 
@@ -9509,7 +9521,7 @@ snapshots:
       webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
       webpack-merge: 6.0.1
 
-  webpack-license-plugin@4.5.1(webpack@5.105.4):
+  webpack-license-plugin@4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
     dependencies:
       chalk: 5.6.2
       lodash: 4.18.1
@@ -9631,6 +9643,8 @@ snapshots:
       strip-ansi: 7.1.2
 
   ws@8.19.0: {}
+
+  ws@8.20.0: {}
 
   xmlbuilder2@4.0.3:
     dependencies:
