@@ -35,7 +35,7 @@ import { useTheme } from "./common/theme.js";
 import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
-import { DemoDetail, TopDemo } from "./topDemo.js";
+import { demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 
 interface Props {
   locale: string;
@@ -65,11 +65,17 @@ export default function TopPage(props: Props) {
   const grassRefFar = useRef<SVGSVGElement>(null);
   const [initAnim, setInitAnim] = useState<boolean>(false);
   const [demoVisible, setDemoVisible] = useState<boolean>(false);
+  const [demoChart, setDemoChart] = useState<DemoChart>();
   useEffect(() => {
     setTimeout(
       () =>
         requestAnimationFrame(() =>
-          requestAnimationFrame(() => setInitAnim(true))
+          requestAnimationFrame(() => {
+            setInitAnim(true);
+            setDemoChart(
+              demoCharts[Math.floor(demoCharts.length * Math.random())]
+            );
+          })
         ),
       100
     );
@@ -137,10 +143,14 @@ export default function TopPage(props: Props) {
               {t("playNow")}
             </Link>
           </section>
-          <TopDemo visible={demoVisible} />
+          <TopDemo {...demoChart} visible={demoVisible} />
         </div>
         <aside className="grow shrink-0 grid-centering px-9">
-          <DemoDetail />
+          <DemoDetail
+            {...demoChart}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+          />
         </aside>
       </div>
 
