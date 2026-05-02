@@ -44,7 +44,7 @@
     "semver": "^7.7.4",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.58.0",
+    "typescript-eslint": "^8.59.1",
     "webpack": "^5.105.4",
     "webpack-cli": "^7.0.2",
     "webpack-license-plugin": "^4.5.1",
