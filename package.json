@@ -38,7 +38,7 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.7",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.4.0",
+    "globals": "^17.6.0",
     "next": "16.1.7",
     "prettier": "^3.7.4",
     "semver": "^7.7.4",
