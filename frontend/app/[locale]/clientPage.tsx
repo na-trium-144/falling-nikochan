@@ -37,8 +37,8 @@ export default function TopPage(props: Props) {
 
   const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
   const isMobilePlay = screenWidth < screenHeight;
-  const grassRefNear = useRef<SVGSVGElement>(null);
-  const grassRefFar = useRef<SVGSVGElement>(null);
+  const grassRefNear = useRef<HTMLDivElement>(null);
+  const grassRefFar = useRef<HTMLDivElement>(null);
   const [initAnim, setInitAnim] = useState<boolean>(false);
   const [demoVisible, setDemoVisible] = useState<boolean>(false);
   const [demoChart, setDemoChart] = useState<DemoChart>();
