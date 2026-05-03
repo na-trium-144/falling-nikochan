@@ -61,13 +61,7 @@ export default function TopPage(props: Props) {
       const onScroll = () => {
         for (const ref of [grassRefNear, grassRefFar]) {
           if (ref.current) {
-            if (window.scrollY > 0) {
-              ref.current.classList.remove(
-                "transition-transform",
-                "duration-500"
-              );
-            }
-            ref.current.style.transform = `translateY(${window.scrollY / 2}px)`;
+            ref.current.style.bottom = `-${2.5 * rem + window.scrollY / 2}px`;
           }
         }
         setDemoVisible(window.scrollY < window.innerHeight);
@@ -77,7 +71,7 @@ export default function TopPage(props: Props) {
       window.addEventListener("scroll", onScroll);
       return () => window.removeEventListener("scroll", onScroll);
     }
-  }, [initAnim]);
+  }, [initAnim, rem]);
 
   return (
     <main
