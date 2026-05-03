@@ -7,7 +7,7 @@ import {
   RecordGetSummary,
   ResultParams,
 } from "@falling-nikochan/chart";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
@@ -15,8 +15,6 @@ import { Box } from "@/common/box.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import { TitleAsLink } from "@/common/titleLogo.jsx";
 import { MobileFooter } from "@/common/footer.jsx";
-import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
-import { AboutDescription } from "@/main/main.jsx";
 import { APIError } from "@/common/apiError.js";
 import { PCHeader2 } from "@/common/header.js";
 import { Features, PoliciesAndLinks } from "@/clientPage.js";
@@ -109,15 +107,6 @@ export default function ShareChart(props: Props) {
     }
     return () => clearInterval(titleUpdate);
   }, [t]);
-
-  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
-  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
-  const setAboutPageIndex = useCallback(
-    (i: number | null) => {
-      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
-    },
-    [setAboutOpen_]
-  );
 
   return (
     <main

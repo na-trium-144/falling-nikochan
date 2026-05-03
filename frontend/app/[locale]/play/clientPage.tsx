@@ -15,7 +15,7 @@ const exampleResult = {
 
 import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow, { FlashPos } from "./fallingWindow.js";
+import FallingWindow from "./fallingWindow.js";
 import {
   bigScoreRate,
   chainScoreRate,

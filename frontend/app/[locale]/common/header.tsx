@@ -5,14 +5,9 @@ import { ReactNode, useEffect, useState } from "react";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import HamburgerButton from "@icon-park/react/lib/icons/HamburgerButton";
 import Comment from "@icon-park/react/lib/icons/Comment";
-import {
-  historyBackWithReview,
-  LinkWithReview,
-  requestReview,
-} from "./pwaInstall.jsx";
+import { historyBackWithReview, LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
-import Title, { TitleAsLink } from "./titleLogo.js";
-import Link from "next/link.js";
+import Title from "./titleLogo.js";
 import { useTranslations } from "next-intl";
 import { lastVisitedOld } from "./version.js";
 import { ChangeLogPopup } from "./changeLog.js";

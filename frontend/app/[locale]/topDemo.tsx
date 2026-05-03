@@ -9,7 +9,7 @@ import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
 import { ButtonHighlight } from "./common/button";
 
-interface DemoChart {
+export interface DemoChart {
   cid: string;
   lvIndex: number;
   offset: number;

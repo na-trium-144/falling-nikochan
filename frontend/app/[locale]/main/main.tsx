@@ -3,18 +3,12 @@
 import clsx from "clsx/lite";
 import { MobileHeader, PCHeader, PCHeader2 } from "@/common/header.js";
 import { Box } from "@/common/box.js";
-import { MobileFooter, PCFooter, TabKeys } from "@/common/footer.js";
-import { ReactNode, RefObject, useCallback, useState } from "react";
-import Link from "next/link";
-import { TitleAsLink } from "@/common/titleLogo.js";
+import { MobileFooter, TabKeys } from "@/common/footer.js";
+import { ReactNode, RefObject } from "react";
 import { useTranslations } from "next-intl";
 import { RedirectedWarning } from "@/common/redirectedWarning";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
-import { historyBackWithReview, LinkWithReview } from "@/common/pwaInstall";
-import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
-import { useDelayedDisplayState } from "@/common/delayedDisplayState";
-import { AboutModal } from "@/common/aboutModal";
-import { ButtonHighlight } from "@/common/button";
+import { historyBackWithReview } from "@/common/pwaInstall";
 
 interface Props {
   classNameInner?: string;

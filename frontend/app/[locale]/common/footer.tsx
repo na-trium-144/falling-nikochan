@@ -1,20 +1,14 @@
 "use client";
 
 import clsx from "clsx/lite";
-import Comment from "@icon-park/react/lib/icons/Comment";
 import Edit from "@icon-park/react/lib/icons/Edit";
 import Home from "@icon-park/react/lib/icons/Home";
-import Moon from "@icon-park/react/lib/icons/Moon";
 import More from "@icon-park/react/lib/icons/More";
 import Search from "@icon-park/react/lib/icons/Search";
-import Sun from "@icon-park/react/lib/icons/Sun";
-import Translate from "@icon-park/react/lib/icons/Translate";
-import { ThemeSwitcher, useTheme } from "./theme.js";
+import { useTheme } from "./theme.js";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "./version.js";
-import { LangSwitcher } from "./langSwitcher.jsx";
-import { ChangeLogPopup } from "./changeLog.jsx";
 import { LinkWithReview } from "./pwaInstall.jsx";
 import { ButtonHighlight } from "./button.jsx";
 

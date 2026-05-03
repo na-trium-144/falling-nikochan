@@ -9,7 +9,7 @@ export function useFlash() {
   const flashAnimationFrame = useRef<ReturnType<
     typeof requestAnimationFrame
   > | null>(null);
-  const flash = useCallback((x: FlashPos) => {
+  const flash = useCallback(function flash_(x: FlashPos) {
     if (flashAnimationFrame.current !== null) {
       cancelAnimationFrame(flashAnimationFrame.current);
       flashAnimationFrame.current = null;
@@ -20,7 +20,7 @@ export function useFlash() {
       setBarFlash(undefined);
       flashAnimationFrame.current = requestAnimationFrame(() => {
         flashAnimationFrame.current = null;
-        flash(x);
+        flash_(x);
       });
     } else {
       setBarFlash(x);

@@ -2,28 +2,12 @@
 import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
 import { IndexMain } from "../main";
-import { ExternalLink } from "@/common/extLink";
-import DownOne from "@icon-park/react/lib/icons/DownOne";
-import Github from "@icon-park/react/lib/icons/Github";
-import Moon from "@icon-park/react/lib/icons/Moon";
-import Sun from "@icon-park/react/lib/icons/Sun";
-import Translate from "@icon-park/react/lib/icons/Translate";
-import Youtube from "@icon-park/react/lib/icons/Youtube";
 import Link from "next/link";
-import {
-  langNames,
-  LangSwitcher,
-  MenuLangSwitcher,
-} from "@/common/langSwitcher";
-import { MenuThemeSwitcher, ThemeSwitcher, useTheme } from "@/common/theme";
+import { MenuLangSwitcher } from "@/common/langSwitcher";
+import { MenuThemeSwitcher } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useEffect, useState } from "react";
-import Mail from "@icon-park/react/lib/icons/Mail";
-import { FestivalLink, useFestival } from "@/common/festival";
-import Code from "@icon-park/react/lib/icons/Code";
-import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { lastVisitedOld } from "@/common/version";
-import { XLogo } from "@/common/x";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");

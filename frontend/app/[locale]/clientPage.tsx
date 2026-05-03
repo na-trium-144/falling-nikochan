@@ -2,26 +2,16 @@
 
 import clsx from "clsx/lite";
 import Link from "next/link";
-import { TitleAsLink } from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
-import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
-import { MobileFooter, PCFooter } from "./common/footer.js";
-import { useRouter } from "next/navigation";
+import { PWAInstallMain } from "./common/pwaInstall.js";
+import { MobileFooter } from "./common/footer.js";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
-import Input from "./common/input.jsx";
-import { ChartBrief, ChartSeqData, CidSchema } from "@falling-nikochan/chart";
-import { SlimeSVG } from "./common/slime.jsx";
+import { useEffect, useRef, useState } from "react";
 import { SmallDomainShare } from "./common/small.jsx";
-import { fetchBrief } from "./common/briefCache.js";
-import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
 import { FesData, FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
-import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
-import { AboutModal } from "./common/aboutModal.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
-import { Key } from "./common/key.js";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 import FormOne from "@icon-park/react/lib/icons/FormOne.js";
@@ -34,28 +24,15 @@ import { useTheme } from "./common/theme.js";
 import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
-import { demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
+import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 
 interface Props {
   locale: string;
 }
 export default function TopPage(props: Props) {
-  const router = useRouter();
   const t = useTranslations("main");
-  const [menuMove, menuMoveAnim, setMenuMove] = useDelayedDisplayState(200);
-  const menuMoveAnimClass =
-    "min-h-0 shrink-2 transition-opacity duration-200 ease-linear " +
-    (menuMoveAnim ? "opacity-0 " : "opacity-100 ");
   const { locale } = props;
   const { openModal, openShareInternal } = useSharePageModal();
-  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
-  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
-  const setAboutPageIndex = useCallback(
-    (i: number | null) => {
-      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
-    },
-    [setAboutOpen_]
-  );
   const fes = useFestival();
 
   const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();

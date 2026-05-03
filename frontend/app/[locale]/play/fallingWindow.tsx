@@ -41,7 +41,15 @@ type Props = {
       posOfs: RefObject<number>;
       timeOfsEstimator: RefObject<OffsetEstimator | null>;
     }
-  | { showTSOffset: false }
+  | {
+      showTSOffset: false;
+      rawStartTimeStamp?: undefined;
+      filteredStartTimeStamp?: undefined;
+      userOffset?: undefined;
+      audioLatency?: undefined;
+      posOfs?: undefined;
+      timeOfsEstimator?: undefined;
+    }
 );
 export type FlashPos = { targetX: number } | { clientX: number } | undefined;
 export default function FallingWindow(props: Props) {
@@ -387,14 +395,15 @@ export default function FallingWindow(props: Props) {
     props.filteredStartTimeStamp,
   ]);
   // rawStartTimeStampからoffsetとaudioを引けば -ytPlayer.current?.getCurrentTime() の値が残る
-  const rawYTStartTimeStamp = rawStartTimeStampSample.current
-    ? (((rawStartTimeStampSample.current -
-        props.userOffset * 1000 +
-        (props.audioLatency || 0) * 1000) %
-        1000) +
-        1000) %
-      1000
-    : null;
+  const rawYTStartTimeStamp =
+    rawStartTimeStampSample.current !== null && props.userOffset !== undefined
+      ? (((rawStartTimeStampSample.current -
+          props.userOffset * 1000 +
+          (props.audioLatency || 0) * 1000) %
+          1000) +
+          1000) %
+        1000
+      : null;
 
   return (
     <div
