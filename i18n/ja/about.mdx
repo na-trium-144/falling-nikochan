@@ -1,13 +1,14 @@
 import { Key } from "@/common/key.js";
 import clsx from "clsx/lite";
+import { JudgeIcon } from "@/play/statusBox.js";
 import {
   levelTypes,
   goodSec,
   okSec,
   badFastSec,
   badLateSec,
-} from "@falling-nikochan/chart";
-import { JudgeIcon } from "@/play/statusBox.js";
+  // "@falling-nikochan/chart" からimportすると、 Fatal JavaScript invalid size error 169220804 でビルドできなくなる なぜ
+} from "../../chart/dist/index.js";
 
 # ゲームルール
 
