@@ -59,9 +59,16 @@ export default function TopPage(props: Props) {
   useEffect(() => {
     if (initAnim) {
       const onScroll = () => {
-        if (grassRefNear.current && grassRefFar.current) {
-          grassRefNear.current.style.transform = `translateY(${window.scrollY / 2}px)`;
-          grassRefFar.current.style.transform = `translateY(${window.scrollY / 2}px)`;
+        for (const ref of [grassRefNear, grassRefFar]) {
+          if (ref.current) {
+            if (window.scrollY > 0) {
+              ref.current.classList.remove(
+                "transition-transform",
+                "duration-500"
+              );
+            }
+            ref.current.style.transform = `translateY(${window.scrollY / 2}px)`;
+          }
         }
         setDemoVisible(window.scrollY < window.innerHeight);
       };
