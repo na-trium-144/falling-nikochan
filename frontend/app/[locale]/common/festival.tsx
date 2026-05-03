@@ -5,7 +5,11 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ExternalLink } from "./extLink";
 
-export function useFestival() {
+export interface FesData {
+  num: number | null;
+  kind: "kf" | "mf" | null;
+}
+export function useFestival(): FesData {
   const [num, setNum] = useState<number | null>(null);
   const [kind, setKind] = useState<"kf" | "mf" | null>(null);
   useEffect(() => {

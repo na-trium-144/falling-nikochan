@@ -73,36 +73,3 @@ export function IndexMain(props: Props) {
     </main>
   );
 }
-
-export function AboutDescription(props: {
-  className: string;
-  locale: string;
-  onClickAbout: () => void;
-}) {
-  const t = useTranslations("main");
-  return (
-    <div className={clsx("flex-none text-center", props.className)}>
-      {t("description")}
-      <Link
-        href={`/${props.locale}/main/about/1`}
-        className={clsx("no-pc inline-block", "ml-2", "fn-link-3")}
-      >
-        {t("aboutNikochan")}
-        <ArrowRight
-          className="inline-block align-middle ml-2 "
-          theme="filled"
-        />
-      </Link>
-      <button
-        className={clsx("no-mobile inline-block", "ml-2", "fn-link-3")}
-        onClick={props.onClickAbout}
-      >
-        {t("aboutNikochan")}
-        <ArrowRight
-          className="inline-block align-middle ml-2 "
-          theme="filled"
-        />
-      </button>
-    </div>
-  );
-}

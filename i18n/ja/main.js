@@ -51,16 +51,10 @@ export default {
       updateDone: "更新が完了しました！",
       updateFailed: "更新に失敗しました...",
     },
-    inputId: "譜面IDを入力",
-    inputIdDesc:
-      "プレイしたい譜面の ID を知っている場合はこちらに入力してください。",
-    inputIdDesc2:
-      "譜面のURL (<url></url>) にアクセスすることでもプレイできます。",
-    aboutNikochan: "Falling Nikochan について詳しく",
     about: {
       title: "ゲーム仕様について",
       description:
-        "音楽ゲームとしての Falling Nikochan のルールや判定などの仕様を説明します。",
+        "音楽ゲームとしての Falling Nikochan のルールや判定などの仕様、スコアについて",
     },
     top: {
       titleShort: "ホーム",

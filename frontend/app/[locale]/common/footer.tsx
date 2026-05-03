@@ -51,7 +51,7 @@ export function MobileFooter(props: MobileProps) {
     <footer
       className={clsx(
         "fn-mobile-footer no-pc",
-        props.blurBg && "fn-mh-blur",
+        props.blurBg && "fn-mf-blur",
         props.className
       )}
     >
