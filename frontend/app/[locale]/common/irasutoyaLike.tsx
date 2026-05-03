@@ -76,8 +76,8 @@ interface GrassProps {
   classNameNear?: string;
   classNameFar?: string;
   className?: string;
-  refNear?: React.RefObject<HTMLDivElement | null>;
-  refFar?: React.RefObject<HTMLDivElement | null>;
+  refNear?: React.RefObject<SVGSVGElement | null>;
+  refFar?: React.RefObject<SVGSVGElement | null>;
   style?: object;
   height: number;
 }
@@ -184,7 +184,7 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
   const viewBox = `0 0 ${screenWidth + 5 * rem} ${screenHeight + 2.5 * rem}`;
   return (
     <>
-      <figure
+      <svg
         ref={props.refFar}
         className={clsx(
           "fn-irasutoya-like-grass-far",
@@ -192,59 +192,58 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
           props.className
         )}
         style={style}
+        viewBox={viewBox}
       >
-        <svg className="w-full h-full" viewBox={viewBox}>
-          <defs>
-            <RoughEdge
-              id="roughEdge2"
-              seed={p.roughEdgeSeed2}
-              baseFrequency={0.05}
-              numOctaves={1}
-              scale={3}
-            />
-            <RandomCurve
-              id="randomCurve2"
-              seed={p.randomCurveSeed2}
-              baseFrequency={0.08 / rem}
-              numOctaves={1}
-              scale={5 * rem}
-            />
-            <PaperTexture
-              id="paperTexture2"
-              seed={p.paperTextureSeed}
-              alphaLight={0.15}
-              alphaDark={0.03}
-              baseFrequency={0.5}
-              numOctaves={1}
-            />
-          </defs>
+        <defs>
+          <RoughEdge
+            id="roughEdge2"
+            seed={p.roughEdgeSeed2}
+            baseFrequency={0.05}
+            numOctaves={1}
+            scale={3}
+          />
+          <RandomCurve
+            id="randomCurve2"
+            seed={p.randomCurveSeed2}
+            baseFrequency={0.08 / rem}
+            numOctaves={1}
+            scale={5 * rem}
+          />
+          <PaperTexture
+            id="paperTexture2"
+            seed={p.paperTextureSeed}
+            alphaLight={0.15}
+            alphaDark={0.03}
+            baseFrequency={0.5}
+            numOctaves={1}
+          />
+        </defs>
 
-          <g filter="url(#paperTexture2)">
-            <g filter="url(#roughEdge2)">
-              <g filter="url(#randomCurve2)">
-                {/* Firefoxでfilterの適用範囲が正しくならないバグがあるので、
+        <g filter="url(#paperTexture2)">
+          <g filter="url(#roughEdge2)">
+            <g filter="url(#randomCurve2)">
+              {/* Firefoxでfilterの適用範囲が正しくならないバグがあるので、
               透明なrectを追加して強制的に範囲を広げる */}
-                <rect
-                  x="0"
-                  y={screenHeight - props.height - 2.5 * rem}
-                  width="100%"
-                  height={5 * rem}
-                  className="dummy"
-                  fill="transparent"
-                />
-                <rect
-                  x="0"
-                  y={screenHeight - props.height}
-                  width="100%"
-                  height={2.5 * rem}
-                  /*fill={in irasutoya-like.css}*/
-                />
-              </g>
+              <rect
+                x="0"
+                y={screenHeight - props.height - 2.5 * rem}
+                width="100%"
+                height={5 * rem}
+                className="dummy"
+                fill="transparent"
+              />
+              <rect
+                x="0"
+                y={screenHeight - props.height}
+                width="100%"
+                height={2.5 * rem}
+                /*fill={in irasutoya-like.css}*/
+              />
             </g>
           </g>
-        </svg>
-      </figure>
-      <figure
+        </g>
+      </svg>
+      <svg
         ref={props.refNear}
         className={clsx(
           "fn-irasutoya-like-grass-near",
@@ -252,92 +251,91 @@ export const IrasutoyaLikeGrassInner = memo(function IrasutoyaLikeGrassInner(
           props.className
         )}
         style={style}
+        viewBox={viewBox}
       >
-        <svg className="w-full h-full" viewBox={viewBox}>
-          <defs>
-            <pattern
-              id="grassPattern"
-              x="0"
-              y={screenHeight - props.height + 0.5 * rem}
-              width={cellWidth * patternCols * rem}
-              height={cellHeight * patternRows * rem}
-              patternUnits="userSpaceOnUse"
-            >
-              <g /*fill={in irasutoya-like.css}*/ fillOpacity="0.3">
-                {p.grassTufts.map((tuft, index) => (
-                  <rect
-                    key={index}
-                    x={tuft.x * rem}
-                    y={tuft.y * rem}
-                    width={tuft.w * rem}
-                    height={tuft.h * rem}
-                    rx={tuft.rx * rem}
-                    ry={tuft.ry * rem}
-                  />
-                ))}
-              </g>
-            </pattern>
-
-            <RoughEdge
-              id="roughEdge"
-              seed={p.roughEdgeSeed1}
-              baseFrequency={0.1}
-              numOctaves={3}
-              scale={5}
-            />
-            <RandomCurve
-              id="randomCurve"
-              seed={p.randomCurveSeed1}
-              baseFrequency={0.05 / rem}
-              numOctaves={1}
-              scale={2 * rem}
-            />
-            <PaperTexture
-              id="paperTexture"
-              seed={p.paperTextureSeed}
-              alphaLight={0.2}
-              alphaDark={0.05}
-              baseFrequency={0.5}
-              numOctaves={1}
-            />
-
-            <linearGradient id="grassGradient" gradientTransform="rotate(90)">
-              <stop offset="0%" />
-              <stop offset="50%" />
-              <stop offset="100%" />
-            </linearGradient>
-          </defs>
-
-          <g filter="url(#paperTexture)">
-            <g filter="url(#roughEdge)">
-              <g filter="url(#randomCurve)">
+        <defs>
+          <pattern
+            id="grassPattern"
+            x="0"
+            y={screenHeight - props.height + 0.5 * rem}
+            width={cellWidth * patternCols * rem}
+            height={cellHeight * patternRows * rem}
+            patternUnits="userSpaceOnUse"
+          >
+            <g /*fill={in irasutoya-like.css}*/ fillOpacity="0.3">
+              {p.grassTufts.map((tuft, index) => (
                 <rect
-                  x="0"
-                  y={screenHeight - props.height - 2.5 * rem}
-                  width="100%"
-                  height={5 * rem}
-                  className="dummy"
-                  fill="transparent"
+                  key={index}
+                  x={tuft.x * rem}
+                  y={tuft.y * rem}
+                  width={tuft.w * rem}
+                  height={tuft.h * rem}
+                  rx={tuft.rx * rem}
+                  ry={tuft.ry * rem}
                 />
-                <rect
-                  x="0"
-                  y={screenHeight - props.height}
-                  width="100%"
-                  height={props.height + 2.5 * rem}
-                  fill="url(#grassGradient)"
-                />
-              </g>
+              ))}
             </g>
-            <rect
-              x="0"
-              y={screenHeight - props.height + 0.5 * rem}
-              width="100%"
-              height={props.height + 2 * rem}
-              fill="url(#grassPattern)"
-            />
+          </pattern>
+
+          <RoughEdge
+            id="roughEdge"
+            seed={p.roughEdgeSeed1}
+            baseFrequency={0.1}
+            numOctaves={3}
+            scale={5}
+          />
+          <RandomCurve
+            id="randomCurve"
+            seed={p.randomCurveSeed1}
+            baseFrequency={0.05 / rem}
+            numOctaves={1}
+            scale={2 * rem}
+          />
+          <PaperTexture
+            id="paperTexture"
+            seed={p.paperTextureSeed}
+            alphaLight={0.2}
+            alphaDark={0.05}
+            baseFrequency={0.5}
+            numOctaves={1}
+          />
+
+          <linearGradient id="grassGradient" gradientTransform="rotate(90)">
+            <stop offset="0%" />
+            <stop offset="50%" />
+            <stop offset="100%" />
+          </linearGradient>
+        </defs>
+
+        <g filter="url(#paperTexture)">
+          <g filter="url(#roughEdge)">
+            <g filter="url(#randomCurve)">
+              <rect
+                x="0"
+                y={screenHeight - props.height - 2.5 * rem}
+                width="100%"
+                height={5 * rem}
+                className="dummy"
+                fill="transparent"
+              />
+              <rect
+                x="0"
+                y={screenHeight - props.height}
+                width="100%"
+                height={props.height + 2.5 * rem}
+                fill="url(#grassGradient)"
+              />
+            </g>
           </g>
-        </svg>
-      </figure>
+          <rect
+            x="0"
+            y={screenHeight - props.height + 0.5 * rem}
+            width="100%"
+            height={props.height + 2 * rem}
+            fill="url(#grassPattern)"
+          />
+        </g>
+      </svg>
     </>
   );
 });
