@@ -165,7 +165,6 @@ export function DemoDetail(
       <ChartListItem
         className={colorThief.boxStyle}
         style={{ color: colorThief.currentColor }}
-        imgRef={colorThief.imgRef}
         cid={props.cid ?? ""}
         brief={brief}
         href={`/share/${props.cid}`}
@@ -175,6 +174,14 @@ export function DemoDetail(
         big
         noDefaultColor
       />
+      {brief?.ytId && (
+        <img
+          ref={colorThief.imgRef}
+          className="hidden"
+          src={`https://i.ytimg.com/vi/${brief?.ytId}/mqdefault.jpg`}
+          crossOrigin="anonymous"
+        />
+      )}
     </ul>
   );
 }

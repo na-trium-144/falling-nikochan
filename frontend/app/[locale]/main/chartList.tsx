@@ -449,7 +449,6 @@ export function ChartList(props: Props) {
 interface CProps {
   className?: string;
   style?: object;
-  imgRef?: Ref<HTMLImageElement>;
   cid: string;
   updatedAt?: number;
   brief?: ChartBrief;
@@ -515,7 +514,7 @@ export function ChartListItem(props: CProps) {
               <span className="fn-glass-1" />
               <span className="fn-glass-2" />
               <ButtonHighlight />
-              <ChartListItemChildren {...props} imgRef={undefined} />
+              <ChartListItemChildren {...props} />
             </a>
           )}
         </>
@@ -575,8 +574,6 @@ function ChartListItemChildren(props: CProps) {
         <img
           className="fn-thumbnail"
           src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
-          ref={props.imgRef}
-          crossOrigin="anonymous"
         />
       ) : (
         <div className="fn-thumbnail" />
