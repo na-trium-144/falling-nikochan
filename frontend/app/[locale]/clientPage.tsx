@@ -173,7 +173,11 @@ export default function TopPage(props: Props) {
           <section className="w-full max-w-main flex flex-col items-center justify-center text-center pl-12 gap-12">
             <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
             <p className="text-2xl">{t("description")}</p>
-            <Link href={`/${locale}/main/play`} className="fn-button fn-cta">
+            <Link
+              href={`/${locale}/main/play`}
+              className="fn-button fn-cta"
+              prefetch={process.env.PREFETCH as "auto"}
+            >
               <span className="fn-glass-1" />
               <span className="fn-glass-2" />
               <ButtonHighlight />
@@ -292,13 +296,21 @@ export function Features({ locale }: { locale: string }) {
             <p>{t("howToPlay.content5")}</p>
           </div>
           <div className="flex items-baseline gap-3">
-            <Link href={`/${locale}/main/play`} className="fn-button fn-cta2">
+            <Link
+              href={`/${locale}/main/play`}
+              className="fn-button fn-cta2"
+              prefetch={process.env.PREFETCH as "auto"}
+            >
               <span className="fn-glass-1" />
               <span className="fn-glass-2" />
               <ButtonHighlight />
               {t("playNow")}
             </Link>
-            <Link href={`/${locale}/main/about`} className="fn-link-3">
+            <Link
+              href={`/${locale}/main/about`}
+              className="fn-link-3"
+              prefetch={process.env.PREFETCH as "auto"}
+            >
               {t("howToPlay.about")}
               <ArrowRight
                 className="inline-block align-middle ml-1"
@@ -336,7 +348,11 @@ export function Features({ locale }: { locale: string }) {
               })}
             </p>
           </div>
-          <Link href={`/${locale}/main/edit`} className="fn-button fn-cta2">
+          <Link
+            href={`/${locale}/main/edit`}
+            className="fn-button fn-cta2"
+            prefetch={process.env.PREFETCH as "auto"}
+          >
             <span className="fn-glass-1" />
             <span className="fn-glass-2" />
             <ButtonHighlight />
@@ -369,7 +385,11 @@ export function PoliciesAndLinks({
             <li>{t("policies.content2")}</li>
             <li>{t("policies.content3")}</li>
           </ul>
-          <Link href={`/${locale}/main/policies`} className="fn-link-3">
+          <Link
+            href={`/${locale}/main/policies`}
+            className="fn-link-3"
+            prefetch={process.env.PREFETCH as "auto"}
+          >
             {t("policies.title")}
             <ArrowRight
               className="inline-block align-middle ml-1"
