@@ -32,6 +32,19 @@
     }
   }
 
+  .fn-pc-header {
+    @apply flex items-center gap-3 h-pc-header;
+    @apply w-full;
+
+    > nav {
+      @apply flex-none flex flex-row gap-3 text-lg;
+    }
+  }
+  .fn-pc-header2 {
+    @apply flex items-center gap-3 h-pc-header;
+    @apply justify-end pr-6 pl-3 z-header2;
+  }
+
   .fn-pwa-install.fn-box {
     @apply fixed z-pwa-install bottom-(--container-mobile-footer) translate-y-1 inset-x-0;
     @apply w-max max-w-full mx-auto shadow-modal;
@@ -44,7 +57,7 @@
 
     > h1 {
       @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
-      -webkit-text-stroke: 0.02em currentColor;
+      @apply semibold-by-stroke;
     }
     > img {
       /* 他のnikochanはopacity-70だが、ここだけちがう */
@@ -82,11 +95,6 @@
     }
   }
 
-  .fn-main-nav-item {
-    @apply text-center rounded-2xl py-3 pl-2 pr-2;
-    @apply fg-bright;
-  }
-
   .fn-sect {
     @apply mb-3;
     @apply w-full;
@@ -113,6 +121,11 @@
     > h3 {
       @apply mb-2;
       @apply text-xl font-semibold font-title;
+      @apply fg-bright;
+    }
+    > h4 {
+      @apply mb-2;
+      @apply text-lg font-medium font-title;
       @apply fg-bright;
     }
     > ul {

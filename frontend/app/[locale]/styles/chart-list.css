@@ -29,6 +29,23 @@
       }
     }
 
+    &.fn-cl-big {
+      --item-min-width: 21.5rem;
+      --item-max-width: 21.5rem;
+      --item-gap: 0.5rem;
+      --item-height: 18.5rem;
+
+      .fn-cl-item {
+        @apply rounded-sq-xl!;
+      }
+      .fn-flat-button {
+        @apply flex-col! items-stretch! p-3!;
+      }
+      .fn-thumbnail {
+        @apply h-45!;
+      }
+    }
+
     grid-template-columns: repeat(
       auto-fill,
       minmax(min(var(--item-min-width), 100%), 1fr)
@@ -38,10 +55,14 @@
 
     .fn-cl-item {
       @apply rounded-md;
-      @apply bg-sky-400/10 dark:bg-orange-700/10;
       @apply w-full mx-auto h-max;
       max-width: var(--item-max-width);
       /*min-height: var(--item-height);*/
+
+      &:has(.fn-sky),
+      &.fn-cl-empty {
+        @apply bg-sky-400/10 dark:bg-orange-700/10;
+      }
 
       &.fn-cl-empty {
         height: var(--item-height);
@@ -66,6 +87,7 @@
 
         > .fn-cl-content {
           @apply flex-1 min-w-0 flex flex-col items-start justify-center;
+          @apply fg-base; /* .fn-flat-button.fn-color-thief の場合に文字色を元に戻す */
 
           .fn-cl-clip {
             /* clipとellipsisを適用する */

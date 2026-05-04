@@ -178,6 +178,16 @@ export function useOSDetector() {
   }, []);
   return os;
 }
+export function detectSafari() {
+  return detectOS() === "ios" || navigator.vendor.includes("Apple");
+}
+export function useSafariDetector() {
+  const [isSafari, setIsSafari] = useState<boolean | undefined>(undefined);
+  useEffect(() => {
+    setIsSafari(detectSafari());
+  }, []);
+  return isSafari;
+}
 
 interface InitAssetsState {
   type?: "initAssets";

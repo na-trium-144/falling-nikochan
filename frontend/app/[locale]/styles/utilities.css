@@ -27,6 +27,9 @@
 @utility bold-by-stroke {
   -webkit-text-stroke: 0.03em currentColor;
 }
+@utility semibold-by-stroke {
+  -webkit-text-stroke: 0.02em currentColor;
+}
 
 @utility fg-base {
   @apply text-fg-base dark:text-fg-base-dark;

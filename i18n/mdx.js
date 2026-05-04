@@ -4,6 +4,9 @@ export async function importPoliciesMDX(locale) {
 export async function importChangeLogMDX(locale) {
   return (await import(`./${locale}/changelog.mdx`)).default;
 }
+export async function importAboutMDX(locale) {
+  return (await import(`./${locale}/about.mdx`)).default;
+}
 export async function importGuideMDX(locale) {
   return Promise.all(
     [

@@ -2,173 +2,232 @@
 
 import clsx from "clsx/lite";
 import Link from "next/link";
-import { TitleAsLink } from "./common/titleLogo.js";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
-import { PWAInstallMain, requestReview } from "./common/pwaInstall.js";
-import {
-  MobileFooter,
-  PCFooter,
-  pcTabTitleKeys,
-  tabURLs,
-} from "./common/footer.js";
-import { useRouter } from "next/navigation";
+import { PWAInstallMain, useSafariDetector } from "./common/pwaInstall.js";
+import { MobileFooter } from "./common/footer.js";
 import { useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
-import Input from "./common/input.jsx";
-import { ChartBrief, CidSchema } from "@falling-nikochan/chart";
-import { SlimeSVG } from "./common/slime.jsx";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SmallDomainShare } from "./common/small.jsx";
-import { fetchBrief } from "./common/briefCache.js";
-import * as v from "valibot";
 import { ChartList } from "./main/chartList.jsx";
-import { FestivalLink, useFestival } from "./common/festival.jsx";
+import { FesData, FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
-import { useDelayedDisplayState } from "./common/delayedDisplayState.js";
-import { AboutModal } from "./common/aboutModal.jsx";
 import { ButtonHighlight } from "./common/button.jsx";
-import { AboutDescription } from "./main/main.jsx";
+import Youtube from "@icon-park/react/lib/icons/Youtube.js";
+import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
+import FormOne from "@icon-park/react/lib/icons/FormOne.js";
+import { ExternalLink } from "./common/extLink.js";
+import { XLogo } from "./common/x.js";
+import Github from "@icon-park/react/lib/icons/Github.js";
+import Code from "@icon-park/react/lib/icons/Code.js";
+import Mail from "@icon-park/react/lib/icons/Mail.js";
+import { useTheme } from "./common/theme.js";
+import { PCHeader2 } from "./common/header.js";
+import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
+import { useDisplayMode } from "./scale.js";
+import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 
 interface Props {
   locale: string;
 }
 export default function TopPage(props: Props) {
-  const router = useRouter();
   const t = useTranslations("main");
-  const [menuMove, menuMoveAnim, setMenuMove] = useDelayedDisplayState(200);
-  const menuMoveAnimClass =
-    "min-h-0 shrink-2 transition-opacity duration-200 ease-linear " +
-    (menuMoveAnim ? "opacity-0 " : "opacity-100 ");
   const { locale } = props;
   const { openModal, openShareInternal } = useSharePageModal();
-  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
-  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
-  const setAboutPageIndex = useCallback(
-    (i: number | null) => {
-      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
-    },
-    [setAboutOpen_]
-  );
   const fes = useFestival();
 
+  const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
+  const isMobilePlay = screenWidth < screenHeight;
+  const isSafari = useSafariDetector();
+  const grassRefNear = useRef<HTMLDivElement | SVGSVGElement>(null);
+  const grassRefFar = useRef<HTMLDivElement | SVGSVGElement>(null);
+  const grassHeight =
+    (isMobilePlay
+      ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+      : 0.1 * screenHeight) +
+    1 * rem;
+  const [initAnim, setInitAnim] = useState<boolean>(false);
+  const [demoVisible, setDemoVisible] = useState<boolean>(false);
+  const [demoChart, setDemoChart] = useState<DemoChart>();
+  useEffect(() => {
+    if (isSafari !== undefined) {
+      setTimeout(
+        () =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              setInitAnim(true);
+              setDemoChart(
+                demoCharts[Math.floor(demoCharts.length * Math.random())]
+              );
+            })
+          ),
+        100
+      );
+    }
+  }, [isSafari]);
+  useLayoutEffect(() => {
+    if (isSafari !== undefined) {
+      let req: ReturnType<typeof requestAnimationFrame> | null = null;
+      const update = () => {
+        for (const ref of [grassRefNear, grassRefFar]) {
+          if (ref.current) {
+            if (isSafari === true) {
+              ref.current.scrollTop =
+                0.3 * window.innerHeight - Math.max(0, window.scrollY / 2);
+            } else {
+              ref.current.style.bottom = `-${2.5 * rem + Math.max(0, window.scrollY / 2)}px`;
+            }
+          }
+        }
+        setDemoVisible(window.scrollY < window.innerHeight);
+        req = null;
+      };
+      const onScroll = () => {
+        if (req === null) {
+          req = requestAnimationFrame(update);
+        }
+      };
+      update();
+      window.addEventListener("scroll", onScroll);
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        if (req !== null) {
+          cancelAnimationFrame(req);
+        }
+      };
+    }
+    // initAnimがtrueになる瞬間にも再実行する必要がある
+  }, [isSafari, initAnim, rem]);
+
   return (
-    <main className="w-full h-full overflow-x-clip overflow-y-auto">
-      {aboutPageIndex !== null && aboutOpen ? (
-        <AboutModal
-          aboutAnim={aboutAnim}
-          aboutPageIndex={aboutPageIndex}
-          setAboutPageIndex={setAboutPageIndex}
-          locale={props.locale}
+    <main
+      className={clsx(
+        "fn-body-scrollable",
+        "flex flex-col items-center",
+        "relative"
+      )}
+    >
+      <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
+
+      {/*
+      safariでは高さ130vhのdiv要素で囲い100vhのdiv要素の中でそれをスクロールすることで動かすのが一番滑らかに動く。
+      しかしこのアプローチはchromeで重く、firefoxでsvgが描画されなくなるバグがある。
+      chrome,firefoxではsvgのbottomの値を書き換えて動かす。これはsafariだと重くて動かない
+      */}
+      {isSafari === true ? (
+        <>
+          <div
+            ref={(node) => {
+              grassRefFar.current = node;
+            }}
+            className="fixed inset-0 overflow-hidden pointer-events-none z-irasutoya-like-grass-far"
+          >
+            <figure className="relative w-full h-[130vh]">
+              <IrasutoyaLikeGrass
+                only="far"
+                className={clsx(
+                  "absolute",
+                  "transition-transform duration-500 ease-out",
+                  initAnim ? "" : "translate-y-[30vh] opacity-0"
+                )}
+                height={grassHeight}
+              />
+            </figure>
+          </div>
+          <div
+            ref={(node) => {
+              grassRefNear.current = node;
+            }}
+            className="fixed inset-0 overflow-hidden pointer-events-none z-irasutoya-like-grass-near"
+          >
+            <figure className="relative w-full h-[130vh]">
+              <IrasutoyaLikeGrass
+                only="near"
+                className={clsx(
+                  "absolute",
+                  "transition-transform duration-500 ease-out",
+                  initAnim ? "" : "translate-y-[30vh] opacity-0"
+                )}
+                height={grassHeight}
+              />
+            </figure>
+          </div>
+        </>
+      ) : isSafari === false ? (
+        <IrasutoyaLikeGrass
+          refNear={(node) => {
+            grassRefNear.current = node;
+          }}
+          refFar={(node) => {
+            grassRefFar.current = node;
+          }}
+          className={clsx(
+            "transition-transform duration-500 ease-out",
+            initAnim ? "" : "translate-y-[30vh] opacity-0"
+          )}
+          height={grassHeight}
         />
       ) : null}
+
       <div
-        className={clsx(
-          "flex flex-col w-full min-h-full h-max items-center",
-          menuMove &&
-            clsx(
-              "transition-[max-height] duration-200 ease-out",
-              menuMoveAnim ? "max-h-full" : "max-h-max"
-            )
-        )}
+        className="w-full h-screen flex items-center justify-center"
+        style={{
+          paddingBottom:
+            (isMobilePlay
+              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+              : 0.1 * screenHeight) +
+            1 * rem,
+        }}
       >
-        <TitleAsLink className="grow-3 shrink-0" locale={locale} />
-        <div className="basis-0 flex-1 " />
-        <AboutDescription
-          className="my-2 px-6"
-          locale={locale}
-          onClickAbout={() => setAboutPageIndex(1)}
-        />
-        <FestivalLink {...fes} className="grow-0 mb-3 px-6 text-center " />
-        <div className={clsx("basis-auto grow-2", menuMoveAnimClass)}>
-          <RedirectedWarning />
-          <PWAInstallMain />
-        </div>
-        <section
-          className={clsx(
-            "fn-sect text-center",
-            "basis-auto grow-1 px-6",
-            menuMoveAnimClass
-          )}
-        >
-          <InputCId
-            openModal={openModal}
-            openShareInternal={openShareInternal}
-          />
-        </section>
-
-        <section
-          className={clsx(
-            "fn-sect text-center",
-            "basis-auto grow-1 px-6",
-            menuMoveAnimClass
-          )}
-        >
-          <h3 className="fn-heading-sect">{t("play.recent")}</h3>
-          <ChartList
-            type="recent"
-            creator
-            href={(cid) => `/share/${cid}`}
-            onClick={openModal}
-            onClickMobile={openShareInternal}
-            showLoading
-            moreHref={`/${locale}/main/recent`}
-            badge
-            fixedRows
-            small
-          />
-        </section>
-
-        <div
-          className={clsx(
-            "shrink-1 h-dvh transition-all duration-200 ease-in",
-            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
-          )}
-        />
-        <nav
-          className={clsx(
-            "shrink-0 basis-auto grow-3",
-            "no-mobile flex",
-            "flex-col justify-center w-main-nav",
-            "transition ease-out duration-200"
-          )}
-          style={{
-            transform: menuMove
-              ? // 挿入されるBoxのサイズは (w-main) or (100% - w-main-nav - p-6)
-                "translateX(max(calc(var(--container-main) / -2), calc((100vw - var(--container-main-nav) - var(--spacing) * 12) / -2)))"
-              : undefined,
-          }}
-        >
-          {pcTabTitleKeys.map((key, i) => (
-            <Link
-              key={i}
-              href={`/${locale}${tabURLs[key]}`}
-              className={clsx("fn-main-nav-item fn-flat-button fn-sky")}
-              prefetch={process.env.PREFETCH as "auto"}
-              onClick={(e) => {
-                requestReview();
-                setMenuMove(true);
-                setTimeout(() => {
-                  router.push(`/${locale}${tabURLs[key]}`);
-                }, 150);
-                e.preventDefault();
-              }}
-            >
+        <div className="basis-main min-w-0 h-full flex-1 flex items-center justify-end relative">
+          <section className="w-full max-w-main flex flex-col items-center justify-center text-center pl-12 gap-12">
+            <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
+            <p className="text-2xl">{t("description")}</p>
+            <Link href={`/${locale}/main/play`} className="fn-button fn-cta">
               <span className="fn-glass-1" />
               <span className="fn-glass-2" />
               <ButtonHighlight />
-              {t(key + ".title")}
+              {t("playNow")}
             </Link>
-          ))}
-        </nav>
-        <div
-          className={clsx(
-            "shrink-1 h-dvh transition-all duration-200 ease-in",
-            menuMoveAnim ? "max-h-[50vh]" : "max-h-0"
-          )}
-        />
-
-        <PCFooter locale={locale} />
-        <div className="flex-none basis-mobile-footer no-pc" />
+          </section>
+          <TopDemo {...demoChart} visible={demoVisible} />
+        </div>
+        <aside className="grow shrink-0 grid-centering px-9">
+          <DemoDetail
+            {...demoChart}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+          />
+        </aside>
       </div>
+
+      <FestivalLink {...fes} className="my-2 px-6 text-center " />
+      <RedirectedWarning />
+      <PWAInstallMain />
+
+      <section className="w-full max-w-main text-center px-6 mb-12">
+        <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
+        {/*TODO: カードの形を変える*/}
+        <ChartList
+          type="popular"
+          creator
+          href={(cid) => `/share/${cid}`}
+          onClick={openModal}
+          onClickMobile={openShareInternal}
+          showLoading
+          moreHref={`/${locale}/main/recent`}
+          badge
+          fixedRows={3}
+          big
+        />
+      </section>
+
+      <Features locale={locale} />
+      <div className="w-full max-w-main">
+        <hr className="h-px w-3/4 my-12 mx-auto border-current/50" />
+      </div>
+      <PoliciesAndLinks locale={locale} fes={fes} />
+
+      <div className="flex-none basis-mobile-footer no-pc" />
       <MobileFooter
         className="fixed bottom-0"
         blurBg
@@ -179,64 +238,211 @@ export default function TopPage(props: Props) {
   );
 }
 
-function InputCId(props: {
-  openModal: (cid: string, brief?: ChartBrief) => void;
-  openShareInternal: (cid: string, brief?: ChartBrief) => void;
-}) {
+function DeferredEMail() {
+  const [mailAddress, setMailAddress] = useState<string>("");
+  const deferShowMail = () =>
+    setMailAddress(atob("bmlrb2NoYW5hYWExNDRAZ21haWwuY29t"));
+  return (
+    <span onPointerEnter={deferShowMail}>
+      <Mail className="inline-block align-middle mr-1" />
+      {mailAddress ? (
+        <ExternalLink href={"mailto:" + mailAddress}>
+          {mailAddress}
+        </ExternalLink>
+      ) : (
+        /*スパム対策でダミーのリンクと画像形式のメールアドレス*/
+        <ExternalLink href="">
+          <EMailImg />
+        </ExternalLink>
+      )}
+    </span>
+  );
+}
+
+function EMailImg() {
+  const theme = useTheme();
+  // メールアドレスを48pxのSVG画像にしたものを1/4にスケールして表示
+  // なぜか *0.75 しないとサイズが合わない inkscapeの1pxとブラウザの1pxは違う?
+  return (
+    <span
+      className="inline-block align-middle origin-top-left "
+      style={{ height: (69.68 / 48) * 0.75 + "rem" }}
+    >
+      <svg height="100%" viewBox="0 0 241.18156 18.440395">
+        <defs id="defs1" />
+        <g id="layer1" transform="translate(-49.20535,-109.45489)">
+          <path
+            d="m 50.424549,115.22915 -1.2192,-0.3048 v -0.9144 l 2.421467,-0.3048 h 0.0508 l 0.3556,0.3048 v 0.7112 l -0.01693,0.4064 q 0.6096,-0.54187 1.608667,-0.98214 0.999067,-0.44026 1.913467,-0.44026 1.066799,0 1.642533,0.4064 0.592666,0.4064 0.829733,1.25306 0.237067,0.82974 0.237067,2.25214 v 4.74133 l 1.185333,0.11853 v 0.84667 h -4.0132 v -0.82973 l 1.049867,-0.13547 v -4.75827 q 0,-0.99906 -0.135467,-1.55786 -0.135467,-0.57574 -0.508,-0.84667 -0.372533,-0.28787 -1.083733,-0.28787 -0.6096,0 -1.303867,0.3048 -0.694266,0.3048 -1.236133,0.7112 v 6.41774 l 1.151467,0.1524 v 0.82973 h -3.996267 v -0.82973 l 1.0668,-0.1524 z m 12.225858,-2.9972 q -0.541866,0 -0.8128,-0.3048 -0.270933,-0.3048 -0.270933,-0.77894 0,-0.54186 0.321733,-0.89746 0.338667,-0.3556 0.9144,-0.3556 0.575734,0 0.846667,0.3048 0.270933,0.3048 0.270933,0.77893 0,0.57573 -0.338666,0.9144 -0.321734,0.33867 -0.9144,0.33867 z m -0.677333,2.9972 -1.286933,-0.3048 v -0.89747 l 2.624666,-0.32173 h 0.03387 l 0.389467,0.3048 v 8.34813 l 1.354666,0.13547 v 0.82973 h -4.487333 v -0.82973 l 1.3716,-0.1524 z m 5.21547,-4.53814 -1.3208,-0.18626 v -0.72814 l 2.6924,-0.32173 h 0.01693 l 0.372534,0.254 v 8.2804 l -0.03387,0.99907 3.9116,-4.04707 -1.27,-0.23707 v -0.77893 h 4.097866 v 0.77893 l -1.337733,0.23707 -2.4892,2.42147 3.217333,4.99533 1.049867,0.13547 v 0.82973 h -4.1148 v -0.82973 l 1.0668,-0.1524 -2.3876,-3.92854 -1.744133,1.7272 0.03387,0.8636 v 1.33774 l 1.202266,0.1524 v 0.82973 h -4.030133 v -0.82973 l 1.0668,-0.1524 z m 9.262539,7.90787 q 0,-1.524 0.626533,-2.6416 0.626534,-1.1176 1.642534,-1.69333 1.032933,-0.59267 2.201333,-0.59267 2.1336,0 3.2004,1.35467 1.083733,1.35466 1.083733,3.556 0,1.54093 -0.626533,2.65853 -0.626534,1.1176 -1.659467,1.69333 -1.016,0.57574 -2.1844,0.57574 -2.1336,0 -3.217333,-1.35467 -1.0668,-1.35467 -1.0668,-3.556 z m 4.385733,3.94547 q 1.1684,0 1.794933,-0.9652 0.626534,-0.9652 0.626534,-2.86174 0,-1.8796 -0.575734,-2.98026 -0.575733,-1.10067 -1.845733,-1.10067 -1.1684,0 -1.811866,0.9652 -0.626534,0.9652 -0.626534,2.86173 0,1.8796 0.592667,2.98027 0.592667,1.10067 1.845733,1.10067 z m 5.706531,-3.8608 q 0,-1.40547 0.541866,-2.54 0.5588,-1.13454 1.6256,-1.79494 1.083733,-0.67733 2.5908,-0.67733 0.728133,0 1.253067,0.13547 0.524933,0.13546 1.253066,0.37253 l -0.06773,2.60773 h -1.100667 l -0.372533,-1.7272 q -0.1016,-0.47413 -1.286933,-0.47413 -1.185334,0 -1.8796,0.9652 -0.677333,0.94827 -0.677333,2.70933 0,1.99814 0.761999,3.048 0.778934,1.03294 2.015067,1.03294 0.7112,0 1.337733,-0.22014 0.643467,-0.22013 1.100667,-0.52493 l 0.321733,0.67733 q -0.4572,0.47414 -1.354666,0.8636 -0.880534,0.37254 -1.794934,0.37254 -1.388533,0 -2.353733,-0.62654 -0.948266,-0.62653 -1.439333,-1.71026 -0.474133,-1.10067 -0.474133,-2.4892 z m 9.804405,-7.99254 -1.4224,-0.18626 v -0.72814 l 2.760134,-0.32173 h 0.03387 l 0.372534,0.254 v 3.92853 l -0.06773,1.43934 q 0.541867,-0.49107 1.490133,-0.93134 0.948267,-0.44026 1.913467,-0.44026 1.0668,0 1.65947,0.4064 0.59267,0.4064 0.82973,1.25306 0.23707,0.82974 0.23707,2.25214 v 4.7244 l 1.18533,0.1524 v 0.82973 h -4.04706 v -0.82973 l 1.10066,-0.1524 v -4.74134 q 0,-0.99906 -0.13546,-1.55786 -0.13547,-0.57574 -0.508,-0.84667 -0.37254,-0.28787 -1.1176,-0.28787 -0.6096,0 -1.303873,0.3048 -0.694267,0.3048 -1.2192,0.7112 v 6.41774 l 1.1684,0.1524 v 0.82973 H 95.33176 v -0.82973 l 1.016,-0.13547 z m 10.244678,10.09227 q 0,-1.59173 1.59173,-2.3368 1.59173,-0.762 4.03013,-0.8128 v -0.47413 q 0,-0.79587 -0.16933,-1.25307 -0.16934,-0.4572 -0.59267,-0.6604 -0.4064,-0.22013 -1.1684,-0.22013 -0.8636,0 -1.55786,0.254 -0.67734,0.23706 -1.35467,0.59266 l -0.42333,-0.88053 q 0.22013,-0.18627 0.8128,-0.49107 0.59266,-0.3048 1.3716,-0.54186 0.77893,-0.23707 1.55786,-0.23707 1.20227,0 1.89653,0.33867 0.7112,0.32173 1.016,1.04986 0.3048,0.72814 0.3048,1.94734 v 5.4356 h 0.99907 v 0.74506 q -0.33867,0.0847 -0.8636,0.16934 -0.508,0.0847 -0.89747,0.0847 -0.47413,0 -0.64346,-0.1524 -0.16934,-0.13546 -0.16934,-0.62653 v -0.5588 q -0.508,0.508 -1.25306,0.93133 -0.72813,0.42334 -1.65947,0.42334 -1.2192,0 -2.032,-0.69427 -0.79586,-0.7112 -0.79586,-2.032 z m 3.556,1.5748 q 0.44026,0 1.01599,-0.27093 0.57574,-0.27094 1.04987,-0.64347 v -2.91253 q -1.84573,0 -2.794,0.57573 -0.93133,0.5588 -0.93133,1.4732 0,0.9144 0.44027,1.35467 0.4572,0.42333 1.2192,0.42333 z m 6.95961,-7.12893 -1.2192,-0.3048 v -0.9144 l 2.42146,-0.3048 h 0.0508 l 0.3556,0.3048 v 0.7112 l -0.0169,0.4064 q 0.6096,-0.54187 1.60867,-0.98214 0.99906,-0.44026 1.91346,-0.44026 1.0668,0 1.64254,0.4064 0.59266,0.4064 0.82973,1.25306 0.23707,0.82974 0.23707,2.25214 v 4.74133 l 1.18533,0.11853 v 0.84667 h -4.0132 v -0.82973 l 1.04987,-0.13547 v -4.75827 q 0,-0.99906 -0.13547,-1.55786 -0.13547,-0.57574 -0.508,-0.84667 -0.37253,-0.28787 -1.08373,-0.28787 -0.6096,0 -1.30387,0.3048 -0.69427,0.3048 -1.23613,0.7112 v 6.41774 l 1.15146,0.1524 v 0.82973 h -3.99626 v -0.82973 l 1.0668,-0.1524 z m 10.22772,5.55413 q 0,-1.59173 1.59174,-2.3368 1.59173,-0.762 4.03013,-0.8128 v -0.47413 q 0,-0.79587 -0.16933,-1.25307 -0.16934,-0.4572 -0.59267,-0.6604 -0.4064,-0.22013 -1.1684,-0.22013 -0.8636,0 -1.55787,0.254 -0.67733,0.23706 -1.35466,0.59266 l -0.42334,-0.88053 q 0.22014,-0.18627 0.8128,-0.49107 0.59267,-0.3048 1.3716,-0.54186 0.77894,-0.23707 1.55787,-0.23707 1.20227,0 1.89653,0.33867 0.7112,0.32173 1.016,1.04986 0.3048,0.72814 0.3048,1.94734 v 5.4356 h 0.99907 v 0.74506 q -0.33867,0.0847 -0.8636,0.16934 -0.508,0.0847 -0.89747,0.0847 -0.47413,0 -0.64346,-0.1524 -0.16934,-0.13546 -0.16934,-0.62653 v -0.5588 q -0.508,0.508 -1.25306,0.93133 -0.72814,0.42334 -1.65947,0.42334 -1.2192,0 -2.032,-0.69427 -0.79587,-0.7112 -0.79587,-2.032 z m 3.556,1.5748 q 0.44027,0 1.016,-0.27093 0.57574,-0.27094 1.04987,-0.64347 v -2.91253 q -1.84573,0 -2.794,0.57573 -0.93133,0.5588 -0.93133,1.4732 0,0.9144 0.44026,1.35467 0.4572,0.42333 1.2192,0.42333 z m 5.94362,-1.5748 q 0,-1.59173 1.59173,-2.3368 1.59173,-0.762 4.03013,-0.8128 v -0.47413 q 0,-0.79587 -0.16933,-1.25307 -0.16933,-0.4572 -0.59267,-0.6604 -0.4064,-0.22013 -1.1684,-0.22013 -0.8636,0 -1.55786,0.254 -0.67734,0.23706 -1.35467,0.59266 l -0.42333,-0.88053 q 0.22013,-0.18627 0.8128,-0.49107 0.59266,-0.3048 1.3716,-0.54186 0.77893,-0.23707 1.55786,-0.23707 1.20227,0 1.89654,0.33867 0.7112,0.32173 1.016,1.04986 0.3048,0.72814 0.3048,1.94734 v 5.4356 h 0.99906 v 0.74506 q -0.33866,0.0847 -0.8636,0.16934 -0.508,0.0847 -0.89746,0.0847 -0.47414,0 -0.64347,-0.1524 -0.16933,-0.13546 -0.16933,-0.62653 v -0.5588 q -0.508,0.508 -1.25307,0.93133 -0.72813,0.42334 -1.65947,0.42334 -1.2192,0 -2.032,-0.69427 -0.79586,-0.7112 -0.79586,-2.032 z m 3.556,1.5748 q 0.44026,0 1.016,-0.27093 0.57573,-0.27094 1.04986,-0.64347 v -2.91253 q -1.84573,0 -2.794,0.57573 -0.93133,0.5588 -0.93133,1.4732 0,0.9144 0.44027,1.35467 0.4572,0.42333 1.2192,0.42333 z m 5.94361,-1.5748 q 0,-1.59173 1.59174,-2.3368 1.59173,-0.762 4.03013,-0.8128 v -0.47413 q 0,-0.79587 -0.16933,-1.25307 -0.16934,-0.4572 -0.59267,-0.6604 -0.4064,-0.22013 -1.1684,-0.22013 -0.8636,0 -1.55787,0.254 -0.67733,0.23706 -1.35466,0.59266 l -0.42334,-0.88053 q 0.22014,-0.18627 0.8128,-0.49107 0.59267,-0.3048 1.3716,-0.54186 0.77894,-0.23707 1.55787,-0.23707 1.20227,0 1.89653,0.33867 0.7112,0.32173 1.016,1.04986 0.3048,0.72814 0.3048,1.94734 v 5.4356 h 0.99907 v 0.74506 q -0.33867,0.0847 -0.8636,0.16934 -0.508,0.0847 -0.89747,0.0847 -0.47413,0 -0.64346,-0.1524 -0.16934,-0.13546 -0.16934,-0.62653 v -0.5588 q -0.508,0.508 -1.25306,0.93133 -0.72814,0.42334 -1.65947,0.42334 -1.2192,0 -2.032,-0.69427 -0.79587,-0.7112 -0.79587,-2.032 z m 3.556,1.5748 q 0.44027,0 1.016,-0.27093 0.57574,-0.27094 1.04987,-0.64347 v -2.91253 q -1.84573,0 -2.794,0.57573 -0.93133,0.5588 -0.93133,1.4732 0,0.9144 0.44026,1.35467 0.4572,0.42333 1.2192,0.42333 z m 8.36508,-7.7724 q -0.3556,0.13547 -1.1176,0.32173 -0.762,0.18627 -1.23613,0.254 l -0.16933,-0.94826 q 0.8636,-0.18627 1.76106,-0.62654 0.9144,-0.44026 1.524,-0.9652 h 0.0169 l 1.03294,0.16934 v 9.5504 l 2.09973,0.1524 v 0.82973 h -6.096 v -0.82973 l 2.1844,-0.1524 z m 10.95588,8.7376 h -5.62187 l -0.44027,-0.762 q 0.99907,-1.89653 2.45534,-5.01227 1.45626,-3.13266 2.60773,-5.7404 h 0.44027 l 1.35466,0.72814 -4.572,8.80533 -0.67733,1.03293 4.45347,-0.23706 0.0677,-3.302 1.43933,-0.11854 v 3.33587 l 2.3876,-0.11853 v 1.38853 h -2.3876 v 2.72627 h -1.50706 z m 10.90505,0 h -5.62187 l -0.44026,-0.762 q 0.99906,-1.89653 2.45533,-5.01227 1.45627,-3.13266 2.60773,-5.7404 h 0.44027 l 1.35467,0.72814 -4.572,8.80533 -0.67734,1.03293 4.45347,-0.23706 0.0677,-3.302 1.43934,-0.11854 v 3.33587 l 2.3876,-0.11853 v 1.38853 h -2.3876 v 2.72627 H 180.117 Z m 5.79118,-2.96333 q 0,-2.86174 1.18533,-5.11387 1.20227,-2.26907 3.2512,-3.52213 2.04893,-1.27 4.50427,-1.27 1.76106,0 3.11573,0.72813 1.3716,0.7112 2.1336,2.11667 0.77893,1.40546 0.77893,3.42053 0,2.0828 -0.82973,3.62373 -0.8128,1.54094 -1.94733,2.35374 -1.13454,0.8128 -1.9812,0.8128 -0.4572,0 -0.82974,-0.38947 -0.37253,-0.4064 -0.38946,-1.08373 -0.0508,-0.8636 0.22013,-2.40454 -0.59267,1.6256 -1.4732,2.77707 -0.88053,1.13453 -1.81187,1.13453 -0.57573,0 -1.1176,-0.4064 -0.54186,-0.4064 -0.88053,-1.1684 -0.32173,-0.77893 -0.32173,-1.79493 0,-1.23613 0.52493,-2.52307 0.54187,-1.30386 1.524,-2.15053 0.98213,-0.8636 2.26907,-0.8636 0.4572,0 0.99906,0.13547 0.5588,0.11853 0.98214,0.3556 0.1524,-0.4572 0.38946,-0.4064 0.3048,0.0847 0.6096,0.2032 l 0.3556,0.11853 q -0.79586,3.72533 -0.89746,5.4864 -0.0169,0.2032 -0.0169,0.54187 0,0.6096 0.1016,0.9144 0.11854,0.3048 0.28787,0.3048 0.67733,0 1.40547,-0.64347 0.72813,-0.6604 1.2192,-1.8288 0.508,-1.18533 0.508,-2.6924 0,-1.96427 -0.762,-3.2004 -0.74507,-1.25307 -1.9812,-1.81187 -1.23614,-0.57573 -2.7432,-0.57573 -1.94734,0 -3.57294,1.0668 -1.6256,1.0668 -2.5908,3.01413 -0.9652,1.94734 -0.9652,4.45347 0,2.0828 0.69427,3.53907 0.7112,1.45626 1.91347,2.20133 1.2192,0.74507 2.76013,0.74507 0.94827,0 1.96427,-0.23707 1.016,-0.23707 1.50706,-0.5588 l 0.28787,0.62653 q -0.6604,0.54187 -1.76107,0.88054 -1.08373,0.33866 -2.286,0.33866 -1.9304,0 -3.36973,-0.89746 -1.4224,-0.88054 -2.20133,-2.52307 -0.762,-1.6256 -0.762,-3.82693 z m 5.11386,-0.59267 q 0,0.89747 0.28787,1.6256 0.28787,0.7112 0.88053,0.7112 0.38947,0 0.88054,-0.52493 0.508,-0.54187 0.98213,-1.4224 0.49107,-0.88054 0.82973,-1.89654 0.38947,-1.1176 0.508,-1.89653 -0.22013,-0.23707 -0.8636,-0.42333 -0.62653,-0.2032 -1.04986,-0.2032 -0.762,0 -1.3208,0.57573 -0.5588,0.57573 -0.84667,1.50707 -0.28787,0.93133 -0.28787,1.94733 z m 16.37452,8.128 q -2.16746,0 -3.1496,-0.69427 -0.9652,-0.67733 -0.9652,-1.8796 0,-0.74506 0.4572,-1.3716 0.47414,-0.62653 1.1176,-0.94826 -0.77893,-0.44027 -0.77893,-1.4224 0,-0.6096 0.3556,-1.15147 0.3556,-0.54187 0.93133,-0.82973 -0.84666,-0.37254 -1.30386,-1.0668 -0.44027,-0.69427 -0.44027,-1.64254 0,-0.98213 0.54187,-1.71026 0.5588,-0.72814 1.45626,-1.1176 0.9144,-0.38947 1.9304,-0.38947 1.71027,0 2.67547,0.7112 0.254,-0.254 0.77893,-0.49107 0.52494,-0.23706 1.1176,-0.23706 h 0.57574 v 1.49013 h -1.86267 q 0.4064,0.62653 0.4064,1.45627 0,0.99906 -0.508,1.778 -0.49107,0.762 -1.38853,1.18533 -0.88054,0.42333 -1.99814,0.42333 -0.72813,0 -1.30386,-0.1524 -0.23707,0.23707 -0.38947,0.52494 -0.1524,0.28786 -0.1524,0.5588 0,0.6096 0.4064,0.84666 0.4064,0.22014 1.45627,0.22014 h 1.91346 q 1.64254,0 2.4384,0.62653 0.79587,0.62653 0.79587,1.778 0,0.9652 -0.69427,1.76107 -0.69426,0.8128 -1.8796,1.27 -1.1684,0.47413 -2.54,0.47413 z m 0.11854,-8.8392 q 1.9304,0 1.9304,-2.286 0,-1.13453 -0.508,-1.65947 -0.49107,-0.54186 -1.49014,-0.54186 -0.93133,0 -1.4732,0.52493 -0.54186,0.508 -0.54186,1.64253 0,1.0668 0.508,1.69334 0.52493,0.62653 1.5748,0.62653 z m 0.0339,7.85707 q 0.82974,0 1.55787,-0.254 0.74507,-0.23707 1.20227,-0.72814 0.4572,-0.47413 0.4572,-1.1176 0,-0.762 -0.4064,-1.1176 -0.4064,-0.33866 -1.5748,-0.33866 H 206.787 q -0.67733,0 -1.0668,-0.0847 -0.69426,0.762 -0.69426,1.71027 0,0.94826 0.57573,1.43933 0.57573,0.49107 1.94733,0.49107 z m 6.06215,-4.4196 1.03294,-0.1524 v -7.112 l -1.2192,-0.3048 v -0.9144 l 2.42146,-0.3048 0.3048,0.22013 0.1016,0.67733 -0.0169,0.54187 q 0.59267,-0.54187 1.60867,-0.98213 1.03293,-0.4572 1.84573,-0.4572 0.9144,0 1.4732,0.3048 0.5588,0.3048 0.84667,0.94826 0.54186,-0.4572 1.50706,-0.84666 0.98214,-0.4064 1.8288,-0.4064 1.04987,0 1.64254,0.4064 0.59266,0.38946 0.82973,1.23613 0.254,0.82973 0.254,2.2352 v 4.75827 l 1.2192,0.1524 v 0.82973 h -4.03013 v -0.82973 l 1.04986,-0.1524 v -4.70747 q 0,-0.98213 -0.1524,-1.55787 -0.13546,-0.59266 -0.54186,-0.88053 -0.38947,-0.28787 -1.13454,-0.28787 -0.5588,0 -1.18533,0.254 -0.62653,0.23707 -1.0668,0.57574 0.1524,0.6604 0.1524,1.8796 v 4.7244 l 1.20227,0.1524 v 0.82973 h -4.09787 v -0.82973 l 1.1176,-0.1524 v -4.74134 q 0,-1.016 -0.13547,-1.5748 -0.11853,-0.5588 -0.47413,-0.82973 -0.3556,-0.28787 -1.08373,-0.28787 -0.6096,0 -1.30387,0.3048 -0.67733,0.3048 -1.18533,0.7112 v 6.41774 l 1.13453,0.1524 v 0.82973 h -3.94547 z m 16.86562,-1.71027 q 0,-1.59173 1.59173,-2.3368 1.59173,-0.762 4.03013,-0.8128 v -0.47413 q 0,-0.79587 -0.16933,-1.25307 -0.16933,-0.4572 -0.59267,-0.6604 -0.4064,-0.22013 -1.1684,-0.22013 -0.8636,0 -1.55786,0.254 -0.67734,0.23706 -1.35467,0.59266 l -0.42333,-0.88053 q 0.22013,-0.18627 0.8128,-0.49107 0.59266,-0.3048 1.3716,-0.54186 0.77893,-0.23707 1.55786,-0.23707 1.20227,0 1.89654,0.33867 0.7112,0.32173 1.016,1.04986 0.3048,0.72814 0.3048,1.94734 v 5.4356 h 0.99906 v 0.74506 q -0.33866,0.0847 -0.8636,0.16934 -0.508,0.0847 -0.89746,0.0847 -0.47414,0 -0.64347,-0.1524 -0.16933,-0.13546 -0.16933,-0.62653 v -0.5588 q -0.508,0.508 -1.25307,0.93133 -0.72813,0.42334 -1.65947,0.42334 -1.2192,0 -2.032,-0.69427 -0.79586,-0.7112 -0.79586,-2.032 z m 3.556,1.5748 q 0.44026,0 1.016,-0.27093 0.57573,-0.27094 1.04986,-0.64347 v -2.91253 q -1.84573,0 -2.794,0.57573 -0.93133,0.5588 -0.93133,1.4732 0,0.9144 0.44027,1.35467 0.4572,0.42333 1.2192,0.42333 z m 7.94173,-10.12613 q -0.54186,0 -0.8128,-0.3048 -0.27093,-0.3048 -0.27093,-0.77894 0,-0.54186 0.32173,-0.89746 0.33867,-0.3556 0.9144,-0.3556 0.57574,0 0.84667,0.3048 0.27093,0.3048 0.27093,0.77893 0,0.57573 -0.33866,0.9144 -0.32174,0.33867 -0.9144,0.33867 z m -0.67733,2.9972 -1.28693,-0.3048 v -0.89747 l 2.62466,-0.32173 h 0.0339 l 0.38947,0.3048 v 8.34813 l 1.35466,0.13547 v 0.82973 h -4.48733 v -0.82973 l 1.3716,-0.1524 z m 5.55414,-4.53814 -1.3716,-0.18626 v -0.72814 l 2.72627,-0.32173 h 0.0339 l 0.37254,0.254 v 12.6492 l 1.43933,0.13547 v 0.82973 h -4.572 v -0.82973 l 1.3716,-0.1524 z m 5.79121,12.8016 q -0.44027,0 -0.762,-0.3048 -0.32173,-0.3048 -0.32173,-0.77893 0,-0.52493 0.37253,-0.88053 0.38947,-0.3556 0.89747,-0.3556 0.52493,0 0.79586,0.32173 0.28787,0.3048 0.28787,0.762 0,0.5588 -0.37253,0.89747 -0.37254,0.33866 -0.89747,0.33866 z m 2.89559,-4.80906 q 0,-1.40547 0.54186,-2.54 0.5588,-1.13454 1.6256,-1.79494 1.08374,-0.67733 2.5908,-0.67733 0.72814,0 1.25307,0.13547 0.52493,0.13546 1.25307,0.37253 l -0.0677,2.60773 h -1.10066 l -0.37254,-1.7272 q -0.1016,-0.47413 -1.28693,-0.47413 -1.18533,0 -1.8796,0.9652 -0.67733,0.94827 -0.67733,2.70933 0,1.99814 0.762,3.048 0.77893,1.03294 2.01506,1.03294 0.7112,0 1.33774,-0.22014 0.64346,-0.22013 1.10066,-0.52493 l 0.32174,0.67733 q -0.4572,0.47414 -1.35467,0.8636 -0.88053,0.37254 -1.79493,0.37254 -1.38854,0 -2.35374,-0.62654 -0.94826,-0.62653 -1.43933,-1.71026 -0.47413,-1.10067 -0.47413,-2.4892 z m 8.89,-0.0847 q 0,-1.524 0.62653,-2.6416 0.62653,-1.1176 1.64253,-1.69333 1.03294,-0.59267 2.20133,-0.59267 2.1336,0 3.2004,1.35467 1.08374,1.35466 1.08374,3.556 0,1.54093 -0.62654,2.65853 -0.62653,1.1176 -1.65946,1.69333 -1.016,0.57574 -2.1844,0.57574 -2.1336,0 -3.21733,-1.35467 -1.0668,-1.35467 -1.0668,-3.556 z m 4.38573,3.94547 q 1.1684,0 1.79493,-0.9652 0.62653,-0.9652 0.62653,-2.86174 0,-1.8796 -0.57573,-2.98026 -0.57573,-1.10067 -1.84573,-1.10067 -1.1684,0 -1.81187,0.9652 -0.62653,0.9652 -0.62653,2.86173 0,1.8796 0.59267,2.98027 0.59266,1.10067 1.84573,1.10067 z m 5.8928,-0.0508 1.03294,-0.1524 v -7.112 l -1.2192,-0.3048 v -0.9144 l 2.42146,-0.3048 0.3048,0.22013 0.1016,0.67733 -0.0169,0.54187 q 0.59267,-0.54187 1.60867,-0.98213 1.03293,-0.4572 1.84573,-0.4572 0.9144,0 1.4732,0.3048 0.5588,0.3048 0.84667,0.94826 0.54186,-0.4572 1.50706,-0.84666 0.98214,-0.4064 1.8288,-0.4064 1.04987,0 1.64254,0.4064 0.59266,0.38946 0.82973,1.23613 0.254,0.82973 0.254,2.2352 v 4.75827 l 1.2192,0.1524 v 0.82973 h -4.03013 v -0.82973 l 1.04986,-0.1524 v -4.70747 q 0,-0.98213 -0.1524,-1.55787 -0.13546,-0.59266 -0.54186,-0.88053 -0.38947,-0.28787 -1.13454,-0.28787 -0.5588,0 -1.18533,0.254 -0.62653,0.23707 -1.0668,0.57574 0.1524,0.6604 0.1524,1.8796 v 4.7244 l 1.20227,0.1524 v 0.82973 h -4.09787 v -0.82973 l 1.1176,-0.1524 v -4.74134 q 0,-1.016 -0.13547,-1.5748 -0.11853,-0.5588 -0.47413,-0.82973 -0.3556,-0.28787 -1.08373,-0.28787 -0.6096,0 -1.30387,0.3048 -0.67733,0.3048 -1.18533,0.7112 v 6.41774 l 1.13453,0.1524 v 0.82973 h -3.94547 z"
+            id="text1"
+            style={{
+              fill: theme.isDark
+                ? "var(--color-blue-500)"
+                : "var(--color-blue-800)", // "fn-link-3"
+            }}
+          />
+        </g>
+      </svg>
+    </span>
+  );
+}
+
+export function Features({ locale }: { locale: string }) {
   const t = useTranslations("main");
-  const te = useTranslations("error");
-  const [cidErrorMsg, setCIdErrorMsg] = useState<string>("");
-  const [cidFetching, setCidFetching] = useState<boolean>(false);
-  const gotoCId = async (cid: string, isMobile: boolean) => {
-    setCIdErrorMsg("");
-    setCidFetching(true);
-    const res = await fetchBrief(cid, true);
-    if (res.ok) {
-      // router.push(`/share/${cid}`);
-      if (isMobile) {
-        props.openShareInternal(cid, res.brief);
-      } else {
-        props.openModal(cid, res.brief);
-      }
-    } else {
-      if (res.is404) {
-        setCIdErrorMsg(te("api.chartIdNotFound"));
-      } else {
-        setCIdErrorMsg(te("unknownApiError"));
-      }
-    }
-    setCidFetching(false);
-  };
   return (
     <>
-      <h3>
-        <span className="fn-heading-sect">{t("inputId")}:</span>
-        <Input
-          className="ml-4 w-20 no-mobile"
-          actualValue=""
-          updateValue={(cid: string) => gotoCId(cid, false)}
-          isValid={(t) => v.safeParse(CidSchema(), t).success}
-          left
-        />
-        <Input
-          className="ml-4 w-20 no-pc"
-          actualValue=""
-          updateValue={(cid: string) => gotoCId(cid, true)}
-          isValid={(t) => v.safeParse(CidSchema(), t).success}
-          left
-        />
-        <span className={clsx(cidFetching ? "inline-block" : "hidden")}>
-          <SlimeSVG />
-          Loading...
-        </span>
-        <span className="ml-1 inline-block">{cidErrorMsg}</span>
-      </h3>
-      <p className="">
-        {t("inputIdDesc")}
-        {t.rich("inputIdDesc2", {
-          url: () => <SmallDomainShare />,
-        })}
-      </p>
+      <section className="w-full max-w-main mb-12 flex">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+          <h2 className="fn-heading-sect text-3xl mb-4">
+            {t("howToPlay.title")}
+          </h2>
+          <div className="mb-4 space-y-2">
+            <p>{t("howToPlay.content1")}</p>
+            <p>{t("howToPlay.content3")}</p>
+            <p>{t("howToPlay.content5")}</p>
+          </div>
+          <div className="flex items-baseline gap-3">
+            <Link href={`/${locale}/main/play`} className="fn-button fn-cta2">
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
+              <ButtonHighlight />
+              {t("playNow")}
+            </Link>
+            <Link href={`/${locale}/main/about`} className="fn-link-3">
+              {t("howToPlay.about")}
+              <ArrowRight
+                className="inline-block align-middle ml-1"
+                theme="filled"
+              />
+            </Link>
+          </div>
+        </div>
+        <div className="basis-2/5 border">イメージ画像</div>
+      </section>
+
+      <section className="w-full max-w-main mb-12 flex flex-row-reverse">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+          <h2 className="fn-heading-sect text-3xl mb-4">
+            {t("howToEdit.title")}
+          </h2>
+          <div className="mb-4 space-y-2">
+            <p>{t("howToEdit.content1")}</p>
+            <p>
+              {t.rich("howToEdit.content2", {
+                youtube: (c) => (
+                  <span className="relative inline-block">
+                    <Youtube
+                      className="absolute left-0.5 bottom-1"
+                      theme="filled"
+                    />
+                    <span className="ml-5 mr-1">{c}</span>
+                  </span>
+                ),
+              })}
+            </p>
+            <p>
+              {t.rich("howToEdit.content5", {
+                url: () => <SmallDomainShare />,
+              })}
+            </p>
+          </div>
+          <Link href={`/${locale}/main/edit`} className="fn-button fn-cta2">
+            <span className="fn-glass-1" />
+            <span className="fn-glass-2" />
+            <ButtonHighlight />
+            {t("editNow")}
+          </Link>
+        </div>
+        <div className="basis-2/5 border">イメージ画像</div>
+      </section>
+    </>
+  );
+}
+
+export function PoliciesAndLinks({
+  locale,
+  fes,
+}: {
+  locale: string;
+  fes?: FesData;
+}) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <section className="w-full max-w-main mb-24 flex flex-row px-12 gap-12">
+        <div className="basis-1/2 flex flex-col items-center justify-center text-center">
+          <h2 className="fn-heading-sect text-2xl mb-3">
+            {t("policies.title")}
+          </h2>
+          <ul className="list-disc ml-6 mb-2 text-left space-y-1">
+            <li>{t("policies.content1")}</li>
+            <li>{t("policies.content2")}</li>
+            <li>{t("policies.content3")}</li>
+          </ul>
+          <Link href={`/${locale}/main/policies`} className="fn-link-3">
+            {t("policies.title")}
+            <ArrowRight
+              className="inline-block align-middle ml-1"
+              theme="filled"
+            />
+          </Link>
+        </div>
+        <div className="basis-1/2 flex flex-col items-center justify-center text-center">
+          <h2 className="fn-heading-sect text-2xl mb-3">{t("links.title")}</h2>
+          <ul className="list-disc ml-6 text-left space-y-1">
+            <li>
+              <FormOne className="inline-block align-middle mr-1" />
+              <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
+                {t("links.contactForm")}
+              </ExternalLink>
+            </li>
+            <li>
+              <DeferredEMail />
+            </li>
+            <li>
+              <Youtube
+                className="inline-block align-middle mr-1"
+                theme="filled"
+              />
+              <ExternalLink href="https://www.youtube.com/@nikochan144">
+                <span className="no-mobile">{t("links.officialChannel")}</span>
+                <span className="no-pc">{t("links.officialChannelShort")}</span>
+              </ExternalLink>
+            </li>
+            <li>
+              <XLogo className="mr-1" />
+              <ExternalLink href="https://twitter.com/nikochan144">
+                <span className="no-mobile">{t("links.officialAccount")}</span>
+                <span className="no-pc">{t("links.officialAccountShort")}</span>
+              </ExternalLink>
+            </li>
+            <li>
+              <Github className="inline-block align-middle mr-1" />
+              <span className="mr-1">GitHub:</span>
+              <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
+                <span className="no-mobile">na-trium-144/</span>
+                <span>falling-nikochan</span>
+              </ExternalLink>
+            </li>
+            <li>
+              <Code className="inline-block align-middle mr-1" />
+              <ExternalLink href="/api" forceColor>
+                <span className="no-mobile">{t("links.apiReference")}</span>
+                <span className="no-pc">{t("links.apiReferenceShort")}</span>
+              </ExternalLink>
+            </li>
+            <li>
+              <ExternalLink href="https://utcode.net">
+                {t("links.aboutUTCode")}
+              </ExternalLink>
+            </li>
+            {fes?.num && (
+              <li>
+                <FestivalLink {...fes} />
+              </li>
+            )}
+          </ul>
+        </div>
+      </section>
     </>
   );
 }
