@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { Fragment, RefObject, useEffect, useRef, useState } from "react";
+import { Fragment, Ref, RefObject, useEffect, useRef, useState } from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import { useStandaloneDetector } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
@@ -83,7 +83,7 @@ interface Props {
   type?: ChartListType;
   briefs?: ChartLineBrief[] | APIError | undefined;
   fetchAll?: boolean;
-  fixedRows?: boolean; // 表示数を6個で固定する
+  fixedRows?: number; // 表示数を固定する
   containerHeight?: number;
   containerRef?: RefObject<HTMLElement | null>;
   creator?: boolean;
@@ -98,6 +98,7 @@ interface Props {
   onMoreClick?: () => void;
   badge?: boolean;
   small?: boolean;
+  big?: boolean;
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
@@ -198,7 +199,7 @@ export function ChartList(props: Props) {
         ulCols
       : undefined;
   // この個数は空でも枠を表示する
-  const fixedRow = props.fixedRows ? 6 : 0;
+  const fixedRow = props.fixedRows ?? 0;
   // 最大で表示する個数
   const maxRow = props.containerHeight ? maxRowPerPage! * pagination : fixedRow;
   const fetchAll = props.fetchAll;
@@ -335,7 +336,11 @@ export function ChartList(props: Props) {
     <div className="relative w-full h-max isolate">
       <ul
         ref={ulSize.ref}
-        className={clsx("fn-chart-list", props.small && "fn-cl-small")}
+        className={clsx(
+          "fn-chart-list",
+          props.small && "fn-cl-small",
+          props.big && "fn-cl-big"
+        )}
       >
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
@@ -372,6 +377,7 @@ export function ChartList(props: Props) {
                 dateDiff={props.dateDiff}
                 badge={props.badge}
                 small={props.small}
+                big={props.big}
               />
             ) : (
               <li key={i} className="fn-cl-item fn-cl-empty" />
@@ -441,6 +447,9 @@ export function ChartList(props: Props) {
 }
 
 interface CProps {
+  className?: string;
+  style?: object;
+  imgRef?: Ref<HTMLImageElement>;
   cid: string;
   updatedAt?: number;
   brief?: ChartBrief;
@@ -453,6 +462,8 @@ interface CProps {
   dateDiff?: boolean;
   badge?: boolean;
   small?: boolean;
+  big?: boolean;
+  noDefaultColor?: boolean;
 }
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
@@ -465,9 +476,12 @@ export function ChartListItem(props: CProps) {
           <a
             href={props.href}
             className={clsx(
-              "fn-flat-button fn-sky",
+              "fn-flat-button",
+              !props.noDefaultColor && "fn-sky",
+              props.className,
               props.onClickMobile && "no-mobile"
             )}
+            style={{ ...props.style }}
             target={props.newTab ? "_blank" : undefined}
             onClick={
               props.onClick
@@ -486,7 +500,13 @@ export function ChartListItem(props: CProps) {
           {props.onClickMobile && (
             <a
               href={props.href}
-              className={clsx("fn-flat-button fn-sky", "no-pc")}
+              className={clsx(
+                "fn-flat-button",
+                !props.noDefaultColor && "fn-sky",
+                props.className,
+                "no-pc"
+              )}
+              style={{ ...props.style }}
               onClick={(e) => {
                 props.onClickMobile!();
                 e.preventDefault();
@@ -495,14 +515,19 @@ export function ChartListItem(props: CProps) {
               <span className="fn-glass-1" />
               <span className="fn-glass-2" />
               <ButtonHighlight />
-              <ChartListItemChildren {...props} />
+              <ChartListItemChildren {...props} imgRef={undefined} />
             </a>
           )}
         </>
       ) : (
         <Link
           href={props.href}
-          className={clsx("fn-flat-button fn-sky")}
+          className={clsx(
+            "fn-flat-button",
+            !props.noDefaultColor && "fn-sky",
+            props.className
+          )}
+          style={{ ...props.style }}
           prefetch={process.env.PREFETCH as "auto"}
         >
           <span className="fn-glass-1" />
@@ -535,22 +560,98 @@ function ChartListItemChildren(props: CProps) {
 
   return (
     <>
-      <LevelBadge
-        className={clsx(!props.small && "no-pc", "absolute z-10 top-1 right-0")}
-        status={status}
-        levels={levelColors}
-        showDot
-      />
+      {!props.big && (
+        <LevelBadge
+          className={clsx(
+            !props.small && "no-pc",
+            "absolute z-10 top-1 right-0"
+          )}
+          status={status}
+          levels={levelColors}
+          showDot
+        />
+      )}
       {props.brief?.ytId ? (
         <img
           className="fn-thumbnail"
           src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
+          ref={props.imgRef}
+          crossOrigin="anonymous"
         />
       ) : (
         <div className="fn-thumbnail" />
       )}
       <div className="fn-cl-content">
-        {props.small ? (
+        {props.big ? (
+          <>
+            <div className="h-4 **:leading-4">
+              <span className="text-xs text-dim">{props.cid}</span>
+              {props.dateDiff && (
+                <DateDiff
+                  className="ml-2 text-xs"
+                  date={props.updatedAt ?? props.brief?.updatedAt ?? 0}
+                />
+              )}
+              {props.original && (
+                <span className="ml-2 text-xs">(オリジナル曲)</span>
+              )}
+            </div>
+            <div className="h-6 **:leading-6 fg-bright">
+              <span className="font-title text-lg font-medium fn-cl-clip">
+                {props.brief?.title}
+              </span>
+            </div>
+            {!props.original && props.brief?.composer && (
+              <div className="h-6 **:leading-6 fg-bright">
+                <span className="text-lg fn-cl-clip font-title">
+                  {props.brief.composer}
+                </span>
+              </div>
+            )}
+            <div className="h-5 **:leading-5">
+              {props.creator && (
+                <span className="flex-1 min-w-0 fn-cl-clip">
+                  <span className="text-xs">{t("chartCreator")}:</span>
+                  <span className="ml-1 font-title text-sm fg-bright">
+                    {props.brief?.chartCreator}
+                  </span>
+                </span>
+              )}
+              {props.badge && (
+                <div
+                  className={clsx(
+                    "flex-none fn-cl-clip mr-2",
+                    props.creator && "min-w-0 max-w-1/2 ml-2"
+                  )}
+                >
+                  {props.brief?.levels
+                    .filter((l) => !l.unlisted)
+                    .map((l, i) => (
+                      <Fragment key={i}>
+                        {i !== 0 && <span className="mx-1 text-sm">/</span>}
+                        {l.name && (
+                          <span className="font-title mr-1">{l.name}</span>
+                        )}
+                        <span className={clsx("fn-level-type", l.type)}>
+                          <span>{l.type}-</span>
+                          <span>{l.difficulty}</span>
+                        </span>
+                        {status[i] && (
+                          <span className="inline-block relative w-4 h-0">
+                            <LevelBadge
+                              className="absolute -bottom-3"
+                              status={[status[i]]}
+                              levels={[levelTypes.indexOf(l.type)]}
+                            />
+                          </span>
+                        )}
+                      </Fragment>
+                    ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : props.small ? (
           <>
             <div className="flex-wrap max-w-full">
               <span className="text-xs/3">ID:</span>
@@ -626,44 +727,49 @@ function ChartListItemChildren(props: CProps) {
                 </span>
               </div>
             )}
-            {props.creator && (
-              <div className="h-5 **:leading-5">
+            <div className="h-5 **:leading-5">
+              {props.creator && (
                 <span className="flex-1 min-w-0 fn-cl-clip">
                   <span className="text-xs">{t("chartCreator")}:</span>
                   <span className="ml-1 font-title text-sm fg-bright">
                     {props.brief?.chartCreator}
                   </span>
                 </span>
-                {props.badge && (
-                  <div className="no-mobile ml-2 flex-none min-w-0 max-w-1/2 fn-cl-clip mr-2">
-                    {props.brief?.levels
-                      .filter((l) => !l.unlisted)
-                      .map((l, i) => (
-                        <Fragment key={i}>
-                          {i !== 0 && <span className="mx-1 text-sm">/</span>}
-                          <span
-                            className={clsx(
-                              `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
-                              "text-base"
-                            )}
-                          >
-                            {l.difficulty}
-                          </span>
-                          {status[i] && (
-                            <span className="inline-block relative w-4 h-0">
-                              <LevelBadge
-                                className="absolute -bottom-3"
-                                status={[status[i]]}
-                                levels={[levelTypes.indexOf(l.type)]}
-                              />
-                            </span>
+              )}
+              {props.badge && (
+                <div
+                  className={clsx(
+                    "no-mobile flex-none fn-cl-clip mr-2",
+                    props.creator && "min-w-0 max-w-1/2 ml-2"
+                  )}
+                >
+                  {props.brief?.levels
+                    .filter((l) => !l.unlisted)
+                    .map((l, i) => (
+                      <Fragment key={i}>
+                        {i !== 0 && <span className="mx-1 text-sm">/</span>}
+                        <span
+                          className={clsx(
+                            `fn-level-col-${"sdm"[levelTypes.indexOf(l.type)]}`,
+                            "text-base"
                           )}
-                        </Fragment>
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
+                        >
+                          {l.difficulty}
+                        </span>
+                        {status[i] && (
+                          <span className="inline-block relative w-4 h-0">
+                            <LevelBadge
+                              className="absolute -bottom-3"
+                              status={[status[i]]}
+                              levels={[levelTypes.indexOf(l.type)]}
+                            />
+                          </span>
+                        )}
+                      </Fragment>
+                    ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

@@ -8,6 +8,7 @@ import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
 import { ButtonHighlight } from "./common/button";
+import { ChartListItem } from "./main/chartList";
 
 export interface DemoChart {
   cid: string;
@@ -144,93 +145,27 @@ export function DemoDetail(
   }, [props.cid, props.lvIndex, brief]);
 
   return (
-    <>
-      <a
-        href={`/share/${props.cid}`}
-        onClick={(e) => {
-          props.onClick(props.cid!, brief);
-          e.preventDefault();
-        }}
-        className={clsx(
-          "no-mobile w-80",
-          "rounded-sq-xl p-3",
-          "relative flex flex-col",
-          "fn-flat-button",
-          colorThief.boxStyle,
-          "transition-[translate,opacity] duration-1000 ease-out",
-          show ? "" : "opacity-0 translate-y-1"
-        )}
+    <ul
+      className={clsx(
+        "fn-chart-list fn-cl-big",
+        "w-(--item-max-width)",
+        "transition-[translate,opacity] duration-1000 ease-out",
+        show ? "" : "opacity-0 translate-y-1"
+      )}
+    >
+      <ChartListItem
+        className={colorThief.boxStyle}
         style={{ color: colorThief.currentColor }}
-      >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
-        <ButtonHighlight />
-        {props.cid && props.lvIndex !== undefined && brief && (
-          <div
-            className={clsx(
-              "flex flex-col",
-              "*:max-w-full *:text-ellipsis *:whitespace-nowrap"
-            )}
-          >
-            <img
-              ref={colorThief.imgRef}
-              src={`https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`}
-              crossOrigin="anonymous"
-              className="mb-2"
-            />
-            <p className="text-xs/4 text-dim">{props.cid}</p>
-            <p className="h-6 font-title text-lg/6 font-medium fg-bright">
-              {brief.title}
-            </p>
-            <p className="h-6 font-title text-lg/6 fg-bright">
-              {brief.composer}
-            </p>
-            <p className="h-5 text-base/5">
-              {brief.levels[props.lvIndex].name && (
-                <span className="font-title mr-[0.25em]">
-                  {brief.levels[props.lvIndex].name}
-                </span>
-              )}
-              <span
-                className={clsx(
-                  "fn-level-type",
-                  brief.levels[props.lvIndex].type
-                )}
-              >
-                <span>{brief.levels[props.lvIndex].type}-</span>
-                <span>{brief.levels[props.lvIndex].difficulty}</span>
-              </span>
-            </p>
-          </div>
-        )}
-      </a>
-      <a
+        imgRef={colorThief.imgRef}
+        cid={props.cid ?? ""}
+        brief={brief}
         href={`/share/${props.cid}`}
-        onClick={(e) => {
-          props.onClickMobile(props.cid!, brief);
-          e.preventDefault();
-        }}
-        className={clsx(
-          "no-pc w-80",
-          "rounded-sq-xl p-3",
-          "relative flex flex-col",
-          "fn-flat-button",
-          colorThief.boxStyle
-        )}
-        style={{ color: colorThief.currentColor }}
-      >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
-        <ButtonHighlight />
-        {props.cid && props.lvIndex !== undefined && brief && (
-          <div className="flex flex-col">
-            <img
-              src={`https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`}
-              crossOrigin="anonymous"
-            />
-          </div>
-        )}
-      </a>
-    </>
+        onClick={() => props.onClick(props.cid!, brief)}
+        onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+        badge
+        big
+        noDefaultColor
+      />
+    </ul>
   );
 }
