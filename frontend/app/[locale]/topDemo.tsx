@@ -17,7 +17,16 @@ export interface DemoChart {
 export const demoCharts: DemoChart[] = (
   process.env.NODE_ENV === "development"
     ? ([["102399", 0, 4.5]] as const)
-    : ([] as const)
+    : ([
+        ["850858", 1, 11.3], // bad apple!! single-7
+        ["596134", 0, 8.1], // lagtrain single-3
+        ["170465", 1, 0], // tetoris double-7
+        ["592994", 0, 38.3], // phony single-4
+        ["488006", 0, 15.4], // megalovania single-5
+        ["142383", 0, 10.8], // night of nights single-6
+        ["683932", 1, 10.5], // conflict double-9
+        ["768743", 0, 46.4], // freedom dive single-8
+      ] as const)
 ).map(([cid, lvIndex, offset]) => ({ cid, lvIndex, offset }));
 
 export function TopDemo(props: { visible: boolean } & Partial<DemoChart>) {
@@ -127,29 +136,36 @@ export function DemoDetail(
 
   const colorThief = useColorThief();
 
+  const [show, setShow] = useState<boolean>(false);
+  useEffect(() => {
+    if (props.cid && props.lvIndex !== undefined && brief) {
+      setTimeout(() => setShow(true), 500);
+    }
+  }, [props.cid, props.lvIndex, brief]);
+
   return (
-    props.cid &&
-    props.lvIndex !== undefined &&
-    brief && (
-      <>
-        <a
-          href={`/share/${props.cid}`}
-          onClick={(e) => {
-            props.onClick(props.cid!, brief);
-            e.preventDefault();
-          }}
-          className={clsx(
-            "no-mobile w-80",
-            "rounded-sq-xl p-3",
-            "relative flex flex-col",
-            "fn-flat-button",
-            colorThief.boxStyle
-          )}
-          style={{ color: colorThief.currentColor }}
-        >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
-          <ButtonHighlight />
+    <>
+      <a
+        href={`/share/${props.cid}`}
+        onClick={(e) => {
+          props.onClick(props.cid!, brief);
+          e.preventDefault();
+        }}
+        className={clsx(
+          "no-mobile w-80",
+          "rounded-sq-xl p-3",
+          "relative flex flex-col",
+          "fn-flat-button",
+          colorThief.boxStyle,
+          "transition-[translate,opacity] duration-1000 ease-out",
+          show ? "" : "opacity-0 translate-y-1"
+        )}
+        style={{ color: colorThief.currentColor }}
+      >
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
+        <ButtonHighlight />
+        {props.cid && props.lvIndex !== undefined && brief && (
           <div
             className={clsx(
               "flex flex-col",
@@ -186,33 +202,35 @@ export function DemoDetail(
               </span>
             </p>
           </div>
-        </a>
-        <a
-          href={`/share/${props.cid}`}
-          onClick={(e) => {
-            props.onClickMobile(props.cid!, brief);
-            e.preventDefault();
-          }}
-          className={clsx(
-            "no-pc w-80",
-            "rounded-sq-xl p-3",
-            "relative flex flex-col",
-            "fn-flat-button",
-            colorThief.boxStyle
-          )}
-          style={{ color: colorThief.currentColor }}
-        >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
-          <ButtonHighlight />
+        )}
+      </a>
+      <a
+        href={`/share/${props.cid}`}
+        onClick={(e) => {
+          props.onClickMobile(props.cid!, brief);
+          e.preventDefault();
+        }}
+        className={clsx(
+          "no-pc w-80",
+          "rounded-sq-xl p-3",
+          "relative flex flex-col",
+          "fn-flat-button",
+          colorThief.boxStyle
+        )}
+        style={{ color: colorThief.currentColor }}
+      >
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
+        <ButtonHighlight />
+        {props.cid && props.lvIndex !== undefined && brief && (
           <div className="flex flex-col">
             <img
               src={`https://i.ytimg.com/vi/${brief.ytId}/mqdefault.jpg`}
               crossOrigin="anonymous"
             />
           </div>
-        </a>
-      </>
-    )
+        )}
+      </a>
+    </>
   );
 }
