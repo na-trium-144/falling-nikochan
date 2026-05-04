@@ -138,9 +138,18 @@ export function DemoDetail(
   const colorThief = useColorThief();
 
   const [show, setShow] = useState<boolean>(false);
+  const initTimeStamp = useRef<DOMHighResTimeStamp | null>(null);
   useEffect(() => {
-    if (props.cid && props.lvIndex !== undefined && brief) {
-      setTimeout(() => setShow(true), 500);
+    if (props.cid && props.lvIndex !== undefined) {
+      if (initTimeStamp.current === null) {
+        initTimeStamp.current = performance.now();
+      }
+      if (brief) {
+        setTimeout(
+          () => setShow(true),
+          Math.max(0, initTimeStamp.current + 500 - performance.now())
+        );
+      }
     }
   }, [props.cid, props.lvIndex, brief]);
 
