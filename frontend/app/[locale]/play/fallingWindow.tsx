@@ -20,6 +20,7 @@ import { OffsetEstimator } from "./offsetEstimator";
 type Props = {
   className?: string;
   style?: object;
+  blur?: boolean;
   notes: NoteInGame[];
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
@@ -99,7 +100,8 @@ export default function FallingWindow(props: Props) {
   const tailsCanvasDPR = Math.min(1, 6.5 / noteSize);
   const nikochanCanvasDPR = useRef<number>(1);
   useEffect(() => {
-    nikochanCanvasDPR.current = window.devicePixelRatio;
+    nikochanCanvasDPR.current =
+      window.devicePixelRatio * (props.blur ? 0.17 : 1);
   });
 
   const [rerenderIndex, setRerenderIndex] = useState<number>(0);
@@ -441,7 +443,7 @@ export default function FallingWindow(props: Props) {
       {/* 判定線 */}
       {boxSize && marginY !== undefined && (
         <TargetLine
-          className="z-fw-target-line"
+          className={clsx("z-fw-target-line", props.blur && "blur-2xs")}
           barFlash={
             props.barFlash === undefined || marginX === undefined
               ? undefined
@@ -456,6 +458,7 @@ export default function FallingWindow(props: Props) {
       )}
       {boxSize && marginX !== undefined && marginY !== undefined && (
         <NikochansMemo
+          blur={props.blur}
           displayNotes={displayNotes.current}
           notes={notes}
           noteSize={noteSize}
@@ -572,6 +575,7 @@ interface MProps {
   marginX: number;
   marginY: number;
   particleAssets: RefObject<string[]>;
+  blur: boolean;
 }
 const NikochansMemo = memo(function Nikochans(props: MProps) {
   return props.displayNotes.map((d) => (
@@ -584,6 +588,7 @@ const NikochansMemo = memo(function Nikochans(props: MProps) {
       marginY={props.marginY}
       boxSize={props.boxSize}
       particleAssets={props.particleAssets}
+      blur={props.blur}
     />
   ));
 });
@@ -596,6 +601,7 @@ interface NProps {
   marginY: number;
   boxSize: number;
   particleAssets: RefObject<string[]>;
+  blur: boolean;
 }
 function Nikochan(props: NProps) {
   /* にこちゃん
@@ -614,6 +620,7 @@ function Nikochan(props: NProps) {
           bottom={targetY * boxSize + marginY}
           big={displayNote.bigDone}
           chain={displayNote.chain || 0}
+          blur={props.blur}
         />
       )}
       {displayNote.chain && [1, 2].includes(displayNote.done) && (
@@ -628,6 +635,7 @@ function Nikochan(props: NProps) {
           big={!!displayNote.bigBonus}
           chain={displayNote.chain || 0}
           particleAssets={props.particleAssets}
+          blur={props.blur}
         />
       )}
     </>
@@ -640,6 +648,7 @@ interface RProps {
   bottom: number;
   big: boolean;
   chain: number;
+  blur: boolean;
 }
 function Ripple(props: RProps) {
   const ref = useRef<HTMLDivElement>(null!);
@@ -670,7 +679,10 @@ function Ripple(props: RProps) {
   }, [noteSize]);
   return (
     <div
-      className="absolute z-fw-ripple dark:opacity-70 opacity-90"
+      className={clsx(
+        "absolute z-fw-ripple dark:opacity-70 opacity-90",
+        props.blur && "blur-2xs"
+      )}
       style={{
         width: 1,
         height: 1,
@@ -710,6 +722,7 @@ interface PProps {
   big: boolean;
   chain: number;
   particleAssets: RefObject<string[]>;
+  blur: boolean;
 }
 function Particle(props: PProps) {
   const ref = useRef<HTMLImageElement>(null!);
@@ -761,7 +774,10 @@ function Particle(props: PProps) {
 
   return (
     <div
-      className="absolute z-fw-particle dark:opacity-70 opacity-90"
+      className={clsx(
+        "absolute z-fw-particle dark:opacity-70 opacity-90",
+        props.blur && "blur-2xs"
+      )}
       style={{
         width: 1,
         height: 1,

@@ -86,7 +86,8 @@ export function TopDemo(props: { visible: boolean } & Partial<DemoChart>) {
   return (
     <>
       <FallingWindow
-        className="absolute inset-0 blur-2xs isolate z-title-fw"
+        blur
+        className="absolute inset-0 isolate z-title-fw"
         notes={notesAll}
         getCurrentTimeSec={getCurrentTimeSec}
         playing={true}
