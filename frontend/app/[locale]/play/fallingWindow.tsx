@@ -79,11 +79,13 @@ export default function FallingWindow(props: Props) {
   useEffect(() => {
     if (ref.current && marginX !== undefined && marginY !== undefined) {
       canvasLeft.current = -(
-        ref.current as HTMLDivElement
-      ).getBoundingClientRect().left;
+        (ref.current as HTMLDivElement).getBoundingClientRect().left +
+        window.scrollX
+      );
       canvasTop.current = -(
-        ref.current as HTMLDivElement
-      ).getBoundingClientRect().top;
+        (ref.current as HTMLDivElement).getBoundingClientRect().top +
+        window.scrollY
+      );
       canvasWidth.current = window.innerWidth;
       canvasHeight.current = window.innerHeight;
     }

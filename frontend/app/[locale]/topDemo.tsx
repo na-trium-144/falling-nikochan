@@ -30,7 +30,9 @@ export const demoCharts: DemoChart[] = (
       ] as const)
 ).map(([cid, lvIndex, offset]) => ({ cid, lvIndex, offset }));
 
-export function TopDemo(props: { visible: boolean } & Partial<DemoChart>) {
+export function TopDemo(
+  props: { visible: boolean; bottom: number } & Partial<DemoChart>
+) {
   const { realFps, stable: realFpsStable } = useRealFPS();
   const [runFps, setRunFps] = useState<number>(0);
   const [renderFps, setRenderFps] = useState<number>(0);
@@ -98,6 +100,7 @@ export function TopDemo(props: { visible: boolean } & Partial<DemoChart>) {
       <FallingWindow
         blur
         className="absolute inset-0 isolate z-title-fw"
+        style={{ bottom: props.bottom }}
         notes={notesAll}
         getCurrentTimeSec={getCurrentTimeSec}
         playing={true}

@@ -168,16 +168,7 @@ export default function TopPage(props: Props) {
         />
       ) : null}
 
-      <div
-        className="w-full h-screen flex items-center justify-center"
-        style={{
-          paddingBottom:
-            (isMobilePlay
-              ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
-              : 0.1 * screenHeight) +
-            1 * rem,
-        }}
-      >
+      <div className="w-full h-screen flex items-center justify-center">
         <div className="basis-main min-w-0 h-full flex-1 flex items-center justify-end relative">
           <section className="w-full max-w-main flex flex-col items-center justify-center text-center pl-12 gap-12">
             <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
@@ -189,7 +180,7 @@ export default function TopPage(props: Props) {
               {t("playNow")}
             </Link>
           </section>
-          <TopDemo {...demoChart} visible={demoVisible} />
+          <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
         </div>
         <aside className="grow shrink-0 grid-centering px-9">
           <DemoDetail
