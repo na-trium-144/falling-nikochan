@@ -3,10 +3,10 @@
 import clsx from "clsx/lite";
 import Link from "next/link";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
-import { PWAInstallMain } from "./common/pwaInstall.js";
+import { PWAInstallMain, useSafariDetector } from "./common/pwaInstall.js";
 import { MobileFooter } from "./common/footer.js";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SmallDomainShare } from "./common/small.jsx";
 import { ChartList } from "./main/chartList.jsx";
 import { FesData, FestivalLink, useFestival } from "./common/festival.jsx";
@@ -37,41 +37,66 @@ export default function TopPage(props: Props) {
 
   const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
   const isMobilePlay = screenWidth < screenHeight;
-  const grassRefNear = useRef<SVGSVGElement>(null);
-  const grassRefFar = useRef<SVGSVGElement>(null);
+  const isSafari = useSafariDetector();
+  const grassRefNear = useRef<HTMLDivElement | SVGSVGElement>(null);
+  const grassRefFar = useRef<HTMLDivElement | SVGSVGElement>(null);
+  const grassHeight =
+    (isMobilePlay
+      ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
+      : 0.1 * screenHeight) +
+    1 * rem;
   const [initAnim, setInitAnim] = useState<boolean>(false);
   const [demoVisible, setDemoVisible] = useState<boolean>(false);
   const [demoChart, setDemoChart] = useState<DemoChart>();
   useEffect(() => {
-    setTimeout(
-      () =>
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            setInitAnim(true);
-            setDemoChart(
-              demoCharts[Math.floor(demoCharts.length * Math.random())]
-            );
-          })
-        ),
-      100
-    );
-  }, []);
-  useEffect(() => {
-    if (initAnim) {
-      const onScroll = () => {
+    if (isSafari !== undefined) {
+      setTimeout(
+        () =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              setInitAnim(true);
+              setDemoChart(
+                demoCharts[Math.floor(demoCharts.length * Math.random())]
+              );
+            })
+          ),
+        100
+      );
+    }
+  }, [isSafari]);
+  useLayoutEffect(() => {
+    if (isSafari !== undefined) {
+      let req: ReturnType<typeof requestAnimationFrame> | null = null;
+      const update = () => {
         for (const ref of [grassRefNear, grassRefFar]) {
           if (ref.current) {
-            ref.current.style.bottom = `-${2.5 * rem + window.scrollY / 2}px`;
+            if (isSafari === true) {
+              ref.current.scrollTop =
+                0.3 * window.innerHeight - Math.max(0, window.scrollY / 2);
+            } else {
+              ref.current.style.bottom = `-${2.5 * rem + Math.max(0, window.scrollY / 2)}px`;
+            }
           }
         }
         setDemoVisible(window.scrollY < window.innerHeight);
+        req = null;
       };
-      // initAnimがtrueになる瞬間にも実行する必要がある
-      onScroll();
+      const onScroll = () => {
+        if (req === null) {
+          req = requestAnimationFrame(update);
+        }
+      };
+      update();
       window.addEventListener("scroll", onScroll);
-      return () => window.removeEventListener("scroll", onScroll);
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        if (req !== null) {
+          cancelAnimationFrame(req);
+        }
+      };
     }
-  }, [initAnim, rem]);
+    // initAnimがtrueになる瞬間にも再実行する必要がある
+  }, [isSafari, initAnim, rem]);
 
   return (
     <main
@@ -83,20 +108,65 @@ export default function TopPage(props: Props) {
     >
       <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
-      <IrasutoyaLikeGrass
-        refNear={grassRefNear}
-        refFar={grassRefFar}
-        className={clsx(
-          "transition-transform duration-500 ease-out",
-          initAnim ? "" : "translate-y-[30vh] opacity-0"
-        )}
-        height={
-          (isMobilePlay
-            ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
-            : 0.1 * screenHeight) +
-          1 * rem
-        }
-      />
+      {/*
+      safariでは高さ130vhのdiv要素で囲い100vhのdiv要素の中でそれをスクロールすることで動かすのが一番滑らかに動く。
+      しかしこのアプローチはchromeで重く、firefoxでsvgが描画されなくなるバグがある。
+      chrome,firefoxではsvgのbottomの値を書き換えて動かす。これはsafariだと重くて動かない
+      */}
+      {isSafari === true ? (
+        <>
+          <div
+            ref={(node) => {
+              grassRefFar.current = node;
+            }}
+            className="fixed inset-0 overflow-hidden pointer-events-none z-irasutoya-like-grass-far"
+          >
+            <figure className="relative w-full h-[130vh]">
+              <IrasutoyaLikeGrass
+                only="far"
+                className={clsx(
+                  "absolute",
+                  "transition-transform duration-500 ease-out",
+                  initAnim ? "" : "translate-y-[30vh] opacity-0"
+                )}
+                height={grassHeight}
+              />
+            </figure>
+          </div>
+          <div
+            ref={(node) => {
+              grassRefNear.current = node;
+            }}
+            className="fixed inset-0 overflow-hidden pointer-events-none z-irasutoya-like-grass-near"
+          >
+            <figure className="relative w-full h-[130vh]">
+              <IrasutoyaLikeGrass
+                only="near"
+                className={clsx(
+                  "absolute",
+                  "transition-transform duration-500 ease-out",
+                  initAnim ? "" : "translate-y-[30vh] opacity-0"
+                )}
+                height={grassHeight}
+              />
+            </figure>
+          </div>
+        </>
+      ) : isSafari === false ? (
+        <IrasutoyaLikeGrass
+          refNear={(node) => {
+            grassRefNear.current = node;
+          }}
+          refFar={(node) => {
+            grassRefFar.current = node;
+          }}
+          className={clsx(
+            "transition-transform duration-500 ease-out",
+            initAnim ? "" : "translate-y-[30vh] opacity-0"
+          )}
+          height={grassHeight}
+        />
+      ) : null}
 
       <div
         className="w-full h-screen flex items-center justify-center"

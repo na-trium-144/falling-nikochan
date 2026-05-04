@@ -10,7 +10,7 @@ import { CidSchema, rateLimit } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
-import { detectOS, isStandalone } from "@/common/pwaInstall.js";
+import { isStandalone, useSafariDetector } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
@@ -22,10 +22,7 @@ export default function EditTab({ locale }: { locale: string }) {
   const te = useTranslations("error");
   const router = useRouter();
 
-  const [isSafari, setIsSafari] = useState<boolean>(false);
-  useEffect(() => {
-    setIsSafari(detectOS() === "ios" || navigator.vendor.includes("Apple"));
-  }, []);
+  const isSafari = useSafariDetector();
 
   const [cidErrorMsg, setCIdErrorMsg] = useState<APIError>();
   const [cidFetching, setCidFetching] = useState<boolean>(false);
