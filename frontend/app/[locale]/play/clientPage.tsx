@@ -38,7 +38,7 @@ import StatusBox from "./statusBox.js";
 import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import { CenterBox } from "@/common/box.js";
+import { Box, CenterBox } from "@/common/box.js";
 import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
 import Result, { resultAnimDelays } from "./result.js";
@@ -499,6 +499,8 @@ function Play(props: Props) {
   const [showResult, setShowResult] = useState<boolean>(false);
   const [resultDate, setResultDate] = useState<Date>();
 
+  const [showGuidanceText, setShowGuidanceText] = useState<boolean>(false);
+
   const reset = useCallback(() => setShowReady(true), []);
   const start = useCallback(() => {
     // Space(スタートボタン)が押されたとき
@@ -818,6 +820,9 @@ function Play(props: Props) {
       );
       lateTimes.current = [];
       ytPlayer.current?.setVolume(ytVolume);
+
+      setTimeout(() => setShowGuidanceText(true), 1000);
+      setTimeout(() => setShowGuidanceText(false), 6000);
     }
     ref.current?.focus();
     filteredStartTimeStamp.current = null;
@@ -959,6 +964,31 @@ function Play(props: Props) {
       {!chartPlaying && exitable !== null && exitable < performance.now() && (
         <div className="fixed top-0 left-0 w-8 h-8 bg-[#ff0000] z-100" />
       )}
+      {!isMobile && (
+        <Box
+          classNameOuter={clsx(
+            "fixed left-30 right-60 mx-auto top-[72vh] bottom-8 my-auto w-max h-max z-100",
+            "px-6 py-3 text-center",
+            "transition-opacity duration-1000 ease-linear",
+            showGuidanceText ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <p className="text-xl/6.5">
+            Falling Nikochan はブラウザーから手軽に遊べる音ゲーです！
+          </p>
+          <p className="text-xl/6.5">
+            概要欄のリンクからぜひ遊んでみてください！
+          </p>
+          <p className="text-base/5.5">
+            Falling Nikochan is a rhythm game that can be played on web
+            browsers.
+          </p>
+          <p className="text-base/5.5">
+            Give it a try from the link in the description!
+          </p>
+        </Box>
+      )}
+
       <div
         className={clsx(
           "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch",
