@@ -25,6 +25,8 @@ import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
 import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
+import { Box } from "./common/box.js";
+import { Scrollable } from "./common/scrollable.js";
 
 interface Props {
   locale: string;
@@ -199,22 +201,36 @@ export default function TopPage(props: Props) {
       <RedirectedWarning />
       <PWAInstallMain />
 
-      <section className="w-full max-w-main text-center px-6 mb-12">
-        <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
-        {/*TODO: カードの形を変える*/}
-        <ChartList
-          type="popular"
-          creator
-          href={(cid) => `/share/${cid}`}
-          onClick={openModal}
-          onClickMobile={openShareInternal}
-          showLoading
-          moreHref={`/${locale}/main/recent`}
-          badge
-          fixedRows={3}
-          big
-        />
-      </section>
+      <div className="max-w-main px-6 mb-12">
+        <Box
+          classNameOuter="max-w-main text-center mb-12"
+          classNameInner="flex flex-col items-center"
+          padding={6}
+        >
+          <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
+          <ChartList
+            type="popular"
+            creator
+            href={(cid) => `/share/${cid}`}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+            showLoading
+            badge
+            fixedRows={6}
+            big
+          />
+          <Link
+            href={`/${locale}/main/play?sort=popular`}
+            className="fn-button fn-cta2 mt-2"
+            prefetch={process.env.PREFETCH as "auto"}
+          >
+            <span className="fn-glass-1" />
+            <span className="fn-glass-2" />
+            <ButtonHighlight />
+            {t("popularMore")}
+          </Link>
+        </Box>
+      </div>
 
       <Features locale={locale} />
       <div className="w-full max-w-main">

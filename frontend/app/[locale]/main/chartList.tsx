@@ -18,6 +18,7 @@ import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
+import { Scrollable } from "@/common/scrollable.js";
 
 interface PProps {
   locale: string;
@@ -334,13 +335,17 @@ export function ChartList(props: Props) {
 
   return (
     <div className="relative w-full h-max isolate">
-      <ul
-        ref={ulSize.ref}
+      <Scrollable
+        as="ul"
+        ref={ulSize.ref as RefObject<HTMLDivElement>}
         className={clsx(
           "fn-chart-list",
           props.small && "fn-cl-small",
           props.big && "fn-cl-big"
         )}
+        padding={4}
+        scrollableX={props.big}
+        carouselX={props.big}
       >
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
@@ -383,7 +388,39 @@ export function ChartList(props: Props) {
               <li key={i} className="fn-cl-item fn-cl-empty" />
             )
         )}
-      </ul>
+      </Scrollable>
+      {props.big && (
+        <>
+          <button
+            className="fn-icon-button fn-pager-arrow absolute -left-3 inset-y-0 my-auto"
+            onClick={() =>
+              (ulSize.ref.current as HTMLDivElement).scrollTo({
+                left:
+                  (ulSize.ref.current as HTMLDivElement).scrollLeft -
+                  (itemMinWidth ?? 0) * rem,
+                behavior: "smooth",
+              })
+            }
+          >
+            <ButtonHighlight />
+            &lt;
+          </button>
+          <button
+            className="fn-icon-button fn-pager-arrow absolute -right-3 inset-y-0 my-auto"
+            onClick={() =>
+              (ulSize.ref.current as HTMLDivElement).scrollTo({
+                left:
+                  (ulSize.ref.current as HTMLDivElement).scrollLeft +
+                  (itemMinWidth ?? 0) * rem,
+                behavior: "smooth",
+              })
+            }
+          >
+            <ButtonHighlight />
+            &gt;
+          </button>
+        </>
+      )}
       {firstFetchingIndex >= 0 && props.showLoading ? (
         <div
           className="fn-cl-message"

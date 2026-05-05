@@ -8,6 +8,7 @@ export default {
       "シンプルでかわいい音ゲーです。",
     playNow: "プレイする",
     editNow: "譜面編集へ",
+    popularMore: "もっと見る",
     redirected:
       "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
     back: "戻る",

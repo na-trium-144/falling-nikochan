@@ -1,6 +1,14 @@
 @layer components {
   .fn-chart-list {
-    @apply grid w-full mx-auto justify-items-start items-center mb-1;
+    @apply grid w-full mx-auto justify-items-start items-center;
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(var(--item-min-width), 100%), 1fr)
+    );
+    /*max 3 columns*/
+    max-width: calc(4 * var(--item-min-width) - 0.1rem);
+
+    @apply mb-1;
     gap: var(--item-gap);
 
     /*
@@ -14,8 +22,10 @@
     --item-max-width: 36rem;
     --item-gap: 0.375rem;
     --item-height: 4rem;
+    --thumbnail-height: 2.75rem;
     @variant main-wide {
       --item-height: 5.375rem;
+      --thumbnail-height: 4rem;
     }
 
     &.fn-cl-small {
@@ -23,40 +33,33 @@
       --item-max-width: 27rem;
       --item-gap: 0.25rem;
       --item-height: 2.75rem;
-
-      .fn-thumbnail {
-        @apply h-9!;
-      }
+      --thumbnail-height: 2.25rem;
     }
 
     &.fn-cl-big {
       --item-min-width: 21.5rem;
       --item-max-width: 21.5rem;
-      --item-gap: 0.5rem;
+      --item-gap: 1rem;
       --item-height: 18.5rem;
+      --thumbnail-height: 11.25rem;
+
+      /* Gridを解除し、折り返しなしのFlexに変更 */
+      @apply flex;
+      @apply py-1; /* x方向スクロール可能にする際にoverflow-clipでshadowが見切れるのを防ぐ */
 
       .fn-cl-item {
         @apply rounded-sq-xl!;
-      }
-      .fn-flat-button {
-        @apply flex-col! items-stretch! p-3!;
-      }
-      .fn-thumbnail {
-        @apply h-45!;
+        > .fn-flat-button {
+          @apply flex-col! items-stretch! p-3!;
+        }
       }
     }
-
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(min(var(--item-min-width), 100%), 1fr)
-    );
-    /*max 3 columns*/
-    max-width: calc(4 * var(--item-min-width) - 0.1rem);
 
     .fn-cl-item {
       @apply rounded-md;
       @apply w-full mx-auto h-max;
       max-width: var(--item-max-width);
+      min-width: var(--item-min-width);
       /*min-height: var(--item-height);*/
 
       &:has(.fn-sky),
@@ -82,7 +85,8 @@
 
         > .fn-thumbnail {
           @apply flex-none;
-          @apply aspect-video h-11 main-wide:h-16 object-cover object-center;
+          @apply aspect-video object-cover object-center;
+          height: var(--thumbnail-height);
         }
 
         > .fn-cl-content {

@@ -22,6 +22,7 @@ interface Props<T extends ElementType> {
   scrollableY?: boolean;
   defaultFadeY?: boolean; // jsがロードされるまでの間フェードを有効化する
   convertDeltaYToX?: boolean; // 縦スクロールを横スクロールに変換する
+  carouselX?: boolean;
   onScroll?: () => void;
 }
 export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
@@ -29,7 +30,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
   const ref = props.ref || myRef;
   const { onScroll: propsOnScroll } = props;
   const { rem } = useDisplayMode();
-  const { scrollableX, scrollableY, defaultFadeY, padding } = props;
+  const { scrollableX, scrollableY, defaultFadeY, carouselX, padding } = props;
   useEffect(() => {
     const refCurrent = ref.current;
     if (refCurrent) {
@@ -182,6 +183,7 @@ export function Scrollable<T extends ElementType = "div">(props: Props<T>) {
         scrollableX && "fn-scrollable-x",
         scrollableY && "fn-scrollable-y",
         defaultFadeY && "fn-default-y",
+        carouselX && "snap-x *:snap-center",
         props.className
       )}
       style={
