@@ -62,3 +62,7 @@
 @import "./styles/result.css";
 @import "./styles/scrollbar.css";
 @import "./styles/ace.css";
+
+nextjs-portal {
+  display: none !important;
+}

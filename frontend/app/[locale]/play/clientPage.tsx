@@ -956,6 +956,9 @@ function Play(props: Props) {
         e.preventDefault();
       }}
     >
+      {!chartPlaying && exitable !== null && exitable < performance.now() && (
+        <div className="fixed top-0 left-0 w-8 h-8 bg-[#ff0000] z-100" />
+      )}
       <div
         className={clsx(
           "flex-1 basis-0 min-h-0 w-full overflow-y-visible flex items-stretch",

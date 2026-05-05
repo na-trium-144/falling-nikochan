@@ -70,7 +70,7 @@ const env = {
   buildVersion:
     packageJson.version.split(".").slice(0, 2).join(".") +
     (process.env.VERSION_SUFFIX ||
-      (process.env.NODE_ENV === "development" ? "+dev" : "")),
+      (process.env.NODE_ENV === "development" ? "" : "")),
   browserslist: packageJson.browserslist.join(", "),
   TITLE_SUFFIX:
     process.env.TITLE_SUFFIX ||
