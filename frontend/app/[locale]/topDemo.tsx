@@ -88,9 +88,9 @@ export function TopDemo(
               done: 0,
               bigDone: false,
             })),
-            props.offset!
+            props.offset! - seq.offset
           );
-          currentTimeSec.current = props.offset!;
+          currentTimeSec.current = props.offset! - seq.offset;
         });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
