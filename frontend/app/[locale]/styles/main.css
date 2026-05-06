@@ -25,11 +25,12 @@
       @apply rounded-2xl;
     }
 
-    &.fn-mf-blur {
-      @apply backdrop-blur-2xs;
-      @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
-      @apply dark:from-orange-950 dark:to-orange-950/0;
-    }
+  }
+  .fn-mf-blur {
+    @apply z-mf-blur w-full h-mobile-footer;
+    @apply backdrop-blur-2xs;
+    @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
+    @apply dark:from-orange-950 dark:to-orange-950/0;
   }
 
   .fn-pc-header {

@@ -42,71 +42,70 @@ export function MobileFooter(props: MobileProps) {
     : ["#1d293d" /*slate-800*/, "#62748e" /*slate-500*/];
 
   return (
-    <footer
-      className={clsx(
-        "fn-mobile-footer no-pc",
-        props.blurBg && "fn-mf-blur",
-        props.className
+    <>
+      {props.blurBg && (
+        <div className={clsx("fn-mf-blur no-pc", props.className)} />
       )}
-    >
-      {mobileTabTitleKeys.map((key, i) => (
-        <LinkWithReview
-          key={i}
-          className={clsx(
-            "fn-mf-item",
-            props.tabKey !== "top" && "rounded-t-none",
-            props.tabKey === key && "fg-bright",
-            props.tabKey === key && props.tabKey !== "top"
-              ? "fn-flat-button fn-plain fn-selected"
-              : "fn-flat-button fn-sky"
-          )}
-          href={`/${props.locale}${tabURLs[key]}`}
-        >
-          <span
+      <footer className={clsx("fn-mobile-footer no-pc", props.className)}>
+        {mobileTabTitleKeys.map((key, i) => (
+          <LinkWithReview
+            key={i}
             className={clsx(
-              "fn-glass-1",
-              props.tabKey !== "top" && "border-t-0"
+              "fn-mf-item",
+              props.tabKey !== "top" && "rounded-t-none",
+              props.tabKey === key && "fg-bright",
+              props.tabKey === key && props.tabKey !== "top"
+                ? "fn-flat-button fn-plain fn-selected"
+                : "fn-flat-button fn-sky"
             )}
-          />
-          <span
-            className={clsx(
-              "fn-glass-2",
-              props.tabKey !== "top" && "border-t-0"
-            )}
-          />
-          <ButtonHighlight />
-          {i === 0 ? (
-            <Home
-              theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[0]}
+            href={`/${props.locale}${tabURLs[key]}`}
+          >
+            <span
+              className={clsx(
+                "fn-glass-1",
+                props.tabKey !== "top" && "border-t-0"
+              )}
             />
-          ) : i === 1 ? (
-            <Search
-              theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[0]}
+            <span
+              className={clsx(
+                "fn-glass-2",
+                props.tabKey !== "top" && "border-t-0"
+              )}
             />
-          ) : i === 2 ? (
-            <Edit
-              theme={props.tabKey === key ? "two-tone" : "outline"}
-              fill={props.tabKey === key ? iconFill : iconFill[0]}
-            />
-          ) : (
-            <div className="relative">
-              <More
+            <ButtonHighlight />
+            {i === 0 ? (
+              <Home
                 theme={props.tabKey === key ? "two-tone" : "outline"}
                 fill={props.tabKey === key ? iconFill : iconFill[0]}
               />
-              {isLastVisitedOld && (
-                <span
-                  className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
-                  style={{ top: "-0.1rem", right: "-0.5rem" }}
+            ) : i === 1 ? (
+              <Search
+                theme={props.tabKey === key ? "two-tone" : "outline"}
+                fill={props.tabKey === key ? iconFill : iconFill[0]}
+              />
+            ) : i === 2 ? (
+              <Edit
+                theme={props.tabKey === key ? "two-tone" : "outline"}
+                fill={props.tabKey === key ? iconFill : iconFill[0]}
+              />
+            ) : (
+              <div className="relative">
+                <More
+                  theme={props.tabKey === key ? "two-tone" : "outline"}
+                  fill={props.tabKey === key ? iconFill : iconFill[0]}
                 />
-              )}
-            </div>
-          )}
-          <span className="text-xs">{tm(key + ".titleShort")}</span>
-        </LinkWithReview>
-      ))}
-    </footer>
+                {isLastVisitedOld && (
+                  <span
+                    className={clsx("absolute w-3 h-3 rounded-full bg-red-500")}
+                    style={{ top: "-0.1rem", right: "-0.5rem" }}
+                  />
+                )}
+              </div>
+            )}
+            <span className="text-xs">{tm(key + ".titleShort")}</span>
+          </LinkWithReview>
+        ))}
+      </footer>
+    </>
   );
 }
