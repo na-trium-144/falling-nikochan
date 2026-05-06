@@ -438,6 +438,12 @@ export default function FallingWindow(props: Props) {
           top: canvasTop.current,
           width: canvasWidth.current,
           height: canvasHeight.current,
+          /*
+          Android16のChrome147でトップページにレンダリングしたcanvasが真っ黒になる+GPUのアーチファクトが出るというバグに遭遇したが、
+          opacityを設定するとその謎現象を回避できることを発見。
+          しかし0.999などあまり1に近い値だと効果がないっぽい?
+          */
+          opacity: 0.99,
         }}
         width={canvasWidth.current * nikochanCanvasDPR.current}
         height={canvasHeight.current * nikochanCanvasDPR.current}
