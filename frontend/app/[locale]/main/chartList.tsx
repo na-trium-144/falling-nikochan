@@ -81,6 +81,7 @@ export interface ChartLineBrief {
   original?: boolean;
 }
 interface Props {
+  classNameOuter?: string;
   type?: ChartListType;
   briefs?: ChartLineBrief[] | APIError | undefined;
   fetchAll?: boolean;
@@ -334,7 +335,9 @@ export function ChartList(props: Props) {
   ]);
 
   return (
-    <div className="relative w-full h-max isolate">
+    <div
+      className={clsx("relative w-full h-max isolate", props.classNameOuter)}
+    >
       <Scrollable
         as="ul"
         ref={ulSize.ref as RefObject<HTMLDivElement>}
@@ -343,7 +346,7 @@ export function ChartList(props: Props) {
           props.small && "fn-cl-small",
           props.big && "fn-cl-big"
         )}
-        padding={4}
+        padding={props.big ? 4 : undefined}
         scrollableX={props.big}
         carouselX={props.big}
       >

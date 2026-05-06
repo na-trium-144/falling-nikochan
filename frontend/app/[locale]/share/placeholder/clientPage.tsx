@@ -134,9 +134,7 @@ export default function ShareChart(props: Props) {
       </div>
 
       <Features locale={locale} />
-      <div className="w-full max-w-main">
-        <hr className="h-px w-3/4 my-12 mx-auto border-current/50" />
-      </div>
+      <hr className="fn-hr" />
       <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />

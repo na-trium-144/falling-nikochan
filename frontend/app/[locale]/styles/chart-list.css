@@ -48,9 +48,9 @@
       @apply py-1; /* x方向スクロール可能にする際にoverflow-clipでshadowが見切れるのを防ぐ */
 
       .fn-cl-item {
-        @apply rounded-sq-xl!;
+        @apply rounded-sq-xl;
         > .fn-flat-button {
-          @apply flex-col! items-stretch! p-3!;
+          @apply flex-col items-stretch p-3;
         }
       }
     }
@@ -59,7 +59,7 @@
       @apply rounded-md;
       @apply w-full mx-auto h-max;
       max-width: var(--item-max-width);
-      min-width: var(--item-min-width);
+      min-width: min(var(--item-min-width), 100%);
       /*min-height: var(--item-height);*/
 
       &:has(.fn-sky),

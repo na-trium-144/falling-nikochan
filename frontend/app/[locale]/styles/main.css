@@ -148,6 +148,12 @@
     @apply dark:bg-stone-700 dark:border-stone-500;
   }
 
+  .fn-hr {
+    width: calc(min(100%, var(--container-main)) * 0.75);
+    @apply h-px mx-auto border-current/50;
+    @apply my-8 main-wide:my-12;
+  }
+
   .fn-rss-button {
     @apply relative size-4 bg-contain;
     background-image: url(/feed-icon-28x28.png);

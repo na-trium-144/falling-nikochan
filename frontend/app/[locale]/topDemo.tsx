@@ -157,26 +157,49 @@ export function DemoDetail(
   }, [props.cid, props.lvIndex, brief]);
 
   return (
-    <ul
-      className={clsx(
-        "fn-chart-list fn-cl-big",
-        "w-(--item-max-width)",
-        "transition-[translate,opacity] duration-1000 ease-out",
-        show ? "" : "opacity-0 translate-y-1"
-      )}
-    >
-      <ChartListItem
-        className={colorThief.boxStyle}
-        style={{ color: colorThief.currentColor }}
-        cid={props.cid ?? ""}
-        brief={brief}
-        href={`/share/${props.cid}`}
-        onClick={() => props.onClick(props.cid!, brief)}
-        onClickMobile={() => props.onClickMobile(props.cid!, brief)}
-        badge
-        big
-        noDefaultColor
-      />
+    <>
+      <ul
+        className={clsx(
+          "hidden demo-wide:grid",
+          "fn-chart-list fn-cl-big w-(--item-max-width)",
+          "transition-[translate,opacity] duration-1000 ease-out",
+          show ? "" : "opacity-0 translate-y-1"
+        )}
+      >
+        <ChartListItem
+          className={colorThief.boxStyle}
+          style={{ color: colorThief.currentColor }}
+          cid={props.cid ?? ""}
+          brief={brief}
+          href={`/share/${props.cid}`}
+          onClick={() => props.onClick(props.cid!, brief)}
+          onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+          badge
+          big={true}
+          noDefaultColor
+        />
+      </ul>
+      <ul
+        className={clsx(
+          "demo-wide:hidden",
+          "fn-chart-list",
+          "transition-[translate,opacity] duration-1000 ease-out",
+          show ? "" : "opacity-0 translate-y-1"
+        )}
+      >
+        <ChartListItem
+          className={colorThief.boxStyle}
+          style={{ color: colorThief.currentColor }}
+          cid={props.cid ?? ""}
+          brief={brief}
+          href={`/share/${props.cid}`}
+          onClick={() => props.onClick(props.cid!, brief)}
+          onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+          badge
+          big={false}
+          noDefaultColor
+        />
+      </ul>
       {brief?.ytId && (
         <img
           ref={colorThief.imgRef}
@@ -185,6 +208,6 @@ export function DemoDetail(
           crossOrigin="anonymous"
         />
       )}
-    </ul>
+    </>
   );
 }

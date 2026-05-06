@@ -26,7 +26,6 @@ import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
 import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 import { Box } from "./common/box.js";
-import { Scrollable } from "./common/scrollable.js";
 
 interface Props {
   locale: string;
@@ -37,13 +36,16 @@ export default function TopPage(props: Props) {
   const { openModal, openShareInternal } = useSharePageModal();
   const fes = useFestival();
 
-  const { screenWidth, screenHeight, rem, statusScale } = useDisplayMode();
+  const { isMobileMain, screenWidth, screenHeight, rem, statusScale } =
+    useDisplayMode();
   const isMobilePlay = screenWidth < screenHeight;
+  // 画面幅が一定以下 or 画面が縦長 のときデモ画面をモバイルレイアウトにする
+  const isMobileEither = isMobileMain || isMobilePlay;
   const isSafari = useSafariDetector();
   const grassRefNear = useRef<HTMLDivElement | SVGSVGElement>(null);
   const grassRefFar = useRef<HTMLDivElement | SVGSVGElement>(null);
   const grassHeight =
-    (isMobilePlay
+    (isMobileEither
       ? Math.min(6 * statusScale * rem, 0.15 * screenHeight)
       : 0.1 * screenHeight) +
     1 * rem;
@@ -170,14 +172,54 @@ export default function TopPage(props: Props) {
         />
       ) : null}
 
-      <div className="w-full h-screen flex items-center justify-center">
-        <div className="basis-main min-w-0 h-full flex-1 flex items-center justify-end relative">
-          <section className="w-full max-w-main flex flex-col items-center justify-center text-center pl-12 gap-12">
-            <h1 className="text-8xl semibold-by-stroke">Falling Nikochan</h1>
-            <p className="text-2xl">{t("description")}</p>
+      <div
+        className={clsx(
+          "w-full h-screen flex items-center justify-center",
+          "flex-col demo-wide:flex-row-reverse"
+        )}
+      >
+        <div className="grow shrink-0 grid-centering px-3 demo-wide:px-9">
+          <DemoDetail
+            {...demoChart}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+          />
+        </div>
+        <div
+          className={clsx(
+            "relative w-full",
+            "grow-2 basis-[max-content]",
+            "demo-wide:grow-1 demo-wide:basis-main demo-wide:min-w-0 demo-wide:h-full",
+            "demo-wide:flex demo-wide:items-center demo-wide:justify-end"
+          )}
+        >
+          <section
+            className={clsx(
+              "w-full max-w-main",
+              "flex flex-col items-center text-center",
+              "justify-start px-3 gap-6",
+              "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0 demo-wide:gap-12"
+            )}
+          >
+            <h1 className="text-4xl min-[64rem]:text-6xl min-[80rem]:text-8xl semibold-by-stroke">
+              Falling Nikochan
+            </h1>
+            <p className="text-xl min-[64rem]:text-2xl min-[80rem]:text-3xl">
+              {t("description")}
+            </p>
             <Link
               href={`/${locale}/main/play`}
-              className="fn-button fn-cta"
+              className="fn-button fn-cta2 demo-wide:hidden"
+              prefetch={process.env.PREFETCH as "auto"}
+            >
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
+              <ButtonHighlight />
+              {t("playNow")}
+            </Link>
+            <Link
+              href={`/${locale}/main/play`}
+              className="fn-button fn-cta hidden demo-wide:inline-block"
               prefetch={process.env.PREFETCH as "auto"}
             >
               <span className="fn-glass-1" />
@@ -188,27 +230,21 @@ export default function TopPage(props: Props) {
           </section>
           <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
         </div>
-        <aside className="grow shrink-0 grid-centering px-9">
-          <DemoDetail
-            {...demoChart}
-            onClick={openModal}
-            onClickMobile={openShareInternal}
-          />
-        </aside>
       </div>
 
       <FestivalLink {...fes} className="my-2 px-6 text-center " />
       <RedirectedWarning />
       <PWAInstallMain />
 
-      <div className="max-w-main px-6 mb-12">
+      <div className="w-full max-w-main px-3 mb-8 main-wide:px-6 main-wide:mb-12">
         <Box
-          classNameOuter="max-w-main text-center mb-12"
+          classNameOuter="w-full text-center"
           classNameInner="flex flex-col items-center"
           padding={6}
         >
           <h2 className="fn-heading-sect text-3xl mb-4">{t("popular")}</h2>
           <ChartList
+            classNameOuter="no-mobile"
             type="popular"
             creator
             href={(cid) => `/share/${cid}`}
@@ -218,6 +254,17 @@ export default function TopPage(props: Props) {
             badge
             fixedRows={6}
             big
+          />
+          <ChartList
+            classNameOuter="no-pc"
+            type="popular"
+            creator
+            href={(cid) => `/share/${cid}`}
+            onClick={openModal}
+            onClickMobile={openShareInternal}
+            showLoading
+            badge
+            fixedRows={6}
           />
           <Link
             href={`/${locale}/main/play?sort=popular`}
@@ -233,9 +280,7 @@ export default function TopPage(props: Props) {
       </div>
 
       <Features locale={locale} />
-      <div className="w-full max-w-main">
-        <hr className="h-px w-3/4 my-12 mx-auto border-current/50" />
-      </div>
+      <hr className="fn-hr" />
       <PoliciesAndLinks locale={locale} fes={fes} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
@@ -301,8 +346,19 @@ export function Features({ locale }: { locale: string }) {
   const t = useTranslations("main");
   return (
     <>
-      <section className="w-full max-w-main mb-12 flex">
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+      <section
+        className={clsx(
+          "w-full max-w-main flex",
+          "flex-col gap-4 mb-8",
+          "main-wide:flex-row main-wide:gap-4 main-wide:mb-12"
+        )}
+      >
+        <div
+          className={clsx(
+            "flex-1 flex flex-col items-center justify-center text-center",
+            "px-3 main-wide:px-12"
+          )}
+        >
           <h2 className="fn-heading-sect text-3xl mb-4">
             {t("howToPlay.title")}
           </h2>
@@ -311,7 +367,7 @@ export function Features({ locale }: { locale: string }) {
             <p>{t("howToPlay.content3")}</p>
             <p>{t("howToPlay.content5")}</p>
           </div>
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-center main-wide:items-baseline gap-3">
             <Link
               href={`/${locale}/main/play`}
               className="fn-button fn-cta2"
@@ -338,8 +394,19 @@ export function Features({ locale }: { locale: string }) {
         <div className="basis-2/5 border">イメージ画像</div>
       </section>
 
-      <section className="w-full max-w-main mb-12 flex flex-row-reverse">
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+      <section
+        className={clsx(
+          "w-full max-w-main flex",
+          "flex-col gap-4 mb-8",
+          "main-wide:flex-row-reverse main-wide:gap-4 main-wide:mb-12"
+        )}
+      >
+        <div
+          className={clsx(
+            "flex-1 flex flex-col items-center justify-center text-center",
+            "px-3 main-wide:px-12"
+          )}
+        >
           <h2 className="fn-heading-sect text-3xl mb-4">
             {t("howToEdit.title")}
           </h2>
@@ -391,7 +458,13 @@ export function PoliciesAndLinks({
   const t = useTranslations("main");
   return (
     <>
-      <section className="w-full max-w-main mb-24 flex flex-row px-12 gap-12">
+      <section
+        className={clsx(
+          "w-full max-w-main flex",
+          "flex-col px-3 gap-6 mb-3",
+          "main-wide:flex-row main-wide:px-12 main-wide:gap-12 main-wide:mb-24"
+        )}
+      >
         <div className="basis-1/2 flex flex-col items-center justify-center text-center">
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("policies.title")}
