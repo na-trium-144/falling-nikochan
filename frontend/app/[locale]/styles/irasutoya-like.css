@@ -1,9 +1,17 @@
+:root {
+  &:not(:has(> body > .fn-body-scrollable)) {
+    @apply w-screen h-dvh overflow-hidden;
+  }
+  &:has(> body > .fn-body-scrollable) {
+    @apply w-screen min-h-dvh overflow-x-clip;
+  }
+}
 body.fn-body {
   &:not(:has(> .fn-body-scrollable)) {
-    @apply w-full h-dvh overflow-hidden touch-none;
+    @apply w-full h-full overflow-hidden touch-none;
   }
   &:has(> .fn-body-scrollable) {
-    @apply w-full min-h-dvh overflow-x-clip overflow-y-auto;
+    @apply w-full min-h-dvh overflow-hidden;
   }
 
   &.fn-csr-ready {
