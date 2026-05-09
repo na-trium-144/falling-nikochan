@@ -65,6 +65,7 @@ import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
+import { RecOverlay } from "./recOverlay.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -311,6 +312,9 @@ function Play(props: Props) {
     [exitable]
   );
 
+  const chartRecording =
+    chartPlaying || exitable === null || exitable > performance.now();
+
   const ytPlayer = useRef<YouTubePlayer>(undefined);
   const [ytVolume, setYtVolume_] = useState<number>(100);
   const setYtVolume = useCallback(
@@ -420,7 +424,6 @@ function Play(props: Props) {
     typeof requestAnimationFrame
   > | null>(null);
   const flash = useCallback((x: FlashPos) => {
-    return;
     if (flashAnimationFrame.current !== null) {
       cancelAnimationFrame(flashAnimationFrame.current);
       flashAnimationFrame.current = null;
@@ -962,33 +965,15 @@ function Play(props: Props) {
         e.preventDefault();
       }}
     >
-      {!chartPlaying && exitable !== null && exitable < performance.now() && (
-        <div className="fixed top-0 left-0 w-8 h-8 bg-[#ff0000] z-100" />
-      )}
-      {!isMobile && (
-        <Box
-          classNameOuter={clsx(
-            "fixed left-30 right-60 mx-auto top-[72vh] bottom-8 my-auto w-max h-max z-100",
-            "px-6 py-3 text-center",
-            "transition-opacity duration-1000 ease-linear",
-            showGuidanceText ? "opacity-100" : "opacity-0"
-          )}
-        >
-          <p className="text-xl/6.5">
-            Falling Nikochan はブラウザーから手軽に遊べる音ゲーです！
-          </p>
-          <p className="text-xl/6.5">
-            概要欄のリンクからぜひ遊んでみてください！
-          </p>
-          <p className="text-base/5.5">
-            Falling Nikochan is a rhythm game that can be played on web
-            browsers.
-          </p>
-          <p className="text-base/5.5">
-            Give it a try from the link in the description!
-          </p>
-        </Box>
-      )}
+      <RecOverlay
+        recording={chartRecording}
+        isMobile={isMobile}
+        showGuidanceText={!queryOptions.thumb && showGuidanceText}
+        showThumbTitle={!!queryOptions.thumb}
+        chartBrief={chartBrief}
+        lvIndex={lvIndex}
+        lvType={lvType}
+      />
 
       <div
         className={clsx(
@@ -999,10 +984,12 @@ function Play(props: Props) {
         <div
           className={clsx(
             isMobile || "w-1/3 h-screen overflow-x-visible",
+            queryOptions.thumb && "w-3/7!",
             "flex-none flex flex-col items-stretch"
           )}
         >
           <MusicArea
+            thumb={!!queryOptions.thumb}
             className={clsx(
               "isolate z-play-music-area transition-transform duration-500 ease-in-out",
               musicAreaOk ? "translate-y-0" : "translate-y-[-40vw]"
@@ -1029,7 +1016,7 @@ function Play(props: Props) {
             seVolume={hitVolume}
             setSEVolume={setHitVolume}
           />
-          {!isMobile && (
+          {!isMobile && !queryOptions.thumb && (
             <>
               <div className="grow-1 basis-0" />
               <StatusBox
@@ -1088,9 +1075,17 @@ function Play(props: Props) {
           )}
         </div>
         <div className={clsx("relative flex-1")} ref={mainWindowSpace.ref}>
+          {!chartRecording && (
+            <div
+              className="absolute inset-0 grid-centering"
+              style={{ containerType: "size" }}
+            >
+              <div className="size-[100cqmin] bg-gray-500/50" />
+            </div>
+          )}
           {isReadyAll && (
             <FallingWindow
-              className="absolute inset-0 isolate z-play-fw"
+              className={"absolute inset-0 isolate z-play-fw"}
               notes={notesAll}
               getCurrentTimeSec={getCurrentTimeSec}
               playing={chartPlaying}
@@ -1163,7 +1158,7 @@ function Play(props: Props) {
                 <Pause className="inline-block align-middle text-xl" />
                 {!isTouch && <Key handleKeyDown>Esc</Key>}
               </button>
-              {auto && !isMobile && !isTouch && queryOptions.seek && (
+              {auto && !isMobile && !isTouch && queryOptions.seek && !queryOptions.thumb && (
                 <>
                   <button
                     className={clsx(
@@ -1350,7 +1345,7 @@ function Play(props: Props) {
             1 * rem
           }
         />
-        {chartSeq && (
+        {chartSeq && !queryOptions.thumb && (
           <RhythmicalSlime
             className="isolate z-play-slime absolute"
             style={{
@@ -1485,25 +1480,6 @@ function Play(props: Props) {
           />
         </div>
       )}
-      {/*<Title
-        className="absolute left-0 top-0 h-32 scale-175 origin-top-left "
-        anim={false}
-      />*/}
-      <div
-        className="absolute inset-0 z-10 "
-        style={{ textShadow: "0.15rem 0.2rem 0.2rem rgb(0, 0, 0, 0.7)" }}
-      >
-        <div className="absolute left-32 bottom-16 ">
-          <span className="text-7xl font-bold font-title">初音ミクの激唱</span>
-          <span className="text-6xl ml-6 font-bold font-title"></span>
-        </div>
-        <div
-          className={"absolute right-8 top-72 font-bold fn-level-col-s"}
-        >
-          <span className="text-6xl ">Single-</span>
-          <span className="text-7xl ">11</span>
-        </div>
-      </div>
     </main>
   );
 }

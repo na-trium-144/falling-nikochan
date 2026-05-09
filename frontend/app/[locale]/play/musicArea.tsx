@@ -15,6 +15,7 @@ import { useColorThief } from "@/common/colorThief";
 import { ButtonHighlight } from "@/common/button";
 
 interface Props {
+  thumb: boolean;
   ready: boolean;
   playing: boolean;
   playbackRate: number;
@@ -111,6 +112,7 @@ export function MusicArea(props: Props) {
         props.isMobile
           ? "rounded-b-sq-xl pb-1"
           : "rounded-bl-sq-box pl-3 pb-1.5",
+        props.thumb && "pl-4.5! pb-4.5!",
         "relative flex-col",
         props.className,
         colorThief.boxStyle
@@ -170,7 +172,8 @@ export function MusicArea(props: Props) {
           className={clsx(
             "flex-1 min-w-0 mr-1 flex flex-col justify-between ",
             "fg-base",
-            props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2")
+            props.isMobile && (largeTitle ? "ml-3 mt-4" : "ml-3 mt-2"),
+            props.thumb && "hidden"
           )}
         >
           <div className={clsx(props.isMobile && "h-0 overflow-visible")}>
@@ -350,13 +353,16 @@ export function MusicArea(props: Props) {
           </p>
         </div>
       </div>
-      <ProgressBar
-        value={currentSec / levelLength}
-        fixedColor="bg-red-500/75"
-        className={clsx(props.isMobile ? "mx-2" : "ml-0.5 mr-1")}
-      />
+      {!props.thumb && (
+        <ProgressBar
+          value={currentSec / levelLength}
+          fixedColor="bg-red-500/75"
+          className={clsx(props.isMobile ? "mx-2" : "ml-0.5 mr-1")}
+        />
+      )}
       <button
         className={clsx(
+          props.thumb && "hidden",
           "fn-icon-button absolute",
           "fg-base",
           props.isMobile
@@ -389,7 +395,8 @@ export function MusicArea(props: Props) {
           "transition-all duration-200",
           volumeCtrlOpen
             ? "ease-out scale-100 opacity-100"
-            : "ease-in scale-0 opacity-0"
+            : "ease-in scale-0 opacity-0",
+          props.thumb && "hidden",
         )}
         style={{
           transformOrigin: props.isMobile

@@ -251,7 +251,7 @@ export default function useGameLogic(
       // const now = getCurrentTimeSec?.() ?? 0;
       for (const n of notesCopy) {
         if (n.hitTimeSec < now) {
-          judge({ note: n, judge: 5, late: 0 }, now);
+          judge({ note: n, judge: 1, late: 0 }, now);
           notesYetDone.current.shift();
         } else {
           break;

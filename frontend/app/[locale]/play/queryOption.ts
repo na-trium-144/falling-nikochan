@@ -10,6 +10,8 @@ export interface QueryOptions {
   cid?: string;
   lvIndex?: number;
 
+  thumb?: boolean;
+
   fps?: boolean; // fps表示
   speed?: boolean; // 音符の速度変化を表示 (ver13以降のなめらか速度変化に対応していません)
   result?: boolean; // ページを開いた直後にダミーのリザルト画面に遷移する
@@ -32,6 +34,7 @@ export function getQueryOptions(): QueryOptions {
     sid: q.has("sid") ? Number(q.get("sid")) : undefined,
     cid: q.get("cid") ?? undefined,
     lvIndex: q.has("lvindex") ? Number(q.get("lvindex")) : undefined,
+    thumb: toBoolean(q.get("thumb")),
     fps: toBoolean(q.get("fps")),
     speed: toBoolean(q.get("speed")),
     result: toBoolean(q.get("result")),
@@ -39,6 +42,6 @@ export function getQueryOptions(): QueryOptions {
     judgeAuto: toBoolean(q.get("judgeauto")),
     noClear: toBoolean(q.get("noclear")),
     tsOffset: toBoolean(q.get("tsoffset")),
-    seek: toBoolean(q.get("seek")),
+    seek: toBoolean(q.get("seek")) || toBoolean(q.get("thumb")),
   };
 }
