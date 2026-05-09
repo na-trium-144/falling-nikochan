@@ -91,7 +91,6 @@ const env = {
   ASSET_QUERY_CLOUD: "?v=2",
   // Sentry DSN (make available to client-side code)
   SENTRY_DSN: process.env.SENTRY_DSN || "",
-  SENTRY_SEND_PII: process.env.SENTRY_SEND_PII || "",
   // Sentry release name: "<buildVersion>-<buildCommit>"
   SENTRY_RELEASE: commit ? `${buildVersion}-${commit}` : buildVersion,
 };
