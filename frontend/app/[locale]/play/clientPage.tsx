@@ -420,6 +420,7 @@ function Play(props: Props) {
     typeof requestAnimationFrame
   > | null>(null);
   const flash = useCallback((x: FlashPos) => {
+    return;
     if (flashAnimationFrame.current !== null) {
       cancelAnimationFrame(flashAnimationFrame.current);
       flashAnimationFrame.current = null;
@@ -1484,6 +1485,25 @@ function Play(props: Props) {
           />
         </div>
       )}
+      {/*<Title
+        className="absolute left-0 top-0 h-32 scale-175 origin-top-left "
+        anim={false}
+      />*/}
+      <div
+        className="absolute inset-0 z-10 "
+        style={{ textShadow: "0.15rem 0.2rem 0.2rem rgb(0, 0, 0, 0.7)" }}
+      >
+        <div className="absolute left-32 bottom-16 ">
+          <span className="text-7xl font-bold font-title">初音ミクの激唱</span>
+          <span className="text-6xl ml-6 font-bold font-title"></span>
+        </div>
+        <div
+          className={"absolute right-8 top-72 font-bold fn-level-col-s"}
+        >
+          <span className="text-6xl ">Single-</span>
+          <span className="text-7xl ">11</span>
+        </div>
+      </div>
     </main>
   );
 }
