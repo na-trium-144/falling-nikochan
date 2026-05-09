@@ -37,6 +37,7 @@ const AceEditor = dynamic(
   { ssr: false }
 );
 import type { Selection } from "ace-builds-internal/selection";
+import type { WorkerInput } from "./luaExecWorker";
 // https://github.com/vercel/next.js/discussions/29415
 import "remote-web-worker";
 
@@ -45,17 +46,20 @@ export function useLuaExecutor(): LuaExecutor {
   const [err, setErr] = useState<string[]>([]);
   const [errLine, setErrLine] = useState<number | null>(null);
   const [running, setRunning] = useState<boolean>(false);
+  // workerは一度立てたら使いまわす。
   const worker = useRef<Worker | null>(null);
+  // コードが実行中の場合、結果を返すpromiseのresolverを保持する。
+  // 実行が完了したらresolverを呼び出した後これをnullにする。
   const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
     null
   );
 
   const abortExec = useCallback(() => {
-    if (worker.current !== null) {
-      worker.current.terminate();
-      worker.current = null;
-    }
     if (workerResolver.current !== null) {
+      if (worker.current !== null) {
+        worker.current.terminate();
+        worker.current = null;
+      }
       setRunning(false);
       setStdout([]);
       setErr(["terminated"]);
@@ -66,34 +70,36 @@ export function useLuaExecutor(): LuaExecutor {
   }, []);
   const exec = useCallback(
     (code: string) => {
-      if (worker.current !== null) {
+      if (workerResolver.current !== null) {
         abortExec();
       }
       setRunning(true);
       const p = new Promise<LevelFreeze | null>((resolve) => {
         workerResolver.current = resolve;
       });
-      worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
-      worker.current.postMessage({ code, catchError: true });
-      worker.current.addEventListener(
-        "message",
-        ({ data }: { data: LuaExecResult }) => {
-          if (workerResolver.current) {
-            setRunning(false);
-            setStdout(data.stdout);
-            setErr(data.err);
-            setErrLine(data.errorLine);
-            if (data.err.length === 0) {
-              workerResolver.current(data.levelFreezed);
+      if (worker.current === null) {
+        worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
+        worker.current.addEventListener(
+          "message",
+          ({ data }: { data: LuaExecResult }) => {
+            if (workerResolver.current) {
+              setRunning(false);
+              setStdout(data.stdout);
+              setErr(data.err);
+              setErrLine(data.errorLine);
+              if (data.err.length === 0) {
+                workerResolver.current(data.levelFreezed);
+              } else {
+                workerResolver.current(null);
+              }
+              workerResolver.current = null;
             } else {
-              workerResolver.current(null);
+              throw new Error("luaExecWorker finished but resolver is null");
             }
-            workerResolver.current = null;
-          } else {
-            console.error("luaExecWorker finished but resolver is null");
           }
-        }
-      );
+        );
+      }
+      worker.current.postMessage({ code } satisfies WorkerInput);
       return p;
     },
     [abortExec]

@@ -1,11 +1,18 @@
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import fnCommandsLib from "fn-commands?raw";
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  release: process.env.SENTRY_RELEASE,
+  enabled: process.env.NODE_ENV !== "development",
+  integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+});
 
 const worker = self as unknown as Worker;
 
-interface WorkerInput {
+export interface WorkerInput {
   code: string;
-  catchError: boolean;
 }
 
 worker.addEventListener(
@@ -15,7 +22,7 @@ worker.addEventListener(
       process.env.ASSET_PREFIX + "/wasmoon_glue.wasm",
       fnCommandsLib,
       data.code,
-      { catchError: data.catchError, needReturnValue: false }
+      { catchError: true, needReturnValue: false }
     );
     worker.postMessage(result);
   }
