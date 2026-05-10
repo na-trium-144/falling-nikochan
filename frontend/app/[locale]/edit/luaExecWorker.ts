@@ -8,6 +8,12 @@ Sentry.init({
   sendDefaultPii: false,
   enabled: process.env.NODE_ENV !== "development",
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+  transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
+  transportOptions: {
+    dbName: "sentry-offline-luaExecWorker",
+    // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any,
 });
 
 const worker = self as unknown as Worker;
