@@ -11,3 +11,4 @@ bracketSpacing: true
 objectWrap: preserve
 bracketSameLine: false
 arrowParens: always
+endOfLine: lf

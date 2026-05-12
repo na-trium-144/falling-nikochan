@@ -3,7 +3,7 @@ import { dirname, join, extname } from "node:path";
 
 const baseDir = join(process.cwd(), "out");
 const bannerContent = readFileSync(
-  join(dirname(process.cwd()), "license-banner.txt"),
+  join(dirname(process.cwd()), "frontend", "license-banner.txt"),
   "utf8"
 ).trim();
 
