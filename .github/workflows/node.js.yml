@@ -24,6 +24,8 @@ jobs:
     - run: pnpm run nbuild
       env:
         ALLOW_FETCH_ERROR: "1"
+    - name: Show output size
+      run: du -sh frontend/out/*
 
   test:
     runs-on: ubuntu-latest
@@ -101,6 +103,8 @@ jobs:
         VERSION_SUFFIX: "+#${{ github.event.number }}"
         TITLE_SUFFIX: "Preview #${{ github.event.number }}"
       run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Show output size
+      run: du -sh .vercel/output/static/*
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:
