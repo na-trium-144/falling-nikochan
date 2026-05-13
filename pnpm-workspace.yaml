@@ -16,6 +16,7 @@ allowBuilds:
 
 dedupePeers: true
 minimumReleaseAge: 0
+verifyDepsBeforeRun: warn
 
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated
