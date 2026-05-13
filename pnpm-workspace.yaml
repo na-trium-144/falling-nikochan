@@ -17,6 +17,7 @@ allowBuilds:
   unrs-resolver: true
 
 dedupePeers: true
+verifyDepsBeforeRun: warn
 
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated
