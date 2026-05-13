@@ -14,5 +14,7 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
+dedupePeers: true
+
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated
