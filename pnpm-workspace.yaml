@@ -5,5 +5,14 @@ packages:
   - route
   - worker
 
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  core-js: false
+  esbuild: true
+  protobufjs: false
+  sharp: true
+  unrs-resolver: true
+
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated
