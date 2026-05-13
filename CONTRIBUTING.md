@@ -224,6 +224,7 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 | `ALLOW_FETCH_ERROR` | frontend | `1` or unset |
 | `VERSION_SUFFIX` | frontend | string |
 | `TITLE_SUFFIX` | frontend | string |
+| `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | frontend | |
 | `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
 
 ### Vercel
