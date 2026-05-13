@@ -49,10 +49,5 @@
     "webpack-cli": "^7.0.2",
     "webpack-license-plugin": "^4.5.1",
     "yaml": "^2.8.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "sharp": "^0.34"
-    }
   }
 }
