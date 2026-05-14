@@ -8,6 +8,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 jobs:
   vercel-build:
+    if: "!contains(github.event.head_commit.message, '[no_deploy]')"
     runs-on: ubuntu-latest
     permissions:
       contents: read

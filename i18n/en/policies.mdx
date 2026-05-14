@@ -14,9 +14,10 @@ import { getLicenses } from "next-license-list";
     <Small>([/api/<wbr />openapi.<wbr />json](/api/openapi.json))</Small> is freely available
     under the MIT License.
 - Images, audio, etc. used are released under CC-BY-4.0.
-  (Specifically, the files under the [assets directory](https://github.com/na-trium-144/falling-nikochan/tree/main/frontend/public/assets).)
+  - (Specifically, the files under the [assets directory](https://github.com/na-trium-144/falling-nikochan/tree/main/frontend/public/assets).)
   - Secondary use of these materials is free, as long as the copyright and license information is displayed. <Small>([About CC
     Licenses](https://creativecommons.org/share-your-work/cclicenses/))</Small>
+  - However, if you post gameplay videos, livestreams, or screenshots using this service to social media or video-sharing sites, you do not need to display the developer or license information even if Falling Nikochan images or audio are included.
 - You can check the third-party OSS libraries used by Falling Nikochan and their respective licenses below.
   <OSSLicensesList frontendLicenses={await getLicenses()}/>
 
@@ -33,39 +34,46 @@ import { getLicenses } from "next-license-list";
   - Cloudflare Analytics: Used to understand access numbers and usage environment statistics. No cookies are used, and measurement is conducted in a privacy-conscious manner.
   - Sentry: Used to identify the cause of errors that occur when the site is running. IP addresses and information that could identify users are not transmitted.
 - Play records such as the history of the charts played by users and best scores are stored in the Local Storage of the user's browser. This information is not transmitted to our servers or third parties.
-  - On Mac Safari and iOS, these data stored in the browser may be deleted after a certain period of time. This is due to Apple's regulations and is not a bug of Falling Nikochan.
+- Local Storage and Cookies are used to store passwords when users upload charts they created. They are not used to identify personal information.
+- On Mac Safari and iOS, these data stored in the browser may be deleted after a certain period of time. This is due to Apple's regulations and is not a bug of Falling Nikochan.
 - When a user creates and uploads a chart, the user's IP address is collected and stored. It is used for rate limiting of some APIs and may be used for other purposes if the developer deems it necessary, but it will not be provided to third parties.
 
-# YouTube
+# About using YouTube videos
 
 - This service uses [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference).
   - YouTube IFrame Player API is a video embedding tool officially provided by YouTube.
     This service streams videos directly from YouTube, fully complying with its terms of service.
     This is different from downloading or storing videos that unofficial tools do.
+  - Falling Nikochan is a service unrelated to YouTube. Please do not contact YouTube about this service.
 - The rights to the videos embedded in this service belong to the original video poster (or the copyright holder of the content used in that video).
   This service does not earn revenue from video playback, etc.
-- Fallling Nikochan is a service unrelated to YouTube. Please do not contact YouTube about this service.
+- This service does not grant permission for secondary use of embedded videos. If you publish gameplay videos or livestreams using this service, you are responsible for complying with the policies of the respective rights holders regarding the music and video content from the embedded YouTube videos.
 
-# About uploading charts
+# About uploading charts and copyright
 
 - This service allows anyone to upload charts without registering as a user.
   The chart uploaded by users is stored on Falling Nikochan's server.
 - When creating a chart, you can set an editing password.
-- The password can be saved in the browser used for editing.
-  In this case, you can usually edit without entering a password, but if you change your PC or browser, or delete data stored in your browser, you may be asked to enter a password.
-- Local Storage and Cookies are used to store passwords. They are not used to identify personal information.
 - Falling Nikochan does not provide a way to reset your password if you forget it.
   Please manage it at your own risk.
-- This service is operated by an individual, so I cannot guarantee the confidentiality, integrity, or availability of the data stored on the server.
-  If data is leaked or lost due to a malicious third party or due to the developer's negligence, the developer will not be liable for any disadvantage or damage suffered by the user.
-  Please back up your data at your own risk.
+- The copyright of chart data uploaded to this service belongs to the user who uploaded it.
+  - However, the user grants this service the right to use such content free of charge and non-exclusively, to the extent necessary to provide and promote this service, including reproduction, distribution, display, and modification.
+- Please do not upload content that infringes copyright.
+  In particular, do not use illegally uploaded videos or content that the copyright holder prohibits from being used in YouTube embedding on this service.
+  - If there is a legitimate claim from a rights holder regarding copyright infringement, the developer may delete the relevant data from the server without prior notice.
+  - If you believe data was deleted by mistake despite you having legitimate rights, you may file an objection. However, if identity verification is difficult, we may not be able to respond.
 
 # Prohibited acts
 
-- Do not engage in any acts that infringe copyrights, etc.
-  In particular, do not use illegally uploaded videos or content that the copyright holder prohibits from being used in YouTube embedding on this service.
-- Do not place a load on the server with more access than necessary, or engage in any acts that disrupt the operation of the service, such as undeveloperized access to the server.
-- If the data uploaded by the user is deemed by us to be inappropriate, such as content that violates laws, public order, or good morals, or content that viewers find offensive, I may delete the data from the server or restrict the user's access to the service.
+- Do not place a load on the server with more access than necessary, or engage in any acts that disrupt the operation of the service, such as unauthorized access to the server.
+- If the data uploaded by the user is deemed by us to be inappropriate, such as content that violates laws, public order, or good morals, content that viewers find offensive, content that may interfere with operation of the service, or other inappropriate content, the developer may delete the relevant data from the server without prior notice.
+
+# Disclaimer
+
+- This service is a neutral platform that hosts content posted by users, and does not guarantee the legality of posted content.
+  The developer shall not be liable for any trouble or damage related to posted content.
+- This service is provided "as is". The developer makes no warranties, express or implied, regarding this service, including its accuracy, currency, completeness, fitness for a particular purpose, or absence of security defects.
+- The developer shall not be liable for any damage incurred by users in connection with this service, except in cases of intentional misconduct or gross negligence by the developer.
 
 # Changes to, suspension of, etc. of the service
 
