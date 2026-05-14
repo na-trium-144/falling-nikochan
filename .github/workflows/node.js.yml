@@ -155,7 +155,7 @@ jobs:
           -e API_ENV=development \
           -p 8787:8787 \
           falling-nikochan-ci:latest
-    - name: Check /en and /api/brief/102399
+    - name: Wait until container is ready
       run: |
         sleep 5
         ready=0
@@ -167,8 +167,14 @@ jobs:
           sleep 1
         done
         test "$ready" = "1"
+    - name: Check output of /en
+      run: |
+        curl -v http://localhost:8787/en  # show full output for debug
         curl -fsS http://localhost:8787/en | grep -qi '<html'
-        curl -fsS http://localhost:8787/api/brief/102399 | jq -e '.cid == "102399"' >/dev/null
+    - name: Check output of /api/brief/102399
+      run: |
+        curl -v http://localhost:8787/api/brief/102399  # show full output for debug
+        curl -fsS http://localhost:8787/api/brief/102399 | jq -e '.chartCreator == "na-trium-144"' >/dev/null
     - name: Stop container
       if: always()
       run: docker stop falling-nikochan-ci || true
