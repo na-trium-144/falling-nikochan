@@ -1,3 +1,7 @@
+## ver. 15.11 - 2026/05/14
+
+* mainCacheNameの変更とcache更新が同時実行されるとmainCacheが空になるのを修正
+
 ## ver. 15.10 - 2026/05/14
 
 * 著作権関連の利用規約の更新 [#1124](https://github.com/na-trium-144/falling-nikochan/pull/1124)
