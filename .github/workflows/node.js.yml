@@ -174,7 +174,7 @@ jobs:
       run: docker stop falling-nikochan-ci || true
 
   vercel-deploy:
-    needs: [lint, test, test-bun, vercel-build, docker-runtime-check]
+    needs: [lint, test, test-bun, vercel-build]
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
