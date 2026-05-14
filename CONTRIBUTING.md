@@ -222,8 +222,8 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 | `NO_PREFETCH` | frontend | `1` or unset |
 | `YOUTUBE_API_KEY` | backend | API key for YouTube Data API v3 |
 | `ALLOW_FETCH_ERROR` | frontend | `1` or unset |
-| `VERSION_SUFFIX` | frontend | string |
-| `TITLE_SUFFIX` | frontend | string |
+| `VERSION_SUFFIX` | frontend | suffix appended to version; `+stg` on staging, `+#PR` on preview. In development `+dev` is automatically used if not set. |
+| `TITLE_SUFFIX` | frontend | suffix appended to version, also used as sentry environment; `Staging` on staging, `Preview #PR` on preview. In development `Development` is automatically used if not set. |
 | `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | frontend | |
 | `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
 
