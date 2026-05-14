@@ -226,6 +226,16 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 | `TITLE_SUFFIX` | frontend | string |
 | `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
 
+### GitHub Action
+
+- Pushing to the main branch will deploy to the production environment.
+  - However, if the commit message contains `[no_deploy]`, it will be skipped.
+- Pushing to the staging branch will deploy to nikochan-staging.utcode.net.
+  - This URL is accessible even to non-maintainers.
+  - Adding the `staging` label to a PR will force-push the commits of that PR to the staging branch and deploy them. Do not add the `staging` label to more than one PR.
+- Creating a PR will deploy a preview using Vercel.
+  - Accessible from the URL in the vercel-deploy job log. Deployment protection may be in place, restricting access to non-maintainers.
+
 ### Vercel
 
 - Set `NODEJS_HELPERS=0`. See [honojs/hono#1256](https://github.com/honojs/hono/issues/1256).
