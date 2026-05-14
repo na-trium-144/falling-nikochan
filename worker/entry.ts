@@ -58,8 +58,8 @@ self.console = {
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
-const mainCacheName = "main2";
-const tmpCacheName = "tmp2";
+const mainCacheName = "main3";
+const tmpCacheName = "tmp3";
 const mainCache = () => caches.open(mainCacheName);
 const tmpCache = () => caches.open(tmpCacheName);
 // 設定など
