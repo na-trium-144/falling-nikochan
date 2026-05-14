@@ -150,6 +150,18 @@ let nextConfig = {
           module: false,
           ...config.resolve?.fallback,
         },
+        alias: {
+          ...(options.isServer
+            ? {
+                // サーバーサイドでのsharpのインポートでなぜかwarningが出るので除外する (結局クライアントでしか使わない)
+                "colorthief": false,
+              }
+            : {
+                // chartのdocSchemaからimportされwarningが出るので除外
+                "hono-openapi": false,
+              }),
+          ...config.resolve?.alias,
+        },
       },
       module: {
         ...config.module,
