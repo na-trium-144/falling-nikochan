@@ -76,7 +76,13 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
   );
 }
 
-export function ErrorMessage({ error }: { error: unknown }) {
+export function ErrorMessage({
+  error,
+  eventId,
+}: {
+  error: unknown;
+  eventId?: string;
+}) {
   if (error) {
     return (
       <pre
@@ -89,6 +95,7 @@ export function ErrorMessage({ error }: { error: unknown }) {
         )}
       >
         {String(error)}
+        {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
       </pre>
     );
   } else {

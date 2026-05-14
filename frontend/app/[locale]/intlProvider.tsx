@@ -12,7 +12,12 @@ function IntlProvider({
   locale: string;
 }) {
   return (
-    <NextIntlClientProvider locale={locale} messages={getMessages(locale)}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={getMessages(locale)}
+      // 使用していないが、指定しないとwarningが出る
+      timeZone="Etc/UTC"
+    >
       {children}
     </NextIntlClientProvider>
   );
