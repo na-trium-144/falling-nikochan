@@ -58,8 +58,8 @@ self.console = {
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
-const mainCacheName = "main2";
-const tmpCacheName = "tmp2";
+const mainCacheName = "main3";
+const tmpCacheName = "tmp3";
 const mainCache = () => caches.open(mainCacheName);
 const tmpCache = () => caches.open(tmpCacheName);
 // 設定など
@@ -208,13 +208,19 @@ async function initAssetsCache(config: {
     }
     const remoteVerRes = remoteRes.clone();
     const remoteVer: BuildVer = await remoteRes.json();
-    const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
-      cache.match("/buildVer").then((res) => res?.json())
+    const [cacheVer, lastMainCacheName] = await Promise.all(
+      await configCache().then((cache) => [
+        cache
+          .match("/buildVer")
+          .then((res) => res?.json() as BuildVer | undefined),
+        cache.match("/lastMainCacheName").then((res) => res?.text()),
+      ])
     );
     if (
       remoteVer.version === cacheVer?.version &&
       remoteVer.commit === cacheVer?.commit &&
-      remoteVer.date === cacheVer?.date
+      remoteVer.date === cacheVer?.date &&
+      lastMainCacheName === mainCacheName
     ) {
       return sendInitState("noUpdate");
     }
@@ -352,7 +358,10 @@ async function initAssetsCache(config: {
       })
     );
     // finished
-    await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
+    await configCache().then((cache) => {
+      cache.put("/buildVer", remoteVerRes);
+      cache.put("/lastMainCacheName", new Response(mainCacheName));
+    });
     console.log("initAssetsCache: finished");
     return sendInitState("done");
   } finally {

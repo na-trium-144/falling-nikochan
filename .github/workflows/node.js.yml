@@ -24,6 +24,8 @@ jobs:
     - run: pnpm run nbuild
       env:
         ALLOW_FETCH_ERROR: "1"
+    - name: Show output size
+      run: du -sh frontend/out/*
 
   test:
     runs-on: ubuntu-latest
@@ -100,7 +102,14 @@ jobs:
         MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
         VERSION_SUFFIX: "+#${{ github.event.number }}"
         TITLE_SUFFIX: "Preview #${{ github.event.number }}"
+        SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        SENTRY_URL: ${{ secrets.SENTRY_URL }}
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Show output size
+      run: du -sh .vercel/output/static/*
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:

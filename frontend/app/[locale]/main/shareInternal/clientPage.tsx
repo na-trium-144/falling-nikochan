@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { IndexMain } from "../main.js";
 import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
@@ -44,6 +45,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
               setRecord(await res.json());
             } catch (e) {
               console.error(e);
+              Sentry.captureException(e);
               setRecord(APIError.badResponse());
             }
           } else {

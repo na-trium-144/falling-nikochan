@@ -13,6 +13,7 @@ const exampleResult = {
   bigCount: 55,
 } as const;
 
+import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -145,6 +146,7 @@ export function InitPlay({ locale }: { locale: string }) {
             } catch (e) {
               setChartSeq(undefined);
               console.error(e);
+              Sentry.captureException(e);
               setErrorMsg(APIError.badResponse());
             }
           } else {
@@ -154,6 +156,7 @@ export function InitPlay({ locale }: { locale: string }) {
         } catch (e) {
           setChartSeq(undefined);
           console.error(e);
+          Sentry.captureException(e);
           setErrorMsg(APIError.fetchError());
         }
       })();
@@ -672,6 +675,7 @@ function Play(props: Props) {
                   );
                 } catch (e) {
                   console.error(e);
+                  Sentry.captureException(e);
                   setRecord(APIError.badResponse());
                 }
               } else {

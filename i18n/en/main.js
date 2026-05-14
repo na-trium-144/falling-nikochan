@@ -101,8 +101,7 @@ export default {
       notFound: "No charts found",
     },
     policies: {
-      // Ja:"利用規約っぽいもの" (Something like terms of use)
-      title: "(Kind of) Terms of Use",
+      title: "Terms of Use",
       license: {
         showDetail: "Show Details",
         // "× Close" button
@@ -132,7 +131,7 @@ export default {
         "Some parts may not function or display properly in earlier versions.",
       version: "Version Info",
       changelog: "Changelogs here",
-      policies: "(Kind of) Terms of Use",
+      policies: "Terms of Use",
       settings: "Settings",
       theme: "Theme",
       light: "Light",

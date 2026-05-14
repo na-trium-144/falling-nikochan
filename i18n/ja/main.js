@@ -152,7 +152,7 @@ export default {
         "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
       version: "バージョン",
       changelog: "更新履歴はこちら",
-      policies: "利用規約っぽいもの",
+      policies: "利用規約",
       settings: "設定",
       theme: "テーマ色",
       light: "ライト",
