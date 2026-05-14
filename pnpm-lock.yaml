@@ -71,13 +71,13 @@ importers:
         version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       webpack:
         specifier: ^5.105.4
-        version: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+        version: 5.105.4(webpack-cli@7.0.2)
       webpack-cli:
         specifier: ^7.0.2
         version: 7.0.2(webpack@5.105.4)
       webpack-license-plugin:
         specifier: ^4.5.1
-        version: 4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+        version: 4.5.1(webpack@5.105.4)
       yaml:
         specifier: ^2.8.3
         version: 2.8.3
@@ -153,7 +153,7 @@ importers:
         version: 1.4.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@mdx-js/loader':
         specifier: ^3.1.1
-        version: 3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+        version: 3.1.1(webpack@5.105.4(webpack-cli@7.0.2))
       '@mdx-js/react':
         specifier: ^3.1.1
         version: 3.1.1(@types/react@19.2.14)(react@19.2.4)
@@ -162,13 +162,13 @@ importers:
         version: 3.1.3
       '@next/mdx':
         specifier: 16.1.7
-        version: 16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))
+        version: 16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2)))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))
       '@sentry/browser':
         specifier: ^10.52.0
         version: 10.52.0
       '@sentry/nextjs':
         specifier: ^10.52.0
-        version: 10.52.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+        version: 10.52.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(webpack@5.105.4(webpack-cli@7.0.2))
       ace-builds:
         specifier: ^1.43.5
         version: 1.43.6
@@ -195,7 +195,7 @@ importers:
         version: 4.9.1(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(typescript@5.9.3)
       next-license-list:
         specifier: ^1.0.1
-        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+        version: 1.0.1(webpack@5.105.4(webpack-cli@7.0.2))
       pretty-checkbox:
         specifier: ^3.0.3
         version: 3.0.3
@@ -387,7 +387,7 @@ importers:
     devDependencies:
       babel-loader:
         specifier: ^10.1.1
-        version: 10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+        version: 10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2))
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -2428,9 +2428,6 @@ packages:
   '@types/node@24.10.9':
     resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
 
-  '@types/node@25.6.2':
-    resolution: {integrity: sha512-sokuT28dxf9JT5Kady1fsXOvI4HVpjZa95NKT5y9PNTIrs2AsobR4GFAA90ZG8M+nxVRLysCXsVj6eGC7Vbrlw==}
-
   '@types/object-hash@3.0.6':
     resolution: {integrity: sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w==}
 
@@ -2536,6 +2533,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@unrs/resolver-binding-android-arm-eabi@1.11.1':
     resolution: {integrity: sha512-ppLRUgHVaGRWUx0R0Ut06Mjo9gBaBkg3v/8AxusGLhsIotbBLuRk51rAzqLC8gq6NyyAojEXglNjzf6R948DNw==}
@@ -4277,10 +4275,6 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  minipass@7.1.2:
-    resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
-    engines: {node: '>=16 || 14 >=14.17'}
-
   minipass@7.1.3:
     resolution: {integrity: sha512-tEBHqDnIoM/1rXME1zgka9g6Q2lcoCkxHLuc7ODJ5BxbP5d4c2Z5cGgtXAku59200Cx7diuHTOYfSBD8n6mm8A==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -5156,9 +5150,6 @@ packages:
 
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
-
-  undici-types@7.19.2:
-    resolution: {integrity: sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg==}
 
   undici@6.24.1:
     resolution: {integrity: sha512-sC+b0tB1whOCzbtlx20fx3WgCXwkW627p4EA9uM+/tNNPkSS+eSEld6pAs9nDv7WbY1UUljBMYPtu9BCOrCWKA==}
@@ -6444,12 +6435,12 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))':
+  '@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2))':
     dependencies:
       '@mdx-js/mdx': 3.1.1
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+      webpack: 5.105.4(webpack-cli@7.0.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -6508,11 +6499,11 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/mdx@16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))':
+  '@next/mdx@16.1.7(@mdx-js/loader@3.1.1(webpack@5.105.4(webpack-cli@7.0.2)))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))':
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
-      '@mdx-js/loader': 3.1.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+      '@mdx-js/loader': 3.1.1(webpack@5.105.4(webpack-cli@7.0.2))
       '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.4)
 
   '@next/swc-darwin-arm64@16.1.7':
@@ -7106,7 +7097,7 @@ snapshots:
 
   '@sentry/core@10.52.0': {}
 
-  '@sentry/nextjs@10.52.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))':
+  '@sentry/nextjs@10.52.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0))(react@19.2.4)(webpack@5.105.4(webpack-cli@7.0.2))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.40.0
@@ -7118,7 +7109,7 @@ snapshots:
       '@sentry/opentelemetry': 10.52.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)
       '@sentry/react': 10.52.0(react@19.2.4)
       '@sentry/vercel-edge': 10.52.0
-      '@sentry/webpack-plugin': 5.2.0(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+      '@sentry/webpack-plugin': 5.2.0(webpack@5.105.4(webpack-cli@7.0.2))
       next: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.98.0)
       rollup: 4.60.2
       stacktrace-parser: 0.1.11
@@ -7198,10 +7189,10 @@ snapshots:
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.1)
       '@sentry/core': 10.52.0
 
-  '@sentry/webpack-plugin@5.2.0(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))':
+  '@sentry/webpack-plugin@5.2.0(webpack@5.105.4(webpack-cli@7.0.2))':
     dependencies:
       '@sentry/bundler-plugin-core': 5.2.0
-      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+      webpack: 5.105.4(webpack-cli@7.0.2)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7369,7 +7360,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 25.6.2
+      '@types/node': 22.19.7
 
   '@types/debug@4.1.12':
     dependencies:
@@ -7417,7 +7408,7 @@ snapshots:
 
   '@types/mysql@2.15.27':
     dependencies:
-      '@types/node': 25.6.2
+      '@types/node': 22.19.7
 
   '@types/node@22.19.7':
     dependencies:
@@ -7427,10 +7418,6 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/node@25.6.2':
-    dependencies:
-      undici-types: 7.19.2
-
   '@types/object-hash@3.0.6': {}
 
   '@types/pg-pool@2.0.7':
@@ -7439,7 +7426,7 @@ snapshots:
 
   '@types/pg@8.15.6':
     dependencies:
-      '@types/node': 25.6.2
+      '@types/node': 22.19.7
       pg-protocol: 1.13.0
       pg-types: 2.2.0
 
@@ -7459,7 +7446,7 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 25.6.2
+      '@types/node': 22.19.7
 
   '@types/twitter-text@3.1.10': {}
 
@@ -7868,12 +7855,12 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
+  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.105.4(webpack-cli@7.0.2)):
     dependencies:
       '@babel/core': 7.29.0
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+      webpack: 5.105.4(webpack-cli@7.0.2)
 
   babel-plugin-polyfill-corejs2@0.4.15(@babel/core@7.29.0):
     dependencies:
@@ -8790,7 +8777,7 @@ snapshots:
       foreground-child: 3.3.1
       jackspeak: 3.4.3
       minimatch: 9.0.9
-      minipass: 7.1.2
+      minipass: 7.1.3
       package-json-from-dist: 1.0.1
       path-scurry: 1.11.1
 
@@ -9665,8 +9652,6 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  minipass@7.1.2: {}
-
   minipass@7.1.3: {}
 
   module-details-from-path@1.0.4: {}
@@ -9724,9 +9709,9 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
+  next-license-list@1.0.1(webpack@5.105.4(webpack-cli@7.0.2)):
     dependencies:
-      webpack-license-plugin: 4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+      webpack-license-plugin: 4.5.1(webpack@5.105.4)
     transitivePeerDependencies:
       - webpack
 
@@ -9903,7 +9888,7 @@ snapshots:
   path-scurry@1.11.1:
     dependencies:
       lru-cache: 10.4.3
-      minipass: 7.1.2
+      minipass: 7.1.3
 
   path-scurry@2.0.2:
     dependencies:
@@ -10552,13 +10537,13 @@ snapshots:
 
   tapable@2.3.2: {}
 
-  terser-webpack-plugin@5.4.0(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
+  terser-webpack-plugin@5.4.0(webpack@5.105.4):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.46.1
-      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+      webpack: 5.105.4(webpack-cli@7.0.2)
 
   terser@5.46.1:
     dependencies:
@@ -10685,8 +10670,6 @@ snapshots:
   undici-types@6.21.0: {}
 
   undici-types@7.16.0: {}
-
-  undici-types@7.19.2: {}
 
   undici@6.24.1: {}
 
@@ -10824,16 +10807,16 @@ snapshots:
       import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+      webpack: 5.105.4(webpack-cli@7.0.2)
       webpack-merge: 6.0.1
 
-  webpack-license-plugin@4.5.1(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4))):
+  webpack-license-plugin@4.5.1(webpack@5.105.4):
     dependencies:
       chalk: 5.6.2
       lodash: 4.18.1
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
-      webpack: 5.105.4(webpack-cli@7.0.2(webpack@5.105.4))
+      webpack: 5.105.4(webpack-cli@7.0.2)
       webpack-sources: 3.3.4
 
   webpack-merge@6.0.1:
@@ -10844,7 +10827,7 @@ snapshots:
 
   webpack-sources@3.3.4: {}
 
-  webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)):
+  webpack@5.105.4(webpack-cli@7.0.2):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.8
@@ -10868,7 +10851,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.2
-      terser-webpack-plugin: 5.4.0(webpack@5.105.4(webpack-cli@7.0.2(webpack@5.105.4)))
+      terser-webpack-plugin: 5.4.0(webpack@5.105.4)
       watchpack: 2.5.1
       webpack-sources: 3.3.4
     optionalDependencies:
