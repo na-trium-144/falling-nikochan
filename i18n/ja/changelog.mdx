@@ -18,6 +18,8 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 - 譜面編集のタイムバーをドラッグで移動できるようにしました。
 - 譜面編集のタイムバー上の音符をクリックして選択できるようにしました。
 
+<Hidden>
+
 ## ver. 15.5 - 2026/04/15
 
 - 「人気の譜面」「新着譜面」リストを検索機能に統合しました。
@@ -29,8 +31,6 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 - Falling Nikochan のサイトURLをIFrameに埋め込んでもエラーにならないようにしました。
 - 新着譜面のRSSフィードを追加しました。
-
-<Hidden>
 
 ## ver. 15.0 - 2026/03/25
 
@@ -91,7 +91,9 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 - YouTube動画の枠の色は動画のサムネイルに合わせて変わるようにしました。
 - プレイ画面・譜面編集画面ともに音符が重なる場合の順序を今までと逆にしました。
 - 譜面編集機能
-  - <Key className="text-sm p-0.5 ">Delete</Key> キー / <Key className="text-sm p-0.5 ">BackSpace</Key> キーで音符を削除できるようにしました。
+  - <Key className="text-sm p-0.5 ">Delete</Key> キー /
+    <Key className="text-sm p-0.5 ">BackSpace</Key>
+    キーで音符を削除できるようにしました。
   - 音符を左右反転する機能を追加しました。( <Key className="text-sm p-0.5 ">M</Key> キー)
   - 1ステップのサイズと拡大表示の状態が譜面データと一緒に保存されるようにしました。
   - コードタブでカーソルと小節線位置の表示をわかりやすくしました。
@@ -134,7 +136,9 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 ## ver. 13.0 - 2025/09/21
 
-- <XLogo /> (Twitter) の公式アカウント [@nikochan144](https://twitter.com/nikochan144) を開設しました。譜面が新しく公開された際・更新された際に自動的にツイートされます。
+- <XLogo /> (Twitter) の公式アカウント
+  [@nikochan144](https://twitter.com/nikochan144)
+  を開設しました。譜面が新しく公開された際・更新された際に自動的にツイートされます。
 - 譜面編集画面に音符のタップ音とメトロノーム音を追加しました
   - タイミングタブからオン/オフ切り替えと音量を設定できます
 - 特にスマホ等で編集画面のカーソル移動が高速になりました
@@ -252,8 +256,8 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 - Falling Nikochan をPWAアプリとしてインストールして遊ぶことができるようにしました。
   - Androidでは Falling Nikochan のトップページ
-  (または [Falling Nikochan とは？](/main/about/1) の概要ページ)
-  に表示される「ホーム画面に追加」ボタンをタップすることでインストールできます。
+    (または [Falling Nikochan とは？](/main/about/1) の概要ページ)
+    に表示される「ホーム画面に追加」ボタンをタップすることでインストールできます。
   - iOSではSafariで共有ボタンから「ホーム画面に追加」を選択することでインストールできます。
   - ホーム画面からアプリとして起動するとブラウザのツールバーが非表示になり、フルスクリーンで快適にプレイできます。
   - (また、アプリとして起動した場合はアプリ全体をダウンロードしてから起動するため、インターネット接続が遅い環境でのページの読み込みが速くなります。)
@@ -263,7 +267,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
   - プレイ前のオプション画面でオン・オフを選択できます。
   - Windows,Linux,MacOS(Safari以外)とAndroidでは、音声出力の遅延分だけ自動で判定タイミングが補正されます。
   - MacOS(Safari)とiOSでは、音声出力の遅延を検出できないため、判定オフセットを手動で調整する必要がある場合があります。
-  またこのためデフォルトではタップ音はオフにしています。
+    またこのためデフォルトではタップ音はオフにしています。
 - プレイ時のYouTubeの再生音量とタップ音の音量を調整できるようにしました。
 - プレイ中に画面上部に停止ボタンを追加しました。
 
@@ -284,7 +288,8 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 
 ## ver. 9.4 - 2025/03/12
 
-- <SlimeSVG />の動きがなめらかになりました。
+- <SlimeSVG />
+  の動きがなめらかになりました。
 - その他プレイ画面の表示やエフェクトなどを一部変更しました。
 
 ## ver. 9.0 - 2025/03/11
@@ -320,7 +325,7 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
   - ローカルに保存した場合のファイルサイズが今までよりも小さくなりました。
   - ver. 7 の譜面データは自動的に ver. 8 に変換されます。この変換は100%互換性があり譜面の挙動が変わることはありません。
 - 隠し機能としてプレイ中の音符速度変化の表示を実装
-    - URLに `&speed=1` を追加すると表示されます。
+  - URLに `&speed=1` を追加すると表示されます。
 - アップロードできる譜面サイズの制限を 1000kB まで から、イベント数基準で 20000 イベントまで に変更しました
 
 ## ver. 7.15 - 2025/02/21
@@ -328,10 +333,13 @@ import { Hidden } from "@/common/mdxHiddenPart.js";
 - <img
     src={process.env.ASSET_PREFIX + "/assets/slime.svg"}
     className="inline-block w-6 "
-  /> に加えて <img
+  />
+  に加えて
+  <img
     src={process.env.ASSET_PREFIX + "/assets/slime2.svg"}
     className="inline-block w-6 "
-  /> の画像を追加し、アニメーションするようにした
+  />
+  の画像を追加し、アニメーションするようにした
 
 ## ver. 7.11 - 2025/02/14
 
