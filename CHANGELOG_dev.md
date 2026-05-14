@@ -1,3 +1,16 @@
+## ver. 15.10 - 2026/05/14
+
+* 著作権関連の利用規約の更新 [#1124](https://github.com/na-trium-144/falling-nikochan/pull/1124)
+    * 「利用規約っぽいもの」と表示していたのを正式な利用規約に変更
+* frontendにSentry導入 [#1091](https://github.com/na-trium-144/falling-nikochan/pull/1091)
+    * luaTabのコード実行のworkerを1回だけ初期化して使いまわす実装に変更
+    * SentryとCloudflareAnalyticsについて利用規約に追記
+    * jsファイルに挿入していたバナーをファイル先頭から末尾に移動
+        * これを反映するためservice workerのキャッシュキーをmain2からmain3に変更
+    * pwaInstallのエラー処理をSentry導入のついでに書き直し
+    * エラーページにSentryのeventIdの表示を追加
+* frontendビルド時のsharp,openapi,next-intlのwarningを修正 [#1127](https://github.com/na-trium-144/falling-nikochan/pull/1127)
+
 ## ver. 15.9 - 2026/04/24
 
 * search APIのDoS,ReDoS脆弱性を修正 [#1101](https://github.com/na-trium-144/falling-nikochan/pull/1101)
