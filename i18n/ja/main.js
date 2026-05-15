@@ -143,16 +143,15 @@ export default {
       showAll: "もっと見る",
     },
     links: {
-      title: "お問い合わせ先・その他リンク",
+      title: "その他",
       titleShort: "その他",
-      description: "Falling Nikochan のお問い合わせ先・その他リンクです。",
+      description: "モバイル用その他ページ",
       about: "Falling Nikochan について",
       supportedBrowsers:
         "対応ブラウザは {browserslist} です。" +
         "それ以前のバージョンでは一部正常に動作・表示しない可能性があります。",
       version: "バージョン",
       changelog: "更新履歴はこちら",
-      policies: "利用規約",
       settings: "設定",
       theme: "テーマ色",
       light: "ライト",

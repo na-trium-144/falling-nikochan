@@ -152,16 +152,15 @@ export default {
       showAll: "Show More",
     },
     links: {
-      title: "Contact and Other Links",
+      title: "Other",
       titleShort: "Other",
-      description: "Contact and other links of Falling Nikochan.",
+      description: "'Other' page for mobile UI",
       about: "About Falling Nikochan",
       supportedBrowsers:
         "Supported browsers are {browserslist}. " +
         "Some parts may not function or display properly in earlier versions.",
       version: "Version Info",
       changelog: "Changelogs here",
-      policies: "Terms of Use",
       settings: "Settings",
       theme: "Theme",
       light: "Light",

@@ -23,7 +23,7 @@ export default function LinksPage({ locale }: { locale: string }) {
       noBackButtonMobile
       locale={locale}
     >
-      <section className="fn-sect no-pc">
+      <section className="fn-sect">
         <h3 className="fn-heading-sect">{t("settings")}</h3>
         <div className="space-y-2">
           <MenuLangSwitcher locale={locale} />
@@ -31,7 +31,6 @@ export default function LinksPage({ locale }: { locale: string }) {
           <PWAInstallDesc block />
         </div>
       </section>
-      <PWAInstallDesc block className="fn-sect no-mobile" />
       <section className="fn-sect">
         <h3 className="fn-heading-sect">{t("about")}</h3>
         <div className="space-y-1">
@@ -61,19 +60,7 @@ export default function LinksPage({ locale }: { locale: string }) {
               browserslist: process.env.browserslist!,
             })}
           </p>
-          <p className="no-pc">
-            <Link
-              className={clsx("fn-link-3")}
-              href={`/${locale}/main/policies`}
-              prefetch={process.env.PREFETCH as "auto"}
-            >
-              {t("policies")}
-            </Link>
-          </p>
         </div>
-      </section>
-      <section className="fn-sect">
-        <h3 className="fn-heading-sect">{t("title")}</h3>
       </section>
     </IndexMain>
   );
