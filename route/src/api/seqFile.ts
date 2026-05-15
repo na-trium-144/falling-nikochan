@@ -114,6 +114,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           );
           break;
         case 15:
+        case 16:
           if (
             !chart.levelsMeta.at(lvIndex) ||
             !chart.levelsFreeze.at(lvIndex)

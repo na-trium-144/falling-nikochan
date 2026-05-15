@@ -1,0 +1,75 @@
+import { Key } from "@/common/key.js";
+import clsx from "clsx/lite";
+import { JudgeIcon } from "@/play/statusBox.js";
+import {
+  levelTypes,
+  goodSec,
+  okSec,
+  badFastSec,
+  badLateSec,
+  baseScoreRate,
+  chainScoreRate,
+  bigScoreRate,
+  okBaseScore,
+  // "@falling-nikochan/chart" からimportすると、 Fatal JavaScript invalid size error 169220804 でビルドできなくなる なぜ
+} from "../../chart/dist/index.js";
+
+# Game Rules
+
+- When the Nikochan (smiley faces) aligns with the judgment line, press any key (except <Key className="text-sm p-0.5">Esc</Key>) on a PC, or tap anywhere on the screen on a tablet or smartphone.
+- Regardless of the Nikochan's position or falling direction, all are the same note.
+- For larger Nikochans, pressing two keys simultaneously or tapping with two fingers will grant bonus points.
+
+# Level Difficulty
+
+export const LevelDifficulty = ({ i, lv }) => (
+  <span className={clsx("inline-block ml-0.5", "fn-level-type", levelTypes[i])}>
+    <span>{levelTypes[i]}-</span>
+    <span>{lv}</span>
+  </span>
+);
+
+export const LevelOnly = ({ i }) => (
+  <span className={clsx("mx-1", `fn-level-col-${"sdm"[i]}`)}>
+    {levelTypes[i]}
+  </span>
+);
+
+- There may be multiple charts (levels) for one song.
+  Each chart is labeled with a difficulty level such as <LevelDifficulty i={0} lv={4} />, <LevelDifficulty i={1} lv={8} />, <LevelDifficulty i={2} lv={12} />, etc.
+- Levels marked <LevelOnly i={0} /> has no simultaneous presses, so it can be easily played with one hand.
+  Levels marked <LevelOnly i={1} /> may require processing two notes simultaneously, and <LevelOnly i={2} /> may require processing three or more notes simultaneously.
+  {/*  */}
+  - You don't necessarily have to play exactly as indicated (e.g., <LevelOnly i={0} /> is for one-handed play).
+- The number after the difficulty level (1-20) indicates the difficulty of the level.
+  - The difficulty level is automatically calculated based only on the note density of the charts. Note placement patterns and the appearance of the charts are not considered, so the difficulty may not always match the indicated level. Please use this only as a guideline.
+
+# Scores
+
+- The score consists of three components: "<span className="font-bold fg-bright">Base Score</span>," "<span className="font-bold fg-bright">Combo Bonus</span>," and "<span className="font-bold fg-bright">Big Bonus</span>," with a maximum total of 120 points.
+- Based on the total score, you will be evaluated as a rank: B (70~), B+ (80~), A (90~), A+ (100~), S (110~), S+ (120~).
+
+## Base Score ({baseScoreRate} points)
+
+export const JudgeName = ({ i, name, sec }) => (
+  <span className="relative inline-block">
+    <span className="absolute left-0.5 bottom-1">
+      <JudgeIcon index={i} />
+    </span>
+    <span className="ml-5">{name}</span>
+    <span className="text-sm mx-0.5">({sec})</span>
+  </span>
+);
+
+- Depending on when the Nikochan is tapped, There is a judgment condition of <JudgeName i={0} name="Good" sec={`±${goodSec*1000}ms`} />, <JudgeName i={1} name="OK" sec={`±${okSec*1000}ms`} /> and <JudgeName i={2} name="Bad" sec={`+${badLateSec*1000}ms ~ ${badFastSec * 1000}ms)`} />.
+- If all notes are judged "Good", the total score will be {baseScoreRate}, and "OK" judgment earns {okBaseScore} times the points of a "Good" judgment.
+
+## Chain Bonus ({chainScoreRate} points)
+
+- Hitting the notes consecutively with "Good" or "OK" judgments increases the chain, and bonus points are awarded accordingly.
+
+## Big Bonus ({bigScoreRate} points)
+
+- This bonus is awarded when pressing two keys or tapping with two fingers on a big Nikochan.
+- There is only one judgment criterion: points are awarded if the timing is within ±{`${okSec * 1000}`}ms.
+- In charts with no big Nikochan, there is no Big Bonus, and the maximum score is {baseScoreRate + chainScoreRate} points.

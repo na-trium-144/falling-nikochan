@@ -36,7 +36,11 @@ export function ExternalLink(props: Props) {
     );
   } else if (props.href?.startsWith("/") && (isStandalone || isInsideFrame)) {
     return (
-      <Link className={clsx("fn-link-1", props.className)} href={props.href}>
+      <Link
+        className={clsx("fn-link-1", props.className)}
+        href={props.href}
+        prefetch={process.env.PREFETCH as "auto"}
+      >
         <LinkChildren {...props} />
       </Link>
     );

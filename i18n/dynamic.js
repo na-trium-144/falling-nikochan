@@ -1,11 +1,9 @@
 import { createTranslator } from "next-intl";
-import enAbout from "./en/about.js";
 import enEdit from "./en/edit.js";
 import enError from "./en/error.js";
 import enMain from "./en/main.js";
 import enPlay from "./en/play.js";
 import enShare from "./en/share.js";
-import jaAbout from "./ja/about.js";
 import jaEdit from "./ja/edit.js";
 import jaError from "./ja/error.js";
 import jaMain from "./ja/main.js";
@@ -21,7 +19,6 @@ export function getMessages(locale) {
   switch (locale) {
     case "en":
       return {
-        ...enAbout,
         ...enEdit,
         ...enError,
         ...enMain,
@@ -30,7 +27,6 @@ export function getMessages(locale) {
       };
     case "ja":
       return {
-        ...jaAbout,
         ...jaEdit,
         ...jaError,
         ...jaMain,

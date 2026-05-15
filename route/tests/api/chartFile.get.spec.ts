@@ -8,6 +8,7 @@ import {
   dummyChart12,
   dummyChart13,
   dummyChart14,
+  dummyChart15,
   dummyChart6,
   dummyChart7,
   dummyChart8,
@@ -81,7 +82,14 @@ describe("GET /api/chartFile/:cid", () => {
     const chart = msgpack.decode(await res.arrayBuffer()) as Chart15;
     expect(chart).to.deep.equal({ ...dummyChart(), published: true });
   });
-  currentChartVer satisfies 15; // edit tests below when chart version is bumped
+  currentChartVer satisfies 16; // edit tests below when chart version is bumped
+  test("should return Chart15 if chart version is 15", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100015?p=p");
+    expect(res.status).to.equal(200);
+    const chart = msgpack.decode(await res.arrayBuffer()) as Chart15;
+    expect(chart).to.deep.equal(dummyChart15());
+  });
   test("should return Chart14 if chart version is 14", async () => {
     await initDb();
     const res = await app.request("/api/chartFile/100014?p=p");

@@ -1,4 +1,4 @@
-body {
+:root {
   --scrollbar-color-thumb: color-mix(
     in oklab,
     var(--color-fg-base) 65%,

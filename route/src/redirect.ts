@@ -13,23 +13,54 @@ const redirectApp = (config: {
     .use(config?.languageDetector || languageDetector())
     .get("/edit/:cid", (c) => {
       // deprecated (used until ver6.15)
+      const q = new URLSearchParams(new URL(c.req.url).search);
       const cid = c.req.param("cid");
-      return c.redirect(new URL(`/edit?cid=${cid}`, backendOrigin(c)), 301);
+      q.set("cid", cid);
+      return c.redirect(new URL(`/edit?${q}`, backendOrigin(c)), 301);
     })
     .get("/:lang/main/:sort{latest|popular}", (c) => {
       // deprecated (used until ver15.3)
+      const q = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.req.param("lang");
       const sort = c.req.param("sort");
+      q.set("sort", sort);
       return c.redirect(
-        new URL(`/${lang}/main/play?sort=${sort}`, backendOrigin(c)),
+        new URL(`/${lang}/main/play?${q}`, backendOrigin(c)),
         301
       );
     })
+    .get("/:lang/main/about/:page", (c) => {
+      // deprecated (used until ver15.12)
+      const q = new URLSearchParams(new URL(c.req.url).search);
+      const lang = c.req.param("lang");
+      const page = Number(c.req.param("page"));
+      switch (page) {
+        case 1:
+        case 2:
+          return c.redirect(
+            new URL(`/${lang}?${q}#feature-play`, backendOrigin(c)),
+            301
+          );
+        case 3:
+          return c.redirect(
+            new URL(`/${lang}?${q}#feature-edit`, backendOrigin(c)),
+            301
+          );
+        case 4:
+        case 5:
+          return c.redirect(
+            new URL(`/${lang}/main/about?${q}`, backendOrigin(c)),
+            301
+          );
+        default:
+          return c.notFound();
+      }
+    })
     .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
-      const params = new URLSearchParams(new URL(c.req.url).search);
+      const q = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.get("language");
       const redirected = new URL(
-        `/${lang}${c.req.path}${params ? "?" + params : ""}`,
+        `/${lang}${c.req.path}?${q}`,
         backendOrigin(c)
       );
       if (isbot(c.req.header("User-Agent"))) {

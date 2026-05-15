@@ -1,3 +1,12 @@
+## ver. 16.0 - 2026/05/15
+
+* タイトルページのリニューアル [#1092](https://github.com/na-trium-144/falling-nikochan/pull/1092)
+    * /main/about/{1..5} を廃止し、MDXベースの /main/about を新設（i18nメッセージも整理）
+    * PC向けヘッダー/メニュー（PCHeader/PCHeader2）の導入と、フッター/リンクページ等の構造整理
+    * トップページにデモ表示・人気譜面ショーケース等を追加し、ChartList を横スクロール/大カード表示に拡張
+* route/redirect.tsのリダイレクトがクエリを保持していなかったのを修正
+* 以降バージョン番号の記述をfrontendとrouteだけにし、それ以外のpackage.jsonからバージョン表記を削除
+
 ## ver. 15.11 - 2026/05/14
 
 * mainCacheNameの変更とcache更新が同時実行されるとmainCacheが空になるのを修正

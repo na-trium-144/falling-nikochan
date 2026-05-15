@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { WarningBox } from "./box";
 
-export function RedirectedWarning() {
+export function RedirectedWarning(props: { className?: string }) {
   const t = useTranslations("main");
   const [showRedirectWarning, setShowRedirectWarning] =
     useState<boolean>(false);
@@ -18,7 +18,7 @@ export function RedirectedWarning() {
   );
 
   return (
-    <WarningBox hidden={!showRedirectWarning}>
+    <WarningBox hidden={!showRedirectWarning} classNameOuter={props.className}>
       <Caution className="inline-block align-middle mr-1 " />
       {t.rich("redirected", {
         url: () => (

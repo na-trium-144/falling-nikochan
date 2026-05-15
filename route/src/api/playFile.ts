@@ -112,6 +112,7 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           level = convertToPlay15(await convertTo15(chart), lvIndex);
           break;
         case 15:
+        case 16:
           if (
             !chart.levelsMeta.at(lvIndex) ||
             !chart.levelsFreeze.at(lvIndex)

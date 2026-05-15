@@ -9,6 +9,11 @@ interface Props {
   anim?: boolean;
   className?: string;
 }
+/**
+ * このTitleコンポーネントはサイズを変えられない。サイズを変えたいときはscaleで変える。
+ * 横方向は中央揃え、縦方向は下揃えになる(heightを指定すると上のマージンが変わる)
+ * 仕様を変えると既存のレイアウトが崩れそうで触りたくない。
+ */
 export default function Title(props: Props) {
   const [nikochanPhase, setNikochanPhase] = useState<number>(
     props.anim ? 0 : 2
