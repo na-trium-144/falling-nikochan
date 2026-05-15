@@ -32,7 +32,7 @@ export function IndexMain(props: Props) {
       </MobileHeader>
       <PCHeader locale={locale} />
       <PCHeader2 className="absolute top-0 right-0" locale={locale} />
-      <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2"/>
+      <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />
       <div
         className={clsx(
           "w-full overflow-hidden",

@@ -24,7 +24,6 @@
       @apply pb-2 pt-2;
       @apply rounded-2xl;
     }
-
   }
   .fn-mf-blur {
     @apply z-mf-blur w-full h-mobile-footer;
