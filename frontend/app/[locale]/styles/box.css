@@ -32,7 +32,7 @@
 
   .fn-warning-box {
     /* for WarningBox component */
-    @apply text-center text-sm mx-6 my-2 p-3 h-max;
+    @apply text-center text-sm p-3 h-max;
     @apply rounded-sq-2xl;
     @apply relative;
   }

@@ -122,7 +122,7 @@ export default function ShareChart(props: Props) {
       <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
 
       <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
-      <RedirectedWarning />
+      <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2"/>
       <div className="w-full max-w-main px-3 main-wide:px-6 grid-centering mb-12">
         <Box classNameOuter="w-full main-wide:w-max h-max max-w-full p-6">
           <ShareBox

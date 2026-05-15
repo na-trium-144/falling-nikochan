@@ -111,7 +111,11 @@ export function CenterBox(props: Props) {
 export function WarningBox(props: Props) {
   return (
     <div
-      className={clsx("fn-warning-box", props.hidden && "hidden")}
+      className={clsx(
+        "fn-warning-box",
+        props.hidden && "hidden",
+        props.classNameOuter
+      )}
       ref={props.refOuter}
       style={props.styleOuter}
       onClick={props.onClick}

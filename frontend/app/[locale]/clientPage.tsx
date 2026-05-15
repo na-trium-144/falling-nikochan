@@ -198,13 +198,14 @@ export default function TopPage(props: Props) {
               "w-full max-w-main",
               "flex flex-col items-center text-center",
               "justify-start px-3 gap-6",
-              "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0 demo-wide:gap-12"
+              "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0",
+              "min-[64rem]:gap-8 min-[82rem]:gap-12"
             )}
           >
-            <h1 className="text-4xl min-[64rem]:text-6xl min-[80rem]:text-8xl semibold-by-stroke">
+            <h1 className="text-4xl min-[64rem]:text-6xl min-[82rem]:text-8xl semibold-by-stroke">
               Falling Nikochan
             </h1>
-            <p className="text-xl min-[64rem]:text-2xl min-[80rem]:text-3xl">
+            <p className="text-xl min-[64rem]:text-2xl min-[82rem]:text-3xl">
               {t("description")}
             </p>
             <Link
@@ -227,14 +228,13 @@ export default function TopPage(props: Props) {
               <ButtonHighlight />
               {t("playNow")}
             </Link>
+            <FestivalLink {...fes} className="text-center" />
+            <RedirectedWarning />
+            <PWAInstallMain />
           </section>
           <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
         </div>
       </div>
-
-      <FestivalLink {...fes} className="my-2 px-6 text-center " />
-      <RedirectedWarning />
-      <PWAInstallMain />
 
       <div className="w-full max-w-main px-3 mb-8 main-wide:px-6 main-wide:mb-12">
         <Box
@@ -355,7 +355,7 @@ export function Features({ locale }: { locale: string }) {
       >
         <div
           className={clsx(
-            "flex-1 flex flex-col items-center justify-center text-center",
+            "flex-1 flex flex-col items-center justify-center text-center"
           )}
         >
           <h2 className="fn-heading-sect text-3xl mb-4">
@@ -390,7 +390,10 @@ export function Features({ locale }: { locale: string }) {
             </Link>
           </div>
         </div>
-        <Box classNameOuter="w-full main-wide:w-3/7 main-wide:-mr-3" padding={4.5}>
+        <Box
+          classNameOuter="w-full main-wide:w-3/7 main-wide:-mr-3"
+          padding={4.5}
+        >
           <div className="relative w-full aspect-[1.6] overflow-hidden">
             <img
               src={
@@ -421,7 +424,7 @@ export function Features({ locale }: { locale: string }) {
       >
         <div
           className={clsx(
-            "flex-1 flex flex-col items-center justify-center text-center",
+            "flex-1 flex flex-col items-center justify-center text-center"
           )}
         >
           <h2 className="fn-heading-sect text-3xl mb-4">
@@ -459,7 +462,10 @@ export function Features({ locale }: { locale: string }) {
             {t("editNow")}
           </Link>
         </div>
-        <Box classNameOuter="w-full main-wide:w-3/7 main-wide:-ml-3" padding={4.5}>
+        <Box
+          classNameOuter="w-full main-wide:w-3/7 main-wide:-ml-3"
+          padding={4.5}
+        >
           <img
             src={
               process.env.ASSET_PREFIX +
