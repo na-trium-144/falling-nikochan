@@ -89,6 +89,7 @@ const env = {
   ASSET_QUERY_ICON: "?v=4",
   ASSET_QUERY_NIKOCHAN: "?v=2",
   ASSET_QUERY_CLOUD: "?v=2",
+  ASSET_LP: "?v=1",
   // Sentry DSN (make available to client-side code)
   SENTRY_DSN: process.env.SENTRY_DSN || "",
   // Sentry release name: "<buildVersion>-<buildCommit>"

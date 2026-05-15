@@ -349,14 +349,13 @@ export function Features({ locale }: { locale: string }) {
       <section
         className={clsx(
           "w-full max-w-main flex",
-          "flex-col gap-4 mb-8",
-          "main-wide:flex-row main-wide:gap-4 main-wide:mb-12"
+          "flex-col gap-4 mb-8 px-3",
+          "main-wide:flex-row main-wide:gap-4 main-wide:mb-12 main-wide:pl-12 main-wide:pr-0"
         )}
       >
         <div
           className={clsx(
             "flex-1 flex flex-col items-center justify-center text-center",
-            "px-3 main-wide:px-12"
           )}
         >
           <h2 className="fn-heading-sect text-3xl mb-4">
@@ -391,20 +390,38 @@ export function Features({ locale }: { locale: string }) {
             </Link>
           </div>
         </div>
-        <div className="basis-2/5 border">イメージ画像</div>
+        <Box classNameOuter="w-full main-wide:w-3/7 main-wide:-mr-3" padding={4.5}>
+          <div className="relative w-full aspect-[1.6] overflow-hidden">
+            <img
+              src={
+                process.env.ASSET_PREFIX +
+                "/assets/lp-play.jpg" +
+                process.env.ASSET_LP
+              }
+              className="absolute bottom-[10%] left-[-1%] w-[70%]"
+            />
+            <img
+              src={
+                process.env.ASSET_PREFIX +
+                "/assets/lp-play-mobile.jpg" +
+                process.env.ASSET_LP
+              }
+              className="absolute right-[-4%] top-0 h-[105%] rotate-3 origin-top-right"
+            />
+          </div>
+        </Box>
       </section>
 
       <section
         className={clsx(
-          "w-full max-w-main flex",
-          "flex-col gap-4 mb-8",
-          "main-wide:flex-row-reverse main-wide:gap-4 main-wide:mb-12"
+          "w-full max-w-main flex items-center",
+          "flex-col gap-4 mb-8 px-3",
+          "main-wide:flex-row-reverse main-wide:gap-4 main-wide:mb-12 main-wide:pl-0 main-wide:pr-12"
         )}
       >
         <div
           className={clsx(
             "flex-1 flex flex-col items-center justify-center text-center",
-            "px-3 main-wide:px-12"
           )}
         >
           <h2 className="fn-heading-sect text-3xl mb-4">
@@ -442,7 +459,16 @@ export function Features({ locale }: { locale: string }) {
             {t("editNow")}
           </Link>
         </div>
-        <div className="basis-2/5 border">イメージ画像</div>
+        <Box classNameOuter="w-full main-wide:w-3/7 main-wide:-ml-3" padding={4.5}>
+          <img
+            src={
+              process.env.ASSET_PREFIX +
+              "/assets/lp-edit.jpg" +
+              process.env.ASSET_LP
+            }
+            className="w-full"
+          />
+        </Box>
       </section>
     </>
   );

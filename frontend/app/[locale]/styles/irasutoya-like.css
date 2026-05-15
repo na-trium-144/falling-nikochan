@@ -3,7 +3,7 @@
     @apply w-screen h-dvh overflow-hidden;
   }
   &:has(> body > .fn-body-scrollable) {
-    @apply w-screen min-h-dvh overflow-x-clip;
+    @apply w-full min-h-dvh overflow-x-clip;
   }
 }
 body.fn-body {
