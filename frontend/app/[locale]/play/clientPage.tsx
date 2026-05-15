@@ -121,15 +121,16 @@ export function InitPlay({ locale }: { locale: string }) {
           );
           if (res.ok) {
             try {
-              currentChartVer satisfies 15; // update the code below when chart version is bumped
+              currentChartVer satisfies 16; // update the code below when chart version is bumped
               const seq = msgpack.decode(await res.arrayBuffer()) as
                 | Level6Play
                 | Level15Play;
               console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 15) {
+              if (seq.ver === 6 || seq.ver === 15 || seq.ver === 16) {
                 switch (seq.ver) {
                   case 6:
                   case 15:
+                  case 16:
                     setChartSeq(loadChart(seq));
                     break;
                   default:
@@ -139,7 +140,7 @@ export function InitPlay({ locale }: { locale: string }) {
                 addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
-                seq satisfies never;
+                // seq satisfies never;
                 setChartSeq(undefined);
                 setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
               }

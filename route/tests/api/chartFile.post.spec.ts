@@ -6,6 +6,7 @@ import {
   dummyChart12,
   dummyChart13,
   dummyChart14,
+  dummyChart15,
   dummyChart4,
   dummyCid,
   dummyDate,
@@ -231,7 +232,7 @@ describe("POST /api/chartFile/:cid", () => {
     expect(body).to.deep.equal({ message: "tooManyEvent" });
   });
   describe("should return 409 for chart version older than 14", () => {
-    currentChartVer satisfies 15; // edit this test when chart version is bumped
+    currentChartVer satisfies 16; // edit this test when chart version is bumped
     test("version 13", async () => {
       await initDb();
       const res = await app.request("/api/chartFile/100000?p=p", {
@@ -266,13 +267,13 @@ describe("POST /api/chartFile/:cid", () => {
       expect(body).to.deep.equal({ message: "oldChartVersion" });
     });
   });
-  test("should update chart for chart version 14", async () => {
-    currentChartVer satisfies 15; // edit this test when chart version is bumped
+  test("should update chart for chart version 15", async () => {
+    currentChartVer satisfies 16; // edit this test when chart version is bumped
     await initDb();
     const res = await app.request("/api/chartFile/100000?p=p", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
-      body: msgpack.encode({ ...dummyChart14(), title: "updated" }),
+      body: msgpack.encode({ ...dummyChart15(), title: "updated" }),
     });
     expect(res.status).to.equal(204);
 

@@ -247,7 +247,7 @@ export async function LevelFreeze15Doc(): Promise<Schema> {
 
 export const LevelPlaySchema15 = () =>
   v.object({
-    ver: v.union([v.literal(15)]),
+    ver: v.union([v.literal(15), v.literal(16)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     notes: v.array(NoteCommandSchema15()),
     bpmChanges: v.array(BPMChangeSchema15()),
@@ -309,7 +309,7 @@ export const ChartSchema15 = () =>
   v.pipe(
     v.object({
       falling: v.literal("nikochan"),
-      ver: v.union([v.literal(15)]),
+      ver: v.union([v.literal(15), v.literal(16)]),
       offset: v.pipe(v.number(), v.minValue(0)),
       ytId: v.string(),
       title: v.string(),
