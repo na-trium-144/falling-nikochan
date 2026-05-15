@@ -70,7 +70,7 @@ export function FestivalLink(props: Props) {
               props.large ? (
                 <img
                   src="https://utcode.net/utcode-logo/normal.svg"
-                  className="inline-block h-[1.5em] -translate-y-[0.1em]"
+                  className="fn-utc-img inline-block h-[1.5em] -translate-y-[0.1em]"
                 />
               ) : (
                 "ut.code();"
