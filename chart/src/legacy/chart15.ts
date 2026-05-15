@@ -433,6 +433,26 @@ export async function convertTo15(chart: ChartUntil14): Promise<Chart15> {
     ...others,
     ver: 15,
     levelsMeta: chart.levelsMin,
+    levelsFreeze: chart.levelsFreeze.map((l) => ({
+      ...l,
+      bpmChanges: l.bpmChanges.map((b) => ({
+        step: b.step,
+        bpm: b.bpm,
+        luaLine: b.luaLine,
+      })),
+      speedChanges: l.speedChanges.map((b) => ({
+        step: b.step,
+        bpm: b.bpm,
+        interp: b.interp,
+        luaLine: b.luaLine,
+      })),
+      signature: l.signature.map((s) => ({
+        step: s.step,
+        offset: s.offset,
+        bars: s.bars,
+        luaLine: s.luaLine,
+      })),
+    })),
     copyBuffer: Object.fromEntries(
       chart.copyBuffer.map((entry, i) => [
         String(i),
