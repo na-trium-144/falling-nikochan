@@ -80,7 +80,6 @@ interface Props2 {
   backdropBlur?: boolean;
 }
 export function PCHeader2(props: Props2) {
-  const t = useTranslations("main");
   const [showChangeLog, setShowChangeLog] = useState<boolean>(false);
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);

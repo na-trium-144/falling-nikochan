@@ -466,7 +466,7 @@ export default function FallingWindow(props: Props) {
       )}
       {boxSize && marginX !== undefined && marginY !== undefined && (
         <NikochansMemo
-          blur={props.blur}
+          blur={!!props.blur}
           displayNotes={displayNotes.current}
           notes={notes}
           noteSize={noteSize}

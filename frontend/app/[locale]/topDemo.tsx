@@ -7,7 +7,6 @@ import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
-import { ButtonHighlight } from "./common/button";
 import { ChartListItem } from "./main/chartList";
 
 export interface DemoChart {
