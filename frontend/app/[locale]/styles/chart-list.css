@@ -36,11 +36,11 @@
       --thumbnail-height: 2.25rem;
     }
 
-    &.fn-cl-big {
+    &.fn-cl-big-v {
       --item-min-width: 21.5rem;
       --item-max-width: 21.5rem;
       --item-gap: 1rem;
-      --item-height: 18.5rem;
+      --item-height: 19.5rem;
       --thumbnail-height: 11.25rem;
 
       /* Gridを解除し、折り返しなしのFlexに変更 */
@@ -51,6 +51,31 @@
         @apply rounded-sq-xl;
         > .fn-flat-button {
           @apply flex-col items-stretch p-3;
+        }
+      }
+    }
+
+    &.fn-cl-big-h {
+      --item-min-width: 24rem;
+      --item-max-width: calc(
+        var(--thumbnail-height) * 16 / 9 * 2 + var(--spacing) * 3 * 2
+      );
+      --item-gap: 1rem;
+      --item-height: 0;
+      /*
+      縦が短い場合 → 15vh ただし5remより小さくしない
+      横が短い場合 → 42vw ただし11.25remより大きくしない
+      */
+      --thumbnail-height: min(max(15vh, 5rem), calc(42vw * 9 / 16), 11.25rem);
+
+      /* Gridを解除し、折り返しなしのFlexに変更 */
+      @apply flex;
+      @apply py-1; /* x方向スクロール可能にする際にoverflow-clipでshadowが見切れるのを防ぐ */
+
+      .fn-cl-item {
+        @apply rounded-sq-xl;
+        > .fn-flat-button {
+          @apply flex-row-reverse p-3 gap-0;
         }
       }
     }

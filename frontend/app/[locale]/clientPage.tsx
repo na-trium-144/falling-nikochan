@@ -253,7 +253,7 @@ export default function TopPage(props: Props) {
             showLoading
             badge
             fixedRows={6}
-            big
+            big="v"
           />
           <ChartList
             classNameOuter="no-pc"

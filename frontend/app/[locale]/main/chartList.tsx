@@ -101,7 +101,7 @@ interface Props {
   onMoreClick?: () => void;
   badge?: boolean;
   small?: boolean;
-  big?: boolean;
+  big?: "h" | "v";
 }
 export function ChartList(props: Props) {
   const t = useTranslations("main.chartList");
@@ -346,11 +346,11 @@ export function ChartList(props: Props) {
         className={clsx(
           "fn-chart-list",
           props.small && "fn-cl-small",
-          props.big && "fn-cl-big"
+          props.big && "fn-cl-big-" + props.big
         )}
         padding={props.big ? 4 : undefined}
-        scrollableX={props.big}
-        carouselX={props.big}
+        scrollableX={!!props.big}
+        carouselX={!!props.big}
       >
         {Array.from(new Array(Math.max(filteredNumRows, fixedRow))).map(
           (_, i) =>
@@ -503,7 +503,7 @@ interface CProps {
   dateDiff?: boolean;
   badge?: boolean;
   small?: boolean;
-  big?: boolean;
+  big?: "h" | "v";
   noDefaultColor?: boolean;
 }
 export function ChartListItem(props: CProps) {
@@ -647,22 +647,24 @@ function ChartListItemChildren(props: CProps) {
                 </span>
               </div>
             )}
-            <div className="h-5 **:leading-5">
+            <div className="h-4.5 **:leading-4.5">
               {props.creator && (
-                <span className="flex-1 min-w-0 fn-cl-clip">
+                <span className="fn-cl-clip">
                   <span className="text-xs">{t("chartCreator")}:</span>
                   <span className="ml-1 font-title text-sm fg-bright">
                     {props.brief?.chartCreator}
                   </span>
                 </span>
               )}
+            </div>
+            <div
+              className={clsx(
+                "h-4.5 **:leading-4.5",
+                props.big === "v" && "justify-end"
+              )}
+            >
               {props.badge && (
-                <div
-                  className={clsx(
-                    "flex-none fn-cl-clip mr-2",
-                    props.creator && "min-w-0 max-w-1/2 ml-2"
-                  )}
-                >
+                <div className="fn-cl-clip">
                   {props.brief?.levels
                     .filter((l) => !l.unlisted)
                     .map((l, i) => (

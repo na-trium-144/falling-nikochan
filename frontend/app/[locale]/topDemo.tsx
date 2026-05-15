@@ -78,20 +78,22 @@ export function TopDemo(
       fetch(
         process.env.BACKEND_PREFIX +
           `/api/seqFile/${props.cid}/${props.lvIndex}`
-      )
-        .then((res) => res.arrayBuffer())
-        .then((buf) => {
-          const seq = msgpack.decode(buf) as ChartSeqData;
-          resetNotesAll(
-            seq.notes.map((n) => ({
-              ...n,
-              done: 0,
-              bigDone: false,
-            })),
-            props.offset! - seq.offset
-          );
-          currentTimeSec.current = props.offset! - seq.offset;
-        });
+      ).then((res) => {
+        if (res.ok) {
+          res.arrayBuffer().then((buf) => {
+            const seq = msgpack.decode(buf) as ChartSeqData;
+            resetNotesAll(
+              seq.notes.map((n) => ({
+                ...n,
+                done: 0,
+                bigDone: false,
+              })),
+              props.offset! - seq.offset
+            );
+            currentTimeSec.current = props.offset! - seq.offset;
+          });
+        }
+      });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
 
@@ -132,9 +134,13 @@ export function DemoDetail(
   const [brief, setBrief] = useState<ChartBrief>();
   useEffect(() => {
     if (!brief && props.cid) {
-      fetch(process.env.BACKEND_PREFIX + `/api/brief/${props.cid}`)
-        .then((res) => res.json())
-        .then((brief: ChartBrief) => setBrief(brief));
+      fetch(process.env.BACKEND_PREFIX + `/api/brief/${props.cid}`).then(
+        (res) => {
+          if (res.ok) {
+            res.json().then((brief: ChartBrief) => setBrief(brief));
+          }
+        }
+      );
     }
   }, [brief, props.cid]);
 
@@ -161,7 +167,7 @@ export function DemoDetail(
       <ul
         className={clsx(
           "hidden demo-wide:grid",
-          "fn-chart-list fn-cl-big w-(--item-max-width)",
+          "fn-chart-list fn-cl-big-v w-(--item-max-width)",
           "transition-[translate,opacity] duration-1000 ease-out",
           show ? "" : "opacity-0 translate-y-1"
         )}
@@ -175,14 +181,14 @@ export function DemoDetail(
           onClick={() => props.onClick(props.cid!, brief)}
           onClickMobile={() => props.onClickMobile(props.cid!, brief)}
           badge
-          big={true}
+          big="v"
           noDefaultColor
         />
       </ul>
       <ul
         className={clsx(
           "demo-wide:hidden",
-          "fn-chart-list",
+          "fn-chart-list fn-cl-big-h w-[min(var(--item-max-width),var(--item-min-width))] max-w-full",
           "transition-[translate,opacity] duration-1000 ease-out",
           show ? "" : "opacity-0 translate-y-1"
         )}
@@ -196,7 +202,7 @@ export function DemoDetail(
           onClick={() => props.onClick(props.cid!, brief)}
           onClickMobile={() => props.onClickMobile(props.cid!, brief)}
           badge
-          big={false}
+          big="h"
           noDefaultColor
         />
       </ul>
