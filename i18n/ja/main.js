@@ -12,7 +12,7 @@ export default {
     redirected:
       "2025年3月に Falling Nikochan のサイトのURLは <url></url> に移転しました。",
     back: "戻る",
-    popular: "人気の譜面",
+    popular: "人気の楽曲",
     howToPlay: {
       title: "Falling Nikochan とは？",
       content1:

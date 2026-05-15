@@ -34,15 +34,15 @@
   }
 
   .fn-pc-header {
-    @apply flex items-center gap-3 h-pc-header;
+    @apply flex items-center gap-4 h-pc-header;
     @apply w-full;
 
     > nav {
-      @apply flex-none flex flex-row gap-3 text-lg;
+      @apply flex-none flex flex-row gap-4 text-lg;
     }
   }
   .fn-pc-header2 {
-    @apply flex items-center gap-3 h-pc-header;
+    @apply flex items-center gap-4 h-pc-header;
     @apply justify-end pr-6 pl-3 z-header2;
   }
 

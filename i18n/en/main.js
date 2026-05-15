@@ -7,10 +7,34 @@ export default {
     descriptionVerbose:
       "Falling Nikochan is a simple and cute rhythm game, " +
       "where anyone can create and share charts.",
+    playNow: "Play Now",
+    editNow: "Chart Editor",
+    popularMore: "Show More",
     redirected:
       "The URL of Falling Nikochan site has been moved to <url></url> in March 2025.",
     // "← Back" button
     back: "Back",
+    popular: "Popular Songs",
+    howToPlay: {
+      title: "What is Falling Nikochan?",
+      content1:
+        "A simple and cute rhythm game that you can play from your browser without downloading.",
+      content3:
+        "The rule is simple: when Nikochan (smiley faces) overlaps the line, you press a key or tap anywhere on the screen. " +
+        "It's easy to play not only on PCs but also on tablets and smartphones.",
+      content5:
+        "You can hit big Nikochans just like normal Nikochans, " +
+        "but if you press two keys at the same time or tap with two fingers, you will get more score than usual.",
+      about: "Learn more about the game rule",
+    },
+    howToEdit: {
+      title: "Create Charts",
+      content1: "In Falling Nikochan, anyone can create and publish charts.",
+      content2:
+        "It plays sound sources by embedding <youtube>YouTube</youtube>, so you can use any music uploaded to YouTube.",
+      content5:
+        "You can share the charts you create with other users by providing them with either the issued chart ID (a 6-digit number) or the URL (<url></url>).",
+    },
     pwa: {
       // Android Chrome
       installWithPrompt:
@@ -31,13 +55,10 @@ export default {
       updateDone: "Update completed!",
       updateFailed: "Update failed...",
     },
-    inputId: "Enter Chart ID",
-    inputIdDesc: "Enter the ID of the chart you want to play.",
-    inputIdDesc2: "You can also play by accessing the chart URL (<url></url>).",
-    // concatenated after description, in the top page
-    aboutNikochan: "Learn more about Falling Nikochan",
     about: {
-      title: "About Falling Nikochan",
+      title: "Game Specifications",
+      description:
+        "Regarding the rules, judgment, and scoring specifications of Falling Nikochan as a rhythm game.",
     },
     top: {
       // used in mobile navigation
@@ -48,6 +69,7 @@ export default {
       title: "Play with Public Charts",
       // mobile navigation
       titleShort: "Play",
+      titleHeader: "Game Play",
       description: "List of published charts.",
       descriptionX:
         "Updates are also announced on the official account of <xlogo></xlogo> <twitter>@nikochan144</twitter>.",
@@ -68,6 +90,7 @@ export default {
     edit: {
       title: "Create a Chart",
       titleShort: "Create",
+      titleHeader: "Chart Editor",
       description:
         "Welcome to Falling Nikochan chart editor. " +
         "You can create charts without an account. " +
@@ -102,6 +125,7 @@ export default {
     },
     policies: {
       title: "Terms of Use",
+      titleShort: "Terms of Use",
       license: {
         showDetail: "Show Details",
         // "× Close" button
@@ -109,6 +133,12 @@ export default {
         // "Source: https://github.com/username/repo↗︎"
         source: "Source",
       },
+      content1: "Falling Nikochan is open source.",
+      content2:
+        "Falling Nikochan can be used without user registration for both playing and creating charts, and does not collect personal information.",
+      content3:
+        "The music and videos used in the game are played by directly embedding the videos in accordance with YouTube's terms of service, " +
+        "and the rights to the videos belong to the original copyright holders.",
     },
     version: {
       title: "Version Info",
