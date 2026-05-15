@@ -32,8 +32,15 @@ const redirectApp = (config: {
       switch (page) {
         case 1:
         case 2:
+          return c.redirect(
+            new URL(`/${lang}#feature-play`, backendOrigin(c)),
+            301
+          );
         case 3:
-          return c.redirect(new URL(`/${lang}`, backendOrigin(c)), 301);
+          return c.redirect(
+            new URL(`/${lang}#feature-edit`, backendOrigin(c)),
+            301
+          );
         case 4:
         case 5:
           return c.redirect(

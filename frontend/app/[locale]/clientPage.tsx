@@ -172,6 +172,7 @@ export default function TopPage(props: Props) {
       ) : null}
 
       <div
+        id="top"
         className={clsx(
           "w-full h-screen flex items-center justify-center",
           "flex-col demo-wide:flex-row-reverse"
@@ -235,7 +236,10 @@ export default function TopPage(props: Props) {
         </div>
       </div>
 
-      <div className="w-full max-w-main px-3 mb-8 main-wide:px-6 main-wide:mb-12">
+      <div
+        id="popular"
+        className="w-full max-w-main px-3 mb-8 main-wide:px-6 main-wide:mb-12"
+      >
         <Box
           classNameOuter="w-full text-center"
           classNameInner="flex flex-col items-center"
@@ -341,6 +345,7 @@ export function Features({ locale }: { locale: string }) {
   return (
     <>
       <section
+        id="feature-play"
         className={clsx(
           "w-full max-w-main flex",
           "flex-col gap-4 mb-8 px-3",
@@ -410,6 +415,7 @@ export function Features({ locale }: { locale: string }) {
       </section>
 
       <section
+        id="feature-edit"
         className={clsx(
           "w-full max-w-main flex items-center",
           "flex-col gap-4 mb-8 px-3",
