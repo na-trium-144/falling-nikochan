@@ -34,6 +34,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant demo-wide {
   /* 画面幅が一定以下 or 画面が縦長 のときデモ画面をモバイルレイアウトにする */
+  /* 正方形は縦長扱い */
   @variant main-wide {
     @variant landscape {
       @slot;

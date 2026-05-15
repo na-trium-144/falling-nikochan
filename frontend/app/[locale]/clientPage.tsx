@@ -38,7 +38,7 @@ export default function TopPage(props: Props) {
 
   const { isMobileMain, screenWidth, screenHeight, rem, statusScale } =
     useDisplayMode();
-  const isMobilePlay = screenWidth < screenHeight;
+  const isMobilePlay = screenWidth <= screenHeight;
   // 画面幅が一定以下 or 画面が縦長 のときデモ画面をモバイルレイアウトにする
   const isMobileEither = isMobileMain || isMobilePlay;
   const isSafari = useSafariDetector();

@@ -267,7 +267,8 @@ function Play(props: Props) {
   const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
     useDisplayMode();
   // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
-  const isMobile = screenWidth < screenHeight;
+  // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
+  const isMobile = screenWidth <= screenHeight;
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
