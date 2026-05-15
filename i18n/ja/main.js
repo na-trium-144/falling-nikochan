@@ -167,7 +167,7 @@ export default {
       aboutUTCode: "ut.code(); について",
     },
     festival:
-      "ut.code(); 第{num}回{kind, select, mf {五月祭} kf {駒場祭} other {other}}ウェブサイトに戻る",
+      "<utcode></utcode> 第{num}回{kind, select, mf {五月} kf {駒場} other {other}}祭トップに戻る",
   },
   dev: {
     title: "デバッグ用",

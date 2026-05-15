@@ -178,8 +178,8 @@ export default {
     },
     // previously used in a school festival in the university of tokyo
     festival:
-      "Back to the {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
-      "{kind, select, mf {May Festival} kf {Komaba Festival} other {other}} website of ut.code();",
+      "Back to the <utcode></utcode> {num, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} " +
+      "{kind, select, mf {May} kf {Komaba} other {other}} Festival website",
   },
   dev: {
     title: "Debugging Tools",
