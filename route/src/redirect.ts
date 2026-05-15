@@ -25,6 +25,25 @@ const redirectApp = (config: {
         301
       );
     })
+    .get("/:lang/main/about/:page", (c) => {
+      // deprecated (used until ver15.12)
+      const lang = c.req.param("lang");
+      const page = Number(c.req.param("page"));
+      switch (page) {
+        case 1:
+        case 2:
+        case 3:
+          return c.redirect(new URL(`/${lang}`, backendOrigin(c)), 301);
+        case 4:
+        case 5:
+          return c.redirect(
+            new URL(`/${lang}/main/about`, backendOrigin(c)),
+            301
+          );
+        default:
+          return c.notFound();
+      }
+    })
     .on("get", ["/", "/edit", "/main/*", "/play"], async (c) => {
       const params = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.get("language");
