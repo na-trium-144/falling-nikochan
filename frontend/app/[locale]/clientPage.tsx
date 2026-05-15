@@ -202,7 +202,7 @@ export default function TopPage(props: Props) {
               "min-[64rem]:gap-8 min-[82rem]:gap-12"
             )}
           >
-            <FestivalLink {...fes} />
+            <FestivalLink {...fes} large />
             <h1 className="text-4xl min-[64rem]:text-6xl min-[82rem]:text-8xl semibold-by-stroke">
               Falling Nikochan
             </h1>

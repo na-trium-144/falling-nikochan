@@ -49,26 +49,32 @@ interface Props {
   num: number | null;
   kind: "mf" | "kf" | null;
   className?: string;
+  large?: boolean;
 }
 export function FestivalLink(props: Props) {
   const t = useTranslations("main");
   if (props.num && props.kind) {
     return (
-      <span className={clsx("text-lg", props.className)}>
+      <span className={clsx(props.large && "text-lg", props.className)}>
         <ExternalLink href={`https://${props.kind}${props.num}.utcode.net`}>
-          <ArrowLeft
-            className="inline-block align-middle mr-1"
-            theme="filled"
-          />
+          {props.large && (
+            <ArrowLeft
+              className="inline-block align-middle mr-1"
+              theme="filled"
+            />
+          )}
           {t.rich("festival", {
             kind: props.kind,
             num: props.num,
-            utcode: () => (
-              <img
-                src="https://utcode.net/utcode-logo/normal.svg"
-                className="inline-block h-[1.5em] -translate-y-[0.1em]"
-              />
-            ),
+            utcode: () =>
+              props.large ? (
+                <img
+                  src="https://utcode.net/utcode-logo/normal.svg"
+                  className="inline-block h-[1.5em] -translate-y-[0.1em]"
+                />
+              ) : (
+                "ut.code();"
+              ),
           })}
         </ExternalLink>
       </span>
