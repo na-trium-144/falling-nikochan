@@ -316,7 +316,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
           });
       } else {
         console.warn(
-          `This origin is not included in the list of origins that are permitted to run the service worker: ${SW_ALLOWED_ORIGINS}.` +
+          `This origin is not included in the list of origins that are permitted to run the service worker: ${JSON.stringify(SW_ALLOWED_ORIGINS)}.` +
             `If you want to test the service worker's functionality, please edit common/pwaInstall.tsx.`
         );
         navigator.serviceWorker.getRegistrations().then(async (regs) => {
