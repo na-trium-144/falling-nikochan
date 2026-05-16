@@ -90,14 +90,13 @@ export default function ShareChart(props: Props) {
             setRecord(await res.json());
           } catch (e) {
             console.error(e);
-            Sentry.captureException(e);
-            setRecord(APIError.badResponse());
+            setRecord(APIError.badResponse(e));
           }
         } else {
           setRecord(await APIError.fromRes(res));
         }
-      } catch {
-        setRecord(APIError.fetchError());
+      } catch (e) {
+        setRecord(APIError.fetchError(e));
       }
     })();
     if (searchParams.get("result")) {

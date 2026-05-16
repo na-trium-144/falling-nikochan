@@ -180,8 +180,7 @@ export function useChartState(props: Props) {
               onLoadRef.current(cid);
             } catch (e) {
               console.error(e);
-              Sentry.captureException(e);
-              setChartState({ state: APIError.badResponse() });
+              setChartState({ state: APIError.badResponse(e) });
             }
           } else {
             if (res.status === 401 || res.status === 400) {
@@ -209,8 +208,7 @@ export function useChartState(props: Props) {
         }
       } catch (e) {
         console.error(e);
-        Sentry.captureException(e);
-        setChartState({ state: APIError.fetchError() });
+        setChartState({ state: APIError.fetchError(e) });
       }
     },
     [locale]
@@ -226,26 +224,25 @@ export function useChartState(props: Props) {
         }
         if (savePasswd) {
           if (currentPasswd.p) {
-            try {
-              fetch(
-                process.env.BACKEND_PREFIX +
-                  `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
-                {
-                  credentials:
-                    process.env.NODE_ENV === "development"
-                      ? "include"
-                      : "same-origin",
-                }
-              ).then(async (res) => {
+            fetch(
+              process.env.BACKEND_PREFIX +
+                `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
+              {
+                credentials:
+                  process.env.NODE_ENV === "development"
+                    ? "include"
+                    : "same-origin",
+              }
+            ).then(
+              async (res) => {
                 if (res.ok) {
                   const ph = await res.text();
                   setPasswd(cid, ph);
                   currentPasswd.ph = ph;
                 }
-              });
-            } catch {
-              //ignore
-            }
+              },
+              () => undefined
+            );
           }
         } else {
           unsetPasswd(cid);
@@ -270,20 +267,17 @@ export function useChartState(props: Props) {
           );
           if (res.ok) {
             try {
-              const resBody = (await res.json()) as {
-                message?: string;
-                cid?: string;
-              };
-              if (typeof resBody.cid === "string") {
-                onLoadRef.current(resBody.cid);
-                onSave(resBody.cid);
-                setSaveState("ok");
-                return;
-              }
-            } catch {
-              // pass through
+              const resBody = v.parse(
+                v.object({ cid: v.string() }),
+                await res.json()
+              );
+              onLoadRef.current(resBody.cid);
+              onSave(resBody.cid);
+              setSaveState("ok");
+              return;
+            } catch (e) {
+              setSaveState(APIError.badResponse(e));
             }
-            setSaveState(APIError.badResponse());
             return;
           } else {
             setSaveState(await APIError.fromRes(res));
@@ -291,8 +285,7 @@ export function useChartState(props: Props) {
           }
         } catch (e) {
           console.error(e);
-          Sentry.captureException(e);
-          setSaveState(APIError.fetchError());
+          setSaveState(APIError.fetchError(e));
           return;
         }
       } else {
@@ -336,8 +329,7 @@ export function useChartState(props: Props) {
           }
         } catch (e) {
           console.error(e);
-          Sentry.captureException(e);
-          setSaveState(APIError.fetchError());
+          setSaveState(APIError.fetchError(e));
           return;
         }
       }

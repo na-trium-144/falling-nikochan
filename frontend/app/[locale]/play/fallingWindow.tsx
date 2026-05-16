@@ -207,6 +207,7 @@ export default function FallingWindow(props: Props) {
   useEffect(() => {
     Promise.all(
       [0, 1, 2, 3].map(async (i) => {
+        // TODO: エラーハンドリング
         const res = await fetch(
           process.env.ASSET_PREFIX +
             `/assets/nikochan${i}.svg` +
@@ -372,7 +373,8 @@ export default function FallingWindow(props: Props) {
     Promise.all(
       Array.from(new Array(13)).map((_, i) =>
         [4, 6, 8, 10, 12].includes(i)
-          ? fetch(process.env.ASSET_PREFIX + `/assets/particle${i}.svg`)
+          ? // TODO: エラーハンドリング
+            fetch(process.env.ASSET_PREFIX + `/assets/particle${i}.svg`)
               .then((res) => res.text())
               .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
           : ""

@@ -1,5 +1,4 @@
 "use client";
-import * as Sentry from "@sentry/nextjs";
 import { ChartBrief, levelTypes } from "@falling-nikochan/chart";
 import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
@@ -153,8 +152,7 @@ export function ChartList(props: Props) {
             }
           } catch (e) {
             console.error(e);
-            Sentry.captureException(e);
-            setBriefs(APIError.fetchError());
+            setBriefs(APIError.fetchError(e));
           }
         })();
     }

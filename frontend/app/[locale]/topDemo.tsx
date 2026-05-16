@@ -77,22 +77,25 @@ export function TopDemo(
       fetch(
         process.env.BACKEND_PREFIX +
           `/api/seqFile/${props.cid}/${props.lvIndex}`
-      ).then((res) => {
-        if (res.ok) {
-          res.arrayBuffer().then((buf) => {
-            const seq = msgpack.decode(buf) as ChartSeqData;
-            resetNotesAll(
-              seq.notes.map((n) => ({
-                ...n,
-                done: 0,
-                bigDone: false,
-              })),
-              props.offset! - seq.offset
-            );
-            currentTimeSec.current = props.offset! - seq.offset;
-          });
-        }
-      });
+      ).then(
+        (res) => {
+          if (res.ok) {
+            res.arrayBuffer().then((buf) => {
+              const seq = msgpack.decode(buf) as ChartSeqData;
+              resetNotesAll(
+                seq.notes.map((n) => ({
+                  ...n,
+                  done: 0,
+                  bigDone: false,
+                })),
+                props.offset! - seq.offset
+              );
+              currentTimeSec.current = props.offset! - seq.offset;
+            });
+          }
+        },
+        () => undefined
+      );
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
 
@@ -138,7 +141,8 @@ export function DemoDetail(
           if (res.ok) {
             res.json().then((brief: ChartBrief) => setBrief(brief));
           }
-        }
+        },
+        () => undefined
       );
     }
   }, [brief, props.cid]);

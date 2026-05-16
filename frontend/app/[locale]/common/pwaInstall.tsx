@@ -270,25 +270,21 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
               clearTimeout(updateFetching.current);
             }
             const checkUpdate = () =>
-              fetch("/worker/checkUpdate")
-                .then((res) => {
+              fetch("/worker/checkUpdate").then(
+                (res) => {
                   // okの場合、messageイベントで受け取るのでここでは何もしない
                   if (!res.ok) {
                     if (isStandalone()) {
                       setWorkerUpdate({ state: "failed" });
                     }
                   }
-                })
-                .catch((e) => {
+                },
+                () => {
                   if (isStandalone()) {
                     setWorkerUpdate({ state: "failed" });
                   }
-                  Sentry.withScope((scope) => {
-                    // ページURLごとに別issueに分けられるのを防ぐ
-                    scope.setTransactionName("common/pwaInstall");
-                    Sentry.captureException(e);
-                  });
-                });
+                }
+              );
             updateFetching.current = setTimeout(checkUpdate, 1000);
             reg.addEventListener("updatefound", () => {
               if (isStandalone()) {
