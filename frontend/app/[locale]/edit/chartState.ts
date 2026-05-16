@@ -36,7 +36,6 @@ import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
 import { isInsideFrame } from "@/scale";
-import * as v from "valibot";
 
 interface Props {
   onLoad: (cid: string) => void;
