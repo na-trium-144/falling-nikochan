@@ -7,7 +7,6 @@ Sentry.init({
   release: process.env.SENTRY_RELEASE,
   environment: (process.env.TITLE_SUFFIX || "production").toLowerCase(),
   sendDefaultPii: false,
-  enabled: process.env.NODE_ENV !== "development",
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
   transportOptions: {
