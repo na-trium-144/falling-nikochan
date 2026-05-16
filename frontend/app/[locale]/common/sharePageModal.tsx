@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import { titleShare, titleWithSiteName } from "@/common/title";
 import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
@@ -79,14 +78,13 @@ export function SharePageModalProvider(props: {
               setModalRecord(await res.json());
             } catch (e) {
               console.error(e);
-              Sentry.captureException(e);
-              setModalRecord(APIError.badResponse());
+              setModalRecord(APIError.badResponse(e));
             }
           } else {
             setModalRecord(await APIError.fromRes(res));
           }
-        } catch {
-          setModalRecord(APIError.fetchError());
+        } catch (e) {
+          setModalRecord(APIError.fetchError(e));
         }
       })();
       setModalOpened(true);

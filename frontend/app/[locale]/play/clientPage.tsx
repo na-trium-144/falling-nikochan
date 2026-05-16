@@ -13,7 +13,6 @@ const exampleResult = {
   bigCount: 55,
 } as const;
 
-import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FallingWindow from "./fallingWindow.js";
@@ -147,8 +146,7 @@ export function InitPlay({ locale }: { locale: string }) {
             } catch (e) {
               setChartSeq(undefined);
               console.error(e);
-              Sentry.captureException(e);
-              setErrorMsg(APIError.badResponse());
+              setErrorMsg(APIError.badResponse(e));
             }
           } else {
             setChartSeq(undefined);
@@ -157,8 +155,7 @@ export function InitPlay({ locale }: { locale: string }) {
         } catch (e) {
           setChartSeq(undefined);
           console.error(e);
-          Sentry.captureException(e);
-          setErrorMsg(APIError.fetchError());
+          setErrorMsg(APIError.fetchError(e));
         }
       })();
     }
@@ -677,14 +674,13 @@ function Play(props: Props) {
                   );
                 } catch (e) {
                   console.error(e);
-                  Sentry.captureException(e);
-                  setRecord(APIError.badResponse());
+                  setRecord(APIError.badResponse(e));
                 }
               } else {
                 setRecord(await APIError.fromRes(res));
               }
-            } catch {
-              setRecord(APIError.fetchError());
+            } catch (e) {
+              setRecord(APIError.fetchError(e));
             }
           })();
         }
