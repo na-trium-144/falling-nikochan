@@ -1,3 +1,8 @@
+## ver. 16.2 - 2026/05/16
+
+* APIErrorクラスをErrorのサブクラスにしてSentry送信も統一して処理する
+* catchのないfetch呼び出しに空のcatchを追加
+
 ## ver. 16.1 - 2026/05/16
 
 * service workerがレスポンスを返す際にcloudflareのbeaconを手動挿入
