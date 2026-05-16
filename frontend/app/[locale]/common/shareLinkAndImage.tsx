@@ -74,7 +74,7 @@ export function useShareLink(
       // og画像の生成は時間がかかるので、
       // 共有される前にogを1回fetchしておくことにより、
       // cloudflareにキャッシュさせる
-      void fetch(process.env.BACKEND_PREFIX + ogPath);
+      void fetch(process.env.BACKEND_PREFIX + ogPath).catch(() => undefined);
       if (withTitle) {
         navigator.clipboard.writeText(
           newTitle +
@@ -92,7 +92,7 @@ export function useShareLink(
   );
   const [shareData, setShareData] = useState<object | null>(null);
   const toAPI = useCallback(() => {
-    void fetch(process.env.BACKEND_PREFIX + ogPath);
+    void fetch(process.env.BACKEND_PREFIX + ogPath).catch(() => undefined);
     navigator.share(shareData!);
   }, [shareData, ogPath]);
   useEffect(() => {
@@ -221,8 +221,9 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
   const [imageBlob, setImageBlob] = useState<Blob>();
   useEffect(() => {
     if (modalOpened) {
-      fetch(process.env.BACKEND_PREFIX + ogPath).then((r) =>
-        r.blob().then((b) => setImageBlob(b))
+      fetch(process.env.BACKEND_PREFIX + ogPath).then(
+        (r) => r.blob().then((b) => setImageBlob(b)),
+        () => undefined
       );
     }
   }, [ogPath, modalOpened]);

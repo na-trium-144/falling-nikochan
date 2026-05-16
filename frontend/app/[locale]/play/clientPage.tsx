@@ -691,30 +691,26 @@ function Play(props: Props) {
             playbackRate === 1 &&
             chartBrief?.levels.at(lvIndex)
           ) {
-            try {
-              void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  lvHash: chartBrief.levels[lvIndex].hash,
-                  auto,
-                  score,
-                  baseScore,
-                  chainScore,
-                  bigScore,
-                  fc: chainScore === chainScoreRate,
-                  fb: bigScore === bigScoreRate,
-                  editing,
-                  factor: updateRecordFactor(
-                    cid,
-                    chartBrief.levels[lvIndex].hash,
-                    auto
-                  ),
-                } satisfies RecordPost),
-              });
-            } catch {
-              //ignore
-            }
+            fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lvHash: chartBrief.levels[lvIndex].hash,
+                auto,
+                score,
+                baseScore,
+                chainScore,
+                bigScore,
+                fc: chainScore === chainScoreRate,
+                fb: bigScore === bigScoreRate,
+                editing,
+                factor: updateRecordFactor(
+                  cid,
+                  chartBrief.levels[lvIndex].hash,
+                  auto
+                ),
+              } satisfies RecordPost),
+            }).catch(() => undefined);
           }
           setResultDate(newResultDate);
           setExitable((ex) =>
