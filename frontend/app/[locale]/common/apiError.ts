@@ -45,11 +45,14 @@ export class APIError extends Error {
     return new APIError(null, "badResponse", original);
   }
   static async fromRes(res: Response) {
+    let e: APIError;
     try {
-      return new APIError(res.status, (await res.json()).message || "");
+      e = new APIError(res.status, (await res.json()).message || "");
     } catch {
-      return new APIError(res.status, "");
+      e = new APIError(res.status, "");
     }
+    Error.captureStackTrace(e, APIError);
+    return e;
   }
 
   formatMsg(t: {
