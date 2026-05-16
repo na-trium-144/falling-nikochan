@@ -2,6 +2,7 @@
 **/*.yaml
 **/*.md
 **/*.mdx
+**/*.html
 .next/
 out/
 dist/

@@ -1,3 +1,8 @@
+## ver. 16.1 - 2026/05/16
+
+* service workerがレスポンスを返す際にcloudflareのbeaconを手動挿入
+* nikochan.utcode.net以外(-assets など)でのservice workerの実行を禁止
+
 ## ver. 16.0 - 2026/05/15
 
 * タイトルページのリニューアル [#1092](https://github.com/na-trium-144/falling-nikochan/pull/1092)

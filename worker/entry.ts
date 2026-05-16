@@ -10,6 +10,7 @@ import {
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
+import cfBeaconHtml from "./beacon.html?raw";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -72,6 +73,7 @@ async function clearOldCaches() {
       keys
         .filter(
           (k) =>
+            // pwaInstall.tsxにもキャッシュを削除する処理があるので、ここを編集する場合はそちらも確認
             ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
             !k.startsWith("brief") // used in @/common/briefCache
         )
@@ -501,6 +503,7 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/*", async (c) => {
+    let res: Response | undefined = undefined;
     if (
       !c.req.path.includes(".") ||
       c.req.path.endsWith(".txt") ||
@@ -518,13 +521,22 @@ const app = new Hono({ strict: false })
         ).catch(fetchError(e));
         clearTimeout(timeout);
         if (remoteRes.ok) {
-          return returnBody(remoteRes.body, remoteRes.headers);
+          res = returnBody(remoteRes.body, remoteRes.headers);
         }
       } catch {
         // pass
       }
     }
-    return await fetchStatic(null, new URL(c.req.url));
+    if (!res) {
+      res = await fetchStatic(null, new URL(c.req.url));
+    }
+    if (res.headers.get("Content-Type")?.includes("text/html")) {
+      res = returnBody(
+        (await res.text()).replace("</body>", cfBeaconHtml + "</body>"),
+        res.headers
+      );
+    }
+    return res;
   })
   .use(languageDetector)
   .onError(onError({ fetchStatic }))

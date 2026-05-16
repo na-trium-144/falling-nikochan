@@ -20,6 +20,8 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
 
+const SW_ALLOWED_ORIGINS = ["https://nikochan.utcode.net"];
+
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
   useEffect(() => setState(isStandalone()), []);
@@ -260,57 +262,81 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       navigator.serviceWorker.addEventListener("message", (e) => {
         console.warn("sw:", e.data);
       });
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .then((reg) => {
-          if (updateFetching.current !== null) {
-            clearTimeout(updateFetching.current);
-          }
-          const checkUpdate = () =>
-            fetch("/worker/checkUpdate")
-              .then((res) => {
-                // okの場合、messageイベントで受け取るのでここでは何もしない
-                if (!res.ok) {
-                  if (isStandalone()) {
-                    setWorkerUpdate({ state: "failed" });
-                  }
-                }
-              })
-              .catch((e) => {
-                if (isStandalone()) {
-                  setWorkerUpdate({ state: "failed" });
-                }
-                Sentry.withScope((scope) => {
-                  // ページURLごとに別issueに分けられるのを防ぐ
-                  scope.setTransactionName("common/pwaInstall");
-                  Sentry.captureException(e);
-                });
-              });
-          updateFetching.current = setTimeout(checkUpdate, 1000);
-          reg.addEventListener("updatefound", () => {
-            if (isStandalone()) {
-              setWorkerUpdate({ state: "updating" });
-            }
+      if (SW_ALLOWED_ORIGINS.includes(window.location.origin)) {
+        navigator.serviceWorker
+          .register("/sw.js", { scope: "/" })
+          .then((reg) => {
             if (updateFetching.current !== null) {
               clearTimeout(updateFetching.current);
             }
-            const newWorker = reg.installing;
-            newWorker?.addEventListener("statechange", () => {
-              console.log("sw statechange:", newWorker?.state);
-              if (newWorker?.state === "activated") {
-                // setWorkerUpdate({ state: "done" });
-                updateFetching.current = setTimeout(checkUpdate, 1000);
+            const checkUpdate = () =>
+              fetch("/worker/checkUpdate")
+                .then((res) => {
+                  // okの場合、messageイベントで受け取るのでここでは何もしない
+                  if (!res.ok) {
+                    if (isStandalone()) {
+                      setWorkerUpdate({ state: "failed" });
+                    }
+                  }
+                })
+                .catch((e) => {
+                  if (isStandalone()) {
+                    setWorkerUpdate({ state: "failed" });
+                  }
+                  Sentry.withScope((scope) => {
+                    // ページURLごとに別issueに分けられるのを防ぐ
+                    scope.setTransactionName("common/pwaInstall");
+                    Sentry.captureException(e);
+                  });
+                });
+            updateFetching.current = setTimeout(checkUpdate, 1000);
+            reg.addEventListener("updatefound", () => {
+              if (isStandalone()) {
+                setWorkerUpdate({ state: "updating" });
               }
+              if (updateFetching.current !== null) {
+                clearTimeout(updateFetching.current);
+              }
+              const newWorker = reg.installing;
+              newWorker?.addEventListener("statechange", () => {
+                console.log("sw statechange:", newWorker?.state);
+                if (newWorker?.state === "activated") {
+                  // setWorkerUpdate({ state: "done" });
+                  updateFetching.current = setTimeout(checkUpdate, 1000);
+                }
+              });
+            });
+          })
+          .catch((e) => {
+            Sentry.withScope((scope) => {
+              // ページURLごとに別issueに分けられるのを防ぐ
+              scope.setTransactionName("common/pwaInstall");
+              Sentry.captureException(e);
             });
           });
-        })
-        .catch((e) => {
-          Sentry.withScope((scope) => {
-            // ページURLごとに別issueに分けられるのを防ぐ
-            scope.setTransactionName("common/pwaInstall");
-            Sentry.captureException(e);
-          });
+      } else {
+        console.warn(
+          `This origin is not included in the list of origins that are permitted to run the service worker: ${SW_ALLOWED_ORIGINS}.` +
+            `If you want to test the service worker's functionality, please edit common/pwaInstall.tsx.`
+        );
+        navigator.serviceWorker.getRegistrations().then(async (regs) => {
+          await Promise.all(
+            regs.map(async (reg) => {
+              const result = reg.unregister();
+              console.log("unregistered service worker:", result);
+            })
+          );
+          await caches.keys().then((keys) =>
+            Promise.all(
+              keys
+                .filter(
+                  (k) => !k.startsWith("brief") // used in @/common/briefCache
+                )
+                .map((k) => caches.delete(k))
+            )
+          );
         });
+      }
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (
           typeof event.data === "object" &&

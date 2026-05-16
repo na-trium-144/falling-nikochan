@@ -8,7 +8,8 @@
     "strict": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "outDir": "./dist"
+    "outDir": "."
   },
-  "include": ["./*.ts"]
+  "include": ["./*.ts"],
+  "exclude": []
 }

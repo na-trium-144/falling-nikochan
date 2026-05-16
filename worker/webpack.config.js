@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const config = {
-  entry: "./dist/entry.js",
+  entry: "./entry.js",
   target: "browserslist",
   mode: process.env.API_ENV === "development" ? "development" : "production",
   module: {
@@ -17,6 +17,10 @@ const config = {
         use: {
           loader: "babel-loader",
         },
+      },
+      {
+        resourceQuery: /raw/,
+        type: "asset/source",
       },
     ],
   },
