@@ -71,6 +71,12 @@ API_NO_RATELIMIT="1"
 pnpm install
 ```
 
+**Adding External Libraries**
+
+- When adding new dependencies, please install them at the individual package level (e.g., `pnpm add <package> --filter <package_dir>`) rather than at the workspace root, unless the dependency is truly used by all packages.
+  - Don’t worry too much about which level to choose—maintainers may adjust this at review time if necessary.
+  - If you’re not sure, just ask in your PR or choose whatever seems reasonable.
+
 ### Seed the Database
 
 ```sh
