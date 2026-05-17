@@ -29,7 +29,7 @@ const redirectApp = (config: {
         301
       );
     })
-    .get("/:lang/main/about/:page", (c) => {
+    .get("/:lang/main/about/:page{[1-5]}", (c) => {
       // deprecated (used until ver15.12)
       const q = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.req.param("lang");
