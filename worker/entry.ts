@@ -75,7 +75,8 @@ async function clearOldCaches() {
           (k) =>
             // pwaInstall.tsxにもキャッシュを削除する処理があるので、ここを編集する場合はそちらも確認
             ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
-            !k.startsWith("brief") // used in @/common/briefCache
+            !k.startsWith("brief") && // used in @/common/briefCache
+            !k.startsWith("demoSeq") // used in @/topDemo
         )
         .map((k) => caches.delete(k))
     )

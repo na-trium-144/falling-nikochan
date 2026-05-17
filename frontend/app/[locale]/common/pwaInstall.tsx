@@ -326,7 +326,9 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             Promise.all(
               keys
                 .filter(
-                  (k) => !k.startsWith("brief") // used in @/common/briefCache
+                  (k) =>
+                    !k.startsWith("brief") && // used in @/common/briefCache
+                    !k.startsWith("demoSeq") // used in @/topDemo
                 )
                 .map((k) => caches.delete(k))
             )

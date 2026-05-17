@@ -74,12 +74,27 @@ export function TopDemo(
       props.lvIndex !== undefined &&
       props.offset !== undefined
     ) {
-      fetch(
-        process.env.BACKEND_PREFIX +
-          `/api/seqFile/${props.cid}/${props.lvIndex}`
-      ).then(
-        (res) => {
-          if (res.ok) {
+      const seqPath = `/api/seqFile/${props.cid}/${props.lvIndex}`;
+      caches
+        .open("demoSeq")
+        .then(async (demoSeqCache) => {
+          const res = await demoSeqCache.match(seqPath);
+          if (res) {
+            return res;
+          } else {
+            return fetch(process.env.BACKEND_PREFIX + seqPath).then(
+              async (res) => {
+                if (res.ok) {
+                  await demoSeqCache.put(seqPath, res.clone());
+                  return res;
+                }
+              },
+              () => undefined
+            );
+          }
+        })
+        .then((res) => {
+          if (res) {
             res.arrayBuffer().then((buf) => {
               const seq = msgpack.decode(buf) as ChartSeqData;
               resetNotesAll(
@@ -93,9 +108,7 @@ export function TopDemo(
               currentTimeSec.current = props.offset! - seq.offset;
             });
           }
-        },
-        () => undefined
-      );
+        });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
 
