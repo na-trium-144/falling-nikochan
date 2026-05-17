@@ -6,7 +6,9 @@ packages:
   - worker
 
 allowBuilds:
+  '@google/genai': true
   '@parcel/watcher': true
+  '@sentry/cli': true
   '@swc/core': true
   core-js: false
   esbuild: true
