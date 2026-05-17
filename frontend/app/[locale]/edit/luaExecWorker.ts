@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/browser";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
+  tunnel: process.env.SENTRY_TUNNEL || undefined,
   release: process.env.SENTRY_RELEASE,
   environment: (process.env.TITLE_SUFFIX || "production").toLowerCase(),
   sendDefaultPii: false,

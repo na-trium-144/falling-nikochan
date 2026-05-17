@@ -92,6 +92,10 @@ const env = {
   ASSET_LP: "?v=1",
   // Sentry DSN (make available to client-side code)
   SENTRY_DSN: process.env.SENTRY_DSN || "",
+  SENTRY_TUNNEL:
+    process.env.NODE_ENV === "development"
+      ? ""
+      : process.env.SENTRY_TUNNEL || "",
   // Sentry release name: "<buildVersion>-<buildCommit>"
   SENTRY_RELEASE: commit ? `${buildVersion}-${commit}` : buildVersion,
 };
