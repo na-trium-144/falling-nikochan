@@ -2,6 +2,7 @@
 
 import clsx from "clsx/lite";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { RedirectedWarning } from "./common/redirectedWarning.js";
 import { PWAInstallMain, useSafariDetector } from "./common/pwaInstall.js";
 import { MobileFooter } from "./common/footer.js";
@@ -23,12 +24,18 @@ import Mail from "@icon-park/react/lib/icons/Mail.js";
 import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
-import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
+import { DemoChart, demoCharts, DemoDetail } from "./topDemo.js";
 import { Box } from "./common/box.js";
 
 interface Props {
   locale: string;
 }
+
+const TopDemo = dynamic(
+  () => import("./topDemoMain.js").then((mod) => mod.TopDemo),
+  { ssr: false }
+);
+
 export default function TopPage(props: Props) {
   const t = useTranslations("main");
   const { locale } = props;
@@ -50,6 +57,7 @@ export default function TopPage(props: Props) {
     1 * rem;
   const [initAnim, setInitAnim] = useState<boolean>(false);
   const [demoVisible, setDemoVisible] = useState<boolean>(false);
+  const [demoLoaded, setDemoLoaded] = useState<boolean>(false);
   const [demoChart, setDemoChart] = useState<DemoChart>();
   useEffect(() => {
     if (isSafari !== undefined) {
@@ -81,7 +89,11 @@ export default function TopPage(props: Props) {
             }
           }
         }
-        setDemoVisible(window.scrollY < window.innerHeight);
+        const visible = window.scrollY < window.innerHeight;
+        setDemoVisible(visible);
+        if (visible) {
+          setDemoLoaded(true);
+        }
         req = null;
       };
       const onScroll = () => {
@@ -232,7 +244,9 @@ export default function TopPage(props: Props) {
             <RedirectedWarning />
             <PWAInstallMain />
           </section>
-          <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
+          {demoLoaded && (
+            <TopDemo {...demoChart} bottom={grassHeight} visible={demoVisible} />
+          )}
         </div>
       </div>
 
