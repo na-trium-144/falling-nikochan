@@ -5,5 +5,20 @@ packages:
   - route
   - worker
 
+allowBuilds:
+  '@google/genai': true
+  '@parcel/watcher': true
+  '@sentry/cli': true
+  '@swc/core': true
+  core-js: false
+  esbuild: true
+  protobufjs: false
+  sharp: true
+  unrs-resolver: true
+
+dedupePeers: true
+minimumReleaseAge: 0
+verifyDepsBeforeRun: warn
+
 # change this to hoisted only when deploying to vercel
 nodeLinker: isolated
