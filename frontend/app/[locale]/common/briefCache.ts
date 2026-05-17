@@ -47,110 +47,100 @@ export function useChartBriefs(cids: string[]) {
     (async () =>
       "caches" in window ? window.caches.open("brief2") : null)().then(
       (cache) => {
-        cids.forEach(async (cid) => {
-          // 既に404として処理されているIDはスキップ
-          if (notFoundCids.has(cid)) return;
+        cids.forEach((cid) =>
+          Sentry.withScope(async (scope) => {
+            scope.setTransactionName("common/briefCache");
+            try {
+              // 既に404として処理されているIDはスキップ
+              if (notFoundCids.has(cid)) return;
 
-          const briefPath = `/api/brief/${cid}`;
+              const briefPath = `/api/brief/${cid}`;
 
-          // 0. 旧バージョンのnikochanが保存したキャッシュデータ
-          let cachedData: ChartBrief | null = await migrateFromOldCache(cid);
-          let isStale = true;
+              // 0. 旧バージョンのnikochanが保存したキャッシュデータ
+              let cachedData: ChartBrief | null =
+                await migrateFromOldCache(cid);
 
-          // 1. CacheStorageの確認
-          try {
-            const cachedRes = await cache?.match(briefPath);
-            if (cachedRes) {
-              const fetchedAt = Number(
-                cachedRes.headers.get("x-fetched-at") || "0"
-              );
-              cachedData = await cachedRes.json();
-              // 経過時間がTTL以内なら「新しい」とみなす
-              if (Date.now() - fetchedAt < 600) {
-                isStale = false;
+              // 1. CacheStorageの確認
+              const cachedRes = await cache?.match(briefPath);
+              if (cachedRes) {
+                cachedData = await cachedRes.json();
               }
-            }
-          } catch (e) {
-            console.error("CacheStorage read failed", e);
-            Sentry.withScope((scope) => {
-              scope.setTransactionName("common/briefCache");
-              Sentry.captureException(e);
-            });
-          }
 
-          if (cachedData) {
-            setStates((prev) => {
-              if (cid in prev) {
-                return prev;
-              } else {
-                return { ...prev, [cid]: cachedData };
+              if (cachedData) {
+                setStates((prev) => {
+                  if (cid in prev) {
+                    return prev;
+                  } else {
+                    return { ...prev, [cid]: cachedData };
+                  }
+                });
               }
-            });
-          }
 
-          // 3. データが古い(stale) または キャッシュがない場合はfetchを行う
-          if (isStale) {
-            // 同じURLに対するリクエストが既に走っていないかチェック（複数コンポーネント同時実行対策）
-            if (!pendingFetches.has(cid)) {
-              const fetchPromise = fetch(
-                process.env.BACKEND_PREFIX + briefPath,
-                {
-                  cache: "default",
-                }
-              )
-                .then(
-                  async (res) => {
-                    if (res.ok) {
-                      // レスポンスをクローンし、取得時刻ヘッダーを付与してキャッシュに保存
-                      const resToCache = res.clone();
-                      const headers = new Headers(resToCache.headers);
-                      headers.set("x-fetched-at", Date.now().toString());
-                      const cacheRes = new Response(resToCache.body, {
-                        status: resToCache.status,
-                        statusText: resToCache.statusText,
-                        headers: headers,
-                      });
-                      await cache?.put(briefPath, cacheRes);
-                      return (await res.json()) as ChartBrief;
-                    } else {
-                      if (res.status === 404) {
-                        await cache?.delete(briefPath); // キャッシュからも削除
-                      }
-                      return await APIError.fromRes(res);
-                    }
-                  },
-                  (e) => APIError.fetchError(e)
+              // 3. fetchを行う
+              // 同じURLに対するリクエストが既に走っていないかチェック（複数コンポーネント同時実行対策）
+              if (!pendingFetches.has(cid)) {
+                const fetchPromise = fetch(
+                  process.env.BACKEND_PREFIX + briefPath,
+                  {
+                    cache: "default",
+                  }
                 )
-                .catch((e) => APIError.badResponse(e));
+                  .then(
+                    async (res) => {
+                      if (res.ok) {
+                        // レスポンスをクローンし、取得時刻ヘッダーを付与してキャッシュに保存
+                        const resToCache = res.clone();
+                        const headers = new Headers(resToCache.headers);
+                        headers.set("x-fetched-at", Date.now().toString());
+                        const cacheRes = new Response(resToCache.body, {
+                          status: resToCache.status,
+                          statusText: resToCache.statusText,
+                          headers: headers,
+                        });
+                        await cache?.put(briefPath, cacheRes);
+                        return (await res.json()) as ChartBrief;
+                      } else {
+                        if (res.status === 404) {
+                          await cache?.delete(briefPath); // キャッシュからも削除
+                        }
+                        return await APIError.fromRes(res);
+                      }
+                    },
+                    (e) => APIError.fetchError(e)
+                  )
+                  .catch((e) => APIError.badResponse(e));
 
-              pendingFetches.set(briefPath, fetchPromise);
+                pendingFetches.set(briefPath, fetchPromise);
 
-              // fetch完了後にMapから削除
-              fetchPromise.finally(() => {
-                pendingFetches.delete(briefPath);
-              });
-            }
-
-            // 重複排除されたPromiseを待つ
-            const result = await pendingFetches.get(briefPath)!;
-
-            // 4. fetch結果に応じた処理
-            if (result instanceof APIError) {
-              if (result.status === 404) {
-                setNotFoundCids((prev) => new Set(prev).add(cid));
-              } else {
-                // キャッシュが「ない」場合のみエラー表示。
-                // キャッシュが「ある」場合は何もしないことで古いデータを維持する。
-                if (!cachedData) {
-                  setStates((prev) => ({ ...prev, [cid]: result }));
-                }
+                // fetch完了後にMapから削除
+                fetchPromise.finally(() => {
+                  pendingFetches.delete(briefPath);
+                });
               }
-            } else {
-              // fetch成功時、取得した最新データで再レンダリング
-              setStates((prev) => ({ ...prev, [cid]: result }));
+
+              // 重複排除されたPromiseを待つ
+              const result = await pendingFetches.get(briefPath)!;
+
+              // 4. fetch結果に応じた処理
+              if (result instanceof APIError) {
+                if (result.status === 404) {
+                  setNotFoundCids((prev) => new Set(prev).add(cid));
+                } else {
+                  // キャッシュが「ない」場合のみエラー表示。
+                  // キャッシュが「ある」場合は何もしないことで古いデータを維持する。
+                  if (!cachedData) {
+                    setStates((prev) => ({ ...prev, [cid]: result }));
+                  }
+                }
+              } else {
+                // fetch成功時、取得した最新データで再レンダリング
+                setStates((prev) => ({ ...prev, [cid]: result }));
+              }
+            } catch (e) {
+              Sentry.captureException(e);
             }
-          }
-        });
+          })
+        );
       }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
