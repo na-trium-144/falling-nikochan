@@ -25,7 +25,7 @@ jobs:
       env:
         ALLOW_FETCH_ERROR: "1"
     - name: Show output size
-      run: du -sh frontend/out/*
+      run: du -sk frontend/out/*
 
   test:
     runs-on: ubuntu-latest
@@ -110,7 +110,7 @@ jobs:
         SENTRY_TUNNEL: ${{ secrets.SENTRY_TUNNEL }}
       run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
     - name: Show output size
-      run: du -sh .vercel/output/static/*
+      run: du -sk .vercel/output/static/*
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:
