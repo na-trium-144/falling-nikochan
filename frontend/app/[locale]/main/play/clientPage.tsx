@@ -166,7 +166,7 @@ function PlayTabInternal(
       })
       .catch((e) => {
         console.error(e);
-        setSearchResult(APIError.fetchError());
+        setSearchResult(APIError.fetchError(e));
       });
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 

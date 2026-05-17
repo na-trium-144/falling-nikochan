@@ -18,6 +18,9 @@ import { SlimeSVG } from "./slime";
 import ProgressBar from "./progressBar";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
+
+const SW_ALLOWED_ORIGINS = ["https://nikochan.utcode.net"];
 
 export function useStandaloneDetector() {
   const [state, setState] = useState<boolean | null>(null);
@@ -178,6 +181,16 @@ export function useOSDetector() {
   }, []);
   return os;
 }
+export function detectSafari() {
+  return detectOS() === "ios" || navigator.vendor.includes("Apple");
+}
+export function useSafariDetector() {
+  const [isSafari, setIsSafari] = useState<boolean | undefined>(undefined);
+  useEffect(() => {
+    setIsSafari(detectSafari());
+  }, []);
+  return isSafari;
+}
 
 interface InitAssetsState {
   type?: "initAssets";
@@ -249,54 +262,85 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       navigator.serviceWorker.addEventListener("message", (e) => {
         console.warn("sw:", e.data);
       });
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).then((reg) => {
-        if (updateFetching.current !== null) {
-          clearTimeout(updateFetching.current);
-        }
-        updateFetching.current = setTimeout(
-          () => void fetch("/worker/checkUpdate"),
-          1000
-        );
-        reg.addEventListener("updatefound", () => {
-          if (isStandalone()) {
-            setWorkerUpdate({ state: "updating" });
-          }
-          if (updateFetching.current !== null) {
-            clearTimeout(updateFetching.current);
-          }
-          const newWorker = reg.installing;
-          newWorker?.addEventListener("statechange", () => {
-            console.log("sw statechange:", newWorker?.state);
-            if (newWorker?.state === "activated") {
-              // setWorkerUpdate({ state: "done" });
-              updateFetching.current = setTimeout(() => {
-                fetch("/worker/checkUpdate")
-                  .then((res) => {
-                    // okの場合、messageイベントで受け取るのでここでは何もしない
-                    if (!res.ok) {
-                      if (isStandalone()) {
-                        setWorkerUpdate({ state: "failed" });
-                      }
-                    }
-                  })
-                  .catch(() => {
+      if (SW_ALLOWED_ORIGINS.includes(window.location.origin)) {
+        navigator.serviceWorker
+          .register("/sw.js", { scope: "/" })
+          .then((reg) => {
+            if (updateFetching.current !== null) {
+              clearTimeout(updateFetching.current);
+            }
+            const checkUpdate = () =>
+              fetch("/worker/checkUpdate").then(
+                (res) => {
+                  // okの場合、messageイベントで受け取るのでここでは何もしない
+                  if (!res.ok) {
                     if (isStandalone()) {
                       setWorkerUpdate({ state: "failed" });
                     }
-                  });
-              }, 1000);
-            }
+                  }
+                },
+                () => {
+                  if (isStandalone()) {
+                    setWorkerUpdate({ state: "failed" });
+                  }
+                }
+              );
+            updateFetching.current = setTimeout(checkUpdate, 1000);
+            reg.addEventListener("updatefound", () => {
+              if (isStandalone()) {
+                setWorkerUpdate({ state: "updating" });
+              }
+              if (updateFetching.current !== null) {
+                clearTimeout(updateFetching.current);
+              }
+              const newWorker = reg.installing;
+              newWorker?.addEventListener("statechange", () => {
+                console.log("sw statechange:", newWorker?.state);
+                if (newWorker?.state === "activated") {
+                  // setWorkerUpdate({ state: "done" });
+                  updateFetching.current = setTimeout(checkUpdate, 1000);
+                }
+              });
+            });
+          })
+          .catch((e) => {
+            Sentry.withScope((scope) => {
+              // ページURLごとに別issueに分けられるのを防ぐ
+              scope.setTransactionName("common/pwaInstall");
+              Sentry.captureException(e);
+            });
           });
+      } else {
+        console.warn(
+          `This origin is not included in the list of origins that are permitted to run the service worker: ${JSON.stringify(SW_ALLOWED_ORIGINS)}.` +
+            `If you want to test the service worker's functionality, please edit common/pwaInstall.tsx.`
+        );
+        navigator.serviceWorker.getRegistrations().then(async (regs) => {
+          await Promise.all(
+            regs.map(async (reg) => {
+              const result = reg.unregister();
+              console.log("unregistered service worker:", result);
+            })
+          );
+          await caches.keys().then((keys) =>
+            Promise.all(
+              keys
+                .filter(
+                  (k) => !k.startsWith("brief") // used in @/common/briefCache
+                )
+                .map((k) => caches.delete(k))
+            )
+          );
         });
-      });
+      }
       navigator.serviceWorker.addEventListener("message", (event) => {
-        // console.log("Service Worker message:", event.data);
         if (
           typeof event.data === "object" &&
           event.data.type === "initAssets" &&
           isStandalone()
         ) {
-          switch ((event.data as InitAssetsState).state) {
+          const state = (event.data as InitAssetsState).state;
+          switch (state) {
             case "done":
             case "failed":
             case "updating":
@@ -315,8 +359,10 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
               // ignore
               break;
             default:
-              console.warn("Unknown worker update state:", event.data.state);
-              break;
+              state satisfies never;
+              throw new Error(
+                `Unknown worker update state: ${event.data.state}`
+              );
           }
         }
       });

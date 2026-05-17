@@ -35,6 +35,15 @@
 @utility z-mobile-footer {
   z-index: 10;
 }
+@utility z-mf-blur {
+  z-index: 9; /* mobile-footerとgrass-nearよりも奥 */
+}
+@utility z-header2 {
+  z-index: 10;
+}
+@utility z-title-fw {
+  z-index: -5;
+}
 
 @utility z-fallback-bg {
   z-index: -101;

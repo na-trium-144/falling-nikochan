@@ -1,3 +1,50 @@
+## ver. 16.4 - 2026/05/17
+
+* 譜面エディターのタイミングタブと音符タブで数式を入力可能に
+
+## ver. 16.3 - 2026/05/17
+
+* service workerがprefetch時のHEADリクエストで毎回ページ全体をfetchしていたのを修正
+    * `/*` へのHEADリクエストに対しては即座に空の200レスポンスを返す
+    * 拡張子のないパスに対してgetContentType()でhtmlと判定するように変更
+* `main/about/__next_tree`がリダイレクト処理で404になっていたのを修正
+
+## ver. 16.2 - 2026/05/16
+
+* APIErrorクラスをErrorのサブクラスにしてSentry送信も統一して処理する
+* catchのないfetch呼び出しに空のcatchを追加
+
+## ver. 16.1 - 2026/05/16
+
+* service workerがレスポンスを返す際にcloudflareのbeaconを手動挿入
+* nikochan.utcode.net以外(-assets など)でのservice workerの実行を禁止
+
+## ver. 16.0 - 2026/05/15
+
+* タイトルページのリニューアル [#1092](https://github.com/na-trium-144/falling-nikochan/pull/1092)
+    * /main/about/{1..5} を廃止し、MDXベースの /main/about を新設（i18nメッセージも整理）
+    * PC向けヘッダー/メニュー（PCHeader/PCHeader2）の導入と、フッター/リンクページ等の構造整理
+    * トップページにデモ表示・人気譜面ショーケース等を追加し、ChartList を横スクロール/大カード表示に拡張
+* route/redirect.tsのリダイレクトがクエリを保持していなかったのを修正
+* 以降バージョン番号の記述をfrontendとrouteだけにし、それ以外のpackage.jsonからバージョン表記を削除
+
+## ver. 15.11 - 2026/05/14
+
+* mainCacheNameの変更とcache更新が同時実行されるとmainCacheが空になるのを修正
+
+## ver. 15.10 - 2026/05/14
+
+* 著作権関連の利用規約の更新 [#1124](https://github.com/na-trium-144/falling-nikochan/pull/1124)
+    * 「利用規約っぽいもの」と表示していたのを正式な利用規約に変更
+* frontendにSentry導入 [#1091](https://github.com/na-trium-144/falling-nikochan/pull/1091)
+    * luaTabのコード実行のworkerを1回だけ初期化して使いまわす実装に変更
+    * SentryとCloudflareAnalyticsについて利用規約に追記
+    * jsファイルに挿入していたバナーをファイル先頭から末尾に移動
+        * これを反映するためservice workerのキャッシュキーをmain2からmain3に変更
+    * pwaInstallのエラー処理をSentry導入のついでに書き直し
+    * エラーページにSentryのeventIdの表示を追加
+* frontendビルド時のsharp,openapi,next-intlのwarningを修正 [#1127](https://github.com/na-trium-144/falling-nikochan/pull/1127)
+
 ## ver. 15.9 - 2026/04/24
 
 * search APIのDoS,ReDoS脆弱性を修正 [#1101](https://github.com/na-trium-144/falling-nikochan/pull/1101)

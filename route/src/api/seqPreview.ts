@@ -75,7 +75,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         decodedData !== null &&
         "ver" in decodedData
       ) {
-        if (decodedData.ver !== 15) {
+        if (decodedData.ver !== 15 && decodedData.ver !== 16) {
           throw new HTTPException(409, { message: "oldChartVersion" });
         }
       }

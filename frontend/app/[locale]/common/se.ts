@@ -139,12 +139,14 @@ export function useSE(
           ["beat1", audioBeat1],
         ] as const
       ).forEach(([name, audioBuffer]) =>
-        fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`)
-          .then((res) => res.arrayBuffer())
-          .then((aryBuf) => audioContext.current!.decodeAudioData(aryBuf))
-          .then((audio) => {
+        fetch(process.env.ASSET_PREFIX + `/assets/${name}.wav`).then(
+          async (res) => {
+            const aryBuf = await res.arrayBuffer();
+            const audio = await audioContext.current!.decodeAudioData(aryBuf);
             audioBuffer.current = audio;
-          })
+          },
+          () => undefined
+        )
       );
       return () => {
         gainNodeHit.current?.disconnect();

@@ -21,6 +21,10 @@
 
     &:hover:not(:active) {
       @apply text-highlight;
+
+      .fn-utc-img {
+        @apply brightness-150 contrast-80 saturate-120;
+      }
     }
   }
 }

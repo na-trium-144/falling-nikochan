@@ -15,7 +15,7 @@ const exampleResult = {
 
 import clsx from "clsx/lite";
 import { useCallback, useEffect, useRef, useState } from "react";
-import FallingWindow, { FlashPos } from "./fallingWindow.js";
+import FallingWindow from "./fallingWindow.js";
 import {
   bigScoreRate,
   chainScoreRate,
@@ -65,6 +65,7 @@ import { IrasutoyaLikeGrass } from "@/common/irasutoyaLike.jsx";
 import { getQueryOptions, QueryOptions } from "./queryOption.js";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { APIError } from "@/common/apiError.js";
+import { useFlash } from "./useFlash.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -119,15 +120,16 @@ export function InitPlay({ locale }: { locale: string }) {
           );
           if (res.ok) {
             try {
-              currentChartVer satisfies 15; // update the code below when chart version is bumped
+              currentChartVer satisfies 16; // update the code below when chart version is bumped
               const seq = msgpack.decode(await res.arrayBuffer()) as
                 | Level6Play
                 | Level15Play;
               console.log("seq.ver", seq.ver);
-              if (seq.ver === 6 || seq.ver === 15) {
+              if (seq.ver === 6 || seq.ver === 15 || seq.ver === 16) {
                 switch (seq.ver) {
                   case 6:
                   case 15:
+                  case 16:
                     setChartSeq(loadChart(seq));
                     break;
                   default:
@@ -137,14 +139,14 @@ export function InitPlay({ locale }: { locale: string }) {
                 addRecent("play", session?.cid ?? q.cid ?? "");
                 updatePlayCountForReview();
               } else {
-                seq satisfies never;
+                // seq satisfies never;
                 setChartSeq(undefined);
                 setErrorMsg(te("chartVersion", { ver: (seq as any)?.ver }));
               }
             } catch (e) {
               setChartSeq(undefined);
               console.error(e);
-              setErrorMsg(APIError.badResponse());
+              setErrorMsg(APIError.badResponse(e));
             }
           } else {
             setChartSeq(undefined);
@@ -153,7 +155,7 @@ export function InitPlay({ locale }: { locale: string }) {
         } catch (e) {
           setChartSeq(undefined);
           console.error(e);
-          setErrorMsg(APIError.fetchError());
+          setErrorMsg(APIError.fetchError(e));
         }
       })();
     }
@@ -262,7 +264,9 @@ function Play(props: Props) {
   const ref = useRef<HTMLDivElement>(null!);
   const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
     useDisplayMode();
-  const isMobile = screenWidth < screenHeight;
+  // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
+  // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
+  const isMobile = screenWidth <= screenHeight;
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -412,34 +416,7 @@ function Play(props: Props) {
     }
   }, [chartSeq, chartPlaying, offsetPlusLatency, playbackRate]);
 
-  // キーを押したとき一定時間光らせる
-  // ここではnoteのx座標の値そのままを扱う
-  const [barFlash, setBarFlash] = useState<FlashPos>(undefined);
-  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const flashAnimationFrame = useRef<ReturnType<
-    typeof requestAnimationFrame
-  > | null>(null);
-  const flash = useCallback((x: FlashPos) => {
-    if (flashAnimationFrame.current !== null) {
-      cancelAnimationFrame(flashAnimationFrame.current);
-      flashAnimationFrame.current = null;
-    }
-    if (flashTimeout.current !== null) {
-      clearTimeout(flashTimeout.current);
-      flashTimeout.current = null;
-      setBarFlash(undefined);
-      flashAnimationFrame.current = requestAnimationFrame(() => {
-        flashAnimationFrame.current = null;
-        flash(x);
-      });
-    } else {
-      setBarFlash(x);
-      flashTimeout.current = setTimeout(() => {
-        flashTimeout.current = null;
-        setBarFlash(undefined);
-      }, 100);
-    }
-  }, []);
+  const { barFlash, flash } = useFlash();
 
   const {
     baseScore,
@@ -697,13 +674,13 @@ function Play(props: Props) {
                   );
                 } catch (e) {
                   console.error(e);
-                  setRecord(APIError.badResponse());
+                  setRecord(APIError.badResponse(e));
                 }
               } else {
                 setRecord(await APIError.fromRes(res));
               }
-            } catch {
-              setRecord(APIError.fetchError());
+            } catch (e) {
+              setRecord(APIError.fetchError(e));
             }
           })();
         }
@@ -715,7 +692,12 @@ function Play(props: Props) {
             chartBrief?.levels.at(lvIndex)
           ) {
             try {
-              void fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
+              const factor = updateRecordFactor(
+                cid,
+                chartBrief.levels[lvIndex].hash,
+                auto
+              );
+              fetch(process.env.BACKEND_PREFIX + `/api/record/${cid}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -728,15 +710,11 @@ function Play(props: Props) {
                   fc: chainScore === chainScoreRate,
                   fb: bigScore === bigScoreRate,
                   editing,
-                  factor: updateRecordFactor(
-                    cid,
-                    chartBrief.levels[lvIndex].hash,
-                    auto
-                  ),
+                  factor,
                 } satisfies RecordPost),
-              });
+              }).catch(() => undefined);
             } catch {
-              //ignore
+              // ignore errors from updateRecordFactor
             }
           }
           setResultDate(newResultDate);

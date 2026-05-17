@@ -15,16 +15,7 @@ if (!VALID_TYPES.includes(updateType)) {
   process.exit(1);
 }
 
-const workspacePackages = YAML.parse(
-  fs.readFileSync("pnpm-workspace.yaml", "utf8")
-).packages;
-
-for (const filePath of [
-  "package.json",
-  ...workspacePackages.flatMap((pattern) =>
-    pattern.endsWith("/") ? `${pattern}package.json` : `${pattern}/package.json`
-  ),
-]) {
+for (const filePath of ["frontend/package.json", "route/package.json"]) {
   const pkgContent = fs.readFileSync(filePath, "utf8");
   const pkg = JSON.parse(pkgContent);
   const oldVersion = pkg.version;

@@ -50,6 +50,10 @@
     {
       "source": "/(.*)/main/(latest|popular)",
       "destination": "/api"
+    },
+    {
+      "source": "/(.*)/main/about/(1-5)",
+      "destination": "/api"
     }
   ]
 }

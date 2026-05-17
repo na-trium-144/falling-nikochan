@@ -1,4 +1,6 @@
 "use client";
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { CenterBox } from "@/common/box";
 import { ErrorMessage } from "@/common/errorPageComponent";
 import clsx from "clsx/lite";
@@ -10,13 +12,16 @@ interface ErrorProps {
   reset: () => void;
 }
 export default function Error(props: ErrorProps) {
+  useEffect(() => {
+    Sentry.captureException(props.error);
+  }, [props.error]);
   // ここに到達するのは error.tsx のレンダリングですらエラーになった場合。
   // ボタンとかは置いても無駄でしょう
   return (
     <html>
       <body
         className={clsx(
-          "w-full h-dvh overflow-hidden touch-none",
+          "fn-body",
           // ThemeProviderのimportも避けて直接書いている。
           "fn-csr-ready"
         )}

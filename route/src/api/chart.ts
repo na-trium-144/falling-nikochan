@@ -144,7 +144,7 @@ export interface ChartEntryCompressed {
   levelsCompressed: Binary | null; // <- ChartLevelCore をjson化&gzip圧縮したもの
   deleted: boolean;
   published: boolean;
-  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+  ver: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
   offset: number;
   ytId: string;
   title: string;
@@ -258,7 +258,7 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 11 | 12; levels: ChartLevelCore11[] }
     | { ver: 13; levels: ChartLevelCore13[] }
     | { ver: 14; levels: ChartLevelCore14[] }
-    | { ver: 15; levels: ChartLevelCore15[] }
+    | { ver: 15 | 16; levels: ChartLevelCore15[] }
   );
 
 export async function unzipEntry(
@@ -632,6 +632,7 @@ export function entryToChart(
         zoom: entry.zoom || 0,
       } as Chart14Edit;
     case 15:
+    case 16:
       return {
         falling: "nikochan",
         ver: entry.ver,

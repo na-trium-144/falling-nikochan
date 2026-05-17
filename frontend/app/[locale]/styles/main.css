@@ -24,12 +24,25 @@
       @apply pb-2 pt-2;
       @apply rounded-2xl;
     }
+  }
+  .fn-mf-blur {
+    @apply z-mf-blur w-full h-mobile-footer;
+    @apply backdrop-blur-2xs;
+    @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
+    @apply dark:from-orange-950 dark:to-orange-950/0;
+  }
 
-    &.fn-mf-blur {
-      @apply backdrop-blur-2xs;
-      @apply bg-gradient-to-t from-30% from-sky-50 to-sky-50/0;
-      @apply dark:from-orange-950 dark:to-orange-950/0;
+  .fn-pc-header {
+    @apply flex items-center gap-4 h-pc-header;
+    @apply w-full;
+
+    > nav {
+      @apply flex-none flex flex-row gap-4 text-lg;
     }
+  }
+  .fn-pc-header2 {
+    @apply flex items-center gap-4 h-pc-header;
+    @apply justify-end pr-6 pl-3 z-header2;
   }
 
   .fn-pwa-install.fn-box {
@@ -44,7 +57,7 @@
 
     > h1 {
       @apply text-4xl inline-block absolute inset-x-0 w-max m-auto bottom-7;
-      -webkit-text-stroke: 0.02em currentColor;
+      @apply semibold-by-stroke;
     }
     > img {
       /* 他のnikochanはopacity-70だが、ここだけちがう */
@@ -82,11 +95,6 @@
     }
   }
 
-  .fn-main-nav-item {
-    @apply text-center rounded-2xl py-3 pl-2 pr-2;
-    @apply fg-bright;
-  }
-
   .fn-sect {
     @apply mb-3;
     @apply w-full;
@@ -115,6 +123,11 @@
       @apply text-xl font-semibold font-title;
       @apply fg-bright;
     }
+    > h4 {
+      @apply mb-2;
+      @apply text-lg font-medium font-title;
+      @apply fg-bright;
+    }
     > ul {
       @apply mb-3;
     }
@@ -133,6 +146,12 @@
     @apply font-mono text-sm px-1 py-0.5 rounded border;
     @apply bg-white border-slate-300;
     @apply dark:bg-stone-700 dark:border-stone-500;
+  }
+
+  .fn-hr {
+    width: calc(min(100%, var(--container-main)) * 0.75);
+    @apply h-px mx-auto border-current/50;
+    @apply my-8 main-wide:my-12;
   }
 
   .fn-rss-button {

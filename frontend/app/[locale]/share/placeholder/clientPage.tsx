@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import clsx from "clsx/lite";
 import {
   ChartBrief,
@@ -7,18 +8,17 @@ import {
   RecordGetSummary,
   ResultParams,
 } from "@falling-nikochan/chart";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "./shareBox.js";
 import { Box } from "@/common/box.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import { TitleAsLink } from "@/common/titleLogo.jsx";
-import { MobileFooter, PCFooter } from "@/common/footer.jsx";
-import { AboutModal } from "@/common/aboutModal.jsx";
-import { useDelayedDisplayState } from "@/common/delayedDisplayState.js";
-import { AboutDescription } from "@/main/main.jsx";
+import { MobileFooter } from "@/common/footer.jsx";
 import { APIError } from "@/common/apiError.js";
+import { PCHeader2 } from "@/common/header.js";
+import { Features, PoliciesAndLinks } from "@/clientPage.js";
 
 const dummyBrief = {
   title: "placeholder",
@@ -90,13 +90,13 @@ export default function ShareChart(props: Props) {
             setRecord(await res.json());
           } catch (e) {
             console.error(e);
-            setRecord(APIError.badResponse());
+            setRecord(APIError.badResponse(e));
           }
         } else {
           setRecord(await APIError.fromRes(res));
         }
-      } catch {
-        setRecord(APIError.fetchError());
+      } catch (e) {
+        setRecord(APIError.fetchError(e));
       }
     })();
     if (searchParams.get("result")) {
@@ -104,59 +104,42 @@ export default function ShareChart(props: Props) {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));
       } catch (e) {
         console.error(e);
+        Sentry.captureException(e);
       }
     }
     return () => clearInterval(titleUpdate);
   }, [t]);
 
-  const [aboutPageIndex, setAboutPageIndex_] = useState<number | null>(null);
-  const [aboutOpen, aboutAnim, setAboutOpen_] = useDelayedDisplayState(200);
-  const setAboutPageIndex = useCallback(
-    (i: number | null) => {
-      setAboutOpen_(i !== null, () => setAboutPageIndex_(i));
-    },
-    [setAboutOpen_]
-  );
-
   return (
-    <main className="w-full h-full overflow-x-clip overflow-y-auto ">
-      {aboutPageIndex !== null && aboutOpen && (
-        <AboutModal
-          aboutAnim={aboutAnim}
-          aboutPageIndex={aboutPageIndex}
-          setAboutPageIndex={setAboutPageIndex}
-          locale={props.locale}
-        />
+    <main
+      className={clsx(
+        "fn-body-scrollable",
+        "flex flex-col items-center",
+        "relative"
       )}
-      <div className="flex flex-col w-full min-h-full items-center ">
-        <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
-        <div className="basis-0 flex-1" />
-        <AboutDescription
-          className="mb-3 px-6"
-          locale={locale}
-          onClickAbout={() => setAboutPageIndex(1)}
-        />
-        <RedirectedWarning />
-        <div
-          className={clsx(
-            "basis-auto grow-6 shrink min-h-0 w-full px-3 main-wide:px-6",
-            "flex flex-row items-center justify-center"
-          )}
-        >
-          <Box classNameOuter="w-max h-max max-w-main p-6">
-            <ShareBox
-              cid={cid}
-              brief={brief}
-              record={record}
-              sharedResult={sharedResult}
-              locale={locale}
-              forceShowCId
-            />
-          </Box>
-        </div>
-        <div className="flex-none basis-mobile-footer no-pc" />
-        <PCFooter locale={locale} nav />
+    >
+      <PCHeader2 className="fixed top-0 right-0" locale={locale} backdropBlur />
+
+      <TitleAsLink className="grow-3 shrink-0" locale={props.locale} />
+      <RedirectedWarning className="mx-3 main-wide:mx-6 mb-2" />
+      <div className="w-full max-w-main px-3 main-wide:px-6 grid-centering mb-12">
+        <Box classNameOuter="w-full main-wide:w-max h-max max-w-full p-6">
+          <ShareBox
+            cid={cid}
+            brief={brief}
+            record={record}
+            sharedResult={sharedResult}
+            locale={locale}
+            forceShowCId
+          />
+        </Box>
       </div>
+
+      <Features locale={locale} />
+      <hr className="fn-hr" />
+      <PoliciesAndLinks locale={locale} />
+
+      <div className="flex-none basis-mobile-footer no-pc" />
       <MobileFooter
         className="fixed bottom-0"
         blurBg

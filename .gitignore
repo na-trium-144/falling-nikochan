@@ -11,3 +11,4 @@
 /.vercel*
 .vite
 /frontend/.babelrc
+/worker/entry.js

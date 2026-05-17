@@ -182,7 +182,7 @@ export function emptyBrief(): ChartBrief {
     levels: [],
   };
 }
-export const currentChartVer = 15;
+export const currentChartVer = 16;
 export const lastIncompatibleVer = 6;
 export type ChartEdit = Chart15;
 export type LevelPlay = Level15Play;
@@ -192,7 +192,8 @@ export const convertToMin = convertToMin14;
 export const convertToPlay = convertToPlay15;
 
 export async function convertToLatest(chart: ChartUntil15): Promise<ChartEdit> {
-  if (chart.ver !== 15) chart = await convertTo15(chart as ChartUntil14);
+  if (chart.ver !== 15 && chart.ver !== 16)
+    chart = await convertTo15(chart as ChartUntil14);
   return chart;
 }
 export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
@@ -200,11 +201,12 @@ export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
   chart = await convertToLatest(chart);
   chart satisfies Chart15;
   chart = v.parse(ChartSchema15(), chart);
-  return { ...chart, ver: 15 };
+  return { ...chart, ver: currentChartVer };
 }
 export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
+    case 16:
     case 15:
       chart satisfies Chart15;
       return v.parse(ChartSchema15(), chart);

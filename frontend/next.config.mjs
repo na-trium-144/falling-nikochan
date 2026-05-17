@@ -9,6 +9,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import createMDX from "@next/mdx";
+import { withSentryConfig } from "@sentry/nextjs";
 import packageJson from "./package.json" with { type: "json" };
 import parentPackageJson from "../package.json" with { type: "json" };
 import { join, dirname } from "node:path";
@@ -64,13 +65,15 @@ try {
   console.error("Failed to get commit hash: ", e);
 }
 
+const buildVersion =
+  packageJson.version.split(".").slice(0, 2).join(".") +
+  (process.env.VERSION_SUFFIX ||
+    (process.env.NODE_ENV === "development" ? "+dev" : ""));
+
 const env = {
   buildDate: date,
   buildCommit: commit,
-  buildVersion:
-    packageJson.version.split(".").slice(0, 2).join(".") +
-    (process.env.VERSION_SUFFIX ||
-      (process.env.NODE_ENV === "development" ? "+dev" : "")),
+  buildVersion,
   browserslist: packageJson.browserslist.join(", "),
   TITLE_SUFFIX:
     process.env.TITLE_SUFFIX ||
@@ -86,6 +89,15 @@ const env = {
   ASSET_QUERY_ICON: "?v=4",
   ASSET_QUERY_NIKOCHAN: "?v=2",
   ASSET_QUERY_CLOUD: "?v=2",
+  ASSET_LP: "?v=1",
+  // Sentry DSN (make available to client-side code)
+  SENTRY_DSN: process.env.SENTRY_DSN || "",
+  SENTRY_TUNNEL:
+    process.env.NODE_ENV === "development"
+      ? ""
+      : process.env.SENTRY_TUNNEL || "",
+  // Sentry release name: "<buildVersion>-<buildCommit>"
+  SENTRY_RELEASE: commit ? `${buildVersion}-${commit}` : buildVersion,
 };
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("env: ", env);
@@ -143,6 +155,18 @@ let nextConfig = {
           module: false,
           ...config.resolve?.fallback,
         },
+        alias: {
+          ...(options.isServer
+            ? {
+                // サーバーサイドでのsharpのインポートでなぜかwarningが出るので除外する (結局クライアントでしか使わない)
+                "colorthief": false,
+              }
+            : {
+                // chartのdocSchemaからimportされwarningが出るので除外
+                "hono-openapi": false,
+              }),
+          ...config.resolve?.alias,
+        },
       },
       module: {
         ...config.module,
@@ -180,4 +204,11 @@ nextConfig = withLicense(nextConfig, {
     ),
 });
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  sentryUrl: process.env.SENTRY_URL || undefined,
+  release: { name: env.SENTRY_RELEASE },
+  widenClientFileUpload: true,
+});

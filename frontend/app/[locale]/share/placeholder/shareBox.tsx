@@ -53,13 +53,16 @@ export function ShareBox(props: Props) {
     if (cid) {
       fetch(
         process.env.BACKEND_PREFIX + `/api/ytMeta/${cid}?lang=${locale}`
-      ).then(async (res) => {
-        if (res.ok) {
-          setYtMeta(await res.json());
-        } else {
-          setYtMeta(null);
-        }
-      });
+      ).then(
+        async (res) => {
+          if (res.ok) {
+            setYtMeta(await res.json());
+          } else {
+            setYtMeta(null);
+          }
+        },
+        () => setYtMeta(null)
+      );
     }
   }, [cid, locale]);
 
