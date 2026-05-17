@@ -12,6 +12,7 @@ Sentry.init({
   transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
   transportOptions: {
     dbName: "sentry-offline-main",
+    flushAtStartup: true,
     // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any,
