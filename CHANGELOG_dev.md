@@ -1,3 +1,10 @@
+## ver. 16.3 - 2026/05/17
+
+* service workerがprefetch時のHEADリクエストで毎回ページ全体をfetchしていたのを修正
+    * `/*` へのHEADリクエストに対しては即座に空の200レスポンスを返す
+    * 拡張子のないパスに対してgetContentType()でhtmlと判定するように変更
+* `main/about/__next_tree`がリダイレクト処理で404になっていたのを修正
+
 ## ver. 16.2 - 2026/05/16
 
 * APIErrorクラスをErrorのサブクラスにしてSentry送信も統一して処理する

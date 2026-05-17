@@ -125,7 +125,12 @@ function returnBody(body: string | ReadableStream | null, headers: Headers) {
 
 // Determine Content-Type from a file path
 function getContentType(pathname: string): string {
-  const ext = pathname.split(".").pop()?.toLowerCase() ?? "";
+  let ext: string | undefined;
+  if (!pathname.includes(".")) {
+    ext = "html";
+  } else {
+    ext = pathname.split(".").pop()?.toLowerCase();
+  }
   const types: Record<string, string> = {
     html: "text/html; charset=utf-8",
     css: "text/css; charset=utf-8",
@@ -145,7 +150,12 @@ function getContentType(pathname: string): string {
     xml: "application/xml",
     gz: "application/gzip",
   };
-  return types[ext] ?? "application/octet-stream";
+  if (ext && ext in types) {
+    return types[ext];
+  } else {
+    console.error(`Unknown extension ${ext} for path ${pathname}`);
+    return "application/octet-stream";
+  }
 }
 
 // Decompress gzip data using the browser's native DecompressionStream
@@ -503,6 +513,13 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/*", async (c) => {
+    if (c.req.method === "HEAD") {
+      return c.body(null, 200, {
+        "Cache-Control": "no-store",
+        "Content-Type": getContentType(c.req.path),
+      });
+    }
+
     let res: Response | undefined = undefined;
     if (
       !c.req.path.includes(".") ||
