@@ -1,6 +1,6 @@
 {
   "name": "@falling-nikochan/frontend",
-  "version": "16.3.0",
+  "version": "16.4.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -41,6 +41,7 @@
     "file-saver": "^2.0.5",
     "fn-commands": "^1.0.0",
     "keyboard-css": "^1.2.4",
+    "mathjs": "^15.2.0",
     "next": "16.1.7",
     "next-intl": "^4.12.0",
     "next-license-list": "^1.0.1",
