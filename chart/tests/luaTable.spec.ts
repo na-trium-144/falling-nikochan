@@ -32,7 +32,7 @@ describe("luaTable", () => {
     const lua = await factory.createEngine();
     const result = await lua.doString(code);
     console.log(result);
-    currentChartVer satisfies 15;
+    currentChartVer satisfies 16;
     v.parse(ChartSchema15(), { ...result, lua: dummyChartData.lua });
   });
   test("should restore original lua code with findLuaLevelCode()", () => {

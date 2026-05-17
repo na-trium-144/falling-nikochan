@@ -78,13 +78,13 @@ export function SharePageModalProvider(props: {
               setModalRecord(await res.json());
             } catch (e) {
               console.error(e);
-              setModalRecord(APIError.badResponse());
+              setModalRecord(APIError.badResponse(e));
             }
           } else {
             setModalRecord(await APIError.fromRes(res));
           }
-        } catch {
-          setModalRecord(APIError.fetchError());
+        } catch (e) {
+          setModalRecord(APIError.fetchError(e));
         }
       })();
       setModalOpened(true);

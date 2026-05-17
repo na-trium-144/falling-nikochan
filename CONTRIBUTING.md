@@ -71,6 +71,12 @@ API_NO_RATELIMIT="1"
 pnpm install
 ```
 
+**Adding External Libraries**
+
+- When adding new dependencies, please install them at the individual package level (e.g., `pnpm add <package> --filter <package_dir>`) rather than at the workspace root, unless the dependency is truly used by all packages.
+  - Don’t worry too much about which level to choose—maintainers may adjust this at review time if necessary.
+  - If you’re not sure, just ask in your PR or choose whatever seems reasonable.
+
 ### Seed the Database
 
 ```sh
@@ -222,9 +228,20 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 | `NO_PREFETCH` | frontend | `1` or unset |
 | `YOUTUBE_API_KEY` | backend | API key for YouTube Data API v3 |
 | `ALLOW_FETCH_ERROR` | frontend | `1` or unset |
-| `VERSION_SUFFIX` | frontend | string |
-| `TITLE_SUFFIX` | frontend | string |
+| `VERSION_SUFFIX` | frontend | suffix appended to version; `+stg` on staging, `+#PR` on preview. In development `+dev` is automatically used if not set. |
+| `TITLE_SUFFIX` | frontend | suffix appended to version, also used as sentry environment; `Staging` on staging, `Preview #PR` on preview. In development `Development` is automatically used if not set. |
+| `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL`, `SENTRY_TUNNEL` | frontend | |
 | `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
+
+### GitHub Action
+
+- Pushing to the main branch will deploy to the production environment.
+  - However, if the commit message contains `[no_deploy]`, it will be skipped.
+- Pushing to the staging branch will deploy to nikochan-staging.utcode.net.
+  - This URL is accessible even to non-maintainers.
+  - Adding the `staging` label to a PR will force-push the commits of that PR to the staging branch and deploy them. Do not add the `staging` label to more than one PR.
+- Creating a PR will deploy a preview using Vercel.
+  - Accessible from the URL in the vercel-deploy job log. Deployment protection may be in place, restricting access to non-maintainers.
 
 ### Vercel
 

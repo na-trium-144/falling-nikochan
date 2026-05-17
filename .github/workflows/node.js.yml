@@ -24,6 +24,8 @@ jobs:
     - run: pnpm run nbuild
       env:
         ALLOW_FETCH_ERROR: "1"
+    - name: Show output size
+      run: du -sh frontend/out/*
 
   test:
     runs-on: ubuntu-latest
@@ -100,13 +102,83 @@ jobs:
         MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
         VERSION_SUFFIX: "+#${{ github.event.number }}"
         TITLE_SUFFIX: "Preview #${{ github.event.number }}"
+        SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        SENTRY_URL: ${{ secrets.SENTRY_URL }}
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        SENTRY_TUNNEL: ${{ secrets.SENTRY_TUNNEL }}
       run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Show output size
+      run: du -sh .vercel/output/static/*
     - name: Upload .vercel/output
       uses: actions/upload-artifact@v4
       with:
         name: vercel-output
         path: .vercel/output
         include-hidden-files: true
+
+  docker-runtime-check:
+    needs: [vercel-build]
+    runs-on: ubuntu-latest
+    env:
+      MONGODB_URI: mongodb://localhost:27017
+      API_ENV: development
+    steps:
+    - uses: actions/checkout@v6
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - uses: docker/setup-buildx-action@v3
+    - name: Download .vercel/output
+      uses: actions/download-artifact@v4
+      with:
+        name: vercel-output
+        path: .vercel/output
+        include-hidden-files: true
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        load: true
+        tags: falling-nikochan-ci:latest
+    - run: pnpm run mongo-docker
+    - run: pnpm run seed
+    - name: Run container
+      run: |
+        docker run --rm -d \
+          --name falling-nikochan-ci \
+          --add-host=host.docker.internal:host-gateway \
+          -e MONGODB_URI=mongodb://host.docker.internal:27017 \
+          -e API_ENV=development \
+          -p 8787:8787 \
+          falling-nikochan-ci:latest
+    - name: Wait until container is ready
+      run: |
+        sleep 5
+        ready=0
+        for i in $(seq 1 60); do
+          if curl -fsS http://localhost:8787/en >/dev/null; then
+            ready=1
+            break
+          fi
+          sleep 1
+        done
+        test "$ready" = "1"
+    - name: Check output of /en
+      run: |
+        curl -v http://localhost:8787/en  # show full output for debug
+        curl -fsS http://localhost:8787/en | grep -qi '<html'
+    - name: Check output of /api/brief/102399
+      run: |
+        curl -v http://localhost:8787/api/brief/102399  # show full output for debug
+        curl -fsS http://localhost:8787/api/brief/102399 | jq -e '.chartCreator == "na-trium-144"' >/dev/null
+    - name: Stop container
+      if: always()
+      run: docker stop falling-nikochan-ci || true
 
   vercel-deploy:
     needs: [lint, test, test-bun, vercel-build]

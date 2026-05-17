@@ -16,7 +16,14 @@ describe("GET /api/playFile/:cid/:lvIndex", () => {
     const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
     expect(level).to.deep.equal(dummyLevel15());
   });
-  currentChartVer satisfies 15; // edit tests below when chart version is bumped
+  currentChartVer satisfies 16; // edit tests below when chart version is bumped
+  test("should return Level15Play if chart version is 15", async () => {
+    await initDb();
+    const res = await app.request("/api/playFile/100015/0");
+    expect(res.status).to.equal(200);
+    const level = msgpack.decode(await res.arrayBuffer()) as Level15Play;
+    expect(level).to.deep.include(dummyLevel15());
+  });
   test("should return Level15Play if chart version is 14", async () => {
     await initDb();
     const res = await app.request("/api/playFile/100014/0");

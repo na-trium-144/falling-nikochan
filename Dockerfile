@@ -42,7 +42,7 @@ RUN pnpm install --prod --frozen-lockfile --ignore-scripts \
 
 COPY . .
 
-FROM oven/bun:1-slim AS production
+FROM oven/bun:1.3-slim AS production
 
 WORKDIR /app
 

@@ -13,6 +13,9 @@ import { useTranslations } from "next-intl";
 import { themeColorDark, themeColorLight } from "@/metadata.js";
 import DropDown from "./dropdown";
 import { IrasutoyaLikeBg } from "./irasutoyaLike.jsx";
+import Moon from "@icon-park/react/lib/icons/Moon";
+import Sun from "@icon-park/react/lib/icons/Sun";
+import DownOne from "@icon-park/react/lib/icons/DownOne";
 
 export interface ThemeState {
   theme: "dark" | "light" | null;
@@ -139,5 +142,42 @@ export function ThemeSwitcher(props: {
     >
       {props.children}
     </DropDown>
+  );
+}
+
+export function MenuThemeSwitcher() {
+  const t = useTranslations("main.links");
+  const themeState = useTheme();
+  return (
+    <p>
+      {themeState.isDark ? (
+        <Moon className="inline-block align-middle " />
+      ) : (
+        <Sun className="inline-block align-middle " />
+      )}
+      <span className="ml-1 ">{t("theme")}:</span>
+      <ThemeSwitcher
+        className={clsx(
+          "relative inline-block align-top pr-6 text-center",
+          "fn-link-1",
+          "fn-input"
+        )}
+      >
+        <div>
+          {themeState.theme === "dark"
+            ? t("dark")
+            : themeState.theme === "light"
+              ? t("light")
+              : t("default")}
+        </div>
+        <DownOne
+          className="absolute right-1 inset-y-0 h-max m-auto"
+          theme="filled"
+        />
+        <span className="block h-0 overflow-hidden">{t("dark")}</span>
+        <span className="block h-0 overflow-hidden">{t("light")}</span>
+        <span className="block h-0 overflow-hidden">{t("default")}</span>
+      </ThemeSwitcher>
+    </p>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@/common/box";
-import { MobileFooter, PCFooter } from "@/common/footer";
+import { MobileFooter } from "@/common/footer";
 import { MobileHeader } from "@/common/header";
 import clsx from "clsx/lite";
 import { useTranslations } from "next-intl";
@@ -84,7 +84,6 @@ export function DevPage(props: { locale: string }) {
           </Box>
         </div>
         <div className="flex-none basis-mobile-footer no-pc" />
-        <PCFooter locale={props.locale} />
       </div>
       <MobileFooter
         className="fixed bottom-0"

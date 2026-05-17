@@ -1,28 +1,58 @@
+import * as Sentry from "@sentry/nextjs";
+
 const fetchErrorStatus = 499;
 
-export class APIError {
+/**
+ * fetch()におけるネットワークエラーと5xxのサーバーエラーを統一して扱うクラス。
+ * サーバーエラーの場合は自動的にSentryへの送信も行う。
+ */
+export class APIError extends Error {
   status: number | null;
-  message: string;
-  constructor(status: number | null, message: string) {
+  original?: unknown; // 一応sentryから確認するため
+  // message: string;
+  constructor(status: number | null, message: string, original?: unknown) {
+    super(message);
+    this.name = status ? `APIError-${status}` : "APIError";
     this.status = status;
-    this.message = message;
     if (this.status === fetchErrorStatus) {
       // 499はユーザーに表示しない
       this.status = null;
     }
+    this.original = original;
+    if (this.original instanceof Error) {
+      this.stack = this.original.stack;
+      this.original.stack = undefined;
+    } else if ("captureStackTrace" in Error) {
+      Error.captureStackTrace(this, APIError);
+    }
+    if (this.isServerSide()) {
+      Sentry.captureException(this);
+    }
   }
-  static fetchError() {
-    return new APIError(fetchErrorStatus, "fetchError");
+  static fetchError(original: unknown) {
+    if (
+      original instanceof TypeError ||
+      (original instanceof DOMException &&
+        ["AbortError", "NotAllowedError"].includes(original.name))
+    ) {
+      return new APIError(fetchErrorStatus, "fetchError", original);
+    } else {
+      Sentry.captureException(`Object is not fetch error: ${original}`);
+      throw original;
+    }
   }
-  static badResponse() {
-    return new APIError(null, "badResponse");
+  static badResponse(original: unknown) {
+    return new APIError(null, "badResponse", original);
   }
   static async fromRes(res: Response) {
+    let e: APIError;
     try {
-      return new APIError(res.status, (await res.json()).message || "");
+      e = new APIError(res.status, (await res.json()).message || "");
     } catch {
-      return new APIError(res.status, "");
+      e = new APIError(res.status, "");
     }
+    Error.captureStackTrace(e, APIError);
+    return e;
   }
 
   formatMsg(t: {

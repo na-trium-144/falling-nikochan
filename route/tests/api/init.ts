@@ -95,10 +95,15 @@ export function dummyChart(): Chart15 {
         ],
         rest: [{ begin: stepZero(), duration: stepZero(), luaLine: null }],
         bpmChanges: [
-          { step: stepZero(), timeSec: 0, bpm: 180, luaLine: null },
+          {
+            step: stepZero(),
+            // timeSec: 0,
+            bpm: 180,
+            luaLine: null,
+          },
           {
             step: { fourth: 1, numerator: 0, denominator: 1 },
-            timeSec: 60 / 180,
+            // timeSec: 60 / 180,
             bpm: 120,
             luaLine: null,
           },
@@ -106,7 +111,7 @@ export function dummyChart(): Chart15 {
         speedChanges: [
           {
             step: stepZero(),
-            timeSec: 0,
+            // timeSec: 0,
             bpm: 240,
             interp: false,
             luaLine: null,
@@ -116,7 +121,7 @@ export function dummyChart(): Chart15 {
           {
             step: stepZero(),
             offset: stepZero(),
-            barNum: 0,
+            // barNum: 0,
             bars: [[4]],
             luaLine: null,
           },
@@ -125,13 +130,21 @@ export function dummyChart(): Chart15 {
     ],
   };
 }
+currentChartVer satisfies 16;
+export function dummyChart15(): Chart15 {
+  return { ...dummyChart(), ver: 15 };
+}
 export function dummyChart14(): Chart14Edit {
   const c: Chart14Edit & Partial<Omit<Chart15, "ver" | "copyBuffer">> = {
-    ...dummyChart(),
+    ...dummyChart15(),
     ver: 14,
     levelsMin: [],
     copyBuffer: defaultCopyBuffer(),
   };
+  c.levelsFreeze[0].bpmChanges[0].timeSec = 0;
+  c.levelsFreeze[0].bpmChanges[1].timeSec = 60 / 180;
+  c.levelsFreeze[0].speedChanges[0].timeSec = 0;
+  c.levelsFreeze[0].signature[0].barNum = 0;
   c.levelsMin = c.levelsMeta!;
   delete c.levelsMeta;
   return c;
@@ -247,22 +260,33 @@ export function dummyLevel15(): Level15Play {
       },
     ],
     bpmChanges: [
-      { step: stepZero(), timeSec: 0, bpm: 180, luaLine: null },
+      {
+        step: stepZero(),
+        // timeSec: 0,
+        bpm: 180,
+        luaLine: null,
+      },
       {
         step: { fourth: 1, numerator: 0, denominator: 1 },
-        timeSec: 60 / 180,
+        // timeSec: 60 / 180,
         bpm: 120,
         luaLine: null,
       },
     ],
     speedChanges: [
-      { step: stepZero(), timeSec: 0, bpm: 240, interp: false, luaLine: null },
+      {
+        step: stepZero(),
+        // timeSec: 0,
+        bpm: 240,
+        interp: false,
+        luaLine: null,
+      },
     ],
     signature: [
       {
         step: stepZero(),
         offset: stepZero(),
-        barNum: 0,
+        // barNum: 0,
         bars: [[4]],
         luaLine: null,
       },
@@ -668,6 +692,33 @@ export async function initDb() {
       },
       { upsert: true }
     );
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: String(Number(dummyCid) + 15) },
+      {
+        $set: await zipEntry({
+          ...(await chartToEntry(
+            {
+              ...dummyChart(),
+              changePasswd: "p",
+            },
+            String(Number(dummyCid) + 15),
+            dummyDate.getTime(),
+            null,
+            undefined,
+            pSecretSalt,
+            null
+          )),
+          ver: 15,
+          levels: dummyChart15().levelsMeta.map((meta, i) => ({
+            ...meta,
+            ...dummyChart15().levelsFreeze![i],
+            lua: dummyChart15().lua![i],
+          })),
+        }),
+      },
+      { upsert: true }
+    );
+    currentChartVer satisfies 16;
   } finally {
     await client.close();
   }

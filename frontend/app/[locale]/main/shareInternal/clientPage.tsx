@@ -44,13 +44,13 @@ export default function ShareInternal({ locale }: { locale: string }) {
               setRecord(await res.json());
             } catch (e) {
               console.error(e);
-              setRecord(APIError.badResponse());
+              setRecord(APIError.badResponse(e));
             }
           } else {
             setRecord(await APIError.fromRes(res));
           }
-        } catch {
-          setRecord(APIError.fetchError());
+        } catch (e) {
+          setRecord(APIError.fetchError(e));
         }
       })();
     } else {

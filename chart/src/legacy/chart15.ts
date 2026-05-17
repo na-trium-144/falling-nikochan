@@ -247,7 +247,7 @@ export async function LevelFreeze15Doc(): Promise<Schema> {
 
 export const LevelPlaySchema15 = () =>
   v.object({
-    ver: v.union([v.literal(15)]),
+    ver: v.union([v.literal(15), v.literal(16)]),
     offset: v.pipe(v.number(), v.minValue(0)),
     notes: v.array(NoteCommandSchema15()),
     bpmChanges: v.array(BPMChangeSchema15()),
@@ -309,7 +309,7 @@ export const ChartSchema15 = () =>
   v.pipe(
     v.object({
       falling: v.literal("nikochan"),
-      ver: v.union([v.literal(15)]),
+      ver: v.union([v.literal(15), v.literal(16)]),
       offset: v.pipe(v.number(), v.minValue(0)),
       ytId: v.string(),
       title: v.string(),
@@ -433,6 +433,26 @@ export async function convertTo15(chart: ChartUntil14): Promise<Chart15> {
     ...others,
     ver: 15,
     levelsMeta: chart.levelsMin,
+    levelsFreeze: chart.levelsFreeze.map((l) => ({
+      ...l,
+      bpmChanges: l.bpmChanges.map((b) => ({
+        step: b.step,
+        bpm: b.bpm,
+        luaLine: b.luaLine,
+      })),
+      speedChanges: l.speedChanges.map((b) => ({
+        step: b.step,
+        bpm: b.bpm,
+        interp: b.interp,
+        luaLine: b.luaLine,
+      })),
+      signature: l.signature.map((s) => ({
+        step: s.step,
+        offset: s.offset,
+        bars: s.bars,
+        luaLine: s.luaLine,
+      })),
+    })),
     copyBuffer: Object.fromEntries(
       chart.copyBuffer.map((entry, i) => [
         String(i),

@@ -18,9 +18,10 @@ function addBannerToFiles(dir) {
         const content = readFileSync(filePath, "utf8");
         // 既にバナーがあるかチェック
         if (!content.includes(bannerContent)) {
+          // sourcemapが正しく取得できるようbannerは先頭ではなく末尾に入れる
           writeFileSync(
             filePath,
-            `/*!\n${bannerContent}\n*/\n${content}`,
+            `${content}\n/*!\n${bannerContent}\n*/`,
             "utf8"
           );
         }

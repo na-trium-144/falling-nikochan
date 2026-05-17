@@ -10,6 +10,7 @@ import {
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
+import cfBeaconHtml from "./beacon.html?raw";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -58,8 +59,8 @@ self.console = {
 
 // assetsを保存する
 // cacheの中身の仕様を変更したときにはcacheの名前を変える
-const mainCacheName = "main2";
-const tmpCacheName = "tmp2";
+const mainCacheName = "main3";
+const tmpCacheName = "tmp3";
 const mainCache = () => caches.open(mainCacheName);
 const tmpCache = () => caches.open(tmpCacheName);
 // 設定など
@@ -72,6 +73,7 @@ async function clearOldCaches() {
       keys
         .filter(
           (k) =>
+            // pwaInstall.tsxにもキャッシュを削除する処理があるので、ここを編集する場合はそちらも確認
             ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
             !k.startsWith("brief") // used in @/common/briefCache
         )
@@ -123,7 +125,12 @@ function returnBody(body: string | ReadableStream | null, headers: Headers) {
 
 // Determine Content-Type from a file path
 function getContentType(pathname: string): string {
-  const ext = pathname.split(".").pop()?.toLowerCase() ?? "";
+  let ext: string | undefined;
+  if (!pathname.includes(".")) {
+    ext = "html";
+  } else {
+    ext = pathname.split(".").pop()?.toLowerCase();
+  }
   const types: Record<string, string> = {
     html: "text/html; charset=utf-8",
     css: "text/css; charset=utf-8",
@@ -143,7 +150,12 @@ function getContentType(pathname: string): string {
     xml: "application/xml",
     gz: "application/gzip",
   };
-  return types[ext] ?? "application/octet-stream";
+  if (ext && ext in types) {
+    return types[ext];
+  } else {
+    console.error(`Unknown extension ${ext} for path ${pathname}`);
+    return "application/octet-stream";
+  }
 }
 
 // Decompress gzip data using the browser's native DecompressionStream
@@ -208,13 +220,19 @@ async function initAssetsCache(config: {
     }
     const remoteVerRes = remoteRes.clone();
     const remoteVer: BuildVer = await remoteRes.json();
-    const cacheVer: BuildVer | undefined = await configCache().then((cache) =>
-      cache.match("/buildVer").then((res) => res?.json())
+    const [cacheVer, lastMainCacheName] = await Promise.all(
+      await configCache().then((cache) => [
+        cache
+          .match("/buildVer")
+          .then((res) => res?.json() as BuildVer | undefined),
+        cache.match("/lastMainCacheName").then((res) => res?.text()),
+      ])
     );
     if (
       remoteVer.version === cacheVer?.version &&
       remoteVer.commit === cacheVer?.commit &&
-      remoteVer.date === cacheVer?.date
+      remoteVer.date === cacheVer?.date &&
+      lastMainCacheName === mainCacheName
     ) {
       return sendInitState("noUpdate");
     }
@@ -352,7 +370,10 @@ async function initAssetsCache(config: {
       })
     );
     // finished
-    await configCache().then((cache) => cache.put("/buildVer", remoteVerRes));
+    await configCache().then((cache) => {
+      cache.put("/buildVer", remoteVerRes);
+      cache.put("/lastMainCacheName", new Response(mainCacheName));
+    });
     console.log("initAssetsCache: finished");
     return sendInitState("done");
   } finally {
@@ -492,6 +513,14 @@ const app = new Hono({ strict: false })
     }
   })
   .get("/*", async (c) => {
+    if (c.req.method === "HEAD") {
+      return c.body(null, 200, {
+        "Cache-Control": "no-store",
+        "Content-Type": getContentType(c.req.path),
+      });
+    }
+
+    let res: Response | undefined = undefined;
     if (
       !c.req.path.includes(".") ||
       c.req.path.endsWith(".txt") ||
@@ -509,13 +538,22 @@ const app = new Hono({ strict: false })
         ).catch(fetchError(e));
         clearTimeout(timeout);
         if (remoteRes.ok) {
-          return returnBody(remoteRes.body, remoteRes.headers);
+          res = returnBody(remoteRes.body, remoteRes.headers);
         }
       } catch {
         // pass
       }
     }
-    return await fetchStatic(null, new URL(c.req.url));
+    if (!res) {
+      res = await fetchStatic(null, new URL(c.req.url));
+    }
+    if (res.headers.get("Content-Type")?.includes("text/html")) {
+      res = returnBody(
+        (await res.text()).replace("</body>", cfBeaconHtml + "</body>"),
+        res.headers
+      );
+    }
+    return res;
   })
   .use(languageDetector)
   .onError(onError({ fetchStatic }))
