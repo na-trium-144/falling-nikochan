@@ -107,6 +107,7 @@ jobs:
         SENTRY_URL: ${{ secrets.SENTRY_URL }}
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        SENTRY_TUNNEL: ${{ secrets.SENTRY_TUNNEL }}
       run: pnpm dlx vercel build --token=${{ secrets.VERCEL_TOKEN }}
     - name: Show output size
       run: du -sh .vercel/output/static/*
