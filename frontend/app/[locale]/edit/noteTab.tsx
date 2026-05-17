@@ -1,5 +1,5 @@
 import Button from "@/common/button.js";
-import Input from "@/common/input.js";
+import MathInput from "@/common/mathInput.js";
 import { Key } from "@/common/key.js";
 import Mouse from "@icon-park/react/lib/icons/Mouse";
 import CheckBox from "@/common/checkBox.js";
@@ -155,7 +155,7 @@ function NoteEdit(props: Props) {
               </td>
               <td>x =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={n.hitX.toString()}
                   updateValue={(v) =>
@@ -211,7 +211,7 @@ function NoteEdit(props: Props) {
               </td>
               <td>vx =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={n.hitVX.toString()}
                   updateValue={(v) =>
@@ -227,7 +227,7 @@ function NoteEdit(props: Props) {
               <td>,</td>
               <td>vy =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={n.hitVY.toString()}
                   updateValue={(v) =>
@@ -245,7 +245,7 @@ function NoteEdit(props: Props) {
               <td></td>
               <td>|v| =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={(Math.round(nv * 100) / 100).toString()}
                   updateValue={(v) =>
@@ -264,7 +264,7 @@ function NoteEdit(props: Props) {
               <td>,</td>
               <td>angle =</td>
               <td>
-                <Input
+                <MathInput
                   className="w-20"
                   actualValue={(
                     (Math.atan2(n.hitVY, n.hitVX) / Math.PI) *
