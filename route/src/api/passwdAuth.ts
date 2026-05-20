@@ -11,7 +11,7 @@ function decodeBase64Utf8(value: string): string {
   try {
     bin = atob(value);
   } catch {
-    throw new HTTPException(400, { message: "invalidAuthorization" });
+    throw new HTTPException(400, { message: "invalidBase64InAuthorization" });
   }
   return new TextDecoder().decode(
     Uint8Array.from(bin, (char) => char.charCodeAt(0))

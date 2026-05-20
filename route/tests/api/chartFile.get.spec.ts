@@ -36,6 +36,17 @@ import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 const basicAuth = (passwd: string) =>
   `Nikochan-Basic ${btoa(passwd)}`;
 const hashAuth = (passwdHash: string) => `Nikochan-Hash ${passwdHash}`;
+const getServerHash = async () => {
+  const client = new MongoClient(process.env.MONGODB_URI!);
+  try {
+    return (await (await client.connect())
+      .db("nikochan")
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: "100000" }))!.pServerHash!;
+  } finally {
+    client.close();
+  }
+};
 
 describe("GET /api/chartFile/:cid", () => {
   test(
@@ -71,16 +82,7 @@ describe("GET /api/chartFile/:cid", () => {
   });
   test("should return ChartEdit if password hash with pUserSalt matches", async () => {
     await initDb();
-    let pServerHash: string;
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      pServerHash = (await (await client.connect())
-        .db("nikochan")
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash!;
-    } finally {
-      client.close();
-    }
+    const pServerHash = await getServerHash();
 
     const res = await app.request("/api/chartFile/100000", {
       headers: {
@@ -99,16 +101,7 @@ describe("GET /api/chartFile/:cid", () => {
   });
   test("should return ChartEdit when ph query is used for backward compatibility", async () => {
     await initDb();
-    let pServerHash: string;
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      pServerHash = (await (await client.connect())
-        .db("nikochan")
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash!;
-    } finally {
-      client.close();
-    }
+    const pServerHash = await getServerHash();
     const res = await app.request(
       "/api/chartFile/100000?ph=" + (await hash(pServerHash + "def")),
       {
