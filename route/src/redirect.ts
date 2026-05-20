@@ -18,7 +18,7 @@ const redirectApp = (config: {
       q.set("cid", cid);
       return c.redirect(new URL(`/edit?${q}`, backendOrigin(c)), 301);
     })
-    .get("/:lang/main/:sort{latest|popular}", (c) => {
+    .get("/:lang/main/:sort{latest|popular|recent}", (c) => {
       // deprecated (used until ver15.3)
       const q = new URLSearchParams(new URL(c.req.url).search);
       const lang = c.req.param("lang");
