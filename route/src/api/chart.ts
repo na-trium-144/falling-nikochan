@@ -58,7 +58,7 @@ export async function getChartEntryCompressed(
   p: Passwd | null
 ): Promise<ChartEntryCompressed> {
   v.parse(CidSchema(), cid);
-  
+
   const entryCompressed = await db
     .collection<ChartEntryCompressed>("chart")
     .findOne({ cid, deleted: false });
