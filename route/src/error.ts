@@ -59,20 +59,17 @@ export const onError =
     try {
       const lang = c.get("language") || "en";
       let status: ContentfulStatusCode;
-      let message: string;
+      let message: string = "";
       let others: object = {};
       if (v.isValiError(err)) {
         status = 400;
-        message = "badRequest";
         others = {
           flattened: v.flatten(err.issues),
           issues: err.issues,
         };
       } else if (err instanceof HTTPException) {
         status = err.status;
-        message =
-          err.message ||
-          (status === 400 ? "badRequest" : status === 404 ? "notFound" : "");
+        message = err.message;
         if (v.isValiError(err.cause)) {
           others = {
             flattened: v.flatten(err.cause.issues),
@@ -81,8 +78,15 @@ export const onError =
         }
       } else {
         status = 500;
-        message = "unknownApiError";
       }
+
+      const messageFallbacks: Record<number, string> = {
+        400: "badRequest",
+        404: "notFound",
+        500: "unknownApiError",
+      };
+      message = message || messageFallbacks[status] || "";
+
       if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
         return c.json(
           {
