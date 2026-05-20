@@ -5,7 +5,11 @@ import { env } from "hono/adapter";
 import { ChartBrief } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import xmlbuilder2 from "xmlbuilder2";
 
@@ -66,6 +70,20 @@ const oembedApp = async (config: {
               schema: resolver(OEmbedSchema()),
             },
           },
+          headers: {
+            "Cache-Control": {
+              description: `max-age=${CACHE_MAX_AGE}`,
+              schema: { type: "string" },
+            },
+          },
+        },
+        400: {
+          description: "invalid parameter",
+          content: {
+            "application/json": {
+              schema: resolver(await validationErrorSchema()),
+            },
+          },
         },
         404: {
           description: "Chart not found or invalid url",
@@ -79,7 +97,7 @@ const oembedApp = async (config: {
         },
       },
     }),
-    validator("query", OEmbedParamSchema()),
+    validator("query", OEmbedParamSchema(), sValidatorHook()),
     async (c) => {
       const {
         url: embedUrl,

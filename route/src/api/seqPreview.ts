@@ -12,7 +12,7 @@ import {
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { describeRoute, resolver } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import { errorLiteral, validationErrorSchema } from "../error.js";
 
 const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
   "/",
@@ -36,6 +36,12 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
             schema: docRefs("ChartSeqData"),
           },
         },
+        headers: {
+          "Content-Disposition": {
+            description: "Filename with extension of .fnseq.mpk",
+            schema: { type: "string" },
+          },
+        },
       },
       409: {
         description: "chart version is not 15",
@@ -49,7 +55,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         description: "Invalid chart format",
         content: {
           "application/json": {
-            schema: resolver(await errorLiteral("invalidChart")),
+            schema: resolver(await validationErrorSchema("invalidChart")),
           },
         },
       },
@@ -73,11 +79,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
       }
       levelData = v.parse(LevelPlaySchema15(), decodedData);
     } catch (e) {
-      console.error(e);
-      throw new HTTPException(415, {
-        message: "invalidChart",
-        cause: v.isValiError(e) ? e.issues : undefined,
-      });
+      throw new HTTPException(415, { message: "invalidChart", cause: e });
     }
 
     // Load chart data

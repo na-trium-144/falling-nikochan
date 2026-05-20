@@ -7,7 +7,11 @@ import { env } from "hono/adapter";
 import { CidSchema, docRefs } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
@@ -28,12 +32,18 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             schema: docRefs("ChartBrief"),
           },
         },
+        headers: {
+          "Cache-Control": {
+            description: `max-age=${CACHE_MAX_AGE}`,
+            schema: { type: "string" },
+          },
+        },
       },
       400: {
         description: "invalid chart id",
         content: {
           "application/json": {
-            schema: resolver(v.object({})),
+            schema: resolver(await validationErrorSchema()),
           },
         },
       },
@@ -47,7 +57,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
-  validator("param", v.object({ cid: CidSchema() })),
+  validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
     const client = new MongoClient(env(c).MONGODB_URI);

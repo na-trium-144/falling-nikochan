@@ -12,7 +12,11 @@ import * as v from "valibot";
 import { MongoClient } from "mongodb";
 import { env } from "hono/adapter";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { ConnInfo } from "hono/conninfo";
 
@@ -53,12 +57,18 @@ const recordApp = async (config: {
                 schema: resolver(v.array(RecordGetSummarySchema())),
               },
             },
+            headers: {
+              "Cache-Control": {
+                description: `max-age=${CACHE_MAX_AGE}`,
+                schema: { type: "string" },
+              },
+            },
           },
           400: {
             description: "invalid chart id",
             content: {
               "application/json": {
-                schema: resolver(v.object({})),
+                schema: resolver(await validationErrorSchema()),
               },
             },
           },
@@ -72,7 +82,7 @@ const recordApp = async (config: {
           },
         },
       }),
-      validator("param", v.object({ cid: CidSchema() })),
+      validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
       async (c) => {
         const { cid } = c.req.valid("param");
         const client = new MongoClient(env(c).MONGODB_URI);
@@ -142,7 +152,7 @@ const recordApp = async (config: {
             description: "invalid chart id or body",
             content: {
               "application/json": {
-                schema: resolver(v.object({})),
+                schema: resolver(await validationErrorSchema()),
               },
             },
           },
@@ -164,8 +174,8 @@ const recordApp = async (config: {
           },
         },
       }),
-      validator("param", v.object({ cid: CidSchema() })),
-      validator("json", RecordPostSchema()),
+      validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
+      validator("json", RecordPostSchema(), sValidatorHook()),
       async (c) => {
         const { cid } = c.req.valid("param");
         const {
