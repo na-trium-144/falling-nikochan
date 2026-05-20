@@ -55,7 +55,12 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         description: "Invalid chart format",
         content: {
           "application/json": {
-            schema: resolver(await validationErrorSchema("invalidChart")),
+            schema: resolver(
+              v.union([
+                await validationErrorSchema("invalidChart"),
+                await errorLiteral("invalidChart"),
+              ])
+            ),
           },
         },
       },

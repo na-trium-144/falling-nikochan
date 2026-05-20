@@ -137,7 +137,7 @@ async function errorResponse(
       t.has("api." + message)
         ? t("api." + message)
         : status === 400
-          ? t("api.badResponse")
+          ? t("api.badRequest")
           : status === 404
             ? t("api.notFound")
             : message || t("unknownApiError")

@@ -50,7 +50,7 @@ describe("GET /api/hashPasswd/:cid", () => {
       pServerHash = (await (await client.connect())
         .db("nikochan")
         .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash;
+        .findOne({ cid: "100000" }))!.pServerHash!;
     } finally {
       client.close();
     }
@@ -59,6 +59,9 @@ describe("GET /api/hashPasswd/:cid", () => {
   test("should return 400 for invalid cid", async () => {
     const res = await app.request("/api/hashPasswd/invalid?p=p");
     expect(res.status).to.equal(400);
+    const body = await res.json();
+    expect(body.message).to.equal("badRequest");
+    expect(body.flattened.nested.cid[0]).to.be.a("string");
   });
   test("should return 404 for nonexistent cid", async () => {
     const res = await app.request("/api/hashPasswd/100002?p=p");

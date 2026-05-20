@@ -354,7 +354,12 @@ const chartFileApp = async (config: {
             description: "Invalid chart format",
             content: {
               "application/json": {
-                schema: resolver(await validationErrorSchema("invalidChart")),
+                schema: resolver(
+                  v.union([
+                    await validationErrorSchema("invalidChart"),
+                    await errorLiteral("invalidChart"),
+                  ])
+                ),
               },
             },
           },
