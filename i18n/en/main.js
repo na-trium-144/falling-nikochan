@@ -79,7 +79,7 @@ export default {
       searchPlaceholder: "Song title, composer, chart creator, etc.",
       searchTitle: "Search results for {search}",
       sort: "Sort by",
-      recent: "Recently Played Charts",
+      recent: "Play history",
       relevance: "Relevance",
       latest: "Latest",
       popular: "Popular",

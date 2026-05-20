@@ -73,7 +73,7 @@ export default {
       searchPlaceholder: "曲名や作曲者、譜面製作者など",
       searchTitle: "{search} の検索結果",
       sort: "表示順",
-      recent: "最近プレイした譜面",
+      recent: "プレイ履歴",
       relevance: "関連度順",
       latest: "更新日順",
       popular: "人気順",

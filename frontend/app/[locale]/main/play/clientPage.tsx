@@ -74,7 +74,7 @@ function PlayTabInternal(
     const params: PageParams = {
       search: props.searchParams?.get("search") || "",
       sort: props.searchParams
-          ? (props.searchParams.get("sort") as
+        ? (props.searchParams.get("sort") as
             | "relevance"
             | "latest"
             | "popular"
@@ -242,7 +242,7 @@ function PlayTabInternal(
         />
       </section>
       <section className="fn-sect">
-        <ul className="list-disc ml-6 space-y-1 text-left">
+        <ul className="list-disc ml-6 space-y-2 text-left">
           <li>
             <div className="flex items-baseline">
               <span className="mr-2 flex-none">{t("search")}:</span>
@@ -261,30 +261,36 @@ function PlayTabInternal(
           <li>
             <div className="flex flex-wrap items-center">
               <span className="mr-2">{t("sort")}:</span>
-              <span className="inline-grid grid-cols-4 w-max max-w-full">
+              <span
+                className={clsx(
+                  "inline-grid max-w-full text-nowrap",
+                  "grid-cols-1 w-full",
+                  "min-[18rem]:grid-cols-2 min-[18rem]:w-max min-[36rem]:grid-cols-4"
+                )}
+              >
                 {(["relevance", "latest", "popular", "recent"] as const).map(
                   (sort) => (
-                  <button
-                    key={sort}
-                    className={clsx(
-                      "fn-toggle",
-                      sort === params.sort
-                        ? "fn-flat-button fn-plain fn-selected"
-                        : "fn-flat-button fn-sky"
-                    )}
-                    onClick={() => updateParams({ sort })}
-                    disabled={sort === "relevance" && !params.search}
-                  >
-                    <span className="fn-glass-1" />
-                    <span className="fn-glass-2" />
-                    <ButtonHighlight />
-                    {t(sort)}
-                  </button>
+                    <button
+                      key={sort}
+                      className={clsx(
+                        "fn-toggle",
+                        sort === params.sort
+                          ? "fn-flat-button fn-plain fn-selected"
+                          : "fn-flat-button fn-sky"
+                      )}
+                      onClick={() => updateParams({ sort })}
+                      disabled={sort === "relevance" && !params.search}
+                    >
+                      <span className="fn-glass-1" />
+                      <span className="fn-glass-2" />
+                      <ButtonHighlight />
+                      {t(sort)}
+                    </button>
                   )
                 )}
               </span>
             </div>
-            <p className="ml-2">
+            <p className="ml-2 mt-1">
               {params.sort === "popular" && t("popularDesc", { popularDays })}
               {
                 params.sort === "latest" && t("latestDesc")
