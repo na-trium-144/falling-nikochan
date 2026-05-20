@@ -14,7 +14,7 @@ function decodeBase64Utf8(value: string): string {
     throw new HTTPException(400, { message: "invalidAuthorization" });
   }
   return new TextDecoder().decode(
-    Uint8Array.from(bin, (char) => char.codePointAt(0) ?? 0)
+    Uint8Array.from(bin, (char) => char.charCodeAt(0))
   );
 }
 
