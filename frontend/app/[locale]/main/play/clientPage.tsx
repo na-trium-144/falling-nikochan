@@ -154,7 +154,7 @@ function PlayTabInternal(
     })
       .then(async (res) => {
         if (res.ok) {
-          const mapped = (await res.json()).map(
+          const mapped: ChartLineBrief[] = (await res.json()).map(
             (r: { cid: string; updatedAt?: number }) => ({
               cid: r.cid,
               updatedAt: r.updatedAt,
@@ -162,13 +162,16 @@ function PlayTabInternal(
             })
           );
           if (params.sort === "recent") {
-            const mappedByCid = new Map(mapped.map((brief) => [brief.cid, brief]));
-            const sortedByRecent = getRecent("play")
-              .reverse()
-              .flatMap((cid) => {
-                const brief = mappedByCid.get(cid);
-                return brief ? [brief] : [];
-              });
+            const mappedByCid = new Map(
+              mapped.map((brief: ChartLineBrief) => [brief.cid, brief] as const)
+            );
+            const sortedByRecent: ChartLineBrief[] = [];
+            for (const cid of getRecent("play").reverse()) {
+              const brief = mappedByCid.get(cid);
+              if (brief) {
+                sortedByRecent.push(brief);
+              }
+            }
             setSearchResult(sortedByRecent);
           } else {
             setSearchResult(mapped);
