@@ -40,7 +40,7 @@ describe("POST /api/seqPreview", () => {
 
     expect(res.status).to.equal(415);
     const body = await res.json();
-    expect(body.message).to.equal("Invalid msgpack format");
+    expect(body.message).to.equal("invalidChart");
   });
 
   test("should return 415 for invalid Level15Play data (missing required fields)", async () => {
@@ -60,7 +60,7 @@ describe("POST /api/seqPreview", () => {
 
     expect(res.status).to.equal(415);
     const body = await res.json();
-    expect(body.message).to.include("Validation error");
+    expect(body.message).to.include("invalidChart");
   });
 
   test("should return 409 for invalid ver field", async () => {
@@ -102,6 +102,6 @@ describe("POST /api/seqPreview", () => {
 
     expect(res.status).to.equal(415);
     const body = await res.json();
-    expect(body.message).to.include("Validation error");
+    expect(body.message).to.include("invalidChart");
   });
 });

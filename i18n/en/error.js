@@ -2,7 +2,7 @@ export default {
   error: {
     api: {
       // 400
-      generic400: "The parameter is invalid",
+      badRequest: "The parameter is invalid",
       noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
@@ -25,6 +25,7 @@ export default {
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500
+      unknownApiError: "An error occurred on the server",
       imageGenerationFailed: "Failed to generate the image",
       unsupportedChartVersion: "Unsupported chart data version",
       // 499
