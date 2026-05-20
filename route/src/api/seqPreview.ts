@@ -44,7 +44,7 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         },
       },
       409: {
-        description: "chart version is not 15",
+        description: `chart version is older than ${currentChartVer - 1}`,
         content: {
           "application/json": {
             schema: resolver(await errorLiteral("oldChartVersion")),
