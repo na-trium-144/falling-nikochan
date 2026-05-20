@@ -28,13 +28,13 @@ const basicAuth = (passwd: string) =>
 const hashAuth = (passwdHash: string) => `Nikochan-Hash ${passwdHash}`;
 const requestChartFile = (
   path: string,
-  init: RequestInit & { passwd?: string } = {}
+  init: RequestInit & { passwd?: string | null } = {}
 ) => {
   const { passwd = "p", headers, ...rest } = init;
   return app.request(path, {
     ...rest,
     headers: {
-      Authorization: basicAuth(passwd),
+      ...(passwd === null ? {} : { Authorization: basicAuth(passwd) }),
       ...(headers ?? {}),
     },
   });

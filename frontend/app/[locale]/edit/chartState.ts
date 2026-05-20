@@ -83,11 +83,11 @@ export interface FetchChartOptions {
 }
 
 const encodeBase64Utf8 = (value: string) => {
-  let bin = "";
-  for (const byte of new TextEncoder().encode(value)) {
-    bin += String.fromCodePoint(byte);
-  }
-  return btoa(bin);
+  return btoa(
+    Array.from(new TextEncoder().encode(value), (byte) =>
+      String.fromCodePoint(byte)
+    ).join("")
+  );
 };
 const basicAuthorization = (passwd: string) =>
   `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
