@@ -45,7 +45,7 @@ export const onError =
       const status = (err as HTTPException).status;
       const message =
         (err as HTTPException).message || (status === 404 ? "notFound" : "");
-      const cause = JSON.parse(JSON.stringify((err as HTTPException).cause));
+      const cause = (err as HTTPException).cause;
       if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
         return c.json(
           {
