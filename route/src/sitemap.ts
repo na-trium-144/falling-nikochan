@@ -16,7 +16,6 @@ const staticSitemapItems: SitemapItemLoose[] = [
   // { url: "/main/links", priority: 0 },
   { url: "/main/play" },
   { url: "/main/policies" },
-  // { url: "/main/recent", priority: 0.3 },
   // {url: "/main/shareInternal", priority: 0,},
   { url: "/main/version" },
   // {url: "/play", priority: 0,},

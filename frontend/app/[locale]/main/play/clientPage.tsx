@@ -26,6 +26,7 @@ import { APIError } from "@/common/apiError.js";
 import { useRouter, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
+import { getRecent } from "@/common/recent.js";
 import Search from "@icon-park/react/lib/icons/Search";
 
 interface Props {
@@ -60,7 +61,7 @@ function PlayTabInternal(
 
   interface PageParams {
     search: string;
-    sort: "relevance" | "latest" | "popular" | undefined;
+    sort: "relevance" | "latest" | "popular" | "recent" | undefined;
     minLv: number;
     maxLv: number;
   }
@@ -76,7 +77,8 @@ function PlayTabInternal(
         ? (props.searchParams.get("sort") as
             | "relevance"
             | "latest"
-            | "popular") || "relevance"
+            | "popular"
+            | "recent") || "relevance"
         : undefined,
       minLv: Number(props.searchParams?.get("minLv") ?? minLv),
       maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
@@ -132,9 +134,11 @@ function PlayTabInternal(
     }
     setWaitingDebounce(false);
     setSearchResult(undefined);
+    const sortForAPI =
+      params.sort === "recent" ? "latest" : (params.sort ?? "relevance");
     const apiParams = new URLSearchParams({
       q: params.search,
-      sort: params.sort,
+      sort: sortForAPI,
       difficultyMin: String(params.minLv),
       difficultyMax: String(params.maxLv),
     });
@@ -151,15 +155,31 @@ function PlayTabInternal(
     })
       .then(async (res) => {
         if (res.ok) {
-          setSearchResult(
-            (await res.json()).map(
-              (r: { cid: string; updatedAt?: number }) => ({
-                cid: r.cid,
-                updatedAt: r.updatedAt,
-                fetched: false,
-              })
-            )
+          const mapped: ChartLineBrief[] = (await res.json()).map(
+            (r: { cid: string; updatedAt?: number }) => ({
+              cid: r.cid,
+              updatedAt: r.updatedAt,
+              fetched: false,
+            })
           );
+          if (params.sort === "recent") {
+            const mappedByCid = new Map(
+              mapped.map((brief: ChartLineBrief) => [brief.cid, brief])
+            );
+            const sortedByRecent: ChartLineBrief[] = [];
+            for (const cid of getRecent("play").reverse()) {
+              if (sortedByRecent.length === mapped.length) {
+                break;
+              }
+              const brief = mappedByCid.get(cid);
+              if (brief) {
+                sortedByRecent.push(brief);
+              }
+            }
+            setSearchResult(sortedByRecent);
+          } else {
+            setSearchResult(mapped);
+          }
         } else {
           setSearchResult(await APIError.fromRes(res));
         }
@@ -222,7 +242,7 @@ function PlayTabInternal(
         />
       </section>
       <section className="fn-sect">
-        <ul className="list-disc ml-6 space-y-1 text-left">
+        <ul className="list-disc ml-6 space-y-2 text-left">
           <li>
             <div className="flex items-baseline">
               <span className="mr-2 flex-none">{t("search")}:</span>
@@ -241,28 +261,36 @@ function PlayTabInternal(
           <li>
             <div className="flex flex-wrap items-center">
               <span className="mr-2">{t("sort")}:</span>
-              <span className="inline-grid grid-cols-3 w-max max-w-full">
-                {(["relevance", "latest", "popular"] as const).map((sort) => (
-                  <button
-                    key={sort}
-                    className={clsx(
-                      "fn-toggle",
-                      sort === params.sort
-                        ? "fn-flat-button fn-plain fn-selected"
-                        : "fn-flat-button fn-sky"
-                    )}
-                    onClick={() => updateParams({ sort })}
-                    disabled={sort === "relevance" && !params.search}
-                  >
-                    <span className="fn-glass-1" />
-                    <span className="fn-glass-2" />
-                    <ButtonHighlight />
-                    {t(sort)}
-                  </button>
-                ))}
+              <span
+                className={clsx(
+                  "inline-grid max-w-full text-nowrap",
+                  "grid-cols-1 w-full",
+                  "min-[18rem]:grid-cols-2 min-[18rem]:w-max min-[36rem]:grid-cols-4"
+                )}
+              >
+                {(["relevance", "latest", "popular", "recent"] as const).map(
+                  (sort) => (
+                    <button
+                      key={sort}
+                      className={clsx(
+                        "fn-toggle",
+                        sort === params.sort
+                          ? "fn-flat-button fn-plain fn-selected"
+                          : "fn-flat-button fn-sky"
+                      )}
+                      onClick={() => updateParams({ sort })}
+                      disabled={sort === "relevance" && !params.search}
+                    >
+                      <span className="fn-glass-1" />
+                      <span className="fn-glass-2" />
+                      <ButtonHighlight />
+                      {t(sort)}
+                    </button>
+                  )
+                )}
               </span>
             </div>
-            <p className="ml-2">
+            <p className="ml-2 mt-1">
               {params.sort === "popular" && t("popularDesc", { popularDays })}
               {
                 params.sort === "latest" && t("latestDesc")
