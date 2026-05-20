@@ -82,6 +82,23 @@ export interface FetchChartOptions {
   savePasswd: boolean;
 }
 
+const encodeBase64Utf8 = (value: string) =>
+  btoa(String.fromCodePoint(...new TextEncoder().encode(value)));
+const basicAuthorization = (passwd: string) =>
+  `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
+const chartAuthorization = (currentPasswd: CurrentPasswd) => {
+  if (currentPasswd.pbypass) {
+    return `Nikochan-Bypass ${currentPasswd.pbypass}`;
+  }
+  if (currentPasswd.ph) {
+    return `Nikochan-Hash ${currentPasswd.ph}`;
+  }
+  if (currentPasswd.p) {
+    return basicAuthorization(currentPasswd.p);
+  }
+  return undefined;
+};
+
 export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_rerenderIndex, setRerenderIndex] = useState<number>(0);
@@ -121,24 +138,18 @@ export function useChartState(props: Props) {
         ph: getPasswd(cid),
         pbypass: options.bypass ? "1" : null,
       };
-      const q = new URLSearchParams(
-        Object.entries(currentPasswd).filter(([, v]) => v)
-      );
+      const authorization = chartAuthorization(currentPasswd);
       let res: Response | null = null;
       try {
         for (let retry = 0; ; retry++) {
-          res = await fetch(
-            process.env.BACKEND_PREFIX +
-              `/api/chartFile/${cid}?` +
-              q.toString(),
-            {
-              cache: "no-store",
-              credentials:
-                process.env.NODE_ENV === "development"
-                  ? "include"
-                  : "same-origin",
-            }
-          );
+          res = await fetch(process.env.BACKEND_PREFIX + `/api/chartFile/${cid}`, {
+            cache: "no-store",
+            credentials:
+              process.env.NODE_ENV === "development"
+                ? "include"
+                : "same-origin",
+            headers: authorization ? { Authorization: authorization } : undefined,
+          });
           if (res.ok) {
             try {
               const chartRes = msgpack.decode(
@@ -148,9 +159,11 @@ export function useChartState(props: Props) {
                 if (options.editPasswd) {
                   try {
                     const res = await fetch(
-                      process.env.BACKEND_PREFIX +
-                        `/api/hashPasswd/${cid}?p=${options.editPasswd}`,
+                      process.env.BACKEND_PREFIX + `/api/hashPasswd/${cid}`,
                       {
+                        headers: {
+                          Authorization: basicAuthorization(options.editPasswd),
+                        },
                         credentials:
                           process.env.NODE_ENV === "development"
                             ? "include"
@@ -225,9 +238,11 @@ export function useChartState(props: Props) {
         if (savePasswd) {
           if (currentPasswd.p) {
             fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/hashPasswd/${cid}?p=${currentPasswd.p}`,
+              process.env.BACKEND_PREFIX + `/api/hashPasswd/${cid}`,
               {
+                headers: {
+                  Authorization: basicAuthorization(currentPasswd.p),
+                },
                 credentials:
                   process.env.NODE_ENV === "development"
                     ? "include"
@@ -289,15 +304,11 @@ export function useChartState(props: Props) {
           return;
         }
       } else {
-        const q = new URLSearchParams(
-          Object.entries(chartState.chart.currentPasswd).filter(([, v]) => v)
-        );
+        const authorization = chartAuthorization(chartState.chart.currentPasswd);
         try {
           for (let retry = 0; ; retry++) {
             const res = await fetch(
-              process.env.BACKEND_PREFIX +
-                `/api/chartFile/${chartState.chart.cid}?` +
-                q.toString(),
+              process.env.BACKEND_PREFIX + `/api/chartFile/${chartState.chart.cid}`,
               {
                 method: "POST",
                 body: msgpack.encode(chartState.chart.toObject()),
@@ -306,6 +317,9 @@ export function useChartState(props: Props) {
                   process.env.NODE_ENV === "development"
                     ? "include"
                     : "same-origin",
+                headers: authorization
+                  ? { Authorization: authorization }
+                  : undefined,
               }
             );
             if (res.ok) {

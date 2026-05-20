@@ -36,6 +36,7 @@ import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { ConnInfo } from "hono/conninfo";
+import { getPasswdParamsFromAuthHeader } from "./passwdAuth.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 /**
@@ -45,7 +46,8 @@ dotenv.config({ path: join(dirname(process.cwd()), ".env") });
  * chartFileのクエリパラメータph,localStorageに保存するph = hash(pServerHash + pUserSalt)
  *   pUserSaltは /api/hashPasswd でランダムにセットされる
  *
- * /api/chartFile には p=passwd または ph=hash(pServerHash + pUserSalt) を指定してアクセスする
+ * /api/chartFile にはクエリ p=passwd または ph=hash(pServerHash + pUserSalt)、
+ * もしくは Authorization ヘッダーで Nikochan-Basic/Nikochan-Hash/Nikochan-Bypass を指定してアクセスする
  * POST時のデータのchangePasswdをnullにすると以前のパスワードを次回も使用し、nullでない場合それを新しいパスワードとしてデータベースを更新
  *
  * v8以前で空文字列パスワードで保存していたデータについては、 pServerhash=pRandomSalt=null
@@ -97,7 +99,16 @@ const chartFileApp = async (config: {
       ),
       async (c, next) => {
         const { cid } = c.req.valid("param");
-        const { p, ph, pbypass } = c.req.valid("query");
+        const { p: queryP, ph: queryPh, pbypass: queryPbypass } =
+          c.req.valid("query");
+        const { p, ph, pbypass } = getPasswdParamsFromAuthHeader(
+          c.req.header("Authorization"),
+          {
+            p: queryP,
+            ph: queryPh,
+            pbypass: queryPbypass,
+          }
+        );
         const ip = getIp(c, config.getConnInfo);
         const v9UserSalt =
           env(c).API_ENV === "development"
@@ -144,7 +155,7 @@ const chartFileApp = async (config: {
       "/:cid",
       describeRoute({
         description:
-          "Get a raw chart file in MessagePack format. Requires a password (either p or ph). " +
+           "Get a raw chart file in MessagePack format. Requires a password (either p/ph query or Authorization header). " +
           "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit or Chart14Edit, " +
           `while this documentation only describes Chart15 format. ` +
           `The chart editor can import chart data from the API.`,
@@ -204,7 +215,7 @@ const chartFileApp = async (config: {
       "/:cid",
       describeRoute({
         description:
-          "Soft delete a chart. The chart will be marked as deleted and won't appear in searches or latest/popular lists. Requires a password (either p or ph).",
+           "Soft delete a chart. The chart will be marked as deleted and won't appear in searches or latest/popular lists. Requires a password (either p/ph query or Authorization header).",
         responses: {
           204: {
             description: "No content, chart deleted successfully",
@@ -264,7 +275,7 @@ const chartFileApp = async (config: {
         description:
           "Update a chart file with new data in MessagePack format. " +
           `The chart data format must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
-          "The previous password is required (either p or ph). If the posted chart data has a different password, it will be used next time.",
+           "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time.",
         requestBody: {
           description: "Chart data in MessagePack format.",
           required: true,

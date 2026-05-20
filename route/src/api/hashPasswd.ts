@@ -10,6 +10,7 @@ import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { errorLiteral } from "../error.js";
+import { getPasswdParamsFromAuthHeader } from "./passwdAuth.js";
 
 /**
  * chartFile のコメントを参照
@@ -19,7 +20,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   describeRoute({
     description:
       "Generate a unique hash of the password to be used when accessing the chart. " +
-      "The correct password for the chart is required. " +
+      "The correct password for the chart is required (query p or Authorization header). " +
       "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
     responses: {
       200: {
@@ -69,13 +70,20 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator(
     "query",
     v.object({
-      p: v.pipe(v.string(), v.minLength(1), v.description("plain password")),
+      p: v.optional(
+        v.pipe(v.string(), v.minLength(1), v.description("plain password"))
+      ),
     })
   ),
   validator("cookie", v.object({ pUserSalt: v.optional(v.string()) })),
   async (c) => {
     const { cid } = c.req.valid("param");
-    const { p } = c.req.valid("query");
+    const { p } = getPasswdParamsFromAuthHeader(c.req.header("Authorization"), {
+      p: c.req.valid("query").p,
+    });
+    if (p === undefined) {
+      throw new HTTPException(400, { message: "passwordNotSpecified" });
+    }
     let pUserSalt: string;
     const newUserSalt = () =>
       randomBytes(16)
