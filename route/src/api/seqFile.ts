@@ -36,7 +36,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         description: "invalid chart id",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(v.object({})),
           },
         },
       },

@@ -58,7 +58,7 @@ const recordApp = async (config: {
             description: "invalid chart id",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(v.object({})),
               },
             },
           },
@@ -142,7 +142,7 @@ const recordApp = async (config: {
             description: "invalid chart id or body",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(v.object({})),
               },
             },
           },

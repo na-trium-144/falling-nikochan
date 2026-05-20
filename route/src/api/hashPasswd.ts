@@ -43,7 +43,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         description: "invalid chart id or password not specified",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(v.object({})),
           },
         },
       },

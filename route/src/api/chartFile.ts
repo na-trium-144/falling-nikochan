@@ -161,7 +161,7 @@ const chartFileApp = async (config: {
             description: "invalid chart id or password not specified",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(v.object({})),
               },
             },
           },
@@ -213,7 +213,7 @@ const chartFileApp = async (config: {
             description: "invalid chart id or password not specified",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(v.object({})),
               },
             },
           },
@@ -282,7 +282,7 @@ const chartFileApp = async (config: {
             description: "invalid chart id or password not specified",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(v.object({})),
               },
             },
           },
