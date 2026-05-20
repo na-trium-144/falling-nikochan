@@ -164,7 +164,7 @@ function PlayTabInternal(
           );
           if (params.sort === "recent") {
             const mappedByCid = new Map(
-              mapped.map((brief: ChartLineBrief) => [brief.cid, brief] as const)
+              mapped.map((brief: ChartLineBrief) => [brief.cid, brief])
             );
             const sortedByRecent: ChartLineBrief[] = [];
             for (const cid of getRecent("play").reverse()) {
