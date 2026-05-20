@@ -82,8 +82,13 @@ export interface FetchChartOptions {
   savePasswd: boolean;
 }
 
-const encodeBase64Utf8 = (value: string) =>
-  btoa(String.fromCodePoint(...new TextEncoder().encode(value)));
+const encodeBase64Utf8 = (value: string) => {
+  let bin = "";
+  for (const byte of new TextEncoder().encode(value)) {
+    bin += String.fromCodePoint(byte);
+  }
+  return btoa(bin);
+};
 const basicAuthorization = (passwd: string) =>
   `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
 const chartAuthorization = (currentPasswd: CurrentPasswd) => {

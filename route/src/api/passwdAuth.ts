@@ -7,7 +7,12 @@ interface PasswdParams {
 }
 
 function decodeBase64Utf8(value: string): string {
-  const bin = atob(value);
+  let bin: string;
+  try {
+    bin = atob(value);
+  } catch {
+    throw new HTTPException(400, { message: "invalidAuthorization" });
+  }
   return new TextDecoder().decode(
     Uint8Array.from(bin, (char) => char.codePointAt(0) ?? 0)
   );
@@ -21,12 +26,7 @@ export function getPasswdParamsFromAuthHeader(
     return fallback;
   }
   if (authorization.startsWith("Nikochan-Basic ")) {
-    let p: string;
-    try {
-      p = decodeBase64Utf8(authorization.slice("Nikochan-Basic ".length));
-    } catch {
-      throw new HTTPException(400, { message: "invalidAuthorization" });
-    }
+    const p = decodeBase64Utf8(authorization.slice("Nikochan-Basic ".length));
     if (p.length === 0) {
       throw new HTTPException(400, { message: "invalidAuthorization" });
     }

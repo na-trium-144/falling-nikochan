@@ -7,6 +7,17 @@ import { app, initDb } from "./init";
 
 const basicAuth = (passwd: string) =>
   `Nikochan-Basic ${btoa(passwd)}`;
+const getServerHash = async () => {
+  const client = new MongoClient(process.env.MONGODB_URI!);
+  try {
+    return (await (await client.connect())
+      .db("nikochan")
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: "100000" }))!.pServerHash;
+  } finally {
+    client.close();
+  }
+};
 
 describe("GET /api/hashPasswd/:cid", () => {
   test("should return hashed password and random pUserSalt", async () => {
@@ -22,16 +33,7 @@ describe("GET /api/hashPasswd/:cid", () => {
     expect(pUserSalt).to.be.a("string");
     expect(pUserSalt).not.to.be.empty;
 
-    let pServerHash: string;
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      pServerHash = (await (await client.connect())
-        .db("nikochan")
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash;
-    } finally {
-      client.close();
-    }
+    const pServerHash = await getServerHash();
     expect(resHash).to.equal(await hash(pServerHash + pUserSalt));
   });
   test("should return hashed password when Authorization header is provided", async () => {
@@ -48,16 +50,7 @@ describe("GET /api/hashPasswd/:cid", () => {
     expect(pUserSalt).to.be.a("string");
     expect(pUserSalt).not.to.be.empty;
 
-    let pServerHash: string;
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      pServerHash = (await (await client.connect())
-        .db("nikochan")
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash;
-    } finally {
-      client.close();
-    }
+    const pServerHash = await getServerHash();
     expect(resHash).to.equal(await hash(pServerHash + pUserSalt));
   });
   test("should use same pUserSalt if it is set in the cookie", async () => {
@@ -73,16 +66,7 @@ describe("GET /api/hashPasswd/:cid", () => {
       .split("=")[1];
     expect(pUserSalt).to.equal("def");
 
-    let pServerHash: string;
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      pServerHash = (await (await client.connect())
-        .db("nikochan")
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash;
-    } finally {
-      client.close();
-    }
+    const pServerHash = await getServerHash();
     expect(resHash).to.equal(await hash(pServerHash + pUserSalt));
   });
   test("should return 400 for invalid cid", async () => {
