@@ -5,8 +5,14 @@ import { hash } from "@falling-nikochan/chart";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
+const encodeBase64Utf8 = (value: string) =>
+  btoa(
+    Array.from(new TextEncoder().encode(value), (byte) =>
+      String.fromCodePoint(byte)
+    ).join("")
+  );
 const basicAuth = (passwd: string) =>
-  `Nikochan-Basic ${btoa(passwd)}`;
+  `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
 const hashAuth = (passwdHash: string) => `Nikochan-Hash ${passwdHash}`;
 
 describe("DELETE /api/chartFile/:cid", () => {

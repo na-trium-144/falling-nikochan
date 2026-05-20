@@ -5,8 +5,14 @@ import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 import { app, initDb } from "./init";
 
+const encodeBase64Utf8 = (value: string) =>
+  btoa(
+    Array.from(new TextEncoder().encode(value), (byte) =>
+      String.fromCodePoint(byte)
+    ).join("")
+  );
 const basicAuth = (passwd: string) =>
-  `Nikochan-Basic ${btoa(passwd)}`;
+  `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
 const getServerHash = async () => {
   const client = new MongoClient(process.env.MONGODB_URI!);
   try {
