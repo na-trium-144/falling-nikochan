@@ -52,6 +52,7 @@ const oembedApp = async (config: {
       cacheControl: `max-age=${CACHE_MAX_AGE}`,
     }),
     describeRoute({
+      hide: true,
       description:
         "Get oEmbed information about the chart according to oEmbed spec: https://oembed.com/",
       responses: {
