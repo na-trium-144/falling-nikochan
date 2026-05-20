@@ -33,6 +33,10 @@ AIエージェントは以下の特殊な構成に注意してください。
 - 入力のバリデーションやOpenAPIドキュメントの入出力型定義には Valibot を使用しています。
 - バックエンドのエントリーポイントは、Node.js用の route/serve-local.ts 、Bun用の route/serve-bun-prod.ts 、Cloudflare Worker用の route/serve-cf.js 、Vercel用の api/index.js 、Service Workerで実行される worker/entry.ts (リダイレクトなど一部のロジックのみ) の5箇所あります。変更する際はこれらすべてを更新してください。
 - バックエンドが処理するパスを追加した場合には vercel.json のrewritesの更新も必要な場合があります。
+- 異常時のレスポンスはjsonで `{message: "事前に定義されたメッセージ"}` の形式でなければなりません。メッセージは `i18n/{ja,en}/error.js` 内の`api`に定義されているものでなければなりません。
+    - `throw new HTTPException(4xx, {message: "事前に定義されたメッセージ"})` とすることでグローバルなエラーハンドラー(src/error.ts)がそれをJSONに整形して返します。
+    - `ValiError` をthrowするとグローバルなエラーハンドラーが400として返します。 したがってそれぞれのAPIのハンドラーでは常に `v.parse()` を使用し、catchする必要はありません。
+    - `ValiError` を400以外のレスポンスで返したい場合は、 `throw new HTTPException(4xx, {message: "事前に定義されたメッセージ", cause: e.issues });` としてください。
 
 ### 3. Frontend Code
 - すべてのフロントエンドのソースコードは frontend/app/[locale]/ ディレクトリ内にあります。 ja, en ディレクトリではなく文字通り [locale] という名前のディレクトリです(dynamic route)。

@@ -144,7 +144,10 @@ pnpm run ldev
 **Conventions**
 
 - When code branches depending on the deployment target, the Hono App creation is made into a function. (`const fooApp = async (config: ...) => new Hono(...)`)
-- Error messages use only those included in `i18n/[locale]/error.js`, except for validation errors, and are returned using `throw new HTTPException` or `return c.json()`.
+- The error response must be in JSON format and be in the form of `{message: "predefined message"}`. The message must be one defined in `api` within `i18n/{ja,en}/error.js`.
+  - Throwing an HTTPException will cause the global error handler (src/error.ts) to format it into JSON and return it.
+  - Throwing a `ValiError` will cause the global error handler to return a 400 status code. Therefore, handlers for each API should always use `v.parse()` and do not need to catch it.
+  - If you want to return a `ValiError` with a response other than 400, use `throw new HTTPException(4xx, {message: "predefined message", cause: e.issues });`.
 
 ### Frontend
 
