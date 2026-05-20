@@ -77,7 +77,7 @@ const newChartFileApp = async (config: {
           description: "Invalid chart format",
           content: {
             "application/json": {
-              schema: resolver(v.object({ message: v.string() })),
+              schema: resolver(await errorLiteral("invalidChart")),
             },
           },
         },
@@ -135,7 +135,10 @@ const newChartFileApp = async (config: {
             | Chart15;
         } catch (e) {
           console.error(e);
-          throw new HTTPException(415, { message: (e as Error).toString() });
+          throw new HTTPException(415, {
+            message: "invalidChart",
+            cause: v.isValiError(e) ? e.issues : undefined,
+          });
         }
 
         if (numEvents(newChart) > chartMaxEvent) {

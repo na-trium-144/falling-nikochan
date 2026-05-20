@@ -1,6 +1,5 @@
 import { Context } from "hono";
 import { backendOrigin, Bindings } from "./env.js";
-import { ValiError } from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
@@ -38,17 +37,23 @@ export const onError =
     }
     try {
       const lang = c.get("language") || "en";
-      if (err instanceof ValiError) {
-        err = new HTTPException(400, { message: err.message });
+      if (v.isValiError(err)) {
+        err = new HTTPException(400, { cause: err.issues });
       } else if (!(err instanceof HTTPException)) {
         err = new HTTPException(500);
       }
       const status = (err as HTTPException).status;
       const message =
-        (await (err as HTTPException).getResponse().text()) ||
-        (status === 404 ? "notFound" : "");
+        (err as HTTPException).message || (status === 404 ? "notFound" : "");
+      const cause = JSON.parse(JSON.stringify((err as HTTPException).cause));
       if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
-        return c.json({ message }, status);
+        return c.json(
+          {
+            ...(message ? { message } : {}),
+            ...(cause ? { cause } : {}),
+          },
+          status
+        );
       } else {
         if (c.req.path === `/${lang}/errorPlaceholder`) {
           // エラーハンドラーがfetchに失敗して無限ループになるのを防ぐ

@@ -7,6 +7,7 @@ import {
   LevelPlaySchema15,
   Level15Play,
   docRefs,
+  currentChartVer,
 } from "@falling-nikochan/chart";
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
@@ -48,65 +49,46 @@ const seqPreviewApp = new Hono<{ Bindings: Bindings }>({ strict: false }).post(
         description: "Invalid chart format",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(await errorLiteral("invalidChart")),
           },
         },
       },
     },
   }),
   async (c) => {
+    const rawBody = await c.req.arrayBuffer();
+
+    let levelData: Level15Play;
     try {
-      // Get the raw body as ArrayBuffer
-      const rawBody = await c.req.arrayBuffer();
-
-      // Decode msgpack
-      let decodedData: unknown;
-      try {
-        decodedData = msgpack.decode(new Uint8Array(rawBody));
-      } catch {
-        throw new HTTPException(415, {
-          message: "Invalid msgpack format",
-        });
-      }
-
-      // Check version first
+      const decodedData = msgpack.decode(new Uint8Array(rawBody));
       if (
         typeof decodedData === "object" &&
         decodedData !== null &&
-        "ver" in decodedData
+        "ver" in decodedData &&
+        typeof decodedData.ver === "number"
       ) {
-        if (decodedData.ver !== 15 && decodedData.ver !== 16) {
-          throw new HTTPException(409, { message: "oldChartVersion" });
+        if (decodedData.ver < currentChartVer - 1) {
+          return c.json({ message: "oldChartVersion" }, 409);
         }
       }
-
-      // Validate with LevelPlaySchema15
-      const parseResult = v.safeParse(LevelPlaySchema15(), decodedData);
-      if (!parseResult.success) {
-        throw new HTTPException(415, {
-          message: `Validation error: ${parseResult.issues.map((i) => i.message).join(", ")}`,
-        });
-      }
-
-      const levelData = parseResult.output as Level15Play;
-
-      // Load chart data
-      const seqData: ChartSeqData = loadChart(levelData);
-
-      // Return msgpack-encoded response
-      const filename = "preview.fnseq.mpk";
-      return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
-        "Content-Type": "application/vnd.msgpack",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      });
-    } catch (error) {
-      if (error instanceof HTTPException) {
-        throw error;
-      }
-      throw new HTTPException(500, {
-        message: "Internal server error",
+      levelData = v.parse(LevelPlaySchema15(), decodedData);
+    } catch (e) {
+      console.error(e);
+      throw new HTTPException(415, {
+        message: "invalidChart",
+        cause: v.isValiError(e) ? e.issues : undefined,
       });
     }
+
+    // Load chart data
+    const seqData: ChartSeqData = loadChart(levelData);
+
+    // Return msgpack-encoded response
+    const filename = "preview.fnseq.mpk";
+    return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
+      "Content-Type": "application/vnd.msgpack",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    });
   }
 );
 
