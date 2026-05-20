@@ -26,6 +26,7 @@ import { APIError } from "@/common/apiError.js";
 import { useRouter, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
+import { getRecent } from "@/common/recent.js";
 import Search from "@icon-park/react/lib/icons/Search";
 
 interface Props {
@@ -60,7 +61,7 @@ function PlayTabInternal(
 
   interface PageParams {
     search: string;
-    sort: "relevance" | "latest" | "popular" | undefined;
+    sort: "relevance" | "latest" | "popular" | "recent" | undefined;
     minLv: number;
     maxLv: number;
   }
@@ -73,10 +74,11 @@ function PlayTabInternal(
     const params: PageParams = {
       search: props.searchParams?.get("search") || "",
       sort: props.searchParams
-        ? (props.searchParams.get("sort") as
+          ? (props.searchParams.get("sort") as
             | "relevance"
             | "latest"
-            | "popular") || "relevance"
+            | "popular"
+            | "recent") || "relevance"
         : undefined,
       minLv: Number(props.searchParams?.get("minLv") ?? minLv),
       maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
@@ -132,9 +134,10 @@ function PlayTabInternal(
     }
     setWaitingDebounce(false);
     setSearchResult(undefined);
+    const sortForAPI = params.sort === "recent" ? "latest" : params.sort;
     const apiParams = new URLSearchParams({
       q: params.search,
-      sort: params.sort,
+      sort: sortForAPI,
       difficultyMin: String(params.minLv),
       difficultyMax: String(params.maxLv),
     });
@@ -151,15 +154,25 @@ function PlayTabInternal(
     })
       .then(async (res) => {
         if (res.ok) {
-          setSearchResult(
-            (await res.json()).map(
-              (r: { cid: string; updatedAt?: number }) => ({
-                cid: r.cid,
-                updatedAt: r.updatedAt,
-                fetched: false,
-              })
-            )
+          const mapped = (await res.json()).map(
+            (r: { cid: string; updatedAt?: number }) => ({
+              cid: r.cid,
+              updatedAt: r.updatedAt,
+              fetched: false,
+            })
           );
+          if (params.sort === "recent") {
+            const mappedByCid = new Map(mapped.map((brief) => [brief.cid, brief]));
+            const sortedByRecent = getRecent("play")
+              .reverse()
+              .flatMap((cid) => {
+                const brief = mappedByCid.get(cid);
+                return brief ? [brief] : [];
+              });
+            setSearchResult(sortedByRecent);
+          } else {
+            setSearchResult(mapped);
+          }
         } else {
           setSearchResult(await APIError.fromRes(res));
         }
@@ -241,8 +254,9 @@ function PlayTabInternal(
           <li>
             <div className="flex flex-wrap items-center">
               <span className="mr-2">{t("sort")}:</span>
-              <span className="inline-grid grid-cols-3 w-max max-w-full">
-                {(["relevance", "latest", "popular"] as const).map((sort) => (
+              <span className="inline-grid grid-cols-4 w-max max-w-full">
+                {(["relevance", "latest", "popular", "recent"] as const).map(
+                  (sort) => (
                   <button
                     key={sort}
                     className={clsx(
@@ -259,7 +273,8 @@ function PlayTabInternal(
                     <ButtonHighlight />
                     {t(sort)}
                   </button>
-                ))}
+                  )
+                )}
               </span>
             </div>
             <p className="ml-2">
