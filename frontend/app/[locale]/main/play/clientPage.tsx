@@ -134,7 +134,8 @@ function PlayTabInternal(
     }
     setWaitingDebounce(false);
     setSearchResult(undefined);
-    const sortForAPI = params.sort === "recent" ? "latest" : params.sort;
+    const sortForAPI =
+      params.sort === "recent" ? "latest" : (params.sort ?? "relevance");
     const apiParams = new URLSearchParams({
       q: params.search,
       sort: sortForAPI,
@@ -167,6 +168,9 @@ function PlayTabInternal(
             );
             const sortedByRecent: ChartLineBrief[] = [];
             for (const cid of getRecent("play").reverse()) {
+              if (sortedByRecent.length === mapped.length) {
+                break;
+              }
               const brief = mappedByCid.get(cid);
               if (brief) {
                 sortedByRecent.push(brief);
