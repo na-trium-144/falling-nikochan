@@ -168,6 +168,9 @@ describe("POST /api/chartFile/:cid", () => {
       body: msgpack.encode({ ...dummyChart(), title: "updated" }),
     });
     expect(res.status).to.equal(400);
+    const body = await res.json();
+    expect(body.message).to.equal("badRequest");
+    expect(body.flattened.nested.cid[0]).to.be.a("string");
   });
   test("should return 401 for wrong password", async () => {
     await initDb();
@@ -297,6 +300,8 @@ describe("POST /api/chartFile/:cid", () => {
       body: "invalid",
     });
     expect(res.status).to.equal(415);
+    const body = await res.json();
+    expect(body.message).to.equal("invalidChart");
   });
   describe("password of chart", () => {
     test("should not be changed if changePasswd is null", async () => {

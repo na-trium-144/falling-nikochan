@@ -31,7 +31,11 @@ import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { getYTDataEntry } from "./ytData.js";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import { getIp, updateIp } from "./dbRateLimit.js";
@@ -71,7 +75,7 @@ const chartFileApp = async (config: {
     .on(
       ["GET", "POST", "DELETE"],
       "/:cid",
-      validator("param", v.object({ cid: CidSchema() })),
+      validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
       validator(
         "query",
         v.object({
@@ -87,13 +91,15 @@ const chartFileApp = async (config: {
             )
           ),
           pbypass: v.optional(v.string()),
-        })
+        }),
+        sValidatorHook()
       ),
       validator(
         "cookie",
         v.object({
           pUserSalt: v.optional(v.string()),
-        })
+        }),
+        sValidatorHook()
       ),
       async (c, next) => {
         const { cid } = c.req.valid("param");
@@ -156,12 +162,18 @@ const chartFileApp = async (config: {
                 schema: docRefs("Chart15"),
               },
             },
+            headers: {
+              "Content-Disposition": {
+                description: "Filename with extension of .fn{ver}.mpk",
+                schema: { type: "string" },
+              },
+            },
           },
           400: {
-            description: "invalid chart id or password not specified",
+            description: "invalid chart id or parameter",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(await validationErrorSchema()),
               },
             },
           },
@@ -186,6 +198,12 @@ const chartFileApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("tooManyRequest")),
+              },
+            },
+            headers: {
+              "Retry-After": {
+                description: "Number of seconds to wait before retrying",
+                schema: { type: "integer" },
               },
             },
           },
@@ -210,10 +228,10 @@ const chartFileApp = async (config: {
             description: "No content, chart deleted successfully",
           },
           400: {
-            description: "invalid chart id or password not specified",
+            description: "invalid chart id or parameter",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(await validationErrorSchema()),
               },
             },
           },
@@ -238,6 +256,12 @@ const chartFileApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("tooManyRequest")),
+              },
+            },
+            headers: {
+              "Retry-After": {
+                description: "Number of seconds to wait before retrying",
+                schema: { type: "integer" },
               },
             },
           },
@@ -279,10 +303,16 @@ const chartFileApp = async (config: {
             description: "No content, chart updated successfully",
           },
           400: {
-            description: "invalid chart id or password not specified",
+            description:
+              "invalid chart id or parameter, or password not specified in the chart data",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(
+                  v.union([
+                    await validationErrorSchema(),
+                    await errorLiteral("noPasswd"),
+                  ])
+                ),
               },
             },
           },
@@ -324,7 +354,12 @@ const chartFileApp = async (config: {
             description: "Invalid chart format",
             content: {
               "application/json": {
-                schema: resolver(v.object({ message: v.string() })),
+                schema: resolver(
+                  v.union([
+                    await validationErrorSchema("invalidChart"),
+                    await errorLiteral("invalidChart"),
+                  ])
+                ),
               },
             },
           },
@@ -333,6 +368,12 @@ const chartFileApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("tooManyRequest")),
+              },
+            },
+            headers: {
+              "Retry-After": {
+                description: "Number of seconds to wait before retrying",
+                schema: { type: "integer" },
               },
             },
           },
@@ -364,8 +405,7 @@ const chartFileApp = async (config: {
             | Chart14Edit
             | Chart15;
         } catch (e) {
-          console.error(e);
-          throw new HTTPException(415, { message: (e as Error).toString() });
+          throw new HTTPException(415, { message: "invalidChart", cause: e });
         }
 
         if (numEvents(newChart as Chart14Edit | Chart15) > chartMaxEvent) {
