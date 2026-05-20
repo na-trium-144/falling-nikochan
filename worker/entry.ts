@@ -447,6 +447,15 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
   return res;
 }
 const app = new Hono({ strict: false })
+  .use(async (c, next) => {
+    await next();
+    if (c.res.headers.get("Content-Type")?.includes("text/html")) {
+      c.res = returnBody(
+        (await c.res.text()).replace("</body>", cfBeaconHtml + "</body>"),
+        c.res.headers
+      );
+    }
+  })
   .route(
     "/share",
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
@@ -520,7 +529,6 @@ const app = new Hono({ strict: false })
       });
     }
 
-    let res: Response | undefined = undefined;
     if (
       !c.req.path.includes(".") ||
       c.req.path.endsWith(".txt") ||
@@ -538,22 +546,13 @@ const app = new Hono({ strict: false })
         ).catch(fetchError(e));
         clearTimeout(timeout);
         if (remoteRes.ok) {
-          res = returnBody(remoteRes.body, remoteRes.headers);
+          return returnBody(remoteRes.body, remoteRes.headers);
         }
       } catch {
         // pass
       }
     }
-    if (!res) {
-      res = await fetchStatic(null, new URL(c.req.url));
-    }
-    if (res.headers.get("Content-Type")?.includes("text/html")) {
-      res = returnBody(
-        (await res.text()).replace("</body>", cfBeaconHtml + "</body>"),
-        res.headers
-      );
-    }
-    return res;
+    return await fetchStatic(null, new URL(c.req.url));
   })
   .use(languageDetector)
   .onError(onError({ fetchStatic }))
