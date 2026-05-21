@@ -34,7 +34,7 @@ export default {
     unknownApiError: "サーバーで何らかのエラーが発生しました",
     noSession: "セッションデータを読み込めません",
     chartVersion: "譜面データのバージョン (ver. {ver}) が正しくありません",
-    badResponse: "サーバーからの応答を処理できませんでした",
+    badResponse: "何らかのエラーが発生しました",
     ytError: "YouTube 動画再生のエラー ({code})",
     noYtId: "再生する YouTube 動画が指定されていません",
     seqEmpty: "譜面データが空です",

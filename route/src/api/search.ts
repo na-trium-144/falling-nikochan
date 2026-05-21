@@ -121,6 +121,8 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   async (c) => {
     let { q, sort, difficultyMin, difficultyMax } = c.req.valid("query");
 
+    return c.json({message: "a"}, 400)
+
     const normalizedQueries = q
       ? Array.from(
           new Set(

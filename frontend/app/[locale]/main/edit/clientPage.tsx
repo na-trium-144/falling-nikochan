@@ -14,8 +14,9 @@ import { isStandalone, useSafariDetector } from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
-import { APIError } from "@/common/apiError.js";
 import { isInsideFrame } from "@/scale.jsx";
+import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
+import { markAsExpected } from "@/common/apiError.js";
 
 export default function EditTab({ locale }: { locale: string }) {
   const t = useTranslations("main.edit");
@@ -24,38 +25,34 @@ export default function EditTab({ locale }: { locale: string }) {
 
   const isSafari = useSafariDetector();
 
-  const [cidErrorMsg, setCIdErrorMsg] = useState<APIError>();
+  const [cidErrorMsg, setCIdErrorMsg] = useState<Error>();
   const [cidFetching, setCidFetching] = useState<boolean>(false);
   const [inputCId, setInputCId] = useState<string>("");
   const gotoCId = async (cid: string) => {
     setCIdErrorMsg(undefined);
     setCidFetching(true);
-    try {
-      const res = await fetch(
-        process.env.BACKEND_PREFIX + `/api/brief/${cid}`,
-        {
-          cache: "no-store",
-        }
-      );
-      setCidFetching(false);
-      if (res.ok) {
+    await fetchBackend()
+      .url(`/api/brief/${cid}`)
+      .options({
+        cache: "no-store",
+      })
+      .get()
+      .notFound(markAsExpected)
+      .res(() => {
         if (isStandalone() || isInsideFrame()) {
           router.push(`/${locale}/edit?cid=${cid}`);
         } else {
           window.open(`/${locale}/edit?cid=${cid}`, "_blank")?.focus(); // これで新しいタブが開かない場合がある
         }
+        setCidFetching(false);
         setCIdErrorMsg(undefined);
         setInputCId(cid);
-      } else {
-        setCIdErrorMsg(await APIError.fromRes(res));
+      })
+      .catch((e: unknown) => {
+        setCidFetching(false);
+        setCIdErrorMsg(captureAndWrap(e));
         setInputCId("");
-      }
-    } catch (e) {
-      console.error(e);
-      setCidFetching(false);
-      setCIdErrorMsg(APIError.fetchError(e));
-      setInputCId("");
-    }
+      });
   };
 
   return (
@@ -107,7 +104,11 @@ export default function EditTab({ locale }: { locale: string }) {
             <SlimeSVG />
             Loading...
           </span>
-          <span className="ml-1 inline-block">{cidErrorMsg?.format(te)}</span>
+          {cidErrorMsg instanceof Error && (
+            <span className="ml-1 inline-block">
+              {formatError(cidErrorMsg, te)}
+            </span>
+          )}
         </h3>
         <p>{t("inputIdDesc")}</p>
       </section>

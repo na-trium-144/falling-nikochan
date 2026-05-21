@@ -25,8 +25,9 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
-import { APIError } from "@/common/apiError";
+import { APIError, FETCH_ERROR_STATUS } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
+import { formatErrorMsg, isExpectedError } from "@/common/fetch";
 
 interface MessageProps {
   className?: string;
@@ -462,7 +463,7 @@ interface MessageProps3 {
   className?: string;
   isTouch: boolean;
   exit: () => void;
-  msg: string | APIError;
+  msg: string | Error;
 }
 export function InitErrorMessage(props: MessageProps3) {
   const t = useTranslations("play.message");
@@ -470,7 +471,7 @@ export function InitErrorMessage(props: MessageProps3) {
 
   const status = props.msg instanceof APIError ? props.msg.status : undefined;
   const message =
-    props.msg instanceof APIError ? props.msg.formatMsg(te) : props.msg;
+    props.msg instanceof Error ? formatErrorMsg(props.msg, te) : props.msg;
 
   return (
     <CenterBox
@@ -478,11 +479,18 @@ export function InitErrorMessage(props: MessageProps3) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      {status && <h4 className="fn-heading-box">Error {status}</h4>}
-      <p className="mb-3">{message}</p>
-      {props.msg instanceof APIError && props.msg.isServerSide() && (
-        <LinksOnError />
+      {status && status !== FETCH_ERROR_STATUS && (
+        <h4 className="fn-heading-box">Error {status}</h4>
       )}
+      <p className="mb-3">{message}</p>
+
+      {
+        // play/clientPage.tsx で生成されるstring型のerrorMsgはすべてexpectedのエラー
+        props.msg instanceof Error && !isExpectedError(props.msg) && (
+          <LinksOnError />
+        )
+      }
+      {!(props.msg instanceof APIError) && <LinksOnError />}
       <p>
         <Button
           text={t("exit")}

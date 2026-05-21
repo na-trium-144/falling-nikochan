@@ -178,6 +178,7 @@ pnpm run nbuild
   - This project uses custom breakpoints such as `main-wide:` instead of standard `md:` or `lg:`.
   - Custom utility classes: `styles/utilities.css`
   - When the same styles are repeated, extract them into a Tailwind component in a `styles/*.css` file. Custom component names start with `fn-`.
+- For HTTP requests, we use [wretch](https://elbywan.github.io/wretch/) library instead of plain fetch API. Use the wrapper method `fetchBackend()` or `fetchAsset()` defined in `@/common/fetch.ts`.
 - The `/share/[cid]` page is special. It works by having the Hono backend rewrite the exported placeholder HTML at runtime. It does **not** work in the `pnpm run ndev` development environment.
   - Use `/{ja,en}/share/placeholder` for the placeholder page during development.
 - `/play` page

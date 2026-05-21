@@ -22,11 +22,12 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
 import { XLogo } from "@/common/x.jsx";
-import { APIError } from "@/common/apiError.js";
 import { useRouter, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
 import Search from "@icon-park/react/lib/icons/Search";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
 
 interface Props {
   locale: string;
@@ -119,7 +120,7 @@ function PlayTabInternal(
 
   const abortSearching = useRef<AbortController | null>(null);
   const [searchResult, setSearchResult] = useState<
-    ChartLineBrief[] | APIError | undefined
+    ChartLineBrief[] | Error | undefined
   >();
 
   useLayoutEffect(() => {
@@ -132,12 +133,12 @@ function PlayTabInternal(
     }
     setWaitingDebounce(false);
     setSearchResult(undefined);
-    const apiParams = new URLSearchParams({
+    const apiParams = {
       q: params.search,
       sort: params.sort,
       difficultyMin: String(params.minLv),
       difficultyMax: String(params.maxLv),
-    });
+    };
     if (!params.search) {
       document.title = titleWithSiteName(t("title"));
     } else {
@@ -146,27 +147,35 @@ function PlayTabInternal(
       );
     }
     abortSearching.current = new AbortController();
-    fetch(process.env.BACKEND_PREFIX + `/api/search?${apiParams.toString()}`, {
-      signal: abortSearching.current.signal,
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          setSearchResult(
-            (await res.json()).map(
-              (r: { cid: string; updatedAt?: number }) => ({
-                cid: r.cid,
-                updatedAt: r.updatedAt,
-                fetched: false,
+    fetchBackend()
+      .url(`/api/search`)
+      .query(apiParams)
+      .signal(abortSearching.current)
+      .get()
+      .onAbort(() => undefined) // ignore.
+      .json((res) =>
+        v
+          .parse(
+            v.array(
+              v.object({
+                cid: v.string(),
+                count: v.optional(v.number()),
+                updatedAt: v.optional(v.number()),
               })
-            )
-          );
-        } else {
-          setSearchResult(await APIError.fromRes(res));
+            ),
+            res
+          )
+          .map((r) => ({
+            cid: r.cid,
+            updatedAt: r.updatedAt,
+            fetched: false,
+          }))
+      )
+      .catch((e: unknown) => captureAndWrap(e))
+      .then((res) => {
+        if (res !== undefined) {
+          setSearchResult(res);
         }
-      })
-      .catch((e) => {
-        console.error(e);
-        setSearchResult(APIError.fetchError(e));
       });
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 

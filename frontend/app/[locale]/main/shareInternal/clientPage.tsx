@@ -1,13 +1,18 @@
 "use client";
 
 import { IndexMain } from "../main.js";
-import { ChartBrief, RecordGetSummary } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  RecordGetSummary,
+  RecordGetSummarySchema,
+} from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { titleShare } from "@/common/title.js";
 import { ShareBox } from "@/share/placeholder/shareBox.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
-import { APIError } from "@/common/apiError.js";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
 
 export default function ShareInternal({ locale }: { locale: string }) {
   const t = useTranslations("share");
@@ -15,9 +20,7 @@ export default function ShareInternal({ locale }: { locale: string }) {
   const [cid, setCId] = useState<string | null>(null);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
   const [fromPlay, setFromPlay] = useState<boolean | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | APIError | null>(
-    null
-  );
+  const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
   const [sessionError, setSessionError] = useState<boolean>(false);
   useEffect(() => {
     const param = new URLSearchParams(window.location.search);
@@ -34,25 +37,11 @@ export default function ShareInternal({ locale }: { locale: string }) {
         }
       });
       setRecord(null);
-      (async () => {
-        try {
-          const res = await fetch(
-            process.env.BACKEND_PREFIX + `/api/record/${cid}`
-          );
-          if (res.ok) {
-            try {
-              setRecord(await res.json());
-            } catch (e) {
-              console.error(e);
-              setRecord(APIError.badResponse(e));
-            }
-          } else {
-            setRecord(await APIError.fromRes(res));
-          }
-        } catch (e) {
-          setRecord(APIError.fetchError(e));
-        }
-      })();
+      fetchBackend()
+        .get(`/api/record/${cid}`)
+        .json((record) => v.parse(v.array(RecordGetSummarySchema()), record))
+        .catch((e: unknown) => captureAndWrap(e, { cid }))
+        .then((record) => setRecord(record));
     } else {
       setSessionError(true);
     }

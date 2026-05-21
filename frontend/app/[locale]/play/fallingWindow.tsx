@@ -16,6 +16,7 @@ import { useDisplayMode } from "@/scale.js";
 import { useRealFPS } from "@/common/fpsCalculator";
 import { DisplayNikochan } from "./displayNikochan";
 import { OffsetEstimator } from "./offsetEstimator";
+import { fetchAsset } from "@/common/fetch";
 
 type Props = {
   className?: string;
@@ -207,13 +208,9 @@ export default function FallingWindow(props: Props) {
   useEffect(() => {
     Promise.all(
       [0, 1, 2, 3].map(async (i) => {
-        // TODO: エラーハンドリング
-        const res = await fetch(
-          process.env.ASSET_PREFIX +
-            `/assets/nikochan${i}.svg` +
-            process.env.ASSET_QUERY_NIKOCHAN
-        );
-        const svg = await res.text();
+        const svg = await fetchAsset()
+          .get(`/assets/nikochan${i}.svg` + process.env.ASSET_QUERY_NIKOCHAN)
+          .text();
         // chromeではcreateImageBitmap()でsvgをきれいにresizeできるが、
         // firefoxではbitmap化してから拡大縮小するようなので、svg自体をリサイズしてからbitmap化する必要がある
         const svgResized = svg
@@ -373,10 +370,9 @@ export default function FallingWindow(props: Props) {
     Promise.all(
       Array.from(new Array(13)).map((_, i) =>
         [4, 6, 8, 10, 12].includes(i)
-          ? // TODO: エラーハンドリング
-            fetch(process.env.ASSET_PREFIX + `/assets/particle${i}.svg`)
-              .then((res) => res.text())
-              .then((text) => `data:image/svg+xml;base64,${btoa(text)}`)
+          ? fetchAsset()
+              .get(`/assets/particle${i}.svg`)
+              .text((text) => `data:image/svg+xml;base64,${btoa(text)}`)
           : ""
       )
     ).then((urls) => {

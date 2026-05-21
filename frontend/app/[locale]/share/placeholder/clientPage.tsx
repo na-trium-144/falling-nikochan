@@ -6,6 +6,7 @@ import {
   ChartBrief,
   deserializeResultParams,
   RecordGetSummary,
+  RecordGetSummarySchema,
   ResultParams,
 } from "@falling-nikochan/chart";
 import { useEffect, useState } from "react";
@@ -16,9 +17,10 @@ import { Box } from "@/common/box.js";
 import { RedirectedWarning } from "@/common/redirectedWarning.js";
 import { TitleAsLink } from "@/common/titleLogo.jsx";
 import { MobileFooter } from "@/common/footer.jsx";
-import { APIError } from "@/common/apiError.js";
 import { PCHeader2 } from "@/common/header.js";
 import { Features, PoliciesAndLinks } from "@/clientPage.js";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
 
 const dummyBrief = {
   title: "placeholder",
@@ -52,7 +54,7 @@ export default function ShareChart(props: Props) {
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | APIError | null>(
+  const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(
     null
   );
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
@@ -80,25 +82,11 @@ export default function ShareChart(props: Props) {
       }
     }, 100);
     setRecord(null);
-    (async () => {
-      try {
-        const res = await fetch(
-          process.env.BACKEND_PREFIX + `/api/record/${cid}`
-        );
-        if (res.ok) {
-          try {
-            setRecord(await res.json());
-          } catch (e) {
-            console.error(e);
-            setRecord(APIError.badResponse(e));
-          }
-        } else {
-          setRecord(await APIError.fromRes(res));
-        }
-      } catch (e) {
-        setRecord(APIError.fetchError(e));
-      }
-    })();
+    fetchBackend()
+      .get(`/api/record/${cid}`)
+      .json((record) => v.parse(v.array(RecordGetSummarySchema()), record))
+      .catch((e: unknown) => captureAndWrap(e, { cid }))
+      .then((record) => setRecord(record));
     if (searchParams.get("result")) {
       try {
         setSharedResult(deserializeResultParams(searchParams.get("result")!));

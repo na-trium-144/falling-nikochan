@@ -9,6 +9,7 @@ import RightOne from "@icon-park/react/lib/icons/RightOne.js";
 import Close from "@icon-park/react/lib/icons/Close";
 import { ExternalLink } from "@/common/extLink";
 import { LicenseEntry, normalizeRepositoryURL } from "next-license-list";
+import { fetchAsset } from "@/common/fetch";
 
 export function OSSLicensesList({
   frontendLicenses,
@@ -22,14 +23,13 @@ export function OSSLicensesList({
   );
   useEffect(() => {
     if (workerLicenses === null) {
-      fetch(process.env.ASSET_PREFIX + "/oss-licenses/worker.json")
-        .then((res) => res.json())
-        .then((data) =>
+      fetchAsset()
+        .get("/oss-licenses/worker.json")
+        .json((data) =>
           setWorkerLicenses(
             (data as LicenseEntry[]).map((e) => normalizeRepositoryURL(e))
           )
-        )
-        .catch(() => []);
+        );
     }
   }, [workerLicenses]);
   const licenses: LicenseEntry[] = Array.isArray(frontendLicenses)
