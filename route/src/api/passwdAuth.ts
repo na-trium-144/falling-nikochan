@@ -11,9 +11,7 @@ function decodeBase64Utf8(value: string): string {
   try {
     bin = atob(value);
   } catch {
-    throw new HTTPException(400, {
-      message: "malformedBase64InAuthorizationHeader",
-    });
+    throw new HTTPException(400, { message: "badRequest" });
   }
   return new TextDecoder().decode(
     Uint8Array.from(bin, (char) => char.charCodeAt(0))
@@ -30,7 +28,7 @@ export function getPasswdParamsFromAuthHeader(
   if (authorization.startsWith("Nikochan-Basic ")) {
     const p = decodeBase64Utf8(authorization.slice("Nikochan-Basic ".length));
     if (p.length === 0) {
-      throw new HTTPException(400, { message: "emptyPasswordInAuthorization" });
+      throw new HTTPException(400, { message: "noPasswd" });
     }
     return { p };
   }
@@ -41,7 +39,7 @@ export function getPasswdParamsFromAuthHeader(
     return { pbypass: authorization.slice("Nikochan-Bypass ".length) };
   }
   if (authorization.startsWith("Nikochan-")) {
-    throw new HTTPException(400, { message: "invalidAuthorization" });
+    throw new HTTPException(400, { message: "badRequest" });
   }
   return fallback;
 }

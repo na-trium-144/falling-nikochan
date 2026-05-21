@@ -16,7 +16,11 @@ import {
 import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 
 const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   "/:cid/:lvIndex",
@@ -33,12 +37,18 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             schema: docRefs("LevelPlay15"),
           },
         },
+        headers: {
+          "Content-Disposition": {
+            description: "Filename with extension of .fn{ver}p.mpk",
+            schema: { type: "string" },
+          },
+        },
       },
       400: {
         description: "invalid chart id",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(await validationErrorSchema()),
           },
         },
       },
@@ -59,7 +69,8 @@ const playFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     v.object({
       cid: CidSchema(),
       lvIndex: v.pipe(v.string(), v.regex(/^[0-9]+$/), v.transform(Number)),
-    })
+    }),
+    sValidatorHook()
   ),
   async (c) => {
     const { cid, lvIndex } = c.req.valid("param");

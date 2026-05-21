@@ -14,6 +14,7 @@ import {
   popularDays,
 } from "@falling-nikochan/chart";
 import { PlayRecordEntry } from "./record.js";
+import { sValidatorHook, validationErrorSchema } from "../error.js";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
@@ -73,6 +74,20 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             schema: resolver(v.array(SearchResultSchema())),
           },
         },
+        headers: {
+          "Cache-Control": {
+            description: `max-age=${CACHE_MAX_AGE}`,
+            schema: { type: "string" },
+          },
+        },
+      },
+      400: {
+        description: "invalid parameter",
+        content: {
+          "application/json": {
+            schema: resolver(await validationErrorSchema()),
+          },
+        },
       },
     },
   }),
@@ -100,7 +115,8 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         v.transform(Number),
         DifficultySchema()
       ),
-    })
+    }),
+    sValidatorHook()
   ),
   async (c) => {
     let { q, sort, difficultyMin, difficultyMax } = c.req.valid("query");

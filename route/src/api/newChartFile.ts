@@ -20,7 +20,7 @@ import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
 import { getYTDataEntry } from "./ytData.js";
 import { describeRoute, resolver } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import { errorLiteral, validationErrorSchema } from "../error.js";
 import * as v from "valibot";
 import { ConnInfo } from "hono/conninfo";
 
@@ -55,6 +55,14 @@ const newChartFileApp = async (config: {
             },
           },
         },
+        400: {
+          description: "password not specified in the chart data",
+          content: {
+            "application/json": {
+              schema: resolver(await errorLiteral("noPasswd")),
+            },
+          },
+        },
         409: {
           description: `chart version is older than ${currentChartVer - 1}`,
           content: {
@@ -77,7 +85,12 @@ const newChartFileApp = async (config: {
           description: "Invalid chart format",
           content: {
             "application/json": {
-              schema: resolver(v.object({ message: v.string() })),
+              schema: resolver(
+                v.union([
+                  await validationErrorSchema("invalidChart"),
+                  await errorLiteral("invalidChart"),
+                ])
+              ),
             },
           },
         },
@@ -88,12 +101,12 @@ const newChartFileApp = async (config: {
               schema: resolver(await errorLiteral("tooManyRequest")),
             },
           },
-          // headers: {
-          //   "retry-after": {
-          //     description: `Number of seconds to wait before retrying (approximately ${rateLimitMin} minutes)`,
-          //     schema: { type: "string", format: "int32" },
-          //   },
-          // },
+          headers: {
+            "Retry-After": {
+              description: "Number of seconds to wait before retrying",
+              schema: { type: "integer" },
+            },
+          },
         },
       },
     }),
@@ -134,8 +147,7 @@ const newChartFileApp = async (config: {
             | Chart14Edit
             | Chart15;
         } catch (e) {
-          console.error(e);
-          throw new HTTPException(415, { message: (e as Error).toString() });
+          throw new HTTPException(415, { message: "invalidChart", cause: e });
         }
 
         if (numEvents(newChart) > chartMaxEvent) {

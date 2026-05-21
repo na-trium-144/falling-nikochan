@@ -2,7 +2,7 @@ export default {
   error: {
     api: {
       // 400
-      generic400: "パラメータが正しくありません",
+      badRequest: "パラメータが正しくありません",
       noPasswd: "パスワードが指定されていません",
       invalidChartId: "譜面 ID が正しくありません",
       invalidResultParam: "result パラメータが正しくありません",
@@ -25,6 +25,7 @@ export default {
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500
+      unknownApiError: "サーバーで何らかのエラーが発生しました",
       imageGenerationFailed: "画像生成に失敗しました",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
       // 499
