@@ -51,8 +51,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             schema: resolver(
               v.union([
                 await validationErrorSchema(),
-                await errorLiteral("badRequest"),
-                await errorLiteral("noPasswd"),
+                await errorLiteral("badRequest", "noPasswd"),
               ])
             ),
           },
