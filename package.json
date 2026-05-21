@@ -14,7 +14,7 @@
     "t": "pnpm run -r --if-present t",
     "cdev": "pnpm run --filter chart cdev",
     "test": "pnpm run -r --if-present test",
-    "mongo-docker": "docker run --rm -p 27017:27017 -d mongodb/mongodb-community-server:latest",
+    "mongo-docker": "docker run --rm -p 27017:27017 -d mongo:8.0.4",
     "seed": "pnpm run -r --if-present t && pnpm run --filter route seed",
     "ndev": "pnpm run --filter frontend dev",
     "nbuild": "pnpm run -r --if-present t && pnpm run --filter frontend build && pnpm run --filter frontend postbuild",
