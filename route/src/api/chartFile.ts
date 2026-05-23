@@ -187,7 +187,7 @@ const chartFileApp = async (config: {
                 schema: resolver(
                   v.union([
                     await validationErrorSchema(),
-                    await errorLiteral("badRequest", "noPasswd"),
+                    await errorLiteral("badRequest"),
                   ])
                 ),
               },
@@ -250,7 +250,7 @@ const chartFileApp = async (config: {
                 schema: resolver(
                   v.union([
                     await validationErrorSchema(),
-                    await errorLiteral("badRequest", "noPasswd"),
+                    await errorLiteral("badRequest"),
                   ])
                 ),
               },

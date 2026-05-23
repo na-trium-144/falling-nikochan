@@ -28,7 +28,7 @@ export function getPasswdParamsFromAuthHeader(
   if (authorization.startsWith("Nikochan-Basic ")) {
     const p = decodeBase64Utf8(authorization.slice("Nikochan-Basic ".length));
     if (p.length === 0) {
-      throw new HTTPException(400, { message: "noPasswd" });
+      throw new HTTPException(400, { message: "badRequest" });
     }
     return { p };
   }
