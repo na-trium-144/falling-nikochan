@@ -95,11 +95,11 @@ const chartAuthorization = (currentPasswd: CurrentPasswd) => {
   if (currentPasswd.pbypass) {
     return `Nikochan-Bypass ${currentPasswd.pbypass}`;
   }
-  if (currentPasswd.ph) {
-    return `Nikochan-Hash ${currentPasswd.ph}`;
-  }
   if (currentPasswd.p) {
     return basicAuthorization(currentPasswd.p);
+  }
+  if (currentPasswd.ph) {
+    return `Nikochan-Hash ${currentPasswd.ph}`;
   }
   return undefined;
 };
