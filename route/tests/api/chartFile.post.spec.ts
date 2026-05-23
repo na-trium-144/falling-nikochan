@@ -23,6 +23,29 @@ import * as msgpack from "@msgpack/msgpack";
 import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
+const encodeBase64Utf8 = (value: string) =>
+  btoa(
+    Array.from(new TextEncoder().encode(value), (byte) =>
+      String.fromCodePoint(byte)
+    ).join("")
+  );
+const basicAuth = (passwd: string) =>
+  `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
+const hashAuth = (passwdHash: string) => `Nikochan-Hash ${passwdHash}`;
+const requestChartFile = (
+  path: string,
+  init: RequestInit & { passwd?: string | null } = {}
+) => {
+  const { passwd = "p", headers, ...rest } = init;
+  return app.request(path, {
+    ...rest,
+    headers: {
+      ...(passwd === null ? {} : { Authorization: basicAuth(passwd) }),
+      ...(headers ?? {}),
+    },
+  });
+};
+
 describe("POST /api/chartFile/:cid", () => {
   test(
     "should return 429 for too many requests",
@@ -32,14 +55,14 @@ describe("POST /api/chartFile/:cid", () => {
     },
     async () => {
       await initDb();
-      const res1 = await app.request("/api/chartFile/100000?p=p", {
+      const res1 = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart(), title: "updated" }),
       });
       expect(res1.status).to.equal(204);
 
-      const res2 = await app.request("/api/chartFile/100000?p=p", {
+      const res2 = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart(), title: "updated" }),
@@ -52,7 +75,7 @@ describe("POST /api/chartFile/:cid", () => {
 
   test("should update chart if raw password matches", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100000?p=p", {
+    const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({ ...dummyChart(), title: "updated" }),
@@ -86,17 +109,15 @@ describe("POST /api/chartFile/:cid", () => {
         client.close();
       }
     }
-    const res = await app.request(
-      "/api/chartFile/100000?ph=" + (await hash(pServerHash + "def")),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/vnd.msgpack",
-          Cookie: "pUserSalt=def",
-        },
-        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
-      }
-    );
+    const res = await requestChartFile("/api/chartFile/100000", {
+      method: "POST",
+      headers: {
+        Authorization: hashAuth(await hash(pServerHash + "def")),
+        "Content-Type": "application/vnd.msgpack",
+        Cookie: "pUserSalt=def",
+      },
+      body: msgpack.encode({ ...dummyChart(), title: "updated" }),
+    });
     expect(res.status).to.equal(204);
 
     const client = new MongoClient(process.env.MONGODB_URI!);
@@ -114,7 +135,7 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should save ip address", async () => {
     await initDb();
-    let res = await app.request("/api/chartFile/100000?p=p", {
+    let res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -137,7 +158,7 @@ describe("POST /api/chartFile/:cid", () => {
       await client.close();
     }
 
-    res = await app.request("/api/chartFile/100000?p=p", {
+    res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.msgpack",
@@ -162,7 +183,7 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 400 for invalid cid", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100000a?p=p", {
+    const res = await requestChartFile("/api/chartFile/100000a", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({ ...dummyChart(), title: "updated" }),
@@ -174,21 +195,19 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 401 for wrong password", async () => {
     await initDb();
-    const res = await app.request(
-      "/api/chartFile/100000?p=wrong&ph=" + (await hash("wrong")),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/vnd.msgpack" },
-        body: msgpack.encode({ ...dummyChart(), title: "updated" }),
-      }
-    );
+    const res = await requestChartFile("/api/chartFile/100000", {
+      method: "POST",
+      passwd: "wrong",
+      headers: { "Content-Type": "application/vnd.msgpack" },
+      body: msgpack.encode({ ...dummyChart(), title: "updated" }),
+    });
     expect(res.status).to.equal(401);
     const body = await res.json();
     expect(body).to.deep.equal({ message: "badPassword" });
   });
   test("should return 404 for nonexistent cid", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100002?p=p", {
+    const res = await requestChartFile("/api/chartFile/100002", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({ ...dummyChart(), title: "updated" }),
@@ -199,7 +218,7 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 404 for deleted cid", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100001?p=p", {
+    const res = await requestChartFile("/api/chartFile/100001", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({ ...dummyChart(), title: "updated" }),
@@ -210,7 +229,7 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 413 for large file", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100000?p=p", {
+    const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: new ArrayBuffer(fileMaxSize + 1),
@@ -225,7 +244,7 @@ describe("POST /api/chartFile/:cid", () => {
     chart.levelsFreeze[0].rest = new Array(chartMaxEvent + 1).fill(
       chart.levelsFreeze[0].rest[0]
     );
-    const res = await app.request("/api/chartFile/100000?p=p", {
+    const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode(chart),
@@ -238,7 +257,7 @@ describe("POST /api/chartFile/:cid", () => {
     currentChartVer satisfies 16; // edit this test when chart version is bumped
     test("version 13", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart13() }),
@@ -249,7 +268,7 @@ describe("POST /api/chartFile/:cid", () => {
     });
     test("version 12", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart12() }),
@@ -260,7 +279,7 @@ describe("POST /api/chartFile/:cid", () => {
     });
     test("version 4", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart4() }),
@@ -273,7 +292,7 @@ describe("POST /api/chartFile/:cid", () => {
   test("should update chart for chart version 15", async () => {
     currentChartVer satisfies 16; // edit this test when chart version is bumped
     await initDb();
-    const res = await app.request("/api/chartFile/100000?p=p", {
+    const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: { "Content-Type": "application/vnd.msgpack" },
       body: msgpack.encode({ ...dummyChart15(), title: "updated" }),
@@ -295,7 +314,7 @@ describe("POST /api/chartFile/:cid", () => {
   });
   test("should return 415 for invalid chart", async () => {
     await initDb();
-    const res = await app.request("/api/chartFile/100000?p=p", {
+    const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       body: "invalid",
     });
@@ -306,7 +325,7 @@ describe("POST /api/chartFile/:cid", () => {
   describe("password of chart", () => {
     test("should not be changed if changePasswd is null", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode(dummyChart()),
@@ -315,7 +334,7 @@ describe("POST /api/chartFile/:cid", () => {
 
       expect(
         (
-          await app.request("/api/chartFile/100000?p=p", {
+          await requestChartFile("/api/chartFile/100000", {
             headers: {
               "x-forwarded-for": "123", // rateLimit回避
             },
@@ -325,7 +344,7 @@ describe("POST /api/chartFile/:cid", () => {
     });
     test("should be changed if changePasswd is not null", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({
@@ -337,7 +356,7 @@ describe("POST /api/chartFile/:cid", () => {
 
       expect(
         (
-          await app.request("/api/chartFile/100000?p=p", {
+          await requestChartFile("/api/chartFile/100000", {
             headers: {
               "x-forwarded-for": "123",
             },
@@ -346,7 +365,8 @@ describe("POST /api/chartFile/:cid", () => {
       ).to.equal(401);
       expect(
         (
-          await app.request("/api/chartFile/100000?p=newPasswd", {
+          await requestChartFile("/api/chartFile/100000", {
+            passwd: "newPasswd",
             headers: {
               "x-forwarded-for": "456",
             },
@@ -358,7 +378,7 @@ describe("POST /api/chartFile/:cid", () => {
   describe("ChartEntry.updatedAt", () => {
     test("should not be updated with uploading same chart", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode(dummyChart()),
@@ -380,7 +400,7 @@ describe("POST /api/chartFile/:cid", () => {
     });
     test("should not be updated with metadata change", async () => {
       await initDb();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart(), title: "updated" }),
@@ -407,7 +427,7 @@ describe("POST /api/chartFile/:cid", () => {
         chart.levelsFreeze[0].notes[0]
       );
       const dateBefore = new Date();
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode(chart),
@@ -435,12 +455,12 @@ describe("POST /api/chartFile/:cid", () => {
     test("should be updated with publish", async () => {
       await initDb();
       const dateBefore = new Date();
-      await app.request("/api/chartFile/100000?p=p", {
+      await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: { "Content-Type": "application/vnd.msgpack" },
         body: msgpack.encode({ ...dummyChart(), published: false }),
       });
-      const res = await app.request("/api/chartFile/100000?p=p", {
+      const res = await requestChartFile("/api/chartFile/100000", {
         method: "POST",
         headers: {
           "Content-Type": "application/vnd.msgpack",
@@ -480,7 +500,7 @@ describe("POST /api/chartFile/:cid", () => {
             },
           }
         );
-        const res = await app.request("/api/chartFile/100007?p=p", {
+        const res = await requestChartFile("/api/chartFile/100007", {
           method: "POST",
           headers: { "Content-Type": "application/vnd.msgpack" },
           body: msgpack.encode(dummyChart()),
