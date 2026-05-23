@@ -14,7 +14,11 @@ import {
   sValidatorHook,
   validationErrorSchema,
 } from "../error.js";
-import { getPasswdParamsFromAuthHeader } from "./passwdAuth.js";
+import {
+  getPasswdParamsFromAuthHeader,
+  plainPasswdHeaderDoc,
+  PlainPasswdParamSchema,
+} from "./passwdAuth.js";
 
 /**
  * chartFile のコメントを参照
@@ -26,6 +30,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       "Generate a unique hash of the password to be used when accessing the chart. " +
       "The correct password for the chart is required (query p or Authorization header). " +
       "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
+    parameters: [plainPasswdHeaderDoc],
     responses: {
       200: {
         description:
@@ -79,9 +84,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator(
     "query",
     v.object({
-      p: v.optional(
-        v.pipe(v.string(), v.minLength(1), v.description("plain password"))
-      ),
+      p: v.optional(PlainPasswdParamSchema()),
     }),
     sValidatorHook()
   ),
@@ -92,11 +95,11 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   ),
   async (c) => {
     const { cid } = c.req.valid("param");
-    const { p } = getPasswdParamsFromAuthHeader(c.req.header("Authorization"), {
-      p: c.req.valid("query").p,
-    });
+    const { p } =
+      getPasswdParamsFromAuthHeader(c.req.header("Authorization")) ??
+      c.req.valid("query");
     if (p === undefined) {
-      throw new HTTPException(400, { message: "noPasswd" });
+      throw new HTTPException(400, { message: "badRequest" });
     }
     let pUserSalt: string;
     const newUserSalt = () =>
