@@ -158,17 +158,12 @@ export function PlayOption(props: Props) {
                 lvIndex: selectedLevel,
                 brief: props.brief,
               });
-              // cid と lvindex も付与しておくことで、アプリ内ブラウザから外部ブラウザへ
-              // 遷移して localStorage のセッションが取れなくても、play 画面側で
-              // fetchBrief 経由のフォールバックが効くようにする
-              const url =
-                `/${props.locale}/play?sid=${sessionId}` +
-                `&cid=${encodeURIComponent(props.cid)}` +
-                `&lvindex=${selectedLevel}`;
               if (isStandalone() || isInsideFrame()) {
-                router.push(url);
+                router.push(`/${props.locale}/play?sid=${sessionId}`);
               } else {
-                window.open(url, "_blank")?.focus();
+                window
+                  .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
+                  ?.focus();
               }
             }}
           />
