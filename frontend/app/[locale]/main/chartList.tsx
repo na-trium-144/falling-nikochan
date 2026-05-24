@@ -213,25 +213,25 @@ export function ChartList(props: Props) {
         if (b !== null && !b.fetched && !b.fetching) {
           b.fetching = true;
           changed = true;
-          fetchBrief(b.cid).then(({ brief, is404 }) => {
-            setBriefs((briefs) => {
-              if (
-                Array.isArray(briefs) &&
-                briefs[i] !== null &&
-                briefs[i]!.cid === b.cid
-              ) {
-                if (is404) {
-                  briefs[i] = null;
-                } else {
+          fetchBrief(b.cid, {
+            onResult: (brief) =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                  briefs = briefs.slice();
                   briefs[i]!.fetched = true;
                   briefs[i]!.brief = brief;
                 }
-                return briefs.slice();
-              } else {
-                // そんなことあるのか...?
                 return briefs;
-              }
-            });
+              }),
+            onNotFound: () =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                  briefs = briefs.slice();
+                  briefs[i] = null;
+                }
+                return briefs;
+              }),
+            onError: (e) => setBriefs(e),
           });
         }
       }

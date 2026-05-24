@@ -66,11 +66,11 @@ export function SharePageModalProvider(props: {
       setModalBrief(null);
       setModalCId(cid);
       // document.title = titleShare(th, cid);
-      fetchBrief(cid).then((res) => {
-        if (res.ok) {
-          setModalBrief(res.brief!);
-          document.title = titleShare(th, cid, res.brief!);
-        }
+      fetchBrief(cid, {
+        onResult: (brief) => {
+          setModalBrief(brief);
+          document.title = titleShare(th, cid, brief);
+        },
       });
       setModalRecord(null);
       fetchBackend()

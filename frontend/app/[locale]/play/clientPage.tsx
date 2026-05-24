@@ -97,7 +97,7 @@ export function InitPlay({ locale }: { locale: string }) {
       if (q.cid) {
         setCid(q.cid);
         setLvIndex(q.lvIndex);
-        void (async () => setChartBrief((await fetchBrief(q.cid!)).brief))();
+        fetchBrief(q.cid!, { onResult: (brief) => setChartBrief(brief) });
         setEditing(false);
       } else {
         setErrorMsg(te("noSession"));

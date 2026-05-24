@@ -1,73 +1,71 @@
-import { ChartBrief } from "@falling-nikochan/chart";
+import { ChartBrief, ChartBriefSchema } from "@falling-nikochan/chart";
+import { captureAndWrap, fetchBackend } from "./fetch";
+import * as v from "valibot";
 
 function briefKeyOld(cid: string) {
   return "brief-" + cid;
 }
 const briefCacheName = "brief1";
 
-export async function fetchBrief(
-  cid: string,
-  noCache?: boolean
-): Promise<{ brief?: ChartBrief; ok: boolean; is404: boolean }> {
-  const fetchRes = fetch(process.env.BACKEND_PREFIX + `/api/brief/${cid}`, {
-    cache: noCache ? "no-store" : "default",
-  });
-  const staleLS = localStorage.getItem(briefKeyOld(cid));
-  let stale: string | undefined = undefined;
+interface Callbacks {
+  onResult: (brief: ChartBrief) => void;
+  onNotFound?: () => void;
+  onError?: (e: Error) => void;
+}
+/**
+ * cacheからbriefデータを取得し、あればonResultを呼ぶ。
+ * APIをfetchし、レスポンスが返ってきたら再度onResultを呼ぶ。
+ * APIのレスポンスが404だった場合は、onNotFoundを呼びcacheを消す。
+ * APIのレスポンスがエラーになり、かつcacheデータもない場合、onErrorを呼ぶ。fetchBrief()側でsentryへは送信済み。
+ */
+export async function fetchBrief(cid: string, callbacks: Callbacks) {
+  window.caches
+    .keys()
+    .then((keys) =>
+      keys
+        .filter((k) => k.startsWith("brief") && k !== briefCacheName)
+        .forEach((k) => window.caches.delete(k))
+    );
   let cache: Cache | undefined = undefined;
   if ("caches" in window) {
     cache = await window.caches.open(briefCacheName);
-    window.caches
-      .keys()
-      .then((keys) =>
-        keys
-          .filter((k) => k.startsWith("brief") && k !== briefCacheName)
-          .forEach((k) => window.caches.delete(k))
-      );
-    if (staleLS) {
-      cache.put(`/api/brief/${cid}`, new Response(staleLS));
-      localStorage.removeItem(briefKeyOld(cid));
-    }
-    stale =
-      staleLS ||
-      (await cache.match(`/api/brief/${cid}`).then((res) => res?.text()));
   }
-  if (stale && !noCache) {
-    fetchRes
-      .then(async (res) => {
-        if (res.ok) {
-          cache?.put(`/api/brief/${cid}`, res);
-        } else if (res.status == 404) {
-          cache?.delete(`/api/brief/${cid}`);
-          localStorage.removeItem(briefKeyOld(cid));
-        }
-      })
-      .catch(() => undefined);
-    return {
-      brief: JSON.parse(stale) as ChartBrief,
-      ok: true,
-      is404: false,
-    };
+  let hasResult = false;
+
+  const staleLS = localStorage.getItem(briefKeyOld(cid));
+  if (staleLS) {
+    cache?.put(`/api/brief/${cid}`, new Response(staleLS));
+    localStorage.removeItem(briefKeyOld(cid));
+    callbacks.onResult(JSON.parse(staleLS) as ChartBrief);
+    hasResult = true;
   } else {
-    try {
-      const res = await fetchRes;
-      if (res.ok) {
-        cache?.put(`/api/brief/${cid}`, res.clone());
-        const brief = (await res.json()) as ChartBrief;
-        return {
-          brief,
-          ok: true,
-          is404: false,
-        };
-      } else {
-        if (res.status == 404) {
-          cache?.delete(`/api/brief/${cid}`);
-          localStorage.removeItem(briefKeyOld(cid));
-        }
-        return { ok: false, is404: res.status == 404 };
+    cache?.match(`/api/brief/${cid}`).then(async (res) => {
+      if (res) {
+        callbacks.onResult((await res.json()) as ChartBrief);
+        hasResult = true;
       }
-    } catch {
-      return { ok: false, is404: false };
-    }
+    });
   }
+
+  fetchBackend()
+    .get(`/api/brief/${cid}`)
+    .notFound(async () => {
+      if ("caches" in window) {
+        cache?.delete(`/api/brief/${cid}`);
+      }
+      localStorage.removeItem(briefKeyOld(cid));
+      callbacks.onNotFound?.();
+      hasResult = false;
+    })
+    .res(async (res) => {
+      callbacks.onResult(v.parse(ChartBriefSchema(), await res.clone().json()));
+      hasResult = true;
+      await cache?.put(`/api/brief/${cid}`, res);
+    })
+    .catch((e: unknown) => {
+      e = captureAndWrap(e, { cid });
+      if (!hasResult) {
+        callbacks.onError?.(e as Error);
+      }
+    });
 }

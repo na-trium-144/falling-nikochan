@@ -30,11 +30,11 @@ export default function ShareInternal({ locale }: { locale: string }) {
       setCId(cid);
       setFromPlay(fromPlay);
       document.title = titleShare(t, cid);
-      fetchBrief(cid).then((res) => {
-        if (res.ok) {
-          setBrief(res.brief!);
-          document.title = titleShare(t, cid, res.brief!);
-        }
+      fetchBrief(cid, {
+        onResult: (brief) => {
+          setBrief(brief);
+          document.title = titleShare(t, cid, brief);
+        },
       });
       setRecord(null);
       fetchBackend()
