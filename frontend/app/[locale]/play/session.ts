@@ -32,6 +32,13 @@ export function initSession(
 // なければsessionStorageから取得
 // それもなければnull
 export function getSession(sessionId?: number): SessionData | null {
+  // Discord等のアプリ内ブラウザからFirefoxに遷移すると、ユーザーに見えない隠しタブが
+  // 同時にplayページを開くことがある。隠しタブが先にlocalStorageのsessionを読み出して
+  // 削除すると、表示タブで「セッションを読み込めません」になるため、隠しタブ
+  // (window.innerWidth === 0) では読み込みをスキップする。
+  if (typeof window !== "undefined" && window.innerWidth === 0) {
+    return null;
+  }
   if (sessionId) {
     const sessionData = JSON.parse(
       localStorage.getItem(`session-${sessionId}`) || "null"
