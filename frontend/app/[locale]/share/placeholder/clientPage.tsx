@@ -54,9 +54,7 @@ export default function ShareChart(props: Props) {
   const [cid, setCId] = useState<string>("");
   // const { res, brief } = await getBrief(cid, true);
   const [brief, setBrief] = useState<ChartBrief | null>(null);
-  const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(
-    null
-  );
+  const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
   const [sharedResult, setSharedResult] = useState<ResultParams | null>(null);
 
   useEffect(() => {

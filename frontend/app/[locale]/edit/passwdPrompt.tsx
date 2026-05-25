@@ -7,11 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
-import {
-  APIError,
-  FETCH_ERROR_STATUS,
-  shouldHideStatus,
-} from "@/common/apiError";
+import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import {
   historyBackWithReview,

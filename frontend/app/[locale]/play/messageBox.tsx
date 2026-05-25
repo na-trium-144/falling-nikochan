@@ -25,11 +25,7 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
-import {
-  APIError,
-  FETCH_ERROR_STATUS,
-  shouldHideStatus,
-} from "@/common/apiError";
+import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import { formatErrorMsg, isExpectedError } from "@/common/fetch";
 
