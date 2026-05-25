@@ -5,6 +5,11 @@ on:
       - staging
   pull_request:
     types: [opened, synchronize, labeled]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        required: true
+        type: string
 
 concurrency:
   group: staging
@@ -17,17 +22,17 @@ jobs:
   sync-staging:
     runs-on: ubuntu-latest
     if: >-
-      github.event_name == 'pull_request' &&
-      contains(github.event.pull_request.labels.*.name, 'staging')
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'staging'))
+      || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
-      - name: Checkout PR code
+      - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0 # force pushするために履歴が必要
-
+          fetch-depth: 0
+          # workflow_dispatch の場合は指定コミット、それ以外はPRのHEAD
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.commit_sha || github.event.pull_request.head.sha }}
       - name: Force push to staging branch
         run: |
           git config user.name "github-actions[bot]"
