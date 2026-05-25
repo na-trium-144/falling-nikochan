@@ -7,7 +7,11 @@ import { useEffect, useRef, useState } from "react";
 import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
-import { APIError, FETCH_ERROR_STATUS } from "@/common/apiError";
+import {
+  APIError,
+  FETCH_ERROR_STATUS,
+  shouldHideStatus,
+} from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import {
   historyBackWithReview,
@@ -55,7 +59,7 @@ export function PasswdPrompt(props: PasswdProps) {
     return (
       <>
         {props.loadStatus instanceof APIError &&
-          props.loadStatus.status !== FETCH_ERROR_STATUS && (
+          !shouldHideStatus(props.loadStatus.status) && (
             <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
           )}
         <p className="mb-3">{formatErrorMsg(props.loadStatus, te)}</p>

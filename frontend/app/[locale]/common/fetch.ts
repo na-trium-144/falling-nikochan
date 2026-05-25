@@ -3,7 +3,7 @@ import QueryStringAddon from "wretch/addons/queryString";
 import AbortAddon from "wretch/addons/abort";
 import { dedupe, retry } from "wretch/middlewares";
 import * as Sentry from "@sentry/nextjs";
-import { APIError, FETCH_ERROR_STATUS } from "./apiError";
+import { ABORT_ERROR_STATUS, APIError, FETCH_ERROR_STATUS } from "./apiError";
 
 /**
  * wretchのwrapper
@@ -74,18 +74,21 @@ function APIErrorTransformer(referenceError: { stack: string }) {
     res: Response | undefined,
     req: { _url: string }
   ): Promise<APIError> => {
-    if (we instanceof DOMException && we.name === "AbortError") {
-      // AbortErrorはネットワークエラーではないのでそのまま流す
-      // → AbortAddonの onAbort() (単にnameで判定している) でキャッチ
-      // wretchの型定義が微妙なのでここでDOMException型として返すと他のcatcherの型指定が面倒なことになる
-      return we as any;
-    }
     const status =
-      we instanceof wretch.WretchError ? we.status : FETCH_ERROR_STATUS;
+      we instanceof wretch.WretchError
+        ? we.status
+        : we instanceof DOMException && we.name === "AbortError"
+          ? ABORT_ERROR_STATUS
+          : FETCH_ERROR_STATUS;
     let message: string;
     let body: unknown = undefined;
     if (!res) {
-      message = "fetchError";
+      if (status === FETCH_ERROR_STATUS) {
+        // fetchErrorはユーザー向けメッセージがある
+        message = "fetchError";
+      } else {
+        message = String(we);
+      }
       body = {
         error: String(we),
         ...(we && typeof we === "object" ? we : {}),
@@ -127,6 +130,9 @@ export function captureAndWrap(
 ): Error {
   if (!(e instanceof Error)) {
     e = new Error(String(e));
+    Error.captureStackTrace(e as Error, captureAndWrap);
+  }
+  if (!(e as Error).stack) {
     Error.captureStackTrace(e as Error, captureAndWrap);
   }
   Sentry.captureException(e, { extra });

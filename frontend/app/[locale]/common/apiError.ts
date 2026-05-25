@@ -1,4 +1,9 @@
 export const FETCH_ERROR_STATUS = 499;
+export const ABORT_ERROR_STATUS = 498;
+
+export function shouldHideStatus(status: number) {
+  return status === FETCH_ERROR_STATUS || status === ABORT_ERROR_STATUS;
+}
 
 /**
  * fetch()におけるネットワークエラーと5xxのサーバーエラー、その他処理中に起きたロジックエラーを統一して扱うクラス。
@@ -22,7 +27,7 @@ export class APIError extends Error {
     super(message);
     this.name = `APIError-${status}`;
     this.status = status;
-    if (status === FETCH_ERROR_STATUS) {
+    if (status === FETCH_ERROR_STATUS || status === ABORT_ERROR_STATUS) {
       this.expected = true;
     }
     this.url = url;
@@ -58,10 +63,10 @@ export class APIError extends Error {
     }
   }
   format(t: { (key: string): string; has: (key: string) => boolean }): string {
-    if (this.status !== FETCH_ERROR_STATUS) {
-      return `${this.status}: ${this.formatMsg(t)}`;
-    } else {
+    if (shouldHideStatus(this.status)) {
       return this.formatMsg(t);
+    } else {
+      return `${this.status}: ${this.formatMsg(t)}`;
     }
   }
 }

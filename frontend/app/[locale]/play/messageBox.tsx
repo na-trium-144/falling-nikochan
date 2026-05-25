@@ -25,7 +25,11 @@ import DropDown from "@/common/dropdown";
 import DownOne from "@icon-park/react/lib/icons/DownOne";
 import { Scrollable } from "@/common/scrollable";
 import { HelpIcon } from "@/common/caption";
-import { APIError, FETCH_ERROR_STATUS } from "@/common/apiError";
+import {
+  APIError,
+  FETCH_ERROR_STATUS,
+  shouldHideStatus,
+} from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import { formatErrorMsg, isExpectedError } from "@/common/fetch";
 
@@ -479,7 +483,7 @@ export function InitErrorMessage(props: MessageProps3) {
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
-      {status && status !== FETCH_ERROR_STATUS && (
+      {status && !shouldHideStatus(status) && (
         <h4 className="fn-heading-box">Error {status}</h4>
       )}
       <p className="mb-3">{message}</p>
