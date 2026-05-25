@@ -19,18 +19,19 @@ interface Callbacks {
  * APIのレスポンスがエラーになり、かつcacheデータもない場合、onErrorを呼ぶ。fetchBrief()側でsentryへは送信済み。
  */
 export async function fetchBrief(cid: string, callbacks: Callbacks) {
-  window.caches
-    .keys()
-    .then((keys) =>
-      keys
-        .filter((k) => k.startsWith("brief") && k !== briefCacheName)
-        .forEach((k) => window.caches.delete(k))
-    );
   let cache: Cache | undefined = undefined;
   if ("caches" in window) {
+    window.caches
+      .keys()
+      .then((keys) =>
+        keys
+          .filter((k) => k.startsWith("brief") && k !== briefCacheName)
+          .forEach((k) => window.caches.delete(k))
+      );
     cache = await window.caches.open(briefCacheName);
   }
   let hasResult = false;
+  let cachePromise: Promise<void> | undefined = undefined;
 
   const staleLS = localStorage.getItem(briefKeyOld(cid));
   if (staleLS) {
@@ -39,7 +40,7 @@ export async function fetchBrief(cid: string, callbacks: Callbacks) {
     callbacks.onResult(JSON.parse(staleLS) as ChartBrief);
     hasResult = true;
   } else {
-    cache?.match(`/api/brief/${cid}`).then(async (res) => {
+    cachePromise = cache?.match(`/api/brief/${cid}`).then(async (res) => {
       if (res) {
         callbacks.onResult((await res.json()) as ChartBrief);
         hasResult = true;
@@ -50,6 +51,7 @@ export async function fetchBrief(cid: string, callbacks: Callbacks) {
   fetchBackend()
     .get(`/api/brief/${cid}`)
     .notFound(async () => {
+      await cachePromise;
       if ("caches" in window) {
         cache?.delete(`/api/brief/${cid}`);
       }
@@ -58,11 +60,14 @@ export async function fetchBrief(cid: string, callbacks: Callbacks) {
       hasResult = false;
     })
     .res(async (res) => {
-      callbacks.onResult(v.parse(ChartBriefSchema(), await res.clone().json()));
+      const result = v.parse(ChartBriefSchema(), await res.clone().json());
+      await cachePromise;
+      callbacks.onResult(result);
       hasResult = true;
       await cache?.put(`/api/brief/${cid}`, res);
     })
-    .catch((e: unknown) => {
+    .catch(async (e: unknown) => {
+      await cachePromise;
       e = captureAndWrap(e, { cid });
       if (!hasResult) {
         callbacks.onError?.(e as Error);

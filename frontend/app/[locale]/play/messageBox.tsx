@@ -490,7 +490,6 @@ export function InitErrorMessage(props: MessageProps3) {
           <LinksOnError />
         )
       }
-      {!(props.msg instanceof APIError) && <LinksOnError />}
       <p>
         <Button
           text={t("exit")}

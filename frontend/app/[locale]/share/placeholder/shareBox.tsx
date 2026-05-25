@@ -54,15 +54,19 @@ export function ShareBox(props: Props) {
 
   const [ytMeta, setYtMeta] = useState<YtMeta | null>(null);
   useEffect(() => {
-    fetchBackend()
-      .url(`/api/ytMeta/${cid}`)
-      .query({ lang: locale })
-      .get()
-      .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
-      .catch((e) => {
-        captureAndWrap(e, { cid });
-        setYtMeta(null);
-      });
+    if (cid) {
+      fetchBackend()
+        .url(`/api/ytMeta/${cid}`)
+        .query({ lang: locale })
+        .get()
+        .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
+        .catch((e) => {
+          captureAndWrap(e, { cid });
+          setYtMeta(null);
+        });
+    } else {
+      setYtMeta(null);
+    }
   }, [cid, locale]);
 
   return (

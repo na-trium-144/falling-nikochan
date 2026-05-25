@@ -6,7 +6,7 @@ export function shouldHideStatus(status: number) {
 }
 
 /**
- * fetch()におけるネットワークエラーと5xxのサーバーエラー、その他処理中に起きたロジックエラーを統一して扱うクラス。
+ * fetch()におけるネットワークエラーと5xxのサーバーエラーを統一して扱うクラス。
  */
 export class APIError extends Error {
   url: string;
@@ -38,7 +38,7 @@ export class APIError extends Error {
       this.message,
       // url内のパラメータ部分を消す (cid, lvIndex など)
       // TODO: 数値以外がパラメータになるAPIが今後作られた場合ロジックを変更する必要がある
-      new URL(this.url).pathname.replace(/\/[0-9]*/g, ""),
+      new URL(this.url).pathname.replace(/\/\d+/g, ""),
     ];
   }
 

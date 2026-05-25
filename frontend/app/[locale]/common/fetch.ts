@@ -21,7 +21,10 @@ import { ABORT_ERROR_STATUS, APIError, FETCH_ERROR_STATUS } from "./apiError";
  * のように使う。
  *
  * fetchがエラーを投げたときと、レスポンスが4xxや5xxだった場合は APIError がthrowされる。
- * catch()されなかったエラーは自動でSentryがキャッチし、整形してイベントとして送信される。
+ *
+ * 想定内のエラーがない場合はcatch()しなくてもよい。
+ * その場合はunhandledrejectionとして自動でSentryがキャッチし、整形してイベントとして送信される。
+ * (ネットワークエラーとAbortErrorはいずれの場合でもexpectedとしてマークされSentry送信の対象外)
  */
 export function fetchBackend() {
   const referenceError = { stack: "" };
