@@ -235,6 +235,9 @@ importers:
       wasmoon:
         specifier: ^1.16.0
         version: 1.16.0
+      wretch:
+        specifier: ^3.0.8
+        version: 3.0.8
       yaml:
         specifier: ^2.8.3
         version: 2.8.3
@@ -5316,6 +5319,10 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
+
+  wretch@3.0.8:
+    resolution: {integrity: sha512-HDDFvyELFUVZFiw4hb/QfMkuh+xwHwJoRjCCTDO+E9ik3TrRJSVI7MmzSKQemimeDH9EwIRmQuh4HTgEcVcYVw==}
+    engines: {node: '>=22'}
 
   ws@8.20.1:
     resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
@@ -10928,6 +10935,8 @@ snapshots:
       pako: 1.0.11
 
   word-wrap@1.2.5: {}
+
+  wretch@3.0.8: {}
 
   ws@8.20.1: {}
 

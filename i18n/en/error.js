@@ -34,7 +34,7 @@ export default {
     unknownApiError: "An error occurred on the server",
     noSession: "Failed to load session data",
     chartVersion: "The version of the chart data (ver. {ver}) is invalid",
-    badResponse: "Failed to process the server response",
+    badResponse: "An unknown error occurred",
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",

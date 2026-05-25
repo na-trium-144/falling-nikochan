@@ -1,3 +1,4 @@
+import { APIError } from "@/common/apiError";
 import * as Sentry from "@sentry/nextjs";
 import { isbot } from "isbot";
 
@@ -29,6 +30,12 @@ Sentry.init({
       ) {
         return null;
       }
+    }
+    if (hint.syntheticException instanceof APIError) {
+      if (hint.syntheticException.expected) {
+        return null;
+      }
+      event.fingerprint = hint.syntheticException.fingerprint;
     }
     return event;
   },

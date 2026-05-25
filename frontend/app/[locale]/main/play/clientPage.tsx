@@ -22,12 +22,13 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
 import { XLogo } from "@/common/x.jsx";
-import { APIError } from "@/common/apiError.js";
 import { useRouter, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
 import { getRecent } from "@/common/recent.js";
 import Search from "@icon-park/react/lib/icons/Search";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
 
 interface Props {
   locale: string;
@@ -121,7 +122,7 @@ function PlayTabInternal(
 
   const abortSearching = useRef<AbortController | null>(null);
   const [searchResult, setSearchResult] = useState<
-    ChartLineBrief[] | APIError | undefined
+    ChartLineBrief[] | Error | undefined
   >();
 
   useLayoutEffect(() => {
@@ -136,12 +137,12 @@ function PlayTabInternal(
     setSearchResult(undefined);
     const sortForAPI =
       params.sort === "recent" ? "latest" : (params.sort ?? "relevance");
-    const apiParams = new URLSearchParams({
+    const apiParams = {
       q: params.search,
       sort: sortForAPI,
       difficultyMin: String(params.minLv),
       difficultyMax: String(params.maxLv),
-    });
+    };
     if (!params.search) {
       document.title = titleWithSiteName(t("title"));
     } else {
@@ -150,43 +151,53 @@ function PlayTabInternal(
       );
     }
     abortSearching.current = new AbortController();
-    fetch(process.env.BACKEND_PREFIX + `/api/search?${apiParams.toString()}`, {
-      signal: abortSearching.current.signal,
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          const mapped: ChartLineBrief[] = (await res.json()).map(
-            (r: { cid: string; updatedAt?: number }) => ({
-              cid: r.cid,
-              updatedAt: r.updatedAt,
-              fetched: false,
-            })
+    fetchBackend()
+      .url(`/api/search`)
+      .query(apiParams)
+      .signal(abortSearching.current)
+      .get()
+      .onAbort(() => undefined) // ignore.
+      .json((res) => {
+        const mapped = v
+          .parse(
+            v.array(
+              v.object({
+                cid: v.string(),
+                count: v.optional(v.number()),
+                updatedAt: v.optional(v.number()),
+              })
+            ),
+            res
+          )
+          .map((r) => ({
+            cid: r.cid,
+            updatedAt: r.updatedAt,
+            fetched: false,
+          }));
+        if (params.sort === "recent") {
+          const mappedByCid = new Map(
+            mapped.map((brief: ChartLineBrief) => [brief.cid, brief])
           );
-          if (params.sort === "recent") {
-            const mappedByCid = new Map(
-              mapped.map((brief: ChartLineBrief) => [brief.cid, brief])
-            );
-            const sortedByRecent: ChartLineBrief[] = [];
-            for (const cid of getRecent("play").reverse()) {
-              if (sortedByRecent.length === mapped.length) {
-                break;
-              }
-              const brief = mappedByCid.get(cid);
-              if (brief) {
-                sortedByRecent.push(brief);
-              }
+          const sortedByRecent: ChartLineBrief[] = [];
+          for (const cid of getRecent("play").reverse()) {
+            if (sortedByRecent.length === mapped.length) {
+              break;
             }
-            setSearchResult(sortedByRecent);
-          } else {
-            setSearchResult(mapped);
+            const brief = mappedByCid.get(cid);
+            if (brief) {
+              sortedByRecent.push(brief);
+            }
           }
+          return sortedByRecent;
         } else {
-          setSearchResult(await APIError.fromRes(res));
+          return mapped;
         }
       })
-      .catch((e) => {
-        console.error(e);
-        setSearchResult(APIError.fetchError(e));
+      .catch((e: unknown) => captureAndWrap(e))
+      .then((res) => {
+        if (res !== undefined) {
+          setSearchResult(res);
+        }
       });
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 
