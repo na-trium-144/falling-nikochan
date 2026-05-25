@@ -1,4 +1,4 @@
-## ver. 16.7 - 2026/05/26
+## ver. 16.7 - 2026/05/26 [#1154](https://github.com/na-trium-144/falling-nikochan/pull/1154)
 
 * Androidでアプリ内ブラウザ経由でFirefoxが開く隠しタブによるセッション消費を回避
 
@@ -6,11 +6,11 @@
 
 * service worker側でのbeacon挿入が/shareやエラーページに対しても確実に行われるよう修正
 
-## ver. 16.5 - 2026/05/21
+## ver. 16.5 - 2026/05/21 [#1150](https://github.com/na-trium-144/falling-nikochan/pull/1150)
 
 * 最近プレイした譜面のリストを検索機能と統合、復活
 
-## ver. 16.4 - 2026/05/17
+## ver. 16.4 - 2026/05/17 [#1140](https://github.com/na-trium-144/falling-nikochan/pull/1140)
 
 * 譜面エディターのタイミングタブと音符タブで数式を入力可能に
 
@@ -21,7 +21,7 @@
     * 拡張子のないパスに対してgetContentType()でhtmlと判定するように変更
 * `main/about/__next_tree`がリダイレクト処理で404になっていたのを修正
 
-## ver. 16.2 - 2026/05/16
+## ver. 16.2 - 2026/05/16 [#1134](https://github.com/na-trium-144/falling-nikochan/pull/1134)
 
 * APIErrorクラスをErrorのサブクラスにしてSentry送信も統一して処理する
 * catchのないfetch呼び出しに空のcatchを追加
