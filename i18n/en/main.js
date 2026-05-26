@@ -155,6 +155,7 @@ export default {
       title: "Other",
       titleShort: "Other",
       description: "'Other' page for mobile UI",
+      contactLinks: "Contact Links",
       about: "About Falling Nikochan",
       supportedBrowsers:
         "Supported browsers are {browserslist}. " +

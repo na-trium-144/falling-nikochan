@@ -284,7 +284,7 @@ export default function TopPage(props: Props) {
 
       <Features locale={locale} />
       <hr className="fn-hr" />
-      <PoliciesAndLinks locale={locale} fes={fes} />
+      <PoliciesAndLinks locale={locale} />
 
       <div className="flex-none basis-mobile-footer no-pc" />
       <MobileFooter
@@ -297,7 +297,7 @@ export default function TopPage(props: Props) {
   );
 }
 
-function DeferredEMail() {
+export function DeferredEMail() {
   const [mailAddress, setMailAddress] = useState<string>("");
   const deferShowMail = () =>
     setMailAddress(atob("bmlrb2NoYW5hYWExNDRAZ21haWwuY29t"));
@@ -480,12 +480,65 @@ export function Features({ locale }: { locale: string }) {
   );
 }
 
+export function ContactFormLink() {
+  const t = useTranslations("main");
+  return (
+    <>
+      <FormOne className="inline-block align-middle mr-1" />
+      <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
+        {t("links.contactForm")}
+      </ExternalLink>
+    </>
+  );
+}
+export function YouTubeLink() {
+  const t = useTranslations("main");
+  return (
+    <>
+      <Youtube className="inline-block align-middle mr-1" theme="filled" />
+      <ExternalLink href="https://www.youtube.com/@nikochan144">
+        <span className="no-mobile">{t("links.officialChannel")}</span>
+        <span className="no-pc">{t("links.officialChannelShort")}</span>
+      </ExternalLink>
+    </>
+  );
+}
+export function XLink({ small }: { small?: boolean }) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <XLogo className="mr-1" />
+      <ExternalLink href="https://twitter.com/nikochan144">
+        {small ? (
+          <span>{t("links.officialAccountShort")}</span>
+        ) : (
+          <>
+            <span className="no-mobile">{t("links.officialAccount")}</span>
+            <span className="no-pc">{t("links.officialAccountShort")}</span>
+          </>
+        )}
+      </ExternalLink>
+    </>
+  );
+}
+export function GitHubLink({ small }: { small?: boolean }) {
+  return (
+    <>
+      <Github className="inline-block align-middle mr-1" />
+      <span className="mr-1">GitHub:</span>
+      <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
+        {!small && <span className="no-mobile">na-trium-144/</span>}
+        <span>falling-nikochan</span>
+      </ExternalLink>
+    </>
+  );
+}
 export function PoliciesAndLinks({
   locale,
-  fes,
+  // fes,
 }: {
   locale: string;
-  fes?: FesData;
+  // fes?: FesData;
 }) {
   const t = useTranslations("main");
   return (
@@ -494,7 +547,7 @@ export function PoliciesAndLinks({
         className={clsx(
           "w-full max-w-main flex",
           "flex-col px-3 gap-6 mb-3",
-          "main-wide:flex-row main-wide:px-12 main-wide:gap-12 main-wide:mb-24"
+          "main-wide:flex-row main-wide:items-start main-wide:px-12 main-wide:gap-12 main-wide:mb-24"
         )}
       >
         <div className="basis-1/2 flex flex-col items-center justify-center text-center">
@@ -519,59 +572,44 @@ export function PoliciesAndLinks({
           </Link>
         </div>
         <div className="basis-1/2 flex flex-col items-center justify-center text-center">
-          <h2 className="fn-heading-sect text-2xl mb-3">{t("links.title")}</h2>
+          <h2 className="fn-heading-sect text-2xl mb-3">
+            {t("links.contactLinks")}
+          </h2>
           <ul className="list-disc ml-6 text-left space-y-1">
             <li>
-              <FormOne className="inline-block align-middle mr-1" />
-              <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
-                {t("links.contactForm")}
-              </ExternalLink>
+              <ContactFormLink />
+            </li>
+            {/*<li>
+              YouTubeは問い合わせ用リンクではない
+              ソーシャルリンクとしてもっと目立つところに置きたいかも?
+              <YouTubeLink />
+            </li>*/}
+            <li>
+              <XLink />
+            </li>
+            <li>
+              <GitHubLink />
             </li>
             <li>
               <DeferredEMail />
             </li>
-            <li>
-              <Youtube
-                className="inline-block align-middle mr-1"
-                theme="filled"
-              />
-              <ExternalLink href="https://www.youtube.com/@nikochan144">
-                <span className="no-mobile">{t("links.officialChannel")}</span>
-                <span className="no-pc">{t("links.officialChannelShort")}</span>
-              </ExternalLink>
-            </li>
-            <li>
-              <XLogo className="mr-1" />
-              <ExternalLink href="https://twitter.com/nikochan144">
-                <span className="no-mobile">{t("links.officialAccount")}</span>
-                <span className="no-pc">{t("links.officialAccountShort")}</span>
-              </ExternalLink>
-            </li>
-            <li>
-              <Github className="inline-block align-middle mr-1" />
-              <span className="mr-1">GitHub:</span>
-              <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
-                <span className="no-mobile">na-trium-144/</span>
-                <span>falling-nikochan</span>
-              </ExternalLink>
-            </li>
-            <li>
+            {/*<li>
               <Code className="inline-block align-middle mr-1" />
               <ExternalLink href="/api" forceColor>
                 <span className="no-mobile">{t("links.apiReference")}</span>
                 <span className="no-pc">{t("links.apiReferenceShort")}</span>
               </ExternalLink>
-            </li>
-            <li>
+            </li>*/}
+            {/*<li>
               <ExternalLink href="https://utcode.net">
                 {t("links.aboutUTCode")}
               </ExternalLink>
-            </li>
-            {fes?.num && (
+            </li>*/}
+            {/*fes?.num && (
               <li>
                 <FestivalLink {...fes} />
               </li>
-            )}
+            )*/}
           </ul>
         </div>
       </section>
