@@ -1,3 +1,11 @@
+## ver. 16.9 - 2026/05/27 [#1158](https://github.com/na-trium-144/falling-nikochan/pull/1158)
+
+* エラーページの中央揃えをflexに変更
+* preをglassスタイルに変更
+* DOMExceptionの場合の専用メッセージを追加 (Chromeの翻訳機能を使うとエラーになる の応急処置)
+* リンクの見出しを修正&内容を統一
+* PCHeader2とlinksページにも問い合わせリンクを追加
+
 ## ver. 16.8 - 2026/05/27 [#1157](https://github.com/na-trium-144/falling-nikochan/pull/1157)
 
 * 譜面編集ページの音符と軌跡をUIの後ろに描画し、さらに範囲外に表示される場合はぼかす
