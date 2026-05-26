@@ -7,7 +7,7 @@ import FormOne from "@icon-park/react/lib/icons/FormOne";
 import { ExternalLink } from "@/common/extLink";
 import { XLogo } from "@/common/x";
 import Github from "@icon-park/react/lib/icons/Github";
-import { Box } from "./box";
+import { Box, WarningBox } from "./box";
 import { useEffect, useState } from "react";
 
 // IntlProvider内の場合はuseTranslationsで取得する。
@@ -83,20 +83,28 @@ export function ErrorMessage({
   error: unknown;
   eventId?: string;
 }) {
+  const t = useTranslations("error.errorPage");
   if (error) {
     return (
-      <pre
-        className={clsx(
-          "mb-3",
-          "p-2 rounded-md",
-          "text-xs",
-          "bg-sky-200/25 dark:bg-orange-800/10",
-          "whitespace-pre-wrap"
+      <>
+        <pre
+          className={clsx(
+            "relative fn-sky fn-pre",
+            "mb-3 p-2 rounded-sq-xl text-xs",
+            "whitespace-pre-wrap"
+          )}
+        >
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
+          {String(error)}
+          {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
+        </pre>
+        {error instanceof DOMException && error.name === "NotFoundError" && (
+          <WarningBox classNameOuter="mb-3">
+            {t("disableTranslation")}
+          </WarningBox>
         )}
-      >
-        {String(error)}
-        {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
-      </pre>
+      </>
     );
   } else {
     return <div>See the browser console for more information.</div>;

@@ -15,7 +15,7 @@ export default async function NotFoundPage() {
     <html>
       <body className="fn-body">
         <ThemeProvider>
-          <CenterBox>
+          <CenterBox classNameInner="flex flex-col items-center">
             <h4 className="fn-heading-box">Error 404</h4>
             <p className="mb-3">{t("api.notFound")}</p>
             <GoHomeButton goHome={t("errorPage.goHome")} />

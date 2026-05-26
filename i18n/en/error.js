@@ -40,6 +40,8 @@ export default {
     errorPage: {
       title: "An error has occurred 😢",
       goHome: "Return to top page",
+      disableTranslation:
+        "Please disable your browser's automatic translation or extensions and try again.",
     },
   },
 };

@@ -40,6 +40,8 @@ export default {
     errorPage: {
       title: "エラーが発生しました 😢",
       goHome: "トップへ戻る",
+      disableTranslation:
+        "ブラウザの自動翻訳などをオフにして再度試してみてください。",
     },
   },
 };

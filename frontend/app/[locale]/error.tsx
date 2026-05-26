@@ -21,7 +21,7 @@ export default function ClientErrorPage(props: ErrorProps) {
     setEventId(Sentry.captureException(props.error));
   }, [props.error]);
   return (
-    <CenterBox scrollableY>
+    <CenterBox scrollableY classNameInner="flex flex-col items-center">
       <h4 className="fn-heading-box">{t("title")}</h4>
       <ErrorMessage error={props.error} eventId={eventId} />
       <LinksOnError />
