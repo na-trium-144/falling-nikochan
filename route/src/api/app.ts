@@ -35,12 +35,13 @@ const apiApp = async (config: {
   const prodCors = cors({
     origin: "*",
     credentials: false,
-    exposeHeaders: ["Retry-After"],
+    // allowHeaders は指定しなければcors middlewareが自動ですべてのヘッダーを許可する
+    exposeHeaders: ["*"],
   });
   const devCors = cors({
     origin: (origin) => origin,
     credentials: true,
-    exposeHeaders: ["Retry-After"],
+    exposeHeaders: ["*"],
   });
   const apiApp = new Hono<{
     Bindings: Bindings;

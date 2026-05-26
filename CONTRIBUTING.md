@@ -153,6 +153,7 @@ pnpm run ldev
   - For unexpected errors, the global error handler (`src/error.ts`) formats the thrown error into JSON and returns it. Therefore, it is not necessary for each API handler to catch unexpected errors and return a 500 error response.
   - For the format when throwing errors based on ValiError or responses from external fetch, please refer to the comments in `onError` in `src/error.ts`.
 - For APIs under /api, please write OpenAPI documentation like existing APIs.
+- If the response returns `Cache-Control: max-age=...`, specify the same cacheControl in the Hono cache middleware and use them together.
 
 ### Frontend
 

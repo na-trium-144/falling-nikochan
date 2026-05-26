@@ -44,6 +44,10 @@ const seqFileApp = new Hono<{
             description: "Filename with extension of .fnseq.mpk",
             schema: { type: "string" },
           },
+          "Cache-Control": {
+            description: `no-cache`,
+            schema: { type: "string" },
+          },
         },
       },
       400: {
@@ -137,6 +141,7 @@ const seqFileApp = new Hono<{
     return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
       "Content-Type": "application/vnd.msgpack",
       "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-cache",
     });
   }
 );

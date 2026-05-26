@@ -151,6 +151,10 @@ const chartFileApp = async (config: {
                 description: "Filename with extension of .fn{ver}.mpk",
                 schema: { type: "string" },
               },
+              "Cache-Control": {
+                description: `private, no-cache`,
+                schema: { type: "string" },
+              },
             },
           },
           400: {
@@ -204,6 +208,7 @@ const chartFileApp = async (config: {
         return c.body(new Blob([msgpack.encode(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
           "Content-Disposition": `attachment; filename="${filename}"`,
+          "Cache-Control": "private, no-cache",
         });
       }
     )

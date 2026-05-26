@@ -18,12 +18,15 @@ import {
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
 import { Context, Hono } from "hono";
+import { cache } from "hono/cache";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
 クエリのlangとaccept-languageが異なる場合、クライアントサイドでリダイレクトするように
 bodyを無理やり書き換える。
 */
+
+const CACHE_MAX_AGE = 600;
 
 const shareApp = (config: {
   fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
@@ -32,6 +35,12 @@ const shareApp = (config: {
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use(config.languageDetector || languageDetector())
+    .use(
+      cache({
+        cacheName: "share",
+        cacheControl: `max-age=${CACHE_MAX_AGE}`,
+      })
+    )
     .get("/:cid{[0-9]+}", async (c) => {
       const lang = c.get("language");
       const qLang = c.req.query("lang") || lang;
@@ -165,7 +174,7 @@ const shareApp = (config: {
 
       return c.text(replacedBody, 200, {
         "Content-Type": res.headers.get("Content-Type") || "text/plain",
-        "Cache-Control": cacheControl(env(c), null),
+        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
         /*
           Linkヘッダーかmetaタグのどちらかがあればいいはずだが、
           Linkタグは例えばdiscordで動作しないらしい?: https://github.com/discord/discord-api-docs/issues/7370

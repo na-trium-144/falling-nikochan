@@ -46,6 +46,10 @@ const playFileApp = new Hono<{
             description: "Filename with extension of .fn{ver}p.mpk",
             schema: { type: "string" },
           },
+          "Cache-Control": {
+            description: `no-cache`,
+            schema: { type: "string" },
+          },
         },
       },
       400: {
@@ -139,6 +143,7 @@ const playFileApp = new Hono<{
     return c.body(new Blob([msgpack.encode(level)]).stream(), 200, {
       "Content-Type": "application/vnd.msgpack",
       "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-cache",
     });
   }
 );

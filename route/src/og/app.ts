@@ -19,6 +19,9 @@ import { getColor } from "colorthief";
 import { adjustColor } from "./style.js";
 import * as v from "valibot";
 import { fetchError } from "../error.js";
+import { cache } from "hono/cache";
+
+const CACHE_MAX_AGE = 315360000;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -43,6 +46,13 @@ const ogApp = (config: {
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use("/*", cors({ origin: "*" }))
+    .use(
+      "/*",
+      cache({
+        cacheName: "og",
+        cacheControl: `max-age=${CACHE_MAX_AGE}`,
+      })
+    )
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
 
@@ -263,7 +273,7 @@ const ogApp = (config: {
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), 315360000),
+        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
       });
     })
     .get("/:cid{[0-9]+}", (c) =>
