@@ -142,12 +142,27 @@
   z-index: -10;
 }
 /* これはFallingWindowの中にあるので、FallingWindowにzを設定すればローカルになる */
+@utility z-edit-trace {
+  z-index: -60;
+}
+@utility z-edit-trace-current {
+  z-index: -59;
+}
+@utility z-edit-target-line {
+  z-index: -50;
+}
+@utility z-edit-nikochan {
+  z-index: -40;
+}
+@utility z-edit-blur-overlay {
+  z-index: -5;
+}
+@utility z-edit-arrow {
+  z-index: 10;
+}
 @utility z-edit-draghandle {
   z-index: 10;
 }
 @utility z-edit-drag-overlay {
-  z-index: 10;
-}
-@utility z-edit-trace-current {
   z-index: 10;
 }
