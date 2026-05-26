@@ -3,10 +3,6 @@
 import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
 import { ButtonHighlight } from "@/common/button";
-import FormOne from "@icon-park/react/lib/icons/FormOne";
-import { ExternalLink } from "@/common/extLink";
-import { XLogo } from "@/common/x";
-import Github from "@icon-park/react/lib/icons/Github";
 import { Box, WarningBox } from "./box";
 import { useEffect, useState } from "react";
 import { ContactFormLink, GitHubLink, XLink } from "@/clientPage";
