@@ -602,7 +602,8 @@ export default function Edit(props: {
         <div
           className={clsx(
             "w-full",
-            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row"
+            "edit-wide:h-full edit-wide:flex edit-wide:items-stretch edit-wide:justify-center edit-wide:flex-row",
+            "overflow-hidden"
           )}
         >
           <div
@@ -672,18 +673,43 @@ export default function Edit(props: {
             </div>
             <div
               className={clsx(
-                "relative",
-                "w-full aspect-square",
+                "w-full aspect-square grid-centering",
                 "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
               )}
             >
-              <FallingWindow
-                inCodeTab={isCodeTab}
-                className="absolute inset-0"
-                chart={chart}
-                dragMode={dragMode}
-                setDragMode={setDragMode}
-              />
+              <div className="relative w-full aspect-square border border-gray-400/25">
+                <FallingWindow
+                  inCodeTab={isCodeTab}
+                  className="absolute inset-0"
+                  chart={chart}
+                  dragMode={dragMode}
+                  setDragMode={setDragMode}
+                />
+                <div
+                  className={clsx(
+                    "absolute -top-[200%] bottom-full -left-[50%] -right-[250%]",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+                <div
+                  className={clsx(
+                    "absolute top-full -bottom-[300vh] -left-[50%] -right-[250%]",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+                <div
+                  className={clsx(
+                    "absolute inset-y-0 -left-[50%] right-full",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+                <div
+                  className={clsx(
+                    "absolute inset-y-0 left-full -right-[250%]",
+                    "z-edit-blur-overlay backdrop-blur-2xs"
+                  )}
+                />
+              </div>
             </div>
             {chart && isTouch && (
               <button
