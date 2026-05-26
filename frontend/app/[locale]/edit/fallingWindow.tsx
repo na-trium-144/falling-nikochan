@@ -107,6 +107,7 @@ export default function FallingWindow(props: Props) {
         {boxSize && marginY !== undefined && (
           <div
             className={clsx(
+              "z-edit-target-line",
               "absolute h-0.5 transition duration-100",
               "bg-gray-400 shadow-none"
             )}
@@ -146,7 +147,7 @@ export default function FallingWindow(props: Props) {
             <>
               {pendingNoteUpdate && (
                 <div
-                  className="absolute rounded-full border-2 border-yellow-500 "
+                  className="absolute rounded-full border-2 border-yellow-500 z-edit-nikochan"
                   style={{
                     width: noteSize * bigScale(pendingNoteUpdate.big),
                     height: noteSize * bigScale(pendingNoteUpdate.big),
@@ -313,7 +314,7 @@ function NikochanAndTrace(props: NProps) {
       */}
       <div
         className={clsx(
-          "absolute rounded-full",
+          "absolute rounded-full z-edit-nikochan",
           displayNote.current.id === currentNoteIndex
             ? "bg-red-400"
             : "bg-yellow-400"
@@ -346,7 +347,7 @@ function NikochanAndTrace(props: NProps) {
             "absolute border-b origin-bottom-left",
             displayNote.history[di].id === currentNoteIndex
               ? "border-red-300 z-edit-trace-current"
-              : "border-gray-300"
+              : "border-gray-300 z-edit-trace"
           )}
           style={{
             width:
