@@ -1,3 +1,7 @@
+## ver. 16.8 - 2026/05/27 [#1157](https://github.com/na-trium-144/falling-nikochan/pull/1157)
+
+* 譜面編集ページの音符と軌跡をUIの後ろに描画し、さらに範囲外に表示される場合はぼかす
+
 ## ver. 16.7 - 2026/05/26 [#1154](https://github.com/na-trium-144/falling-nikochan/pull/1154)
 
 * Androidでアプリ内ブラウザ経由でFirefoxが開く隠しタブによるセッション消費を回避
