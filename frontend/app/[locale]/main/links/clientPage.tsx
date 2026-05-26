@@ -8,6 +8,12 @@ import { MenuThemeSwitcher } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "@/common/version";
+import {
+  ContactFormLink,
+  DeferredEMail,
+  GitHubLink,
+  XLink,
+} from "@/clientPage";
 
 export default function LinksPage({ locale }: { locale: string }) {
   const t = useTranslations("main.links");
@@ -61,6 +67,23 @@ export default function LinksPage({ locale }: { locale: string }) {
             })}
           </p>
         </div>
+      </section>
+      <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("contactLinks")}</h3>
+        <ul className="list-disc ml-6 space-y-1 text-left">
+          <li>
+            <ContactFormLink />
+          </li>
+          <li>
+            <XLink />
+          </li>
+          <li>
+            <GitHubLink />
+          </li>
+          <li>
+            <DeferredEMail />
+          </li>
+        </ul>
       </section>
     </IndexMain>
   );

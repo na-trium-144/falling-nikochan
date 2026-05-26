@@ -15,6 +15,7 @@ import { useDelayedDisplayState } from "./delayedDisplayState.js";
 import { Box } from "./box.js";
 import { MenuLangSwitcher } from "./langSwitcher.js";
 import { MenuThemeSwitcher } from "./theme.js";
+import { ContactFormLink, GitHubLink, XLink } from "@/clientPage.js";
 
 const pcTabTitleKeys = ["play", "edit"] as const;
 const tabURLs = {
@@ -171,6 +172,18 @@ export function PCMenuPopup(props: PopupProps) {
           >
             <MenuLangSwitcher locale={props.locale} />
             <MenuThemeSwitcher />
+            <hr className="fn-hr my-4" />
+            <ul className="list-disc ml-4.5 space-y-1 text-left">
+              <li>
+                <ContactFormLink />
+              </li>
+              <li>
+                <XLink small />
+              </li>
+              <li>
+                <GitHubLink small />
+              </li>
+            </ul>
           </Box>
         </div>
       </>

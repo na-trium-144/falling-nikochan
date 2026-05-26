@@ -27,7 +27,7 @@ export default function Error(props: ErrorProps) {
         )}
       >
         <div className="fn-fallback-bg" />
-        <CenterBox>
+        <CenterBox classNameInner="flex flex-col items-center">
           <h4 className="fn-heading-box">An error has occurred 😢</h4>
           <ErrorMessage error={props.error} />
         </CenterBox>

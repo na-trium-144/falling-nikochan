@@ -146,6 +146,7 @@ export default {
       title: "その他",
       titleShort: "その他",
       description: "モバイル用その他ページ",
+      contactLinks: "お問い合わせリンク",
       about: "Falling Nikochan について",
       supportedBrowsers:
         "対応ブラウザは {browserslist} です。" +

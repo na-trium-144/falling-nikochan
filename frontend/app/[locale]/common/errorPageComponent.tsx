@@ -3,12 +3,9 @@
 import { useTranslations } from "next-intl";
 import clsx from "clsx/lite";
 import { ButtonHighlight } from "@/common/button";
-import FormOne from "@icon-park/react/lib/icons/FormOne";
-import { ExternalLink } from "@/common/extLink";
-import { XLogo } from "@/common/x";
-import Github from "@icon-park/react/lib/icons/Github";
-import { Box } from "./box";
+import { Box, WarningBox } from "./box";
 import { useEffect, useState } from "react";
+import { ContactFormLink, GitHubLink, XLink } from "@/clientPage";
 
 // IntlProvider内の場合はuseTranslationsで取得する。
 // IntlProvider外で使う場合はサーバーサイドでerror.errorPage.goHomeに相当するメッセージを取得してpropsに渡す。
@@ -47,29 +44,16 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
 
   return (
     <Box classNameOuter="mb-3" padding={3}>
-      <h4 className="fn-heading-box">{tl("title")}</h4>
+      <h4 className="fn-heading-box">{tl("contactLinks")}</h4>
       <ul className="list-disc ml-6 space-y-1 text-left">
-        {/* TODO: links/clientPage.tsx と共通化 */}
         <li>
-          <FormOne className="inline-block align-middle mr-1" />
-          <ExternalLink href="https://forms.gle/3PVFRA7nUtXSHb8TA">
-            {tl("contactForm")}
-          </ExternalLink>
+          <ContactFormLink />
         </li>
         <li>
-          <XLogo className="mr-1" />
-          <ExternalLink href="https://twitter.com/nikochan144">
-            <span className="no-mobile">{tl("officialAccount")}</span>
-            <span className="no-pc">{tl("officialAccountShort")}</span>
-          </ExternalLink>
+          <XLink />
         </li>
         <li>
-          <Github className="inline-block align-middle mr-1" />
-          <span className="mr-1">GitHub:</span>
-          <ExternalLink href="https://github.com/na-trium-144/falling-nikochan">
-            <span className="no-mobile">na-trium-144/</span>
-            <span>falling-nikochan</span>
-          </ExternalLink>
+          <GitHubLink />
         </li>
       </ul>
     </Box>
@@ -83,20 +67,28 @@ export function ErrorMessage({
   error: unknown;
   eventId?: string;
 }) {
+  const t = useTranslations("error.errorPage");
   if (error) {
     return (
-      <pre
-        className={clsx(
-          "mb-3",
-          "p-2 rounded-md",
-          "text-xs",
-          "bg-sky-200/25 dark:bg-orange-800/10",
-          "whitespace-pre-wrap"
+      <>
+        <pre
+          className={clsx(
+            "relative fn-sky fn-pre",
+            "mb-3 p-2 rounded-sq-xl text-xs",
+            "whitespace-pre-wrap"
+          )}
+        >
+          <span className="fn-glass-1" />
+          <span className="fn-glass-2" />
+          {String(error)}
+          {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
+        </pre>
+        {error instanceof DOMException && error.name === "NotFoundError" && (
+          <WarningBox classNameOuter="mb-3">
+            {t("disableTranslation")}
+          </WarningBox>
         )}
-      >
-        {String(error)}
-        {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
-      </pre>
+      </>
     );
   } else {
     return <div>See the browser console for more information.</div>;

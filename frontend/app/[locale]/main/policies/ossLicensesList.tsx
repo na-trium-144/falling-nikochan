@@ -128,11 +128,13 @@ function LicenseTextBox(props: { children: string }) {
   return (
     <pre
       className={clsx(
-        "mt-1 p-2 rounded-md",
-        "overflow-x-auto text-xs",
-        "bg-sky-200/25 dark:bg-orange-800/10"
+        "relative fn-sky fn-pre",
+        "mt-1 p-2 rounded-sq-xl",
+        "overflow-x-auto text-xs"
       )}
     >
+      <span className="fn-glass-1" />
+      <span className="fn-glass-2" />
       {props.children.trim()}
     </pre>
   );
