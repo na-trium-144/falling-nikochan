@@ -1,3 +1,7 @@
+## ver. 16.10 - 2025/05/28 [#1159](https://github.com/na-trium-144/falling-nikochan/pull/1159)
+
+* tsconfigのtargetとlibをnode23相当に変更
+
 ## ver. 16.9 - 2026/05/27 [#1158](https://github.com/na-trium-144/falling-nikochan/pull/1158)
 
 * エラーページの中央揃えをflexに変更
