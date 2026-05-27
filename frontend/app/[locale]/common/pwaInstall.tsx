@@ -18,7 +18,6 @@ import { SlimeSVG } from "./slime";
 import ProgressBar from "./progressBar";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import * as Sentry from "@sentry/nextjs";
 
 const SW_ALLOWED_ORIGINS = ["https://nikochan.utcode.net"];
 
@@ -263,9 +262,8 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
         console.warn("sw:", e.data);
       });
       if (SW_ALLOWED_ORIGINS.includes(window.location.origin)) {
-        navigator.serviceWorker
-          .register("/sw.js", { scope: "/" })
-          .then((reg) => {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).then(
+          (reg) => {
             if (updateFetching.current !== null) {
               clearTimeout(updateFetching.current);
             }
@@ -302,14 +300,9 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
                 }
               });
             });
-          })
-          .catch((e) => {
-            Sentry.withScope((scope) => {
-              // ページURLごとに別issueに分けられるのを防ぐ
-              scope.setTransactionName("common/pwaInstall");
-              Sentry.captureException(e);
-            });
-          });
+          },
+          (e) => console.error("Failed to register service worker:", e)
+        );
       } else {
         console.warn(
           `This origin is not included in the list of origins that are permitted to run the service worker: ${JSON.stringify(SW_ALLOWED_ORIGINS)}.` +

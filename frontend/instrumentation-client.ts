@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { isbot } from "isbot";
 
 // Sentryの初期化箇所はここ以外に app/[locale]/edit/luaExecWorker.ts にもあるので注意！(そちらも同様に編集すること)
 
@@ -16,6 +17,21 @@ Sentry.init({
     // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any,
+  enabled: !isbot(navigator?.userAgent),
+  beforeSend(event, hint) {
+    for (const [errorClass, name] of [
+      [Error, "ChunkLoadError"],
+      [DOMException, "AbortError"],
+    ] as [() => unknown, string][]) {
+      if (
+        hint.syntheticException instanceof errorClass &&
+        hint.syntheticException.name === name
+      ) {
+        return null;
+      }
+    }
+    return event;
+  },
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

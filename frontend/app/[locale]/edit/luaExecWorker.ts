@@ -1,6 +1,7 @@
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import fnCommandsLib from "fn-commands?raw";
 import * as Sentry from "@sentry/browser";
+import { isbot } from "isbot";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -16,6 +17,10 @@ Sentry.init({
     // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any,
+  enabled: !isbot(navigator?.userAgent),
+  beforeSend(event /*, hint*/) {
+    return event;
+  },
 });
 
 const worker = self as unknown as Worker;
