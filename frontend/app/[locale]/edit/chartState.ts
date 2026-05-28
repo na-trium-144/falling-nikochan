@@ -95,7 +95,7 @@ function chartFileRetryMiddleware() {
   });
 }
 
-async function gzipRequestBodyIfAvailable(
+async function compressRequestBodyIfSupported(
   body: Uint8Array<ArrayBuffer>
 ): Promise<{
   body: Uint8Array<ArrayBuffer>;
@@ -303,9 +303,9 @@ export function useChartState(props: Props) {
 
       setSaveState("saving");
       const { body: requestBody, isCompressed } =
-        await gzipRequestBodyIfAvailable(
-        msgpack.encode(chartState.chart.toObject())
-      );
+        await compressRequestBodyIfSupported(
+          msgpack.encode(chartState.chart.toObject())
+        );
       const requestHeaders: Record<string, string> = {
         "Content-Type": "application/vnd.msgpack",
       };
