@@ -95,14 +95,20 @@ function chartFileRetryMiddleware() {
   });
 }
 
-async function gzipRequestBody(body: Uint8Array<ArrayBuffer>): Promise<Uint8Array> {
+async function prepareRequestBody(body: Uint8Array<ArrayBuffer>): Promise<{
+  body: Uint8Array<ArrayBuffer>;
+  isCompressed: boolean;
+}> {
   if (typeof CompressionStream === "undefined") {
-    throw new Error("compressionNotSupported");
+    return { body, isCompressed: false };
   }
   const compressedBody = await new Response(
     new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))
   ).arrayBuffer();
-  return new Uint8Array(compressedBody);
+  return {
+    body: new Uint8Array(compressedBody),
+    isCompressed: true,
+  };
 }
 const encodeBase64Utf8 = (value: string) => {
   return btoa(
@@ -294,17 +300,20 @@ export function useChartState(props: Props) {
       };
 
       setSaveState("saving");
-      const compressedBody = await gzipRequestBody(
+      const { body: requestBody, isCompressed } = await prepareRequestBody(
         msgpack.encode(chartState.chart.toObject())
       );
+      const requestHeaders: Record<string, string> = {
+        "Content-Type": "application/vnd.msgpack",
+      };
+      if (isCompressed) {
+        requestHeaders["Content-Encoding"] = "gzip";
+      }
       if (chartState.chart.cid === undefined) {
         await fetchBackend()
           .url(`/api/newChartFile`)
-          .headers({
-            "Content-Type": "application/vnd.msgpack",
-            "Content-Encoding": "gzip",
-          })
-          .body(compressedBody)
+          .headers(requestHeaders)
+          .body(requestBody)
           .options({
             cache: "no-store",
             credentials:
@@ -328,11 +337,8 @@ export function useChartState(props: Props) {
       } else {
         await fetchBackend()
           .url(`/api/chartFile/${chartState.chart.cid}`)
-          .headers({
-            "Content-Type": "application/vnd.msgpack",
-            "Content-Encoding": "gzip",
-          })
-          .body(compressedBody)
+          .headers(requestHeaders)
+          .body(requestBody)
           .options({
             cache: "no-store",
             credentials:
