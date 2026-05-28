@@ -49,7 +49,6 @@ import {
   ChartEditSchema14,
   ChartMinSchema14,
   ChartUntil14,
-  ChartUntil14Min,
   convertTo14Min,
   convertToMin14,
 } from "./legacy/chart14.js";
@@ -73,6 +72,7 @@ import {
   Chart15,
   ChartSchema15,
   ChartUntil15,
+  ChartUntil15Min,
   convertTo15,
   convertToPlay15,
   Level15Freeze,
@@ -221,13 +221,21 @@ export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
   }
 }
 export async function validateChartMin(
-  chart: ChartUntil14Min
-): Promise<Chart14Min> {
+  chart: ChartUntil15Min
+): Promise<Chart14Min | Chart15> {
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
-  if (chart.ver !== 14) chart = await convertTo14Min(chart as ChartUntil13Min);
-  chart satisfies Chart14Min;
-  chart = v.parse(ChartMinSchema14(), chart);
-  return { ...chart, ver: 14 };
+  if (chart.ver >= 15) {
+    // if(chart.ver !== 15 &&chart.ver !== 16)
+    // chart satisfies Chart15;
+    chart = v.parse(ChartSchema15(), chart);
+    return { ...chart, ver: 16 };
+  } else {
+    if (chart.ver !== 14)
+      chart = await convertTo14Min(chart as ChartUntil13Min);
+    chart satisfies Chart14Min;
+    chart = v.parse(ChartMinSchema14(), chart);
+    return { ...chart, ver: 14 };
+  }
 }
 
 export async function hash(text: string) {
