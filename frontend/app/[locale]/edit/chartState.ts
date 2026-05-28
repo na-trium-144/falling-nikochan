@@ -95,7 +95,9 @@ function chartFileRetryMiddleware() {
   });
 }
 
-async function maybeGzipRequestBody(body: Uint8Array<ArrayBuffer>): Promise<{
+async function gzipRequestBodyIfAvailable(
+  body: Uint8Array<ArrayBuffer>
+): Promise<{
   body: Uint8Array<ArrayBuffer>;
   isCompressed: boolean;
 }> {
@@ -300,7 +302,8 @@ export function useChartState(props: Props) {
       };
 
       setSaveState("saving");
-      const { body: requestBody, isCompressed } = await maybeGzipRequestBody(
+      const { body: requestBody, isCompressed } =
+        await gzipRequestBodyIfAvailable(
         msgpack.encode(chartState.chart.toObject())
       );
       const requestHeaders: Record<string, string> = {
