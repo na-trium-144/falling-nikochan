@@ -94,6 +94,16 @@ function chartFileRetryMiddleware() {
     resolveWithLatestResponse: true,
   });
 }
+
+async function gzipRequestBody(body: Uint8Array): Promise<Uint8Array> {
+  if (typeof CompressionStream === "undefined") {
+    throw new Error("CompressionStream is not supported");
+  }
+  const compressedBody = await new Response(
+    new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))
+  ).arrayBuffer();
+  return new Uint8Array(compressedBody);
+}
 const encodeBase64Utf8 = (value: string) => {
   return btoa(
     Array.from(new TextEncoder().encode(value), (byte) =>
@@ -284,10 +294,17 @@ export function useChartState(props: Props) {
       };
 
       setSaveState("saving");
+      const compressedBody = await gzipRequestBody(
+        msgpack.encode(chartState.chart.toObject())
+      );
       if (chartState.chart.cid === undefined) {
         await fetchBackend()
           .url(`/api/newChartFile`)
-          .body(msgpack.encode(chartState.chart.toObject()))
+          .headers({
+            "Content-Type": "application/vnd.msgpack",
+            "Content-Encoding": "gzip",
+          })
+          .body(compressedBody)
           .options({
             cache: "no-store",
             credentials:
@@ -311,7 +328,11 @@ export function useChartState(props: Props) {
       } else {
         await fetchBackend()
           .url(`/api/chartFile/${chartState.chart.cid}`)
-          .body(msgpack.encode(chartState.chart.toObject()))
+          .headers({
+            "Content-Type": "application/vnd.msgpack",
+            "Content-Encoding": "gzip",
+          })
+          .body(compressedBody)
           .options({
             cache: "no-store",
             credentials:
