@@ -9,7 +9,7 @@ const decompressGzip = async (payload: Buffer): Promise<Buffer> => {
     .stream()
     .pipeThrough(new DecompressionStream("gzip"));
   const arrayBuffer = await new Response(stream).arrayBuffer();
-  return Buffer.from(arrayBuffer as ArrayBuffer);
+  return Buffer.from(arrayBuffer);
 };
 const isSupportedEncoding = (
   value: string
