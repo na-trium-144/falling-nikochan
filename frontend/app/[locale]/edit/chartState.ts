@@ -97,9 +97,7 @@ function chartFileRetryMiddleware() {
 
 async function gzipRequestBody(body: Uint8Array<ArrayBuffer>): Promise<Uint8Array> {
   if (typeof CompressionStream === "undefined") {
-    throw new Error(
-      "Your browser does not support compressed uploads. Please use a newer browser."
-    );
+    throw new Error("compressionNotSupported");
   }
   const compressedBody = await new Response(
     new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))

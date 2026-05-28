@@ -9,6 +9,7 @@ import decompressMiddleware from "../../src/api/decompress";
 const gzipAsync = promisify(gzip);
 
 describe("decompress middleware", () => {
+  // Keep middleware order aligned with route/src/api/app.ts.
   const app = new Hono()
     .use("/*", bodyLimit({ maxSize: 1024 * 1024 }))
     .use("/*", decompressMiddleware)

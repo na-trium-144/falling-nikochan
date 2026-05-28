@@ -5,8 +5,13 @@ import { promisify } from "node:util";
 const supportedEncodings = ["identity", "gzip"] as const;
 const acceptEncodingHeader = supportedEncodings.join(", ");
 const gunzipAsync = promisify(gunzip);
+const isSupportedEncoding = (
+  value: string
+): value is (typeof supportedEncodings)[number] =>
+  supportedEncodings.some((encoding) => encoding === value);
 
 const decompressMiddleware: MiddlewareHandler = async (c, next) => {
+  // This middleware must run before any handler/middleware that consumes c.req body.
   const contentEncoding = c.req.header("content-encoding");
   if (!contentEncoding) {
     await next();
@@ -19,7 +24,7 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
     .filter((v) => v.length > 0);
   if (
     encodings.length === 0 ||
-    encodings.some((v) => !supportedEncodings.includes(v as "identity" | "gzip"))
+    encodings.some((v) => !isSupportedEncoding(v))
   ) {
     return c.json(
       { message: "unsupportedContentEncoding" },
@@ -34,14 +39,14 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
   }
 
   // Read from raw request so Hono bodyCache does not retain compressed payload.
-  let body = Buffer.from(await c.req.raw.arrayBuffer());
+  let bodyBuffer = Buffer.from(await c.req.raw.arrayBuffer());
   try {
     // Content-Encoding is listed in the order applied, so decode in reverse order.
     for (const encoding of encodings.toReversed()) {
       if (encoding === "identity") {
         continue;
       }
-      body = await gunzipAsync(body);
+      bodyBuffer = await gunzipAsync(bodyBuffer);
     }
   } catch {
     return c.json(
@@ -53,9 +58,9 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
 
   const headers = new Headers(c.req.raw.headers);
   headers.delete("content-encoding");
-  headers.set("content-length", body.byteLength.toString());
+  headers.set("content-length", bodyBuffer.byteLength.toString());
   c.req.raw = new Request(c.req.raw, {
-    body,
+    body: bodyBuffer,
     headers,
   });
   await next();
