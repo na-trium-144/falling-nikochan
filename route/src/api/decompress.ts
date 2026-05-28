@@ -28,15 +28,19 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
     );
   }
 
-  const gzipCount = encodings.filter((v) => v === "gzip").length;
-  if (gzipCount === 0) {
+  if (!encodings.includes("gzip")) {
     await next();
     return;
   }
 
-  let body = Buffer.from(await c.req.arrayBuffer());
+  // Read from raw request so Hono bodyCache does not retain compressed payload.
+  let body = Buffer.from(await c.req.raw.arrayBuffer());
   try {
-    for (let i = 0; i < gzipCount; i++) {
+    // Content-Encoding is listed in the order applied, so decode in reverse order.
+    for (const encoding of encodings.toReversed()) {
+      if (encoding === "identity") {
+        continue;
+      }
       body = await gunzipAsync(body);
     }
   } catch {
@@ -49,12 +53,11 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
 
   const headers = new Headers(c.req.raw.headers);
   headers.delete("content-encoding");
-  headers.delete("content-length");
+  headers.set("content-length", body.byteLength.toString());
   c.req.raw = new Request(c.req.raw, {
     body,
     headers,
   });
-  c.req.bodyCache = {};
   await next();
 };
 

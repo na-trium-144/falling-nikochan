@@ -22,6 +22,8 @@ export default {
       tooManyEvent: "譜面データ内のイベント数が多すぎます",
       // 415
       invalidChart: "譜面データのフォーマットが正しくありません",
+      unsupportedContentEncoding: "サポートされていない content-encoding です",
+      invalidContentEncoding: "content-encoding が不正です",
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500

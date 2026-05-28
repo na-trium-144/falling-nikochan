@@ -22,6 +22,8 @@ export default {
       tooManyEvent: "Too many events in the chart data",
       // 415
       invalidChart: "Invalid chart data format",
+      unsupportedContentEncoding: "Unsupported content encoding",
+      invalidContentEncoding: "Invalid content encoding",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500

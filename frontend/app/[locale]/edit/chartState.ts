@@ -95,13 +95,14 @@ function chartFileRetryMiddleware() {
   });
 }
 
-async function gzipRequestBody(body: Uint8Array): Promise<Uint8Array> {
+async function gzipRequestBody(body: Uint8Array<ArrayBuffer>): Promise<Uint8Array> {
   if (typeof CompressionStream === "undefined") {
-    throw new Error("CompressionStream is not supported");
+    throw new Error(
+      "Your browser does not support compressed uploads. Please use a newer browser."
+    );
   }
-  const normalizedBody = Uint8Array.from(body);
   const compressedBody = await new Response(
-    new Blob([normalizedBody]).stream().pipeThrough(new CompressionStream("gzip"))
+    new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))
   ).arrayBuffer();
   return new Uint8Array(compressedBody);
 }

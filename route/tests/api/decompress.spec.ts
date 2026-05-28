@@ -44,4 +44,20 @@ describe("decompress middleware", () => {
       message: "unsupportedContentEncoding",
     });
   });
+
+  test("should return 415 for invalid gzip body", async () => {
+    const res = await app.request("/echo", {
+      method: "POST",
+      headers: {
+        "Content-Encoding": "gzip",
+      },
+      body: "not-gzip",
+    });
+
+    expect(res.status).to.equal(415);
+    expect(res.headers.get("Accept-Encoding")).to.equal("identity, gzip");
+    expect(await res.json()).to.deep.equal({
+      message: "invalidContentEncoding",
+    });
+  });
 });
