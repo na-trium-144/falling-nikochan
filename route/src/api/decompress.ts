@@ -1,75 +1,67 @@
-import { MiddlewareHandler } from "hono";
+import { createMiddleware } from "hono/factory";
 import { Blob } from "node:buffer";
 import { DecompressionStream } from "node:stream/web";
 
-const supportedEncodings = ["identity", "gzip"] as const;
-const acceptEncodingHeader = supportedEncodings.join(", ");
-const decompressGzip = async (payload: Buffer): Promise<Buffer> => {
-  const stream = new Blob([payload])
-    .stream()
-    .pipeThrough(new DecompressionStream("gzip"));
-  const arrayBuffer = await new Response(stream).arrayBuffer();
-  return Buffer.from(arrayBuffer);
-};
-const isSupportedEncoding = (
-  value: string
-): value is (typeof supportedEncodings)[number] =>
-  supportedEncodings.some((encoding) => encoding === value);
+const supportedEncodings = ["gzip"] as const;
 
-const decompressMiddleware: MiddlewareHandler = async (c, next) => {
+const decompressMiddleware = createMiddleware(async (c, next) => {
   // This middleware must run before any handler/middleware that consumes c.req body.
   const contentEncoding = c.req.header("content-encoding");
   if (!contentEncoding) {
-    await next();
-    return;
+    return next();
   }
 
   const encodings = contentEncoding
     .split(",")
     .map((v) => v.trim().toLowerCase())
-    .filter((v) => v.length > 0);
+    .filter(Boolean);
+
+  // 今回サポートするのは gzip のみ
   if (
     encodings.length === 0 ||
-    encodings.some((v) => !isSupportedEncoding(v))
+    encodings.some(
+      (v) => !(supportedEncodings as readonly string[]).includes(v)
+    )
   ) {
-    return c.json(
-      { message: "unsupportedContentEncoding" },
-      415,
-      { "Accept-Encoding": acceptEncodingHeader }
-    );
-  }
-
-  if (!encodings.includes("gzip")) {
-    await next();
-    return;
+    return c.json({ message: "unsupportedContentEncoding" }, 415, {
+      "Accept-Encoding": supportedEncodings.join(", "),
+    });
   }
 
   // Read from raw request so Hono bodyCache does not retain compressed payload.
-  let bodyBuffer: Buffer = Buffer.from(await c.req.raw.arrayBuffer());
+  let bodyBuffer = Buffer.from(await c.req.raw.arrayBuffer());
+
   try {
     // Content-Encoding is listed in the order applied, so decode in reverse order.
     for (const encoding of encodings.toReversed()) {
-      if (encoding === "identity") {
-        continue;
+      switch (encoding) {
+        case "gzip":
+          bodyBuffer = Buffer.from(
+            await new Response(
+              new Blob([bodyBuffer])
+                .stream()
+                .pipeThrough(new DecompressionStream("gzip"))
+            ).arrayBuffer()
+          );
+          break;
       }
-      bodyBuffer = await decompressGzip(bodyBuffer);
     }
   } catch {
-    return c.json(
-      { message: "invalidContentEncoding" },
-      415,
-      { "Accept-Encoding": acceptEncodingHeader }
-    );
+    return c.json({ message: "invalidContentEncoding" }, 415, {
+      "Accept-Encoding": supportedEncodings.join(", "),
+    });
   }
 
   const headers = new Headers(c.req.raw.headers);
   headers.delete("content-encoding");
   headers.set("content-length", bodyBuffer.byteLength.toString());
+
   c.req.raw = new Request(c.req.raw, {
     body: bodyBuffer,
     headers,
   });
+
   await next();
-};
+});
 
 export default decompressMiddleware;

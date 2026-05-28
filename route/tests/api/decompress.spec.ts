@@ -2,16 +2,13 @@ import { describe, test } from "node:test";
 import { expect } from "chai";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { Blob } from "node:buffer";
-import { CompressionStream } from "node:stream/web";
 import decompressMiddleware from "../../src/api/decompress";
 
-const gzipAsync = async (payload: string): Promise<Buffer> => {
+const gzipAsync = async (payload: string): Promise<ArrayBuffer> => {
   const stream = new Blob([payload])
     .stream()
     .pipeThrough(new CompressionStream("gzip"));
-  const arrayBuffer = await new Response(stream).arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  return await new Response(stream).arrayBuffer();
 };
 
 describe("decompress middleware", () => {
@@ -46,7 +43,7 @@ describe("decompress middleware", () => {
     });
 
     expect(res.status).to.equal(415);
-    expect(res.headers.get("Accept-Encoding")).to.equal("identity, gzip");
+    expect(res.headers.get("Accept-Encoding")).to.equal("gzip");
     expect(await res.json()).to.deep.equal({
       message: "unsupportedContentEncoding",
     });
@@ -62,7 +59,7 @@ describe("decompress middleware", () => {
     });
 
     expect(res.status).to.equal(415);
-    expect(res.headers.get("Accept-Encoding")).to.equal("identity, gzip");
+    expect(res.headers.get("Accept-Encoding")).to.equal("gzip");
     expect(await res.json()).to.deep.equal({
       message: "invalidContentEncoding",
     });

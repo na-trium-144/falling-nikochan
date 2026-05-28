@@ -95,22 +95,19 @@ function chartFileRetryMiddleware() {
   });
 }
 
-async function compressBodyIfSupported(
-  body: Uint8Array<ArrayBuffer>
-): Promise<{
-  body: Uint8Array<ArrayBuffer>;
-  isCompressed: boolean;
-}> {
-  if (typeof CompressionStream === "undefined") {
-    return { body, isCompressed: false };
+async function compressBodyIfSupported(body: Uint8Array<ArrayBuffer>) {
+  if ("CompressionStream" in window) {
+    return {
+      body: await new Response(
+        new Blob([body])
+          .stream()
+          .pipeThrough(new window.CompressionStream("gzip"))
+      ).blob(),
+      encoding: "gzip",
+    };
+  } else {
+    return { body, encoding: undefined };
   }
-  const compressedBody = await new Response(
-    new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))
-  ).arrayBuffer();
-  return {
-    body: new Uint8Array(compressedBody),
-    isCompressed: true,
-  };
 }
 const encodeBase64Utf8 = (value: string) => {
   return btoa(
@@ -302,15 +299,13 @@ export function useChartState(props: Props) {
       };
 
       setSaveState("saving");
-      const { body: requestBody, isCompressed } = await compressBodyIfSupported(
-          msgpack.encode(chartState.chart.toObject())
-        );
+      const { body: requestBody, encoding } = await compressBodyIfSupported(
+        msgpack.encode(chartState.chart.toObject())
+      );
       const requestHeaders: Record<string, string> = {
         "Content-Type": "application/vnd.msgpack",
+        ...(encoding ? { "Content-Encoding": encoding } : {}),
       };
-      if (isCompressed) {
-        requestHeaders["Content-Encoding"] = "gzip";
-      }
       if (chartState.chart.cid === undefined) {
         await fetchBackend()
           .url(`/api/newChartFile`)
