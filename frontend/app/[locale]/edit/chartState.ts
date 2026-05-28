@@ -99,8 +99,9 @@ async function gzipRequestBody(body: Uint8Array): Promise<Uint8Array> {
   if (typeof CompressionStream === "undefined") {
     throw new Error("CompressionStream is not supported");
   }
+  const normalizedBody = Uint8Array.from(body);
   const compressedBody = await new Response(
-    new Blob([body]).stream().pipeThrough(new CompressionStream("gzip"))
+    new Blob([normalizedBody]).stream().pipeThrough(new CompressionStream("gzip"))
   ).arrayBuffer();
   return new Uint8Array(compressedBody);
 }
