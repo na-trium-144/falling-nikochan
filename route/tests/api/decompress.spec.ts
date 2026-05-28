@@ -29,7 +29,7 @@ describe("decompress middleware", () => {
       headers: {
         "Content-Encoding": "gzip",
       },
-      body: await gzipAsync(Buffer.from("hello")),
+      body: await gzipAsync("hello"),
     });
 
     expect(res.status).to.equal(200);

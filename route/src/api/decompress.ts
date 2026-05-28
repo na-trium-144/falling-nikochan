@@ -4,14 +4,12 @@ import { DecompressionStream } from "node:stream/web";
 
 const supportedEncodings = ["identity", "gzip"] as const;
 const acceptEncodingHeader = supportedEncodings.join(", ");
-const gunzipAsync = async (
-  payload: Buffer<ArrayBufferLike>
-): Promise<Buffer<ArrayBufferLike>> => {
+const gunzipAsync = async (payload: Buffer): Promise<Buffer> => {
   const stream = new Blob([payload])
     .stream()
     .pipeThrough(new DecompressionStream("gzip"));
   const arrayBuffer = await new Response(stream).arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  return Buffer.from(arrayBuffer as ArrayBuffer);
 };
 const isSupportedEncoding = (
   value: string
@@ -47,9 +45,7 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
   }
 
   // Read from raw request so Hono bodyCache does not retain compressed payload.
-  let bodyBuffer: Buffer<ArrayBufferLike> = Buffer.from(
-    await c.req.raw.arrayBuffer()
-  );
+  let bodyBuffer: Buffer = Buffer.from(await c.req.raw.arrayBuffer());
   try {
     // Content-Encoding is listed in the order applied, so decode in reverse order.
     for (const encoding of encodings.toReversed()) {
