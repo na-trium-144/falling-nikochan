@@ -95,7 +95,7 @@ function chartFileRetryMiddleware() {
   });
 }
 
-async function compressRequestBodyIfSupported(
+async function compressBodyIfSupported(
   body: Uint8Array<ArrayBuffer>
 ): Promise<{
   body: Uint8Array<ArrayBuffer>;
@@ -302,8 +302,7 @@ export function useChartState(props: Props) {
       };
 
       setSaveState("saving");
-      const { body: requestBody, isCompressed } =
-        await compressRequestBodyIfSupported(
+      const { body: requestBody, isCompressed } = await compressBodyIfSupported(
           msgpack.encode(chartState.chart.toObject())
         );
       const requestHeaders: Record<string, string> = {
