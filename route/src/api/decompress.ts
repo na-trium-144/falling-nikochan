@@ -4,7 +4,7 @@ import { DecompressionStream } from "node:stream/web";
 
 const supportedEncodings = ["identity", "gzip"] as const;
 const acceptEncodingHeader = supportedEncodings.join(", ");
-const gunzipAsync = async (payload: Buffer): Promise<Buffer> => {
+const decompressGzip = async (payload: Buffer): Promise<Buffer> => {
   const stream = new Blob([payload])
     .stream()
     .pipeThrough(new DecompressionStream("gzip"));
@@ -52,7 +52,7 @@ const decompressMiddleware: MiddlewareHandler = async (c, next) => {
       if (encoding === "identity") {
         continue;
       }
-      bodyBuffer = await gunzipAsync(bodyBuffer);
+      bodyBuffer = await decompressGzip(bodyBuffer);
     }
   } catch {
     return c.json(
