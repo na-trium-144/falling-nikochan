@@ -1,10 +1,16 @@
 import { MiddlewareHandler } from "hono";
-import { gunzip } from "node:zlib";
-import { promisify } from "node:util";
+import { Blob } from "node:buffer";
+import { DecompressionStream } from "node:stream/web";
 
 const supportedEncodings = ["identity", "gzip"] as const;
 const acceptEncodingHeader = supportedEncodings.join(", ");
-const gunzipAsync = promisify(gunzip);
+const gunzipAsync = async (payload: Buffer): Promise<Buffer> => {
+  const stream = new Blob([payload])
+    .stream()
+    .pipeThrough(new DecompressionStream("gzip"));
+  const arrayBuffer = await new Response(stream).arrayBuffer();
+  return Buffer.from(arrayBuffer);
+};
 const isSupportedEncoding = (
   value: string
 ): value is (typeof supportedEncodings)[number] =>

@@ -2,11 +2,17 @@ import { describe, test } from "node:test";
 import { expect } from "chai";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { promisify } from "node:util";
-import { gzip } from "node:zlib";
+import { Blob } from "node:buffer";
+import { CompressionStream } from "node:stream/web";
 import decompressMiddleware from "../../src/api/decompress";
 
-const gzipAsync = promisify(gzip);
+const gzipAsync = async (payload: string): Promise<Buffer> => {
+  const stream = new Blob([payload])
+    .stream()
+    .pipeThrough(new CompressionStream("gzip"));
+  const arrayBuffer = await new Response(stream).arrayBuffer();
+  return Buffer.from(arrayBuffer);
+};
 
 describe("decompress middleware", () => {
   // Keep middleware order aligned with route/src/api/app.ts.

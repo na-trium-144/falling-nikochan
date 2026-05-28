@@ -33,8 +33,8 @@ import {
   SignatureWithLua15,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
-import { gzip, gunzip } from "node:zlib";
-import { promisify } from "node:util";
+import { Blob } from "node:buffer";
+import { CompressionStream, DecompressionStream } from "node:stream/web";
 import { Binary, Db } from "mongodb";
 import { HTTPException } from "hono/http-exception";
 import { randomBytes } from "node:crypto";
@@ -118,6 +118,20 @@ export async function getChartEntry(
 
   return { entry, chart };
 }
+
+const textDecoder = new TextDecoder();
+const textEncoder = new TextEncoder();
+const gzipCompress = async (payload: string | Uint8Array): Promise<Buffer> => {
+  const source = typeof payload === "string" ? textEncoder.encode(payload) : payload;
+  const stream = new Blob([source]).stream().pipeThrough(new CompressionStream("gzip"));
+  const arrayBuffer = await new Response(stream).arrayBuffer();
+  return Buffer.from(arrayBuffer);
+};
+const gzipDecompress = async (payload: Uint8Array): Promise<Uint8Array> => {
+  const stream = new Blob([payload]).stream().pipeThrough(new DecompressionStream("gzip"));
+  const arrayBuffer = await new Response(stream).arrayBuffer();
+  return new Uint8Array(arrayBuffer);
+};
 
 export function getPUserHash(
   pServerHash: string,
@@ -267,8 +281,8 @@ export async function unzipEntry(
     throw new Error("levelsCompressed is null");
   }
   const decodedChart = entry.levelsCompressed.buffer;
-  const decompressedChart = await promisify(gunzip)(decodedChart);
-  const levels = JSON.parse(new TextDecoder().decode(decompressedChart));
+  const decompressedChart = await gzipDecompress(decodedChart);
+  const levels = JSON.parse(textDecoder.decode(decompressedChart));
   return {
     ...entry,
     levelsCompressed: null,
@@ -279,9 +293,7 @@ export async function unzipEntry(
 export async function zipEntry(
   entry: ChartEntry
 ): Promise<ChartEntryCompressed> {
-  const levelsCompressed: Buffer = await promisify(gzip)(
-    JSON.stringify(entry.levels)
-  );
+  const levelsCompressed = await gzipCompress(JSON.stringify(entry.levels));
   return {
     cid: entry.cid,
     deleted: entry.deleted,
