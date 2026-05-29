@@ -38,7 +38,6 @@ const shareApp = (config: {
     .use(
       cache({
         cacheName: "share",
-        cacheControl: `max-age=${CACHE_MAX_AGE}`,
       })
     )
     .get("/:cid{[0-9]+}", async (c) => {

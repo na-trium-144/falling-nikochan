@@ -50,7 +50,6 @@ const ogApp = (config: {
       "/*",
       cache({
         cacheName: "og",
-        cacheControl: `max-age=${CACHE_MAX_AGE}`,
       })
     )
     .get("/:type/:cid", async (c) => {

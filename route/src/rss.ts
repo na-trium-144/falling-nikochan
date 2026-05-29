@@ -19,7 +19,6 @@ const rssApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
     "/",
     cache({
       cacheName: "rss",
-      cacheControl: `max-age=${CACHE_MAX_AGE}`,
     }),
     config.dbMiddleware,
     async (c) => {

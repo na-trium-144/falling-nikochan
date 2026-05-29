@@ -25,7 +25,6 @@ const briefApp = new Hono<{
   "/:cid",
   cache({
     cacheName: "api-brief",
-    cacheControl: `max-age=${CACHE_MAX_AGE}`,
   }),
   describeRoute({
     description: "Get brief information about the chart.",

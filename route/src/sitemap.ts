@@ -31,7 +31,6 @@ const sitemapApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
     "/",
     cache({
       cacheName: "sitemap",
-      cacheControl: `max-age=${CACHE_MAX_AGE}`,
     }),
     config.dbMiddleware,
     async (c) => {

@@ -47,7 +47,6 @@ const recordApp = async (config: {
       "/:cid",
       cache({
         cacheName: "api-record",
-        cacheControl: `max-age=${CACHE_MAX_AGE}`,
       }),
       describeRoute({
         description: "Get play record summary for the chart.",
