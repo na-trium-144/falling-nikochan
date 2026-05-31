@@ -1,6 +1,12 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
-import { entryToBrief, getChartEntryCompressed } from "./chart.js";
+import {
+  calcETag,
+  entryToBrief,
+  etagHeaderDoc,
+  getChartEntryCompressed,
+  ifNoneMatchHeaderDoc,
+} from "./chart.js";
 import { Db } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
@@ -28,6 +34,7 @@ const briefApp = new Hono<{
   }),
   describeRoute({
     description: "Get brief information about the chart.",
+    parameters: [ifNoneMatchHeaderDoc],
     responses: {
       200: {
         description: "Successful response",
@@ -41,7 +48,11 @@ const briefApp = new Hono<{
             description: `max-age=${CACHE_MAX_AGE}`,
             schema: { type: "string" },
           },
+          ...etagHeaderDoc,
         },
+      },
+      304: {
+        description: "No content if If-None-Match header matches",
       },
       400: {
         description: "invalid chart id",
@@ -64,8 +75,11 @@ const briefApp = new Hono<{
   validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
-    return c.json(await getBrief(await c.get("db")(), cid), 200, {
+    const db = await c.get("db")();
+    const entry = await getChartEntryCompressed(db, cid, null);
+    return c.json(entryToBrief(entry), 200, {
       "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+      "ETag": await calcETag(entry),
     });
   }
 );

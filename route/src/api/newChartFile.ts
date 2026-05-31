@@ -12,7 +12,14 @@ import {
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
 import { Db } from "mongodb";
-import { ChartEntryCompressed, chartToEntry, zipEntry } from "./chart.js";
+import {
+  calcETag,
+  ChartEntryCompressed,
+  chartToEntry,
+  etagHeaderDoc,
+  getChartEntryCompressed,
+  zipEntry,
+} from "./chart.js";
 import { Context, Hono } from "hono";
 import { Bindings, secretSalt } from "../env.js";
 import { env } from "hono/adapter";
@@ -64,6 +71,9 @@ const newChartFileApp = async (config: {
             "application/json": {
               schema: resolver(v.object({ cid: CidSchema() })),
             },
+          },
+          headers: {
+            ...etagHeaderDoc,
           },
         },
         400: {
@@ -209,7 +219,10 @@ const newChartFileApp = async (config: {
           )
         );
 
-      return c.json({ cid: cid });
+      const newEntry = await getChartEntryCompressed(db, cid, null);
+      return c.json({ cid: cid }, 200, {
+        "ETag": await calcETag(newEntry),
+      });
     }
   );
 
