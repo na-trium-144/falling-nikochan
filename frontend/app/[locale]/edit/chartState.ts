@@ -94,6 +94,21 @@ function chartFileRetryMiddleware() {
     resolveWithLatestResponse: true,
   });
 }
+
+async function compressBodyIfSupported(body: Uint8Array<ArrayBuffer>) {
+  if ("CompressionStream" in window) {
+    return {
+      body: await new Response(
+        new Blob([body])
+          .stream()
+          .pipeThrough(new window.CompressionStream("gzip"))
+      ).blob(),
+      encoding: "gzip",
+    };
+  } else {
+    return { body, encoding: undefined };
+  }
+}
 const encodeBase64Utf8 = (value: string) => {
   return btoa(
     Array.from(new TextEncoder().encode(value), (byte) =>
@@ -284,10 +299,18 @@ export function useChartState(props: Props) {
       };
 
       setSaveState("saving");
+      const { body: requestBody, encoding } = await compressBodyIfSupported(
+        msgpack.encode(chartState.chart.toObject())
+      );
+      const requestHeaders: Record<string, string> = {
+        "Content-Type": "application/vnd.msgpack",
+        ...(encoding ? { "Content-Encoding": encoding } : {}),
+      };
       if (chartState.chart.cid === undefined) {
         await fetchBackend()
           .url(`/api/newChartFile`)
-          .body(msgpack.encode(chartState.chart.toObject()))
+          .headers(requestHeaders)
+          .body(requestBody)
           .options({
             cache: "no-store",
             credentials:
@@ -311,7 +334,8 @@ export function useChartState(props: Props) {
       } else {
         await fetchBackend()
           .url(`/api/chartFile/${chartState.chart.cid}`)
-          .body(msgpack.encode(chartState.chart.toObject()))
+          .headers(requestHeaders)
+          .body(requestBody)
           .options({
             cache: "no-store",
             credentials:

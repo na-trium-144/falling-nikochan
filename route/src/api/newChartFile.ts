@@ -4,7 +4,6 @@ import {
   numEvents,
   validateChartWithoutConvert,
   chartMaxEvent,
-  fileMaxSize,
   rateLimit,
   CidSchema,
   Chart14Edit,
@@ -23,6 +22,7 @@ import { describeRoute, resolver } from "hono-openapi";
 import { errorLiteral, validationErrorSchema } from "../error.js";
 import * as v from "valibot";
 import { ConnInfo } from "hono/conninfo";
+import { supportedEncodings } from "./decompress.js";
 
 const newChartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
@@ -34,6 +34,7 @@ const newChartFileApp = async (config: {
         "Create a new chart. " +
         "The chart data should be in MessagePack format, and " +
         `must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
+        `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
         "Returns the chart ID (cid) of the newly created chart. " +
         `This endpoint is rate limited to one request per ${rateLimit.newChartFile / 60} minutes. `,
       requestBody: {
@@ -46,6 +47,14 @@ const newChartFileApp = async (config: {
           },
         },
       },
+      parameters: [
+        {
+          name: "Content-Encoding",
+          in: "header",
+          description: "Encoding applied to the request body",
+          schema: { type: "string" },
+        },
+      ],
       responses: {
         200: {
           description: "Successful response",
@@ -82,15 +91,26 @@ const newChartFileApp = async (config: {
           },
         },
         415: {
-          description: "Invalid chart format",
+          description:
+            "Invalid chart format, or given Content-Encoding is unsupported",
           content: {
             "application/json": {
               schema: resolver(
                 v.union([
                   await validationErrorSchema("invalidChart"),
-                  await errorLiteral("invalidChart"),
+                  await errorLiteral(
+                    "invalidChart",
+                    "unsupportedContentEncoding",
+                    "invalidContentEncoding"
+                  ),
                 ])
               ),
+            },
+          },
+          headers: {
+            "Accept-Encoding": {
+              description: `Supported encoding type (${supportedEncodings.join(", ")})`,
+              schema: { type: "string" },
             },
           },
         },
@@ -128,13 +148,6 @@ const newChartFileApp = async (config: {
             429,
             { "retry-after": rateLimit.newChartFile.toString() }
           );
-        }
-
-        if (chartBuf.byteLength > fileMaxSize) {
-          throw new HTTPException(413, {
-            message: "tooLargeFile",
-            // message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
-          });
         }
 
         let newChart: Chart14Edit | Chart15;
