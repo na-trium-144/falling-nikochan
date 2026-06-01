@@ -5,7 +5,6 @@ import {
   hashLevel,
   numEvents,
   chartMaxEvent,
-  fileMaxSize,
   CidSchema,
   rateLimit,
   convertToLatest,
@@ -44,6 +43,7 @@ import {
   passwdHeaderDoc,
   PasswdParamSchema,
 } from "./passwdAuth.js";
+import { supportedEncodings } from "./decompress.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 /**
@@ -290,6 +290,7 @@ const chartFileApp = async (config: {
         description:
           "Update a chart file with new data in MessagePack format. " +
           `The chart data format must be the latest format (Chart15) or one version earlier (Chart14Edit). ` +
+          `The chart data may be compressed using ${supportedEncodings.join(", ")} (in that case Content-Encoding header must be set.) ` +
           "The previous password is required (either p/ph query or Authorization header). If the posted chart data has a different password, it will be used next time.",
         requestBody: {
           description: "Chart data in MessagePack format.",
@@ -300,7 +301,15 @@ const chartFileApp = async (config: {
             },
           },
         },
-        parameters: [passwdHeaderDoc],
+        parameters: [
+          passwdHeaderDoc,
+          {
+            name: "Content-Encoding",
+            in: "header",
+            description: "Encoding applied to the request body",
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           204: {
             description: "No content, chart updated successfully",
@@ -354,15 +363,26 @@ const chartFileApp = async (config: {
             },
           },
           415: {
-            description: "Invalid chart format",
+            description:
+              "Invalid chart format, or given Content-Encoding is unsupported",
             content: {
               "application/json": {
                 schema: resolver(
                   v.union([
                     await validationErrorSchema("invalidChart"),
-                    await errorLiteral("invalidChart"),
+                    await errorLiteral(
+                      "invalidChart",
+                      "unsupportedContentEncoding",
+                      "invalidContentEncoding"
+                    ),
                   ])
                 ),
+              },
+            },
+            headers: {
+              "Accept-Encoding": {
+                description: `Supported encoding type (${supportedEncodings.join(", ")})`,
+                schema: { type: "string" },
               },
             },
           },
@@ -390,12 +410,6 @@ const chartFileApp = async (config: {
         const pSecretSalt = c.get("pSecretSalt");
 
         const chartBuf = await c.req.arrayBuffer();
-        if (chartBuf.byteLength > fileMaxSize) {
-          throw new HTTPException(413, {
-            message: "tooLargeFile",
-            // message: `Chart too large (file size is ${chartBuf.byteLength} / ${fileMaxSize})`,
-          });
-        }
 
         let newChart: Chart14Edit | Chart15;
         try {

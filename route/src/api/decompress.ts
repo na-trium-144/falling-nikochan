@@ -2,7 +2,7 @@ import { createMiddleware } from "hono/factory";
 import { Blob } from "node:buffer";
 import { DecompressionStream } from "node:stream/web";
 
-const supportedEncodings = ["gzip"] as const;
+export const supportedEncodings = ["gzip"] as const;
 
 const decompressMiddleware = createMiddleware(async (c, next) => {
   // This middleware must run before any handler/middleware that consumes c.req body.
