@@ -5,6 +5,8 @@ import { dedupe, retry } from "wretch/middlewares";
 import * as Sentry from "@sentry/nextjs";
 import { APIError, FETCH_ERROR_STATUS } from "./apiError";
 
+const dedupeMiddleware = dedupe();
+
 /**
  * wretchのwrapper
  *
@@ -32,7 +34,7 @@ export function fetchBackend() {
   return wretch(process.env.BACKEND_PREFIX || window.location.origin)
     .addon(QueryStringAddon)
     .addon(AbortAddon())
-    .middlewares([dedupe()])
+    .middlewares([dedupeMiddleware])
     .customError(APIErrorTransformer(referenceError))
     .resolve((r) =>
       r.fetchError((e, w) => {
@@ -54,7 +56,7 @@ export function fetchAsset() {
   Error.captureStackTrace(referenceError, fetchAsset);
   return wretch(process.env.ASSET_PREFIX || window.location.origin)
     .middlewares([
-      dedupe(),
+      dedupeMiddleware,
       retry({
         // fetching static asset should not fail. infinite retry with error report
         maxAttempts: 0,
@@ -128,7 +130,13 @@ function APIErrorTransformer(referenceError: { stack: string }) {
       body = String(e);
       message = "(Failed to parse body of error response)";
     }
-    return new APIError(req._url, we.status, message, referenceError.stack, body);
+    return new APIError(
+      req._url,
+      we.status,
+      message,
+      referenceError.stack,
+      body
+    );
   };
 }
 
