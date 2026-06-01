@@ -25,17 +25,17 @@ Sentry.init({
       [DOMException, "AbortError"],
     ] as [() => unknown, string][]) {
       if (
-        hint.syntheticException instanceof errorClass &&
-        hint.syntheticException.name === name
+        hint.originalException instanceof errorClass &&
+        (hint.originalException as Error).name === name
       ) {
         return null;
       }
     }
-    if (hint.syntheticException instanceof APIError) {
-      if (hint.syntheticException.expected) {
+    if (hint.originalException instanceof APIError) {
+      if (hint.originalException.expected) {
         return null;
       }
-      event.fingerprint = hint.syntheticException.fingerprint;
+      event.fingerprint = hint.originalException.fingerprint;
     }
     return event;
   },
