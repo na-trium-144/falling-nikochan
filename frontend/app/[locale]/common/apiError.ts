@@ -1,8 +1,7 @@
 export const FETCH_ERROR_STATUS = 499;
-export const ABORT_ERROR_STATUS = 498;
 
 export function shouldHideStatus(status: number) {
-  return status === FETCH_ERROR_STATUS || status === ABORT_ERROR_STATUS;
+  return status === FETCH_ERROR_STATUS;
 }
 
 /**
@@ -27,7 +26,7 @@ export class APIError extends Error {
     super(message);
     this.name = `APIError-${status}`;
     this.status = status;
-    if (status === FETCH_ERROR_STATUS || status === ABORT_ERROR_STATUS) {
+    if (status === FETCH_ERROR_STATUS) {
       this.expected = true;
     }
     this.url = url;

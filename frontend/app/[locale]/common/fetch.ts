@@ -1,9 +1,9 @@
-import wretch from "wretch";
+import wretch, { WretchError } from "wretch";
 import QueryStringAddon from "wretch/addons/queryString";
 import AbortAddon from "wretch/addons/abort";
 import { dedupe, retry } from "wretch/middlewares";
 import * as Sentry from "@sentry/nextjs";
-import { ABORT_ERROR_STATUS, APIError, FETCH_ERROR_STATUS } from "./apiError";
+import { APIError, FETCH_ERROR_STATUS } from "./apiError";
 
 /**
  * wretchのwrapper
@@ -33,7 +33,21 @@ export function fetchBackend() {
     .addon(QueryStringAddon)
     .addon(AbortAddon())
     .middlewares([dedupe()])
-    .customError(APIErrorTransformer(referenceError));
+    .customError(APIErrorTransformer(referenceError))
+    .resolve((r) =>
+      r.fetchError((e, w) => {
+        throw new APIError(
+          w._url,
+          FETCH_ERROR_STATUS,
+          "fetchError",
+          referenceError.stack,
+          {
+            error: String(e),
+            ...(e && typeof e === "object" ? e : {}),
+          }
+        );
+      })
+    );
 }
 export function fetchAsset() {
   const referenceError = { stack: "" };
@@ -68,58 +82,53 @@ export function fetchAsset() {
         retryOnNetworkError: true,
       }),
     ])
-    .customError(APIErrorTransformer(referenceError));
+    .customError(APIErrorTransformer(referenceError))
+    .resolve((r) =>
+      r.fetchError((e, w) => {
+        throw new APIError(
+          w._url,
+          FETCH_ERROR_STATUS,
+          "fetchError",
+          referenceError.stack,
+          {
+            error: String(e),
+            ...(e && typeof e === "object" ? e : {}),
+          }
+        );
+      })
+    );
 }
 
 function APIErrorTransformer(referenceError: { stack: string }) {
   return async (
-    we: unknown,
-    res: Response | undefined,
+    we: WretchError,
+    res: Response,
     req: { _url: string }
   ): Promise<APIError> => {
-    const status =
-      we instanceof wretch.WretchError
-        ? we.status
-        : we instanceof DOMException && we.name === "AbortError"
-          ? ABORT_ERROR_STATUS
-          : FETCH_ERROR_STATUS;
     let message: string;
     let body: unknown = undefined;
-    if (!res) {
-      if (status === FETCH_ERROR_STATUS) {
-        // fetchErrorはユーザー向けメッセージがある
-        message = "fetchError";
-      } else {
-        message = String(we);
-      }
-      body = {
-        error: String(we),
-        ...(we && typeof we === "object" ? we : {}),
-      };
-    } else {
+    try {
+      const bodyText = await res.text();
       try {
-        const bodyText = await res.text();
-        try {
-          body = JSON.parse(bodyText);
-          if (body && typeof body === "object" && "message" in body) {
-            message = String(body.message);
-          } else {
-            message = bodyText.slice(0, 50);
-          }
-        } catch {
-          body = bodyText;
-          // cloudflareが返すエラーレスポンスのHTMLとかの可能性を考慮
-          // HTMLでなかった場合はbodyそのまま(長すぎる場合はslice)
-          message =
-            bodyText.match(/<title>\s*([\s\S]*?)\s*<\/title>/i)?.[1] ??
-            bodyText.slice(0, 50);
+        body = JSON.parse(bodyText);
+        if (body && typeof body === "object" && "message" in body) {
+          message = String(body.message);
+        } else {
+          message = bodyText.slice(0, 50);
         }
-      } catch (e) {
-        body = String(e);
-        message = "(Failed to parse body of error response)";
+      } catch {
+        body = bodyText;
+        // cloudflareが返すエラーレスポンスのHTMLとかの可能性を考慮
+        // HTMLでなかった場合はbodyそのまま(長すぎる場合はslice)
+        message =
+          bodyText.match(/<title>\s*([\s\S]*?)\s*<\/title>/i)?.[1] ??
+          bodyText.slice(0, 50);
       }
+    } catch (e) {
+      body = String(e);
+      message = "(Failed to parse body of error response)";
     }
-    return new APIError(req._url, status, message, referenceError.stack, body);
+    return new APIError(req._url, we.status, message, referenceError.stack, body);
   };
 }
 
