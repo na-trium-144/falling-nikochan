@@ -20,6 +20,7 @@ import { adjustColor } from "./style.js";
 import * as v from "valibot";
 import { fetchError } from "../error.js";
 import { cache } from "hono/cache";
+import { etag } from "hono/etag";
 
 const CACHE_MAX_AGE = 315360000;
 
@@ -46,6 +47,7 @@ const ogApp = (config: {
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use("/*", cors({ origin: "*" }))
+    .use(etag())
     .use(
       "/*",
       cache({

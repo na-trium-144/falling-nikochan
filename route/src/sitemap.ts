@@ -7,6 +7,7 @@ import { ChartEntryCompressed } from "./api/chart.js";
 import { text } from "node:stream/consumers";
 import { Db } from "mongodb";
 import { cache } from "hono/cache";
+import { etag } from "hono/etag";
 
 const CACHE_MAX_AGE = 86400;
 
@@ -29,6 +30,7 @@ const sitemapApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
     strict: false,
   }).get(
     "/",
+    etag(),
     cache({
       cacheName: "sitemap",
     }),

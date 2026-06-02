@@ -6,6 +6,7 @@ import xmlbuilder2 from "xmlbuilder2";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import { Db } from "mongodb";
 import { cache } from "hono/cache";
+import { etag } from "hono/etag";
 
 // Cache duration for RSS feed (in seconds) - 30 minutes
 const CACHE_MAX_AGE = 1800;
@@ -17,6 +18,7 @@ const rssApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
     strict: false,
   }).get(
     "/",
+    etag(),
     cache({
       cacheName: "rss",
     }),
