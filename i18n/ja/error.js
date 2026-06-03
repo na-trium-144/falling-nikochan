@@ -25,6 +25,9 @@ export default {
       invalidChart: "譜面データのフォーマットが正しくありません",
       unsupportedContentEncoding: "サポートされていない content-encoding です",
       invalidContentEncoding: "content-encoding が不正です",
+      // 418
+      noCORSCredentialsOnProd:
+        "production サーバーで cookie を使ったクロスオリジンの認証はできません",
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500

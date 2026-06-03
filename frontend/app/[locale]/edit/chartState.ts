@@ -118,6 +118,10 @@ const chartAuthorization = (currentPasswd: CurrentPasswd) => {
   }
   return undefined;
 };
+const credentials =
+  process.env.NODE_ENV === "development" ? "include" : "same-origin";
+const xCredentialsHeader: Record<string, string> =
+  process.env.NODE_ENV === "development" ? { "X-Credentials": "include" } : {};
 
 export function useChartState(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -162,9 +166,9 @@ export function useChartState(props: Props) {
         .url(`/api/chartFile/${cid}`)
         .options({
           cache: "no-store",
-          credentials:
-            process.env.NODE_ENV === "development" ? "include" : "same-origin",
+          credentials,
         })
+        .headers(xCredentialsHeader)
         .auth(chartAuthorization(initialPasswd) ?? "")
         .get()
         // passwdPrompt has unique handler for 401 and 429 messages
@@ -184,12 +188,8 @@ export function useChartState(props: Props) {
             if (options.editPasswd) {
               updatedPh = await fetchBackend()
                 .url(`/api/hashPasswd/${cid}`)
-                .options({
-                  credentials:
-                    process.env.NODE_ENV === "development"
-                      ? "include"
-                      : "same-origin",
-                })
+                .options({ credentials })
+                .headers(xCredentialsHeader)
                 .auth(basicAuthorization(options.editPasswd) ?? "")
                 .get()
                 .badRequest(() => undefined)
@@ -255,12 +255,8 @@ export function useChartState(props: Props) {
           if (currentPasswd.p) {
             const updatedPh = await fetchBackend()
               .url(`/api/hashPasswd/${cid}`)
-              .options({
-                credentials:
-                  process.env.NODE_ENV === "development"
-                    ? "include"
-                    : "same-origin",
-              })
+              .options({ credentials })
+              .headers(xCredentialsHeader)
               .auth(basicAuthorization(currentPasswd.p))
               .get()
               .unauthorized(() => undefined)
@@ -300,11 +296,9 @@ export function useChartState(props: Props) {
           .body(requestBody)
           .options({
             cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
+            credentials,
           })
+          .headers(xCredentialsHeader)
           .post()
           .notFound(markAsExpected)
           .error(409, markAsExpected)
@@ -325,11 +319,9 @@ export function useChartState(props: Props) {
           .body(requestBody)
           .options({
             cache: "no-store",
-            credentials:
-              process.env.NODE_ENV === "development"
-                ? "include"
-                : "same-origin",
+            credentials,
           })
+          .headers(xCredentialsHeader)
           .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
           .post()
           .unauthorized(markAsExpected)
@@ -370,9 +362,9 @@ export function useChartState(props: Props) {
         .url(`/api/chartFile/${chartState.chart.cid}`)
         .options({
           cache: "no-store",
-          credentials:
-            process.env.NODE_ENV === "development" ? "include" : "same-origin",
+          credentials,
         })
+        .headers(xCredentialsHeader)
         .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
         .delete()
         .unauthorized(() => undefined)

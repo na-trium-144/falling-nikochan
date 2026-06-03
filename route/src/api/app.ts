@@ -22,6 +22,7 @@ import ytMetaApp from "./ytMeta.js";
 import { forwardCheckApp } from "./dbRateLimit.js";
 import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
+import { env } from "hono/adapter";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export { fetchBrief } from "./brief.js";
@@ -29,16 +30,51 @@ export { fetchBrief } from "./brief.js";
 const apiApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) => {
+  const prodCors = cors({
+    origin: "*",
+    credentials: false,
+    exposeHeaders: ["Retry-After"],
+  });
+  const devCors = cors({
+    origin: (origin) => origin,
+    credentials: true,
+    exposeHeaders: ["Retry-After"],
+  });
   const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
-    .use(
-      "/*",
-      cors({
-        origin:
-          process.env.API_ENV === "development" ? (origin) => origin : "*",
-        credentials: process.env.API_ENV === "development",
-        exposeHeaders: ["Retry-After"],
-      })
-    )
+    .use("/*", async (c, next) => {
+      if (env(c).API_ENV === "development") {
+        return devCors(c, next);
+      } else {
+        /*
+        productionサーバーのcors設定ではcredentialsを渡せないようにしている。
+        しかしdev環境のフロントエンドがcredentials(具体的にはクッキー)を含むリクエストを送った場合
+        CORSエラーでTypeErrorになり、有用なエラーメッセージを表示することができない。
+        そこで、credentialsを含むCORSリクエスト(カスタムヘッダーX-Credentialsで判別)の場合に限り
+        CORSの制限をdevと同様にゆるくする代わりに418レスポンスを返す。
+        クエリやAuthorizationヘッダー手動設定による認証はcredentialsに該当せず、対象外。
+        */
+        if (
+          c.req.header("Origin") &&
+          c.req.header("Origin") !== new URL(c.req.url).origin &&
+          (c.req.header("X-Credentials") === "include" ||
+            c.req
+              .header("Access-Control-Request-Headers")
+              ?.split(/\s*,\s*/)
+              .some((h) => h.toLowerCase() === "x-credentials"))
+        ) {
+          if (c.req.method === "OPTIONS") {
+            // OPTIONSリクエスト（プリフライト）は、CORSヘッダーを返すためにそのまま通過させる必要がある
+            return devCors(c, next);
+          } else {
+            // 後続の処理（next）を呼ばずにその場でエラーを返す
+            await devCors(c, async () => undefined);
+            return c.json({ message: "noCORSCredentialsOnProd" }, 418);
+          }
+        } else {
+          return prodCors(c, next);
+        }
+      }
+    })
     .use(
       "/*",
       bodyLimit({

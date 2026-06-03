@@ -25,6 +25,9 @@ export default {
       invalidChart: "Invalid chart data format",
       unsupportedContentEncoding: "Unsupported content encoding",
       invalidContentEncoding: "Invalid content encoding",
+      // 418
+      noCORSCredentialsOnProd:
+        "Cross-origin authentication using cookie is not allowed on the production server",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500
