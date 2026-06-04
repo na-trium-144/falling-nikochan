@@ -18,12 +18,14 @@ import {
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "hono/vercel";
+import { compress } from "hono/compress";
 
 // export const config = {
 //   runtime: "nodejs",
 // };
 
 const app = new Hono({ strict: false })
+  .use(compress())
   .route("/api", await apiApp({ getConnInfo }))
   .route(
     "/og",

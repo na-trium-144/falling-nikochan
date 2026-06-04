@@ -17,8 +17,9 @@ import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { APIError } from "@/common/apiError.js";
 import { Scrollable } from "@/common/scrollable.js";
+import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
+import * as v from "valibot";
 
 interface PProps {
   locale: string;
@@ -83,7 +84,7 @@ export interface ChartLineBrief {
 interface Props {
   classNameOuter?: string;
   type?: ChartListType;
-  briefs?: ChartLineBrief[] | APIError | undefined;
+  briefs?: ChartLineBrief[] | Error | undefined;
   fetchAll?: boolean;
   fixedRows?: number; // 表示数を固定する
   containerHeight?: number;
@@ -108,9 +109,9 @@ export function ChartList(props: Props) {
 
   // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    (ChartLineBrief | null)[] | APIError | undefined
+    (ChartLineBrief | null)[] | Error | undefined
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | APIError | undefined>(
+  const prevPropBriefs = useRef<ChartLineBrief[] | Error | undefined>(
     props.briefs
   );
   useEffect(() => {
@@ -138,23 +139,17 @@ export function ChartList(props: Props) {
         break;
       case "latest":
       case "popular":
-        void (async () => {
-          try {
-            const latestRes = await fetch(
-              process.env.BACKEND_PREFIX + `/api/${props.type}`,
-              { cache: "default" }
-            );
-            if (latestRes.ok) {
-              const latestCId = (await latestRes.json()) as { cid: string }[];
-              setBriefs(latestCId.map(({ cid }) => ({ cid, fetched: false })));
-            } else {
-              setBriefs(await APIError.fromRes(latestRes));
-            }
-          } catch (e) {
-            console.error(e);
-            setBriefs(APIError.fetchError(e));
-          }
-        })();
+        fetchBackend()
+          .url(`/api/${props.type}`)
+          .options({ cache: "default" })
+          .get()
+          .json((latest) =>
+            v
+              .parse(v.array(v.object({ cid: v.string() })), latest)
+              .map(({ cid }) => ({ cid, fetched: false }))
+          )
+          .catch((e: unknown) => captureAndWrap(e, { type: props.type }))
+          .then((latest) => setBriefs(latest));
     }
   }, [props.type]);
 
@@ -218,25 +213,25 @@ export function ChartList(props: Props) {
         if (b !== null && !b.fetched && !b.fetching) {
           b.fetching = true;
           changed = true;
-          fetchBrief(b.cid).then(({ brief, is404 }) => {
-            setBriefs((briefs) => {
-              if (
-                Array.isArray(briefs) &&
-                briefs[i] !== null &&
-                briefs[i]!.cid === b.cid
-              ) {
-                if (is404) {
-                  briefs[i] = null;
-                } else {
+          fetchBrief(b.cid, {
+            onResult: (brief) =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                  briefs = briefs.slice();
                   briefs[i]!.fetched = true;
                   briefs[i]!.brief = brief;
                 }
-                return briefs.slice();
-              } else {
-                // そんなことあるのか...?
                 return briefs;
-              }
-            });
+              }),
+            onNotFound: () =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                  briefs = briefs.slice();
+                  briefs[i] = null;
+                }
+                return briefs;
+              }),
+            onError: (e) => setBriefs(e),
           });
         }
       }
@@ -268,7 +263,7 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs: ChartLineBrief[] | APIError | undefined = Array.isArray(
+  const filteredBriefs: ChartLineBrief[] | Error | undefined = Array.isArray(
     briefs
   )
     ? fetchAll
@@ -438,7 +433,7 @@ export function ChartList(props: Props) {
           Loading...
         </div>
       ) : briefs && "message" in briefs ? (
-        <div className="fn-cl-message">{briefs.format(te)}</div>
+        <div className="fn-cl-message">{formatError(briefs, te)}</div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
         <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}

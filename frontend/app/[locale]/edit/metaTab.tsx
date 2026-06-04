@@ -16,7 +16,7 @@ import { isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { LocalLoadError, LocalLoadState, SaveState } from "./chartState";
-import { APIError } from "@/common/apiError";
+import { formatError } from "@/common/fetch";
 
 interface Props {
   chart?: ChartEditing;
@@ -192,8 +192,8 @@ export function MetaTab(props: Props2) {
         <span className="inline-block ml-1 ">
           {props.saveState === "ok"
             ? t("saveDone")
-            : props.saveState instanceof APIError
-              ? props.saveState.format(te)
+            : props.saveState instanceof Error
+              ? formatError(props.saveState, te)
               : !props.chart?.meta.ytId
                 ? t("saveFail.noId")
                 : !props.chart?.cid && !props.chart?.changePasswd

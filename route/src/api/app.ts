@@ -21,6 +21,7 @@ import { ConnInfo } from "hono/conninfo";
 import ytMetaApp from "./ytMeta.js";
 import { forwardCheckApp } from "./dbRateLimit.js";
 import oembedApp from "./oembed.js";
+import decompressMiddleware from "./decompress.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 const apiApp = async (config: {
@@ -45,6 +46,7 @@ const apiApp = async (config: {
         },
       })
     )
+    .use("/*", decompressMiddleware)
     .route("/brief", briefApp)
     .route("/ytMeta", ytMetaApp)
     .route(

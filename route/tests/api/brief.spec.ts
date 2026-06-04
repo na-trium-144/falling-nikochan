@@ -50,5 +50,8 @@ describe("GET /api/brief/:cid", () => {
     await initDb();
     const res = await app.request("/api/brief/invalid");
     expect(res.status).to.equal(400);
+    const body = await res.json();
+    expect(body.message).to.equal("badRequest");
+    expect(body.flattened.nested.cid[0]).to.be.a("string");
   });
 });

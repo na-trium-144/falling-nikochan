@@ -2,7 +2,7 @@ export default {
   error: {
     api: {
       // 400
-      generic400: "パラメータが正しくありません",
+      badRequest: "パラメータが正しくありません",
       noPasswd: "パスワードが指定されていません",
       invalidChartId: "譜面 ID が正しくありません",
       invalidResultParam: "result パラメータが正しくありません",
@@ -22,9 +22,12 @@ export default {
       tooManyEvent: "譜面データ内のイベント数が多すぎます",
       // 415
       invalidChart: "譜面データのフォーマットが正しくありません",
+      unsupportedContentEncoding: "サポートされていない content-encoding です",
+      invalidContentEncoding: "content-encoding が不正です",
       // 429
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500
+      unknownApiError: "サーバーで何らかのエラーが発生しました",
       imageGenerationFailed: "画像生成に失敗しました",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
       // 499
@@ -33,7 +36,7 @@ export default {
     unknownApiError: "サーバーで何らかのエラーが発生しました",
     noSession: "セッションデータを読み込めません",
     chartVersion: "譜面データのバージョン (ver. {ver}) が正しくありません",
-    badResponse: "サーバーからの応答を処理できませんでした",
+    badResponse: "何らかのエラーが発生しました",
     ytError: "YouTube 動画再生のエラー ({code})",
     noYtId: "再生する YouTube 動画が指定されていません",
     seqEmpty: "譜面データが空です",

@@ -7,13 +7,14 @@ import { useEffect, useRef, useState } from "react";
 import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
-import { APIError } from "@/common/apiError";
+import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import {
   historyBackWithReview,
   useStandaloneDetector,
 } from "@/common/pwaInstall";
 import { useInsideFrameDetector } from "@/scale";
+import { formatErrorMsg, isExpectedError } from "@/common/fetch";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -50,14 +51,15 @@ export function PasswdPrompt(props: PasswdProps) {
         Loading...
       </p>
     );
-  } else if (props.loadStatus instanceof APIError) {
+  } else if (props.loadStatus instanceof Error) {
     return (
       <>
-        {props.loadStatus.status && (
-          <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
-        )}
-        <p className="mb-3">{props.loadStatus.formatMsg(te)}</p>
-        {props.loadStatus.isServerSide() && <LinksOnError />}
+        {props.loadStatus instanceof APIError &&
+          !shouldHideStatus(props.loadStatus.status) && (
+            <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
+          )}
+        <p className="mb-3">{formatErrorMsg(props.loadStatus, te)}</p>
+        {!isExpectedError(props.loadStatus) && <LinksOnError />}
         {(standalone || insideFrame) && (
           <p>
             <Button text={t("back")} onClick={historyBackWithReview} />
