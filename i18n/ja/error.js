@@ -15,6 +15,7 @@ export default {
       levelNotFound: "指定したレベルのデータはありません",
       // 409
       oldChartVersion: "譜面データのバージョンが最新ではありません",
+      unsupportedChartVersion: "サポートされていない譜面バージョンです",
       // 410
       noLongerSupportedAPI: "サポートされていない API です",
       // 413
@@ -28,8 +29,6 @@ export default {
       tooManyRequest: "しばらく待ってからやり直してください",
       // 500
       unknownApiError: "サーバーで何らかのエラーが発生しました",
-      imageGenerationFailed: "画像生成に失敗しました",
-      unsupportedChartVersion: "サポートされていない譜面バージョンです",
       // 499
       fetchError: "サーバーへ接続できません (オフライン?)",
     },

@@ -136,7 +136,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           break;
         default:
           chart satisfies never;
-          throw new HTTPException(500, { message: "unsupportedChartVersion" });
+          throw new HTTPException(409, { message: "unsupportedChartVersion" });
       }
 
       const filename = `${cid}.${lvIndex}.fnseq.mpk`;

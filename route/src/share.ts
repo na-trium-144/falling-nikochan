@@ -196,16 +196,17 @@ const shareApp = (config: {
           */
         });
       } else {
-        let message = "";
+        const briefBody = await briefRes.text();
         try {
-          message =
-            ((await briefRes.json()) as { message?: string }).message || "";
+          const message =JSON.parse(briefBody).mesage;
+          throw new HTTPException(briefRes.status as 401 | 404 | 500, {
+            message,
+          });
         } catch {
-          //
+          const e = new Error("Failed to fetch brief");
+          (e as any).body = briefBody;
+          throw e;
         }
-        throw new HTTPException(briefRes.status as 401 | 404 | 500, {
-          message,
-        });
       }
     });
 

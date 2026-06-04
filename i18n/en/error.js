@@ -15,6 +15,7 @@ export default {
       levelNotFound: "The specified level does not exist",
       // 409
       oldChartVersion: "The chart data version is not up to date",
+      unsupportedChartVersion: "Unsupported chart data version",
       // 410
       noLongerSupportedAPI: "This API is no longer supported",
       // 413
@@ -28,8 +29,6 @@ export default {
       tooManyRequest: "Please wait a while and try again",
       // 500
       unknownApiError: "An error occurred on the server",
-      imageGenerationFailed: "Failed to generate the image",
-      unsupportedChartVersion: "Unsupported chart data version",
       // 499
       fetchError: "Failed to connect to the server (offline?)",
     },

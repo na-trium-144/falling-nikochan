@@ -201,7 +201,9 @@ const newChartFileApp = async (config: {
                 cid,
                 updatedAt,
                 ip,
-                await getYTDataEntry(env(c), db, newChart.ytId),
+                await getYTDataEntry(env(c), db, newChart.ytId).catch(
+                  () => undefined
+                ),
                 pSecretSalt,
                 null
               )

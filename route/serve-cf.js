@@ -76,14 +76,30 @@ export default Sentry.withSentry(sentryConfig, {
         if (res.status < 500) {
           return res;
         } else {
-          console.log(
-            "passthrough request returned:",
-            res.status,
-            await res.text()
+          Sentry.captureException(
+            new Error(
+              `passthrough request to ${url.hostname} failed (${res.status})`
+            ),
+            {
+              extra: {
+                url: url,
+                status: res.status,
+                body: await res.text(),
+              },
+            }
           );
         }
       } catch (e) {
-        console.log("passthrough request failed:", e);
+        Sentry.captureException(
+          new Error(`passthrough request to ${url.hostname} failed`, {
+            cause: e,
+          }),
+          {
+            extra: {
+              url: url,
+            },
+          }
+        );
         // passthrough
       }
     }

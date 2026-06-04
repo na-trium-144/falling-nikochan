@@ -288,15 +288,10 @@ const ogApp = (config: {
           }))
         ),
       }) as Response;
-      if (imRes.ok && imRes.body) {
-        return c.body(imRes.body, 200, {
-          "Content-Type": imRes.headers.get("Content-Type") || "",
-          "Cache-Control": cacheControl(env(c), 315360000),
-        });
-      } else {
-        console.error(imRes);
-        throw new HTTPException(500, { message: "imageGenerationFailed" });
-      }
+      return c.body(imRes.body!, imRes.status as 200, {
+        "Content-Type": imRes.headers.get("Content-Type") || "",
+        "Cache-Control": cacheControl(env(c), 315360000),
+      });
     })
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)

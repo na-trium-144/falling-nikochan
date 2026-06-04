@@ -674,6 +674,6 @@ export function entryToChart(
       } as Chart15;
     default:
       entry satisfies never;
-      throw new HTTPException(500, { message: "unsupportedChartVersion" });
+      throw new HTTPException(409, { message: "unsupportedChartVersion" });
   }
 }

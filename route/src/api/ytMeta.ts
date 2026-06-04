@@ -13,7 +13,6 @@ import {
   validationErrorSchema,
 } from "../error.js";
 import { getYTDataEntry } from "./ytData.js";
-import { HTTPException } from "hono/http-exception";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 86400;
@@ -76,28 +75,23 @@ const ytMetaApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       const entry = await getChartEntryCompressed(db, cid, null);
       const ytId = entry.ytId;
       const ytData = await getYTDataEntry(env(c), db, ytId);
-      if (ytData) {
-        let title =
-          // exact match
-          ytData.localizations[lang]?.title ??
-          // partial match
-          Object.entries(ytData.localizations).find(([key]) =>
-            key.startsWith(lang.split("-")[0])
-          )?.[1].title ??
-          // use en
-          ytData.localizations["en"]?.title ??
-          Object.entries(ytData.localizations).find(([key]) =>
-            key.startsWith("en")
-          )?.[1].title ??
-          // default
-          ytData.title;
-        return c.json({ title, channelTitle: ytData.channelTitle }, 200, {
-          "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
-        });
-      } else {
-        // todo: better error message
-        throw new HTTPException(500);
-      }
+      let title =
+        // exact match
+        ytData.localizations[lang]?.title ??
+        // partial match
+        Object.entries(ytData.localizations).find(([key]) =>
+          key.startsWith(lang.split("-")[0])
+        )?.[1].title ??
+        // use en
+        ytData.localizations["en"]?.title ??
+        Object.entries(ytData.localizations).find(([key]) =>
+          key.startsWith("en")
+        )?.[1].title ??
+        // default
+        ytData.title;
+      return c.json({ title, channelTitle: ytData.channelTitle }, 200, {
+        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+      });
     } finally {
       await client.close();
     }
