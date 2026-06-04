@@ -1,3 +1,24 @@
+## ver. 16.11 - 2025/06/04 [#1153](https://github.com/na-trium-144/falling-nikochan/pull/1153)
+
+* APIのエラーレスポンスのmessageの改善 [#1152](https://github.com/na-trium-144/falling-nikochan/pull/1152)
+    * 400, 500のメッセージなしエラーに対してエラーハンドラで汎用メッセージを付与
+    * 400のgeneric400をbadResponseに変更
+    ** ValiErrorの場合にその詳細をmessageではなく flattened, issues として出力する
+    * レスポンスヘッダーのドキュメントを追加、resolverを使わず直接型を記述することでtypescriptのエラー回避
+    * hono-openapiのvalidatorにhookを設定し他のエラーレスポンスと同じ出力形式にする
+    * /api/oembedのドキュメントが不要なので隠す
+* /api/chartFile APIでクエリに平文パスワードを載せるのをやめてAuthorizationヘッダーを使う [#1151](https://github.com/na-trium-144/falling-nikochan/pull/1151)
+* fetchのエラーハンドリングを改善する [#1155](https://github.com/na-trium-144/falling-nikochan/pull/1155)
+    * wretchライブラリを導入。fetchBackend, fetchAsset関数でラップ
+    * APIErrorクラスをリファクタ。
+        * staticメソッドで呼び出し側が個別にAPIErrorを作っていたのをやめ、エラーの分類とメッセージの処理はwretchのcustomErrorの中で統一的に行う。
+        * Sentryへの送信はAPIErrorの中で行わず、呼び出し側で行う。unknownからError型への変換、stackがない場合の追加、Sentryへの送信、という処理が頻出なのでcaptureAndWrap関数にまとめた
+    * ネットワークエラーとAbortエラーはSentryに送信されないようにする。(instrumentation-client.ts)
+        * また、それ以外でもエラーが想定内の箇所ではmarkAsExpected(e)でexpectedフラグを立て、Sentryがキャプチャしても送信されないようにする。
+    * fetchBriefを複数回値を返す仕様に変更
+* APIのレスポンスを圧縮 (一旦vercelのみ)
+* APIのリクエストを圧縮 [#1162](https://github.com/na-trium-144/falling-nikochan/pull/1162)
+
 ## ver. 16.10 - 2025/05/28 [#1159](https://github.com/na-trium-144/falling-nikochan/pull/1159)
 
 * tsconfigのtargetとlibをnode23相当に変更

@@ -1,3 +1,4 @@
+import { APIError } from "@/common/apiError";
 import * as Sentry from "@sentry/nextjs";
 import { isbot } from "isbot";
 
@@ -24,11 +25,17 @@ Sentry.init({
       [DOMException, "AbortError"],
     ] as [() => unknown, string][]) {
       if (
-        hint.syntheticException instanceof errorClass &&
-        hint.syntheticException.name === name
+        hint.originalException instanceof errorClass &&
+        (hint.originalException as Error).name === name
       ) {
         return null;
       }
+    }
+    if (hint.originalException instanceof APIError) {
+      if (hint.originalException.expected) {
+        return null;
+      }
+      event.fingerprint = hint.originalException.fingerprint;
     }
     return event;
   },

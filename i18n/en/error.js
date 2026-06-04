@@ -2,7 +2,7 @@ export default {
   error: {
     api: {
       // 400
-      generic400: "The parameter is invalid",
+      badRequest: "The parameter is invalid",
       noPasswd: "Password is not specified",
       invalidChartId: "Chart ID is invalid",
       invalidResultParam: "Result parameter is invalid",
@@ -22,9 +22,12 @@ export default {
       tooManyEvent: "Too many events in the chart data",
       // 415
       invalidChart: "Invalid chart data format",
+      unsupportedContentEncoding: "Unsupported content encoding",
+      invalidContentEncoding: "Invalid content encoding",
       // 429
       tooManyRequest: "Please wait a while and try again",
       // 500
+      unknownApiError: "An error occurred on the server",
       imageGenerationFailed: "Failed to generate the image",
       unsupportedChartVersion: "Unsupported chart data version",
       // 499
@@ -33,7 +36,7 @@ export default {
     unknownApiError: "An error occurred on the server",
     noSession: "Failed to load session data",
     chartVersion: "The version of the chart data (ver. {ver}) is invalid",
-    badResponse: "Failed to process the server response",
+    badResponse: "An unknown error occurred",
     ytError: "Error on the YouTube video ({code})",
     noYtId: "No YouTube video is specified",
     seqEmpty: "The chart data is empty",

@@ -8,6 +8,7 @@ import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
 import { ChartListItem } from "./main/chartList";
+import { fetchBackend } from "./common/fetch";
 
 export interface DemoChart {
   cid: string;
@@ -74,28 +75,20 @@ export function TopDemo(
       props.lvIndex !== undefined &&
       props.offset !== undefined
     ) {
-      fetch(
-        process.env.BACKEND_PREFIX +
-          `/api/seqFile/${props.cid}/${props.lvIndex}`
-      ).then(
-        (res) => {
-          if (res.ok) {
-            res.arrayBuffer().then((buf) => {
-              const seq = msgpack.decode(buf) as ChartSeqData;
-              resetNotesAll(
-                seq.notes.map((n) => ({
-                  ...n,
-                  done: 0,
-                  bigDone: false,
-                })),
-                props.offset! - seq.offset
-              );
-              currentTimeSec.current = props.offset! - seq.offset;
-            });
-          }
-        },
-        () => undefined
-      );
+      fetchBackend()
+        .get(`/api/seqFile/${props.cid}/${props.lvIndex}`)
+        .arrayBuffer((buf) => {
+          const seq = msgpack.decode(buf) as ChartSeqData;
+          resetNotesAll(
+            seq.notes.map((n) => ({
+              ...n,
+              done: 0,
+              bigDone: false,
+            })),
+            props.offset! - seq.offset
+          );
+          currentTimeSec.current = props.offset! - seq.offset;
+        });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);
 

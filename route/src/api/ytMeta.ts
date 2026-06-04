@@ -7,8 +7,13 @@ import { env } from "hono/adapter";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
 import { getYTDataEntry } from "./ytData.js";
+import { HTTPException } from "hono/http-exception";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 86400;
@@ -34,12 +39,18 @@ const ytMetaApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
             ),
           },
         },
+        headers: {
+          "Cache-Control": {
+            description: `max-age=${CACHE_MAX_AGE}`,
+            schema: { type: "string" },
+          },
+        },
       },
       400: {
         description: "invalid chart id",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(await validationErrorSchema()),
           },
         },
       },
@@ -53,8 +64,8 @@ const ytMetaApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
-  validator("param", v.object({ cid: CidSchema() })),
-  validator("query", v.object({ lang: v.string() })),
+  validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
+  validator("query", v.object({ lang: v.string() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
     const { lang } = c.req.valid("query");
@@ -85,7 +96,7 @@ const ytMetaApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         });
       } else {
         // todo: better error message
-        return c.json({}, 500);
+        throw new HTTPException(500);
       }
     } finally {
       await client.close();

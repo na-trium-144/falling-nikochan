@@ -224,5 +224,7 @@ describe("POST /api/newChartFile", () => {
       body: "invalid",
     });
     expect(res.status).to.equal(415);
+    const body = await res.json();
+    expect(body.message).to.equal("invalidChart");
   });
 });
