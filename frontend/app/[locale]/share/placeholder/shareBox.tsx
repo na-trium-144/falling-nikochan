@@ -17,12 +17,20 @@ import { SharedResultBox } from "./sharedResult.js";
 import { useColorThief } from "@/common/colorThief.js";
 import { ExternalLink } from "@/common/extLink.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
-import { APIError } from "@/common/apiError.js";
+import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
+import * as v from "valibot";
+
+const YtMetaSchema = () =>
+  v.object({
+    title: v.string(),
+    channelTitle: v.string(),
+  });
+type YtMeta = v.InferOutput<ReturnType<typeof YtMetaSchema>>;
 
 interface Props {
   cid: string | undefined;
   brief: ChartBrief | null;
-  record: RecordGetSummary[] | APIError | null;
+  record: RecordGetSummary[] | Error | null;
   sharedResult?: ResultParams | null;
   locale: string;
   backButton?: () => void;
@@ -44,25 +52,20 @@ export function ShareBox(props: Props) {
   const shareLink = useShareLink(cid, brief, locale);
   const colorThief = useColorThief();
 
-  interface YtMeta {
-    title: string;
-    channelTitle: string;
-  }
   const [ytMeta, setYtMeta] = useState<YtMeta | null>(null);
   useEffect(() => {
     if (cid) {
-      fetch(
-        process.env.BACKEND_PREFIX + `/api/ytMeta/${cid}?lang=${locale}`
-      ).then(
-        async (res) => {
-          if (res.ok) {
-            setYtMeta(await res.json());
-          } else {
-            setYtMeta(null);
-          }
-        },
-        () => setYtMeta(null)
-      );
+      fetchBackend()
+        .url(`/api/ytMeta/${cid}`)
+        .query({ lang: locale })
+        .get()
+        .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
+        .catch((e) => {
+          captureAndWrap(e, { cid });
+          setYtMeta(null);
+        });
+    } else {
+      setYtMeta(null);
     }
   }, [cid, locale]);
 

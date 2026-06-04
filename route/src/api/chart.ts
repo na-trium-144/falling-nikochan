@@ -57,9 +57,8 @@ export async function getChartEntryCompressed(
   cid: string,
   p: Passwd | null
 ): Promise<ChartEntryCompressed> {
-  if (!v.parse(CidSchema(), cid)) {
-    throw new HTTPException(400, { message: "invalidChartId" });
-  }
+  v.parse(CidSchema(), cid);
+
   const entryCompressed = await db
     .collection<ChartEntryCompressed>("chart")
     .findOne({ cid, deleted: false });

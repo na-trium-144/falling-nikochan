@@ -28,14 +28,14 @@ import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import { APIError } from "@/common/apiError";
 import { isInsideFrame } from "@/scale";
+import { formatError } from "@/common/fetch";
 
 interface Props {
   locale: string;
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | APIError | null;
+  record: RecordGetSummary[] | Error | null;
 }
 export function PlayOption(props: Props) {
   const t = useTranslations("share");
@@ -215,7 +215,7 @@ function LevelButton(props: {
 function SelectedLevelInfo(props: {
   cid: string;
   brief: ChartBrief;
-  record: RecordGetSummary[] | APIError | null;
+  record: RecordGetSummary[] | Error | null;
   selectedLevel: number;
   locale: string;
 }) {
@@ -223,10 +223,10 @@ function SelectedLevelInfo(props: {
   const te = useTranslations("error");
   const [showBestDetail, setShowBestDetail] = useState(false);
 
-  const selectedRecord: RecordGetSummary | APIError | undefined =
+  const selectedRecord: RecordGetSummary | Error | undefined =
     props.selectedLevel === null
       ? undefined
-      : props.record instanceof APIError
+      : props.record instanceof Error
         ? props.record
         : props.record?.find(
             (r) => r.lvHash === props.brief.levels[props.selectedLevel]?.hash
@@ -322,25 +322,24 @@ function SelectedLevelInfo(props: {
       <p className="mt-2 min-w-65 ">
         {/* histogramの幅 w-5 x13 */}
         {t("otherPlayers")}
-        {selectedRecord !== undefined &&
-          !(selectedRecord instanceof APIError) && (
-            <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
-          )}
+        {selectedRecord !== undefined && !(selectedRecord instanceof Error) && (
+          <span className="ml-2 text-sm">({selectedRecord.count || 0})</span>
+        )}
       </p>
       <span className={clsx(props.record === null ? "block" : "hidden")}>
         <SlimeSVG />
         Loading...
       </span>
       {selectedRecord !== undefined &&
-        !(selectedRecord instanceof APIError) &&
+        !(selectedRecord instanceof Error) &&
         selectedRecord.count >= 5 && (
           <RecordHistogram
             histogram={selectedRecord.histogram}
             bestScoreTotal={selectedBestScore ? totalScore : null}
           />
         )}
-      {selectedRecord instanceof APIError && (
-        <p className="text-dim">{selectedRecord.format(te)}</p>
+      {selectedRecord instanceof Error && (
+        <p className="text-dim">{formatError(selectedRecord, te)}</p>
       )}
       <button
         className={clsx(

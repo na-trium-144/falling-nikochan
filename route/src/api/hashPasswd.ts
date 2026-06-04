@@ -9,7 +9,16 @@ import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { errorLiteral } from "../error.js";
+import {
+  errorLiteral,
+  sValidatorHook,
+  validationErrorSchema,
+} from "../error.js";
+import {
+  getPasswdParamsFromAuthHeader,
+  plainPasswdHeaderDoc,
+  PlainPasswdParamSchema,
+} from "./passwdAuth.js";
 
 /**
  * chartFile のコメントを参照
@@ -19,8 +28,9 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   describeRoute({
     description:
       "Generate a unique hash of the password to be used when accessing the chart. " +
-      "The correct password for the chart is required. " +
+      "The correct password for the chart is required (query p or Authorization header). " +
       "The hashed password will be different for each client and each chart (due to the pUserSalt cookie).",
+    parameters: [plainPasswdHeaderDoc],
     responses: {
       200: {
         description:
@@ -34,16 +44,21 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
           "Set-Cookie": {
             description:
               "Sets the pUserSalt cookie if it was not present in the request.",
-            // @ts-expect-error type OpenAPIV3_1.SchemaObject is not assignable to type OpenAPIV3.SchemaObject... why?
-            schema: (await resolver(v.string()).toOpenAPISchema()).schema,
+            schema: { type: "string" },
           },
         },
       },
       400: {
-        description: "invalid chart id or password not specified",
+        description:
+          "invalid chart id or parameter, or password not specified in the chart data",
         content: {
           "application/json": {
-            schema: resolver(v.object({ message: v.string() })),
+            schema: resolver(
+              v.union([
+                await validationErrorSchema(),
+                await errorLiteral("badRequest", "noPasswd"),
+              ])
+            ),
           },
         },
       },
@@ -65,17 +80,27 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
       },
     },
   }),
-  validator("param", v.object({ cid: CidSchema() })),
+  validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   validator(
     "query",
     v.object({
-      p: v.pipe(v.string(), v.minLength(1), v.description("plain password")),
-    })
+      p: v.optional(PlainPasswdParamSchema()),
+    }),
+    sValidatorHook()
   ),
-  validator("cookie", v.object({ pUserSalt: v.optional(v.string()) })),
+  validator(
+    "cookie",
+    v.object({ pUserSalt: v.optional(v.string()) }),
+    sValidatorHook()
+  ),
   async (c) => {
     const { cid } = c.req.valid("param");
-    const { p } = c.req.valid("query");
+    const { p } =
+      getPasswdParamsFromAuthHeader(c.req.header("Authorization")) ??
+      c.req.valid("query");
+    if (p === undefined) {
+      throw new HTTPException(400, { message: "badRequest" });
+    }
     let pUserSalt: string;
     const newUserSalt = () =>
       randomBytes(16)
