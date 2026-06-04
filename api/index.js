@@ -19,12 +19,25 @@ import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "hono/vercel";
 import { compress } from "hono/compress";
+import * as Sentry from "@sentry/hono/node";
+import packageJson from "@falling-nikochan/route/package.json" with { type: "json" };
 
 // export const config = {
 //   runtime: "nodejs",
 // };
 
-const app = new Hono({ strict: false })
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  release: `${packageJson.version}-v-${process.env.VERCEL_DEPLOYMENT_ID}`,
+  environment: process.env.VERCEL_TARGET_ENV,
+  sendDefaultPii: false,
+  integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+  includeLocalVariables: true,
+});
+
+const app = new Hono({ strict: false });
+app.use(Sentry.sentry(app));
+app
   .use(compress())
   .route("/api", await apiApp({ getConnInfo }))
   .route(
@@ -46,7 +59,12 @@ const app = new Hono({ strict: false })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({
+      fetchStatic,
+      captureException: Sentry.captureException,
+    })
+  )
   .notFound(notFound);
 
 export const GET = handle(app);

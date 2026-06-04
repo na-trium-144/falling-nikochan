@@ -15,10 +15,21 @@ import {
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import { getConnInfo } from "hono/cloudflare-workers";
+import * as Sentry from "@sentry/hono/cloudflare";
+import packageJson from "@falling-nikochan/route/package.json" with { type: "json" };
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
+const sentryConfig = (env) => ({
+  dsn: env.SENTRY_DSN,
+  release: `${packageJson.version}-cf-${env.CF_VERSION_METADATA.id}`,
+  environment: env.CF_VERSION_METADATA.tag,
+  sendDefaultPii: false,
+  integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+});
 
-const app = new Hono({ strict: false })
+const app = new Hono({ strict: false });
+app.use(Sentry.sentry(app, sentryConfig));
+app
   .route("/api", await apiApp({ getConnInfo }))
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);
@@ -38,10 +49,15 @@ const app = new Hono({ strict: false })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({
+      fetchStatic,
+      captureException: Sentry.captureException,
+    })
+  )
   .notFound(notFound);
 
-export default {
+export default Sentry.withSentry(sentryConfig, {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
@@ -96,4 +112,4 @@ export default {
       })()
     );
   },
-};
+});

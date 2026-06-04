@@ -65,7 +65,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     })
   )
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(onError({ fetchStatic, captureException: () => "" }))
   .notFound(notFound);
 
 serve({

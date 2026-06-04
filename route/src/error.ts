@@ -5,6 +5,7 @@ import { env } from "hono/adapter";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
+import type { captureException } from "@sentry/node";
 
 export function notFound(): Response {
   throw new HTTPException(404);
@@ -43,6 +44,7 @@ export const onError =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
     isTest?: boolean;
+    captureException: typeof captureException;
   }) =>
   async (err: unknown, c: Context) => {
     if (err instanceof Error) {
@@ -87,6 +89,16 @@ export const onError =
       };
       message = message || messageFallbacks[status] || "";
 
+      if (status >= 500) {
+        config.captureException(err, {
+          extra: {
+            status,
+            message,
+            ...others,
+          },
+        });
+      }
+
       if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
         return c.json(
           {
@@ -117,6 +129,7 @@ export const onError =
       }
     } catch (e) {
       console.error("While handling the above error, another error thrown:", e);
+      config.captureException(e, { extra: { err: String(err) } });
       return c.body(null, 500);
     }
   };

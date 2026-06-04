@@ -17,10 +17,21 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "hono/bun";
+import * as Sentry from "@sentry/hono/bun";
+import packageJson from "./package.json" with { type: "json" };
 
 const port = 8787;
 
-const app = new Hono<{ Bindings: Bindings }>({ strict: false })
+const app = new Hono<{ Bindings: Bindings }>({ strict: false });
+app.use(
+  Sentry.sentry(app, {
+    dsn: process.env.SENTRY_DSN,
+    release: `${packageJson.version}-bun`,
+    sendDefaultPii: false,
+    integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+  })
+);
+app
   .use(logger())
   .route("/api", await apiApp({ getConnInfo }))
   .route(
@@ -61,7 +72,12 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     })
   )
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({
+      fetchStatic,
+      captureException: Sentry.captureException,
+    })
+  )
   .notFound(notFound);
 
 export default {
