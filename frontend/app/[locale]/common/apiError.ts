@@ -24,7 +24,7 @@ export class APIError extends Error {
     body: unknown
   ) {
     super(message);
-    this.name = `APIError-${status}`;
+    this.name = `APIError-${status} (${new URL(url).pathname})`;
     this.status = status;
     if (status === FETCH_ERROR_STATUS) {
       this.expected = true;
