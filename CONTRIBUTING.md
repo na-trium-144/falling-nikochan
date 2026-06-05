@@ -65,6 +65,11 @@ API_ENV="development"
 API_NO_RATELIMIT="1"
 ```
 
+Alternatively, if you are only working on the frontend, you can access all public charts with:
+```sh
+BACKEND_PREFIX="https://nikochan.utcode.net"
+```
+
 ### Install Dependencies
 
 ```sh
