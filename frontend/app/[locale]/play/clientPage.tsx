@@ -657,6 +657,7 @@ function Play(props: Props) {
         const t = setTimeout(() => {
           setShowResult(true);
           if (
+            cid &&
             userBegin === null &&
             playbackRate === 1 &&
             chartBrief?.levels.at(lvIndex)
