@@ -75,7 +75,10 @@ const apiApp = async (config: {
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
-    .route("/oembed", await oembedApp({ fetchBrief: config.fetchBrief }));
+    .route("/oembed", await oembedApp({ fetchBrief: config.fetchBrief }))
+    .get("/debug-sentry", () => {
+      throw new Error("My first sentry error!");
+    });
   apiApp.get(
     "/openapi.json",
     openAPIRouteHandler(apiApp, {
