@@ -66,7 +66,7 @@ export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
 }
 /**
  * src/api/brief.ts を用いてbriefデータを取得。
- * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseをthrowする
+ * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
  */
 export const fetchBrief =
   (config: {
@@ -98,7 +98,7 @@ export const fetchBrief =
   };
 /**
  * URLをfetch()してリソースを取得。
- * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseをthrowする
+ * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
  */
 export async function fetchStatic(e: Bindings, url: URL) {
   const res = await fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {

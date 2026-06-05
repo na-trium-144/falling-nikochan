@@ -466,7 +466,9 @@ const app = new Hono({ strict: false })
         if (res.ok) {
           return await res.json();
         } else {
-          throw res;
+          throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
+            cause: res,
+          });
         }
       },
       fetchStatic,
