@@ -37,6 +37,9 @@ Sentry.init({
       }
       event.fingerprint = hint.originalException.fingerprint;
     }
+    if (event.transaction && /^\/share\/\d+$/.test(event.transaction)) {
+      event.transaction = "/share/:cid";
+    }
     return event;
   },
 });
