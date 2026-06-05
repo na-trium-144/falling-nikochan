@@ -461,8 +461,16 @@ const app = new Hono({ strict: false })
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: (_e, cid: string /*, _ctx */) =>
-        fetchAPI(self.origin + `/api/brief/${cid}`),
+      fetchBrief: async (_e, cid: string /*, _ctx */) => {
+        const res = await fetchAPI(self.origin + `/api/brief/${cid}`);
+        if (res.ok) {
+          return await res.json();
+        } else {
+          throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
+            cause: res,
+          });
+        }
+      },
       fetchStatic,
       languageDetector,
     })
@@ -555,7 +563,9 @@ const app = new Hono({ strict: false })
     return await fetchStatic(null, new URL(c.req.url));
   })
   .use(languageDetector)
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({ fetchStatic, captureException: null, setTransactionName: null })
+  )
   .notFound(notFound);
 
 self.addEventListener("install", () => {

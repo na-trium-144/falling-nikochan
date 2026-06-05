@@ -47,7 +47,7 @@ const oembedApp = async (config: {
     e: Bindings,
     cid: string,
     ctx: ExecutionContext | undefined
-  ) => Response | Promise<Response>;
+  ) => Promise<ChartBrief>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     "/",
@@ -121,11 +121,7 @@ const oembedApp = async (config: {
       } catch {
         //ignore
       }
-      const briefRes = await config.fetchBrief(env(c), cid, executionCtx);
-      if (!briefRes.ok) {
-        return briefRes;
-      }
-      const brief = (await briefRes.json()) as ChartBrief;
+      const brief = await config.fetchBrief(env(c), cid, executionCtx);
 
       const iframeURL = new URL(
         `/share/${cid}`,

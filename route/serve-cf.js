@@ -15,11 +15,38 @@ import {
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import { getConnInfo } from "hono/cloudflare-workers";
+import * as Sentry from "@sentry/hono/cloudflare";
+import packageJson from "@falling-nikochan/route/package.json" with { type: "json" };
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
+const sentryConfig = (env) => ({
+  dsn: env.SENTRY_DSN,
+  release: `${packageJson.version}-cf-${env.CF_VERSION_METADATA.id}`,
+  environment: env.CF_VERSION_METADATA.tag,
+  sendDefaultPii: false,
+  integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+});
+const sentryHonoConfig = (env) => ({
+  ...sentryConfig(env),
+  shouldHandleError: () => false,
+});
 
-const app = new Hono({ strict: false })
-  .route("/api", await apiApp({ getConnInfo }))
+const app = new Hono({ strict: false });
+app.use(Sentry.sentry(app, sentryHonoConfig));
+app
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo,
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: (app) => Sentry.sentry(app, sentryHonoConfig),
+        captureException: Sentry.captureException,
+        setTransactionName: (name) =>
+          void Sentry.getCurrentScope().setTransactionName(name),
+      }),
+    })
+  )
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);
     return c.redirect(
@@ -32,16 +59,29 @@ const app = new Hono({ strict: false })
   .route(
     "/share",
     shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: (app) => Sentry.sentry(app, sentryHonoConfig),
+        captureException: Sentry.captureException,
+        setTransactionName: (name) =>
+          void Sentry.getCurrentScope().setTransactionName(name),
+      }),
       fetchStatic,
     })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .onError(onError({ fetchStatic }))
+  .onError(
+    onError({
+      fetchStatic,
+      captureException: Sentry.captureException,
+      setTransactionName: (name) =>
+        void Sentry.getCurrentScope().setTransactionName(name),
+    })
+  )
   .notFound(notFound);
 
-export default {
+export default Sentry.withSentry(sentryConfig, {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
@@ -60,14 +100,30 @@ export default {
         if (res.status < 500) {
           return res;
         } else {
-          console.log(
-            "passthrough request returned:",
-            res.status,
-            await res.text()
+          Sentry.captureException(
+            new Error(
+              `passthrough request to ${url.hostname} failed (${res.status})`
+            ),
+            {
+              extra: {
+                url: url,
+                status: res.status,
+                body: await res.text(),
+              },
+            }
           );
         }
       } catch (e) {
-        console.log("passthrough request failed:", e);
+        Sentry.captureException(
+          new Error(`passthrough request to ${url.hostname} failed`, {
+            cause: e,
+          }),
+          {
+            extra: {
+              url: url,
+            },
+          }
+        );
         // passthrough
       }
     }
@@ -96,4 +152,4 @@ export default {
       })()
     );
   },
-};
+});

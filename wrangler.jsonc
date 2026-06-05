@@ -8,6 +8,10 @@
     "directory": "frontend/out",
     "binding": "ASSETS",
   },
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA",
+  },
+  "upload_source_maps": true,
   "triggers": {
     // "crons": ["*/15 * * * *"],
   },

@@ -2,9 +2,11 @@ import { Context } from "hono";
 import { backendOrigin, Bindings } from "./env.js";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
+import { matchedRoutes } from "hono/route";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
+import type { captureException } from "@sentry/hono/node";
 
 export function notFound(): Response {
   throw new HTTPException(404);
@@ -39,10 +41,26 @@ export function sValidatorHook() {
     }
   };
 }
+
+/**
+ * APIの異常時のレスポンスはjsonで `{message: "事前に定義されたメッセージ"}` の形式でなければならない。
+ * メッセージは `i18n/{ja,en}/error.js` 内の`api`に定義されているものでなければならない。
+ *
+ * このエラーハンドラーはthrowされた例外を上記のレスポンスフォーマットに整形する。
+ * したがってそれぞれのrouteで想定外のエラーをcatchして500レスポンスなどにする必要はない。
+ * * `HTTPException(4xx, {message: "事前に定義されたメッセージ"})` をthrowするとそのメッセージをそのまま返す。
+ * * `ValiError` をthrowするか、HTTPExceptionの`cause`に渡すと、`message`に加えてvalibotのissueを含んだレスポンスを返す。
+ *    したがってそれぞれのAPIのハンドラーでは常に `v.parse()` を使用し、catchしたり手動でjsonにして返す必要はない
+ * * `hono-openapi` のvalidatorを使用する場合は第3引数に `sValidatorHook()` を渡すことで
+ *    バリデーションエラーが上記のValiErrorの処理と同じロジックに流れる。
+ * * cause に Response を含むエラーをthrowするとそのbodyをパースし、JSON形式で message が含まれていればそれを返す。
+ */
 export const onError =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
     isTest?: boolean;
+    captureException: typeof captureException | null;
+    setTransactionName: ((name: string) => undefined) | null;
   }) =>
   async (err: unknown, c: Context) => {
     if (err instanceof Error) {
@@ -56,11 +74,20 @@ export const onError =
     } else {
       console.error(`Error handler triggered in ${c.req.path}: ${err}`);
     }
+    // routeハンドラーのあとにmiddlewareがある場合があり、routePath(c, -1)で正しく取得できないので、
+    // pathが最長のハンドラーを採用する
+    const route = matchedRoutes(c)
+      .sort((a, b) => a.path.length - b.path.length)
+      .at(-1);
+    if (route && config.setTransactionName) {
+      config.setTransactionName(`${route.method} ${route.path}`);
+    }
     try {
       const lang = c.get("language") || "en";
-      let status: ContentfulStatusCode;
+      let status: ContentfulStatusCode = 500;
       let message: string = "";
-      let others: object = {};
+      let others: object = {}; // レスポンスに含まれる
+      let extra: object = {}; // レスポンスに含まれない、Sentryに送られる
       if (v.isValiError(err)) {
         status = 400;
         others = {
@@ -70,14 +97,31 @@ export const onError =
       } else if (err instanceof HTTPException) {
         status = err.status;
         message = err.message;
-        if (v.isValiError(err.cause)) {
-          others = {
-            flattened: v.flatten(err.cause.issues),
-            issues: err.cause.issues,
-          };
+      }
+      if (err instanceof Error && v.isValiError(err.cause)) {
+        others = {
+          flattened: v.flatten(err.cause.issues),
+          issues: err.cause.issues,
+        };
+      }
+      if (err instanceof Error && err.cause instanceof Response) {
+        status = err.cause.status as ContentfulStatusCode;
+        try {
+          const bodyText = await err.cause.text();
+          try {
+            const body = JSON.parse(bodyText);
+            if (body && typeof body === "object" && "message" in body) {
+              message = String(body.message);
+              others = body;
+            } else {
+              extra = { body };
+            }
+          } catch {
+            extra = { body: bodyText };
+          }
+        } catch (e) {
+          extra = { bodyReadError: String(e) };
         }
-      } else {
-        status = 500;
       }
 
       const messageFallbacks: Record<number, string> = {
@@ -86,6 +130,17 @@ export const onError =
         500: "unknownApiError",
       };
       message = message || messageFallbacks[status] || "";
+
+      if (status >= 500) {
+        config.captureException?.(err, {
+          extra: {
+            status,
+            message,
+            ...others,
+            ...extra,
+          },
+        });
+      }
 
       if (c.req.path.startsWith("/api") || c.req.path.startsWith("/og")) {
         return c.json(
@@ -117,6 +172,7 @@ export const onError =
       }
     } catch (e) {
       console.error("While handling the above error, another error thrown:", e);
+      config.captureException?.(e, { extra: { err: String(err) } });
       return c.body(null, 500);
     }
   };

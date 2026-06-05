@@ -34,9 +34,8 @@ AIエージェントは以下の特殊な構成に注意してください。
 - バックエンドのエントリーポイントは、Node.js用の route/serve-local.ts 、Bun用の route/serve-bun-prod.ts 、Cloudflare Worker用の route/serve-cf.js 、Vercel用の api/index.js 、Service Workerで実行される worker/entry.ts (リダイレクトなど一部のロジックのみ) の5箇所あります。変更する際はこれらすべてを更新してください。
 - バックエンドが処理するパスを追加した場合には vercel.json のrewritesの更新も必要な場合があります。
 - 異常時のレスポンスはjsonで `{message: "事前に定義されたメッセージ"}` の形式でなければなりません。メッセージは `i18n/{ja,en}/error.js` 内の`api`に定義されているもの、または空でなければなりません。
-    - `throw new HTTPException(4xx, {message: "事前に定義されたメッセージ", cause: optional_data})` とすることでグローバルなエラーハンドラー(`src/error.ts`)がそれをJSONに整形して返します。
-    - `ValiError` をthrowするか、HTTPExceptionの`cause`に渡すと、グローバルなエラーハンドラーが`message`に加えてvalibotのissueを含んだレスポンスを返します。 したがってそれぞれのAPIのハンドラーでは常に `v.parse()` を使用し、catchしたり手動でjsonにして返す必要はありません。
-    - `hono-openapi` のvalidatorを使用する場合は第3引数に `sValidatorHook()` を渡すことでバリデーションエラーが上記のValiErrorの処理と同じロジックに流れます。
+    - 想定外のエラーについてはthrowされたものをグローバルなエラーハンドラー(`src/error.ts`)がJSONに整形して返します。したがってそれぞれのAPIのハンドラーで想定外のエラーをcatchして500エラーレスポンスを返す必要はありません。
+    - ValiErrorや外部fetchのResponseをもとにthrowする場合の形式については`src/error.ts`の `onError` のコメントを参照してください。
 - /api 以下のAPIには既存のAPIと同様にOpenAPIのドキュメントを記述してください。異常時のレスポンスのスキーマは `await errorLiteral("メッセージ")` (またはvalibotのissueを含む場合 `await validationErrorSchema("メッセージ")`) で記述してください。
 
 ### 3. Frontend Code

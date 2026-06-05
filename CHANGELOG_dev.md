@@ -1,3 +1,14 @@
+## ver. 16.13 - 2025/06/06 [#1187](https://github.com/na-trium-144/falling-nikochan/pull/1187)
+
+* バックエンドにSentry導入
+    * cloudflare, bun, vercelにsentryを導入
+        * deploy時のsourcemap送信は未実装
+    * HTTPException(500)ではなく意味のあるErrorを投げるようにする
+        * imageGenerationFailedエラーを廃止し、そのままエラーをthrow→onErrorがキャッチし、sentryに送信
+        * unsupportedChartVersionエラーを409に移動
+        * getYTDataEntryはundefinedを返すのではなくエラーをthrowする仕様に変更
+    * fetchBrief,fetchStaticは異常時にResponseを含むErrorをthrowする仕様に変更
+
 ## ver. 16.11 - 2025/06/04 [#1153](https://github.com/na-trium-144/falling-nikochan/pull/1153)
 
 * APIのエラーレスポンスのmessageの改善 [#1152](https://github.com/na-trium-144/falling-nikochan/pull/1152)

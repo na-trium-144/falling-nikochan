@@ -42,8 +42,8 @@ const ogApp = (config: {
     e: Bindings,
     cid: string,
     ctx: ExecutionContext | undefined
-  ) => Response | Promise<Response>;
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+  ) => Promise<ChartBrief>;
+  fetchStatic: (e: Bindings, url: URL) => Promise<Response>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use("/*", cors({ origin: "*" }))
@@ -60,20 +60,7 @@ const ogApp = (config: {
         } catch {
           //ignore
         }
-        const briefRes = await config.fetchBrief(env(c), cid, executionCtx);
-        if (!briefRes.ok) {
-          let message = "";
-          try {
-            message =
-              ((await briefRes.json()) as { message?: string }).message || "";
-          } catch {
-            //
-          }
-          throw new HTTPException(briefRes.status as 401 | 404 | 500, {
-            message,
-          });
-        }
-        const brief = (await briefRes.json()) as ChartBrief;
+        const brief = await config.fetchBrief(env(c), cid, executionCtx);
         const lvType = levelTypes.indexOf(
           brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
         );
@@ -183,9 +170,8 @@ const ogApp = (config: {
         default:
           throw new HTTPException(404);
       }
-      const pBgImageBin = new Promise<Response>((res) =>
-        res(config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c))))
-      )
+      const pBgImageBin = config
+        .fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
         .then((bgImage) => bgImage.arrayBuffer())
         .then((buf) => {
           const bgImageBuf = new Uint8Array(buf);
@@ -224,11 +210,8 @@ const ogApp = (config: {
             break;
         }
         if (imagePath) {
-          pInputTypeImageBin = new Promise<Response>((res) =>
-            res(
-              config.fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
-            )
-          )
+          pInputTypeImageBin = config
+            .fetchStatic(env(c), new URL(imagePath, backendOrigin(c)))
             .then((image) => image.arrayBuffer())
             .then((buf) => {
               const inputTypeImageBuf = new Uint8Array(buf);
@@ -288,15 +271,10 @@ const ogApp = (config: {
           }))
         ),
       }) as Response;
-      if (imRes.ok && imRes.body) {
-        return c.body(imRes.body, 200, {
-          "Content-Type": imRes.headers.get("Content-Type") || "",
-          "Cache-Control": cacheControl(env(c), 315360000),
-        });
-      } else {
-        console.error(imRes);
-        throw new HTTPException(500, { message: "imageGenerationFailed" });
-      }
+      return c.body(imRes.body!, imRes.status as 200, {
+        "Content-Type": imRes.headers.get("Content-Type") || "",
+        "Cache-Control": cacheControl(env(c), 315360000),
+      });
     })
     .get("/:cid{[0-9]+}", (c) =>
       // deprecated (used until ver8.11)
