@@ -72,7 +72,8 @@ export const fetchBrief =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
     sentry: ((app: Hono<{ Bindings: Bindings }>) => MiddlewareHandler) | null;
-    captureException: typeof captureException;
+    captureException: typeof captureException | null;
+    setTransactionName: ((name: string) => undefined) | null;
   }) =>
   async (e: Bindings, cid: string, ctx: ExecutionContext | undefined) => {
     const app = new Hono<{ Bindings: Bindings }>({ strict: false });
@@ -83,6 +84,7 @@ export const fetchBrief =
       onError({
         fetchStatic: config.fetchStatic,
         captureException: config.captureException,
+        setTransactionName: config.setTransactionName,
       })
     );
     const res = await Promise.resolve(

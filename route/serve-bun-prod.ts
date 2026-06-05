@@ -42,6 +42,8 @@ app
         fetchStatic,
         sentry: sentryMiddleware,
         captureException: Sentry.captureException,
+        setTransactionName: (name) =>
+          void Sentry.getCurrentScope().setTransactionName(name),
       }),
     })
   )
@@ -53,6 +55,8 @@ app
         fetchStatic,
         sentry: sentryMiddleware,
         captureException: Sentry.captureException,
+        setTransactionName: (name) =>
+          void Sentry.getCurrentScope().setTransactionName(name),
       }),
       fetchStatic,
     })
@@ -66,6 +70,8 @@ app
         fetchStatic,
         sentry: sentryMiddleware,
         captureException: Sentry.captureException,
+        setTransactionName: (name) =>
+          void Sentry.getCurrentScope().setTransactionName(name),
       }),
       fetchStatic,
     })
@@ -95,6 +101,8 @@ app
     onError({
       fetchStatic,
       captureException: Sentry.captureException,
+      setTransactionName: (name) =>
+        void Sentry.getCurrentScope().setTransactionName(name),
     })
   )
   .notFound(notFound);

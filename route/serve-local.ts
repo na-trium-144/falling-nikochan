@@ -32,7 +32,8 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchBrief: fetchBrief({
         fetchStatic,
         sentry: null,
-        captureException: () => "",
+        captureException: null,
+        setTransactionName: null,
       }),
     })
   )
@@ -43,7 +44,8 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchBrief: fetchBrief({
         fetchStatic,
         sentry: null,
-        captureException: () => "",
+        captureException: null,
+        setTransactionName: null,
       }),
       fetchStatic,
     })
@@ -57,7 +59,8 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchBrief: fetchBrief({
         fetchStatic,
         sentry: null,
-        captureException: () => "",
+        captureException: null,
+        setTransactionName: null,
       }),
       fetchStatic,
     })
@@ -83,7 +86,9 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     })
   )
   .use(languageDetector())
-  .onError(onError({ fetchStatic, captureException: () => "" }))
+  .onError(
+    onError({ fetchStatic, captureException: null, setTransactionName: null })
+  )
   .notFound(notFound);
 
 serve({

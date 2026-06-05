@@ -46,7 +46,8 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchBrief: fetchBrief({
         fetchStatic,
         sentry: null,
-        captureException: () => "",
+        captureException: null,
+        setTransactionName: null,
       }),
     })
   )
@@ -56,7 +57,8 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
       fetchBrief: fetchBrief({
         fetchStatic,
         sentry: null,
-        captureException: () => "",
+        captureException: null,
+        setTransactionName: null,
       }),
       fetchStatic,
     })
@@ -67,7 +69,8 @@ export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
     onError({
       fetchStatic,
       isTest: true,
-      captureException: () => "",
+      captureException: null,
+      setTransactionName: null,
     })
   )
   .notFound(notFound);

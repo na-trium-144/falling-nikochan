@@ -563,7 +563,9 @@ const app = new Hono({ strict: false })
     return await fetchStatic(null, new URL(c.req.url));
   })
   .use(languageDetector)
-  .onError(onError({ fetchStatic, captureException: () => "" }))
+  .onError(
+    onError({ fetchStatic, captureException: null, setTransactionName: null })
+  )
   .notFound(notFound);
 
 self.addEventListener("install", () => {

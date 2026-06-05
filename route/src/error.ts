@@ -2,6 +2,7 @@ import { Context } from "hono";
 import { backendOrigin, Bindings } from "./env.js";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
+import { matchedRoutes } from "hono/route";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
@@ -58,7 +59,8 @@ export const onError =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
     isTest?: boolean;
-    captureException: typeof captureException;
+    captureException: typeof captureException | null;
+    setTransactionName: ((name: string) => undefined) | null;
   }) =>
   async (err: unknown, c: Context) => {
     if (err instanceof Error) {
@@ -71,6 +73,14 @@ export const onError =
       }
     } else {
       console.error(`Error handler triggered in ${c.req.path}: ${err}`);
+    }
+    // routeハンドラーのあとにmiddlewareがある場合があり、routePath(c, -1)で正しく取得できないので、
+    // pathが最長のハンドラーを採用する
+    const route = matchedRoutes(c)
+      .sort((a, b) => a.path.length - b.path.length)
+      .at(-1);
+    if (route && config.setTransactionName) {
+      config.setTransactionName(`${route.method} ${route.path}`);
     }
     try {
       const lang = c.get("language") || "en";
@@ -122,7 +132,7 @@ export const onError =
       message = message || messageFallbacks[status] || "";
 
       if (status >= 500) {
-        config.captureException(err, {
+        config.captureException?.(err, {
           extra: {
             status,
             message,
@@ -162,7 +172,7 @@ export const onError =
       }
     } catch (e) {
       console.error("While handling the above error, another error thrown:", e);
-      config.captureException(e, { extra: { err: String(err) } });
+      config.captureException?.(e, { extra: { err: String(err) } });
       return c.body(null, 500);
     }
   };
