@@ -91,7 +91,9 @@ export const fetchBrief =
     if (res.ok) {
       return (await res.json()) as ChartBrief;
     } else {
-      throw res;
+      throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
+        cause: res,
+      });
     }
   };
 /**
@@ -113,7 +115,7 @@ export async function fetchStatic(e: Bindings, url: URL) {
   if (res.ok) {
     return res;
   } else {
-    throw res;
+    throw new Error(`failed to fetch ${url} (${res.status})`, { cause: res });
   }
 }
 

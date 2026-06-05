@@ -52,8 +52,7 @@ export function sValidatorHook() {
  *    したがってそれぞれのAPIのハンドラーでは常に `v.parse()` を使用し、catchしたり手動でjsonにして返す必要はない
  * * `hono-openapi` のvalidatorを使用する場合は第3引数に `sValidatorHook()` を渡すことで
  *    バリデーションエラーが上記のValiErrorの処理と同じロジックに流れる。
- * * Response をthrowするとそのbodyをパースし、JSON形式で message が含まれていればそれを返す。
- *    body形式がそれ以外の場合unknownAPIErrorにする。
+ * * cause に Response を含むエラーをthrowするとそのbodyをパースし、JSON形式で message が含まれていればそれを返す。
  */
 export const onError =
   (config: {
@@ -75,7 +74,7 @@ export const onError =
     }
     try {
       const lang = c.get("language") || "en";
-      let status: ContentfulStatusCode;
+      let status: ContentfulStatusCode = 500;
       let message: string = "";
       let others: object = {}; // レスポンスに含まれる
       let extra: object = {}; // レスポンスに含まれない、Sentryに送られる
@@ -88,16 +87,17 @@ export const onError =
       } else if (err instanceof HTTPException) {
         status = err.status;
         message = err.message;
-        if (v.isValiError(err.cause)) {
-          others = {
-            flattened: v.flatten(err.cause.issues),
-            issues: err.cause.issues,
-          };
-        }
-      } else if (err instanceof Response) {
-        status = err.status as ContentfulStatusCode;
+      }
+      if (err instanceof Error && v.isValiError(err.cause)) {
+        others = {
+          flattened: v.flatten(err.cause.issues),
+          issues: err.cause.issues,
+        };
+      }
+      if (err instanceof Error && err.cause instanceof Response) {
+        status = err.cause.status as ContentfulStatusCode;
         try {
-          const bodyText = await err.text();
+          const bodyText = await err.cause.text();
           try {
             const body = JSON.parse(bodyText);
             if (body && typeof body === "object" && "message" in body) {
@@ -112,8 +112,6 @@ export const onError =
         } catch (e) {
           extra = { bodyReadError: String(e) };
         }
-      } else {
-        status = 500;
       }
 
       const messageFallbacks: Record<number, string> = {
