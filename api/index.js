@@ -28,7 +28,7 @@ import packageJson from "@falling-nikochan/route/package.json" with { type: "jso
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
-  release: `${packageJson.version}-v-${process.env.VERCEL_DEPLOYMENT_ID}`,
+  release: `${packageJson.version}-v-${process.env.VERCEL_URL.replace(".vercel.app", "")}`,
   environment: process.env.VERCEL_TARGET_ENV,
   sendDefaultPii: false,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
