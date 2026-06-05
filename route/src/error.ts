@@ -5,7 +5,7 @@ import { env } from "hono/adapter";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
-import type { captureException } from "@sentry/node";
+import type { captureException } from "@sentry/hono/node";
 
 export function notFound(): Response {
   throw new HTTPException(404);
@@ -40,6 +40,21 @@ export function sValidatorHook() {
     }
   };
 }
+
+/**
+ * APIの異常時のレスポンスはjsonで `{message: "事前に定義されたメッセージ"}` の形式でなければならない。
+ * メッセージは `i18n/{ja,en}/error.js` 内の`api`に定義されているものでなければならない。
+ *
+ * このエラーハンドラーはthrowされた例外を上記のレスポンスフォーマットに整形する。
+ * したがってそれぞれのrouteで想定外のエラーをcatchして500レスポンスなどにする必要はない。
+ * * `HTTPException(4xx, {message: "事前に定義されたメッセージ"})` をthrowするとそのメッセージをそのまま返す。
+ * * `ValiError` をthrowするか、HTTPExceptionの`cause`に渡すと、`message`に加えてvalibotのissueを含んだレスポンスを返す。
+ *    したがってそれぞれのAPIのハンドラーでは常に `v.parse()` を使用し、catchしたり手動でjsonにして返す必要はない
+ * * `hono-openapi` のvalidatorを使用する場合は第3引数に `sValidatorHook()` を渡すことで
+ *    バリデーションエラーが上記のValiErrorの処理と同じロジックに流れる。
+ * * Response をthrowするとそのbodyをパースし、JSON形式で message が含まれていればそれを返す。
+ *    body形式がそれ以外の場合unknownAPIErrorにする。
+ */
 export const onError =
   (config: {
     fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
@@ -62,7 +77,8 @@ export const onError =
       const lang = c.get("language") || "en";
       let status: ContentfulStatusCode;
       let message: string = "";
-      let others: object = {};
+      let others: object = {}; // レスポンスに含まれる
+      let extra: object = {}; // レスポンスに含まれない、Sentryに送られる
       if (v.isValiError(err)) {
         status = 400;
         others = {
@@ -77,6 +93,24 @@ export const onError =
             flattened: v.flatten(err.cause.issues),
             issues: err.cause.issues,
           };
+        }
+      } else if (err instanceof Response) {
+        status = err.status as ContentfulStatusCode;
+        try {
+          const bodyText = await err.text();
+          try {
+            const body = JSON.parse(bodyText);
+            if (body && typeof body === "object" && "message" in body) {
+              message = String(body.message);
+              others = body;
+            } else {
+              extra = { body };
+            }
+          } catch {
+            extra = { body: bodyText };
+          }
+        } catch (e) {
+          extra = { bodyReadError: String(e) };
         }
       } else {
         status = 500;
@@ -95,6 +129,7 @@ export const onError =
             status,
             message,
             ...others,
+            ...extra,
           },
         });
       }

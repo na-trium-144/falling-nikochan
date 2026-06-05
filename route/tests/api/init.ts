@@ -39,17 +39,37 @@ import { inspect } from "node:util";
 inspect.defaultOptions.depth = null;
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .route("/api", await apiApp({ getConnInfo: () => null }))
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo: () => null,
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: null,
+        captureException: () => "",
+      }),
+    })
+  )
   .route(
     "/share",
     shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: null,
+        captureException: () => "",
+      }),
       fetchStatic,
     })
   )
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
-  .onError(onError({ fetchStatic, isTest: true }))
+  .onError(
+    onError({
+      fetchStatic,
+      isTest: true,
+      captureException: () => "",
+    })
+  )
   .notFound(notFound);
 
 export const dummyCid = "100000";

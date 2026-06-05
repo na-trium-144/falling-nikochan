@@ -30,7 +30,17 @@ const sentryConfig = (env) => ({
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryConfig));
 app
-  .route("/api", await apiApp({ getConnInfo }))
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo,
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: (app) => Sentry.sentry(app, sentryConfig),
+        captureException: Sentry.captureException,
+      }),
+    })
+  )
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);
     return c.redirect(
@@ -43,7 +53,11 @@ app
   .route(
     "/share",
     shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: (app) => Sentry.sentry(app, sentryConfig),
+        captureException: Sentry.captureException,
+      }),
       fetchStatic,
     })
   )

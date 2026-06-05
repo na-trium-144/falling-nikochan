@@ -25,12 +25,26 @@ console.log(`Server is running on http://localhost:${port}`);
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(logger())
-  .route("/api", await apiApp({ getConnInfo }))
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo,
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: null,
+        captureException: () => "",
+      }),
+    })
+  )
   .route(
     "/og",
     ogApp({
       ImageResponse,
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: null,
+        captureException: () => "",
+      }),
       fetchStatic,
     })
   )
@@ -40,7 +54,11 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route(
     "/share",
     shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: null,
+        captureException: () => "",
+      }),
       fetchStatic,
     })
   )

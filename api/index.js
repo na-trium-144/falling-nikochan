@@ -39,12 +39,26 @@ const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app));
 app
   .use(compress())
-  .route("/api", await apiApp({ getConnInfo }))
+  .route(
+    "/api",
+    await apiApp({
+      getConnInfo,
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: Sentry.sentry,
+        captureException: Sentry.captureException,
+      }),
+    })
+  )
   .route(
     "/og",
     ogApp({
       ImageResponse,
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: Sentry.sentry,
+        captureException: Sentry.captureException,
+      }),
       fetchStatic,
     })
   )
@@ -53,7 +67,11 @@ app
   .route(
     "/share",
     shareApp({
-      fetchBrief: fetchBrief({ fetchStatic }),
+      fetchBrief: fetchBrief({
+        fetchStatic,
+        sentry: Sentry.sentry,
+        captureException: Sentry.captureException,
+      }),
       fetchStatic,
     })
   )
