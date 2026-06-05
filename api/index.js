@@ -34,9 +34,11 @@ Sentry.init({
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   includeLocalVariables: true,
 });
+const sentryMiddleware = (app) =>
+  Sentry.sentry(app, { shouldHandleError: () => false });
 
 const app = new Hono({ strict: false });
-app.use(Sentry.sentry(app));
+app.use(sentryMiddleware(app));
 app
   .use(compress())
   .route(
@@ -45,7 +47,7 @@ app
       getConnInfo,
       fetchBrief: fetchBrief({
         fetchStatic,
-        sentry: Sentry.sentry,
+        sentry: sentryMiddleware,
         captureException: Sentry.captureException,
         setTransactionName: (name) =>
           void Sentry.getCurrentScope().setTransactionName(name),
@@ -58,7 +60,7 @@ app
       ImageResponse,
       fetchBrief: fetchBrief({
         fetchStatic,
-        sentry: Sentry.sentry,
+        sentry: sentryMiddleware,
         captureException: Sentry.captureException,
         setTransactionName: (name) =>
           void Sentry.getCurrentScope().setTransactionName(name),
@@ -73,7 +75,7 @@ app
     shareApp({
       fetchBrief: fetchBrief({
         fetchStatic,
-        sentry: Sentry.sentry,
+        sentry: sentryMiddleware,
         captureException: Sentry.captureException,
         setTransactionName: (name) =>
           void Sentry.getCurrentScope().setTransactionName(name),

@@ -26,9 +26,13 @@ const sentryConfig = (env) => ({
   sendDefaultPii: false,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
 });
+const sentryHonoConfig = (env) => ({
+  ...sentryConfig(env),
+  shouldHandleError: () => false,
+});
 
 const app = new Hono({ strict: false });
-app.use(Sentry.sentry(app, sentryConfig));
+app.use(Sentry.sentry(app, sentryHonoConfig));
 app
   .route(
     "/api",
@@ -36,7 +40,7 @@ app
       getConnInfo,
       fetchBrief: fetchBrief({
         fetchStatic,
-        sentry: (app) => Sentry.sentry(app, sentryConfig),
+        sentry: (app) => Sentry.sentry(app, sentryHonoConfig),
         captureException: Sentry.captureException,
         setTransactionName: (name) =>
           void Sentry.getCurrentScope().setTransactionName(name),
@@ -57,7 +61,7 @@ app
     shareApp({
       fetchBrief: fetchBrief({
         fetchStatic,
-        sentry: (app) => Sentry.sentry(app, sentryConfig),
+        sentry: (app) => Sentry.sentry(app, sentryHonoConfig),
         captureException: Sentry.captureException,
         setTransactionName: (name) =>
           void Sentry.getCurrentScope().setTransactionName(name),

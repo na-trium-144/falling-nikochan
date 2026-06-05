@@ -28,6 +28,7 @@ const sentryMiddleware = (app) =>
     release: `${packageJson.version}-bun`,
     sendDefaultPii: false,
     integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+    shouldHandleError: () => false,
   });
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
