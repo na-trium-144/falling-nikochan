@@ -12,12 +12,12 @@ export function notFound(): Response {
   throw new HTTPException(404);
 }
 export function fetchError(e: Bindings) {
-  return () => {
+  return (err: unknown) => {
     if (e.IS_SERVICE_WORKER) {
       // @ts-expect-error 499 is not standard HTTP status code
-      throw new HTTPException(499, { message: "fetchError" });
+      throw new HTTPException(499, { message: "fetchError", cause: err });
     } else {
-      throw new HTTPException(502);
+      throw new HTTPException(502, { cause: err });
     }
   };
 }
