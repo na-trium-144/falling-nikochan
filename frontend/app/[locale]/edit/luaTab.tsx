@@ -38,8 +38,22 @@ const AceEditor = dynamic(
 );
 import type { Selection } from "ace-builds-internal/selection";
 import type { WorkerInput } from "./luaExecWorker";
+
 // https://github.com/vercel/next.js/discussions/29415
-import "remote-web-worker";
+// import "remote-web-worker";
+// nikochanでは同一originからも同じスクリプトにアクセス可能なので、
+// 無理にクロスオリジンのスクリプトを読み込まず単にurlのoriginを書き換えるだけでok
+if (typeof window !== "undefined") {
+  const BaseWorker = window.Worker;
+  window.Worker = class Worker extends BaseWorker {
+    constructor(scriptURL: string | URL, options?: WorkerOptions) {
+      super(
+        new URL(new URL(scriptURL).pathname, window.location.origin),
+        options
+      );
+    }
+  };
+}
 
 export function useLuaExecutor(): LuaExecutor {
   const [stdout, setStdout] = useState<string[]>([]);
