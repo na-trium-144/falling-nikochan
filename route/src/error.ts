@@ -97,6 +97,7 @@ export const onError =
       } else if (err instanceof HTTPException) {
         status = err.status;
         message = err.message;
+        err.name = `HTTPException-${status}`;
       }
       if (err instanceof Error && v.isValiError(err.cause)) {
         others = {
