@@ -289,10 +289,14 @@ async function initAssetsCache(config: {
         .split("\n")
         .map((file) => file.replaceAll("[", "%5B").replaceAll("]", "%5D"));
       // パス名にハッシュが入っているので既にキャッシュ済みのものはスキップ
+      // フォントはスキップ (必要なときにダウンロードすればいい)
       const toFetch = (
         await Promise.all(
           nextFiles.map(async (pathname) =>
-            (await cache.match(pathname)) || (await tmp.match(pathname))
+            pathname.endsWith(".woff") ||
+            pathname.endsWith(".woff2") ||
+            (await cache.match(pathname)) ||
+            (await tmp.match(pathname))
               ? null
               : pathname
           )
