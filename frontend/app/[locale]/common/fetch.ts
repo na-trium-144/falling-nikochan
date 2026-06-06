@@ -29,8 +29,7 @@ const dedupeMiddleware = dedupe();
  * (ネットワークエラーとAbortErrorはいずれの場合でもexpectedとしてマークされSentry送信の対象外)
  */
 export function fetchBackend() {
-  const referenceError = { stack: "" };
-  Error.captureStackTrace(referenceError, fetchBackend);
+  const referenceError = new Error();
   return wretch(process.env.BACKEND_PREFIX || window.location.origin)
     .addon(QueryStringAddon)
     .addon(AbortAddon())
@@ -52,8 +51,7 @@ export function fetchBackend() {
     );
 }
 export function fetchAsset() {
-  const referenceError = { stack: "" };
-  Error.captureStackTrace(referenceError, fetchAsset);
+  const referenceError = new Error();
   return wretch(process.env.ASSET_PREFIX || window.location.origin)
     .middlewares([
       dedupeMiddleware,
@@ -101,7 +99,7 @@ export function fetchAsset() {
     );
 }
 
-function APIErrorTransformer(referenceError: { stack: string }) {
+function APIErrorTransformer(referenceError: Error) {
   return async (
     we: WretchError,
     res: Response,
@@ -150,10 +148,9 @@ export function captureAndWrap(
 ): Error {
   if (!(e instanceof Error)) {
     e = new Error(String(e));
-    Error.captureStackTrace(e as Error, captureAndWrap);
   }
   if (!(e as Error).stack) {
-    Error.captureStackTrace(e as Error, captureAndWrap);
+    (e as Error).stack = new Error().stack;
   }
   Sentry.captureException(e, { extra });
   console.error(e, { extra });

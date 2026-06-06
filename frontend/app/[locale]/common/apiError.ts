@@ -20,7 +20,7 @@ export class APIError extends Error {
     url: string,
     status: number,
     message: string,
-    stack: string,
+    stack: string | undefined,
     body: unknown
   ) {
     super(message);
