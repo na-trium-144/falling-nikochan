@@ -93,6 +93,16 @@ export function useLuaExecutor(): LuaExecutor {
       });
       if (worker.current === null) {
         worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
+        worker.current.addEventListener("error", (e) => {
+          console.error(e)
+          setRunning(false);
+          setStdout([]);
+          // e.messageが空の場合がある
+          setErr([e.message || "Unknown error"]);
+          setErrLine(-1);
+          workerResolver.current?.(null);
+          workerResolver.current = null;
+        });
         worker.current.addEventListener(
           "message",
           ({ data }: { data: LuaExecResult }) => {
@@ -108,7 +118,7 @@ export function useLuaExecutor(): LuaExecutor {
               }
               workerResolver.current = null;
             } else {
-              throw new Error("luaExecWorker finished but resolver is null");
+              console.error("luaExecWorker finished but resolver is null");
             }
           }
         );
