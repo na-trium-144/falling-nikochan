@@ -60,18 +60,22 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const entry = await getChartEntryCompressed(db, cid, null);
-      return c.json(entryToBrief(entry), 200, {
-        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
-      });
-    } finally {
-      await client.close();
-    }
+    return c.json(fetchBrief(env(c), cid), 200, {
+      "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+    });
   }
 );
+
+export async function fetchBrief(e: Bindings, cid: string) {
+  const client = new MongoClient(e.MONGODB_URI);
+  try {
+    await client.connect();
+    const db = client.db("nikochan");
+    const entry = await getChartEntryCompressed(db, cid, null);
+    return entryToBrief(entry);
+  } finally {
+    await client.close();
+  }
+}
 
 export default briefApp;

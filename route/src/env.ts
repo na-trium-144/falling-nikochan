@@ -65,44 +65,6 @@ export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
   }
 }
 /**
- * src/api/brief.ts を用いてbriefデータを取得。
- * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
- */
-export const fetchBrief = (config: {
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
-  sentry: ((app: Hono<{ Bindings: Bindings }>) => MiddlewareHandler) | null;
-  captureException: typeof captureException | null;
-  setTransactionName: ((name: string) => undefined) | null;
-}) => {
-  const app = new Hono<{ Bindings: Bindings }>({ strict: false });
-  if (config.sentry) {
-    app.use(config.sentry(app));
-  }
-  app.route("/api/brief", briefApp).onError(
-    onError({
-      fetchStatic: config.fetchStatic,
-      captureException: config.captureException,
-      setTransactionName: config.setTransactionName,
-    })
-  );
-  return async (
-    e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => {
-    const res = await Promise.resolve(
-      app.request(`/api/brief/${cid}`, undefined, e, ctx)
-    ).catch(fetchError(e));
-    if (res.ok) {
-      return (await res.json()) as ChartBrief;
-    } else {
-      throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
-        cause: res,
-      });
-    }
-  };
-};
-/**
  * URLをfetch()してリソースを取得。
  * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
  */

@@ -41,48 +41,11 @@ const app = new Hono({ strict: false });
 app.use(sentryMiddleware(app));
 app
   .use(compress())
-  .route(
-    "/api",
-    await apiApp({
-      getConnInfo,
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: sentryMiddleware,
-        captureException: Sentry.captureException,
-        setTransactionName: (name) =>
-          void Sentry.getCurrentScope().setTransactionName(name),
-      }),
-    })
-  )
-  .route(
-    "/og",
-    ogApp({
-      ImageResponse,
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: sentryMiddleware,
-        captureException: Sentry.captureException,
-        setTransactionName: (name) =>
-          void Sentry.getCurrentScope().setTransactionName(name),
-      }),
-      fetchStatic,
-    })
-  )
+  .route("/api", await apiApp({ getConnInfo }))
+  .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", sitemapApp)
   .route("/rss.xml", rssApp)
-  .route(
-    "/share",
-    shareApp({
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: sentryMiddleware,
-        captureException: Sentry.captureException,
-        setTransactionName: (name) =>
-          void Sentry.getCurrentScope().setTransactionName(name),
-      }),
-      fetchStatic,
-    })
-  )
+  .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
   .onError(

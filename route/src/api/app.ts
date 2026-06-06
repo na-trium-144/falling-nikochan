@@ -1,6 +1,6 @@
-import { Context, ExecutionContext, Hono } from "hono";
+import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
-import briefApp from "./brief.js";
+import briefApp, { fetchBrief } from "./brief.js";
 import { backendOrigin, Bindings } from "../env.js";
 import chartFileApp from "./chartFile.js";
 import newChartFileApp from "./newChartFile.js";
@@ -24,13 +24,10 @@ import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
+export { fetchBrief } from "./brief.js";
+
 const apiApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
-  fetchBrief: (
-    e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => Promise<ChartBrief>;
 }) => {
   const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     .use(
@@ -75,7 +72,7 @@ const apiApp = async (config: {
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
-    .route("/oembed", await oembedApp({ fetchBrief: config.fetchBrief }))
+    .route("/oembed", oembedApp)
     .get("/debug-sentry", () => {
       throw new Error("My first sentry error!");
     });

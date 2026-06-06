@@ -16,7 +16,7 @@ import {
 } from "@falling-nikochan/chart";
 import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
-import { Context, ExecutionContext, Hono } from "hono";
+import { Context, Hono } from "hono";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -25,11 +25,7 @@ bodyを無理やり書き換える。
 */
 
 const shareApp = (config: {
-  fetchBrief: (
-    e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => Promise<ChartBrief>;
+  fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
   fetchStatic: (e: Bindings, url: URL) => Promise<Response>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
@@ -50,13 +46,7 @@ const shareApp = (config: {
           // throw new HTTPException(400, { message: "invalidResultParam" });
         }
       }
-      let executionCtx: ExecutionContext | undefined = undefined;
-      try {
-        executionCtx = c.executionCtx;
-      } catch {
-        //ignore
-      }
-      const pBriefRes = config.fetchBrief(env(c), cid, executionCtx);
+      const pBriefRes = config.fetchBrief(env(c), cid);
       const t = await getTranslations(qLang, "share");
       const tr = await getTranslations(qLang, "play.result");
       let placeholderUrl: URL;
