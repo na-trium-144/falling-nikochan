@@ -31,7 +31,11 @@ import {
   hash,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
+import {
+  calcETag,
+  ChartEntryCompressed,
+  getChartEntryCompressed,
+} from "@falling-nikochan/route/src/api/chart";
 
 const encodeBase64Utf8 = (value: string) =>
   btoa(
@@ -109,6 +113,67 @@ describe("GET /api/chartFile/:cid", () => {
       }
     );
     expect(res.status).to.equal(200);
+  });
+  test("should return ETag calculated by calcETag()", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100000", {
+      headers: { Authorization: basicAuth("p") },
+    });
+    expect(res.status).to.equal(200);
+    const client = new MongoClient(process.env.MONGODB_URI!);
+    try {
+      await client.connect();
+      const db = client.db("nikochan");
+      const entry = await getChartEntryCompressed(db, "100000", null);
+      expect(res.headers.get("etag")).to.equal(await calcETag(entry));
+    } finally {
+      await client.close();
+    }
+  });
+  test("should return 304 for matching If-None-Match", async () => {
+    await initDb();
+    const res1 = await app.request("/api/chartFile/100000", {
+      headers: { Authorization: basicAuth("p") },
+    });
+    expect(res1.status).to.equal(200);
+    const etag = res1.headers.get("etag");
+    expect(etag).to.be.a("string");
+
+    const res2 = await app.request("/api/chartFile/100000", {
+      headers: {
+        Authorization: basicAuth("p"),
+        "If-None-Match": etag!,
+      },
+    });
+    expect(res2.status).to.equal(304);
+  });
+  test("should return 200 for matching If-Match", async () => {
+    await initDb();
+    const res1 = await app.request("/api/chartFile/100000", {
+      headers: { Authorization: basicAuth("p") },
+    });
+    expect(res1.status).to.equal(200);
+    const etag = res1.headers.get("etag");
+    expect(etag).to.be.a("string");
+
+    const res2 = await app.request("/api/chartFile/100000", {
+      headers: {
+        Authorization: basicAuth("p"),
+        "If-Match": etag!,
+      },
+    });
+    expect(res2.status).to.equal(200);
+  });
+  test("should return 412 for mismatching If-Match", async () => {
+    await initDb();
+    const res = await app.request("/api/chartFile/100000", {
+      headers: {
+        Authorization: basicAuth("p"),
+        "If-Match": '"invalid-etag"',
+      },
+    });
+    expect(res.status).to.equal(412);
+    expect(await res.json()).to.deep.equal({ message: "etagMismatch" });
   });
   currentChartVer satisfies 16; // edit tests below when chart version is bumped
   test("should return Chart15 if chart version is 15", async () => {

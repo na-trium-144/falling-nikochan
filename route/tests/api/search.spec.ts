@@ -88,4 +88,16 @@ describe("GET /api/search", () => {
       expect(body).to.be.an("array");
     }
   });
+  test("should return 304 for matching If-None-Match", async () => {
+    await initDb();
+    const res1 = await app.request("/api/search?q=テスト");
+    expect(res1.status).to.equal(200);
+    const etag = res1.headers.get("etag");
+    expect(etag).to.be.a("string");
+
+    const res2 = await app.request("/api/search?q=テスト", {
+      headers: { "If-None-Match": etag! },
+    });
+    expect(res2.status).to.equal(304);
+  });
 });
