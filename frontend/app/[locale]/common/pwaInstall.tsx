@@ -296,27 +296,34 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
             if (updateFetching.current !== null) {
               clearTimeout(updateFetching.current);
             }
-            const checkUpdate = () =>
-              !isStandalone() && isLowSpeed()
-                ? // アセットの更新を行わず、完了したことにする
-                  setWorkerUpdate((prev) =>
-                    prev?.state === "updating" ? { state: "done" } : prev
-                  )
-                : fetch("/worker/checkUpdate").then(
-                    (res) => {
-                      // okの場合、messageイベントで受け取るのでここでは何もしない
-                      if (!res.ok) {
-                        if (isStandalone()) {
-                          setWorkerUpdate({ state: "failed" });
-                        }
-                      }
-                    },
-                    () => {
+            const checkUpdate = () => {
+              if (isStandalone()) {
+                // standaloneの場合、ネットワークの状態に関わらず更新を行う (良いのか?)
+                // もともとこのSWはv10.0でPWAが絶対にエラーページを出さないようにという意図で実装したものなので、そっちの意図を優先している
+                fetch("/worker/checkUpdate").then(
+                  (res) => {
+                    // okの場合、messageイベントで受け取るのでここでは何もしない
+                    if (!res.ok) {
                       if (isStandalone()) {
                         setWorkerUpdate({ state: "failed" });
                       }
                     }
-                  );
+                  },
+                  () => {
+                    if (isStandalone()) {
+                      setWorkerUpdate({ state: "failed" });
+                    }
+                  }
+                );
+              } else {
+                if (isLowSpeed()) {
+                  // standaloneでなく、かつ低速の場合、アセットの更新を行わない
+                } else {
+                  // 更新を行うが、結果が何であってもなにもしない
+                  fetch("/worker/checkUpdate").catch(() => undefined);
+                }
+              }
+            };
             updateFetching.current = setTimeout(checkUpdate, 1000);
             reg.addEventListener("updatefound", () => {
               if (isStandalone()) {
