@@ -191,6 +191,35 @@ export function useSafariDetector() {
   return isSafari;
 }
 
+function isLowSpeed(): boolean {
+  const connection =
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
+  if (!connection) {
+    return false;
+  }
+  if (connection.saveData) {
+    console.warn(
+      "skipping service worker update because of connection.saveData"
+    );
+    return true;
+  }
+  if (connection.type && ["ethernet", "wifi"].includes(connection.type)) {
+    return false;
+  }
+  if (
+    connection.effectiveType &&
+    ["slow-2g", "2g", "3g"].includes(connection.effectiveType)
+  ) {
+    console.warn(
+      `skipping service worker update because of connection.effectiveType=${connection.effectiveType} and type=${connection.type}`
+    );
+    return true;
+  }
+  return false;
+}
+
 interface InitAssetsState {
   type?: "initAssets";
   state: InitAssetsResult;
@@ -268,21 +297,26 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
               clearTimeout(updateFetching.current);
             }
             const checkUpdate = () =>
-              fetch("/worker/checkUpdate").then(
-                (res) => {
-                  // okの場合、messageイベントで受け取るのでここでは何もしない
-                  if (!res.ok) {
-                    if (isStandalone()) {
-                      setWorkerUpdate({ state: "failed" });
+              !isStandalone() && isLowSpeed()
+                ? // アセットの更新を行わず、完了したことにする
+                  setWorkerUpdate((prev) =>
+                    prev?.state === "updating" ? { state: "done" } : prev
+                  )
+                : fetch("/worker/checkUpdate").then(
+                    (res) => {
+                      // okの場合、messageイベントで受け取るのでここでは何もしない
+                      if (!res.ok) {
+                        if (isStandalone()) {
+                          setWorkerUpdate({ state: "failed" });
+                        }
+                      }
+                    },
+                    () => {
+                      if (isStandalone()) {
+                        setWorkerUpdate({ state: "failed" });
+                      }
                     }
-                  }
-                },
-                () => {
-                  if (isStandalone()) {
-                    setWorkerUpdate({ state: "failed" });
-                  }
-                }
-              );
+                  );
             updateFetching.current = setTimeout(checkUpdate, 1000);
             reg.addEventListener("updatefound", () => {
               if (isStandalone()) {
@@ -295,7 +329,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
               newWorker?.addEventListener("statechange", () => {
                 console.log("sw statechange:", newWorker?.state);
                 if (newWorker?.state === "activated") {
-                  // setWorkerUpdate({ state: "done" });
                   updateFetching.current = setTimeout(checkUpdate, 1000);
                 }
               });
