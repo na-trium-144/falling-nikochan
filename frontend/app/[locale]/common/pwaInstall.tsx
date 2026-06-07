@@ -287,9 +287,6 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       process.env.NODE_ENV !== "development" &&
       "serviceWorker" in navigator
     ) {
-      navigator.serviceWorker.addEventListener("message", (e) => {
-        console.warn("sw:", e.data);
-      });
       if (SW_ALLOWED_ORIGINS.includes(window.location.origin)) {
         navigator.serviceWorker.register("/sw.js", { scope: "/" }).then(
           (reg) => {
@@ -369,34 +366,37 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (
           typeof event.data === "object" &&
-          event.data.type === "initAssets" &&
-          isStandalone()
+          event.data.type === "initAssets"
         ) {
-          const state = (event.data as InitAssetsState).state;
-          switch (state) {
-            case "done":
-            case "failed":
-            case "updating":
-              setWorkerUpdate(event.data);
-              break;
-            case "noUpdate":
-              setWorkerUpdate((current) => {
-                if (current?.state === "updating") {
-                  // serviceworkerのinstallのためにupdatingになり、その後assetの更新はない場合
-                  return { state: "done" };
-                }
-                return null;
-              });
-              break;
-            case "inProgress":
-              // ignore
-              break;
-            default:
-              state satisfies never;
-              throw new Error(
-                `Unknown worker update state: ${event.data.state}`
-              );
+          if (isStandalone()) {
+            const state = (event.data as InitAssetsState).state;
+            switch (state) {
+              case "done":
+              case "failed":
+              case "updating":
+                setWorkerUpdate(event.data);
+                break;
+              case "noUpdate":
+                setWorkerUpdate((current) => {
+                  if (current?.state === "updating") {
+                    // serviceworkerのinstallのためにupdatingになり、その後assetの更新はない場合
+                    return { state: "done" };
+                  }
+                  return null;
+                });
+                break;
+              case "inProgress":
+                // ignore
+                break;
+              default:
+                state satisfies never;
+                throw new Error(
+                  `Unknown worker update state: ${event.data.state}`
+                );
+            }
           }
+        } else {
+          console.warn("sw:", event.data);
         }
       });
     }

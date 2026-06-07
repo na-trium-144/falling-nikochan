@@ -97,7 +97,7 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     return res;
   } else {
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
-    console.warn(`${url} is not in cache`);
+    // console.warn(`${url} is not in cache`);
     const res = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + url.pathname
     ).catch(fetchError(e));
@@ -325,11 +325,11 @@ async function initAssetsCache(config: {
               progressSize += size;
               sendInitState("updating", progressNum, totalNum, progressSize);
             } else {
-              console.error(`failed to fetch ${pathname}: ${res.status}`);
+              // console.error(`failed to fetch ${pathname}: ${res.status}`);
               failed = true;
             }
-          } catch (err) {
-            console.error(`failed to fetch ${pathname}: ${err}`);
+          } catch {
+            // console.error(`failed to fetch ${pathname}: ${err}`);
             failed = true;
           }
         })
@@ -347,8 +347,8 @@ async function initAssetsCache(config: {
         downloadNextAssets(),
       ]);
       allPathnames = [...tarPathnames, ...nextPathnames];
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // console.error(err);
       return sendInitState("failed");
     }
 
@@ -357,7 +357,7 @@ async function initAssetsCache(config: {
       await Promise.all(
         keys.map(async (req) => {
           if (!allPathnames.includes(new URL(req.url).pathname)) {
-            console.warn(`delete ${req.url}`);
+            // console.warn(`delete ${req.url}`);
             await cache.delete(req);
           }
         })
