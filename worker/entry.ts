@@ -11,6 +11,7 @@ import {
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
+import { getMimeType, mimes } from "hono/utils/mime";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -131,27 +132,13 @@ function getContentType(pathname: string): string {
   } else {
     ext = pathname.split(".").pop()?.toLowerCase();
   }
-  const types: Record<string, string> = {
-    html: "text/html; charset=utf-8",
-    css: "text/css; charset=utf-8",
-    js: "application/javascript; charset=utf-8",
-    mjs: "application/javascript; charset=utf-8",
-    json: "application/json; charset=utf-8",
-    txt: "text/plain; charset=utf-8",
-    svg: "image/svg+xml",
-    png: "image/png",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    webp: "image/webp",
-    ico: "image/x-icon",
-    woff: "font/woff",
-    woff2: "font/woff2",
-    wasm: "application/wasm",
-    xml: "application/xml",
-    gz: "application/gzip",
-  };
-  if (ext && ext in types) {
-    return types[ext];
+  const type = getMimeType("." + ext, {
+    ...mimes,
+    wav: "audio/wav",
+    md: "text/markdown; charset=utf-8",
+  });
+  if (type) {
+    return type;
   } else {
     console.error(`Unknown extension ${ext} for path ${pathname}`);
     return "application/octet-stream";
