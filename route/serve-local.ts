@@ -25,46 +25,12 @@ console.log(`Server is running on http://localhost:${port}`);
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .use(logger())
-  .route(
-    "/api",
-    await apiApp({
-      getConnInfo,
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: null,
-        captureException: null,
-        setTransactionName: null,
-      }),
-    })
-  )
-  .route(
-    "/og",
-    ogApp({
-      ImageResponse,
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: null,
-        captureException: null,
-        setTransactionName: null,
-      }),
-      fetchStatic,
-    })
-  )
+  .route("/api", await apiApp({ getConnInfo }))
+  .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/cron", cronTestApp)
   .route("/sitemap.xml", sitemapApp)
   .route("/rss.xml", rssApp)
-  .route(
-    "/share",
-    shareApp({
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: null,
-        captureException: null,
-        setTransactionName: null,
-      }),
-      fetchStatic,
-    })
-  )
+  .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(
     "/*",

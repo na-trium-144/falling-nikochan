@@ -1,4 +1,4 @@
-import { Context, ExecutionContext, Hono } from "hono";
+import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import briefApp from "./brief.js";
 import { backendOrigin, Bindings } from "../env.js";
@@ -13,7 +13,7 @@ import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import searchApp from "./search.js";
 import { bodyLimit } from "hono/body-limit";
-import { ChartBrief, docSchemas, fileMaxSize } from "@falling-nikochan/chart";
+import { docSchemas, fileMaxSize } from "@falling-nikochan/chart";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
@@ -24,13 +24,10 @@ import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
+export { fetchBrief } from "./brief.js";
+
 const apiApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
-  fetchBrief: (
-    e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => Promise<ChartBrief>;
 }) => {
   const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
     .use(
@@ -75,7 +72,7 @@ const apiApp = async (config: {
     .route("/hashPasswd", hashPasswdApp)
     .route("/record", await recordApp({ getConnInfo: config.getConnInfo }))
     .route("/ip", forwardCheckApp({ getConnInfo: config.getConnInfo }))
-    .route("/oembed", await oembedApp({ fetchBrief: config.fetchBrief }))
+    .route("/oembed", oembedApp)
     .get("/debug-sentry", () => {
       throw new Error("My first sentry error!");
     });

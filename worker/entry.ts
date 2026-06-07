@@ -452,7 +452,7 @@ const app = new Hono({ strict: false })
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: async (_e, cid: string /*, _ctx */) => {
+      fetchBrief: async (_e, cid) => {
         const res = await fetchAPI(self.origin + `/api/brief/${cid}`);
         if (res.ok) {
           return await res.json();

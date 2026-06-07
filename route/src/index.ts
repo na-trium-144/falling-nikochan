@@ -1,11 +1,11 @@
 export { onError, notFound, fetchError } from "./error.js";
-export { default as apiApp } from "./api/app.js";
+export { default as apiApp, fetchBrief } from "./api/app.js";
 export { default as ogApp } from "./og/app.js";
 export { default as shareApp } from "./share.js";
 export { default as redirectApp } from "./redirect.js";
 export { default as sitemapApp } from "./sitemap.js";
 export { default as rssApp } from "./rss.js";
-export { languageDetector, fetchStatic, fetchBrief } from "./env.js";
+export { languageDetector, fetchStatic } from "./env.js";
 export type { Bindings } from "./env.js";
 export { default as cronTestApp } from "./cron/app.js";
 export { reportPopularCharts } from "./cron/popular.js";

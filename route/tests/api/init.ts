@@ -39,30 +39,8 @@ import { inspect } from "node:util";
 inspect.defaultOptions.depth = null;
 
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
-  .route(
-    "/api",
-    await apiApp({
-      getConnInfo: () => null,
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: null,
-        captureException: null,
-        setTransactionName: null,
-      }),
-    })
-  )
-  .route(
-    "/share",
-    shareApp({
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: null,
-        captureException: null,
-        setTransactionName: null,
-      }),
-      fetchStatic,
-    })
-  )
+  .route("/api", await apiApp({ getConnInfo: () => null }))
+  .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
   .onError(

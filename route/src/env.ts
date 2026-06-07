@@ -2,12 +2,9 @@ import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
-import briefApp from "./api/brief.js";
-import { Context, ExecutionContext, Hono, MiddlewareHandler } from "hono";
-import { fetchError, onError } from "./error.js";
+import { Context } from "hono";
+import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
-import type { captureException } from "@sentry/hono/node";
-import type { ChartBrief } from "@falling-nikochan/chart";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -64,44 +61,6 @@ export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
     return url.origin;
   }
 }
-/**
- * src/api/brief.ts を用いてbriefデータを取得。
- * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
- */
-export const fetchBrief = (config: {
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
-  sentry: ((app: Hono<{ Bindings: Bindings }>) => MiddlewareHandler) | null;
-  captureException: typeof captureException | null;
-  setTransactionName: ((name: string) => undefined) | null;
-}) => {
-  const app = new Hono<{ Bindings: Bindings }>({ strict: false });
-  if (config.sentry) {
-    app.use(config.sentry(app));
-  }
-  app.route("/api/brief", briefApp).onError(
-    onError({
-      fetchStatic: config.fetchStatic,
-      captureException: config.captureException,
-      setTransactionName: config.setTransactionName,
-    })
-  );
-  return async (
-    e: Bindings,
-    cid: string,
-    ctx: ExecutionContext | undefined
-  ) => {
-    const res = await Promise.resolve(
-      app.request(`/api/brief/${cid}`, undefined, e, ctx)
-    ).catch(fetchError(e));
-    if (res.ok) {
-      return (await res.json()) as ChartBrief;
-    } else {
-      throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
-        cause: res,
-      });
-    }
-  };
-};
 /**
  * URLをfetch()してリソースを取得。
  * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
