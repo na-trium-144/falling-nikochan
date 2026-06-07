@@ -63,19 +63,12 @@ export function fetchAsset() {
           if (!response) {
             // network error, do not report
           } else {
-            let message: string;
-            try {
-              message = await response.text();
-            } catch {
-              message = response.statusText;
-            }
-            const we = new wretch.WretchError(message);
-            we.cause = referenceError;
-            // we.stack += "\nCAUSE: " + referenceError.stack;
-            we.response = response;
-            we.status = response.status;
-            we.url = url;
-            Sentry.captureException(we);
+            const e = await APIErrorTransformer(referenceError)(
+              null,
+              response,
+              { _url: url }
+            );
+            Sentry.captureException(e);
           }
           return {};
         },
@@ -101,7 +94,7 @@ export function fetchAsset() {
 
 function APIErrorTransformer(referenceError: Error) {
   return async (
-    we: WretchError,
+    _we: WretchError | null,
     res: Response,
     req: { _url: string }
   ): Promise<APIError> => {
@@ -130,7 +123,7 @@ function APIErrorTransformer(referenceError: Error) {
     }
     return new APIError(
       req._url,
-      we.status,
+      res.status,
       message,
       referenceError.stack,
       body
