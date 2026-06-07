@@ -231,7 +231,15 @@ export function ChartList(props: Props) {
                 }
                 return briefs;
               }),
-            onError: (e) => setBriefs(e),
+            onError: () =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                  briefs = briefs.slice();
+                  briefs[i]!.fetched = true;
+                  // briefs[i]!.brief = undefined;
+                }
+                return briefs;
+              }),
           });
         }
       }
