@@ -29,7 +29,7 @@ body.fn-body {
 @layer components {
   .fn-irasutoya-like-bg {
     /* absoluteにするとなぜかSafariでパフォーマンスが大幅に低下する。 */
-    @apply fixed inset-0 pointer-events-none z-irasutoya-like-bg;
+    @apply fixed inset-y-0 left-0 w-screen pointer-events-none z-irasutoya-like-bg;
 
     #bgGradient > stop {
       &:nth-child(1) {

@@ -11,6 +11,7 @@ import {
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
+import { getMimeType, mimes } from "hono/utils/mime";
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -97,7 +98,7 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     return res;
   } else {
     // 通常は全部cacheに入っているはずなのでここに来ることはほぼない
-    console.warn(`${url} is not in cache`);
+    // console.warn(`${url} is not in cache`);
     const res = await fetch(
       (process.env.ASSET_PREFIX || self.origin) + url.pathname
     ).catch(fetchError(e));
@@ -131,27 +132,13 @@ function getContentType(pathname: string): string {
   } else {
     ext = pathname.split(".").pop()?.toLowerCase();
   }
-  const types: Record<string, string> = {
-    html: "text/html; charset=utf-8",
-    css: "text/css; charset=utf-8",
-    js: "application/javascript; charset=utf-8",
-    mjs: "application/javascript; charset=utf-8",
-    json: "application/json; charset=utf-8",
-    txt: "text/plain; charset=utf-8",
-    svg: "image/svg+xml",
-    png: "image/png",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    webp: "image/webp",
-    ico: "image/x-icon",
-    woff: "font/woff",
-    woff2: "font/woff2",
-    wasm: "application/wasm",
-    xml: "application/xml",
-    gz: "application/gzip",
-  };
-  if (ext && ext in types) {
-    return types[ext];
+  const type = getMimeType("." + ext, {
+    ...mimes,
+    wav: "audio/wav",
+    md: "text/markdown; charset=utf-8",
+  });
+  if (type) {
+    return type;
   } else {
     console.error(`Unknown extension ${ext} for path ${pathname}`);
     return "application/octet-stream";
@@ -289,10 +276,14 @@ async function initAssetsCache(config: {
         .split("\n")
         .map((file) => file.replaceAll("[", "%5B").replaceAll("]", "%5D"));
       // パス名にハッシュが入っているので既にキャッシュ済みのものはスキップ
+      // フォントはスキップ (必要なときにダウンロードすればいい)
       const toFetch = (
         await Promise.all(
           nextFiles.map(async (pathname) =>
-            (await cache.match(pathname)) || (await tmp.match(pathname))
+            pathname.endsWith(".woff") ||
+            pathname.endsWith(".woff2") ||
+            (await cache.match(pathname)) ||
+            (await tmp.match(pathname))
               ? null
               : pathname
           )
@@ -321,11 +312,11 @@ async function initAssetsCache(config: {
               progressSize += size;
               sendInitState("updating", progressNum, totalNum, progressSize);
             } else {
-              console.error(`failed to fetch ${pathname}: ${res.status}`);
+              // console.error(`failed to fetch ${pathname}: ${res.status}`);
               failed = true;
             }
-          } catch (err) {
-            console.error(`failed to fetch ${pathname}: ${err}`);
+          } catch {
+            // console.error(`failed to fetch ${pathname}: ${err}`);
             failed = true;
           }
         })
@@ -343,8 +334,8 @@ async function initAssetsCache(config: {
         downloadNextAssets(),
       ]);
       allPathnames = [...tarPathnames, ...nextPathnames];
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // console.error(err);
       return sendInitState("failed");
     }
 
@@ -353,7 +344,7 @@ async function initAssetsCache(config: {
       await Promise.all(
         keys.map(async (req) => {
           if (!allPathnames.includes(new URL(req.url).pathname)) {
-            console.warn(`delete ${req.url}`);
+            // console.warn(`delete ${req.url}`);
             await cache.delete(req);
           }
         })
@@ -461,7 +452,7 @@ const app = new Hono({ strict: false })
     // fetch済みの新しいページ + 古いサーバーのコード ではバグを起こす可能性があるため、
     // /shareページ自体についてはfetchせずcacheにあるもののみを使用する
     shareApp({
-      fetchBrief: async (_e, cid: string /*, _ctx */) => {
+      fetchBrief: async (_e, cid) => {
         const res = await fetchAPI(self.origin + `/api/brief/${cid}`);
         if (res.ok) {
           return await res.json();

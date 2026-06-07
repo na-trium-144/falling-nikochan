@@ -22,7 +22,6 @@ import {
   convertToLatest,
   updateBpmTimeSec,
   updateBarNum,
-  rateLimit,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -37,7 +36,6 @@ import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
 import { isInsideFrame } from "@/scale";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
-import { retry } from "wretch/middlewares";
 import { markAsExpected } from "@/common/apiError";
 
 interface Props {
@@ -83,16 +81,6 @@ export interface FetchChartOptions {
   bypass?: boolean;
   editPasswd: string;
   savePasswd: boolean;
-}
-
-function chartFileRetryMiddleware() {
-  return retry({
-    delayTimer: rateLimit.chartFile * 1000 + 500,
-    delayRamp: (delay) => delay,
-    maxAttempts: 3,
-    until: (response) => !response || response.status !== 429,
-    resolveWithLatestResponse: true,
-  });
 }
 
 async function compressBodyIfSupported(body: Uint8Array<ArrayBuffer>) {
@@ -178,7 +166,6 @@ export function useChartState(props: Props) {
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
         })
         .auth(chartAuthorization(initialPasswd) ?? "")
-        .middlewares([chartFileRetryMiddleware()])
         .get()
         // passwdPrompt has unique handler for 401 and 429 messages
         .unauthorized(
@@ -344,7 +331,6 @@ export function useChartState(props: Props) {
                 : "same-origin",
           })
           .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
-          .middlewares([chartFileRetryMiddleware()])
           .post()
           .unauthorized(markAsExpected)
           .notFound(markAsExpected)
@@ -388,7 +374,6 @@ export function useChartState(props: Props) {
             process.env.NODE_ENV === "development" ? "include" : "same-origin",
         })
         .auth(chartAuthorization(chartState.chart.currentPasswd) ?? "")
-        .middlewares([chartFileRetryMiddleware()])
         .delete()
         .unauthorized(() => undefined)
         .notFound(() => undefined)

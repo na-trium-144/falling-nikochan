@@ -7,10 +7,10 @@ import {
   languageDetector,
   onError,
   notFound,
-  fetchBrief,
   reportPopularCharts,
   checkNewCharts,
   reportToDiscord,
+  fetchBrief,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -34,19 +34,7 @@ const sentryHonoConfig = (env) => ({
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryHonoConfig));
 app
-  .route(
-    "/api",
-    await apiApp({
-      getConnInfo,
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: (app) => Sentry.sentry(app, sentryHonoConfig),
-        captureException: Sentry.captureException,
-        setTransactionName: (name) =>
-          void Sentry.getCurrentScope().setTransactionName(name),
-      }),
-    })
-  )
+  .route("/api", await apiApp({ getConnInfo }))
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);
     return c.redirect(
@@ -56,19 +44,7 @@ app
   })
   .route("/sitemap.xml", sitemapApp)
   .route("/rss.xml", rssApp)
-  .route(
-    "/share",
-    shareApp({
-      fetchBrief: fetchBrief({
-        fetchStatic,
-        sentry: (app) => Sentry.sentry(app, sentryHonoConfig),
-        captureException: Sentry.captureException,
-        setTransactionName: (name) =>
-          void Sentry.getCurrentScope().setTransactionName(name),
-      }),
-      fetchStatic,
-    })
-  )
+  .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())
   .onError(

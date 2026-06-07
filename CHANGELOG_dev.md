@@ -1,3 +1,21 @@
+## ver. 16.14 - 2025/06/07
+
+* トップページとchartListの改善
+* トップページで表示されるオートプレイのconsole.logを削除
+* webworkerのエラーハンドリング [#1188](https://github.com/na-trium-144/falling-nikochan/pull/1188)
+    * remote-web-workerを単にurlのoriginを書き換えるだけのパッチに変更
+    * luaExecWorker内のenvironmentを分ける
+    * worker自体のエラー時にメッセージを表示
+* serviceworker改善 [#1192](https://github.com/na-trium-144/falling-nikochan/pull/1192)
+    * Service Worker でフォントをプレキャッシュしない
+    * navigator.connection を見て低速だった場合はアセットの更新(プレキャッシュ)を呼び出さない
+    * ついでにmimetypeの判定にhono/utils/mimeを使うよう変更
+* フロントエンドのfetchエラー処理改善 [#1195](https://github.com/na-trium-144/falling-nikochan/pull/1195)
+    * fetchAssetのリトライ時のエラーハンドリングを修正
+    * 429リトライとネットワークエラー時リトライをfetchBackend側に常時入れる
+    * briefの取得に失敗してもリスト全体をエラー表示にしない
+* api,og,shareへのfetchBriefAPIのインジェクションをリファクタ [#1193](https://github.com/na-trium-144/falling-nikochan/pull/1193)
+
 ## ver. 16.13 - 2025/06/06 [#1187](https://github.com/na-trium-144/falling-nikochan/pull/1187)
 
 * バックエンドにSentry導入

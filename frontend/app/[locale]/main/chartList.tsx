@@ -231,7 +231,15 @@ export function ChartList(props: Props) {
                 }
                 return briefs;
               }),
-            onError: (e) => setBriefs(e),
+            onError: () =>
+              setBriefs((briefs) => {
+                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                  briefs = briefs.slice();
+                  briefs[i]!.fetched = true;
+                  // briefs[i]!.brief = undefined;
+                }
+                return briefs;
+              }),
           });
         }
       }
@@ -608,7 +616,7 @@ function ChartListItemChildren(props: CProps) {
       {props.brief?.ytId ? (
         <img
           className="fn-thumbnail"
-          src={`https://i.ytimg.com/vi/${props.brief?.ytId}/default.jpg`}
+          src={`https://i.ytimg.com/vi/${props.brief?.ytId}/${props.big ? "mqdefault" : "default"}.jpg`}
         />
       ) : (
         <div className="fn-thumbnail" />
@@ -640,16 +648,16 @@ function ChartListItemChildren(props: CProps) {
                 </span>
               </div>
             )}
-            <div className="h-4.5 **:leading-4.5">
-              {props.creator && (
+            {props.creator && (
+              <div className="h-4.5 **:leading-4.5">
                 <span className="fn-cl-clip">
                   <span className="text-xs">{t("chartCreator")}:</span>
                   <span className="ml-1 font-title text-sm fg-bright">
                     {props.brief?.chartCreator}
                   </span>
                 </span>
-              )}
-            </div>
+              </div>
+            )}
             <div
               className={clsx(
                 "h-4.5 **:leading-4.5",
@@ -673,7 +681,7 @@ function ChartListItemChildren(props: CProps) {
                         {status[i] && (
                           <span className="inline-block relative w-4 h-0">
                             <LevelBadge
-                              className="absolute -bottom-3"
+                              className="absolute -bottom-2.5"
                               status={[status[i]]}
                               levels={[levelTypes.indexOf(l.type)]}
                             />

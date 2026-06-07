@@ -4,6 +4,7 @@ import AbortAddon from "wretch/addons/abort";
 import { dedupe, retry } from "wretch/middlewares";
 import * as Sentry from "@sentry/nextjs";
 import { APIError, FETCH_ERROR_STATUS } from "./apiError";
+import { rateLimit } from "@falling-nikochan/chart";
 
 const dedupeMiddleware = dedupe();
 
@@ -33,7 +34,21 @@ export function fetchBackend() {
   return wretch(process.env.BACKEND_PREFIX || window.location.origin)
     .addon(QueryStringAddon)
     .addon(AbortAddon())
-    .middlewares([dedupeMiddleware])
+    .middlewares([
+      dedupeMiddleware,
+      retry({
+        delayTimer: rateLimit.chartFile * 1000 + 500,
+        delayRamp: (delay) => delay,
+        maxAttempts: 3,
+        until: (response) => !!response && response.status !== 429,
+        resolveWithLatestResponse: true,
+      }),
+      retry({
+        maxAttempts: 1,
+        until: (response) => !!response,
+        retryOnNetworkError: true,
+      }),
+    ])
     .customError(APIErrorTransformer(referenceError))
     .resolve((r) =>
       r.fetchError((e, w) => {
@@ -63,19 +78,12 @@ export function fetchAsset() {
           if (!response) {
             // network error, do not report
           } else {
-            let message: string;
-            try {
-              message = await response.text();
-            } catch {
-              message = response.statusText;
-            }
-            const we = new wretch.WretchError(message);
-            we.cause = referenceError;
-            // we.stack += "\nCAUSE: " + referenceError.stack;
-            we.response = response;
-            we.status = response.status;
-            we.url = url;
-            Sentry.captureException(we);
+            const e = await APIErrorTransformer(referenceError)(
+              null,
+              response,
+              { _url: url }
+            );
+            Sentry.captureException(e);
           }
           return {};
         },
@@ -101,7 +109,7 @@ export function fetchAsset() {
 
 function APIErrorTransformer(referenceError: Error) {
   return async (
-    we: WretchError,
+    _we: WretchError | null,
     res: Response,
     req: { _url: string }
   ): Promise<APIError> => {
@@ -130,7 +138,7 @@ function APIErrorTransformer(referenceError: Error) {
     }
     return new APIError(
       req._url,
-      we.status,
+      res.status,
       message,
       referenceError.stack,
       body
