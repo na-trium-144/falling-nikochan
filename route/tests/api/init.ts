@@ -38,6 +38,14 @@ import {
 import { inspect } from "node:util";
 inspect.defaultOptions.depth = null;
 
+if (typeof process.env.MONGODB_URI !== "string") {
+  throw new Error("MONGODB_URI is not set");
+}
+if (/[a-z]\.[a-z]/.test(process.env.MONGODB_URI)) {
+  // 本番環境(ネットワーク越し)はTLDを含むはずという雑なチェック
+  throw new Error("MONGODB_URI seems to be a production database.");
+}
+
 export const app = new Hono<{ Bindings: Bindings }>({ strict: false })
   .route("/api", await apiApp({ getConnInfo: () => null }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
@@ -343,9 +351,6 @@ cid100000に最新バージョンのchart(dummyChart()参照)を、
 100004〜100013にそれぞれver4〜13のchartを保存する
 */
 export async function initDb() {
-  if (typeof process.env.MONGODB_URI !== "string") {
-    throw new Error("MONGODB_URI is not set");
-  }
   const pSecretSalt = process.env.SECRET_SALT || "SecretSalt";
   const client = new MongoClient(process.env.MONGODB_URI);
   try {

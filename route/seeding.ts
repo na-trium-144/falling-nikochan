@@ -20,6 +20,7 @@ if (typeof process.env.MONGODB_URI !== "string") {
   throw new Error("MONGODB_URI is not set");
 }
 if (/[a-z]\.[a-z]/.test(process.env.MONGODB_URI)) {
+  // 本番環境(ネットワーク越し)はTLDを含むはずという雑なチェック
   throw new Error("MONGODB_URI seems to be a production database.");
 }
 
