@@ -4,6 +4,7 @@ import AbortAddon from "wretch/addons/abort";
 import { dedupe, retry } from "wretch/middlewares";
 import * as Sentry from "@sentry/nextjs";
 import { APIError, FETCH_ERROR_STATUS } from "./apiError";
+import { rateLimit } from "@falling-nikochan/chart";
 
 const dedupeMiddleware = dedupe();
 
@@ -33,7 +34,21 @@ export function fetchBackend() {
   return wretch(process.env.BACKEND_PREFIX || window.location.origin)
     .addon(QueryStringAddon)
     .addon(AbortAddon())
-    .middlewares([dedupeMiddleware])
+    .middlewares([
+      dedupeMiddleware,
+      retry({
+        delayTimer: rateLimit.chartFile * 1000 + 500,
+        delayRamp: (delay) => delay,
+        maxAttempts: 3,
+        until: (response) => !!response && response.status !== 429,
+        resolveWithLatestResponse: true,
+      }),
+      retry({
+        maxAttempts: 1,
+        until: (response) => !!response,
+        retryOnNetworkError: true,
+      }),
+    ])
     .customError(APIErrorTransformer(referenceError))
     .resolve((r) =>
       r.fetchError((e, w) => {
