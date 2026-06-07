@@ -33,7 +33,7 @@ export class APIError extends Error {
     this.stack = stack;
     this.body = body;
     this.fingerprint = [
-      this.name,
+      `APIError-${status}`,
       this.message,
       // url内のパラメータ部分を消す (cid, lvIndex など)
       // TODO: 数値以外がパラメータになるAPIが今後作られた場合ロジックを変更する必要がある
