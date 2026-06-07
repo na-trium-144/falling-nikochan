@@ -1,3 +1,8 @@
+## ver. 16.15 - 2025/06/07
+
+* ver16.14のエラーハンドリングのバグ修正
+* 本番dbでのテスト、本番dbを使った開発環境サーバーへのpost、本番サーバーに対する開発フロントエンドのcredentialつきリクエストを禁止 [#1185](https://github.com/na-trium-144/falling-nikochan/pull/1185)
+
 ## ver. 16.14 - 2025/06/07
 
 * トップページとchartListの改善
