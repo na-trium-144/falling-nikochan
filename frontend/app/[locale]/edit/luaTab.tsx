@@ -94,7 +94,7 @@ export function useLuaExecutor(): LuaExecutor {
       if (worker.current === null) {
         worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
         worker.current.addEventListener("error", (e) => {
-          console.error(e)
+          console.error(e);
           setRunning(false);
           setStdout([]);
           // e.messageが空の場合がある
