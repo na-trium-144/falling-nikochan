@@ -45,8 +45,10 @@ export function fetchBackend() {
       }),
       retry({
         maxAttempts: 1,
-        until: (response) => !!response,
+        until: (response) =>
+          !!response && response.status !== FETCH_ERROR_STATUS,
         retryOnNetworkError: true,
+        resolveWithLatestResponse: true,
       }),
     ])
     .customError(APIErrorTransformer(referenceError))

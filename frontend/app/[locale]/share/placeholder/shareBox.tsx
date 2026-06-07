@@ -19,6 +19,7 @@ import { ExternalLink } from "@/common/extLink.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
+import { markAsExpected } from "@/common/apiError.js";
 
 const YtMetaSchema = () =>
   v.object({
@@ -59,6 +60,7 @@ export function ShareBox(props: Props) {
         .url(`/api/ytMeta/${cid}`)
         .query({ lang: locale })
         .get()
+        .notFound((e) => markAsExpected(e))
         .json((res) => setYtMeta(v.parse(YtMetaSchema(), res)))
         .catch((e) => {
           captureAndWrap(e, { cid });
