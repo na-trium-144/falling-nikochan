@@ -1,13 +1,16 @@
 import { describe, test } from "node:test";
 import { expect } from "chai";
 import redirectApp from "@falling-nikochan/route/src/redirect";
+import { ResponseOK } from "../src/env";
 
 const app = redirectApp({
   languageDetector: async (c, next) => {
     c.set("language", "ja");
     await next();
   },
-  fetchStatic: () => new Response("not found", { status: 404 }),
+  fetchStatic: () => {
+    throw new Error("not implemented");
+  },
 });
 
 describe("redirectApp", () => {
@@ -93,10 +96,12 @@ describe("redirectApp", () => {
         await next();
       },
       fetchStatic: (_e, url) =>
-        new Response(`fetched:${url.pathname}`, {
-          status: 200,
-          headers: { "Content-Type": "text/plain" },
-        }),
+        Promise.resolve(
+          new Response(`fetched:${url.pathname}`, {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          }) as ResponseOK
+        ),
     });
 
     const res = await botApp.request("http://example.com/play", {

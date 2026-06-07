@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { backendOrigin, Bindings, cacheControl } from "../env.js";
+import { backendOrigin, Bindings, cacheControl, ResponseOK } from "../env.js";
 // import { ImageResponse } from "@vercel/og";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -39,7 +39,7 @@ const ChartBriefMinArraySchema = v.tuple([
 const ogApp = (config: {
   ImageResponse: any;
   fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
-  fetchStatic: (e: Bindings, url: URL) => Promise<Response>;
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use("/*", cors({ origin: "*" }))

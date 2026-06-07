@@ -61,11 +61,13 @@ export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
     return url.origin;
   }
 }
+
+export type ResponseOK = Response & { ok: true };
 /**
- * URLをfetch()してリソースを取得。
+ * URLをfetch()してリソースを取得。OKの場合のみreturnする。
  * ネットワークエラー時HTTPException(502), エラーレスポンス時Responseを含むErrorをthrowする
  */
-export async function fetchStatic(e: Bindings, url: URL) {
+export async function fetchStatic(e: Bindings, url: URL): Promise<ResponseOK> {
   const res = await fetch(new URL(url.pathname, e.ASSET_PREFIX || url.origin), {
     headers: {
       // https://vercel.com/docs/security/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation
@@ -78,7 +80,7 @@ export async function fetchStatic(e: Bindings, url: URL) {
     },
   }).catch(fetchError(e));
   if (res.ok) {
-    return res;
+    return res as ResponseOK;
   } else {
     throw new Error(`failed to fetch ${url} (${res.status})`, { cause: res });
   }

@@ -3,6 +3,7 @@ import {
   Bindings,
   cacheControl,
   languageDetector,
+  ResponseOK,
 } from "./env.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import {
@@ -26,7 +27,7 @@ bodyを無理やり書き換える。
 
 const shareApp = (config: {
   fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
-  fetchStatic: (e: Bindings, url: URL) => Promise<Response>;
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })

@@ -6,6 +6,7 @@ import {
   notFound,
   onError,
   redirectApp,
+  ResponseOK,
   shareApp,
 } from "@falling-nikochan/route";
 import { locales } from "@falling-nikochan/i18n/staticMin.js";
@@ -109,6 +110,14 @@ async function fetchStatic(_e: any, url: URL): Promise<Response> {
     } else {
       return res;
     }
+  }
+}
+async function fetchStaticWithThrow(_e: any, url: URL): Promise<ResponseOK> {
+  const res = await fetchStatic(_e, url);
+  if (res.ok) {
+    return res as ResponseOK;
+  } else {
+    throw new Error(`failed to fetch ${url} (${res.status})`, { cause: res });
   }
 }
 
@@ -462,7 +471,7 @@ const app = new Hono({ strict: false })
           });
         }
       },
-      fetchStatic,
+      fetchStatic: fetchStaticWithThrow,
       languageDetector,
     })
   )
@@ -470,7 +479,7 @@ const app = new Hono({ strict: false })
     "/",
     redirectApp({
       languageDetector,
-      fetchStatic,
+      fetchStatic: fetchStaticWithThrow,
     })
   )
   .all("/api/*", (c) => fetchAPI(c.req.raw))
@@ -555,7 +564,11 @@ const app = new Hono({ strict: false })
   })
   .use(languageDetector)
   .onError(
-    onError({ fetchStatic, captureException: null, setTransactionName: null })
+    onError({
+      fetchStatic: fetchStaticWithThrow,
+      captureException: null,
+      setTransactionName: null,
+    })
   )
   .notFound(notFound);
 

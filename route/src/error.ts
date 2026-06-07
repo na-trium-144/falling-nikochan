@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { backendOrigin, Bindings } from "./env.js";
+import { backendOrigin, Bindings, ResponseOK } from "./env.js";
 import { HTTPException } from "hono/http-exception";
 import { env } from "hono/adapter";
 import { matchedRoutes } from "hono/route";
@@ -8,7 +8,7 @@ import * as v from "valibot";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import type { captureException } from "@sentry/hono/node";
 
-export function notFound(): Response {
+export function notFound(): never {
   throw new HTTPException(404);
 }
 export function fetchError(e: Bindings) {
@@ -57,7 +57,7 @@ export function sValidatorHook() {
  */
 export const onError =
   (config: {
-    fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>;
+    fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
     isTest?: boolean;
     captureException: typeof captureException | null;
     setTransactionName: ((name: string) => undefined) | null;
@@ -167,7 +167,7 @@ export const onError =
               message
             ),
             status,
-            { "Content-Type": "text/html" }
+            { "Content-Type": "text/html; charset=utf-8" }
           );
         }
       }
@@ -179,7 +179,7 @@ export const onError =
   };
 
 async function errorResponse(
-  fetchStatic: (e: Bindings, url: URL) => Response | Promise<Response>,
+  fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>,
   e: Bindings,
   origin: string,
   lang: string,
@@ -187,27 +187,30 @@ async function errorResponse(
   message: string
 ) {
   const t = await getTranslations(lang, "error");
-  return (
-    await (await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin)))
-      .text()
-      .catch((e) => {
+  return await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin))
+    .then(
+      (res) => res.text(),
+      (e) => {
         console.error(`Failed to fetch error placeholder: `, e);
         console.warn("Fallback to plain error placeholder message.");
         return "Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE";
-      })
-  )
-    .replaceAll("PLACEHOLDER_STATUS", String(status))
-    .replaceAll(
-      "PLACEHOLDER_MESSAGE",
-      t.has("api." + message)
-        ? t("api." + message)
-        : status === 400
-          ? t("api.badRequest")
-          : status === 404
-            ? t("api.notFound")
-            : message || t("unknownApiError")
+      }
     )
-    .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error");
+    .then((text) =>
+      text
+        .replaceAll("PLACEHOLDER_STATUS", String(status))
+        .replaceAll(
+          "PLACEHOLDER_MESSAGE",
+          t.has("api." + message)
+            ? t("api." + message)
+            : status === 400
+              ? t("api.badRequest")
+              : status === 404
+                ? t("api.notFound")
+                : message || t("unknownApiError")
+        )
+        .replaceAll("PLACEHOLDER_TITLE", status == 404 ? "Not Found" : "Error")
+    );
   // _next/static/chunks/errorPlaceholder のほうには置き換え処理するべきものはなさそう
 }
 
