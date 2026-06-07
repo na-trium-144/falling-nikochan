@@ -75,6 +75,16 @@ const apiApp = async (config: {
         }
       }
     })
+    .use("/*", async (c, next) => {
+      if (
+        !["GET", "HEAD"].includes(c.req.method) &&
+        env(c).API_ENV === "development" &&
+        /[a-z]\.[a-z]/.test(env(c).MONGODB_URI) // 本番環境(ネットワーク越し)はTLDを含むはずという雑なチェック
+      ) {
+        return c.json({ message: "readonlyOnDev" }, 405);
+      }
+      await next();
+    })
     .use(
       "/*",
       bodyLimit({

@@ -13,6 +13,9 @@ export default {
       notFound: "The specified URL does not exist",
       chartIdNotFound: "The specified chart ID does not exist",
       levelNotFound: "The specified level does not exist",
+      // 405
+      readonlyOnDev:
+        "Modification to the production database is not allowed on the development server",
       // 409
       oldChartVersion: "The chart data version is not up to date",
       unsupportedChartVersion: "Unsupported chart data version",

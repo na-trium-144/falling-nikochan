@@ -13,6 +13,9 @@ export default {
       notFound: "指定したURLは存在しません",
       chartIdNotFound: "指定した譜面IDのデータはありません",
       levelNotFound: "指定したレベルのデータはありません",
+      // 405
+      readonlyOnDev:
+        "development サーバーで production データベースに変更を加えることはできません",
       // 409
       oldChartVersion: "譜面データのバージョンが最新ではありません",
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
