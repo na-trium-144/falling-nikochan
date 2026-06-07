@@ -13,7 +13,7 @@ interface Props {
 export default function TargetLine(props: Props) {
   const [spreadShadow, setSpreadShadow] = useState(false);
   useEffect(() => {
-    console.log(props.barFlash);
+    // console.log(props.barFlash);
     if (props.barFlash !== undefined) {
       // なぜかrequestAnimationFrameだけではdelayが足りない
       const t = setTimeout(() =>
