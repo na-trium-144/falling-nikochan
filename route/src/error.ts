@@ -188,9 +188,13 @@ async function errorResponse(
 ) {
   const t = await getTranslations(lang, "error");
   return (
-    await (
-      await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin))
-    ).text()
+    await (await fetchStatic(e, new URL(`/${lang}/errorPlaceholder`, origin)))
+      .text()
+      .catch((e) => {
+        console.error(`Failed to fetch error placeholder: `, e);
+        console.warn("Fallback to plain error placeholder message.");
+        return "Error PLACEHOLDER_STATUS: PLACEHOLDER_MESSAGE";
+      })
   )
     .replaceAll("PLACEHOLDER_STATUS", String(status))
     .replaceAll(
