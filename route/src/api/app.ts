@@ -96,7 +96,7 @@ const apiApp = async (config: {
     )
     .use("/*", decompressMiddleware)
     .use("/*", config.dbMiddleware)
-    .route("/brief", briefApp)
+    .route("/brief", await briefApp())
     .route("/ytMeta", ytMetaApp)
     .route(
       "/chartFile",
