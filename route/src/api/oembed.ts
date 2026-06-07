@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { cache } from "hono/cache";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
-import { ChartBrief } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import {

@@ -60,7 +60,7 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
-    return c.json(fetchBrief(env(c), cid), 200, {
+    return c.json(await fetchBrief(env(c), cid), 200, {
       "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
     });
   }

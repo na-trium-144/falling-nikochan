@@ -2,12 +2,9 @@ import { locales } from "@falling-nikochan/i18n/dynamic.js";
 import { languageDetector as honoLanguageDetector } from "hono/language";
 import dotenv from "dotenv";
 import { dirname, join } from "node:path";
-import briefApp from "./api/brief.js";
-import { Context, ExecutionContext, Hono, MiddlewareHandler } from "hono";
-import { fetchError, onError } from "./error.js";
+import { Context } from "hono";
+import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
-import type { captureException } from "@sentry/hono/node";
-import type { ChartBrief } from "@falling-nikochan/chart";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };

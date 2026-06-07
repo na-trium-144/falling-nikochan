@@ -1,6 +1,6 @@
 import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
-import briefApp, { fetchBrief } from "./brief.js";
+import briefApp from "./brief.js";
 import { backendOrigin, Bindings } from "../env.js";
 import chartFileApp from "./chartFile.js";
 import newChartFileApp from "./newChartFile.js";
@@ -13,7 +13,7 @@ import { join, dirname } from "node:path";
 import dotenv from "dotenv";
 import searchApp from "./search.js";
 import { bodyLimit } from "hono/body-limit";
-import { ChartBrief, docSchemas, fileMaxSize } from "@falling-nikochan/chart";
+import { docSchemas, fileMaxSize } from "@falling-nikochan/chart";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../package.json" with { type: "json" };
 import { Scalar } from "@scalar/hono-api-reference";
