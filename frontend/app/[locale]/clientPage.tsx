@@ -343,23 +343,10 @@ export function Features({ locale }: { locale: string }) {
   const t = useTranslations("main");
   return (
     <>
-      <section
-        id="feature-play"
-        className={clsx(
-          "w-full max-w-main flex",
-          "flex-col gap-4 mb-8 px-3",
-          "main-wide:flex-row main-wide:gap-4 main-wide:mb-12 main-wide:pl-12 main-wide:pr-0"
-        )}
-      >
-        <div
-          className={clsx(
-            "flex-1 flex flex-col items-center justify-center text-center"
-          )}
-        >
-          <h2 className="fn-heading-sect text-3xl mb-4">
-            {t("howToPlay.title")}
-          </h2>
-          <div className="mb-4 space-y-2">
+      <section id="feature-play" className="fn-feature mb-8 main-wide:mb-12">
+        <div>
+          <h2 className="fn-heading-sect text-3xl">{t("howToPlay.title")}</h2>
+          <div className="space-y-2">
             <p>{t("howToPlay.content1")}</p>
             <p>{t("howToPlay.content3")}</p>
             <p>{t("howToPlay.content5")}</p>
@@ -388,10 +375,7 @@ export function Features({ locale }: { locale: string }) {
             </Link>
           </div>
         </div>
-        <Box
-          classNameOuter="w-full main-wide:w-3/7 main-wide:-mr-3"
-          padding={4.5}
-        >
+        <Box>
           <div className="relative w-full aspect-[1.6] overflow-hidden">
             <img
               src={
@@ -415,21 +399,11 @@ export function Features({ locale }: { locale: string }) {
 
       <section
         id="feature-edit"
-        className={clsx(
-          "w-full max-w-main flex items-center",
-          "flex-col gap-4 mb-8 px-3",
-          "main-wide:flex-row-reverse main-wide:gap-4 main-wide:mb-12 main-wide:pl-0 main-wide:pr-12"
-        )}
+        className="fn-feature fn-reverse mb-8 main-wide:mb-12"
       >
-        <div
-          className={clsx(
-            "flex-1 flex flex-col items-center justify-center text-center"
-          )}
-        >
-          <h2 className="fn-heading-sect text-3xl mb-4">
-            {t("howToEdit.title")}
-          </h2>
-          <div className="mb-4 space-y-2">
+        <div>
+          <h2 className="fn-heading-sect text-3xl">{t("howToEdit.title")}</h2>
+          <div className="space-y-2">
             <p>{t("howToEdit.content1")}</p>
             <p>
               {t.rich("howToEdit.content2", {
@@ -461,10 +435,7 @@ export function Features({ locale }: { locale: string }) {
             {t("editNow")}
           </Link>
         </div>
-        <Box
-          classNameOuter="w-full main-wide:w-3/7 main-wide:-ml-3"
-          padding={4.5}
-        >
+        <Box>
           <img
             src={
               process.env.ASSET_PREFIX +
@@ -542,14 +513,8 @@ export function PoliciesAndLinks({
   const t = useTranslations("main");
   return (
     <>
-      <section
-        className={clsx(
-          "w-full max-w-main flex",
-          "flex-col px-3 gap-6 mb-3",
-          "main-wide:flex-row main-wide:items-start main-wide:px-12 main-wide:gap-12 main-wide:mb-24"
-        )}
-      >
-        <div className="basis-1/2 flex flex-col items-center justify-center text-center">
+      <section className="fn-policies-and-links mb-3 main-wide:mb-24">
+        <div>
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("policies.title")}
           </h2>
@@ -570,7 +535,7 @@ export function PoliciesAndLinks({
             />
           </Link>
         </div>
-        <div className="basis-1/2 flex flex-col items-center justify-center text-center">
+        <div>
           <h2 className="fn-heading-sect text-2xl mb-3">
             {t("links.contactLinks")}
           </h2>
