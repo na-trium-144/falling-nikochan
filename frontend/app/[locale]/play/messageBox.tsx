@@ -88,7 +88,15 @@ export function ReadyMessage(props: MessageProps) {
       autoOffset: props.autoOffset,
       // userOffset: props.userOffset,
     });
-  }, []);
+  }, [
+    props.auto,
+    props.enableIOSThru,
+    props.enableSE,
+    props.audioLatency,
+    props.playbackRate,
+    props.userBegin,
+    props.autoOffset,
+  ]);
 
   return (
     <CenterBox
