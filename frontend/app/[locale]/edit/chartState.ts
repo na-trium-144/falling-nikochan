@@ -533,6 +533,7 @@ export function useChartState(props: Props) {
             } else if (e3 instanceof LocalLoadError) {
               setLocalLoadState(e3);
             } else {
+              // いずれにおいてもvalidation以前のエラー → たぶんnikochanのファイルではない
               setLocalLoadState(new LocalLoadError(""));
             }
             return;
@@ -541,21 +542,28 @@ export function useChartState(props: Props) {
       }
 
       if (confirm(t("meta.confirmLoad"))) {
-        setChartState({
-          chart: new ChartEditing(result.newChart, {
-            luaExecutorRef,
-            locale,
-            cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
-            currentPasswd:
-              chartState.state === "ok"
-                ? chartState.chart.currentPasswd
-                : undefined,
-            convertedFrom: result.originalVer,
-          }),
-          state: "ok",
-        });
-        setLocalLoadState("ok");
-        return;
+        try {
+          setChartState({
+            chart: new ChartEditing(result.newChart, {
+              luaExecutorRef,
+              locale,
+              cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
+              currentPasswd:
+                chartState.state === "ok"
+                  ? chartState.chart.currentPasswd
+                  : undefined,
+              convertedFrom: result.originalVer,
+            }),
+            state: "ok",
+          });
+          setLocalLoadState("ok");
+          return;
+        } catch (e) {
+          // ここでエラーが出るのはバグ、でも失敗したことは伝えなければならない
+          Sentry.captureException(e);
+          setLocalLoadState(new LocalLoadError(String(e)));
+          return;
+        }
       }
       return setLocalLoadState(undefined);
     },
