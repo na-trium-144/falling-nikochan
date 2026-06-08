@@ -51,6 +51,21 @@ async function run() {
       console.error(`Error processing file ${file}:`, error);
     }
   }
+
+  const apiInitFileRef = Bun.file("./route/tests/api/init.ts");
+  let apiInitContent = await apiInitFileRef.text();
+  // Remove `before(async () => {`  and  `})`  because it doesn't work for some reason
+  apiInitContent = apiInitContent.replace(
+    /before\(async \(\) => \{\n([\s\S]*?)\n\}\);\n/,
+    "$1"
+  );
+  apiInitContent = apiInitContent.replace(
+    /after\(async \(\) => \{\n([\s\S]*?)\n\}\);\n/,
+    ""
+  );
+  await Bun.write("./route/tests/api/init.ts", apiInitContent);
+  console.log(`Updated ./route/tests/api/init.ts`);
+
   console.log("Replacement process finished.");
 }
 

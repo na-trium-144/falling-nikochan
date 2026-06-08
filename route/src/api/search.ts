@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
-import { Db, Filter, MongoClient } from "mongodb";
+import { Db, Filter } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { ChartEntryCompressed, ChartLevelBrief } from "./chart.js";
@@ -53,7 +53,12 @@ const SearchResultSchema = () =>
     ),
   });
 
-const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const searchApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
+  strict: false,
+}).get(
   "/",
   cache({
     cacheName: "api-search",
@@ -132,106 +137,100 @@ const searchApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
         ).slice(0, MAX_QUERY_TOKENS)
       : [];
 
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
+    const db = await c.get("db")();
 
-      let mongoQuery: Filter<ChartEntryCompressed> = {
-        deleted: false,
-        levelBrief: {
-          $elemMatch: {
-            difficulty: {
-              $gte: difficultyMin,
-              $lte: difficultyMax,
-            },
-            unlisted: { $ne: true },
+    let mongoQuery: Filter<ChartEntryCompressed> = {
+      deleted: false,
+      levelBrief: {
+        $elemMatch: {
+          difficulty: {
+            $gte: difficultyMin,
+            $lte: difficultyMax,
           },
+          unlisted: { $ne: true },
         },
+      },
+    };
+
+    if (normalizedQueries.length > 0) {
+      mongoQuery = {
+        ...mongoQuery,
+        $or: [
+          // クエリがcidに完全一致する場合は、publishedの状態に関わらず返す。これは意図的な仕様
+          { cid: q },
+          {
+            published: true,
+            $and: normalizedQueries.map((s) => ({
+              normalizedText: { $regex: escapeRegex(s) },
+            })),
+          },
+        ],
       };
-
-      if (normalizedQueries.length > 0) {
-        mongoQuery = {
-          ...mongoQuery,
-          $or: [
-            // クエリがcidに完全一致する場合は、publishedの状態に関わらず返す。これは意図的な仕様
-            { cid: q },
-            {
-              published: true,
-              $and: normalizedQueries.map((s) => ({
-                normalizedText: { $regex: escapeRegex(s) },
-              })),
-            },
-          ],
-        };
-      } else {
-        mongoQuery = {
-          ...mongoQuery,
-          published: true,
-        };
-      }
-
-      let results = await db
-        .collection<ChartEntryCompressed>("chart")
-        .find(mongoQuery)
-        .project<{
-          cid: string;
-          normalizedText: string;
-          updatedAt: number;
-          levelBrief: ChartLevelBrief[];
-        }>({
-          _id: 0,
-          cid: 1,
-          normalizedText: 1,
-          updatedAt: 1,
-          levelBrief: 1,
-        })
-        .toArray();
-
-      let sortedResults: v.InferOutput<ReturnType<typeof SearchResultSchema>>[];
-
-      switch (sort) {
-        case "popular": {
-          const rawPopularCounts = await getRawPopularCounts(db);
-          const mapped = results
-            .map((r) => ({
-              cid: r.cid,
-              updatedAt: r.updatedAt,
-              count: aggeratePopularCounts(rawPopularCounts, r),
-            }))
-            .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
-            .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
-
-          sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
-          break;
-        }
-        case "latest":
-          sortedResults = results
-            .sort((a, b) => b.updatedAt - a.updatedAt)
-            .map((r) => ({ cid: r.cid, updatedAt: r.updatedAt }));
-          break;
-        case "relevance":
-          sortedResults = results
-            .sort(
-              (a, b) =>
-                -normalizedQueries.reduce(
-                  (prev, token) =>
-                    prev +
-                    a.normalizedText.split(token).length -
-                    b.normalizedText.split(token).length,
-                  0
-                ) || b.updatedAt - a.updatedAt
-            )
-            .map((r) => ({ cid: r.cid }));
-          break;
-      }
-
-      return c.json(sortedResults, 200, {
-        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
-      });
-    } finally {
-      await client.close();
+    } else {
+      mongoQuery = {
+        ...mongoQuery,
+        published: true,
+      };
     }
+
+    let results = await db
+      .collection<ChartEntryCompressed>("chart")
+      .find(mongoQuery)
+      .project<{
+        cid: string;
+        normalizedText: string;
+        updatedAt: number;
+        levelBrief: ChartLevelBrief[];
+      }>({
+        _id: 0,
+        cid: 1,
+        normalizedText: 1,
+        updatedAt: 1,
+        levelBrief: 1,
+      })
+      .toArray();
+
+    let sortedResults: v.InferOutput<ReturnType<typeof SearchResultSchema>>[];
+
+    switch (sort) {
+      case "popular": {
+        const rawPopularCounts = await getRawPopularCounts(db);
+        const mapped = results
+          .map((r) => ({
+            cid: r.cid,
+            updatedAt: r.updatedAt,
+            count: aggeratePopularCounts(rawPopularCounts, r),
+          }))
+          .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
+          .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
+
+        sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
+        break;
+      }
+      case "latest":
+        sortedResults = results
+          .sort((a, b) => b.updatedAt - a.updatedAt)
+          .map((r) => ({ cid: r.cid, updatedAt: r.updatedAt }));
+        break;
+      case "relevance":
+        sortedResults = results
+          .sort(
+            (a, b) =>
+              -normalizedQueries.reduce(
+                (prev, token) =>
+                  prev +
+                  a.normalizedText.split(token).length -
+                  b.normalizedText.split(token).length,
+                0
+              ) || b.updatedAt - a.updatedAt
+          )
+          .map((r) => ({ cid: r.cid }));
+        break;
+    }
+
+    return c.json(sortedResults, 200, {
+      "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+    });
   }
 );
 

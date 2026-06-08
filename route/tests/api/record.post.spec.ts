@@ -1,8 +1,7 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, initDb } from "./init";
+import { app, db, initDb } from "./init";
 import { RecordPost, hash } from "@falling-nikochan/chart";
-import { MongoClient } from "mongodb";
 import { PlayRecordEntry } from "@falling-nikochan/route/src/api/record";
 
 describe("POST /api/record/:cid", () => {
@@ -68,31 +67,23 @@ describe("POST /api/record/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    let client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      const record = await (
-        await client.connect()
-      )
-        .db("nikochan")
-        .collection<PlayRecordEntry>("playRecord")
-        .find({ $and: [{ cid: "100000" }, { lvHash: await hash("dummy") }] })
-        .toArray();
-      expect(record.length).to.equal(1);
-      expect(record[0]).to.include({
-        lvHash: await hash("dummy"),
-        auto: false,
-        score: 100,
-        baseScore: 70,
-        chainScore: 15,
-        bigScore: 15,
-        fc: true,
-        fb: false,
-        factor: 0.5,
-        editing: false,
-      });
-    } finally {
-      client.close();
-    }
+    const record = await db
+      .collection<PlayRecordEntry>("playRecord")
+      .find({ $and: [{ cid: "100000" }, { lvHash: await hash("dummy") }] })
+      .toArray();
+    expect(record.length).to.equal(1);
+    expect(record[0]).to.include({
+      lvHash: await hash("dummy"),
+      auto: false,
+      score: 100,
+      baseScore: 70,
+      chainScore: 15,
+      bigScore: 15,
+      fc: true,
+      fb: false,
+      factor: 0.5,
+      editing: false,
+    });
 
     res = await app.request("/api/record/100000", {
       method: "POST",
@@ -109,18 +100,10 @@ describe("POST /api/record/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      const record = await (
-        await client.connect()
-      )
-        .db("nikochan")
-        .collection<PlayRecordEntry>("playRecord")
-        .find({ $and: [{ cid: "100000" }, { lvHash: await hash("dummy") }] })
-        .toArray();
-      expect(record.length).to.equal(2);
-    } finally {
-      client.close();
-    }
+    const record2 = await db
+      .collection<PlayRecordEntry>("playRecord")
+      .find({ $and: [{ cid: "100000" }, { lvHash: await hash("dummy") }] })
+      .toArray();
+    expect(record2.length).to.equal(2);
   });
 });

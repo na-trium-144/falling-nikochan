@@ -11,7 +11,7 @@ import {
   docRefs,
 } from "@falling-nikochan/chart";
 import { getIp, updateIp } from "./dbRateLimit.js";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { ChartEntryCompressed, chartToEntry, zipEntry } from "./chart.js";
 import { Context, Hono } from "hono";
 import { Bindings, secretSalt } from "../env.js";
@@ -27,7 +27,9 @@ import { supportedEncodings } from "./decompress.js";
 const newChartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
-  new Hono<{ Bindings: Bindings }>({ strict: false }).post(
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
+    strict: false,
+  }).post(
     "/",
     describeRoute({
       description:
@@ -134,86 +136,80 @@ const newChartFileApp = async (config: {
       const ip = getIp(c, config.getConnInfo);
       const chartBuf = await c.req.arrayBuffer();
       const pSecretSalt = secretSalt(env(c));
-      const client = new MongoClient(env(c).MONGODB_URI);
-      try {
-        await client.connect();
-        const db = client.db("nikochan");
+      const db = await c.get("db")();
 
-        if (!(await updateIp(env(c), db, ip, "newChartFile"))) {
-          return c.json(
-            {
-              message: "tooManyRequest",
-              // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
-            },
-            429,
-            { "retry-after": rateLimit.newChartFile.toString() }
-          );
-        }
-
-        let newChart: Chart14Edit | Chart15;
-        try {
-          newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
-          if (newChart.ver < currentChartVer - 1) {
-            return c.json({ message: "oldChartVersion" }, 409);
-          }
-          newChart = validateChartWithoutConvert(newChart) as
-            | Chart14Edit
-            | Chart15;
-        } catch (e) {
-          throw new HTTPException(415, { message: "invalidChart", cause: e });
-        }
-
-        if (numEvents(newChart) > chartMaxEvent) {
-          throw new HTTPException(413, {
-            message: "tooManyEvent",
-            // message: `Chart too large (number of events is ${numEvents(
-            //   newChart
-            // )} / ${chartMaxEvent})`,
-          });
-        }
-
-        // update Time
-        const updatedAt = new Date().getTime();
-
-        let cid: string;
-        while (true) {
-          // 生成するcidは110000〜999999まで
-          // 10xxxxはテストデータに使用するので、誤ってテストを本番環境で実行する可能性に備えて予約
-          cid = Math.floor(Math.random() * 890000 + 110000).toString();
-          if (
-            await db
-              .collection<ChartEntryCompressed>("chart")
-              .countDocuments({ cid }, { limit: 1 })
-          ) {
-            // cidかぶり
-            continue;
-          } else {
-            break;
-          }
-        }
-
-        await db
-          .collection<ChartEntryCompressed>("chart")
-          .insertOne(
-            await zipEntry(
-              await chartToEntry(
-                newChart,
-                cid,
-                updatedAt,
-                ip,
-                await getYTDataEntry(env(c), db, newChart.ytId).catch(
-                  () => undefined
-                ),
-                pSecretSalt,
-                null
-              )
-            )
-          );
-
-        return c.json({ cid: cid });
-      } finally {
-        await client.close();
+      if (!(await updateIp(env(c), db, ip, "newChartFile"))) {
+        return c.json(
+          {
+            message: "tooManyRequest",
+            // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
+          },
+          429,
+          { "retry-after": rateLimit.newChartFile.toString() }
+        );
       }
+
+      let newChart: Chart14Edit | Chart15;
+      try {
+        newChart = msgpack.decode(chartBuf) as Chart14Edit | Chart15;
+        if (newChart.ver < currentChartVer - 1) {
+          return c.json({ message: "oldChartVersion" }, 409);
+        }
+        newChart = validateChartWithoutConvert(newChart) as
+          | Chart14Edit
+          | Chart15;
+      } catch (e) {
+        throw new HTTPException(415, { message: "invalidChart", cause: e });
+      }
+
+      if (numEvents(newChart) > chartMaxEvent) {
+        throw new HTTPException(413, {
+          message: "tooManyEvent",
+          // message: `Chart too large (number of events is ${numEvents(
+          //   newChart
+          // )} / ${chartMaxEvent})`,
+        });
+      }
+
+      // update Time
+      const updatedAt = new Date().getTime();
+
+      let cid: string;
+      while (true) {
+        // 生成するcidは110000〜999999まで
+        // 10xxxxはテストデータに使用するので、誤ってテストを本番環境で実行する可能性に備えて予約
+        cid = Math.floor(Math.random() * 890000 + 110000).toString();
+        if (
+          await db
+            .collection<ChartEntryCompressed>("chart")
+            .countDocuments({ cid }, { limit: 1 })
+        ) {
+          // cidかぶり
+          continue;
+        } else {
+          break;
+        }
+      }
+
+      await db
+        .collection<ChartEntryCompressed>("chart")
+        .insertOne(
+          await zipEntry(
+            await chartToEntry(
+              newChart,
+              cid,
+              updatedAt,
+              ip,
+              await getYTDataEntry(env(c), db, newChart.ytId).catch(
+                () => undefined
+              ),
+              pSecretSalt,
+              null
+            )
+          )
+        );
+
+      return c.json({ cid: cid });
     }
   );
 

@@ -10,13 +10,16 @@ import {
   reportPopularCharts,
   checkNewCharts,
   reportToDiscord,
-  fetchBrief,
+  getBrief,
+  sentryBeforeSend,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import { getConnInfo } from "hono/cloudflare-workers";
 import * as Sentry from "@sentry/hono/cloudflare";
 import packageJson from "@falling-nikochan/route/package.json" with { type: "json" };
+import { MongoClient } from "mongodb";
+import { createMiddleware } from "hono/factory";
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
 const sentryConfig = (env) => ({
@@ -25,16 +28,45 @@ const sentryConfig = (env) => ({
   environment: env.CF_VERSION_METADATA.tag,
   sendDefaultPii: false,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+  beforeSend: sentryBeforeSend,
 });
 const sentryHonoConfig = (env) => ({
   ...sentryConfig(env),
   shouldHandleError: () => false,
 });
 
+const dbMiddleware = createMiddleware(async (c, next) => {
+  let client = null;
+  c.set("db", async () => {
+    if (!client) {
+      client = new MongoClient(env(c).MONGODB_URI);
+      await client.connect();
+    }
+    return client.db("nikochan");
+  });
+  try {
+    await next();
+  } finally {
+    if (client) {
+      await client.close();
+    }
+  }
+});
+const fetchBrief = async (e, cid) => {
+  const client = new MongoClient(e.MONGODB_URI);
+  try {
+    await client.connect();
+    const db = client.db("nikochan");
+    return await getBrief(db, cid);
+  } finally {
+    await client.close();
+  }
+};
+
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryHonoConfig));
 app
-  .route("/api", await apiApp({ getConnInfo }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);
     return c.redirect(
@@ -42,8 +74,8 @@ app
       307
     );
   })
-  .route("/sitemap.xml", sitemapApp)
-  .route("/rss.xml", rssApp)
+  .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
+  .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())

@@ -30,11 +30,10 @@ import { useRouter } from "next/navigation";
 import saveAs from "file-saver";
 import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
-import { isInsideFrame } from "@/scale";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { markAsExpected } from "@/common/apiError";
 
@@ -533,6 +532,7 @@ export function useChartState(props: Props) {
             } else if (e3 instanceof LocalLoadError) {
               setLocalLoadState(e3);
             } else {
+              // いずれにおいてもvalidation以前のエラー → たぶんnikochanのファイルではない
               setLocalLoadState(new LocalLoadError(""));
             }
             return;
@@ -541,21 +541,28 @@ export function useChartState(props: Props) {
       }
 
       if (confirm(t("meta.confirmLoad"))) {
-        setChartState({
-          chart: new ChartEditing(result.newChart, {
-            luaExecutorRef,
-            locale,
-            cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
-            currentPasswd:
-              chartState.state === "ok"
-                ? chartState.chart.currentPasswd
-                : undefined,
-            convertedFrom: result.originalVer,
-          }),
-          state: "ok",
-        });
-        setLocalLoadState("ok");
-        return;
+        try {
+          setChartState({
+            chart: new ChartEditing(result.newChart, {
+              luaExecutorRef,
+              locale,
+              cid: chartState.state === "ok" ? chartState.chart.cid : undefined,
+              currentPasswd:
+                chartState.state === "ok"
+                  ? chartState.chart.currentPasswd
+                  : undefined,
+              convertedFrom: result.originalVer,
+            }),
+            state: "ok",
+          });
+          setLocalLoadState("ok");
+          return;
+        } catch (e) {
+          // ここでエラーが出るのはバグ、でも失敗したことは伝えなければならない
+          Sentry.captureException(e);
+          setLocalLoadState(new LocalLoadError(String(e)));
+          return;
+        }
       }
       return setLocalLoadState(undefined);
     },

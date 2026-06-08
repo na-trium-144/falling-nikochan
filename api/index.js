@@ -13,7 +13,8 @@ import {
   onError,
   notFound,
   fetchStatic,
-  fetchBrief,
+  getBrief,
+  sentryBeforeSend,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -21,6 +22,9 @@ import { getConnInfo } from "hono/vercel";
 import { compress } from "hono/compress";
 import * as Sentry from "@sentry/hono/node";
 import packageJson from "@falling-nikochan/route/package.json" with { type: "json" };
+import { MongoClient } from "mongodb";
+import { createMiddleware } from "hono/factory";
+import { attachDatabasePool } from "@vercel/functions";
 
 // export const config = {
 //   runtime: "nodejs",
@@ -33,18 +37,30 @@ Sentry.init({
   sendDefaultPii: false,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   includeLocalVariables: true,
+  beforeSend: sentryBeforeSend,
 });
 const sentryMiddleware = (app) =>
   Sentry.sentry(app, { shouldHandleError: () => false });
+
+const client = new MongoClient(process.env.MONGODB_URI);
+attachDatabasePool(client);
+await client.connect();
+const db = client.db("nikochan");
+console.log(`connected to ${process.env.MONGODB_URI}`);
+const dbMiddleware = createMiddleware(async (c, next) => {
+  c.set("db", async () => db);
+  await next();
+});
+const fetchBrief = (_e, cid) => getBrief(db, cid);
 
 const app = new Hono({ strict: false });
 app.use(sentryMiddleware(app));
 app
   .use(compress())
-  .route("/api", await apiApp({ getConnInfo }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
-  .route("/sitemap.xml", sitemapApp)
-  .route("/rss.xml", rssApp)
+  .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
+  .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(languageDetector())

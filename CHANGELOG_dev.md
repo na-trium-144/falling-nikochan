@@ -1,3 +1,10 @@
+## ver. 16.16 - 2025/06/09
+
+* MongoClientをリクエストごとに破棄せず再利用 [#1201](https://github.com/na-trium-144/falling-nikochan/pull/1201)
+* バックエンドのsentryのbeforeSendをenv.tsの1箇所で定義
+* フロントエンドのセッションなどのコンテキストをsentryに送信
+* record送信時のスコア0のバリデーションを修正
+
 ## ver. 16.15 - 2025/06/07
 
 * ver16.14のエラーハンドリングのバグ修正

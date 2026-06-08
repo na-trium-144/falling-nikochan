@@ -40,7 +40,6 @@ import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { CenterBox } from "@/common/box.js";
-import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
 import Result, { resultAnimDelays } from "./result.js";
 import { getBestScore, setBestScore } from "@/common/bestScore.js";
@@ -57,6 +56,7 @@ import { Key } from "@/common/key.js";
 import {
   detectOS,
   historyBackWithReview,
+  isInsideFrame,
   isStandalone,
   updatePlayCountForReview,
 } from "@/common/pwaInstall.js";
@@ -69,6 +69,8 @@ import { useFlash } from "./useFlash.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
+import * as Sentry from "@sentry/nextjs";
+import { useDisplayMode } from "@/scale.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -86,22 +88,22 @@ export function InitPlay({ locale }: { locale: string }) {
     const q = getQueryOptions();
     setQueryOptions(q);
 
+    let cid: string | undefined = undefined;
+    let lvIndex: number | undefined = undefined;
+
     const session = getSession(q.sid);
     // history.replaceState(null, "", location.pathname);
     if (session !== null) {
-      setCid(session.cid);
-      setLvIndex(session.lvIndex);
+      cid = session.cid;
+      lvIndex = session.lvIndex;
       setChartBrief(session.brief);
       setEditing(!!session.editing);
     } else {
       if (q.cid) {
-        setCid(q.cid);
-        setLvIndex(q.lvIndex);
+        cid = q.cid;
+        lvIndex = q.lvIndex;
         fetchBrief(q.cid!, { onResult: (brief) => setChartBrief(brief) });
         setEditing(false);
-      } else {
-        setErrorMsg(te("noSession"));
-        return;
       }
     }
     // document.title =
@@ -109,12 +111,18 @@ export function InitPlay({ locale }: { locale: string }) {
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
+    Sentry.setContext("play.init", {
+      ...q,
+      cid,
+      lvIndex,
+    });
+    setCid(cid);
+    setLvIndex(lvIndex);
+
     if (session?.level) {
       setChartSeq(loadChart(session.level));
       setErrorMsg(undefined);
-    } else {
-      const cid = session?.cid ?? q.cid;
-      const lvIndex = session?.lvIndex ?? q.lvIndex;
+    } else if (cid !== undefined && lvIndex !== undefined) {
       fetchBackend()
         .url(`/api/playFile/${cid}/${lvIndex}`)
         .options({ cache: "no-store" })
@@ -145,6 +153,8 @@ export function InitPlay({ locale }: { locale: string }) {
           setChartSeq(seq);
           setErrorMsg(error);
         });
+    } else {
+      setErrorMsg(te("noSession"));
     }
   }, [te]);
 
@@ -247,11 +257,14 @@ function Play(props: Props) {
   );
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
-    useDisplayMode();
-  // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
-  // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
-  const isMobile = screenWidth <= screenHeight;
+  const {
+    isTouch,
+    isMobileGame: isMobile,
+    screenHeight,
+    rem,
+    statusScale,
+    largeResult,
+  } = useDisplayMode();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;
@@ -705,31 +718,9 @@ function Play(props: Props) {
     } else if (queryOptions.result) {
       setShowResult(true);
     }
-  }, [
-    chartPlaying,
-    showResult,
-    chartEnd,
-    endSecPassed,
-    chartSeq,
-    score,
-    bestScoreState,
-    cid,
-    auto,
-    userBegin,
-    playbackRate,
-    lvIndex,
-    chartBrief,
-    baseScore,
-    chainScore,
-    bigScore,
-    judgeCount,
-    stop,
-    queryOptions,
-    bigCount,
-    hitType,
-    editing,
-    reloadBestScore,
-  ]);
+    // 値の変化にあわせて正確に再実行することよりも二重送信を防ぐことのほうが大事
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPlaying, showResult, chartEnd, endSecPassed]);
 
   const onReady = useCallback(() => {
     console.log("ready ->", ytPlayer.current?.getPlayerState());
@@ -749,13 +740,13 @@ function Play(props: Props) {
       }
       setLoadingAfterReady(false);
       setNeedManualStart(false);
-      setShowResult(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
       setOldPlaybackRate(playbackRate);
       setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
+      setShowResult(false);
       const now =
         (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
         chartSeq.offset -

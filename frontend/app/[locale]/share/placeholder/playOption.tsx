@@ -22,13 +22,12 @@ import Timer from "@icon-park/react/lib/icons/Timer";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RecordHistogram } from "@/common/recordHistogram";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge";
 import { SlimeSVG } from "@/common/slime";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import { isInsideFrame } from "@/scale";
 import { formatError } from "@/common/fetch";
 
 interface Props {

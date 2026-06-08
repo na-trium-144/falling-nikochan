@@ -2,6 +2,7 @@ import { test, describe } from "node:test";
 import { expect } from "chai";
 import {
   app,
+  db,
   dummyChart,
   dummyChart10,
   dummyChart11,
@@ -30,7 +31,6 @@ import {
   hash,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 const encodeBase64Utf8 = (value: string) =>
@@ -43,15 +43,9 @@ const basicAuth = (passwd: string) =>
   `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
 const hashAuth = (passwdHash: string) => `Nikochan-Hash ${passwdHash}`;
 const getServerHash = async () => {
-  const client = new MongoClient(process.env.MONGODB_URI!);
-  try {
-    return (await (await client.connect())
-      .db("nikochan")
-      .collection<ChartEntryCompressed>("chart")
-      .findOne({ cid: "100000" }))!.pServerHash!;
-  } finally {
-    client.close();
-  }
+  return (await db
+    .collection<ChartEntryCompressed>("chart")
+    .findOne({ cid: "100000" }))!.pServerHash!;
 };
 
 describe("GET /api/chartFile/:cid", () => {

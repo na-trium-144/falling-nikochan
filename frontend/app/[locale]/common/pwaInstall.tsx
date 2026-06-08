@@ -18,6 +18,7 @@ import { SlimeSVG } from "./slime";
 import ProgressBar from "./progressBar";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 
 const SW_ALLOWED_ORIGINS = ["https://nikochan.utcode.net"];
 
@@ -49,6 +50,14 @@ export function isAndroidTWA(): boolean {
       !!sessionStorage.getItem("fromAndroidTWA") ||
       document.referrer.includes("android-app://net.utcode.nikochan.twa/"))
   );
+}
+export function isInsideFrame() {
+  return window.self !== window.top;
+}
+export function useInsideFrameDetector() {
+  const [state, setState] = useState<boolean | null>(null);
+  useEffect(() => setState(isInsideFrame()), []);
+  return state;
 }
 
 export function updatePlayCountForReview() {
@@ -255,6 +264,11 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
     if (isAndroidTWA()) {
       sessionStorage.setItem("fromAndroidTWA", "1");
     }
+    Sentry.setContext("pwaInstall.mode", {
+      standalone: isStandalone(),
+      androidTWA: isAndroidTWA(),
+      insideFrame: isInsideFrame(),
+    });
     setDismissed(
       isStandalone() || localStorage.getItem("PWADismissed") === "1"
     );
@@ -290,6 +304,7 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
       if (SW_ALLOWED_ORIGINS.includes(window.location.origin)) {
         navigator.serviceWorker.register("/sw.js", { scope: "/" }).then(
           (reg) => {
+            Sentry.setContext("pwaInstall.serviceWorker", { register: true });
             if (updateFetching.current !== null) {
               clearTimeout(updateFetching.current);
             }
@@ -338,7 +353,10 @@ export function PWAInstallProvider(props: { children: ReactNode }) {
               });
             });
           },
-          (e) => console.error("Failed to register service worker:", e)
+          (e) => {
+            console.error("Failed to register service worker:", e);
+            Sentry.setContext("pwaInstall.serviceWorker", { register: false });
+          }
         );
       } else {
         console.warn(

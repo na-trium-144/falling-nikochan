@@ -5,6 +5,8 @@ import { dirname, join } from "node:path";
 import { Context } from "hono";
 import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
+import { Db } from "mongodb";
+import type { ErrorEvent, EventHint } from "@sentry/hono/node";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -50,7 +52,11 @@ export function cacheControl(e: Bindings, age: number | null) {
   }
 }
 
-export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
+export function backendOrigin(
+  c:
+    | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
+): string {
   if (env(c).BACKEND_PREFIX) {
     return env(c).BACKEND_PREFIX!;
   } else {
@@ -104,4 +110,17 @@ export function languageDetector() {
     },
     // debug: process.env.API_ENV === "development",
   });
+}
+
+export function sentryBeforeSend(
+  event: ErrorEvent,
+  hint: EventHint
+): ErrorEvent | null {
+  if (
+    hint.originalException instanceof Error &&
+    hint.originalException.name === "MongoServerError"
+  ) {
+    event.fingerprint = ["MongoServerError"];
+  }
+  return event;
 }

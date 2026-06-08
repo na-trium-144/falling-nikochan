@@ -24,7 +24,6 @@ import { LuaTabPlaceholder, LuaTabProvider, useLuaExecutor } from "./luaTab.js";
 import Select from "@/common/select.js";
 import LevelTab from "./levelTab.js";
 import { initSession, SessionData } from "@/play/session.js";
-import { useDisplayMode, useInsideFrameDetector } from "@/scale.js";
 import Forbid from "@icon-park/react/lib/icons/Forbid";
 import Move from "@icon-park/react/lib/icons/Move";
 import { GuideMain } from "./guideMain.js";
@@ -35,6 +34,7 @@ import { SlimeSVG } from "@/common/slime.js";
 import {
   historyBackWithReview,
   updatePlayCountForReview,
+  useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall.jsx";
 import { useSE } from "@/common/se.js";
@@ -42,6 +42,7 @@ import { useChartState } from "./chartState.js";
 import { PasswdPrompt } from "./passwdPrompt.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
+import { useDisplayMode } from "@/scale.js";
 
 export default function Edit(props: {
   locale: string;
