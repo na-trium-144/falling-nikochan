@@ -11,7 +11,8 @@ import {
 } from "../error.js";
 import { getTranslations } from "@falling-nikochan/i18n/dynamic.js";
 import xmlbuilder2 from "xmlbuilder2";
-import { fetchBrief } from "./brief.js";
+import { entryToBrief, getChartEntryCompressed } from "./chart.js";
+import { Db } from "mongodb";
 
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
@@ -42,7 +43,9 @@ const OEmbedParamSchema = () =>
     format: v.optional(v.union([v.literal("json"), v.literal("xml")])),
   });
 
-const oembedApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const oembedApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+  strict: false,
+}).get(
   "/",
   cache({
     cacheName: "api-oembed",
@@ -106,7 +109,9 @@ const oembedApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
 
     const t = await getTranslations("en", "share");
 
-    const brief = await fetchBrief(env(c), cid);
+    const db = c.get("db");
+    const entry = await getChartEntryCompressed(db, cid, null);
+    const brief = entryToBrief(entry);
 
     const iframeURL = new URL(
       `/share/${cid}`,

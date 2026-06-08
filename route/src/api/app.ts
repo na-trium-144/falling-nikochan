@@ -1,4 +1,4 @@
-import { Context, Hono } from "hono";
+import { Context, Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import briefApp from "./brief.js";
 import { backendOrigin, Bindings } from "../env.js";
@@ -23,12 +23,14 @@ import { forwardCheckApp } from "./dbRateLimit.js";
 import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 import { env } from "hono/adapter";
+import { Db } from "mongodb";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
-export { fetchBrief } from "./brief.js";
+export { getBrief } from "./brief.js";
 
 const apiApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
+  dbMiddleware: MiddlewareHandler;
 }) => {
   const prodCors = cors({
     origin: "*",
@@ -40,7 +42,9 @@ const apiApp = async (config: {
     credentials: true,
     exposeHeaders: ["Retry-After"],
   });
-  const apiApp = new Hono<{ Bindings: Bindings }>({ strict: false })
+  const apiApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+    strict: false,
+  })
     .use("/*", async (c, next) => {
       if (env(c).API_ENV === "development") {
         return devCors(c, next);
@@ -75,16 +79,6 @@ const apiApp = async (config: {
         }
       }
     })
-    .use("/*", async (c, next) => {
-      if (
-        !["GET", "HEAD"].includes(c.req.method) &&
-        env(c).API_ENV === "development" &&
-        /[a-z]\.[a-z]/.test(env(c).MONGODB_URI) // 本番環境(ネットワーク越し)はTLDを含むはずという雑なチェック
-      ) {
-        return c.json({ message: "readonlyOnDev" }, 405);
-      }
-      await next();
-    })
     .use(
       "/*",
       bodyLimit({
@@ -95,6 +89,7 @@ const apiApp = async (config: {
       })
     )
     .use("/*", decompressMiddleware)
+    .use("/*", config.dbMiddleware)
     .route("/brief", briefApp)
     .route("/ytMeta", ytMetaApp)
     .route(

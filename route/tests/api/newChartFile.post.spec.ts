@@ -2,6 +2,7 @@ import { test, describe } from "node:test";
 import { expect } from "chai";
 import {
   app,
+  db,
   dummyChart,
   dummyChart12,
   dummyChart13,
@@ -16,7 +17,6 @@ import {
   fileMaxSize,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 describe("POST /api/newChartFile", () => {
@@ -67,20 +67,13 @@ describe("POST /api/newChartFile", () => {
     const body = await res.json();
     expect(body.cid).to.be.a("string");
 
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: body.cid });
-      expect(e).not.to.be.null;
-      expect(e!.title).to.equal(dummyChart().title);
-      expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
-      expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: body.cid });
+    expect(e).not.to.be.null;
+    expect(e!.title).to.equal(dummyChart().title);
+    expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
+    expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
   });
   test("should save ip address", async () => {
     await initDb();
@@ -98,18 +91,11 @@ describe("POST /api/newChartFile", () => {
     expect(res.status).to.equal(200);
     const body = await res.json();
 
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: body.cid });
-      expect(e).not.to.be.null;
-      expect(e!.ip).to.deep.equal(["123"]);
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: body.cid });
+    expect(e).not.to.be.null;
+    expect(e!.ip).to.deep.equal(["123"]);
   });
   test("should return 400 is passwd is not set", async () => {
     await initDb();
@@ -201,20 +187,13 @@ describe("POST /api/newChartFile", () => {
     const body = await res.json();
     expect(body.cid).to.be.a("string");
 
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: body.cid });
-      expect(e).not.to.be.null;
-      expect(e!.title).to.equal(dummyChart().title);
-      expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
-      expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: body.cid });
+    expect(e).not.to.be.null;
+    expect(e!.title).to.equal(dummyChart().title);
+    expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
+    expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
   });
 
   test("should return 415 for invalid chart", async () => {

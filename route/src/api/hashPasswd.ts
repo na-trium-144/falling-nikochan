@@ -4,7 +4,7 @@ import { env } from "hono/adapter";
 import { getCookie, setCookie } from "hono/cookie";
 import { getChartEntryCompressed, getPUserHash } from "./chart.js";
 import { randomBytes } from "node:crypto";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { CidSchema } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { HTTPException } from "hono/http-exception";
@@ -23,7 +23,9 @@ import {
 /**
  * chartFile のコメントを参照
  */
-const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const hashPasswdApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+  strict: false,
+}).get(
   "/:cid",
   describeRoute({
     description:
@@ -134,23 +136,17 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
     } else {
       throw new Error("SECRET_SALT not set in production environment!");
     }
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const entry = await getChartEntryCompressed(db, cid, {
-        rawPasswd: p,
-        pSecretSalt,
+    const db = c.get("db");
+    const entry = await getChartEntryCompressed(db, cid, {
+      rawPasswd: p,
+      pSecretSalt,
+    });
+    if (entry.pServerHash) {
+      return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
+        "cache-control": cacheControl(env(c), null),
       });
-      if (entry.pServerHash) {
-        return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
-          "cache-control": cacheControl(env(c), null),
-        });
-      } else {
-        throw new HTTPException(400, { message: "noPasswd" });
-      }
-    } finally {
-      await client.close();
+    } else {
+      throw new HTTPException(400, { message: "noPasswd" });
     }
   }
 );

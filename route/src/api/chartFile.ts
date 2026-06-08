@@ -13,7 +13,7 @@ import {
   Chart15,
   docRefs,
 } from "@falling-nikochan/chart";
-import { Db, MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import {
   ChartEntry,
   ChartEntryCompressed,
@@ -101,39 +101,32 @@ const chartFileApp = async (config: {
             : getCookie(c, "pUserSalt", "host");
         const bypass = !!pbypass && env(c).API_ENV === "development";
         const pSecretSalt = secretSalt(env(c));
-        const client = new MongoClient(env(c).MONGODB_URI);
-        try {
-          await client.connect();
-          const db = client.db("nikochan");
-          if (!(await updateIp(env(c), db, ip, "chartFile"))) {
-            return c.json(
-              {
-                message: "tooManyRequest",
-                // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
-              },
-              429,
-              { "retry-after": rateLimit.chartFile.toString() }
-            );
-          }
-
-          let { entry, chart } = await getChartEntry(db, cid, {
-            bypass,
-            rawPasswd: p,
-            v9PasswdHash: ph,
-            v9UserSalt,
-            pSecretSalt,
-          });
-          // 必要なデータをコンテキストに保存
-          c.set("cid", cid);
-          c.set("ip", ip);
-          c.set("entry", entry);
-          c.set("chart", chart);
-          c.set("db", db);
-          c.set("pSecretSalt", pSecretSalt);
-          await next();
-        } finally {
-          await client.close();
+        const db = c.get("db");
+        if (!(await updateIp(env(c), db, ip, "chartFile"))) {
+          return c.json(
+            {
+              message: "tooManyRequest",
+              // message: `Too many requests, please retry ${rateLimitMin} minutes later`,
+            },
+            429,
+            { "retry-after": rateLimit.chartFile.toString() }
+          );
         }
+
+        let { entry, chart } = await getChartEntry(db, cid, {
+          bypass,
+          rawPasswd: p,
+          v9PasswdHash: ph,
+          v9UserSalt,
+          pSecretSalt,
+        });
+        // 必要なデータをコンテキストに保存
+        c.set("cid", cid);
+        c.set("ip", ip);
+        c.set("entry", entry);
+        c.set("chart", chart);
+        c.set("pSecretSalt", pSecretSalt);
+        await next();
       }
     )
     .get(

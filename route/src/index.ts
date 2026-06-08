@@ -1,5 +1,5 @@
 export { onError, notFound, fetchError } from "./error.js";
-export { default as apiApp, fetchBrief } from "./api/app.js";
+export { default as apiApp, getBrief } from "./api/app.js";
 export { default as ogApp } from "./og/app.js";
 export { default as shareApp } from "./share.js";
 export { default as redirectApp } from "./redirect.js";

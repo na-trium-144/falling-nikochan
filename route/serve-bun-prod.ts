@@ -11,7 +11,7 @@ import {
   onError,
   notFound,
   fetchStatic,
-  fetchBrief,
+  getBrief,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -19,6 +19,8 @@ import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "hono/bun";
 import * as Sentry from "@sentry/hono/bun";
 import packageJson from "./package.json" with { type: "json" };
+import { MongoClient } from "mongodb";
+import { createMiddleware } from "hono/factory";
 
 const port = 8787;
 
@@ -31,14 +33,24 @@ const sentryMiddleware = (app) =>
     shouldHandleError: () => false,
   });
 
+const client = new MongoClient(process.env.MONGODB_URI!);
+await client.connect();
+const db = client.db("nikochan");
+console.log(`connected to ${process.env.MONGODB_URI}`);
+const dbMiddleware = createMiddleware(async (c, next) => {
+  c.set("db", db);
+  await next();
+});
+const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);
+
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
   .use(logger())
-  .route("/api", await apiApp({ getConnInfo }))
+  .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
-  .route("/sitemap.xml", sitemapApp)
-  .route("/rss.xml", rssApp)
+  .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))
+  .route("/rss.xml", await rssApp({ dbMiddleware }))
   .route("/share", shareApp({ fetchBrief, fetchStatic }))
   .route("/", redirectApp({ fetchStatic }))
   .use(
