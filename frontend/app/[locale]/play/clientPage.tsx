@@ -718,31 +718,9 @@ function Play(props: Props) {
     } else if (queryOptions.result) {
       setShowResult(true);
     }
-  }, [
-    chartPlaying,
-    showResult,
-    chartEnd,
-    endSecPassed,
-    chartSeq,
-    score,
-    bestScoreState,
-    cid,
-    auto,
-    userBegin,
-    playbackRate,
-    lvIndex,
-    chartBrief,
-    baseScore,
-    chainScore,
-    bigScore,
-    judgeCount,
-    stop,
-    queryOptions,
-    bigCount,
-    hitType,
-    editing,
-    reloadBestScore,
-  ]);
+    // 値の変化にあわせて正確に再実行することよりも二重送信を防ぐことのほうが大事
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPlaying, showResult, chartEnd, endSecPassed]);
 
   const onReady = useCallback(() => {
     console.log("ready ->", ytPlayer.current?.getPlayerState());
@@ -762,13 +740,13 @@ function Play(props: Props) {
       }
       setLoadingAfterReady(false);
       setNeedManualStart(false);
-      setShowResult(false);
       setChartPlaying(true);
       setWasAutoPlay(auto);
       setOldPlaybackRate(playbackRate);
       setOldUserBegin(userBegin);
       // setChartStarted(true);
       setExitable(null);
+      setShowResult(false);
       const now =
         (ytPlayer.current?.getCurrentTime() ?? -Infinity) -
         chartSeq.offset -
