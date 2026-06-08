@@ -6,7 +6,10 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Fragment, RefObject, useEffect, useRef, useState } from "react";
 import { SlimeSVG } from "@/common/slime.js";
-import { useStandaloneDetector } from "@/common/pwaInstall.js";
+import {
+  useInsideFrameDetector,
+  useStandaloneDetector,
+} from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
 import { getRecent, updateRecent } from "@/common/recent.js";
 import { TabKeys } from "@/common/footer.jsx";
@@ -15,11 +18,11 @@ import { getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
-import { useDisplayMode, useInsideFrameDetector } from "@/scale.jsx";
 import { ButtonHighlight } from "@/common/button.jsx";
 import { Scrollable } from "@/common/scrollable.js";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import * as v from "valibot";
+import { useDisplayMode } from "@/scale.js";
 
 interface PProps {
   locale: string;

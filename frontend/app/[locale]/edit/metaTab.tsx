@@ -12,11 +12,11 @@ import { useTranslations } from "next-intl";
 import { HelpIcon } from "@/common/caption";
 import { chartMaxEvent } from "@falling-nikochan/chart";
 import { useShareLink } from "@/common/shareLinkAndImage";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import { useRouter } from "next/navigation";
-import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { LocalLoadError, LocalLoadState, SaveState } from "./chartState";
 import { formatError } from "@/common/fetch";
+import { useDisplayMode } from "@/scale";
 
 interface Props {
   chart?: ChartEditing;

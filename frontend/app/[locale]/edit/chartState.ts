@@ -30,11 +30,10 @@ import { useRouter } from "next/navigation";
 import saveAs from "file-saver";
 import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
-import { isStandalone } from "@/common/pwaInstall";
+import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
 import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
-import { isInsideFrame } from "@/scale";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { markAsExpected } from "@/common/apiError";
 

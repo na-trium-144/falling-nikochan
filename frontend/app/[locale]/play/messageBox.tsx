@@ -28,6 +28,7 @@ import { HelpIcon } from "@/common/caption";
 import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import { formatErrorMsg, isExpectedError } from "@/common/fetch";
+import * as Sentry from "@sentry/nextjs";
 
 interface MessageProps {
   className?: string;
@@ -74,6 +75,20 @@ export function ReadyMessage(props: MessageProps) {
   });
   const [optionOpen, optionSlideIn, setOptionOpen] =
     useDelayedDisplayState(200);
+
+  useEffect(() => {
+    Sentry.setContext("play.options", {
+      auto: props.auto,
+      enableIOSThru: props.enableIOSThru,
+      enableSE: props.enableSE,
+      audioLatency: props.audioLatency,
+      // displaySpeed: props.displaySpeed,
+      playbackRate: props.playbackRate,
+      userBegin: props.userBegin !== null,
+      autoOffset: props.autoOffset,
+      // userOffset: props.userOffset,
+    });
+  }, []);
 
   return (
     <CenterBox

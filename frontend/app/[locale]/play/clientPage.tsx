@@ -40,7 +40,6 @@ import { useResizeDetector } from "react-resize-detector";
 import { ChartBrief } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { CenterBox } from "@/common/box.js";
-import { isInsideFrame, useDisplayMode } from "@/scale.js";
 import { addRecent } from "@/common/recent.js";
 import Result, { resultAnimDelays } from "./result.js";
 import { getBestScore, setBestScore } from "@/common/bestScore.js";
@@ -57,6 +56,7 @@ import { Key } from "@/common/key.js";
 import {
   detectOS,
   historyBackWithReview,
+  isInsideFrame,
   isStandalone,
   updatePlayCountForReview,
 } from "@/common/pwaInstall.js";
@@ -70,6 +70,7 @@ import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
+import { useDisplayMode } from "@/scale.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -110,7 +111,7 @@ export function InitPlay({ locale }: { locale: string }) {
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
-    Sentry.setContext("play", {
+    Sentry.setContext("play.init", {
       ...q,
       cid,
       lvIndex,
@@ -256,11 +257,14 @@ function Play(props: Props) {
   );
 
   const ref = useRef<HTMLDivElement>(null!);
-  const { isTouch, screenWidth, screenHeight, rem, statusScale, largeResult } =
-    useDisplayMode();
-  // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
-  // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
-  const isMobile = screenWidth <= screenHeight;
+  const {
+    isTouch,
+    isMobileGame: isMobile,
+    screenHeight,
+    rem,
+    statusScale,
+    largeResult,
+  } = useDisplayMode();
 
   const statusSpace = useResizeDetector();
   const statusHide = !isMobile && statusSpace.height === 0;

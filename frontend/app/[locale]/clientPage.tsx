@@ -34,11 +34,10 @@ export default function TopPage(props: Props) {
   const { openModal, openShareInternal } = useSharePageModal();
   const fes = useFestival();
 
-  const { isMobileMain, screenWidth, screenHeight, rem, statusScale } =
+  const { isMobileMain, isMobileGame, screenHeight, rem, statusScale } =
     useDisplayMode();
-  const isMobilePlay = screenWidth <= screenHeight;
   // 画面幅が一定以下 or 画面が縦長 のときデモ画面をモバイルレイアウトにする
-  const isMobileEither = isMobileMain || isMobilePlay;
+  const isMobileEither = isMobileMain || isMobileGame;
   const isSafari = useSafariDetector();
   const grassRefNear = useRef<HTMLDivElement | SVGSVGElement>(null);
   const grassRefFar = useRef<HTMLDivElement | SVGSVGElement>(null);

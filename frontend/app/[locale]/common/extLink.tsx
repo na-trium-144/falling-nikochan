@@ -1,10 +1,9 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { useStandaloneDetector } from "./pwaInstall";
+import { useInsideFrameDetector, useStandaloneDetector } from "./pwaInstall";
 import Link from "next/link";
 import EfferentThree from "@icon-park/react/lib/icons/EfferentThree";
-import { useInsideFrameDetector } from "@/scale";
 
 interface Props {
   className?: string;

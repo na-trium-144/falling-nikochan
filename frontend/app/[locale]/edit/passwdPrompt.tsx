@@ -11,9 +11,9 @@ import { APIError, shouldHideStatus } from "@/common/apiError";
 import { LinksOnError } from "@/common/errorPageComponent";
 import {
   historyBackWithReview,
+  useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall";
-import { useInsideFrameDetector } from "@/scale";
 import { formatErrorMsg, isExpectedError } from "@/common/fetch";
 
 interface PasswdProps {

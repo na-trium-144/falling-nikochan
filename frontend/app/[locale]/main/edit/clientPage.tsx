@@ -10,11 +10,14 @@ import { CidSchema, rateLimit } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import * as v from "valibot";
 import { SlimeSVG } from "@/common/slime.js";
-import { isStandalone, useSafariDetector } from "@/common/pwaInstall.js";
+import {
+  isInsideFrame,
+  isStandalone,
+  useSafariDetector,
+} from "@/common/pwaInstall.js";
 import { useRouter } from "next/navigation";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import Caution from "@icon-park/react/lib/icons/Caution.js";
-import { isInsideFrame } from "@/scale.jsx";
 import { captureAndWrap, fetchBackend, formatError } from "@/common/fetch.js";
 import { markAsExpected } from "@/common/apiError.js";
 
