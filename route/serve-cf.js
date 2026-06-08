@@ -11,6 +11,7 @@ import {
   checkNewCharts,
   reportToDiscord,
   getBrief,
+  sentryBeforeSend,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -27,6 +28,7 @@ const sentryConfig = (env) => ({
   environment: env.CF_VERSION_METADATA.tag,
   sendDefaultPii: false,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+  beforeSend: sentryBeforeSend,
 });
 const sentryHonoConfig = (env) => ({
   ...sentryConfig(env),

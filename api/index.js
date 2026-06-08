@@ -14,6 +14,7 @@ import {
   notFound,
   fetchStatic,
   getBrief,
+  sentryBeforeSend,
 } from "@falling-nikochan/route";
 import { Hono } from "hono";
 import { ImageResponse } from "@vercel/og";
@@ -36,6 +37,7 @@ Sentry.init({
   sendDefaultPii: false,
   integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
   includeLocalVariables: true,
+  beforeSend: sentryBeforeSend,
 });
 const sentryMiddleware = (app) =>
   Sentry.sentry(app, { shouldHandleError: () => false });

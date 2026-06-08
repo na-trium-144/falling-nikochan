@@ -12,6 +12,7 @@ import {
   notFound,
   fetchStatic,
   getBrief,
+  sentryBeforeSend,
 } from "./src/index.js";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -31,6 +32,7 @@ const sentryMiddleware = (app) =>
     sendDefaultPii: false,
     integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
     shouldHandleError: () => false,
+    beforeSend: sentryBeforeSend,
   });
 
 const client = new MongoClient(process.env.MONGODB_URI!);
