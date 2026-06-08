@@ -69,6 +69,7 @@ import { useFlash } from "./useFlash.js";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
+import * as Sentry from "@sentry/nextjs";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -86,22 +87,22 @@ export function InitPlay({ locale }: { locale: string }) {
     const q = getQueryOptions();
     setQueryOptions(q);
 
+    let cid: string | undefined = undefined;
+    let lvIndex: number | undefined = undefined;
+
     const session = getSession(q.sid);
     // history.replaceState(null, "", location.pathname);
     if (session !== null) {
-      setCid(session.cid);
-      setLvIndex(session.lvIndex);
+      cid = session.cid;
+      lvIndex = session.lvIndex;
       setChartBrief(session.brief);
       setEditing(!!session.editing);
     } else {
       if (q.cid) {
-        setCid(q.cid);
-        setLvIndex(q.lvIndex);
+        cid = q.cid;
+        lvIndex = q.lvIndex;
         fetchBrief(q.cid!, { onResult: (brief) => setChartBrief(brief) });
         setEditing(false);
-      } else {
-        setErrorMsg(te("noSession"));
-        return;
       }
     }
     // document.title =
@@ -109,12 +110,18 @@ export function InitPlay({ locale }: { locale: string }) {
     //   pageTitle(session.cid || "-", session.brief) +
     //   " | Falling Nikochan";
 
+    Sentry.setContext("play", {
+      ...q,
+      cid,
+      lvIndex,
+    });
+    setCid(cid);
+    setLvIndex(lvIndex);
+
     if (session?.level) {
       setChartSeq(loadChart(session.level));
       setErrorMsg(undefined);
-    } else {
-      const cid = session?.cid ?? q.cid;
-      const lvIndex = session?.lvIndex ?? q.lvIndex;
+    } else if (cid !== undefined && lvIndex !== undefined) {
       fetchBackend()
         .url(`/api/playFile/${cid}/${lvIndex}`)
         .options({ cache: "no-store" })
@@ -145,6 +152,8 @@ export function InitPlay({ locale }: { locale: string }) {
           setChartSeq(seq);
           setErrorMsg(error);
         });
+    } else {
+      setErrorMsg(te("noSession"));
     }
   }, [te]);
 
