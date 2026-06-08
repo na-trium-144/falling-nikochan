@@ -19,6 +19,9 @@ Sentry.init({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any,
   enabled: !isbot(navigator?.userAgent),
+  ignoreErrors: [
+    "Minified React error #418", // hydration failed
+  ],
   beforeSend(event, hint) {
     for (const [errorClass, name] of [
       [Error, "ChunkLoadError"],
