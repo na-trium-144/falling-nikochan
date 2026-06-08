@@ -1,9 +1,8 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
 import { hash } from "@falling-nikochan/chart";
-import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
-import { app, initDb } from "./init";
+import { app, db, initDb } from "./init";
 
 const encodeBase64Utf8 = (value: string) =>
   btoa(
@@ -14,15 +13,9 @@ const encodeBase64Utf8 = (value: string) =>
 const basicAuth = (passwd: string) =>
   `Nikochan-Basic ${encodeBase64Utf8(passwd)}`;
 const getServerHash = async () => {
-  const client = new MongoClient(process.env.MONGODB_URI!);
-  try {
-    return (await (await client.connect())
-      .db("nikochan")
-      .collection<ChartEntryCompressed>("chart")
-      .findOne({ cid: "100000" }))!.pServerHash;
-  } finally {
-    client.close();
-  }
+  return (await db
+    .collection<ChartEntryCompressed>("chart")
+    .findOne({ cid: "100000" }))!.pServerHash;
 };
 
 describe("GET /api/hashPasswd/:cid", () => {

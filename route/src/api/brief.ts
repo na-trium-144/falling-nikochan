@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
 import { entryToBrief, getChartEntryCompressed } from "./chart.js";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { CidSchema, docRefs } from "@falling-nikochan/chart";
@@ -16,7 +16,12 @@ import {
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
 
-const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const briefApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
+  strict: false,
+}).get(
   "/:cid",
   cache({
     cacheName: "api-brief",
@@ -60,22 +65,15 @@ const briefApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
-    return c.json(await fetchBrief(env(c), cid), 200, {
+    return c.json(await getBrief(await c.get("db")(), cid), 200, {
       "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
     });
   }
 );
 
-export async function fetchBrief(e: Bindings, cid: string) {
-  const client = new MongoClient(e.MONGODB_URI);
-  try {
-    await client.connect();
-    const db = client.db("nikochan");
-    const entry = await getChartEntryCompressed(db, cid, null);
-    return entryToBrief(entry);
-  } finally {
-    await client.close();
-  }
+export async function getBrief(db: Db, cid: string) {
+  const entry = await getChartEntryCompressed(db, cid, null);
+  return entryToBrief(entry);
 }
 
 export default briefApp;

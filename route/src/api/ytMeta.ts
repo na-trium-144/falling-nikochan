@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cache } from "hono/cache";
 import { getChartEntryCompressed } from "./chart.js";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { Bindings, cacheControl } from "../env.js";
 import { env } from "hono/adapter";
 import { CidSchema } from "@falling-nikochan/chart";
@@ -17,7 +17,12 @@ import { getYTDataEntry } from "./ytData.js";
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 86400;
 
-const ytMetaApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const ytMetaApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
+  strict: false,
+}).get(
   "/:cid",
   cache({
     cacheName: "api-ytMeta",
@@ -68,33 +73,27 @@ const ytMetaApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   async (c) => {
     const { cid } = c.req.valid("param");
     const { lang } = c.req.valid("query");
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const entry = await getChartEntryCompressed(db, cid, null);
-      const ytId = entry.ytId;
-      const ytData = await getYTDataEntry(env(c), db, ytId);
-      let title =
-        // exact match
-        ytData.localizations[lang]?.title ??
-        // partial match
-        Object.entries(ytData.localizations).find(([key]) =>
-          key.startsWith(lang.split("-")[0])
-        )?.[1].title ??
-        // use en
-        ytData.localizations["en"]?.title ??
-        Object.entries(ytData.localizations).find(([key]) =>
-          key.startsWith("en")
-        )?.[1].title ??
-        // default
-        ytData.title;
-      return c.json({ title, channelTitle: ytData.channelTitle }, 200, {
-        "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
-      });
-    } finally {
-      await client.close();
-    }
+    const db = await c.get("db")();
+    const entry = await getChartEntryCompressed(db, cid, null);
+    const ytId = entry.ytId;
+    const ytData = await getYTDataEntry(env(c), db, ytId);
+    let title =
+      // exact match
+      ytData.localizations[lang]?.title ??
+      // partial match
+      Object.entries(ytData.localizations).find(([key]) =>
+        key.startsWith(lang.split("-")[0])
+      )?.[1].title ??
+      // use en
+      ytData.localizations["en"]?.title ??
+      Object.entries(ytData.localizations).find(([key]) =>
+        key.startsWith("en")
+      )?.[1].title ??
+      // default
+      ytData.title;
+    return c.json({ title, channelTitle: ytData.channelTitle }, 200, {
+      "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
+    });
   }
 );
 

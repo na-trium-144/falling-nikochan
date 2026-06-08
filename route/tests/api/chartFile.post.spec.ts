@@ -2,6 +2,7 @@ import { test, describe } from "node:test";
 import { expect } from "chai";
 import {
   app,
+  db,
   dummyChart,
   dummyChart12,
   dummyChart13,
@@ -20,7 +21,6 @@ import {
   hashLevel,
 } from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
-import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 const encodeBase64Utf8 = (value: string) =>
@@ -82,33 +82,17 @@ describe("POST /api/chartFile/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: dummyCid });
-      expect(e).not.to.be.null;
-      expect(e!.title).to.equal("updated");
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: dummyCid });
+    expect(e).not.to.be.null;
+    expect(e!.title).to.equal("updated");
   });
   test("should update chart if password hash matches", async () => {
     await initDb();
-    let pServerHash: string;
-    {
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        pServerHash = (await (await client.connect())
-          .db("nikochan")
-          .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: "100000" }))!.pServerHash!;
-      } finally {
-        client.close();
-      }
-    }
+    const pServerHash = (await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: "100000" }))!.pServerHash!;
     const res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
       headers: {
@@ -120,18 +104,11 @@ describe("POST /api/chartFile/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: dummyCid });
-      expect(e).not.to.be.null;
-      expect(e!.title).to.equal("updated");
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: dummyCid });
+    expect(e).not.to.be.null;
+    expect(e!.title).to.equal("updated");
   });
   test("should save ip address", async () => {
     await initDb();
@@ -145,18 +122,11 @@ describe("POST /api/chartFile/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    let client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: dummyCid });
-      expect(e).not.to.be.null;
-      expect(e!.ip).to.deep.equal(["123"]);
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: dummyCid });
+    expect(e).not.to.be.null;
+    expect(e!.ip).to.deep.equal(["123"]);
 
     res = await requestChartFile("/api/chartFile/100000", {
       method: "POST",
@@ -168,18 +138,11 @@ describe("POST /api/chartFile/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: dummyCid });
-      expect(e).not.to.be.null;
-      expect(e!.ip).to.deep.equal(["123", "456"]);
-    } finally {
-      await client.close();
-    }
+    const e2 = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: dummyCid });
+    expect(e2).not.to.be.null;
+    expect(e2!.ip).to.deep.equal(["123", "456"]);
   });
   test("should return 400 for invalid cid", async () => {
     await initDb();
@@ -299,18 +262,11 @@ describe("POST /api/chartFile/:cid", () => {
     });
     expect(res.status).to.equal(204);
 
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const e = await db
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: dummyCid });
-      expect(e).not.to.be.null;
-      expect(e!.title).to.equal("updated");
-    } finally {
-      await client.close();
-    }
+    const e = await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: dummyCid });
+    expect(e).not.to.be.null;
+    expect(e!.title).to.equal("updated");
   });
   test("should return 415 for invalid chart", async () => {
     await initDb();
@@ -385,18 +341,11 @@ describe("POST /api/chartFile/:cid", () => {
       });
       expect(res.status).to.equal(204);
 
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        await client.connect();
-        const db = client.db("nikochan");
-        const e = await db
-          .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid });
-        expect(e).not.to.be.null;
-        expect(e!.updatedAt).to.equal(dummyDate.getTime());
-      } finally {
-        await client.close();
-      }
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.to.be.null;
+      expect(e!.updatedAt).to.equal(dummyDate.getTime());
     });
     test("should not be updated with metadata change", async () => {
       await initDb();
@@ -407,18 +356,11 @@ describe("POST /api/chartFile/:cid", () => {
       });
       expect(res.status).to.equal(204);
 
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        await client.connect();
-        const db = client.db("nikochan");
-        const e = await db
-          .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid });
-        expect(e).not.to.be.null;
-        expect(e!.updatedAt).to.equal(dummyDate.getTime());
-      } finally {
-        await client.close();
-      }
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.to.be.null;
+      expect(e!.updatedAt).to.equal(dummyDate.getTime());
     });
     test("should be updated with level change", async () => {
       await initDb();
@@ -435,22 +377,15 @@ describe("POST /api/chartFile/:cid", () => {
       const dateAfter = new Date();
       expect(res.status).to.equal(204);
 
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        await client.connect();
-        const db = client.db("nikochan");
-        const e = await db
-          .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid });
-        expect(e).not.to.be.null;
-        expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
-        expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
-        expect(e!.levelBrief[0].hash).to.not.equal(
-          await hashLevel(dummyChart().levelsFreeze[0])
-        );
-      } finally {
-        await client.close();
-      }
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.to.be.null;
+      expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
+      expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
+      expect(e!.levelBrief[0].hash).to.not.equal(
+        await hashLevel(dummyChart().levelsFreeze[0])
+      );
     });
     test("should be updated with publish", async () => {
       await initDb();
@@ -471,51 +406,37 @@ describe("POST /api/chartFile/:cid", () => {
       const dateAfter = new Date();
       expect(res.status).to.equal(204);
 
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        await client.connect();
-        const db = client.db("nikochan");
-        const e = await db
-          .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: dummyCid });
-        expect(e).not.to.be.null;
-        expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
-        expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
-      } finally {
-        await client.close();
-      }
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: dummyCid });
+      expect(e).not.to.be.null;
+      expect(e!.updatedAt).to.be.at.least(dateBefore.getTime());
+      expect(e!.updatedAt).to.be.at.most(dateAfter.getTime());
     });
     test("should not be updated when re-calculated hash matches regardless of hash on db", async () => {
       await initDb();
-      const client = new MongoClient(process.env.MONGODB_URI!);
-      try {
-        await client.connect();
-        const db = client.db("nikochan");
 
-        await db.collection<ChartEntryCompressed>("chart").updateOne(
-          { cid: "100007" },
-          {
-            $set: {
-              "levelBrief.0.hash": "aaaaa",
-            },
-          }
-        );
-        const res = await requestChartFile("/api/chartFile/100007", {
-          method: "POST",
-          headers: { "Content-Type": "application/vnd.msgpack" },
-          body: msgpack.encode(dummyChart()),
-        });
-        expect(res.status).to.equal(204);
+      await db.collection<ChartEntryCompressed>("chart").updateOne(
+        { cid: "100007" },
+        {
+          $set: {
+            "levelBrief.0.hash": "aaaaa",
+          },
+        }
+      );
+      const res = await requestChartFile("/api/chartFile/100007", {
+        method: "POST",
+        headers: { "Content-Type": "application/vnd.msgpack" },
+        body: msgpack.encode(dummyChart()),
+      });
+      expect(res.status).to.equal(204);
 
-        const e = await db
-          .collection<ChartEntryCompressed>("chart")
-          .findOne({ cid: String(Number(dummyCid) + 7) });
-        expect(e).not.to.be.null;
-        expect(e!.updatedAt).to.equal(dummyDate.getTime());
-        expect(e!.levelBrief[0].hash).to.equal("aaaaa");
-      } finally {
-        await client.close();
-      }
+      const e = await db
+        .collection<ChartEntryCompressed>("chart")
+        .findOne({ cid: String(Number(dummyCid) + 7) });
+      expect(e).not.to.be.null;
+      expect(e!.updatedAt).to.equal(dummyDate.getTime());
+      expect(e!.levelBrief[0].hash).to.equal("aaaaa");
     });
   });
 });

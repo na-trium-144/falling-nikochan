@@ -1,9 +1,8 @@
 import * as msgpack from "@msgpack/msgpack";
-import { MongoClient } from "mongodb";
+import { Db } from "mongodb";
 import { getChartEntry } from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
-import { env } from "hono/adapter";
 import {
   convertTo6,
   CidSchema,
@@ -22,7 +21,12 @@ import {
   validationErrorSchema,
 } from "../error.js";
 
-const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
+const seqFileApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
+  strict: false,
+}).get(
   "/:cid/:lvIndex",
   describeRoute({
     description:
@@ -73,80 +77,67 @@ const seqFileApp = new Hono<{ Bindings: Bindings }>({ strict: false }).get(
   async (c) => {
     const { cid, lvIndex } = c.req.valid("param");
 
-    const client = new MongoClient(env(c).MONGODB_URI);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      let { chart } = await getChartEntry(db, cid, null);
+    const db = await c.get("db")();
+    let { chart } = await getChartEntry(db, cid, null);
 
-      let seqData: ChartSeqData;
-      switch (chart.ver) {
-        case 4:
-        case 5:
-          if (!chart.levels.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          seqData = loadChart({
-            ...(await convertTo6(chart)).levels.at(lvIndex)!,
-            ver: 6,
-            offset: chart.offset,
-          });
-          break;
-        case 6:
-          if (!chart.levels.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          seqData = loadChart({
-            ...chart.levels.at(lvIndex)!,
-            ver: 6,
-            offset: chart.offset,
-          });
-          break;
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-          if (!chart.levels.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          seqData = loadChart(
-            convertToPlay15(await convertTo15(chart), lvIndex)
-          );
-          break;
-        case 14:
-          if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          seqData = loadChart(
-            convertToPlay15(await convertTo15(chart), lvIndex)
-          );
-          break;
-        case 15:
-        case 16:
-          if (
-            !chart.levelsMeta.at(lvIndex) ||
-            !chart.levelsFreeze.at(lvIndex)
-          ) {
-            throw new HTTPException(404, { message: "levelNotFound" });
-          }
-          seqData = loadChart(convertToPlay15(chart, lvIndex));
-          break;
-        default:
-          chart satisfies never;
-          throw new HTTPException(409, { message: "unsupportedChartVersion" });
-      }
-
-      const filename = `${cid}.${lvIndex}.fnseq.mpk`;
-      return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
-        "Content-Type": "application/vnd.msgpack",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      });
-    } finally {
-      await client.close();
+    let seqData: ChartSeqData;
+    switch (chart.ver) {
+      case 4:
+      case 5:
+        if (!chart.levels.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        seqData = loadChart({
+          ...(await convertTo6(chart)).levels.at(lvIndex)!,
+          ver: 6,
+          offset: chart.offset,
+        });
+        break;
+      case 6:
+        if (!chart.levels.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        seqData = loadChart({
+          ...chart.levels.at(lvIndex)!,
+          ver: 6,
+          offset: chart.offset,
+        });
+        break;
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+        if (!chart.levels.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        seqData = loadChart(convertToPlay15(await convertTo15(chart), lvIndex));
+        break;
+      case 14:
+        if (!chart.levelsMin.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        seqData = loadChart(convertToPlay15(await convertTo15(chart), lvIndex));
+        break;
+      case 15:
+      case 16:
+        if (!chart.levelsMeta.at(lvIndex) || !chart.levelsFreeze.at(lvIndex)) {
+          throw new HTTPException(404, { message: "levelNotFound" });
+        }
+        seqData = loadChart(convertToPlay15(chart, lvIndex));
+        break;
+      default:
+        chart satisfies never;
+        throw new HTTPException(409, { message: "unsupportedChartVersion" });
     }
+
+    const filename = `${cid}.${lvIndex}.fnseq.mpk`;
+    return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
+      "Content-Type": "application/vnd.msgpack",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    });
   }
 );
 

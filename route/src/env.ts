@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { Context } from "hono";
 import { fetchError } from "./error.js";
 import { env } from "hono/adapter";
+import { Db } from "mongodb";
 
 export interface Bindings {
   ASSETS?: { fetch: typeof fetch };
@@ -50,7 +51,11 @@ export function cacheControl(e: Bindings, age: number | null) {
   }
 }
 
-export function backendOrigin(c: Context<{ Bindings: Bindings }>): string {
+export function backendOrigin(
+  c:
+    | Context<{ Bindings: Bindings }>
+    | Context<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>
+): string {
   if (env(c).BACKEND_PREFIX) {
     return env(c).BACKEND_PREFIX!;
   } else {

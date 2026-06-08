@@ -1,8 +1,7 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, initDb } from "./init";
+import { app, db, initDb } from "./init";
 import { hash } from "@falling-nikochan/chart";
-import { MongoClient } from "mongodb";
 import { ChartEntryCompressed } from "@falling-nikochan/route/src/api/chart";
 
 const encodeBase64Utf8 = (value: string) =>
@@ -51,16 +50,9 @@ describe("DELETE /api/chartFile/:cid", () => {
   });
   test("should delete ChartEdit if password hash with pUserSalt matches", async () => {
     await initDb();
-    let pServerHash: string;
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      pServerHash = (await (await client.connect())
-        .db("nikochan")
-        .collection<ChartEntryCompressed>("chart")
-        .findOne({ cid: "100000" }))!.pServerHash!;
-    } finally {
-      client.close();
-    }
+    const pServerHash = (await db
+      .collection<ChartEntryCompressed>("chart")
+      .findOne({ cid: "100000" }))!.pServerHash!;
 
     expect((await app.request("/api/brief/100000")).status).to.equal(200);
     const res = await app.request("/api/chartFile/100000", {

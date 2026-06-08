@@ -8,6 +8,9 @@ import { reportToDiscord } from "./discord.js";
 import { entryToBrief, getChartEntryCompressed } from "../api/chart.js";
 import { reportPopularCharts } from "./popular.js";
 
+// 以前cronをcloudflare workerで動かしていた際、geminiの応答待ちの間にmongodbの接続がcloseするという問題があり、
+// checkNewChartsの中で細かく接続とcloseを繰り返す仕様にしている。
+// そのため現時点ではapp.tsと同じdbMiddlewareでの管理には統一せずそのままにしている
 const cronTestApp = new Hono<{ Bindings: Bindings }>({ strict: false })
   .post("/latest", async (c) => {
     await checkNewCharts(env(c));

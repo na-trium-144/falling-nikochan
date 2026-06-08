@@ -1,7 +1,6 @@
 import { test, describe } from "node:test";
 import { expect } from "chai";
-import { app, dummyCid, initDb } from "./init";
-import { MongoClient } from "mongodb";
+import { app, db, dummyCid, initDb } from "./init";
 import { ChartEntryCompressed } from "../../src/api/chart";
 
 describe("GET /api/search", () => {
@@ -59,22 +58,15 @@ describe("GET /api/search", () => {
     }
 
     const date = new Date().getTime();
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      await db.collection<ChartEntryCompressed>("chart").updateOne(
-        { cid: dummyCid },
-        {
-          $set: {
-            updatedAt: date,
-            published: true,
-          },
-        }
-      );
-    } finally {
-      await client.close();
-    }
+    await db.collection<ChartEntryCompressed>("chart").updateOne(
+      { cid: dummyCid },
+      {
+        $set: {
+          updatedAt: date,
+          published: true,
+        },
+      }
+    );
 
     const res2 = await app.request("/api/search?sort=latest");
     expect(res2.status).to.equal(200);
