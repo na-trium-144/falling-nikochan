@@ -23,7 +23,10 @@ import {
 /**
  * chartFile のコメントを参照
  */
-const hashPasswdApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+const hashPasswdApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
   strict: false,
 }).get(
   "/:cid",
@@ -136,7 +139,7 @@ const hashPasswdApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
     } else {
       throw new Error("SECRET_SALT not set in production environment!");
     }
-    const db = c.get("db");
+    const db = await c.get("db")();
     const entry = await getChartEntryCompressed(db, cid, {
       rawPasswd: p,
       pSecretSalt,

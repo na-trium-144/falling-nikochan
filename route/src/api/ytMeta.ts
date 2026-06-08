@@ -17,7 +17,10 @@ import { getYTDataEntry } from "./ytData.js";
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 86400;
 
-const ytMetaApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+const ytMetaApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
   strict: false,
 }).get(
   "/:cid",
@@ -70,7 +73,7 @@ const ytMetaApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
   async (c) => {
     const { cid } = c.req.valid("param");
     const { lang } = c.req.valid("query");
-    const db = c.get("db");
+    const db = await c.get("db")();
     const entry = await getChartEntryCompressed(db, cid, null);
     const ytId = entry.ytId;
     const ytData = await getYTDataEntry(env(c), db, ytId);

@@ -43,7 +43,10 @@ const OEmbedParamSchema = () =>
     format: v.optional(v.union([v.literal("json"), v.literal("xml")])),
   });
 
-const oembedApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+const oembedApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
   strict: false,
 }).get(
   "/",
@@ -109,7 +112,7 @@ const oembedApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
 
     const t = await getTranslations("en", "share");
 
-    const db = c.get("db");
+    const db = await c.get("db")();
     const entry = await getChartEntryCompressed(db, cid, null);
     const brief = entryToBrief(entry);
 

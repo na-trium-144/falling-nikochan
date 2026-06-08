@@ -38,7 +38,7 @@ await client.connect();
 const db = client.db("nikochan");
 console.log(`connected to ${process.env.MONGODB_URI}`);
 const dbMiddleware = createMiddleware(async (c, next) => {
-  c.set("db", db);
+  c.set("db", async () => db);
   await next();
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);

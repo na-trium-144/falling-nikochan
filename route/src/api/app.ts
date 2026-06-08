@@ -42,7 +42,10 @@ const apiApp = async (config: {
     credentials: true,
     exposeHeaders: ["Retry-After"],
   });
-  const apiApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+  const apiApp = new Hono<{
+    Bindings: Bindings;
+    Variables: { db: () => Promise<Db> };
+  }>({
     strict: false,
   })
     .use("/*", async (c, next) => {

@@ -21,6 +21,7 @@ import { ImageResponse } from "@vercel/og";
 import { getConnInfo } from "@hono/node-server/conninfo";
 import { Db, MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
 
 const port = 8787;
 
@@ -39,10 +40,12 @@ if (process.env.MONGODB_URI) {
   console.warn("MONGODB_URI not set");
 }
 const dbMiddleware = createMiddleware(async (c, next) => {
-  if (!["GET", "HEAD"].includes(c.req.method) && isProd) {
-    return c.json({ message: "readonlyOnDev" }, 405);
-  }
-  c.set("db", db);
+  c.set("db", async () => {
+    if (!["GET", "HEAD"].includes(c.req.method) && isProd) {
+      throw new HTTPException(405, { message: "readonlyOnDev" });
+    }
+    return db;
+  });
   await next();
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);

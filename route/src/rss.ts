@@ -12,12 +12,12 @@ const CACHE_MAX_AGE = 1800;
 const RSS_ITEM_LIMIT = 25;
 
 const rssApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
-  new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
     strict: false,
   }).get("/", config.dbMiddleware, async (c) => {
     const t = await getTranslations("en", "share");
 
-    const db = c.get("db");
+    const db = await c.get("db")();
     const charts = await db
       .collection<ChartEntryCompressed>("chart")
       .find({ published: true, deleted: false })

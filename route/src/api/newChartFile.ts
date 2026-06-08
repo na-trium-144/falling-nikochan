@@ -27,7 +27,7 @@ import { supportedEncodings } from "./decompress.js";
 const newChartFileApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
-  new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
     strict: false,
   }).post(
     "/",
@@ -136,7 +136,7 @@ const newChartFileApp = async (config: {
       const ip = getIp(c, config.getConnInfo);
       const chartBuf = await c.req.arrayBuffer();
       const pSecretSalt = secretSalt(env(c));
-      const db = c.get("db");
+      const db = await c.get("db")();
 
       if (!(await updateIp(env(c), db, ip, "newChartFile"))) {
         return c.json(

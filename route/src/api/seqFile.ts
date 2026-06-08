@@ -21,7 +21,10 @@ import {
   validationErrorSchema,
 } from "../error.js";
 
-const seqFileApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+const seqFileApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
   strict: false,
 }).get(
   "/:cid/:lvIndex",
@@ -74,7 +77,7 @@ const seqFileApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
   async (c) => {
     const { cid, lvIndex } = c.req.valid("param");
 
-    const db = c.get("db");
+    const db = await c.get("db")();
     let { chart } = await getChartEntry(db, cid, null);
 
     let seqData: ChartSeqData;

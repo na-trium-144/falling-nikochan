@@ -68,7 +68,7 @@ after(async () => {
 });
 
 const dbMiddleware = createMiddleware(async (c, next) => {
-  c.set("db", db);
+  c.set("db", async () => db);
   await next();
 });
 const fetchBrief = (_e: Bindings, cid: string) => getBrief(db!, cid);

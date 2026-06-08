@@ -34,14 +34,20 @@ const sentryHonoConfig = (env) => ({
 });
 
 const dbMiddleware = createMiddleware(async (c, next) => {
-  const client = new MongoClient(env(c).MONGODB_URI);
+  let client = null;
+  c.set("db", async () => {
+    if (!client) {
+      client = new MongoClient(env(c).MONGODB_URI);
+      await client.connect();
+    }
+    return client.db("nikochan");
+  });
   try {
-    await client.connect();
-    const db = client.db("nikochan");
-    c.set("db", db);
     await next();
   } finally {
-    await client.close();
+    if (client) {
+      await client.close();
+    }
   }
 });
 const fetchBrief = async (e, cid) => {

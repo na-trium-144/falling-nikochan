@@ -16,7 +16,10 @@ import {
 // Cache duration for this API endpoint (in seconds)
 const CACHE_MAX_AGE = 600;
 
-const briefApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+const briefApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
   strict: false,
 }).get(
   "/:cid",
@@ -62,7 +65,7 @@ const briefApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
   validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
   async (c) => {
     const { cid } = c.req.valid("param");
-    return c.json(await getBrief(c.get("db"), cid), 200, {
+    return c.json(await getBrief(await c.get("db")(), cid), 200, {
       "cache-control": cacheControl(env(c), CACHE_MAX_AGE),
     });
   }

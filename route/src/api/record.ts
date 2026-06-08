@@ -40,7 +40,9 @@ export interface PlayRecordEntry {
 const recordApp = async (config: {
   getConnInfo: (c: Context) => ConnInfo | null;
 }) =>
-  new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({ strict: false })
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
+    strict: false,
+  })
     .get(
       "/:cid",
       cache({
@@ -85,7 +87,7 @@ const recordApp = async (config: {
       validator("param", v.object({ cid: CidSchema() }), sValidatorHook()),
       async (c) => {
         const { cid } = c.req.valid("param");
-        const db = c.get("db");
+        const db = await c.get("db")();
         const records = db
           .collection<PlayRecordEntry>("playRecord")
           .find({ cid });
@@ -185,7 +187,7 @@ const recordApp = async (config: {
         } = c.req.valid("json");
 
         const ip = getIp(c, config.getConnInfo);
-        const db = c.get("db");
+        const db = await c.get("db")();
 
         if (!(await updateIp(env(c), db, ip, "record"))) {
           return c.json(

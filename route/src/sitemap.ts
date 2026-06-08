@@ -22,11 +22,11 @@ const staticSitemapItems: SitemapItemLoose[] = [
 ];
 
 const sitemapApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
-  new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+  new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
     strict: false,
   }).get("/", config.dbMiddleware, async (c) => {
     let allCharts: SitemapItemLoose[];
-    const db = c.get("db");
+    const db = await c.get("db")();
     allCharts = (
       await db
         .collection<ChartEntryCompressed>("chart")

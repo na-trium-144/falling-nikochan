@@ -53,7 +53,10 @@ const SearchResultSchema = () =>
     ),
   });
 
-const searchApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
+const searchApp = new Hono<{
+  Bindings: Bindings;
+  Variables: { db: () => Promise<Db> };
+}>({
   strict: false,
 }).get(
   "/",
@@ -134,7 +137,7 @@ const searchApp = new Hono<{ Bindings: Bindings; Variables: { db: Db } }>({
         ).slice(0, MAX_QUERY_TOKENS)
       : [];
 
-    const db = c.get("db");
+    const db = await c.get("db")();
 
     let mongoQuery: Filter<ChartEntryCompressed> = {
       deleted: false,
