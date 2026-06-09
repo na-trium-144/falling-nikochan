@@ -31,7 +31,7 @@ The code for the backend is in the [route/](route/) directory, NOT in the [api/]
 
 API Reference is here: https://nikochan.utcode.net/api
 
-See also [chart/src/chart.ts](chart/src/chart.ts) for relations among the chart data formats.
+The Lua script API used for chart editing is available in a separate repository ([na-trium-144/fn-commands](https://github.com/na-trium-144/fn-commands))
 
 ## License
 
