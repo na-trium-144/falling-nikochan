@@ -24,6 +24,7 @@ const CACHE_MAX_AGE = 600;
 const MAX_QUERY_LENGTH = 200;
 const MAX_QUERY_TOKENS = 20;
 
+// /[locale]/main/play/clientPage.tsx とあわせる
 const MAX_CIDS_COUNT = 100;
 
 /*
