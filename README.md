@@ -2,7 +2,7 @@
 
 [![Production Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Prod&color=%23b8f6fe)](https://nikochan.utcode.net)
 [![Staging Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnikochan-staging.utcode.net%2FbuildVer.json&query=%24.version&prefix=v&label=Staging&color=%23441306)](https://nikochan-staging.utcode.net)
-[![GitHub License](https://img.shields.io/github/license/na-trium-144/falling-nikochan)](./LICENSE)
+[![GitHub License](https://img.shields.io/badge/License-AGPL--3.0-orange)](./LICENSE)
 
 [![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UChAEFwUtjsbWmWwZSxYLXWQ?label=%40nikochan144)](https://www.youtube.com/@nikochan144)
 [![Twitter Follow](https://img.shields.io/twitter/follow/nikochan144)](https://x.com/nikochan144)
