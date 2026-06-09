@@ -8,6 +8,7 @@ import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import {
+  CidSchema,
   DifficultySchema,
   maxLv,
   minLv,
@@ -22,6 +23,8 @@ const CACHE_MAX_AGE = 600;
 // Limits to prevent DoS/ReDoS attacks
 const MAX_QUERY_LENGTH = 200;
 const MAX_QUERY_TOKENS = 20;
+
+const MAX_CIDS_COUNT = 100;
 
 /*
 レスポンスで返す譜面の数には制限を設けていない。
@@ -114,15 +117,17 @@ const searchApp = new Hono<{
           v.optional(
             v.union([
               v.pipe(
-                v.string(),
+                CidSchema(),
                 v.transform((c) => [c])
               ),
-              v.array(v.string()),
+              v.array(CidSchema()),
             ]),
-            [] as string[]
+            []
           ),
+          v.maxLength(MAX_CIDS_COUNT),
           v.description(
-            "If chart ids are provided, the results will be filtered and returned in the specified order."
+            "If chart ids are provided, the results will be filtered and returned in the specified order. " +
+              `Up to ${MAX_CIDS_COUNT} chart IDs can be specified. To retrieve more, split into multiple requests.`
           )
         ),
         sort: v.pipe(
@@ -197,7 +202,7 @@ const searchApp = new Hono<{
         mongoQuery = {
           $and: [
             ...baseMongoQuery,
-            { $or: cids.map((qc) => ({ cid: qc })) },
+            { cid: { $in: cids } },
             {
               $or: [
                 { cid: q },
@@ -232,7 +237,7 @@ const searchApp = new Hono<{
     } else {
       if (cids.length) {
         mongoQuery = {
-          $and: [...baseMongoQuery, { $or: cids.map((qc) => ({ cid: qc })) }],
+          $and: [...baseMongoQuery, { cid: { $in: cids } }],
         };
       } else {
         mongoQuery = {
@@ -261,9 +266,8 @@ const searchApp = new Hono<{
     let sortedResults: v.InferOutput<ReturnType<typeof SearchResultSchema>>[];
 
     if (cids.length) {
-      const resultsSet = new Set<string>(results.map((r) => r.cid));
       sortedResults = cids
-        .filter((qc) => resultsSet.has(qc))
+        .filter((qc) => results.some((r) => r.cid === qc))
         .map((qc) => ({ cid: qc }));
     } else {
       switch (sort) {
