@@ -37,6 +37,7 @@ AIエージェントは以下の特殊な構成に注意してください。
     - 想定外のエラーについてはthrowされたものをグローバルなエラーハンドラー(`src/error.ts`)がJSONに整形して返します。したがってそれぞれのAPIのハンドラーで想定外のエラーをcatchして500エラーレスポンスを返す必要はありません。
     - ValiErrorや外部fetchのResponseをもとにthrowする場合の形式については`src/error.ts`の `onError` のコメントを参照してください。
 - /api 以下のAPIには既存のAPIと同様にOpenAPIのドキュメントを記述してください。異常時のレスポンスのスキーマは `await errorLiteral("メッセージ")` (またはvalibotのissueを含む場合 `await validationErrorSchema("メッセージ")`) で記述してください。
+- レスポンスが `Cache-Control: max-age=...` を返す場合は、Honoのcache middlewareを併用します。
 
 ### 3. Frontend Code
 - すべてのフロントエンドのソースコードは frontend/app/[locale]/ ディレクトリ内にあります。 ja, en ディレクトリではなく文字通り [locale] という名前のディレクトリです(dynamic route)。

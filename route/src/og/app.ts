@@ -19,6 +19,10 @@ import { getColor } from "colorthief";
 import { adjustColor } from "./style.js";
 import * as v from "valibot";
 import { fetchError } from "../error.js";
+import { cache } from "hono/cache";
+import { etag } from "hono/etag";
+
+const CACHE_MAX_AGE = 315360000;
 
 export interface ChartBriefMin {
   ytId: string;
@@ -38,11 +42,18 @@ const ChartBriefMinArraySchema = v.tuple([
 
 const ogApp = (config: {
   ImageResponse: any;
-  fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
+  fetchBrief: (e: Bindings, cid: string) => Promise<{ brief: ChartBrief }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
     .use("/*", cors({ origin: "*" }))
+    .use(etag())
+    .use(
+      "/*",
+      cache({
+        cacheName: "og",
+      })
+    )
     .get("/:type/:cid", async (c) => {
       const cid = c.req.param("cid");
 
@@ -50,7 +61,7 @@ const ogApp = (config: {
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
       if (!c.req.query("brief")) {
-        const brief = await config.fetchBrief(env(c), cid);
+        const { brief } = await config.fetchBrief(env(c), cid);
         const lvType = levelTypes.indexOf(
           brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
         );
@@ -263,7 +274,7 @@ const ogApp = (config: {
       }) as Response;
       return c.body(imRes.body!, imRes.status as 200, {
         "Content-Type": imRes.headers.get("Content-Type") || "",
-        "Cache-Control": cacheControl(env(c), 315360000),
+        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
       });
     })
     .get("/:cid{[0-9]+}", (c) =>

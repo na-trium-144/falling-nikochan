@@ -14,7 +14,10 @@ export async function generateMetadata({ params }: MetadataProps) {
         "application/json+oembed": "https://placeholder_oembed/json",
         "text/xml+oembed": "https://placeholder_oembed/xml",
       },
-      custom: { nikochanSharingBrief: "PLACEHOLDER_BRIEF" },
+      custom: {
+        nikochanSharingBrief: "PLACEHOLDER_BRIEF",
+        nikochanSharingETag: "PLACEHOLDER_ETAG",
+      },
     }
   );
 }

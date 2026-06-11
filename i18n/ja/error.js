@@ -21,6 +21,8 @@ export default {
       unsupportedChartVersion: "サポートされていない譜面バージョンです",
       // 410
       noLongerSupportedAPI: "サポートされていない API です",
+      // 412
+      etagMismatch: "譜面データが更新されています。もう一度やり直してください",
       // 413
       tooLargeFile: "ファイルサイズが大きすぎます",
       tooManyEvent: "譜面データ内のイベント数が多すぎます",

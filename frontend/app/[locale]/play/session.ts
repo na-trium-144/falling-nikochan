@@ -1,12 +1,20 @@
 import { ChartBrief, LevelPlay } from "@falling-nikochan/chart";
 
-export interface SessionData {
-  cid?: string;
-  lvIndex: number;
-  brief: ChartBrief;
-  level?: LevelPlay;
-  editing?: boolean;
-}
+export type SessionData =
+  | {
+      cid?: string;
+      lvIndex: number;
+      brief: ChartBrief;
+      level: LevelPlay;
+      editing: true;
+    }
+  | {
+      cid: string;
+      lvIndex: number;
+      brief: ChartBrief & { etag: string };
+      editing: false;
+    };
+
 // プレイボタンを押した時にlocalStorageに保存し、sessionIdを返す
 // share->play では押すたびにidを発行、edit->playでは使い回し
 // localStorageのsessionは多くても1回しか呼ばれないので、容量節約のため定期的に消す

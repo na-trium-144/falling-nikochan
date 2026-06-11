@@ -26,7 +26,6 @@ const ytMetaApp = new Hono<{
   "/:cid",
   cache({
     cacheName: "api-ytMeta",
-    cacheControl: `max-age=${CACHE_MAX_AGE}`,
   }),
   describeRoute({
     description: "Get YouTube metadata about the chart.",

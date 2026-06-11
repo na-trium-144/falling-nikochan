@@ -66,7 +66,6 @@ const searchApp = new Hono<{
   "/",
   cache({
     cacheName: "api-search",
-    cacheControl: `max-age=${CACHE_MAX_AGE}`,
   }),
   describeRoute({
     description:

@@ -40,15 +40,13 @@ export function secretSalt(e: Bindings) {
   }
 }
 
-export function cacheControl(e: Bindings, age: number | null) {
-  if (age) {
-    if (e.API_CACHE_EDGE) {
-      return `max-age=${age}, s-maxage=${age}`;
-    } else {
-      return `max-age=${age}`;
-    }
+export function cacheControl(e: Bindings, age: number, private_?: boolean) {
+  if (private_) {
+    return `private, max-age=${age}, must-revalidate`;
+  } else if (e.API_CACHE_EDGE) {
+    return `max-age=${age}, s-maxage=${age}, must-revalidate`;
   } else {
-    return "no-store";
+    return `max-age=${age}, must-revalidate`;
   }
 }
 
