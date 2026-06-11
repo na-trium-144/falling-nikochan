@@ -70,7 +70,7 @@ import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
 import { useDisplayMode } from "@/scale.js";
-import { refreshBrief } from "@/common/briefCache.js";
+import { playCacheName, refreshBrief } from "@/common/briefCache.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -113,40 +113,71 @@ export function InitPlay({ locale }: { locale: string }) {
       setChartSeq(loadChart(session.level));
       setErrorMsg(undefined);
     } else {
-      fetchBackend()
-        .url(`/api/playFile/${session.cid}/${session.lvIndex}`)
-        .headers({ "If-Match": `"${session.brief.etag}"`, "If-None-Match": `"${session.brief.etag}"` })
-        .get()
-        .badRequest(markAsExpected)
-        .notFound(markAsExpected)
-        .error(412, (e) => {
-          refreshBrief(session.cid);
-          markAsExpected(e);
-        })
-        .arrayBuffer((buf) => {
-          currentChartVer satisfies 16; // update the code below when chart version is bumped
-          const seq = msgpack.decode(buf) as Level6Play | Level15Play;
-          console.log("seq.ver", seq.ver);
-          if (seq.ver === 6 || seq.ver === 15 || seq.ver === 16) {
-            addRecent("play", session.cid ?? "");
-            updatePlayCountForReview();
-            return { seq: loadChart(seq), error: undefined };
-          } else {
-            // seq satisfies never;
-            return {
-              seq: undefined,
-              error: te("chartVersion", { ver: (seq as any)?.ver }),
-            };
-          }
-        })
-        .catch((e: unknown) => ({
-          seq: undefined,
-          error: captureAndWrap(e),
-        }))
-        .then(({ seq, error }) => {
-          setChartSeq(seq);
-          setErrorMsg(error);
-        });
+      /*
+      briefデータのetagをIf-Matchで送り、持っているキャッシュのetagをIf-None-Matchで送る。
+      (少なくともchromeでは)If-Matchを送るとIf-None-Matchは自動送信されず、
+      304時のレスポンスもブラウザが自動処理してくれないようなので、
+      cache apiを使って自前でキャッシュ管理する。
+      初回は200が返る→キャッシュに保存
+      2回目以降は304が返る→キャッシュを使う
+      データに変更があった場合412が返るので、ユーザーにやり直させる
+      */
+      ("caches" in window
+        ? window.caches.open(playCacheName)
+        : Promise.resolve()
+      ).then(async (cache) => {
+        const url = `/api/playFile/${session.cid}/${session.lvIndex}`;
+        const prevFile = await cache?.match(url);
+        fetchBackend()
+          .url(url)
+          .headers({
+            "If-Match": `"${session.brief.etag}"`,
+            "If-None-Match": prevFile?.ok
+              ? (prevFile?.headers.get("ETag") ?? "")
+              : "",
+          })
+          .get()
+          .badRequest(markAsExpected)
+          .notFound(markAsExpected)
+          .error(412, (e) => {
+            refreshBrief(session.cid);
+            markAsExpected(e);
+          })
+          .error(304, (e) => {
+            if (prevFile && prevFile.ok) {
+              return prevFile;
+            } else {
+              throw e;
+            }
+          })
+          .res()
+          .then(async (res) => {
+            const buf = await res.clone().arrayBuffer();
+            currentChartVer satisfies 16; // update the code below when chart version is bumped
+            const seq = msgpack.decode(buf) as Level6Play | Level15Play;
+            console.log("seq.ver", seq.ver);
+            if (seq.ver === 6 || seq.ver === 15 || seq.ver === 16) {
+              addRecent("play", session.cid ?? "");
+              updatePlayCountForReview();
+              await cache?.put(url, res);
+              return { seq: loadChart(seq), error: undefined };
+            } else {
+              // seq satisfies never;
+              return {
+                seq: undefined,
+                error: te("chartVersion", { ver: (seq as any)?.ver }),
+              };
+            }
+          })
+          .catch((e: unknown) => ({
+            seq: undefined,
+            error: captureAndWrap(e),
+          }))
+          .then(({ seq, error }) => {
+            setChartSeq(seq);
+            setErrorMsg(error);
+          });
+      });
     }
   }, [te]);
 

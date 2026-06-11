@@ -6,6 +6,7 @@ function briefKeyOld(cid: string) {
   return "brief-" + cid;
 }
 const briefCacheName = "brief1";
+export const playCacheName = "play1";
 
 // w/や引用符を除いた部分
 export const etagContentRegex = /\d+-[a-zA-Z0-9+/]+=*/;
@@ -28,7 +29,11 @@ export async function fetchBrief(cid: string, callbacks: Callbacks) {
       .keys()
       .then((keys) =>
         keys
-          .filter((k) => k.startsWith("brief") && k !== briefCacheName)
+          .filter(
+            (k) =>
+              (k.startsWith("brief") && k !== briefCacheName) ||
+              (k.startsWith("play") && k !== playCacheName)
+          )
           .forEach((k) => window.caches.delete(k))
       );
     cache = await window.caches.open(briefCacheName);
@@ -47,8 +52,7 @@ export async function fetchBrief(cid: string, callbacks: Callbacks) {
       if (res) {
         callbacks.onResult({
           ...((await res.json()) as ChartBrief),
-          etag:
-            res.headers.get("ETag")?.match(etagContentRegex)?.[0] ?? "",
+          etag: res.headers.get("ETag")?.match(etagContentRegex)?.[0] ?? "",
         });
         hasResult = true;
       }
