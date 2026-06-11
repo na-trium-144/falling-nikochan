@@ -112,7 +112,7 @@ export default function Edit(props: {
               chart.toObject(),
               chart.currentLevelIndex || 0
             ),
-            editing: true,
+            editing: true as const,
           };
           setSessionData(data);
           initSession(data, sessionId);

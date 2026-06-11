@@ -42,7 +42,7 @@ const ChartBriefMinArraySchema = v.tuple([
 
 const ogApp = (config: {
   ImageResponse: any;
-  fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
+  fetchBrief: (e: Bindings, cid: string) => Promise<{ brief: ChartBrief }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
 }) =>
   new Hono<{ Bindings: Bindings }>({ strict: false })
@@ -61,7 +61,7 @@ const ogApp = (config: {
       // /og/share/cid?brief=表示する全情報 で生成した画像を永久にキャッシュ
       // (vパラメータは /share でも追加されるけど)
       if (!c.req.query("brief")) {
-        const brief = await config.fetchBrief(env(c), cid);
+        const { brief } = await config.fetchBrief(env(c), cid);
         const lvType = levelTypes.indexOf(
           brief.levels.filter((l) => !l.unlisted).at(0)?.type || ""
         );

@@ -28,8 +28,14 @@ bodyを無理やり書き換える。
 
 const CACHE_MAX_AGE = 600;
 
+// w/や引用符を除いた部分
+export const etagContentRegex = /\d+-[a-zA-Z0-9+/]+=*/;
+
 const shareApp = (config: {
-  fetchBrief: (e: Bindings, cid: string) => Promise<ChartBrief>;
+  fetchBrief: (
+    e: Bindings,
+    cid: string
+  ) => Promise<{ brief: ChartBrief; etag: string }>;
   fetchStatic: (e: Bindings, url: URL) => Promise<ResponseOK>;
   languageDetector?: (c: Context, next: () => Promise<void>) => Promise<void>;
 }) =>
@@ -64,7 +70,7 @@ const shareApp = (config: {
       //   );
       // }
       const pRes = config.fetchStatic(env(c), placeholderUrl);
-      const brief = await pBriefRes;
+      const { brief, etag } = await pBriefRes;
       const res = await pRes;
       let newTitle = brief.composer
         ? t("titleWithComposer", {
@@ -155,6 +161,8 @@ const shareApp = (config: {
         .replaceAll("PLACEHOLDER_DESCRIPTION", escapeHtml(newDescription))
         .replaceAll('\\"PLACEHOLDER_BRIEF', '\\"' + escapeJs(briefStr))
         .replaceAll("PLACEHOLDER_BRIEF", escapeHtml(briefStr))
+        // 引用符やw/がついている場合ここで除外するので、fetchBrief()が返すetagはなんでもよい
+        .replaceAll("PLACEHOLDER_ETAG", etag.match(etagContentRegex)?.[0] ?? "")
         .replaceAll("https://placeholder_oembed/json", oembedJsonURL.toString())
         .replaceAll("https://placeholder_oembed/xml", oembedXmlURL.toString());
       if (c.req.path.startsWith("/share") && lang !== qLang) {

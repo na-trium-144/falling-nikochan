@@ -87,7 +87,7 @@ const briefApp = async () =>
 
 export async function getBrief(db: Db, cid: string) {
   const entry = await getChartEntryCompressed(db, cid, null);
-  return entryToBrief(entry);
+  return { brief: entryToBrief(entry), etag: await calcETag(entry) };
 }
 
 export default briefApp;

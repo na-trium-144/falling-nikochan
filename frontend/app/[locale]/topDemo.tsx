@@ -9,6 +9,7 @@ import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
 import { ChartListItem } from "./main/chartList";
 import { fetchBackend } from "./common/fetch";
+import { fetchBrief } from "./common/briefCache";
 
 export interface DemoChart {
   cid: string;
@@ -129,14 +130,9 @@ export function DemoDetail(
   const [brief, setBrief] = useState<ChartBrief>();
   useEffect(() => {
     if (!brief && props.cid) {
-      fetch(process.env.BACKEND_PREFIX + `/api/brief/${props.cid}`).then(
-        (res) => {
-          if (res.ok) {
-            res.json().then((brief: ChartBrief) => setBrief(brief));
-          }
-        },
-        () => undefined
-      );
+      fetchBrief(props.cid, {
+        onResult: (brief) => setBrief(brief),
+      });
     }
   }, [brief, props.cid]);
 

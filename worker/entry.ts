@@ -464,7 +464,10 @@ const app = new Hono({ strict: false })
       fetchBrief: async (_e, cid) => {
         const res = await fetchAPI(self.origin + `/api/brief/${cid}`);
         if (res.ok) {
-          return await res.json();
+          return {
+            brief: await res.json(),
+            etag: res.headers.get("ETag") ?? "",
+          };
         } else {
           throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
             cause: res,
