@@ -99,7 +99,6 @@ jobs:
       run: pnpm dlx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
     - name: Build Project Artifacts
       env:
-        MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
         VERSION_SUFFIX: "+#${{ github.event.number }}"
         TITLE_SUFFIX: "Preview #${{ github.event.number }}"
         SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
