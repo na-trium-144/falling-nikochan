@@ -101,6 +101,7 @@ export default function ShareChart(props: Props) {
       } catch (e) {
         console.error(e);
         Sentry.captureException(e);
+        // TODO: show error message?
       }
     }
     return () => clearInterval(titleUpdate);

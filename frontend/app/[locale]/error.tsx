@@ -18,7 +18,9 @@ export default function ClientErrorPage(props: ErrorProps) {
   const t = useTranslations("error.errorPage");
   const [eventId, setEventId] = useState<string>();
   useEffect(() => {
-    setEventId(Sentry.captureException(props.error));
+    setEventId(
+      Sentry.captureException(props.error, { extra: { captured: "error.tsx" } })
+    );
   }, [props.error]);
   return (
     <CenterBox scrollableY classNameInner="flex flex-col items-center">

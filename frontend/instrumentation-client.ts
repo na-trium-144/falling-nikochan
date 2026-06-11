@@ -21,18 +21,15 @@ Sentry.init({
   enabled: !isbot(navigator?.userAgent),
   ignoreErrors: [
     "Minified React error #418", // hydration failed
+    // "ChunkLoadError:",
+    "AbortError:",
   ],
   beforeSend(event, hint) {
-    for (const [errorClass, name] of [
-      [Error, "ChunkLoadError"],
-      [DOMException, "AbortError"],
-    ] as [() => unknown, string][]) {
-      if (
-        hint.originalException instanceof errorClass &&
-        (hint.originalException as Error).name === name
-      ) {
-        return null;
-      }
+    if (
+      hint.originalException instanceof Error &&
+      hint.originalException.name === "ChunkLoadError"
+    ) {
+      event.fingerprint = ["ChunkLoadError"];
     }
     if (hint.originalException instanceof APIError) {
       if (hint.originalException.expected) {

@@ -67,7 +67,6 @@ jobs:
         run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
         env:
-          MONGODB_URI: ${{ secrets.PRODUCTION_MONGODB_URI }}
           ASSET_PREFIX: ${{ vars.STAGING_ASSET_PREFIX }}
           NO_PREFETCH: ${{ vars.STAGING_NO_PREFETCH }}
           VERSION_SUFFIX: +stg

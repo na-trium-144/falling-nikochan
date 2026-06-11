@@ -559,7 +559,7 @@ export function useChartState(props: Props) {
           return;
         } catch (e) {
           // ここでエラーが出るのはバグ、でも失敗したことは伝えなければならない
-          Sentry.captureException(e);
+          Sentry.captureException(e, { extra: { captured: "localLoadState" } });
           setLocalLoadState(new LocalLoadError(String(e)));
           return;
         }

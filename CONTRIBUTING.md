@@ -82,14 +82,6 @@ pnpm install
   - Don’t worry too much about which level to choose—maintainers may adjust this at review time if necessary.
   - If you’re not sure, just ask in your PR or choose whatever seems reasonable.
 
-### Seed the Database
-
-```sh
-pnpm run seed
-```
-
-This inserts a sample chart at cid `102399` ("Get Started!").
-
 ### Common Files (`chart/`)
 
 The `chart/` directory contains chart data schemas and conversion logic shared between the frontend and backend.
@@ -128,33 +120,6 @@ The compiled files are also regenerated automatically when building the frontend
 
   </details>
 
-### Backend
-
-The backend is built with Hono and can run on multiple runtimes.
-There are five backend entry points:
-- `route/serve-local.ts` for Node.js (local development)
-- `route/serve-bun-prod.ts` for Bun (production)
-- `route/serve-cf.js` for Cloudflare Worker
-- `api/index.js` for Vercel
-- (`worker/entry.ts` executed by the Service Worker)
-
-If you modify any of these, please update all of them.
-When adding new API paths, you may also need to update the `rewrites` in `vercel.json`.
-
-For local development, start the Node.js server at `http://localhost:8787`:
-```sh
-pnpm run ldev
-```
-
-**Conventions**
-
-- When code branches depending on the deployment target, the Hono App creation is made into a function. (`const fooApp = async (config: ...) => new Hono(...)`)
-- The error response must be in JSON format and be in the form of `{message: "predefined message"}`. The message must be one defined in `api` within `i18n/{ja,en}/error.js` or empty.
-  - For unexpected errors, the global error handler (`src/error.ts`) formats the thrown error into JSON and returns it. Therefore, it is not necessary for each API handler to catch unexpected errors and return a 500 error response.
-  - For the format when throwing errors based on ValiError or responses from external fetch, please refer to the comments in `onError` in `src/error.ts`.
-- For APIs under /api, please write OpenAPI documentation like existing APIs.
-- If the response returns `Cache-Control: max-age=...`, use Hono cache middleware them together.
-
 ### Frontend
 
 Start the Next.js development server (hot-reload) at `http://localhost:3000/ja` or `/en`:
@@ -165,7 +130,7 @@ pnpm run ndev
 
 `http://localhost:3000/` returns 404. Always access `/ja` or `/en`.
 
-To build and export the static HTML:
+To build and export the static HTML (to frontend/out/):
 ```sh
 pnpm run nbuild
 ```
@@ -193,22 +158,66 @@ pnpm run nbuild
   - The state of the chart data being edited is managed by the `ChartEditing` class (under `chart/src/editing/`), and is not a typical React state management method.
   - `useEffect` will not execute automatically even if the dependency array is correctly specified; it needs to subscribe to the events of `ChartEditing` class.
 
-### Service Worker
-
-Build both the frontend and the service worker, then access via the backend:
-
-```sh
-pnpm run nbuild && pnpm run swbuild
-```
-
-The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`) caches all static assets and pages (except `/api` and `/og`). It updates the cache whenever `/buildVer.json` changes.
-
 ### Localization (i18n)
 
 - Language resources are in `i18n` directory.
 - To add a new language, create a new directory with the language code and add all the translations in the corresponding files.
 
 See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
+
+### Backend
+
+The backend is built with Hono and can run on multiple runtimes.
+There are five backend entry points:
+- `route/serve-local.ts` for Node.js (local development)
+- `route/serve-bun-prod.ts` for Bun (production)
+- `route/serve-cf.js` for Cloudflare Worker
+- `api/index.js` for Vercel
+- (`worker/entry.ts` executed by the Service Worker)
+
+If you modify any of these, please update all of them.
+When adding new API paths, you may also need to update the `rewrites` in `vercel.json`.
+
+For local development, start the Node.js server at `http://localhost:8787`:
+```sh
+pnpm run ldev
+```
+
+**Seed the Database**
+
+```sh
+pnpm run seed
+```
+
+This inserts a sample chart at cid `102399` ("Get Started!").
+
+**Conventions**
+
+- When code branches depending on the deployment target, the Hono App creation is made into a function. (`const fooApp = async (config: ...) => new Hono(...)`)
+- The error response must be in JSON format and be in the form of `{message: "predefined message"}`. The message must be one defined in `api` within `i18n/{ja,en}/error.js` or empty.
+  - For unexpected errors, the global error handler (`src/error.ts`) formats the thrown error into JSON and returns it. Therefore, it is not necessary for each API handler to catch unexpected errors and return a 500 error response.
+  - For the format when throwing errors based on ValiError or responses from external fetch, please refer to the comments in `onError` in `src/error.ts`.
+- For APIs under /api, please write OpenAPI documentation like existing APIs.
+- If the response returns `Cache-Control: max-age=...`, use Hono cache middleware them together.
+
+### Service Worker
+
+Add `http://localhost:8787` to `SW_ALLOWED_ORIGINS` in frontend/app/[locale]/common/pwaInstall.tsx
+
+Build both the frontend and the service worker, then access via the backend:
+
+```sh
+pnpm run nbuild
+pnpm run swbuild
+```
+
+or 
+
+```sh
+pnpm run allbuild
+```
+
+The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`) caches all static assets and pages (except `/api` and `/og`). It updates the cache whenever `/buildVer.json` changes.
 
 ## Versioning
 
@@ -221,27 +230,41 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 
 <details>
 
+### Building
+
+- Build the frontend and service worker first.
+- `pnpm run allbuild` will put them in frontend/out
+- `pnpm dlx vercel build` will also build them, and in that case the output will be .vercel/output/static
+- The Dockerfile expects them to already be built and located in .vercel/output/static.
+
 ### Environment Variables
 
-| Variable | Location | Description |
-|---|---|---|
-| `MONGODB_URI` | backend | `mongodb://...` | 
-| `API_ENV` | backend | DO NOT SET; if set to `development`, development-specific behaviors such as password bypass will be enabled |
-| `API_NO_RATELIMIT` | backend | DO NOT SET |
-| `SECRET_SALT` | backend | string |
-| `VERCEL_PROTECTION_BYPASS_SECRET` | backend | string |
-| `API_CACHE_EDGE` | backend | `1` or unset |
-| `ASSET_PREFIX` | backend & frontend | `https://domain-of-your-assets` or unset |
-| `BACKEND_PREFIX` | backend & frontend | `https://domain-of-your-backend` or unset — needed when the page origin differs from the backend origin |
-| `BACKEND_OG_PREFIX` | backend | alternate backend for OG image generation; used by Cloudflare Worker entrypoint only |
-| `BACKEND_ALT_PREFIX` | frontend | fallback backend URL used when the primary backend returns 5xx |
-| `NO_PREFETCH` | frontend | `1` or unset |
-| `YOUTUBE_API_KEY` | backend | API key for YouTube Data API v3 |
-| `ALLOW_FETCH_ERROR` | frontend | `1` or unset |
-| `VERSION_SUFFIX` | frontend | suffix appended to version; `+stg` on staging, `+#PR` on preview. In development `+dev` is automatically used if not set. |
-| `TITLE_SUFFIX` | frontend | suffix appended to version, also used as sentry environment; `Staging` on staging, `Preview #PR` on preview. In development `Development` is automatically used if not set. |
-| `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL`, `SENTRY_TUNNEL` | frontend | |
-| `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` | cronjob | — |
+| Variable | GitHub Action | Build time | Backend runtime | Description |
+|---|---|---|---|---|
+| `MONGODB_URI` | | | required | `mongodb://...` |
+| `API_ENV` |  |  | DO NOT SET | if set to `development`, development-specific behaviors such as password bypass will be enabled |
+| `API_NO_RATELIMIT` |  |  | DO NOT SET | |
+| `SECRET_SALT` |  |  | required | any string |
+| `VERCEL_PROTECTION_BYPASS_SECRET` |  |  | optional | needed only when deploy to vercel as preview |
+| `API_CACHE_EDGE` |  |  | optional | `1` or unset, if set `s-maxage` is added to response cache-control |
+| `ASSET_PREFIX` | vars.`PRODUCTION_ASSET_PREFIX`, `STAGING_ASSET_PREFIX` | optional | optional | `https://domain-of-your-assets` or unset, if you want to use different domain for assets |
+| `BACKEND_PREFIX` |  | optional | optional | `https://domain-of-your-backend` or unset — (frontend) if you want to use different domain for API, (backend) if request origin differs from the actual one due to reverse proxy |
+| `BACKEND_OG_PREFIX` |  |  | required on cloudflare worker | redirect OG image generation to another server because worker cannot handle that |
+| `BACKEND_ALT_PREFIX` | vars.`PRODUCTION_BACKEND_ALT_PREFIX` | optional |  | fallback backend domain used when the primary backend returns 5xx |
+| `NO_PREFETCH` | vars.`PRODUCTION_NO_PREFETCH`, `STAGING_NO_PREFETCH` | optional |  | `1` or unset, disables prefetches of Next.js (useful if you want to reduce number of requests when using vercel free tier etc.) |
+| `YOUTUBE_API_KEY` |  |  | required | API key for YouTube Data API v3 |
+| `VERSION_SUFFIX` |  | optional |  | suffix appended to version; `+stg` on staging, `+#PR` on preview. In development `+dev` is automatically used if not set. |
+| `TITLE_SUFFIX` |  | optional |  | suffix appended to app title, also used as sentry environment; `Staging` on staging, `Preview #PR` on preview. In development `Development` is automatically used if not set. |
+| `SENTRY_DSN` | secrets.`SENTRY_DSN` | optional | optional | |
+| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | secrets.`SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `SENTRY_URL` | optional | | |
+| `SENTRY_TUNNEL` | secrets.`SENTRY_TUNNEL` | optional | | |
+| `TWITTER_API_KEY`, `TWITTER_API_KEY_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET`, `GEMINI_API_KEY`, `DISCORD_WEBHOOK_ID`, `DISCORD_WEBHOOK_TOKEN` |  |   | optional | used by cronjob |
+| | secrets.`ACTION_FAILURE_DISCORD_WEBHOOK` | | | Notifies when action fails |
+| | secrets.`CF_ASSETS_ACCOUNT_ID`, `CF_ASSETS_API_TOKEN`, `CF_ASSETS_PROJECT_NAME` | | | cloudflare pages deploy |
+| | secrets.`CF_ASSETS_ACCOUNT_ID`, `CF_WORKER_API_TOKEN` | | | cloudflare worker deploy |
+| | secrets.`SELFHOST_HOST`, `SELFHOST_KEY`, `SELFHOST_USERNAME`, vars.`SELFHOST_PORT` | | | ssh server |
+| | secrets.`VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `VERCEL_TOKEN` | | | vercel production and preview |
+| | secrets.`VERCEL_ORG_ID`, `VERCEL_STAGING_PROJECT_ID`, `VERCEL_TOKEN` | | | vercel staging |
 
 ### GitHub Action
 
@@ -253,16 +276,22 @@ See also [next-intl Usage guide](https://next-intl.dev/docs/usage/messages)
 - Creating a PR will deploy a preview using Vercel.
   - Accessible from the URL in the vercel-deploy job log. Deployment protection may be in place, restricting access to non-maintainers.
 
+### Docker
+
+- To deploy with docker, see docker-compose.yml (uses bun)
+
 ### Vercel
 
+- Run `pnpm config set node-linker hoisted --local` before installing dependencies (otherwise Vercel cannot resolve packages in workspaces).
+- Then just deploy this repository (`pnpm dlx vercel build` and `pnpm dlx vercel deploy`).
 - Set `NODEJS_HELPERS=0`. See [honojs/hono#1256](https://github.com/honojs/hono/issues/1256).
 - Set `ENABLE_EXPERIMENTAL_COREPACK=1`. See [Vercel docs](https://vercel.com/docs/builds/configure-a-build#corepack).
-- Run `pnpm config set node-linker hoisted --local` before installing dependencies (otherwise Vercel cannot resolve packages in workspaces).
 
 ### Cloudflare Worker
 
-- Access to MongoDB from a Cloudflare Worker is unstable for some reason.
-- Currently, API requests with a hostname that exactly matches `nikochan.utcode.net` are passed to the origin server before being processed by the Worker.
+- To deploy on Cloudflare Worker, frontend and service worker must be built first and located in frontend/out/.
+- Then deploy this repository (`wrangler deploy`)
+- Access to MongoDB from a Cloudflare Worker is unstable for some reason, so currently API requests with a hostname that exactly matches `nikochan.utcode.net` are passed to the origin server before being processed by the Worker.
 
 ### Reverse Proxy
 
