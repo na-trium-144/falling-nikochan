@@ -13,7 +13,9 @@ interface ErrorProps {
 }
 export default function Error(props: ErrorProps) {
   useEffect(() => {
-    Sentry.captureException(props.error);
+    Sentry.captureException(props.error, {
+      extra: { captured: "global-error.tsx" },
+    });
   }, [props.error]);
   // ここに到達するのは error.tsx のレンダリングですらエラーになった場合。
   // ボタンとかは置いても無駄でしょう
