@@ -120,15 +120,8 @@ describe("GET /api/chartFile/:cid", () => {
       headers: { Authorization: basicAuth("p") },
     });
     expect(res.status).to.equal(200);
-    const client = new MongoClient(process.env.MONGODB_URI!);
-    try {
-      await client.connect();
-      const db = client.db("nikochan");
-      const entry = await getChartEntryCompressed(db, "100000", null);
-      expect(res.headers.get("etag")).to.equal(await calcETag(entry));
-    } finally {
-      await client.close();
-    }
+    const entry = await getChartEntryCompressed(db, "100000", null);
+    expect(res.headers.get("etag")).to.equal(await calcETag(entry));
   });
   test("should return 304 for matching If-None-Match", async () => {
     await initDb();
@@ -143,6 +136,7 @@ describe("GET /api/chartFile/:cid", () => {
       headers: {
         Authorization: basicAuth("p"),
         "If-None-Match": etag!,
+        "x-forwarded-for": "123",
       },
     });
     expect(res2.status).to.equal(304);
@@ -160,6 +154,7 @@ describe("GET /api/chartFile/:cid", () => {
       headers: {
         Authorization: basicAuth("p"),
         "If-Match": etag!,
+        "x-forwarded-for": "123",
       },
     });
     expect(res2.status).to.equal(200);
