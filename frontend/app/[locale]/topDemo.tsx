@@ -5,7 +5,6 @@ import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
 import {
   ChartBrief,
-  ChartSeqData,
   currentChartVer,
   Level15Play,
   Level6Play,
