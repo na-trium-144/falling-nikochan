@@ -87,7 +87,7 @@ export interface ChartLineBrief {
 interface Props {
   classNameOuter?: string;
   type?: ChartListType;
-  briefs?: ChartLineBrief[] | Error | undefined;
+  briefs?: ChartLineBrief[] | Error | undefined | "loading" | "empty";
   fetchAll?: boolean;
   fixedRows?: number; // 表示数を固定する
   containerHeight?: number;
@@ -112,11 +112,11 @@ export function ChartList(props: Props) {
 
   // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    (ChartLineBrief | null)[] | Error | undefined
+    (ChartLineBrief | null)[] | Error | undefined | "loading" | "empty"
   >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | Error | undefined>(
-    props.briefs
-  );
+  const prevPropBriefs = useRef<
+    ChartLineBrief[] | Error | undefined | "loading" | "empty"
+  >(props.briefs);
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
       setBriefs(props.briefs);
@@ -274,9 +274,12 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs: ChartLineBrief[] | Error | undefined = Array.isArray(
-    briefs
-  )
+  const filteredBriefs:
+    | ChartLineBrief[]
+    | Error
+    | undefined
+    | "loading"
+    | "empty" = Array.isArray(briefs)
     ? fetchAll
       ? briefs.filter((b) => b !== null)
       : briefs.filter((b) => b !== null).slice(0, maxRow)
@@ -443,12 +446,14 @@ export function ChartList(props: Props) {
           <SlimeSVG />
           Loading...
         </div>
-      ) : briefs && "message" in briefs ? (
+      ) : briefs instanceof Error ? (
         <div className="fn-cl-message">{formatError(briefs, te)}</div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
         <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}
         </div>
+      ) : briefs === "empty" ? (
+        <div className="fn-cl-message">{t("empty")}</div>
       ) : null}
       {Array.isArray(briefs) &&
       briefs.filter((b) => b !== null).length > maxRow ? (
