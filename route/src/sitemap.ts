@@ -6,6 +6,10 @@ import { env } from "hono/adapter";
 import { ChartEntryCompressed } from "./api/chart.js";
 import { text } from "node:stream/consumers";
 import { Db } from "mongodb";
+import { cache } from "hono/cache";
+import { etag } from "hono/etag";
+
+const CACHE_MAX_AGE = 86400;
 
 const staticSitemapItems: SitemapItemLoose[] = [
   { url: "/", priority: 1 },
@@ -24,33 +28,41 @@ const staticSitemapItems: SitemapItemLoose[] = [
 const sitemapApp = async (config: { dbMiddleware: MiddlewareHandler }) =>
   new Hono<{ Bindings: Bindings; Variables: { db: () => Promise<Db> } }>({
     strict: false,
-  }).get("/", config.dbMiddleware, async (c) => {
-    let allCharts: SitemapItemLoose[];
-    const db = await c.get("db")();
-    allCharts = (
-      await db
-        .collection<ChartEntryCompressed>("chart")
-        .find({ published: true })
-        .project<{
-          cid: string;
-          updatedAt: number;
-        }>({ _id: 0, cid: 1, updatedAt: 1 })
-        .toArray()
-    ).map((c) => ({
-      url: `/share/${c.cid}`,
-      priority: 0.8,
-      lastmod: new Date(c.updatedAt).toISOString(),
-    }));
+  }).get(
+    "/",
+    etag(),
+    cache({
+      cacheName: "sitemap",
+    }),
+    config.dbMiddleware,
+    async (c) => {
+      let allCharts: SitemapItemLoose[];
+      const db = await c.get("db")();
+      allCharts = (
+        await db
+          .collection<ChartEntryCompressed>("chart")
+          .find({ published: true })
+          .project<{
+            cid: string;
+            updatedAt: number;
+          }>({ _id: 0, cid: 1, updatedAt: 1 })
+          .toArray()
+      ).map((c) => ({
+        url: `/share/${c.cid}`,
+        priority: 0.8,
+        lastmod: new Date(c.updatedAt).toISOString(),
+      }));
 
-    const smStream = new SitemapStream({
-      hostname: "https://nikochan.utcode.net/",
-    });
-    Readable.from(staticSitemapItems.concat(allCharts)).pipe(smStream);
-    // smStream.end();
-    return c.body(await text(smStream), 200, {
-      "Content-Type": "application/xml",
-      "Cache-Control": cacheControl(env(c), 86400),
-    });
-  });
+      const smStream = new SitemapStream({
+        hostname: "https://nikochan.utcode.net/",
+      });
+      Readable.from(staticSitemapItems.concat(allCharts)).pipe(smStream);
+      // smStream.end();
+      return c.body(await text(smStream), 200, {
+        "Content-Type": "application/xml",
+        "Cache-Control": cacheControl(env(c), CACHE_MAX_AGE),
+      });
+    }
+  );
 
 export default sitemapApp;

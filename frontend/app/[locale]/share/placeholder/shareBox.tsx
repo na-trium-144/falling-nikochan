@@ -20,6 +20,11 @@ import { ButtonHighlight } from "@/common/button.jsx";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
+import {
+  briefIsStale,
+  briefStaleKey,
+  fetchBrief,
+} from "@/common/briefCache.js";
 
 const YtMetaSchema = () =>
   v.object({
@@ -30,7 +35,7 @@ type YtMeta = v.InferOutput<ReturnType<typeof YtMetaSchema>>;
 
 interface Props {
   cid: string | undefined;
-  brief: ChartBrief | null;
+  brief: (ChartBrief & { etag: string }) | null;
   record: RecordGetSummary[] | Error | null;
   sharedResult?: ResultParams | null;
   locale: string;
@@ -39,7 +44,39 @@ interface Props {
 }
 export function ShareBox(props: Props) {
   const t = useTranslations("share");
-  const { cid, brief, sharedResult, locale } = props;
+  const { cid, brief: propBrief, sharedResult, locale } = props;
+
+  const [refreshedBrief, setRefreshedBrief] = useState<
+    (ChartBrief & { etag: string }) | null
+  >(null);
+  const brief = refreshedBrief ?? propBrief;
+  useEffect(() => {
+    const update = () => {
+      if (cid && briefIsStale(cid)) {
+        fetchBrief(cid, {
+          onResult: (brief) => {
+            setRefreshedBrief(brief);
+          },
+        });
+      } else {
+        setRefreshedBrief(null);
+      }
+    };
+    const storageUpdate = (e: StorageEvent) => {
+      if (cid && e.key === briefStaleKey(cid)) {
+        update();
+      }
+    };
+    update();
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+    window.addEventListener("popstate", update); // router.push()からもどってきたとき
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", update);
+      window.removeEventListener("popstate", update);
+    };
+  }, [cid]);
 
   const [updatedAt, setUpdatedAt] = useState<string>("");
 

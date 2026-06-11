@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Bindings, cacheControl } from "../env.js";
+import { Bindings } from "../env.js";
 import { env } from "hono/adapter";
 import { getCookie, setCookie } from "hono/cookie";
 import { getChartEntryCompressed, getPUserHash } from "./chart.js";
@@ -49,6 +49,10 @@ const hashPasswdApp = new Hono<{
           "Set-Cookie": {
             description:
               "Sets the pUserSalt cookie if it was not present in the request.",
+            schema: { type: "string" },
+          },
+          "Cache-Control": {
+            description: `no-store`,
             schema: { type: "string" },
           },
         },
@@ -146,7 +150,7 @@ const hashPasswdApp = new Hono<{
     });
     if (entry.pServerHash) {
       return c.text(await getPUserHash(entry.pServerHash, pUserSalt), 200, {
-        "cache-control": cacheControl(env(c), null),
+        "cache-control": "no-store",
       });
     } else {
       throw new HTTPException(400, { message: "noPasswd" });

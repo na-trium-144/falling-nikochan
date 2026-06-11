@@ -24,6 +24,7 @@ import oembedApp from "./oembed.js";
 import decompressMiddleware from "./decompress.js";
 import { env } from "hono/adapter";
 import { Db } from "mongodb";
+import { etag } from "hono/etag";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
 
 export { getBrief } from "./brief.js";
@@ -35,12 +36,13 @@ const apiApp = async (config: {
   const prodCors = cors({
     origin: "*",
     credentials: false,
-    exposeHeaders: ["Retry-After"],
+    // allowHeaders は指定しなければcors middlewareが自動ですべてのヘッダーを許可する
+    exposeHeaders: ["*"],
   });
   const devCors = cors({
     origin: (origin) => origin,
     credentials: true,
-    exposeHeaders: ["Retry-After"],
+    exposeHeaders: ["*"],
   });
   const apiApp = new Hono<{
     Bindings: Bindings;
@@ -82,6 +84,7 @@ const apiApp = async (config: {
         }
       }
     })
+    .use(etag())
     .use(
       "/*",
       bodyLimit({
@@ -93,7 +96,7 @@ const apiApp = async (config: {
     )
     .use("/*", decompressMiddleware)
     .use("/*", config.dbMiddleware)
-    .route("/brief", briefApp)
+    .route("/brief", await briefApp())
     .route("/ytMeta", ytMetaApp)
     .route(
       "/chartFile",

@@ -33,7 +33,7 @@ import { formatError } from "@/common/fetch";
 interface Props {
   locale: string;
   cid: string;
-  brief: ChartBrief;
+  brief: ChartBrief & { etag: string };
   record: RecordGetSummary[] | Error | null;
 }
 export function PlayOption(props: Props) {
@@ -156,6 +156,7 @@ export function PlayOption(props: Props) {
                 cid: props.cid,
                 lvIndex: selectedLevel,
                 brief: props.brief,
+                editing: false as const,
               });
               if (isStandalone() || isInsideFrame()) {
                 router.push(`/${props.locale}/play?sid=${sessionId}`);

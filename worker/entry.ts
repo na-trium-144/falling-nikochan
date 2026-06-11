@@ -77,7 +77,8 @@ async function clearOldCaches() {
           (k) =>
             // pwaInstall.tsxにもキャッシュを削除する処理があるので、ここを編集する場合はそちらも確認
             ![mainCacheName, tmpCacheName, configCacheName].includes(k) &&
-            !k.startsWith("brief") // used in @/common/briefCache
+            !k.startsWith("brief") &&
+            !k.startsWith("play") // used in @/common/briefCache
         )
         .map((k) => caches.delete(k))
     )
@@ -464,7 +465,10 @@ const app = new Hono({ strict: false })
       fetchBrief: async (_e, cid) => {
         const res = await fetchAPI(self.origin + `/api/brief/${cid}`);
         if (res.ok) {
-          return await res.json();
+          return {
+            brief: await res.json(),
+            etag: res.headers.get("ETag") ?? "",
+          };
         } else {
           throw new Error(`failed to fetch /api/brief/${cid} (${res.status})`, {
             cause: res,

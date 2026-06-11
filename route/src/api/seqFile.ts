@@ -1,6 +1,11 @@
 import * as msgpack from "@msgpack/msgpack";
 import { Db } from "mongodb";
-import { getChartEntry } from "./chart.js";
+import {
+  etagHeaderDoc,
+  getChartEntry,
+  ifMatchHeaderDoc,
+  ifNoneMatchHeaderDoc,
+} from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
 import {
@@ -31,6 +36,7 @@ const seqFileApp = new Hono<{
   describeRoute({
     description:
       "Gets chart sequence data in MessagePack format, which is used for playing the chart.",
+    parameters: [ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
     responses: {
       200: {
         description: "chart sequence data in MessagePack format.",
@@ -44,7 +50,15 @@ const seqFileApp = new Hono<{
             description: "Filename with extension of .fnseq.mpk",
             schema: { type: "string" },
           },
+          "Cache-Control": {
+            description: `no-cache`,
+            schema: { type: "string" },
+          },
+          ...etagHeaderDoc,
         },
+      },
+      304: {
+        description: "No content if If-None-Match header matches",
       },
       400: {
         description: "invalid chart id",
@@ -64,6 +78,14 @@ const seqFileApp = new Hono<{
           },
         },
       },
+      412: {
+        description: "ETag does not match with given If-Match header",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("etagMismatch")),
+          },
+        },
+      },
     },
   }),
   validator(
@@ -78,7 +100,12 @@ const seqFileApp = new Hono<{
     const { cid, lvIndex } = c.req.valid("param");
 
     const db = await c.get("db")();
-    let { chart } = await getChartEntry(db, cid, null);
+    let { chart, etag } = await getChartEntry(
+      db,
+      cid,
+      null,
+      c.req.header("If-Match")
+    );
 
     let seqData: ChartSeqData;
     switch (chart.ver) {
@@ -137,6 +164,8 @@ const seqFileApp = new Hono<{
     return c.body(new Blob([msgpack.encode(seqData)]).stream(), 200, {
       "Content-Type": "application/vnd.msgpack",
       "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-cache",
+      "ETag": etag,
     });
   }
 );

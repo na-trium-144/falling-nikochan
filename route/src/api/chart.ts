@@ -31,11 +31,12 @@ import {
   BPMChangeWithLua15,
   SpeedChangeWithLua15,
   SignatureWithLua15,
+  currentChartVer,
 } from "@falling-nikochan/chart";
 import * as v from "valibot";
 import { gzip, gunzip } from "node:zlib";
 import { promisify } from "node:util";
-import { Binary, Db } from "mongodb";
+import { Binary, Db, BSON } from "mongodb";
 import { HTTPException } from "hono/http-exception";
 import { randomBytes } from "node:crypto";
 import { normalizeEntry, YTDataEntry } from "./ytData.js";
@@ -93,10 +94,14 @@ export async function getChartEntryCompressed(
     throw new HTTPException(401, { message: "badPassword" });
   }
 }
+/**
+ * ifMatchが文字列で一致しなかったら412を返す、undefinedならチェックを行わない
+ */
 export async function getChartEntry(
   db: Db,
   cid: string,
-  p: Passwd | null
+  p: Passwd | null,
+  ifMatch: string | undefined
 ): Promise<{
   entry: ChartEntry;
   chart:
@@ -110,13 +115,19 @@ export async function getChartEntry(
     | Chart13Edit
     | Chart14Edit
     | Chart15;
+  etag: string;
 }> {
   const entryCompressed = await getChartEntryCompressed(db, cid, p);
+
+  const etag = await calcETag(entryCompressed);
+  if (ifMatch && ifMatch !== etag) {
+    throw new HTTPException(412, { message: "etagMismatch" });
+  }
 
   const entry = await unzipEntry(entryCompressed);
   const chart = entryToChart(entry);
 
-  return { entry, chart };
+  return { entry, chart, etag };
 }
 
 export function getPUserHash(
@@ -259,6 +270,32 @@ export type ChartEntry = ChartEntryCompressed &
     | { ver: 14; levels: ChartLevelCore14[] }
     | { ver: 15 | 16; levels: ChartLevelCore15[] }
   );
+
+export async function calcETag(entry: ChartEntryCompressed) {
+  const bsonBuffer = BSON.serialize(entry);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", bsonBuffer);
+  const hashBase64 = Buffer.from(hashBuffer).toString("base64");
+  return `"${currentChartVer}-${hashBase64}"`;
+}
+export const etagHeaderDoc = {
+  "ETag": {
+    description: `"${currentChartVer}-(hash of chart data)"`,
+    schema: { type: "string" },
+  },
+} as const;
+export const ifMatchHeaderDoc = {
+  name: "If-Match",
+  in: "header",
+  description:
+    "If strong ETag of chart data is given and does not match, it returns 412.",
+  schema: { type: "string" },
+} as const;
+export const ifNoneMatchHeaderDoc = {
+  name: "If-None-Match",
+  in: "header",
+  description: "If ETag of chart data is given and matches, it returns 304.",
+  schema: { type: "string" },
+} as const;
 
 export async function unzipEntry(
   entry: ChartEntryCompressed

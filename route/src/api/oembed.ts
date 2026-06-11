@@ -52,7 +52,6 @@ const oembedApp = new Hono<{
   "/",
   cache({
     cacheName: "api-oembed",
-    cacheControl: `max-age=${CACHE_MAX_AGE}`,
   }),
   describeRoute({
     hide: true,
