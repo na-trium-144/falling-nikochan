@@ -3,7 +3,14 @@ import { useRealFPS } from "./common/fpsCalculator";
 import FallingWindow from "./play/fallingWindow";
 import { useFlash } from "./play/useFlash";
 import useGameLogic from "./play/gameLogic";
-import { ChartBrief, ChartSeqData } from "@falling-nikochan/chart";
+import {
+  ChartBrief,
+  ChartSeqData,
+  currentChartVer,
+  Level15Play,
+  Level6Play,
+  loadChart,
+} from "@falling-nikochan/chart";
 import * as msgpack from "@msgpack/msgpack";
 import { useColorThief } from "./common/colorThief";
 import clsx from "clsx/lite";
@@ -77,18 +84,28 @@ export function TopDemo(
       props.offset !== undefined
     ) {
       fetchBackend()
-        .get(`/api/seqFile/${props.cid}/${props.lvIndex}`)
+        .get(`/api/playFile/${props.cid}/${props.lvIndex}`)
         .arrayBuffer((buf) => {
-          const seq = msgpack.decode(buf) as ChartSeqData;
-          resetNotesAll(
-            seq.notes.map((n) => ({
-              ...n,
-              done: 0,
-              bigDone: false,
-            })),
-            props.offset! - seq.offset
-          );
-          currentTimeSec.current = props.offset! - seq.offset;
+          currentChartVer satisfies 16; // update the code below when chart version is bumped
+          const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+          if (
+            playFile.ver === 6 ||
+            playFile.ver === 15 ||
+            playFile.ver === 16
+          ) {
+            const seq = loadChart(playFile);
+            resetNotesAll(
+              seq.notes.map((n) => ({
+                ...n,
+                done: 0,
+                bigDone: false,
+              })),
+              props.offset! - seq.offset
+            );
+            currentTimeSec.current = props.offset! - seq.offset;
+          } else {
+            // ignore
+          }
         });
     }
   }, [notesAll, resetNotesAll, props.cid, props.lvIndex, props.offset]);

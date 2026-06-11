@@ -154,18 +154,22 @@ export function InitPlay({ locale }: { locale: string }) {
           .then(async (res) => {
             const buf = await res.clone().arrayBuffer();
             currentChartVer satisfies 16; // update the code below when chart version is bumped
-            const seq = msgpack.decode(buf) as Level6Play | Level15Play;
-            console.log("seq.ver", seq.ver);
-            if (seq.ver === 6 || seq.ver === 15 || seq.ver === 16) {
+            const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+            console.log("playFile.ver", playFile.ver);
+            if (
+              playFile.ver === 6 ||
+              playFile.ver === 15 ||
+              playFile.ver === 16
+            ) {
               addRecent("play", session.cid ?? "");
               updatePlayCountForReview();
-              await cache?.put(url, res);
-              return { seq: loadChart(seq), error: undefined };
+              cache?.put(url, res);
+              return { seq: loadChart(playFile), error: undefined };
             } else {
-              // seq satisfies never;
+              // playFile satisfies never;
               return {
                 seq: undefined,
-                error: te("chartVersion", { ver: (seq as any)?.ver }),
+                error: te("chartVersion", { ver: (playFile as any)?.ver }),
               };
             }
           })
