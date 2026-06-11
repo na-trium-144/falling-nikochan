@@ -30,6 +30,9 @@ import Search from "@icon-park/react/lib/icons/Search";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
 
+// route/src/api/search.tsとあわせる
+const MAX_CIDS_COUNT = 100;
+
 interface Props {
   locale: string;
 }
@@ -65,6 +68,13 @@ function PlayTabInternal(
     sort: "relevance" | "latest" | "popular" | "recent" | undefined;
     minLv: number;
     maxLv: number;
+  }
+  interface APIParams {
+    q: string;
+    sort?: "relevance" | "latest" | "popular";
+    c?: string[];
+    difficultyMin: string;
+    difficultyMax: string;
   }
   const prevParam = useRef<PageParams>(null);
   const params = useMemo(() => {
@@ -121,9 +131,10 @@ function PlayTabInternal(
   );
 
   const abortSearching = useRef<AbortController | null>(null);
+  // [] = not found, empty = empty
   const [searchResult, setSearchResult] = useState<
-    ChartLineBrief[] | Error | undefined
-  >();
+    ChartLineBrief[] | Error | "loading" | "empty"
+  >("loading");
 
   useLayoutEffect(() => {
     if (!params.sort) {
@@ -134,15 +145,22 @@ function PlayTabInternal(
       abortSearching.current = null;
     }
     setWaitingDebounce(false);
-    setSearchResult(undefined);
-    const sortForAPI =
-      params.sort === "recent" ? "latest" : (params.sort ?? "relevance");
-    const apiParams = {
+    setSearchResult("loading");
+    const apiBaseParams = {
       q: params.search,
-      sort: sortForAPI,
       difficultyMin: String(params.minLv),
       difficultyMax: String(params.maxLv),
     };
+    const recent = getRecent("play").reverse();
+    // recentの場合、cidが100件を超えると複数リクエストになる
+    const apiSortParams =
+      params.sort === "recent"
+        ? Array.from(new Array(Math.ceil(recent.length / MAX_CIDS_COUNT))).map(
+            (_, i) => ({
+              c: recent.slice(i * MAX_CIDS_COUNT, (i + 1) * MAX_CIDS_COUNT),
+            })
+          )
+        : [{ sort: params.sort ?? "relevance" }];
     if (!params.search) {
       document.title = titleWithSiteName(t("title"));
     } else {
@@ -150,55 +168,54 @@ function PlayTabInternal(
         t("searchTitle", { search: params.search })
       );
     }
-    abortSearching.current = new AbortController();
-    fetchBackend()
-      .url(`/api/search`)
-      .query(apiParams)
-      .signal(abortSearching.current)
-      .get()
-      .onAbort(() => undefined) // ignore.
-      .json((res) => {
-        const mapped = v
-          .parse(
-            v.array(
-              v.object({
-                cid: v.string(),
-                count: v.optional(v.number()),
-                updatedAt: v.optional(v.number()),
-              })
-            ),
-            res
+    if (apiSortParams.length === 0) {
+      setSearchResult("empty");
+    } else {
+      abortSearching.current = new AbortController();
+      let searchResultChunks: ChartLineBrief[][] = [];
+      let firstError: Error | null = null;
+      apiSortParams.forEach((apiSortParam, i) => {
+        searchResultChunks.push([]);
+        fetchBackend()
+          .url(`/api/search`)
+          .query({ ...apiBaseParams, ...apiSortParam } satisfies APIParams)
+          .signal(abortSearching.current!)
+          .get()
+          .onAbort(() => undefined) // ignore.
+          .json((res) =>
+            v
+              .parse(
+                v.array(
+                  v.object({
+                    cid: v.string(),
+                    count: v.optional(v.number()),
+                    updatedAt: v.optional(v.number()),
+                  })
+                ),
+                res
+              )
+              .map((r) => ({
+                cid: r.cid,
+                updatedAt: r.updatedAt,
+                fetched: false,
+              }))
           )
-          .map((r) => ({
-            cid: r.cid,
-            updatedAt: r.updatedAt,
-            fetched: false,
-          }));
-        if (params.sort === "recent") {
-          const mappedByCid = new Map(
-            mapped.map((brief: ChartLineBrief) => [brief.cid, brief])
-          );
-          const sortedByRecent: ChartLineBrief[] = [];
-          for (const cid of getRecent("play").reverse()) {
-            if (sortedByRecent.length === mapped.length) {
-              break;
+          .catch((e: unknown) => captureAndWrap(e))
+          .then((res) => {
+            if (res === undefined) {
+              return; // ignore
             }
-            const brief = mappedByCid.get(cid);
-            if (brief) {
-              sortedByRecent.push(brief);
+            if (Array.isArray(res)) {
+              searchResultChunks[i] = res;
+            } else if (res instanceof Error && !firstError) {
+              firstError = res;
             }
-          }
-          return sortedByRecent;
-        } else {
-          return mapped;
-        }
-      })
-      .catch((e: unknown) => captureAndWrap(e))
-      .then((res) => {
-        if (res !== undefined) {
-          setSearchResult(res);
-        }
+            setSearchResult(
+              firstError ? firstError : searchResultChunks.flat(1)
+            );
+          });
       });
+    }
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 
   const boxSize = useResizeDetector();
