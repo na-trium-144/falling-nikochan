@@ -67,6 +67,19 @@ const fetchBrief = async (e, cid) => {
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryHonoConfig));
 app
+  .use(async (c, next) => {
+    await next();
+    if (c.res.headers.has("content-encoding")) {
+      // https://leaysgur.github.io/posts/2022/03/07/141253/
+      // 既存のレスポンスの Body と Headers、Status を引き継ぎつつ、 encodeBody: "manual" を付与した新しい Response を作成
+      c.res = new Response(c.res.body, {
+        status: c.res.status,
+        statusText: c.res.statusText,
+        headers: c.res.headers,
+        encodeBody: "manual",
+      });
+    }
+  })
   .use(compress())
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .get("/og/*", (c) => {
