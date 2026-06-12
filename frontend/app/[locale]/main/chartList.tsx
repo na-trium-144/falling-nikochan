@@ -4,7 +4,14 @@ import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { Fragment, RefObject, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import {
   useInsideFrameDetector,
@@ -117,19 +124,51 @@ export function ChartList(props: Props) {
   const prevPropBriefs = useRef<ChartLineBrief[] | Error | "loading" | "empty">(
     props.briefs
   );
+  // briefのリストを更新する際に、既存のfetch済みbriefデータを引き継ぐ。
+  const mergeAndSetBriefs = useCallback(
+    (briefs: ChartLineBrief[] | Error | "loading" | "empty") => {
+      setBriefs((prev) => {
+        if (!Array.isArray(briefs) || !Array.isArray(prev)) {
+          return briefs;
+        }
+        // 既存の要素を cid をキーにしたマップにして、検索しやすくする
+        const prevMap = new Map<string, ChartLineBrief>();
+        prev.forEach((item) => {
+          if (item && item.cid) {
+            prevMap.set(item.cid, item);
+          }
+        });
+        // 新しい id リストを回し、既存のデータがあれば引き継ぐ
+        return briefs.map((brief) => {
+          const prevItem = prevMap.get(brief.cid);
+          if (prevItem?.fetched) {
+            // すでにデータが存在するので、それをそのまま返す（loadingにならない）
+            return {
+              ...brief,
+              fetched: true,
+              brief: prevItem.brief,
+            };
+          } else {
+            return brief;
+          }
+        });
+      });
+    },
+    []
+  );
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
-      setBriefs(props.briefs ?? "loading");
+      mergeAndSetBriefs(props.briefs ?? "loading");
       prevPropBriefs.current = props.briefs;
     }
-  }, [props.briefs]);
+  }, [props.briefs, mergeAndSetBriefs]);
   useEffect(() => {
     // 譜面リストのfetch (中身のbriefのfetchは別で行う)
     switch (props.type) {
       case "recent":
       case "recentEdit": {
         const update = () => {
-          setBriefs(
+          mergeAndSetBriefs(
             getRecent(props.type === "recent" ? "play" : "edit")
               .reverse()
               .map((cid) => ({ cid, fetched: false }))
@@ -162,9 +201,9 @@ export function ChartList(props: Props) {
               .map(({ cid }) => ({ cid, fetched: false }))
           )
           .catch((e: unknown) => captureAndWrap(e, { type: props.type }))
-          .then((latest) => setBriefs(latest));
+          .then((latest) => mergeAndSetBriefs(latest));
     }
-  }, [props.type]);
+  }, [props.type, mergeAndSetBriefs]);
 
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
@@ -229,27 +268,36 @@ export function ChartList(props: Props) {
           fetchBrief(b.cid, {
             onResult: (brief) =>
               setBriefs((briefs) => {
-                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                if (Array.isArray(briefs)) {
                   briefs = briefs.slice();
-                  briefs[i]!.fetched = true;
-                  briefs[i]!.brief = brief;
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i]!.fetched = true;
+                    briefs[i]!.brief = brief;
+                  }
                 }
                 return briefs;
               }),
             onNotFound: () =>
               setBriefs((briefs) => {
-                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                if (Array.isArray(briefs)) {
                   briefs = briefs.slice();
-                  briefs[i] = null;
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i] = null;
+                  }
                 }
                 return briefs;
               }),
             onError: () =>
               setBriefs((briefs) => {
-                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                if (Array.isArray(briefs)) {
                   briefs = briefs.slice();
-                  briefs[i]!.fetched = true;
-                  // briefs[i]!.brief = undefined;
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i]!.fetched = true;
+                    // briefs[i]!.brief = undefined;
+                  }
                 }
                 return briefs;
               }),
