@@ -36,6 +36,7 @@ import fnCommandsLib from "fn-commands?raw";
 import fnCommandsPackageJson from "fn-commands/package.json";
 import { captureAndWrap, fetchBackend } from "@/common/fetch";
 import { markAsExpected } from "@/common/apiError";
+import { removeRecent } from "@/common/recent";
 
 interface Props {
   onLoad: (cid: string) => void;
@@ -370,6 +371,7 @@ export function useChartState(props: Props) {
         .notFound(() => undefined)
         .error(429, () => undefined)
         .res(() => {
+          removeRecent("edit", chartState.chart.cid!);
           if (isStandalone() || isInsideFrame()) {
             history.back();
           } else {
@@ -559,7 +561,7 @@ export function useChartState(props: Props) {
           return;
         } catch (e) {
           // ここでエラーが出るのはバグ、でも失敗したことは伝えなければならない
-          Sentry.captureException(e);
+          Sentry.captureException(e, { extra: { captured: "localLoadState" } });
           setLocalLoadState(new LocalLoadError(String(e)));
           return;
         }

@@ -44,7 +44,9 @@ export function SharePageModalProvider(props: {
   const th = useTranslations("share");
   const tp = useTranslations("main.play");
   const [modalCId, setModalCId] = useState<string | null>(null);
-  const [modalBrief, setModalBrief] = useState<ChartBrief | null>(null);
+  const [modalBrief, setModalBrief] = useState<
+    (ChartBrief & { etag: string }) | null
+  >(null);
   const [modalRecord, setModalRecord] = useState<
     RecordGetSummary[] | Error | null
   >(null);

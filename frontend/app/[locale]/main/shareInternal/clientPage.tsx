@@ -18,7 +18,9 @@ export default function ShareInternal({ locale }: { locale: string }) {
   const t = useTranslations("share");
   const te = useTranslations("error");
   const [cid, setCId] = useState<string | null>(null);
-  const [brief, setBrief] = useState<ChartBrief | null>(null);
+  const [brief, setBrief] = useState<(ChartBrief & { etag: string }) | null>(
+    null
+  );
   const [fromPlay, setFromPlay] = useState<boolean | null>(null);
   const [record, setRecord] = useState<RecordGetSummary[] | Error | null>(null);
   const [sessionError, setSessionError] = useState<boolean>(false);

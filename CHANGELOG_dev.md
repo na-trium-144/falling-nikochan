@@ -1,3 +1,18 @@
+## ver. 16.17 - 2025/06/13
+
+* ETagとIf-Matchの利用 [#1190](https://github.com/na-trium-144/falling-nikochan/pull/1190)
+    * etag middlewareをデフォルト設定で/api,/og,/share,/rss,/sitemapに追加、If-None-MatchヘッダーがETagとマッチしたら304が返る
+    * oembed, record, search, ytMeta, /rss.xml, /sitemap.xmlにcache middlewareを追加
+    * /share/:cidのキャッシュをbriefとおなじ10分に
+    * brief, playFile, seqFile, chartFile, newChartFile で譜面データのハッシュをETagとして返す
+    * chartFile, playFile, seqFile のcache-controlを no-cache に
+    * chartFile, playFile, seqFile リクエストにIf-MatchまたはX-If-Matchヘッダーが含まれていた場合、ETagが一致しなかったら412を返す
+* プレイ履歴で非公開譜面も表示 [#1204](https://github.com/na-trium-144/falling-nikochan/pull/1204)
+    * search APIに指定したcidの中でだけ非公開譜面も含めて検索する機能を追加
+* cloudflare,bunでAPIのレスポンスを圧縮
+* theme,recent,bestScoreの使用箇所でstorageイベントと画面遷移時に毎回更新する
+* wretchのAbortAddonをdedupe middlewareと組み合わせるのをやめる
+
 ## ver. 16.16 - 2025/06/09
 
 * MongoClientをリクエストごとに破棄せず再利用 [#1201](https://github.com/na-trium-144/falling-nikochan/pull/1201)

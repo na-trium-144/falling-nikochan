@@ -88,4 +88,68 @@ describe("GET /api/search", () => {
       expect(body).to.be.an("array");
     }
   });
+  test("should return 304 for matching If-None-Match", async () => {
+    await initDb();
+    const res1 = await app.request("/api/search?q=テスト");
+    expect(res1.status).to.equal(200);
+    const etag = res1.headers.get("etag");
+    expect(etag).to.be.a("string");
+
+    const res2 = await app.request("/api/search?q=テスト", {
+      headers: { "If-None-Match": etag! },
+    });
+    expect(res2.status).to.equal(304);
+  });
+
+  describe("c parameter", () => {
+    test("single cid", async () => {
+      await initDb();
+      const res = await app.request(`/api/search?c=${dummyCid}`);
+      expect(res.status).to.equal(200);
+      const json = await res.json();
+      expect(json).to.have.lengthOf(1);
+      expect(json[0].cid).to.equal(dummyCid);
+    });
+
+    test("multiple cids with order preserved", async () => {
+      await initDb();
+      const cid2 = String(Number(dummyCid) + 4);
+      const res = await app.request(`/api/search?c=${cid2}&c=${dummyCid}`);
+      expect(res.status).to.equal(200);
+      const json = await res.json();
+      expect(json).to.have.lengthOf(2);
+      expect(json[0].cid).to.equal(cid2);
+      expect(json[1].cid).to.equal(dummyCid);
+    });
+
+    test("filter by query and cids", async () => {
+      await initDb();
+      const cid2 = String(Number(dummyCid) + 4);
+      const res = await app.request(
+        `/api/search?q=テスト&c=${dummyCid}&c=${cid2}`
+      );
+      expect(res.status).to.equal(200);
+      const json = await res.json();
+      expect(json).to.have.lengthOf(2);
+    });
+
+    test("returns 400 when used with sort", async () => {
+      await initDb();
+      const res = await app.request(`/api/search?c=${dummyCid}&sort=latest`);
+      expect(res.status).to.equal(400);
+    });
+
+    test("excludes non-existent or deleted cids", async () => {
+      await initDb();
+      const deletedCid = String(Number(dummyCid) + 1);
+      const nonExistentCid = "999999";
+      const res = await app.request(
+        `/api/search?c=${dummyCid}&c=${deletedCid}&c=${nonExistentCid}`
+      );
+      expect(res.status).to.equal(200);
+      const json = await res.json();
+      expect(json).to.have.lengthOf(1);
+      expect(json[0].cid).to.equal(dummyCid);
+    });
+  });
 });

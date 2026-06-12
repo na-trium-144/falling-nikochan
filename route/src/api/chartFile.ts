@@ -15,11 +15,16 @@ import {
 } from "@falling-nikochan/chart";
 import { Db } from "mongodb";
 import {
+  calcETag,
   ChartEntry,
   ChartEntryCompressed,
   chartToEntry,
   entryToChart,
+  etagHeaderDoc,
   getChartEntry,
+  getChartEntryCompressed,
+  ifMatchHeaderDoc,
+  ifNoneMatchHeaderDoc,
   zipEntry,
 } from "./chart.js";
 import { Bindings, secretSalt } from "../env.js";
@@ -67,6 +72,7 @@ interface ChartFileAppVars {
   ip: string;
   entry: ChartEntry;
   chart: ReturnType<typeof entryToChart>;
+  etag: string;
   db: () => Promise<Db>;
   pSecretSalt: string;
 }
@@ -113,18 +119,24 @@ const chartFileApp = async (config: {
           );
         }
 
-        let { entry, chart } = await getChartEntry(db, cid, {
-          bypass,
-          rawPasswd: p,
-          v9PasswdHash: ph,
-          v9UserSalt,
-          pSecretSalt,
-        });
+        const { entry, chart, etag } = await getChartEntry(
+          db,
+          cid,
+          {
+            bypass,
+            rawPasswd: p,
+            v9PasswdHash: ph,
+            v9UserSalt,
+            pSecretSalt,
+          },
+          c.req.header("X-If-Match") ?? c.req.header("If-Match")
+        );
         // 必要なデータをコンテキストに保存
         c.set("cid", cid);
         c.set("ip", ip);
         c.set("entry", entry);
         c.set("chart", chart);
+        c.set("etag", etag);
         c.set("pSecretSalt", pSecretSalt);
         await next();
       }
@@ -137,7 +149,7 @@ const chartFileApp = async (config: {
           "The chart data format can be either Chart4, Chart5, Chart6, Chart7, Chart8Edit, Chart9Edit, Chart11Edit, Chart13Edit or Chart14Edit, " +
           `while this documentation only describes Chart15 format. ` +
           `The chart editor can import chart data from the API.`,
-        parameters: [passwdHeaderDoc],
+        parameters: [passwdHeaderDoc, ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
         responses: {
           200: {
             description: "Successful response",
@@ -151,7 +163,15 @@ const chartFileApp = async (config: {
                 description: "Filename with extension of .fn{ver}.mpk",
                 schema: { type: "string" },
               },
+              "Cache-Control": {
+                description: `private, no-cache`,
+                schema: { type: "string" },
+              },
+              ...etagHeaderDoc,
             },
+          },
+          304: {
+            description: "No content if If-None-Match header matches",
           },
           400: {
             description: "invalid chart id or parameter",
@@ -182,6 +202,14 @@ const chartFileApp = async (config: {
               },
             },
           },
+          412: {
+            description: "ETag does not match with given If-Match header",
+            content: {
+              "application/json": {
+                schema: resolver(await errorLiteral("etagMismatch")),
+              },
+            },
+          },
           429: {
             description: "Rate limited",
             content: {
@@ -204,6 +232,8 @@ const chartFileApp = async (config: {
         return c.body(new Blob([msgpack.encode(chart)]).stream(), 200, {
           "Content-Type": "application/vnd.msgpack",
           "Content-Disposition": `attachment; filename="${filename}"`,
+          "Cache-Control": "private, no-cache",
+          "ETag": c.get("etag"),
         });
       }
     )
@@ -212,7 +242,7 @@ const chartFileApp = async (config: {
       describeRoute({
         description:
           "Soft delete a chart. The chart will be marked as deleted and won't appear in searches or latest/popular lists. Requires a password (either p/ph query or Authorization header).",
-        parameters: [passwdHeaderDoc],
+        parameters: [passwdHeaderDoc, ifMatchHeaderDoc],
         responses: {
           204: {
             description: "No content, chart deleted successfully",
@@ -243,6 +273,14 @@ const chartFileApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("chartIdNotFound")),
+              },
+            },
+          },
+          412: {
+            description: "ETag does not match with given If-Match header",
+            content: {
+              "application/json": {
+                schema: resolver(await errorLiteral("etagMismatch")),
               },
             },
           },
@@ -296,6 +334,7 @@ const chartFileApp = async (config: {
         },
         parameters: [
           passwdHeaderDoc,
+          ifMatchHeaderDoc,
           {
             name: "Content-Encoding",
             in: "header",
@@ -306,6 +345,9 @@ const chartFileApp = async (config: {
         responses: {
           204: {
             description: "No content, chart updated successfully",
+            headers: {
+              ...etagHeaderDoc,
+            },
           },
           400: {
             description:
@@ -342,6 +384,14 @@ const chartFileApp = async (config: {
             content: {
               "application/json": {
                 schema: resolver(await errorLiteral("oldChartVersion")),
+              },
+            },
+          },
+          412: {
+            description: "ETag does not match with given If-Match header",
+            content: {
+              "application/json": {
+                schema: resolver(await errorLiteral("etagMismatch")),
               },
             },
           },
@@ -496,7 +546,10 @@ const chartFileApp = async (config: {
             ),
           }
         );
-        return c.body(null, 204);
+        const newEntry = await getChartEntryCompressed(db, cid, null);
+        return c.body(null, 204, {
+          "ETag": await calcETag(newEntry),
+        });
       }
     );
 

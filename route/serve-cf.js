@@ -20,6 +20,7 @@ import * as Sentry from "@sentry/hono/cloudflare";
 import packageJson from "@falling-nikochan/route/package.json" with { type: "json" };
 import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
+import { compress } from "hono/compress";
 
 const fetchStatic = (e, url) => e.ASSETS.fetch(url);
 const sentryConfig = (env) => ({
@@ -66,6 +67,7 @@ const fetchBrief = async (e, cid) => {
 const app = new Hono({ strict: false });
 app.use(Sentry.sentry(app, sentryHonoConfig));
 app
+  .use(compress())
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .get("/og/*", (c) => {
     const url = new URL(c.req.raw.url);

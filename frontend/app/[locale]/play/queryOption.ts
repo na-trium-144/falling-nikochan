@@ -6,9 +6,6 @@ boolean値については、 0, 空文字, 未指定 をfalse、それ以外をt
 export interface QueryOptions {
   // session idで譜面を指定
   sid?: number;
-  // sidの代わりにcidとlvIndexで譜面を指定することも可能
-  cid?: string;
-  lvIndex?: number;
 
   fps?: boolean; // fps表示
   speed?: boolean; // 音符の速度変化を表示 (ver13以降のなめらか速度変化に対応していません)
@@ -30,8 +27,6 @@ export function getQueryOptions(): QueryOptions {
   );
   return {
     sid: q.has("sid") ? Number(q.get("sid")) : undefined,
-    cid: q.get("cid") ?? undefined,
-    lvIndex: q.has("lvindex") ? Number(q.get("lvindex")) : undefined,
     fps: toBoolean(q.get("fps")),
     speed: toBoolean(q.get("speed")),
     result: toBoolean(q.get("result")),

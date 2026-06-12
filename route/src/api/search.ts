@@ -8,6 +8,7 @@ import * as v from "valibot";
 import { normalizeStr } from "./ytData.js";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import {
+  CidSchema,
   DifficultySchema,
   maxLv,
   minLv,
@@ -22,6 +23,9 @@ const CACHE_MAX_AGE = 600;
 // Limits to prevent DoS/ReDoS attacks
 const MAX_QUERY_LENGTH = 200;
 const MAX_QUERY_TOKENS = 20;
+
+// /[locale]/main/play/clientPage.tsx とあわせる
+const MAX_CIDS_COUNT = 100;
 
 /*
 レスポンスで返す譜面の数には制限を設けていない。
@@ -62,15 +66,10 @@ const searchApp = new Hono<{
   "/",
   cache({
     cacheName: "api-search",
-    cacheControl: `max-age=${CACHE_MAX_AGE}`,
   }),
   describeRoute({
     description:
-      "Search charts by text or get charts sorted by latest or popularity. " +
-      "If q is provided, searches by title, artist, tags, and author name. " +
-      "Otherwise, returns all charts. " +
-      "Sort order can be 'relevance', 'popular', or 'latest'. " +
-      "Optional difficultyMin and difficultyMax can be used to filter charts by difficulty range.",
+      "Search charts by text or get charts sorted by latest or popularity.",
     responses: {
       200: {
         description: "Successful response",
@@ -98,33 +97,75 @@ const searchApp = new Hono<{
   }),
   validator(
     "query",
-    v.object({
-      q: v.optional(
-        v.pipe(
-          v.string(),
-          v.transform((s) => s.slice(0, MAX_QUERY_LENGTH))
+    v.pipe(
+      v.object({
+        q: v.pipe(
+          v.optional(
+            v.pipe(
+              v.string(),
+              v.transform((s) => s.slice(0, MAX_QUERY_LENGTH))
+            ),
+            ""
+          ),
+          v.description(
+            "If provided, searches by title, artist, tags, author name, or exact match of chart id. " +
+              "Multiple entries separated by spaces will perform an AND search. " +
+              "If not specified, returns all charts."
+          )
         ),
-        ""
-      ),
-      sort: v.optional(
-        v.picklist(["relevance", "popular", "latest"]),
-        "relevance"
-      ),
-      difficultyMin: v.pipe(
-        v.optional(v.string(), String(minLv)),
-        v.transform(Number),
-        DifficultySchema()
-      ),
-      difficultyMax: v.pipe(
-        v.optional(v.string(), String(maxLv)),
-        v.transform(Number),
-        DifficultySchema()
-      ),
-    }),
+        c: v.pipe(
+          v.optional(
+            v.union([
+              v.pipe(
+                CidSchema(),
+                v.transform((c) => [c])
+              ),
+              v.array(CidSchema()),
+            ]),
+            []
+          ),
+          v.maxLength(MAX_CIDS_COUNT),
+          v.description(
+            "If chart ids are provided, the results will be filtered and returned in the specified order. " +
+              `Up to ${MAX_CIDS_COUNT} chart IDs can be specified. To retrieve more, split into multiple requests.`
+          )
+        ),
+        sort: v.pipe(
+          v.optional(v.picklist(["relevance", "popular", "latest"])),
+          v.description(
+            "The results will be sorted by relevance to the search keyword, number of views, or update date. " +
+              'If not specified, it will default to "relevance". ' +
+              "Cannot be used in conjunction with the c parameter."
+          )
+        ),
+        difficultyMin: v.pipe(
+          v.optional(v.string(), String(minLv)),
+          v.transform(Number),
+          DifficultySchema(),
+          v.description("filter charts by difficulty range")
+        ),
+        difficultyMax: v.pipe(
+          v.optional(v.string(), String(maxLv)),
+          v.transform(Number),
+          DifficultySchema(),
+          v.description("filter charts by difficulty range")
+        ),
+      }),
+      v.check(
+        (q) => !(q.c.length && q.sort),
+        "Cannot use c and sort parameter at the same time"
+      )
+    ),
     sValidatorHook()
   ),
   async (c) => {
-    let { q, sort, difficultyMin, difficultyMax } = c.req.valid("query");
+    let {
+      q,
+      c: cids,
+      sort,
+      difficultyMin,
+      difficultyMax,
+    } = c.req.valid("query");
 
     const normalizedQueries = q
       ? Array.from(
@@ -139,38 +180,70 @@ const searchApp = new Hono<{
 
     const db = await c.get("db")();
 
-    let mongoQuery: Filter<ChartEntryCompressed> = {
-      deleted: false,
-      levelBrief: {
-        $elemMatch: {
-          difficulty: {
-            $gte: difficultyMin,
-            $lte: difficultyMax,
+    const baseMongoQuery: Filter<ChartEntryCompressed>[] = [
+      { deleted: false },
+      {
+        levelBrief: {
+          $elemMatch: {
+            difficulty: {
+              $gte: difficultyMin,
+              $lte: difficultyMax,
+            },
+            unlisted: { $ne: true },
           },
-          unlisted: { $ne: true },
         },
       },
-    };
+    ];
+    let mongoQuery: Filter<ChartEntryCompressed>;
 
     if (normalizedQueries.length > 0) {
-      mongoQuery = {
-        ...mongoQuery,
-        $or: [
-          // クエリがcidに完全一致する場合は、publishedの状態に関わらず返す。これは意図的な仕様
-          { cid: q },
-          {
-            published: true,
-            $and: normalizedQueries.map((s) => ({
-              normalizedText: { $regex: escapeRegex(s) },
-            })),
-          },
-        ],
-      };
+      if (cids.length) {
+        // cidsが指定されている場合、publishedの状態に関わらず一致するものを返す
+        mongoQuery = {
+          $and: [
+            ...baseMongoQuery,
+            { cid: { $in: cids } },
+            {
+              $or: [
+                { cid: q },
+                {
+                  $and: normalizedQueries.map((s) => ({
+                    normalizedText: { $regex: escapeRegex(s) },
+                  })),
+                },
+              ],
+            },
+          ],
+        };
+      } else {
+        mongoQuery = {
+          $and: [
+            ...baseMongoQuery,
+            {
+              $or: [
+                // クエリがcidに完全一致する場合は、publishedの状態に関わらず返す。これは意図的な仕様
+                { cid: q },
+                {
+                  published: true,
+                  $and: normalizedQueries.map((s) => ({
+                    normalizedText: { $regex: escapeRegex(s) },
+                  })),
+                },
+              ],
+            },
+          ],
+        };
+      }
     } else {
-      mongoQuery = {
-        ...mongoQuery,
-        published: true,
-      };
+      if (cids.length) {
+        mongoQuery = {
+          $and: [...baseMongoQuery, { cid: { $in: cids } }],
+        };
+      } else {
+        mongoQuery = {
+          $and: [...baseMongoQuery, { published: true }],
+        };
+      }
     }
 
     let results = await db
@@ -192,40 +265,47 @@ const searchApp = new Hono<{
 
     let sortedResults: v.InferOutput<ReturnType<typeof SearchResultSchema>>[];
 
-    switch (sort) {
-      case "popular": {
-        const rawPopularCounts = await getRawPopularCounts(db);
-        const mapped = results
-          .map((r) => ({
-            cid: r.cid,
-            updatedAt: r.updatedAt,
-            count: aggeratePopularCounts(rawPopularCounts, r),
-          }))
-          .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
-          .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
+    if (cids.length) {
+      sortedResults = cids
+        .filter((qc) => results.some((r) => r.cid === qc))
+        .map((qc) => ({ cid: qc }));
+    } else {
+      switch (sort) {
+        case "popular": {
+          const rawPopularCounts = await getRawPopularCounts(db);
+          const mapped = results
+            .map((r) => ({
+              cid: r.cid,
+              updatedAt: r.updatedAt,
+              count: aggeratePopularCounts(rawPopularCounts, r),
+            }))
+            .filter((r) => r.count > 0 || q) // If q is empty, only return those with at least one records
+            .sort((a, b) => b.count - a.count || b.updatedAt - a.updatedAt);
 
-        sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
-        break;
+          sortedResults = mapped.map((r) => ({ cid: r.cid, count: r.count }));
+          break;
+        }
+        case "latest":
+          sortedResults = results
+            .sort((a, b) => b.updatedAt - a.updatedAt)
+            .map((r) => ({ cid: r.cid, updatedAt: r.updatedAt }));
+          break;
+        case "relevance":
+        default:
+          sortedResults = results
+            .sort(
+              (a, b) =>
+                -normalizedQueries.reduce(
+                  (prev, token) =>
+                    prev +
+                    a.normalizedText.split(token).length -
+                    b.normalizedText.split(token).length,
+                  0
+                ) || b.updatedAt - a.updatedAt
+            )
+            .map((r) => ({ cid: r.cid }));
+          break;
       }
-      case "latest":
-        sortedResults = results
-          .sort((a, b) => b.updatedAt - a.updatedAt)
-          .map((r) => ({ cid: r.cid, updatedAt: r.updatedAt }));
-        break;
-      case "relevance":
-        sortedResults = results
-          .sort(
-            (a, b) =>
-              -normalizedQueries.reduce(
-                (prev, token) =>
-                  prev +
-                  a.normalizedText.split(token).length -
-                  b.normalizedText.split(token).length,
-                0
-              ) || b.updatedAt - a.updatedAt
-          )
-          .map((r) => ({ cid: r.cid }));
-        break;
     }
 
     return c.json(sortedResults, 200, {

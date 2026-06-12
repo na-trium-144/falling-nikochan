@@ -22,6 +22,7 @@ import * as Sentry from "@sentry/hono/bun";
 import packageJson from "./package.json" with { type: "json" };
 import { MongoClient } from "mongodb";
 import { createMiddleware } from "hono/factory";
+import { compress } from "hono/compress";
 
 const port = 8787;
 
@@ -49,6 +50,7 @@ const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 app.use(sentryMiddleware(app));
 app
   .use(logger())
+  .use(compress())
   .route("/api", await apiApp({ getConnInfo, dbMiddleware }))
   .route("/og", ogApp({ ImageResponse, fetchBrief, fetchStatic }))
   .route("/sitemap.xml", await sitemapApp({ dbMiddleware }))

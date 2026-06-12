@@ -4,17 +4,24 @@ import clsx from "clsx/lite";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { Fragment, RefObject, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SlimeSVG } from "@/common/slime.js";
 import {
   useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
-import { getRecent, updateRecent } from "@/common/recent.js";
+import { getRecent, recentKey, updateRecent } from "@/common/recent.js";
 import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
-import { getBestScore } from "@/common/bestScore.js";
+import { bestKey, getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
@@ -87,7 +94,7 @@ export interface ChartLineBrief {
 interface Props {
   classNameOuter?: string;
   type?: ChartListType;
-  briefs?: ChartLineBrief[] | Error | undefined;
+  briefs?: ChartLineBrief[] | Error | undefined | "loading" | "empty"; // undefined is loading
   fetchAll?: boolean;
   fixedRows?: number; // 表示数を固定する
   containerHeight?: number;
@@ -112,34 +119,76 @@ export function ChartList(props: Props) {
 
   // props.briefs が初期値 (prerenderされたsample譜面リストなどの場合はすでにfetch済みのbriefを渡し、そうでない場合はChartList内でfetchする)
   const [briefs, setBriefs] = useState<
-    (ChartLineBrief | null)[] | Error | undefined
-  >(props.briefs || undefined);
-  const prevPropBriefs = useRef<ChartLineBrief[] | Error | undefined>(
+    (ChartLineBrief | null)[] | Error | "loading" | "empty"
+  >(props.briefs || "loading");
+  const prevPropBriefs = useRef<ChartLineBrief[] | Error | "loading" | "empty">(
     props.briefs
+  );
+  // briefのリストを更新する際に、既存のfetch済みbriefデータを引き継ぐ。
+  const mergeAndSetBriefs = useCallback(
+    (briefs: ChartLineBrief[] | Error | "loading" | "empty") => {
+      setBriefs((prev) => {
+        if (!Array.isArray(briefs) || !Array.isArray(prev)) {
+          return briefs;
+        }
+        // 既存の要素を cid をキーにしたマップにして、検索しやすくする
+        const prevMap = new Map<string, ChartLineBrief>();
+        prev.forEach((item) => {
+          if (item && item.cid) {
+            prevMap.set(item.cid, item);
+          }
+        });
+        // 新しい id リストを回し、既存のデータがあれば引き継ぐ
+        return briefs.map((brief) => {
+          const prevItem = prevMap.get(brief.cid);
+          if (prevItem?.fetched) {
+            // すでにデータが存在するので、それをそのまま返す（loadingにならない）
+            return {
+              ...brief,
+              fetched: true,
+              brief: prevItem.brief,
+            };
+          } else {
+            return brief;
+          }
+        });
+      });
+    },
+    []
   );
   useEffect(() => {
     if (props.briefs !== prevPropBriefs.current) {
-      setBriefs(props.briefs);
+      mergeAndSetBriefs(props.briefs ?? "loading");
       prevPropBriefs.current = props.briefs;
     }
-  }, [props.briefs]);
+  }, [props.briefs, mergeAndSetBriefs]);
   useEffect(() => {
     // 譜面リストのfetch (中身のbriefのfetchは別で行う)
     switch (props.type) {
       case "recent":
-        setBriefs(
-          getRecent("play")
-            .reverse()
-            .map((cid) => ({ cid, fetched: false }))
-        );
-        break;
-      case "recentEdit":
-        setBriefs(
-          getRecent("edit")
-            .reverse()
-            .map((cid) => ({ cid, fetched: false }))
-        );
-        break;
+      case "recentEdit": {
+        const update = () => {
+          mergeAndSetBriefs(
+            getRecent(props.type === "recent" ? "play" : "edit")
+              .reverse()
+              .map((cid) => ({ cid, fetched: false }))
+          );
+        };
+        const storageUpdate = (e: StorageEvent) => {
+          if (e.key === recentKey(props.type === "recent" ? "play" : "edit")) {
+            update();
+          }
+        };
+        update();
+        window.addEventListener("storage", storageUpdate);
+        window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+        window.addEventListener("popstate", update); // router.push()からもどってきたとき
+        return () => {
+          window.removeEventListener("storage", storageUpdate);
+          window.removeEventListener("visibilitychange", update);
+          window.removeEventListener("popstate", update);
+        };
+      }
       case "latest":
       case "popular":
         fetchBackend()
@@ -152,9 +201,9 @@ export function ChartList(props: Props) {
               .map(({ cid }) => ({ cid, fetched: false }))
           )
           .catch((e: unknown) => captureAndWrap(e, { type: props.type }))
-          .then((latest) => setBriefs(latest));
+          .then((latest) => mergeAndSetBriefs(latest));
     }
-  }, [props.type]);
+  }, [props.type, mergeAndSetBriefs]);
 
   const ulSize = useResizeDetector();
   const { rem } = useDisplayMode();
@@ -214,32 +263,42 @@ export function ChartList(props: Props) {
       ) {
         const b = briefs[i];
         if (b !== null && !b.fetched && !b.fetching) {
+          // eslint-disable-next-line react-hooks/immutability
           b.fetching = true;
           changed = true;
           fetchBrief(b.cid, {
             onResult: (brief) =>
               setBriefs((briefs) => {
-                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                if (Array.isArray(briefs)) {
                   briefs = briefs.slice();
-                  briefs[i]!.fetched = true;
-                  briefs[i]!.brief = brief;
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i]!.fetched = true;
+                    briefs[i]!.brief = brief;
+                  }
                 }
                 return briefs;
               }),
             onNotFound: () =>
               setBriefs((briefs) => {
-                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                if (Array.isArray(briefs)) {
                   briefs = briefs.slice();
-                  briefs[i] = null;
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i] = null;
+                  }
                 }
                 return briefs;
               }),
             onError: () =>
               setBriefs((briefs) => {
-                if (Array.isArray(briefs) && briefs.at(i)?.cid === b.cid) {
+                if (Array.isArray(briefs)) {
                   briefs = briefs.slice();
-                  briefs[i]!.fetched = true;
-                  // briefs[i]!.brief = undefined;
+                  const i = briefs.findIndex((b2) => b2?.cid === b.cid);
+                  if (i >= 0) {
+                    briefs[i]!.fetched = true;
+                    // briefs[i]!.brief = undefined;
+                  }
                 }
                 return briefs;
               }),
@@ -274,9 +333,12 @@ export function ChartList(props: Props) {
     }
   }, [briefs, props.type]);
 
-  const filteredBriefs: ChartLineBrief[] | Error | undefined = Array.isArray(
-    briefs
-  )
+  const filteredBriefs:
+    | ChartLineBrief[]
+    | Error
+    | undefined
+    | "loading"
+    | "empty" = Array.isArray(briefs)
     ? fetchAll
       ? briefs.filter((b) => b !== null)
       : briefs.filter((b) => b !== null).slice(0, maxRow)
@@ -286,10 +348,10 @@ export function ChartList(props: Props) {
     Array.isArray(filteredBriefs) && (fetchAll || props.containerRef)
       ? filteredBriefs.length
       : 0;
-  // filteredBriefs内で最初にfetch中のbriefのインデックス
-  // すべてfetch完了なら-1
+  // loadingを表示するための、filteredBriefs内で最初にfetch中のbriefのインデックス
+  // すべてfetch完了なら-1 (loadingを表示しない)
   const firstFetchingIndex: number =
-    filteredBriefs === undefined
+    filteredBriefs === "loading"
       ? 0
       : Array.isArray(filteredBriefs)
         ? filteredBriefs.findIndex((b) => !b.fetched)
@@ -443,12 +505,14 @@ export function ChartList(props: Props) {
           <SlimeSVG />
           Loading...
         </div>
-      ) : briefs && "message" in briefs ? (
+      ) : briefs instanceof Error ? (
         <div className="fn-cl-message">{formatError(briefs, te)}</div>
       ) : Array.isArray(briefs) && briefs.length === 0 ? (
         <div className="fn-cl-message">
           {props.search ? t("notFound") : t("empty")}
         </div>
+      ) : briefs === "empty" ? (
+        <div className="fn-cl-message">{t("empty")}</div>
       ) : null}
       {Array.isArray(briefs) &&
       briefs.filter((b) => b !== null).length > maxRow ? (
@@ -593,11 +657,29 @@ function ChartListItemChildren(props: CProps) {
       .map((l) => levelTypes.indexOf(l.type)) || [];
   useEffect(() => {
     if (props.badge) {
-      setStatus(
-        props.brief?.levels
-          .filter((l) => !l.unlisted)
-          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
-      );
+      const update = () => {
+        setStatus(
+          props.brief?.levels
+            .filter((l) => !l.unlisted)
+            .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
+        );
+      };
+      const storageUpdate = (e: StorageEvent) => {
+        if (
+          props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
+        ) {
+          update();
+        }
+      };
+      update();
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+      window.addEventListener("popstate", update); // router.push()からもどってきたとき
+      return () => {
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", update);
+        window.removeEventListener("popstate", update);
+      };
     } else {
       setStatus([]);
     }

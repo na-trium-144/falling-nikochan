@@ -1,6 +1,11 @@
 import * as msgpack from "@msgpack/msgpack";
 import { Db } from "mongodb";
-import { getChartEntry } from "./chart.js";
+import {
+  etagHeaderDoc,
+  getChartEntry,
+  ifMatchHeaderDoc,
+  ifNoneMatchHeaderDoc,
+} from "./chart.js";
 import { Bindings } from "../env.js";
 import { Hono } from "hono";
 import {
@@ -33,6 +38,7 @@ const playFileApp = new Hono<{
       "Gets level data in MessagePack format, which is only used for playing the chart, not for editing. " +
       "Note that the level data is either in Level6Play or Level15Play format, " +
       `while this documentation only describes Level15Play format. `,
+    parameters: [ifNoneMatchHeaderDoc, ifMatchHeaderDoc],
     responses: {
       200: {
         description: "chart file in MessagePack format.",
@@ -46,7 +52,15 @@ const playFileApp = new Hono<{
             description: "Filename with extension of .fn{ver}p.mpk",
             schema: { type: "string" },
           },
+          "Cache-Control": {
+            description: `no-cache`,
+            schema: { type: "string" },
+          },
+          ...etagHeaderDoc,
         },
+      },
+      304: {
+        description: "No content if If-None-Match header matches",
       },
       400: {
         description: "invalid chart id",
@@ -66,6 +80,14 @@ const playFileApp = new Hono<{
           },
         },
       },
+      412: {
+        description: "ETag does not match with given If-Match header",
+        content: {
+          "application/json": {
+            schema: resolver(await errorLiteral("etagMismatch")),
+          },
+        },
+      },
     },
   }),
   validator(
@@ -80,7 +102,12 @@ const playFileApp = new Hono<{
     const { cid, lvIndex } = c.req.valid("param");
 
     const db = await c.get("db")();
-    let { chart } = await getChartEntry(db, cid, null);
+    let { chart, etag } = await getChartEntry(
+      db,
+      cid,
+      null,
+      c.req.header("X-If-Match") ?? c.req.header("If-Match")
+    );
 
     let level: Level6Play | Level15Play;
     switch (chart.ver) {
@@ -139,6 +166,8 @@ const playFileApp = new Hono<{
     return c.body(new Blob([msgpack.encode(level)]).stream(), 200, {
       "Content-Type": "application/vnd.msgpack",
       "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-cache",
+      "ETag": etag,
     });
   }
 );

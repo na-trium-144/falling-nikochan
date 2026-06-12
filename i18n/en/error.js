@@ -21,6 +21,8 @@ export default {
       unsupportedChartVersion: "Unsupported chart data version",
       // 410
       noLongerSupportedAPI: "This API is no longer supported",
+      // 412
+      etagMismatch: "Chart data has been updated. Please try again",
       // 413
       tooLargeFile: "File size is too large",
       tooManyEvent: "Too many events in the chart data",
