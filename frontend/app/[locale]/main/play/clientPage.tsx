@@ -130,7 +130,6 @@ function PlayTabInternal(
     [props.searchParams, router]
   );
 
-  const abortSearching = useRef<AbortController | null>(null);
   // [] = not found, empty = empty
   const [searchResult, setSearchResult] = useState<
     ChartLineBrief[] | Error | "loading" | "empty"
@@ -142,11 +141,8 @@ function PlayTabInternal(
     }
     setWaitingDebounce(false);
     setSearchResult("loading");
+    let aborted = false;
     const doSearch = () => {
-      if (abortSearching.current) {
-        abortSearching.current.abort();
-        abortSearching.current = null;
-      }
       const apiBaseParams = {
         q: params.search,
         difficultyMin: String(params.minLv),
@@ -172,7 +168,6 @@ function PlayTabInternal(
       if (apiSortParams.length === 0) {
         setSearchResult("empty");
       } else {
-        abortSearching.current = new AbortController();
         let searchResultChunks: ChartLineBrief[][] = [];
         let firstError: Error | null = null;
         apiSortParams.forEach((apiSortParam, i) => {
@@ -180,9 +175,7 @@ function PlayTabInternal(
           fetchBackend()
             .url(`/api/search`)
             .query({ ...apiBaseParams, ...apiSortParam } satisfies APIParams)
-            .signal(abortSearching.current!)
             .get()
-            .onAbort(() => undefined) // ignore.
             .json((res) =>
               v
                 .parse(
@@ -203,7 +196,7 @@ function PlayTabInternal(
             )
             .catch((e: unknown) => captureAndWrap(e))
             .then((res) => {
-              if (res === undefined) {
+              if (aborted) {
                 return; // ignore
               }
               if (Array.isArray(res)) {
@@ -219,22 +212,23 @@ function PlayTabInternal(
       }
     };
     doSearch();
+    const storageUpdate = (e: StorageEvent) => {
+      if (e.key === recentKey("play")) {
+        doSearch();
+      }
+    };
     if (params.sort === "recent") {
       // recentは別タブで更新される場合があり、そのとき再検索する
-      const storageUpdate = (e: StorageEvent) => {
-        if (e.key === recentKey("play")) {
-          doSearch();
-        }
-      };
       window.addEventListener("storage", storageUpdate);
       window.addEventListener("visibilitychange", doSearch); // 別タブからもどってきたとき
       window.addEventListener("popstate", doSearch); // router.push()からもどってきたとき
-      return () => {
-        window.removeEventListener("storage", storageUpdate);
-        window.removeEventListener("visibilitychange", doSearch);
-        window.removeEventListener("popstate", doSearch);
-      };
     }
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", doSearch);
+      window.removeEventListener("popstate", doSearch);
+      aborted = true;
+    };
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 
   const boxSize = useResizeDetector();

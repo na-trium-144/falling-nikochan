@@ -1,6 +1,5 @@
 import wretch, { WretchError } from "wretch";
 import QueryStringAddon from "wretch/addons/queryString";
-import AbortAddon from "wretch/addons/abort";
 import { dedupe, retry } from "wretch/middlewares";
 import * as Sentry from "@sentry/nextjs";
 import { APIError, FETCH_ERROR_STATUS } from "./apiError";
@@ -27,13 +26,12 @@ const dedupeMiddleware = dedupe();
  *
  * 想定内のエラーがない場合はcatch()しなくてもよい。
  * その場合はunhandledrejectionとして自動でSentryがキャッチし、整形してイベントとして送信される。
- * (ネットワークエラーとAbortErrorはいずれの場合でもexpectedとしてマークされSentry送信の対象外)
+ * (ネットワークエラーはいずれの場合でもexpectedとしてマークされSentry送信の対象外)
  */
 export function fetchBackend() {
   const referenceError = new Error();
   return wretch(process.env.BACKEND_PREFIX || window.location.origin)
     .addon(QueryStringAddon)
-    .addon(AbortAddon())
     .middlewares([
       dedupeMiddleware,
       retry({
