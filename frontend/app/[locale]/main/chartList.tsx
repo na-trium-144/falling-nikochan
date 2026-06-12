@@ -263,6 +263,7 @@ export function ChartList(props: Props) {
       ) {
         const b = briefs[i];
         if (b !== null && !b.fetched && !b.fetching) {
+          // eslint-disable-next-line react-hooks/immutability
           b.fetching = true;
           changed = true;
           fetchBrief(b.cid, {
