@@ -19,6 +19,7 @@ import packageJson from "../package.json" with { type: "json" };
 import { env } from "hono/adapter";
 import { Context, Hono } from "hono";
 import { etag } from "hono/etag";
+import { etagContentRegex } from "./api/chart.js";
 
 /*
 OGPの見た目を優先するため、shareページではクエリのlangを優先する。
@@ -27,9 +28,6 @@ bodyを無理やり書き換える。
 */
 
 const CACHE_MAX_AGE = 600;
-
-// w/や引用符を除いた部分
-export const etagContentRegex = /\d+-[a-zA-Z0-9+/]+=*/;
 
 const shareApp = (config: {
   fetchBrief: (

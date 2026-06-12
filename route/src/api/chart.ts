@@ -94,6 +94,10 @@ export async function getChartEntryCompressed(
     throw new HTTPException(401, { message: "badPassword" });
   }
 }
+
+// w/や引用符を除いた部分
+export const etagContentRegex = /\d+-[a-zA-Z0-9+/]+=*/;
+
 /**
  * ifMatchが文字列で一致しなかったら412を返す、undefinedならチェックを行わない
  */
@@ -120,7 +124,7 @@ export async function getChartEntry(
   const entryCompressed = await getChartEntryCompressed(db, cid, p);
 
   const etag = await calcETag(entryCompressed);
-  if (ifMatch && ifMatch !== etag) {
+  if (ifMatch && `"${ifMatch.match(etagContentRegex)?.[0]}"` !== etag) {
     throw new HTTPException(412, { message: "etagMismatch" });
   }
 
@@ -284,10 +288,11 @@ export const etagHeaderDoc = {
   },
 } as const;
 export const ifMatchHeaderDoc = {
-  name: "If-Match",
+  name: "X-If-Match",
   in: "header",
   description:
-    "If strong ETag of chart data is given and does not match, it returns 412.",
+    "If ETag of chart data is given and does not match, it returns 412. " +
+    "(Standard If-Match header has constraints requiring a strong etag and can interfere with CDN/proxy, so a custom header is used.)",
   schema: { type: "string" },
 } as const;
 export const ifNoneMatchHeaderDoc = {

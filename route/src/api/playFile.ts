@@ -106,7 +106,7 @@ const playFileApp = new Hono<{
       db,
       cid,
       null,
-      c.req.header("If-Match")
+      c.req.header("X-If-Match") ?? c.req.header("If-Match")
     );
 
     let level: Level6Play | Level15Play;

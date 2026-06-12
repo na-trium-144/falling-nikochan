@@ -70,7 +70,7 @@ import * as v from "valibot";
 import { markAsExpected } from "@/common/apiError.js";
 import * as Sentry from "@sentry/nextjs";
 import { useDisplayMode } from "@/scale.js";
-import { playCacheName, refreshBrief } from "@/common/briefCache.js";
+import { refreshBrief } from "@/common/briefCache.js";
 
 export function InitPlay({ locale }: { locale: string }) {
   const te = useTranslations("error");
@@ -114,74 +114,50 @@ export function InitPlay({ locale }: { locale: string }) {
       setErrorMsg(undefined);
     } else {
       /*
-      briefデータのetagをIf-Matchで送り、持っているキャッシュのetagをIf-None-Matchで送る。
-      (少なくともchromeでは)If-Matchを送るとIf-None-Matchは自動送信されず、
-      304時のレスポンスもブラウザが自動処理してくれないようなので、
-      cache apiを使って自前でキャッシュ管理する。
-      初回は200が返る→キャッシュに保存
-      2回目以降は304が返る→キャッシュを使う
-      データに変更があった場合412が返るので、ユーザーにやり直させる
+      briefデータのetagをX-If-Matchで送り、データに変更があった場合412が返るので、ユーザーにやり直させる
+
+      標準のIf-MatchにはvercelのCDNが勝手にetag比較して412を返したり、
+      (少なくともchromeでは)If-Matchを送るとIf-None-Matchは自動送信されず304時のレスポンスもブラウザが自動処理してくれない
+      といった不都合がある
       */
-      ("caches" in window
-        ? window.caches.open(playCacheName)
-        : Promise.resolve()
-      ).then(async (cache) => {
-        const url = `/api/playFile/${session.cid}/${session.lvIndex}`;
-        const prevFile = await cache?.match(url);
-        fetchBackend()
-          .url(url)
-          .headers({
-            "If-Match": `"${session.brief.etag}"`,
-            "If-None-Match": prevFile?.ok
-              ? (prevFile?.headers.get("ETag") ?? "")
-              : "",
-          })
-          .get()
-          .badRequest(markAsExpected)
-          .notFound(markAsExpected)
-          .error(412, (e) => {
-            refreshBrief(session.cid);
-            markAsExpected(e);
-          })
-          .error(304, (e) => {
-            if (prevFile && prevFile.ok) {
-              return prevFile;
-            } else {
-              throw e;
-            }
-          })
-          .res()
-          .then(async (res) => {
-            const buf = await res.clone().arrayBuffer();
-            currentChartVer satisfies 16; // update the code below when chart version is bumped
-            const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
-            console.log("playFile.ver", playFile.ver);
-            if (
-              playFile.ver === 6 ||
-              playFile.ver === 15 ||
-              playFile.ver === 16
-            ) {
-              addRecent("play", session.cid ?? "");
-              updatePlayCountForReview();
-              cache?.put(url, res);
-              return { seq: loadChart(playFile), error: undefined };
-            } else {
-              // playFile satisfies never;
-              return {
-                seq: undefined,
-                error: te("chartVersion", { ver: (playFile as any)?.ver }),
-              };
-            }
-          })
-          .catch((e: unknown) => ({
-            seq: undefined,
-            error: captureAndWrap(e),
-          }))
-          .then(({ seq, error }) => {
-            setChartSeq(seq);
-            setErrorMsg(error);
-          });
-      });
+      fetchBackend()
+        .url(`/api/playFile/${session.cid}/${session.lvIndex}`)
+        .headers({ "X-If-Match": `"${session.brief.etag}"` })
+        .get()
+        .badRequest(markAsExpected)
+        .notFound(markAsExpected)
+        .error(412, (e) => {
+          refreshBrief(session.cid);
+          markAsExpected(e);
+        })
+        .arrayBuffer((buf) => {
+          currentChartVer satisfies 16; // update the code below when chart version is bumped
+          const playFile = msgpack.decode(buf) as Level6Play | Level15Play;
+          console.log("playFile.ver", playFile.ver);
+          if (
+            playFile.ver === 6 ||
+            playFile.ver === 15 ||
+            playFile.ver === 16
+          ) {
+            addRecent("play", session.cid ?? "");
+            updatePlayCountForReview();
+            return { seq: loadChart(playFile), error: undefined };
+          } else {
+            // playFile satisfies never;
+            return {
+              seq: undefined,
+              error: te("chartVersion", { ver: (playFile as any)?.ver }),
+            };
+          }
+        })
+        .catch((e: unknown) => ({
+          seq: undefined,
+          error: captureAndWrap(e),
+        }))
+        .then(({ seq, error }) => {
+          setChartSeq(seq);
+          setErrorMsg(error);
+        });
     }
   }, [te]);
 

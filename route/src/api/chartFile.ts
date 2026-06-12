@@ -129,7 +129,7 @@ const chartFileApp = async (config: {
             v9UserSalt,
             pSecretSalt,
           },
-          c.req.header("If-Match")
+          c.req.header("X-If-Match") ?? c.req.header("If-Match")
         );
         // 必要なデータをコンテキストに保存
         c.set("cid", cid);
