@@ -21,7 +21,8 @@ export class APIError extends Error {
     status: number,
     message: string,
     stack: string | undefined,
-    body: unknown
+    body: unknown,
+    cause?: Error
   ) {
     super(message);
     this.name = `APIError-${status} (${new URL(url).pathname})`;
@@ -32,6 +33,7 @@ export class APIError extends Error {
     this.url = url;
     this.stack = stack;
     this.body = body;
+    this.cause = cause;
     this.fingerprint = [
       `APIError-${status}`,
       this.message,

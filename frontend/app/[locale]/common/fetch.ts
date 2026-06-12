@@ -57,10 +57,8 @@ export function fetchBackend() {
           FETCH_ERROR_STATUS,
           "fetchError",
           referenceError.stack,
-          {
-            error: String(e),
-            ...(e && typeof e === "object" ? e : {}),
-          }
+          null,
+          e
         );
       })
     );
@@ -98,10 +96,8 @@ export function fetchAsset() {
           FETCH_ERROR_STATUS,
           "fetchError",
           referenceError.stack,
-          {
-            error: String(e),
-            ...(e && typeof e === "object" ? e : {}),
-          }
+          null,
+          e
         );
       })
     );
