@@ -68,6 +68,7 @@ export function ShareBox(props: Props) {
       }
     };
     update();
+    // TODO: ページ間でのlocalStorageの同期のために shareBox, theme, recentを読み込む2箇所, bestScoreを読み込む3箇所 で似たようなコードを書いているが、統一したい。
     window.addEventListener("storage", storageUpdate);
     window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
     window.addEventListener("popstate", update); // router.push()からもどってきたとき

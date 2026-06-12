@@ -9,6 +9,7 @@ import {
   serializeResultParams,
 } from "@falling-nikochan/chart";
 import {
+  bestKey,
   getBestScore,
   ResultData,
   toResultParams,
@@ -42,11 +43,29 @@ export function PlayOption(props: Props) {
 
   const [status, setStatus] = useState<BadgeStatus[]>([]);
   useEffect(() => {
-    setStatus(
-      props.brief?.levels
-        // .filter((l) => !l.unlisted)
-        .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
-    );
+    const update = () => {
+      setStatus(
+        props.brief?.levels
+          // .filter((l) => !l.unlisted)
+          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
+      );
+    };
+    const storageUpdate = (e: StorageEvent) => {
+      if (
+        props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
+      ) {
+        update();
+      }
+    };
+    update();
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+    window.addEventListener("popstate", update); // router.push()からもどってきたとき
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", update);
+      window.removeEventListener("popstate", update);
+    };
   }, [props.cid, props.brief]);
 
   // levelが存在しない時 -1
@@ -237,21 +256,39 @@ function SelectedLevelInfo(props: {
   );
   const [serializedParam, setSerializedParam] = useState<string[]>([]);
   useEffect(() => {
-    const bestScoreState: (ResultData | null)[] = [];
-    const serializedParam: string[] = [];
-    for (let i = 0; i < props.brief.levels.length; i++) {
-      const bestScore = getBestScore(props.cid, props.brief.levels[i].hash);
-      bestScoreState.push(bestScore);
-      serializedParam.push(
-        bestScore
-          ? serializeResultParams(
-              toResultParams(bestScore, props.brief.levels[i])
-            )
-          : ""
-      );
-    }
-    setBestScoreState(bestScoreState);
-    setSerializedParam(serializedParam);
+    const update = () => {
+      const bestScoreState: (ResultData | null)[] = [];
+      const serializedParam: string[] = [];
+      for (let i = 0; i < props.brief.levels.length; i++) {
+        const bestScore = getBestScore(props.cid, props.brief.levels[i].hash);
+        bestScoreState.push(bestScore);
+        serializedParam.push(
+          bestScore
+            ? serializeResultParams(
+                toResultParams(bestScore, props.brief.levels[i])
+              )
+            : ""
+        );
+      }
+      setBestScoreState(bestScoreState);
+      setSerializedParam(serializedParam);
+    };
+    const storageUpdate = (e: StorageEvent) => {
+      if (
+        props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
+      ) {
+        update();
+      }
+    };
+    update();
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+    window.addEventListener("popstate", update); // router.push()からもどってきたとき
+    return () => {
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", update);
+      window.removeEventListener("popstate", update);
+    };
   }, [props.cid, props.brief]);
 
   const selectedBestScore = bestScoreState.at(props.selectedLevel);

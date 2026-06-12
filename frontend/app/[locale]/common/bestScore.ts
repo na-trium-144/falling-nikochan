@@ -1,6 +1,6 @@
 import { levelTypes, ResultParams } from "@falling-nikochan/chart";
 
-function bestKey(cid: string, lvHash: string) {
+export function bestKey(cid: string, lvHash: string) {
   return `best-${cid}-${lvHash.slice(0, 8)}`;
 }
 export interface ResultData {

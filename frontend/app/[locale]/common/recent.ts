@@ -1,4 +1,4 @@
-function recentKey(key: string) {
+export function recentKey(key: string) {
   return "recent-" + key;
 }
 export function getRecent(key: string): string[] {

@@ -25,7 +25,7 @@ import { XLogo } from "@/common/x.jsx";
 import { useRouter, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
-import { getRecent } from "@/common/recent.js";
+import { getRecent, recentKey } from "@/common/recent.js";
 import Search from "@icon-park/react/lib/icons/Search";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
@@ -140,81 +140,100 @@ function PlayTabInternal(
     if (!params.sort) {
       return;
     }
-    if (abortSearching.current) {
-      abortSearching.current.abort();
-      abortSearching.current = null;
-    }
     setWaitingDebounce(false);
     setSearchResult("loading");
-    const apiBaseParams = {
-      q: params.search,
-      difficultyMin: String(params.minLv),
-      difficultyMax: String(params.maxLv),
-    };
-    const recent = getRecent("play").reverse();
-    // recentの場合、cidが100件を超えると複数リクエストになる
-    const apiSortParams =
-      params.sort === "recent"
-        ? Array.from(new Array(Math.ceil(recent.length / MAX_CIDS_COUNT))).map(
-            (_, i) => ({
+    const doSearch = () => {
+      if (abortSearching.current) {
+        abortSearching.current.abort();
+        abortSearching.current = null;
+      }
+      const apiBaseParams = {
+        q: params.search,
+        difficultyMin: String(params.minLv),
+        difficultyMax: String(params.maxLv),
+      };
+      const recent = getRecent("play").reverse();
+      // recentの場合、cidが100件を超えると複数リクエストになる
+      const apiSortParams =
+        params.sort === "recent"
+          ? Array.from(
+              new Array(Math.ceil(recent.length / MAX_CIDS_COUNT))
+            ).map((_, i) => ({
               c: recent.slice(i * MAX_CIDS_COUNT, (i + 1) * MAX_CIDS_COUNT),
-            })
-          )
-        : [{ sort: params.sort ?? "relevance" }];
-    if (!params.search) {
-      document.title = titleWithSiteName(t("title"));
-    } else {
-      document.title = titleWithSiteName(
-        t("searchTitle", { search: params.search })
-      );
-    }
-    if (apiSortParams.length === 0) {
-      setSearchResult("empty");
-    } else {
-      abortSearching.current = new AbortController();
-      let searchResultChunks: ChartLineBrief[][] = [];
-      let firstError: Error | null = null;
-      apiSortParams.forEach((apiSortParam, i) => {
-        searchResultChunks.push([]);
-        fetchBackend()
-          .url(`/api/search`)
-          .query({ ...apiBaseParams, ...apiSortParam } satisfies APIParams)
-          .signal(abortSearching.current!)
-          .get()
-          .onAbort(() => undefined) // ignore.
-          .json((res) =>
-            v
-              .parse(
-                v.array(
-                  v.object({
-                    cid: v.string(),
-                    count: v.optional(v.number()),
-                    updatedAt: v.optional(v.number()),
-                  })
-                ),
-                res
-              )
-              .map((r) => ({
-                cid: r.cid,
-                updatedAt: r.updatedAt,
-                fetched: false,
-              }))
-          )
-          .catch((e: unknown) => captureAndWrap(e))
-          .then((res) => {
-            if (res === undefined) {
-              return; // ignore
-            }
-            if (Array.isArray(res)) {
-              searchResultChunks[i] = res;
-            } else if (res instanceof Error && !firstError) {
-              firstError = res;
-            }
-            setSearchResult(
-              firstError ? firstError : searchResultChunks.flat(1)
-            );
-          });
-      });
+            }))
+          : [{ sort: params.sort ?? "relevance" }];
+      if (!params.search) {
+        document.title = titleWithSiteName(t("title"));
+      } else {
+        document.title = titleWithSiteName(
+          t("searchTitle", { search: params.search })
+        );
+      }
+      if (apiSortParams.length === 0) {
+        setSearchResult("empty");
+      } else {
+        abortSearching.current = new AbortController();
+        let searchResultChunks: ChartLineBrief[][] = [];
+        let firstError: Error | null = null;
+        apiSortParams.forEach((apiSortParam, i) => {
+          searchResultChunks.push([]);
+          fetchBackend()
+            .url(`/api/search`)
+            .query({ ...apiBaseParams, ...apiSortParam } satisfies APIParams)
+            .signal(abortSearching.current!)
+            .get()
+            .onAbort(() => undefined) // ignore.
+            .json((res) =>
+              v
+                .parse(
+                  v.array(
+                    v.object({
+                      cid: v.string(),
+                      count: v.optional(v.number()),
+                      updatedAt: v.optional(v.number()),
+                    })
+                  ),
+                  res
+                )
+                .map((r) => ({
+                  cid: r.cid,
+                  updatedAt: r.updatedAt,
+                  fetched: false,
+                }))
+            )
+            .catch((e: unknown) => captureAndWrap(e))
+            .then((res) => {
+              if (res === undefined) {
+                return; // ignore
+              }
+              if (Array.isArray(res)) {
+                searchResultChunks[i] = res;
+              } else if (res instanceof Error && !firstError) {
+                firstError = res;
+              }
+              setSearchResult(
+                firstError ? firstError : searchResultChunks.flat(1)
+              );
+            });
+        });
+      }
+    };
+    doSearch();
+    if (params.sort === "recent") {
+      // recentは別タブで更新される場合があり、そのとき再検索する
+      const storageUpdate = (e: StorageEvent) => {
+        if (e.key === recentKey("play")) {
+          doSearch();
+        }
+      };
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", doSearch); // 別タブからもどってきたとき
+      window.addEventListener("popstate", doSearch); // router.push()からもどってきたとき
+      return () => {
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", doSearch);
+        window.removeEventListener("popstate", doSearch);
+      };
     }
   }, [t, params.search, params.sort, params.maxLv, params.minLv]);
 

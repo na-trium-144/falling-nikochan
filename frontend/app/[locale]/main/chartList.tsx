@@ -11,10 +11,10 @@ import {
   useStandaloneDetector,
 } from "@/common/pwaInstall.js";
 import { IndexMain } from "./main.js";
-import { getRecent, updateRecent } from "@/common/recent.js";
+import { getRecent, recentKey, updateRecent } from "@/common/recent.js";
 import { TabKeys } from "@/common/footer.jsx";
 import { BadgeStatus, getBadge, LevelBadge } from "@/common/levelBadge.jsx";
-import { getBestScore } from "@/common/bestScore.js";
+import { bestKey, getBestScore } from "@/common/bestScore.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { fetchBrief } from "@/common/briefCache.js";
 import { useResizeDetector } from "react-resize-detector";
@@ -127,19 +127,29 @@ export function ChartList(props: Props) {
     // 譜面リストのfetch (中身のbriefのfetchは別で行う)
     switch (props.type) {
       case "recent":
-        setBriefs(
-          getRecent("play")
-            .reverse()
-            .map((cid) => ({ cid, fetched: false }))
-        );
-        break;
-      case "recentEdit":
-        setBriefs(
-          getRecent("edit")
-            .reverse()
-            .map((cid) => ({ cid, fetched: false }))
-        );
-        break;
+      case "recentEdit": {
+        const update = () => {
+          setBriefs(
+            getRecent(props.type === "recent" ? "play" : "edit")
+              .reverse()
+              .map((cid) => ({ cid, fetched: false }))
+          );
+        };
+        const storageUpdate = (e: StorageEvent) => {
+          if (e.key === recentKey(props.type === "recent" ? "play" : "edit")) {
+            update();
+          }
+        };
+        update();
+        window.addEventListener("storage", storageUpdate);
+        window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+        window.addEventListener("popstate", update); // router.push()からもどってきたとき
+        return () => {
+          window.removeEventListener("storage", storageUpdate);
+          window.removeEventListener("visibilitychange", update);
+          window.removeEventListener("popstate", update);
+        };
+      }
       case "latest":
       case "popular":
         fetchBackend()
@@ -598,11 +608,29 @@ function ChartListItemChildren(props: CProps) {
       .map((l) => levelTypes.indexOf(l.type)) || [];
   useEffect(() => {
     if (props.badge) {
-      setStatus(
-        props.brief?.levels
-          .filter((l) => !l.unlisted)
-          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
-      );
+      const update = () => {
+        setStatus(
+          props.brief?.levels
+            .filter((l) => !l.unlisted)
+            .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
+        );
+      };
+      const storageUpdate = (e: StorageEvent) => {
+        if (
+          props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
+        ) {
+          update();
+        }
+      };
+      update();
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+      window.addEventListener("popstate", update); // router.push()からもどってきたとき
+      return () => {
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", update);
+        window.removeEventListener("popstate", update);
+      };
     } else {
       setStatus([]);
     }

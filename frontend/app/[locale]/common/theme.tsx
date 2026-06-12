@@ -86,12 +86,21 @@ export function ThemeProvider(props: { children: ReactNode }) {
   }, []);
   useLayoutEffect(() => {
     updateTheme();
+    const storageUpdate = (e: StorageEvent) => {
+      if (e.key === "theme") {
+        updateTheme();
+      }
+    };
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     mql.addEventListener("change", updateTheme);
-    const i = setInterval(updateTheme, 1000);
+    window.addEventListener("storage", storageUpdate);
+    window.addEventListener("visibilitychange", updateTheme); // 別タブからもどってきたとき
+    window.addEventListener("popstate", updateTheme); // router.push()からもどってきたとき
     return () => {
       mql.removeEventListener("change", updateTheme);
-      clearInterval(i);
+      window.removeEventListener("storage", storageUpdate);
+      window.removeEventListener("visibilitychange", updateTheme);
+      window.removeEventListener("popstate", updateTheme);
     };
   }, [updateTheme]);
   return (
