@@ -1,21 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Input from "./input";
 
 // import { evaluate } from "mathjs";
 // lazy load mathjs because it's heavy
-let evaluate: null | typeof import("mathjs").evaluate = null;
-
-function evalMath(value: string): number {
-  try {
-    const result = evaluate?.(value);
-    if (typeof result === "number" && isFinite(result)) return result;
-    return NaN;
-  } catch {
-    return NaN;
-  }
-}
 
 interface MathInputProps {
   className?: string;
@@ -25,34 +14,58 @@ interface MathInputProps {
   disabled?: boolean;
 }
 export default function MathInput(props: MathInputProps) {
+  const [evaluate, setEvaluate] = useState<
+    null | typeof import("mathjs").evaluate
+  >(null);
   useEffect(() => {
     (async () => {
-      if (!evaluate) {
-        evaluate = (await import("mathjs")).evaluate;
-      }
+      const { evaluate } = await import("mathjs");
+      setEvaluate(() => evaluate);
     })();
   }, []);
 
-  const mathIsValid = (raw: string): boolean => {
-    const evaluated = evalMath(raw);
-    if (isNaN(evaluated)) return false;
-    return props.isValid(evaluated.toString());
-  };
+  if (evaluate) {
+    const evalMath = (value: string): number => {
+      try {
+        const result = evaluate(value);
+        if (typeof result === "number" && isFinite(result)) return result;
+        return NaN;
+      } catch {
+        return NaN;
+      }
+    };
 
-  const mathUpdateValue = (raw: string): void => {
-    const evaluated = evalMath(raw);
-    if (!isNaN(evaluated)) {
-      props.updateValue(evaluated.toString());
-    }
-  };
+    const mathIsValid = (raw: string): boolean => {
+      const evaluated = evalMath(raw);
+      if (isNaN(evaluated)) return false;
+      return props.isValid(evaluated.toString());
+    };
 
-  return (
-    <Input
-      className={props.className}
-      actualValue={props.actualValue}
-      updateValue={mathUpdateValue}
-      isValid={mathIsValid}
-      disabled={props.disabled}
-    />
-  );
+    const mathUpdateValue = (raw: string): void => {
+      const evaluated = evalMath(raw);
+      if (!isNaN(evaluated)) {
+        props.updateValue(evaluated.toString());
+      }
+    };
+
+    return (
+      <Input
+        className={props.className}
+        actualValue={props.actualValue}
+        updateValue={mathUpdateValue}
+        isValid={mathIsValid}
+        disabled={props.disabled}
+      />
+    );
+  } else {
+    // mathjsの読み込みが完了するまでの間は、一旦disabled
+    return (
+      <Input
+        className={props.className}
+        actualValue={props.actualValue}
+        updateValue={() => undefined}
+        disabled={true}
+      />
+    );
+  }
 }
