@@ -23,6 +23,7 @@ interface Props {
   style?: object;
   getCurrentTimeSec: () => number | undefined;
   playing: boolean;
+  startsJumping: DOMHighResTimeStamp | null;
   bpmChanges?: BPMChange[] | BPMChange1[];
   signature: Signature[] | Signature5[];
   playbackRate: number;
@@ -39,7 +40,13 @@ interface SlimeState {
   animDuration: number;
 }
 export default function RhythmicalSlime(props: Props) {
-  const { playing, getCurrentTimeSec, bpmChanges, playbackRate } = props;
+  const {
+    playing,
+    getCurrentTimeSec,
+    bpmChanges,
+    playbackRate,
+    startsJumping,
+  } = props;
   const step = useRef<Step | null>(null);
   const prevSS = useRef<SignatureState | null>(null);
   const lastPreparingSec = useRef<number | null>(null);
@@ -213,6 +220,7 @@ export default function RhythmicalSlime(props: Props) {
           playUIScale={playUIScale}
           rem={rem}
           playbackRate={playbackRate}
+          startsJumping={startsJumping}
         />
       ))}
     </div>
@@ -227,6 +235,7 @@ interface PropsS {
   playUIScale: number;
   rem: number;
   playbackRate: number;
+  startsJumping: DOMHighResTimeStamp | null;
 }
 function Slime(props: PropsS) {
   const prevSize = useRef<4 | 8 | 16 | null>(null);
@@ -245,7 +254,8 @@ function Slime(props: PropsS) {
   const [jumpingMidDate, setJumpingMidDate] =
     useState<DOMHighResTimeStamp | null>(null);
   const durationSec = useRef<number>(0);
-  const { getCurrentTimeSec, state, playbackRate } = props;
+  const { getCurrentTimeSec, state, playbackRate, startsJumping } = props;
+  const randInterval = useRef(0);
   useEffect(() => {
     const now = getCurrentTimeSec();
     if (now === undefined || state === undefined) {
@@ -258,7 +268,27 @@ function Slime(props: PropsS) {
         performance.now() + ((state.jumpMidSec - now) * 1000) / playbackRate
       );
     }
-  }, [getCurrentTimeSec, state, playbackRate]);
+    if (startsJumping !== null) {
+      let i: ReturnType<typeof setInterval> | null = null;
+      const t = setTimeout(() => {
+        durationSec.current = Math.random() * 0.2 + 0.1;
+        randInterval.current = 0.15;
+        i = setInterval(
+          () => {
+            setJumpingMidDate(performance.now() + durationSec.current * 1000);
+          },
+          (randInterval.current + durationSec.current) * 1000
+        );
+      }, startsJumping - performance.now());
+      return () => {
+        if (i !== null) {
+          clearInterval(i);
+        }
+        clearTimeout(t);
+      };
+    }
+  }, [getCurrentTimeSec, state, playbackRate, startsJumping]);
+
   return (
     <span
       className="relative transition-all ease-in-out duration-150 "
