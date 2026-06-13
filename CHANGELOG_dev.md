@@ -5,6 +5,8 @@
 * テーマの読み込みをインラインscriptタグに移動
 * next/bundle-analyzerを追加、環境変数でいつでも有効化できる
 * workerをeditページ起動時に非同期に初期化し、エラーが出たらページ全体を止める
+* suppressHydrationWarningを追加、global-errorにもテーマ切替スクリプトを追加
+* 譜面編集のYouTube表示と譜面プレビューを画面幅と高さに応じて調整
 
 ## ver. 16.17 - 2025/06/13
 
