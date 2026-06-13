@@ -25,6 +25,11 @@ import { useDisplayMode } from "./scale.js";
 import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 import { Box } from "./common/box.js";
 import { LazyImg } from "./common/lazyImage.js";
+import Search from "@icon-park/react/lib/icons/Search.js";
+import { useRouter } from "next/navigation.js";
+import { fetchBrief } from "./common/briefCache.js";
+import * as v from "valibot";
+import { CidSchema } from "@falling-nikochan/chart";
 
 interface Props {
   locale: string;
@@ -99,6 +104,26 @@ export default function TopPage(props: Props) {
     }
     // initAnimがtrueになる瞬間にも再実行する必要がある
   }, [isSafari, initAnim, rem]);
+
+  const [searchText, setSearchText] = useState<string>("");
+  const router = useRouter();
+  const gotoCId = (cid: string) => {
+    fetchBrief(cid, {
+      onResult: () => {
+        if (isMobileMain) {
+          openShareInternal(cid);
+        } else {
+          openModal(cid);
+        }
+      },
+    });
+  };
+  const searchParams = new URLSearchParams({ search: searchText });
+  if (!isMobileMain) {
+    // スマホでは検索欄にフォーカスしたらソフトキーボードで結果が隠れて邪魔なのでは。
+    searchParams.set("focus", "search");
+  }
+  const searchURL = `${locale}/main/play?` + searchParams.toString();
 
   return (
     <main
@@ -228,6 +253,42 @@ export default function TopPage(props: Props) {
               <ButtonHighlight />
               {t("playNow")}
             </Link>
+            <div
+              className={clsx(
+                "relative fn-plain rounded-sq-2xl w-full max-w-120 main-wide:max-w-160",
+                "has-focus:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
+              )}
+            >
+              <span className="fn-glass-1" />
+              <span className="fn-glass-2" />
+              <input
+                className={clsx(
+                  "w-full font-title text-base min-[64rem]:text-xl p-3",
+                  "border-0 outline-0! bg-transparent appearance-none rounded-none"
+                )}
+                placeholder={t("play.searchPlaceholder")}
+                value={searchText}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                  if (v.safeParse(CidSchema(), e.target.value).success) {
+                    gotoCId(e.target.value);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === "Enter") {
+                    router.push(searchURL);
+                  }
+                }}
+              />
+              <Link
+                href={searchURL}
+                className="absolute right-1.5 inset-y-0 my-auto fn-icon-button h-max"
+                prefetch={process.env.PREFETCH as "auto"}
+              >
+                <Search className="text-lg min-[64rem]:text-2xl self-center" />
+              </Link>
+            </div>
             <RedirectedWarning />
             <PWAInstallMain />
           </section>

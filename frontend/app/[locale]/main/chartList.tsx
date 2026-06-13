@@ -104,8 +104,8 @@ interface Props {
   dateDiff?: boolean;
   search?: boolean;
   href: (cid: string) => string;
-  onClick?: (cid: string, brief?: ChartBrief) => void;
-  onClickMobile?: (cid: string, brief?: ChartBrief) => void;
+  onClick?: (cid: string) => void;
+  onClickMobile?: (cid: string) => void;
   newTab?: boolean;
   moreHref?: string | null;
   onMoreClick?: () => void;
@@ -431,20 +431,12 @@ export function ChartList(props: Props) {
                 href={props.href(filteredBriefs.at(i)!.cid)}
                 onClick={
                   props.onClick
-                    ? () =>
-                        props.onClick!(
-                          filteredBriefs.at(i)!.cid,
-                          filteredBriefs.at(i)!.brief
-                        )
+                    ? () => props.onClick!(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 onClickMobile={
                   props.onClickMobile
-                    ? () =>
-                        props.onClickMobile!(
-                          filteredBriefs.at(i)!.cid,
-                          filteredBriefs.at(i)!.brief
-                        )
+                    ? () => props.onClickMobile!(filteredBriefs.at(i)!.cid)
                     : undefined
                 }
                 creator={props.creator}

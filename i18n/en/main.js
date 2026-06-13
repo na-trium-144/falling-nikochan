@@ -76,7 +76,7 @@ export default {
       descriptionPublic:
         "Check 'Publish this chart' in chart editor to reflect here after a few minutes.",
       search: "Search",
-      searchPlaceholder: "Song title, composer, chart creator, etc.",
+      searchPlaceholder: "Song title, composer, etc. or chart ID",
       searchTitle: "Search results for {search}",
       sort: "Sort by",
       recent: "Play history",

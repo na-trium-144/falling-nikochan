@@ -27,7 +27,7 @@ import * as v from "valibot";
 
 interface SharePageModalState {
   openModal: (cid: string) => void;
-  openShareInternal: (cid: string, brief?: ChartBrief) => void;
+  openShareInternal: (cid: string) => void;
 }
 const SharePageModalContext = createContext<SharePageModalState>({
   openModal: () => {},
@@ -85,13 +85,11 @@ export function SharePageModalProvider(props: {
     [th, setModalOpened, modalCId]
   );
   const openShareInternal = useCallback(
-    (cid: string, brief: ChartBrief | undefined) => {
-      if (brief) {
-        router.push(
-          `/${props.locale}/main/shareInternal` +
-            `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
-        );
-      }
+    (cid: string) => {
+      router.push(
+        `/${props.locale}/main/shareInternal` +
+          `?cid=${cid}&fromPlay=${props.from === "play" ? "1" : ""}`
+      );
     },
     [props.locale, props.from, router]
   );

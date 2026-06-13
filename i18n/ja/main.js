@@ -70,7 +70,7 @@ export default {
       descriptionPublic:
         "譜面編集から「一般公開する」にチェックを入れると、数分後にここに反映されます。",
       search: "検索",
-      searchPlaceholder: "曲名や作曲者、譜面製作者など",
+      searchPlaceholder: "曲名や作曲者、または譜面IDで検索",
       searchTitle: "{search} の検索結果",
       sort: "表示順",
       recent: "プレイ履歴",
