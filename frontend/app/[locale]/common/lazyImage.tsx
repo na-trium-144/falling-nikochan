@@ -17,7 +17,7 @@ export function LazyImg(props: Props) {
   if (loadImages) {
     return (
       <img
-        loading="lazy"
+        // loading="lazy"  // <- the image does not show up on safari for some reason
         decoding="async"
         fetchPriority="low"
         className={props.className}
