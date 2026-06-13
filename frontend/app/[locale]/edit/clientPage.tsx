@@ -43,6 +43,7 @@ import { PasswdPrompt } from "./passwdPrompt.jsx";
 import { useColorThief } from "@/common/colorThief.js";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft.js";
 import { useDisplayMode } from "@/scale.js";
+import { useResizeDetector } from "react-resize-detector";
 
 export default function Edit(props: {
   locale: string;
@@ -52,7 +53,7 @@ export default function Edit(props: {
   const [guidePage, setGuidePage] = useState<number | null>(null);
 
   const t = useTranslations("edit");
-  const { isTouch } = useDisplayMode();
+  const { isTouch, isMobileEdit } = useDisplayMode();
   const standalone = useStandaloneDetector();
   const insideFrame = useInsideFrameDetector();
 
@@ -422,6 +423,12 @@ export default function Edit(props: {
 
   const colorThief = useColorThief();
 
+  const youtubeSpace = useResizeDetector();
+  const youtubeFitToWidth =
+    isMobileEdit ||
+    (youtubeSpace.width ?? 0) / (youtubeSpace.height ?? 0) < 16 / 9;
+  const fallingWindowSpace = useResizeDetector();
+
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (chart && !isCodeTab) {
@@ -638,47 +645,57 @@ export default function Edit(props: {
               <Button text={t("help")} onClick={openGuide} />
             </div>
             <div
-              className={clsx(
-                "relative grow-0 shrink-0 p-3 rounded-sq-xl flex flex-col items-center",
-                // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
-                //   levelBgColors[1],
-                chart || "invisible",
-                colorThief.boxStyle
-              )}
-              style={{ color: colorThief.currentColor }}
+              ref={youtubeSpace.ref}
+              className="grow-0 shrink-0 grid-centering edit-wide:h-9/25"
             >
-              <span className={clsx("fn-glass-1")} />
-              <span className={clsx("fn-glass-2")} />
-              <FlexYouTube
-                fixedSide="width"
+              <div
                 className={clsx(
-                  "w-full h-max",
-                  "edit-wide:w-full edit-wide:h-auto"
+                  youtubeFitToWidth ? "w-full" : "h-full",
+                  "relative p-3 rounded-sq-xl",
+                  // levelBgColors[levelTypes.indexOf(currentLevel?.meta.type || "")] ||
+                  //   levelBgColors[1],
+                  chart || "invisible",
+                  colorThief.boxStyle
                 )}
-                control={true}
-                id={chart?.meta.ytId}
-                ytPlayer={ytPlayer}
-                onReady={onReady}
-                onStart={onStart}
-                onStop={onStop}
-                onPlaybackRateChange={setPlaybackRate}
-              />
-              {chart?.meta.ytId && (
-                <img
-                  ref={colorThief.imgRef}
-                  className="hidden"
-                  src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
-                  crossOrigin="anonymous"
+                style={{ color: colorThief.currentColor }}
+              >
+                <span className={clsx("fn-glass-1")} />
+                <span className={clsx("fn-glass-2")} />
+                <FlexYouTube
+                  fixedSide={youtubeFitToWidth ? "width" : "height"}
+                  className={youtubeFitToWidth ? "w-full" : "h-full"}
+                  control={true}
+                  id={chart?.meta.ytId}
+                  ytPlayer={ytPlayer}
+                  onReady={onReady}
+                  onStart={onStart}
+                  onStop={onStop}
+                  onPlaybackRateChange={setPlaybackRate}
                 />
-              )}
+                {chart?.meta.ytId && (
+                  <img
+                    ref={colorThief.imgRef}
+                    className="hidden"
+                    src={`https://i.ytimg.com/vi/${chart?.meta.ytId}/mqdefault.jpg`}
+                    crossOrigin="anonymous"
+                  />
+                )}
+              </div>
             </div>
             <div
+              ref={fallingWindowSpace.ref}
               className={clsx(
-                "w-full aspect-square grid-centering",
-                "edit-wide:flex-1 edit-wide:basis-8/12 edit-wide:aspect-auto"
+                "w-full aspect-square min-h-0",
+                "edit-wide:flex-1 edit-wide:aspect-auto"
               )}
             >
-              <div className="relative w-full aspect-square border border-gray-400/25">
+              <div
+                className="m-auto relative border border-gray-400/25"
+                style={{
+                  width: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
+                  height: `min(${fallingWindowSpace.width}px,${fallingWindowSpace.height}px)`,
+                }}
+              >
                 <FallingWindow
                   inCodeTab={isCodeTab}
                   className="absolute inset-0"

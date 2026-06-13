@@ -8,6 +8,7 @@ interface DisplayMode {
   screenWidth: number;
   screenHeight: number;
   isMobileMain: boolean;
+  isMobileEdit: boolean;
   isMobileGame: boolean;
   rem: number;
   playUIScale: number;
@@ -30,6 +31,7 @@ export function useDisplayMode(): DisplayMode {
   const [width, height] = size;
 
   const isMobileMain = width < 48 * rem; // global.css と合わせる
+  const isMobileEdit = width < 50 * rem; // global.css と合わせる
   // TODO: cssの切り替えはjs側のこの変数ではなく landscape: variantで切り替えたほうが良さそう
   // cssのlandscapeと挙動を合わせるため、正方形は縦長扱いとする
   const isMobileGame = width <= height;
@@ -59,16 +61,18 @@ export function useDisplayMode(): DisplayMode {
   useEffect(() => {
     Sentry.setContext("displayMode", {
       isMobileMain,
+      isMobileEdit,
       isMobileGame,
       isTouch,
     });
-  }, [isMobileMain, isMobileGame, isTouch]);
+  }, [isMobileMain, isMobileEdit, isMobileGame, isTouch]);
 
   return {
     isTouch,
     screenWidth: width,
     screenHeight: height,
     isMobileMain,
+    isMobileEdit,
     isMobileGame,
     rem,
     playUIScale,
