@@ -24,6 +24,7 @@ import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
 import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 import { Box } from "./common/box.js";
+import { LazyImg } from "./common/lazyImage.js";
 
 interface Props {
   locale: string;
@@ -375,24 +376,22 @@ export function Features({ locale }: { locale: string }) {
           </div>
         </div>
         <Box>
-          <div className="relative w-full aspect-[1.6] overflow-hidden">
-            <img
-              src={
-                process.env.ASSET_PREFIX +
-                "/assets/lp-play.jpg" +
-                process.env.ASSET_LP
-              }
-              className="absolute bottom-[10%] left-[-1%] w-[70%]"
-            />
-            <img
-              src={
-                process.env.ASSET_PREFIX +
-                "/assets/lp-play-mobile.jpg" +
-                process.env.ASSET_LP
-              }
-              className="absolute right-[-4%] top-0 h-[105%] rotate-3 origin-top-right"
-            />
-          </div>
+          <LazyImg
+            src={
+              process.env.ASSET_PREFIX +
+              "/assets/lp-play.jpg" +
+              process.env.ASSET_LP
+            }
+            className="absolute bottom-[10%] left-[-1%] w-[70%]"
+          />
+          <LazyImg
+            src={
+              process.env.ASSET_PREFIX +
+              "/assets/lp-play-mobile.jpg" +
+              process.env.ASSET_LP
+            }
+            className="absolute right-[-4%] top-0 h-[105%] rotate-3 origin-top-right"
+          />
         </Box>
       </section>
 
@@ -435,13 +434,13 @@ export function Features({ locale }: { locale: string }) {
           </Link>
         </div>
         <Box>
-          <img
+          <LazyImg
             src={
               process.env.ASSET_PREFIX +
               "/assets/lp-edit.jpg" +
               process.env.ASSET_LP
             }
-            className="w-full"
+            className="absolute inset-0 w-full h-auto my-auto!"
           />
         </Box>
       </section>

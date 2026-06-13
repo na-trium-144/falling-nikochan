@@ -700,6 +700,9 @@ function ChartListItemChildren(props: CProps) {
       )}
       {props.brief?.ytId ? (
         <img
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
           className="fn-thumbnail"
           src={`https://i.ytimg.com/vi/${props.brief?.ytId}/${props.big ? "mqdefault" : "default"}.jpg`}
         />

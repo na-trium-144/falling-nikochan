@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/common/theme";
 import { useDisplayMode } from "@/scale";
-import YAML from "yaml";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import Right from "@icon-park/react/lib/icons/Right";
 import Down from "@icon-park/react/lib/icons/Down";
@@ -129,9 +128,10 @@ function StorageEditor(props: EProps) {
     }
   }, [props.storage]);
   const setCode = useCallback(
-    (code: string) => {
+    async (code: string) => {
       setCode_(code);
       if (props.storage) {
+        const YAML = await import("yaml");
         try {
           const newObj = YAML.parse(code || "{}");
           const newKeys = Object.keys(newObj);

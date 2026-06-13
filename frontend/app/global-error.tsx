@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { CenterBox } from "@/common/box";
 import { ErrorMessage } from "@/common/errorPageComponent";
-import clsx from "clsx/lite";
+import themeInitScript from "@/common/themeInit.js?raw";
 
 // Error boundaries must be Client Components
 
@@ -21,13 +21,13 @@ export default function Error(props: ErrorProps) {
   // ボタンとかは置いても無駄でしょう
   return (
     <html>
-      <body
-        className={clsx(
-          "fn-body",
-          // ThemeProviderのimportも避けて直接書いている。
-          "fn-csr-ready"
-        )}
-      >
+      <body className="fn-body" suppressHydrationWarning>
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: themeInitScript.replace(/\s+/g, " "),
+          }}
+        />
         <div className="fn-fallback-bg" />
         <CenterBox classNameInner="flex flex-col items-center">
           <h4 className="fn-heading-box">An error has occurred 😢</h4>

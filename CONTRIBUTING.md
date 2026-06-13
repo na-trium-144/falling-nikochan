@@ -241,6 +241,7 @@ The service worker ([`worker/entry.ts`](worker/entry.ts), bundled into `/sw.js`)
 
 | Variable | GitHub Action | Build time | Backend runtime | Description |
 |---|---|---|---|---|
+| `ANALYZE` | | optional | | Enables next/bundle-analyzer |
 | `MONGODB_URI` | | | required | `mongodb://...` |
 | `API_ENV` |  |  | DO NOT SET | if set to `development`, development-specific behaviors such as password bypass will be enabled |
 | `API_NO_RATELIMIT` |  |  | DO NOT SET | |

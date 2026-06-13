@@ -29,7 +29,7 @@ export default async function RootLayout({
   const ChangeLog = await importChangeLogMDX(locale);
   return (
     <html lang={locale}>
-      <body className="fn-body">
+      <body className="fn-body" suppressHydrationWarning>
         <ThemeProvider>
           <IntlProvider locale={locale}>
             <ChangeLogProvider changeLog={<ChangeLog />}>

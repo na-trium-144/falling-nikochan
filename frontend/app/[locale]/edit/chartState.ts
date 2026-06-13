@@ -28,7 +28,6 @@ import * as msgpack from "@msgpack/msgpack";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import saveAs from "file-saver";
-import YAML from "yaml";
 import { luaExec } from "@falling-nikochan/chart/dist/luaExec";
 import { isInsideFrame, isStandalone } from "@/common/pwaInstall";
 import * as v from "valibot";
@@ -486,6 +485,7 @@ export function useChartState(props: Props) {
         }
       };
       let result: Awaited<ReturnType<typeof validateAndExec>> | null = null;
+      const YAML = await import("yaml");
       try {
         result = await validateAndExec(
           YAML.parse(new TextDecoder().decode(buffer))

@@ -42,3 +42,5 @@ worker.addEventListener(
     worker.postMessage(result);
   }
 );
+
+worker.postMessage("initDone");
