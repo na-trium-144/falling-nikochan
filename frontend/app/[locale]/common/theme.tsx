@@ -79,6 +79,7 @@ export function ThemeProvider(props: { children: ReactNode }) {
       }}
     >
       <script
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{
           __html: themeInitScript.replace(/\s+/g, " "),
         }}

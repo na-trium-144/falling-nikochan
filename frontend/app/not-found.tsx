@@ -13,7 +13,7 @@ export default async function NotFoundPage() {
   const t = await getTranslations("en", "error");
   return (
     <html>
-      <body className="fn-body">
+      <body className="fn-body" suppressHydrationWarning>
         <ThemeProvider>
           <CenterBox classNameInner="flex flex-col items-center">
             <h4 className="fn-heading-box">Error 404</h4>
