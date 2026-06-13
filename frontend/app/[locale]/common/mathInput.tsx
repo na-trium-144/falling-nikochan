@@ -1,9 +1,15 @@
-import { evaluate } from "mathjs";
+"use client";
+
+import { useEffect } from "react";
 import Input from "./input";
+
+// import { evaluate } from "mathjs";
+// lazy load mathjs because it's heavy
+let evaluate: null | typeof import("mathjs").evaluate = null;
 
 function evalMath(value: string): number {
   try {
-    const result = evaluate(value);
+    const result = evaluate?.(value);
     if (typeof result === "number" && isFinite(result)) return result;
     return NaN;
   } catch {
@@ -19,6 +25,14 @@ interface MathInputProps {
   disabled?: boolean;
 }
 export default function MathInput(props: MathInputProps) {
+  useEffect(() => {
+    (async () => {
+      if (!evaluate) {
+        evaluate = (await import("mathjs")).evaluate;
+      }
+    })();
+  }, []);
+
   const mathIsValid = (raw: string): boolean => {
     const evaluated = evalMath(raw);
     if (isNaN(evaluated)) return false;
