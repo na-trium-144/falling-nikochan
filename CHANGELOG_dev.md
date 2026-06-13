@@ -1,9 +1,10 @@
 ## ver. 16.18 - 2025/06/13 [#1205](https://github.com/na-trium-144/falling-nikochan/pull/1205)
 
 * 画像の遅延読み込み
-* mathjsの遅延読み込み
+* mathjs,yaml,wasmoonの遅延読み込み
 * テーマの読み込みをインラインscriptタグに移動
 * next/bundle-analyzerを追加、環境変数でいつでも有効化できる
+* workerをeditページ起動時に非同期に初期化し、エラーが出たらページ全体を止める
 
 ## ver. 16.17 - 2025/06/13
 
