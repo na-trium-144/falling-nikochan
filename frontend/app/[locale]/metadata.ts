@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { getTranslations, locales } from "@falling-nikochan/i18n/dynamic";
 import { titleWithoutSiteName, titleWithSiteName } from "./common/title.js";
 
+// @common/themeInit.js にも同じものがある。
 export const backgroundColorLight = "#f0f9ff"; // sky-50
 export const themeColorLight = "#b8e6fe"; // sky-200
 export const backgroundColorDark = "#441306"; // orange-950
