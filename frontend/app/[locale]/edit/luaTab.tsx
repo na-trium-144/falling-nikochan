@@ -56,6 +56,8 @@ if (typeof window !== "undefined") {
 }
 
 export function useLuaExecutor(): LuaExecutor {
+  const initDoneRef = useRef(false);
+  const [initError, setInitError] = useState<Error>();
   const [stdout, setStdout] = useState<string[]>([]);
   const [err, setErr] = useState<string[]>([]);
   const [errLine, setErrLine] = useState<number | null>(null);
@@ -67,6 +69,61 @@ export function useLuaExecutor(): LuaExecutor {
   const workerResolver = useRef<((result: LevelFreeze | null) => void) | null>(
     null
   );
+
+  const initWorker = useCallback(() => {
+    if (worker.current === null) {
+      worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
+      worker.current.addEventListener("error", (e) => {
+        console.error(e);
+        if (!initDoneRef.current) {
+          let err = e.error ?? e.message;
+          if (!(err instanceof Error)) {
+            err = new Error(String(err));
+          }
+          if (!(err as Error).stack) {
+            (err as Error).stack = new Error().stack;
+          }
+          setInitError(err);
+        }
+        if (workerResolver.current) {
+          setRunning(false);
+          setStdout([]);
+          // e.messageが空の場合がある
+          setErr([e.message || "Unknown error"]);
+          setErrLine(-1);
+          workerResolver.current(null);
+          workerResolver.current = null;
+        }
+      });
+      worker.current.addEventListener(
+        "message",
+        ({ data }: { data: LuaExecResult | "initDone" }) => {
+          if (typeof data === "string") {
+            initDoneRef.current = true;
+          } else {
+            if (workerResolver.current) {
+              setRunning(false);
+              setStdout(data.stdout);
+              setErr(data.err);
+              setErrLine(data.errorLine);
+              if (data.err.length === 0) {
+                workerResolver.current(data.levelFreezed);
+              } else {
+                workerResolver.current(null);
+              }
+              workerResolver.current = null;
+            } else {
+              console.error("luaExecWorker finished but resolver is null");
+            }
+          }
+        }
+      );
+    }
+  }, []);
+  useEffect(initWorker, [initWorker]);
+  if (initError) {
+    throw initError;
+  }
 
   const abortExec = useCallback(() => {
     if (workerResolver.current !== null) {
@@ -84,51 +141,26 @@ export function useLuaExecutor(): LuaExecutor {
   }, []);
   const exec = useCallback(
     (code: string) => {
-      if (workerResolver.current !== null) {
-        abortExec();
-      }
+      abortExec();
+      initWorker();
       setRunning(true);
       const p = new Promise<LevelFreeze | null>((resolve) => {
         workerResolver.current = resolve;
       });
-      if (worker.current === null) {
-        worker.current = new Worker(new URL("luaExecWorker", import.meta.url));
-        worker.current.addEventListener("error", (e) => {
-          console.error(e);
-          setRunning(false);
-          setStdout([]);
-          // e.messageが空の場合がある
-          setErr([e.message || "Unknown error"]);
-          setErrLine(-1);
-          workerResolver.current?.(null);
-          workerResolver.current = null;
-        });
-        worker.current.addEventListener(
-          "message",
-          ({ data }: { data: LuaExecResult }) => {
-            if (workerResolver.current) {
-              setRunning(false);
-              setStdout(data.stdout);
-              setErr(data.err);
-              setErrLine(data.errorLine);
-              if (data.err.length === 0) {
-                workerResolver.current(data.levelFreezed);
-              } else {
-                workerResolver.current(null);
-              }
-              workerResolver.current = null;
-            } else {
-              console.error("luaExecWorker finished but resolver is null");
-            }
-          }
-        );
-      }
-      worker.current.postMessage({ code } satisfies WorkerInput);
+      worker.current!.postMessage({ code } satisfies WorkerInput);
       return p;
     },
-    [abortExec]
+    [abortExec, initWorker]
   );
-  return { stdout, err, errLine, running, exec, abortExec };
+
+  return {
+    stdout,
+    err,
+    errLine,
+    running,
+    exec,
+    abortExec,
+  };
 }
 
 // Aceはposition:fixedがviewportに対する絶対座標であることを想定しているが
