@@ -31,7 +31,7 @@
     "mongodb": "^7.2.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-env": "^7.29.7",
     "@eslint/config-helpers": "^0.4.2",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.4",
