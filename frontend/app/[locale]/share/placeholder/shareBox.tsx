@@ -119,7 +119,7 @@ export function ShareBox(props: Props) {
       >
         <div
           className={clsx(
-            "w-full shrink-0 main-wide:basis-1/3 share-yt-wide:w-80",
+            "w-full shrink-0 main-wide:w-80",
             "p-2 rounded-sq-lg",
             ytMeta &&
               colorThief.ready &&
@@ -221,18 +221,21 @@ export function ShareBox(props: Props) {
               </div>
               <p
                 className={clsx(
-                  "font-title text-2xl font-semibold",
+                  "font-title text-2xl min-h-8 font-semibold",
                   "fg-bright"
                 )}
               >
                 {brief?.title}
               </p>
               <p
-                className={clsx("font-title text-lg font-medium", "fg-bright")}
+                className={clsx(
+                  "font-title text-lg min-h-7 font-medium",
+                  "fg-bright"
+                )}
               >
                 {brief?.composer}
               </p>
-              <p className="mt-1">
+              <p className="mt-1 min-h-7">
                 <span className="inline-block">
                   <span className="text-sm">
                     {brief && `${t("chartCreator")}:`}
@@ -276,28 +279,24 @@ export function ShareBox(props: Props) {
         </div>
       </div>
       {sharedResult && <SharedResultBox result={sharedResult} />}
-      {brief && (
-        <p className="mt-2">
-          <span className="no-mobile mr-2">{t("shareLink")}:</span>
-          <a
-            className={clsx("inline-block py-2", "fn-link-1")}
-            href={shareLink.path}
-            onClick={(e) => e.preventDefault()}
-          >
-            <span className="no-pc">{t("shareLink")}</span>
-            <span className="no-mobile">{shareLink.url}</span>
-          </a>
-          <span className="inline-block ml-2">{shareLink.buttons}</span>
-        </p>
-      )}
-      {cid && brief && (
-        <PlayOption
-          cid={cid}
-          brief={brief}
-          record={props.record}
-          locale={props.locale}
-        />
-      )}
+      <p className="mt-2">
+        <span className="no-mobile mr-2">{t("shareLink")}:</span>
+        <a
+          className={clsx("inline-block py-2", "fn-link-1")}
+          href={shareLink.path}
+          onClick={(e) => e.preventDefault()}
+        >
+          <span className="no-pc">{t("shareLink")}</span>
+          <span className="no-mobile">{shareLink.url}</span>
+        </a>
+        <span className="inline-block ml-2">{shareLink.buttons}</span>
+      </p>
+      <PlayOption
+        cid={cid}
+        brief={brief}
+        record={props.record}
+        locale={props.locale}
+      />
     </>
   );
 }

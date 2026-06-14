@@ -33,8 +33,8 @@ import { formatError } from "@/common/fetch";
 
 interface Props {
   locale: string;
-  cid: string;
-  brief: ChartBrief & { etag: string };
+  cid?: string;
+  brief: (ChartBrief & { etag: string }) | null;
   record: RecordGetSummary[] | Error | null;
 }
 export function PlayOption(props: Props) {
@@ -43,29 +43,31 @@ export function PlayOption(props: Props) {
 
   const [status, setStatus] = useState<BadgeStatus[]>([]);
   useEffect(() => {
-    const update = () => {
-      setStatus(
-        props.brief?.levels
-          // .filter((l) => !l.unlisted)
-          .map((l) => getBadge(getBestScore(props.cid, l.hash))) || []
-      );
-    };
-    const storageUpdate = (e: StorageEvent) => {
-      if (
-        props.brief?.levels.some((l) => e.key === bestKey(props.cid, l.hash))
-      ) {
-        update();
-      }
-    };
-    update();
-    window.addEventListener("storage", storageUpdate);
-    window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
-    window.addEventListener("popstate", update); // router.push()からもどってきたとき
-    return () => {
-      window.removeEventListener("storage", storageUpdate);
-      window.removeEventListener("visibilitychange", update);
-      window.removeEventListener("popstate", update);
-    };
+    if (props.cid) {
+      const update = () => {
+        setStatus(
+          props.brief?.levels
+            // .filter((l) => !l.unlisted)
+            .map((l) => getBadge(getBestScore(props.cid!, l.hash))) || []
+        );
+      };
+      const storageUpdate = (e: StorageEvent) => {
+        if (
+          props.brief?.levels.some((l) => e.key === bestKey(props.cid!, l.hash))
+        ) {
+          update();
+        }
+      };
+      update();
+      window.addEventListener("storage", storageUpdate);
+      window.addEventListener("visibilitychange", update); // 別タブからもどってきたとき
+      window.addEventListener("popstate", update); // router.push()からもどってきたとき
+      return () => {
+        window.removeEventListener("storage", storageUpdate);
+        window.removeEventListener("visibilitychange", update);
+        window.removeEventListener("popstate", update);
+      };
+    }
   }, [props.cid, props.brief]);
 
   // levelが存在しない時 -1
@@ -73,12 +75,12 @@ export function PlayOption(props: Props) {
     // props.brief.levels.findIndex((l) => !l.unlisted),
     null
   );
-  const levelsNum = props.brief.levels.filter((l) => !l.unlisted).length;
+  const levelsNum = props.brief?.levels.filter((l) => !l.unlisted).length;
   useEffect(() => {
     if (selectedLevel === null && levelsNum === 1) {
-      setSelectedLevel(props.brief.levels.findIndex((l) => !l.unlisted));
+      setSelectedLevel(props.brief!.levels.findIndex((l) => !l.unlisted));
     }
-  }, [props.brief.levels, selectedLevel, levelsNum]);
+  }, [props.brief, selectedLevel, levelsNum]);
 
   return (
     <div
@@ -96,7 +98,7 @@ export function PlayOption(props: Props) {
           {t("selectLevel")}:
         </p>
         <ul className="min-w-0 max-w-full grow-0 shrink ml-2 self-center">
-          {props.brief.levels.map(
+          {props.brief?.levels.map(
             (level, i) =>
               level.unlisted || (
                 <li
@@ -131,7 +133,7 @@ export function PlayOption(props: Props) {
               )
           )}
         </ul>
-        {levelsNum === 0 && <p>{t("unavailable")}</p>}
+        {props.brief && levelsNum === 0 && <p>{t("unavailable")}</p>}
         <div
           className={clsx(
             "flex-none flex flex-col max-w-full",
@@ -152,7 +154,10 @@ export function PlayOption(props: Props) {
                 : "scale-0 px-0! py-0!"
             )}
           >
-            {selectedLevel !== null && selectedLevel >= 0 ? (
+            {props.cid &&
+            props.brief &&
+            selectedLevel !== null &&
+            selectedLevel >= 0 ? (
               <SelectedLevelInfo
                 cid={props.cid}
                 brief={props.brief}
@@ -162,32 +167,37 @@ export function PlayOption(props: Props) {
               />
             ) : null}
           </div>
-          <span style={{ flexGrow: levelsNum - (selectedLevel || 0) - 1 }} />
+          <span
+            style={{ flexGrow: (levelsNum ?? 0) - (selectedLevel || 0) - 1 }}
+          />
         </div>
       </div>
-      {selectedLevel !== null && selectedLevel >= 0 && (
-        <p className="mt-3 text-center ">
-          <Button
-            text={t("start")}
-            onClick={() => {
-              // 押したときにも再度sessionを初期化
-              const sessionId = initSession({
-                cid: props.cid,
-                lvIndex: selectedLevel,
-                brief: props.brief,
-                editing: false as const,
-              });
-              if (isStandalone() || isInsideFrame()) {
-                router.push(`/${props.locale}/play?sid=${sessionId}`);
-              } else {
-                window
-                  .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
-                  ?.focus();
-              }
-            }}
-          />
-        </p>
-      )}
+      {props.cid &&
+        props.brief &&
+        selectedLevel !== null &&
+        selectedLevel >= 0 && (
+          <p className="mt-3 text-center ">
+            <Button
+              text={t("start")}
+              onClick={() => {
+                // 押したときにも再度sessionを初期化
+                const sessionId = initSession({
+                  cid: props.cid!,
+                  lvIndex: selectedLevel,
+                  brief: props.brief!,
+                  editing: false as const,
+                });
+                if (isStandalone() || isInsideFrame()) {
+                  router.push(`/${props.locale}/play?sid=${sessionId}`);
+                } else {
+                  window
+                    .open(`/${props.locale}/play?sid=${sessionId}`, "_blank")
+                    ?.focus();
+                }
+              }}
+            />
+          </p>
+        )}
     </div>
   );
 }
