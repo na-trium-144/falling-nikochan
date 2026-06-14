@@ -1,3 +1,9 @@
+## ver. 16.19 - 2025/06/14
+
+* トップページに検索欄追加、cid入力でジャンプを実装 [#1208](https://github.com/na-trium-144/falling-nikochan/pull/1208)
+* shareBoxの初期レイアウトを調整
+* APIドキュメントとデバッグページのリンクをheaderとlinksに追加
+
 ## ver. 16.18 - 2025/06/13 [#1205](https://github.com/na-trium-144/falling-nikochan/pull/1205)
 
 * 画像の遅延読み込み
