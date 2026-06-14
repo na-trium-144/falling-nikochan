@@ -78,6 +78,7 @@ export default {
       search: "Search",
       searchPlaceholder: "Song title, composer, etc. or chart ID",
       searchTitle: "Search results for {search}",
+      cidNotFound: "The chart ID {cid} was not found.",
       sort: "Sort by",
       recent: "Play history",
       relevance: "Relevance",

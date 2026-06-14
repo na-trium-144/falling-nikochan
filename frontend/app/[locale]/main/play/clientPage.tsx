@@ -30,7 +30,6 @@ import { getRecent, recentKey } from "@/common/recent.js";
 import Search from "@icon-park/react/lib/icons/Search";
 import { captureAndWrap, fetchBackend } from "@/common/fetch.js";
 import * as v from "valibot";
-import { fetchBrief } from "@/common/briefCache.js";
 
 // route/src/api/search.tsとあわせる
 const MAX_CIDS_COUNT = 100;
@@ -264,15 +263,16 @@ function PlayTabInternal(
 
   const { isMobileMain } = useDisplayMode();
   const gotoCId = (cid: string) => {
-    fetchBrief(cid, {
-      onResult: () => {
+    fetchBackend()
+      .get(`/api/brief/${cid}`)
+      .notFound(() => undefined)
+      .res(() => {
         if (isMobileMain) {
           openShareInternal(cid);
         } else {
           openModal(cid);
         }
-      },
-    });
+      });
   };
 
   return (
