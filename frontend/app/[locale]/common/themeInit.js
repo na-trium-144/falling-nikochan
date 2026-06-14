@@ -26,16 +26,18 @@ window.fnApplyTheme = () => {
   }
   const metaThemeColor = document.querySelectorAll("meta[name=theme-color]");
   switch (window.fnGetCurrentTheme()) {
-    case "dark":
-      metaThemeColor.forEach((e) => {
-        e.setAttribute("content", themeColorDark);
-      });
+    case "dark": {
+      for (let i = 0; i < metaThemeColor.length; i++) {
+        metaThemeColor[i].setAttribute("content", themeColorDark);
+      }
       break;
-    case "light":
-      metaThemeColor.forEach((e) => {
-        e.setAttribute("content", themeColorLight);
-      });
+    }
+    case "light": {
+      for (let i = 0; i < metaThemeColor.length; i++) {
+        metaThemeColor[i].setAttribute("content", themeColorLight);
+      }
       break;
+    }
     default:
       metaThemeColor[0].setAttribute("content", themeColorLight);
       metaThemeColor[1].setAttribute("content", themeColorDark);
