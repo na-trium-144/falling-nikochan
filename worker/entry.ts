@@ -439,9 +439,13 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
         signal: inputReq.signal,
       }
     );
-    const resAlt = await fetch(altReq).catch(fetchError(e));
-    if (resAlt.ok) {
-      return resAlt;
+    try {
+      const resAlt = await fetch(altReq).catch(fetchError(e));
+      if (resAlt.ok) {
+        return resAlt;
+      }
+    } catch {
+      // pass
     }
   }
   return res;
