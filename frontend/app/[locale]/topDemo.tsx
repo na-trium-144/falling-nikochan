@@ -139,8 +139,8 @@ export function TopDemo(
 
 export function DemoDetail(
   props: {
-    onClick: (cid: string, brief?: ChartBrief) => void;
-    onClickMobile: (cid: string, brief: ChartBrief | undefined) => void;
+    onClick: (cid: string) => void;
+    onClickMobile: (cid: string) => void;
   } & Partial<DemoChart>
 ) {
   const [brief, setBrief] = useState<ChartBrief>();
@@ -186,8 +186,8 @@ export function DemoDetail(
           cid={props.cid ?? ""}
           brief={brief}
           href={`/share/${props.cid}`}
-          onClick={() => props.onClick(props.cid!, brief)}
-          onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+          onClick={() => props.onClick(props.cid!)}
+          onClickMobile={() => props.onClickMobile(props.cid!)}
           badge
           big="v"
           noDefaultColor
@@ -207,8 +207,8 @@ export function DemoDetail(
           cid={props.cid ?? ""}
           brief={brief}
           href={`/share/${props.cid}`}
-          onClick={() => props.onClick(props.cid!, brief)}
-          onClickMobile={() => props.onClickMobile(props.cid!, brief)}
+          onClick={() => props.onClick(props.cid!)}
+          onClickMobile={() => props.onClickMobile(props.cid!)}
           badge
           big="h"
           noDefaultColor

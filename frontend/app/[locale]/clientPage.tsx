@@ -25,6 +25,11 @@ import { useDisplayMode } from "./scale.js";
 import { DemoChart, demoCharts, DemoDetail, TopDemo } from "./topDemo.js";
 import { Box } from "./common/box.js";
 import { LazyImg } from "./common/lazyImage.js";
+import Search from "@icon-park/react/lib/icons/Search.js";
+import { useRouter } from "next/navigation.js";
+import * as v from "valibot";
+import { CidSchema } from "@falling-nikochan/chart";
+import { fetchBackend } from "./common/fetch.js";
 
 interface Props {
   locale: string;
@@ -100,6 +105,31 @@ export default function TopPage(props: Props) {
     // initAnimがtrueになる瞬間にも再実行する必要がある
   }, [isSafari, initAnim, rem]);
 
+  const [searchText, setSearchText] = useState<string>("");
+  const router = useRouter();
+  // cidの検索中にsearchTextが変わる可能性もある → 見つからなかったcidを入れ、searchText===cidNotFoundなら見つかりませんでしたを表示する
+  const [cidNotFound, setCidNotFound] = useState<string | null>(null);
+  const gotoCId = (cid: string) => {
+    fetchBackend()
+      .get(`/api/brief/${cid}`)
+      .notFound(() => {
+        setCidNotFound(cid);
+      })
+      .res(() => {
+        if (isMobileMain) {
+          openShareInternal(cid);
+        } else {
+          openModal(cid);
+        }
+      });
+  };
+  const searchParams = new URLSearchParams({ search: searchText });
+  if (!isMobileMain) {
+    // スマホでは検索欄にフォーカスしたらソフトキーボードで結果が隠れて邪魔なのでは。
+    searchParams.set("focus", "search");
+  }
+  const searchURL = `${locale}/main/play?` + searchParams.toString();
+
   return (
     <main
       className={clsx(
@@ -173,7 +203,7 @@ export default function TopPage(props: Props) {
       <div
         id="top"
         className={clsx(
-          "w-full h-screen flex items-center justify-center",
+          "w-full h-screen min-h-max flex items-center justify-center",
           "flex-col demo-wide:flex-row-reverse"
         )}
       >
@@ -196,7 +226,7 @@ export default function TopPage(props: Props) {
             className={clsx(
               "w-full max-w-main",
               "flex flex-col items-center text-center",
-              "justify-start px-3 gap-6",
+              "justify-start px-3 py-6 gap-6",
               "demo-wide:justify-center demo-wide:pl-12 demo-wide:pr-0",
               "min-[64rem]:gap-8 min-[82rem]:gap-12"
             )}
@@ -228,6 +258,53 @@ export default function TopPage(props: Props) {
               <ButtonHighlight />
               {t("playNow")}
             </Link>
+            <div className="flex flex-col items-center w-full gap-1">
+              <div
+                className={clsx(
+                  "relative fn-plain rounded-sq-2xl w-full max-w-120 main-wide:max-w-160",
+                  "has-focus:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
+                )}
+              >
+                <span className="fn-glass-1" />
+                <span className="fn-glass-2" />
+                <input
+                  className={clsx(
+                    "w-full font-title text-base min-[64rem]:text-xl p-3",
+                    "border-0 outline-0! bg-transparent appearance-none rounded-none"
+                  )}
+                  placeholder={t("play.searchPlaceholder")}
+                  value={searchText}
+                  onChange={(e) => {
+                    setSearchText(e.target.value);
+                    setCidNotFound(null);
+                    if (v.safeParse(CidSchema(), e.target.value).success) {
+                      gotoCId(e.target.value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      router.push(searchURL);
+                    }
+                  }}
+                />
+                <Link
+                  href={searchURL}
+                  className="absolute right-1.5 inset-y-0 my-auto fn-icon-button h-max"
+                  prefetch={process.env.PREFETCH as "auto"}
+                >
+                  <Search className="text-lg min-[64rem]:text-2xl self-center" />
+                </Link>
+              </div>
+              <span
+                className={clsx(
+                  "text-red-500",
+                  cidNotFound !== searchText && "invisible"
+                )}
+              >
+                {t("play.cidNotFound", { cid: cidNotFound ?? "" })}
+              </span>
+            </div>
             <RedirectedWarning />
             <PWAInstallMain />
           </section>

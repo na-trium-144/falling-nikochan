@@ -4,7 +4,7 @@ import clsx from "clsx/lite";
 import { IndexMain } from "../main.js";
 import { ChartList } from "../chartList.js";
 import { ExternalLink } from "@/common/extLink.js";
-import { maxLv, minLv, popularDays } from "@falling-nikochan/chart";
+import { CidSchema, maxLv, minLv, popularDays } from "@falling-nikochan/chart";
 import { useTranslations } from "next-intl";
 import { ChartLineBrief } from "../chartList.js";
 import Input from "@/common/input.jsx";
@@ -16,6 +16,7 @@ import {
   Suspense,
   useMemo,
   useLayoutEffect,
+  useEffect,
 } from "react";
 import { titleWithSiteName } from "@/common/title.js";
 import { useSharePageModal } from "@/common/sharePageModal.jsx";
@@ -100,9 +101,16 @@ function PlayTabInternal(
     prevParam.current = params;
     return params;
   }, [props.searchParams]);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (props.searchParams?.get("focus") === "search") {
+      searchRef.current?.focus();
+    }
+  }, [props.searchParams]);
   const updateParams = useCallback(
     (params: Partial<PageParams>) => {
       const newParams = new URLSearchParams(props.searchParams);
+      newParams.delete("focus");
       if (params.search !== undefined) {
         if (params.search) {
           newParams.set("search", params.search);
@@ -253,6 +261,20 @@ function PlayTabInternal(
     }
   }
 
+  const { isMobileMain } = useDisplayMode();
+  const gotoCId = (cid: string) => {
+    fetchBackend()
+      .get(`/api/brief/${cid}`)
+      .notFound(() => undefined)
+      .res(() => {
+        if (isMobileMain) {
+          openShareInternal(cid);
+        } else {
+          openModal(cid);
+        }
+      });
+  };
+
   return (
     <IndexMain
       title={t("title")}
@@ -289,10 +311,16 @@ function PlayTabInternal(
               <span className="mr-2 flex-none">{t("search")}:</span>
               <Search className="text-lg self-center" />
               <Input
+                ref={searchRef}
                 actualValue={params.search}
                 updateValue={(v) => updateParams({ search: v })}
                 updateDebounce={1000}
-                onChange={() => setWaitingDebounce(true)}
+                onChange={(val) => {
+                  setWaitingDebounce(true);
+                  if (v.safeParse(CidSchema(), val).success) {
+                    gotoCId(val);
+                  }
+                }}
                 left
                 className="flex-1 font-title min-w-0"
                 placeholder={t("searchPlaceholder")}
