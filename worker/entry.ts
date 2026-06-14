@@ -13,6 +13,22 @@ import { locales } from "@falling-nikochan/i18n/staticMin.js";
 import { TarFileType, TarReader } from "@gera2ld/tarjs";
 import cfBeaconHtml from "./beacon.html?raw";
 import { getMimeType, mimes } from "hono/utils/mime";
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  tunnel: process.env.SENTRY_TUNNEL || undefined,
+  release: process.env.SENTRY_RELEASE,
+  sendDefaultPii: false,
+  integrations: [Sentry.extraErrorDataIntegration({ depth: 10 })],
+  transport: Sentry.makeBrowserOfflineTransport(Sentry.makeFetchTransport),
+  transportOptions: {
+    dbName: "sentry-offline-sw",
+    flushAtStartup: true,
+    // transportOptions type is not recognized correctly: https://github.com/getsentry/sentry-javascript/issues/13548
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any,
+});
 
 const e: Bindings = {
   MONGODB_URI: "",
@@ -212,7 +228,7 @@ async function initAssetsCache(config: {
       { cache: "no-store" }
     ).catch(fetchError(e));
     if (!remoteRes.ok) {
-      return sendInitState("failed");
+      throw new Error(`failed to fetch buildVer.json: ${remoteRes.status}`);
     }
     const remoteVerRes = remoteRes.clone();
     const remoteVer: BuildVer = await remoteRes.json();
@@ -230,6 +246,7 @@ async function initAssetsCache(config: {
       remoteVer.date === cacheVer?.date &&
       lastMainCacheName === mainCacheName
     ) {
+      Sentry.setContext("initAssetsCache", { result: "noUpdate" });
       return sendInitState("noUpdate");
     }
 
@@ -343,8 +360,12 @@ async function initAssetsCache(config: {
         downloadNextAssets(),
       ]);
       allPathnames = [...tarPathnames, ...nextPathnames];
-    } catch {
-      // console.error(err);
+    } catch (err) {
+      console.error(err);
+      Sentry.setContext("initAssetsCache", {
+        result: "failed",
+        err: String(err),
+      });
       return sendInitState("failed");
     }
 
@@ -375,6 +396,7 @@ async function initAssetsCache(config: {
       cache.put("/lastMainCacheName", new Response(mainCacheName));
     });
     console.log("initAssetsCache: finished");
+    Sentry.setContext("initAssetsCache", { result: "done" });
     return sendInitState("done");
   } finally {
     initInProgress = false;
@@ -405,6 +427,7 @@ const languageDetector = async (c: Context, next: () => Promise<void>) => {
   }
   c.set("language", lang);
   cache.put("/lang", new Response(lang));
+  Sentry.setContext("languageDetector", { lang, systemLangs });
   await next();
 };
 
@@ -421,6 +444,9 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
     !inputUrl.pathname.startsWith("/api/newChartFile") &&
     !inputUrl.pathname.startsWith("/api/hashPasswd")
   ) {
+    Sentry.captureException(
+      new Error(`${inputUrl.pathname} returned ${res.status}`)
+    );
     const altReq = new Request(
       process.env.BACKEND_ALT_PREFIX + inputUrl.pathname + inputUrl.search,
       {
@@ -439,9 +465,13 @@ async function fetchAPI(input: string | URL | Request, init?: RequestInit) {
         signal: inputReq.signal,
       }
     );
-    const resAlt = await fetch(altReq).catch(fetchError(e));
-    if (resAlt.ok) {
-      return resAlt;
+    try {
+      const resAlt = await fetch(altReq).catch(fetchError(e));
+      if (resAlt.ok) {
+        return resAlt;
+      }
+    } catch {
+      // pass
     }
   }
   return res;
@@ -569,8 +599,10 @@ const app = new Hono({ strict: false })
   .onError(
     onError({
       fetchStatic: fetchStaticWithThrow,
-      captureException: null,
-      setTransactionName: null,
+      // @ts-expect-error なんか型が違う
+      captureException: Sentry.captureException,
+      setTransactionName: (name) =>
+        void Sentry.getCurrentScope().setTransactionName(name),
     })
   )
   .notFound(notFound);

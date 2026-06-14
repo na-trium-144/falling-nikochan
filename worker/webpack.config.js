@@ -1,9 +1,27 @@
 import { join, dirname } from "node:path";
+import { execSync } from "node:child_process";
+import crypto from "node:crypto";
 import webpack from "webpack";
 import LicensePlugin from "webpack-license-plugin";
 // import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
+import packageJson from "./package.json" with { type: "json" };
 import dotenv from "dotenv";
 dotenv.config({ path: join(dirname(process.cwd()), ".env") });
+
+// 1. ソースコードの最終コミット
+const sourceHash = execSync("git log -n 1 --pretty=format:%H -- .")
+  .toString()
+  .trim();
+
+// 2. SWに関連する依存ライブラリの解決状態を JSON で取得
+// --filter を使うことで、workspace 全体ではなく SW の依存ツリーだけに絞れる
+const depsInfo = execSync(
+  'pnpm list --filter "./src/service-worker" --depth Infinity --json'
+).toString();
+
+const depsHash = crypto.createHash("sha1").update(depsInfo).digest("hex");
+const sentryRelease = `sw${packageJson.version}-${sourceHash}-${depsHash}`;
 
 const config = {
   entry: "./entry.js",
@@ -35,6 +53,9 @@ const config = {
       "process.env.BACKEND_ALT_PREFIX": JSON.stringify(
         process.env.BACKEND_ALT_PREFIX
       ),
+      "process.env.SENTRY_DSN": JSON.stringify(process.env.SENTRY_DSN),
+      "process.env.SENTRY_TUNNEL": JSON.stringify(process.env.SENTRY_TUNNEL),
+      "process.env.SENTRY_RELEASE": JSON.stringify(sentryRelease),
       process: "{cwd:()=>''}",
     }),
     new LicensePlugin({
@@ -42,6 +63,18 @@ const config = {
       includeNoticeText: true,
       excludedPackageTest: (packageName /*, version*/) => {
         return packageName.startsWith("@falling-nikochan");
+      },
+    }),
+    sentryWebpackPlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      url: process.env.SENTRY_URL || undefined,
+      release: { name: sentryRelease },
+      sourcemaps: {
+        // As you're enabling client source maps, you probably want to delete them after they're uploaded to Sentry.
+        // Set the appropriate glob pattern for your output folder - some glob examples below:
+        filesToDeleteAfterUpload: ["./**/*.map"],
       },
     }),
   ],
