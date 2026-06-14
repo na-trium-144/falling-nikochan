@@ -19,6 +19,8 @@ import { ExternalLink } from "./common/extLink.js";
 import { XLogo } from "./common/x.js";
 import Github from "@icon-park/react/lib/icons/Github.js";
 import Mail from "@icon-park/react/lib/icons/Mail.js";
+import Code from "@icon-park/react/lib/icons/Code.js";
+import Tool from "@icon-park/react/lib/icons/Tool.js";
 import { PCHeader2 } from "./common/header.js";
 import { IrasutoyaLikeGrass } from "./common/irasutoyaLike.js";
 import { useDisplayMode } from "./scale.js";
@@ -578,6 +580,39 @@ export function GitHubLink({ small }: { small?: boolean }) {
     </>
   );
 }
+export function APIDocsLink({ small }: { small?: boolean }) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <Code className="inline-block align-middle mr-1" />
+      <a className="fn-link-1" href={process.env.BACKEND_PREFIX + "/api"}>
+        {small ? (
+          <span>{t("links.apiReferenceShort")}</span>
+        ) : (
+          <>
+            <span className="no-mobile">{t("links.apiReference")}</span>
+            <span className="no-pc">{t("links.apiReferenceShort")}</span>
+          </>
+        )}
+      </a>
+    </>
+  );
+}
+export function DevPageLink({ locale }: { locale: string }) {
+  const t = useTranslations("main");
+  return (
+    <>
+      <Tool className="inline-block align-middle mr-1" />
+      <Link
+        className="fn-link-1"
+        href={`/${locale}/dev`}
+        prefetch={process.env.PREFETCH as "auto"}
+      >
+        {t("links.devPage")}
+      </Link>
+    </>
+  );
+}
 export function PoliciesAndLinks({
   locale,
   // fes,
@@ -633,11 +668,7 @@ export function PoliciesAndLinks({
               <DeferredEMail />
             </li>
             {/*<li>
-              <Code className="inline-block align-middle mr-1" />
-              <ExternalLink href="/api" forceColor>
-                <span className="no-mobile">{t("links.apiReference")}</span>
-                <span className="no-pc">{t("links.apiReferenceShort")}</span>
-              </ExternalLink>
+              <APIDocsLink />
             </li>*/}
             {/*<li>
               <ExternalLink href="https://utcode.net">

@@ -176,6 +176,7 @@ export default {
       officialAccountShort: "Official Account",
       apiReference: "Falling Nikochan API Reference",
       apiReferenceShort: "API Reference",
+      devPage: "Debugging Page",
       aboutUTCode: "About ut.code();",
     },
     // previously used in a school festival in the university of tokyo
@@ -184,7 +185,7 @@ export default {
       "{kind, select, mf {May} kf {Komaba} other {other}} Festival website",
   },
   dev: {
-    title: "Debugging Tools",
+    title: "Debugging Page",
     description: "Hidden page for debugging purposes",
     back: "Back",
   },

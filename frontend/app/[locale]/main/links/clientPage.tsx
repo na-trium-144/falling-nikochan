@@ -9,8 +9,10 @@ import { PWAInstallDesc } from "@/common/pwaInstall";
 import { useEffect, useState } from "react";
 import { lastVisitedOld } from "@/common/version";
 import {
+  APIDocsLink,
   ContactFormLink,
   DeferredEMail,
+  DevPageLink,
   GitHubLink,
   XLink,
 } from "@/clientPage";
@@ -38,8 +40,25 @@ export default function LinksPage({ locale }: { locale: string }) {
         </div>
       </section>
       <section className="fn-sect">
+        <h3 className="fn-heading-sect">{t("contactLinks")}</h3>
+        <ul className="list-disc ml-6 space-y-1 text-left">
+          <li>
+            <ContactFormLink />
+          </li>
+          <li>
+            <XLink />
+          </li>
+          <li>
+            <GitHubLink />
+          </li>
+          <li>
+            <DeferredEMail />
+          </li>
+        </ul>
+      </section>
+      <section className="fn-sect">
         <h3 className="fn-heading-sect">{t("about")}</h3>
-        <div className="space-y-1">
+        <div className="space-y-1 mb-2">
           <p className="text-left">
             <span>{t("version")}:</span>
             <span className="inline-block">
@@ -67,21 +86,12 @@ export default function LinksPage({ locale }: { locale: string }) {
             })}
           </p>
         </div>
-      </section>
-      <section className="fn-sect">
-        <h3 className="fn-heading-sect">{t("contactLinks")}</h3>
         <ul className="list-disc ml-6 space-y-1 text-left">
           <li>
-            <ContactFormLink />
+            <APIDocsLink />
           </li>
           <li>
-            <XLink />
-          </li>
-          <li>
-            <GitHubLink />
-          </li>
-          <li>
-            <DeferredEMail />
+            <DevPageLink locale={locale} />
           </li>
         </ul>
       </section>

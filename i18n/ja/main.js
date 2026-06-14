@@ -166,13 +166,14 @@ export default {
       officialAccountShort: "公式アカウント",
       apiReference: "Falling Nikochan API リファレンス",
       apiReferenceShort: "API リファレンス",
+      devPage: "デバッグ用ページ",
       aboutUTCode: "ut.code(); について",
     },
     festival:
       "<utcode></utcode> 第{num}回{kind, select, mf {五月} kf {駒場} other {other}}祭トップに戻る",
   },
   dev: {
-    title: "デバッグ用",
+    title: "デバッグ用ページ",
     description: "デバッグ用の隠しページ",
     back: "戻る",
   },
