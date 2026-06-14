@@ -65,7 +65,7 @@ importers:
         version: 17.6.0
       next:
         specifier: 16.1.7
-        version: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0)
+        version: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0)
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -162,25 +162,25 @@ importers:
         version: 5.2.5
       '@icon-park/react':
         specifier: ^1.4.2
-        version: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 1.4.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@mdx-js/loader':
         specifier: ^3.1.1
-        version: 3.1.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
+        version: 3.1.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
       '@mdx-js/react':
         specifier: ^3.1.1
-        version: 3.1.1(@types/react@19.2.14)(react@19.2.6)
+        version: 3.1.1(@types/react@19.2.17)(react@19.2.7)
       '@msgpack/msgpack':
         specifier: ^3.1.3
         version: 3.1.3
       '@next/mdx':
         specifier: 16.1.7
-        version: 16.1.7(@mdx-js/loader@3.1.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.6))
+        version: 16.1.7(@mdx-js/loader@3.1.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)))(@mdx-js/react@3.1.1(@types/react@19.2.17)(react@19.2.7))
       '@sentry/browser':
         specifier: ^10.52.0
         version: 10.52.0
       '@sentry/nextjs':
         specifier: ^10.52.0
-        version: 10.52.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0))(react@19.2.6)(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
+        version: 10.52.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0))(react@19.2.7)(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
       ace-builds:
         specifier: ^1.43.5
         version: 1.43.6
@@ -207,34 +207,34 @@ importers:
         version: 15.2.0
       next:
         specifier: 16.1.7
-        version: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0)
+        version: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0)
       next-intl:
         specifier: ^4.12.0
-        version: 4.12.0(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0))(react@19.2.6)(typescript@5.9.3)
+        version: 4.12.0(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0))(react@19.2.7)(typescript@5.9.3)
       next-license-list:
         specifier: ^1.0.1
-        version: 1.0.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
+        version: 1.0.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
       pretty-checkbox:
         specifier: ^3.0.3
         version: 3.0.3
       pretty-checkbox-react:
         specifier: ^3.2.0
-        version: 3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react:
-        specifier: ^19.2.6
-        version: 19.2.6
+        specifier: ^19.2.7
+        version: 19.2.7
       react-ace:
         specifier: ^14.0.1
-        version: 14.0.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 14.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-dom:
-        specifier: ^19.2.6
-        version: 19.2.6(react@19.2.6)
+        specifier: ^19.2.7
+        version: 19.2.7(react@19.2.7)
       react-range:
         specifier: ^1.10.0
-        version: 1.10.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 1.10.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-resize-detector:
         specifier: ^12.3.0
-        version: 12.3.0(react@19.2.6)
+        version: 12.3.0(react@19.2.7)
       valibot:
         specifier: ^1.3.1
         version: 1.3.1(typescript@5.9.3)
@@ -267,11 +267,11 @@ importers:
         specifier: ^2.0.13
         version: 2.0.13
       '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.14)
+        version: 19.2.3(@types/react@19.2.17)
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -295,7 +295,7 @@ importers:
     dependencies:
       next-intl:
         specifier: ^4.12.0
-        version: 4.12.0(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0))(react@19.2.6)(typescript@5.9.3)
+        version: 4.12.0(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0))(react@19.2.7)(typescript@5.9.3)
 
   route:
     dependencies:
@@ -354,8 +354,8 @@ importers:
         specifier: ^2.2.6
         version: 2.2.6
       react:
-        specifier: ^19.2.6
-        version: 19.2.6
+        specifier: ^19.2.7
+        version: 19.2.7
       sitemap:
         specifier: ^9.0.1
         version: 9.0.1
@@ -379,8 +379,8 @@ importers:
         specifier: ^0.5.3
         version: 0.5.3
       '@types/react':
-        specifier: ^19.2.14
-        version: 19.2.14
+        specifier: ^19.2.17
+        version: 19.2.17
       '@types/twitter-text':
         specifier: ^3.1.10
         version: 3.1.10
@@ -405,7 +405,7 @@ importers:
     devDependencies:
       babel-loader:
         specifier: ^10.1.1
-        version: 10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2))
+        version: 10.1.1(@babel/core@7.29.0)(webpack@5.107.2(webpack-cli@7.0.2))
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -1558,6 +1558,12 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
+  '@opentelemetry/core@2.8.0':
+    resolution: {integrity: sha512-hd1Lfh8p545nNz+jq1Ejfz+Mn1hyLuxYn1YzTfFNrxr8urEWMNQLPf1Th8kjOH+HxwawCrtgBp8JpBUR4ZSgww==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0 <1.10.0'
+
   '@opentelemetry/instrumentation-amqplib@0.61.0':
     resolution: {integrity: sha512-mCKoyTGfRNisge4br0NpOFSy2Z1NnEW8hbCJdUDdJFHrPqVzc4IIBPA/vX0U+LUcQqrQvJX+HMIU0dbDRe0i0Q==}
     engines: {node: ^18.19.0 || >=20.6.0}
@@ -1690,14 +1696,30 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
+  '@opentelemetry/resources@2.8.0':
+    resolution: {integrity: sha512-qmXQ27ilDbUK/vGMqwL8D4/rhn76C+sherM4wTbjlfknR8Nvfc/hCxjRJPhkzZzUsPiNg16SA31NxMabwttRjg==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
   '@opentelemetry/sdk-trace-base@2.7.1':
     resolution: {integrity: sha512-NAYIlsF8MPUsKqJMiDQJTMPOmlbawC1Iz/omMLygZ1C9am8fTKYjTaI+OZM+WTY3t3Glo0wnOg/6/pac6RGPPw==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
+  '@opentelemetry/sdk-trace-base@2.8.0':
+    resolution: {integrity: sha512-mhU4jp+vW0mGbFRd+GeXHvmfA4aDqWjBjLC3pE5XMpLs0IE2ryYb019Ts2AQrOq67gaTF25D91+fgvEHDZEnuQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
   '@opentelemetry/semantic-conventions@1.40.0':
     resolution: {integrity: sha512-cifvXDhcqMwwTlTK04GBNeIe7yyo28Mfby85QXFe1Yk8nmi36Ab/5UQwptOx84SsoGNRg+EVSjwzfSZMy6pmlw==}
+    engines: {node: '>=14'}
+
+  '@opentelemetry/semantic-conventions@1.41.1':
+    resolution: {integrity: sha512-/UhIkaZgPutTFmQ7RnIJGgDXZmtEJ7Dvi86xNTFWcnRxVRNk/aotsqDJYeEvDP+FSMB2SdW+pQzNMcWP0rwuNA==}
     engines: {node: '>=14'}
 
   '@opentelemetry/sql-common@0.41.2':
@@ -2563,8 +2585,8 @@ packages:
     peerDependencies:
       '@types/react': ^19.2.0
 
-  '@types/react@19.2.14':
-    resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
+  '@types/react@19.2.17':
+    resolution: {integrity: sha512-MXfmqaVPEVgkBT/aY0aGCkRWWtByiYQXo3xdQ8r5RzuFrPiRn8Gar2tQdXSUQ2GKV3bkXckek89V8wQBY2Q/Aw==}
 
   '@types/retry@0.12.0':
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
@@ -2860,6 +2882,11 @@ packages:
 
   acorn@8.16.0:
     resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  acorn@8.17.0:
+    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -3342,6 +3369,10 @@ packages:
 
   enhanced-resolve@5.21.3:
     resolution: {integrity: sha512-QyL119InA+XXEkNLNTPCXPugSvOfhwv0JOlGNzvxs0hZaiHLNvXSpudUWsOlsXGWJh8G6ckCScEkVHfX3kw/2Q==}
+    engines: {node: '>=10.13.0'}
+
+  enhanced-resolve@5.24.0:
+    resolution: {integrity: sha512-SkE2t82KlkkxQRVMVLAGKxLfORGQfrkx5dkj+vlgXRVNEdPc4eZcR+J/Fvj8C+yKSFH5L0q3NFlyufOVQnCcYQ==}
     engines: {node: '>=10.13.0'}
 
   entities@4.5.0:
@@ -3881,6 +3912,10 @@ packages:
 
   import-in-the-middle@3.0.1:
     resolution: {integrity: sha512-pYkiyXVL2Mf3pozdlDGV6NAObxQx13Ae8knZk1UJRJ6uRW/ZRmTGHlQYtrsSl7ubuE5F8CD1z+s1n4RHNuTtuA==}
+    engines: {node: '>=18'}
+
+  import-in-the-middle@3.0.2:
+    resolution: {integrity: sha512-LGLYRl0A2gtyUJb2WDliBHmk6TtlHwdDjxonacZ8QrEs/ZW+YDgNv2QAfjRQWpS8HqvNcq6GGnN6jrOa5FysDQ==}
     engines: {node: '>=18'}
 
   import-local@3.2.0:
@@ -4808,10 +4843,10 @@ packages:
       react: ^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  react-dom@19.2.6:
-    resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
+  react-dom@19.2.7:
+    resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
-      react: ^19.2.6
+      react: ^19.2.7
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -4830,8 +4865,8 @@ packages:
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
 
-  react@19.2.6:
-    resolution: {integrity: sha512-sfWGGfavi0xr8Pg0sVsyHMAOziVYKgPLNrS7ig+ivMNb3wbCBw3KxtflsGBAwD3gYQlE/AEZsTLgToRrSCjb0Q==}
+  react@19.2.7:
+    resolution: {integrity: sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==}
     engines: {node: '>=0.10.0'}
 
   readdirp@4.1.2:
@@ -5224,8 +5259,56 @@ packages:
       uglify-js:
         optional: true
 
+  terser-webpack-plugin@5.6.1:
+    resolution: {integrity: sha512-201R5j+sJpK8nFWwKVyNfZot8FaJbLZDq5evriVzbV1wDtSXDjRUDRfJzHpAaxFDMEhsZL1QkeqM61wgsS3KaQ==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      '@minify-html/node': '*'
+      '@swc/core': '*'
+      '@swc/css': '*'
+      '@swc/html': '*'
+      clean-css: '*'
+      cssnano: '*'
+      csso: '*'
+      esbuild: '*'
+      html-minifier-terser: '*'
+      lightningcss: '*'
+      postcss: '*'
+      uglify-js: '*'
+      webpack: ^5.1.0
+    peerDependenciesMeta:
+      '@minify-html/node':
+        optional: true
+      '@swc/core':
+        optional: true
+      '@swc/css':
+        optional: true
+      '@swc/html':
+        optional: true
+      clean-css:
+        optional: true
+      cssnano:
+        optional: true
+      csso:
+        optional: true
+      esbuild:
+        optional: true
+      html-minifier-terser:
+        optional: true
+      lightningcss:
+        optional: true
+      postcss:
+        optional: true
+      uglify-js:
+        optional: true
+
   terser@5.47.1:
     resolution: {integrity: sha512-tPbLXTI6ohPASb/1YViL428oEHu6/qv1OxqYnfaonVCFHqx4+wCd95pHrQWsL5X4pl90CTyW9piSAsS2L0VoMw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  terser@5.48.0:
+    resolution: {integrity: sha512-J/9An6vs9Us6wKRriSFXBWdRZapREHqFzdNUKk0pmu804EMR6dr6winwo7e5JDxN4xahxQsuysyYFwlwj4XN/Q==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -5423,6 +5506,10 @@ packages:
     resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
     engines: {node: '>=10.13.0'}
 
+  watchpack@2.5.2:
+    resolution: {integrity: sha512-6i/00NBjP4yGPs+caKSyRfpTF/8Torsu0MOW3mMzIbhgISFder8i7xbqgHlLMwJrdiN8ndBV3UA1/AfzPSr+jg==}
+    engines: {node: '>=10.13.0'}
+
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
@@ -5467,8 +5554,22 @@ packages:
     resolution: {integrity: sha512-eACpxRN02yaawnt+uUNIF7Qje6A9zArxBbcAJjK1PK3S9Ycg5jIuJ8pW4q8EMnwNZCEGltcjkRx1QzOxOkKD8A==}
     engines: {node: '>=10.13.0'}
 
+  webpack-sources@3.5.0:
+    resolution: {integrity: sha512-HPuy+uuoTCaaoEoI1LQ3JN9+vrPBvEesnnX1jADHy728cHSMlq4wUc4afYqahq2B1mhQVZxCXOkNTnXltr+2vQ==}
+    engines: {node: '>=10.13.0'}
+
   webpack@5.106.2:
     resolution: {integrity: sha512-wGN3qcrBQIFmQ/c0AiOAQBvrZ5lmY8vbbMv4Mxfgzqd/B6+9pXtLo73WuS1dSGXM5QYY3hZnIbvx+K1xxe6FyA==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    peerDependencies:
+      webpack-cli: '*'
+    peerDependenciesMeta:
+      webpack-cli:
+        optional: true
+
+  webpack@5.107.2:
+    resolution: {integrity: sha512-v7RhXaJbpMlV0D7hC7lb2EbnxkoeUqf9qhKr6lozx3Q48pmFrqqNRmZFUEGmi7pSwm6fCQ2H1IjvCkHqdpVdjQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     peerDependencies:
@@ -6522,10 +6623,10 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@icon-park/react@1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@icon-park/react@1.4.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   '@icon-park/svg@1.4.2': {}
 
@@ -6650,12 +6751,12 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mdx-js/loader@3.1.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))':
+  '@mdx-js/loader@3.1.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))':
     dependencies:
       '@mdx-js/mdx': 3.1.1
       source-map: 0.7.6
     optionalDependencies:
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
+      webpack: 5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -6689,11 +6790,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.6)':
+  '@mdx-js/react@3.1.1(@types/react@19.2.17)(react@19.2.7)':
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 19.2.14
-      react: 19.2.6
+      '@types/react': 19.2.17
+      react: 19.2.7
 
   '@mongodb-js/saslprep@1.4.11':
     dependencies:
@@ -6721,12 +6822,12 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/mdx@16.1.7(@mdx-js/loader@3.1.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.6))':
+  '@next/mdx@16.1.7(@mdx-js/loader@3.1.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)))(@mdx-js/react@3.1.1(@types/react@19.2.17)(react@19.2.7))':
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
-      '@mdx-js/loader': 3.1.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
-      '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.6)
+      '@mdx-js/loader': 3.1.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
+      '@mdx-js/react': 3.1.1(@types/react@19.2.17)(react@19.2.7)
 
   '@next/swc-darwin-arm64@16.1.7':
     optional: true
@@ -6806,6 +6907,11 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.40.0
+
+  '@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/semantic-conventions': 1.41.1
 
   '@opentelemetry/instrumentation-amqplib@0.61.0(@opentelemetry/api@1.9.1)':
     dependencies:
@@ -6995,6 +7101,12 @@ snapshots:
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.40.0
 
+  '@opentelemetry/resources@2.8.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.41.1
+
   '@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
@@ -7002,7 +7114,16 @@ snapshots:
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.40.0
 
+  '@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/resources': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.41.1
+
   '@opentelemetry/semantic-conventions@1.40.0': {}
+
+  '@opentelemetry/semantic-conventions@1.41.1': {}
 
   '@opentelemetry/sql-common@0.41.2(@opentelemetry/api@1.9.1)':
     dependencies:
@@ -7350,7 +7471,7 @@ snapshots:
       '@sentry/cloudflare': 10.56.0
       '@sentry/node': 10.56.0
 
-  '@sentry/nextjs@10.52.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0))(react@19.2.6)(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))':
+  '@sentry/nextjs@10.52.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0))(react@19.2.7)(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.40.0
@@ -7359,11 +7480,11 @@ snapshots:
       '@sentry/bundler-plugin-core': 5.2.0
       '@sentry/core': 10.52.0
       '@sentry/node': 10.52.0
-      '@sentry/opentelemetry': 10.52.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)
-      '@sentry/react': 10.52.0(react@19.2.6)
+      '@sentry/opentelemetry': 10.52.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)
+      '@sentry/react': 10.52.0(react@19.2.7)
       '@sentry/vercel-edge': 10.52.0
-      '@sentry/webpack-plugin': 5.2.0(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
-      next: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0)
+      '@sentry/webpack-plugin': 5.2.0(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
+      next: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0)
       rollup: 4.60.3
       stacktrace-parser: 0.1.11
     transitivePeerDependencies:
@@ -7387,17 +7508,17 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.40.0
 
-  '@sentry/node-core@10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)':
+  '@sentry/node-core@10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.41.1)':
     dependencies:
       '@sentry/core': 10.56.0
-      '@sentry/opentelemetry': 10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)
-      import-in-the-middle: 3.0.1
+      '@sentry/opentelemetry': 10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.41.1)
+      import-in-the-middle: 3.0.2
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/instrumentation': 0.214.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.41.1
     optional: true
 
   '@sentry/node@10.52.0':
@@ -7438,15 +7559,15 @@ snapshots:
   '@sentry/node@10.56.0':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/instrumentation': 0.214.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.41.1
       '@sentry-internal/server-utils': 10.56.0
       '@sentry/core': 10.56.0
-      '@sentry/node-core': 10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)
-      '@sentry/opentelemetry': 10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)
-      import-in-the-middle: 3.0.1
+      '@sentry/node-core': 10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.41.1)
+      '@sentry/opentelemetry': 10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.41.1)
+      import-in-the-middle: 3.0.2
     transitivePeerDependencies:
       - '@opentelemetry/exporter-trace-otlp-http'
       - supports-color
@@ -7460,20 +7581,28 @@ snapshots:
       '@opentelemetry/semantic-conventions': 1.40.0
       '@sentry/core': 10.52.0
 
-  '@sentry/opentelemetry@10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)':
+  '@sentry/opentelemetry@10.52.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.1)
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.40.0
+      '@sentry/core': 10.52.0
+
+  '@sentry/opentelemetry@10.56.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.41.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/semantic-conventions': 1.41.1
       '@sentry/core': 10.56.0
     optional: true
 
-  '@sentry/react@10.52.0(react@19.2.6)':
+  '@sentry/react@10.52.0(react@19.2.7)':
     dependencies:
       '@sentry/browser': 10.52.0
       '@sentry/core': 10.52.0
-      react: 19.2.6
+      react: 19.2.7
 
   '@sentry/vercel-edge@10.52.0':
     dependencies:
@@ -7481,10 +7610,10 @@ snapshots:
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.1)
       '@sentry/core': 10.52.0
 
-  '@sentry/webpack-plugin@5.2.0(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))':
+  '@sentry/webpack-plugin@5.2.0(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))':
     dependencies:
       '@sentry/bundler-plugin-core': 5.2.0
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
+      webpack: 5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7734,11 +7863,11 @@ snapshots:
       pg-protocol: 1.13.0
       pg-types: 2.2.0
 
-  '@types/react-dom@19.2.3(@types/react@19.2.14)':
+  '@types/react-dom@19.2.3(@types/react@19.2.17)':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.17
 
-  '@types/react@19.2.14':
+  '@types/react@19.2.17':
     dependencies:
       csstype: 3.2.3
 
@@ -8037,9 +8166,18 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
+  acorn-import-attributes@1.9.5(acorn@8.17.0):
+    dependencies:
+      acorn: 8.17.0
+    optional: true
+
   acorn-import-phases@1.0.4(acorn@8.16.0):
     dependencies:
       acorn: 8.16.0
+
+  acorn-import-phases@1.0.4(acorn@8.17.0):
+    dependencies:
+      acorn: 8.17.0
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
@@ -8050,6 +8188,8 @@ snapshots:
       acorn: 8.16.0
 
   acorn@8.16.0: {}
+
+  acorn@8.17.0: {}
 
   agent-base@6.0.2:
     dependencies:
@@ -8175,12 +8315,12 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.106.2(webpack-cli@7.0.2)):
+  babel-loader@10.1.1(@babel/core@7.29.0)(webpack@5.107.2(webpack-cli@7.0.2)):
     dependencies:
       '@babel/core': 7.29.0
       find-up: 5.0.0
     optionalDependencies:
-      webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack: 5.107.2(webpack-cli@7.0.2)
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.0):
     dependencies:
@@ -8521,6 +8661,11 @@ snapshots:
   emoji-regex@9.2.2: {}
 
   enhanced-resolve@5.21.3:
+    dependencies:
+      graceful-fs: 4.2.11
+      tapable: 2.3.3
+
+  enhanced-resolve@5.24.0:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
@@ -9282,6 +9427,14 @@ snapshots:
       cjs-module-lexer: 2.2.0
       module-details-from-path: 1.0.4
 
+  import-in-the-middle@3.0.2:
+    dependencies:
+      acorn: 8.17.0
+      acorn-import-attributes: 1.9.5(acorn@8.17.0)
+      cjs-module-lexer: 2.2.0
+      module-details-from-path: 1.0.4
+    optional: true
+
   import-local@3.2.0:
     dependencies:
       pkg-dir: 4.2.0
@@ -10019,39 +10172,39 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.12.0: {}
 
-  next-intl@4.12.0(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0))(react@19.2.6)(typescript@5.9.3):
+  next-intl@4.12.0(next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0))(react@19.2.7)(typescript@5.9.3):
     dependencies:
       '@formatjs/intl-localematcher': 0.8.7
       '@parcel/watcher': 2.5.6
       '@swc/core': 1.15.33
       icu-minify: 4.12.0
       negotiator: 1.0.0
-      next: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0)
+      next: 16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0)
       next-intl-swc-plugin-extractor: 4.12.0
       po-parser: 2.1.1
-      react: 19.2.6
-      use-intl: 4.12.0(react@19.2.6)
+      react: 19.2.7
+      use-intl: 4.12.0(react@19.2.7)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  next-license-list@1.0.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
+  next-license-list@1.0.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)):
     dependencies:
-      webpack-license-plugin: 4.5.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
+      webpack-license-plugin: 4.5.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
     transitivePeerDependencies:
       - webpack
 
-  next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.98.0):
+  next@16.1.7(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.98.0):
     dependencies:
       '@next/env': 16.1.7
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.10.19
       caniuse-lite: 1.0.30001788
       postcss: 8.4.31
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-      styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.6)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+      styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.7)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.1.7
       '@next/swc-darwin-x64': 16.1.7
@@ -10281,13 +10434,13 @@ snapshots:
 
   prettier@3.8.3: {}
 
-  pretty-checkbox-react@3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+  pretty-checkbox-react@3.2.0(pretty-checkbox@3.0.3)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       clsx: 1.2.1
       nanoid: 3.3.12
       pretty-checkbox: 3.0.3
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
       react-merge-refs: 1.1.0
 
   pretty-checkbox@3.0.3: {}
@@ -10327,36 +10480,36 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  react-ace@14.0.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+  react-ace@14.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       ace-builds: 1.43.6
       diff-match-patch: 1.0.5
       lodash.get: 4.4.2
       lodash.isequal: 4.5.0
       prop-types: 15.8.1
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
-  react-dom@19.2.6(react@19.2.6):
+  react-dom@19.2.7(react@19.2.7):
     dependencies:
-      react: 19.2.6
+      react: 19.2.7
       scheduler: 0.27.0
 
   react-is@16.13.1: {}
 
   react-merge-refs@1.1.0: {}
 
-  react-range@1.10.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+  react-range@1.10.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
-  react-resize-detector@12.3.0(react@19.2.6):
+  react-resize-detector@12.3.0(react@19.2.7):
     dependencies:
       es-toolkit: 1.44.0
-      react: 19.2.6
+      react: 19.2.7
 
-  react@19.2.6: {}
+  react@19.2.7: {}
 
   readdirp@4.1.2: {}
 
@@ -10821,10 +10974,10 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(@babel/core@7.29.0)(react@19.2.6):
+  styled-jsx@5.1.6(@babel/core@7.29.0)(react@19.2.7):
     dependencies:
       client-only: 0.0.1
-      react: 19.2.6
+      react: 19.2.7
     optionalDependencies:
       '@babel/core': 7.29.0
 
@@ -10854,16 +11007,6 @@ snapshots:
 
   tapable@2.3.3: {}
 
-  terser-webpack-plugin@5.6.0(postcss@8.5.14)(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
-      jest-worker: 27.5.1
-      schema-utils: 4.3.3
-      terser: 5.47.1
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
-    optionalDependencies:
-      postcss: 8.5.14
-
   terser-webpack-plugin@5.6.0(webpack@5.106.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -10872,10 +11015,36 @@ snapshots:
       terser: 5.47.1
       webpack: 5.106.2(webpack-cli@7.0.2)
 
+  terser-webpack-plugin@5.6.1(postcss@8.5.14)(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      jest-worker: 27.5.1
+      schema-utils: 4.3.3
+      terser: 5.48.0
+      webpack: 5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)
+    optionalDependencies:
+      postcss: 8.5.14
+
+  terser-webpack-plugin@5.6.1(webpack@5.107.2(webpack-cli@7.0.2)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      jest-worker: 27.5.1
+      schema-utils: 4.3.3
+      terser: 5.48.0
+      webpack: 5.107.2(webpack-cli@7.0.2)
+    optional: true
+
   terser@5.47.1:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.16.0
+      commander: 2.20.3
+      source-map-support: 0.5.21
+
+  terser@5.48.0:
+    dependencies:
+      '@jridgewell/source-map': 0.3.11
+      acorn: 8.17.0
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -11093,13 +11262,13 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  use-intl@4.12.0(react@19.2.6):
+  use-intl@4.12.0(react@19.2.7):
     dependencies:
       '@formatjs/fast-memoize': 3.1.5
       '@schummar/icu-type-parser': 1.21.5
       icu-minify: 4.12.0
       intl-messageformat: 11.2.5
-      react: 19.2.6
+      react: 19.2.7
 
   valibot@1.3.1(typescript@5.9.3):
     optionalDependencies:
@@ -11122,6 +11291,10 @@ snapshots:
   watchpack@2.5.1:
     dependencies:
       glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.11
+
+  watchpack@2.5.2:
+    dependencies:
       graceful-fs: 4.2.11
 
   web-streams-polyfill@3.3.3: {}
@@ -11164,15 +11337,6 @@ snapshots:
     optionalDependencies:
       webpack-bundle-analyzer: 4.10.1
 
-  webpack-license-plugin@4.5.1(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))):
-    dependencies:
-      chalk: 5.6.2
-      lodash: 4.18.1
-      needle: 3.3.1
-      spdx-expression-validate: 2.0.0
-      webpack: 5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2))
-      webpack-sources: 3.4.1
-
   webpack-license-plugin@4.5.1(webpack@5.106.2):
     dependencies:
       chalk: 5.6.2
@@ -11180,6 +11344,15 @@ snapshots:
       needle: 3.3.1
       spdx-expression-validate: 2.0.0
       webpack: 5.106.2(webpack-cli@7.0.2)
+      webpack-sources: 3.4.1
+
+  webpack-license-plugin@4.5.1(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)):
+    dependencies:
+      chalk: 5.6.2
+      lodash: 4.18.1
+      needle: 3.3.1
+      spdx-expression-validate: 2.0.0
+      webpack: 5.107.2(postcss@8.5.14)(webpack-cli@7.0.2)
       webpack-sources: 3.4.1
 
   webpack-merge@6.0.1:
@@ -11190,47 +11363,7 @@ snapshots:
 
   webpack-sources@3.4.1: {}
 
-  webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)):
-    dependencies:
-      '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.9
-      '@types/json-schema': 7.0.15
-      '@webassemblyjs/ast': 1.14.1
-      '@webassemblyjs/wasm-edit': 1.14.1
-      '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.16.0
-      acorn-import-phases: 1.0.4(acorn@8.16.0)
-      browserslist: 4.28.2
-      chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.21.3
-      es-module-lexer: 2.1.0
-      eslint-scope: 5.1.1
-      events: 3.3.0
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-      loader-runner: 4.3.2
-      mime-db: 1.54.0
-      neo-async: 2.6.2
-      schema-utils: 4.3.3
-      tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(postcss@8.5.14)(webpack@5.106.2(postcss@8.5.14)(webpack-cli@7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)))
-      watchpack: 2.5.1
-      webpack-sources: 3.4.1
-    optionalDependencies:
-      webpack-cli: 7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)
-    transitivePeerDependencies:
-      - '@minify-html/node'
-      - '@swc/core'
-      - '@swc/css'
-      - '@swc/html'
-      - clean-css
-      - cssnano
-      - csso
-      - esbuild
-      - html-minifier-terser
-      - lightningcss
-      - postcss
-      - uglify-js
+  webpack-sources@3.5.0: {}
 
   webpack@5.106.2(webpack-cli@7.0.2):
     dependencies:
@@ -11273,6 +11406,89 @@ snapshots:
       - lightningcss
       - postcss
       - uglify-js
+
+  webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2):
+    dependencies:
+      '@types/estree': 1.0.9
+      '@types/json-schema': 7.0.15
+      '@webassemblyjs/ast': 1.14.1
+      '@webassemblyjs/wasm-edit': 1.14.1
+      '@webassemblyjs/wasm-parser': 1.14.1
+      acorn: 8.17.0
+      acorn-import-phases: 1.0.4(acorn@8.17.0)
+      browserslist: 4.28.2
+      chrome-trace-event: 1.0.4
+      enhanced-resolve: 5.24.0
+      es-module-lexer: 2.1.0
+      eslint-scope: 5.1.1
+      events: 3.3.0
+      glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.11
+      loader-runner: 4.3.2
+      mime-db: 1.54.0
+      neo-async: 2.6.2
+      schema-utils: 4.3.3
+      tapable: 2.3.3
+      terser-webpack-plugin: 5.6.1(postcss@8.5.14)(webpack@5.107.2(postcss@8.5.14)(webpack-cli@7.0.2))
+      watchpack: 2.5.2
+      webpack-sources: 3.5.0
+    optionalDependencies:
+      webpack-cli: 7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)
+    transitivePeerDependencies:
+      - '@minify-html/node'
+      - '@swc/core'
+      - '@swc/css'
+      - '@swc/html'
+      - clean-css
+      - cssnano
+      - csso
+      - esbuild
+      - html-minifier-terser
+      - lightningcss
+      - postcss
+      - uglify-js
+
+  webpack@5.107.2(webpack-cli@7.0.2):
+    dependencies:
+      '@types/estree': 1.0.9
+      '@types/json-schema': 7.0.15
+      '@webassemblyjs/ast': 1.14.1
+      '@webassemblyjs/wasm-edit': 1.14.1
+      '@webassemblyjs/wasm-parser': 1.14.1
+      acorn: 8.17.0
+      acorn-import-phases: 1.0.4(acorn@8.17.0)
+      browserslist: 4.28.2
+      chrome-trace-event: 1.0.4
+      enhanced-resolve: 5.24.0
+      es-module-lexer: 2.1.0
+      eslint-scope: 5.1.1
+      events: 3.3.0
+      glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.11
+      loader-runner: 4.3.2
+      mime-db: 1.54.0
+      neo-async: 2.6.2
+      schema-utils: 4.3.3
+      tapable: 2.3.3
+      terser-webpack-plugin: 5.6.1(webpack@5.107.2(webpack-cli@7.0.2))
+      watchpack: 2.5.2
+      webpack-sources: 3.5.0
+    optionalDependencies:
+      webpack-cli: 7.0.2(webpack-bundle-analyzer@4.10.1)(webpack@5.106.2)
+    transitivePeerDependencies:
+      - '@minify-html/node'
+      - '@swc/core'
+      - '@swc/css'
+      - '@swc/html'
+      - clean-css
+      - cssnano
+      - csso
+      - esbuild
+      - html-minifier-terser
+      - lightningcss
+      - postcss
+      - uglify-js
+    optional: true
 
   whatwg-url@14.2.0:
     dependencies:
