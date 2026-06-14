@@ -130,7 +130,7 @@ export default function TopPage(props: Props) {
     // スマホでは検索欄にフォーカスしたらソフトキーボードで結果が隠れて邪魔なのでは。
     searchParams.set("focus", "search");
   }
-  const searchURL = `${locale}/main/play?` + searchParams.toString();
+  const searchURL = `/${locale}/main/play?` + searchParams.toString();
 
   return (
     <main
