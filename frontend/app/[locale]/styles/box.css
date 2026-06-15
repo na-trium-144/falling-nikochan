@@ -1,5 +1,5 @@
 @layer components {
-  .fn-modal-bg {
+  fn-modal-bg {
     @apply fixed inset-0 grid-centering bg-slate-100/50 dark:bg-stone-900/50 z-modal-bg;
   }
 
@@ -19,7 +19,7 @@
     }
   }
 
-  .fn-centered-box-bg {
+  fn-centered-box-bg {
     /* for CenterBox component */
     @apply absolute inset-0 grid-centering;
     @apply pointer-events-none;

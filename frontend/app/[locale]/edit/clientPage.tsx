@@ -543,8 +543,7 @@ export default function Edit(props: {
       </div>
       <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
-        <div
-          className={clsx("fn-modal-bg")}
+        <fn-modal-bg
           onClick={(e) => e.stopPropagation()}
         >
           <div className="absolute inset-6 grid place-content-center">
@@ -565,7 +564,7 @@ export default function Edit(props: {
               />
             </Box>
           </div>
-        </div>
+        </fn-modal-bg>
       ) : guidePage !== null ? (
         <GuideMain
           content={props.guideContents[guidePage]}
@@ -577,8 +576,8 @@ export default function Edit(props: {
       ) : null}
 
       {dragOver && (
-        <div
-          className="fn-modal-bg z-edit-dragover-bg"
+        <fn-modal-bg
+          className="z-edit-dragover-bg"
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => {
             e.preventDefault();
@@ -596,7 +595,7 @@ export default function Edit(props: {
           <Box classNameOuter="w-max h-max p-6 shadow-modal">
             <p>{t("dragOver")}</p>
           </Box>
-        </div>
+        </fn-modal-bg>
       )}
 
       <LuaTabProvider

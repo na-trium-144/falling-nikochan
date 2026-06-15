@@ -159,9 +159,9 @@ export function FlexYouTube(props: Props) {
     }
   }, [id, control, ytPlayer]);
   return (
-    <div
+    <fn-youtube
       className={clsx(
-        "relative isolate aspect-video",
+        "block relative isolate aspect-video",
         props.className
         /* "flex justify-center items-center" */
       )}
@@ -193,7 +193,7 @@ export function FlexYouTube(props: Props) {
       >
         <div id="youtube-player" />
       </div>
-    </div>
+    </fn-youtube>
   );
 }
 

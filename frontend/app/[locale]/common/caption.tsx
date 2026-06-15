@@ -68,8 +68,8 @@ export function HelpIcon(props: Props) {
 
   return (
     <>
-      <span
-        className={clsx("fn-help-icon", props.className)}
+      <fn-help-icon
+        className={clsx(props.className)}
         ref={ref}
         onPointerEnter={() => {
           const rect = ref.current.getBoundingClientRect();
@@ -83,7 +83,7 @@ export function HelpIcon(props: Props) {
       >
         <ButtonHighlight />
         <Help className="inline-block align-middle text-xl" />
-      </span>
+      </fn-help-icon>
       {captionData && createPortal(<Caption {...captionData} />, document.body)}
     </>
   );

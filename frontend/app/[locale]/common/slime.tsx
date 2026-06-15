@@ -29,7 +29,7 @@ export function SlimeSVG(props: Props) {
   }, [csr, props.hidden]);
 
   return (
-    <span
+    <fn-slime
       className={clsx(
         props.className
           ? props.className
@@ -44,7 +44,7 @@ export function SlimeSVG(props: Props) {
       )}
     >
       {csr && <SlimeSVGInner {...props} id={id} />}
-    </span>
+    </fn-slime>
   );
 }
 const SlimeSVGInner = memo(function SlimeSVGInner(

@@ -164,7 +164,7 @@ export default function BPMSign(props: Props) {
   ]);
 
   return (
-    <div
+    <fn-bpm-sign
       className={clsx("absolute origin-bottom-left", props.className)}
       style={{
         bottom: "100%",
@@ -225,6 +225,6 @@ export default function BPMSign(props: Props) {
           </div>
         )}
       </div>
-    </div>
+    </fn-bpm-sign>
   );
 }

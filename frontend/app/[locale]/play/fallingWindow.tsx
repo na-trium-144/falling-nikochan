@@ -408,7 +408,7 @@ export default function FallingWindow(props: Props) {
       : null;
 
   return (
-    <div
+    <fn-falling-window
       className={clsx(props.className, "overflow-visible")}
       style={props.style}
       ref={ref}
@@ -569,7 +569,7 @@ export default function FallingWindow(props: Props) {
           </tbody>
         </table>
       )}
-    </div>
+    </fn-falling-window>
   );
 }
 

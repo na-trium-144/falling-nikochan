@@ -186,7 +186,7 @@ export function ReadyMessage(props: MessageProps) {
           </button>
         ) : (
           <>
-            <div className="mt-2 mb-2 border-b border-base" />
+            <hr className="fn-hr w-full my-2" />
             <OptionMenu {...props} header />
           </>
         )}

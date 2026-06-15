@@ -101,7 +101,7 @@ export default function FallingWindow(props: Props) {
     pendingNoteUpdate || currentLevel?.currentNote;
 
   return (
-    <div className={clsx(props.className)} style={props.style} ref={ref}>
+    <fn-falling-window className={clsx(props.className)} style={props.style} ref={ref}>
       <div className="relative w-full h-full overflow-visible">
         {/* 判定線 */}
         {boxSize && marginY !== undefined && (
@@ -284,7 +284,7 @@ export default function FallingWindow(props: Props) {
             </>
           )}
       </div>
-    </div>
+    </fn-falling-window>
   );
 }
 

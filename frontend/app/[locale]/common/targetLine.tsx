@@ -39,7 +39,7 @@ export default function TargetLine(props: Props) {
     flashPos.current = props.barFlash;
   }
   return (
-    <div
+    <fn-target-line
       className={clsx(
         "absolute h-0.5 transition-all",
         "overflow-x-clip",
@@ -76,6 +76,6 @@ export default function TargetLine(props: Props) {
           width: "200%",
         }}
       />
-    </div>
+    </fn-target-line>
   );
 }

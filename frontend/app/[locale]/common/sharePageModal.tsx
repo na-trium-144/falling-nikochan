@@ -125,9 +125,8 @@ export function SharePageModalProvider(props: {
     <SharePageModalContext.Provider value={{ openModal, openShareInternal }}>
       {props.children}
       {modalOpened && (
-        <div
+        <fn-modal-bg
           className={clsx(
-            "fn-modal-bg",
             "transition-opacity duration-200",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
@@ -159,7 +158,7 @@ export function SharePageModalProvider(props: {
               />
             </Box>
           </div>
-        </div>
+        </fn-modal-bg>
       )}
     </SharePageModalContext.Provider>
   );

@@ -197,7 +197,7 @@ export default function TimeBar(props: Props) {
   const barHeight = 1.5 * rem;
   const barBottom = 6 * rem; // including scrollbar
   return (
-    <div className="relative w-full **:leading-4">
+    <fn-timebar className="block relative w-full **:leading-4">
       <Scrollable
         className={clsx(
           "min-w-0 w-full overflow-x-scroll overflow-y-visible",
@@ -555,6 +555,6 @@ export default function TimeBar(props: Props) {
           </div>
         </div>
       )}
-    </div>
+    </fn-timebar>
   );
 }

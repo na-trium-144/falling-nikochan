@@ -80,10 +80,9 @@ export function Box(props: Props) {
 
 export function CenterBox(props: Props) {
   return (
-    <div
+    <fn-centered-box-bg
       ref={props.refOuter}
       className={clsx(
-        "fn-centered-box-bg",
         props.classNameOuter,
         props.hidden && "hidden"
       )}
@@ -104,7 +103,7 @@ export function CenterBox(props: Props) {
       >
         {props.children}
       </Box>
-    </div>
+    </fn-centered-box-bg>
   );
 }
 

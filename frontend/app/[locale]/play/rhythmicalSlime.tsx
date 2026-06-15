@@ -199,7 +199,7 @@ export default function RhythmicalSlime(props: Props) {
   const { playUIScale, rem } = useDisplayMode();
 
   return (
-    <div
+    <fn-rhythmical-slimes
       className={clsx(props.className, "flex flex-row-reverse")}
       style={props.style}
     >
@@ -215,7 +215,7 @@ export default function RhythmicalSlime(props: Props) {
           playbackRate={playbackRate}
         />
       ))}
-    </div>
+    </fn-rhythmical-slimes>
   );
 }
 

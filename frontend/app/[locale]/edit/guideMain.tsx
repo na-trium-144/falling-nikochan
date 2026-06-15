@@ -19,7 +19,7 @@ interface Props {
 export function GuideMain(props: Props) {
   const t = useTranslations("edit.guide");
   return (
-    <div className={clsx("fn-modal-bg")}>
+    <fn-modal-bg>
       <Box
         classNameOuter="shadow-modal"
         classNameInner="flex flex-col"
@@ -50,6 +50,6 @@ export function GuideMain(props: Props) {
           />
         </p>
       </Box>
-    </div>
+    </fn-modal-bg>
   );
 }

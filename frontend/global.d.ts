@@ -9,10 +9,25 @@ declare module "*?raw" {
 declare namespace React {
   namespace JSX {
     interface IntrinsicElements {
-      // 追加要素のないHTMLElementで最短というだけで、i に特に意味はない
-      "fn-glass-1": JSX.IntrinsicElements.i;
-      "fn-glass-2": JSX.IntrinsicElements.i;
-      "fn-highlight": JSX.IntrinsicElements.i;
+      "fn-glass-1": UnknownHTMLProps;
+      "fn-glass-2": UnknownHTMLProps;
+      "fn-highlight": UnknownHTMLProps;
+      "fn-falling-window": UnknownHTMLProps;
+      "fn-target-line": UnknownHTMLProps;
+      "fn-music-area": UnknownHTMLProps;
+      "fn-volume-control": UnknownHTMLProps;
+      "fn-cloud": UnknownHTMLProps;
+      "fn-youtube": UnknownHTMLProps;
+      "fn-slime": UnknownHTMLProps;
+      "fn-rhythmical-slimes": UnknownHTMLProps;
+      "fn-bpm-sign": UnknownHTMLProps;
+      "fn-timebar": UnknownHTMLProps;
+      "fn-help-icon": UnknownHTMLProps;
+      "fn-lua-editor": UnknownHTMLProps;
+      "fn-level-badge": UnknownHTMLProps;
+      "fn-modal-bg": UnknownHTMLProps;
+      "fn-centered-box-bg": UnknownHTMLProps;
     }
   }
 }
+type UnknownHTMLProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLUnknownElement>, HTMLUnknownElement>;

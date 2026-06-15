@@ -17,7 +17,7 @@
       @apply dark:hover:bg-stone-600/25 active:bg-stone-600/25;
     }
   }
-  .fn-help-icon {
+  fn-help-icon {
     @apply relative inline-block leading-0;
     @apply rounded-full p-2 cursor-help;
     @apply text-sky-300 hover:text-sky-500;

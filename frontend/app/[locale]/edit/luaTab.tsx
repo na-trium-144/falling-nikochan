@@ -250,7 +250,7 @@ export function LuaTabProvider(props: Props & PProps) {
   return (
     <LuaPositionContext.Provider value={{ data, setData }}>
       {props.children}
-      <div
+      <fn-lua-editor
         className={clsx("absolute rounded-sq-box isolate", visible || "hidden")}
         style={{ top, left, width, height }}
       >
@@ -336,7 +336,7 @@ export function LuaTabProvider(props: Props & PProps) {
             }
           }}
         />
-      </div>
+      </fn-lua-editor>
     </LuaPositionContext.Provider>
   );
 }

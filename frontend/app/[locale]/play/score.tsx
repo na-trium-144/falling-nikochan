@@ -16,7 +16,7 @@ function Cloud(props: CProps) {
   const { playUIScale } = useDisplayMode();
 
   return (
-    <div
+    <fn-cloud
       className={clsx(
         "absolute top-0",
         props.left ? "origin-top-left" : "origin-top-right"
@@ -48,7 +48,7 @@ function Cloud(props: CProps) {
       >
         {props.children}
       </div>
-    </div>
+    </fn-cloud>
   );
 }
 interface Props {

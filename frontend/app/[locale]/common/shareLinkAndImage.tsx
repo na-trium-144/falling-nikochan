@@ -270,9 +270,8 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
     <ShareImageModalContext.Provider value={{ openModal }}>
       {props.children}
       {modalOpened && (
-        <div
+        <fn-modal-bg
           className={clsx(
-            "fn-modal-bg",
             "transition-opacity duration-200 z-share-image-bg",
             modalAppearing ? "ease-in opacity-100" : "ease-out opacity-0"
           )}
@@ -353,7 +352,7 @@ export function ShareImageModalProvider(props: { children: React.ReactNode }) {
               <Button text={t("close")} onClick={closeModal} />
             </Box>
           </div>
-        </div>
+        </fn-modal-bg>
       )}
     </ShareImageModalContext.Provider>
   );

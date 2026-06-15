@@ -104,7 +104,7 @@ export function MusicArea(props: Props) {
   const colorThief = useColorThief();
 
   return (
-    <div
+    <fn-music-area
       className={clsx(
         "grow-0 shrink-0 flex",
         // levelBgColors.at(levelTypes.indexOf(props.lvType)) || levelBgColors[1],
@@ -375,14 +375,14 @@ export function MusicArea(props: Props) {
         <ButtonHighlight />
         <VolumeNotice theme="filled" className="inline-block align-middle" />
       </button>
-      <div
+      <fn-volume-control
         className={clsx(
-          "fg-base",
+          "block fg-base",
           "absolute z-10",
           props.isMobile
             ? "bottom-0 inset-x-0 mx-auto w-80 max-w-full p-4"
             : "top-full left-3 ml-auto max-w-100 right-1 mt-1 p-3",
-          "rounded-sq-box",
+          "rounded-sq-2xl",
           "fn-plain",
           "transition-all duration-200",
           volumeCtrlOpen
@@ -452,7 +452,7 @@ export function MusicArea(props: Props) {
             onChange={props.setSEVolume}
           />
         </div>
-      </div>
-    </div>
+      </fn-volume-control>
+    </fn-music-area>
   );
 }

@@ -38,7 +38,7 @@ export function LevelBadge(props: Props) {
     "text-rose-600",
   ];
   return props.status.toReversed().map((s, i) => (
-    <span
+    <fn-level-badge
       className={clsx(
         "text-center text-base",
         iconColorClasses[props.levels.toReversed()[i]],
@@ -62,6 +62,6 @@ export function LevelBadge(props: Props) {
           <span className="inline-block -translate-y-1.5 ">・</span>
         )
       )}
-    </span>
+    </fn-level-badge>
   ));
 }
