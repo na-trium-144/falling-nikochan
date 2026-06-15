@@ -5,18 +5,35 @@ import { ReactNode, PointerEvent, createContext, useContext } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 
+/*
+<div className="fn-button">
+  <span className="fn-glass-1"/>
+  <span className="fn-glass-2"/>
+  <ButtonHighlight />
+  ...
+</div>
+の代わりに、
+<div className="fn-button" onPointerMove={buttonHighlightHandler}>
+  <span className="fn-glass-1"/>
+  <span className="fn-glass-2"/>
+  <span className="fn-highlight pointer-events-none"/>
+  ...
+</div>
+とすることもでき、記述量が増えるがこちらのほうがhighlightにpointerイベントを取られず汎用性が高い
+*/
+export function buttonHighlightHandler(e: PointerEvent) {
+  const button = e.currentTarget as HTMLElement;
+  const rect = button.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  button.style.setProperty("--hl-x", `${x}px`);
+  button.style.setProperty("--hl-y", `${y}px`);
+}
 export function ButtonHighlight(props: { className?: string }) {
   return (
     <span
       className={clsx("fn-highlight", props.className)}
-      onPointerMove={(e: PointerEvent) => {
-        const button = e.currentTarget as HTMLButtonElement;
-        const rect = button.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        button.style.setProperty("--hl-x", `${x}px`);
-        button.style.setProperty("--hl-y", `${y}px`);
-      }}
+      onPointerMove={buttonHighlightHandler}
     />
   );
 }
