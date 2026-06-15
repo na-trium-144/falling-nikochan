@@ -11,7 +11,7 @@ import { SmallDomainShare } from "./common/small.jsx";
 import { ChartList } from "./main/chartList.jsx";
 import { FestivalLink, useFestival } from "./common/festival.jsx";
 import { useSharePageModal } from "./common/sharePageModal.jsx";
-import { ButtonHighlight, buttonHighlightHandler } from "./common/button.jsx";
+import { ButtonHighlight } from "./common/button.jsx";
 import Youtube from "@icon-park/react/lib/icons/Youtube.js";
 import ArrowRight from "@icon-park/react/lib/icons/ArrowRight.js";
 import FormOne from "@icon-park/react/lib/icons/FormOne.js";
@@ -268,11 +268,10 @@ export default function TopPage(props: Props) {
                   "fn-flat-button fn-selected fn-plain rounded-sq-2xl w-full max-w-120 main-wide:max-w-160",
                   "has-focus:shadow-sm hover:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
                 )}
-                onPointerMove={buttonHighlightHandler}
               >
                 <span className="fn-glass-1" />
                 <span className="fn-glass-2" />
-                <span className="fn-highlight pointer-events-none" />
+                <ButtonHighlight />
                 <input
                   className={clsx(
                     "w-full font-title text-base min-[64rem]:text-xl p-3",

@@ -1,27 +1,11 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, PointerEvent, createContext, useContext } from "react";
+import { ReactNode, createContext, useContext, useEffect, useRef } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 
-/*
-<div className="fn-button">
-  <span className="fn-glass-1"/>
-  <span className="fn-glass-2"/>
-  <ButtonHighlight />
-  ...
-</div>
-の代わりに、
-<div className="fn-button" onPointerMove={buttonHighlightHandler}>
-  <span className="fn-glass-1"/>
-  <span className="fn-glass-2"/>
-  <span className="fn-highlight pointer-events-none"/>
-  ...
-</div>
-とすることもでき、記述量が増えるがこちらのほうがhighlightにpointerイベントを取られず汎用性が高い
-*/
-export function buttonHighlightHandler(e: PointerEvent) {
+function buttonHighlightHandler(e: PointerEvent) {
   const button = e.currentTarget as HTMLElement;
   const rect = button.getBoundingClientRect();
   const x = e.clientX - rect.left;
@@ -30,12 +14,14 @@ export function buttonHighlightHandler(e: PointerEvent) {
   button.style.setProperty("--hl-y", `${y}px`);
 }
 export function ButtonHighlight(props: { className?: string }) {
-  return (
-    <span
-      className={clsx("fn-highlight", props.className)}
-      onPointerMove={buttonHighlightHandler}
-    />
-  );
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const parent = ref.current?.parentElement;
+    parent?.addEventListener("pointermove", buttonHighlightHandler);
+    return () =>
+      parent?.removeEventListener("pointermove", buttonHighlightHandler);
+  }, []);
+  return <span ref={ref} className={clsx("fn-highlight", props.className)} />;
 }
 
 const ButtonKeyDisablerContext = createContext<boolean>(false);
