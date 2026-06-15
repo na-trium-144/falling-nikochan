@@ -91,8 +91,8 @@ export function PlayOption(props: Props) {
         "fn-sky fn-play-option"
       )}
     >
-      <span className="fn-glass-1" />
-      <span className="fn-glass-2" />
+      <fn-glass-1 />
+      <fn-glass-2 />
       <div className="flex flex-col main-wide:flex-row">
         <p className="flex-none w-max self-begin main-wide:self-center ">
           {t("selectLevel")}:
@@ -219,8 +219,8 @@ function LevelButton(props: {
       )}
       onClick={props.onClick}
     >
-      <span className="fn-glass-1" />
-      <span className="fn-glass-2" />
+      <fn-glass-1 />
+      <fn-glass-2 />
       <ButtonHighlight />
       <LevelBadge
         className="absolute top-0.5 -right-3 z-10"
@@ -400,8 +400,8 @@ function SelectedLevelInfo(props: {
       >
         {selectedBestScore && (
           <>
-            <span className={"fn-glass-1"} />
-            <span className={"fn-glass-2"} />
+            <fn-glass-1 />
+            <fn-glass-2 />
             <ButtonHighlight />
           </>
         )}

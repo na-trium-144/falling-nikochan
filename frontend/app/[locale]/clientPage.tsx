@@ -247,8 +247,8 @@ export default function TopPage(props: Props) {
               className="fn-button fn-cta2 demo-wide:hidden"
               prefetch={process.env.PREFETCH as "auto"}
             >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
+              <fn-glass-1 />
+              <fn-glass-2 />
               <ButtonHighlight />
               {t("playNow")}
             </Link>
@@ -257,8 +257,8 @@ export default function TopPage(props: Props) {
               className="fn-button fn-cta hidden demo-wide:inline-block"
               prefetch={process.env.PREFETCH as "auto"}
             >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
+              <fn-glass-1 />
+              <fn-glass-2 />
               <ButtonHighlight />
               {t("playNow")}
             </Link>
@@ -269,8 +269,8 @@ export default function TopPage(props: Props) {
                   "has-focus:shadow-sm hover:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
                 )}
               >
-                <span className="fn-glass-1" />
-                <span className="fn-glass-2" />
+                <fn-glass-1 />
+                <fn-glass-2 />
                 <ButtonHighlight />
                 <input
                   className={clsx(
@@ -355,8 +355,8 @@ export default function TopPage(props: Props) {
             className="fn-button fn-cta2 mt-2"
             prefetch={process.env.PREFETCH as "auto"}
           >
-            <span className="fn-glass-1" />
-            <span className="fn-glass-2" />
+            <fn-glass-1 />
+            <fn-glass-2 />
             <ButtonHighlight />
             {t("popularMore")}
           </Link>
@@ -439,8 +439,8 @@ export function Features({ locale }: { locale: string }) {
               className="fn-button fn-cta2"
               prefetch={process.env.PREFETCH as "auto"}
             >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
+              <fn-glass-1 />
+              <fn-glass-2 />
               <ButtonHighlight />
               {t("playNow")}
             </Link>
@@ -509,8 +509,8 @@ export function Features({ locale }: { locale: string }) {
             className="fn-button fn-cta2"
             prefetch={process.env.PREFETCH as "auto"}
           >
-            <span className="fn-glass-1" />
-            <span className="fn-glass-2" />
+            <fn-glass-1 />
+            <fn-glass-2 />
             <ButtonHighlight />
             {t("editNow")}
           </Link>

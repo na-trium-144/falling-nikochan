@@ -29,20 +29,20 @@
       @apply bg-none;
       @apply shadow-none;
 
-      > .fn-glass-1 {
+      > fn-glass-1 {
         @apply hidden;
       }
-      > .fn-glass-2 {
+      > fn-glass-2 {
         @apply hidden;
       }
     }
 
-    > .fn-glass-1 {
+    > fn-glass-1 {
       @apply border-white/80 dark:border-stone-300/50;
       @apply mask-linear-to-75%;
       @apply opacity-100;
     }
-    > .fn-glass-2 {
+    > fn-glass-2 {
       @apply border-blue-300/80 dark:border-amber-800/50;
       @apply mask-linear-to-75%;
     }
@@ -52,16 +52,16 @@
       @apply dark:bg-amber-950/75 dark:from-amber-950/75 dark:to-amber-950/75;
       @apply inset-shadow-button inset-shadow-blue-400/50 dark:inset-shadow-amber-975/75;
 
-      > .fn-glass-1 {
+      > fn-glass-1 {
         @apply opacity-0;
       }
-      > .fn-glass-2 {
+      > fn-glass-2 {
         @apply mask-none;
       }
     }
   }
 
-  .fn-highlight {
+  fn-highlight {
     @apply absolute inset-0 z-3 rounded-[inherit] sq-inherit;
     @apply pointer-events-none;
     @apply bg-radial-[circle_3rem_at_var(--hl-x,50%)_var(--hl-y,50%)];
@@ -70,13 +70,13 @@
     @apply opacity-0;
     @apply transition-opacity duration-100;
   }
-  *:disabled > .fn-highlight {
+  *:disabled > fn-highlight {
     @apply hidden;
   }
-  *:hover > .fn-highlight {
+  *:hover > fn-highlight {
     @apply opacity-100;
   }
-  *:active > .fn-highlight {
+  *:active > fn-highlight {
     @apply opacity-25;
   }
 }

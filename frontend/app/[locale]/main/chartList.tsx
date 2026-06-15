@@ -602,8 +602,8 @@ export function ChartListItem(props: CProps) {
           }
         }}
       >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
+        <fn-glass-1 />
+        <fn-glass-2 />
         <ButtonHighlight />
         <ChartListItemChildren {...props} />
       </Link>

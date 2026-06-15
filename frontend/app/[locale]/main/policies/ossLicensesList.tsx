@@ -133,8 +133,8 @@ function LicenseTextBox(props: { children: string }) {
         "overflow-x-auto text-xs"
       )}
     >
-      <span className="fn-glass-1" />
-      <span className="fn-glass-2" />
+      <fn-glass-1 />
+      <fn-glass-2 />
       {props.children.trim()}
     </pre>
   );

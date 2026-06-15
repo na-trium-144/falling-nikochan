@@ -1,6 +1,6 @@
 @layer components {
   /*
-  .fn-glass-* に対して、通常時非表示、hover時のみ表示、active時には2のみ表示
+  fn-glass-* に対して、通常時非表示、hover時のみ表示、active時には2のみ表示
   という動作を追加する。
 
   ただし .fn-selected を追加すると通常時も常時表示する。
@@ -12,37 +12,37 @@
       @apply cursor-default;
     }
 
-    > .fn-glass-1 {
+    > fn-glass-1 {
       @apply opacity-0;
     }
-    > .fn-glass-2 {
+    > fn-glass-2 {
       @apply opacity-0;
     }
     &:not(:disabled) {
       @variant hover {
-        > .fn-glass-1 {
+        > fn-glass-1 {
           @apply opacity-100;
         }
-        > .fn-glass-2 {
+        > fn-glass-2 {
           @apply opacity-100;
         }
       }
       @variant active {
         @apply inset-shadow-button;
-        > .fn-glass-1 {
+        > fn-glass-1 {
           @apply opacity-0;
         }
-        > .fn-glass-2 {
+        > fn-glass-2 {
           @apply mask-none;
         }
       }
     }
 
     &.fn-selected {
-      > .fn-glass-1 {
+      > fn-glass-1 {
         @apply opacity-100;
       }
-      > .fn-glass-2 {
+      > fn-glass-2 {
         @apply opacity-100;
       }
     }

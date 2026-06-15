@@ -129,8 +129,8 @@ export function ShareBox(props: Props) {
           )}
           style={{ color: colorThief.currentColor }}
         >
-          <span className={"fn-glass-1"} />
-          <span className={"fn-glass-2"} />
+          <fn-glass-1 />
+          <fn-glass-2 />
           <FlexYouTube
             fixedSide="width"
             className="w-full"
@@ -168,15 +168,13 @@ export function ShareBox(props: Props) {
                 )}
                 style={{ color: colorThief.currentColor }}
               >
-                <span
+                <fn-glass-1
                   className={clsx(
-                    "fn-glass-1",
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />
-                <span
+                <fn-glass-2
                   className={clsx(
-                    "fn-glass-2",
                     "border-t-0 main-wide:border-t main-wide:border-r-0"
                   )}
                 />

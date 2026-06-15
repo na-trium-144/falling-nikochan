@@ -46,8 +46,8 @@ export function Box(props: Props) {
       onPointerUp={props.onPointerUp}
       onPointerLeave={props.onPointerLeave}
     >
-      <span className={clsx("fn-glass-1", props.classNameBorder)} />
-      <span className={clsx("fn-glass-2", props.classNameBorder)} />
+      <fn-glass-1 className={clsx(props.classNameBorder)} />
+      <fn-glass-2 className={clsx(props.classNameBorder)} />
       {props.scrollableX || props.scrollableY ? (
         <Scrollable
           ref={props.refInner}
@@ -122,8 +122,8 @@ export function WarningBox(props: Props) {
       onPointerDown={props.onPointerDown}
       onPointerUp={props.onPointerUp}
     >
-      <span className={clsx("fn-glass-1", props.classNameBorder)} />
-      <span className={clsx("fn-glass-2", props.classNameBorder)} />
+      <fn-glass-1 className={clsx(props.classNameBorder)} />
+      <fn-glass-2 className={clsx(props.classNameBorder)} />
       {props.children}
     </div>
   );

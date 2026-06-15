@@ -387,8 +387,8 @@ function PlayTabInternal(
                       onClick={() => updateParams({ sort })}
                       disabled={sort === "relevance" && !params.search}
                     >
-                      <span className="fn-glass-1" />
-                      <span className="fn-glass-2" />
+                      <fn-glass-1 />
+                      <fn-glass-2 />
                       <ButtonHighlight />
                       {t(sort)}
                     </button>

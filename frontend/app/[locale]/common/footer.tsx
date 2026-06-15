@@ -60,17 +60,11 @@ export function MobileFooter(props: MobileProps) {
             )}
             href={`/${props.locale}${tabURLs[key]}`}
           >
-            <span
-              className={clsx(
-                "fn-glass-1",
-                props.tabKey !== "top" && "border-t-0"
-              )}
+            <fn-glass-1
+              className={clsx(props.tabKey !== "top" && "border-t-0")}
             />
-            <span
-              className={clsx(
-                "fn-glass-2",
-                props.tabKey !== "top" && "border-t-0"
-              )}
+            <fn-glass-2
+              className={clsx(props.tabKey !== "top" && "border-t-0")}
             />
             <ButtonHighlight />
             {i === 0 ? (

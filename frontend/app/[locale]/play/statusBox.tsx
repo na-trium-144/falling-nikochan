@@ -67,8 +67,8 @@ export default function StatusBox(props: Props) {
             fontSize: isMobile ? "0.8em" : undefined,
           }}
         >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
+          <fn-glass-1 />
+          <fn-glass-2 />
           <span>{t("bestScore")}:</span>
           <span
             className="inline-block text-right"

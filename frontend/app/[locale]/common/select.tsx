@@ -13,8 +13,8 @@ interface Props<T = unknown> extends DropDownProps<T> {
 export default function Select<T = unknown>(props: Props<T>) {
   return (
     <DropDown {...props} className={clsx("fn-button", "pr-6", props.className)}>
-      <span className="fn-glass-1" />
-      <span className="fn-glass-2" />
+      <fn-glass-1 />
+      <fn-glass-2 />
       <ButtonHighlight />
       <span className="relative flex flex-row items-center justify-center">
         {props.showValue

@@ -19,8 +19,8 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
   return (
     <div>
       <a href="/" className="inline-block fn-button">
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
+        <fn-glass-1 />
+        <fn-glass-2 />
         <ButtonHighlight />
         {goHome}
       </a>
@@ -85,8 +85,8 @@ export function ErrorMessage({
             "whitespace-pre-wrap"
           )}
         >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
+          <fn-glass-1 />
+          <fn-glass-2 />
           {String(error)}
           {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
         </pre>

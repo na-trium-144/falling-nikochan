@@ -14,14 +14,16 @@ function buttonHighlightHandler(e: PointerEvent) {
   button.style.setProperty("--hl-y", `${y}px`);
 }
 export function ButtonHighlight(props: { className?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     const parent = ref.current?.parentElement;
     parent?.addEventListener("pointermove", buttonHighlightHandler);
     return () =>
       parent?.removeEventListener("pointermove", buttonHighlightHandler);
   }, []);
-  return <span ref={ref} className={clsx("fn-highlight", props.className)} />;
+  return (
+    <fn-highlight ref={ref} className={clsx(props.className)} />
+  );
 }
 
 const ButtonKeyDisablerContext = createContext<boolean>(false);
@@ -72,8 +74,8 @@ export default function Button(props: Props) {
       }}
       disabled={props.disabled || props.loading}
     >
-      <span className="fn-glass-1" />
-      <span className="fn-glass-2" />
+      <fn-glass-1 />
+      <fn-glass-2 />
       <ButtonHighlight />
       {props.loading && <SlimeSVG />}
       <span
@@ -112,8 +114,8 @@ export function ButtonStyledLabel(props: LabelProps) {
       )}
       htmlFor={props.htmlFor}
     >
-      <span className="fn-glass-1" />
-      <span className="fn-glass-2" />
+      <fn-glass-1 />
+      <fn-glass-2 />
       <ButtonHighlight />
       {props.children}
     </label>

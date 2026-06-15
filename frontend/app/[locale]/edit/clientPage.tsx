@@ -659,8 +659,8 @@ export default function Edit(props: {
                 )}
                 style={{ color: colorThief.currentColor }}
               >
-                <span className={clsx("fn-glass-1")} />
-                <span className={clsx("fn-glass-2")} />
+                <fn-glass-1 />
+                <fn-glass-2 />
                 <FlexYouTube
                   fixedSide={youtubeFitToWidth ? "width" : "height"}
                   className={youtubeFitToWidth ? "w-full" : "h-full"}
@@ -928,8 +928,8 @@ export default function Edit(props: {
                       ref.current?.focus();
                     }}
                   >
-                    <span className={clsx("fn-glass-1", "border-b-0")} />
-                    <span className={clsx("fn-glass-2", "border-b-0")} />
+                    <fn-glass-1 className="border-b-0" />
+                    <fn-glass-2 className="border-b-0" />
                     <ButtonHighlight />
                     {t(`${key}.title`)}
                   </button>

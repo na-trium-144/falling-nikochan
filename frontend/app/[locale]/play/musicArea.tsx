@@ -120,16 +120,14 @@ export function MusicArea(props: Props) {
       onPointerLeave={() => setPointerInVolumeCtrl(false)}
       ref={ref}
     >
-      <span
+      <fn-glass-1
         className={clsx(
-          "fn-glass-1",
           "border-t-0 border-r-0",
           props.isMobile && "border-l-0"
         )}
       />
-      <span
+      <fn-glass-2
         className={clsx(
-          "fn-glass-2",
           "border-t-0 border-r-0",
           props.isMobile && "border-l-0"
         )}
@@ -408,8 +406,8 @@ export function MusicArea(props: Props) {
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
+        <fn-glass-1 />
+        <fn-glass-2 />
         {/*{!props.isMobile && (
           <span
             className={clsx(

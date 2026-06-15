@@ -44,8 +44,8 @@ function Caption({ top, left, content }: CaptionProps) {
         )}
         style={{ translate: `${translateX} -0.5rem` }}
       >
-        <span className="fn-glass-1" />
-        <span className="fn-glass-2" />
+        <fn-glass-1 />
+        <fn-glass-2 />
         {content}
       </div>
       <span

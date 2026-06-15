@@ -125,8 +125,8 @@ export function PCHeader2(props: Props2) {
           className="fn-flat-button fn-sky rounded-lg p-1"
           onClick={() => setShowMenu(!showMenu)}
         >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
+          <fn-glass-1 />
+          <fn-glass-2 />
           <ButtonHighlight />
           <HamburgerButton className="text-2xl" />
         </button>
