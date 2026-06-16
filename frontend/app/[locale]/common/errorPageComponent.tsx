@@ -67,7 +67,14 @@ export function ErrorMessage({
   error: unknown;
   eventId?: string;
 }) {
-  const t = useTranslations("error.errorPage");
+  let t: ReturnType<typeof useTranslations> | null = null;
+  try {
+    // global-errorやnot-foundなどNextIntlが初期化されていない環境では使えない
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    t = useTranslations("error.errorPage");
+  } catch {
+    // pass
+  }
   if (error) {
     return (
       <>
@@ -83,11 +90,13 @@ export function ErrorMessage({
           {String(error)}
           {eventId && <div className="text-dim mt-1">EventID={eventId}</div>}
         </pre>
-        {error instanceof DOMException && error.name === "NotFoundError" && (
-          <WarningBox classNameOuter="mb-3">
-            {t("disableTranslation")}
-          </WarningBox>
-        )}
+        {t &&
+          error instanceof DOMException &&
+          error.name === "NotFoundError" && (
+            <WarningBox classNameOuter="mb-3">
+              {t("disableTranslation")}
+            </WarningBox>
+          )}
       </>
     );
   } else {
