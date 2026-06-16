@@ -27,6 +27,7 @@ declare namespace React {
       "fn-level-badge": UnknownHTMLProps;
       "fn-modal-bg": UnknownHTMLProps;
       "fn-centered-box-bg": UnknownHTMLProps;
+      "fn-changelog-bg": UnknownHTMLProps;
     }
   }
 }

@@ -41,7 +41,7 @@ export function ChangeLogPopup(props: PopupProps) {
   return (
     popupOpened && (
       <>
-        <div
+        <fn-changelog-bg
           className={clsx("fixed z-changelog-bg inset-0")}
           onClick={(e) => {
             props.onClose();
