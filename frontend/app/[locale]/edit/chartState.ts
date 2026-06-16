@@ -71,7 +71,6 @@ const EditSessionSchema = () =>
   v.object({
     cid: v.undefinedable(v.string()),
     currentPasswd: v.object({
-      p: v.nullable(v.string()),
       ph: v.nullable(v.string()),
       pbypass: v.nullable(v.string()),
     }),
@@ -115,9 +114,6 @@ const basicAuthorization = (passwd: string) =>
 const chartAuthorization = (currentPasswd: CurrentPasswd) => {
   if (currentPasswd.pbypass) {
     return `Nikochan-Bypass ${currentPasswd.pbypass}`;
-  }
-  if (currentPasswd.p) {
-    return basicAuthorization(currentPasswd.p);
   }
   if (currentPasswd.ph) {
     return `Nikochan-Hash ${currentPasswd.ph}`;
@@ -164,7 +160,6 @@ export function useChartState(props: Props) {
       setSavePasswd(options.savePasswd);
 
       const initialPasswd: CurrentPasswd = {
-        p: options.editPasswd || null,
         ph: getPasswd(cid),
         pbypass: options.bypass ? "1" : null,
       };
@@ -175,7 +170,11 @@ export function useChartState(props: Props) {
           credentials,
         })
         .headers(xCredentialsHeader)
-        .auth(chartAuthorization(initialPasswd) ?? "")
+        .auth(
+          options.editPasswd
+            ? basicAuthorization(options.editPasswd)
+            : (chartAuthorization(initialPasswd) ?? "")
+        )
         .get()
         // passwdPrompt has unique handler for 401 and 429 messages
         .unauthorized(
@@ -190,25 +189,25 @@ export function useChartState(props: Props) {
         .arrayBuffer(async (buf) => {
           const chartRes = msgpack.decode(buf) as ChartUntil14;
           let updatedPh: string | undefined = undefined;
-          if (options.savePasswd) {
-            if (options.editPasswd) {
-              updatedPh = await fetchBackend()
-                .url(`/api/hashPasswd/${cid}`)
-                .options({ credentials })
-                .headers(xCredentialsHeader)
-                .auth(basicAuthorization(options.editPasswd) ?? "")
-                .get()
-                .badRequest(() => undefined)
-                .notFound(() => undefined)
-                .text()
-                .catch((e: unknown) => {
-                  Sentry.captureException(e);
-                  console.error(e);
-                  return undefined; // ignore error and continue
-                });
-              if (updatedPh) {
-                setPasswd(cid, updatedPh);
-              }
+          if (options.editPasswd) {
+            updatedPh = await fetchBackend()
+              .url(`/api/hashPasswd/${cid}`)
+              .options({ credentials })
+              .headers(xCredentialsHeader)
+              .auth(basicAuthorization(options.editPasswd))
+              .get()
+              .badRequest((e) => {
+                if (e.message === "noPasswd") {
+                  // 譜面データにパスワードが設定されていない場合
+                  return undefined;
+                } else {
+                  throw e;
+                }
+              })
+              .notFound(markAsExpected)
+              .text(); // エラーになったら続行できない。awaitで再送出
+            if (updatedPh && options.savePasswd) {
+              setPasswd(cid, updatedPh);
             }
           } else {
             /* パスワード保存のチェックが外れたときに保存済みパスワードを消す処理だが、PR#973でコメントアウトされている。
@@ -221,6 +220,7 @@ export function useChartState(props: Props) {
             // unsetPasswd(cid);
           }
 
+          // savePasswdがtrueでもfalseでもこのセッションではupdatePhを使う
           const finalPasswd: CurrentPasswd = {
             ...initialPasswd,
             ...(updatedPh ? { ph: updatedPh } : {}),
@@ -251,37 +251,25 @@ export function useChartState(props: Props) {
   const remoteSave = useCallback<() => Promise<void>>(async () => {
     if (chartState.state === "ok") {
       const onSave = async (cid: string) => {
-        let currentPasswd = {
-          ...chartState.chart.currentPasswd,
-          ...(chartState.chart.changePasswd
-            ? { p: chartState.chart.changePasswd }
-            : {}),
-        };
-        if (savePasswd) {
-          if (currentPasswd.p) {
-            const updatedPh = await fetchBackend()
-              .url(`/api/hashPasswd/${cid}`)
-              .options({ credentials })
-              .headers(xCredentialsHeader)
-              .auth(basicAuthorization(currentPasswd.p))
-              .get()
-              .unauthorized(() => undefined)
-              .notFound(() => undefined)
-              .text()
-              .catch((e: unknown) => {
-                Sentry.captureException(e);
-                console.error(e);
-                return undefined; // ignore error and continue
-              });
-            if (updatedPh) {
-              setPasswd(cid, updatedPh);
-              currentPasswd = {
-                ...currentPasswd,
-                ph: updatedPh,
-              };
-            }
+        let currentPasswd = chartState.chart.currentPasswd;
+        if (chartState.chart.changePasswd) {
+          const updatedPh = await fetchBackend()
+            .url(`/api/hashPasswd/${cid}`)
+            .options({ credentials })
+            .headers(xCredentialsHeader)
+            .auth(basicAuthorization(chartState.chart.changePasswd))
+            .get()
+            .notFound(markAsExpected)
+            .text();
+          if (savePasswd) {
+            setPasswd(cid, updatedPh);
           }
-        } else {
+          currentPasswd = {
+            ...currentPasswd,
+            ph: updatedPh,
+          };
+        }
+        if (!savePasswd) {
           unsetPasswd(cid);
         }
         chartState.chart.resetOnSave(cid, currentPasswd);

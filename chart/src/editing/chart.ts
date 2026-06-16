@@ -12,7 +12,6 @@ import { CopyBuffer } from "../legacy/chart15.js";
 import { stepZero } from "../step.js";
 
 export interface CurrentPasswd {
-  p: string | null;
   ph: string | null;
   pbypass: string | null;
 }
@@ -61,7 +60,6 @@ export class ChartEditing extends EventEmitter<EventType> {
     this.#convertedFrom = options.convertedFrom ?? obj.ver;
     this.#cid = options.cid;
     this.#currentPasswd = options.currentPasswd ?? {
-      p: null,
       ph: null,
       pbypass: null,
     };
