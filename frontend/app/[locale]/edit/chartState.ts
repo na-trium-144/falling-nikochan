@@ -22,6 +22,7 @@ import {
   convertToLatest,
   updateBpmTimeSec,
   updateBarNum,
+  ChartSchema15,
 } from "@falling-nikochan/chart";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as msgpack from "@msgpack/msgpack";
@@ -66,15 +67,21 @@ export class LocalLoadError {
 }
 export type LocalLoadState = undefined | "loading" | "ok" | LocalLoadError;
 export type SaveState = undefined | "saving" | "ok" | Error;
-interface EditSession {
-  cid: string | undefined;
-  currentPasswd: CurrentPasswd;
-  chart: ChartEdit;
-  convertedFrom: number;
-  currentLevelIndex: number | undefined;
-  hasChange: boolean;
-  savePasswd: boolean;
-}
+const EditSessionSchema = () =>
+  v.object({
+    cid: v.undefinedable(v.string()),
+    currentPasswd: v.object({
+      p: v.nullable(v.string()),
+      ph: v.nullable(v.string()),
+      pbypass: v.nullable(v.string()),
+    }),
+    chart: ChartSchema15(),
+    convertedFrom: v.number(),
+    currentLevelIndex: v.undefinedable(v.number()),
+    hasChange: v.boolean(),
+    savePasswd: v.boolean(),
+  });
+type EditSession = v.InferOutput<ReturnType<typeof EditSessionSchema>>;
 export interface FetchChartOptions {
   isFirst?: boolean;
   bypass?: boolean;
@@ -576,26 +583,34 @@ export function useChartState(props: Props) {
       const params = new URLSearchParams(window.location.search);
       const cid = params.get("cid");
       if (sessionStorage.getItem("editSession")) {
-        const data = JSON.parse(
-          sessionStorage.getItem("editSession")!
-        ) as EditSession;
-        sessionStorage.removeItem("editSession");
-        if (data.cid === cid || (data.cid === undefined && cid === "new")) {
-          setChartState({
-            chart: new ChartEditing(data.chart, {
-              luaExecutorRef,
-              cid: data.cid,
-              currentPasswd: data.currentPasswd,
-              convertedFrom: data.convertedFrom,
-              currentLevelIndex: data.currentLevelIndex,
-              hasChange: data.hasChange,
-              locale,
-            }),
-            state: "ok",
-          });
-          setSavePasswd(data.savePasswd);
-          // onLoadRef.current();
-          return;
+        try {
+          const data = v.parse(
+            EditSessionSchema(),
+            JSON.parse(sessionStorage.getItem("editSession")!)
+          );
+          sessionStorage.removeItem("editSession");
+          if (data.cid === cid || (data.cid === undefined && cid === "new")) {
+            setChartState({
+              chart: new ChartEditing(data.chart, {
+                luaExecutorRef,
+                cid: data.cid,
+                currentPasswd: data.currentPasswd,
+                convertedFrom: data.convertedFrom,
+                currentLevelIndex: data.currentLevelIndex,
+                hasChange: data.hasChange,
+                locale,
+              }),
+              state: "ok",
+            });
+            setSavePasswd(data.savePasswd);
+            // onLoadRef.current();
+            return;
+          }
+        } catch (e) {
+          console.error(
+            `Error parsing edit session from sessionStorage:`,
+            v.isValiError(e) ? v.flatten(e.issues) : e
+          );
         }
       }
 

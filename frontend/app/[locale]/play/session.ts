@@ -1,19 +1,26 @@
-import { ChartBrief, LevelPlay } from "@falling-nikochan/chart";
+import * as v from "valibot";
+import { ChartBriefSchema, LevelPlaySchema15 } from "@falling-nikochan/chart";
 
-export type SessionData =
-  | {
-      cid?: string;
-      lvIndex: number;
-      brief: ChartBrief;
-      level: LevelPlay;
-      editing: true;
-    }
-  | {
-      cid: string;
-      lvIndex: number;
-      brief: ChartBrief & { etag: string };
-      editing: false;
-    };
+const SessionDataSchema = () =>
+  v.union([
+    v.object({
+      cid: v.optional(v.string()),
+      lvIndex: v.number(),
+      brief: ChartBriefSchema(),
+      level: LevelPlaySchema15(),
+      editing: v.literal(true),
+    }),
+    v.object({
+      cid: v.string(),
+      lvIndex: v.number(),
+      brief: v.object({
+        ...ChartBriefSchema().entries,
+        etag: v.string(),
+      }),
+      editing: v.literal(false),
+    }),
+  ]);
+export type SessionData = v.InferOutput<ReturnType<typeof SessionDataSchema>>;
 
 // プレイボタンを押した時にlocalStorageに保存し、sessionIdを返す
 // share->play では押すたびにidを発行、edit->playでは使い回し
@@ -47,15 +54,34 @@ export function getSession(sessionId?: number): SessionData | null {
   if (typeof window !== "undefined" && window.innerWidth === 0) {
     return null;
   }
-  if (sessionId) {
-    const sessionData = JSON.parse(
-      localStorage.getItem(`session-${sessionId}`) || "null"
-    );
-    localStorage.removeItem(`session-${sessionId}`);
-    if (sessionData) {
+  if (sessionId && localStorage.getItem(`session-${sessionId}`)) {
+    try {
+      const sessionData = v.parse(
+        SessionDataSchema(),
+        JSON.parse(localStorage.getItem(`session-${sessionId}`)!)
+      );
+      localStorage.removeItem(`session-${sessionId}`);
       sessionStorage.setItem("session", JSON.stringify(sessionData));
       return sessionData;
+    } catch (e) {
+      console.error(
+        `Error parsing session-${sessionId}:`,
+        v.isValiError(e) ? v.flatten(e.issues) : e
+      );
     }
   }
-  return JSON.parse(sessionStorage.getItem("session") || "null");
+  if (sessionStorage.getItem("session")) {
+    try {
+      return v.parse(
+        SessionDataSchema(),
+        JSON.parse(sessionStorage.getItem("session")!)
+      );
+    } catch (e) {
+      console.error(
+        `Error parsing session from sessionStorage:`,
+        v.isValiError(e) ? v.flatten(e.issues) : e
+      );
+    }
+  }
+  return null;
 }

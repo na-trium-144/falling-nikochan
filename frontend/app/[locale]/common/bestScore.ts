@@ -1,20 +1,21 @@
 import { levelTypes, ResultParams } from "@falling-nikochan/chart";
+import * as v from "valibot";
 
 export function bestKey(cid: string, lvHash: string) {
   return `best-${cid}-${lvHash.slice(0, 8)}`;
 }
-export interface ResultData {
-  baseScore: number;
-  chainScore: number;
-  bigScore: number;
-  judgeCount: [number, number, number, number];
-  bigCount?: number | null;
-  inputType?: number | null;
-  date?: number;
-}
-interface ResultDataOld extends ResultData {
-  levelHash: string;
-}
+const ResultDataSchema = () =>
+  v.object({
+    baseScore: v.number(),
+    chainScore: v.number(),
+    bigScore: v.number(),
+    judgeCount: v.pipe(v.array(v.pipe(v.number(), v.integer())), v.length(4)),
+    bigCount: v.optional(v.nullable(v.number())),
+    inputType: v.optional(v.nullable(v.number())),
+    date: v.optional(v.number()),
+    levelHash: v.optional(v.string()),
+  });
+export type ResultData = v.InferOutput<ReturnType<typeof ResultDataSchema>>;
 
 export function toResultParams(
   data: ResultData,
@@ -35,7 +36,7 @@ export function toResultParams(
     score100: Math.round(
       (data.baseScore + data.chainScore + data.bigScore) * 100
     ),
-    judgeCount: data.judgeCount,
+    judgeCount: data.judgeCount as [number, number, number, number],
     bigCount: data.bigCount !== undefined ? data.bigCount : false,
     inputType: data.inputType !== undefined ? data.inputType : null,
     playbackRate4: 4, // x1以外の記録は保存されないので
@@ -43,25 +44,42 @@ export function toResultParams(
 }
 
 export function getBestScore(cid: string, lvHash: string): ResultData | null {
-  let bestScore: ResultData | null = JSON.parse(
-    localStorage.getItem(bestKey(cid, lvHash)) || "null"
-  );
+  let bestScore: ResultData | null = null;
+  try {
+    bestScore = v.parse(
+      v.nullable(ResultDataSchema()),
+      JSON.parse(localStorage.getItem(bestKey(cid, lvHash)) || "null")
+    );
+  } catch (e) {
+    console.error(
+      `Error parsing ${bestKey(cid, lvHash)}:`,
+      v.isValiError(e) ? v.flatten(e.issues) : e
+    );
+  }
   if (!bestScore) {
     for (let i = 0; i < 10; i++) {
       const oldKey = `best-${cid}-${i}`;
-      const oldScore: ResultDataOld | null = JSON.parse(
-        localStorage.getItem(oldKey) || "null"
-      );
-      if (oldScore && oldScore.levelHash === lvHash) {
-        bestScore = {
-          baseScore: oldScore.baseScore,
-          chainScore: oldScore.chainScore,
-          bigScore: oldScore.bigScore,
-          judgeCount: oldScore.judgeCount,
-        };
-        localStorage.setItem(bestKey(cid, lvHash), JSON.stringify(bestScore));
-        localStorage.removeItem(oldKey);
-        break;
+      try {
+        const oldScore = v.parse(
+          v.nullable(ResultDataSchema()),
+          JSON.parse(localStorage.getItem(oldKey) || "null")
+        );
+        if (oldScore && oldScore.levelHash === lvHash) {
+          bestScore = {
+            baseScore: oldScore.baseScore,
+            chainScore: oldScore.chainScore,
+            bigScore: oldScore.bigScore,
+            judgeCount: oldScore.judgeCount,
+          };
+          localStorage.setItem(bestKey(cid, lvHash), JSON.stringify(bestScore));
+          localStorage.removeItem(oldKey);
+          break;
+        }
+      } catch (e) {
+        console.error(
+          `Error parsing ${oldKey}:`,
+          v.isValiError(e) ? v.flatten(e.issues) : e
+        );
       }
     }
   }

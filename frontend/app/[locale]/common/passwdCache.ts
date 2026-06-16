@@ -6,10 +6,16 @@ function passwdKey(cid: string) {
 }
 export function getPasswd(cid: string): string | null {
   try {
-    return v.parse(HashSchema(), localStorage.getItem(passwdKey(cid)));
-  } catch {
-    return null;
+    if (localStorage.getItem(passwdKey(cid))) {
+      return v.parse(HashSchema(), localStorage.getItem(passwdKey(cid)));
+    }
+  } catch (e) {
+    console.error(
+      `Error parsing ${passwdKey(cid)}:`,
+      v.isValiError(e) ? v.flatten(e.issues) : e
+    );
   }
+  return null;
 }
 export function preferSavePasswd(): boolean {
   return !!Number(localStorage.getItem("preferSavePasswd"));
