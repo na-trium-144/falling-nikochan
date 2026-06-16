@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import ArrowLeft from "@icon-park/react/lib/icons/ArrowLeft";
 import HamburgerButton from "@icon-park/react/lib/icons/HamburgerButton";
 import Comment from "@icon-park/react/lib/icons/Comment";
@@ -151,6 +151,20 @@ export function PCMenuPopup(props: PopupProps) {
   useEffect(() => {
     setPopupOpened(props.open);
   }, [props.open, setPopupOpened]);
+
+  const clickCount = useRef<number>(0);
+  const prevClickCount = useRef<DOMHighResTimeStamp>(0);
+  const [showDev, setShowDev] = useState(false);
+  const clickCounter = () => {
+    if (performance.now() - prevClickCount.current > 1000) {
+      clickCount.current = 0;
+    }
+    prevClickCount.current = performance.now();
+    if (++clickCount.current >= 7) {
+      setShowDev(true);
+    }
+    console.log(clickCount.current);
+  };
   return (
     popupOpened && (
       <>
@@ -163,6 +177,7 @@ export function PCMenuPopup(props: PopupProps) {
         />
         <div
           className={clsx("absolute top-full mt-1 right-0 w-max z-changelog")}
+          onClick={clickCounter}
         >
           <Box
             classNameOuter={clsx(
@@ -190,15 +205,19 @@ export function PCMenuPopup(props: PopupProps) {
                 <GitHubLink small />
               </li>
             </ul>
-            <hr className="fn-hr my-4" />
-            <ul className="list-disc ml-4.5 space-y-1 text-left">
-              <li>
-                <APIDocsLink small />
-              </li>
-              <li>
-                <DevPageLink locale={props.locale} />
-              </li>
-            </ul>
+            {showDev && (
+              <>
+                <hr className="fn-hr my-4" />
+                <ul className="list-disc ml-4.5 space-y-1 text-left">
+                  <li>
+                    <APIDocsLink small />
+                  </li>
+                  <li>
+                    <DevPageLink locale={props.locale} />
+                  </li>
+                </ul>
+              </>
+            )}
           </Box>
         </div>
       </>

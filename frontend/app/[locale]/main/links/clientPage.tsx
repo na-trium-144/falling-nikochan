@@ -6,7 +6,7 @@ import Link from "next/link";
 import { MenuLangSwitcher } from "@/common/langSwitcher";
 import { MenuThemeSwitcher } from "@/common/theme";
 import { PWAInstallDesc } from "@/common/pwaInstall";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { lastVisitedOld } from "@/common/version";
 import {
   APIDocsLink,
@@ -22,6 +22,20 @@ export default function LinksPage({ locale }: { locale: string }) {
 
   const [isLastVisitedOld, setIsLastVisitedOld] = useState<boolean>(false);
   useEffect(() => setIsLastVisitedOld(lastVisitedOld()), []);
+
+  const clickCount = useRef<number>(0);
+  const prevClickCount = useRef<DOMHighResTimeStamp>(0);
+  const [showDev, setShowDev] = useState(false);
+  const clickCounter = () => {
+    if (performance.now() - prevClickCount.current > 1000) {
+      clickCount.current = 0;
+    }
+    prevClickCount.current = performance.now();
+    if (++clickCount.current >= 7) {
+      setShowDev(true);
+    }
+    console.log(clickCount.current);
+  };
 
   return (
     <IndexMain
@@ -56,7 +70,7 @@ export default function LinksPage({ locale }: { locale: string }) {
           </li>
         </ul>
       </section>
-      <section className="fn-sect">
+      <section className="fn-sect" onClick={clickCounter}>
         <h3 className="fn-heading-sect">{t("about")}</h3>
         <div className="space-y-1 mb-2">
           <p className="text-left">
@@ -86,14 +100,16 @@ export default function LinksPage({ locale }: { locale: string }) {
             })}
           </p>
         </div>
-        <ul className="list-disc ml-6 space-y-1 text-left">
-          <li>
-            <APIDocsLink />
-          </li>
-          <li>
-            <DevPageLink locale={locale} />
-          </li>
-        </ul>
+        {showDev && (
+          <ul className="list-disc ml-6 space-y-1 text-left">
+            <li>
+              <APIDocsLink />
+            </li>
+            <li>
+              <DevPageLink locale={locale} />
+            </li>
+          </ul>
+        )}
       </section>
     </IndexMain>
   );

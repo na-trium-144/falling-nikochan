@@ -3,7 +3,8 @@
 import { IndexMain } from "../main.js";
 import { useTranslations } from "next-intl";
 import { updateLastVisited } from "@/common/version.js";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation.js";
 
 export default function ChangelogPage(props: {
   locale: string;
@@ -11,6 +12,20 @@ export default function ChangelogPage(props: {
 }) {
   const t = useTranslations("main.version");
   useEffect(() => updateLastVisited(), []);
+  const versionClickCount = useRef<number>(0);
+  const prevVersionClickCount = useRef<DOMHighResTimeStamp>(0);
+  const router = useRouter();
+
+  const versionClick = () => {
+    if (performance.now() - prevVersionClickCount.current > 1000) {
+      versionClickCount.current = 0;
+    }
+    prevVersionClickCount.current = performance.now();
+    if (++versionClickCount.current >= 7) {
+      router.push(`/${props.locale}/dev`);
+    }
+    console.log(versionClickCount.current);
+  };
 
   return (
     <IndexMain
@@ -19,7 +34,7 @@ export default function ChangelogPage(props: {
       mobileTabKey="links"
       locale={props.locale}
     >
-      <section className="fn-sect">
+      <section className="fn-sect" onClick={versionClick}>
         <h3 className="fn-heading-sect">{t("about")}</h3>
         <p className="mb-2 text-left flex flex-wrap items-baseline">
           <span>Falling Nikochan</span>
