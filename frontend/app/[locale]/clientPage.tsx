@@ -126,11 +126,13 @@ export default function TopPage(props: Props) {
       });
   };
   const searchParams = new URLSearchParams({ search: searchText });
+  let searchHash = "";
   if (!isMobileMain) {
     // スマホでは検索欄にフォーカスしたらソフトキーボードで結果が隠れて邪魔なのでは。
-    searchParams.set("focus", "search");
+    searchHash = "#search";
   }
-  const searchURL = `/${locale}/main/play?` + searchParams.toString();
+  const searchURL =
+    `/${locale}/main/play?` + searchParams.toString() + searchHash;
 
   return (
     <main

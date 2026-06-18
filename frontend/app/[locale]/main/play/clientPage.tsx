@@ -138,14 +138,13 @@ function PlayTabInternal(
   }, [searchParams?.toString()]);
   const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (props.searchParams?.get("focus") === "search") {
+    if (window.location.hash === "#search") {
       searchRef.current?.focus();
     }
-  }, [props.searchParams]);
+  }, []);
   const updateParams = useCallback(
     (params: Partial<PageParams>) => {
       const newParams = new URLSearchParams(props.searchParams);
-      newParams.delete("focus");
       if (params.search !== undefined) {
         if (params.search) {
           newParams.set("search", params.search);
