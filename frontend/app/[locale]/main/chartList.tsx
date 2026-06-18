@@ -569,74 +569,44 @@ interface CProps {
 export function ChartListItem(props: CProps) {
   const isStandalone = useStandaloneDetector();
   const isInsideFrame = useInsideFrameDetector();
+  const { isMobileMain } = useDisplayMode();
 
   return (
     <li className="fn-cl-item">
-      {props.onClick || (props.newTab && !isStandalone && !isInsideFrame) ? (
-        <>
-          <a
-            href={props.href}
-            className={clsx(
-              "fn-flat-button",
-              !props.noDefaultColor && "fn-sky",
-              props.className,
-              props.onClickMobile && "no-mobile"
-            )}
-            style={{ ...props.style }}
-            target={props.newTab ? "_blank" : undefined}
-            onClick={
-              props.onClick
-                ? (e) => {
-                    props.onClick!();
-                    e.preventDefault();
-                  }
-                : undefined
-            }
-          >
-            <span className="fn-glass-1" />
-            <span className="fn-glass-2" />
-            <ButtonHighlight />
-            <ChartListItemChildren {...props} />
-          </a>
-          {props.onClickMobile && (
-            <a
-              href={props.href}
-              className={clsx(
-                "fn-flat-button",
-                !props.noDefaultColor && "fn-sky",
-                props.className,
-                "no-pc"
-              )}
-              style={{ ...props.style }}
-              onClick={(e) => {
-                props.onClickMobile!();
-                e.preventDefault();
-              }}
-            >
-              <span className="fn-glass-1" />
-              <span className="fn-glass-2" />
-              <ButtonHighlight />
-              <ChartListItemChildren {...props} />
-            </a>
-          )}
-        </>
-      ) : (
-        <Link
-          href={props.href}
-          className={clsx(
-            "fn-flat-button",
-            !props.noDefaultColor && "fn-sky",
-            props.className
-          )}
-          style={{ ...props.style }}
-          prefetch={process.env.PREFETCH as "auto"}
-        >
-          <span className="fn-glass-1" />
-          <span className="fn-glass-2" />
-          <ButtonHighlight />
-          <ChartListItemChildren {...props} />
-        </Link>
-      )}
+      <Link
+        href={props.href}
+        className={clsx(
+          "fn-flat-button",
+          !props.noDefaultColor && "fn-sky",
+          props.className
+        )}
+        style={{ ...props.style }}
+        prefetch={
+          props.onClick ||
+          props.onClickMobile ||
+          (props.newTab && !isStandalone && !isInsideFrame)
+            ? false
+            : (process.env.PREFETCH as "auto")
+        }
+        target={
+          props.newTab && !isStandalone && !isInsideFrame ? "_blank" : undefined
+        }
+        onClick={(e) => {
+          if (props.onClick && !isMobileMain) {
+            props.onClick();
+            e.preventDefault();
+          }
+          if (props.onClickMobile && isMobileMain) {
+            props.onClickMobile();
+            e.preventDefault();
+          }
+        }}
+      >
+        <span className="fn-glass-1" />
+        <span className="fn-glass-2" />
+        <ButtonHighlight />
+        <ChartListItemChildren {...props} />
+      </Link>
     </li>
   );
 }

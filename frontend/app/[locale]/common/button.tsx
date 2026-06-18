@@ -1,24 +1,27 @@
 "use client";
 
 import clsx from "clsx/lite";
-import { ReactNode, PointerEvent, createContext, useContext } from "react";
+import { ReactNode, createContext, useContext, useEffect, useRef } from "react";
 import { Key } from "./key.js";
 import { SlimeSVG } from "./slime.js";
 
+function buttonHighlightHandler(e: PointerEvent) {
+  const button = e.currentTarget as HTMLElement;
+  const rect = button.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  button.style.setProperty("--hl-x", `${x}px`);
+  button.style.setProperty("--hl-y", `${y}px`);
+}
 export function ButtonHighlight(props: { className?: string }) {
-  return (
-    <span
-      className={clsx("fn-highlight", props.className)}
-      onPointerMove={(e: PointerEvent) => {
-        const button = e.currentTarget as HTMLButtonElement;
-        const rect = button.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        button.style.setProperty("--hl-x", `${x}px`);
-        button.style.setProperty("--hl-y", `${y}px`);
-      }}
-    />
-  );
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const parent = ref.current?.parentElement;
+    parent?.addEventListener("pointermove", buttonHighlightHandler);
+    return () =>
+      parent?.removeEventListener("pointermove", buttonHighlightHandler);
+  }, []);
+  return <span ref={ref} className={clsx("fn-highlight", props.className)} />;
 }
 
 const ButtonKeyDisablerContext = createContext<boolean>(false);

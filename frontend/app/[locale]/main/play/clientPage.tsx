@@ -23,7 +23,7 @@ import { useSharePageModal } from "@/common/sharePageModal.jsx";
 import { useResizeDetector } from "react-resize-detector";
 import { useDisplayMode } from "@/scale.jsx";
 import { XLogo } from "@/common/x.jsx";
-import { useRouter, useSearchParams } from "next/navigation.js";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation.js";
 import { ButtonHighlight } from "@/common/button.js";
 import { Range2 } from "@/common/range.js";
 import { getRecent, recentKey } from "@/common/recent.js";
@@ -57,12 +57,41 @@ function PlayTabInternal(
   const t = useTranslations("main.play");
   const { locale } = props;
 
+  // 基本的には現在のlocationのクエリパラメーター(props.searchParamsで得られる)を真とするが、
+  // URLが/shareの場合のみそれを使用できないので、stateにもコピーを保存しておく
+  // /shareの間にfetchした検索結果を反映するため、shareから戻る瞬間にもこのstateを参照してhistoryを修正する
+  const [fallbackSearchParams, setFallbackSearchParams] =
+    useState<URLSearchParams>(new URLSearchParams());
+  let searchParams: ReadonlyURLSearchParams | URLSearchParams | undefined =
+    props.searchParams;
+  const prevPathName = useRef<string>("");
+  if (typeof window !== "undefined") {
+    if (window.location.pathname.includes("/share")) {
+      searchParams = fallbackSearchParams;
+    } else {
+      if (
+        window.location.search &&
+        window.location.search !== "?" + fallbackSearchParams?.toString()
+      ) {
+        if (prevPathName.current.includes("/share")) {
+          searchParams = fallbackSearchParams;
+          window.history.replaceState(
+            null,
+            "",
+            `?${fallbackSearchParams.toString()}`
+          );
+        } else {
+          setFallbackSearchParams(new URLSearchParams(window.location.search));
+        }
+      }
+    }
+    prevPathName.current = window.location.pathname;
+  }
+
   const { openModal, openShareInternal } = useSharePageModal();
 
   // ユーザーが文字を入力してから実際にAPIを呼び出すまでの間loading表示にする
   const [waitingDebounce, setWaitingDebounce] = useState(false);
-
-  const router = useRouter();
 
   interface PageParams {
     search: string;
@@ -79,38 +108,43 @@ function PlayTabInternal(
   }
   const prevParam = useRef<PageParams>(null);
   const params = useMemo(() => {
-    // /share の間はsearchParamを無視する
-    if (prevParam.current && window.location.pathname.includes("/share")) {
-      return prevParam.current;
-    }
-    const params: PageParams = {
-      search: props.searchParams?.get("search") || "",
-      sort: props.searchParams
-        ? (props.searchParams.get("sort") as
+    if (!searchParams) {
+      // SSR時・初期化前
+      return {
+        search: "",
+        sort: undefined, // 最初はどれも選択していない状態でレンダリングする
+        minLv: minLv,
+        maxLv: maxLv,
+      };
+    } else {
+      const params: PageParams = {
+        search: searchParams.get("search") || "",
+        sort:
+          (searchParams.get("sort") as
             | "relevance"
             | "latest"
             | "popular"
-            | "recent") || "relevance"
-        : undefined,
-      minLv: Number(props.searchParams?.get("minLv") ?? minLv),
-      maxLv: Number(props.searchParams?.get("maxLv") ?? maxLv),
-    };
-    if (params && !params.search && params.sort === "relevance") {
-      params.sort = "latest";
+            | "recent") || "relevance",
+        minLv: Number(searchParams.get("minLv") ?? minLv),
+        maxLv: Number(searchParams.get("maxLv") ?? maxLv),
+      };
+      if (params && !params.search && params.sort === "relevance") {
+        params.sort = "latest";
+      }
+      prevParam.current = params;
+      return params;
     }
-    prevParam.current = params;
-    return params;
-  }, [props.searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams?.toString()]);
   const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (props.searchParams?.get("focus") === "search") {
+    if (window.location.hash === "#search") {
       searchRef.current?.focus();
     }
-  }, [props.searchParams]);
+  }, []);
   const updateParams = useCallback(
     (params: Partial<PageParams>) => {
       const newParams = new URLSearchParams(props.searchParams);
-      newParams.delete("focus");
       if (params.search !== undefined) {
         if (params.search) {
           newParams.set("search", params.search);
@@ -127,7 +161,10 @@ function PlayTabInternal(
       if (params.maxLv !== undefined) {
         newParams.set("maxLv", String(params.maxLv));
       }
-      router.replace(`?${newParams.toString()}`);
+      if (!window.location.pathname.includes("/share")) {
+        window.history.replaceState(null, "", `?${newParams.toString()}`);
+      }
+      setFallbackSearchParams(newParams);
       // useEffectでAPIを呼び出すときにwaitingDebounceをfalseにするが、
       // paramsに変化がなかったときなどuseEffectが呼び出されない可能性もあるので、
       // そのfallback
@@ -135,7 +172,7 @@ function PlayTabInternal(
         setWaitingDebounce(false);
       }, 250);
     },
-    [props.searchParams, router]
+    [props.searchParams]
   );
 
   // [] = not found, empty = empty

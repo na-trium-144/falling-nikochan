@@ -126,11 +126,13 @@ export default function TopPage(props: Props) {
       });
   };
   const searchParams = new URLSearchParams({ search: searchText });
+  let searchHash = "";
   if (!isMobileMain) {
     // スマホでは検索欄にフォーカスしたらソフトキーボードで結果が隠れて邪魔なのでは。
-    searchParams.set("focus", "search");
+    searchHash = "#search";
   }
-  const searchURL = `/${locale}/main/play?` + searchParams.toString();
+  const searchURL =
+    `/${locale}/main/play?` + searchParams.toString() + searchHash;
 
   return (
     <main
@@ -263,12 +265,13 @@ export default function TopPage(props: Props) {
             <div className="flex flex-col items-center w-full gap-1">
               <div
                 className={clsx(
-                  "relative fn-plain rounded-sq-2xl w-full max-w-120 main-wide:max-w-160",
-                  "has-focus:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
+                  "fn-flat-button fn-selected fn-plain rounded-sq-2xl w-full max-w-120 main-wide:max-w-160",
+                  "has-focus:shadow-sm hover:shadow-sm shadow-slate-500/50 dark:shadow-stone-950/50"
                 )}
               >
                 <span className="fn-glass-1" />
                 <span className="fn-glass-2" />
+                <ButtonHighlight />
                 <input
                   className={clsx(
                     "w-full font-title text-base min-[64rem]:text-xl p-3",

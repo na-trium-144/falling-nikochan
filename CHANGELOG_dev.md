@@ -1,3 +1,10 @@
+## ver. 16.20 - 2025/06/19
+
+* /main/play からshareページ遷移前後でのクエリパラメータの挙動を修正
+* トップページの検索欄使用時に/main/playの検索ボックスへフォーカスを当てる動作をクエリではなくハッシュで行う
+* buttonhighlightはparentにイベントハンドラーを与えるようにする
+* chartlistの重複aタグをやめる
+
 ## ver. 16.19 - 2025/06/14
 
 * トップページに検索欄追加、cid入力でジャンプを実装 [#1208](https://github.com/na-trium-144/falling-nikochan/pull/1208)
