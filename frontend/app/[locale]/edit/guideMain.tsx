@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx/lite";
 import { Box } from "@/common/box.js";
 import { Pager } from "@/common/pager.js";
 import Button from "@/common/button.js";

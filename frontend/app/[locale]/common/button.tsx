@@ -21,9 +21,7 @@ export function ButtonHighlight(props: { className?: string }) {
     return () =>
       parent?.removeEventListener("pointermove", buttonHighlightHandler);
   }, []);
-  return (
-    <fn-highlight ref={ref} className={clsx(props.className)} />
-  );
+  return <fn-highlight ref={ref} className={clsx(props.className)} />;
 }
 
 const ButtonKeyDisablerContext = createContext<boolean>(false);

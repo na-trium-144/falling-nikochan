@@ -543,9 +543,7 @@ export default function Edit(props: {
       </div>
       <div className="w-0 h-mobile-header edit-wide:hidden" />
       {chart === undefined ? (
-        <fn-modal-bg
-          onClick={(e) => e.stopPropagation()}
-        >
+        <fn-modal-bg onClick={(e) => e.stopPropagation()}>
           <div className="absolute inset-6 grid place-content-center">
             <Box
               classNameOuter={clsx(

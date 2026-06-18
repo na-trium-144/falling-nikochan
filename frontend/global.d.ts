@@ -31,4 +31,7 @@ declare namespace React {
     }
   }
 }
-type UnknownHTMLProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLUnknownElement>, HTMLUnknownElement>;
+type UnknownHTMLProps = React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLUnknownElement>,
+  HTMLUnknownElement
+>;
