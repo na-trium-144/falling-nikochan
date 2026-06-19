@@ -8,7 +8,7 @@ import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
 import { APIError, shouldHideStatus } from "@/common/apiError";
-import { LinksOnError } from "@/common/errorPageComponent";
+import { ErrorMessage, LinksOnError } from "@/common/errorPageComponent";
 import {
   historyBackWithReview,
   useInsideFrameDetector,
@@ -33,6 +33,7 @@ export function PasswdPrompt(props: PasswdProps) {
   }, []);
   const [editPasswd, setEditPasswd] = useState<string>("");
   const te = useTranslations("error");
+  const tep = useTranslations("error.errorPage");
   const standalone = useStandaloneDetector();
   const insideFrame = useInsideFrameDetector();
 
@@ -54,12 +55,28 @@ export function PasswdPrompt(props: PasswdProps) {
   } else if (props.loadStatus instanceof Error) {
     return (
       <>
-        {props.loadStatus instanceof APIError &&
-          !shouldHideStatus(props.loadStatus.status) && (
-            <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
-          )}
-        <p className="mb-3">{formatErrorMsg(props.loadStatus, te)}</p>
-        {!isExpectedError(props.loadStatus) && <LinksOnError />}
+        {props.loadStatus instanceof APIError ? (
+          <>
+            {!shouldHideStatus(props.loadStatus.status) && (
+              <h4 className="fn-heading-box">
+                Error {props.loadStatus.status}
+              </h4>
+            )}
+            <p className="mb-3">{formatErrorMsg(props.loadStatus, te)}</p>
+          </>
+        ) : (
+          <>
+            <h4 className="fn-heading-box">{tep("title")}</h4>
+            <ErrorMessage error={props.loadStatus} />
+          </>
+        )}
+        <LinksOnError
+          dependOnStatus={
+            props.loadStatus instanceof APIError
+              ? String(props.loadStatus)
+              : undefined
+          }
+        />
         {(standalone || insideFrame) && (
           <p>
             <Button text={t("back")} onClick={historyBackWithReview} />
