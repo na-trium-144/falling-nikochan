@@ -8,13 +8,17 @@ import { FetchChartOptions, LoadState } from "./chartState";
 import { SlimeSVG } from "@/common/slime";
 import { rateLimit } from "@falling-nikochan/chart";
 import { APIError, shouldHideStatus } from "@/common/apiError";
-import { LinksOnError } from "@/common/errorPageComponent";
+import {
+  ClientErrorTitle,
+  ErrorMessage,
+  LinksOnError,
+} from "@/common/errorPageComponent";
 import {
   historyBackWithReview,
   useInsideFrameDetector,
   useStandaloneDetector,
 } from "@/common/pwaInstall";
-import { formatErrorMsg, isExpectedError } from "@/common/fetch";
+import { formatErrorMsg } from "@/common/fetch";
 
 interface PasswdProps {
   loadStatus: LoadState;
@@ -54,12 +58,28 @@ export function PasswdPrompt(props: PasswdProps) {
   } else if (props.loadStatus instanceof Error) {
     return (
       <>
-        {props.loadStatus instanceof APIError &&
-          !shouldHideStatus(props.loadStatus.status) && (
-            <h4 className="fn-heading-box">Error {props.loadStatus.status}</h4>
-          )}
-        <p className="mb-3">{formatErrorMsg(props.loadStatus, te)}</p>
-        {!isExpectedError(props.loadStatus) && <LinksOnError />}
+        {props.loadStatus instanceof APIError ? (
+          <>
+            {!shouldHideStatus(props.loadStatus.status) && (
+              <h4 className="fn-heading-box">
+                Error {props.loadStatus.status}
+              </h4>
+            )}
+            <p className="mb-3">{formatErrorMsg(props.loadStatus, te)}</p>
+          </>
+        ) : (
+          <>
+            <ClientErrorTitle />
+            <ErrorMessage error={props.loadStatus} />
+          </>
+        )}
+        <LinksOnError
+          dependOnStatus={
+            props.loadStatus instanceof APIError
+              ? props.loadStatus.status
+              : undefined
+          }
+        />
         {(standalone || insideFrame) && (
           <p>
             <Button text={t("back")} onClick={historyBackWithReview} />

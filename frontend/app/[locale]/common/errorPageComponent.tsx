@@ -28,7 +28,11 @@ export function GoHomeButton({ goHome }: { goHome?: string }) {
   );
 }
 
-export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
+export function LinksOnError({
+  dependOnStatus,
+}: {
+  dependOnStatus?: string | number;
+}) {
   const tl = useTranslations("main.links");
   const [isServerSideError, setIsServerSideError] = useState(false);
 
@@ -57,6 +61,21 @@ export function LinksOnError({ dependOnStatus }: { dependOnStatus?: string }) {
         </li>
       </ul>
     </Box>
+  );
+}
+
+export function ClientErrorTitle() {
+  let t: ReturnType<typeof useTranslations> | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    t = useTranslations("error.errorPage");
+  } catch {
+    // pass
+  }
+  return (
+    <h4 className="fn-heading-box">
+      {t?.("title") ?? "An error has occurred 😢"}
+    </h4>
   );
 }
 
