@@ -196,7 +196,14 @@ export async function convertToLatest(chart: ChartUntil15): Promise<ChartEdit> {
     chart = await convertTo15(chart as ChartUntil14);
   return chart;
 }
+/*
+サーバーはchartデータをjsonにシリアライズしてから保存しており、
+jsonシリアライズ可能ではないinfinityなどが含まれると保存はできて読み込みができないということが起きる。
+それを防ぐためjsonシリアライズを通してからバリデーションする。
+(TODO)そもそも保存時にjson化すべきでない。
+*/
 export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
+  chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   chart = await convertToLatest(chart);
   chart satisfies Chart15;
@@ -204,6 +211,7 @@ export async function validateChart(chart: ChartUntil15): Promise<ChartEdit> {
   return { ...chart, ver: currentChartVer };
 }
 export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
+  chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   switch (chart.ver) {
     case 16:
@@ -223,6 +231,7 @@ export function validateChartWithoutConvert(chart: ChartUntil15): ChartUntil15 {
 export async function validateChartMin(
   chart: ChartUntil15Min
 ): Promise<Chart14Min | Chart15> {
+  chart = JSON.parse(JSON.stringify(chart));
   if (chart.falling !== "nikochan") throw "not a falling nikochan data";
   if (chart.ver >= 15) {
     // if(chart.ver !== 15 &&chart.ver !== 16)
