@@ -1,3 +1,8 @@
+## ver. 16.21 - 2025/06/21
+
+* 譜面編集で譜面データfetch時、shareBoxでbriefのfetch時のエラーの表示を修正 [#1217](https://github.com/na-trium-144/falling-nikochan/pull/1217)
+* chartのバリデーション前にjsonシリアライズを通す
+
 ## ver. 16.20 - 2025/06/19
 
 * /main/play からshareページ遷移前後でのクエリパラメータの挙動を修正
