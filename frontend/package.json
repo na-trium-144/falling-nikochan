@@ -44,7 +44,7 @@
     "keyboard-css": "^1.2.4",
     "mathjs": "^15.2.0",
     "next": "16.1.7",
-    "next-intl": "^4.12.0",
+    "next-intl": "^4.13.0",
     "next-license-list": "^1.0.1",
     "pretty-checkbox": "^3.0.3",
     "pretty-checkbox-react": "^3.2.0",
